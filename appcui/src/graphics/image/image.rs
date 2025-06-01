@@ -4,7 +4,7 @@ use super::RendererType;
 use super::Scale;
 
 /// A structure representing a raster image with RGBA pixels.
-/// 
+///
 /// Images are stored in memory as a vector of pixels with a specified width and height.
 #[derive(Clone)]
 pub struct Image {
@@ -219,7 +219,7 @@ impl Image {
     #[inline]
     pub fn render_size(&self, rendering_method: RendererType, scale_method: Scale) -> Size {
         let rap = scale_method as u32;
-        match rendering_method { 
+        match rendering_method {
             RendererType::SmallBlocks => Size::new(self.width.div_ceil(rap), self.height.div_ceil(2 * rap)),
             RendererType::LargeBlocks64Colors => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
             RendererType::GrayScale => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),

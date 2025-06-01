@@ -2,8 +2,8 @@ use super::should_not_use;
 use super::Alignament;
 use super::ControlLayout;
 use super::Coordonate16;
-use super::LayoutParameters;
 use super::Dimension16;
+use super::LayoutParameters;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct PointAndSizeLayout {

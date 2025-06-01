@@ -13,7 +13,6 @@ pub enum TextAlignament {
     Right,
 }
 
-
 /// Represents the wrap type of the text. It can be WordWrap, CharacterWrap, MultiLine, SingleLine or SingleLineWrap.
 /// - `WordWrap`: The text will be wrapped to the next line if it exceeds the width.
 /// - `CharacterWrap`: The text will be wrapped to the next line if it exceeds the width, but it will not break words.
@@ -61,7 +60,7 @@ impl TextFormat {
     pub(super) fn has_chars_count(&self) -> bool {
         self.flags.contains(TextFormatFlags::CharsCount)
     }
-    
+
     /// Sets the alignment of the text. It can be Left, Center or Right.
     #[inline(always)]
     pub fn set_align(&mut self, align: TextAlignament) {
@@ -139,7 +138,7 @@ impl Default for TextFormat {
     /// - `hotkey_pos`: 0
     /// - `chars_count`: 0
     /// - `align`: TextAlignament::Left
-    /// - `wrap_type`: WrapType::SingleLine 
+    /// - `wrap_type`: WrapType::SingleLine
     fn default() -> Self {
         Self {
             flags: TextFormatFlags::None,
@@ -157,11 +156,11 @@ impl Default for TextFormat {
 
 /// A builder for the [TextFormat] struct.
 /// This builder allows you to create a TextFormat instance starting from the default values and modify it step by step.
-/// 
+///
 /// # Example
 /// ```rust
 /// use appcui::prelude::*;
-/// 
+///
 /// let format = TextFormatBuilder::new()
 ///                     .position(10, 20)
 ///                     .attribute(CharAttribute::with_color(Color::White, Color::Black))

@@ -1,11 +1,11 @@
-use std::cmp::Ordering;
 use super::FoldStatus;
 use super::Item;
 use super::ItemVisibility;
 use super::ListItem;
 use crate::prelude::ColumnsHeader;
-use crate::system::Handle;
 use crate::prelude::*;
+use crate::system::Handle;
+use std::cmp::Ordering;
 
 macro_rules! new_mutable_ref {
     ($current_ref:expr) => {
@@ -74,7 +74,7 @@ where
             parent.children.push(item.handle);
             if parent.fold_status == FoldStatus::NonExpandable {
                 parent.fold_status = FoldStatus::Expanded;
-                log!("INFO","Setting parent to expanded for {:?}", parent_handle);
+                log!("INFO", "Setting parent to expanded for {:?}", parent_handle);
             }
         } else {
             item.parent = Handle::None;
@@ -307,7 +307,7 @@ where
         }
     }
 
-    pub(super) fn set_fold_status(&mut self, parent: Handle<Item<T>>, fold_status: FoldStatus)-> bool {
+    pub(super) fn set_fold_status(&mut self, parent: Handle<Item<T>>, fold_status: FoldStatus) -> bool {
         if let Some(item) = self.get_mut(parent) {
             if item.fold_status != FoldStatus::NonExpandable {
                 let mut change = item.fold_status != fold_status;
@@ -325,7 +325,7 @@ where
         }
     }
 
-    pub(super) fn collapse_all(&mut self)->bool {
+    pub(super) fn collapse_all(&mut self) -> bool {
         let mut change = false;
         let list = new_mutable_ref!(&mut self.roots);
         for h in list.iter() {
@@ -334,7 +334,7 @@ where
         change
     }
 
-    pub(super) fn expand_all(&mut self)->bool {
+    pub(super) fn expand_all(&mut self) -> bool {
         let mut change = false;
         let list = new_mutable_ref!(&mut self.roots);
         for h in list.iter() {
@@ -344,7 +344,7 @@ where
     }
 
     #[inline(always)]
-    pub(super) fn update_selected_count(&mut self, increase: bool)  {
+    pub(super) fn update_selected_count(&mut self, increase: bool) {
         if increase {
             self.selected_count += 1;
         } else {

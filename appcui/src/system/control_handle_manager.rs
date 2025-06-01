@@ -1,7 +1,4 @@
-use crate::{
-    ui::common::ControlManager,
-    utils::HandleManager,
-};
+use crate::{ui::common::ControlManager, utils::HandleManager};
 
 use super::Handle;
 

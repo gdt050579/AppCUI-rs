@@ -13,11 +13,26 @@ pub(super) struct AllAnchorsLayout {
 
 impl AllAnchorsLayout {
     pub(super) fn new(params: &LayoutParameters) -> Self {
-        should_not_use!(params.x, "When (left,top,right,bottom) parameters are used together, 'X' parameter can not be used");
-        should_not_use!(params.y, "When (left,top,right,bottom) parameters are used together, 'Y' parameter can not be used");
-        should_not_use!(params.height, "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used");
-        should_not_use!(params.width, "When (left,top,right,bottom) parameters are used together, 'widyj' parameter can not be used");
-        should_not_use!(params.align, "When (left,top,right,bottom) parameters are used together, 'align' parameter can not be used");
+        should_not_use!(
+            params.x,
+            "When (left,top,right,bottom) parameters are used together, 'X' parameter can not be used"
+        );
+        should_not_use!(
+            params.y,
+            "When (left,top,right,bottom) parameters are used together, 'Y' parameter can not be used"
+        );
+        should_not_use!(
+            params.height,
+            "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used"
+        );
+        should_not_use!(
+            params.width,
+            "When (left,top,right,bottom) parameters are used together, 'widyj' parameter can not be used"
+        );
+        should_not_use!(
+            params.align,
+            "When (left,top,right,bottom) parameters are used together, 'align' parameter can not be used"
+        );
 
         AllAnchorsLayout {
             left: params.a_left.unwrap(),
@@ -27,12 +42,7 @@ impl AllAnchorsLayout {
         }
     }
     #[inline]
-    pub(super) fn update_control_layout(
-        &self,
-        control_layout: &mut ControlLayout,
-        parent_width: u16,
-        parent_height: u16,
-    ) {
+    pub(super) fn update_control_layout(&self, control_layout: &mut ControlLayout, parent_width: u16, parent_height: u16) {
         let left = self.left.absolute(parent_width);
         let top = self.top.absolute(parent_height);
         let right = self.right.absolute(parent_width);

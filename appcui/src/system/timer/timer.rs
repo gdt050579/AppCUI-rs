@@ -27,11 +27,11 @@ enum TimerState {
 
 #[derive(Debug)]
 pub struct Timer {
-    synk:              Arc<(Mutex<Command>, Condvar)>,
-    control_handle:    Handle<()>,
-    handle:            Handle<Timer>,
+    synk: Arc<(Mutex<Command>, Condvar)>,
+    control_handle: Handle<()>,
+    handle: Handle<Timer>,
     requested_command: Command,
-    state:             TimerState,
+    state: TimerState,
 }
 impl Timer {
     pub(super) fn new(control_handle: Handle<()>, handle: Handle<Timer>) -> Self {

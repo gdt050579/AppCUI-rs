@@ -2,7 +2,6 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("name", "caption", ParamType::String),
@@ -10,11 +9,10 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("text", "caption", ParamType::String),
 ];
 
-
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("label", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
     cb.init_control("Label::new");
-    cb.add_string_parameter("caption", None);  
+    cb.add_string_parameter("caption", None);
     cb.add_layout();
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();

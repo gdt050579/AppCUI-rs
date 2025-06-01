@@ -1,7 +1,7 @@
 use super::super::Column;
-use crate::graphics::{Surface, TextAlignament, CharAttribute};
-use crate::system::Theme;
 use super::RenderMethod;
+use crate::graphics::{CharAttribute, Surface, TextAlignament};
+use crate::system::Theme;
 use std::cmp::Ordering;
 
 pub trait ListItem {

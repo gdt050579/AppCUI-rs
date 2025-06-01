@@ -30,12 +30,12 @@ impl Symbol {
         }
     }
     #[inline(always)]
-    pub(crate) fn width(&self)->u8 {
+    pub(crate) fn width(&self) -> u8 {
         match () {
             _ if self.chars[2] != 0 as char => 3,
             _ if self.chars[1] != 0 as char => 2,
             _ if self.chars[0] != 0 as char => 1,
-            _ => 0
+            _ => 0,
         }
     }
 }

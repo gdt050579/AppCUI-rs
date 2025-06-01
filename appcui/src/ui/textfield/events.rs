@@ -1,7 +1,7 @@
-use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::TextField;
+use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 
-#[derive(Copy,Clone,Eq,PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub(crate) enum TextFieldEventsType {
     OnValidate,
     //OnTextChanged,

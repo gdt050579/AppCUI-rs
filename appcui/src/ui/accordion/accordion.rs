@@ -8,11 +8,10 @@ pub struct Accordion {
     hovered_page_idx: Option<usize>,
 }
 impl Accordion {
-
     /// Creates a new Accordion control with the specified `layout` and `flags`.
     /// The flags parameter is a bitmask tthat contains the following flags:
     /// - `TransparentBackground`: If set, the background of the accordion will be transparent.
-    /// 
+    ///
     /// # Examples
     /// ```rust,no_run
     /// use appcui::prelude::*;
@@ -213,7 +212,7 @@ impl OnPaint for Accordion {
             format.set_chars_count(page.chars_count() as u16);
             format.set_attribute(text_attr);
             format.set_hotkey_from_caption(hotkey_attr, page);
-            
+
             // position
             if index <= cidx {
                 format.y = index as i32;

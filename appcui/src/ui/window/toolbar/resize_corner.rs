@@ -1,6 +1,6 @@
 use crate::{
     graphics::{Character, SpecialChar, Surface},
-    system::{Handle, Theme}
+    system::{Handle, Theme},
 };
 
 use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
@@ -23,16 +23,8 @@ impl ResizeCorner {
             let x = self.base.get_left();
             let y = self.base.get_y();
             let a = st.get_attr(theme, theme.symbol.resize);
-            surface.write_char(
-                x,
-                y,
-                Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a),
-            );
-            surface.write_char(
-                x + 1,
-                y,
-                Character::with_attributes(SpecialChar::BoxBottomRightCornerSingleLine, a),
-            );
+            surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
+            surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::BoxBottomRightCornerSingleLine, a));
         }
     }
 }

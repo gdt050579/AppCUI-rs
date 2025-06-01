@@ -12,36 +12,36 @@ use web_sys::{
 };
 
 struct TerminalDomConfig {
-    cols:        u32,
-    rows:        u32,
+    cols: u32,
+    rows: u32,
     font_family: String,
-    font_size:   u32,
-    cell_w:      u32,
-    cell_h:      u32,
+    font_size: u32,
+    cell_w: u32,
+    cell_h: u32,
 }
 
 struct WebGLResources {
-    gl:                    GL,
-    program:               WebGlProgram,
-    buffer:                WebGlBuffer,
-    pos_attrib_location:   u32,
+    gl: GL,
+    program: WebGlProgram,
+    buffer: WebGlBuffer,
+    pos_attrib_location: u32,
     color_attrib_location: u32,
 }
 
 pub struct WebTerminal {
-    gl:                    GL,
-    size:                  Size,
-    webgl_canvas:          HtmlCanvasElement,
-    text_canvas:           HtmlCanvasElement,
-    program:               WebGlProgram,
-    buffer:                WebGlBuffer,
-    pos_attrib_location:   u32,
+    gl: GL,
+    size: Size,
+    webgl_canvas: HtmlCanvasElement,
+    text_canvas: HtmlCanvasElement,
+    program: WebGlProgram,
+    buffer: WebGlBuffer,
+    pos_attrib_location: u32,
     color_attrib_location: u32,
-    event_queue:           Arc<Mutex<Vec<SystemEvent>>>,
-    font:                  String,
-    cell_width_px:         f32,
-    cell_height_px:        f32,
-    clipboard_content:     Arc<Mutex<Option<String>>>,
+    event_queue: Arc<Mutex<Vec<SystemEvent>>>,
+    font: String,
+    cell_width_px: f32,
+    cell_height_px: f32,
+    clipboard_content: Arc<Mutex<Option<String>>>,
 }
 
 unsafe impl Send for WebTerminal {}
@@ -51,12 +51,12 @@ impl WebTerminal {
     fn load_dom_config(document: &web_sys::Document) -> TerminalDomConfig {
         let font_size_val = Self::get_config(document, "terminal-font-size", 20);
         TerminalDomConfig {
-            cols:        Self::get_config(document, "terminal-cols", 211),
-            rows:        Self::get_config(document, "terminal-rows", 56),
+            cols: Self::get_config(document, "terminal-cols", 211),
+            rows: Self::get_config(document, "terminal-rows", 56),
             font_family: Self::get_config(document, "terminal-font", "Consolas Mono, monospace".to_string()),
-            font_size:   font_size_val,
-            cell_w:      Self::get_config(document, "terminal-cell-width", 9),
-            cell_h:      Self::get_config(document, "terminal-cell-height", font_size_val),
+            font_size: font_size_val,
+            cell_w: Self::get_config(document, "terminal-cell-width", 9),
+            cell_h: Self::get_config(document, "terminal-cell-height", font_size_val),
         }
     }
 
@@ -109,7 +109,7 @@ impl WebTerminal {
         let term = WebTerminal {
             gl: webgl_resources.gl,
             size: Size {
-                width:  dom_config.cols,
+                width: dom_config.cols,
                 height: dom_config.rows,
             },
             webgl_canvas,

@@ -1,5 +1,5 @@
-use std::any::TypeId;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
+use std::any::TypeId;
 
 pub trait GenericTreeViewEvents {
     fn on_current_item_changed(&mut self, _handle: Handle<()>, _type_id: TypeId, _current_item: Handle<()>) -> EventProcessStatus {
@@ -17,10 +17,9 @@ pub trait GenericTreeViewEvents {
     fn on_item_action(&mut self, _handle: Handle<()>, _type_id: TypeId, _current_item: Handle<()>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-
 }
 
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub(crate) enum TreeViewEventTypes {
     CurrentItemChanged(Handle<()>),
     ItemCollapsed(Handle<()>, bool),
@@ -32,5 +31,5 @@ pub(crate) enum TreeViewEventTypes {
 #[derive(Copy, Clone)]
 pub(crate) struct EventData {
     pub(crate) event_type: TreeViewEventTypes,
-    pub(crate) type_id: std::any::TypeId
+    pub(crate) type_id: std::any::TypeId,
 }

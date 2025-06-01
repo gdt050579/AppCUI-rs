@@ -12,9 +12,9 @@ use crate::system::Handle;
 use crate::ui::{
     button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents,
     datepicker::events::DatePickerEvents, dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents,
-    listview::events::GenericListViewEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents,
-    radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
-    markdown, markdown::events::MarkdownEvents
+    listview::events::GenericListViewEvents, markdown, markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents,
+    password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents,
+    treeview::events::GenericTreeViewEvents,
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -44,7 +44,7 @@ pub(crate) enum ControlEventData {
     ListView(listview::events::EventData),
     PathFinder(pathfinder::events::EventData),
     TreeView(treeview::events::EventData),
-    Markdown(markdown::events::EventData)
+    Markdown(markdown::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -123,10 +123,10 @@ impl ControlEvent {
                 }
                 treeview::events::TreeViewEventTypes::ItemCollapsed(item_handle, recursive) => {
                     GenericTreeViewEvents::on_item_collapsed(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
-                },
+                }
                 treeview::events::TreeViewEventTypes::ItemExpanded(item_handle, recursive) => {
                     GenericTreeViewEvents::on_item_expanded(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
-                },
+                }
                 treeview::events::TreeViewEventTypes::ItemAction(item_handle) => {
                     GenericTreeViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, item_handle)
                 }
@@ -135,13 +135,9 @@ impl ControlEvent {
                 }
             },
             ControlEventData::Markdown(data) => match &data.event_type {
-                markdown::events::Data::BackEvent => {
-                    MarkdownEvents::on_backspace_navigation(receiver, self.emitter.cast())
-                },
-                markdown::events::Data::LinkClickEvent(link) => {
-                    MarkdownEvents::on_external_link(receiver, self.emitter.cast(), link)
-                },
-            }
+                markdown::events::Data::BackEvent => MarkdownEvents::on_backspace_navigation(receiver, self.emitter.cast()),
+                markdown::events::Data::LinkClickEvent(link) => MarkdownEvents::on_external_link(receiver, self.emitter.cast(), link),
+            },
         }
     }
 }

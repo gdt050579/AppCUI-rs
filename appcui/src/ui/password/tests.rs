@@ -91,17 +91,17 @@ fn check_events() {
         fn on_accept(&mut self, handle: Handle<Password>) -> EventProcessStatus {
             if handle == self.pass {
                 if let Some(p) = self.control(handle) {
-                    self.set_info(format!("Acepted: {}",p.password()).as_str());
+                    self.set_info(format!("Acepted: {}", p.password()).as_str());
                     return EventProcessStatus::Processed;
                 }
             }
             EventProcessStatus::Ignored
         }
-    
+
         fn on_cancel(&mut self, handle: Handle<Password>) -> EventProcessStatus {
             if handle == self.pass {
                 if let Some(p) = self.control(handle) {
-                    self.set_info(format!("Canceled: {}",p.password()).as_str());                    
+                    self.set_info(format!("Canceled: {}", p.password()).as_str());
                 }
                 if let Some(p) = self.control_mut(handle) {
                     p.set_password("");

@@ -324,7 +324,12 @@ impl Tokenizer {
         }
         // check scenarios
         // 1. <key> <eq> <value> [separator]
-        if (pos + 3 <= end) && (allow_key) && self.tokens[pos].is_possible_key() && self.tokens[pos + 1].is_equal() && self.tokens[pos + 2].is_possible_value() {
+        if (pos + 3 <= end)
+            && (allow_key)
+            && self.tokens[pos].is_possible_key()
+            && self.tokens[pos + 1].is_equal()
+            && self.tokens[pos + 2].is_possible_value()
+        {
             // either KeyValue or KeyValueSep
             let next_pos = self.tokens[pos + 2].get_next(pos + 2);
             if (next_pos < end) && (self.tokens[next_pos].is_separator()) {
@@ -344,7 +349,7 @@ impl Tokenizer {
             // else we have an internal error ==> in theory we should not reach this step
             return Err(Error::new(
                 text,
-                format!("Internal error (1) - next_pos={},pos={},end={}",next_pos,pos,end).as_str(),
+                format!("Internal error (1) - next_pos={},pos={},end={}", next_pos, pos, end).as_str(),
                 self.tokens[pos].start,
                 self.tokens[pos + 2].end,
             ));

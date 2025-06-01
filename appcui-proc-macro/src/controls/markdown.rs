@@ -16,7 +16,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("markdown", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
-    cb.init_control("Markdown::new", );
+    cb.init_control("Markdown::new");
     cb.add_string_parameter("content", None);
     cb.add_layout();
     cb.add_flags_parameter("flags", "markdown::Flags", &FLAGS);

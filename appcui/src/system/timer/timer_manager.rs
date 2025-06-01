@@ -1,5 +1,5 @@
-use crate::system::{Handle, RuntimeManager};
 use super::Timer;
+use crate::system::{Handle, RuntimeManager};
 
 pub(crate) struct TimerManager {
     slots: Vec<Option<Timer>>,
@@ -42,7 +42,6 @@ impl TimerManager {
         }
     }
     pub(crate) fn update_threads(&mut self) {
-
         let rm = RuntimeManager::get();
         for slot in self.slots.iter_mut() {
             if let Some(timer) = slot {
@@ -81,6 +80,6 @@ impl TimerManager {
                 timer.stop();
             }
             self.slots[index] = None;
-        } 
+        }
     }
 }

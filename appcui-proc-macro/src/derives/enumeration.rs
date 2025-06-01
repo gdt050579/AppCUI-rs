@@ -1,6 +1,5 @@
-use proc_macro::{TokenStream, TokenTree, Delimiter};
+use proc_macro::{Delimiter, TokenStream, TokenTree};
 use std::collections::HashMap;
-
 
 #[derive(Debug, Eq, PartialEq)]
 enum TokenType {
@@ -83,9 +82,7 @@ impl Enum {
             TokenTree::Punct(punct) => punct.to_string(),
             TokenTree::Literal(literal) => {
                 let mut res = literal.to_string();
-                if (res.starts_with("\"") && res.ends_with("\""))
-                    || (res.starts_with("'") && res.ends_with("'"))
-                {
+                if (res.starts_with("\"") && res.ends_with("\"")) || (res.starts_with("'") && res.ends_with("'")) {
                     res.truncate(res.len() - 1);
                     if res.len() > 1 {
                         res.remove(0);
@@ -149,7 +146,10 @@ impl Enum {
                 }
             }
             _ => {
-                return Err(format!("Expecting '=' or a value definition but found: '{:?}' for attribute: '{}'", &tokens[index], key));
+                return Err(format!(
+                    "Expecting '=' or a value definition but found: '{:?}' for attribute: '{}'",
+                    &tokens[index], key
+                ));
             }
         }
         if index < tokens.len() {
@@ -221,9 +221,8 @@ impl Enum {
                     return Ok(start + 2);
                 }
                 return Ok(start + 1);
-            }
-            else {
-                return  Ok(start); // no pub specifier
+            } else {
+                return Ok(start); // no pub specifier
             }
         }
         Err(format!("Expecting 'pub' keyword but found: '{:?}'", tokens[start]))
@@ -324,11 +323,7 @@ impl Enum {
             }
             index += 1;
         }
-        let generics = tokens[start..index]
-            .iter()
-            .map(Self::token_to_string)
-            .collect::<Vec<_>>()
-            .join("");
+        let generics = tokens[start..index].iter().map(Self::token_to_string).collect::<Vec<_>>().join("");
         Ok((generics, index))
     }
 

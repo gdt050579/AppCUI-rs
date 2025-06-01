@@ -1,7 +1,7 @@
 use crate::utils::FormatNumber;
 
 const KM: FormatNumber = FormatNumber::new(10).suffix(" km").group(3, b',');
-const M:  FormatNumber = FormatNumber::new(10).suffix(" m ").group(3, b',');
+const M: FormatNumber = FormatNumber::new(10).suffix(" m ").group(3, b',');
 const CM: FormatNumber = FormatNumber::new(10).suffix(" cm").group(3, b',');
 const MM: FormatNumber = FormatNumber::new(10).suffix(" mm").group(3, b',');
 const IN: FormatNumber = FormatNumber::new(10).suffix(" in").group(3, b',');

@@ -3,16 +3,16 @@
 //! The components module provides reusable elements and helpers that are used by various
 //! UI controls to implement common functionality like item rendering and event handling.
 
-mod combobox_component;
-mod searchbar;
-mod scrollbars_components;
-mod listscrollbars;
-mod scrollbars;
-mod symbol;
 pub mod column;
 mod columns_header;
-mod navigator_component;
+mod combobox_component;
 pub mod listitem;
+mod listscrollbars;
+mod navigator_component;
+mod scrollbars;
+mod scrollbars_components;
+mod searchbar;
+mod symbol;
 
 // pub(crate) use self::scrollbars::VScrollBar;
 // pub(crate) use self::horizontal_scrollbar::HScrollBar;
@@ -25,9 +25,9 @@ pub(crate) use self::symbol::Symbol;
 
 pub use self::listitem::*;
 
-pub use self::scrollbars::ScrollBars;
-pub use self::listscrollbars::ListScrollBars;
 pub use self::column::Column;
-pub use self::listitem::ListItem;
 pub use self::columns_header::ColumnsHeader;
 pub use self::columns_header::ColumnsHeaderAction;
+pub use self::listitem::ListItem;
+pub use self::listscrollbars::ListScrollBars;
+pub use self::scrollbars::ScrollBars;

@@ -11,7 +11,7 @@ impl CheckCursorCommand {
             if (param != "false") && (param != "hidden") {
                 return Err(ParserError::new("CheckCursor can be used in two forms: CheckCursor(hidden) or CheckCursor(false) - to check if a cursor is hidden, or CheckCursor(x,y) to check if a cursor is at a specified position. In this case, CheckCursor it is used with one parameter that is neither 'false' nor 'hidden'"));
             }
-            return Ok(Self { point: Point::new(-1,-1) });
+            return Ok(Self { point: Point::new(-1, -1) });
         }
         if parser.get_params_count() == 2 {
             let x = parser.get_i32(0);

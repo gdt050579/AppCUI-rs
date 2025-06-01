@@ -477,6 +477,10 @@ impl Structure {
         let content = Self::group_to_stream(&v[index])?;
         let fields = Self::parse_fileds(content)?;
 
-        Ok(Self { name, _generics: generics, fields })
+        Ok(Self {
+            name,
+            _generics: generics,
+            fields,
+        })
     }
 }

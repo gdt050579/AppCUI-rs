@@ -16,16 +16,10 @@ impl StructDefinition {
         pos
     }
     fn skip_spaces(buf: &[u8], pos: usize) -> usize {
-        StructDefinition::skip_while(buf, pos, |value| {
-            matches!(value, b' ' | b'\t' | b'\n' | b'\r')
-        })
+        StructDefinition::skip_while(buf, pos, |value| matches!(value, b' ' | b'\t' | b'\n' | b'\r'))
     }
     fn skip_word(buf: &[u8], pos: usize) -> usize {
-        StructDefinition::skip_while(
-            buf,
-            pos,
-            |value| matches!(value, b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_'),
-        )
+        StructDefinition::skip_while(buf, pos, |value| matches!(value, b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_'))
     }
 }
 impl From<&str> for StructDefinition {
@@ -58,8 +52,7 @@ impl From<&str> for StructDefinition {
                 b'<' => {
                     // we have a template
                     let start_template = pos;
-                    let end_template =
-                        StructDefinition::skip_while(buf, pos, |value| value != b'{');
+                    let end_template = StructDefinition::skip_while(buf, pos, |value| value != b'{');
                     if end_template == len {
                         panic!("Unexpected end of structure definition (expecting a '{{' after the template definition) ! ");
                     }
@@ -67,7 +60,7 @@ impl From<&str> for StructDefinition {
                     let start_tamplate_type = StructDefinition::skip_spaces(buf, pos + 1);
                     //let end_template_type = StructDefinition::skip_word(buf, start_tamplate_type);
                     let end_template_type = StructDefinition::skip_while(buf, pos, |value| value != b'>');
-                    if end_template_type==start_tamplate_type {
+                    if end_template_type == start_tamplate_type {
                         panic!("Expecting a valid template type (e.g. <T>");
                     }
 
@@ -83,10 +76,7 @@ impl From<&str> for StructDefinition {
                     }
                 }
                 _ => {
-                    panic!(
-                        "Unexpected word in after a structure name: {}",
-                        &value[pos..]
-                    );
+                    panic!("Unexpected word in after a structure name: {}", &value[pos..]);
                 }
             }
         } else {

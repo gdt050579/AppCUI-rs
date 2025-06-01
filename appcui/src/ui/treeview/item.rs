@@ -83,7 +83,11 @@ where
     }
     #[inline(always)]
     pub fn parent(&self) -> Option<Handle<Item<T>>> {
-        if !self.parent.is_none() { Some(self.parent) } else { None }
+        if !self.parent.is_none() {
+            Some(self.parent)
+        } else {
+            None
+        }
     }
     #[inline(always)]
     pub fn set_icon(&mut self, icon: [char; 2]) {

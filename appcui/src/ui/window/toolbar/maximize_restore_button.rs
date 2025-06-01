@@ -1,9 +1,9 @@
 use crate::{
-    graphics::{Character, Surface, SpecialChar},
-    system::{Handle, Theme}
+    graphics::{Character, SpecialChar, Surface},
+    system::{Handle, Theme},
 };
 
-use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, Group, SymbolAttrState};
+use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
 pub(crate) struct MaximizeRestoreButton {
     pub(super) base: ItemBase,
@@ -19,13 +19,7 @@ impl MaximizeRestoreButton {
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
-        surface.write_string(
-            self.base.get_left(),
-            self.base.get_y(),
-            "[ ]",
-            st.get_attr(theme, data.sep_attr),
-            false,
-        );
+        surface.write_string(self.base.get_left(), self.base.get_y(), "[ ]", st.get_attr(theme, data.sep_attr), false);
         let ch = match data.maximized {
             true => SpecialChar::ArrowUpDown,
             false => SpecialChar::ArrowUp,

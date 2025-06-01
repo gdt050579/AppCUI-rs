@@ -610,7 +610,6 @@ where
         self.header.columns_mut().get_mut(index)
     }
 
-
     fn goto_element(&mut self, element: Element, emit_event: bool) -> bool {
         for (index, item) in self.filter.iter().enumerate() {
             if *item == element {

@@ -225,8 +225,7 @@ where
             if self.flags.contains(InnerFlags::ValidateOverwrite) {
                 match self.nav.exists(&result) {
                     Some(true) => {
-                        if !crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str())
-                        {
+                        if !crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str()) {
                             return;
                         }
                     }
@@ -239,7 +238,7 @@ where
                     }
                 }
             }
-            self.update_last_path(&result); 
+            self.update_last_path(&result);
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
             crate::dialogs::error(
@@ -281,7 +280,7 @@ where
                     }
                 }
             }
-            self.update_last_path(&result); 
+            self.update_last_path(&result);
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
             crate::dialogs::error(
@@ -294,7 +293,6 @@ where
                 .as_str(),
             );
         }
-
     }
     fn return_result(&mut self) {
         if self.flags.contains(InnerFlags::Save) {
@@ -420,7 +418,7 @@ where
 impl<T> PathFinderEvents for FileExplorer<T>
 where
     T: Navigator<Entry, Root, PathBuf> + 'static,
-{ 
+{
     fn on_path_updated(&mut self, handle: Handle<PathFinder>) -> EventProcessStatus {
         if handle == self.path_viewer {
             if let Some(pv) = self.control(self.path_viewer) {
@@ -430,4 +428,4 @@ where
         }
         EventProcessStatus::Processed
     }
-}   
+}

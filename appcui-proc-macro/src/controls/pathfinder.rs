@@ -4,7 +4,6 @@ use proc_macro::*;
 
 static FLAGS: FlagsSignature = FlagsSignature::new(&["ReadOnly", "CaseSensitive"]);
 
-
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("path", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("path", "path", ParamType::String),

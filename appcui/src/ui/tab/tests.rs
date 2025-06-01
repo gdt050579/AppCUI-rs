@@ -383,7 +383,6 @@ fn check_tabsbar_on_left() {
     a.run();
 }
 
-
 #[test]
 fn check_page_width_on_left() {
     #[Window(events = ButtonEvents, internal=true)]
@@ -492,36 +491,36 @@ fn check_tab_caption() {
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,d:c,w:70,h:17,flags: Sizeable");
     let mut tab = Tab::new(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None);
-    
+
     // Add initial tabs
     tab.add_tab("Page &1");
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
 
     tab.set_tab_width(22);
-    
+
     // Verify initial captions
     assert_eq!(tab.tab_caption(0), Some("Page 1"));
     assert_eq!(tab.tab_caption(1), Some("Page 2"));
     assert_eq!(tab.tab_caption(2), Some("Page 3"));
-    
+
     // Verify None for invalid indices
     assert_eq!(tab.tab_caption(3), None);
     assert_eq!(tab.tab_caption(999), None);
-    
+
     // Change captions
     tab.set_tab_caption(1, "New Page 2");
     tab.set_tab_caption(2, "Updated Page 3");
-    
+
     // Verify changed captions
     assert_eq!(tab.tab_caption(0), Some("Page 1"));
     assert_eq!(tab.tab_caption(1), Some("New Page 2"));
     assert_eq!(tab.tab_caption(2), Some("Updated Page 3"));
-    
+
     // Verify None still works after changes
     assert_eq!(tab.tab_caption(3), None);
     assert_eq!(tab.tab_caption(999), None);
-    
+
     // Add controls to tabs
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
     tab.add(0, button!("Page1-B,d:c,w:10"));
@@ -588,7 +587,6 @@ fn check_hiddentabs_changepage() {
             me.tab = me.add(t);
             me
         }
-
     }
     impl ButtonEvents for MyWin {
         fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
@@ -670,14 +668,13 @@ fn check_tab_mouse_events() {
     let mut a = App::debug(80, 10, script).build().unwrap();
     let mut w = window!("Test,d:c,w:70,h:7,flags: Sizeable");
     let mut tab = Tab::new(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None);
-    
+
     // Add tabs with wider width to make empty space more obvious
     tab.add_tab("Page 1");
     tab.add_tab("Page 2");
     tab.add_tab("Page 3");
-    
+
     w.add(tab);
     a.add_window(w);
     a.run();
 }
-

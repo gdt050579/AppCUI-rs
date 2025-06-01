@@ -1,5 +1,7 @@
 use crate::{
-    input::{Key, KeyModifier, MouseButton}, prelude::KeyCode, terminals::termios::api::TermiosError
+    input::{Key, KeyModifier, MouseButton},
+    prelude::KeyCode,
+    terminals::termios::api::TermiosError,
 };
 
 // Define C system binding calls
@@ -23,9 +25,9 @@ pub struct AnsiKey {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MouseButtonEvent {
-    pub (crate) button: MouseButton, // None => release (in xterm documentation there is no None)
-    pub (crate) x: u8,
-    pub (crate) y: u8,
+    pub(crate) button: MouseButton, // None => release (in xterm documentation there is no None)
+    pub(crate) x: u8,
+    pub(crate) y: u8,
 }
 
 impl AnsiKey {
@@ -169,36 +171,34 @@ impl TryFrom<u8> for Letter {
 impl From<AnsiKey> for Key {
     fn from(value: AnsiKey) -> Self {
         let code = match value.code {
-            AnsiKeyCode::Letter(letter) => {
-                match letter {
-                    Letter::A => KeyCode::A,
-                    Letter::B => KeyCode::B,
-                    Letter::C => KeyCode::C,
-                    Letter::D => KeyCode::D,
-                    Letter::E => KeyCode::E,
-                    Letter::F => KeyCode::F,
-                    Letter::G => KeyCode::G,
-                    Letter::H => KeyCode::H,
-                    Letter::I => KeyCode::I,
-                    Letter::J => KeyCode::J,
-                    Letter::K => KeyCode::K,
-                    Letter::L => KeyCode::L,
-                    Letter::M => KeyCode::M,
-                    Letter::N => KeyCode::N,
-                    Letter::O => KeyCode::O,
-                    Letter::P => KeyCode::P,
-                    Letter::Q => KeyCode::Q,
-                    Letter::R => KeyCode::R,
-                    Letter::S => KeyCode::S,
-                    Letter::T => KeyCode::T,
-                    Letter::U => KeyCode::U,
-                    Letter::V => KeyCode::V,
-                    Letter::W => KeyCode::W,
-                    Letter::X => KeyCode::X,
-                    Letter::Y => KeyCode::Y,
-                    Letter::Z => KeyCode::Z,
-                }
-            }
+            AnsiKeyCode::Letter(letter) => match letter {
+                Letter::A => KeyCode::A,
+                Letter::B => KeyCode::B,
+                Letter::C => KeyCode::C,
+                Letter::D => KeyCode::D,
+                Letter::E => KeyCode::E,
+                Letter::F => KeyCode::F,
+                Letter::G => KeyCode::G,
+                Letter::H => KeyCode::H,
+                Letter::I => KeyCode::I,
+                Letter::J => KeyCode::J,
+                Letter::K => KeyCode::K,
+                Letter::L => KeyCode::L,
+                Letter::M => KeyCode::M,
+                Letter::N => KeyCode::N,
+                Letter::O => KeyCode::O,
+                Letter::P => KeyCode::P,
+                Letter::Q => KeyCode::Q,
+                Letter::R => KeyCode::R,
+                Letter::S => KeyCode::S,
+                Letter::T => KeyCode::T,
+                Letter::U => KeyCode::U,
+                Letter::V => KeyCode::V,
+                Letter::W => KeyCode::W,
+                Letter::X => KeyCode::X,
+                Letter::Y => KeyCode::Y,
+                Letter::Z => KeyCode::Z,
+            },
             AnsiKeyCode::N0 => KeyCode::N0,
             AnsiKeyCode::N1 => KeyCode::N1,
             AnsiKeyCode::N2 => KeyCode::N2,
@@ -255,35 +255,47 @@ const MOUSE_SHIFT_MASK: u8 = 4;
 const MOUSE_META_MASK: u8 = 8;
 const MOUSE_CTRL_MASK: u8 = 16;
 
-impl TermiosReader {  
+impl TermiosReader {
     fn parse_mouse_event() -> Result<AnsiKey, TermiosError> {
         let (mut button_code, x, y) = (checked_stdin_read()? - 32, checked_stdin_read()? - 32, checked_stdin_read()? - 32); // all of them are "encoded" by adding 32 to the actual value
-        
-        let is_motion_event = button_code >= 32;  // the way we differentiate between a simple mouse move event and simple mouse press/release event is this
-        if is_motion_event { button_code -= 32; }
-        
+
+        let is_motion_event = button_code >= 32; // the way we differentiate between a simple mouse move event and simple mouse press/release event is this
+        if is_motion_event {
+            button_code -= 32;
+        }
+
         let button_bits = button_code & 0b11;
         let button: MouseButton = match button_bits {
             0 => MouseButton::Left,
             1 => MouseButton::Right,
             2 => MouseButton::Center,
-            _ => MouseButton::None
+            _ => MouseButton::None,
         };
 
-        let event = MouseButtonEvent {button, x: x - 1, y: y - 1};  // coordinates start at 1 in the codes
-        
+        let event = MouseButtonEvent { button, x: x - 1, y: y - 1 }; // coordinates start at 1 in the codes
+
         let mut modifier = KeyModifier::None;
-        if (button_code & MOUSE_SHIFT_MASK) != 0 { modifier.set(KeyModifier::Shift); }
-        if (button_code & MOUSE_META_MASK) != 0 { modifier.set(KeyModifier::Alt); }
-        if (button_code & MOUSE_CTRL_MASK) != 0 { modifier.set(KeyModifier::Ctrl); }
-        
+        if (button_code & MOUSE_SHIFT_MASK) != 0 {
+            modifier.set(KeyModifier::Shift);
+        }
+        if (button_code & MOUSE_META_MASK) != 0 {
+            modifier.set(KeyModifier::Alt);
+        }
+        if (button_code & MOUSE_CTRL_MASK) != 0 {
+            modifier.set(KeyModifier::Ctrl);
+        }
+
         Ok(AnsiKey {
-            bytes: [27, 91, 77, button_code, 0], 
-            code: if is_motion_event {AnsiKeyCode::MouseMove(event)} else {AnsiKeyCode::MouseButton(event)},
-            modifier
+            bytes: [27, 91, 77, button_code, 0],
+            code: if is_motion_event {
+                AnsiKeyCode::MouseMove(event)
+            } else {
+                AnsiKeyCode::MouseButton(event)
+            },
+            modifier,
         })
     }
-    
+
     pub fn read_key() -> Result<AnsiKey, TermiosError> {
         while let Ok(c) = checked_stdin_read() {
             if c == 0 {
@@ -339,8 +351,7 @@ impl TermiosReader {
                                         // F7 -> 27 91 49 56 126
                                         // F8 -> 27 91 49 57 126
                                         49 => {
-                                            let (byte_4, byte_5) =
-                                                (checked_stdin_read()?, checked_stdin_read()?);
+                                            let (byte_4, byte_5) = (checked_stdin_read()?, checked_stdin_read()?);
                                             let key = match (byte_4, byte_5) {
                                                 (53, 126) => AnsiKeyCode::F5,
                                                 (55, 126) => AnsiKeyCode::F6,
@@ -355,8 +366,7 @@ impl TermiosReader {
                                         // F11 -> Seems to be hardwired by the OS
                                         // F12 -> 27 91 50 52 126
                                         50 => {
-                                            let (byte_4, byte_5) =
-                                                (checked_stdin_read()?, checked_stdin_read()?);
+                                            let (byte_4, byte_5) = (checked_stdin_read()?, checked_stdin_read()?);
                                             let key = match (byte_4, byte_5) {
                                                 (48, 126) => AnsiKeyCode::F9,
                                                 (49, 126) => AnsiKeyCode::F10,
@@ -446,68 +456,38 @@ impl TermiosReader {
                     let byte_2 = checked_stdin_read()?;
                     match byte_2 {
                         // `Alt-Space`
-                        160 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Space, modifier)
-                        }
+                        160 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Space, modifier),
                         // `Alt-1` (Alt, one)
-                        161 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N1, modifier)
-                        }
+                        161 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::N1, modifier),
                         // `Alt-4`
-                        162 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N4, modifier)
-                        }
+                        162 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::N4, modifier),
                         // `Alt-3`
-                        163 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N3, modifier)
-                        }
+                        163 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::N3, modifier),
                         // `Alt-6`
-                        167 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N6, modifier)
-                        }
+                        167 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::N6, modifier),
                         // `Alt-u`
-                        168 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::U), modifier)
-                        }
+                        168 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::U), modifier),
                         // `Alt-g`
-                        169 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::G), modifier)
-                        }
+                        169 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::G), modifier),
                         // `Alt-8`
-                        170 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N9, modifier)
-                        }
+                        170 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::N9, modifier),
                         // `Alt-\` (Alt-backslash)
-                        171 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::BackSlash, modifier)
-                        }
+                        171 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::BackSlash, modifier),
                         // `Alt-l`
-                        172 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::L), modifier)
-                        }
+                        172 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::L), modifier),
                         // `Alt-r`
-                        174 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::R), modifier)
-                        }
+                        174 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::R), modifier),
                         // `Alt-e`
-                        180 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::E), modifier)
-                        }
+                        180 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::E), modifier),
                         // `Alt-m`
-                        181 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::M), modifier)
-                        }
+                        181 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::M), modifier),
                         // `Alt-7`
-                        182 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N7, modifier)
-                        }
+                        182 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::N7, modifier),
                         // `Alt-0`
-                        186 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::N0, modifier)
-                        }
+                        186 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::N0, modifier),
                         // If we do not know the key, we log it in case we might want to have
                         // support for it.
-                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier),
                     }
                 }
                 195 => {
@@ -518,28 +498,18 @@ impl TermiosReader {
                     let byte_2 = checked_stdin_read()?;
                     match byte_2 {
                         // `Alt-s`
-                        159 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::S), modifier)
-                        }
+                        159 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::S), modifier),
                         // `Alt-a`
-                        165 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::A), modifier)
-                        }
+                        165 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::A), modifier),
                         // `Alt-'` (Alt-quote)
-                        166 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Quote, modifier)
-                        }
+                        166 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Quote, modifier),
                         // `Alt-c`
-                        167 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::C), modifier)
-                        }
+                        167 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::C), modifier),
                         // `Alt-o`
-                        184 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::O), modifier)
-                        }
+                        184 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::O), modifier),
                         // If we do not know the key, we log it in case we might want to have
                         // support for it.
-                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier),
                     }
                 }
                 197 => {
@@ -550,12 +520,10 @@ impl TermiosReader {
                     let byte_2 = checked_stdin_read()?;
                     match byte_2 {
                         // `Alt-q`
-                        147 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::Q), modifier)
-                        }
+                        147 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::Q), modifier),
                         // If we do not know the key, we log it in case we might want to have
                         // support for it.
-                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier),
                     }
                 }
                 198 => {
@@ -566,12 +534,10 @@ impl TermiosReader {
                     let byte_2 = checked_stdin_read()?;
                     match byte_2 {
                         // `Alt-f`
-                        146 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::F), modifier)
-                        }
+                        146 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::F), modifier),
                         // If we do not know the key, we log it in case we might want to have
                         // support for it.
-                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier),
                     }
                 }
                 203 => {
@@ -582,24 +548,16 @@ impl TermiosReader {
                     let byte_2 = checked_stdin_read()?;
                     match byte_2 {
                         // `Alt-i`
-                        134 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::I), modifier)
-                        }
+                        134 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::I), modifier),
                         // `Alt-h`
-                        153 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::H), modifier)
-                        }
+                        153 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::H), modifier),
                         // `Alt-k`
-                        154 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::K), modifier)
-                        }
+                        154 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::K), modifier),
                         // `Alt-n`
-                        156 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::N), modifier)
-                        }
+                        156 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::N), modifier),
                         // If we do not know the key, we log it in case we might want to have
                         // support for it.
-                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier),
                     }
                 }
                 206 => {
@@ -610,12 +568,10 @@ impl TermiosReader {
                     let byte_2 = checked_stdin_read()?;
                     match byte_2 {
                         // `Alt-z`
-                        169 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::Z), modifier)
-                        }
+                        169 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::Z), modifier),
                         // If we do not know the key, we log it in case we might want to have
                         // support for it.
-                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier),
                     }
                 }
                 207 => {
@@ -626,12 +582,10 @@ impl TermiosReader {
                     let byte_2 = checked_stdin_read()?;
                     match byte_2 {
                         // `Alt-p`
-                        128 => {
-                            ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::P), modifier)
-                        }
+                        128 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Letter(Letter::P), modifier),
                         // If we do not know the key, we log it in case we might want to have
                         // support for it.
-                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier)
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier),
                     }
                 }
                 226 => {
@@ -646,38 +600,20 @@ impl TermiosReader {
                             let byte_3 = checked_stdin_read()?;
                             match byte_3 {
                                 // `Alt-]` (Alt-dash)
-                                147 => {
-                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Dash, modifier)
-                                }
+                                147 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Dash, modifier),
                                 // `Alt-]` (Alt-right bracket)
-                                152 => {
-                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::RightBracket, modifier)
-                                }
+                                152 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::RightBracket, modifier),
                                 // `Alt-[` (Alt-left bracket)
-                                156 => {
-                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::LeftBracket, modifier)
-                                }
+                                156 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::LeftBracket, modifier),
                                 // `Alt-t`
-                                160 => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Letter(Letter::T),
-                                    modifier,
-                                ),
+                                160 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Letter(Letter::T), modifier),
                                 // `Alt-8`
-                                162 => {
-                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::N8, modifier)
-                                }
+                                162 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::N8, modifier),
                                 // `Alt-;` (Alt-semicolon)
-                                166 => {
-                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::SemiColon, modifier)
-                                }
+                                166 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::SemiColon, modifier),
                                 // If we do not know the key, we log it in case we might want to
                                 // have support for it.
-                                _ => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Unknown,
-                                    KeyModifier::None
-                                ),
+                                _ => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
                             }
                         }
                         132 => {
@@ -688,18 +624,10 @@ impl TermiosReader {
                             let byte_3 = checked_stdin_read()?;
                             match byte_3 {
                                 // `Alt-2`
-                                162 => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::N2,
-                                    modifier,
-                                ),
+                                162 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::N2, modifier),
                                 // If we do not know the key, we log it in case we might want to
                                 // have support for it.
-                                _ => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Unknown,
-                                    KeyModifier::None
-                                ),
+                                _ => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
                             }
                         }
                         136 => {
@@ -710,46 +638,20 @@ impl TermiosReader {
                             let byte_3 = checked_stdin_read()?;
                             match byte_3 {
                                 // `Alt-d`
-                                130 => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Letter(Letter::D),
-                                    modifier,
-                                ),
+                                130 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Letter(Letter::D), modifier),
                                 // `Alt-j`
-                                134 => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Letter(Letter::J),
-                                    modifier,
-                                ),
+                                134 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Letter(Letter::J), modifier),
                                 // `Alt-w`
-                                145 => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Letter(Letter::W),
-                                    modifier,
-                                ),
+                                145 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Letter(Letter::W), modifier),
                                 // `Alt-v`
-                                154 => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Letter(Letter::V),
-                                    modifier,
-                                ),
+                                154 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Letter(Letter::V), modifier),
                                 // `Alt-5`
-                                158 => {
-                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::N5, modifier)
-                                }
+                                158 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::N5, modifier),
                                 // `Alt-b`
-                                171 => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Letter(Letter::B),
-                                    modifier,
-                                ),
+                                171 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Letter(Letter::B), modifier),
                                 // If we do not know the key, we log it in case we might want to
                                 // have support for it.
-                                _ => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Unknown,
-                                    KeyModifier::None
-                                ),
+                                _ => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
                             }
                         }
                         137 => {
@@ -760,50 +662,30 @@ impl TermiosReader {
                             let byte_3 = checked_stdin_read()?;
                             match byte_3 {
                                 // `Alt-X`
-                                136 => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Letter(Letter::X),
-                                    modifier,
-                                ),
+                                136 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Letter(Letter::X), modifier),
                                 // `Alt-=` (Alt-equal)
-                                160 => {
-                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Equal, modifier)
-                                }
+                                160 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Equal, modifier),
                                 // `Alt-,` (Alt-comma)
-                                164 => {
-                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Comma, modifier)
-                                }
+                                164 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Comma, modifier),
                                 // `Alt-.` (Alt-dot)
-                                165 => {
-                                    ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Dot, modifier)
-                                }
+                                165 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Dot, modifier),
                                 // If we do not know the key, we log it in case we might want to
                                 // have support for it.
-                                _ => (
-                                    [c, byte_2, byte_3, 0, 0],
-                                    AnsiKeyCode::Unknown,
-                                    KeyModifier::None
-                                ),
+                                _ => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
                             }
                         }
                         // If we do not know the key, we log it in case we might want to have
                         // support for it.
-                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None)
+                        _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
                     }
                 }
                 _ => ([c, 0, 0, 0, 0], AnsiKeyCode::Unknown, KeyModifier::None),
             };
-            return Ok(AnsiKey {
-                bytes,
-                code,
-                modifier,
-            });
+            return Ok(AnsiKey { bytes, code, modifier });
         }
         Err(TermiosError::ReadStdInFailed)
     }
 }
-
-
 
 /// Calls the system `read` and checks that no error occurs
 ///

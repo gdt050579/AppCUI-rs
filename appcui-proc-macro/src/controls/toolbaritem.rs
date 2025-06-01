@@ -20,7 +20,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         let init_type = format!("toolbar::{}::new", item_type);
         let is_checkbox = item_type == "CheckBox";
         cb.init_control(init_type.as_str());
-        cb.add_string_parameter("caption", None);        
+        cb.add_string_parameter("caption", None);
         if is_checkbox {
             cb.add_bool_parameter("checked", Some(false));
         }

@@ -46,7 +46,7 @@ impl Type {
         match self {
             Type::Standard => "[?]",
             Type::Ascii => "[?]",
-            Type::CheckBox => "⍰ ", 
+            Type::CheckBox => "⍰ ",
             Type::CheckMark => "?",
             Type::FilledBox => "◪",
             Type::YesNo => "[?]",

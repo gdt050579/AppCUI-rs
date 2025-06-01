@@ -12,8 +12,6 @@ const BTC: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2).prefi
 const BTC_SYMBOL: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2).prefix("₿ ");
 const RON: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2).prefix("RON ");
 
-
-
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum CurrencyFormat {
     USD,
@@ -26,12 +24,12 @@ pub enum CurrencyFormat {
     YENSymbol,
     Bitcoin,
     BitcoinSymbol,
-    RON,    
+    RON,
 }
 
 impl CurrencyFormat {
     pub(crate) const NUMERIC_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2);
-    pub(crate) const fn name(&self)->(&'static str, usize){
+    pub(crate) const fn name(&self) -> (&'static str, usize) {
         match self {
             CurrencyFormat::USD => ("USD", 3),
             CurrencyFormat::USDSymbol => ("$", 1),
@@ -43,7 +41,7 @@ impl CurrencyFormat {
             CurrencyFormat::YENSymbol => ("¥", 1),
             CurrencyFormat::Bitcoin => ("BTC", 3),
             CurrencyFormat::BitcoinSymbol => ("₿", 1),
-            CurrencyFormat::RON => ("RON", 3),            
+            CurrencyFormat::RON => ("RON", 3),
         }
     }
     pub(crate) const fn formatter(&self) -> &'static FormatNumber {
@@ -62,4 +60,3 @@ impl CurrencyFormat {
         }
     }
 }
-

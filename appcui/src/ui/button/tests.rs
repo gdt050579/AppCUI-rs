@@ -297,7 +297,6 @@ fn check_tool_tip() {
     a.run();
 }
 
-
 #[test]
 fn check_mouse_drag_test() {
     let script = "

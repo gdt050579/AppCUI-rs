@@ -196,7 +196,8 @@ fn check_scrollbars_on_arrows_and_click() {
         Paint('5. scroll bars moved with mouse')
         CheckHash(0xB7F2FEFDD0647BF4) 
 ";
-    let m = markdown!("'
+    let m = markdown!(
+        "'
     # My Markdown Example\r\n\r\n\
     Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.\r\n\r\n\
     ---\r\n\
@@ -272,7 +273,8 @@ fn check_scrollbars_on_drag_and_weel() {
         Paint('5. drag mouse down (scroll up)')
         CheckHash(0x93FD8A2AF6052839)
     ";
-    let m = markdown!("'
+    let m = markdown!(
+        "'
     # My Markdown Example\r\n\r\n\
     Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.\r\n\r\n\
     ---\r\n\
@@ -339,7 +341,8 @@ fn check_move_to_section_on_link_click() {
         Paint('2. scroll bars moved with mouse')
         CheckHash(0x19DD90B0FD257FA9) 
     ";
-    let m = markdown!("'
+    let m = markdown!(
+        "'
     [Go to end](#end-link)\r\n\r\n\
     Some testing for links back \r\n\r\n\
     ## Table of Contents\r\n\r\n\
@@ -399,7 +402,8 @@ fn check_inactive() {
         Paint('2. scroll bars moved with mouse')
         CheckHash(0xF5953A121DF629B6) 
 ";
-    let mut m = markdown!("'
+    let mut m = markdown!(
+        "'
     [Go to end](#end-link)\r\n\r\n\
     Some testing for links back \r\n\r\n\
     ## Table of Contents\r\n\r\n\
@@ -441,7 +445,8 @@ fn check_set_content() {
         Paint('1. Initial state')
         CheckHash(0xF1F34BA26A32DF9C)
 ";
-    let mut m = markdown!("'
+    let mut m = markdown!(
+        "'
     [Go to end](#end-link)\r\n\r\n\
     Some testing for links back \r\n\r\n\
     ## Table of Contents\r\n\r\n\

@@ -250,7 +250,7 @@ impl Window {
     ///
     /// let mut win = window!("'My Window',d:c,w:40,h:10");
     /// let label_handle = win.add(label!("'Hello World',d:c,w:12,h:1"));
-    /// 
+    ///
     /// if let Some(label) = win.control(label_handle) {
     ///     // Use the label reference
     ///     assert_eq!(label.caption(), "Hello World");
@@ -282,7 +282,7 @@ impl Window {
     ///
     /// let mut win = window!("'My Window',d:c,w:40,h:10");
     /// let label_handle = win.add(label!("'Hello World',d:c,w:12,h:1"));
-    /// 
+    ///
     /// if let Some(label) = win.control_mut(label_handle) {
     ///     // Use the mutable label reference
     ///     label.set_caption("New Text");
@@ -310,7 +310,7 @@ impl Window {
     ///
     /// let mut win = window!("'My Window',d:c,w:40,h:10");
     /// let button_handle = win.add(button!("'Click Me',d:c,w:10,h:1"));
-    /// 
+    ///
     /// // Set focus to the button
     /// win.request_focus_for_control(button_handle);
     /// ```
@@ -323,7 +323,7 @@ impl Window {
 
     /// Gets a mutable reference to the window's toolbar.
     ///
-    /// The toolbar allows adding toolbar items like buttons, checkboxes, labels, and 
+    /// The toolbar allows adding toolbar items like buttons, checkboxes, labels, and
     /// single choice items to the window.
     ///
     /// # Returns
@@ -336,7 +336,7 @@ impl Window {
     /// use appcui::prelude::*;
     ///
     /// let mut win = window!("'My Window',d:c,w:40,h:10");
-    /// 
+    ///
     /// // Create a toolbar group and add a button to it
     /// let group = win.toolbar().create_group(toolbar::GroupPosition::TopRight);
     /// let button = win.toolbar().add(group, toolbar::Button::new("Help"));

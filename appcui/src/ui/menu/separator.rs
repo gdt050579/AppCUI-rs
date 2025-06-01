@@ -1,8 +1,8 @@
 use crate::{
     graphics::{LineType, Surface},
+    system::Handle,
     system::MenuTheme,
     ui::menu::Menu,
-    system::Handle, 
 };
 
 use super::{menu_item::MenuItem, MenuItemWrapper};
@@ -14,7 +14,7 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 /// the organization and readability of menus.
 pub struct Separator {
     pub(super) menu_handle: Handle<Menu>,
-    pub(super) handle: Handle<Separator>
+    pub(super) handle: Handle<Separator>,
 }
 impl Separator {
     /// Creates a new separator menu item.

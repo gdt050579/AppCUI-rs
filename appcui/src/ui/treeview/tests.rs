@@ -32,11 +32,10 @@ impl ListItem for TestData {
     fn column(_: u16) -> crate::prelude::Column {
         crate::prelude::Column::new("", 50, crate::prelude::TextAlignament::Left)
     }
-        
+
     fn matches(&self, text: &str) -> bool {
         self.text.contains(text)
     }
-    
 }
 
 #[derive(ListItem)]
@@ -1726,7 +1725,10 @@ fn check_select_and_count_method() {
                 let idx = self.idx;
                 if let Some(tv) = self.control_mut(h) {
                     if let Some(current) = tv.current_item_handle() {
-                        tv.add_to_parent(Course::new(format!("Item {}", idx).as_str(), (idx * 7) % 3 + 1, (idx * 11) % 5 + 1), current);
+                        tv.add_to_parent(
+                            Course::new(format!("Item {}", idx).as_str(), (idx * 7) % 3 + 1, (idx * 11) % 5 + 1),
+                            current,
+                        );
                     }
                 }
             }
@@ -1898,7 +1900,12 @@ fn check_current_item_via_api() {
             let h = self.tv;
             match command_id {
                 mywin::Commands::Read => {
-                    let name = self.control(h).map(|tv| tv.current_item().unwrap()).map(|ci| ci.value().name.as_str()).unwrap_or("").to_string();
+                    let name = self
+                        .control(h)
+                        .map(|tv| tv.current_item().unwrap())
+                        .map(|ci| ci.value().name.as_str())
+                        .unwrap_or("")
+                        .to_string();
                     self.set_title(&name);
                 }
                 mywin::Commands::Change => {

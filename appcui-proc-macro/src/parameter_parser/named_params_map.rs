@@ -130,7 +130,11 @@ impl<'a> NamedParamsMap<'a> {
                 }
                 return Err(Error::new(
                     param_list,
-                    format!("Unknwon parameter: '{}' !\nHere is a list of all available parameters: {}", value.param_name, &s).as_str(),
+                    format!(
+                        "Unknwon parameter: '{}' !\nHere is a list of all available parameters: {}",
+                        value.param_name, &s
+                    )
+                    .as_str(),
                     value.start,
                     value.end,
                 ));

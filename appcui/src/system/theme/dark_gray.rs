@@ -1,6 +1,6 @@
-use appcui_proc_macro::*;
 use super::structures::*;
 use crate::{controlattr, graphics::*, ui::common::ControlCharAttributesState};
+use appcui_proc_macro::*;
 
 pub(crate) fn new() -> Theme {
     Theme {
@@ -91,7 +91,13 @@ pub(crate) fn new() -> Theme {
         },
         header: HeaderTheme {
             text: controlattr!("black,silver", "black,silver", "black,white", "gray", "black,silver"),
-            hotkey: controlattr!("w,silver,flags: Underline", "w,silver,flags: Underline", "w,silver,flags: Underline", "gray", "w,silver,flags: Underline"), 
+            hotkey: controlattr!(
+                "w,silver,flags: Underline",
+                "w,silver,flags: Underline",
+                "w,silver,flags: Underline",
+                "gray",
+                "w,silver,flags: Underline"
+            ),
             symbol: controlattr!("black,silver", "black,silver", "black,white", "gray", "black,silver"),
         },
         toggle_button: ToggleButtonTheme {
@@ -111,8 +117,8 @@ pub(crate) fn new() -> Theme {
             ordered_list: charattr!("black"),
             unordered_list: charattr!("black"),
             table: charattr!("black"),
-            table_header: charattr!("black, flags: Bold")
-        },               
+            table_header: charattr!("black, flags: Bold"),
+        },
         progressbar: ProgressBarTheme {
             background: Color::Black,
             progress: Color::Gray,

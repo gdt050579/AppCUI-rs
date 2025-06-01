@@ -35,7 +35,7 @@ impl ComboBox {
     /// Creates a new ComboBox control with the specified layout and flags.
     /// The flags can be a combination of the following values:
     /// * `Flags::ShowDescription` - if set, the description of the selected item will be displayed in the ComboBox
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
@@ -47,7 +47,7 @@ impl ComboBox {
     pub fn new(layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            component: ComboBoxComponent::new(false,flags.contains(Flags::ShowDescription), 0, 0),
+            component: ComboBoxComponent::new(false, flags.contains(Flags::ShowDescription), 0, 0),
             data: DataProvider { items: Vec::new() },
             flags,
         };
@@ -63,7 +63,7 @@ impl ComboBox {
 
     /// Returns the value of the selected item. If no item is selected, the code will return None
     /// You can use this function to check if the ComboBox has a selected item
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
@@ -81,7 +81,7 @@ impl ComboBox {
     }
 
     /// Adds a new item to the ComboBox control. The item will have no description
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
@@ -95,7 +95,7 @@ impl ComboBox {
     }
 
     /// Adds a new item to the ComboBox control. The item will uses combobox::Item object and allows providing a description.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
@@ -108,7 +108,6 @@ impl ComboBox {
         self.data.items.push(item);
         self.component.update_count(&mut self.base, self.data.items.len() as u32);
     }
-
 
     /// Returns the selected item from the ComboBox control. If no item is selected, the code will return None
     pub fn selected_item(&self) -> Option<&Item> {
@@ -143,7 +142,7 @@ impl ComboBox {
     /// Sets the selected item based on the provided index. If the index is invalid, the index will be ignored
     pub fn set_index(&mut self, index: u32) {
         if index < self.data.count() {
-            self.component.update_current_index(index); 
+            self.component.update_current_index(index);
         }
     }
 

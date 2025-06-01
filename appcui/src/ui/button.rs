@@ -4,8 +4,8 @@
 //! It supports different styles including normal and flat buttons with customizable captions.
 
 mod button;
-mod initialization_flags;
 pub mod events;
+mod initialization_flags;
 #[cfg(test)]
 mod tests;
 

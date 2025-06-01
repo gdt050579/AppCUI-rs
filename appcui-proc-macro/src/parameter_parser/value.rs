@@ -1,7 +1,7 @@
 use super::alignament::Alignament;
+use super::color::Color;
 use super::coordonate::Coordonate;
 use super::dimension::Dimension;
-use super::color::Color;
 use super::named_params_map::NamedParamsMap;
 use super::size::Size;
 use super::Error;
@@ -407,7 +407,7 @@ impl<'a> Value<'a> {
             self.start,
             self.end,
         ))
-    }   
+    }
     fn validate_coordonate(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_coordonate().is_some() {
             return Ok(());
@@ -422,7 +422,7 @@ impl<'a> Value<'a> {
             self.start,
             self.end,
         ))
-    }  
+    }
     pub(crate) fn validate(&mut self, param_list: &str, key_name: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if !self.param_name.is_empty() { self.param_name } else { key_name };
         match expected_type {
@@ -436,7 +436,7 @@ impl<'a> Value<'a> {
             super::ParamType::Dict => self.validate_dict(display_param_name, param_list)?,
             super::ParamType::List => self.validate_list(display_param_name, param_list)?,
             super::ParamType::Integer => self.validate_i32(display_param_name, param_list)?,
-            super::ParamType::Percentage => self.validate_percentage(display_param_name, param_list)?,            
+            super::ParamType::Percentage => self.validate_percentage(display_param_name, param_list)?,
             super::ParamType::Dimension => self.validate_dimension(display_param_name, param_list)?,
             super::ParamType::Coordonate => self.validate_coordonate(display_param_name, param_list)?,
         }

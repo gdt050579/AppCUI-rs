@@ -48,15 +48,9 @@ pub(crate) fn to_i32(text: &str) -> Option<i32> {
 }
 pub(crate) fn to_bool(text: &str) -> Option<bool> {
     match text {
-        "true" | "yes" => {
-            Some(true)
-        }
-        "false" | "no" => {
-            Some(false)
-        }
-        _ => {
-            None
-        }
+        "true" | "yes" => Some(true),
+        "false" | "no" => Some(false),
+        _ => None,
     }
 }
 pub(crate) fn to_percentage(text: &str) -> Option<f32> {
@@ -118,9 +112,9 @@ pub(crate) fn skip_words(buf: &[u8], start: usize) -> usize {
     while (pos < len) && is_word_character(buf[pos]) {
         pos += 1;
     }
-    pos   
+    pos
 }
-pub(crate)  fn validate_name(name: &str, force_one_capilat_letter: bool) -> Result<(),&'static str> {
+pub(crate) fn validate_name(name: &str, force_one_capilat_letter: bool) -> Result<(), &'static str> {
     if name.is_empty() {
         return Err("Empty names are not allowed !");
     }

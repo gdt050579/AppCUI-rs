@@ -22,7 +22,6 @@ use super::utils;
 use super::winapi;
 use crate::graphics::*;
 
-
 pub(crate) struct Input {
     stdin: HANDLE,
     stdout: HANDLE,
@@ -31,7 +30,6 @@ pub(crate) struct Input {
     visible_region: SMALL_RECT,
     shared_visible_region: Arc<Mutex<SMALL_RECT>>,
 }
-
 
 const TRANSLATION_MATRIX: [KeyCode; 256] = [
     KeyCode::None,
@@ -320,7 +318,6 @@ impl SystemEventReader for Input {
             //println!("Event: {}",ir.event_type);
         }
 
-
         // Key processings
         if ir.event_type == KEY_EVENT {
             let mut key_code = KeyCode::None;
@@ -473,5 +470,4 @@ impl SystemEventReader for Input {
 
         None
     }
-
 }

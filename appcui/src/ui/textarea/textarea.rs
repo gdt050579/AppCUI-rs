@@ -15,14 +15,14 @@ struct Cursor {
 enum SelectionDirection {
     None,
     Right,
-    Left
+    Left,
 }
 impl fmt::Display for SelectionDirection {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             SelectionDirection::Left => write!(f, "Left"),
             SelectionDirection::Right => write!(f, "Right"),
-            SelectionDirection::None => write!(f, "None")
+            SelectionDirection::None => write!(f, "None"),
         }
     }
 }
@@ -31,12 +31,12 @@ impl fmt::Display for SelectionDirection {
 enum CharacterType {
     None,
     AlphaNumeric,
-    NonAlphaNumeric
+    NonAlphaNumeric,
 }
 #[derive(Debug, PartialEq, Eq)]
 enum Direction {
     Left,
-    Right
+    Right,
 }
 
 #[derive(Debug)]
@@ -62,7 +62,7 @@ pub struct TextArea {
 
     // LineNumberBar size
     line_number_bar_size: u32,
-    
+
     // Current position in the line
     row_offset: u32,
 
@@ -78,18 +78,17 @@ pub struct TextArea {
     mouse_x: u32,
     mouse_y: u32,
 
-    window_width: u32
+    window_width: u32,
 }
 
 impl TextArea {
-
     fn get_current_character(bytes: &[u8], position: usize) -> Option<(usize, char)> {
         if position >= bytes.len() {
             return None; // Out of bounds
         }
-    
+
         let first_byte = bytes[position];
-    
+
         // Determine the number of bytes in the character
         let char_len = if first_byte & 0x80 == 0x00 {
             1 // 1-byte (ASCII)
@@ -102,11 +101,11 @@ impl TextArea {
         } else {
             return None; // Invalid UTF-8 sequence start
         };
-    
+
         if position + char_len > bytes.len() {
             return None; // Avoid out-of-bounds access
         }
-    
+
         // Extract the UTF-8 character
         std::str::from_utf8(&bytes[position..position + char_len])
             .ok()
@@ -123,10 +122,11 @@ impl TextArea {
             start -= 1;
         }
 
-        std::str::from_utf8(&bytes[start..position]).ok().and_then(|s| s.chars().next().map(|c| (start, c)))
+        std::str::from_utf8(&bytes[start..position])
+            .ok()
+            .and_then(|s| s.chars().next().map(|c| (start, c)))
     }
     fn get_start_of_word(&mut self, absolute_position_start: usize) -> (usize, i32) {
-
         let mut current_position = absolute_position_start;
         let bytes = self.text.as_bytes();
 
@@ -137,15 +137,12 @@ impl TextArea {
             if prev_char.is_alphanumeric() {
                 if previous_type == CharacterType::None {
                     previous_type = CharacterType::AlphaNumeric;
-                }
-                else if previous_type == CharacterType::NonAlphaNumeric {
+                } else if previous_type == CharacterType::NonAlphaNumeric {
                     return (current_position, character_count);
                 }
-            }
-            else if previous_type == CharacterType::None {
+            } else if previous_type == CharacterType::None {
                 previous_type = CharacterType::NonAlphaNumeric;
-            }
-            else if previous_type == CharacterType::AlphaNumeric {
+            } else if previous_type == CharacterType::AlphaNumeric {
                 return (current_position, character_count);
             }
 
@@ -156,7 +153,6 @@ impl TextArea {
         (current_position, character_count)
     }
     fn get_end_of_word(&mut self, absolute_position_start: usize) -> (usize, i32) {
-
         let mut current_position = absolute_position_start;
         let bytes = self.text.as_bytes();
 
@@ -167,15 +163,12 @@ impl TextArea {
             if prev_char.is_alphanumeric() {
                 if previous_type == CharacterType::None {
                     previous_type = CharacterType::AlphaNumeric;
-                }
-                else if previous_type == CharacterType::NonAlphaNumeric {
+                } else if previous_type == CharacterType::NonAlphaNumeric {
                     return (current_position, character_count);
                 }
-            }
-            else if previous_type == CharacterType::None {
+            } else if previous_type == CharacterType::None {
                 previous_type = CharacterType::NonAlphaNumeric;
-            }
-            else if previous_type == CharacterType::AlphaNumeric {
+            } else if previous_type == CharacterType::AlphaNumeric {
                 return (current_position, character_count);
             }
 
@@ -193,8 +186,7 @@ impl TextArea {
 
         if direction == Direction::Right {
             (_absolute_position, char_count) = self.get_end_of_word(absolute_position_inital);
-        }
-        else {
+        } else {
             (_absolute_position, char_count) = self.get_start_of_word(absolute_position_inital);
         }
 
@@ -205,54 +197,50 @@ impl TextArea {
     }
 
     pub fn move_cursor_vertical(&mut self, no_of_rows: i32) {
-
         // We are already on the first line, moving left to the max
         if self.line_offset as i32 + self.cursor.pos_y as i32 + no_of_rows < 0 {
             return self.move_cursor_horizontal(i32::MIN);
         }
         // We are already on the last line, moving right to the max
-        else if  self.line_offset as i32 + self.cursor.pos_y as i32 + no_of_rows >= self.line_character_counts.len() as i32 {
+        else if self.line_offset as i32 + self.cursor.pos_y as i32 + no_of_rows >= self.line_character_counts.len() as i32 {
             return self.move_cursor_horizontal(i32::MAX);
         }
 
         let new_position = self.cursor.pos_y as i32 + no_of_rows;
-        
+
         if new_position < 0 {
-            let update_offset = new_position + self.line_offset as i32; 
+            let update_offset = new_position + self.line_offset as i32;
 
             self.cursor.pos_y = 0;
 
             if update_offset > 0 {
                 self.line_offset = update_offset as u32;
-            }
-            else {
+            } else {
                 self.line_offset = 0;
             }
-        }
-        else if new_position >= self.size().height as i32 {
+        } else if new_position >= self.size().height as i32 {
             self.cursor.pos_y = self.size().height as usize - 1;
-            
+
             let mut update_offset = new_position - self.size().height as i32 + 1 + self.line_offset as i32;
-            
+
             if update_offset > self.line_character_counts.len() as i32 - self.size().height as i32 {
                 update_offset = self.line_character_counts.len() as i32 - self.size().height as i32;
             }
 
             self.line_offset = update_offset as u32;
-        }
-        else {
+        } else {
             self.cursor.pos_y = new_position as usize;
             if self.line_offset + self.cursor.pos_y as u32 >= self.line_character_counts.len() as u32 - 1 {
                 self.cursor.pos_y = self.line_character_counts.len() - self.line_offset as usize - 1;
             }
         }
-        
+
         // Checking if the cursor points to a valid character in line
         let current_cursor_position_x = self.row_offset as usize + self.cursor.pos_x;
         let current_cursor_position_y = self.line_offset as usize + self.cursor.pos_y;
 
         let position_diff_x = self.line_character_counts[current_cursor_position_y] as i32 - current_cursor_position_x as i32 - 1; // -1 for the newline
-        
+
         log!("TextArea", "Position diff: {}", position_diff_x);
         log!("TextArea", "Cursor position x: {}, y: {}", self.cursor.pos_x, self.cursor.pos_y);
         log!("TextArea", "Line length: {}", self.line_character_counts[current_cursor_position_y]);
@@ -264,12 +252,10 @@ impl TextArea {
             log!("TextArea", "Cursor new position x: {}, y: {}", self.cursor.pos_x, self.cursor.pos_y);
             self.cursor_position_x_backup = tmp_cursor_position_x_backup;
             self.cursor_position_x_backup += -position_diff_x as u32;
-        }
-        else if self.cursor_position_x_backup > 0 {
+        } else if self.cursor_position_x_backup > 0 {
             if (position_diff_x as u32) >= self.cursor_position_x_backup {
                 self.move_cursor_horizontal(self.cursor_position_x_backup as i32);
-            }
-            else {
+            } else {
                 let tmp_cursor_position_x_backup = self.cursor_position_x_backup;
                 self.move_cursor_horizontal(position_diff_x);
                 self.cursor_position_x_backup = tmp_cursor_position_x_backup;
@@ -296,23 +282,22 @@ impl TextArea {
         if new_position < 0 {
             // Current row, the offset of the first line printed + the row cursor position
             let mut current_row = self.line_offset + self.cursor.pos_y as u32;
-            
+
             // Going up while we are still on a valid row
             while current_row > 0 && new_position < 0 {
-                
                 // Going a row above
                 current_row -= 1;
 
-                // Adding the row size of the current row 
+                // Adding the row size of the current row
                 new_position += self.line_character_counts[current_row as usize] as i32;
             }
 
-            // Too much left move, setting to pos (0, 0) 
+            // Too much left move, setting to pos (0, 0)
             if new_position < 0 {
-                // Updating the cursor 
+                // Updating the cursor
                 self.cursor.pos_x = 0;
                 self.cursor.pos_y = 0;
-                
+
                 // Updating the view as well
                 self.line_offset = 0;
                 self.row_offset = 0;
@@ -332,8 +317,7 @@ impl TextArea {
                 if !(new_position as u32 >= self.row_offset && new_position < self.window_width as i32 + self.row_offset as i32) {
                     if new_position < self.window_width as i32 {
                         self.row_offset = new_position as u32;
-                    }
-                    else {
+                    } else {
                         self.row_offset = new_position as u32 - self.window_width + 1;
                     }
                 }
@@ -348,13 +332,12 @@ impl TextArea {
 
             // The number of position will needed, without the ones available in the current line which we know is not enough
             new_position = (new_position as u32 - self.line_character_counts[current_row as usize]) as i32;
-            
+
             // Going to the next row
             current_row += 1;
             // Going up while we are still on a valid row
             while current_row < self.line_character_counts.len() as u32 {
-                
-                // Checking if the new position will land on the current row 
+                // Checking if the new position will land on the current row
                 if new_position <= self.line_character_counts[current_row as usize] as i32 {
                     break;
                 }
@@ -366,19 +349,18 @@ impl TextArea {
                 // Going a row below
                 current_row += 1;
             }
-            
-            // Too much right move, setting to pos (last_line, last_char_in_line) 
+
+            // Too much right move, setting to pos (last_line, last_char_in_line)
             if current_row == self.line_character_counts.len() as u32 {
                 current_row = self.line_character_counts.len() as u32 - 1;
                 new_position = self.line_character_counts[current_row as usize] as i32 - 1;
             }
 
-            // Updating the line offset, which will be 0 if the text fits enterely on the screen, otherwise last_line - line_capacity 
+            // Updating the line offset, which will be 0 if the text fits enterely on the screen, otherwise last_line - line_capacity
             let tmp_line_offset = current_row as i32 - self.size().height as i32 + 1;
             if tmp_line_offset < 0 {
                 self.line_offset = 0;
-            }
-            else {
+            } else {
                 self.line_offset = tmp_line_offset as u32;
             }
             // Updating the cursor position vertically
@@ -394,8 +376,7 @@ impl TextArea {
                 let tmp_row_offset = new_position - self.window_width as i32;
                 if tmp_row_offset < 0 {
                     self.row_offset = 0;
-                }
-                else {
+                } else {
                     self.row_offset = tmp_row_offset as u32;
                 }
                 self.cursor.pos_x = new_position as usize - self.row_offset as usize;
@@ -408,7 +389,6 @@ impl TextArea {
 
             // We consider a character a screen if row_offset <= new_position < row_offset + screen_width
             if !(self.row_offset <= new_position as u32 && (new_position as u32) < self.row_offset + self.window_width) {
-                
                 // We need to update position, we will check where the direction on movement
                 // Checking if the movement is to the left
                 if self.row_offset > new_position as u32 {
@@ -419,15 +399,14 @@ impl TextArea {
                     let tmp_row_offset = new_position - self.window_width as i32 + 1;
                     if tmp_row_offset < 0 {
                         self.row_offset = new_position as u32;
-                    }
-                    else {
+                    } else {
                         self.row_offset = tmp_row_offset as u32;
                     }
                 }
             }
             self.cursor.pos_x = (new_position as usize).saturating_sub(self.row_offset as usize);
         }
-        
+
         self.update_scrollbar_pos();
     }
 
@@ -437,8 +416,7 @@ impl TextArea {
         let char_index = line_text.char_indices().nth(cursor_offset).map(|(i, _)| i);
         if let Some(bytes_index) = char_index {
             bytes_index
-        }
-        else {
+        } else {
             usize::MAX
         }
     }
@@ -458,10 +436,11 @@ impl TextArea {
             cursor_absolute_position += self.line_sizes[i as usize];
         }
 
-        // Here I need the absolute position of that character, therefore I need to slice 
+        // Here I need the absolute position of that character, therefore I need to slice
         // the text and extract the absolute position
-        let line_text = &self.text[cursor_absolute_position as usize .. (cursor_absolute_position + self.line_sizes[self.line_offset as usize + self.cursor.pos_y]) as usize];
-        
+        let line_text = &self.text
+            [cursor_absolute_position as usize..(cursor_absolute_position + self.line_sizes[self.line_offset as usize + self.cursor.pos_y]) as usize];
+
         let byte_index_in_line = Self::get_cursor_position_in_line(line_text, self.row_offset as usize, self.cursor.pos_x, 0);
         if byte_index_in_line != usize::MAX {
             cursor_absolute_position += byte_index_in_line as u32;
@@ -479,7 +458,9 @@ impl TextArea {
     fn reposition_cursor(&mut self) {
         // If the cursor is outside the line its supposed to be
         if self.cursor.pos_x + self.row_offset as usize >= self.line_character_counts[self.cursor.pos_y + self.line_offset as usize] as usize {
-            let diff = (self.cursor.pos_x + self.row_offset as usize) - self.line_character_counts[self.cursor.pos_y + self.line_offset as usize] as usize + 1;
+            let diff = (self.cursor.pos_x + self.row_offset as usize)
+                - self.line_character_counts[self.cursor.pos_y + self.line_offset as usize] as usize
+                + 1;
             log!("TextArea", "Repositioning diff: {}", 0 - diff as i32);
             self.move_cursor_horizontal(0 - diff as i32);
         }
@@ -500,7 +481,7 @@ impl TextArea {
             line_character_counts.push(0);
         } else {
             let line_count = line_character_counts.len();
-            
+
             line_sizes[line_count - 1] -= 1;
             line_character_counts[line_count - 1] -= 1;
         }
@@ -520,7 +501,7 @@ impl TextArea {
         }
 
         let mut temp_size = 0;
-        let mut temp_line_number = self.line_sizes.len();    
+        let mut temp_line_number = self.line_sizes.len();
         while temp_line_number > 0 {
             temp_size += 1;
             temp_line_number /= 10;
@@ -537,7 +518,7 @@ impl TextArea {
     fn update_window_width(&mut self) {
         if self.size().width < self.line_number_bar_size {
             self.window_width = 0;
-            return
+            return;
         }
         self.window_width = self.size().width - self.line_number_bar_size;
     }
@@ -549,13 +530,13 @@ impl TextArea {
     /// * `Flags::ShowLineNumber` - if set, the control will show line numbers
     /// * `Flags::ReadOnly` - if set, the control will be read-only
     /// * `Flags::HighlightCursor` - if set, the control will highlight the cursor
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
-    /// let textarea = TextArea::new("Hello, world!", 
-    ///                              Layout::new("x:1,y:1,w:20,h:10"), 
+    ///
+    /// let textarea = TextArea::new("Hello, world!",
+    ///                              Layout::new("x:1,y:1,w:20,h:10"),
     ///                              textarea::Flags::ShowLineNumber);
     /// ```
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {
@@ -572,8 +553,16 @@ impl TextArea {
             flags,
             text: text.to_string().replace('\t', "    ").replace("\r\n", "\n"),
 
-            cursor: Cursor { pos_x: 0, pos_y: 0, pressed: false},
-            selection: Selection {pos_start: 0, pos_end: 0, direction: SelectionDirection::None},
+            cursor: Cursor {
+                pos_x: 0,
+                pos_y: 0,
+                pressed: false,
+            },
+            selection: Selection {
+                pos_start: 0,
+                pos_end: 0,
+                direction: SelectionDirection::None,
+            },
 
             line_sizes: Vec::new(),
             line_character_counts: Vec::new(),
@@ -594,7 +583,7 @@ impl TextArea {
             mouse_x: 0,
             mouse_y: 0,
 
-            window_width: 0
+            window_width: 0,
         };
 
         if !flags.contains(Flags::ShowLineNumber) {
@@ -607,13 +596,14 @@ impl TextArea {
 
         for line in text.lines() {
             control.line_sizes.push(line.len() as u32 + 1); // +1 for the \n we need to keep in mind
-            control.line_character_counts.push(line.chars().count() as u32 + 1); // +1 for the \n we need to keep in mind
+            control.line_character_counts.push(line.chars().count() as u32 + 1);
+            // +1 for the \n we need to keep in mind
         }
 
         control.update_max_line_size();
         control.update_line_number_tab_size();
         control.update_window_width();
-        
+
         control
     }
 
@@ -625,13 +615,14 @@ impl TextArea {
     }
     #[inline(always)]
     fn update_scrollbar_pos(&mut self) {
-        self.scrollbars.set_indexes((self.row_offset as usize) as u64, (self.line_offset as usize) as u64);
+        self.scrollbars
+            .set_indexes((self.row_offset as usize) as u64, (self.line_offset as usize) as u64);
         self.update_scrollbar_data();
     }
     fn update_view_from_scrollbars(&mut self, vertical: i32, horizontal: i32) {
-        // In this function we need to change the horizontal and vertical view, 
+        // In this function we need to change the horizontal and vertical view,
         // without changing the position of the cursor, if possible. If the cursor is out of view,
-        // it will be set on the first viewed character of the line if moving to right or the 
+        // it will be set on the first viewed character of the line if moving to right or the
         // last if moving to left. Same applies for moving vertically
 
         if horizontal != 0 {
@@ -639,7 +630,6 @@ impl TextArea {
 
             // Moving to right
             if horizontal > 0 {
-
                 // Updating the view
                 self.row_offset += horizontal as u32;
 
@@ -673,7 +663,6 @@ impl TextArea {
 
             // Moving down
             if vertical > 0 {
-
                 // Updating the view
                 self.line_offset += vertical as u32;
 
@@ -707,21 +696,30 @@ impl TextArea {
     pub fn remove_char_back(&mut self) {
         // First we need to calculate the absolute position in the text for the cursor
         let cursor_absolute_position_initial = self.get_absolute_position() as usize;
-        
+
         // If we press Backspace but we do not have any character to the left, we do nothing
         if cursor_absolute_position_initial != 0 {
             // The position we need to remove
             self.move_cursor_horizontal(-1);
             let cursor_absolute_position_new = self.get_absolute_position() as usize;
-            
-            log!("Info", "Removing data from index {} to {}", cursor_absolute_position_new, cursor_absolute_position_initial);
+
+            log!(
+                "Info",
+                "Removing data from index {} to {}",
+                cursor_absolute_position_new,
+                cursor_absolute_position_initial
+            );
 
             let char_size = cursor_absolute_position_initial - cursor_absolute_position_new;
 
-            log!("Info", "Removed text: {}", &self.text[cursor_absolute_position_new..cursor_absolute_position_initial]);
+            log!(
+                "Info",
+                "Removed text: {}",
+                &self.text[cursor_absolute_position_new..cursor_absolute_position_initial]
+            );
 
             // If its a newline, we need to merge 2 rows
-            if self.text.as_bytes()[cursor_absolute_position_new] == b'\n' {   
+            if self.text.as_bytes()[cursor_absolute_position_new] == b'\n' {
                 log!("Info", "Removing newline");
 
                 self.line_sizes[self.line_offset as usize + self.cursor.pos_y] -= char_size as u32;
@@ -729,19 +727,18 @@ impl TextArea {
                 self.line_sizes.remove(self.line_offset as usize + self.cursor.pos_y + 1);
 
                 self.line_character_counts[self.line_offset as usize + self.cursor.pos_y] -= 1;
-                self.line_character_counts[self.line_offset as usize + self.cursor.pos_y] += self.line_character_counts[self.line_offset as usize + self.cursor.pos_y + 1];
+                self.line_character_counts[self.line_offset as usize + self.cursor.pos_y] +=
+                    self.line_character_counts[self.line_offset as usize + self.cursor.pos_y + 1];
                 self.line_character_counts.remove(self.line_offset as usize + self.cursor.pos_y + 1);
-                
-            }
-            else {
+            } else {
                 self.line_sizes[self.line_offset as usize + self.cursor.pos_y] -= char_size as u32;
                 self.line_character_counts[self.line_offset as usize + self.cursor.pos_y] -= 1;
             }
 
             self.text.drain(cursor_absolute_position_new..cursor_absolute_position_initial);
-            
+
             log!("Info", "Text after deletion: {}", self.text);
-            
+
             self.update_line_number_tab_size();
             self.update_max_line_size();
             self.update_scrollbar_pos();
@@ -749,12 +746,13 @@ impl TextArea {
     }
 
     pub fn remove_char_front(&mut self) {
-
         let current_line_number = self.line_offset as usize + self.cursor.pos_y;
         if current_line_number == self.line_sizes.len() - 1 {
             let position_in_line = self.row_offset as usize + self.cursor.pos_x;
 
-            if self.line_character_counts[current_line_number] == 0 || position_in_line == self.line_character_counts[current_line_number] as usize - 1 {
+            if self.line_character_counts[current_line_number] == 0
+                || position_in_line == self.line_character_counts[current_line_number] as usize - 1
+            {
                 return;
             }
         }
@@ -768,7 +766,12 @@ impl TextArea {
         let new_pos_vertical = self.scrollbars.vertical_index() as i32 - self.scrollbar_y as i32;
         let new_pos_horizontal = self.scrollbars.horizontal_index() as i32 - self.scrollbar_x as i32;
 
-        log!("Info", "Scrollbar data y: {}, x: {}", self.scrollbars.vertical_index(), self.scrollbars.horizontal_index());
+        log!(
+            "Info",
+            "Scrollbar data y: {}, x: {}",
+            self.scrollbars.vertical_index(),
+            self.scrollbars.horizontal_index()
+        );
         log!("Info", "Scrollbar update direction V={}, H={}", new_pos_vertical, new_pos_horizontal);
 
         // Updating the view based on the direction
@@ -782,11 +785,11 @@ impl TextArea {
 
         // aaaaaaaa         aaaaaaaa        aaaaa            aaaaabbbb
         // xxxxxxxx
-        // xxxxxxxx     =>              =>              =>  
+        // xxxxxxxx     =>              =>              =>
         // xxxxxxxx
         // bbbbbbbb         bbbbbbbb            bbbb
 
-        // Return if range is invalid 
+        // Return if range is invalid
         if pos_start >= pos_end {
             return;
         }
@@ -800,15 +803,14 @@ impl TextArea {
         let mut line_iterator = 0;
 
         while counter < pos_end && line_iterator < self.line_sizes.len() {
-            
             if counter <= pos_start && pos_start < counter + self.line_sizes[line_iterator] as usize {
                 position_start_y = line_iterator;
-                position_start_x = pos_start - counter; 
+                position_start_x = pos_start - counter;
             }
 
             if counter <= pos_end && pos_end < counter + self.line_sizes[line_iterator] as usize {
                 position_end_y = line_iterator;
-                position_end_x = pos_end - counter; 
+                position_end_x = pos_end - counter;
             }
 
             counter += self.line_sizes[line_iterator] as usize;
@@ -836,9 +838,9 @@ impl TextArea {
         }
         // Remove the selected text
         self.text.drain(pos_start..pos_end);
-        
+
         // Reposition the cursor to the start of the selection
-        
+
         log!("Info", "Starting position: ({}, {})", position_start_x, position_start_y);
         log!("Info", "Cursor position: ({}, {})", self.cursor.pos_x, self.cursor.pos_y);
         log!("Info", "line_offset: {}, row_offset: {}", self.line_offset, self.row_offset);
@@ -854,7 +856,7 @@ impl TextArea {
 
         // Check if cursor can be position in current view for vertical
         if self.line_offset <= position_start_y as u32 && (position_start_y as u32) < self.line_offset + self.size().height {
-            self.cursor.pos_y = position_start_y - self.line_offset as usize; 
+            self.cursor.pos_y = position_start_y - self.line_offset as usize;
         }
         // It does not, updating the view
         else {
@@ -870,17 +872,20 @@ impl TextArea {
         // Splitting the line into 2, [0, position] + (position , line_size]
         destination_line_sizes.insert(line_index + 1, destination_line_sizes[line_index] - insert_index);
         destination_line_sizes[line_index] = insert_index;
-        
+
         // Adding the first line of the inserted text to the original position
         destination_line_sizes[line_index] += new_text_line_sizes[0];
 
         // Adding the last line of the inserted text to the newly added line
         destination_line_sizes[line_index + 1] += new_text_line_sizes[new_text_line_sizes.len() - 1];
-        
+
         // Inserting the new text in between the spliced line
-        destination_line_sizes.splice(line_index + 1..line_index + 1, new_text_line_sizes[1 .. new_text_line_sizes.len() - 1].iter().cloned());
+        destination_line_sizes.splice(
+            line_index + 1..line_index + 1,
+            new_text_line_sizes[1..new_text_line_sizes.len() - 1].iter().cloned(),
+        );
     }
-    
+
     /// Inserts the text at the current cursor position within the text area.
     pub fn insert_text(&mut self, text: &str) {
         if text.contains('\n') {
@@ -892,13 +897,13 @@ impl TextArea {
             let line_index = self.line_offset as usize + self.cursor.pos_y;
             let character_index = self.row_offset as usize + self.cursor.pos_x;
 
-            log!("Info", "Insert text after: {}", &self.text[0 .. cursor_absolute_position as usize]);
+            log!("Info", "Insert text after: {}", &self.text[0..cursor_absolute_position as usize]);
             // Adding the text given as parameter
             self.text.insert_str(cursor_absolute_position as usize, text);
 
             // First we parse the text in lines
-            let mut line_sizes : Vec<u32> = Vec::new();
-            let mut line_character_counts : Vec<u32> = Vec::new();
+            let mut line_sizes: Vec<u32> = Vec::new();
+            let mut line_character_counts: Vec<u32> = Vec::new();
             self.parse_text_in_lines(text, &mut line_sizes, &mut line_character_counts);
 
             for it in 0..line_sizes.len() {
@@ -907,9 +912,13 @@ impl TextArea {
             }
 
             TextArea::update_lines_after_insert(&mut self.line_sizes, line_index, byte_index_in_line, &line_sizes);
-            TextArea::update_lines_after_insert(&mut self.line_character_counts, line_index, character_index as u32, &line_character_counts);
-        }
-        else {
+            TextArea::update_lines_after_insert(
+                &mut self.line_character_counts,
+                line_index,
+                character_index as u32,
+                &line_character_counts,
+            );
+        } else {
             let cursor_absolute_position = self.get_absolute_position();
             let line_index = self.line_offset as usize + self.cursor.pos_y;
 
@@ -932,14 +941,14 @@ impl TextArea {
         if direction == SelectionDirection::None {
             return;
         }
-        
+
         // Checking how the selection was initially started so we understand how to process it
-                
+
         // the selection is already to the left, so we expand the selection
         if self.selection.direction == SelectionDirection::Left {
             self.selection.pos_start = absolute_position_new;
 
-            // by moving our selection to the right, the selection is now sized at 0, 
+            // by moving our selection to the right, the selection is now sized at 0,
             // so we change it to None, in order to be able to switch directions
             match self.selection.pos_start.cmp(&self.selection.pos_end) {
                 Ordering::Equal => {
@@ -956,7 +965,7 @@ impl TextArea {
         else if self.selection.direction == SelectionDirection::Right {
             self.selection.pos_end = absolute_position_new;
 
-            // by moving our selection to the right, the selection is now sized at 0, 
+            // by moving our selection to the right, the selection is now sized at 0,
             // so we change it to None, in order to be able to switch directions
             match self.selection.pos_start.cmp(&self.selection.pos_end) {
                 Ordering::Equal => {
@@ -976,14 +985,13 @@ impl TextArea {
             if self.selection.direction == SelectionDirection::Left {
                 self.selection.pos_end = absolute_position_inital;
                 self.selection.pos_start = absolute_position_new;
-            }
-            else {
+            } else {
                 self.selection.pos_start = absolute_position_inital;
                 self.selection.pos_end = absolute_position_new;
             }
         }
 
-        // print!("Selection start: {}, end: {}, direction: {}\n", self.selection.pos_start, self.selection.pos_end, self.selection.direction);              
+        // print!("Selection start: {}, end: {}, direction: {}\n", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
     }
 
     #[inline(always)]
@@ -1021,8 +1029,7 @@ impl TextArea {
             if -new_pos_horizontal > current_cursor_position_x as i32 {
                 new_pos_horizontal = -(current_cursor_position_x as i32);
             }
-        }
-        else if new_pos_horizontal as u32 + current_cursor_position_x >= self.line_character_counts[current_cursor_position_y as usize] {
+        } else if new_pos_horizontal as u32 + current_cursor_position_x >= self.line_character_counts[current_cursor_position_y as usize] {
             new_pos_horizontal = (self.line_character_counts[current_cursor_position_y as usize] - current_cursor_position_x) as i32 - 1;
         }
         // Ignore mouse drag to the right over the linebar
@@ -1040,21 +1047,20 @@ impl TextArea {
     pub fn text(&self) -> &str {
         &self.text
     }
-
 }
 
 impl OnPaint for TextArea {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if (self.has_focus()) && (self.flags.contains(Flags::ScrollBars)) {
             self.scrollbars.paint(surface, theme, self);
-            surface.reduce_clip_by(0,0,1,1);
+            surface.reduce_clip_by(0, 0, 1, 1);
         }
 
-        let (attr_text, attr_selection) = match (){
+        let (attr_text, attr_selection) = match () {
             _ if !self.is_enabled() => (theme.editor.inactive, theme.editor.inactive),
             _ if self.has_focus() => (theme.editor.focused, theme.editor.pressed_or_selectd),
             _ if self.is_mouse_over() => (theme.editor.hovered, theme.editor.hovered),
-            _ => (theme.editor.normal, theme.editor.normal)
+            _ => (theme.editor.normal, theme.editor.normal),
         };
         let attr_line_number = theme.editor.inactive;
 
@@ -1065,7 +1071,7 @@ impl OnPaint for TextArea {
         let mut y = 0;
 
         log!("TextArea - OnPaint", "line_offset: {}, row_offset: {}", self.line_offset, self.row_offset);
-        
+
         // We reserve the necessary space for showing the line number, which will be dynamically calculated
         // using the number of lines the text has + 1 as a divider for the text
         if self.flags.contains(Flags::ShowLineNumber) {
@@ -1074,7 +1080,7 @@ impl OnPaint for TextArea {
 
         let max_line_size = self.window_width as usize;
         let mut initial_offset = 0;
-        
+
         for it in 0..self.line_sizes.len() {
             let current_offset = &self.line_sizes[it];
 
@@ -1083,13 +1089,19 @@ impl OnPaint for TextArea {
             }
 
             if initial_offset + *current_offset > self.text.len() as u32 {
-                log!("Error", "Attempted to access string data from initial {} + current {} while size: {}", initial_offset, *current_offset, self.text.len());
+                log!(
+                    "Error",
+                    "Attempted to access string data from initial {} + current {} while size: {}",
+                    initial_offset,
+                    *current_offset,
+                    self.text.len()
+                );
                 break;
             }
-            
+
             if it >= self.line_offset as usize {
-                let current_line = &self.text[initial_offset as usize .. (initial_offset + *current_offset) as usize];
-                
+                let current_line = &self.text[initial_offset as usize..(initial_offset + *current_offset) as usize];
+
                 if self.flags.contains(Flags::ShowLineNumber) {
                     let line_number_text = (it + 1).to_string();
                     let mut offset = self.line_number_bar_size as i32 - line_number_text.len() as i32 - 1;
@@ -1099,14 +1111,12 @@ impl OnPaint for TextArea {
                         offset += 1;
                     }
                 }
-                
 
                 if self.row_offset < current_line.len() as u32 {
-                    let current_line_view = &current_line[self.row_offset as usize .. ];
-                
+                    let current_line_view = &current_line[self.row_offset as usize..];
+
                     let mut counter = x as usize;
                     for (ch_index, ch) in current_line_view.char_indices() {
-                        
                         if counter >= max_line_size + self.line_number_bar_size as usize {
                             break;
                         }
@@ -1119,14 +1129,12 @@ impl OnPaint for TextArea {
 
                         if self.selection.pos_start <= absolute_position as usize && (absolute_position as usize) < self.selection.pos_end {
                             surface.write_char(x, y, Character::with_attributes(ch, attr_selection));
-                        }                        
-                        else if self.flags.contains(Flags::HighlightCursor) && y as usize == self.cursor.pos_y {
+                        } else if self.flags.contains(Flags::HighlightCursor) && y as usize == self.cursor.pos_y {
                             surface.write_char(x, y, Character::with_attributes(ch, attr_line_number));
-                        }
-                        else {
+                        } else {
                             surface.write_char(x, y, Character::with_attributes(ch, attr_text));
                         }
-                        
+
                         x += 1;
 
                         counter += 1;
@@ -1150,8 +1158,9 @@ impl OnFocus for TextArea {}
 
 impl OnResize for TextArea {
     fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
-        self.scrollbars.resize(self.max_line_size as u64, self.line_sizes.len() as u64, &self.base);
-        
+        self.scrollbars
+            .resize(self.max_line_size as u64, self.line_sizes.len() as u64, &self.base);
+
         // TODO: cursor should always be on screen, when resize we should always focus on where the cursor is when key action happens
         let tmp_row_offset = self.row_offset as i32 + self.cursor.pos_x as i32;
         self.move_cursor_horizontal(0 - tmp_row_offset);
@@ -1164,7 +1173,7 @@ impl OnResize for TextArea {
         self.update_window_width();
     }
 }
-  
+
 impl OnKeyPressed for TextArea {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         match key.value() {
@@ -1179,7 +1188,7 @@ impl OnKeyPressed for TextArea {
                 self.move_cursor_vertical(1);
 
                 self.reset_selection();
-                
+
                 return EventProcessStatus::Processed;
             }
             key!("PageUp") => {
@@ -1200,7 +1209,7 @@ impl OnKeyPressed for TextArea {
                 self.reposition_cursor();
 
                 self.move_cursor_horizontal(-1);
-                
+
                 self.reset_selection();
 
                 return EventProcessStatus::Processed;
@@ -1214,17 +1223,23 @@ impl OnKeyPressed for TextArea {
 
                 return EventProcessStatus::Processed;
             }
-            
+
             key!("Shift+Right") => {
                 // Making sure our cursor is in Focus
                 self.reposition_cursor();
                 let absolute_position_inital = self.get_absolute_position() as usize;
                 self.move_cursor_horizontal(1);
                 let absolute_position_new = self.get_absolute_position() as usize;
-                
+
                 self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Right);
-                
-                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
+
+                log!(
+                    "Info",
+                    "Selection Start: {}, End: {}, Direction: {}",
+                    self.selection.pos_start,
+                    self.selection.pos_end,
+                    self.selection.direction
+                );
                 return EventProcessStatus::Processed;
             }
             key!("Shift+Left") => {
@@ -1236,11 +1251,17 @@ impl OnKeyPressed for TextArea {
 
                 self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Left);
 
-                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
+                log!(
+                    "Info",
+                    "Selection Start: {}, End: {}, Direction: {}",
+                    self.selection.pos_start,
+                    self.selection.pos_end,
+                    self.selection.direction
+                );
                 return EventProcessStatus::Processed;
             }
             key!("Shift+Up") => {
-                // Making sure our cursor is in Focus 
+                // Making sure our cursor is in Focus
                 self.move_cursor_vertical(0);
                 let absolute_position_inital = self.get_absolute_position() as usize;
                 self.move_cursor_vertical(-1);
@@ -1248,27 +1269,38 @@ impl OnKeyPressed for TextArea {
 
                 self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Right);
 
-                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
+                log!(
+                    "Info",
+                    "Selection Start: {}, End: {}, Direction: {}",
+                    self.selection.pos_start,
+                    self.selection.pos_end,
+                    self.selection.direction
+                );
                 return EventProcessStatus::Processed;
             }
             key!("Shift+Down") => {
-                // Making sure our cursor is in Focus 
+                // Making sure our cursor is in Focus
                 self.move_cursor_vertical(0);
                 let absolute_position_inital = self.get_absolute_position() as usize;
                 self.move_cursor_vertical(1);
                 let absolute_position_new = self.get_absolute_position() as usize;
 
                 self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Right);
-     
 
-                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
+                log!(
+                    "Info",
+                    "Selection Start: {}, End: {}, Direction: {}",
+                    self.selection.pos_start,
+                    self.selection.pos_end,
+                    self.selection.direction
+                );
                 return EventProcessStatus::Processed;
             }
-            
+
             key!("Ctrl+Left") => {
                 // Making sure our cursor is in Focus
                 self.reposition_cursor();
-                
+
                 let (_absolute_position_inital, _absolute_position_new) = self.move_to_edge_of_word(Direction::Left);
 
                 return EventProcessStatus::Processed;
@@ -1276,31 +1308,43 @@ impl OnKeyPressed for TextArea {
             key!("Ctrl+Right") => {
                 // Making sure our cursor is in Focus
                 self.reposition_cursor();
-                
+
                 let (_absolute_position_inital, _absolute_position_new) = self.move_to_edge_of_word(Direction::Right);
-                
+
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Shift+Left") => {
                 // Making sure our cursor is in Focus
                 self.reposition_cursor();
-                
+
                 let (absolute_position_inital, absolute_position_new) = self.move_to_edge_of_word(Direction::Left);
                 self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Left);
-                
-                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
-                
+
+                log!(
+                    "Info",
+                    "Selection Start: {}, End: {}, Direction: {}",
+                    self.selection.pos_start,
+                    self.selection.pos_end,
+                    self.selection.direction
+                );
+
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Shift+Right") => {
                 // Making sure our cursor is in Focus
                 self.reposition_cursor();
-                
+
                 let (absolute_position_inital, absolute_position_new) = self.move_to_edge_of_word(Direction::Right);
                 self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Right);
-                
-                log!("Info", "Selection Start: {}, End: {}, Direction: {}", self.selection.pos_start, self.selection.pos_end, self.selection.direction);
-                
+
+                log!(
+                    "Info",
+                    "Selection Start: {}, End: {}, Direction: {}",
+                    self.selection.pos_start,
+                    self.selection.pos_end,
+                    self.selection.direction
+                );
+
                 return EventProcessStatus::Processed;
             }
 
@@ -1318,8 +1362,8 @@ impl OnKeyPressed for TextArea {
             key!("Ctrl+C") | key!("Ctrl+Shift+C") => {
                 if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
                     RuntimeManager::get()
-                            .terminal_mut()
-                            .set_clipboard_text(&self.text[self.selection.pos_start..self.selection.pos_end]);
+                        .terminal_mut()
+                        .set_clipboard_text(&self.text[self.selection.pos_start..self.selection.pos_end]);
                 }
                 return EventProcessStatus::Processed;
             }
@@ -1331,8 +1375,7 @@ impl OnKeyPressed for TextArea {
                     if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
                         self.remove_text_selection(self.selection.pos_start, self.selection.pos_end);
                         self.reset_selection();
-                    }
-                    else {
+                    } else {
                         self.remove_char_back();
                     }
 
@@ -1346,14 +1389,13 @@ impl OnKeyPressed for TextArea {
                     if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
                         self.remove_text_selection(self.selection.pos_start, self.selection.pos_end);
                         self.reset_selection();
-                    }
-                    else {
+                    } else {
                         self.remove_char_front();
                     }
                     return EventProcessStatus::Processed;
                 }
             }
-            
+
             key!("Ctrl+Back") => {
                 if !self.flags.contains(Flags::ReadOnly) {
                     self.reposition_cursor();
@@ -1361,8 +1403,7 @@ impl OnKeyPressed for TextArea {
                     if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
                         self.remove_text_selection(self.selection.pos_start, self.selection.pos_end);
                         self.reset_selection();
-                    }
-                    else {
+                    } else {
                         let (absolute_position_inital, absolute_position_new) = self.move_to_edge_of_word(Direction::Left);
                         self.remove_text_selection(absolute_position_new, absolute_position_inital);
                     }
@@ -1377,8 +1418,7 @@ impl OnKeyPressed for TextArea {
                     if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
                         self.remove_text_selection(self.selection.pos_start, self.selection.pos_end);
                         self.reset_selection();
-                    }
-                    else {
+                    } else {
                         let (absolute_position_inital, absolute_position_new) = self.move_to_edge_of_word(Direction::Right);
                         self.remove_text_selection(absolute_position_inital, absolute_position_new);
                     }
@@ -1392,7 +1432,7 @@ impl OnKeyPressed for TextArea {
                     self.reposition_cursor();
                     self.insert_text("\n");
                     self.move_cursor_horizontal(1);
-                    
+
                     return EventProcessStatus::Processed;
                 }
             }
@@ -1431,16 +1471,16 @@ impl OnMouseEvent for TextArea {
                 self.cursor.pressed = true;
 
                 self.reset_selection();
-                
+
                 self.selection.pos_start = self.get_absolute_position() as usize;
-                
+
                 self.update_scrollbar_pos();
 
                 EventProcessStatus::Processed
             }
             MouseEvent::Released(_) => {
                 self.cursor.pressed = false;
-                
+
                 EventProcessStatus::Processed
             }
             MouseEvent::DoubleClick(_) => EventProcessStatus::Ignored,
@@ -1449,7 +1489,12 @@ impl OnMouseEvent for TextArea {
                     return EventProcessStatus::Ignored;
                 }
 
-                log!("TextArea - Mouse Drag", "Previous Mouse position x: {}, y: {}", self.mouse_x, self.mouse_y);
+                log!(
+                    "TextArea - Mouse Drag",
+                    "Previous Mouse position x: {}, y: {}",
+                    self.mouse_x,
+                    self.mouse_y
+                );
                 log!("TextArea - Mouse Drag", "New Mouse position x: {}, y: {}", data.x, data.y);
 
                 let cursor_absolute_position = self.get_absolute_position();
@@ -1463,17 +1508,15 @@ impl OnMouseEvent for TextArea {
                         Ordering::Less => {
                             self.update_selection(cursor_absolute_position as usize, absolute_position_new, SelectionDirection::Right);
                         }
-                        
-                        Ordering::Greater =>    {
+
+                        Ordering::Greater => {
                             self.update_selection(cursor_absolute_position as usize, absolute_position_new, SelectionDirection::Left);
                         }
                         Ordering::Equal => {}
                     }
-                }
-                else if self.selection.direction == SelectionDirection::Right {
+                } else if self.selection.direction == SelectionDirection::Right {
                     self.update_selection(cursor_absolute_position as usize, absolute_position_new, SelectionDirection::Right);
-                }
-                else {
+                } else {
                     self.update_selection(cursor_absolute_position as usize, absolute_position_new, SelectionDirection::Left);
                 }
 

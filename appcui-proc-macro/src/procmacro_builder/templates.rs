@@ -305,7 +305,6 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 }
 ";
 
-
 pub(crate) static LISTVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
@@ -389,7 +388,6 @@ impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 }
 ";
 
-
 pub(crate) static TREEVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<TreeView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
@@ -428,7 +426,6 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
     return TreeViewEvents::<$(TYPE)>::on_item_action(self, h, i);
 }
 ";
-
 
 pub(crate) static TREEVIEW_TRAIT_DEF: &str = "
 trait TreeViewEvents<T: treeview::ListItem+'static> {

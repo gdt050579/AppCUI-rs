@@ -11,4 +11,3 @@ pub enum Flags {
     CustomFilter = 0x40,
     NoSelection = 0x80,
 }
-

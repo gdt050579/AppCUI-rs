@@ -10,15 +10,15 @@ use crate::{
     ui::common::traits::EventProcessStatus,
     utils::{Caption, ExtractHotKeyMethod, Strategy, VectorIndex},
 };
-use std::sync::atomic::{AtomicUsize, Ordering};
 use appcui_proc_macro::key;
+use std::sync::atomic::{AtomicUsize, Ordering};
 const MAX_ITEMS: usize = 128;
 static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 
 /// A container for menu items that can be displayed over existing controls.
-/// 
-/// A menu is a list of items (commands, checkboxes, single choice elements) that 
-/// can be displayed over existing controls. Menus can be added to a menu bar or 
+///
+/// A menu is a list of items (commands, checkboxes, single choice elements) that
+/// can be displayed over existing controls. Menus can be added to a menu bar or
 /// displayed as popup menus.
 ///
 /// # Examples
@@ -139,7 +139,7 @@ pub struct Menu {
 impl Menu {
     /// Creates a new menu with the specified name.
     ///
-    /// The name can include the special character `&`, which designates the next 
+    /// The name can include the special character `&`, which designates the next
     /// character as a hotkey to activate the menu (e.g., "&File" makes 'F' the hotkey,
     /// typically activated with Alt+F).
     ///
@@ -173,11 +173,11 @@ impl Menu {
     /// Adds a new menu item to the existing menu.
     ///
     /// # Parameters
-    /// * `menuitem` - The menu item to add. This can be a Command, CheckBox, 
+    /// * `menuitem` - The menu item to add. This can be a Command, CheckBox,
     ///   SingleChoice, Separator, or SubMenu.
     ///
     /// # Returns
-    /// A handle to the added menu item, which can be used to access or modify 
+    /// A handle to the added menu item, which can be used to access or modify
     /// the item later.
     #[allow(private_bounds)]
     pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T>

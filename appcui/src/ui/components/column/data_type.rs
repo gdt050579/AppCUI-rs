@@ -4,7 +4,7 @@ pub enum BoolFormat {
     YesNo,
     OnOff,
     CheckBox,
-    CheckMark
+    CheckMark,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]

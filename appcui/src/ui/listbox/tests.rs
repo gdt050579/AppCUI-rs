@@ -493,7 +493,10 @@ fn check_events() {
 
         fn on_item_checked(&mut self, handle: Handle<ListBox>, index: usize, checked: bool) -> EventProcessStatus {
             if self.lbox == handle {
-                let correct_checked = self.control(self.lbox).map(|l| l.item(index).unwrap().is_checked()==checked).unwrap_or(false);
+                let correct_checked = self
+                    .control(self.lbox)
+                    .map(|l| l.item(index).unwrap().is_checked() == checked)
+                    .unwrap_or(false);
                 assert!(correct_checked);
                 let h = self.log;
                 if let Some(log) = self.control_mut(h) {
@@ -647,7 +650,6 @@ fn check_autoscroll_on_create() {
     a.run();
 }
 
-
 #[test]
 fn check_empty_list_message() {
     let script = "
@@ -671,7 +673,6 @@ fn check_empty_list_message() {
     a.run();
 }
 
-
 #[test]
 fn check_empty_list_message_with_macro() {
     let script = "
@@ -686,7 +687,9 @@ fn check_empty_list_message_with_macro() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, em='No items in the list. Insert some items by pressing the <Add> button.'");
+    let l = listbox!(
+        "d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, em='No items in the list. Insert some items by pressing the <Add> button.'"
+    );
     p.add(l);
     w.add(p);
     w.add(button!("Add,x:1,y:1,w:7,type:flat"));
@@ -883,14 +886,13 @@ fn check_items_checked_with_mouse() {
         }
     }
     impl ListBoxEvents for MyWin {
-
         fn on_item_checked(&mut self, handle: Handle<ListBox>, index: usize, checked: bool) -> EventProcessStatus {
             if self.lbox == handle {
                 let h = self.log;
                 let cnt = self.control(self.lbox).map(|l| l.count_checked()).unwrap_or(0);
                 let log_cnt = self.control(self.log).map(|l| l.count_checked()).unwrap_or(usize::MAX);
                 // log does not have the Checkboxes flag set up --> so count_check() should return 0
-                assert_eq!(log_cnt,0);
+                assert_eq!(log_cnt, 0);
                 if let Some(log) = self.control_mut(h) {
                     log.add(&format!(
                         "Item with index: {} is {}",
@@ -898,7 +900,6 @@ fn check_items_checked_with_mouse() {
                         if checked { "checked" } else { "unchecked" }
                     ));
                     log.add(&format!("Total checked items: {}", cnt));
-                    
                 }
             }
             EventProcessStatus::Processed

@@ -104,7 +104,6 @@ fn check_checkbox_events() {
     a.run();
 }
 
-
 #[test]
 fn check_checkbox_set_checked() {
     #[Window(events = ButtonEvents, internal=true)]
@@ -115,7 +114,7 @@ fn check_checkbox_set_checked() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Win-1,d:c,w:40,h:8"), 
+                base: window!("Win-1,d:c,w:40,h:8"),
                 b: Handle::None,
                 c: Handle::None,
             };
@@ -148,7 +147,7 @@ fn check_checkbox_set_checked() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
-    a.run(); 
+    a.run();
 }
 
 #[test]
@@ -172,7 +171,6 @@ fn check_checkbox_mouse_click() {
     a.run();
 }
 
-
 #[test]
 fn check_checkbox_key_pressed() {
     let script = "
@@ -193,7 +191,6 @@ fn check_checkbox_key_pressed() {
     a.run();
 }
 
-
 #[test]
 fn check_checkbox_ascii_mode() {
     let script = "
@@ -206,8 +203,12 @@ fn check_checkbox_ascii_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Ascii,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Ascii,checked:true"));
-    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Ascii,checked:false, enabled:false"));
-    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Ascii,checked:true, enabled:false"));
+    w.add(checkbox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Ascii,checked:false, enabled:false"
+    ));
+    w.add(checkbox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Ascii,checked:true, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -224,8 +225,12 @@ fn check_checkbox_checkmark_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkmark,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkmark,checked:true"));
-    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkmark,checked:false, enabled:false"));
-    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Checkmark,checked:true, enabled:false"));
+    w.add(checkbox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkmark,checked:false, enabled:false"
+    ));
+    w.add(checkbox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Checkmark,checked:true, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -242,8 +247,12 @@ fn check_checkbox_checkbox_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkbox,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkbox,checked:true"));
-    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkbox,checked:false, enabled:false"));
-    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Checkbox,checked:true, enabled:false"));
+    w.add(checkbox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkbox,checked:false, enabled:false"
+    ));
+    w.add(checkbox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Checkbox,checked:true, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -260,8 +269,12 @@ fn check_checkbox_fillbox_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=FilledBox,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=FilledBox,checked:true"));
-    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=FilledBox,checked:false, enabled:false"));
-    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=FilledBox,checked:true, enabled:false"));
+    w.add(checkbox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=FilledBox,checked:false, enabled:false"
+    ));
+    w.add(checkbox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=FilledBox,checked:true, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -278,8 +291,12 @@ fn check_checkbox_yesno_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=YesNo,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=YesNo,checked:true"));
-    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=YesNo,checked:false, enabled:false"));
-    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=YesNo,checked:true, enabled:false"));
+    w.add(checkbox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=YesNo,checked:false, enabled:false"
+    ));
+    w.add(checkbox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=YesNo,checked:true, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -296,8 +313,12 @@ fn check_checkbox_plusminux_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=PlusMinus,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=PlusMinus,checked:true"));
-    w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=PlusMinus,checked:false, enabled:false"));
-    w.add(checkbox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=PlusMinus,checked:true, enabled:false"));
+    w.add(checkbox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=PlusMinus,checked:false, enabled:false"
+    ));
+    w.add(checkbox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=PlusMinus,checked:true, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }

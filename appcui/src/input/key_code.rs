@@ -135,7 +135,6 @@ const KEY_NAME: [&str; 64] = [
     "9",
 ];
 
-
 const KEY_NAME_PADDED: [&str; 64] = [
     "",
     " F1 ",
@@ -205,40 +204,40 @@ const KEY_NAME_PADDED: [&str; 64] = [
 
 impl KeyCode {
     /// Returns the name of the key.
-    /// 
+    ///
     /// # Returns
     /// The name of the key.
-    /// 
+    ///
     /// # Example
-    /// ```rust 
+    /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let key = KeyCode::A;
     /// let name = key.name();
     /// ```
     pub fn name(&self) -> &'static str {
         let index = ((*self) as u8) as usize;
-        if index<64 {
+        if index < 64 {
             return KEY_NAME[index];
         }
         ""
     }
-    
+
     /// Returns the name of the key with padding (spaces added to the left and right).  
-    /// 
+    ///
     /// # Returns
     /// The name of the key with padding.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let key = KeyCode::A;
     /// let name = key.name_padded();
     /// ```
     pub fn name_padded(&self) -> &'static str {
         let index = ((*self) as u8) as usize;
-        if index<64 {
+        if index < 64 {
             return KEY_NAME_PADDED[index];
         }
         ""
@@ -247,19 +246,19 @@ impl KeyCode {
 
 impl From<u8> for KeyCode {
     /// Creates a new key code from a u8.
-    /// 
+    ///
     /// # Arguments
     /// * `value` - The u8 to create the key code from.
-    /// 
+    ///
     /// # Returns
     /// A new key code created from the u8. If the u8 is not a valid key code, the function will return `KeyCode::None`.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let key = KeyCode::from(0x05);
-    /// ``` 
+    /// ```
     fn from(value: u8) -> Self {
         match value {
             0 => KeyCode::None,

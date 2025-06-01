@@ -1,30 +1,30 @@
 use std::collections::VecDeque;
 
 use crate::graphics::Point;
-use crate::terminals::SystemEvent;
 use crate::input::KeyModifier;
+use crate::terminals::SystemEvent;
 
 use super::{
-    check_cursor_command::CheckCursorCommand, 
-    check_hash_command::CheckHashCommand, 
-    clipboard_clear_command::ClipboardClearCommand, 
-    clipboard_settext_command::ClipboardSetTextCommand, 
     check_clipboardtext_command::CheckClipboardTextCommand,
-    command_parser::{CommandParser, ParserError}, 
-    error_disable_command::ErrorDisableCommand, 
-    keypress_command::KeyPressedCommand, 
-    keytypetext_command::KeyTypeTextCommand, 
-    mouse_click_command::MouseClickCommand, 
-    mouse_doubleclick_command::MouseDoubleClickCommand, 
-    mouse_drag_command::MouseDragCommand, 
-    mouse_hold_command::MouseHoldCommand, 
-    mouse_move_command::MouseMoveCommand, 
-    mouse_release_command::MouseReleaseCommand, 
-    mouse_wheel_command::MouseWheelCommand, 
-    paint_command::PaintCommand, 
-    paint_enable_command::PaintEnableCommand, 
-    resize_command::ResizeCommand,
+    check_cursor_command::CheckCursorCommand,
+    check_hash_command::CheckHashCommand,
+    clipboard_clear_command::ClipboardClearCommand,
+    clipboard_settext_command::ClipboardSetTextCommand,
+    command_parser::{CommandParser, ParserError},
+    error_disable_command::ErrorDisableCommand,
     keymodifier_command::KeyModifierCommand,
+    keypress_command::KeyPressedCommand,
+    keytypetext_command::KeyTypeTextCommand,
+    mouse_click_command::MouseClickCommand,
+    mouse_doubleclick_command::MouseDoubleClickCommand,
+    mouse_drag_command::MouseDragCommand,
+    mouse_hold_command::MouseHoldCommand,
+    mouse_move_command::MouseMoveCommand,
+    mouse_release_command::MouseReleaseCommand,
+    mouse_wheel_command::MouseWheelCommand,
+    paint_command::PaintCommand,
+    paint_enable_command::PaintEnableCommand,
+    resize_command::ResizeCommand,
 };
 
 pub(super) enum Command {
@@ -99,7 +99,7 @@ impl Command {
             "CheckClipboardText" => {
                 let variant = CheckClipboardTextCommand::new(&cp)?;
                 Ok(Command::CheckClipboardText(variant))
-            }            
+            }
             "Error.Disable" => {
                 let variant = ErrorDisableCommand::new(&cp)?;
                 Ok(Command::ErrorDisable(variant))
@@ -152,11 +152,10 @@ impl Command {
             Command::PaintEnable(_) => {}
             Command::ErrorDisable(_) => {}
             Command::CheckHash(_) => {}
-            Command::CheckCursor(_) => {},
-            Command::CheckClipboardText(_) => {},
-            Command::ClipboardSetText(_) => {},
-            Command::ClipboardClear(_) => {},
-            
+            Command::CheckCursor(_) => {}
+            Command::CheckClipboardText(_) => {}
+            Command::ClipboardSetText(_) => {}
+            Command::ClipboardClear(_) => {}
         }
     }
     pub(super) fn get_paint_command_title(&self) -> Option<String> {

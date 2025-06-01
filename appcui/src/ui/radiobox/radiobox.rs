@@ -1,6 +1,6 @@
+use super::Type;
 use crate::prelude::*;
 use crate::ui::radiobox::events::EventData;
-use super::Type;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnSiblingSelected,internal=true)]
 pub struct RadioBox {
@@ -13,13 +13,13 @@ pub struct RadioBox {
 
 impl RadioBox {
     /// Creates a new RadioBox with the specified caption, layout and initial selected state.
-    /// When a radio box is selected, it will notify its parent control to update the selection state of its siblings. 
+    /// When a radio box is selected, it will notify its parent control to update the selection state of its siblings.
     /// Usually multiple radioboxes are being used as part of the same parent control (e.g., a panel)
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut panel = Panel::new("Radioboxes group",
     ///                            Layout::new("x:1,y:1,w:20,h:10"),
     ///                            panel::Type::Border);
@@ -35,11 +35,11 @@ impl RadioBox {
 
     /// Creates a new RadioBox with the specified caption, layout, initial selected state and visual type.
     /// The type parameter determines how the radio box will be displayed when selected and unselected.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut panel = Panel::new("Radioboxes group",
     ///                            Layout::new("x:1,y:1,w:20,h:10"),
     ///                            panel::Type::Border);
@@ -82,7 +82,7 @@ impl RadioBox {
     #[inline(always)]
     pub fn set_selected(&mut self) {
         if self.handle.is_none() {
-            return; 
+            return;
         }
         if let Some(parent) = RuntimeManager::get().get_controls_mut().get(self.parent) {
             parent.base().notify_children_of_selection(self.handle);

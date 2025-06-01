@@ -4,9 +4,9 @@
 //! It allows users to either select from predefined options or enter custom values.
 
 mod combobox;
+pub mod events;
 mod initialization_flags;
 mod item;
-pub mod events;
 #[cfg(test)]
 mod tests;
 

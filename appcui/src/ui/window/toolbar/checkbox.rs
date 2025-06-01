@@ -2,10 +2,10 @@ use crate::{
     graphics::{Character, SpecialChar, Surface, TextAlignament, TextFormatBuilder, WrapType},
     system::{Handle, Theme},
     utils::Caption,
-    utils::ExtractHotKeyMethod
+    utils::ExtractHotKeyMethod,
 };
 
-use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Group};
+use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
 /// A checkbox is a toolbar item that can be positioned on the top or bottom part of a window
 /// and can have two states (checked or unchecked).
@@ -23,7 +23,7 @@ use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Gro
 ///
 /// ```rust, no_run
 /// use appcui::prelude::*;
-/// 
+///
 /// #[Window(events = ToolBarEvents)]
 /// struct CheckboxWindow {
 ///     checkbox_one: Handle<toolbar::CheckBox>,
@@ -44,7 +44,7 @@ use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Gro
 ///         let group = win.toolbar().create_group(toolbar::GroupPosition::BottomLeft);
 ///         
 ///         // Add checkboxes to the toolbar group
-///         let mut cb1 = toolbar::CheckBox::new("Option 1", false); 
+///         let mut cb1 = toolbar::CheckBox::new("Option 1", false);
 ///         cb1.set_tooltip("First option");
 ///         win.checkbox_one = win.toolbar().add(group, cb1);
 ///         
@@ -95,11 +95,11 @@ add_to_toolbar_impl!(CheckBox);
 impl CheckBox {
     /// Creates a new CheckBox toolbar item with the specified text and initial checked state.
     ///
-    /// The width (in characters) of the checkbox is calculated based on the number of characters 
+    /// The width (in characters) of the checkbox is calculated based on the number of characters
     /// in its content plus 2 characters for the checkbox symbol.
-    /// 
+    ///
     /// # Parameters
-    /// 
+    ///
     /// * `text` - The caption (text) to be displayed next to the checkbox
     /// * `checked` - The initial state of the checkbox (true for checked, false for unchecked)
     ///
@@ -118,7 +118,7 @@ impl CheckBox {
         obj.set_content(text);
         obj
     }
-    
+
     /// Sets a new caption for the checkbox.
     ///
     /// The width of the checkbox is automatically updated based on the length of the new caption.
@@ -132,13 +132,13 @@ impl CheckBox {
         self.base.set_width((self.caption.chars_count() + 2) as u16);
         self.base.request_recompute_layout();
     }
-    
+
     /// Returns the current caption text of the checkbox.
     #[inline(always)]
     pub fn caption(&self) -> &str {
         self.caption.text()
     }
-    
+
     /// Sets the checked state of the checkbox.
     ///
     /// # Parameters
@@ -151,7 +151,7 @@ impl CheckBox {
     pub(crate) fn reverse_check(&mut self) {
         self.set_checked(!self.checked);
     }
-    
+
     /// Returns the current checked state of the checkbox.
     ///
     /// Returns `true` if the checkbox is checked or `false` otherwise.
@@ -159,7 +159,7 @@ impl CheckBox {
     pub fn is_checked(&self) -> bool {
         self.checked
     }
-    
+
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
         let text_attr = st.get_button_attr(theme);

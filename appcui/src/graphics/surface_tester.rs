@@ -1,11 +1,11 @@
-use std::ops::{Deref, DerefMut};
 use super::Surface;
+use std::ops::{Deref, DerefMut};
 
-pub (crate) struct SurfaceTester {
+pub(crate) struct SurfaceTester {
     surface: Surface,
 }
 impl SurfaceTester {
-    pub (crate) fn new(width: u32, height: u32) -> SurfaceTester {
+    pub(crate) fn new(width: u32, height: u32) -> SurfaceTester {
         SurfaceTester {
             surface: Surface::new(width, height),
         }
@@ -118,7 +118,7 @@ impl SurfaceTester {
     //     println!("Hash: 0x{:X}", self.compute_hash());
     // }
 
-    pub (crate) fn compute_hash(&self) -> u64 {
+    pub(crate) fn compute_hash(&self) -> u64 {
         // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
         let mut hash = 0xcbf29ce484222325u64;
         let mut buf = [0u8; 8];

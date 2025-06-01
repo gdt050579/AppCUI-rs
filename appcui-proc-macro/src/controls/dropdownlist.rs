@@ -32,7 +32,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     if cb.has_parameter("none") {
         cb.add("\ncontrol.set_none_string(");
         cb.add_string_parameter("none", None);
-        cb.add(");\n"); 
+        cb.add(");\n");
     }
     cb.add_basecontrol_operations();
     cb.into()

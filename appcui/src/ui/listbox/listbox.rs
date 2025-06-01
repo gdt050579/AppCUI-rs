@@ -2,8 +2,8 @@ use super::events::EventData;
 use super::Flags;
 use super::Item;
 use crate::ui::components::ListScrollBars;
-use listbox::events::ListBoxEventTypes;
 use appcui_proc_macro::*;
+use listbox::events::ListBoxEventTypes;
 
 #[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal = true)]
 pub struct ListBox {
@@ -99,7 +99,8 @@ impl ListBox {
         }
         // recompute the scroll bars
         let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
-        self.comp.resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base, self.size());
+        self.comp
+            .resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base, self.size());
         // if auto scroll is enabled, we should scroll to the last item
         if self.flags.contains(Flags::AutoScroll) {
             self.update_position(self.items.len() - 1, false);
@@ -573,7 +574,8 @@ impl OnMouseEvent for ListBox {
 impl OnResize for ListBox {
     fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
         let extra = if self.flags.contains(Flags::CheckBoxes) { 2 } else { 0 };
-        self.comp.resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base, self.size());
+        self.comp
+            .resize(self.max_chars as u64 + extra, self.items.len() as u64, &self.base, self.size());
         self.update_position(self.pos, false);
     }
 }

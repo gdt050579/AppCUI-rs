@@ -6,7 +6,7 @@ use crate::{
     ui::common::traits::CommandID,
     ui::menu::Menu,
     utils::Caption,
-    utils::ExtractHotKeyMethod
+    utils::ExtractHotKeyMethod,
 };
 
 use super::{menu_item::MenuItem, MenuItemWrapper};
@@ -111,7 +111,7 @@ impl Command {
             menu_handle: Handle::None,
         }
     }
-    
+
     /// Sets a new caption for the command.
     ///
     /// # Parameters
@@ -121,7 +121,7 @@ impl Command {
     pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, ExtractHotKeyMethod::Key);
     }
-    
+
     /// Returns the current caption text of the command.
     ///
     /// # Returns
@@ -130,7 +130,7 @@ impl Command {
     pub fn caption(&self) -> &str {
         self.caption.text()
     }
-    
+
     /// Checks if the command is enabled.
     ///
     /// # Returns
@@ -139,7 +139,7 @@ impl Command {
     pub fn is_enabled(&self) -> bool {
         self.enabled
     }
-    
+
     /// Enables or disables the command.
     ///
     /// # Parameters
@@ -148,7 +148,7 @@ impl Command {
     pub fn set_enabled(&mut self, value: bool) {
         self.enabled = value;
     }
-    
+
     /// Returns the keyboard shortcut associated with the command.
     ///
     /// # Returns
@@ -157,13 +157,16 @@ impl Command {
     pub fn shortcut(&self) -> Key {
         self.shortcut
     }
-    
+
     /// Sets a new keyboard shortcut for the command.
     ///
     /// # Parameters
     /// * `shortcut` - The new shortcut to set.
     #[inline(always)]
-    pub fn set_shortcut<T>(&mut self, shortcut: T) where Key: From<T>, {
+    pub fn set_shortcut<T>(&mut self, shortcut: T)
+    where
+        Key: From<T>,
+    {
         self.shortcut = Key::from(shortcut)
     }
 

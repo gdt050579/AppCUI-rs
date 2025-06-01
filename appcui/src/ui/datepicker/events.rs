@@ -1,5 +1,5 @@
-use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::DatePicker;
+use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use chrono::NaiveDate;
 
 pub trait DatePickerEvents {
@@ -8,6 +8,6 @@ pub trait DatePickerEvents {
     }
 }
 #[derive(Copy, Clone)]
-pub(crate) struct EventData{
+pub(crate) struct EventData {
     pub date: NaiveDate,
 }

@@ -44,23 +44,23 @@ use crate::{
 ///         
 ///         // Add checkbox items with initial states
 ///         w.status_bar_checkbox = view_menu.add(menu::CheckBox::new(
-///             "Show &Status Bar", 
-///             Key::None, 
-///             mywindow::Commands::ShowStatusBar, 
+///             "Show &Status Bar",
+///             Key::None,
+///             mywindow::Commands::ShowStatusBar,
 ///             true // initially checked
 ///         ));
 ///         
 ///         w.toolbar_checkbox = view_menu.add(menu::CheckBox::new(
-///             "Show &Toolbar", 
-///             Key::None, 
-///             mywindow::Commands::ShowToolbar, 
+///             "Show &Toolbar",
+///             Key::None,
+///             mywindow::Commands::ShowToolbar,
 ///             true // initially checked
 ///         ));
 ///         
 ///         w.word_wrap_checkbox = view_menu.add(menu::CheckBox::new(
-///             "&Word Wrap", 
-///             key!("Ctrl+W"), 
-///             mywindow::Commands::WordWrap, 
+///             "&Word Wrap",
+///             key!("Ctrl+W"),
+///             mywindow::Commands::WordWrap,
 ///             false // initially unchecked
 ///         ));
 ///         
@@ -86,7 +86,7 @@ use crate::{
 /// }
 ///
 /// impl MenuEvents for MyWindow {
-///     fn on_check(&mut self, _menu: Handle<Menu>, item: Handle<menu::CheckBox>, 
+///     fn on_check(&mut self, _menu: Handle<Menu>, item: Handle<menu::CheckBox>,
 ///                command: mywindow::Commands, checked: bool) {
 ///         match command {
 ///             mywindow::Commands::ShowStatusBar => {
@@ -139,7 +139,7 @@ impl CheckBox {
             menu_handle: Handle::None,
         }
     }
-    
+
     /// Sets a new caption for the checkbox.
     ///
     /// # Parameters
@@ -149,7 +149,7 @@ impl CheckBox {
     pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, ExtractHotKeyMethod::Key);
     }
-    
+
     /// Returns the current caption text of the checkbox.
     ///
     /// # Returns
@@ -158,7 +158,7 @@ impl CheckBox {
     pub fn caption(&self) -> &str {
         self.caption.text()
     }
-    
+
     /// Checks if the checkbox is currently checked.
     ///
     /// # Returns
@@ -167,7 +167,7 @@ impl CheckBox {
     pub fn is_checked(&self) -> bool {
         self.checked
     }
-    
+
     /// Sets the checked state of the checkbox.
     ///
     /// # Parameters
@@ -176,7 +176,7 @@ impl CheckBox {
     pub fn set_checked(&mut self, value: bool) {
         self.checked = value;
     }
-    
+
     /// Checks if the checkbox is enabled.
     ///
     /// # Returns
@@ -185,7 +185,7 @@ impl CheckBox {
     pub fn is_enabled(&self) -> bool {
         self.enabled
     }
-    
+
     /// Enables or disables the checkbox.
     ///
     /// # Parameters
@@ -194,7 +194,7 @@ impl CheckBox {
     pub fn set_enabled(&mut self, value: bool) {
         self.enabled = value;
     }
-    
+
     /// Returns the keyboard shortcut associated with the checkbox.
     ///
     /// # Returns
@@ -203,7 +203,7 @@ impl CheckBox {
     pub fn shortcut(&self) -> Key {
         self.shortcut
     }
-    
+
     /// Sets a new keyboard shortcut for the checkbox.
     ///
     /// # Parameters

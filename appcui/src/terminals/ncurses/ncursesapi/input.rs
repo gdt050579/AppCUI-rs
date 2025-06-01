@@ -1,33 +1,31 @@
+use super::constants::*;
+use super::lib::*;
+use super::structs::*;
+use crate::graphics::*;
 use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
 use crate::input::MouseWheelDirection;
-use crate::terminals::SystemEventReader;
 use crate::terminals::KeyPressedEvent;
-use crate::terminals::SystemEvent;
 use crate::terminals::MouseButtonDownEvent;
 use crate::terminals::MouseButtonUpEvent;
 use crate::terminals::MouseDoubleClickEvent;
 use crate::terminals::MouseMoveEvent;
 use crate::terminals::MouseWheelEvent;
-use super::constants::*;
-use crate::graphics::*;
-use super::lib::*;
-use super::structs::*;  
+use crate::terminals::SystemEvent;
+use crate::terminals::SystemEventReader;
 use std::time::Instant;
 
-    
 const SHFIT_NUM: [i32; 10] = [41, 33, 64, 35, 36, 37, 94, 38, 42, 40];
 pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
     let key_code;
     let mut key_modifier = KeyModifier::None;
     let character: char = ch as u8 as char;
 
-    if ch == 13{
+    if ch == 13 {
         key_code = KeyCode::Enter;
-    }
-    else if (97..=122).contains(&ch) {
+    } else if (97..=122).contains(&ch) {
         key_code = KeyCode::from((ch - 69) as u8);
     } else if (65..=90).contains(&ch) {
         key_code = KeyCode::from((ch - 37) as u8);
@@ -38,7 +36,7 @@ pub fn get_key_struct(ch: u32) -> KeyPressedEvent {
         let pos = SHFIT_NUM.iter().position(|&r| r == ch as i32).unwrap();
         key_code = KeyCode::from((pos + 54) as u8);
         key_modifier = KeyModifier::Shift;
-    } else if (1..=26).contains(&ch) && ch != 13{
+    } else if (1..=26).contains(&ch) && ch != 13 {
         key_code = KeyCode::from((ch + 27_u32) as u8);
         key_modifier = KeyModifier::Ctrl;
     } else {
@@ -74,7 +72,6 @@ impl Input {
             diff: Instant::now(),
         }
     }
-
 
     fn read_event(&mut self) -> Option<SystemEvent> {
         let window = ncurses_stdscr();
@@ -183,13 +180,7 @@ impl Input {
                 }));
             }
             // Arrow keys
-            Some(WchResult::KeyCode(
-                KEY_UP
-                | KEY_DOWN
-                | KEY_LEFT
-                | KEY_RIGHT
-                | 263,
-            )) => {
+            Some(WchResult::KeyCode(KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | 263)) => {
                 let key_code = match ch {
                     Some(WchResult::KeyCode(KEY_UP)) => KeyCode::Up,
                     Some(WchResult::KeyCode(KEY_DOWN)) => KeyCode::Down,
@@ -208,9 +199,7 @@ impl Input {
             }
 
             // Shift + Arrow keys
-            Some(WchResult::KeyCode(
-                KEY_SR | KEY_SF | KEY_SLEFT | KEY_SRIGHT,
-            )) => {
+            Some(WchResult::KeyCode(KEY_SR | KEY_SF | KEY_SLEFT | KEY_SRIGHT)) => {
                 let key_code = match ch {
                     Some(WchResult::KeyCode(KEY_SR)) => KeyCode::Up,
                     Some(WchResult::KeyCode(KEY_SF)) => KeyCode::Down,
@@ -226,7 +215,7 @@ impl Input {
                     character: '\0',
                 }));
             }
-            
+
             Some(WchResult::Char(ch)) => {
                 if ch == 27 {
                     return Some(SystemEvent::KeyPressed(KeyPressedEvent {
@@ -250,7 +239,6 @@ impl Input {
 
         None
     }
-
 }
 
 impl SystemEventReader for Input {
@@ -258,10 +246,10 @@ impl SystemEventReader for Input {
         if let Some(e) = self.next_event.take() {
             return Some(e);
         }
-       if let Some(result) = self.read_event() {
+        if let Some(result) = self.read_event() {
             return Some(result);
-       }
-       self.last_event = None;
-       None
+        }
+        self.last_event = None;
+        None
     }
 }

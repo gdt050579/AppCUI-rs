@@ -858,8 +858,6 @@ fn check_save_dialog_navigate() {
     a.run();
 }
 
-
-
 #[cfg(target_os = "windows")]
 #[test]
 fn check_create_folder_select_dialog() {

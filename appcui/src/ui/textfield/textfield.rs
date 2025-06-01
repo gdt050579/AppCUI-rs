@@ -20,19 +20,18 @@ pub struct TextField {
     flags: Flags,
 }
 impl TextField {
-    
     /// Creates a new TextField control with the specified text, layout and flags.
     /// The flags can be a combination of the following values:
     /// * `Flags::Readonly` - if set, the text field will be readonly
     /// * `Flags::ProcessEnter` - if set, the text field will process the Enter key and raise an event
     /// * `Flags::DisableAutoSelectOnFocus` - if set, the text field will not select all text when it gets focus
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
-    /// let mut textfield = TextField::new("Hello World", 
-    ///                                    Layout::new("x:1,y:1,w:20,h:1"), 
+    ///
+    /// let mut textfield = TextField::new("Hello World",
+    ///                                    Layout::new("x:1,y:1,w:20,h:1"),
     ///                                    textfield::Flags::None);
     /// ```
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {
@@ -48,7 +47,7 @@ impl TextField {
         obj.cursor.pos = obj.glyphs.len();
         obj
     }
-    
+
     /// Returns **true** if the TextField control is readonly, **false** otherwise.
     #[inline(always)]
     pub fn is_readonly(&self) -> bool {
@@ -82,7 +81,12 @@ impl TextField {
             return;
         }
         let sz = self.size();
-        let visible_glyphs = (if sz.width>2 { ((sz.width as usize) - 2) * (sz.height as usize) } else { 0 }).max(1);
+        let visible_glyphs = (if sz.width > 2 {
+            ((sz.width as usize) - 2) * (sz.height as usize)
+        } else {
+            0
+        })
+        .max(1);
 
         if self.cursor.pos < self.cursor.start {
             // scroll to the left

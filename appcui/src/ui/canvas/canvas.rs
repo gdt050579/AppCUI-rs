@@ -11,19 +11,19 @@ pub struct Canvas {
     background: Option<Character>,
     flags: Flags,
     drag_point: Option<Point>,
-    scrollbars: ScrollBars
+    scrollbars: ScrollBars,
 }
 impl Canvas {
     /// Creates a new canvas with the specified size, layout and flags.
     /// The flags can be a combination of the following values:
     /// * `Flags::ScrollBars` - if set, the canvas will have horizontal and vertical scrollbars
-    /// 
+    ///
     /// The parameter `canvas_size` is the size of the canvas (in characters), while the layout is the layout of the control.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut canvas = Canvas::new(Size::new(100, 100), Layout::new("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars); 
+    /// let mut canvas = Canvas::new(Size::new(100, 100), Layout::new("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars);
     /// ```
     pub fn new(canvas_size: Size, layout: Layout, flags: Flags) -> Self {
         Self {
@@ -42,10 +42,9 @@ impl Canvas {
             flags,
             background: None,
             drag_point: None,
-            scrollbars: ScrollBars::new(flags == Flags::ScrollBars)
+            scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
         }
     }
-
 
     /// Resizes the inner surface of the canvas. This will also update the scrollbars if they are present.
     /// # Example
@@ -103,13 +102,13 @@ impl Canvas {
     fn update_scroll_pos_from_scrollbars(&mut self) {
         let h = -(self.scrollbars.horizontal_index() as i32);
         let v = -(self.scrollbars.vertical_index() as i32);
-        self.move_scroll_to(h,v);
+        self.move_scroll_to(h, v);
     }
 }
 impl OnResize for Canvas {
     fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
         let paint_sz = self.surface.size();
-        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64,&self.base);
+        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
         self.move_scroll_to(self.x, self.y);
     }
 }
@@ -117,7 +116,7 @@ impl OnPaint for Canvas {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if (self.has_focus()) && (self.flags == Flags::ScrollBars) {
             self.scrollbars.paint(surface, theme, self);
-            surface.reduce_clip_by(0,0,1,1);
+            surface.reduce_clip_by(0, 0, 1, 1);
         }
         if let Some(back) = self.background {
             surface.clear(back);
@@ -168,11 +167,11 @@ impl OnKeyPressed for Canvas {
                 self.move_scroll_to(self.x - self.size().width as i32, self.y);
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Up") | key!("PageUp")=> {
+            key!("Ctrl+Up") | key!("PageUp") => {
                 self.move_scroll_to(self.x, self.y + self.size().height as i32);
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Down") | key!("PageDown")=> {
+            key!("Ctrl+Down") | key!("PageDown") => {
                 self.move_scroll_to(self.x, self.y - self.size().height as i32);
                 EventProcessStatus::Processed
             }
@@ -241,4 +240,3 @@ impl OnMouseEvent for Canvas {
         }
     }
 }
-

@@ -113,7 +113,7 @@ impl Buttons {
             self.add = ButtonState::Inactive;
         } else if self.add == ButtonState::Inactive {
             self.add = ButtonState::Normal;
-        }   
+        }
     }
     pub(super) fn on_mouse_event(&mut self, event: &MouseEvent) -> ButtonResponse {
         match event {

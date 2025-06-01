@@ -121,9 +121,9 @@ fn check_draw_ascii_art_scale() {
 
 #[test]
 fn check_image_with_invalid_size() {
-    assert!(Image::new(0,0).is_none());
-    assert!(Image::new(100,0).is_none());
-    assert!(Image::new(0xFFFF,0xFFFF).is_none());
+    assert!(Image::new(0, 0).is_none());
+    assert!(Image::new(100, 0).is_none());
+    assert!(Image::new(0xFFFF, 0xFFFF).is_none());
     assert!(Image::with_str("0000").is_none());
     assert!(Image::with_str("||").is_none());
 }
@@ -131,17 +131,16 @@ fn check_image_with_invalid_size() {
 #[test]
 fn check_size_of_image() {
     let i = Image::with_str(HEART).unwrap();
-    assert_eq!(i.size(), Size::new(14,10));
+    assert_eq!(i.size(), Size::new(14, 10));
 }
 
 #[test]
 fn check_clear() {
-    let mut i = Image::new(5,5).unwrap();
-    i.clear(Pixel::new(1,2,3,4));
+    let mut i = Image::new(5, 5).unwrap();
+    i.clear(Pixel::new(1, 2, 3, 4));
     for x in 0..5 {
         for y in 0..5 {
-            assert_eq!(i.pixel(x,y), Some(Pixel::new(1,2,3,4)));
+            assert_eq!(i.pixel(x, y), Some(Pixel::new(1, 2, 3, 4)));
         }
     }
 }
-

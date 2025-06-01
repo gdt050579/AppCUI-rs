@@ -36,7 +36,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     if cb.has_parameter("tag") {
         cb.add("\n\tcontrol.set_tag(");
         cb.add_string_parameter("tag", None);
-        cb.add_line(");\n");  
+        cb.add_line(");\n");
     }
     if cb.has_parameter("hotkey") {
         let s = cb.get_value("hotkey").unwrap();
@@ -46,7 +46,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             let key = crate::key::builder::create_string(s);
             cb.add("\n\tcontrol.set_hotkey(");
             cb.add(&key);
-            cb.add_line(");\n");  
+            cb.add_line(");\n");
         }
     }
     cb.into()

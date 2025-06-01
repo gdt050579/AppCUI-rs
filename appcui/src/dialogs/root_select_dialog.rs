@@ -27,13 +27,7 @@ impl RootSelectDialog {
             lv.add_batch(|l| {
                 for root in roots_list {
                     let icon = root.root_type.icon();
-                    l.add_item(listview::Item::new(
-                        root,
-                        false,
-                        None,
-                        [icon, ' '],
-                        listview::Group::None,
-                    ));
+                    l.add_item(listview::Item::new(root, false, None, [icon, ' '], listview::Group::None));
                 }
             });
         } else {
@@ -41,7 +35,7 @@ impl RootSelectDialog {
         }
         let mut p = panel!("l:1,r:1,t:1,b:3");
         w.list = p.add(lv);
-        w.add(p); 
+        w.add(p);
         let h = w.list;
         w.request_focus_for_control(h);
         w
@@ -54,7 +48,6 @@ impl RootSelectDialog {
         }
     }
 }
-
 
 impl ButtonEvents for RootSelectDialog {
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {

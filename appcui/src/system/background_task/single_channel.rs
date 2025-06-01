@@ -1,7 +1,7 @@
 use std::sync::mpsc::{Receiver, Sender};
 
 pub(crate) struct SingleChannel<T> {
-    sender:   Option<Sender<T>>,
+    sender: Option<Sender<T>>,
     receiver: Option<Receiver<T>>,
 }
 
@@ -9,7 +9,7 @@ impl<T> SingleChannel<T> {
     pub(super) fn new() -> SingleChannel<T> {
         let (sender, receiver) = std::sync::mpsc::channel();
         Self {
-            sender:   Some(sender),
+            sender: Some(sender),
             receiver: Some(receiver),
         }
     }

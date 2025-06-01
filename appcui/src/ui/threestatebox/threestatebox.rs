@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::ui::threestatebox::{events::EventData, State, initialization_flags::Type};
+use crate::ui::threestatebox::{events::EventData, initialization_flags::Type, State};
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent,internal=true)]
 pub struct ThreeStateBox {
@@ -27,15 +27,15 @@ impl ThreeStateBox {
     /// The default action is to change the state of the threestatebox.
     /// The state can be one of the following: Checked, Unchecked, Unknown.
     /// The threestatebox_type defines the symbols used to represent the state of the threestatebox.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```rust,no_run
     /// use appcui::ui::*;
-    /// 
-    /// let threestatebox = ThreeStateBox::with_type("This is a &test", 
-    ///                                              Layout::new("d:c,w:10,h:1"), 
-    ///                                              threestatebox::State::Unchecked, 
+    ///
+    /// let threestatebox = ThreeStateBox::with_type("This is a &test",
+    ///                                              Layout::new("d:c,w:10,h:1"),
+    ///                                              threestatebox::State::Unchecked,
     ///                                              threestatebox::Type::Ascii);
     /// ```
     pub fn with_type(caption: &str, layout: Layout, state: State, threestatebox_type: Type) -> Self {
@@ -63,7 +63,7 @@ impl ThreeStateBox {
         cb.set_hotkey(hotkey);
         cb
     }
-    
+
     /// Returns the current state of the threestatebox.
     #[inline(always)]
     pub fn state(&self) -> State {

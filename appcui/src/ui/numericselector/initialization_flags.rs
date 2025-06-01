@@ -6,12 +6,11 @@ pub enum Flags {
     ReadOnly = 0x0002,
 }
 
-
 #[derive(Clone, Copy)]
 pub enum Format {
     Decimal,
     Percentage,
     DigitGrouping,
     Hex,
-    Size, 
+    Size,
 }

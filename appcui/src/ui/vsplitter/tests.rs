@@ -452,7 +452,6 @@ Multiple convolutional and pooling layers are stacked together, allowing the net
     a.run();
 }
 
-
 #[test]
 fn check_mouse_wheel_and_doubleclicked() {
     let script = "

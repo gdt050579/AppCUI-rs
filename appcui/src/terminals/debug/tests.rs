@@ -38,8 +38,7 @@ fn check_command_parser_spaced() {
 }
 #[test]
 fn check_command_parser_string() {
-    let cp =
-        CommandParser::new("  run     (    'some string '  ,   left  ,   -200   )    ").unwrap();
+    let cp = CommandParser::new("  run     (    'some string '  ,   left  ,   -200   )    ").unwrap();
     assert_eq!(cp.get_command(), "run");
     assert_eq!(cp.get_params_count(), 3);
     assert_eq!(cp.get_param(0), Some("some string "));
@@ -94,10 +93,7 @@ fn test_too_many_params() {
     let command = "update(id,name,age,location,size)";
     let parser = CommandParser::new(command);
     assert!(parser.is_err());
-    assert_eq!(
-        parser.unwrap_err().get_error(),
-        "Too many parameters (max allowed is 4)"
-    );
+    assert_eq!(parser.unwrap_err().get_error(), "Too many parameters (max allowed is 4)");
 }
 
 #[test]
@@ -124,10 +120,7 @@ fn test_invalid_syntax() {
     let command = "update(, id)";
     let parser = CommandParser::new(command);
     assert!(parser.is_err());
-    assert_eq!(
-        parser.unwrap_err().get_error(),
-        "Expecting a word but found ',' separator !"
-    );
+    assert_eq!(parser.unwrap_err().get_error(), "Expecting a word but found ',' separator !");
 }
 
 #[test]
@@ -143,12 +136,8 @@ fn test_invalid_string() {
     let command = "create (user, \"John Smith)";
     let parser = CommandParser::new(command);
     assert!(parser.is_err());
-    assert_eq!(
-        parser.unwrap_err().get_error(),
-        "Invalid string (no ending '\"' character found)"
-    );
+    assert_eq!(parser.unwrap_err().get_error(), "Invalid string (no ending '\"' character found)");
 }
-
 
 #[test]
 fn check_command_parser_bool_params() {
@@ -188,7 +177,6 @@ fn check_resize_errors() {
     assert!(ResizeCommand::new(&CommandParser::new("resize(10,4)").unwrap()).is_err());
     assert!(ResizeCommand::new(&CommandParser::new("resize(10,10001)").unwrap()).is_err());
 }
-
 
 #[test]
 fn check_paint_enable_errors() {
@@ -240,7 +228,6 @@ fn check_mouse_move_errors() {
     assert!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(x,0)").unwrap()).is_err());
     assert!(MouseMoveCommand::new(&CommandParser::new("Mouse.Move(0,y)").unwrap()).is_err());
 }
-
 
 #[test]
 fn check_mouse_hold_errors() {

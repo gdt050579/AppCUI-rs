@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits=8)]
+#[EnumBitFlags(bits = 8)]
 pub enum Flags {
     AllowNoneSelection = 0x01,
     ShowDescription = 0x02,

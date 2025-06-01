@@ -63,7 +63,7 @@ fn check_macro_creation() {
     let mut a = App::debug(40, 12, script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:60,h:7");
     w.add(combobox!("x:1,y:1,w:30,items=['Item 1','Item 2','Item 3']"));
-    w.add(combobox!("x:1,y:3,w:30,items=['Toyota','Dacia','BMW'],index:2"));    
+    w.add(combobox!("x:1,y:3,w:30,items=['Toyota','Dacia','BMW'],index:2"));
     a.add_window(w);
     a.run();
 }
@@ -448,13 +448,13 @@ fn check_value_and_try_value() {
         Paint('No items, no selection')   
         CheckHash(0x64D6F4DC72C8C23A)
     ";
-    
+
     #[Window(events=CommandBarEvents+ComboBoxEvents,commands:A, internal:true)]
     struct MyWin {
         combo_handle: Handle<ComboBox>,
         output_handle: Handle<Label>,
     }
-    
+
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
@@ -462,25 +462,25 @@ fn check_value_and_try_value() {
                 combo_handle: Handle::None,
                 output_handle: Handle::None,
             };
-            
+
             let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::None);
             c.add("option 1");
             c.add("option 2");
             c.add("option 3");
             c.set_index(1); // Select "option 2" initially
-            
+
             // Create a label to display values from value() and try_value()
-            let l = Label::new("",Layout::new("x:1,y:3,w:36,h:4"));
-            
+            let l = Label::new("", Layout::new("x:1,y:3,w:36,h:4"));
+
             w.combo_handle = w.add(c);
             w.output_handle = w.add(l);
-            
+
             // Update the label with initial values
             w.update_output_label();
-            
+
             w
         }
-        
+
         fn update_output_label(&mut self) {
             let h = self.combo_handle;
             let output_text = if let Some(combo) = self.control_mut(h) {
@@ -488,30 +488,30 @@ fn check_value_and_try_value() {
                     Some(value) => format!("try_value(): Some(\"{}\")", value),
                     None => "try_value(): None".to_string(),
                 };
-                
+
                 let value_result = if combo.has_selection() {
                     format!("value(): \"{}\"", combo.value())
                 } else {
                     "value(): would panic!".to_string()
                 };
-                
+
                 format!("{}\n{}", value_result, try_value_result)
             } else {
                 "Error: ComboBox not found".to_string()
             };
-            
+
             let h = self.output_handle;
             if let Some(label) = self.control_mut(h) {
                 label.set_caption(&output_text);
             }
         }
     }
-    
+
     impl CommandBarEvents for MyWin {
         fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
             commandbar.set(key!("F1"), "Clear Items", mywin::Commands::A);
         }
-        
+
         fn on_event(&mut self, command_id: mywin::Commands) {
             if command_id == mywin::Commands::A {
                 let h = self.combo_handle;
@@ -522,14 +522,14 @@ fn check_value_and_try_value() {
             }
         }
     }
-    
+
     impl ComboBoxEvents for MyWin {
         fn on_selection_changed(&mut self, _handle: Handle<ComboBox>) -> EventProcessStatus {
             self.update_output_label();
             EventProcessStatus::Processed
         }
     }
-    
+
     let mut a = App::debug(40, 12, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
@@ -556,13 +556,13 @@ fn check_selected_item_and_index() {
         Paint('No items, no selection')   
         CheckHash(0xF61AF9C9E2DC1793)
     ";
-    
+
     #[Window(events=CommandBarEvents+ComboBoxEvents,commands:A+B, internal:true)]
     struct MyWin {
         combo_handle: Handle<ComboBox>,
         output_handle: Handle<Label>,
     }
-    
+
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
@@ -570,52 +570,52 @@ fn check_selected_item_and_index() {
                 combo_handle: Handle::None,
                 output_handle: Handle::None,
             };
-            
+
             let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::ShowDescription);
             c.add_item(combobox::Item::new("option 1", "first item"));
             c.add_item(combobox::Item::new("option 2", "second item"));
             c.add_item(combobox::Item::new("option 3", "third item"));
             c.set_index(1); // Select "option 2" initially
-            
+
             // Create a label to display info about selected_item and index
             let l = Label::new("", Layout::new("x:1,y:3,w:76,h:5"));
-            
+
             w.combo_handle = w.add(c);
             w.output_handle = w.add(l);
-            
+
             // Update the label with initial values
             w.update_output_label();
-            
+
             w
         }
-        
+
         fn update_output_label(&mut self) {
             let h = self.combo_handle;
             let output_text = if let Some(combo) = self.control_mut(h) {
                 let index = combo.index();
-                
+
                 let selected_item_result = match combo.selected_item() {
                     Some(item) => format!("selected_item(): Some({}, \"{}\")", item.value(), item.description()),
                     None => "selected_item(): None".to_string(),
                 };
-                
+
                 let selected_item_mut_result = if combo.has_selection() {
                     "selected_item_mut(): Available"
                 } else {
                     "selected_item_mut(): Would return None"
                 };
-                
+
                 format!("index(): {:?}\n{}\n{}", index, selected_item_result, selected_item_mut_result)
             } else {
                 "Error: ComboBox not found".to_string()
             };
-            
+
             let h = self.output_handle;
             if let Some(label) = self.control_mut(h) {
                 label.set_caption(&output_text);
             }
         }
-        
+
         // Modify the selected item's description using selected_item_mut
         fn modify_selected_item(&mut self) {
             let h = self.combo_handle;
@@ -623,7 +623,7 @@ fn check_selected_item_and_index() {
                 if let Some(item) = combo.selected_item_mut() {
                     // Modify the description of the selected item
                     item.set_description("MODIFIED description");
-                    
+
                     // Also test setting the value
                     item.set_value(&format!("MODIFIED {}", item.value()));
                 }
@@ -631,13 +631,13 @@ fn check_selected_item_and_index() {
             self.update_output_label();
         }
     }
-    
+
     impl CommandBarEvents for MyWin {
         fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
             commandbar.set(key!("F1"), "Modify Item", mywin::Commands::A);
             commandbar.set(key!("F2"), "Clear Items", mywin::Commands::B);
         }
-        
+
         fn on_event(&mut self, command_id: mywin::Commands) {
             match command_id {
                 mywin::Commands::A => self.modify_selected_item(),
@@ -651,14 +651,14 @@ fn check_selected_item_and_index() {
             }
         }
     }
-    
+
     impl ComboBoxEvents for MyWin {
         fn on_selection_changed(&mut self, _handle: Handle<ComboBox>) -> EventProcessStatus {
             self.update_output_label();
             EventProcessStatus::Processed
         }
     }
-    
+
     let mut a = App::debug(80, 12, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();

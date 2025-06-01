@@ -1,4 +1,4 @@
-use crate::{system::Theme, graphics::CharAttribute};
+use crate::{graphics::CharAttribute, system::Theme};
 
 use super::PaintData;
 

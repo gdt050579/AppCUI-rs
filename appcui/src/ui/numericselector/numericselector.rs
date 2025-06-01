@@ -7,11 +7,10 @@ use crate::prelude::*;
 use std::fmt::Write;
 use std::str::FromStr;
 
-
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct NumericSelector<T>
 where
-    T: Number + 'static, 
+    T: Number + 'static,
 {
     value: T,
     min: T,
@@ -43,34 +42,33 @@ where
     /// The flags can be a combination of the following values:
     /// * `Flags::HideButtons` - if set, the buttons will not be displayed
     /// * `Flags::ReadOnly` - if set, the control will be read-only
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let ns = NumericSelector::<i32>::new(10, 0, 100, 1, Layout::new("x:1,y:1,w:20"), numericselector::Flags::None);
-    /// 
+    ///
     pub fn new(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags) -> Self {
         Self::with_format(value, min, max, step, layout, flags, Format::Decimal)
     }
-
 
     /// Creates a new NumericSelector control with the specified layout, flags, and format
     /// The flags can be a combination of the following values:
     /// * `Flags::HideButtons` - if set, the buttons will not be displayed
     /// * `Flags::ReadOnly` - if set, the control will be read-only
-    /// 
+    ///
     /// The format can be one of the following values:
     /// * `Format::Decimal` - the value will be displayed as a decimal number
     /// * `Format::Percentage` - the value will be displayed as a percentage
     /// * `Format::Hex` - the value will be displayed as a hexadecimal number
     /// * `Format::DigitGrouping` - the value will be displayed with digit grouping
     /// * `Format::Size` - the value will be displayed as a size (bytes, KB, MB, GB, TB)
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let ns = NumericSelector::<i32>::with_format(10, 0, 100, 1, Layout::new("x:1,y:1,w:20"), numericselector::Flags::None, numericselector::Format::Size);
     /// ```
     pub fn with_format(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags, format: Format) -> Self {

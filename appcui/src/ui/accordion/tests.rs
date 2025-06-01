@@ -319,7 +319,6 @@ fn check_not_process_input() {
     let mut ac = Accordion::new(Layout::new("l:0,t:0,r:0,b:0"), accordion::Flags::None);
     assert_eq!(ac.current_panel(), None);
 
-
     ac.add_panel("Panel &1");
     ac.add_panel("Panel &2");
     ac.add_panel("Panel &3");

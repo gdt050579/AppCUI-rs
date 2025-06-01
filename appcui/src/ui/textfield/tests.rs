@@ -253,7 +253,6 @@ fn check_home_end() {
     a.run();
 }
 
-
 #[test]
 fn check_delete() {
     let script = "
@@ -784,7 +783,6 @@ fn check_move_to_next_word() {
     a.run();
 }
 
-
 #[test]
 fn check_move_to_previous_word() {
     let script = "
@@ -975,7 +973,6 @@ fn check_validation_event() {
     a.run();
 }
 
-
 #[test]
 fn check_mouse_click() {
     let script = "
@@ -1112,7 +1109,6 @@ fn check_double_click_selection() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_select_word_for_upper_and_lowercase() {

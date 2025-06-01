@@ -1,11 +1,11 @@
 use super::events::EventData;
 use super::{Flags, FoldStatus, Item, TreeDataManager};
-use components::listitem::render_method::RenderData;
 use appcui_proc_macro::*;
+use components::listitem::render_method::RenderData;
 
 use crate::prelude::*;
 
-#[derive(Copy,Clone,Debug)]
+#[derive(Copy, Clone, Debug)]
 enum UpdateVisibleItemsOperation {
     Refresh,
     Sort,
@@ -250,7 +250,6 @@ where
         } else {
             self.update_item_list(UpdateVisibleItemsOperation::SortAndRefilter);
         }
-
     }
 
     /// Sets the number of frozen columns. Frozen columns are columns that are always visible, even when the list view is scrolled horizontally. The frozen columns are always the first columns in the list view. Using the value 0 will disable frozen columns.

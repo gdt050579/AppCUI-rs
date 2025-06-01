@@ -1,11 +1,11 @@
+use super::formats::{
+    AreaFormat, BoolFormat, CurrencyFormat, DateFormat, DateTimeFormat, DistanceFormat, DurationFormat, FloatFormat, NumericFormat, PercentageFormat,
+    RatingFormat, SizeFormat, SpeedFormat, Status, StatusFormat, TemperatureFormat, TimeFormat, VolumeFormat, WeightFormat,
+};
 use crate::prelude::*;
 use crate::utils::format_datetime::FormatDuration;
 use crate::utils::{FormatDate, FormatDateTime, FormatRatings, FormatTime};
 use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime};
-use super::formats::{
-    AreaFormat, BoolFormat, CurrencyFormat, DateFormat, DateTimeFormat, DistanceFormat, DurationFormat, FloatFormat, NumericFormat, RatingFormat,
-    SizeFormat, SpeedFormat, Status, StatusFormat, TemperatureFormat, TimeFormat, VolumeFormat, WeightFormat, PercentageFormat
-};
 
 const MAX_RATING_STARS: u8 = 10;
 

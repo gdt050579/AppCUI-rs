@@ -11,7 +11,6 @@ const MEGA_BYTES_DECIMALS: FormatNumber = FormatNumber::new(10).suffix(" MB").gr
 const GIGA_BYTES_DECIMALS: FormatNumber = FormatNumber::new(10).suffix(" GB").group(3, b',').decimals(2);
 const TERA_BYTES_DECIMALS: FormatNumber = FormatNumber::new(10).suffix(" TB").group(3, b',').decimals(2);
 
-
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum SizeFormat {
     Bytes,
@@ -40,31 +39,31 @@ impl SizeFormat {
             SizeFormat::GigaBytesWithDecimals => GIGA_BYTES_DECIMALS.write_fraction(value, 1_000_000_000u64, output),
             SizeFormat::TeraBytesWithDecimals => TERA_BYTES_DECIMALS.write_fraction(value, 1_000_000_000_000u64, output),
             SizeFormat::Auto => {
-                if value<1_000u64 {
+                if value < 1_000u64 {
                     BYTES.write_number(value, output)
-                } else if value<1_000_000u64 {
+                } else if value < 1_000_000u64 {
                     KILO_BYTES.write_number(value / 1_000u64, output)
-                } else if value<1_000_000_000u64 {
+                } else if value < 1_000_000_000u64 {
                     MEGA_BYTES.write_number(value / 1_000_000u64, output)
-                } else if value<1_000_000_000_000u64 {
+                } else if value < 1_000_000_000_000u64 {
                     GIGA_BYTES.write_number(value / 1_000_000_000u64, output)
                 } else {
                     TERA_BYTES.write_number(value / 1_000_000_000_000u64, output)
                 }
-            },
+            }
             SizeFormat::AutoWithDecimals => {
-                if value<1_000u64 {
+                if value < 1_000u64 {
                     BYTES_DECIMALS.write_fraction(value, 1u64, output)
-                } else if value<1_000_000u64 {
+                } else if value < 1_000_000u64 {
                     KILO_BYTES_DECIMALS.write_fraction(value, 1_000u64, output)
-                } else if value<1_000_000_000u64 {
+                } else if value < 1_000_000_000u64 {
                     MEGA_BYTES_DECIMALS.write_fraction(value, 1_000_000u64, output)
-                } else if value<1_000_000_000_000u64 {
+                } else if value < 1_000_000_000_000u64 {
                     GIGA_BYTES_DECIMALS.write_fraction(value, 1_000_000_000u64, output)
                 } else {
                     TERA_BYTES_DECIMALS.write_fraction(value, 1_000_000_000_000u64, output)
                 }
-            },
+            }
         }
     }
 }

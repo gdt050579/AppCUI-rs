@@ -4,12 +4,12 @@ pub struct Item {
     pub(super) left_char_offset: u32,
     pub(super) left: u32,
     pub(super) checked: bool,
-    pub(super) filtered: bool
+    pub(super) filtered: bool,
 }
 
 impl Item {
-    /// Creates a new item with the specified text and checked state. 
-    /// 
+    /// Creates a new item with the specified text and checked state.
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::ui::listbox::Item;
@@ -22,7 +22,7 @@ impl Item {
             left: 0,
             left_char_offset: 0,
             checked,
-            filtered: true
+            filtered: true,
         }
     }
 

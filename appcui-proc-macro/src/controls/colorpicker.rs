@@ -29,7 +29,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("colorpicker", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
     cb.init_control("ColorPicker::new");
     cb.add_enum_parameter("color", "Color", &COLORS_TYPE, None);
-    cb.add_layout();    
+    cb.add_layout();
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();
     cb.into()

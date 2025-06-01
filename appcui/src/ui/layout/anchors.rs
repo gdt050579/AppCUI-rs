@@ -28,7 +28,7 @@ pub(super) enum Anchors {
     All = 0x0F,
 }
 impl Anchors {
-    pub (super) fn new(left: bool, top: bool, right: bool, bottom: bool) -> Anchors {
+    pub(super) fn new(left: bool, top: bool, right: bool, bottom: bool) -> Anchors {
         let mut flags = 0u8;
         flags |= if left { Anchors::Left as u8 } else { 0 };
         flags |= if right { Anchors::Right as u8 } else { 0 };

@@ -1,4 +1,4 @@
-use super::{Size, Point};
+use super::{Point, Size};
 
 /// Alignament enum represents the alignment of a rectangle in a 2D space.
 /// It is used to specify how a rectangle or other rectangular objects should be positioned relative to a given point.
@@ -8,27 +8,27 @@ pub enum Alignament {
     /// The top-left corner of the rectangle.
     /// This is the default alignment.
     TopLeft = 0,
-    
+
     /// The top-center of the rectangle.
     /// This alignment is used to center the rectangle horizontally at the top.
     Top,
-    
+
     /// The top-right corner of the rectangle.
     /// This alignment is used to position the rectangle at the top-right corner.
     TopRight,
-    
+
     /// The right-center of the rectangle.
     /// This alignment is used to center the rectangle vertically on the right side.
     Right,
-    
+
     /// The bottom-right corner of the rectangle.
     /// This alignment is used to position the rectangle at the bottom-right corner.
     BottomRight,
-    
+
     /// The bottom-center of the rectangle.
     /// This alignment is used to center the rectangle horizontally at the bottom.
     Bottom,
-    
+
     /// The bottom-left corner of the rectangle.
     /// This alignment is used to position the rectangle at the bottom-left corner.
     BottomLeft,
@@ -63,7 +63,7 @@ impl Rect {
         }
     }
 
-    /// Creates a new rectangle with the specified coordinates and size. 
+    /// Creates a new rectangle with the specified coordinates and size.
     pub fn with_size(x: i32, y: i32, width: u16, height: u16) -> Self {
         Self {
             left: x,
@@ -117,7 +117,7 @@ impl Rect {
 
     /// Creates a new rectangle with the specified coordinates and size.
     /// The coordonates are represented by a Point and are considered the top-left corner of the rectangle.
-    pub fn with_point_and_size(point: Point, size: Size)->Self {
+    pub fn with_point_and_size(point: Point, size: Size) -> Self {
         Rect {
             left: point.x,
             top: point.y,
@@ -165,12 +165,12 @@ impl Rect {
     /// Returns the rectangle X-axis center.
     #[inline]
     pub fn center_x(&self) -> i32 {
-        (self.right+self.left)/2
+        (self.right + self.left) / 2
     }
 
     /// Returns the rectangle Y-axis center.
     #[inline]
     pub fn center_y(&self) -> i32 {
-        (self.bottom+self.top)/2
+        (self.bottom + self.top) / 2
     }
 }

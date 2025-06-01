@@ -1,4 +1,4 @@
-#[derive(Copy,Clone,Eq,PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub(crate) enum CharClass {
     Word,
     Operator,

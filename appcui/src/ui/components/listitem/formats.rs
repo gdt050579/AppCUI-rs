@@ -33,4 +33,3 @@ pub use self::status_format::StatusFormat;
 pub use self::temperature_format::TemperatureFormat;
 pub use self::volume_format::VolumeFormat;
 pub use self::weight_format::WeightFormat;
-

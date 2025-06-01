@@ -12,9 +12,6 @@ const CUBIC_IN: FormatNumber = FormatNumber::new(10).suffix(" in³").group(3, b'
 const CUBIC_YD: FormatNumber = FormatNumber::new(10).suffix(" yd³").group(3, b',');
 const CUBIC_MI: FormatNumber = FormatNumber::new(10).suffix(" mi³").group(3, b',');
 
-
-
-
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum VolumeFormat {
     CubicMilimeters,

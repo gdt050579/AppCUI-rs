@@ -9,11 +9,11 @@ pub struct Password {
 impl Password {
     /// Creates a new Password control with the specified layout.
     /// The Password control is a single line text input control that hides the input characters with asterisks.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut password = Password::new(Layout::new("x:1,y:1,w:20,h:1"));
     /// ```
     pub fn new(layout: Layout) -> Self {

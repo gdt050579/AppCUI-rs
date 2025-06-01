@@ -8,7 +8,7 @@ use crate::{
 use super::command_parser::{CommandParser, ParserError};
 
 pub(super) struct KeyTypeTextCommand {
-    text: String
+    text: String,
 }
 
 impl KeyTypeTextCommand {
@@ -26,9 +26,9 @@ impl KeyTypeTextCommand {
     pub(super) fn generate_event(&self, sys_events: &mut VecDeque<SystemEvent>) {
         for ch in self.text.chars() {
             sys_events.push_back(SystemEvent::KeyPressed(KeyPressedEvent {
-                key: Key::from(ch), 
+                key: Key::from(ch),
                 character: ch,
-            }));           
+            }));
         }
     }
 }

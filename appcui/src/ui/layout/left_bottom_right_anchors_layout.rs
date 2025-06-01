@@ -1,8 +1,8 @@
 use super::should_not_use;
 use super::ControlLayout;
 use super::Coordonate16;
-use super::LayoutParameters;
 use super::Dimension16;
+use super::LayoutParameters;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftBottomRightAnchorsLayout {
@@ -39,12 +39,7 @@ impl LeftBottomRightAnchorsLayout {
         }
     }
     #[inline]
-    pub(super) fn update_control_layout(
-        &self,
-        control_layout: &mut ControlLayout,
-        parent_width: u16,
-        parent_height: u16,
-    ) {
+    pub(super) fn update_control_layout(&self, control_layout: &mut ControlLayout, parent_width: u16, parent_height: u16) {
         let left = self.left.absolute(parent_width);
         let right = self.right.absolute(parent_width);
         let bottom = self.bottom.absolute(parent_height);
@@ -52,9 +47,6 @@ impl LeftBottomRightAnchorsLayout {
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
             self.height.absolute(parent_height),
         );
-        control_layout.set_position(
-            left,
-            (parent_height as i32) - (bottom + (control_layout.get_height() as i32)),
-        );
+        control_layout.set_position(left, (parent_height as i32) - (bottom + (control_layout.get_height() as i32)));
     }
 }

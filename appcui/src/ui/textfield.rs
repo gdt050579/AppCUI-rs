@@ -3,15 +3,15 @@
 //! The TextField control provides a way for users to enter and edit text.
 //! It supports features like text selection, clipboard operations, and input validation.
 
-mod textfield;
-mod initialization_flags;
 mod char_class;
-pub mod selection;
 pub mod events;
+mod initialization_flags;
+pub mod selection;
 #[cfg(test)]
 mod tests;
+mod textfield;
 
+pub(crate) use self::char_class::CharClass;
+pub use self::initialization_flags::Flags;
 use self::selection::Selection;
 pub use self::textfield::TextField;
-pub use self::initialization_flags::Flags;
-pub(crate) use self::char_class::CharClass;

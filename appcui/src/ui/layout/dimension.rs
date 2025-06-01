@@ -13,7 +13,7 @@ impl Dimension {
     pub fn absolute(&self, parent_size: u16) -> u16 {
         match self {
             Dimension::Absolute(v) => (*v) as u16,
-            Dimension::Percentage(v) =>((parent_size as f32) * v) as u16,
+            Dimension::Percentage(v) => ((parent_size as f32) * v) as u16,
         }
     }
 }

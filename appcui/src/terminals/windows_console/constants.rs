@@ -1,4 +1,3 @@
-
 pub(super) const INVALID_HANDLE_VALUE: usize = usize::MAX;
 pub(super) const STD_INPUT_HANDLE: i32 = -10;
 pub(super) const STD_OUTPUT_HANDLE: i32 = -11;

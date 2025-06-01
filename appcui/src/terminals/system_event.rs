@@ -1,4 +1,7 @@
-use crate::{input::{Key, KeyModifier, MouseButton, MouseWheelDirection}, system::Handle};
+use crate::{
+    input::{Key, KeyModifier, MouseButton, MouseWheelDirection},
+    system::Handle,
+};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(crate) struct MouseButtonDownEvent {

@@ -37,7 +37,7 @@ impl Entry {
         if full_path.len() <= path.len() {
             return None;
         }
-        for c in full_path.chars().skip(path.len()).skip_while(|c| (*c == '/') || (*c == '\\' )) {
+        for c in full_path.chars().skip(path.len()).skip_while(|c| (*c == '/') || (*c == '\\')) {
             if (c == '/') || (c == '\\') {
                 return None;
             }
@@ -51,11 +51,12 @@ impl Entry {
         };
         let size = size.parse().ok()?;
         let created = NaiveDateTime::parse_from_str(created, "%Y-%m-%d %H:%M:%S").ok()?;
-        let len = path.len() + match full_path.as_bytes()[path.len()] {
-            b'\\' | b'/' => 1,
-            _ => 0,
-        };
-        
+        let len = path.len()
+            + match full_path.as_bytes()[path.len()] {
+                b'\\' | b'/' => 1,
+                _ => 0,
+            };
+
         Some(Self {
             name: full_path[len..].to_string(),
             size,
@@ -75,23 +76,18 @@ impl NavigatorEntry for Entry {
 }
 
 impl listview::ListItem for Entry {
-    
     fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
         match column_index {
             0 => Some(listview::RenderMethod::Text(&self.name)),
-            1 => {
-                match self.entry_type {
-                    EntryType::UpDir => Some(listview::RenderMethod::Ascii("UpDir")),
-                    EntryType::Folder => Some(listview::RenderMethod::Ascii("Folder")),
-                    EntryType::File => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::AutoWithDecimals)),
-                }
-            }
-            2 => {
-                match self.entry_type {
-                    EntryType::UpDir => Some(listview::RenderMethod::Ascii("-")),
-                    _ => Some(listview::RenderMethod::DateTime(self.created, listview::DateTimeFormat::Short)),
-                }
-            }
+            1 => match self.entry_type {
+                EntryType::UpDir => Some(listview::RenderMethod::Ascii("UpDir")),
+                EntryType::Folder => Some(listview::RenderMethod::Ascii("Folder")),
+                EntryType::File => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::AutoWithDecimals)),
+            },
+            2 => match self.entry_type {
+                EntryType::UpDir => Some(listview::RenderMethod::Ascii("-")),
+                _ => Some(listview::RenderMethod::DateTime(self.created, listview::DateTimeFormat::Short)),
+            },
             _ => None,
         }
     }
@@ -110,11 +106,13 @@ impl listview::ListItem for Entry {
             0 => self.name.cmp(&other.name),
             1 => self.size.cmp(&other.size),
             2 => self.created.cmp(&other.created),
-            _ => std::cmp::Ordering::Equal
+            _ => std::cmp::Ordering::Equal,
         }
     }
 
-    fn columns_count() -> u16 { 3 }
+    fn columns_count() -> u16 {
+        3
+    }
 }
 
 impl Default for Entry {

@@ -1,5 +1,5 @@
-use crate::prelude::MouseEvent;
 use super::ProcessEventResult;
+use crate::prelude::MouseEvent;
 
 #[repr(u8)]
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
@@ -191,7 +191,7 @@ impl GenericScrollBar {
         }
     }
     fn get_drag_status(&self, x: i32, y: i32, vertical: bool) -> MouseOnScrollbarStatus {
-        match self.mouse_coords_to_scroll_pos_for_dragging(x,y,vertical) {
+        match self.mouse_coords_to_scroll_pos_for_dragging(x, y, vertical) {
             MousePosition::MinimizeArrow => MouseOnScrollbarStatus::PressedOnMinimizeArrow,
             MousePosition::MaximizeArrow => MouseOnScrollbarStatus::PressedOnMaximizeArrow,
             MousePosition::Bar => MouseOnScrollbarStatus::PressedOnBar,

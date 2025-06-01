@@ -11,8 +11,8 @@ use super::{Menu, MenuBarItem};
 
 /// A menu bar that displays a horizontal list of menus at the top of a window or desktop.
 ///
-/// The menu bar is responsible for displaying and managing the top-level menus 
-/// in an application. It handles user interactions, keyboard shortcuts, and visual 
+/// The menu bar is responsible for displaying and managing the top-level menus
+/// in an application. It handles user interactions, keyboard shortcuts, and visual
 /// presentation of menus.
 pub struct MenuBar {
     items: Vec<MenuBarItem>,

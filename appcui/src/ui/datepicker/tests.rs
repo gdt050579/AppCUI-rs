@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
 #[test]
-fn check_create(){
+fn check_create() {
     let script = "
         Paint.Enable(false)
         Paint('Initial State')
         CheckHash(0xBE767D638014E39A)
     ";
-    
+
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:50,h:11");
     w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19")));
@@ -22,7 +22,7 @@ fn check_create(){
 }
 
 #[test]
-fn check_on_hover(){
+fn check_on_hover() {
     let script = "
         Paint.Enable(false)
         Paint('Initial State')
@@ -35,7 +35,7 @@ fn check_on_hover(){
         CheckHash(0x93797768E0658943)
         
     ";
- 
+
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:50,h:11");
     w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19")));
@@ -49,9 +49,8 @@ fn check_on_hover(){
     a.run();
 }
 
-
 #[test]
-fn check_expand(){
+fn check_expand() {
     let script = "
         Paint.Enable(false)
         Paint('Init')
@@ -70,7 +69,7 @@ fn check_expand(){
         CheckHash(0x5f66995970a9aa50)
 
     ";
-    
+
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
@@ -79,7 +78,7 @@ fn check_expand(){
 }
 
 #[test]
-fn check_hovers(){
+fn check_hovers() {
     let script = "
         Paint.Enable(false)
         Mouse.Drag(30,9,30,4)
@@ -130,7 +129,7 @@ fn check_hovers(){
         Paint('State_hover_date')
         CheckHash(0x1125aa027ca09f95)
     ";
-    
+
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
@@ -139,13 +138,13 @@ fn check_hovers(){
 }
 
 #[test]
-fn check_procmacro(){
+fn check_procmacro() {
     let script = "
         Paint.Enable(false)
         Paint('Initial State')
         CheckHash(0xBE767D638014E39A)
     ";
-    
+
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:50,h:11");
     w.add(datepicker!("2024-06-13, x:1,y:1,w:19"));
@@ -160,7 +159,7 @@ fn check_procmacro(){
 }
 
 #[test]
-fn check_buttons(){
+fn check_buttons() {
     let script = "
         Paint.Enable(false)
         Mouse.Move(28,9)
@@ -217,7 +216,7 @@ fn check_buttons(){
         Paint('Button_date')
         CheckHash(0x9bd1097ed71b821d)
     ";
-    
+
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
@@ -226,7 +225,7 @@ fn check_buttons(){
 }
 
 #[test]
-fn check_packed_keys(){
+fn check_packed_keys() {
     let script = "
     Paint.Enable(false)
     Resize(60,25)
@@ -421,7 +420,7 @@ fn check_packed_keys(){
     Paint('State_65')
     CheckHash(0x4252fa8abad3e54d)
     ";
-    
+
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
@@ -430,7 +429,7 @@ fn check_packed_keys(){
 }
 
 #[test]
-fn check_expanded_keys(){
+fn check_expanded_keys() {
     let script = "
     Paint.Enable(false)
     Resize(60,25)
@@ -516,7 +515,7 @@ fn check_expanded_keys(){
     Paint('State_28')
     CheckHash(0x4252fa8abad3e54d)
     ";
-    
+
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Dates,d:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));

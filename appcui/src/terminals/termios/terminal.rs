@@ -3,11 +3,19 @@
 
 use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
 
-
 use libc::STDOUT_FILENO;
 
-use super::{super::{ SystemEvent, Terminal }, api::sizing::{get_resize_notification, get_terminal_size, set_terminal_size}, size_reader::SizeReader, input::Input};
-use crate::{ graphics::*, system::Error, terminals::{termios::api::sizing::listen_for_resizes, SystemEventReader} };
+use super::{
+    super::{SystemEvent, Terminal},
+    api::sizing::{get_resize_notification, get_terminal_size, set_terminal_size},
+    input::Input,
+    size_reader::SizeReader,
+};
+use crate::{
+    graphics::*,
+    system::Error,
+    terminals::{termios::api::sizing::listen_for_resizes, SystemEventReader},
+};
 
 #[cfg(target_family = "unix")]
 use super::api::Termios;
@@ -23,7 +31,7 @@ pub struct TermiosTerminal {
     _orig_termios: Termios,
 
     stdout: File,
-    screen_buffer: String
+    screen_buffer: String,
 }
 
 impl TermiosTerminal {
@@ -31,34 +39,34 @@ impl TermiosTerminal {
         let Ok(_orig_termios) = Termios::enable_raw_mode() else {
             return Err(Error::new(
                 crate::prelude::ErrorKind::InitializationFailure,
-                "Cannot enable raw mode in Termios Terminal to get input from stdin"
-                    .to_string(),
+                "Cannot enable raw mode in Termios Terminal to get input from stdin".to_string(),
             ));
         };
 
-        let stdout = unsafe {
-            File::from_raw_fd(STDOUT_FILENO)
-        };
+        let stdout = unsafe { File::from_raw_fd(STDOUT_FILENO) };
 
         let mut t = TermiosTerminal {
             size: Size::new(80, 30),
             _orig_termios,
             stdout,
-            screen_buffer: String::with_capacity(4096)
+            screen_buffer: String::with_capacity(4096),
         };
 
         if let Err(err) = listen_for_resizes() {
             return Err(Error::new(
                 crate::system::ErrorKind::InitializationFailure,
-                format!("Failed to setup terminal resize listener: {:?}", err)));
+                format!("Failed to setup terminal resize listener: {:?}", err),
+            ));
         }
-        
+
         if let Some(sz) = builder.size {
             t.size = sz;
         }
-        
+
         match get_terminal_size() {
-            Err(err) => { return Err(Error::new(crate::system::ErrorKind::InitializationFailure, err.to_string())); }
+            Err(err) => {
+                return Err(Error::new(crate::system::ErrorKind::InitializationFailure, err.to_string()));
+            }
             Ok(size) => {
                 if size != t.size {
                     if let Err(err) = set_terminal_size(&size) {
@@ -81,9 +89,12 @@ impl TermiosTerminal {
     }
 
     fn move_cursor(&mut self, to: &Cursor) -> Result<(), std::io::Error> {
-        if !to.is_visible() { return Ok(()) };
-        
-        self.stdout.write_all(format!("\x1b[{};{}H", to.y.saturating_add(1), to.x.saturating_add(1)).as_bytes())?;
+        if !to.is_visible() {
+            return Ok(());
+        };
+
+        self.stdout
+            .write_all(format!("\x1b[{};{}H", to.y.saturating_add(1), to.x.saturating_add(1)).as_bytes())?;
 
         Ok(())
     }
@@ -92,9 +103,9 @@ impl TermiosTerminal {
 impl Terminal for TermiosTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         self.clear();
-        
+
         let chars = &surface.chars;
-        
+
         self.screen_buffer.clear();
         let mut x = 0;
         let width = surface.size().width;
@@ -138,7 +149,7 @@ impl Terminal for TermiosTerminal {
                 Color::White => self.screen_buffer.push_str("\x1b[107m"),
                 Color::Transparent => {}
             }
-            
+
             self.screen_buffer.push(c.code);
             self.screen_buffer.push_str("\x1b[0m");
 
@@ -172,11 +183,11 @@ impl Terminal for TermiosTerminal {
     fn has_clipboard_text(&self) -> bool {
         todo!()
     }
-    
+
     fn on_resize(&mut self, new_size: Size) {
         self.size = new_size;
     }
-    
+
     fn is_single_threaded(&self) -> bool {
         false
     }

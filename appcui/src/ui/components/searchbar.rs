@@ -142,7 +142,7 @@ impl SearchBar {
                 if self.edit_mode {
                     self.text.push(' ');
                     self.update_text_offset();
-                    return true;                
+                    return true;
                 }
                 return false;
             }
@@ -167,5 +167,4 @@ impl SearchBar {
     pub fn exit_edit_mode(&mut self) {
         self.edit_mode = false;
     }
-
 }

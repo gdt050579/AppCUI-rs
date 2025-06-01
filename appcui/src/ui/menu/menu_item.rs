@@ -1,7 +1,7 @@
 use crate::{
     graphics::{Surface, TextFormat},
     input::{Key, KeyCode},
-    system::{Handle, MenuTheme}, 
+    system::{Handle, MenuTheme},
 };
 
 use super::{CheckBox, Command, Menu, Separator, SingleChoice, SubMenu};

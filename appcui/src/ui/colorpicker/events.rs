@@ -8,5 +8,5 @@ pub trait ColorPickerEvents {
 }
 #[derive(Copy, Clone)]
 pub(crate) struct EventData {
-    pub(crate) color: Color
+    pub(crate) color: Color,
 }

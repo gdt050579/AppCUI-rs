@@ -1,5 +1,5 @@
-use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::Password;
+use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 
 pub trait PasswordEvents {
     fn on_accept(&mut self, _handle: Handle<Password>) -> EventProcessStatus {
@@ -11,5 +11,5 @@ pub trait PasswordEvents {
 }
 #[derive(Copy, Clone)]
 pub(crate) struct EventData {
-    pub(crate) accept: bool
+    pub(crate) accept: bool,
 }

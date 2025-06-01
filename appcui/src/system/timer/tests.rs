@@ -4,12 +4,12 @@ use super::Command;
 
 #[test]
 fn check_command_interval() {
-    assert_eq!(Command::None.iterval(),None);
-    assert_eq!(Command::Start(100).iterval(),Some(100));
-    assert_eq!(Command::SetInterval(200).iterval(),Some(200));
-    assert_eq!(Command::Stop.iterval(),None);
-    assert_eq!(Command::Pause.iterval(),None);
-    assert_eq!(Command::Resume.iterval(),None);    
+    assert_eq!(Command::None.iterval(), None);
+    assert_eq!(Command::Start(100).iterval(), Some(100));
+    assert_eq!(Command::SetInterval(200).iterval(), Some(200));
+    assert_eq!(Command::Stop.iterval(), None);
+    assert_eq!(Command::Pause.iterval(), None);
+    assert_eq!(Command::Resume.iterval(), None);
 }
 
 #[test]
@@ -39,7 +39,6 @@ fn check_timer_manager_control_handle() {
     assert!(timer_manager.control_handle(1).is_none());
     assert!(timer_manager.control_handle(100).is_none());
 }
-
 
 #[test]
 fn check_timer_manager_index_mut() {

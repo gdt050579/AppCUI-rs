@@ -7,7 +7,6 @@ const HEX_16_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").represent
 const HEX_32_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").representation_digits(8);
 const HEX_64_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").representation_digits(16);
 
-
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum NumericFormat {
     Normal,
@@ -30,4 +29,3 @@ impl NumericFormat {
         }
     }
 }
-

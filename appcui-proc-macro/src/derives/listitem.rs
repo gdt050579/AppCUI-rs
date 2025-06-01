@@ -28,15 +28,13 @@ impl components::listitem::ListItem for $(STRUCT_NAME) {
 }
 "#;
 
-
-
 #[derive(Debug, Copy, Clone)]
 enum RenderMethod {
     Text,
     Ascii,
-    Int64(&'static str),    
-    UInt64(&'static str),   
-    Float(&'static str), 
+    Int64(&'static str),
+    UInt64(&'static str),
+    Float(&'static str),
     Bool(&'static str),
     Size(&'static str),
     Area(&'static str),
@@ -86,23 +84,80 @@ impl RenderMethod {
     ];
 
     const NUMERIC_FORMATS: [&'static str; 6] = ["Normal", "Separator", "Hex", "Hex16", "Hex32", "Hex64"];
-    const FLOAT_FORMATS: [&'static str; 4] = ["Normal","TwoDigits", "ThreeDigits", "FourDigits",];
+    const FLOAT_FORMATS: [&'static str; 4] = ["Normal", "TwoDigits", "ThreeDigits", "FourDigits"];
     const BOOL_FORMATS: [&'static str; 4] = ["TrueFalse", "YesNo", "XMinus", "CheckmarkMinus"];
-    const SIZE_FORMATS: [&'static str; 11] = ["Bytes","KiloBytes","MegaBytes","GigaBytes","TeraBytes","KiloBytesWithDecimals","MegaBytesWithDecimals","GigaBytesWithDecimals","TeraBytesWithDecimals","Auto","AutoWithDecimals"];
-    const AREA_FORMATS: [&'static str; 10] = ["SquaredMillimeters","SquaredCentimeters","SquaredMeters","SquaredKilometers","Hectares","Ares","SquareFeet","SquareInches","SquareYards","SquareMiles"];
-    const DISTANCE_FORMATS: [&'static str; 8] = ["Kilometers","Meters","Centimeters","Millimeters","Inches","Feet","Yards","Miles",];
-    const VOLUME_FORMATS: [&'static str; 11] = ["CubicMilimeters","CubicCentimeters","CubicMeters","CubicKilometers","Liters","Milliliters","Gallons","CubicFeet","CubicInches","CubicYards","CubicMiles",];
-    const WEIGHT_FORMATS: [&'static str; 5] = ["Grams","Milligrams","Kilograms","Pounds","Tons",];
-    const SPEED_FORMATS: [&'static str; 9] = ["KilometersPerHour","MetersPerHour","KilometersPerSecond","MetersPerSecond","MilesPerHour","MilesPerSecond","Knots","FeetPerSecond","Mach",  ];
-    const PERCENTAGE_FORMATS: [&'static str; 2] = ["Normal","Decimals"];
-    const TEMPERATURE_FORMATS: [&'static str; 3] = ["Celsius","Fahrenheit","Kelvin"];
-    const CURRENCY_FORMATS: [&'static str; 11] = ["USD","USDSymbol","EUR","EURSymbol","GBP","GBPSymbol","YEN","YENSymbol","Bitcoin","BitcoinSymbol","RON"];
-    const RATNG_FORMATS: [&'static str; 4] = ["Numerical","Stars","Circles","Asterix"];
-    const STATUS_FORMATS: [&'static str; 3] = ["Hashtag","Graphical","Arrow"];
-    const DATETIME_FORMATS: [&'static str; 3] = ["Full","Normal","Short"];
-    const TIME_FORMATS: [&'static str; 3] = ["Short","AMPM","Normal"];
-    const DATE_FORMATS: [&'static str; 3] = ["Full","YearMonthDay","DayMonthYear"];
-    const DURATION_FORMATS: [&'static str; 3] = ["Auto","Seconds","Details"];
+    const SIZE_FORMATS: [&'static str; 11] = [
+        "Bytes",
+        "KiloBytes",
+        "MegaBytes",
+        "GigaBytes",
+        "TeraBytes",
+        "KiloBytesWithDecimals",
+        "MegaBytesWithDecimals",
+        "GigaBytesWithDecimals",
+        "TeraBytesWithDecimals",
+        "Auto",
+        "AutoWithDecimals",
+    ];
+    const AREA_FORMATS: [&'static str; 10] = [
+        "SquaredMillimeters",
+        "SquaredCentimeters",
+        "SquaredMeters",
+        "SquaredKilometers",
+        "Hectares",
+        "Ares",
+        "SquareFeet",
+        "SquareInches",
+        "SquareYards",
+        "SquareMiles",
+    ];
+    const DISTANCE_FORMATS: [&'static str; 8] = ["Kilometers", "Meters", "Centimeters", "Millimeters", "Inches", "Feet", "Yards", "Miles"];
+    const VOLUME_FORMATS: [&'static str; 11] = [
+        "CubicMilimeters",
+        "CubicCentimeters",
+        "CubicMeters",
+        "CubicKilometers",
+        "Liters",
+        "Milliliters",
+        "Gallons",
+        "CubicFeet",
+        "CubicInches",
+        "CubicYards",
+        "CubicMiles",
+    ];
+    const WEIGHT_FORMATS: [&'static str; 5] = ["Grams", "Milligrams", "Kilograms", "Pounds", "Tons"];
+    const SPEED_FORMATS: [&'static str; 9] = [
+        "KilometersPerHour",
+        "MetersPerHour",
+        "KilometersPerSecond",
+        "MetersPerSecond",
+        "MilesPerHour",
+        "MilesPerSecond",
+        "Knots",
+        "FeetPerSecond",
+        "Mach",
+    ];
+    const PERCENTAGE_FORMATS: [&'static str; 2] = ["Normal", "Decimals"];
+    const TEMPERATURE_FORMATS: [&'static str; 3] = ["Celsius", "Fahrenheit", "Kelvin"];
+    const CURRENCY_FORMATS: [&'static str; 11] = [
+        "USD",
+        "USDSymbol",
+        "EUR",
+        "EURSymbol",
+        "GBP",
+        "GBPSymbol",
+        "YEN",
+        "YENSymbol",
+        "Bitcoin",
+        "BitcoinSymbol",
+        "RON",
+    ];
+    const RATNG_FORMATS: [&'static str; 4] = ["Numerical", "Stars", "Circles", "Asterix"];
+    const STATUS_FORMATS: [&'static str; 3] = ["Hashtag", "Graphical", "Arrow"];
+    const DATETIME_FORMATS: [&'static str; 3] = ["Full", "Normal", "Short"];
+    const TIME_FORMATS: [&'static str; 3] = ["Short", "AMPM", "Normal"];
+    const DATE_FORMATS: [&'static str; 3] = ["Full", "YearMonthDay", "DayMonthYear"];
+    const DURATION_FORMATS: [&'static str; 3] = ["Auto", "Seconds", "Details"];
 
     fn validate_format(self, fmt: &str, available: &[&'static str]) -> &'static str {
         for f in available {
@@ -125,7 +180,7 @@ impl RenderMethod {
                 if f.len() == fmt.len() && crate::utils::equal_ignore_case(f, fmt) {
                     // default case
                     return (f, 5);
-                } else if f.len()<fmt.len() && crate::utils::equal_ignore_case(&fmt[..f.len()], f) {
+                } else if f.len() < fmt.len() && crate::utils::equal_ignore_case(&fmt[..f.len()], f) {
                     result = f;
                     break;
                 }
@@ -142,27 +197,43 @@ impl RenderMethod {
         };
         let extra_part = fmt[r_type.len()..].trim();
         if !extra_part.starts_with('(') {
-            panic!("Invalid rating format value: '{}' for render method '{}'. Expected format is: '{}(number)'", fmt, self.name(), r_type);
+            panic!(
+                "Invalid rating format value: '{}' for render method '{}'. Expected format is: '{}(number)'",
+                fmt,
+                self.name(),
+                r_type
+            );
         }
         if !extra_part.ends_with(')') {
-            panic!("Invalid rating format value: '{}' for render method '{}'. Expected format is: '{}(number)'", fmt, self.name(), r_type);
+            panic!(
+                "Invalid rating format value: '{}' for render method '{}'. Expected format is: '{}(number)'",
+                fmt,
+                self.name(),
+                r_type
+            );
         }
         let number_representation = &extra_part[1..extra_part.len() - 1].trim();
         match number_representation.parse::<u32>() {
             Ok(v) => {
-                if v==0 {
-                    panic!("Invalid rating format value: '{}' for render method '{}'. The number of ratings must be greater than 0", fmt, self.name());
+                if v == 0 {
+                    panic!(
+                        "Invalid rating format value: '{}' for render method '{}'. The number of ratings must be greater than 0",
+                        fmt,
+                        self.name()
+                    );
                 }
                 (r_type, v)
-            },
+            }
             Err(_) => panic!(
                 "Invalid numeric format value: '{}' for render method '{}'. Expected format is: '{}(number)'",
-                fmt, self.name(), r_type
+                fmt,
+                self.name(),
+                r_type
             ),
         }
     }
 
-    fn from_type(vartype: &str)->Option<Self> {
+    fn from_type(vartype: &str) -> Option<Self> {
         match vartype {
             "String" | "&str" => Some(Self::Text),
             "i8" | "i16" | "i32" | "i64" => Some(Self::Int64("Normal")),
@@ -202,7 +273,7 @@ impl RenderMethod {
             Self::Percentage(_) => "Percentage",
             Self::Temperature(_) => "Temperature",
             Self::Currency(_) => "Currency",
-            Self::Rating(_,_) => "Rating",
+            Self::Rating(_, _) => "Rating",
             Self::Status(_) => "Status",
             Self::DateTime(_) => "DateTime",
             Self::Date(_) => "Date",
@@ -226,7 +297,7 @@ impl RenderMethod {
             Self::Percentage(_) => Self::Percentage(self.validate_format(fmt, RenderMethod::PERCENTAGE_FORMATS.as_slice())),
             Self::Temperature(_) => Self::Temperature(self.validate_format(fmt, RenderMethod::TEMPERATURE_FORMATS.as_slice())),
             Self::Currency(_) => Self::Currency(self.validate_format(fmt, RenderMethod::CURRENCY_FORMATS.as_slice())),
-            Self::Rating(_,_) => {
+            Self::Rating(_, _) => {
                 let (r_type, number) = self.validate_rating(fmt);
                 Self::Rating(r_type, number)
             }
@@ -426,7 +497,7 @@ impl Column {
         }
         if name.is_none() {
             panic!("Missing 'name' attribute for field '{}'", field.name);
-        }   
+        }
         if render.is_none() {
             if format.is_some() {
                 panic!(
@@ -486,7 +557,7 @@ impl Column {
             "&str" => {
                 format!("{} => self.{}.cmp(other.{}),\n", index, self.varname, self.varname)
             }
-            "Status" | "components::listitem::Status" | "listitem::Status"  => {
+            "Status" | "components::listitem::Status" | "listitem::Status" => {
                 format!("{} => self.{}.cmp(&other.{}),\n", index, self.varname, self.varname)
             }
             "chrono::NaiveDateTime" | "NaiveDateTime" => {

@@ -1,6 +1,9 @@
 use std::collections::VecDeque;
 
-use crate::{input::MouseButton, terminals::{SystemEvent, MouseMoveEvent}};
+use crate::{
+    input::MouseButton,
+    terminals::{MouseMoveEvent, SystemEvent},
+};
 
 use super::command_parser::{CommandParser, ParserError};
 
@@ -10,8 +13,8 @@ pub(super) struct MouseMoveCommand {
 }
 
 impl MouseMoveCommand {
-    pub(super) fn new(parser: &CommandParser)->Result<Self,ParserError> {
-        if parser.get_params_count()!=2 {
+    pub(super) fn new(parser: &CommandParser) -> Result<Self, ParserError> {
+        if parser.get_params_count() != 2 {
             return Err(ParserError::new("Mouse.Move command requires 2 parameters"));
         }
         let x = parser.get_i32(0);

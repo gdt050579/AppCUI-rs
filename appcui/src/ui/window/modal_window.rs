@@ -6,7 +6,7 @@ use std::ops::{Deref, DerefMut};
 
 #[repr(C)]
 pub struct ModalWindow<T: Sized> {
-    base:   Window,
+    base: Window,
     result: Option<T>,
 }
 impl<T> Deref for ModalWindow<T> {
@@ -26,7 +26,7 @@ impl<T> ModalWindow<T> {
         // a Modal Window does not have an implicit close button
         // as exiting has to be done from either exit(...) or exit_with(...) method.
         Self {
-            base:   Window::with_type_and_status_flags(
+            base: Window::with_type_and_status_flags(
                 title,
                 layout,
                 flags | Flags::NoCloseButton,
@@ -40,7 +40,7 @@ impl<T> ModalWindow<T> {
         // a Modal Window does not have an implicit close button
         // as exiting has to be done from either exit(...) or exit_with(...) method.
         Self {
-            base:   Window::with_type_and_status_flags(title, layout, flags | Flags::NoCloseButton, window_type, StatusFlags::ModalWindow),
+            base: Window::with_type_and_status_flags(title, layout, flags | Flags::NoCloseButton, window_type, StatusFlags::ModalWindow),
             result: None,
         }
     }

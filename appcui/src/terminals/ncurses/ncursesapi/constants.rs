@@ -195,9 +195,9 @@ pub(crate) const WHEEL_LEFT: i32 = 134283264;
 pub(crate) const WHEEL_RIGHT: i32 = 136314880;
 // pub(crate) const NCURSES_MOUSE_MASK: i32 = 4294967295;
 
-pub(crate) const A_NORMAL: u64 = 0;//1 - 1;
+pub(crate) const A_NORMAL: u64 = 0; //1 - 1;
 pub(crate) const A_ATTRIBUTES: u64 = !(0); //not(1-1)
-pub(crate) const A_CHARTEXT: u64 = 0;//(1 << 0) - 1;
+pub(crate) const A_CHARTEXT: u64 = 0; //(1 << 0) - 1;
 pub(crate) const A_COLOR: u64 = (1 << 8) - 1;
 pub(crate) const A_STANDOUT: u64 = 1 << 8;
 pub(crate) const A_UNDERLINE: u64 = 1 << 9;

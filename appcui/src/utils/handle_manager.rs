@@ -36,7 +36,7 @@ where
             h
         }
     }
-    pub(crate) fn remove(&mut self, handle: Handle<T> ) -> bool {
+    pub(crate) fn remove(&mut self, handle: Handle<T>) -> bool {
         if handle.is_none() {
             return false;
         }

@@ -9,7 +9,7 @@ pub trait ListBoxEvents {
         EventProcessStatus::Ignored
     }
 }
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub(crate) enum ListBoxEventTypes {
     CurrentItemChanged,
     ItemChecked,

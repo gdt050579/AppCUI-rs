@@ -110,7 +110,6 @@ pub struct ToggleButtonTheme {
     pub unselected: ControlCharAttributesState,
 }
 
-
 #[derive(Default)]
 pub struct MarkdownTheme {
     pub text: CharAttribute,

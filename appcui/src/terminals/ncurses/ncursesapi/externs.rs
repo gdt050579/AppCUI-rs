@@ -29,7 +29,6 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 
-
 use libc::{c_char, c_int, c_short};
 
 #[allow(clippy::upper_case_acronyms)]
@@ -38,13 +37,12 @@ use super::constants::*;
 use super::structs::MEVENT;
 
 mod wrapped {
-    use libc::{ c_char, c_int };
+    use libc::{c_char, c_int};
 
-    use super::WINDOW;
     use super::chtype;
-    
-    extern "C"
-    {
+    use super::WINDOW;
+
+    extern "C" {
         pub(crate) static curscr: WINDOW;
         pub(crate) static newscr: WINDOW;
         pub(crate) static stdscr: WINDOW;
@@ -66,9 +64,8 @@ macro_rules! wrap_extern {
         pub(crate) fn $name() -> $t {
             unsafe { wrapped::$name }
         }
-    }
+    };
 }
-
 
 wrap_extern!(curscr: WINDOW);
 wrap_extern!(newscr: WINDOW);
@@ -84,15 +81,14 @@ pub(crate) fn acs_map() -> *const chtype {
     &raw const wrapped::acs_map as *const chtype
 }
 
-
 #[cfg_attr(target_os = "linux", link(name = "ncursesw"))]
-#[cfg_attr(target_os = "macos", link(name = "ncurses"))]  // on macos `ncurses` already includes wide chars support
+#[cfg_attr(target_os = "macos", link(name = "ncurses"))] // on macos `ncurses` already includes wide chars support
 #[cfg(target_family = "unix")]
-extern "C"{
+extern "C" {
     pub(crate) fn initscr() -> WINDOW;
     pub(crate) fn endwin() -> c_int;
     pub(crate) fn refresh() -> c_int;
-    pub(crate) fn wrefresh(w:WINDOW) -> c_int;
+    pub(crate) fn wrefresh(w: WINDOW) -> c_int;
     pub(crate) fn wresize(win: WINDOW, lines: c_int, columns: c_int) -> c_int;
     pub(crate) fn getch() -> c_int;
     pub(crate) fn nodelay(win: WINDOW, bf: c_bool) -> c_int;
@@ -103,31 +99,30 @@ extern "C"{
     pub(crate) fn nonl() -> c_int;
     pub(crate) fn raw() -> c_int;
     pub(crate) fn meta(win: WINDOW, bf: c_bool) -> c_int;
-    pub(crate) fn mousemask(_:mmask_t,_:*mut mmask_t) -> mmask_t;
+    pub(crate) fn mousemask(_: mmask_t, _: *mut mmask_t) -> mmask_t;
     pub(crate) fn mouseinterval(interval: c_int) -> c_int;
-    pub(crate) fn getmouse(_:*mut MEVENT) -> c_int;
-    pub(crate) fn wmove(_:WINDOW,_:c_int,_:c_int) -> c_int;
+    pub(crate) fn getmouse(_: *mut MEVENT) -> c_int;
+    pub(crate) fn wmove(_: WINDOW, _: c_int, _: c_int) -> c_int;
     pub(crate) fn set_escdelay(ms: c_int) -> c_int;
     pub(crate) fn wclear(w: WINDOW) -> c_int;
     pub(crate) fn mvaddch(y: c_int, x: c_int, ch: chtype) -> c_int;
     pub(crate) fn mvaddwstr(y: c_int, x: c_int, str: *const i8) -> c_int;
     pub(crate) fn getmaxy(w: WINDOW) -> c_int;
     pub(crate) fn getmaxx(w: WINDOW) -> c_int;
-    pub(crate) fn wget_wch(w: WINDOW, _:*mut winttype) -> c_int;
-    pub(crate) fn get_wch(_:*mut winttype) -> c_int;
-    
+    pub(crate) fn wget_wch(w: WINDOW, _: *mut winttype) -> c_int;
+    pub(crate) fn get_wch(_: *mut winttype) -> c_int;
+
     pub(crate) fn start_color() -> c_int;
     pub(crate) fn use_default_colors() -> c_int;
-    pub(crate) fn init_pair(_:c_short,_:c_short,_:c_short) -> c_int;
-    pub(crate) fn wattron(_:WINDOW, _:NCURSES_ATTR_T) -> c_int;
-    pub(crate) fn wattroff(_:WINDOW, _:NCURSES_ATTR_T) -> c_int;
-    pub(crate) fn COLOR_PAIR(_:c_int) -> c_int;
+    pub(crate) fn init_pair(_: c_short, _: c_short, _: c_short) -> c_int;
+    pub(crate) fn wattron(_: WINDOW, _: NCURSES_ATTR_T) -> c_int;
+    pub(crate) fn wattroff(_: WINDOW, _: NCURSES_ATTR_T) -> c_int;
+    pub(crate) fn COLOR_PAIR(_: c_int) -> c_int;
 
-    
-    pub(crate) fn mvaddstr(_:c_int, _:c_int, _:*const c_char) -> c_int;
-    pub(crate) fn addstr(_:*const c_char) -> c_int;
-    pub(crate) fn curs_set(_:c_int) -> c_int;
+    pub(crate) fn mvaddstr(_: c_int, _: c_int, _: *const c_char) -> c_int;
+    pub(crate) fn addstr(_: *const c_char) -> c_int;
+    pub(crate) fn curs_set(_: c_int) -> c_int;
 
     pub(crate) fn wcwidth(c: i32) -> c_int;
-    
+
 }

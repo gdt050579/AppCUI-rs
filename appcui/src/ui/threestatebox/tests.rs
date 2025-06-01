@@ -45,7 +45,6 @@ fn check_three_state_box_macro() {
     a.run();
 }
 
-
 #[test]
 fn check_three_state_box_events() {
     #[Window(events=ThreeStateBoxEvents,internal=true)]
@@ -53,34 +52,34 @@ fn check_three_state_box_events() {
         ts: Handle<ThreeStateBox>,
         lb: Handle<Label>,
     }
-impl MyWindow {
-    fn new() -> MyWindow {
-        let mut w = MyWindow{
-            base:window!("title,d:c,w:40,h:8"),
-            ts: Handle::None,
-            lb:Handle::None,
-        };
-        w.lb = w.add(label!("xyz,x:1,y:1,w:30"));
-        w.ts = w.add(ThreeStateBox::new("smth", Layout::new("x:1,y:2,w:30"), threestatebox::State::Unknown));
-        w
-    }
-}
-
-impl ThreeStateBoxEvents for MyWindow {
-    fn on_status_changed(&mut self, _handle: Handle<ThreeStateBox>, state: threestatebox::State) -> EventProcessStatus {
-        let s = match state {
-            threestatebox::State::Checked => "check",
-            threestatebox::State::Unchecked => "uncheck",
-            threestatebox::State::Unknown => "unknown",
-        };
-        let h = self.lb;
-        if let Some(label) = self.control_mut(h) {
-            label.set_caption(s);
+    impl MyWindow {
+        fn new() -> MyWindow {
+            let mut w = MyWindow {
+                base: window!("title,d:c,w:40,h:8"),
+                ts: Handle::None,
+                lb: Handle::None,
+            };
+            w.lb = w.add(label!("xyz,x:1,y:1,w:30"));
+            w.ts = w.add(ThreeStateBox::new("smth", Layout::new("x:1,y:2,w:30"), threestatebox::State::Unknown));
+            w
         }
-
-        EventProcessStatus::Processed
     }
-}
+
+    impl ThreeStateBoxEvents for MyWindow {
+        fn on_status_changed(&mut self, _handle: Handle<ThreeStateBox>, state: threestatebox::State) -> EventProcessStatus {
+            let s = match state {
+                threestatebox::State::Checked => "check",
+                threestatebox::State::Unchecked => "uncheck",
+                threestatebox::State::Unknown => "unknown",
+            };
+            let h = self.lb;
+            if let Some(label) = self.control_mut(h) {
+                label.set_caption(s);
+            }
+
+            EventProcessStatus::Processed
+        }
+    }
     let script = "
         Paint.Enable(false)
         Paint('InitialState (unknown)')   
@@ -110,12 +109,12 @@ fn check_methods() {
     let mut a = App::debug(80, 13, script).build().unwrap();
     let mut w = window!("Title,d:c,w:78,h:11");
     let mut t = threestatebox!("Options,x:1,y:1,w:16,h:4,state=unchecked");
-    assert_eq!(t.caption(),"Options");
-    assert_eq!(t.state(),threestatebox::State::Unchecked);
+    assert_eq!(t.caption(), "Options");
+    assert_eq!(t.state(), threestatebox::State::Unchecked);
     t.set_caption("New caption");
-    assert_eq!(t.caption(),"New caption");
+    assert_eq!(t.caption(), "New caption");
     t.set_state(threestatebox::State::Unknown);
-    assert_eq!(t.state(),threestatebox::State::Unknown);
+    assert_eq!(t.state(), threestatebox::State::Unknown);
     w.add(t);
     a.add_window(w);
     a.run();
@@ -133,14 +132,19 @@ fn check_threestatebox_plusminus_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=PlusMinus,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=PlusMinus,state=Checked"));
-    w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=PlusMinus,state:Unchecked, enabled:false"));
-    w.add(threestatebox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=PlusMinus,state=Checked, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=PlusMinus,state:Unchecked, enabled:false"
+    ));
+    w.add(threestatebox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=PlusMinus,state=Checked, enabled:false"
+    ));
     w.add(threestatebox!("'Option 5 (unknown)',x:1,y:5,w:40,type=PlusMinus,state=unknown"));
-    w.add(threestatebox!("'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=PlusMinus,state=unknown, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=PlusMinus,state=unknown, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_threestatebox_ascii_mode() {
@@ -154,10 +158,16 @@ fn check_threestatebox_ascii_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Ascii,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=Ascii,state=Checked"));
-    w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Ascii,state:Unchecked, enabled:false"));
-    w.add(threestatebox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Ascii,state=Checked, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Ascii,state:Unchecked, enabled:false"
+    ));
+    w.add(threestatebox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Ascii,state=Checked, enabled:false"
+    ));
     w.add(threestatebox!("'Option 5 (unknown)',x:1,y:5,w:40,type=Ascii,state=unknown"));
-    w.add(threestatebox!("'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=Ascii,state=unknown, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=Ascii,state=unknown, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -174,10 +184,16 @@ fn check_threestatebox_checkbox_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkbox,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkbox,state=Checked"));
-    w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkbox,state:Unchecked, enabled:false"));
-    w.add(threestatebox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Checkbox,state=Checked, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkbox,state:Unchecked, enabled:false"
+    ));
+    w.add(threestatebox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Checkbox,state=Checked, enabled:false"
+    ));
     w.add(threestatebox!("'Option 5 (unknown)',x:1,y:5,w:40,type=Checkbox,state=unknown"));
-    w.add(threestatebox!("'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=Checkbox,state=unknown, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=Checkbox,state=unknown, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -194,10 +210,16 @@ fn check_threestatebox_checkmark_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkmark,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkmark,state=Checked"));
-    w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkmark,state:Unchecked, enabled:false"));
-    w.add(threestatebox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Checkmark,state=Checked, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkmark,state:Unchecked, enabled:false"
+    ));
+    w.add(threestatebox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=Checkmark,state=Checked, enabled:false"
+    ));
     w.add(threestatebox!("'Option 5 (unknown)',x:1,y:5,w:40,type=Checkmark,state=unknown"));
-    w.add(threestatebox!("'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=Checkmark,state=unknown, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=Checkmark,state=unknown, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -214,10 +236,16 @@ fn check_threestatebox_fill_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=FilledBox,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=FilledBox,state=Checked"));
-    w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=FilledBox,state:Unchecked, enabled:false"));
-    w.add(threestatebox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=FilledBox,state=Checked, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=FilledBox,state:Unchecked, enabled:false"
+    ));
+    w.add(threestatebox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=FilledBox,state=Checked, enabled:false"
+    ));
     w.add(threestatebox!("'Option 5 (unknown)',x:1,y:5,w:40,type=FilledBox,state=unknown"));
-    w.add(threestatebox!("'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=FilledBox,state=unknown, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=FilledBox,state=unknown, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -234,10 +262,16 @@ fn check_threestatebox_yes_no_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=YesNo,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=YesNo,state=Checked"));
-    w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=YesNo,state:Unchecked, enabled:false"));
-    w.add(threestatebox!("'Option 4 (disabled and checked)',x:1,y:4,w:40,type=YesNo,state=Checked, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=YesNo,state:Unchecked, enabled:false"
+    ));
+    w.add(threestatebox!(
+        "'Option 4 (disabled and checked)',x:1,y:4,w:40,type=YesNo,state=Checked, enabled:false"
+    ));
     w.add(threestatebox!("'Option 5 (unknown)',x:1,y:5,w:40,type=YesNo,state=unknown"));
-    w.add(threestatebox!("'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=YesNo,state=unknown, enabled:false"));
+    w.add(threestatebox!(
+        "'Option 6 (disabled and unknown)',x:1,y:6,w:40,type=YesNo,state=unknown, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }

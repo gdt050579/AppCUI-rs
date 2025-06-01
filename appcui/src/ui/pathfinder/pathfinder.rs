@@ -108,7 +108,9 @@ IMPLEMENT_METHODS!(PathFinder, fs::Navigator,,);
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnExpand+OnFocus+OnResize+OnThemeChanged+OnMouseEvent, internal=true)]
 pub(crate) struct GenericPathFinder<T>
-where T: Navigator<fs::Entry, fs::Root, PathBuf> {
+where
+    T: Navigator<fs::Entry, fs::Root, PathBuf>,
+{
     inner: InnerPathFinder<T>,
 }
 

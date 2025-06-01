@@ -18,8 +18,8 @@ impl Panel {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut panel = Panel::new("Panel", 
-    ///                            Layout::new("x:1,y:1,w:20,h:10"), 
+    /// let mut panel = Panel::new("Panel",
+    ///                            Layout::new("x:1,y:1,w:20,h:10"),
     ///                            panel::Type::Border);
     /// ```
     pub fn new(caption: &str, layout: Layout, panel_type: Type) -> Self {
@@ -110,7 +110,7 @@ impl Panel {
                 .wrap_type(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();
-            
+
             if chars_count > (sz.width - 6) as usize {
                 surface.write_text(self.caption.text(), &format);
                 surface.write_char(2, 0, Character::with_char(' '));

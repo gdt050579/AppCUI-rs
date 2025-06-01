@@ -1,6 +1,6 @@
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub struct Group {
-    index: u16
+    index: u16,
 }
 impl Group {
     #[allow(non_upper_case_globals)]
@@ -38,9 +38,9 @@ impl GroupInformation {
             collapsed: false,
         }
     }
-    // #[inline(always)]   
+    // #[inline(always)]
     // pub(super) fn is_empty(&self) -> bool {
-    //     self.items_count == 0 
+    //     self.items_count == 0
     // }
     #[inline(always)]
     pub(super) fn name(&self) -> &str {
@@ -57,7 +57,7 @@ impl GroupInformation {
     #[inline(always)]
     pub(super) fn set_items_count(&mut self, value: u32) {
         self.items_count = value;
-    }   
+    }
     #[inline(always)]
     pub(super) fn increment_items_count(&mut self) {
         self.items_count += 1;
@@ -69,7 +69,7 @@ impl GroupInformation {
     #[inline(always)]
     pub(super) fn set_items_checked_count(&mut self, value: u32) {
         self.items_check_count = value;
-    }  
+    }
     #[inline(always)]
     pub(super) fn is_collapsed(&self) -> bool {
         self.collapsed

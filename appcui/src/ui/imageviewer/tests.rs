@@ -1066,7 +1066,11 @@ fn check_resize() {
                 Scale::Scale5 => "Scale:5%",
             };
             commandbar.set(key!("F1"), sc_name, mywin::Commands::Scale);
-            let rd_name = match self.control(self.himg).map(|i| i.render_method()).unwrap_or(image::RendererType::SmallBlocks) {
+            let rd_name = match self
+                .control(self.himg)
+                .map(|i| i.render_method())
+                .unwrap_or(image::RendererType::SmallBlocks)
+            {
                 RendererType::SmallBlocks => "Method:SmallBlocks",
                 RendererType::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
                 RendererType::GrayScale => "Method:GrayScale",
@@ -1074,7 +1078,7 @@ fn check_resize() {
             };
             commandbar.set(key!("F2"), rd_name, mywin::Commands::RenderMethod);
         }
-    
+
         fn on_event(&mut self, command_id: mywin::Commands) {
             let h = self.himg;
             if let Some(img) = self.control_mut(h) {
@@ -1099,13 +1103,13 @@ fn check_resize() {
                             RendererType::GrayScale => img.set_render_method(image::RendererType::AsciiArt),
                             RendererType::AsciiArt => img.set_render_method(image::RendererType::SmallBlocks),
                         }
-                    },
+                    }
                 }
             }
             self.request_update();
         }
     }
-    
+
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
@@ -1135,11 +1139,10 @@ fn check_resize() {
         Paint('Scale 10% - Gray scale - full image')
         CheckHash(0x4929B46F945F5DED)
     ";
-    
+
     let mut a = App::debug(90, 20, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
-
 }
 
 #[test]
@@ -1189,7 +1192,13 @@ fn check_mouse_events() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
-    let i = ImageViewer::new(ferris_image(), Layout::new("d:c"), RendererType::SmallBlocks, Scale::NoScale, imageviewer::Flags::ScrollBars);
+    let i = ImageViewer::new(
+        ferris_image(),
+        Layout::new("d:c"),
+        RendererType::SmallBlocks,
+        Scale::NoScale,
+        imageviewer::Flags::ScrollBars,
+    );
     w.add(i);
     a.add_window(w);
     a.run();

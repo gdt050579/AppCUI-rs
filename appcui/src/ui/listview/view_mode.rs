@@ -1,5 +1,5 @@
-#[derive(Copy,Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum ViewMode {
     Details,
-    Columns(u8)
+    Columns(u8),
 }

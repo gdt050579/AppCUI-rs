@@ -3,11 +3,11 @@
 //! The TextArea control provides a scrollable field for entering and editing larger amounts of text.
 //! It supports word wrapping, text selection, and various keyboard shortcuts for text manipulation.
 
-mod textarea;
-mod initialization_flags;
 pub mod events;
+mod initialization_flags;
 #[cfg(test)]
 mod tests;
+mod textarea;
 
-pub use self::textarea::TextArea;
 pub use self::initialization_flags::Flags;
+pub use self::textarea::TextArea;

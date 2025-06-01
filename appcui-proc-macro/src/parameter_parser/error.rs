@@ -65,7 +65,10 @@ impl Error {
             s.push_str(
                 format!(
                     "Internal error (invalid start/end parameter)\n - start={}\n = end={}\n - len={}\n - text='{}'\n ",
-                    self.start, self.end,self.data.len(),self.data
+                    self.start,
+                    self.end,
+                    self.data.len(),
+                    self.data
                 )
                 .as_str(),
             );
@@ -73,7 +76,7 @@ impl Error {
         s
     }
     pub(crate) fn panic(self) {
-        panic!("{}",self.get_description().as_str());
+        panic!("{}", self.get_description().as_str());
     }
 }
 impl Debug for Error {

@@ -1,6 +1,6 @@
+use self::components::ScrollBars;
 use crate::prelude::*;
 use crate::ui::imageviewer::initialization_flags::Flags;
-use self::components::ScrollBars;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct ImageViewer {
@@ -19,13 +19,13 @@ impl ImageViewer {
     /// Creates a new image viewer with the specified image, layout and flags.
     /// The flags can be a combination of the following values:
     /// * `imageviewer::Flags::ScrollBars` - if set, the image viewer will have horizontal and vertical scrollbars
-    /// 
+    ///
     /// the render type method can be one of the following:
     /// * `image::RendererType::SmallBlocks` - if set, the image will be rendered with small blocks
     /// * `image::RendererType::LargeBlocks64Colors` - if set, the image will be rendered with large blocks
     /// * `image::RendererType::GrayScale` - if set, the image will be rendered with gray scale
     /// * `image::RendererType::AsciiArt` - if set, the image will be rendered as ascii art
-    /// 
+    ///
     /// the scale can be one of the following:
     /// * `image::Scale::None` - if set, the image will be rendered with no scaling (as it is)
     /// * `image::Scale::Scale5` - 5% scale
@@ -34,12 +34,12 @@ impl ImageViewer {
     /// * `image::Scale::Scale25` - 25% scale
     /// * `image::Scale::Scale33` - 33% scale
     /// * `image::Scale::Scale50` - 50% scale
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
-    /// 
+    ///
+    ///
     /// let heart = Image::with_str(r#"
     ///     |.............|
     ///     |...rr...rr...|
@@ -174,7 +174,7 @@ impl ImageViewer {
 impl OnResize for ImageViewer {
     fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
         let paint_sz = self.surface.size();
-        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64,&self.base);
+        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
         self.move_scroll_to(self.x, self.y);
     }
 }

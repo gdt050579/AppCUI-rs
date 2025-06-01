@@ -5,7 +5,7 @@ struct StackBuffer<const N: usize> {
 enum InnerTempBuffer<const N: usize> {
     StackBuffer(StackBuffer<N>),
     HeapBuffer(Vec<u8>),
-}   
+}
 pub(crate) struct TempBuffer<const N: usize> {
     inner: InnerTempBuffer<N>,
 }

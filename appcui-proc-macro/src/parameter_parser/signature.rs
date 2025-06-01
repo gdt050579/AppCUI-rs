@@ -14,7 +14,7 @@ pub(crate) enum ParamType {
     Integer,
     Percentage,
     Dimension,
-    Coordonate
+    Coordonate,
 }
 
 pub(crate) struct PositionalParameter {
@@ -24,10 +24,7 @@ pub(crate) struct PositionalParameter {
 impl PositionalParameter {
     #[inline(always)]
     pub(crate) const fn new(key: &'static str, param_type: ParamType) -> Self {
-        Self {
-            key,
-            param_type,
-        }
+        Self { key, param_type }
     }
     #[inline(always)]
     pub(crate) fn get_key(&self) -> &'static str {
@@ -46,11 +43,7 @@ pub(crate) struct NamedParameter {
 impl NamedParameter {
     #[inline(always)]
     pub(crate) const fn new(name: &'static str, key: &'static str, param_type: ParamType) -> Self {
-        Self {
-            name,
-            key,
-            param_type,
-        }
+        Self { name, key, param_type }
     }
     #[inline(always)]
     pub(crate) fn get_key(&self) -> &'static str {
@@ -65,4 +58,3 @@ impl NamedParameter {
         self.param_type
     }
 }
-

@@ -18,7 +18,6 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("class", "type", ParamType::String),
     NamedParameter::new("columns", "columns", ParamType::List),
-
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("left-scroll-margin", "lsm", ParamType::Integer),
     NamedParameter::new("lsm", "lsm", ParamType::Integer),

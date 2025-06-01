@@ -5,7 +5,7 @@ pub(crate) trait GlyphParser {
     fn next_pos(&self, current_pos: usize, count_glyphs: usize) -> usize;
     fn previous_pos(&self, current_pos: usize, count_glyphs: usize) -> usize;
     fn word_range(&self, current_pos: usize, is_word_char: fn(char) -> bool) -> Option<(usize, usize)>;
-    fn index_ignoring_case(&self, to_find: &str)->Option<usize>;
+    fn index_ignoring_case(&self, to_find: &str) -> Option<usize>;
 }
 
 #[inline(always)]
@@ -135,11 +135,11 @@ impl GlyphParser for str {
                     break;
                 }
             }
-            return Some((start,end));
+            return Some((start, end));
         }
         None
     }
-    fn index_ignoring_case(&self, to_find: &str)->Option<usize> {
+    fn index_ignoring_case(&self, to_find: &str) -> Option<usize> {
         let to_find_buf = to_find.as_bytes();
         let self_buf = self.as_bytes();
         if to_find_buf.len() > self_buf.len() {

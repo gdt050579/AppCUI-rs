@@ -12,6 +12,5 @@ mod tests;
 use self::splitter_panel::SplitterPanel;
 
 pub use self::hsplitter::HSplitter;
-pub use self::initialization_flags::ResizeBehavior;
 pub use self::initialization_flags::Panel;
-
+pub use self::initialization_flags::ResizeBehavior;

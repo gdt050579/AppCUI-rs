@@ -12,10 +12,10 @@ use instant::Duration;
 
 #[derive(Copy, Clone)]
 pub(crate) struct ThreadLogic {
-    tick:     u64,
+    tick: u64,
     interval: u32,
-    id:       u8,
-    paused:   bool,
+    id: u8,
+    paused: bool,
 }
 
 impl ThreadLogic {
@@ -41,7 +41,7 @@ impl ThreadLogic {
                 self.tick += 1;
                 if sender
                     .send(SystemEvent::TimerTickUpdate(TimerTickUpdateEvent {
-                        id:   self.id,
+                        id: self.id,
                         tick: self.tick.into(),
                     }))
                     .is_err()
@@ -67,10 +67,7 @@ impl ThreadLogic {
                 self.tick = 0;
                 self.paused = false;
                 if sender
-                    .send(SystemEvent::TimerStart(TimerStartEvent {
-                        id:   self.id,
-                        tick: 0.into(),
-                    }))
+                    .send(SystemEvent::TimerStart(TimerStartEvent { id: self.id, tick: 0.into() }))
                     .is_err()
                 {
                     self.paused = true;
@@ -85,7 +82,7 @@ impl ThreadLogic {
             Command::Resume => {
                 if sender
                     .send(SystemEvent::TimerStart(TimerStartEvent {
-                        id:   self.id,
+                        id: self.id,
                         tick: self.tick.into(),
                     }))
                     .is_err()
@@ -105,7 +102,7 @@ impl ThreadLogic {
                 self.paused = true;
                 sender
                     .send(SystemEvent::TimerPaused(TimerPausedEvent {
-                        id:   self.id,
+                        id: self.id,
                         tick: self.tick.into(),
                     }))
                     .is_err()

@@ -4,12 +4,9 @@
 //! It supports different visual styles and can be configured to raise events when its state changes.
 
 mod checkbox;
-mod initialization_flags;
 pub mod events;
+mod initialization_flags;
 #[cfg(test)]
 mod tests;
 pub use self::checkbox::CheckBox;
 pub use self::initialization_flags::Type;
-
-
-

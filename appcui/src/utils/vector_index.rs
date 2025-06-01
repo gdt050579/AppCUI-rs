@@ -1,4 +1,4 @@
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub enum Strategy {
     Clamp,
     Rotate,
@@ -21,11 +21,7 @@ impl VectorIndex {
     #[inline(always)]
     pub fn last(count: usize) -> Self {
         Self {
-            value: if count > 0 {
-                count - 1
-            } else {
-                Self::INVALID_INDEX
-            },
+            value: if count > 0 { count - 1 } else { Self::INVALID_INDEX },
         }
     }
     #[inline(always)]
@@ -53,11 +49,7 @@ impl VectorIndex {
         if clamp {
             self.value = value.min(count - 1);
         } else {
-            self.value = if value >= count {
-                Self::INVALID_INDEX
-            } else {
-                value
-            };
+            self.value = if value >= count { Self::INVALID_INDEX } else { value };
         }
     }
     #[inline(always)]
@@ -145,9 +137,7 @@ impl VectorIndex {
 }
 impl Default for VectorIndex {
     fn default() -> Self {
-        Self {
-            value: Self::INVALID_INDEX,
-        }
+        Self { value: Self::INVALID_INDEX }
     }
 }
 impl From<usize> for VectorIndex {
@@ -157,8 +147,6 @@ impl From<usize> for VectorIndex {
 }
 impl From<u32> for VectorIndex {
     fn from(value: u32) -> Self {
-        VectorIndex {
-            value: value as usize,
-        }
+        VectorIndex { value: value as usize }
     }
 }

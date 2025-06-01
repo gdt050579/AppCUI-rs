@@ -591,7 +591,6 @@ fn check_mouse_wheel() {
     From: https://en.wikipedia.org/wiki/Rust_(programming_language)
     ";
 
-   
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
     let mut c = canvas!("'60x15',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");

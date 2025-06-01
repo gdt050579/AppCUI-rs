@@ -1,12 +1,12 @@
-use crate::ui::common::*;
-use crate::ui::common::traits::*;
-use crate::ui::common::control_manager::ParentLayout;
-use crate::ui::menu::Menu;
-use crate::input::*;
-use crate::terminals::*;
 use super::timer::TimerManager;
 use super::Handle;
 use super::Theme;
+use crate::input::*;
+use crate::terminals::*;
+use crate::ui::common::control_manager::ParentLayout;
+use crate::ui::common::traits::*;
+use crate::ui::common::*;
+use crate::ui::menu::Menu;
 
 pub(crate) trait LayoutMethods {
     fn update_control_layout(&mut self, handle: Handle<()>, parent_layout: &ParentLayout);
@@ -19,7 +19,7 @@ pub(crate) trait PaintMethods {
     fn paint_menu(&mut self, handle: Handle<Menu>, activ: bool);
     fn request_repaint(&mut self);
 }
- 
+
 pub(crate) trait KeyboardMethods {
     fn process_key_modifier_changed_event(&mut self, new_state: KeyModifier);
     fn process_keypressed_event(&mut self, event: KeyPressedEvent);

@@ -1,19 +1,19 @@
 use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits=16)]
+#[EnumBitFlags(bits = 16)]
 pub enum Flags {
-    Sizeable      = 0x0001,
+    Sizeable = 0x0001,
     NoCloseButton = 0x0002,
     FixedPosition = 0x0004,
     //Maximized     = 0x0080,
     //ProcessReturn = 0x0200,
 }
 #[repr(u8)]
-#[derive(Copy,Clone,PartialEq,Eq,Default)]
+#[derive(Copy, Clone, PartialEq, Eq, Default)]
 pub enum Type {
     #[default]
     Normal,
     Error,
     Warning,
-    Notification
+    Notification,
 }

@@ -9,7 +9,7 @@ fn check_view_zero() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
+    let p = ProgressBar::new(100, Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
     w.add(p);
     a.add_window(w);
     a.run();
@@ -24,7 +24,7 @@ fn check_view_50() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(500,Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(500, Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
     p.update_progress(250);
     w.add(p);
     a.add_window(w);
@@ -40,7 +40,7 @@ fn check_view_85_and_text() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(500,Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(500, Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
     p.update_progress(425);
     p.update_text("Running...");
     w.add(p);
@@ -57,7 +57,7 @@ fn check_view_100_and_text() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(500,Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(500, Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
     p.update_progress(600);
     p.update_text("Completed");
     w.add(p);
@@ -74,12 +74,11 @@ fn check_view_0_items() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let p = ProgressBar::new(0,Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
+    let p = ProgressBar::new(0, Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
     w.add(p);
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_methods() {
@@ -90,11 +89,11 @@ fn check_methods() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(0,Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(0, Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
     p.reset(100);
     p.update_progress(2);
-    assert_eq!(p.processed(),2);
-    assert_eq!(p.count(),100);
+    assert_eq!(p.processed(), 2);
+    assert_eq!(p.count(), 100);
     w.add(p);
     a.add_window(w);
     a.run();
@@ -109,10 +108,10 @@ fn check_large_number_of_items() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(u64::MAX,Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(u64::MAX, Layout::new("x:1,y:1,w:20"), progressbar::Flags::None);
     p.update_progress(0xFFFF_FFFF_FFFF_FFF0);
-    assert_eq!(p.processed(),0xFFFF_FFFF_FFFF_FFF0);
-    assert_eq!(p.count(),0xFFFF_FFFF_FFFF_FFFF);
+    assert_eq!(p.processed(), 0xFFFF_FFFF_FFFF_FFF0);
+    assert_eq!(p.count(), 0xFFFF_FFFF_FFFF_FFFF);
     w.add(p);
     a.add_window(w);
     a.run();
@@ -127,7 +126,7 @@ fn check_show_eta_for_no_items() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(u64::MAX,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(u64::MAX, Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
     p.update_progress(0);
     w.add(p);
     a.add_window(w);
@@ -143,7 +142,7 @@ fn check_show_eta() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(10,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(10, Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
     p.update_progress(2);
     p.update_eta_with_elapsed_time(40);
     // 40 seconds for 2 items -> remaining is 160 seconds for the rest of the 8 items
@@ -162,7 +161,7 @@ fn check_show_eta_more_than_one_week() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(10,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(10, Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
     p.update_progress(1);
     p.update_eta_with_elapsed_time(300000);
     w.add(p);
@@ -179,7 +178,7 @@ fn check_show_eta_one_day() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(10,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(10, Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
     p.update_progress(5);
     p.update_eta_with_elapsed_time(87400);
     w.add(p);
@@ -196,7 +195,7 @@ fn check_show_eta_four_day() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    let mut p = ProgressBar::new(10,Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
+    let mut p = ProgressBar::new(10, Layout::new("x:1,y:1,w:36,h:2"), progressbar::Flags::None);
     p.update_progress(2);
     p.update_eta_with_elapsed_time(87400);
     w.add(p);

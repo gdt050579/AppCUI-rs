@@ -4263,11 +4263,11 @@ const ASCII_ART_CHARSET: &[char] = &[
 ];
 
 /// A pixel in the image.
-/// 
+///
 /// The pixel is a combination of red, green, and blue components, and an alpha component.
 /// The alpha component is the opacity of the pixel, and is used to determine how much of the pixel's color should be blended with the background.
 /// The red, green, and blue components are the color of the pixel.
-/// 
+///
 /// The pixel is used to represent a single pixel in the image.
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct Pixel {
@@ -4278,17 +4278,17 @@ pub struct Pixel {
 }
 impl Pixel {
     /// Create a new pixel with the given red, green, and blue components, and an alpha component.
-    /// 
+    ///
     /// The alpha component is the opacity of the pixel, and is used to determine how much of the pixel's color should be blended with the background.
     /// The red, green, and blue components are the color of the pixel.
-    /// 
+    ///
     /// The pixel is used to represent a single pixel in the image.
     pub fn new(red: u8, green: u8, blue: u8, alpha: u8) -> Self {
         Pixel { red, green, blue, alpha }
     }
-    
+
     /// Create a new pixel with the given red, green, and blue components.
-    /// 
+    ///
     /// The alpha component is set to 255, which means the pixel is fully opaque.
     pub fn with_rgb(red: u8, green: u8, blue: u8) -> Self {
         Pixel {

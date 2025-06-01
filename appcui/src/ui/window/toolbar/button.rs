@@ -22,7 +22,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 ///
 /// ```rust, no_run
 /// use appcui::prelude::*;
-/// 
+///
 /// #[Window(events = ToolBarEvents)]
 /// struct CounterWindow {
 ///     increase_button: Handle<toolbar::Button>,
@@ -45,7 +45,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 ///         let group = win.toolbar().create_group(toolbar::GroupPosition::BottomRight);
 ///         
 ///         // Add buttons to the toolbar group
-///         let mut btn_minus = toolbar::Button::new("-"); 
+///         let mut btn_minus = toolbar::Button::new("-");
 ///         btn_minus.set_tooltip("Decrease counter");
 ///         win.decrease_button = win.toolbar().add(group, btn_minus);
 ///         let mut btn_plus = toolbar::Button::new("+");
@@ -101,9 +101,9 @@ impl Button {
     /// Creates a new Button toolbar item with the specified text.
     ///
     /// The width (in characters) of the button is calculated based on the number of characters in its content.
-    /// 
+    ///
     /// # Parameters
-    /// 
+    ///
     /// * `text` - The caption (text) to be displayed on the button
     ///
     /// # Example
@@ -120,7 +120,7 @@ impl Button {
         obj.set_caption(text);
         obj
     }
-    
+
     /// Sets a new caption for the button.
     ///
     /// The width of the button is automatically updated based on the length of the new caption.
@@ -134,13 +134,13 @@ impl Button {
         self.base.set_width(self.caption.chars_count() as u16);
         self.base.request_recompute_layout();
     }
-    
+
     /// Returns the current caption text of the button.
     #[inline(always)]
     pub fn caption(&self) -> &str {
         self.caption.text()
     }
-    
+
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
         let mut format = TextFormatBuilder::new()

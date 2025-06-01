@@ -10,8 +10,8 @@ impl FlagsSignature {
     pub(crate) const fn new(flags: &'static [&'static str]) -> Self {
         Self { flags, map: OnceLock::new() }
     }
-    pub(crate) fn get(&self, name: &str)->Option<&'static str> {
-        let map = self.map.get_or_init(||{
+    pub(crate) fn get(&self, name: &str) -> Option<&'static str> {
+        let map = self.map.get_or_init(|| {
             let mut m: HashMap<u64, &'static str> = HashMap::with_capacity(8);
             for elem in self.flags {
                 m.insert(utils::compute_hash(elem), *elem);

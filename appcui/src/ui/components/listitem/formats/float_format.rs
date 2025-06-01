@@ -5,7 +5,6 @@ const TWO_DIGITS: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2
 const THREE_DIGITS: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(3);
 const FOUR_DIGITS: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(4);
 
-
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum FloatFormat {
     Normal,
@@ -24,4 +23,3 @@ impl FloatFormat {
         }
     }
 }
-

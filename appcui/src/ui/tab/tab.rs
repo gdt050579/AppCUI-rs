@@ -15,13 +15,13 @@ impl Tab {
     /// The flags can be a combination of the following values:
     /// * `tab::Flags::TabsBar` - if set, the tabs will be displayed in a bar
     /// * `tab::Flags::TransparentBackground` - if set, the background will be transparent
-    /// 
+    ///
     /// The type of the tab is `Type::OnTop` by default, which means that the tabs will be displayed on top of the control.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut tab = Tab::new(Layout::new("x:1,y:1,w:20,h:10"),
     ///                       tab::Flags::TabsBar);
     /// tab.add_tab("Tab &1");
@@ -40,7 +40,7 @@ impl Tab {
         t.update_margins();
         t
     }
-    
+
     /// Creates a new Tab control with the specified layout, flags and type.
     /// The flags can be a combination of the following values:
     /// * `tab::Flags::TabsBar` - if set, the tabs will be displayed in a bar
@@ -50,13 +50,13 @@ impl Tab {
     /// * `tab::Type::OnBottom` - the tabs will be displayed on the bottom of the control
     /// * `tab::Type::OnLeft` - the tabs will be displayed on the left side of the control
     /// * `tab::Type::HiddenTabs` - the tabs will be hidden. You can still change between them , but manually.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
-    /// let mut tab = Tab::with_type(Layout::new("x:1,y:1,w:20,h:10"), 
-    ///                              tab::Flags::TabsBar, 
+    ///
+    /// let mut tab = Tab::with_type(Layout::new("x:1,y:1,w:20,h:10"),
+    ///                              tab::Flags::TabsBar,
     ///                              tab::Type::OnTop);
     /// tab.add_tab("Tab &1");
     /// tab.add_tab("Tab &2");
@@ -74,7 +74,7 @@ impl Tab {
         t.update_margins();
         t
     }
-    
+
     /// Adds a new tab page with the specified caption. The caption can contain a hotkey, which is indicated by an ampersand (&) before the character.
     /// The function returns the index of the newly created tab page.
     pub fn add_tab(&mut self, caption: &str) -> u32 {
@@ -83,14 +83,14 @@ impl Tab {
         self.pages.push(Caption::new(caption, ExtractHotKeyMethod::AltPlusKey));
         idx
     }
-    
+
     /// Ads a new control to a tab page that is specified by the index.
     /// If the tab index is out of bounds, the function returns `Handle::None`. Otherwise, it returns a handle to the newly created control.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut tab = Tab::new(Layout::new("x:1,y:1,w:20,h:10"), tab::Flags::TabsBar);
     /// let idx = tab.add_tab("Tab 1");
     /// let handle = tab.add(idx, Button::new("Button 1", Layout::new("x:1,y:1,w:20,h:1"), button::Type::Flat));
@@ -112,7 +112,7 @@ impl Tab {
             Handle::None
         }
     }
-    
+
     /// Returns the current tab index or `None` if there are no tabs added.
     #[inline(always)]
     pub fn current_tab(&self) -> Option<usize> {
@@ -123,7 +123,7 @@ impl Tab {
             None
         }
     }
-    
+
     /// Sets the current tab to the specified index.
     /// The index must be valid and the control must be enabled and visible to receive input.
     pub fn set_current_tab(&mut self, index: usize) {
@@ -146,13 +146,13 @@ impl Tab {
             }
         }
     }
-    
+
     /// Returns the width of the tabs.
     #[inline]
     pub fn tab_width(&self) -> u8 {
         self.tab_width
     }
-    
+
     /// Sets the width of the tabs. The width must be between 3 and 32 characters.
     /// If the width is out of bounds, the function does nothing.
     pub fn set_tab_width(&mut self, width: u8) {
@@ -162,7 +162,7 @@ impl Tab {
             self.request_update();
         }
     }
-    
+
     /// Returns the caption of the tab at the specified index or `None` if the index is out of bounds.
     #[inline]
     pub fn tab_caption(&self, index: usize) -> Option<&str> {
@@ -172,7 +172,7 @@ impl Tab {
             None
         }
     }
-    
+
     /// Sets the caption of the tab at the specified index.
     /// The caption can contain a hotkey, which is indicated by an ampersand (&) before the character.
     /// If the index is out of bounds, the function does nothing.

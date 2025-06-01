@@ -6618,13 +6618,12 @@ fn check_autoresize_percentage() {
         v3: 0.5,
         v4: 0.9999,
         v5: 0.625,
-        v6: 0.0625
+        v6: 0.0625,
     });
     w.add(l);
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_autoresize_date_time() {
@@ -6643,7 +6642,7 @@ fn check_autoresize_date_time() {
         #[Column(name: "V6", width: 3, align: Left, render: Date, format: YearMonthDay)]
         v6: chrono::NaiveDate,
         #[Column(name: "V6", width: 3, align: Left, render: Date, format: DayMonthYear)]
-        v7: chrono::NaiveDate,        
+        v7: chrono::NaiveDate,
     }
 
     let script = "
@@ -6670,7 +6669,7 @@ fn check_autoresize_date_time() {
         v4: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
         v5: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(),
         v6: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(),
-        v7: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap()
+        v7: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(),
     });
     w.add(l);
     a.add_window(w);

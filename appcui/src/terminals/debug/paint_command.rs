@@ -14,9 +14,7 @@ impl PaintCommand {
                 title: String::from(parser.get_param(0).unwrap()),
             })
         } else {
-            Ok(Self {
-                title: String::new(),
-            })
+            Ok(Self { title: String::new() })
         }
     }
     pub(super) fn get_title(&self) -> &str {

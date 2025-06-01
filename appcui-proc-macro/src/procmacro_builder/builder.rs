@@ -272,7 +272,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericNumericSelectorEvents => code.push_str(generate_numeric_selector_events(&mut a).as_str()),
                         AppCUITrait::GenericListViewEvents => code.push_str(generate_listview_events(&mut a).as_str()),
                         AppCUITrait::GenericTreeViewEvents => code.push_str(generate_treeview_events(&mut a).as_str()),
-                        AppCUITrait::GenericBackgroundTaskEvents=> code.push_str(generate_backgroundtask_events(&mut a).as_str()),
+                        AppCUITrait::GenericBackgroundTaskEvents => code.push_str(generate_backgroundtask_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

@@ -1,6 +1,6 @@
+use super::{Root, RootType};
 use libc::statvfs;
 use std::{fs::File, io::BufRead, io::BufReader};
-use super::{RootType, Root};
 
 pub(super) fn get_os_roots() -> Vec<Root> {
     let mut roots = Vec::new();

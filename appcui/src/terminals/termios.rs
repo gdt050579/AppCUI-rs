@@ -1,6 +1,6 @@
-mod terminal;
 mod input;
 mod size_reader;
+mod terminal;
 
 mod api;
 

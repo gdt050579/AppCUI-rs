@@ -24,4 +24,4 @@ impl Type {
             Type::Diamond => "◇",
         }
     }
-} 
+}

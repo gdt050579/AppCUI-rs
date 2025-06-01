@@ -4,7 +4,6 @@ const CELSIUS: FormatNumber = FormatNumber::new(10).decimals(1).suffix("°C");
 const FAHRENHEIT: FormatNumber = FormatNumber::new(10).decimals(1).suffix("°F");
 const KELVIN: FormatNumber = FormatNumber::new(10).decimals(1).suffix("°K");
 
-
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum TemperatureFormat {
     Celsius,
@@ -21,4 +20,3 @@ impl TemperatureFormat {
         }
     }
 }
-

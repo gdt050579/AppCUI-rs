@@ -502,14 +502,11 @@ fn check_has_selection_and_count_with_mouse() {
         fn remove_items(&mut self) {
             let h = self.dropdownlist_handle;
             if let Some(ddl) = self.control_mut(h) {
-                let v = vec![
-                    ddl.item(0).unwrap().clone(),
-                    ddl.item(2).unwrap().clone(),
-                ];
+                let v = vec![ddl.item(0).unwrap().clone(), ddl.item(2).unwrap().clone()];
                 ddl.clear();
                 for item in v {
                     ddl.add(item);
-                }            
+                }
             }
             self.update_info_label();
         }
@@ -569,7 +566,7 @@ fn check_item_and_item_mut_methods() {
                 value,
             }
         }
-        
+
         fn update_value(&mut self, new_value: f32) {
             self.value = new_value;
         }
@@ -579,7 +576,7 @@ fn check_item_and_item_mut_methods() {
         fn name(&self) -> &str {
             &self.name
         }
-        
+
         fn description(&self) -> &str {
             ""
         }
@@ -605,13 +602,13 @@ fn check_item_and_item_mut_methods() {
         Paint('Try to access items from empty list')   
         CheckHash(0x6D4AE24F419E4FE1)
     ";
-    
+
     #[Window(events=CommandBarEvents,commands:A+B+C+D+E, internal:true)]
     struct MyWin {
         dropdownlist_handle: Handle<DropDownList<ItemTest>>,
         output_handle: Handle<Label>,
     }
-    
+
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
@@ -619,53 +616,51 @@ fn check_item_and_item_mut_methods() {
                 dropdownlist_handle: Handle::None,
                 output_handle: Handle::None,
             };
-            
+
             let mut ddl = DropDownList::<ItemTest>::new(Layout::new("x:1,y:1,w:60"), dropdownlist::Flags::None);
-            
+
             // Add initial items
             ddl.add(ItemTest::new(1, "Item One", 10.5));
             ddl.add(ItemTest::new(2, "Item Two", 20.7));
             ddl.add(ItemTest::new(3, "Item Three", 30.2));
-            
+
             // Create a label to display results
             let l = Label::new("", Layout::new("x:1,y:3,w:76,h:10"));
-            
+
             w.dropdownlist_handle = w.add(ddl);
             w.output_handle = w.add(l);
-            
+
             // Update the info label with initial values
             w.update_info();
-            
+
             w
         }
-        
+
         fn update_info(&mut self) {
             let h = self.dropdownlist_handle;
             let mut info_text = String::new();
-            
+
             if let Some(ddl) = self.control(h) {
                 // Get count information
                 let count = ddl.count();
                 info_text.push_str(&format!("Total items: {}\n\n", count));
-                
+
                 // Show all items if any
                 if count > 0 {
                     info_text.push_str("Items:\n");
                     for i in 0..count {
                         if let Some(item) = ddl.item(i) {
-                            info_text.push_str(&format!("  [{}] {} (value: {:.2})\n", 
-                                item.id, item.name, item.value));
+                            info_text.push_str(&format!("  [{}] {} (value: {:.2})\n", item.id, item.name, item.value));
                         }
                     }
                 } else {
                     info_text.push_str("No items in the list.\n");
                 }
-                
+
                 // Get selection information
                 if ddl.has_selection() {
                     if let Some(selected) = ddl.selected_item() {
-                        info_text.push_str(&format!("\nSelected: {} (ID: {})", 
-                            selected.name, selected.id));
+                        info_text.push_str(&format!("\nSelected: {} (ID: {})", selected.name, selected.id));
                     }
                 } else {
                     info_text.push_str("\nNo item is selected.");
@@ -673,14 +668,14 @@ fn check_item_and_item_mut_methods() {
             } else {
                 info_text = "Error: DropDownList not found".to_string();
             }
-            
+
             // Update the label
             let h = self.output_handle;
             if let Some(label) = self.control_mut(h) {
                 label.set_caption(&info_text);
             }
         }
-        
+
         // Modify first item using item_mut
         fn modify_first_item(&mut self) {
             let h = self.dropdownlist_handle;
@@ -693,73 +688,75 @@ fn check_item_and_item_mut_methods() {
             }
             self.update_info();
         }
-        
+
         // Examine all items by index and show detailed info
         fn examine_items_by_index(&mut self) {
             let h = self.dropdownlist_handle;
-            
+
             let mut output = String::new();
             output.push_str("Examining items by index:\n");
-            
+
             if let Some(ddl) = self.control(h) {
                 let count = ddl.count();
-                
+
                 for i in 0..count {
                     if let Some(item) = ddl.item(i) {
-                        output.push_str(&format!("Item at index {}: {} (ID: {}, Value: {:.2})\n", 
-                            i, item.name, item.id, item.value));
+                        output.push_str(&format!(
+                            "Item at index {}: {} (ID: {}, Value: {:.2})\n",
+                            i, item.name, item.id, item.value
+                        ));
                     } else {
                         output.push_str(&format!("Item at index {}: None (should not happen)\n", i));
                     }
                 }
             }
-            
+
             let h = self.output_handle;
             if let Some(label) = self.control_mut(h) {
                 label.set_caption(&output);
             }
         }
-        
+
         // Try to access out-of-bounds items
         fn test_out_of_bounds_access(&mut self) {
             let h = self.dropdownlist_handle;
-            
+
             let mut output = String::new();
             output.push_str("Testing out-of-bounds access:\n\n");
-            
+
             if let Some(ddl) = self.control_mut(h) {
                 let count = ddl.count();
-                
+
                 // Try to access at valid index
                 match ddl.item(0) {
                     Some(item) => output.push_str(&format!("item(0): Some({}) - Valid\n", item.name)),
                     None => output.push_str("item(0): None - Invalid\n"),
                 }
-                
+
                 // Try to access at out-of-bounds index
                 match ddl.item(count) {
                     Some(_) => output.push_str(&format!("item({}): Some - Invalid\n", count)),
                     None => output.push_str(&format!("item({}): None - Correctly returns None\n", count)),
                 }
-                
+
                 // Try to access at another out-of-bounds index
                 match ddl.item(99) {
                     Some(_) => output.push_str("item(99): Some - Invalid\n"),
                     None => output.push_str("item(99): None - Correctly returns None\n"),
                 }
-                
+
                 // Same with item_mut (we can't easily display the result directly)
                 output.push_str(&format!("\nitem_mut(0) exists: {}\n", ddl.item_mut(0).is_some()));
                 output.push_str(&format!("item_mut({}) exists: {}\n", count, ddl.item_mut(count).is_some()));
                 output.push_str(&format!("item_mut(99) exists: {}\n", ddl.item_mut(99).is_some()));
             }
-            
+
             let h = self.output_handle;
             if let Some(label) = self.control_mut(h) {
                 label.set_caption(&output);
             }
         }
-        
+
         // Clear all items
         fn clear_items(&mut self) {
             let h = self.dropdownlist_handle;
@@ -768,52 +765,52 @@ fn check_item_and_item_mut_methods() {
             }
             self.update_info();
         }
-        
+
         // Try to access items from an empty list
         fn test_empty_list_access(&mut self) {
             let h = self.dropdownlist_handle;
-            
+
             let mut output = String::new();
             output.push_str("Testing empty list access:\n\n");
-            
+
             if let Some(ddl) = self.control_mut(h) {
                 output.push_str(&format!("List is empty: {}\n", ddl.count() == 0));
-                
+
                 // Test selected_item on empty list
                 match ddl.selected_item() {
                     Some(_) => output.push_str("selected_item(): Some - Invalid\n"),
                     None => output.push_str("selected_item(): None - Correctly returns None\n"),
                 }
-                
+
                 // Test selected_item_mut on empty list
                 match ddl.selected_item_mut() {
                     Some(_) => output.push_str("selected_item_mut(): Some - Invalid\n"),
                     None => output.push_str("selected_item_mut(): None - Correctly returns None\n"),
                 }
-                
+
                 // Test item on empty list
                 match ddl.item(0) {
                     Some(_) => output.push_str("item(0): Some - Invalid\n"),
                     None => output.push_str("item(0): None - Correctly returns None\n"),
                 }
-                
+
                 // Test item_mut on empty list
                 match ddl.item_mut(0) {
                     Some(_) => output.push_str("item_mut(0): Some - Invalid\n"),
                     None => output.push_str("item_mut(0): None - Correctly returns None\n"),
                 }
-                
+
                 // Test has_selection on empty list
                 output.push_str(&format!("\nhas_selection(): {} - Should be false", ddl.has_selection()));
             }
-            
+
             let h = self.output_handle;
             if let Some(label) = self.control_mut(h) {
                 label.set_caption(&output);
             }
         }
     }
-    
+
     impl CommandBarEvents for MyWin {
         fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
             commandbar.set(key!("F1"), "Modify First", mywin::Commands::A);
@@ -822,7 +819,7 @@ fn check_item_and_item_mut_methods() {
             commandbar.set(key!("F4"), "Clear Items", mywin::Commands::D);
             commandbar.set(key!("F5"), "Test Empty", mywin::Commands::E);
         }
-        
+
         fn on_event(&mut self, command_id: mywin::Commands) {
             match command_id {
                 mywin::Commands::A => self.modify_first_item(),
@@ -833,7 +830,7 @@ fn check_item_and_item_mut_methods() {
             }
         }
     }
-    
+
     let mut a = App::debug(80, 18, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();

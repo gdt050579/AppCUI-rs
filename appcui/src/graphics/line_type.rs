@@ -102,7 +102,7 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
         vertical_on_left: '\u{2502}',
         horizontal: '\u{2500}',
         vertical: '\u{2502}',
-    },    
+    },
 ];
 
 /// LineType is an enum that represents the type of line to be drawn (single, double, thick, etc)

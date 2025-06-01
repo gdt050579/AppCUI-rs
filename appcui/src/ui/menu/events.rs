@@ -1,4 +1,4 @@
-use super::{MenuBar, Menu, CheckBox, Command, SingleChoice};
+use super::{CheckBox, Command, Menu, MenuBar, SingleChoice};
 
 /// A trait that defines the event handlers for menu-related interactions.
 ///
@@ -15,7 +15,7 @@ pub trait GenericMenuEvents {
     /// # Parameters
     /// * `menu` - A mutable reference to the menu being opened.
     fn on_menu_open(&self, _menu: &mut Menu) {}
-    
+
     /// Called when a command menu item is activated.
     ///
     /// # Parameters
@@ -23,7 +23,7 @@ pub trait GenericMenuEvents {
     /// * `item` - A handle to the command that was activated.
     /// * `command` - The command identifier associated with the menu item.
     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<Command>, _command: u32) {}
-    
+
     /// Called when a checkbox menu item's state changes.
     ///
     /// # Parameters
@@ -32,7 +32,7 @@ pub trait GenericMenuEvents {
     /// * `command` - The command identifier associated with the menu item.
     /// * `checked` - The new checked state of the checkbox.
     fn on_check(&mut self, _menu: Handle<Menu>, _item: Handle<CheckBox>, _command: u32, _checked: bool) {}
-    
+
     /// Called when a single choice menu item is selected.
     ///
     /// # Parameters
@@ -40,7 +40,7 @@ pub trait GenericMenuEvents {
     /// * `item` - A handle to the single choice item that was selected.
     /// * `command` - The command identifier associated with the menu item.
     fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<SingleChoice>, _command: u32) {}
-    
+
     /// Called when the menu bar needs to be updated.
     ///
     /// This method is used to add registered menus to the menu bar.
@@ -54,7 +54,7 @@ pub trait GenericMenuEvents {
 
 use crate::system::Handle;
 
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub(crate) struct MenuCommandEvent {
     pub(crate) command_id: u32,
     pub(crate) menu: Handle<Menu>,
@@ -62,7 +62,7 @@ pub(crate) struct MenuCommandEvent {
     pub(crate) control_receiver_handle: Handle<()>,
 }
 
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub(crate) struct MenuCheckBoxStateChangedEvent {
     pub(crate) command_id: u32,
     pub(crate) menu: Handle<Menu>,
@@ -71,7 +71,7 @@ pub(crate) struct MenuCheckBoxStateChangedEvent {
     pub(crate) control_receiver_handle: Handle<()>,
 }
 
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub(crate) struct MenuRadioBoxSelectedEvent {
     pub(crate) command_id: u32,
     pub(crate) menu: Handle<Menu>,
@@ -87,15 +87,15 @@ pub(crate) enum MenuEvent {
     SingleChoiceSelected(MenuRadioBoxSelectedEvent),
 }
 
-pub (crate) enum MousePressedMenuResult {
+pub(crate) enum MousePressedMenuResult {
     None,
     Repaint,
-    CheckParent,    
-    Activate
+    CheckParent,
+    Activate,
 }
-pub (crate) enum MouseMoveMenuResult {
+pub(crate) enum MouseMoveMenuResult {
     ProcessedAndRepaint,
     RepaintAndPass,
-    ProcessWithoutRepaint,    
-    Ignored
+    ProcessWithoutRepaint,
+    Ignored,
 }

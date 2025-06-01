@@ -65,6 +65,6 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             cb.add_line(format!("control.set_backgound({});", s).as_str());
         }
     }
-    cb.add_scroll_margin_setup("lsm","tsm");
+    cb.add_scroll_margin_setup("lsm", "tsm");
     cb.into()
 }

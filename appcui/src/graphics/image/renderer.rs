@@ -1,15 +1,18 @@
-use super::{super::{Character, Color, Image, SpecialChar, Surface}, Pixel};
+use super::{
+    super::{Character, Color, Image, SpecialChar, Surface},
+    Pixel,
+};
 
 /// The type of renderer to use for rendering the image.
-/// 
+///
 /// This enum defines the different rendering methods available for images.
 /// Each variant represents a specific rendering style:
-/// 
+///
 /// - `SmallBlocks`: Renders the image using small blocks.
 /// - `LargeBlocks64Colors`: Renders the image using large blocks with 64 colors.
 /// - `GrayScale`: Renders the image using a grayscale palette.
 /// - `AsciiArt`: Renders the image using ASCII characters.
-/// 
+///
 /// The `RendererType` enum is used to select the rendering method for an image.
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -59,7 +62,7 @@ impl Renderer {
         }
     }
 
-    fn render_with_large_block(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: fn(p: Pixel)->Character) {
+    fn render_with_large_block(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: fn(p: Pixel) -> Character) {
         let w = img.width();
         let h = img.height();
         let mut img_y = 0u32;
@@ -81,14 +84,13 @@ impl Renderer {
         }
     }
 
-
     pub(crate) fn render_with_large_blocks_64(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32) {
-        Renderer::render_with_large_block(surface,img,x,y,rap,|p| p.as_character());
+        Renderer::render_with_large_block(surface, img, x, y, rap, |p| p.as_character());
     }
     pub(crate) fn render_with_gray_scale(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32) {
-        Renderer::render_with_large_block(surface,img,x,y,rap,|p| p.as_gray_scale_character());
+        Renderer::render_with_large_block(surface, img, x, y, rap, |p| p.as_gray_scale_character());
     }
     pub(crate) fn render_ascii_art(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32) {
-        Renderer::render_with_large_block(surface,img,x,y,rap,|p| p.as_ascii_art());
+        Renderer::render_with_large_block(surface, img, x, y, rap, |p| p.as_ascii_art());
     }
 }

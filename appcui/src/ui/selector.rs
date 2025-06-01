@@ -3,12 +3,12 @@
 //! The Selector control provides a specialized interface for selecting items organized in categories.
 //! It displays a scrollable list with grouping capabilities and supports keyboard navigation.
 
-mod selector;
-mod initialization_flags;
 pub mod events;
+mod initialization_flags;
+mod selector;
 #[cfg(test)]
 mod tests;
 
-pub use self::selector::Selector;
-pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::EnumSelector;
+pub use self::initialization_flags::Flags;
+pub use self::selector::Selector;

@@ -2,12 +2,13 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 use crate::{
     graphics::{Character, SpecialChar, Surface, TextFormat},
     input::{Key, KeyCode},
+    prelude::RuntimeManager,
+    system::Handle,
     system::MenuTheme,
     ui::common::traits::CommandID,
+    ui::menu::Menu,
     utils::Caption,
     utils::ExtractHotKeyMethod,
-    ui::menu::Menu,
-    system::Handle, prelude::RuntimeManager
 };
 
 /// A single choice menu item that represents one option in a group.
@@ -50,23 +51,23 @@ use crate::{
 ///         
 ///         // Add single choice items with the medium option initially selected
 ///         w.text_size_small = text_size_menu.add(menu::SingleChoice::new(
-///             "&Small", 
-///             Key::None, 
-///             mywindow::Commands::TextSize_Small, 
+///             "&Small",
+///             Key::None,
+///             mywindow::Commands::TextSize_Small,
 ///             false // not initially selected
 ///         ));
 ///         
 ///         w.text_size_medium = text_size_menu.add(menu::SingleChoice::new(
-///             "&Medium", 
-///             Key::None, 
-///             mywindow::Commands::TextSize_Medium, 
+///             "&Medium",
+///             Key::None,
+///             mywindow::Commands::TextSize_Medium,
 ///             true // initially selected
 ///         ));
 ///         
 ///         w.text_size_large = text_size_menu.add(menu::SingleChoice::new(
-///             "&Large", 
-///             Key::None, 
-///             mywindow::Commands::TextSize_Large, 
+///             "&Large",
+///             Key::None,
+///             mywindow::Commands::TextSize_Large,
 ///             false // not initially selected
 ///         ));
 ///         
@@ -123,7 +124,7 @@ use crate::{
 /// }
 ///
 /// impl MenuEvents for MyWindow {
-///     fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<menu::SingleChoice>, 
+///     fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<menu::SingleChoice>,
 ///                 command: mywindow::Commands) {
 ///         match command {
 ///             mywindow::Commands::TextSize_Small => {
@@ -146,7 +147,7 @@ pub struct SingleChoice {
     pub(super) caption: Caption,
     pub(super) shortcut: Key,
     pub(super) menu_handle: Handle<Menu>,
-    pub(super) handle: Handle<SingleChoice>
+    pub(super) handle: Handle<SingleChoice>,
 }
 impl SingleChoice {
     /// Creates a new single choice menu item.
@@ -176,7 +177,7 @@ impl SingleChoice {
             menu_handle: Handle::None,
         }
     }
-    
+
     /// Sets a new caption for the single choice item.
     ///
     /// # Parameters
@@ -186,7 +187,7 @@ impl SingleChoice {
     pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, ExtractHotKeyMethod::Key);
     }
-    
+
     /// Returns the current caption text of the single choice item.
     ///
     /// # Returns
@@ -195,7 +196,7 @@ impl SingleChoice {
     pub fn caption(&self) -> &str {
         self.caption.text()
     }
-    
+
     /// Checks if the single choice item is enabled.
     ///
     /// # Returns
@@ -204,7 +205,7 @@ impl SingleChoice {
     pub fn is_enabled(&self) -> bool {
         self.enabled
     }
-    
+
     /// Enables or disables the single choice item.
     ///
     /// # Parameters
@@ -213,7 +214,7 @@ impl SingleChoice {
     pub fn set_enabled(&mut self, value: bool) {
         self.enabled = value;
     }
-    
+
     /// Checks if the single choice item is currently selected.
     ///
     /// # Returns
@@ -222,7 +223,7 @@ impl SingleChoice {
     pub fn is_selected(&self) -> bool {
         self.selected
     }
-    
+
     /// Selects this single choice item and deselects others in the same group.
     ///
     /// This method should only be called after the item has been added to a menu.
@@ -243,7 +244,7 @@ impl SingleChoice {
             menu.select_single_choice(index);
         }
     }
-    
+
     /// Returns the keyboard shortcut associated with the single choice item.
     ///
     /// # Returns
@@ -252,16 +253,19 @@ impl SingleChoice {
     pub fn shortcut(&self) -> Key {
         self.shortcut
     }
-    
+
     /// Sets a new keyboard shortcut for the single choice item.
     ///
     /// # Parameters
     /// * `shortcut` - The new shortcut to set.
     #[inline(always)]
-    pub fn set_shortcut<T>(&mut self, shortcut: T) where Key: From<T>, {
+    pub fn set_shortcut<T>(&mut self, shortcut: T)
+    where
+        Key: From<T>,
+    {
         self.shortcut = Key::from(shortcut)
     }
-    
+
     pub(super) fn paint(&self, surface: &mut Surface, format: &mut TextFormat, width: u16, current_item: bool, color: &MenuTheme) {
         super::utils::update_format_with_caption(&self.caption, format, self.enabled, current_item, color);
         if current_item && self.enabled {

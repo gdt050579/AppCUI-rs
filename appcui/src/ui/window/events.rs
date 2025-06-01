@@ -1,10 +1,10 @@
 //! Events for windows and modal windows
-//! 
+//!
 //! This module contains the traits and methods for handling events from windows and modal windows.
-//! 
+//!
 //! It includes traits for handling events from windows and modal windows, such as:
 //! - WindowEvents
-//! - ModalWindowEvents 
+//! - ModalWindowEvents
 //! - ToolBarEvents
 
 use super::toolbar::{Button, CheckBox, SingleChoice};
@@ -15,13 +15,13 @@ use crate::{graphics::Rect, prelude::ActionRequest, system::Handle, ui::common::
 pub trait WindowEvents {
     // don't need to change anything --> since layout has been change, repaint wil be force automatically
     fn on_layout_changed(&mut self, _old_layout: Rect, _new_layout: Rect) {}
-    
+
     /// called whenver the window receives focus
     fn on_activate(&mut self) {}
 
-    /// called whenever the window loses focus. 
+    /// called whenever the window loses focus.
     fn on_deactivate(&mut self) {}
-    
+
     /// called whenever the ENTER key is intercepted by the Window
     /// For modal windows the behavior should be to use `.exit_with(...)` method to exit.
     /// for a regular (non-modal) window this callback is never called)
@@ -29,11 +29,11 @@ pub trait WindowEvents {
 
     /// called whenever the ESC key is interpreted by the Window
     /// ## For a modal window
-    /// 
-    /// If this function returns 'ActionRequest::Allow' it will translate into a call to `ModalWindow::exit()` method. 
+    ///
+    /// If this function returns 'ActionRequest::Allow' it will translate into a call to `ModalWindow::exit()` method.
     /// If the returned value is `ActionRequest::Deny` the nothing happens and any `exit()` or `exit_with(...)` methods call will be disregarded.
     /// **OBS**: As a general rule, if should not attempt to close the modal window during this function
-    /// 
+    ///
     /// ## For a regular (non-modal) window
     /// This method is called when the user hits the **close button** or when ESC key is iterpreted by the Window
     /// If this function returns 'ActionRequest::Allow' the window will be closed (and removed from the desktop).
@@ -70,7 +70,7 @@ pub trait ToolBarEvents {
     fn on_button_clicked(&mut self, _handle: Handle<Button>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    
+
     /// Called when a toolbar checkbox is clicked, changing its checked state.
     ///
     /// # Parameters
@@ -85,7 +85,7 @@ pub trait ToolBarEvents {
     fn on_checkbox_clicked(&mut self, _handle: Handle<CheckBox>, _checked: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    
+
     /// Called when a toolbar single choice item is selected.
     ///
     /// # Parameters
@@ -105,9 +105,9 @@ pub trait ToolBarEvents {
 ///
 /// This trait defines methods for showing, exiting, and returning results from modal windows.
 /// Modal windows capture the entire focus during their existence and can return a result when closed.
-/// 
+///
 /// The type parameter `T` represents the result type that the modal window will return.
-/// 
+///
 /// When implementing a modal window, this trait is automatically implemented by the `#[ModalWindow]` macro,
 /// so you typically don't need to implement it manually.
 pub trait ModalWindowMethods<T> {
@@ -122,7 +122,7 @@ pub trait ModalWindowMethods<T> {
     /// * `Some(T)` if the window was closed with a result via `exit_with()`
     /// * `None` if the window was closed via `exit()` or `close()`
     fn show(self) -> Option<T>;
-    
+
     /// Exits the modal window and returns the specified result.
     ///
     /// This method closes the modal window and makes `show()` return `Some(result)` with
@@ -132,12 +132,12 @@ pub trait ModalWindowMethods<T> {
     ///
     /// * `result` - The value to return from the modal window
     fn exit_with(&mut self, result: T);
-    
+
     /// Exits the modal window without a result.
     ///
     /// This method closes the modal window and makes `show()` return `None`.
     fn exit(&mut self);
-    
+
     /// Alias for `exit()` that closes the modal window without a result.
     ///
     /// This method has the same effect as `exit()`, closing the modal window and making

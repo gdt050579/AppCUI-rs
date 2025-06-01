@@ -1,4 +1,4 @@
-use super::{ThreeStateBox, State};
+use super::{State, ThreeStateBox};
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 
 pub trait ThreeStateBoxEvents {

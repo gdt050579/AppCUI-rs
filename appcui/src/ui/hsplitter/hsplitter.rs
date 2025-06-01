@@ -34,11 +34,11 @@ impl HSplitter {
     /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when resizing the control
     /// * `ResizeBehavior::PreserveTopPanelSize` - the size of the top panel is preserved when resizing the control
     /// * `ResizeBehavior::PreserveBottomPanelSize` - the size of the bottom panel is preserved when resizing the control
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut vs = HSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));

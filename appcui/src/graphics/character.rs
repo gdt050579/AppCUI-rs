@@ -11,7 +11,6 @@ static UNICODE_CODES: [char; 48] = [
     '\u{25CF}', '\u{25CB}', '\u{221A}', '\u{2261}', '\u{205E}', '\u{2026}', // symbols
     '\u{251C}', '\u{252C}', '\u{2524}', '\u{2534}', // middle single line box
     '\u{2594}', '\u{2587}', '\u{2595}', '\u{2581}', // middle single line box
-    
 ];
 
 /// A special character set used for drawing boxes, arrows, and other graphical elements in a terminal or console application.
@@ -88,7 +87,6 @@ impl From<SpecialChar> for char {
     }
 }
 
-
 /// Represents a character with its attributes, including foreground and background colors, and flags.
 /// The `Character` struct is used to define a character that can be displayed on the screen.
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
@@ -101,14 +99,14 @@ pub struct Character {
 impl Character {
     /// Creates a new character with the specified code, foreground color, background color, and flags.
     /// The code could be of type `char` or a SpecialChar.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
     /// let ch = Character::new('A', Color::Red, Color::Black, CharFlags::None);
-    /// let special_ch = Character::new(SpecialChar::BoxTopLeftCornerDoubleLine, 
-    ///                                 Color::Green, 
-    ///                                 Color::Black, 
+    /// let special_ch = Character::new(SpecialChar::BoxTopLeftCornerDoubleLine,
+    ///                                 Color::Green,
+    ///                                 Color::Black,
     ///                                 CharFlags::None);
     /// ```
     #[inline(always)]
@@ -149,11 +147,11 @@ impl Character {
     /// Creates a new character with the specified foreground and background colors.
     /// The code is set to the null character ('\0') - meaning that it will not overwrite the existing character when displayed on the surface.
     /// The flags are set to None.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let ch = Character::with_color(Color::Red, Color::Black);
     /// ```
     #[inline(always)]
@@ -168,11 +166,11 @@ impl Character {
 
     /// Creates a new character with the specified code (a char or a SpecialChar) and attributes.
     /// The foreground and background colors are set to the values specified in the `CharAttribute` struct.
-    /// 
+    ///
     /// # Example
     /// ```rust
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let attr = CharAttribute::new(Color::Red, Color::Black, CharFlags::None);
     /// let ch = Character::with_attributes('A', attr);
     /// let special_ch = Character::with_attributes(SpecialChar::BoxTopLeftCornerDoubleLine, attr);
@@ -191,7 +189,7 @@ impl Character {
     }
 
     /// Sets an character based on the provided `Character` instance.
-    /// The code, foreground color, and background color are updated only if they are not set to the default values 
+    /// The code, foreground color, and background color are updated only if they are not set to the default values
     /// Foe example, the character code is only set if the **ch** argument is not 0.
     /// Similarly, if the background or foreground colors are not set to `Color::Transparent`, they will be updated.
     /// The flags are always updated.

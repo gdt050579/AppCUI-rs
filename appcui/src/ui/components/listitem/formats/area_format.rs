@@ -11,7 +11,6 @@ const INP: FormatNumber = FormatNumber::new(10).suffix(" in²").group(3, b',');
 const YDP: FormatNumber = FormatNumber::new(10).suffix(" yd²").group(3, b',');
 const MIP: FormatNumber = FormatNumber::new(10).suffix(" mi²").group(3, b',');
 
-
 // m2, cm2, km2, ha, a, ft2, in2, yd2, mi2
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum AreaFormat {
@@ -39,7 +38,7 @@ impl AreaFormat {
             AreaFormat::SquareFeet => FTP.write_number(value, output),
             AreaFormat::SquareInches => INP.write_number(value, output),
             AreaFormat::SquareYards => YDP.write_number(value, output),
-            AreaFormat::SquareMiles => MIP.write_number(value, output),            
+            AreaFormat::SquareMiles => MIP.write_number(value, output),
         }
     }
 }

@@ -301,7 +301,6 @@ fn check_clipboard_api() {
     a.run();
 }
 
-
 #[test]
 fn check_clipboard_api_without_app_initialization() {
     Clipboard::set_text("Hello, world!");
@@ -356,4 +355,3 @@ fn check_create_app_with_default_terminal() {
 fn check_create_app_with_windows_terminal() {
     let _ = App::with_terminal(crate::terminals::TerminalType::WindowsConsole).build();
 }
-

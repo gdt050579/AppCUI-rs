@@ -1,4 +1,4 @@
-#[derive(Copy,Clone,Eq,PartialEq,)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub(crate) enum BaseControlType {
     Window,
     Desktop,
@@ -6,7 +6,7 @@ pub(crate) enum BaseControlType {
     CustomControl,
 }
 impl BaseControlType {
-    pub (crate) fn as_string(&self) -> String {
+    pub(crate) fn as_string(&self) -> String {
         String::from(match self {
             BaseControlType::Window => "Window",
             BaseControlType::Desktop => "Desktop",

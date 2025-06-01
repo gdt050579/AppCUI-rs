@@ -1,4 +1,3 @@
-
 /// Represents a size (width and height) of a rectangle.
 #[derive(Copy, Clone, PartialEq, Debug, Eq, Default)]
 pub struct Size {
@@ -20,7 +19,7 @@ impl Size {
     /// let reduced_size = size.reduce_by(3);
     /// assert_eq!(reduced_size.width, 7);
     /// assert_eq!(reduced_size.height, 7);
-    /// 
+    ///
     /// // Reduce the size by 100 (since 100 is greater than
     /// // the width and height, the result will be 0)
     /// let reduced_size_zero = size.reduce_by(100);

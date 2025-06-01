@@ -20,19 +20,19 @@ pub enum TimeFormat {
 pub enum DateFormat {
     Full,
     YearMonthDay,
-    DayMonthYear
+    DayMonthYear,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum DurationFormat {
     Auto,
     Seconds,
-    Details
+    Details,
 }
 
 const SECONDS: FormatNumber = FormatNumber::new(10).suffix(" sec");
 impl DurationFormat {
-    pub (crate) fn seconds<'a>(value: &Duration, output: &'a mut [u8]) -> Option<&'a str> {
+    pub(crate) fn seconds<'a>(value: &Duration, output: &'a mut [u8]) -> Option<&'a str> {
         SECONDS.write_number(value.num_seconds(), output)
     }
 }

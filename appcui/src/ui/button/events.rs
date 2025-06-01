@@ -1,5 +1,5 @@
-use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::Button;
+use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 
 pub trait ButtonEvents {
     fn on_pressed(&mut self, _handle: Handle<Button>) -> EventProcessStatus {

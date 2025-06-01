@@ -1,5 +1,5 @@
-use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::Markdown;
+use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 
 pub trait MarkdownEvents {
     fn on_external_link(&mut self, _handle: Handle<Markdown>, _link: &str) -> EventProcessStatus {
@@ -18,5 +18,5 @@ pub(crate) enum Data {
 
 #[derive(Clone)]
 pub(crate) struct EventData {
-    pub(crate) event_type: Data
+    pub(crate) event_type: Data,
 }

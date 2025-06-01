@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use super::Entry;
 use super::NavSimulator;
-use crate::utils::{fs::entry::EntryType, Navigator, NavigatorEntry, NavigatorRoot};
 use crate::utils::fs::root::RootType;
+use crate::utils::{fs::entry::EntryType, Navigator, NavigatorEntry, NavigatorRoot};
 use chrono::NaiveDateTime;
 
 #[test]
@@ -134,7 +134,7 @@ fn check_simulator_exists() {
 #[test]
 fn check_roottype_creation() {
     assert_eq!(RootType::new("fixed"), Some(RootType::Fixed));
-    assert_eq!(RootType::new("disk"), Some(RootType::Fixed));       
+    assert_eq!(RootType::new("disk"), Some(RootType::Fixed));
     assert_eq!(RootType::new("d"), Some(RootType::Fixed));
     assert_eq!(RootType::new("D"), Some(RootType::Fixed));
     assert_eq!(RootType::new("f"), Some(RootType::Fixed));
@@ -144,7 +144,7 @@ fn check_roottype_creation() {
     assert_eq!(RootType::new("usb"), Some(RootType::Removable));
     assert_eq!(RootType::new("U"), Some(RootType::Removable));
     assert_eq!(RootType::new("u"), Some(RootType::Removable));
-    
+
     assert_eq!(RootType::new("network"), Some(RootType::Network));
     assert_eq!(RootType::new("net"), Some(RootType::Network));
     assert_eq!(RootType::new("n"), Some(RootType::Network));
@@ -155,7 +155,7 @@ fn check_roottype_creation() {
     assert_eq!(RootType::new("r"), Some(RootType::RamDisk));
     assert_eq!(RootType::new("R"), Some(RootType::RamDisk));
 
-    assert_eq!(RootType::new("cdrom"), Some(RootType::CdRom));  
+    assert_eq!(RootType::new("cdrom"), Some(RootType::CdRom));
     assert_eq!(RootType::new("cd"), Some(RootType::CdRom));
     assert_eq!(RootType::new("c"), Some(RootType::CdRom));
     assert_eq!(RootType::new("C"), Some(RootType::CdRom));
@@ -174,4 +174,4 @@ fn check_roottype_icon() {
     assert_eq!(RootType::RamDisk.icon(), '▦');
     assert_eq!(RootType::CdRom.icon(), '📀');
     assert_eq!(RootType::Unknown.icon(), '❓');
-}   
+}

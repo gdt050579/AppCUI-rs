@@ -1,17 +1,16 @@
 #[repr(u8)]
-#[derive(Copy,Clone)]
-pub (super) enum Parameter
-{
-    X      = 0,
-    Y      = 1,
-    Left   = 2,
-    Right  = 3,
-    Top    = 4,
+#[derive(Copy, Clone)]
+pub(super) enum Parameter {
+    X = 0,
+    Y = 1,
+    Left = 2,
+    Right = 3,
+    Top = 4,
     Bottom = 5,
-    Width  = 6,
+    Width = 6,
     Height = 7,
-    Align  = 8,
-    Dock   = 9,
+    Align = 8,
+    Dock = 9,
 }
 
 static HASH_TO_PARAMETER: [Option<Parameter>; 47] = [
@@ -64,7 +63,7 @@ static HASH_TO_PARAMETER: [Option<Parameter>; 47] = [
     None,
 ];
 
-static HASH_COLISION_VALIDATOR: [u64;47] = [
+static HASH_COLISION_VALIDATOR: [u64; 47] = [
     0x0,
     0xE117B24625D0110A,
     0x0,
@@ -122,4 +121,4 @@ impl Parameter {
         }
         HASH_TO_PARAMETER[entry_index]
     }
-}   
+}

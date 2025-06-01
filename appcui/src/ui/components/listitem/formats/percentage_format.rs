@@ -3,7 +3,6 @@ use crate::utils::FormatNumber;
 const PERCENTAGE_FORMAT: FormatNumber = FormatNumber::new(10).suffix("%");
 const PERCENTAGE_FORMAT_DIGITS: FormatNumber = FormatNumber::new(10).decimals(2).suffix("%");
 
-
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum PercentageFormat {
     Normal,
@@ -18,4 +17,3 @@ impl PercentageFormat {
         }
     }
 }
-

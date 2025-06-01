@@ -2,7 +2,7 @@ use crate::{
     graphics::{Character, SpecialChar, Surface, TextFormat},
     system::{Handle, MenuTheme, RuntimeManager},
     utils::Caption,
-    utils::ExtractHotKeyMethod
+    utils::ExtractHotKeyMethod,
 };
 
 use super::Menu;
@@ -41,20 +41,20 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 ///         
 ///         // Add items to the text style submenu
 ///         text_style_menu.add(menu::Command::new(
-///             "&Bold", 
-///             key!("Ctrl+B"), 
+///             "&Bold",
+///             key!("Ctrl+B"),
 ///             mywindow::Commands::BoldText
 ///         ));
 ///         
 ///         text_style_menu.add(menu::Command::new(
-///             "&Italic", 
-///             key!("Ctrl+I"), 
+///             "&Italic",
+///             key!("Ctrl+I"),
 ///             mywindow::Commands::ItalicText
 ///         ));
 ///         
 ///         text_style_menu.add(menu::Command::new(
-///             "&Underline", 
-///             key!("Ctrl+U"), 
+///             "&Underline",
+///             key!("Ctrl+U"),
 ///             mywindow::Commands::UnderlineText
 ///         ));
 ///         
@@ -107,7 +107,7 @@ impl SubMenu {
     /// # Returns
     /// A new `SubMenu` instance.
     pub fn new(menu: Menu) -> Self {
-        let mut caption = menu.caption.clone();        
+        let mut caption = menu.caption.clone();
         let handle = RuntimeManager::get().get_menus().add(menu);
         // submenu hotkey should be a letter while a menu hotkey shoult be Alt+Letter
         // as such, we will clear the Alt if it is set up
@@ -120,7 +120,7 @@ impl SubMenu {
             menu_handle: Handle::None,
         }
     }
-    
+
     /// Sets a new caption for the submenu.
     ///
     /// # Parameters
@@ -130,7 +130,7 @@ impl SubMenu {
     pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, ExtractHotKeyMethod::Key);
     }
-    
+
     /// Returns the current caption text of the submenu.
     ///
     /// # Returns
@@ -139,7 +139,7 @@ impl SubMenu {
     pub fn caption(&self) -> &str {
         self.caption.text()
     }
-    
+
     /// Checks if the submenu is enabled.
     ///
     /// # Returns
@@ -148,7 +148,7 @@ impl SubMenu {
     pub fn is_enabled(&self) -> bool {
         self.enabled
     }
-    
+
     /// Enables or disables the submenu.
     ///
     /// # Parameters

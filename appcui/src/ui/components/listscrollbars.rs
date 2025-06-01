@@ -1,7 +1,7 @@
-use super::scrollbars_components::ProcessEventResult;
-use super::searchbar::SearchBar;
 use super::scrollbars_components::HScrollBar;
+use super::scrollbars_components::ProcessEventResult;
 use super::scrollbars_components::VScrollBar;
+use super::searchbar::SearchBar;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::Theme;
@@ -92,17 +92,17 @@ impl ListScrollBars {
             self.vertical.set_value(vertical);
         }
     }
-    
+
     #[inline(always)]
     pub fn horizontal_index(&self) -> u64 {
         self.horizontal.value()
     }
-    
+
     #[inline(always)]
     pub fn vertical_index(&self) -> u64 {
         self.vertical.value()
     }
-    
+
     #[inline(always)]
     pub fn search_text(&self) -> &str {
         self.search.text()

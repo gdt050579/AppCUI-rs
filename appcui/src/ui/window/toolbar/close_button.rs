@@ -1,9 +1,9 @@
 use crate::{
     graphics::{Character, Surface},
-    system::{Handle, Theme}
+    system::{Handle, Theme},
 };
 
-use super::{AddToToolbar, PaintData, ItemBase, ToolBarItem, SymbolAttrState, Group};
+use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
 pub(crate) struct CloseButton {
     pub(super) base: ItemBase,
@@ -19,13 +19,7 @@ impl CloseButton {
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
-        surface.write_string(
-            self.base.get_left(),
-            self.base.get_y(),
-            "[ ]",
-            st.get_attr(theme, data.sep_attr),
-            false,
-        );
+        surface.write_string(self.base.get_left(), self.base.get_y(), "[ ]", st.get_attr(theme, data.sep_attr), false);
         surface.write_char(
             self.base.get_left() + 1,
             self.base.get_y(),

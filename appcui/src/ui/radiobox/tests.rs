@@ -244,7 +244,9 @@ fn check_radiobox_ascii_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
     w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Ascii,select:false"));
     w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Ascii,select:true"));
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Ascii,select:false, enabled:false"));
+    w.add(radiobox!(
+        "'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Ascii,select:false, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -261,7 +263,9 @@ fn check_radiobox_circle_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
     w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Circle,select:false"));
     w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Circle,select:true"));
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Circle,select:false, enabled:false"));
+    w.add(radiobox!(
+        "'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Circle,select:false, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -278,11 +282,12 @@ fn check_radiobox_diamond_mode() {
     let mut w = Window::new("Title", Layout::new("d:c,w:50,h:9"), window::Flags::None);
     w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Diamond,select:false"));
     w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Diamond,select:true"));
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"));
+    w.add(radiobox!(
+        "'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_radiobox_is_selected() {
@@ -300,7 +305,9 @@ fn check_radiobox_is_selected() {
     assert!(r2.is_selected());
     w.add(r1);
     w.add(r2);
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"));
+    w.add(radiobox!(
+        "'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"
+    ));
     a.add_window(w);
     a.run();
 }
@@ -321,7 +328,6 @@ fn check_radiobox_set_caption() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_radiobox_show_tooltip() {

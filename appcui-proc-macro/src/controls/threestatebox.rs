@@ -17,7 +17,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("threestatebox", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
     cb.init_control("ThreeStateBox::with_type");
-    cb.add_string_parameter("caption", None);  
+    cb.add_string_parameter("caption", None);
     cb.add_layout();
     cb.add_enum_parameter("state", "threestatebox::State", &STATE_TYPE, Some("Unknown"));
     cb.add_enum_parameter("type", "threestatebox::Type", &BOX_TYPE, Some("Standard"));

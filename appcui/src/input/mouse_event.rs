@@ -1,13 +1,13 @@
-use crate::graphics::Point;
 use super::KeyModifier;
 use super::MouseButton;
 use super::MouseWheelDirection;
+use crate::graphics::Point;
 
 /// Represents the data associated with a mouse event.
-/// 
+///
 /// This struct contains information about the position of the mouse,
 /// the button that was pressed, and the modifier keys (e.g., shift, ctrl, alt).
-/// 
+///
 /// # Fields
 /// * `x` - The x-coordinate of the mouse position.
 /// * `y` - The y-coordinate of the mouse position.
@@ -18,13 +18,13 @@ pub struct MouseEventData {
     pub x: i32,
     pub y: i32,
     pub button: MouseButton,
-    pub modifier: KeyModifier
+    pub modifier: KeyModifier,
 }
 
 /// Represents the type of mouse event.
-/// 
+///
 /// This enum defines the possible types of mouse events that can occur.
-/// 
+///
 /// # Values
 /// * `Enter` - The mouse pointer has entered a control .
 /// * `Leave` - The mouse pointer has left a control.
@@ -43,7 +43,5 @@ pub enum MouseEvent {
     Released(MouseEventData),
     DoubleClick(MouseEventData),
     Drag(MouseEventData),
-    Wheel(MouseWheelDirection)
+    Wheel(MouseWheelDirection),
 }
-
-

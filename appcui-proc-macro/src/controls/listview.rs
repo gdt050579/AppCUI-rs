@@ -24,7 +24,7 @@ static VIEW_MODES: FlagsSignature = FlagsSignature::new(&[
     "Columns(7)",
     "Columns(8)",
     "Columns(9)",
-    "Columns(10)",    
+    "Columns(10)",
 ]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("type", ParamType::String)];
@@ -32,11 +32,9 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("class", "type", ParamType::String),
     NamedParameter::new("columns", "columns", ParamType::List),
-
     NamedParameter::new("view", "view", ParamType::String),
     NamedParameter::new("viewmode", "view", ParamType::String),
     NamedParameter::new("vm", "view", ParamType::String),
-
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("left-scroll-margin", "lsm", ParamType::Integer),
     NamedParameter::new("lsm", "lsm", ParamType::Integer),

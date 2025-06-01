@@ -478,7 +478,7 @@ impl ColumnsHeader {
         &self.columns
     }
     #[inline(always)]
-    pub (crate) fn columns_mut(&mut self) -> &mut Vec<Column> {
+    pub(crate) fn columns_mut(&mut self) -> &mut Vec<Column> {
         &mut self.columns
     }
     pub fn sort_column(&self) -> Option<u16> {

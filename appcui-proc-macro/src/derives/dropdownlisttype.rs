@@ -35,8 +35,7 @@ fn generate_variant_match_arms(variant: &EnumVariant) -> (String, String, String
     let mut symbol: Option<&String> = None;
 
     for (attr_name, value) in variant.attributes.iter() {
-        if let Some(next_str) = attr_name.strip_prefix("VariantInfo.")
-        {
+        if let Some(next_str) = attr_name.strip_prefix("VariantInfo.") {
             match next_str.trim() {
                 "name" | "Name" | "N" | "n" => {
                     if name.is_some() {
@@ -70,7 +69,11 @@ fn generate_variant_match_arms(variant: &EnumVariant) -> (String, String, String
     let empty = String::new();
     let description_value = description.unwrap_or(&empty);
     let symbol_value = symbol.unwrap_or(&empty);
-    let fields_placeholder = if variant.fields.is_none() { "".to_string() } else { "{ .. }".to_string() };
+    let fields_placeholder = if variant.fields.is_none() {
+        "".to_string()
+    } else {
+        "{ .. }".to_string()
+    };
 
     let name_arm = format!("Self::{} {} => \"{}\",", variant.name, fields_placeholder, name_value);
     let description_arm = format!("Self::{} {} => \"{}\",", variant.name, fields_placeholder, description_value);
@@ -93,15 +96,14 @@ fn build_dropdownlisttype_code(en: &Enum) -> TokenStream {
         symbol_match.push_str(&sm);
         symbol_match.push('\n');
     }
-    
+
     let output = TEMPLATE
         .replace("$(ENUM_NAME)", &en.name)
         .replace("$(NAME_MATCH)", &name_match)
         .replace("$(DESCRIPTION_MATCH)", &description_match)
         .replace("$(SYMBOL_MATCH)", &symbol_match);
 
-    TokenStream::from_str(&output)
-        .expect("Failed to generate DropDownListType implementation")
+    TokenStream::from_str(&output).expect("Failed to generate DropDownListType implementation")
 }
 
 pub fn derive(input: TokenStream) -> TokenStream {

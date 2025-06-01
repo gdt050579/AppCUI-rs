@@ -122,7 +122,6 @@ fn check_events() {
         }
     }
 
-
     let script = "
         Paint.Enable(false)
         Paint('Button () has focus (default)')   
@@ -174,7 +173,9 @@ fn check_events_single_selection() {
     let mut w = window!("Test,d:c,w:100%,h:100%");
     w.add(togglebutton!("<>,'Some button',x:1,y:3,w:2, group: true, type: Underlined"));
     w.add(togglebutton!("(),'Some button 2',x:4,y:3,w:2, group: true, type: Underlined"));
-    w.add(togglebutton!("'{}','Some button 3',x:7,y:3,w:2, single_selection: true, type: Underlined"));
+    w.add(togglebutton!(
+        "'{}','Some button 3',x:7,y:3,w:2, single_selection: true, type: Underlined"
+    ));
     w.add(togglebutton!("'Update','Some button 4',x:30,y:3,w:6, type: Underlined"));
 
     a.add_window(w);

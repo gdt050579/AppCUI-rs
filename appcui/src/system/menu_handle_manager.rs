@@ -3,7 +3,7 @@ use crate::{ui::menu::Menu, utils::HandleManager};
 use super::Handle;
 
 pub(crate) struct MenuHandleManager {
-    manager: HandleManager<Menu>
+    manager: HandleManager<Menu>,
 }
 impl MenuHandleManager {
     pub(crate) fn new() -> MenuHandleManager {

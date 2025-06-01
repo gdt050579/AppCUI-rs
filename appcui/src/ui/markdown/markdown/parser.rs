@@ -9,14 +9,14 @@ pub enum MarkdownElement {
     OrderedList(Vec<ListItem>),
     HorizontalRule,
     CodeBlock(String),
-    Table(Table)
+    Table(Table),
 }
 
 // Enum representing Markdown  table with rows and cells.
 #[derive(Debug)]
 pub struct Table {
     pub headers: Vec<Vec<InlineElement>>,
-    pub rows: Vec<Vec<Vec<InlineElement>>> // rows[row][cell][element]
+    pub rows: Vec<Vec<Vec<InlineElement>>>, // rows[row][cell][element]
 }
 
 /// Enum representing list items in Markdown. List items can be simple or nested.
@@ -40,10 +40,9 @@ impl fmt::Display for InlineElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             InlineElement::Link(text, _) => write!(f, "{}", text),
-            InlineElement::Text(content) |
-            InlineElement::Bold(content) |
-            InlineElement::Italic(content) |
-            InlineElement::Code(content) => write!(f, "{}", content),
+            InlineElement::Text(content) | InlineElement::Bold(content) | InlineElement::Italic(content) | InlineElement::Code(content) => {
+                write!(f, "{}", content)
+            }
         }
     }
 }
@@ -82,8 +81,7 @@ impl MarkdownParser {
                 elements.push(Self::parse_header(trimmed));
             } else if trimmed.starts_with('-') {
                 elements.push(Self::parse_list(&mut lines, trimmed, false));
-            } else if trimmed.starts_with(|c: char| c.is_ascii_digit()) && trimmed[1..].starts_with('.')
-            {
+            } else if trimmed.starts_with(|c: char| c.is_ascii_digit()) && trimmed[1..].starts_with('.') {
                 elements.push(Self::parse_list(&mut lines, trimmed, true));
             } else if !trimmed.is_empty() {
                 elements.push(Self::parse_paragraph(trimmed));
@@ -110,13 +108,10 @@ impl MarkdownParser {
     }
 
     // Parse a table from lines.
-    fn parse_table<'a>(
-        lines: &mut impl Iterator<Item = &'a str>,
-        header_line: &str,
-    ) -> MarkdownElement {
+    fn parse_table<'a>(lines: &mut impl Iterator<Item = &'a str>, header_line: &str) -> MarkdownElement {
         let headers = Self::parse_inline_cells(header_line);
         lines.next();
-    
+
         let mut rows = Vec::new();
 
         for line in lines.by_ref() {
@@ -124,10 +119,10 @@ impl MarkdownParser {
             if trimmed.starts_with('|') && trimmed.ends_with('|') {
                 rows.push(Self::parse_inline_cells(trimmed));
             } else {
-                break; 
+                break;
             }
         }
-        
+
         MarkdownElement::Table(Table { headers, rows })
     }
 
@@ -184,9 +179,7 @@ impl MarkdownParser {
                     }
                 }
             } else {
-                let next_special = input[i..]
-                    .find(|c| ['*', '_', '[', '`'].contains(&c))
-                    .unwrap_or(input.len() - i);
+                let next_special = input[i..].find(|c| ['*', '_', '[', '`'].contains(&c)).unwrap_or(input.len() - i);
                 elements.push(InlineElement::Text(input[i..i + next_special].to_string()));
                 i += next_special;
             }
@@ -195,16 +188,12 @@ impl MarkdownParser {
     }
 
     /// Parses a list in Markdown into either an `UnorderedList` or `OrderedList`.
-    fn parse_list<'a>(
-        lines: &mut impl Iterator<Item = &'a str>,
-        first_line: &str,
-        ordered: bool,
-    ) -> MarkdownElement {
+    fn parse_list<'a>(lines: &mut impl Iterator<Item = &'a str>, first_line: &str, ordered: bool) -> MarkdownElement {
         let mut list_items = Vec::new();
 
         fn indentation_level(line: &str) -> usize {
             line.chars().take_while(|&c| c == '\t').count()
-        }        
+        }
 
         let mut sublist_stack: Vec<(usize, Vec<ListItem>)> = Vec::new();
 
@@ -221,8 +210,7 @@ impl MarkdownParser {
             let trimmed = next_line.trim();
             let next_level = indentation_level(next_line);
 
-            let is_ordered =
-                trimmed.starts_with(|c: char| c.is_ascii_digit()) && trimmed[1..].starts_with('.');
+            let is_ordered = trimmed.starts_with(|c: char| c.is_ascii_digit()) && trimmed[1..].starts_with('.');
             let is_unordered = trimmed.starts_with('-');
 
             if (ordered && is_ordered) || (!ordered && is_unordered) {
@@ -263,7 +251,7 @@ impl MarkdownParser {
                         // Same level, add the item
                         list_items.push(item);
                     }
-                }                
+                }
             } else {
                 break;
             }
@@ -285,4 +273,3 @@ impl MarkdownParser {
         }
     }
 }
-

@@ -6,4 +6,4 @@ macro_rules! should_not_use {
     };
 }
 
-pub (super) use should_not_use;
+pub(super) use should_not_use;

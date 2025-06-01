@@ -452,4 +452,3 @@ impl FormatDuration {
         Some(unsafe { core::str::from_utf8_unchecked(&buf[index..]) })
     }
 }
-

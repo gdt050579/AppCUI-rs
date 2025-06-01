@@ -1,7 +1,7 @@
 use super::super::SystemEvent;
 use super::super::Terminal;
-use super::ncursesapi::lib::ncurses_wcwidth;
 use super::ncursesapi::externs::*;
+use super::ncursesapi::lib::ncurses_wcwidth;
 use crate::terminals::ncurses::ncursesapi::input::Input;
 use std::sync::mpsc::Sender;
 

@@ -35,11 +35,10 @@ fn generate_variant_match_arms(variant: &EnumVariant, index: usize) -> (String, 
     let mut name: Option<&String> = None;
     let mut description: Option<&String> = None;
     let mut init_code: Option<&String> = None;
-    
+
     // modify to use VariantInfo
     for (attr_name, value) in variant.attributes.iter() {
-        if let Some(next_str) = attr_name.strip_prefix("VariantInfo.")
-        {
+        if let Some(next_str) = attr_name.strip_prefix("VariantInfo.") {
             match next_str.trim() {
                 "name" | "Name" | "N" | "n" => {
                     if name.is_some() {
@@ -55,15 +54,17 @@ fn generate_variant_match_arms(variant: &EnumVariant, index: usize) -> (String, 
                 }
                 "init" => {
                     if init_code.is_some() {
-                        panic!("Duplicate 'initialization' attributes found for variant '{}'. Use only one!", variant.name);
+                        panic!(
+                            "Duplicate 'initialization' attributes found for variant '{}'. Use only one!",
+                            variant.name
+                        );
                     }
                     init_code = Some(value)
                 }
                 _ => {
                     panic!(
                         "Unknown attribute: '{}' for field '{}'. Available attributes are: 'name' and 'description' and 'init'.",
-                        &attr_name,
-                        variant.name
+                        &attr_name, variant.name
                     );
                 }
             }
@@ -73,7 +74,11 @@ fn generate_variant_match_arms(variant: &EnumVariant, index: usize) -> (String, 
     let name_value = name.unwrap_or(&variant.name);
     let empty = String::new();
     let description_value = description.unwrap_or(&empty);
-    let fields_placeholder = if variant.fields.is_none() { "".to_string() } else { "{ .. }".to_string() };
+    let fields_placeholder = if variant.fields.is_none() {
+        "".to_string()
+    } else {
+        "{ .. }".to_string()
+    };
     let init_value = init_code.unwrap_or(&empty);
 
     let from_index_arm = format!("{} => Some(Self::{} {}),", index, variant.name, init_value);
@@ -82,8 +87,6 @@ fn generate_variant_match_arms(variant: &EnumVariant, index: usize) -> (String, 
 
     (from_index_arm, name_arm, description_arm)
 }
-
-
 
 fn build_enumselector_code(en: &Enum) -> TokenStream {
     let count = en.variants.len();
@@ -100,7 +103,7 @@ fn build_enumselector_code(en: &Enum) -> TokenStream {
         description_match.push_str(&dm);
         description_match.push('\n');
     }
-    
+
     let output = TEMPLATE
         .replace("$(ENUM_NAME)", &en.name)
         .replace("$(COUNT)", &count.to_string())
@@ -108,8 +111,7 @@ fn build_enumselector_code(en: &Enum) -> TokenStream {
         .replace("$(NAME_MATCH)", &name_match)
         .replace("$(DESCRIPTION_MATCH)", &description_match);
 
-    TokenStream::from_str(&output)
-        .expect("Failed to convert enumselector derived definition to token stream")
+    TokenStream::from_str(&output).expect("Failed to convert enumselector derived definition to token stream")
 }
 
 pub fn derive(input: TokenStream) -> TokenStream {

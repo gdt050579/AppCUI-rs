@@ -18,7 +18,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 ///
 /// ```rust, no_run
 /// use appcui::prelude::*;
-/// 
+///
 /// #[Window(events = ButtonEvents+CheckBoxEvents)]
 /// struct NumberFormatsWindow {
 ///     increase_button: Handle<Button>,
@@ -67,7 +67,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 ///     
 ///     fn update_labels(&mut self) {
 ///         // Update all labels with the current number in different formats
-///         let h = self.decimal_label; 
+///         let h = self.decimal_label;
 ///         let number = self.number;
 ///         if let Some(label) = self.toolbar().get_mut(h) {
 ///             label.set_content(&format!("Dec:{}", number));
@@ -109,7 +109,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 ///         EventProcessStatus::Processed
 ///     }
 /// }
-/// 
+///
 /// fn main() -> Result<(), appcui::system::Error> {
 ///     let mut app = App::new().build()?;
 ///     app.add_window(NumberFormatsWindow::new());
@@ -128,9 +128,9 @@ impl Label {
     /// Creates a new Label toolbar item with the specified text.
     ///
     /// The width (in characters) of the label is calculated based on the number of characters in its content.
-    /// 
+    ///
     /// # Parameters
-    /// 
+    ///
     /// * `text` - The text to be displayed on the label
     ///
     /// # Example
@@ -147,7 +147,7 @@ impl Label {
         obj.set_content(text);
         obj
     }
-    
+
     /// Sets a new text content for the label.
     ///
     /// The width of the label is automatically updated based on the length of the new text.
@@ -162,13 +162,13 @@ impl Label {
         self.base.set_width(text.chars().count() as u16);
         self.base.request_recompute_layout();
     }
-    
+
     /// Returns the current text content of the label.
     #[inline(always)]
     pub fn caption(&self) -> &str {
         &self.text
     }
-    
+
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let attr = match data.focused {
             true => theme.text.normal,
@@ -179,4 +179,3 @@ impl Label {
 
     add_toolbaritem_basic_methods!();
 }
-

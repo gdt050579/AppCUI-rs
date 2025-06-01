@@ -2,11 +2,11 @@ pub enum DialogButtons {
     Ok,
     YesNo,
     YesNoCancel,
-    RetryCancel
+    RetryCancel,
 }
 
 impl DialogButtons {
-    pub (super) fn count(&self)->u32 {
+    pub(super) fn count(&self) -> u32 {
         match self {
             DialogButtons::Ok => 1,
             DialogButtons::YesNo => 2,

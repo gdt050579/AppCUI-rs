@@ -1,4 +1,4 @@
-use crate::input::{MouseButton, MouseWheelDirection, Key, KeyModifier, KeyCode};
+use crate::input::{Key, KeyCode, KeyModifier, MouseButton, MouseWheelDirection};
 
 #[derive(Debug)]
 pub(super) struct ParserError {
@@ -91,15 +91,18 @@ impl<'a> CommandParser<'a> {
     pub(super) fn get_params_count(&self) -> usize {
         self.count
     }
-    pub(super) fn get_string(&self, index: usize)->Option<String> {
-        if index >= self.count {    
+    pub(super) fn get_string(&self, index: usize) -> Option<String> {
+        if index >= self.count {
             return None;
         }
-        let s = String::from(self.params[index]).replace("\\n", "\n").replace("\\t", "\t").replace("\\\\", "\\");
+        let s = String::from(self.params[index])
+            .replace("\\n", "\n")
+            .replace("\\t", "\t")
+            .replace("\\\\", "\\");
         Some(s)
     }
     pub(super) fn get_param(&self, index: usize) -> Option<&'a str> {
-        if index >= self.count {    
+        if index >= self.count {
             return None;
         }
         Some(self.params[index])
@@ -125,11 +128,12 @@ impl<'a> CommandParser<'a> {
                 "Alt" => k |= KeyModifier::Alt,
                 "Shift" => k |= KeyModifier::Shift,
                 "None" => k = KeyModifier::None,
-                _ => { return None; }
+                _ => {
+                    return None;
+                }
             }
-
-        }   
-        Some(k)   
+        }
+        Some(k)
     }
 
     pub(super) fn get_key(&self, index: usize) -> Option<Key> {
@@ -205,11 +209,12 @@ impl<'a> CommandParser<'a> {
                 "7" => k.code = KeyCode::N7,
                 "8" => k.code = KeyCode::N8,
                 "9" => k.code = KeyCode::N9,
-                _ => { return None; }
+                _ => {
+                    return None;
+                }
             }
-
-        }   
-        Some(k)   
+        }
+        Some(k)
     }
     pub(super) fn get_mouse_button(&self, index: usize) -> Option<MouseButton> {
         if index >= self.count {
@@ -251,7 +256,7 @@ impl<'a> CommandParser<'a> {
         if !txt.starts_with("0x") {
             return None;
         }
-        if let Ok(value) = u64::from_str_radix(&txt[2..],16) {
+        if let Ok(value) = u64::from_str_radix(&txt[2..], 16) {
             return Some(value);
         }
         None
@@ -315,12 +320,7 @@ impl<'a> CommandParser<'a> {
                 }
                 b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'-' | b'+' => {
                     if self.count >= 4 {
-                        return Err(ParserError::from_parser(
-                            "Too many parameters (max allowed is 4)",
-                            command,
-                            None,
-                            None,
-                        ));
+                        return Err(ParserError::from_parser("Too many parameters (max allowed is 4)", command, None, None));
                     }
                     let next = CommandParser::skip(buf, poz, CommandParser::is_word);
                     self.params[self.count] = &command[poz..next];
@@ -352,12 +352,7 @@ impl<'a> CommandParser<'a> {
                         ));
                     }
                     if self.count >= 4 {
-                        return Err(ParserError::from_parser(
-                            "Too many parameters (max allowed is 4)",
-                            command,
-                            None,
-                            None,
-                        ));
+                        return Err(ParserError::from_parser("Too many parameters (max allowed is 4)", command, None, None));
                     }
                     self.params[self.count] = &command[poz + 1..next];
                     //println!("FOUND STRING: {}", self.params[self.count]);

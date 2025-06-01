@@ -1,4 +1,4 @@
-#[derive(Copy,Clone,PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub(crate) enum Coordonate {
     Absolute(i32),
     Percentage(f32),
@@ -16,4 +16,3 @@ impl Coordonate {
         None
     }
 }
- 

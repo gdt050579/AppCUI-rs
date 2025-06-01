@@ -197,7 +197,6 @@ fn check_default_theme() {
     a.run();
 }
 
-
 #[test]
 fn check_darkgray_theme() {
     let script = "

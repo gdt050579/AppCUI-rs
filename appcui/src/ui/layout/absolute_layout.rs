@@ -10,12 +10,7 @@ pub(super) struct AbsoluteLayout {
 impl AbsoluteLayout {
     #[inline]
     pub(super) fn new(x: i32, y: i32, width: u16, height: u16) -> Self {
-        AbsoluteLayout {
-            x,
-            y,
-            width,
-            height,
-        }
+        AbsoluteLayout { x, y, width, height }
     }
 
     #[inline]

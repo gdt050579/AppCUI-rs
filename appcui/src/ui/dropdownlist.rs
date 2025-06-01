@@ -4,11 +4,11 @@
 //! It displays the currently selected item and expands to show all options when activated.
 
 mod dropdownlist;
-mod initialization_flags;
 pub mod events;
+mod initialization_flags;
 #[cfg(test)]
 mod tests;
 
 pub use self::dropdownlist::DropDownList;
-pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::DropDownListType;
+pub use self::initialization_flags::Flags;

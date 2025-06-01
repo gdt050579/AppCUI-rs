@@ -28,22 +28,21 @@ pub struct VSplitter {
     state: State,
 }
 impl VSplitter {
-
     /// Creates a new Vertical Splitter control with the specified position, layout and resize behavior
     /// The position can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
     /// The resize behavior can be one of the following values:
     /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when the splitter is resized
     /// * `ResizeBehavior::PreserveLeftPanelSize` - the size of the left panel is preserved when the splitter is resized
     /// * `ResizeBehavior::PreserveRightPanelSize` - the size of the right panel is preserved when the splitter is resized
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
     /// vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     /// vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
-    /// ``` 
+    /// ```
     pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior) -> Self
     where
         Coordonate: From<T>,
@@ -89,19 +88,18 @@ impl VSplitter {
         }
     }
 
-
     /// Sets the minimum width for the left or right panel
     /// The value can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut vs = VSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
     /// vs.add(vsplitter::Panel::Left,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(vsplitter::Panel::Right,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 10 chars from left
-    /// vs.set_min_width(vsplitter::Panel::Left,10); 
+    /// vs.set_min_width(vsplitter::Panel::Left,10);
     /// // minim 20% from right
     /// vs.set_min_width(vsplitter::Panel::Right,0.2);
     /// ```
@@ -118,10 +116,10 @@ impl VSplitter {
     /// Returns the absolute position of the splitter (in characters)
     #[inline(always)]
     pub fn position(&self) -> i32 {
-        self.pos.absolute(self.size().width.saturating_sub(1) as u16) 
+        self.pos.absolute(self.size().width.saturating_sub(1) as u16)
     }
 
-    /// Sets the position of the splitter. The value can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value) 
+    /// Sets the position of the splitter. The value can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
     pub fn set_position<T>(&mut self, pos: T)
     where
         Coordonate: From<T>,
@@ -237,20 +235,14 @@ impl OnKeyPressed for VSplitter {
             key!("Ctrl+Alt+Left") => {
                 let sz = self.size();
                 if sz.width > 0 {
-                    self.update_position(
-                        Coordonate::Absolute(self.pos.absolute(sz.width.saturating_sub(1) as u16) - 1),
-                        true,
-                    );
+                    self.update_position(Coordonate::Absolute(self.pos.absolute(sz.width.saturating_sub(1) as u16) - 1), true);
                 }
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Alt+Right") => {
                 let sz = self.size();
                 if sz.width > 0 {
-                    self.update_position(
-                        Coordonate::Absolute(self.pos.absolute(sz.width.saturating_sub(1) as u16) + 1),
-                        true,
-                    );
+                    self.update_position(Coordonate::Absolute(self.pos.absolute(sz.width.saturating_sub(1) as u16) + 1), true);
                 }
                 EventProcessStatus::Processed
             }

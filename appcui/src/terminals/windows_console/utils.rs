@@ -1,6 +1,6 @@
-use super::winapi;
-use super::structs::*;
 use super::constants::*;
+use super::structs::*;
+use super::winapi;
 use crate::terminals::Error;
 use crate::terminals::ErrorKind;
 

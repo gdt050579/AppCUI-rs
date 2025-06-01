@@ -12,11 +12,11 @@ impl HLine {
     /// The flags can be a combination of the following values:
     /// * `Flags::DoubleLine` - if set, the line will be drawn with double lines
     /// * `Flags::HasTitle` - if set, the line will have a title (otherwise the title field will be ignored)
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// let mut hline = HLine::new("My Title", Layout::new("x:1,y:1,w:30"), hline::Flags::DoubleLine | hline::Flags::HasTitle);
     /// ```
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {

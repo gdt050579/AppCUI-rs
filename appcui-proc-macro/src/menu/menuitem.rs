@@ -1,7 +1,4 @@
-use crate::{
-    parameter_parser,
-    token_stream_to_string::TokenStreamToString,
-};
+use crate::{parameter_parser, token_stream_to_string::TokenStreamToString};
 use proc_macro::*;
 use std::str::FromStr;
 

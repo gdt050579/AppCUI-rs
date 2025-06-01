@@ -183,12 +183,7 @@ where
         for i in 1..=self.count {
             let poz = (self.current_index + i) % self.count;
             if let Some(name) = data.name(poz) {
-                if name
-                    .chars()
-                    .next()
-                    .map(|c| c.eq_ignore_ascii_case(&to_find))
-                    .unwrap_or(false)
-                {
+                if name.chars().next().map(|c| c.eq_ignore_ascii_case(&to_find)).unwrap_or(false) {
                     return poz;
                 }
             }

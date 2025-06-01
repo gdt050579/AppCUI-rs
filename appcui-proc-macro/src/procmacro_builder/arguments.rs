@@ -372,10 +372,7 @@ impl Arguments {
                 }
             }
             // add to a hash map
-            self.template_events
-                .entry(last_control)
-                .or_default()
-                .push(self.template_content.clone());
+            self.template_events.entry(last_control).or_default().push(self.template_content.clone());
         } else {
             // do nothing --> upon validation the template is not valid !! and error will occur anyway !
         }
@@ -383,11 +380,7 @@ impl Arguments {
     fn validate_expect_template(&mut self, token: TokenTree) {
         match token {
             TokenTree::Group(g) => {
-                panic!(
-                    "Invalid group delimiter {} in a template definition : {}",
-                    g,
-                    self.template_content
-                );
+                panic!("Invalid group delimiter {} in a template definition : {}", g, self.template_content);
             }
             TokenTree::Ident(id) => {
                 if !self.template_content.is_empty() {

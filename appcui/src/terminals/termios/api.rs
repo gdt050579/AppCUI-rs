@@ -78,8 +78,7 @@ impl Termios {
         // Disable echoing input submitted to stdin
         // Disabling ISIG also disables: `Ctrl-C` (SIGINT) and `Ctrl-Z` (SIGSUSP)
         // Disabling IEXTEN also disables: `Ctrl-V` (paste) and `Ctrl-O` function
-        raw_termios.c_lflag.0 &=
-            !(local_flags::ECHO | local_flags::ICANON | local_flags::ISIG | local_flags::IEXTEN);
+        raw_termios.c_lflag.0 &= !(local_flags::ECHO | local_flags::ICANON | local_flags::ISIG | local_flags::IEXTEN);
 
         // Set control conditions like characters and time to wait for
         raw_termios.c_cc[ctrl_char_idx::VMIN] = 1;
@@ -100,13 +99,7 @@ impl Drop for Termios {
     fn drop(&mut self) {
         // Set the terminal to the original configuration we had when our own terminal goes out of
         // scope
-        let _result = unsafe {
-            tcsetattr(
-                io::STDIN_FILENO,
-                term_cmd::TC_SET_ATTR_FLUSH,
-                self,
-            )
-        };
+        let _result = unsafe { tcsetattr(io::STDIN_FILENO, term_cmd::TC_SET_ATTR_FLUSH, self) };
     }
 }
 

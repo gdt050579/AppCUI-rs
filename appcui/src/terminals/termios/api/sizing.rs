@@ -8,7 +8,7 @@ use crate::prelude::Size;
 
 pub struct ResizeNotification {
     pub mutex: Mutex<Size>,
-    pub cond_var: Condvar
+    pub cond_var: Condvar,
 }
 
 pub static RESIZE_ARC: OnceLock<Arc<ResizeNotification>> = OnceLock::new();
@@ -17,18 +17,28 @@ pub static RESIZE_ARC: OnceLock<Arc<ResizeNotification>> = OnceLock::new();
 struct Winsize {
     ws_row: u16,
     ws_col: u16,
-    ws_xpixel: u16,  // not used
-    ws_ypixel: u16,  // not used
+    ws_xpixel: u16, // not used
+    ws_ypixel: u16, // not used
 }
 
 impl Winsize {
     pub fn empty() -> Self {
-        Winsize { ws_row: 0, ws_col: 0, ws_xpixel: 0, ws_ypixel: 0 }
+        Winsize {
+            ws_row: 0,
+            ws_col: 0,
+            ws_xpixel: 0,
+            ws_ypixel: 0,
+        }
     }
 }
 
 pub fn get_resize_notification() -> &'static Arc<ResizeNotification> {
-    RESIZE_ARC.get_or_init(|| Arc::new(ResizeNotification {mutex: Mutex::new(Size::default()), cond_var: Condvar::new()}))
+    RESIZE_ARC.get_or_init(|| {
+        Arc::new(ResizeNotification {
+            mutex: Mutex::new(Size::default()),
+            cond_var: Condvar::new(),
+        })
+    })
 }
 
 extern "C" fn handle_resize(_: libc::c_int) {
@@ -41,9 +51,9 @@ extern "C" fn handle_resize(_: libc::c_int) {
     }
 }
 
-pub(crate) fn listen_for_resizes () -> Result<(), std::io::Error> {
+pub(crate) fn listen_for_resizes() -> Result<(), std::io::Error> {
     let _ = get_resize_notification();
-    
+
     unsafe {
         if SIG_ERR == signal(SIGWINCH, handle_resize as sighandler_t) {
             return Err(std::io::Error::last_os_error());
@@ -67,12 +77,10 @@ pub(crate) fn set_terminal_size(size: &Size) -> Result<(), std::io::Error> {
         ws_col: size.width as u16,
         ws_row: size.height as u16,
         ws_xpixel: 0,
-        ws_ypixel: 0
+        ws_ypixel: 0,
     };
 
-    if unsafe {
-        ioctl(STDOUT_FILENO, TIOCSWINSZ, &w_size)
-    } == -1 {
+    if unsafe { ioctl(STDOUT_FILENO, TIOCSWINSZ, &w_size) } == -1 {
         return Err(std::io::Error::last_os_error());
     }
 

@@ -6,7 +6,7 @@ static TYPES: FlagsSignature = FlagsSignature::new(&["Normal", "Underlined"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("caption", ParamType::String),
-    PositionalParameter::new("tooltip", ParamType::String)
+    PositionalParameter::new("tooltip", ParamType::String),
 ];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("name", "caption", ParamType::String),

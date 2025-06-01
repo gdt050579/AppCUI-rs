@@ -39,16 +39,9 @@ impl LinkRegistry {
                 *link_destination = LinkDestination::HeaderPosition(position);
             }
         } else {
-            let area = LinkArea {
-                x_pos: 0, 
-                y_pos: 0,
-                len: 0,
-            };
+            let area = LinkArea { x_pos: 0, y_pos: 0, len: 0 };
             let header_position = LinkDestination::HeaderPosition(position);
-            self.links_map.insert(
-                id,
-                (area, header_position, IsHovered(false)),
-            );
+            self.links_map.insert(id, (area, header_position, IsHovered(false)));
         }
     }
 
@@ -58,11 +51,15 @@ impl LinkRegistry {
             *link_area = LinkArea { x_pos, y_pos, len };
         } else {
             let area = LinkArea { x_pos, y_pos, len };
-            let link_destination = if !external { LinkDestination::HeaderPosition(0) } else { LinkDestination::ExternalLink(link.to_string()) };
+            let link_destination = if !external {
+                LinkDestination::HeaderPosition(0)
+            } else {
+                LinkDestination::ExternalLink(link.to_string())
+            };
             self.links_map.insert(id, (area, link_destination, IsHovered(false)));
         }
     }
-    
+
     pub fn get_header_position(&self, id: &str) -> Option<i32> {
         let key = LinkID(id.to_string());
         self.links_map.get(&key).and_then(|(_, destination, _)| {
@@ -130,11 +127,9 @@ impl LinkRegistry {
 
     pub fn is_link_external(&self, id: &str) -> Option<bool> {
         let key = LinkID(id.to_string());
-        self.links_map.get(&key).map(|(_, destination, _)| {
-            match destination {
-                LinkDestination::HeaderPosition(_) => false,
-                LinkDestination::ExternalLink(_) => true,
-            }
+        self.links_map.get(&key).map(|(_, destination, _)| match destination {
+            LinkDestination::HeaderPosition(_) => false,
+            LinkDestination::ExternalLink(_) => true,
         })
     }
 }

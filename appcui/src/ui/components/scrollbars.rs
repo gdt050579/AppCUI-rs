@@ -66,7 +66,7 @@ impl ScrollBars {
         self.horizontal.set_value(horizontal);
         self.vertical.set_value(vertical);
     }
-    
+
     /// Returns the horizontal index of the scrollbar.
     #[inline(always)]
     pub fn horizontal_index(&self) -> u64 {

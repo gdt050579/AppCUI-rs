@@ -18,7 +18,11 @@ where
     pub(super) fn new(file_path: &str, navigator: T, flags: Flags) -> Self {
         Self {
             navigator,
-            component: crate::ui::components::NavigatorComponent::new(file_path, flags.contains(Flags::ReadOnly), flags.contains(Flags::CaseSensitive)),
+            component: crate::ui::components::NavigatorComponent::new(
+                file_path,
+                flags.contains(Flags::ReadOnly),
+                flags.contains(Flags::CaseSensitive),
+            ),
         }
     }
 
@@ -45,7 +49,7 @@ where
     pub(super) fn on_lose_focus(&mut self, control: &mut ControlBase) {
         self.component.on_lose_focus(control);
     }
-    pub(super) fn on_theme_changed(&mut self, theme: &Theme)  {
+    pub(super) fn on_theme_changed(&mut self, theme: &Theme) {
         self.component.on_theme_changed(theme);
     }
     pub(super) fn on_mouse_event(&mut self, control: &ControlBase, event: &MouseEvent) -> EventProcessStatus {
@@ -56,6 +60,6 @@ where
         Path::new(self.component.path())
     }
     pub(super) fn set_path(&mut self, path: &str, control: &ControlBase) {
-        self.component.set_input_path(path,true, control);
+        self.component.set_input_path(path, true, control);
     }
 }

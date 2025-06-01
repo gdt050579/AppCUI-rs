@@ -1,5 +1,5 @@
-use super::ListItem;
 use super::Group;
+use super::ListItem;
 use crate::graphics::CharAttribute;
 
 pub struct Item<T>
@@ -10,11 +10,14 @@ where
     checked: bool,
     attr: Option<CharAttribute>,
     group_id: u16,
-    icon: [char;2],
+    icon: [char; 2],
 }
 
-impl<T> Item<T> where T: ListItem {
-    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, icon_chars: [char;2], group: Group) -> Self {
+impl<T> Item<T>
+where
+    T: ListItem,
+{
+    pub fn new(data: T, checked: bool, attr: Option<CharAttribute>, icon_chars: [char; 2], group: Group) -> Self {
         Self {
             data,
             checked,
@@ -65,7 +68,10 @@ impl<T> Item<T> where T: ListItem {
         self.attr
     }
 }
-impl<T> From<T> for Item<T> where T: ListItem {
+impl<T> From<T> for Item<T>
+where
+    T: ListItem,
+{
     fn from(value: T) -> Self {
         Self {
             data: value,
