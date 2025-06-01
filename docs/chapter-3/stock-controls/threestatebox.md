@@ -22,10 +22,11 @@ A threestatebox can contain a multi-line text but you will have to set the heigh
 
 A threestatebox supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name      | Type   | Positional parameter                | Purpose                                                                                                                                     |
-| ------------------- | ------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a threestatebox                                                                                               |
-| `state`             | String | **No**                              | threestatebox state: **checked**, **unchecked** or **unknown**. If the parameter is not provided, it will be defaulted to **unknown** state |
+| Parameter name      | Type   | Positional parameter                | Purpose                                                                                                                                                                                          |
+| ------------------- | ------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a threestatebox                                                                                                                                                    |
+| `state`             | String | **No**                              | threestatebox state: **checked**, **unchecked** or **unknown**. If the parameter is not provided, it will be defaulted to **unknown** state                                                      |
+| `type`              | String | **No**                              | threestatebox type: **Standard**, **Ascii**, **CheckBox**, **CheckMark**, **FilledBox**, **YesNo** or **PlusMinus**. If the parameter is not provided, it will be defaulted to **Standard** type |
 
 
 Some examples that uses these paramateres:
@@ -33,7 +34,21 @@ Some examples that uses these paramateres:
 let disabled_threestatebox = threestatebox!("caption=&Disabled,x:10,y:5,w:15,enable=false");
 let hidden_threestatebox = threestatebox!("text='&Hidden',x=9,y:1,align:center,w:9,visible=false");
 let multi_line_threestatebox = threestatebox!("'&Multi line\nLine2\nLine3',x:1,y:1,w:10,h:3");
+let custom_type_threestatebox = threestatebox!("'&Custom type',x:1,y:1,w:10,h:1,type=YesNo");
 ```
+
+The type of the ThreeStateBox describes how the ThreeStateBox state (**checked** , **unchecked** or **unknown**) will be represented on the screen. 
+
+| Type      | Checked State | Unchecked State | Unknown State |
+| --------- | ------------- | --------------- | ------------- |
+| Standard  | [✓] Checked   | [ ] Unchecked   | [?] Unknown   |
+| Ascii     | [X] Checked   | [ ] Unchecked   | [?] Unknown   |
+| CheckBox  | ☑ Checked     | ☐ Unchecked     | ⍰ Unknown   |
+| CheckMark | ✔ Checked     | ✖ Unchecked     | ? Unknown   |
+| FilledBox | ▣ Checked     | ▢ Unchecked     | ◪ Unknown   |
+| YesNo     | [Y] Checked   | [N] Unchecked   | [?] Unknown   |
+| PlusMinus | ➕ Checked     | ➖ Unchecked     | ± Unknown   |
+
 
 ## Events
 To intercept events from a threestatebox, the following trait has to be implemented to the Window that processes the event loop:

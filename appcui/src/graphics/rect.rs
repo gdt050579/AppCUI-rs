@@ -1,18 +1,49 @@
 use super::{Size, Point};
 
+/// Alignament enum represents the alignment of a rectangle in a 2D space.
+/// It is used to specify how a rectangle or other rectangular objects should be positioned relative to a given point.
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Alignament {
+    /// The top-left corner of the rectangle.
+    /// This is the default alignment.
     TopLeft = 0,
+    
+    /// The top-center of the rectangle.
+    /// This alignment is used to center the rectangle horizontally at the top.
     Top,
+    
+    /// The top-right corner of the rectangle.
+    /// This alignment is used to position the rectangle at the top-right corner.
     TopRight,
+    
+    /// The right-center of the rectangle.
+    /// This alignment is used to center the rectangle vertically on the right side.
     Right,
+    
+    /// The bottom-right corner of the rectangle.
+    /// This alignment is used to position the rectangle at the bottom-right corner.
     BottomRight,
+    
+    /// The bottom-center of the rectangle.
+    /// This alignment is used to center the rectangle horizontally at the bottom.
     Bottom,
+    
+    /// The bottom-left corner of the rectangle.
+    /// This alignment is used to position the rectangle at the bottom-left corner.
     BottomLeft,
+
+    /// The left-center of the rectangle.
+    /// This alignment is used to center the rectangle vertically on the left side.
     Left,
+
+    /// The center of the rectangle.
+    /// This alignment is used to center the rectangle both horizontally and vertically.
     Center,
 }
+
+/// A rectangle defined by its left, top, right, and bottom coordinates.
+/// The coordinates are automatically adjusted to ensure that left <= right and top <= bottom.
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Rect {
     left: i32,

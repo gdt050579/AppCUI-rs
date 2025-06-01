@@ -39,6 +39,16 @@ pub struct ColorPicker {
     mouse_on_color_index: i32,
 }
 impl ColorPicker {
+    
+    /// Creates a new color picker with the specified color and layout.
+    /// The color can be any of the predefined colors in the `Color` enum.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut color_picker = ColorPicker::new(Color::Red, Layout::new("x:1,y:1,w:20,h:1"));
+    /// ```
     pub fn new(color: Color, layout: Layout) -> Self {
         let mut cp = ColorPicker {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -50,10 +60,15 @@ impl ColorPicker {
         cp.set_size_bounds(7, 1, u16::MAX, 1);
         cp
     }
+    
+    /// Returns the selected color from the color picker.
     #[inline(always)]
     pub fn color(&self) -> Color {
         self.color
     }
+    
+    /// Sets the selected color in the color picker.
+    /// The color can be any of the predefined colors in the `Color` enum.
     #[inline(always)]
     pub fn set_color(&mut self, color: Color) {
         self.color = color;

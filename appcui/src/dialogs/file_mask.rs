@@ -216,7 +216,7 @@ impl FileMask {
                 loop {
                     // we have a word (extension)
                     let end_word = FileMask::skip_type(bytes, start);
-                    let ext_buf = text[start..end_word].as_bytes();
+                    let ext_buf = &text.as_bytes()[start..end_word];
                     let hash = if let Some(ext_pos) = FileMask::extension_pos(ext_buf) {
                         FileMask::compute_hash(&ext_buf[ext_pos..])
                     } else {

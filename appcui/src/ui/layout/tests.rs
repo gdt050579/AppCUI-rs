@@ -337,5 +337,268 @@ fn coordonate_from_basic_type() {
     assert_eq!(Coordonate::from(-10i64), Coordonate::Absolute(-10));
     assert_eq!(Coordonate::from(1.25f32), Coordonate::Percentage(1.25));
     assert_eq!(Coordonate::from(-1.25f64), Coordonate::Percentage(-1.25));
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlb_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a Top-Left-Bottom layout mode
+    validate_pos!("t:1,l:5,b:7,w:20,x:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlb_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a Top-Left-Bottom layout mode
+    validate_pos!("t:1,l:5,b:7,w:20,y:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlb_dont_allow_height() {
+    // this code should panic because 'h' can not be used in a Top-Left-Bottom layout mode
+    validate_pos!("t:1,l:5,b:7,w:20,h:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlb_dont_allow_allign() {
+    // this code should panic because 'a' can not be used in a Top-Left-Bottom layout mode
+    validate_pos!("t:1,l:5,b:7,w:20,a:c",50,30,5,0,38,10);
+}
+
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_trb_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a Top-Right-Bottom layout mode
+    validate_pos!("t:1,r:5,b:7,w:20,x:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_trb_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a Top-Right-Bottom layout mode
+    validate_pos!("t:1,r:5,b:7,w:20,y:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_trb_dont_allow_height() {
+    // this code should panic because 'h' can not be used in a Top-Right-Bottom layout mode
+    validate_pos!("t:1,r:5,b:7,w:20,h:10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_trb_dont_allow_allign() {
+    // this code should panic because 'a' can not be used in a Top-Right-Bottom layout mode
+    validate_pos!("t:1,r:5,b:7,w:20,a:c",50,30,5,0,38,10);
+}
+
+#[test]
+fn layout_mode_anchor_trb() {
+    validate_pos!("r:5,t:6,b:7,w:10",50,30,35,6,10,17);
+    validate_pos!("r:10%,t:6,b:7,w:20%",50,30,35,6,10,17);
+    validate_pos!("r:5,t:3,b:3,w:10",50,30,35,3,10,24);
+    validate_pos!("r:5,t:10%,b:10%,w:10",50,30,35,3,10,24);
+    validate_pos!("r:10%,t:10%,b:10%,w:20%",50,30,35,3,10,24);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_lbr_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a Left-Bottom-Right layout mode
+    validate_pos!("l:1,r:5,b:7,h:20,x:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_lbr_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a Left-Bottom-Right layout mode
+    validate_pos!("l:1,r:5,b:7,h:20,y:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_lbr_dont_allow_width() {
+    // this code should panic because 'w' can not be used in a Left-Bottom-Right layout mode
+    validate_pos!("l:1,r:5,b:7,h:20,w:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_lbr_dont_allow_allign() {
+    // this code should panic because 'a' can not be used in a Left-Bottom-Right layout mode
+    validate_pos!("l:1,r:5,b:7,h:20,a:c",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlr_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a Top-Left-Right layout mode
+    validate_pos!("l:1,r:5,t:7,h:20,x:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlr_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a Top-Left-Right layout mode
+    validate_pos!("l:1,r:5,t:7,h:20,y:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlr_dont_allow_width() {
+    // this code should panic because 'w' can not be used in a Top-Left-Right layout mode
+    validate_pos!("l:1,r:5,t:7,h:20,w:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tlr_dont_allow_allign() {
+    // this code should panic because 'a' can not be used in a Top-Left-Right layout mode
+    validate_pos!("l:1,r:5,t:7,h:20,a:c",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_dock_dont_allow_left() {
+    // this code should panic because 'l' can not be used in a Top-Left-Right layout mode
+    validate_pos!("d:c,w:100%,h:100%,l:1",50,30,5,0,38,10);
+}
+#[test]
+#[should_panic]
+fn layout_mode_dock_dont_allow_right() {
+    // this code should panic because 'r' can not be used in a Top-Left-Right layout mode
+    validate_pos!("d:c,w:100%,h:100%,r:1",50,30,5,0,38,10);
+}
+#[test]
+#[should_panic]
+fn layout_mode_dock_dont_allow_top() {
+    // this code should panic because 'lt' can not be used in a Top-Left-Right layout mode
+    validate_pos!("d:c,w:100%,h:100%,t:1",50,30,5,0,38,10);
+}
+#[test]
+#[should_panic]
+fn layout_mode_dock_dont_allow_bottom() {
+    // this code should panic because 'b' can not be used in a Top-Left-Right layout mode
+    validate_pos!("d:c,w:100%,h:100%,b:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_simple_coord_dont_allow_right() {
+    // this code should panic because 'r' can not be used in a (X,Y)-(Width x Height) layout mode
+    validate_pos!("x:1,y:1,w:100%,h:100%,r:1",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_align_wh_coord_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a (Allign + Width x Height) layout mode
+    validate_pos!("a:c,w:50%,h:50%,x:0",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_align_wh_coord_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a (Allign + Width x Height) layout mode
+    validate_pos!("a:c,w:50%,h:50%,y:0",50,30,5,0,38,10);
+}
+
+#[test]
+fn check_dimension_is_absolute() {
+    assert!(Dimension::Absolute(10).is_absolute());
+    assert!(!Dimension::Percentage(0.5f32).is_absolute());
+    assert!(!Dimension::Percentage(1.0f32).is_absolute());
+    assert!(Dimension::Absolute(0).is_absolute());
+}
+
+#[test]
+#[should_panic]
+fn layout_mode_lr_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a (Left-right) layout mode
+    validate_pos!("a:c,l:1,r:1,h:10,x:10",50,30,5,0,38,10);
+}
+
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_anchor_variant() {
+    // this code should panic because 'a' can not be 'blablablab'
+    validate_pos!("a:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_dock_variant() {
+    // this code should panic because 'd' can not be 'blablablab'
+    validate_pos!("d:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_negative_width() {
+    // this code should panic because width can not be negative
+    validate_pos!("w:-10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_negative_height() {
+    // this code should panic because height can not be negative
+    validate_pos!("h:-10",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_left() {
+    // this code should panic because left is not a valid value
+    validate_pos!("l:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_right() {
+    // this code should panic because right is not a valid value
+    validate_pos!("r:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_top() {
+    // this code should panic because top is not a valid value
+    validate_pos!("t:blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+#[should_panic]
+fn check_panic_on_invalid_bottom() {
+    // this code should panic because b is not a valid value
+    validate_pos!("b    :blablabla",50,30,5,0,38,10);
+}
+
+#[test]
+fn check_tr_anchor() {
+    // this code should panic because left is not a valid value
+    validate_pos!("t:1,r:1,w:10,h:10",50,30,39,1,10,10);
+}
+
+
+#[test]
+fn check_default_layout_modes() {
+    assert_eq!(LayoutMode::default(),LayoutMode::Absolute(AbsoluteLayout::new(0, 0, 0, 0)));
+}
+
+#[test]
+fn check_coordonate_update_with_absolute_value() {
+    let mut c = Coordonate::Absolute(0);
+    c.update_with_absolute_value(10, 20);
+    assert_eq!(c, Coordonate::Absolute(10));
+
+    let mut c = Coordonate::Percentage(0.0f32);
+    c.update_with_absolute_value(10, 20);
+    assert_eq!(c, Coordonate::Percentage(0.5f32));
 
 }

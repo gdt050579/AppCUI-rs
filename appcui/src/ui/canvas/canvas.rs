@@ -60,8 +60,10 @@ impl Canvas {
         self.scrollbars.update(sz.width as u64, sz.height as u64, self.size());
         self.move_scroll_to(self.x, self.y);
     }
+
+    /// Returns a mutable reference to the inner surface of the canvas.
     #[inline(always)]
-    pub fn get_drawing_surface(&mut self) -> &mut Surface {
+    pub fn drawing_surface_mut(&mut self) -> &mut Surface {
         &mut self.surface
     }
 
@@ -223,7 +225,6 @@ impl OnMouseEvent for Canvas {
             }
             MouseEvent::Wheel(dir) => {
                 match dir {
-                    MouseWheelDirection::None => {}
                     MouseWheelDirection::Left => self.move_scroll_to(self.x + 1, self.y),
                     MouseWheelDirection::Right => self.move_scroll_to(self.x - 1, self.y),
                     MouseWheelDirection::Up => self.move_scroll_to(self.x, self.y + 1),

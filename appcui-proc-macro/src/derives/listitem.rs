@@ -92,7 +92,7 @@ impl RenderMethod {
     const AREA_FORMATS: [&'static str; 10] = ["SquaredMillimeters","SquaredCentimeters","SquaredMeters","SquaredKilometers","Hectares","Ares","SquareFeet","SquareInches","SquareYards","SquareMiles"];
     const DISTANCE_FORMATS: [&'static str; 8] = ["Kilometers","Meters","Centimeters","Millimeters","Inches","Feet","Yards","Miles",];
     const VOLUME_FORMATS: [&'static str; 11] = ["CubicMilimeters","CubicCentimeters","CubicMeters","CubicKilometers","Liters","Milliliters","Gallons","CubicFeet","CubicInches","CubicYards","CubicMiles",];
-    const WEIGHT_FORMATS: [&'static str; 5] = ["Grans","Milligrams","Kilograms","Pounds","Tons",];
+    const WEIGHT_FORMATS: [&'static str; 5] = ["Grams","Milligrams","Kilograms","Pounds","Tons",];
     const SPEED_FORMATS: [&'static str; 9] = ["KilometersPerHour","MetersPerHour","KilometersPerSecond","MetersPerSecond","MilesPerHour","MilesPerSecond","Knots","FeetPerSecond","Mach",  ];
     const PERCENTAGE_FORMATS: [&'static str; 2] = ["Normal","Decimals"];
     const TEMPERATURE_FORMATS: [&'static str; 3] = ["Celsius","Fahrenheit","Kelvin"];

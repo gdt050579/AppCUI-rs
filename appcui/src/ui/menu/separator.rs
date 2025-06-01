@@ -7,11 +7,20 @@ use crate::{
 
 use super::{menu_item::MenuItem, MenuItemWrapper};
 
+/// A separator item for visually separating groups of menu items.
+///
+/// A separator is a non-interactive menu item that displays as a horizontal line.
+/// Separators are used to visually group related menu items together and improve
+/// the organization and readability of menus.
 pub struct Separator {
     pub(super) menu_handle: Handle<Menu>,
     pub(super) handle: Handle<Separator>
 }
 impl Separator {
+    /// Creates a new separator menu item.
+    ///
+    /// # Returns
+    /// A new `Separator` instance.
     pub fn new() -> Self {
         Self {
             menu_handle: Handle::None,
@@ -26,7 +35,7 @@ impl MenuItem for Separator {
     fn into_menuitem(self) -> super::MenuItemWrapper {
         MenuItemWrapper::Separator(self)
     }
-    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<crate::prelude::common::UIElement>) {
+    fn update_handles(&mut self, parent: Handle<crate::prelude::Menu>, me: Handle<()>) {
         self.menu_handle = parent;
         self.handle = me.cast();
     }

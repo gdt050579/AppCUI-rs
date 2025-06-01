@@ -105,6 +105,7 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
     },    
 ];
 
+/// LineType is an enum that represents the type of line to be drawn (single, double, thick, etc)
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum LineType {

@@ -38,8 +38,9 @@ fn generate_variant_match_arms(variant: &EnumVariant, index: usize) -> (String, 
     
     // modify to use VariantInfo
     for (attr_name, value) in variant.attributes.iter() {
-        if attr_name.starts_with("VariantInfo.") {
-            match attr_name[12..].trim() {
+        if let Some(next_str) = attr_name.strip_prefix("VariantInfo.")
+        {
+            match next_str.trim() {
                 "name" | "Name" | "N" | "n" => {
                     if name.is_some() {
                         panic!("Duplicate 'name' attributes found for variant '{}'. Use only one!", variant.name);

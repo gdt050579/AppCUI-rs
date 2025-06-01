@@ -67,11 +67,21 @@ fn main() -> Result<(), appcui::system::Error> {
 }
 ```
 
-Notice that a new data member `base` has been create by the `#[CustomControl]` macro. This data member provides all standard methods that every control has (related to visibility, enablement, etc). This data meber must be instantiated using the following commnad:
+**Remarks**: Notice that a new data member `base` has been create by the `#[CustomControl]` macro. This data member provides all standard methods that every control has (related to visibility, enablement, etc). This data meber must be instantiated in one of the following two ways:
+
 ```rs
 ControlBase::new(layout: Layout, accept_into: bool)
 ```
+
+or
+
+```rs
+ControlBase::with_focus_overlay(layout: Layout)
+```
+
+
 where:
 * `layout` is the [Layout](../chapter-3/layout.md) of the control
 * `accept_input` is either **true** if we want the new custom control to receive events from mouse and/or keyboard or **false** otherwise (the last case is usually when a control similar to a label is being create). 
 
+The second method (`ControlBase::with_focus_overlay`) is used when we want to create a custom control that will extend its size one character to the bottom and one character to the right.

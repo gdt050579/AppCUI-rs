@@ -1,3 +1,8 @@
+//! A treeview UI control for displaying hierarchical data.
+//!
+//! The TreeView control provides a way to display tree-structured data with collapsible nodes.
+//! It supports multiple selection modes, custom node rendering, and keyboard navigation.
+
 pub mod events;
 mod initialization_flags;
 mod treeview;

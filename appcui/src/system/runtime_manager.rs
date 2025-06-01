@@ -14,8 +14,8 @@ use crate::terminals::*;
 use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
+use crate::ui::common::ControlManager;
 use crate::ui::common::{traits::*, ControlEvent};
-use crate::ui::common::{ControlManager, UIElement};
 use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar};
@@ -34,14 +34,14 @@ enum LoopStatus {
 #[derive(Clone, Copy)]
 enum MouseLockedObject {
     None,
-    Control(Handle<UIElement>),
+    Control(Handle<()>),
     CommandBar,
     MenuBar,
 }
 
 #[derive(Default)]
 struct ExpandedControlInfo {
-    handle: Handle<UIElement>,
+    handle: Handle<()>,
     min_size: Size,
     prefered_size: Size,
 }
@@ -62,7 +62,7 @@ pub(crate) struct RuntimeManager {
     menus: *mut MenuHandleManager,
     timers_manager: TimerManager,
     task_manager: BackgroundTaskManager,
-    desktop_handle: Handle<UIElement>,
+    desktop_handle: Handle<()>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
     menubar: Option<MenuBar>,
@@ -76,19 +76,19 @@ pub(crate) struct RuntimeManager {
     request_update_timer_threads: bool,
     single_window: bool,
     loop_status: LoopStatus,
-    request_focus: Option<Handle<UIElement>>,
-    current_focus: Option<Handle<UIElement>>,
-    request_default_action: Option<Handle<UIElement>>,
+    request_focus: Option<Handle<()>>,
+    current_focus: Option<Handle<()>>,
+    request_default_action: Option<Handle<()>>,
     expanded_control: ExpandedControlInfo,
-    mouse_over_control: Handle<UIElement>,
-    focus_chain: Vec<Handle<UIElement>>,
+    mouse_over_control: Handle<()>,
+    focus_chain: Vec<Handle<()>>,
     events: Vec<ControlEvent>,
     commandbar_event: Option<CommandBarEvent>,
     menu_event: Option<MenuEvent>,
     mouse_locked_object: MouseLockedObject,
     opened_menu_handle: Handle<Menu>,
-    modal_windows: Vec<Handle<UIElement>>,
-    to_remove_list: Vec<Handle<UIElement>>,
+    modal_windows: Vec<Handle<()>>,
+    to_remove_list: Vec<Handle<()>>,
     event_receiver: Receiver<SystemEvent>,
     event_sender: Sender<SystemEvent>,
     #[cfg(feature = "EVENT_RECORDER")]
@@ -308,13 +308,13 @@ impl RuntimeManager {
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
     }
-    pub(crate) fn request_focus_for_control(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn request_focus_for_control(&mut self, handle: Handle<()>) {
         self.request_focus = Some(handle);
     }
-    pub(crate) fn request_default_action_for_control(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn request_default_action_for_control(&mut self, handle: Handle<()>) {
         self.request_default_action = Some(handle);
     }
-    pub(crate) fn request_expand_for_control(&mut self, handle: Handle<UIElement>, min_size: Size, prefered_size: Size) {
+    pub(crate) fn request_expand_for_control(&mut self, handle: Handle<()>, min_size: Size, prefered_size: Size) {
         self.expanded_control.handle = handle;
         self.expanded_control.min_size = min_size;
         self.expanded_control.prefered_size = prefered_size;
@@ -326,12 +326,12 @@ impl RuntimeManager {
         self.repaint = true;
         self.recompute_layout = true;
     }
-    pub(crate) fn request_remove(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn request_remove(&mut self, handle: Handle<()>) {
         if !handle.is_none() {
             self.to_remove_list.push(handle);
         }
     }
-    fn set_event_processors(&mut self, control_handle: Handle<UIElement>, event_processor: Handle<UIElement>) {
+    fn set_event_processors(&mut self, control_handle: Handle<()>, event_processor: Handle<()>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(control_handle) {
             let base = control.base_mut();
@@ -452,11 +452,22 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
-    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<UIElement>, x: i32, y: i32, max_size: Option<Size>) {
+    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {
         let menus = unsafe { &mut *self.menus };
+        let controls = unsafe { &mut *self.controls };
         if let Some(menu) = menus.get_mut(handle) {
-            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.terminal.get_size());
+            // 1. make sure that the receiver control is set up for the menu
             menu.set_receiver_control_handle(receiver_control_handle);
+            // 2. update menu items handles (link them to the menu parent)
+            menu.update_menuitems_menu_handle();
+            // 3. call on_menu_opened here
+            // we need to call this first because if on_menu_open changes the size of the menu
+            // we can recompute its position after this
+            if let Some(ctrl) = controls.get(receiver_control_handle) {
+                GenericMenuEvents::on_menu_open(ctrl.control(), menu);
+            }
+            // 4. compute the position and show
+            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.terminal.get_size());
             self.opened_menu_handle = handle;
         }
     }
@@ -728,12 +739,12 @@ impl RuntimeManager {
             SystemEvent::BackgroundTaskQuery(h) => BackgroundTaskMethods::on_query(self, h),
         }
     }
-    fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> (Handle<UIElement>, bool) {
+    fn remove_control(&mut self, handle: Handle<()>, unlink_from_parent: bool) -> (Handle<()>, bool) {
         if handle.is_none() {
             return (Handle::None, false);
         }
         let controls = unsafe { &mut *self.controls };
-        let mut parent: Handle<UIElement> = Handle::None;
+        let mut parent: Handle<()> = Handle::None;
         let mut has_focus = false;
         let mut is_window_control = false;
         let mut timer_handle: Handle<Timer> = Handle::None;
@@ -812,21 +823,21 @@ impl RuntimeManager {
         menus.get_mut(self.opened_menu_handle)
     }
     #[inline(always)]
-    fn get_root_control_handle(&self) -> Handle<UIElement> {
+    fn get_root_control_handle(&self) -> Handle<()> {
         if self.modal_windows.is_empty() {
             self.desktop_handle
         } else {
             self.modal_windows[self.modal_windows.len() - 1]
         }
     }
-    // pub(crate) fn get_parent_handle(&self, handle: Handle<UIElement>) -> Handle<UIElement> {
+    // pub(crate) fn get_parent_handle(&self, handle: Handle<()>) -> Handle<()> {
     //     let controls = unsafe { &mut *self.controls };
     //     if let Some(ctrl) = controls.get(handle) {
     //         return ctrl.get_base().parent;
     //     }
     //     return Handle::None;
     // }
-    pub(crate) fn get_focused_control_for_parent(&self, parent_handle: Handle<UIElement>) -> Option<Handle<UIElement>> {
+    pub(crate) fn get_focused_control_for_parent(&self, parent_handle: Handle<()>) -> Option<Handle<()>> {
         let controls = unsafe { &mut *self.controls };
         if let Some(ctrl) = controls.get(parent_handle) {
             let base = ctrl.base();
@@ -846,7 +857,7 @@ impl RuntimeManager {
         }
         None
     }
-    fn get_focused_control(&self) -> Handle<UIElement> {
+    fn get_focused_control(&self) -> Handle<()> {
         self.get_focused_control_for_parent(self.get_root_control_handle()).unwrap()
         // let controls = unsafe { &mut *self.controls };
         // if let Some(ctrl) = controls.get(parent_handle) {
@@ -961,7 +972,7 @@ impl RuntimeManager {
         self.request_update_command_and_menu_bars = false;
     }
 
-    fn find_last_leaf(&mut self, handle: Handle<UIElement>) -> Handle<UIElement> {
+    fn find_last_leaf(&mut self, handle: Handle<()>) -> Handle<()> {
         let controls = unsafe { &mut *self.controls };
         let mut result = Handle::None;
         let mut handle = handle;
@@ -981,7 +992,7 @@ impl RuntimeManager {
         result
     }
 
-    fn is_nth_child(&mut self, parent: Handle<UIElement>, child: Handle<UIElement>, focusable: bool) -> bool {
+    fn is_nth_child(&mut self, parent: Handle<()>, child: Handle<()>, focusable: bool) -> bool {
         if child.is_none() || parent.is_none() {
             return false;
         }
@@ -1011,7 +1022,7 @@ impl RuntimeManager {
         false
     }
 
-    fn update_focus(&mut self, handle: Handle<UIElement>) {
+    fn update_focus(&mut self, handle: Handle<()>) {
         // if an expanded control exists --> pack it
         if !self.expanded_control.handle.is_none() {
             self.request_expand_for_control(Handle::None, Size::default(), Size::default());
@@ -1103,7 +1114,7 @@ impl RuntimeManager {
         }
     }
 
-    fn update_parent_indexes(&mut self, handle: Handle<UIElement>) {
+    fn update_parent_indexes(&mut self, handle: Handle<()>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base_mut();
@@ -1140,7 +1151,7 @@ impl RuntimeManager {
         self.recompute_layout = true;
     }
 
-    // fn debug_print(&self, handle: Handle<UIElement>, depth: i32) {
+    // fn debug_print(&self, handle: Handle<()>, depth: i32) {
     //     println!("----------------------------- Control Tree -----------------------------");
     //     for _ in 0..depth {
     //         print!(" ");
@@ -1201,7 +1212,7 @@ impl LayoutMethods for RuntimeManager {
             self.update_control_layout(handle, &term_layout);
         }
     }
-    fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout) {
+    fn update_control_layout(&mut self, handle: Handle<()>, parent_layout: &ParentLayout) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base_mut();
@@ -1303,7 +1314,7 @@ impl PaintMethods for RuntimeManager {
         }
         self.terminal.update_screen(&self.surface);
     }
-    fn paint_control(&mut self, handle: Handle<UIElement>) {
+    fn paint_control(&mut self, handle: Handle<()>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(element) = controls.get_mut(handle) {
             let base = element.base();
@@ -1386,7 +1397,7 @@ impl KeyboardMethods for RuntimeManager {
             }
         }
     }
-    fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus {
+    fn process_control_keypressed_event(&mut self, handle: Handle<()>, key: Key, character: char) -> EventProcessStatus {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base();
@@ -1420,7 +1431,7 @@ impl KeyboardMethods for RuntimeManager {
     }
 }
 impl MouseMethods for RuntimeManager {
-    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32, ignore_expanded: bool) -> Handle<UIElement> {
+    fn coordinates_to_child_control(&mut self, handle: Handle<()>, x: i32, y: i32, ignore_expanded: bool) -> Handle<()> {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base_mut();
@@ -1489,7 +1500,7 @@ impl MouseMethods for RuntimeManager {
         }
         Handle::None
     }
-    fn coordinates_to_control(&mut self, x: i32, y: i32, ignore_expanded: bool) -> Handle<UIElement> {
+    fn coordinates_to_control(&mut self, x: i32, y: i32, ignore_expanded: bool) -> Handle<()> {
         // if an expanded control exists --> check it first
         if !self.expanded_control.handle.is_none() {
             let handle = self.coordinates_to_child_control(self.expanded_control.handle, x, y, ignore_expanded);
@@ -1598,33 +1609,6 @@ impl MouseMethods for RuntimeManager {
                 }
             }
         }
-
-        /*
-        void ApplicationImpl::ProcessMenuMouseClick(Controls::Menu* mnu, int x, int y)
-        {
-
-            switch (result)
-            {
-            case MousePressedResult::None:
-                break;
-            case MousePressedResult::Repaint:
-                RepaintStatus |= REPAINT_STATUS_DRAW;
-                break;
-            case MousePressedResult::CheckParent:
-                if (mcx->Parent)
-                    ProcessMenuMouseClick(mcx->Parent, x, y);
-                else
-                    this->CloseContextualMenu();
-                break;
-            case MousePressedResult::Activate:
-                RepaintStatus |= REPAINT_STATUS_DRAW;
-                ShowContextualMenu(mnu);
-                break;
-            }
-        }
-
-
-        */
     }
 
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
@@ -1648,7 +1632,7 @@ impl MouseMethods for RuntimeManager {
             }
         }
     }
-    fn process_mousedrag(&mut self, handle: Handle<UIElement>, event: MouseMoveEvent) {
+    fn process_mousedrag(&mut self, handle: Handle<()>, event: MouseMoveEvent) {
         self.hide_tooltip();
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
@@ -1873,7 +1857,7 @@ impl ThemeMethods for RuntimeManager {
         }
     }
 
-    fn update_theme_for_control(&mut self, handle: Handle<UIElement>) {
+    fn update_theme_for_control(&mut self, handle: Handle<()>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(element) = controls.get_mut(handle) {
             OnThemeChanged::on_theme_changed(element.control_mut(), &self.theme);

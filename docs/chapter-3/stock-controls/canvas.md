@@ -47,7 +47,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a canvas als
 
 | Method                     | Purpose                                                            |
 | -------------------------- | ------------------------------------------------------------------ |
-| `get_drawing_surface(...)` | Returns the inner surface that can be dranw into the canvas        |
+| `drawing_surface_mut(...)` | Returns the inner surface that can be dranw into the canvas        |
 | `resize_surface(...)`      | Resizes the inner surface of the canvas                            |
 | `set_backgound(...)`       | Sets the character used for background                             |
 | `clear_background()`       | Remove the background character making the background transparent. |
@@ -95,7 +95,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().size(Size::new(60,20)).build()?;
     let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
     let mut c = canvas!("'60x15',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
     a.add_window(w);

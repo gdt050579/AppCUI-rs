@@ -1,5 +1,8 @@
+use crate::prelude::Size;
+
 use super::super::SurfaceTester;
 use super::Image;
+use super::Pixel;
 use super::RendererType;
 use super::Scale;
 
@@ -28,6 +31,12 @@ const HEART_RED: &str = r#"
         |......rr......|
 "#;
 
+const ALL_COLORS: &str = r#"
+        |0123456789gArPYW|
+        | BGTRMOSsbgarpyw|
+        |.BGTRmoSsbgtrpyw|
+"#;
+
 #[test]
 fn check_draw_smallblocks() {
     let mut s = SurfaceTester::new(40, 10);
@@ -36,6 +45,16 @@ fn check_draw_smallblocks() {
     //s.print();
     assert_eq!(s.compute_hash(), 0x939D21530F9EB6A5);
 }
+
+#[test]
+fn check_draw_smallblocks_all_colors() {
+    let mut s = SurfaceTester::new(40, 10);
+    let i = Image::with_str(ALL_COLORS).unwrap();
+    s.draw_image(1, 1, &i, RendererType::SmallBlocks, Scale::NoScale);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xEBAE7CC6AE75A08D);
+}
+
 #[test]
 fn check_draw_smallblocks_scale() {
     let mut s = SurfaceTester::new(40, 10);
@@ -99,3 +118,30 @@ fn check_draw_ascii_art_scale() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xFCF9279F2D7E525);
 }
+
+#[test]
+fn check_image_with_invalid_size() {
+    assert!(Image::new(0,0).is_none());
+    assert!(Image::new(100,0).is_none());
+    assert!(Image::new(0xFFFF,0xFFFF).is_none());
+    assert!(Image::with_str("0000").is_none());
+    assert!(Image::with_str("||").is_none());
+}
+
+#[test]
+fn check_size_of_image() {
+    let i = Image::with_str(HEART).unwrap();
+    assert_eq!(i.size(), Size::new(14,10));
+}
+
+#[test]
+fn check_clear() {
+    let mut i = Image::new(5,5).unwrap();
+    i.clear(Pixel::new(1,2,3,4));
+    for x in 0..5 {
+        for y in 0..5 {
+            assert_eq!(i.pixel(x,y), Some(Pixel::new(1,2,3,4)));
+        }
+    }
+}
+

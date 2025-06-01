@@ -45,6 +45,30 @@ impl<T> Selector<T>
 where
     T: EnumSelector + Copy + Eq + 'static,
 {
+    /// Creates a new Selector control with the specified value, layout and flags.
+    /// The flags can be a combination of the following values:
+    /// * `Flags::AllowNoneVariant` - if set, the selector will allow the value `None` to be selected 
+    /// 
+    /// This is a genric control over the type T, which must implement the `EnumSelector` trait. You can do this by manually implement the trait for your enum or by using the `EnumSelector` derive macro.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// #[derive(EnumSelector, Eq, PartialEq, Copy, Clone)]
+    /// enum Shape {
+    ///     #[VariantInfo(name = "Square", description = "a red square")]
+    ///     Square,
+    /// 
+    ///     #[VariantInfo(name = "Rectangle", description = "a green rectangle")]
+    ///     Rectangle,
+    /// }
+    /// 
+    /// let mut selector: Selector<Shape> = Selector::new(
+    ///                                 Some(Shape::Square),
+    ///                                 Layout::new("x:1,y:1,w:20,h:1"),
+    ///                                 selector::Flags::AllowNoneVariant);
+    /// ```
     pub fn new(value: Option<T>, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),

@@ -3,6 +3,7 @@ use crate::utils::*;
 
 
 /// Represents a column in a control that supports such components. A column has a name, a width, an alignment and a tooltip.
+#[derive(Debug,Eq,PartialEq)]
 pub struct Column {
     pub(crate) name: Caption,
     pub(crate) width: u8,

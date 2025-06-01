@@ -40,7 +40,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a button als
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `set_title(...)` | Set the new title of the panel                                                                                                      |
 | `title()`        | Returns the current title of the panel                                                                                              |
-| `get_type()`     | Returns type of the panel                                                                                                           |
+| `panel_type()`   | Returns type of the panel                                                                                                           |
 | `add(...)`       | Adds a new control as a child for the panel. It returns a handle for the new control or `Handle::None` if the control was not added |
 
 ## Key association

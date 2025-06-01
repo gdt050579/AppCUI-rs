@@ -7,6 +7,15 @@ pub struct Password {
     visible: bool,
 }
 impl Password {
+    /// Creates a new Password control with the specified layout.
+    /// The Password control is a single line text input control that hides the input characters with asterisks.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut password = Password::new(Layout::new("x:1,y:1,w:20,h:1"));
+    /// ```
     pub fn new(layout: Layout) -> Self {
         let mut p = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -16,10 +25,14 @@ impl Password {
         p.set_size_bounds(4, 1, u16::MAX, 1);
         p
     }
+
+    /// Manually sets the password string.
     pub fn set_password(&mut self, password: &str) {
         self.pass.clear();
         self.pass.push_str(password);
     }
+
+    /// Returns the current password string.
     #[inline(always)]
     pub fn password(&self) -> &str {
         &self.pass

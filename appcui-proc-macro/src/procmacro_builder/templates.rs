@@ -57,7 +57,7 @@ impl$(TEMPLATE_TYPE) OnMouseEvent for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 
 pub(crate) static ON_SIBLING_SELECTED: &str = "
 impl$(TEMPLATE_TYPE) OnSiblingSelected for $(STRUCT_NAME)$(TEMPLATE_DEF) {
-    fn on_sibling_selected(&mut self, handle: Handle<UIElement>)  { self.base.on_sibling_selected(handle); }
+    fn on_sibling_selected(&mut self, handle: Handle<()>)  { self.base.on_sibling_selected(handle); }
 }
 ";
 

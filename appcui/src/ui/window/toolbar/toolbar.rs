@@ -6,7 +6,6 @@ use crate::{
     graphics::{Size, Surface},
     input::Key,
     system::{Handle, Theme},
-    ui::common::UIElement,
     utils::HandleManager,
 };
 
@@ -17,17 +16,17 @@ use super::{
 
 pub struct ToolbarElementHandle {
     group: Group,
-    handle: Handle<UIElement>,
+    handle: Handle<()>,
 }
 
 #[derive(Default)]
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,
-    current_handle: Handle<UIElement>,
+    current_handle: Handle<()>,
     order: Vec<ToolbarElementHandle>,
     pressed: bool,
     last_group_index: u8,
-    window: Handle<UIElement>,
+    window: Handle<()>,
     // for debug purposes
     #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
     debug_window_title_top_left_margin: i32,
@@ -122,7 +121,7 @@ impl ToolBar {
         None
     }
     #[inline(always)]
-    pub(crate) fn set_current_item_handle(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn set_current_item_handle(&mut self, handle: Handle<()>) {
         self.current_handle = handle;
     }
     #[inline(always)]
@@ -130,19 +129,19 @@ impl ToolBar {
         self.current_handle = Handle::None;
     }
     #[inline(always)]
-    pub(crate) fn get_current_item_handle(&self) -> Handle<UIElement> {
+    pub(crate) fn get_current_item_handle(&self) -> Handle<()> {
         self.current_handle
     }
     // #[inline(always)]
-    // pub(crate) fn get_item(&self, handle: Handle<UIElement>) -> Option<&ToolBarItem> {
+    // pub(crate) fn get_item(&self, handle: Handle<()>) -> Option<&ToolBarItem> {
     //     self.items.get(handle.cast())
     // }
     #[inline(always)]
-    pub(crate) fn get_item_mut(&mut self, handle: Handle<UIElement>) -> Option<&mut ToolBarItem> {
+    pub(crate) fn get_item_mut(&mut self, handle: Handle<()>) -> Option<&mut ToolBarItem> {
         self.items.get_mut(handle.cast())
     }
     #[inline(always)]
-    pub(crate) fn get_window_handle(&self) -> Handle<UIElement> {
+    pub(crate) fn get_window_handle(&self) -> Handle<()> {
         self.window
     }
     #[inline(always)]
@@ -162,7 +161,7 @@ impl ToolBar {
         None
     }
 
-    pub(crate) fn set_window_handle(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn set_window_handle(&mut self, handle: Handle<()>) {
         self.window = handle;
         let count = self.items.allocated_objects();
         for index in 0..count {
@@ -287,7 +286,7 @@ impl ToolBar {
         }
     }
 
-    pub(crate) fn update_singlechoice_group_id(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn update_singlechoice_group_id(&mut self, handle: Handle<()>) {
         // get the group ID for the handle
         let group_id = if let Some(item) = self.items.get(handle.cast()) {
             item.get_base().get_group_id()
@@ -305,7 +304,7 @@ impl ToolBar {
         }
     }
 
-    pub(crate) fn hotkey_to_item(&self, hotkey: Key) -> Option<Handle<UIElement>> {
+    pub(crate) fn hotkey_to_item(&self, hotkey: Key) -> Option<Handle<()>> {
         let count = self.items.allocated_objects();
         // paint bar items
         for index in 0..count {

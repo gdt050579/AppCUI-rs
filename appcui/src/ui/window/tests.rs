@@ -1091,45 +1091,45 @@ fn check_window_toolbar_item_visibility() {
         //expect on top    : ╔════════ My Win ═══════[Bin:11000]═[x]╗
         //expect on bottom : ╚[Dec:24|Hex:18]═══════════════════════╝
         Paint('initial state')
-        CheckHash(0xFA2B2E36B28A0050)
+        CheckHash(0x26CBACC61695381B)
         Mouse.Click(17,4,left)
         Mouse.Click(17,4,left)
         //expect on top    : ╔════════ My Win ═══════[Bin:11010]═[x]╗
         //expect on bottom : ╚[Dec:26|Hex:1A]═══════════════════════╝
         Paint('Number is 26')
-        CheckHash(0x8434D2F808AE0DA)
+        CheckHash(0x5093F71409CDB401)
         Mouse.Click(36,4,left)
         //expect on top    : ╔════════ My Win ═══════[Bin:11010]═[x]╗
         //expect on bottom : ╚[Hex:1A]══════════════════════════════╝
         Paint('Decimal is missing')
-        CheckHash(0x3B1812AD5CF55031)
+        CheckHash(0x6E330F6FF7C5A9E9)
         Mouse.Click(36,6,left)
         //expect on top    : ╔══════════════ My Win ═════════════[x]╗
         //expect on bottom : ╚[Hex:1A]══════════════════════════════╝
         Paint('Bin & Dec are missing')
-        CheckHash(0xE403B3C292B3820F)
+        CheckHash(0x553722D16D8569A8)
         Mouse.Click(17,4,left)
         //expect on top    : ╔══════════════ My Win ═════════════[x]╗
         //expect on bottom : ╚[Hex:1B]══════════════════════════════╝
         Paint('Number if nou 27')
-        CheckHash(0xC8A77483C0FAC0C4)
+        CheckHash(0x5DF422977AF47E13)
         Mouse.Click(36,5,left)
         //expect on top    : ╔══════════════ My Win ═════════════[x]╗
         //expect on bottom : ╚══════════════════════════════════════╝
         Paint('All are hidden')
-        CheckHash(0xD48F9939B3A922AF)
+        CheckHash(0x7E23A72AB78B3DA3)
         Mouse.Click(17,4,left)
         Mouse.Click(36,4,left)
         //expect on top    : ╔══════════════ My Win ═════════════[x]╗
         //expect on bottom : ╚[Dec:28]══════════════════════════════╝
         Paint('Dec is visible, number is 28')
-        CheckHash(0xA934C4B7914E03BA)
+        CheckHash(0x89AB3F6209F291DD)
         Mouse.Click(36,5,left)
         Mouse.Click(36,6,left)
         //expect on top    : ╔════════ My Win ═══════[Bin:11100]═[x]╗
         //expect on bottom : ╚[Dec:28|Hex:1C]═══════════════════════╝
         Paint('All are visible')
-        CheckHash(0xADA39D8995EA0606)
+        CheckHash(0x38A45512A58B0DE5)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
@@ -1817,6 +1817,7 @@ fn check_single_window() {
     a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
     a.run();
 }
+
 #[test]
 fn check_single_window_with_commandbar() {
     let script = "
@@ -1854,6 +1855,72 @@ fn check_single_window_with_menu_and_command_bar() {
 }
 
 #[test]
+#[should_panic(expected = "When `single_window(...)` is being used to initialized an application, you can only use add_window(...) method once (to add the first and single window) !")]
+fn check_single_window_panic_on_multiple_add_window() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen)')
+        // this code will not be reached
+        CheckHash(0x0)
+    ";
+    let mut a = App::debug(40, 10, script).single_window().build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"));
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "A window used in a single window mode (via App::build().single_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !")]
+fn check_single_window_panic_on_sizeable_flags() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen)')
+        // this code will not be reached
+        CheckHash(0x0)
+    ";
+    let mut a = App::debug(40, 10, script).single_window().build().unwrap();
+    a.add_window(window!("Test,x:0,y:1,w:10,h:8,flags:sizeable"));
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")]
+fn check_single_window_panic_no_window() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state (full-screen)')
+        // this code will not be reached
+        CheckHash(0x0)
+    ";
+    let a = App::debug(40, 10, script).single_window().build().unwrap();
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "When `single_window(...)` is being used to initialized an application, you can not use `.desktop(...)` command to provide a custom desktop !")]
+fn check_single_window_panic_no_custom_desktop() {
+    #[Desktop(overwrite = OnPaint, internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl OnPaint for MyDesktop {
+        fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+            surface.clear(Character::new('x', Color::Red, Color::Green, CharFlags::None));
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('desktop with red and green')
+        CheckHash(0x0)
+    ";
+    let a = App::debug(60, 10, script).desktop(MyDesktop::new()).single_window().build().unwrap();
+    a.run();
+}
+
+#[test]
 fn check_multiple_windows_focus() {
     let script = "
         Paint.Enable(false)
@@ -1873,5 +1940,32 @@ fn check_multiple_windows_focus() {
     a.add_window(window!("Win1,x:1,y:1,w:30,h:5"));
     a.add_window(window!("Win2,x:11,y:3,w:30,h:5"));
     a.add_window(window!("Win3,x:21,y:5,w:30,h:5"));
+    a.run();
+}
+
+#[test]
+fn check_window_toolbar_single_choice_caption() {
+    let script = "
+        Paint.Enable(false)
+        //expect on bottom: ╚[Option 1|Option 2]═══════════════════════╝
+        Paint('Initial state - Option 1 selected')
+        CheckHash(0x6A43F6EA0169CF5B)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
+    
+    // Create toolbar with single choice items
+    let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+    // Add items to toolbar
+    let h1 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &1"));
+    let h2 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &2"));
+    
+    // Verify initial state
+    assert_eq!(w.toolbar().get(h1).unwrap().caption(), "Option 1");
+    assert_eq!(w.toolbar().get(h2).unwrap().caption(), "Option 2");
+    assert!(!w.toolbar().get(h1).unwrap().is_selected());
+    assert!(!w.toolbar().get(h2).unwrap().is_selected());
+    
+    a.add_window(w);
     a.run();
 }

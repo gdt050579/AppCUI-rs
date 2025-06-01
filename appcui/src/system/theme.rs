@@ -5,6 +5,7 @@ mod tests;
 // stock themes
 mod default;
 mod dark_gray;
+mod light;
 
 
 pub use structures::Theme;

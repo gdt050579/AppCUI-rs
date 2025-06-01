@@ -1,4 +1,7 @@
-use crate::prelude::*;
+use crate::{prelude::*, ui::numericselector::Format};
+use super::number::Number;
+use crate::ui::numericselector::NumericSelector;
+
 
 #[test]
 fn check_creation() {
@@ -350,3 +353,164 @@ fn check_events() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn test_number_signed_integers_write_to_string() {
+    // Create a string to hold the formatted output
+    let mut output = String::with_capacity(128);
+    
+    // Test i8
+    let i8_value: i8 = 42;
+    i8_value.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "42");
+    
+    i8_value.write_to_string(&mut output, Format::Percentage);
+    assert_eq!(output, "42%");
+    
+    i8_value.write_to_string(&mut output, Format::Hex);
+    assert_eq!(output, "0x2A");
+    
+    // Test i16
+    let i16_value: i16 = -1000;
+    i16_value.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "-1000");
+    
+    i16_value.write_to_string(&mut output, Format::DigitGrouping);
+    assert_eq!(output, "-1,000");
+    
+    // Test i32
+    let i32_value: i32 = 1_000_000;
+    i32_value.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "976 KB");
+    
+    // Test negative values
+    let negative: i32 = -42;
+    negative.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "-42");
+    
+    negative.write_to_string(&mut output, Format::Hex);
+    assert_eq!(output, "-0x2A");
+}
+
+#[test]
+fn test_number_unsigned_integers_write_to_string() {
+    // Create a string to hold the formatted output
+    let mut output = String::with_capacity(128);
+    
+    // Test u8
+    let u8_value: u8 = 255;
+    u8_value.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "255");
+    
+    u8_value.write_to_string(&mut output, Format::Hex);
+    assert_eq!(output, "0xFF");
+    
+    // Test u32
+    let u32_value: u32 = 1_000_000;
+    u32_value.write_to_string(&mut output, Format::DigitGrouping);
+    assert_eq!(output, "1,000,000");
+    
+    // Test u64
+    let u64_value: u64 = 0xDEADBEEF;
+    u64_value.write_to_string(&mut output, Format::Hex);
+    assert_eq!(output, "0xDEADBEEF");
+    
+    // Test usize
+    let usize_value: usize = 50;
+    usize_value.write_to_string(&mut output, Format::Percentage);
+    assert_eq!(output, "50%");
+}
+
+#[test]
+fn test_number_floating_point_write_to_string() {
+    // Create a string to hold the formatted output
+    let mut output = String::with_capacity(128);
+    
+    // Test f32
+    let f32_value: f32 = 3.625;
+    f32_value.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "3.62");
+    
+    // Test f64
+    let f64_value: f64 = 2.5;
+    f64_value.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "2.50");
+    
+    
+    // Test negative float
+    let negative_float: f64 = -1.5;
+    negative_float.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "-1.50");
+}
+
+#[test]
+fn test_number_size_format() {
+    // Create a string to hold the formatted output
+    let mut output = String::with_capacity(128);
+    
+    // Test bytes
+    let bytes: u32 = 900;
+    bytes.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 B");
+    
+    // Test kilobytes
+    let kilobytes: u32 = 2 * 1024;
+    kilobytes.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "2 KB");
+    
+    // Test megabytes
+    let megabytes: u32 = 3 * 1024 * 1024;
+    megabytes.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "3 MB");
+    
+    // Test gigabytes (using u64 to handle larger values)
+    let gigabytes: u64 = 4u64 * 1024 * 1024 * 1024;
+    gigabytes.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "4 GB");
+    
+    // Test terabytes (using u64 to handle larger values)
+    let terabytes: u64 = 5u64 * 1024 * 1024 * 1024 * 1024;
+    terabytes.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "5 TB");
+}
+
+#[test]
+fn test_number_large_numbers() {
+    // Create a string to hold the formatted output
+    let mut output = String::with_capacity(128);
+    
+    // Test large i128
+    let large_i128: i128 = i128::MAX / 2;
+    large_i128.write_to_string(&mut output, Format::DigitGrouping);
+    assert!(output.contains(","));
+    
+    // Test large u128
+    let large_u128: u128 = u128::MAX / 2;
+    large_u128.write_to_string(&mut output, Format::Decimal);
+    assert!(output.len() > 30);
+}
+
+#[test]
+fn test_number_boundary_values() {
+    // Create a string to hold the formatted output
+    let mut output = String::with_capacity(128);
+    
+    // Test minimum values
+    let min_i8: i8 = i8::MIN;
+    min_i8.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "-128");
+    
+    let min_i32: i32 = i32::MIN;
+    min_i32.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "-2147483648");
+    
+    // Test maximum values
+    let max_u8: u8 = u8::MAX;
+    max_u8.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "255");
+    
+    let max_u16: u16 = u16::MAX;
+    max_u16.write_to_string(&mut output, Format::Decimal);
+    assert_eq!(output, "65535");
+}
+

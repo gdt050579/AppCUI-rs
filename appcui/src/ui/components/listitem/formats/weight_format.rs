@@ -9,7 +9,7 @@ const TON: FormatNumber = FormatNumber::new(10).suffix(" t ").group(3, b',');
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum WeightFormat {
-    Grans,
+    Grams,
     Milligrams,
     Kilograms,
     Pounds,
@@ -20,7 +20,7 @@ impl WeightFormat {
     pub(crate) fn write<'a>(&self, value: u64, output: &'a mut [u8]) -> Option<&'a str> {
         match self {
             WeightFormat::Kilograms => KG.write_number(value, output),          
-            WeightFormat::Grans => GR.write_number(value, output),
+            WeightFormat::Grams => GR.write_number(value, output),
             WeightFormat::Milligrams => MG.write_number(value, output),
             WeightFormat::Pounds => LB.write_number(value, output),
             WeightFormat::Tons => TON.write_number(value, output),

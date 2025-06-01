@@ -18,7 +18,9 @@ impl Panel {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut panel = Panel::new("Panel", Layout::new("x:1,y:1,w:20,h:10"), panel::Type::Border);
+    /// let mut panel = Panel::new("Panel", 
+    ///                            Layout::new("x:1,y:1,w:20,h:10"), 
+    ///                            panel::Type::Border);
     /// ```
     pub fn new(caption: &str, layout: Layout, panel_type: Type) -> Self {
         let mut panel = Panel {
@@ -47,7 +49,7 @@ impl Panel {
 
     /// Returns the type of the panel
     #[inline(always)]
-    pub fn get_type(&self) -> Type {
+    pub fn panel_type(&self) -> Type {
         self.panel_type
     }
 

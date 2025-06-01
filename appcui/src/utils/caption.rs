@@ -9,7 +9,7 @@ pub(crate) enum ExtractHotKeyMethod {
     CtrlPlusKey,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
 pub(crate) struct Caption {
     text: String,
     chars_count: usize,

@@ -125,31 +125,31 @@ fn check_panel_add_controls() {
     let script = "
         Paint.Enable(false)
         Paint('focus on checkbox')   
-        CheckHash(0xD719107CC4836D31)
+        CheckHash(0x6B19FDCD55FD95BA)
         Key.Pressed(Tab)
         Paint('focus on but-1')   
-        CheckHash(0x333B7140835D2CDD)
+        CheckHash(0x85CDF462A05261BE)
         Key.Pressed(Tab)
         Paint('focus on <some option> checkbox')   
-        CheckHash(0xE8B901C118B2EF1)
+        CheckHash(0x3A38555BCB031722)
         Key.Pressed(Tab)
         Paint('focus on but-2')   
-        CheckHash(0xA2FEDAC449ABC938)
+        CheckHash(0x794498E2F096BECB)
         Key.Pressed(Tab)
         Paint('focus on checkbox (again)')   
-        CheckHash(0xD719107CC4836D31)
+        CheckHash(0x6B19FDCD55FD95BA)
         Key.Pressed(Shift+Tab)
         Paint('Backwards: focus on but-2')   
-        CheckHash(0xA2FEDAC449ABC938)
+        CheckHash(0x794498E2F096BECB)
         Key.Pressed(Shift+Tab)
         Paint('Backwards: focus on <some option> checkbox')   
-        CheckHash(0xE8B901C118B2EF1)
+        CheckHash(0x3A38555BCB031722)
         Key.Pressed(Shift+Tab)
         Paint('Backwards: focus on but-1')   
-        CheckHash(0x333B7140835D2CDD)
+        CheckHash(0x85CDF462A05261BE)
         Key.Pressed(Shift+Tab)
         Paint('Back to start')   
-        CheckHash(0xD719107CC4836D31)
+        CheckHash(0x6B19FDCD55FD95BA)
     ";
     let mut a = App::debug(60, 13, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:11");
@@ -363,4 +363,23 @@ fn check_panel_navigate_keys() {
     w.add(p4);
     a.add_window(w);
     a.run();    
+}
+
+#[test]
+fn check_panel_api() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Border panel -> New title')   
+        CheckHash(0x226838AC6C4DC67)   
+    ";
+    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:78,h:11");
+    let mut p = panel!("Options,x:1,y:1,w:16,h:4");
+    assert_eq!(p.panel_type(), panel::Type::Border);
+    assert_eq!(p.title(), "Options");
+    p.set_title("New title");
+    assert_eq!(p.title(), "New title");    
+    w.add(p);
+    a.add_window(w);
+    a.run();
 }

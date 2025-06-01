@@ -4,15 +4,24 @@ Represent a control with two states (checked and unckehed):
 
 <img src="img/checkbox.png" width=300/>
 
-To create a checkbox use `CheckBox::new` method (with 3 parameters: a caption, a layout and checked status (**true** or **false**)).
+To create a checkbox use `CheckBox::new` method (with 3 parameters: a caption, a layout and checked status (**true** or **false**)) or method `CheckBox::with_type` (with one aditional parameter - the type of the checblx).
 ```rs
-let b = CheckBox::new("A checkbox", Layout::new("x:10,y:5,w:15"),true);
+let b1 = CheckBox::new("A checkbox", 
+                       Layout::new("x:10,y:5,w:15"),
+                       true);
+let b2 = CheckBox::with_type("Another checkbox", 
+                             Layout::new("x:10,y:5,w:15"),
+                             false,
+                             checkbox::Type::YesNo);
 ```
+
+
 or the macro `checkbox!`
 ```rs
 let c1 = checkbox!("caption='Some option',x:10,y:5,w:15,h:1");
 let c2 = checkbox!("'Another &option',x:10,y:5,w:15,h:1,checked:true");
 let c3 = checkbox!("'&Multi-line option\nthis a hot-key',x:10,y:5,w:15,h:3,checked:false");
+let c4 = checkbox!("'&YesNo checkbox',x:10,y:5,w:15,h:3,checked:false,type: YesNo");
 ```
 
 The caption of a checkbox may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a checkbox with the following caption `&Option number 1` will set up the text of the checkbox to `Option number 1` and will set up character `O` as the hot key for that checkbox (pressing `Alt+O` will be equivalent to changing the status for that checkbox from checked to unchecked or vice-versa).
@@ -25,6 +34,7 @@ A checkbox supports all common parameters (as they are described in [Instantiate
 | -------------------- | ------ | ----------------------------------- | ----------------------------------------------- |
 | `text` or `caption`  | String | **Yes** (first postional parameter) | The caption (text) written on a checkbox        |
 | `checked` or `check` | Bool   | **No**                              | Checkbox checked status: **true** for **false** |
+| `type`               | String | **No**                              | The type of the checkbox (see below)            |
 
 
 Some examples that uses these paramateres:
@@ -33,6 +43,33 @@ let disabled_checkbox = checkbox!("caption=&Disabled,x:10,y:5,w:15,enable=false"
 let hidden_checkbox = checkbox!("text='&Hidden',x=9,y:1,align:center,w:9,visible=false");
 let multi_line_checkbox = checkbox!("'&Multi line\nLine2\nLine3',x:1,y:1,w:10,h:3");
 ```
+
+The type of a checkbox is described by the `checkbox::Type` enum:
+```rust
+#[derive(Copy,Clone,PartialEq,Eq)]
+pub enum Type {
+    Standard, // Default value
+    Ascii,
+    CheckBox,
+    CheckMark,
+    FilledBox,
+    YesNo,
+    PlusMinus,
+}
+```
+
+The type of the checkbox describes how the checkbox state (**checked** or **unchecked**) will be represented on the screen. 
+
+| Type      | Check State | Uncheck State |
+| --------- | ----------- | ------------- |
+| Standard  | [✓] Checked | [ ] Unchecked |
+| Ascii     | [X] Checked | [ ] Unchecked |
+| CheckBox  | ☑ Checked   | ☐ Unchecked   |
+| CheckMark | ✔ Checked   | ✖ Unchecked   |
+| FilledBox | ▣ Checked   | ▢ Unchecked   |
+| YesNo     | [Y] Checked | [N] Unchecked |
+| PlusMinus | ➕ Checked   | ➖ Unchecked   |
+
 
 ## Events
 To intercept events from a checkbox, the following trait has to be implemented to the Window that processes the event loop:

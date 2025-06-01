@@ -63,3 +63,19 @@ fn check_label_with_nacro() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_label_caption() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xC4C7983EC13953E2)   
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let l = Label::new("Some &Text", Layout::new("d:tl,w:10,h:3"));
+    assert_eq!(l.caption(), "Some Text");
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}

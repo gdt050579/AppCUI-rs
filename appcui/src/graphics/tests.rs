@@ -1,4 +1,4 @@
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 use crate::graphics::text_format::TextFormatBuilder;
 use crate::graphics::Point;
@@ -711,7 +711,7 @@ fn check_write_text_multi_line_word_wrap_aligned_v2() {
         .attribute(CharAttribute::with_color(Color::Black, Color::Silver))
         .wrap_type(WrapType::WordWrap(15))
         .hotkey(CharAttribute::with_color(Color::White, Color::DarkGreen), 16)
-        .build();    
+        .build();
     s.write_text(txt, &format);
 
     //s.print();
@@ -893,6 +893,86 @@ fn check_charattr_macro() {
     assert_eq!(charattr!("white,pinK"), CharAttribute::new(Color::White, Color::Pink, CharFlags::None));
     assert_eq!(charattr!("g,r"), CharAttribute::new(Color::Green, Color::Red, CharFlags::None));
     assert_eq!(charattr!("g"), CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None));
-    assert_eq!(charattr!("g,attr: Bold+Italic"), CharAttribute::new(Color::Green, Color::Transparent, CharFlags::Bold | CharFlags::Italic));
-    assert_eq!(charattr!("?,r,attr: Bold+Italic"), CharAttribute::new(Color::Transparent, Color::Red, CharFlags::Bold | CharFlags::Italic));
+    assert_eq!(
+        charattr!("g,attr: Bold+Italic"),
+        CharAttribute::new(Color::Green, Color::Transparent, CharFlags::Bold | CharFlags::Italic)
+    );
+    assert_eq!(
+        charattr!("?,r,attr: Bold+Italic"),
+        CharAttribute::new(Color::Transparent, Color::Red, CharFlags::Bold | CharFlags::Italic)
+    );
+}
+
+#[test]
+fn check_size_reduce_by() {
+    let s = Size::new(100, 100);
+    let s = s.reduce_by(10);
+    assert_eq!(s, Size::new(90, 90));
+    let s = s.reduce_by(91);
+    assert_eq!(s, Size::new(0, 0));
+}
+
+#[test]
+fn check_create_charattributi() {
+    let a = CharAttribute::new(Color::Red, Color::Green, CharFlags::Bold);
+    assert_eq!(a.foreground, Color::Red);
+    assert_eq!(a.background, Color::Green);
+    assert_eq!(a.flags, CharFlags::Bold);
+
+    let a = CharAttribute::with_color(Color::Blue, Color::White);
+    assert_eq!(a.foreground, Color::Blue);
+    assert_eq!(a.background, Color::White);
+    assert_eq!(a.flags, CharFlags::None);
+
+    let a = CharAttribute::with_fore_color(Color::Pink);
+    assert_eq!(a.foreground, Color::Pink);
+    assert_eq!(a.background, Color::Transparent);
+    assert_eq!(a.flags, CharFlags::None);
+
+    let a = CharAttribute::with_back_color(Color::DarkRed);
+    assert_eq!(a.foreground, Color::Transparent);
+    assert_eq!(a.background, Color::DarkRed);
+    assert_eq!(a.flags, CharFlags::None);
+}
+
+#[test]
+fn check_surface_read_char() {
+    let mut s = SurfaceTester::new(10, 10);
+    s.write_char(3, 3, char!("A,Red,Green,flags: Bold"));
+    s.write_char(30, 30, char!("A,Red,Green,flags: Bold"));
+    let c = s.char(3, 3);
+    assert!(c.is_some());
+    let c = c.unwrap();
+    assert_eq!(c.code, 'A');
+    assert_eq!(c.foreground, Color::Red);
+    assert_eq!(c.background, Color::Green);
+    assert_eq!(c.flags, CharFlags::Bold);
+
+    assert_eq!(s.char(11, 11), None);
+}
+
+#[test]
+fn check_fill_vertical_line_with_size() {
+    let mut s = SurfaceTester::new(10, 10);
+    s.fill_vertical_line_with_size(1, 1, 5, char!("A,Red,Green"));
+    s.fill_vertical_line_with_size(3, 3, 5, char!("B,Red,Green"));
+    s.fill_vertical_line_with_size(5, 5, 5, char!("C,Red,Green"));
+    s.fill_vertical_line_with_size(7, 7, 5, char!("D,Red,Green"));
+    s.fill_vertical_line_with_size(0, 0, 0, char!("E,Red,Green"));
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xEACCDD8CC9B5BDE9);
+}
+
+#[test]
+fn check_write_ascii_multi_line() {
+    let mut s = SurfaceTester::new(10, 10);
+    s.write_ascii(
+        1,
+        1,
+        b"Hello \nWorld!\nfrom\nRust",
+        CharAttribute::with_color(Color::White, Color::Black),
+        true,
+    );
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xDE250FB0D21B6412);
 }

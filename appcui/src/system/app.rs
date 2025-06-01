@@ -13,6 +13,9 @@ use crate::ui::common::traits::*;
 
 static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 
+/// Represents the main application object for AppCUI.
+///
+/// This struct is used to create and manage the main application. It provides methods to add windows, set the theme, and run the application.
 pub struct App {
     _phantom: PhantomData<*mut ()>,
 }
@@ -23,6 +26,9 @@ impl App {
         *app_created
     }
     pub(super) fn create(builder: crate::system::Builder) -> Result<Self, Error> {
+        if APP_CREATED_MUTEX.is_poisoned() {
+            APP_CREATED_MUTEX.clear_poison();
+        }
         let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
         if *app_created {
             return Err(Error::new(
@@ -37,6 +43,7 @@ impl App {
         })
     }
     /// Creates a new builder object using the default terminal for the current operating system
+    #[allow(clippy::new_ret_no_self)]
     pub fn new() -> crate::system::Builder {
         crate::system::Builder::new()
     }
@@ -127,6 +134,7 @@ impl App {
         RuntimeManager::get().add_window(window)
     }
 
+    /// Sets the theme for the current application.
     pub fn set_theme(theme: Theme) {
         if !App::is_created() {
             panic!("App::set_theme can only be called after the App has been created !");

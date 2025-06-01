@@ -1,5 +1,7 @@
+#[cfg(target_family = "unix")]
 mod terminal;
-pub (super) mod colors;
+
+#[cfg(target_family = "unix")]
 pub (super) mod ncursesapi;
 
 #[cfg(target_family = "unix")]

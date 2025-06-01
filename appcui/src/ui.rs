@@ -1,3 +1,82 @@
+//! User interface components and controls for AppCUI.
+//!
+//! This module provides a comprehensive set of UI controls and components for building
+//! terminal-based user interfaces in the AppCUI framework. The UI module includes:
+//!
+//! # Core Components
+//!
+//! - [`Desktop`]: The main container for the application UI
+//! - [`Window`]: Standard application windows
+//! - [`Panel`]: Container for grouping related controls
+//! - [`Layout`]: Management of control positioning and sizing
+//!
+//! # Input Controls
+//!
+//! - [`Button`]: Clickable button control
+//! - [`TextField`]: Single-line text input
+//! - [`TextArea`]: Multi-line text input and editing
+//! - [`Password`]: Masked text input for secure data
+//! - [`CheckBox`]: Boolean selection control
+//! - [`RadioBox`]: Single selection from multiple options
+//! - [`ThreeStateBox`]: Three-state checkbox (checked, unchecked, indeterminate)
+//! - [`ComboBox`]: Editable dropdown list
+//! - [`DropDownList`]: Non-editable dropdown list
+//! - [`NumericSelector`]: Numeric value input and adjustment
+//! - [`DatePicker`]: Date selection control
+//! - [`KeySelector`]: Keyboard shortcut selector
+//! - [`ColorPicker`]: Color selection control
+//!
+//! # Display Controls
+//!
+//! - [`Label`]: Static text display
+//! - [`ProgressBar`]: Visual representation of progress
+//! - [`ImageViewer`]: Display and manipulation of images
+//! - [`Canvas`]: Custom drawing surface
+//! - [`HLine`]/[`VLine`]: Horizontal and vertical separators
+//!
+//! # Navigation and Organization
+//!
+//! - [`Tab`]: Tabbed interface for organizing content
+//! - [`Accordion`]: Collapsible sections of controls
+//! - [`VSplitter`]/[`HSplitter`]: Resizable split views (vertical/horizontal)
+//! - [`TreeView`]: Hierarchical data presentation
+//! - [`ListBox`]: Simple list of selectable items
+//! - [`ListView`]: Multi-column list with headers
+//! - [`PathFinder`]: File system navigation control
+//!
+//! # Menus and Commands
+//!
+//! - [`Menu`]: Application menus
+//! - [`CommandBar`]: Shortcut command interface
+//!
+//! # Example
+//!
+//! Creating a simple hello world window:
+//!
+//! ```rust, no_run
+//! use appcui::prelude::*;
+//!
+//! fn main() -> Result<(), appcui::system::Error> {
+//!     // Initialize the application
+//!     let mut app = App::new().build()?;
+//!     
+//!     // Create a window with centered layout and specific size
+//!     let mut win = Window::new(
+//!         "First Window", 
+//!         Layout::new("dock:center,width:30,height:9"), 
+//!         window::Flags::Sizeable
+//!     );
+//!     
+//!     // Add a label to the window
+//!     win.add(Label::new("Hello World !", Layout::new("dock:center,width:13,height:1")));
+//!     
+//!     // Add the window to the application and run
+//!     app.add_window(win);
+//!     app.run();
+//!     
+//!     Ok(())
+//! }
+
 pub mod layout;
 pub mod common;
 
@@ -38,6 +117,7 @@ pub mod markdown;
 pub mod pathfinder;
 pub mod treeview;
 pub mod progressbar;
+pub mod textarea;
 
 // re-export
 pub use common::ControlBase;
@@ -76,3 +156,5 @@ pub use markdown::Markdown;
 pub use pathfinder::PathFinder;
 pub use treeview::TreeView;
 pub use progressbar::ProgressBar;
+pub use textarea::TextArea;
+pub use menu::Menu;

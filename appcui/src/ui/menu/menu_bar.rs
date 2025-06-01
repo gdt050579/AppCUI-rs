@@ -3,12 +3,17 @@ use crate::{
     input::{Key, KeyCode, KeyModifier},
     prelude::TextFormatBuilder,
     system::{Handle, RuntimeManager, Theme},
-    ui::common::{traits::EventProcessStatus, UIElement},
+    ui::common::traits::EventProcessStatus,
     utils::{Strategy, VectorIndex},
 };
 
 use super::{Menu, MenuBarItem};
 
+/// A menu bar that displays a horizontal list of menus at the top of a window or desktop.
+///
+/// The menu bar is responsible for displaying and managing the top-level menus 
+/// in an application. It handles user interactions, keyboard shortcuts, and visual 
+/// presentation of menus.
 pub struct MenuBar {
     items: Vec<MenuBarItem>,
     x: i32,
@@ -17,7 +22,7 @@ pub struct MenuBar {
     opened_item: VectorIndex,
     hovered_item: VectorIndex,
     count: usize,
-    receiver_control_handle: Handle<UIElement>,
+    receiver_control_handle: Handle<()>,
 }
 
 impl MenuBar {
@@ -66,6 +71,13 @@ impl MenuBar {
         self.width = width;
         self.update_positions();
     }
+    /// Adds a menu to the menu bar.
+    ///
+    /// This method adds the specified menu to the menu bar, making it accessible
+    /// to the user. Menus are displayed in the order they are added.
+    ///
+    /// # Parameters
+    /// * `handle` - A handle to the menu to add.
     pub fn add(&mut self, handle: Handle<Menu>) {
         if self.receiver_control_handle.is_none() {
             return;
@@ -109,7 +121,7 @@ impl MenuBar {
     }
 
     #[inline(always)]
-    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;
     }
     pub(crate) fn clear(&mut self) {

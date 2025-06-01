@@ -175,7 +175,7 @@ impl OnMouseEvent for ToggleButton {
 }
 impl OnSiblingSelected for ToggleButton {
     #[allow(private_interfaces)]
-    fn on_sibling_selected(&mut self, handle: Handle<UIElement>) {
+    fn on_sibling_selected(&mut self, handle: Handle<()>) {
         if self.single_selection {
             self.state = self.handle == handle;
         }
