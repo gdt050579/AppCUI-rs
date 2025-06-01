@@ -1,211 +1,141 @@
 # AppCUI-rs
 
-# Web Terminal Implementation
+<img src="./docs/chapter-1/img/logo.png" align="center" />
 
-## Prerequisites
-
-Before you begin, make sure you have:
-
-- **Rust Toolchain:**  
-
->[!IMPORTANT]
-> Use the nightly toolchain, as this project requires unstablefeatures.
-
-- **wasm-bindgen:**  
-  Add the following dependency in your `Cargo.toml`:
-  ```toml
-  wasm-bindgen = { version = "0.2" }
-  ```
-- **wasm-pack:**  
-  Install [wasm-pack](https://rustwasm.github.io/wasm-pack/) for building your WebAssembly package.
-- **A Web Server:**  
-  Use the provided `server.py` or any static server to serve your files.
-  
->[!WARNING]
-> If using threads, make sure to serve all your files inbrowser with these headers:
-> ```
-> Cross-Origin-Opener-Policy: "same-origin"
-> Cross-Origin-Embedder-Policy: "require-corp"
-> ```
-
-## Setup
-
-### 1. Configure Rust for WebAssembly
-
-Create or update your `.cargo/config.toml` to include the following target configuration:
-
-```toml
-[target.wasm32-unknown-unknown]
-rustflags = [
-    "-C", "target-feature=+atomics,+bulk-memory,+mutable-globals"
-]
-
-[unstable]
-build-std = ["panic_abort", "std"]
+```                                                              
+⯈ 𝗔𝗽𝗽𝗖𝗨𝗜-𝗿𝘀 🖳
 ```
 
-This configuration enables atomic operations, bulk memory, and mutable globals on the `wasm32-unknown-unknown` target, and ensures that the build uses the required unstable std features.
+![Windows Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/windows.yml/badge.svg)
+![Linux Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/linux.yml/badge.svg)
+![MacOS Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/macos.yml/badge.svg)
+![Code Coverage](https://gist.githubusercontent.com/gdt050579/f7d7e7d56b2725a3b33a265e8a9d8e9c/raw/coverage.svg)
+![License](https://img.shields.io/github/license/gdt050579/AppCUI-rs)
 
-### 2. Create a Library Package
+AppCUI is a simple, easy-to-use and cross-platform library for creating text-based user interfaces in Rust:
+* [Book](https://gdt050579.github.io/AppCUI-rs/)
+* [Documentation]()
 
-Ensure your Rust project is set up as a library. In your library entry point, add the wasm-bindgen start macro to export your start function:
+
+## ✨ Features
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, combo boxes, date/time pickers, color pickers, etc.). 
+- [x] menus and toolbars
+- [x] multi-platform support (Windows via API, Linux via ncurses, MacOS via termios)
+- [x] multi-threading support
+- [x] timers
+- [x] mouse support
+- [x] clipboard support
+- [x] color themes
+- [x] support for Unicode characters
+- [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc)
+
+## 📸 Screenshots 
+
+<img src="./docs/chapter-1/img/appcui-rs-demo.gif" align="center" />
+
+## 🚀 Quick Start
+
+Add the following to your `Cargo.toml`:
+
+```toml
+[dependencies]
+appcui = "*"
+```
+
+Then create a new Rust project and add the following code:
 
 ```rust
-use wasm_bindgen::prelude::wasm_bindgen;
+use appcui::prelude::*;
 
-#[wasm_bindgen(start)]
-pub fn start() {
-    // your code
+fn main() -> Result<(), appcui::system::Error> {
+    let mut app = App::new().build()?;
+    let mut win = window!("Test,d:c,w:30,h:9");
+    win.add(label!("'Hello World !',d:c,w:13,h:1")));
+    app.add_window(win);
+    app.run();
+    Ok(())
 }
 ```
 
-Make sure that your library depends on the `appcui` crate (or your TUI framework) and that you use its features for rendering and input handling.
+Then run the project with `cargo run`. You should see a window with the title `Test` and the text `Hello World !` in the center.
 
-## Building the Package
+## 🧪 Examples
 
-Use `wasm-pack` to compile the project for the web target:
+- 🌍 [Hello World](examples/hello_world/)
+- 🧮 [Calculator](examples/calculator/)
+- 🎨 [Color Picker](examples/colorpicker/)
+- 📋 [Menus](examples/menus/)
 
-```sh
-wasm-pack build --target web
-```
+Check out the [examples](examples) folder for more examples.
 
-Ensure that your Cargo project has the target `wasm32-unknown-unknown` installed. You can do so with:
+## 🛠️ A more complex example
 
-```sh
-rustup target add wasm32-unknown-unknown
-```
+Am example that creates a window with a button that when pressed increases a counter.
 
-## Example HTML File
+```rust
+use appcui::prelude::*;
 
-Below is an example `index.html` that sets up the canvases and loads the compiled WebAssembly package. Save this file in your project’s root directory:
+// Create a window that handles button events and has a counter
+#[Window(events = ButtonEvents)]
+struct CounterWindow {
+    counter: i32
+}
 
-<details>
-<summary> Index.html Example </summary>
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Web Terminal Test</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
+impl CounterWindow {
+    fn new() -> Self {
+        let mut w = Self {
+            // set up the window title and position
+            base: window!("'Counter window',d:c,w:30,h:5"),
+            // initial counter is 1
+            counter: 1            
+        };
+        // add a single button with the caption "1" (like the counter)
+        w.add(button!("'1',d:b,w:20"));
+        w
     }
-    #canvas, #textCanvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-      background: transparent;
+}
+impl ButtonEvents for CounterWindow {
+    // When the button is pressed, this function will be called
+    // with the handle of the button that was pressed
+    // Since we only have one button, we don't need to store its handle 
+    // in the struct, as we will receive the handle via the on_pressed method
+    fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
+        // increase the counter
+        self.counter += 1;
+        // create a text that containe the new counter
+        let text = format!("{}",self.counter);
+        // aquire a mutable reference to the button using its handle
+        if let Some(button) = self.control_mut(handle) {
+            // set the caption of the button to th new text
+            button.set_caption(&text);
+        }
+        // Tell the AppCUI framework that we have processed this event
+        // This allows AppCUI to repaint the button
+        EventProcessStatus::Processed
     }
-    #textCanvas {
-      pointer-events: none;
-    }
-    .config {
-      display: none;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="canvas"></canvas>
-  <canvas id="textCanvas"></canvas>
+}
 
-  <div class="config">
-    <span id="terminal-cols">211</span>
-    <span id="terminal-rows">56</span>
-    <span id="terminal-font">Consolas Mono, monospace</span>
-    <span id="terminal-font-size">20</span>
-  </div>
-
-  <script type="module">
-    console.log("SharedArrayBuffer available:", typeof SharedArrayBuffer !== "undefined");
-    import init, * as wasm from "./pkg/your_application.js";
-
-    init({ 
-      module: new URL("./pkg/your_application.wasm", import.meta.url),
-      memory: new WebAssembly.Memory({ initial: 200, maximum: 16384, shared: true })
-    }).then(async () => {
-      console.log("WASM module initialized");
-      await wasm.initThreadPool(2);
-    
-      if (wasm.main) {
-        wasm.main();
-        console.log("main called");
-      }
-    });
-  </script>
-</body>
-</html>
+fn main() -> Result<(), appcui::system::Error> {
+    // create a new application
+    let mut a = App::new().build()?;
+    // add a new window (of type CounterWindow) to the application
+    a.add_window(CounterWindow::new());
+    // Run AppCUI framework (this wil start the window loop and messaage passing)
+    a.run();
+    Ok(())
+}
 ```
 
-</details>
+## 🛣️ Roadmap
 
-This file:
-- Creates two canvases – one for WebGL background rendering and one for text rendering.
-- Includes a hidden configuration section for terminal settings.
-- Imports the WebAssembly package and initializes the thread pool.
+- [x] Basic set of widgets and support for Windows, Linux and MaxOS
+- [x] WebGL support
+- [ ] OpenGL / SDL / Vulkan support
+- [ ] TextArea suuport for code highlighting
 
-## Running the Server
+## 🤝 Contributing
 
-A simple Python server is provided to host the built files. Use the following `server.py`:
+Contributions, issues, and feature requests are welcome!  
+Check out [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
-<details>
-<summary>Python Server Example</summary>
-
-```python
-import http.server
-import socketserver
-import os
-
-class CustomHandler(http.server.SimpleHTTPRequestHandler):
-    def send_head(self):
-        path = self.translate_path(self.path)
-        if os.path.isfile(path):
-            f = open(path, 'rb')
-            fs = os.fstat(f.fileno())
-            self.send_response(200)
-            if path.endswith('.js'):
-                mime_type = "application/javascript"
-            elif path.endswith('.wasm'):
-                mime_type = "application/wasm"
-            else:
-                mime_type = "text/html"
-            self.send_header("Content-Type", mime_type)
-            self.send_header("Content-Length", str(fs.st_size))
-            self.send_header("Cross-Origin-Opener-Policy", "same-origin")
-            self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
-            self.end_headers()
-            return f
-        return super().send_head()
-
-    def do_GET(self):
-        f = self.send_head()
-        if f:
-            try:
-                self.wfile.write(f.read())
-            finally:
-                f.close()
-
-PORT = 4000
-with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
-    print(f"Serving on port {PORT}")
-    httpd.serve_forever()
-```
-
-</details>
-
-To run the server, execute:
-
-```sh
-python server.py
-```
-
-Then navigate to [http://localhost:4000/index.html](http://localhost:4000/index.html) in your browser to see your Web Terminal in action.
-
----
-
+Join the discussion in [GitHub Discussions](https://github.com/youruser/AppCUI/discussions).
