@@ -838,3 +838,23 @@ fn check_clear_value_with_panic() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_on_default_action() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (closed)')   
+        CheckHash(0x686CC81380DCE865) 
+        Key.Pressed(Alt+S)
+        Paint('2. Selector is opened (default action)')   
+        CheckHash(0xEFFDEFE5806F6E75) 
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    let mut s = selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant");
+    s.set_hotkey(key!("Alt+S"));
+    w.add(s);
+    w.add(button!("Button,x:1,y:2,w:10"));
+    a.add_window(w);
+    a.run();
+}

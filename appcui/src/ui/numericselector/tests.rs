@@ -539,3 +539,65 @@ fn test_number_boundary_values() {
     assert_eq!(output, "65535");
 }
 
+#[test]
+fn test_unsigned_size_to_string() {
+    // Create a string to hold the formatted output
+    let mut output = String::with_capacity(128);
+
+    // Bytes
+    let sz: u64 = 900;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 B");     
+
+    // KB
+    let sz: u64 = 900 * 1024;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 KB");   
+
+    // MB
+    let sz: u64 = 900 * 1024*1024;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 MB");  
+
+    // GB
+    let sz: u64 = 900 * 1024 * 1024 * 1024;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 GB");      
+
+    // TB
+    let sz: u64 = 900 * 1024 * 1024 * 1024 * 1024;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 TB");      
+}
+
+#[test]
+fn test_signed_size_to_string() {
+    // Create a string to hold the formatted output
+    let mut output = String::with_capacity(128);
+
+    // Bytes
+    let sz: i64 = 900;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 B");     
+
+    // KB
+    let sz: i64 = 900 * 1024;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 KB");   
+
+    // MB
+    let sz: i64 = 900 * 1024*1024;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 MB");  
+
+    // GB
+    let sz: i64 = 900 * 1024 * 1024 * 1024;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 GB");      
+
+    // TB
+    let sz: i64 = 900 * 1024 * 1024 * 1024 * 1024;
+    sz.write_to_string(&mut output, Format::Size);
+    assert_eq!(output, "900 TB");      
+}
+
