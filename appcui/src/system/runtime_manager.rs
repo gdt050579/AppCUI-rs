@@ -1672,6 +1672,8 @@ impl MouseMethods for RuntimeManager {
                     base.update_mouse_over_flag(true);
                     let scr_x = base.screen_clip.left;
                     let scr_y = base.screen_clip.top;
+                    let response = control.control_mut().on_mouse_event(&MouseEvent::Enter);
+                    self.repaint |= response == EventProcessStatus::Processed;
                     let response = control
                         .control_mut()
                         .on_mouse_event(&MouseEvent::Over(Point::new(event.x - scr_x, event.y - scr_y)));
