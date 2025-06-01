@@ -44,23 +44,23 @@ const MAX_SURFACE_HEIGHT: u32 = 10000;
 /// The surface has a size, an origin point, a clip area, and a cursor position.
 /// The size of the surface is maximum 10000 x 10000 characters.
 pub struct Surface {
-    pub(crate) size:   Size,
-    pub(crate) chars:  Vec<Character>,
+    pub(crate) size: Size,
+    pub(crate) chars: Vec<Character>,
     pub(crate) cursor: Cursor,
 
     #[cfg(target_arch = "wasm32")]
-    pub origin:      Point,
+    pub origin: Point,
     #[cfg(target_arch = "wasm32")]
     pub(crate) clip: ClipArea,
 
     #[cfg(not(target_arch = "wasm32"))]
     origin: Point,
     #[cfg(not(target_arch = "wasm32"))]
-    clip:   ClipArea,
+    clip: ClipArea,
 
     base_origin: Point,
-    base_clip:   ClipArea,
-    right_most:  i32,
+    base_clip: ClipArea,
+    right_most: i32,
     bottom_most: i32,
 }
 
@@ -79,14 +79,14 @@ impl Surface {
         let h = height.clamp(1, MAX_SURFACE_HEIGHT);
         let count = (w as usize) * (h as usize);
         let mut s = Surface {
-            size:        Size::new(w, h),
-            origin:      Point::default(),
+            size: Size::new(w, h),
+            origin: Point::default(),
             base_origin: Point::default(),
-            chars:       Vec::<Character>::with_capacity(count),
-            clip:        ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
-            base_clip:   ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
-            cursor:      Cursor::new(),
-            right_most:  (w - 1) as i32,
+            chars: Vec::<Character>::with_capacity(count),
+            clip: ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
+            base_clip: ClipArea::new(0, 0, (w - 1) as i32, (h - 1) as i32),
+            cursor: Cursor::new(),
+            right_most: (w - 1) as i32,
             bottom_most: (h - 1) as i32,
         };
         s.chars.resize(count, Character::default());

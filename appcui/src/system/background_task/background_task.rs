@@ -9,7 +9,7 @@ use super::{
 };
 
 pub struct BackgroundTask<T: Send + 'static, R: Send + 'static> {
-    id:       u32,
+    id: u32,
     _phantom: std::marker::PhantomData<(T, R)>,
 }
 
@@ -20,7 +20,7 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
         if let Some(t) = btm.get::<T, R>(id) {
             if t.validate(std::any::TypeId::of::<T>(), std::any::TypeId::of::<R>()) {
                 Some(Self {
-                    id:       id as u32,
+                    id: id as u32,
                     _phantom: std::marker::PhantomData,
                 })
             } else {

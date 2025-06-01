@@ -25,12 +25,12 @@ where
     R: crate::utils::NavigatorRoot,
     T: crate::utils::Navigator<E, R, PathBuf>,
 {
-    cached_path:  String,
+    cached_path: String,
     cached_items: Vec<String>,
-    suggestions:  Vec<String>,
-    _phantom_t:   std::marker::PhantomData<T>,
-    _phantom_r:   std::marker::PhantomData<R>,
-    _phantom_e:   std::marker::PhantomData<E>,
+    suggestions: Vec<String>,
+    _phantom_t: std::marker::PhantomData<T>,
+    _phantom_r: std::marker::PhantomData<R>,
+    _phantom_e: std::marker::PhantomData<E>,
 }
 
 impl<T, E, R> NavigatorDataCacher<T, E, R>
@@ -41,12 +41,12 @@ where
 {
     fn new() -> Self {
         Self {
-            cached_path:  String::new(),
+            cached_path: String::new(),
             cached_items: vec![],
-            suggestions:  vec![],
-            _phantom_r:   PhantomData,
-            _phantom_t:   PhantomData,
-            _phantom_e:   PhantomData,
+            suggestions: vec![],
+            _phantom_r: PhantomData,
+            _phantom_t: PhantomData,
+            _phantom_e: PhantomData,
         }
     }
     fn suggestions(&self) -> &Vec<String> {
@@ -99,27 +99,27 @@ where
     R: crate::utils::NavigatorRoot,
     T: crate::utils::Navigator<E, R, PathBuf>,
 {
-    is_readonly:       bool,
+    is_readonly: bool,
     is_case_sensitive: bool,
-    navigator_cacher:  NavigatorDataCacher<T, E, R>,
+    navigator_cacher: NavigatorDataCacher<T, E, R>,
 
     // input area
-    cursor:               usize,
-    start:                usize,
-    end:                  usize,
-    width:                u32,
-    input_path:           String,
-    backup_path:          String,
-    selection:            Selection,
-    drag_started:         bool,
+    cursor: usize,
+    start: usize,
+    end: usize,
+    width: u32,
+    input_path: String,
+    backup_path: String,
+    selection: Selection,
+    drag_started: bool,
     out_of_focus_surface: Surface,
 
     // suggestions area
-    header_y_ofs:            i32,
-    expanded_panel_y:        i32,
+    header_y_ofs: i32,
+    expanded_panel_y: i32,
     selected_suggestion_pos: u16,
-    start_suggestions_pos:   u16,
-    expanded_above:          bool,
+    start_suggestions_pos: u16,
+    expanded_above: bool,
 
     // unused
     _phantom_t: std::marker::PhantomData<T>,
@@ -159,26 +159,26 @@ where
 
     pub(crate) fn new(path: &str, readonly: bool, case_sensitive: bool) -> Self {
         Self {
-            input_path:              path.to_string(),
-            backup_path:             path.to_string(),
-            cursor:                  0,
-            start:                   0,
-            end:                     0,
-            selection:               Selection::NONE,
-            drag_started:            false,
-            out_of_focus_surface:    Surface::new(1, 1),
-            is_readonly:             readonly,
-            is_case_sensitive:       case_sensitive,
-            width:                   0,
-            header_y_ofs:            0,
-            expanded_panel_y:        1,
+            input_path: path.to_string(),
+            backup_path: path.to_string(),
+            cursor: 0,
+            start: 0,
+            end: 0,
+            selection: Selection::NONE,
+            drag_started: false,
+            out_of_focus_surface: Surface::new(1, 1),
+            is_readonly: readonly,
+            is_case_sensitive: case_sensitive,
+            width: 0,
+            header_y_ofs: 0,
+            expanded_panel_y: 1,
             selected_suggestion_pos: 0,
-            start_suggestions_pos:   1,
-            expanded_above:          false,
-            navigator_cacher:        NavigatorDataCacher::new(),
-            _phantom_r:              PhantomData,
-            _phantom_t:              PhantomData,
-            _phantom_e:              PhantomData,
+            start_suggestions_pos: 1,
+            expanded_above: false,
+            navigator_cacher: NavigatorDataCacher::new(),
+            _phantom_r: PhantomData,
+            _phantom_t: PhantomData,
+            _phantom_e: PhantomData,
         }
     }
 
@@ -758,9 +758,9 @@ where
                 self.backup_path.clear();
                 self.backup_path.push_str(self.input_path.as_str());
                 control.raise_event(ControlEvent {
-                    emitter:  control.handle,
+                    emitter: control.handle,
                     receiver: control.event_processor,
-                    data:     ControlEventData::PathFinder(EventData {}),
+                    data: ControlEventData::PathFinder(EventData {}),
                 });
                 return EventProcessStatus::Processed;
             }

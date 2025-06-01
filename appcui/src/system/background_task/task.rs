@@ -20,19 +20,19 @@ pub(crate) trait Task {
 }
 
 pub(crate) struct InnerTask<T: Send, R: Send> {
-    pub(crate) control:      Handle<()>,
+    pub(crate) control: Handle<()>,
     pub(crate) main_to_task: SingleChannel<R>,
     pub(crate) task_to_main: SingleChannel<T>,
-    state:                   Arc<(Mutex<StatusUpdateRequest>, Condvar)>,
+    state: Arc<(Mutex<StatusUpdateRequest>, Condvar)>,
 }
 
 impl<T: Send + 'static, R: Send + 'static> InnerTask<T, R> {
     pub(crate) fn new(control_handle: Handle<()>) -> InnerTask<T, R> {
         InnerTask {
-            control:      control_handle,
+            control: control_handle,
             main_to_task: SingleChannel::new(),
             task_to_main: SingleChannel::new(),
-            state:        Arc::new((Mutex::new(StatusUpdateRequest::None), Condvar::new())),
+            state: Arc::new((Mutex::new(StatusUpdateRequest::None), Condvar::new())),
         }
     }
 

@@ -3,11 +3,11 @@ use crate::{system::Handle, terminals::SystemEvent};
 use std::sync::{Arc, Condvar, Mutex};
 
 pub struct BackgroundTaskConector<T: Send + 'static, R: Send + 'static> {
-    handle:          Handle<BackgroundTask<T, R>>,
+    handle: Handle<BackgroundTask<T, R>>,
     sysevent_sender: std::sync::mpsc::Sender<SystemEvent>,
-    sender:          std::sync::mpsc::Sender<T>,
-    receiver:        std::sync::mpsc::Receiver<R>,
-    state:           Arc<(Mutex<StatusUpdateRequest>, Condvar)>,
+    sender: std::sync::mpsc::Sender<T>,
+    receiver: std::sync::mpsc::Receiver<R>,
+    state: Arc<(Mutex<StatusUpdateRequest>, Condvar)>,
 }
 
 impl<T, R> BackgroundTaskConector<T, R>

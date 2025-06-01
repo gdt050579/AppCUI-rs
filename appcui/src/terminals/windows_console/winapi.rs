@@ -66,5 +66,4 @@ extern "system" {
     #[warn(non_camel_case_types)]
     pub(super) fn GlobalUnlock(hMem: HANDLE) -> BOOL;
 
-
 }
