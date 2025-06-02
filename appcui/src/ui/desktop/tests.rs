@@ -706,3 +706,29 @@ fn check_on_close_allow() {
     let a = App::debug(40, 6, script).desktop(MyDesktop::new()).build().unwrap();
     a.run();
 }
+
+#[test]
+fn check_commands_ignored() {
+    #[Desktop(events = DesktopEvents, internal = true)]
+    struct MyDesktop {}
+    impl MyDesktop {
+        fn new() -> Self {
+            Self { base: Desktop::new() }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) { 
+            // nothing should happen - set_size is ignored for desktop
+            self.set_size(1,1);
+            self.set_enabled(false);
+            self.set_visible(false);
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state (with menus)')
+        CheckHash(0xAB06844D69595285)
+    ";
+    let a = App::debug(40, 6, script).desktop(MyDesktop::new()).build().unwrap();
+    a.run();
+}
