@@ -570,7 +570,9 @@ fn check_window_toolbar_label() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
     let g = w.toolbar().create_group(GroupPosition::BottomLeft);
-    w.toolbar().add(g, toolbar::Label::new("Label 1"));
+    let l = toolbar::Label::new("Label 1");
+    assert_eq!(l.caption(),"Label 1");
+    w.toolbar().add(g, l);
     w.toolbar().add(g, toolbar::Label::new("Label 2"));
     let g = w.toolbar().create_group(GroupPosition::BottomRight);
     w.toolbar().add(g, toolbar::Label::new("Label 3"));
@@ -578,6 +580,8 @@ fn check_window_toolbar_label() {
     a.add_window(w);
     a.run();
 }
+
+
 
 #[test]
 fn check_window_toolbar_label_tooltip() {
