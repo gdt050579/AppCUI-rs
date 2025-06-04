@@ -1973,3 +1973,43 @@ fn check_window_toolbar_single_choice_caption() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_resize_mode_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xFB90C0EC876B3F5)
+        Mouse.Click(12,3,left)
+        Paint('2. Maximized')
+        CheckHash(0xA4905A9581B29981)
+        Mouse.Click(3,0,left)
+        Paint('3. Restore initial size')
+        CheckHash(0xFB90C0EC876B3F5)
+        Key.Pressed(Ctrl+Alt+R)
+        Paint('4. Enter in resize mode')
+        CheckHash(0x9D898E4DE3BD8DE8)
+        Key.Pressed(Right,10)
+        Paint('5. Move to Right 10 characters')
+        CheckHash(0x7EE9041F0A3176B8)
+        Key.Pressed(C)
+        Paint('6. Center the window')
+        CheckHash(0x9D898E4DE3BD8DE8)
+        Key.Pressed(Alt+F1)
+        Paint('7. Nothing happens')
+        CheckHash(0x9D898E4DE3BD8DE8)      
+        Key.Pressed(Ctrl+Down)
+        Paint('8. Increase height')
+        CheckHash(0x8344EF1CD0DB1C08)   
+        Key.Pressed(Ctrl+Left)
+        Paint('9. Decrease Width')
+        CheckHash(0xE0A5BFC25FE43E2E)   
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:40,h:8,flags: Sizeable");
+    w.set_tag("XYZ");
+    assert_eq!(w.tag(),Some("XYZ"));
+    assert_eq!(w.title(),"Title");
+    a.add_window(w);
+    a.run();
+}
