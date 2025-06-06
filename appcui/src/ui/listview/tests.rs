@@ -12,6 +12,7 @@ impl listview::ListItem for TestItem {
     }
 }
 
+#[derive(Debug,Eq,PartialEq)]
 struct Person {
     name: &'static str,
     age: &'static str,
@@ -105,7 +106,7 @@ impl Person {
         l.add(Person::new("Ileana", "45", "Bucharest"));
         l.add(Person::new("Geta", "50", "Timisoara"));
     }
-    fn populate_with_icon(l: &mut ListView<Person>) {
+    fn populate_with_icon(l: &mut ListView<Person>)->Group {
         let g1 = l.add_group("Group 1");
         l.add_item(listview::Item::new(
             Person {
@@ -129,6 +130,7 @@ impl Person {
             ['@', '@'],
             g1,
         ));
+        g1
     }
 }
 impl listview::ListItem for Person {
@@ -6673,6 +6675,58 @@ fn check_autoresize_date_time() {
         v7: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap()
     });
     w.add(l);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_current_group() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x7FA38519D4D7F5C3)  
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    assert_eq!(lv.current_item_index(),None);
+    assert_eq!(lv.current_item_mut(), None);
+    assert_eq!(lv.current_group(), None);
+    assert_eq!(lv.current_item(), None);
+    let g = Person::populate_with_icon(&mut lv);
+    assert_eq!(lv.current_group(),Some(g));
+    assert_eq!(lv.current_item_mut(), None);
+    assert_eq!(lv.current_item_index(),None);
+
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_current_item() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x128B0BA6B5DAA76)  
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
+    let mut lv = listview!("Person,d:c,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+    assert_eq!(lv.current_item_index(),None);
+    assert_eq!(lv.current_item_mut(), None);
+    assert_eq!(lv.current_group(), None);
+    assert_eq!(lv.current_item(), None);
+    assert_eq!(lv.item(0), None);
+    assert_eq!(lv.item_mut(0), None);
+    let g = Person::populate_with_icon(&mut lv);
+    assert_eq!(lv.current_group(),Some(g));
+    assert_eq!(lv.current_item_index(),Some(0));
+    assert_eq!(lv.current_item().unwrap().name,"Popescu");
+    assert_eq!(lv.current_item_mut().unwrap().name,"Popescu");
+    assert_eq!(lv.item_mut(0).unwrap().name,"Popescu");
+
+    w.add(lv);
     a.add_window(w);
     a.run();
 }

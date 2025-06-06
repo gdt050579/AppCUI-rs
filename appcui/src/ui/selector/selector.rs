@@ -76,8 +76,7 @@ where
             flags,
         };
         if let Some(val) = value {
-            let count = T::COUNT;
-            for i in 0..count {
+            for i in 0..T::COUNT {
                 if T::from_index(i) == Some(val) {
                     obj.component.current_index = i;
                     break;

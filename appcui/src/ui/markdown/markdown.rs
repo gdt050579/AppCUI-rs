@@ -32,7 +32,7 @@ impl Markdown {
     /// - `content`: The markdown-formatted string to be displayed.
     /// - `layout`: The layout configuration for positioning and sizing.
     /// - `flags`: Initialization flags that define specific behaviors (e.g., enabling scrollbars).
-    /// 
+    ///
     /// # Example
     /// ```rust,no_run
     /// use appcui::prelude::*;
@@ -59,12 +59,12 @@ impl Markdown {
             drag_point: None,
             scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
             link_registry: RefCell::new(LinkRegistry::new()),
-            elements: MarkdownParser::parse(content) ,
+            elements: MarkdownParser::parse(content),
         }
     }
 
     /// Sets new content in the markdown component.
-    /// This method resets the scroll position, reparses the content, 
+    /// This method resets the scroll position, reparses the content,
     /// and adjusts the surface and scrollbars accordingly.
     ///
     /// # Parameters
@@ -74,10 +74,9 @@ impl Markdown {
         self.y = 0;
         self.elements = MarkdownParser::parse(content);
         self.link_registry.replace(LinkRegistry::new());
-  
+
         (self.w, self.h) = Self::compute_dimension(content);
 
-        
         self.scrollbars.resize(self.w as u64, self.h as u64, &self.base);
         self.move_scroll_to(self.x, self.y);
     }
@@ -85,8 +84,8 @@ impl Markdown {
     fn compute_dimension(content: &str) -> (u32, u32) {
         let lines: Vec<&str> = content.lines().collect();
         let height = lines.len() as u32;
-        let width = lines.iter().map(|line| line.len()).max().unwrap_or(0) as u32; 
-    
+        let width = lines.iter().map(|line| line.len()).max().unwrap_or(0) as u32;
+
         (width, height)
     }
 
@@ -118,27 +117,28 @@ impl Markdown {
             InlineElement::Text(_) => theme.markdown.text,
             InlineElement::Bold(_) => theme.markdown.bold,
             InlineElement::Italic(_) => theme.markdown.italic,
-            InlineElement::Link(_, _) => if !hovered { theme.markdown.link } else { theme.text.highlighted },
+            InlineElement::Link(_, _) => {
+                if !hovered {
+                    theme.markdown.link
+                } else {
+                    theme.text.highlighted
+                }
+            }
             InlineElement::Code(_) => theme.markdown.code,
         }
     }
 
-    fn register_if_link(
-        link_registry: &mut LinkRegistry,
-        element: &InlineElement,
-        x: i32,
-        y: i32,
-    ) -> Option<String> {
+    fn register_if_link(link_registry: &mut LinkRegistry, element: &InlineElement, x: i32, y: i32) -> Option<String> {
         if let InlineElement::Link(display_str, link) = element {
             let link_str = if link.starts_with("#") {
                 link.trim_start_matches("#").to_string()
             } else {
                 link.to_string()
             };
-    
+
             let link_width = display_str.chars().count() as i32;
             link_registry.register_link_position(&link_str, x, y, link_width, !link.starts_with("#"));
-    
+
             return Some(link_str);
         }
         None
@@ -147,20 +147,19 @@ impl Markdown {
     fn process_list_element(
         elements: &[InlineElement],
         indent: i32,
-        x_pos: &mut i32,
-        y_pos: &mut i32,
+        p: &mut Point,
         xlsurface: &mut Surface,
         prefix: Option<String>,
         link_registry: &mut LinkRegistry,
         theme: &Theme,
-        inactive: bool
-    ) {
+        inactive: bool,
+    ) {                
         for (i, element) in elements.iter().enumerate() {
             if i == 0 {
-                *x_pos = indent;
+                p.x = indent;
             }
 
-            let link_identifier = Self::register_if_link(link_registry, element, *x_pos, *y_pos);
+            let link_identifier = Self::register_if_link(link_registry, element, p.x, p.y);
             let is_hovered = if let Some(ref id) = link_identifier {
                 link_registry.is_hovered(id)
             } else {
@@ -180,35 +179,36 @@ impl Markdown {
                 content_str
             };
 
-            xlsurface.write_string(*x_pos, *y_pos, &Self::replace_tabs(&formatted_content), attr, false);
+            xlsurface.write_string(p.x, p.y, &Self::replace_tabs(&formatted_content), attr, false);
 
-            *x_pos += formatted_content.chars().count() as i32;
+            p.x += formatted_content.chars().count() as i32;
         }
     }
 
     fn process_nested_list(
         depth: u8,
         nested_items: &MarkdownElement,
-        x_pos: &mut i32,
-        y_pos: &mut i32,
+        p: &mut Point,
+        // x_pos: &mut i32,
+        // y_pos: &mut i32,
         xlsurface: &mut Surface,
         link_registry: &mut LinkRegistry,
         theme: &Theme,
-        inactive: bool
+        inactive: bool,
     ) {
-        let indent = *x_pos + (depth as i32) * 4;
+        let indent = p.x + (depth as i32) * 4;
 
         match *nested_items {
             MarkdownElement::UnorderedList(ref items) => {
                 for item in items.iter() {
                     match item {
                         parser::ListItem::Simple(ref elements) => {
-                            let mut x = *x_pos;
-                            Self::process_list_element(elements, indent, &mut x, y_pos, xlsurface, None, link_registry, theme, inactive);
-                            *y_pos += 1;
+                            //let mut x = p.x;
+                            Self::process_list_element(elements, indent, p, xlsurface, None, link_registry, theme, inactive);
+                            p.y += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
-                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_registry, theme, inactive);
+                            Self::process_nested_list(depth + 1, nested, p, xlsurface, link_registry, theme, inactive);
                         }
                     }
                 }
@@ -218,23 +218,22 @@ impl Markdown {
                 for item in items.iter() {
                     match item {
                         parser::ListItem::Simple(ref elements) => {
-                            let mut x = *x_pos;
+                            //let mut x = p.x;
                             Self::process_list_element(
                                 elements,
                                 indent,
-                                &mut x,
-                                y_pos,
+                                p,
                                 xlsurface,
                                 Some(format!("{}.", index)),
                                 link_registry,
                                 theme,
-                                inactive
+                                inactive,
                             );
                             index += 1;
-                            *y_pos += 1;
+                            p.y += 1;
                         }
                         parser::ListItem::Nested(ref nested) => {
-                            Self::process_nested_list(depth + 1, nested, x_pos, y_pos, xlsurface, link_registry, theme, inactive);
+                            Self::process_nested_list(depth + 1, nested, p, xlsurface, link_registry, theme, inactive);
                         }
                     }
                 }
@@ -253,8 +252,12 @@ impl Markdown {
         let code_lines: Vec<&str> = content.lines().collect();
         let max_width = code_lines.iter().map(|line| line.len()).max().unwrap_or(0);
 
-        let attr = if self.is_enabled() { theme.markdown.code_block } else { theme.text.inactive };
-        
+        let attr = if self.is_enabled() {
+            theme.markdown.code_block
+        } else {
+            theme.text.inactive
+        };
+
         for line in code_lines {
             let formatted_line = format!(" {:width$} ", line, width = max_width);
             surface.write_string(self.x + left_padding - 1, *y_pos, &Self::replace_tabs(&formatted_line), attr, false);
@@ -277,7 +280,6 @@ impl Markdown {
     }
 
     fn paint_table(&self, table: &Table, y_pos: &mut i32, surface: &mut Surface, theme: &Theme) {
-
         let (attr, attr_header) = if self.is_enabled() {
             (theme.markdown.table, theme.markdown.table_header)
         } else {
@@ -361,35 +363,15 @@ impl Markdown {
                 x_pos += column_widths[i] as i32 + 3;
                 if row_index == 0 && i < (row.len() - 1) {
                     // cross separators
-                    surface.write_char(
-                        x_pos - 1,
-                        *y_pos - 1,
-                        Character::with_attributes(SpecialChar::BoxCrossSingleLine, attr),
-                    );
+                    surface.write_char(x_pos - 1, *y_pos - 1, Character::with_attributes(SpecialChar::BoxCrossSingleLine, attr));
 
                     // horizontal separators
-                    surface.write_char(
-                        rect.left(),
-                        *y_pos - 1,
-                        Character::with_attributes(SpecialChar::BoxMidleLeft, attr),
-                    );
-                    surface.write_char(
-                        rect.right(),
-                        *y_pos - 1,
-                        Character::with_attributes(SpecialChar::BoxMidleRight, attr),
-                    );
+                    surface.write_char(rect.left(), *y_pos - 1, Character::with_attributes(SpecialChar::BoxMidleLeft, attr));
+                    surface.write_char(rect.right(), *y_pos - 1, Character::with_attributes(SpecialChar::BoxMidleRight, attr));
 
                     // vertical separators
-                    surface.write_char(
-                        x_pos - 1,
-                        rect.top(),
-                        Character::with_attributes(SpecialChar::BoxMidleTop, attr),
-                    );
-                    surface.write_char(
-                        x_pos - 1,
-                        rect.bottom(),
-                        Character::with_attributes(SpecialChar::BoxMidleBottom, attr),
-                    );
+                    surface.write_char(x_pos - 1, rect.top(), Character::with_attributes(SpecialChar::BoxMidleTop, attr));
+                    surface.write_char(x_pos - 1, rect.bottom(), Character::with_attributes(SpecialChar::BoxMidleBottom, attr));
                 }
             }
             *y_pos += 1;
@@ -398,51 +380,42 @@ impl Markdown {
 
     fn paint_paragraph(&self, content: &[InlineElement], y_pos: i32, surface: &mut Surface, theme: &Theme) {
         let mut x_pos: i32 = self.x;
-        
+
         for element in content.iter() {
             let link_identifier = {
                 let mut registry = self.link_registry.borrow_mut();
                 Self::register_if_link(&mut registry, element, x_pos, y_pos)
             };
-            
+
             let is_hovered = if let Some(ref id) = link_identifier {
                 self.link_registry.borrow().is_hovered(id)
             } else {
                 false
             };
-            
+
             let style = Self::get_element_style(element, theme, is_hovered);
             let attr = if self.is_enabled() { style } else { theme.text.inactive };
             let content_str = element.to_string();
-            
+
             surface.write_string(x_pos, y_pos, &Self::replace_tabs(&content_str), attr, false);
             x_pos += content_str.chars().count() as i32;
         }
     }
-    
-    fn paint_unordered_list(
-        &self,
-        items: &[parser::ListItem],
-        mut y_pos: i32,
-        surface: &mut Surface,
-        theme: &Theme,
-    ) -> i32 {
+
+    fn paint_unordered_list(&self, items: &[parser::ListItem], mut y_pos: i32, surface: &mut Surface, theme: &Theme) -> i32 {
         for item in items.iter() {
-            let mut x_pos: i32 = self.x + 4;
+            let mut x_pos: i32;
 
             let elements = match item {
-                parser::ListItem::Simple(elements) => elements,
+                parser::ListItem::Simple(elements) => {
+                    x_pos = self.x + 4;
+                    elements
+                }
                 parser::ListItem::Nested(items) => {
-                    Self::process_nested_list(
-                        1,
-                        items,
-                        &mut x_pos,
-                        &mut y_pos,
-                        surface,
-                        &mut self.link_registry.borrow_mut(),
-                        theme,
-                        !self.is_enabled()
-                    );
+                    let mut p = Point::new(self.x + 4, y_pos);
+                    Self::process_nested_list(1, items, &mut p, surface, &mut self.link_registry.borrow_mut(), theme, !self.is_enabled());
+                    //x_pos = p.x;
+                    y_pos = p.y;
                     continue;
                 }
             };
@@ -482,7 +455,9 @@ impl Markdown {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::Markdown(EventData { event_type: markdown::events::Data::LinkClickEvent(link.to_string()) })
+            data: ControlEventData::Markdown(EventData {
+                event_type: markdown::events::Data::LinkClickEvent(link.to_string()),
+            }),
         });
     }
 
@@ -490,69 +465,59 @@ impl Markdown {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::Markdown(EventData { event_type: markdown::events::Data::BackEvent }),
+            data: ControlEventData::Markdown(EventData {
+                event_type: markdown::events::Data::BackEvent,
+            }),
         });
     }
 
-    fn paint_ordered_list(
-        &self,
-        items: &[parser::ListItem],
-        mut y_pos: i32,
-        surface: &mut Surface,
-        theme: &Theme,
-    ) -> i32 {
+    fn paint_ordered_list(&self, items: &[parser::ListItem], mut y_pos: i32, surface: &mut Surface, theme: &Theme) -> i32 {
         let mut index = 1;
-                    for item in items.iter() {
-                        let mut x_pos: i32 = self.x + 4;
+        for item in items.iter() {
+            let mut x_pos: i32 = self.x + 4;
 
-                        let elements = match item {
-                            parser::ListItem::Simple(elements) => elements,
-                            parser::ListItem::Nested(items) => {
-                                Self::process_nested_list(
-                                    1,
-                                    items,
-                                    &mut x_pos,
-                                    &mut y_pos,
-                                    surface,
-                                    &mut self.link_registry.borrow_mut(),
-                                    theme,
-                                    !self.is_enabled()
-                                );
-                                continue;
-                            }
-                        };
-
-                        for (i, element) in elements.iter().enumerate() {
-                            let link_identifier = {
-                                let mut registry = self.link_registry.borrow_mut();
-                                Self::register_if_link(&mut registry, element, x_pos, y_pos)
-                            };
-                            let is_hovered = if let Some(ref id) = link_identifier {
-                                self.link_registry.borrow().is_hovered(id)
-                            } else {
-                                false
-                            };
-                            let style = Self::get_element_style(element, theme, is_hovered);
-                            let attr = if self.is_enabled() { style } else { theme.text.inactive };
-                            let content_str = element.to_string();
-
-                            let formatted_content = if i == 0 {
-                                let prefix = index;
-                                index += 1;
-                                format!("{}. {}", prefix, content_str).to_string()
-                            } else {
-                                content_str
-                            };
-
-                            surface.write_string(x_pos, y_pos, &Self::replace_tabs(&formatted_content), attr, false);
-
-                            x_pos += formatted_content.chars().count() as i32;
-                        }
-
-                        y_pos += 1;
-                    }
-                    y_pos
+            let elements = match item {
+                parser::ListItem::Simple(elements) => elements,
+                parser::ListItem::Nested(items) => {
+                    let mut p = Point::new(x_pos, y_pos);
+                    Self::process_nested_list(1, items, &mut p, surface, &mut self.link_registry.borrow_mut(), theme, !self.is_enabled());
+                    //x_pos = p.x;
+                    y_pos = p.y;
+                    continue;
                 }
+            };
+
+            for (i, element) in elements.iter().enumerate() {
+                let link_identifier = {
+                    let mut registry = self.link_registry.borrow_mut();
+                    Self::register_if_link(&mut registry, element, x_pos, y_pos)
+                };
+                let is_hovered = if let Some(ref id) = link_identifier {
+                    self.link_registry.borrow().is_hovered(id)
+                } else {
+                    false
+                };
+                let style = Self::get_element_style(element, theme, is_hovered);
+                let attr = if self.is_enabled() { style } else { theme.text.inactive };
+                let content_str = element.to_string();
+
+                let formatted_content = if i == 0 {
+                    let prefix = index;
+                    index += 1;
+                    format!("{}. {}", prefix, content_str).to_string()
+                } else {
+                    content_str
+                };
+
+                surface.write_string(x_pos, y_pos, &Self::replace_tabs(&formatted_content), attr, false);
+
+                x_pos += formatted_content.chars().count() as i32;
+            }
+
+            y_pos += 1;
+        }
+        y_pos
+    }
 }
 
 impl OnPaint for Markdown {
@@ -572,8 +537,8 @@ impl OnPaint for Markdown {
             match element {
                 MarkdownElement::Header(content, level) => self.paint_header(content, y_pos, level, surface, theme),
                 MarkdownElement::Paragraph(content) => self.paint_paragraph(content, y_pos, surface, theme),
-                MarkdownElement::UnorderedList(items) => { y_pos = self.paint_unordered_list(items, y_pos, surface, theme) },
-                MarkdownElement::OrderedList(items) => { y_pos = self.paint_ordered_list(items, y_pos, surface, theme) },
+                MarkdownElement::UnorderedList(items) => y_pos = self.paint_unordered_list(items, y_pos, surface, theme),
+                MarkdownElement::OrderedList(items) => y_pos = self.paint_ordered_list(items, y_pos, surface, theme),
                 MarkdownElement::HorizontalRule => {
                     surface.draw_horizontal_line(self.x, y_pos, surface.size().width as i32, LineType::Single, theme.markdown.text);
                     y_pos += 1;
@@ -621,7 +586,6 @@ impl OnKeyPressed for Markdown {
     }
 }
 
-
 impl OnMouseEvent for Markdown {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if self.scrollbars.process_mouse_event(event) {
@@ -649,7 +613,6 @@ impl OnMouseEvent for Markdown {
             MouseEvent::Released(data) => {
                 let mut y_header: Option<i32> = None;
 
-    
                 if let Some(link_id) = self.link_registry.borrow().check_for_link_at_position(data.x, data.y) {
                     if let Some(is_external) = self.link_registry.borrow().is_link_external(&link_id) {
                         if is_external {
