@@ -113,7 +113,7 @@ impl App {
             let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
             *app_created = false;
         }
-        // For WASM, APP_CREATED_MUTEX is reset via signal_wasm_app_fully_stopped
+        // For WASM, APP_CREATED_MUTEX is reset via drop_app
         // called from RuntimeManager's animation loop when it terminates.
     }
 
