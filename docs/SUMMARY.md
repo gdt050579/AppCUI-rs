@@ -14,6 +14,7 @@
         - [Windows Console](chapter-2/terminals/windows_console.md)
         - [NCurses](chapter-2/terminals/ncurses.md)
         - [Termios](chapter-2/terminals/termios.md)
+        - [Web Terminal](chapter-2/terminals/web_terminal.md)
     - [Screen area and sizes](chapter-2/screen.md)
     - [Surface](chapter-2/surface.md)
         - [Clipping and origin point](chapter-2/surface/clipping.md)

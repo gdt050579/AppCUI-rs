@@ -43,7 +43,7 @@
 //! }
 //!
 //! // Open a file dialog
-//! if let Some(file_path) = dialogs::open("Open File", 
+//! if let Some(file_path) = dialogs::open("Open File",
 //!                                        "document.txt",
 //!                                        dialogs::Location::Current,
 //!                                        Some("Text files = [txt]"),
@@ -79,7 +79,7 @@ use EnumBitFlags::EnumBitFlags;
 
 /// Result of a validation dialog with a cancel option.
 ///
-/// This enum represents the possible outcomes when a dialog with "Yes", "No", 
+/// This enum represents the possible outcomes when a dialog with "Yes", "No",
 /// and "Cancel" buttons is displayed.
 ///
 /// # Values
@@ -282,12 +282,12 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
 
 /// Specifies the initial location for file and folder selection dialogs.
 ///
-/// This enum represents different ways to specify where file and folder 
+/// This enum represents different ways to specify where file and folder
 /// selection dialogs should start browsing.
 ///
 /// # Variants
 /// * `Current` - Start in the current working directory.
-/// * `Last` - Start in the last location used in a previous dialog. If no previous dialog 
+/// * `Last` - Start in the last location used in a previous dialog. If no previous dialog
 ///   has been opened, falls back to the current directory.
 /// * `Path` - Start in the specified path.
 ///
@@ -486,18 +486,18 @@ pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Op
 /// * `title` - The title of the dialog.
 /// * `location` - The initial location of the dialog (one of Current, Last or Path). If Last is used, the dialog will open in the last location used by the user.
 /// * `flags` - Flags that specify the behavior of the dialog (ex: display icons).
-/// 
+///
 /// # Example
 /// ```rust,no_run
 /// use appcui::dialogs;
-/// 
-/// if let Some(path) = dialogs::select_folder("Select folder", 
-///                                            dialogs::Location::Current, 
-///                                            dialogs::SelectFolderDialogFlags::Icons) 
+///
+/// if let Some(path) = dialogs::select_folder("Select folder",
+///                                            dialogs::Location::Current,
+///                                            dialogs::SelectFolderDialogFlags::Icons)
 /// {
 ///    println!("Folder selected: {:?}", path);
 /// }
 /// ```
-pub fn select_folder(title:&str, location: Location, flags: SelectFolderDialogFlags) -> Option<PathBuf> {
+pub fn select_folder(title: &str, location: Location, flags: SelectFolderDialogFlags) -> Option<PathBuf> {
     inner_select_folder(title, location, flags, utils::fs::Navigator::new())
 }

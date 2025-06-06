@@ -478,7 +478,7 @@ fn check_validate_or_cancel() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_save_dialog_select_existent() {
     let script = "
@@ -515,7 +515,7 @@ fn check_save_dialog_select_existent() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_save_dialog_cancelt_existent() {
     let script = "
@@ -552,7 +552,7 @@ fn check_save_dialog_cancelt_existent() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_save_dialog_select_existent_with_validate_overwrite() {
     let script = "
@@ -594,7 +594,7 @@ fn check_save_dialog_select_existent_with_validate_overwrite() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_hardcoded_relative_path() {
     let script = "
@@ -618,7 +618,7 @@ fn check_open_dialog_hardcoded_relative_path() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_hardcoded_absolute_path() {
     let script = "
@@ -642,7 +642,7 @@ fn check_open_dialog_hardcoded_absolute_path() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_invalid_path_with_validation_flag() {
     let script = "
@@ -672,7 +672,7 @@ fn check_open_dialog_invalid_path_with_validation_flag() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_last_path() {
     let script = "
@@ -707,7 +707,7 @@ fn check_open_dialog_last_path() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_select_drive() {
     let script = "
@@ -735,7 +735,7 @@ fn check_open_dialog_select_drive() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_change_path_manually() {
     let script = "
@@ -766,7 +766,7 @@ fn check_open_dialog_change_path_manually() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_select_drive_with_mouse() {
     let script = "
@@ -801,7 +801,7 @@ fn check_open_dialog_select_drive_with_mouse() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_save_dialog_navigate() {
     let script = "
@@ -858,9 +858,7 @@ fn check_save_dialog_navigate() {
     a.run();
 }
 
-
-
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_create_folder_select_dialog() {
     let script = "
@@ -885,7 +883,7 @@ fn check_create_folder_select_dialog() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_expand_collapse_select_dialog() {
     let script = "
@@ -926,7 +924,7 @@ fn check_expand_collapse_select_dialog() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_with_icons() {
     let script = "
@@ -946,7 +944,7 @@ fn check_folder_select_dialog_with_icons() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_cancel() {
     let script = "
@@ -971,7 +969,7 @@ fn check_folder_select_dialog_cancel() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_cancel_via_button() {
     let script = "
@@ -997,7 +995,7 @@ fn check_folder_select_dialog_cancel_via_button() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_ok_via_button() {
     let script = "
@@ -1023,7 +1021,7 @@ fn check_folder_select_dialog_ok_via_button() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_navigator() {
     let script = "
@@ -1052,7 +1050,7 @@ fn check_folder_select_dialog_navigator() {
     a.run();
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_mouse_usage() {
     let script = "

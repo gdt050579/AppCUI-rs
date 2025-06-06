@@ -1,6 +1,6 @@
-mod timer;
-mod thread_logic;
 mod command;
+mod thread_logic;
+mod timer;
 mod timer_manager;
 
 #[cfg(test)]

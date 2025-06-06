@@ -407,7 +407,7 @@ impl Terminal for WindowsTerminal {
     fn get_size(&self) -> Size {
         self.size
     }
-    
+
     fn get_clipboard_text(&self) -> Option<String> {
         unsafe {
             if winapi::OpenClipboard(0) == FALSE {

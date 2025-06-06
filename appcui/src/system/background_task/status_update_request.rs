@@ -3,5 +3,5 @@
 pub(super) enum StatusUpdateRequest {
     None,
     Pause,
-    Close
+    Close,
 }

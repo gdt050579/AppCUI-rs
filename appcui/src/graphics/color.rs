@@ -44,10 +44,10 @@ pub enum Color {
 
     /// <table><tr><td style="background-color: #FF00FF; width: 20px; height: 20px; border: 1px solid #000;"></td></tr></table>
     Pink = 0x0D,
-    
+
     /// <table><tr><td style="background-color: #FFFF00; width: 20px; height: 20px; border: 1px solid #000;"></td></tr></table>
     Yellow = 0x0E,
-    
+
     /// <table><tr><td style="background-color: #FFFFFF; width: 20px; height: 20px; border: 1px solid #000;"></td></tr></table>
     White = 0x0F,
 
@@ -55,7 +55,7 @@ pub enum Color {
     Transparent = 0x10,
 }
 impl Color {
-    pub fn from_value(value: i32)->Option<Color> {
+    pub fn from_value(value: i32) -> Option<Color> {
         match value {
             0 => Some(Color::Black),
             1 => Some(Color::DarkBlue),
@@ -74,10 +74,10 @@ impl Color {
             14 => Some(Color::Yellow),
             15 => Some(Color::White),
             16 => Some(Color::Transparent),
-            _ => None
+            _ => None,
         }
     }
-    pub fn name(&self)->&str {
+    pub fn name(&self) -> &str {
         match self {
             Color::Black => "Black",
             Color::DarkBlue => "DarkBlue",

@@ -1,6 +1,15 @@
 use super::{BackgroundTask, BackgroundTaskConector, SingleChannel, StatusUpdateRequest};
 use crate::system::{Handle, RuntimeManager};
-use std::{any::{Any, TypeId}, sync::{Arc, Condvar, Mutex}, thread};
+use std::{
+    any::{Any, TypeId},
+    sync::{Arc, Condvar, Mutex},
+};
+
+#[cfg(not(target_arch = "wasm32"))]
+use std::thread;
+
+#[cfg(target_arch = "wasm32")]
+use rayon;
 
 pub(crate) trait Task {
     fn update_control_handle(&mut self, control_handle: Handle<()>);
@@ -9,6 +18,7 @@ pub(crate) trait Task {
     fn validate(&self, t: TypeId, r: TypeId) -> bool;
     fn receiver_control_handle(&self) -> Handle<()>;
 }
+
 pub(crate) struct InnerTask<T: Send, R: Send> {
     pub(crate) control: Handle<()>,
     pub(crate) main_to_task: SingleChannel<R>,
@@ -25,6 +35,7 @@ impl<T: Send + 'static, R: Send + 'static> InnerTask<T, R> {
             state: Arc::new((Mutex::new(StatusUpdateRequest::None), Condvar::new())),
         }
     }
+
     pub(super) fn run(&mut self, task: fn(conector: &BackgroundTaskConector<T, R>), handle: Handle<BackgroundTask<T, R>>) {
         let conector = BackgroundTaskConector::new(
             handle,
@@ -33,32 +44,46 @@ impl<T: Send + 'static, R: Send + 'static> InnerTask<T, R> {
             self.main_to_task.take_ownership_for_receiver().unwrap(),
             self.state.clone(),
         );
-        thread::spawn(move || {
-            conector.notify_start();
-            task(&conector);
-            conector.notify_end();
-        });
+
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            thread::spawn(move || {
+                conector.notify_start();
+                task(&conector);
+                conector.notify_end();
+            });
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            rayon::spawn(move || {
+                conector.notify_start();
+                task(&conector);
+                conector.notify_end();
+            });
+        }
     }
+
     pub(super) fn pause(&mut self) {
         let (lock, cvar) = &*self.state;
         let mut status = lock.lock().unwrap();
-        // if status is Paused or Close then exit
         if (*status) != StatusUpdateRequest::None {
             return;
         }
         *status = StatusUpdateRequest::Pause;
         cvar.notify_one();
     }
+
     pub(super) fn resume(&mut self) {
         let (lock, cvar) = &*self.state;
         let mut status = lock.lock().unwrap();
-        // if status is None or Close then exit
         if (*status) != StatusUpdateRequest::Pause {
             return;
         }
         *status = StatusUpdateRequest::None;
         cvar.notify_one();
     }
+
     pub(super) fn stop(&mut self) {
         let (lock, cvar) = &*self.state;
         let mut status = lock.lock().unwrap();
@@ -69,6 +94,7 @@ impl<T: Send + 'static, R: Send + 'static> InnerTask<T, R> {
         cvar.notify_one();
     }
 }
+
 impl<T: Send + 'static, R: Send + 'static> Task for InnerTask<T, R> {
     fn update_control_handle(&mut self, control_handle: Handle<()>) {
         self.control = control_handle;

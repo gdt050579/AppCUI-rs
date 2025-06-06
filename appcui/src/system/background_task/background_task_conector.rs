@@ -53,6 +53,7 @@ where
         if self.sysevent_sender.send(SystemEvent::BackgroundTaskQuery(self.handle.cast())).is_err() {
             return None;
         }
+
         self.receiver.recv().ok()
     }
 
@@ -60,12 +61,12 @@ where
     /// If there is a task request to close the task from the main thread, it returns true. Otherwise, it returns false.
     /// This method should be used in the background task to validate that the task should continue.
     ///
-    /// # Example 
+    /// # Example
     /// ```rust, no_compile
     /// use appcui::prelude::*;
-    /// 
-    /// fn run_background_task_function<T,R>(conector: &BackgroundTaskConector<T, R>) 
-    /// where 
+    ///
+    /// fn run_background_task_function<T,R>(conector: &BackgroundTaskConector<T, R>)
+    /// where
     ///     T:Send+'static,
     ///     R:Send+'static
     /// {

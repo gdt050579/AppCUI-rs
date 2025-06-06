@@ -1,5 +1,5 @@
-use crate::system::Handle;
 use super::task::{InnerTask, Task};
+use crate::system::Handle;
 
 pub(crate) struct BackgroundTaskManager {
     tasks: Vec<Option<Box<dyn Task>>>,
@@ -19,12 +19,12 @@ impl BackgroundTaskManager {
             self.tasks.len() - 1
         }
     }
-    pub(crate) fn get<T: Send+'static, R: Send+'static>(&self, index: usize) -> Option<&InnerTask<T,R>> {
-        if index>=self.tasks.len() {
+    pub(crate) fn get<T: Send + 'static, R: Send + 'static>(&self, index: usize) -> Option<&InnerTask<T, R>> {
+        if index >= self.tasks.len() {
             return None;
         }
         if let Some(interface) = &self.tasks[index] {
-            if let Some(task) = interface.as_any().downcast_ref::<InnerTask<T,R>>() {
+            if let Some(task) = interface.as_any().downcast_ref::<InnerTask<T, R>>() {
                 Some(task)
             } else {
                 None
@@ -33,12 +33,12 @@ impl BackgroundTaskManager {
             None
         }
     }
-    pub(crate) fn get_mut<T: Send+'static, R: Send+'static>(&mut self, index: usize) -> Option<&mut InnerTask<T,R>> {
-        if index>=self.tasks.len() {
+    pub(crate) fn get_mut<T: Send + 'static, R: Send + 'static>(&mut self, index: usize) -> Option<&mut InnerTask<T, R>> {
+        if index >= self.tasks.len() {
             return None;
         }
         if let Some(interface) = &mut self.tasks[index] {
-            if let Some(task) = interface.as_any_mut().downcast_mut::<InnerTask<T,R>>() {
+            if let Some(task) = interface.as_any_mut().downcast_mut::<InnerTask<T, R>>() {
                 Some(task)
             } else {
                 None
@@ -49,14 +49,14 @@ impl BackgroundTaskManager {
     }
     #[inline(always)]
     pub(crate) fn receiver_control_handle(&self, index: usize) -> Option<Handle<()>> {
-        if index>=self.tasks.len() {
+        if index >= self.tasks.len() {
             return None;
         }
         self.tasks[index].as_ref().map(|interface| interface.receiver_control_handle())
     }
     pub(crate) fn remove_task(&mut self, handle: Handle<()>) {
         let index = handle.index();
-        if index<self.tasks.len() {
+        if index < self.tasks.len() {
             self.tasks[index] = None;
         }
     }

@@ -1,6 +1,7 @@
 use super::SystemEvent;
 use std::{sync::mpsc::Sender, thread};
 
+#[allow(dead_code)]
 pub(crate) trait SystemEventReader {
     fn read(&mut self) -> Option<SystemEvent>;
     fn start(mut self, sender: Sender<SystemEvent>)

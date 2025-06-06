@@ -30,7 +30,7 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
             None
         }
     }
-    
+
     /// Starts a new background task. The task will run in a separate thread.
     /// The task will receive a conector that can be used to send and receive data from the main thread.
     pub fn run(task: fn(conector: &BackgroundTaskConector<T, R>), receiver: Handle<Window>) -> Handle<BackgroundTask<T, R>> {
@@ -44,7 +44,7 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
             Handle::None
         }
     }
-    
+
     /// Reads the data sent by the background task. If there is no data, it returns None.
     /// This method is not meant to be used directly (it will be used by the generated code).
     pub fn read(&self) -> Option<T> {
@@ -55,16 +55,16 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
             None
         }
     }
-    
-    /// Sends data to the background task. 
+
+    /// Sends data to the background task.
     /// This method is not meant to be used directly (it will be used by the generated code).
     pub fn send(&self, value: R) {
         let btm = RuntimeManager::get().get_background_task_manager();
         if let Some(t) = btm.get_mut::<T, R>(self.id as usize) {
             t.main_to_task.send(value);
-        } 
+        }
     }
-    
+
     /// Request the background task to pause. For this method to work, the background task must use the `should_stop()` method
     pub fn pause(&self) {
         let btm = RuntimeManager::get().get_background_task_manager();
@@ -72,7 +72,7 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
             t.pause();
         }
     }
-        
+
     /// Request the background task to resume. For this method to work, the background task must use the `should_stop()` method
     pub fn resume(&self) {
         let btm = RuntimeManager::get().get_background_task_manager();
@@ -80,7 +80,7 @@ impl<T: Send, R: Send> BackgroundTask<T, R> {
             t.resume();
         }
     }
-    
+
     /// Request the background task to stop. For this method to work, the background task must use the `should_stop()` method
     pub fn stop(&self) {
         let btm = RuntimeManager::get().get_background_task_manager();

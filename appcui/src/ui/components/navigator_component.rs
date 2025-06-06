@@ -7,9 +7,10 @@ use crate::prelude::*;
 use crate::utils::glyphs::GlyphParser;
 use std::marker::PhantomData;
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", all(target_arch = "wasm32", wasm_windows)))]
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
-#[cfg(target_family = "unix")]
+
+#[cfg(any(target_family = "unix", all(target_arch = "wasm32", wasm_unix)))]
 const PLATFORM_SEPARATOR_CHARACTER: char = '/';
 
 struct NavigatorDataCacher<T, E, R>

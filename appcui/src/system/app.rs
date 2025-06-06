@@ -13,8 +13,12 @@ use crate::ui::common::traits::*;
 
 static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 
+/// HTML message displayed at the end of the application for WASM targets.
+#[cfg(target_arch = "wasm32")]
+const WEBTERMINAL_END_MESSAGE_HTML: &str = "<h1>{} has ended</h1><p>To re-start the application, please refresh the page.</p>";
+
 /// Represents the main application object for AppCUI.
-/// 
+///
 /// This struct is used to create and manage the main application. It provides methods to add windows, set the theme, and run the application.
 pub struct App {
     _phantom: PhantomData<*mut ()>,
@@ -91,14 +95,26 @@ impl App {
 
     /// Runs the current appcui application. This command will display all windows, and allow you to run the cod that perform the event logic for every control.
     pub fn run(self) {
+        #[cfg(target_arch = "wasm32")]
+        #[allow(unused_imports)]
+        {
+            use wasm_bindgen_rayon::init_thread_pool; // Explicitly import for WASM to export this function
+            console_error_panic_hook::set_once();
+        }
         // must pe self so that after a run a second call will not be possible
         RuntimeManager::get().run();
         // clear the mutex from open_save_dialog to clear the last path
         crate::dialogs::clear_last_path();
+
         // clear the mutex so that other apps can be created after this step
-        RuntimeManager::destroy();
-        let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
-        *app_created = false;
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            RuntimeManager::destroy();
+            let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
+            *app_created = false;
+        }
+        // For WASM, APP_CREATED_MUTEX is reset via drop_app
+        // called from RuntimeManager's animation loop when it terminates.
     }
 
     /// Adds a new window to AppCUI framework and returns a Handle towords it.
@@ -117,10 +133,8 @@ impl App {
         }
         RuntimeManager::get().set_theme(theme);
     }
-}
 
-impl Drop for App {
-    fn drop(&mut self) {
+    pub(crate) fn drop_app() {
         if APP_CREATED_MUTEX.is_poisoned() {
             APP_CREATED_MUTEX.clear_poison();
         }
@@ -129,5 +143,24 @@ impl Drop for App {
         }
         let mut app_created = APP_CREATED_MUTEX.lock().unwrap();
         *app_created = false;
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            use web_sys::window;
+            if let Some(win) = window() {
+                if let Some(doc) = win.document() {
+                    if let Some(body) = doc.body() {
+                        body.set_inner_html(&WEBTERMINAL_END_MESSAGE_HTML.replace("{}", &doc.title()));
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl Drop for App {
+    fn drop(&mut self) {
+        Self::drop_app();
     }
 }
