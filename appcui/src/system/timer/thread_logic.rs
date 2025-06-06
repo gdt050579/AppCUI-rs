@@ -8,7 +8,7 @@ use std::sync::{Arc, Condvar, Mutex};
 use std::time::Duration;
 
 #[cfg(target_arch = "wasm32")]
-use instant::Duration;
+use web_time::Duration;
 
 #[derive(Copy, Clone)]
 pub(crate) struct ThreadLogic {

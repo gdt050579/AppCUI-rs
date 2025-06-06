@@ -47,17 +47,8 @@ pub struct Surface {
     pub(crate) size: Size,
     pub(crate) chars: Vec<Character>,
     pub(crate) cursor: Cursor,
-
-    #[cfg(target_arch = "wasm32")]
-    pub origin: Point,
-    #[cfg(target_arch = "wasm32")]
-    pub(crate) clip: ClipArea,
-
-    #[cfg(not(target_arch = "wasm32"))]
     origin: Point,
-    #[cfg(not(target_arch = "wasm32"))]
     clip: ClipArea,
-
     base_origin: Point,
     base_clip: ClipArea,
     right_most: i32,

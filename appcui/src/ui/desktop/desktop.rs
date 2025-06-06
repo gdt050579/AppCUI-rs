@@ -15,7 +15,6 @@ impl Desktop {
     /// Creates a new desktop object. This is something that the AppCUI does automatically unless a custom Desktop is provided.
     /// The desktop object is the main control of the application and it is used to manage the windows and controls.
     pub fn new() -> Self {
-        #[cfg(not(target_arch = "wasm32"))]
         if RuntimeManager::is_instantiated() {
             panic!("A desktop object can only be created once (when the application is started) !");
         }

@@ -1,5 +1,5 @@
 use crate::{
-    prelude::{ErrorKind, Size, Surface},
+    prelude::{Color, ErrorKind, Size, Surface},
     system::Error,
     terminals::{SystemEvent, Terminal},
 };
@@ -11,37 +11,39 @@ use web_sys::{
     WebGlRenderingContext as GL, WheelEvent,
 };
 
+const CURSOR_COLOR: &str = "rgba(255, 255, 255, 0.5)";
+
 struct TerminalDomConfig {
-    cols:        u32,
-    rows:        u32,
+    cols: u32,
+    rows: u32,
     font_family: String,
-    font_size:   u32,
-    cell_w:      u32,
-    cell_h:      u32,
+    font_size: u32,
+    cell_w: u32,
+    cell_h: u32,
 }
 
 struct WebGLResources {
-    gl:                    GL,
-    program:               WebGlProgram,
-    buffer:                WebGlBuffer,
-    pos_attrib_location:   u32,
+    gl: GL,
+    program: WebGlProgram,
+    buffer: WebGlBuffer,
+    pos_attrib_location: u32,
     color_attrib_location: u32,
 }
 
 pub struct WebTerminal {
-    gl:                    GL,
-    size:                  Size,
-    webgl_canvas:          HtmlCanvasElement,
-    text_canvas:           HtmlCanvasElement,
-    program:               WebGlProgram,
-    buffer:                WebGlBuffer,
-    pos_attrib_location:   u32,
+    gl: GL,
+    size: Size,
+    webgl_canvas: HtmlCanvasElement,
+    text_canvas: HtmlCanvasElement,
+    program: WebGlProgram,
+    buffer: WebGlBuffer,
+    pos_attrib_location: u32,
     color_attrib_location: u32,
-    event_queue:           Arc<Mutex<Vec<SystemEvent>>>,
-    font:                  String,
-    cell_width_px:         f32,
-    cell_height_px:        f32,
-    clipboard_content:     Arc<Mutex<Option<String>>>,
+    event_queue: Arc<Mutex<Vec<SystemEvent>>>,
+    font: String,
+    cell_width_px: f32,
+    cell_height_px: f32,
+    clipboard_content: Arc<Mutex<Option<String>>>,
 }
 
 unsafe impl Send for WebTerminal {}
@@ -51,12 +53,12 @@ impl WebTerminal {
     fn load_dom_config(document: &web_sys::Document) -> TerminalDomConfig {
         let font_size_val = Self::get_config(document, "terminal-font-size", 20);
         TerminalDomConfig {
-            cols:        Self::get_config(document, "terminal-cols", 211),
-            rows:        Self::get_config(document, "terminal-rows", 56),
+            cols: Self::get_config(document, "terminal-cols", 211),
+            rows: Self::get_config(document, "terminal-rows", 56),
             font_family: Self::get_config(document, "terminal-font", "Consolas Mono, monospace".to_string()),
-            font_size:   font_size_val,
-            cell_w:      Self::get_config(document, "terminal-cell-width", 9),
-            cell_h:      Self::get_config(document, "terminal-cell-height", font_size_val),
+            font_size: font_size_val,
+            cell_w: Self::get_config(document, "terminal-cell-width", 9),
+            cell_h: Self::get_config(document, "terminal-cell-height", font_size_val),
         }
     }
 
@@ -109,7 +111,7 @@ impl WebTerminal {
         let term = WebTerminal {
             gl: webgl_resources.gl,
             size: Size {
-                width:  dom_config.cols,
+                width: dom_config.cols,
                 height: dom_config.rows,
             },
             webgl_canvas,
@@ -177,10 +179,15 @@ impl WebTerminal {
 
     fn get_gl(canvas: &HtmlCanvasElement) -> Result<GL, Error> {
         let opts = js_sys::Object::new();
-        js_sys::Reflect::set(&opts, &"alpha".into(), &true.into()).unwrap();
+        js_sys::Reflect::set(&opts, &"alpha".into(), &true.into()).map_err(|e| {
+            Error::new(
+                ErrorKind::InitializationFailure,
+                format!("Failed to configure WebGL context options: {e:?}"),
+            )
+        })?;
         canvas
             .get_context_with_context_options("webgl", &opts)
-            .map_err(|e| Error::new(ErrorKind::InitializationFailure, format!("Error getting WebGL context: {:?}", e)))?
+            .map_err(|e| Error::new(ErrorKind::InitializationFailure, format!("Error getting WebGL context: {e:?}")))?
             .ok_or_else(|| Error::new(ErrorKind::InitializationFailure, "WebGL not supported".into()))?
             .dyn_into::<GL>()
             .map_err(|e| Error::new(ErrorKind::InitializationFailure, format!("Failed to cast context: {:?}", e)))
@@ -385,31 +392,20 @@ impl WebTerminal {
         let cell_width = self.cell_width_px;
         let cell_height = self.cell_height_px;
 
-        let clip_left = surface.clip.left as i32;
-        let clip_top = surface.clip.top as i32;
-        let clip_right = surface.clip.right as i32;
-        let clip_bottom = surface.clip.bottom as i32;
-
+        let width = surface.size.width as i32;
+        let height = surface.size.height as i32;
         let mut vertices: Vec<f32> = Vec::new();
 
-        let mut min_px_x = i32::MAX;
-        let mut min_px_y = i32::MAX;
-        let mut max_px_x = 0;
-        let mut max_px_y = 0;
-
-        for global_y in clip_top..=clip_bottom {
-            for global_x in clip_left..=clip_right {
-                let cell_x = global_x - surface.origin.x;
-                let cell_y = global_y - surface.origin.y;
-                if let Some(cell) = &surface.char(cell_x, cell_y) {
+        for global_y in 0..height {
+            for global_x in 0..width {
+                if let Some(cell) = &surface.char(global_x, global_y) {
+                    if cell.background == Color::Transparent {
+                        web_sys::console::log_1(&format!("Skipping transparent cell at ({}, {})", global_x, global_y).into());
+                        continue;
+                    }
                     let pos_x = global_x as f32 * cell_width;
                     let pos_y = global_y as f32 * cell_height;
-                    let bg_color = cell.background.to_rgba();
-
-                    min_px_x = min_px_x.min(pos_x as i32);
-                    min_px_y = min_px_y.min(pos_y as i32);
-                    max_px_x = max_px_x.max((pos_x + cell_width) as i32);
-                    max_px_y = max_px_y.max((pos_y + cell_height) as i32);
+                    let bg_color = self.color_to_rgba(cell.background);
 
                     let x_ndc = 2.0 * (pos_x / canvas_width) - 1.0;
                     let y_ndc = 1.0 - 2.0 * (pos_y / canvas_height);
@@ -460,16 +456,6 @@ impl WebTerminal {
             }
         }
 
-        let scissor_x = min_px_x.max(0);
-        let scissor_y = min_px_y.max(0);
-        let scissor_width = (max_px_x - min_px_x).max(0).min(canvas_width as i32 - scissor_x);
-        let scissor_height = (max_px_y - min_px_y).max(0).min(canvas_height as i32 - scissor_y);
-
-        // web_sys::console::log_1(&format!("Scissor rect: ({}, {}), {}x{}", scissor_x, scissor_y, scissor_width, scissor_height).into());
-
-        self.gl.enable(GL::SCISSOR_TEST);
-        self.gl.scissor(scissor_x, scissor_y, scissor_width, scissor_height);
-
         self.gl.bind_buffer(GL::ARRAY_BUFFER, Some(&self.buffer));
         unsafe {
             let vertex_array = js_sys::Float32Array::view(&vertices);
@@ -495,8 +481,6 @@ impl WebTerminal {
 
         let vertex_count = (vertices.len() / 6) as i32;
         self.gl.draw_arrays(GL::TRIANGLES, 0, vertex_count);
-
-        self.gl.disable(GL::SCISSOR_TEST);
     }
 
     fn render_text(&self, surface: &Surface) -> Result<(), JsValue> {
@@ -511,33 +495,26 @@ impl WebTerminal {
         let cell_width = self.cell_width_px as f64;
         let cell_height = self.cell_height_px as f64;
 
-        context.clear_rect(
-            (surface.clip.left as f64 * cell_width) as f64,
-            (surface.clip.top as f64 * cell_height) as f64,
-            ((surface.clip.right - surface.clip.left) as f64 * cell_width) as f64,
-            ((surface.clip.bottom - surface.clip.top) as f64 * cell_height) as f64,
-        );
+        // clear entire canvas
+        context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
 
-        // context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
-
-        context.save();
+        // context.save();
         context.set_font(self.font.as_str());
         context.set_text_baseline("top");
         context.set_text_align("center");
 
-        let clip_left = surface.clip.left;
-        let clip_top = surface.clip.top;
-        let clip_right = surface.clip.right;
-        let clip_bottom = surface.clip.bottom;
-
-        for global_y in clip_top..=clip_bottom {
-            for global_x in clip_left..=clip_right {
-                let cell_x = global_x - surface.origin.x as i32;
-                let cell_y = global_y - surface.origin.y as i32;
-                if let Some(cell) = &surface.char(cell_x, cell_y) {
+        let width = surface.size.width as i32;
+        let height = surface.size.height as i32;
+        for global_y in 0..height {
+            for global_x in 0..width {
+                if let Some(cell) = &surface.char(global_x, global_y) {
+                    if cell.foreground == Color::Transparent {
+                        web_sys::console::log_1(&format!("Skipping transparent cell at ({}, {})", global_x, global_y).into());
+                        continue;
+                    }
                     let pos_x = global_x as f64 * cell_width;
                     let pos_y = global_y as f64 * cell_height;
-                    let foreground = cell.foreground.to_rgba();
+                    let foreground = self.color_to_rgba(cell.foreground);
                     let css_color = format!(
                         "rgba({},{},{},{})",
                         (foreground[0] * 255.0) as u8,
@@ -545,13 +522,13 @@ impl WebTerminal {
                         (foreground[2] * 255.0) as u8,
                         foreground[3],
                     );
-                    context.set_fill_style(&JsValue::from_str(&css_color));
+                    context.set_fill_style_str(&css_color);
                     context.fill_text(&cell.code.to_string(), pos_x.into(), pos_y.into())?;
                 }
             }
         }
 
-        context.restore();
+        // context.restore();
         Ok(())
     }
 
@@ -576,7 +553,7 @@ impl WebTerminal {
         let cursor_x = surface.cursor.x as f64;
         let cursor_y = surface.cursor.y as f64;
 
-        context.set_fill_style(&JsValue::from_str("rgba(255,255,255,0.5)"));
+        context.set_fill_style_str(CURSOR_COLOR);
         context.fill_rect(cursor_x * cell_width, cursor_y * cell_height, cell_width, cell_height);
 
         Ok(())
@@ -584,7 +561,7 @@ impl WebTerminal {
 }
 
 impl Terminal for WebTerminal {
-    fn on_resize(&mut self, new_size: crate::prelude::Size) {
+    fn on_resize(&mut self, new_size: Size) {
         self.webgl_canvas.set_width(new_size.width);
         self.webgl_canvas.set_height(new_size.height);
         self.text_canvas.set_width(new_size.width);
@@ -597,13 +574,6 @@ impl Terminal for WebTerminal {
     }
 
     fn update_screen(&mut self, surface: &Surface) {
-        // web_sys::console::log_1(
-        //     &format!(
-        //         "Update screen: origin {:?}, base_origin: {:?}, clip: {:?}, base_clip: {:?}, right_most: {}, bottom_most: {}",
-        //         surface.origin, surface.base_origin, surface.clip, surface.base_clip, surface.right_most, surface.bottom_most
-        //     )
-        //     .into(),
-        // );
         self.render_background(surface);
         if let Err(e) = self.render_text(surface) {
             web_sys::console::log_1(&format!("Error rendering text: {e:?}").into());

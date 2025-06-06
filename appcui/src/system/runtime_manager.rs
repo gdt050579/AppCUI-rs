@@ -497,59 +497,7 @@ impl RuntimeManager {
         }
     }
 
-    #[cfg(target_arch = "wasm32")]
-    pub fn run(&mut self) {
-        use wasm_bindgen::prelude::*;
-        use web_sys::window;
-
-        // Initialize console error handling for better debugging
-        console_error_panic_hook::set_once();
-
-        // Process desktop on start event since we're running for the first time
-        if !self.desktop_os_start_called {
-            self.process_terminal_resize_event(self.terminal.get_size());
-            self.process_desktop_on_start();
-            if self.single_window && self.get_controls_mut().desktop_mut().base().children.len() != 1 {
-                panic!("You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")
-            }
-        }
-        self.request_update();
-
-        let window = window().expect("No global `window` exists");
-        let window_clone = window.clone();
-
-        let callback_holder = std::rc::Rc::new(std::cell::RefCell::new(None::<Closure<dyn FnMut()>>));
-        let callback_holder_clone = callback_holder.clone();
-
-        self.recompute_layout = true;
-        self.repaint = true;
-        self.recompute_parent_indexes = true;
-        self.commandbar_event = None;
-        self.menu_event = None;
-
-        // Create the closure that represents one tick of the animation loop
-        *callback_holder.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-            let rt = RuntimeManager::get();
-            rt.tick();
-
-            if rt.loop_status != LoopStatus::StopApp && rt.loop_status != LoopStatus::ExitCurrentLoop {
-                // Continue the animation loop
-                window_clone
-                    .request_animation_frame(callback_holder_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref())
-                    .expect("Failed to request animation frame");
-            } else {
-                // Cleanup when the app stops
-                RuntimeManager::destroy();
-            }
-        }) as Box<dyn FnMut()>));
-
-        window
-            .request_animation_frame(callback_holder.borrow().as_ref().unwrap().as_ref().unchecked_ref())
-            .expect("Failed to request animation frame");
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    pub(crate) fn tick(&mut self) {
+    pub(crate) fn tick(&mut self, single_threaded: bool) {
         if let Some(event) = self.commandbar_event.take() {
             self.process_commandbar_event(event);
         }
@@ -597,7 +545,7 @@ impl RuntimeManager {
             self.timers_manager.update_threads();
             self.request_update_timer_threads = false;
         }
-        if self.terminal.is_single_threaded() {
+        if single_threaded {
             if let Some(sys_event) = self.terminal.query_system_event() {
                 self.process_system_event(sys_event);
             }
@@ -619,7 +567,22 @@ impl RuntimeManager {
         }
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
+    fn exit_loop(&mut self) {
+        // if we are in a modal loop --> we just need to change loop_statup
+        // and delete the window and its children (mark them for deleteion)
+        if let Some(modal_handle) = self.modal_windows.pop() {
+            self.request_remove(modal_handle);
+        }
+        // also we need to change focus to the previous window in the loop or desktop
+        if let Some(previous_modal_handle) = self.modal_windows.last() {
+            self.request_focus_for_control(*previous_modal_handle);
+        } else {
+            self.request_focus_for_control(self.desktop_handle);
+        }
+        self.loop_status = LoopStatus::Normal;
+        self.request_update();
+    }
+
     pub(crate) fn run(&mut self) {
         self.recompute_layout = true;
         self.repaint = true;
@@ -635,84 +598,54 @@ impl RuntimeManager {
                 panic!("You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")
             }
         }
-        while self.loop_status == LoopStatus::Normal {
-            // 1. Process events from command bar
-            if let Some(event) = self.commandbar_event {
-                self.process_commandbar_event(event);
-            }
-            // 2. Process events from menu
-            if let Some(event) = self.menu_event {
-                self.process_menu_event(event);
-            }
-            // 3. Process events from controls
-            if !self.events.is_empty() {
-                self.process_events_queue();
-            }
-            // 4. if there is a control that was removed (due to the previously fired events) remove it
-            if !self.to_remove_list.is_empty() {
-                self.remove_deleted_controls();
-                self.recompute_parent_indexes = true;
-                self.request_update_command_and_menu_bars = true;
-            }
 
-            // If we reach this point, there should not be any change in the logic of controls
-            if self.recompute_parent_indexes {
-                self.update_parent_indexes(self.get_root_control_handle());
-                self.recompute_parent_indexes = false;
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            while self.loop_status == LoopStatus::Normal {
+                self.tick(single_threaded);
             }
-            if let Some(handle) = self.request_focus {
-                self.update_focus(handle);
-                self.request_focus = None;
-                self.request_default_action = None;
-                self.repaint = true;
-                self.request_update_command_and_menu_bars = true;
-            }
-            if self.recompute_layout {
-                self.recompute_layouts();
-            }
-            if self.request_update_command_and_menu_bars {
-                self.update_command_and_menu_bars();
-            }
-            if self.repaint || self.recompute_layout {
-                self.paint();
-            }
-            self.recompute_layout = false;
-            self.repaint = false;
-
-            // timer threads update
-            if self.request_update_timer_threads {
-                self.timers_manager.update_threads();
-                self.request_update_timer_threads = false;
-            }
-            // auto save changes
-            #[cfg(feature = "EVENT_RECORDER")]
-            self.event_recorder.auto_update(&self.surface);
-
-            if single_threaded {
-                if let Some(sys_event) = self.terminal.query_system_event() {
-                    self.process_system_event(sys_event);
-                }
-            } else if let Ok(sys_event) = self.event_receiver.recv() {
-                self.process_system_event(sys_event);
-                #[cfg(feature = "EVENT_RECORDER")]
-                self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
+            // loop has ended
+            if self.loop_status == LoopStatus::ExitCurrentLoop {
+                self.exit_loop();
             }
         }
-        // loop has ended
-        if self.loop_status == LoopStatus::ExitCurrentLoop {
-            // if we are in a modal loop --> we just need to change loop_statup
-            // and delete the window and its children (mark them for deleteion)
-            if let Some(modal_handle) = self.modal_windows.pop() {
-                self.request_remove(modal_handle);
-            }
-            // also we need to change focus to the previous window in the loop or desktop
-            if let Some(previous_modal_handle) = self.modal_windows.last() {
-                self.request_focus_for_control(*previous_modal_handle);
-            } else {
-                self.request_focus_for_control(self.desktop_handle);
-            }
-            self.loop_status = LoopStatus::Normal;
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            use crate::system::App;
+            use std::{cell::RefCell, rc::Rc};
+            use wasm_bindgen::{closure::Closure, JsCast};
+            use web_sys::window;
+
             self.request_update();
+
+            let window = window().expect("No global `window` exists");
+            let window_clone = window.clone();
+
+            let callback_holder = Rc::new(RefCell::new(None::<Closure<dyn FnMut()>>));
+            let callback_holder_clone = callback_holder.clone();
+
+            // Create the closure that represents one tick of the animation loop
+            *callback_holder.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+                let rt = RuntimeManager::get();
+                rt.tick(single_threaded);
+
+                if rt.loop_status == LoopStatus::Normal {
+                    // Continue the animation loop
+                    window_clone
+                        .request_animation_frame(callback_holder_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref())
+                        .expect("Failed to request animation frame");
+                } else if rt.loop_status == LoopStatus::ExitCurrentLoop {
+                    rt.exit_loop();
+                    App::drop_app();
+                } else {
+                    App::drop_app();
+                }
+            }) as Box<dyn FnMut()>));
+
+            window
+                .request_animation_frame(callback_holder.borrow().as_ref().unwrap().as_ref().unchecked_ref())
+                .expect("Failed to request animation frame");
         }
     }
     #[inline(always)]

@@ -4,7 +4,7 @@ use crate::prelude::*;
 use std::time::{Duration, Instant};
 
 #[cfg(target_arch = "wasm32")]
-use instant::{Duration, Instant};
+use web_time::{Duration, Instant};
 
 #[CustomControl(overwrite=OnPaint, internal=true)]
 pub struct ProgressBar {

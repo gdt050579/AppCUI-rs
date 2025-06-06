@@ -6,12 +6,12 @@ use super::Command;
 use super::{super::Handle, thread_logic::ThreadLogic};
 use std::sync::mpsc::Sender;
 
-#[cfg(target_arch = "wasm32")]
-use instant::Duration;
 #[cfg(not(target_arch = "wasm32"))]
 use std::thread;
 #[cfg(not(target_arch = "wasm32"))]
 use std::time::Duration;
+#[cfg(target_arch = "wasm32")]
+use web_time::Duration;
 
 use std::sync::{Arc, Condvar, Mutex};
 

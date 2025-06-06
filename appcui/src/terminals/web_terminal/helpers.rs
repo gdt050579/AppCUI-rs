@@ -1,4 +1,7 @@
-use crate::terminals::{Error, ErrorKind, WebTerminal};
+use crate::{
+    prelude::Color,
+    terminals::{Error, ErrorKind, WebTerminal},
+};
 use web_sys::{WebGlProgram, WebGlRenderingContext as GL, WebGlShader};
 
 pub(super) const VERTEX_SHADER_SOURCE: &str = r#"
@@ -20,13 +23,35 @@ pub(super) const FRAGMENT_SHADER_SOURCE: &str = r#"
 "#;
 
 impl WebTerminal {
-    pub fn init_program(gl: &GL) -> Result<WebGlProgram, Error> {
+    pub(super) fn init_program(gl: &GL) -> Result<WebGlProgram, Error> {
         let vert_shader = compile_shader(gl, GL::VERTEX_SHADER, VERTEX_SHADER_SOURCE)
             .map_err(|msg| Error::new(ErrorKind::InitializationFailure, format!("Vertex shader error: {}", msg)))?;
         let frag_shader = compile_shader(gl, GL::FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE)
             .map_err(|msg| Error::new(ErrorKind::InitializationFailure, format!("Fragment shader error: {}", msg)))?;
         link_program(gl, &vert_shader, &frag_shader)
             .map_err(|msg| Error::new(ErrorKind::InitializationFailure, format!("Program linking error: {}", msg)))
+    }
+
+    pub(super) fn color_to_rgba(&self, color: Color) -> [f32; 4] {
+        match color {
+            Color::Black => [0.0, 0.0, 0.0, 1.0],
+            Color::DarkBlue => [0.0, 0.0, 127.5, 1.0],
+            Color::DarkGreen => [0.0, 127.5, 0.0, 1.0],
+            Color::Teal => [0.0, 127.5, 127.5, 1.0],
+            Color::DarkRed => [127.5, 0.0, 0.0, 1.0],
+            Color::Magenta => [127.5, 0.0, 127.5, 1.0],
+            Color::Olive => [127.5, 127.5, 0.0, 1.0],
+            Color::Silver => [191.25, 191.25, 191.25, 1.0],
+            Color::Gray => [127.5, 127.5, 127.5, 1.0],
+            Color::Blue => [0.0, 0.0, 255.0, 1.0],
+            Color::Green => [0.0, 255.0, 0.0, 1.0],
+            Color::Aqua => [0.0, 255.0, 255.0, 1.0],
+            Color::Red => [255.0, 0.0, 0.0, 1.0],
+            Color::Pink => [255.0, 0.0, 255.0, 1.0],
+            Color::Yellow => [255.0, 255.0, 0.0, 1.0],
+            Color::White => [255.0, 255.0, 255.0, 1.0],
+            Color::Transparent => [0.0, 0.0, 0.0, 0.0],
+        }
     }
 }
 

@@ -44,7 +44,7 @@ web-sys = { version = "0.3", features = [
     "TextMetrics"]}
 js-sys = "0.3"
 console_error_panic_hook = "0.1"
-instant = {version = "*", features = ["wasm-bindgen"]}
+web-time = {version = "1.1.0"}
 wasm-bindgen-rayon = { version = "1.2", features = ["no-bundler"] }
 rayon = {version = "1.5", features = ["web_spin_lock"]}
 wasm-bindgen-futures = "0.4.45"
