@@ -498,31 +498,37 @@ impl RuntimeManager {
     }
 
     pub(crate) fn tick(&mut self, single_threaded: bool) {
-        if let Some(event) = self.commandbar_event.take() {
+        // 1. Process events from command bar
+        if let Some(event) = self.commandbar_event {
             self.process_commandbar_event(event);
         }
 
-        if let Some(event) = self.menu_event.take() {
+        // 2. Process events from menu
+        if let Some(event) = self.menu_event {
             self.process_menu_event(event);
         }
 
+        // 3. Process events from controls
         if !self.events.is_empty() {
             self.process_events_queue();
         }
 
+        // 4. if there is a control that was removed (due to the previously fired events) remove it
         if !self.to_remove_list.is_empty() {
             self.remove_deleted_controls();
             self.recompute_parent_indexes = true;
             self.request_update_command_and_menu_bars = true;
         }
 
+        // If we reach this point, there should not be any change in the logic of controls
         if self.recompute_parent_indexes {
             self.update_parent_indexes(self.get_root_control_handle());
             self.recompute_parent_indexes = false;
         }
 
-        if let Some(handle) = self.request_focus.take() {
+        if let Some(handle) = self.request_focus {
             self.update_focus(handle);
+            self.request_focus = None;
             self.request_default_action = None;
             self.repaint = true;
             self.request_update_command_and_menu_bars = true;
@@ -541,29 +547,39 @@ impl RuntimeManager {
         self.recompute_layout = false;
         self.repaint = false;
 
+        // timer threads update
         if self.request_update_timer_threads {
             self.timers_manager.update_threads();
             self.request_update_timer_threads = false;
         }
+
+        // auto save changes
+        #[cfg(feature = "EVENT_RECORDER")]
+        self.event_recorder.auto_update(&self.surface);
+
         if single_threaded {
             if let Some(sys_event) = self.terminal.query_system_event() {
                 self.process_system_event(sys_event);
             }
-        } else if let Ok(sys_event) = self.event_receiver.try_recv() {
-            self.process_system_event(sys_event);
+        } else {
+            let event = if cfg!(target_arch = "wasm32") {
+                self.event_receiver.try_recv().ok()
+            } else {
+                self.event_receiver.recv().ok()
+            };
+
+            if let Some(sys_event) = event {
+                self.process_system_event(sys_event);
+                #[cfg(feature = "EVENT_RECORDER")]
+                self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
+            }
         }
 
-        if self.loop_status == LoopStatus::ExitCurrentLoop {
-            if let Some(modal_handle) = self.modal_windows.pop() {
-                self.request_remove(modal_handle);
+        #[cfg(target_arch = "wasm32")]
+        {
+            if self.loop_status == LoopStatus::ExitCurrentLoop {
+                self.exit_loop();
             }
-            if let Some(previous_modal_handle) = self.modal_windows.last().copied() {
-                self.request_focus_for_control(previous_modal_handle);
-            } else {
-                self.request_focus_for_control(self.desktop_handle);
-            }
-            self.loop_status = LoopStatus::Normal;
-            self.request_update();
         }
     }
 
