@@ -353,7 +353,7 @@ fn check_visible() {
                     c.set_visible(!vis);
                 }
             }
-            return EventProcessStatus::Processed;
+            EventProcessStatus::Processed
         }
     }
 
