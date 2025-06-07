@@ -1,5 +1,5 @@
 use crate::{
-    prelude::{Color, ErrorKind, Size, Surface},
+    prelude::{CharFlags, Color, ErrorKind, Size, Surface},
     system::Error,
     terminals::{SystemEvent, Terminal},
 };
@@ -310,22 +310,22 @@ impl WebTerminal {
                     event.prevent_default();
                 }
 
-                let key_code = crate::input::KeyCode::from(idx);
-                let mut mods = crate::input::KeyModifier::None;
+                let key_code = KeyCode::from(idx);
+                let mut mods = KeyModifier::None;
                 if event.alt_key() {
-                    mods |= crate::input::KeyModifier::Alt;
+                    mods |= KeyModifier::Alt;
                 }
                 if event.ctrl_key() {
-                    mods |= crate::input::KeyModifier::Ctrl;
+                    mods |= KeyModifier::Ctrl;
                 }
                 if event.shift_key() {
-                    mods |= crate::input::KeyModifier::Shift;
+                    mods |= KeyModifier::Shift;
                 }
 
                 let character = if k.len() == 1 { k.chars().next().unwrap_or('\0') } else { '\0' };
 
-                let sys_event = SystemEvent::KeyPressed(crate::terminals::KeyPressedEvent {
-                    key: crate::input::Key::new(key_code, mods),
+                let sys_event = SystemEvent::KeyPressed(KeyPressedEvent {
+                    key: Key::new(key_code, mods),
                     character,
                 });
 
@@ -340,10 +340,10 @@ impl WebTerminal {
 
         // MOUSE MOVE
         let mouse_move_closure = self.create_mouse_event_handler(sender.clone(), |x, y, _event| {
-            SystemEvent::MouseMove(crate::terminals::MouseMoveEvent {
+            SystemEvent::MouseMove(MouseMoveEvent {
                 x,
                 y,
-                button: crate::input::MouseButton::None,
+                button: MouseButton::None,
             })
         });
         attach::<MouseEvent>(target, "mousemove", mouse_move_closure)?;
@@ -351,12 +351,12 @@ impl WebTerminal {
         // MOUSE DOWN
         let mouse_down_closure = self.create_mouse_event_handler(sender.clone(), |x, y, event| {
             let button = match event.button() {
-                0 => crate::input::MouseButton::Left,
-                1 => crate::input::MouseButton::Center,
-                2 => crate::input::MouseButton::Right,
-                _ => crate::input::MouseButton::None,
+                0 => MouseButton::Left,
+                1 => MouseButton::Center,
+                2 => MouseButton::Right,
+                _ => MouseButton::None,
             };
-            SystemEvent::MouseButtonDown(crate::terminals::MouseButtonDownEvent { x, y, button })
+            SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button })
         });
         attach::<MouseEvent>(target, "mousedown", mouse_down_closure)?;
 
@@ -368,18 +368,18 @@ impl WebTerminal {
                 2 => crate::input::MouseButton::Right,
                 _ => crate::input::MouseButton::None,
             };
-            SystemEvent::MouseButtonUp(crate::terminals::MouseButtonUpEvent { x, y, button })
+            SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button })
         });
         attach::<MouseEvent>(target, "mouseup", mouse_up_closure)?;
 
         // MOUSE WHEEL
         let wheel_closure = self.create_wheel_event_handler(sender, |x, y, event| {
             let direction = if event.delta_y() < 0.0 {
-                crate::input::MouseWheelDirection::Up
+                MouseWheelDirection::Up
             } else {
-                crate::input::MouseWheelDirection::Down
+                MouseWheelDirection::Down
             };
-            SystemEvent::MouseWheel(crate::terminals::MouseWheelEvent { x, y, direction })
+            SystemEvent::MouseWheel(MouseWheelEvent { x, y, direction })
         });
         attach::<WheelEvent>(target, "wheel", wheel_closure)?;
 
@@ -498,7 +498,7 @@ impl WebTerminal {
         // clear entire canvas
         context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
 
-        // context.save();
+        context.save();
         context.set_font(self.font.as_str());
         context.set_text_baseline("top");
         context.set_text_align("center");
@@ -514,6 +514,7 @@ impl WebTerminal {
                     }
                     let pos_x = global_x as f64 * cell_width;
                     let pos_y = global_y as f64 * cell_height;
+
                     let foreground = self.color_to_rgba(cell.foreground);
                     let css_color = format!(
                         "rgba({},{},{},{})",
@@ -524,11 +525,24 @@ impl WebTerminal {
                     );
                     context.set_fill_style_str(&css_color);
                     context.fill_text(&cell.code.to_string(), pos_x.into(), pos_y.into())?;
+
+                    if cell.flags.contains(CharFlags::Underline) {
+                        context.begin_path();
+                        context.set_stroke_style_str(&css_color);
+                        let x_start = pos_x + 1.0;
+                        let x_end = pos_x + cell_width - 1.0;
+                        let y_line = pos_y + cell_height - 1.0;
+                        context.move_to(x_start, y_line);
+                        context.line_to(x_end, y_line);
+                        context.stroke();
+                        // restore fill style for next character
+                        context.set_fill_style_str(&css_color);
+                    }
                 }
             }
         }
 
-        // context.restore();
+        context.restore();
         Ok(())
     }
 
