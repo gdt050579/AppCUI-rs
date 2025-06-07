@@ -8,7 +8,7 @@ license = "MIT"
 repository = "https://github.com/gdt050579/AppCUI-rs"
 readme = "../README.md"
 keywords = ["tui", "cui", "proc-macro"]
-categories = ["gui", "development-tools::procedural-macro"]
+categories = ["development-tools::procedural-macro-helpers"]
 documentation = "https://docs.rs/appcui-proc-macro"
 
 [lib]
