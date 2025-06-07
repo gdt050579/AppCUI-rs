@@ -27,6 +27,52 @@ impl fmt::Display for SelectionDirection {
     }
 }
 
+pub struct TextPosition {
+    pub (crate) line_and_collumn: Option<u64>,
+    pub (crate) offset: Option<u32>,
+}
+
+impl TextPosition {
+    pub fn with_offset(offset: u32) -> Self {
+        TextPosition { offset: Some(offset), line_and_collumn: None }
+    }
+
+    pub fn with_line_column(line: u32, column: u32) -> Self {
+        let v = (line as u64) << 32 | column as u64;
+        TextPosition { line_and_collumn: Some(v), offset: None }
+    }
+
+    pub fn with_both(offset: u32, line: u32, column: u32) -> Self {
+        let v = (line as u64) << 32 | column as u64;
+
+        TextPosition { line_and_collumn: Some(v), offset: Some(offset) }
+    }
+
+    pub fn offset(&self) -> Option<u32> {
+        self.offset
+    }
+
+    pub fn line(&self) -> Option<u32> {
+        if self.line_and_collumn.is_none() {
+            None
+        }
+        else {
+            let value = self.line_and_collumn.unwrap();
+            Some((value >> 32) as u32)
+        }
+    }
+
+    pub fn collumn(&self) -> Option<u32> {
+        if self.line_and_collumn.is_none() {
+            None
+        }
+        else {
+            let value = self.line_and_collumn.unwrap();
+            Some((value & 0xFFFFFFFF) as u32)
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 enum CharacterType {
     None,
@@ -204,7 +250,7 @@ impl TextArea {
         (absolute_position_inital, absolute_position_new)
     }
 
-    pub fn move_cursor_vertical(&mut self, no_of_rows: i32) {
+    fn move_cursor_vertical(&mut self, no_of_rows: i32) {
 
         // We are already on the first line, moving left to the max
         if self.line_offset as i32 + self.cursor.pos_y as i32 + no_of_rows < 0 {
@@ -282,7 +328,7 @@ impl TextArea {
         self.update_scrollbar_pos();
     }
 
-    pub fn move_cursor_horizontal(&mut self, no_collumns: i32) {
+    fn move_cursor_horizontal(&mut self, no_collumns: i32) {
         if self.window_width == 0 {
             return;
         }
@@ -431,12 +477,16 @@ impl TextArea {
         self.update_scrollbar_pos();
     }
 
-    fn get_cursor_position_in_line(line_text: &str, row_offset: usize, cursor_index: usize, linebar_size: usize) -> usize {
-        let cursor_offset = row_offset + cursor_index - linebar_size;
+    fn get_cursor_position_in_line(line_text: &str, row_position: usize, linebar_size: usize) -> usize {
+        let cursor_offset = row_position - linebar_size;
 
         let char_index = line_text.char_indices().nth(cursor_offset).map(|(i, _)| i);
         if let Some(bytes_index) = char_index {
             bytes_index
+        }
+        else if line_text.chars().count() == cursor_offset {
+            // If the cursor is at the end of the line, we return the length of the line
+            line_text.len()
         }
         else {
             usize::MAX
@@ -450,6 +500,27 @@ impl TextArea {
 
         cursor_absolute_position
     }
+
+    fn get_absolute_position_xy(&mut self, x: usize, y: usize) -> (u32, u32) {
+        let mut cursor_absolute_position = 0;
+
+        // Here I count the byte sizes of that lines above
+        for i in 0..y as u32 {
+            cursor_absolute_position += self.line_sizes[i as usize];
+        }
+
+        // Here I need the absolute position of that character, therefore I need to slice 
+        // the text and extract the absolute position
+        let line_text = &self.text[cursor_absolute_position as usize .. (cursor_absolute_position + self.line_sizes[y]) as usize];
+        
+        let byte_index_in_line = Self::get_cursor_position_in_line(line_text, x, 0);
+        if byte_index_in_line != usize::MAX {
+            cursor_absolute_position += byte_index_in_line as u32;
+        }
+
+        (cursor_absolute_position, byte_index_in_line as u32)
+    }
+
     fn get_absolute_position_verbose(&mut self) -> (u32, u32) {
         let mut cursor_absolute_position = 0;
 
@@ -462,7 +533,7 @@ impl TextArea {
         // the text and extract the absolute position
         let line_text = &self.text[cursor_absolute_position as usize .. (cursor_absolute_position + self.line_sizes[self.line_offset as usize + self.cursor.pos_y]) as usize];
         
-        let byte_index_in_line = Self::get_cursor_position_in_line(line_text, self.row_offset as usize, self.cursor.pos_x, 0);
+        let byte_index_in_line = Self::get_cursor_position_in_line(line_text, self.row_offset as usize + self.cursor.pos_x, 0);
         if byte_index_in_line != usize::MAX {
             cursor_absolute_position += byte_index_in_line as u32;
         }
@@ -490,7 +561,6 @@ impl TextArea {
     #[inline(always)]
     fn parse_text_in_lines(&mut self, text: &str, line_sizes: &mut Vec<u32>, line_character_counts: &mut Vec<u32>) {
         for line in text.lines() {
-            log!("Info", "Print line: {}", line);
             line_sizes.push(line.len() as u32 + 1); // +1 for the \n we need to keep in mind
             line_character_counts.push(line.chars().count() as u32 + 1); // +1 for the \n we need to keep in mind
         }
@@ -540,7 +610,7 @@ impl TextArea {
             return
         }
         self.window_width = self.size().width - self.line_number_bar_size;
-    }
+}
 
     /// Creates a new TextArea control with the specified text, layout, and flags.
     /// The TextArea control is a multi-line text input control that allows for scrolling and selection.
@@ -600,7 +670,7 @@ impl TextArea {
         if !flags.contains(Flags::ShowLineNumber) {
             control.line_number_bar_size = 0;
         }
-
+        
         if !control.text.ends_with('\n') {
             control.text += "\n";
         }
@@ -608,6 +678,11 @@ impl TextArea {
         for line in text.lines() {
             control.line_sizes.push(line.len() as u32 + 1); // +1 for the \n we need to keep in mind
             control.line_character_counts.push(line.chars().count() as u32 + 1); // +1 for the \n we need to keep in mind
+        }
+
+        if text.ends_with("\n") {
+            control.line_sizes.push(0);
+            control.line_character_counts.push(0);
         }
 
         control.update_max_line_size();
@@ -704,7 +779,7 @@ impl TextArea {
         }
     }
 
-    pub fn remove_char_back(&mut self) {
+    fn remove_char_back(&mut self) {
         // First we need to calculate the absolute position in the text for the cursor
         let cursor_absolute_position_initial = self.get_absolute_position() as usize;
         
@@ -748,7 +823,7 @@ impl TextArea {
         }
     }
 
-    pub fn remove_char_front(&mut self) {
+    fn remove_char_front(&mut self) {
 
         let current_line_number = self.line_offset as usize + self.cursor.pos_y;
         if current_line_number == self.line_sizes.len() - 1 {
@@ -776,7 +851,7 @@ impl TextArea {
         self.update_scrollbar_data();
     }
 
-    pub fn remove_text_selection(&mut self, pos_start: usize, pos_end: usize) {
+    fn remove_text_selection(&mut self, pos_start: usize, pos_end: usize) {
         // Here we should reverse from absolut_position -> relative line position in order to modify our lines
         // If the remove is multiline, we should remove lines in between, cut and merge first and last line
 
@@ -882,7 +957,7 @@ impl TextArea {
     }
     
     /// Inserts the text at the current cursor position within the text area.
-    pub fn insert_text(&mut self, text: &str) {
+    fn insert_text_internal(&mut self, text: &str) {
         if text.contains('\n') {
             // We need to calculate the absolute position in the text for the cursor and the position in line
             let cursor_absolute_position;
@@ -1039,6 +1114,152 @@ impl TextArea {
     #[inline(always)]
     pub fn text(&self) -> &str {
         &self.text
+    }
+
+    // Function that get a TextPosition and sets the cursor position
+    pub fn set_cursor_position(&mut self, pos: TextPosition)  -> bool{
+        // If we have an offset, we use that offset for cursor position
+        // If we have an absolute position, we need to calculate the offset
+
+        let offset_position;
+        let absolute_position = self.get_absolute_position();
+
+        if pos.offset.is_some() {
+            offset_position = pos.offset().unwrap();
+        }
+        else if pos.line_and_collumn.is_some() {
+            let line = pos.line().unwrap();
+            let collumn = pos.collumn().unwrap();
+            (offset_position, _) = self.get_absolute_position_xy(collumn as usize, line as usize);
+        }
+        else {
+            return false; // Invalid position
+        }
+
+        self.move_cursor_horizontal(offset_position as i32 - absolute_position as i32);
+        
+        true
+    }
+
+    // Sets the text of the TextArea
+    pub fn set_text(&mut self, text: &str) {
+        // We reset all the data we have
+        
+        // Reset the selection
+        self.reset_selection();
+
+        // Reset the view and cursor
+        self.line_offset = 0;
+        self.row_offset = 0;
+        self.cursor.pos_x = 0;
+        self.cursor.pos_y = 0;
+        self.reposition_cursor();
+
+        // Reset the line sizes and character counts
+        self.line_sizes.clear();
+        self.line_character_counts.clear();
+
+        // Reset the text
+        self.text = text.to_string().replace('\t', "    ").replace("\r\n", "\n");
+        if !self.text.ends_with('\n') {
+            self.text += "\n";
+        }
+
+        if !self.flags.contains(Flags::ShowLineNumber) {
+            self.line_number_bar_size = 0;
+        }
+
+        // Parse the new text and set the new data
+        let mut line_sizes = Vec::new();
+        let mut line_character_counts = Vec::new();
+        self.parse_text_in_lines(text, &mut line_sizes, &mut line_character_counts);
+        self.line_sizes = line_sizes;
+        self.line_character_counts = line_character_counts;
+
+        if text.ends_with("\n") {
+            self.line_sizes.push(0);
+            self.line_character_counts.push(0);
+        }
+
+        self.update_max_line_size();
+        self.update_line_number_tab_size();
+        self.update_scrollbar_pos();
+    }
+
+    // Inserts the text at the specified position in the TextArea.
+    // The position can be specified as an offset or as a line and collumn.
+    // The function will move the cursor to the specified position and insert the text at that position.
+    pub fn insert_text(&mut self, pos: TextPosition, text: &str) {
+        //  First we move the cursor to the position
+        if self.set_cursor_position(pos) {
+            // Then we insert the text at the current cursor position
+            self.insert_text_internal(text);
+            self.move_cursor_horizontal(text.chars().count() as i32);
+        }
+    }
+
+    pub fn remove_text(&mut self, pos_start: TextPosition, size: u32) {
+        // First move the cursor to the start position
+        if self.set_cursor_position(pos_start) {
+            // Then we remove the text at the current cursor position
+            let absolute_position = self.get_absolute_position() as usize;
+            let pos_end = absolute_position + size as usize;
+            if pos_end > self.text.len() {
+                return;
+            }
+
+            self.remove_text_selection(absolute_position, pos_end);
+        }
+    }
+
+    pub fn select_text(&mut self, pos_start: TextPosition, size: u32) {
+        // First move the cursor to the start position
+        if self.set_cursor_position(pos_start) {
+            // Then we select the text at the current cursor position
+            let absolute_position_inital = self.get_absolute_position() as usize;
+            
+            self.move_cursor_horizontal(size as i32);
+            let absolute_position_new = self.get_absolute_position() as usize;
+
+            self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Right);
+        }
+    }
+
+    pub fn clear_selection(&mut self) {
+        self.reset_selection();
+    }
+
+    pub fn selection(&self) -> Option<&str> {
+        if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
+            let start = self.selection.pos_start.min(self.selection.pos_end);
+            let end = self.selection.pos_start.max(self.selection.pos_end);
+
+            return Some(&self.text[start..end]);
+            
+        }
+
+        None
+    }
+
+    pub fn delete_selection(&mut self) {
+        if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
+            self.remove_text_selection(self.selection.pos_start, self.selection.pos_end);
+            self.reset_selection();
+        }
+    }
+
+    pub fn has_selection(&self) -> bool {
+        self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end
+    }
+
+    pub fn is_read_only(&self) -> bool {
+        self.flags.contains(Flags::ReadOnly)
+    }
+
+    pub fn cursor_position(&mut self) -> TextPosition {
+        let absolute_position = self.get_absolute_position();
+
+        TextPosition::with_both(absolute_position, self.cursor.pos_y as u32 + self.line_offset, self.cursor.pos_x as u32 + self.row_offset)
     }
 
 }
@@ -1309,7 +1530,7 @@ impl OnKeyPressed for TextArea {
                     self.reposition_cursor();
 
                     if let Some(clipboard_data) = RuntimeManager::get().terminal().get_clipboard_text() {
-                        self.insert_text(&clipboard_data);
+                        self.insert_text_internal(&clipboard_data);
                         self.move_cursor_horizontal(clipboard_data.chars().count() as i32);
                     }
                     return EventProcessStatus::Processed;
@@ -1390,7 +1611,7 @@ impl OnKeyPressed for TextArea {
             key!("Enter") => {
                 if !self.flags.contains(Flags::ReadOnly) {
                     self.reposition_cursor();
-                    self.insert_text("\n");
+                    self.insert_text_internal("\n");
                     self.move_cursor_horizontal(1);
                     
                     return EventProcessStatus::Processed;
@@ -1405,7 +1626,7 @@ impl OnKeyPressed for TextArea {
 
             self.reset_selection();
 
-            self.insert_text(&character.to_string());
+            self.insert_text_internal(&character.to_string());
             self.move_cursor_horizontal(1);
 
             return EventProcessStatus::Processed;
