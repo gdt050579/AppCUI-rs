@@ -40,11 +40,18 @@ jobs:
       
     - name: Run cargo-tarpaulin
       run: cargo tarpaulin -p appcui -o xml
-      
+              
     - name: Generate coverage summary
       id: coverage_summary
-      run: powershell -Command "$c=[xml](Get-Content 'cobertura.xml'); $r=[double]$c.coverage.GetAttribute('line-rate'); $p=$r*100; $i=[math]::Round($p); 'coverage=' + $i | Out-File -Encoding ASCII $env:GITHUB_OUTPUT"
-        
+      shell: pwsh
+      run: |
+        $xml = [xml](Get-Content 'cobertura.xml')
+        $lineRate = [double]$xml.coverage.GetAttribute('line-rate')
+        $coveragePct = $lineRate * 100
+        $coverageInt = [math]::Round($coveragePct)
+        "coverage=$coverageInt" >> $env:GITHUB_OUTPUT
+    
+
     - name: Create Coverage Badge
       uses: emibcn/badge-action@v1
       with:
