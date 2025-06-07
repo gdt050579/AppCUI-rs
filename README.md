@@ -14,7 +14,7 @@
 
 AppCUI is a simple, easy-to-use and cross-platform library for creating text-based user interfaces in Rust:
 * [Book](https://gdt050579.github.io/AppCUI-rs/)
-* [Documentation]()
+* [Documentation](https://docs.rs/appcui)
 
 
 ## ✨ Features

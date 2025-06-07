@@ -10,7 +10,7 @@ homepage = "https://gdt050579.github.io/AppCUI-rs/"
 documentation = "https://docs.rs/appcui"
 readme = "../README.md"
 keywords = ["tui", "cui", "ui", "terminal"]
-categories = ["gui", "tui", "cui", "command-line-utilities", ]
+categories = ["gui", "command-line-interface", "command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -18,7 +18,7 @@ categories = ["gui", "tui", "cui", "command-line-utilities", ]
 EnumBitFlags = "1.0.10"
 flat_string = "1.0.0"
 chrono = {version = "0.4.38", features = ["wasmbind"]}
-appcui_proc_macro = {path = "../appcui-proc-macro"}
+appcui_proc_macro = "0.1.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
