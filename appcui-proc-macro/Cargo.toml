@@ -2,11 +2,14 @@
 name = "appcui_proc_macro"
 version = "0.1.0"
 edition = "2021"
-authors = ["gavrilut.dragos@gmail.com"]
-description = "..."
+authors = ["Gavrilut Dragos <gavrilut.dragos@gmail.com>"]
+description = "Procedural macros for the AppCUI TUI framework."
 license = "MIT"
-#repository = ""
-#readme = "README.md"
+repository = "https://github.com/gdt050579/AppCUI-rs"
+readme = "../README.md"
+keywords = ["tui", "cui", "proc-macro"]
+categories = ["development-tools::procedural-macro-helpers"]
+documentation = "https://docs.rs/appcui-proc-macro"
 
 [lib]
 proc-macro = true
