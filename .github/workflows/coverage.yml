@@ -52,16 +52,16 @@ jobs:
         status: ${{ steps.coverage_summary.outputs.coverage }}%
         color: ${{ steps.coverage_summary.outputs.coverage >= 80 && 'green' || steps.coverage_summary.outputs.coverage >= 70 && 'yellow' || steps.coverage_summary.outputs.coverage >= 60 && 'orange' || 'red' }}
         path: coverage.svg
-        
+
     - name: Upload badge to Gist
       if: github.ref == 'refs/heads/main'
-      uses: gist-updater@v1
+      uses: exuanbo/actions-deploy-gist@v1
       with:
         token: ${{ secrets.GIST_CODECOVERAGE }}
         gist_id: f7d7e7d56b2725a3b33a265e8a9d8e9c
-        filename: coverage.svg
-        content: ${{ steps.coverage_summary.outputs.coverage }}%
-        
+        file_path: coverage.svg
+        file_type: binary
+              
     - name: Archive code coverage results
       uses: actions/upload-artifact@v4
       with:
