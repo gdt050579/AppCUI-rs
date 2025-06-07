@@ -69,7 +69,6 @@
         - [ProgressBar](chapter-3/stock-controls/progressbar.md)
         - [RadioBox](chapter-3/stock-controls/radiobox.md)
         - [Selector](chapter-3/stock-controls/selector.md)
-        - [Slider]()
         - [Tab](chapter-3/stock-controls/tab.md)
         - [TextArea](chapter-3/stock-controls/textarea.md)
         - [TextField](chapter-3/stock-controls/textfield.md)
