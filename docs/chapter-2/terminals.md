@@ -63,12 +63,12 @@ AppCUI supports various terminals (but each one comes with advantages and drawba
 ## Clipboard
 AppCUI provides clipboard support for copying and pasting text. The clipboard functionality is available on the following terminals:
 
-| Terminal        | Clipboard Support | API Used              |
-| --------------- | ----------------- | --------------------- |
-| Windows Console | Yes               | Windows API           |
-| NCurses         | Yes               | copypasta crate       |
-| Termios         | -                 | -                     |
-| Web Terminal    | Yes               | Browser Clipboard API |
+| Terminal        | Clipboard Support | API Used        |
+| --------------- | ----------------- | --------------- |
+| Windows Console | Yes               | Windows API     |
+| NCurses         | Yes               | copypasta crate |
+| Termios         | -                 | -               |
+| Web Terminal    | Yes               | Browser API     |
 
 ## Defaults
 
