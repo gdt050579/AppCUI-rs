@@ -3,22 +3,24 @@
 AppCUI supports various terminals (but each one comes with advantages and drawbacks).
 
 ## OS Support
-| OS      | Windows Console | NCurses | Termios |
-| ------- | --------------- | ------- | ------- |
-| Windows | Yes             | ?       | -       |
-| Linux   | -               | Yes     | Yes     |
-| Mac/OSX | -               | Yes     | Yes     |
-| Web     | Yes             | Yes     | -       |
+
+| OS      | Windows Console | NCurses | Termios | Web Terminal |
+| ------- | --------------- | ------- | ------- | ------------ |
+| Windows | Yes             | -       | -       | -            |
+| Linux   | -               | Yes     | Yes     | -            |
+| Mac/OSX | -               | Yes     | Yes     | -            |
+| Web     | -               | -       | -       | Yes          |
 
 
 ## Display
 
 | Display       | Windows Console     | NCurses             | Termios             | Web Terminal        |
-| ------------- | ------------------- | ------------------- | ------------------- |-------------------- |
+| ------------- | ------------------- | ------------------- | ------------------- | ------------------- |
 | Colors        | 16 (fore),16 (back) | 16 (fore),16 (back) | 16 (fore),16 (back) | 16 (fore),16 (back) |
 | Bold          | -                   | Yes                 | -                   | -                   |
 | Underline     | Yes                 | Yes                 | -                   | Yes                 |
-| Character Set | Ascii,WTF-16        | Ascii,UTF-8         | -                   | Ascii,WTF-16        |
+| Italic        | -                   | -                   | -                   | -                   |
+| Character Set | Ascii,WTF-16        | Ascii,UTF-8         | -                   | Ascii,UTF-8         |
 | Cursor        | Yes                 | Yes                 | -                   | Yes                 |
 
 
@@ -61,6 +63,7 @@ AppCUI supports various terminals (but each one comes with advantages and drawba
 | Set title     | Yes             | -             | -       | Yes          |
 
 ## Clipboard
+
 AppCUI provides clipboard support for copying and pasting text. The clipboard functionality is available on the following terminals:
 
 | Terminal        | Clipboard Support | API Used        |
