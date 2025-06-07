@@ -34,12 +34,19 @@ Besides the [Common methods for all Controls](../common_methods.md) a textfield 
 
 | Method                                      | Purpose |
 |---------------------------------------------|---------|
-| **move_cursor_vertical** | Moves the cursor up or down by the specified number of rows. A positive value moves it down, while a negative value moves it up. |
-| **move_cursor_horizontal** | Moves the cursor left or right by the specified number of columns. A positive value moves it to the right, while a negative value moves it to the left. |
-| **remove_char_back**             | Deletes the character before the cursor, similar to pressing "Backspace". |
-| **remove_char_front**            | Deletes the character after the cursor, similar to pressing "Delete". |
-| **remove_text_selection** | Removes the text between `pos_start` and `pos_end`, deleting the selected text range. |
-| **insert_text**      | Inserts the given text at the cursor position, shifting existing content forward. |
+| **set_text** | Replaces the current content with the specified text. |
+| **insert_text** | Inserts the given text at the specified cursor position. |
+| **remove_text** | Removes a portion of the text between specified positions. |
+| **text** | Returns the full content of the text editor. |
+| **select_text** | Selects a range of text with the given start position and size. |
+| **clear_selection**      | Clears any active text selection. |
+| **has_selection**      | Returns true if there is an active text selection. |
+| **selection**      | Returns the currently selected text, if any. |
+| **delete_selection**      | Deletes the currently selected text. |
+| **is_read_only**      | Returns true if the text editor is in read-only mode. |
+| **set_cursor_position**      | Moves the cursor to the specified position. |
+| **cursor_position**      | Returns the current position of the cursor. |
+
 
 ## Key association
 
