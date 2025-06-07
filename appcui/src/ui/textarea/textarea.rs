@@ -614,7 +614,7 @@ impl TextArea {
             return
         }
         self.window_width = self.size().width - self.line_number_bar_size;
-    }
+}
 
     /// Creates a new TextArea control with the specified text, layout, and flags.
     /// The TextArea control is a multi-line text input control that allows for scrolling and selection.
@@ -1250,7 +1250,7 @@ impl TextArea {
         self.flags.contains(Flags::ReadOnly)
     }
 
-    pub fn cursor(&mut self) -> TextPosition {
+    pub fn cursor_position(&mut self) -> TextPosition {
         let absolute_position = self.get_absolute_position();
 
         TextPosition::with_both(absolute_position, self.cursor.pos_x as u32 + self.row_offset, self.cursor.pos_y as u32 + self.line_offset)
