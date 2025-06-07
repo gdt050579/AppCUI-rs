@@ -3,12 +3,7 @@ use crate::{prelude::*, ui::textarea::textarea::TextPosition};
 #[test]
 fn check_move_left_right_1() {
     let script = "
-        
-        
-        Paint.Enable(false)
-
-        Error.Disable(true)
-        
+        Paint.Enable(false)        
         Paint('Initial State')
         CheckHash(0xA7E1DBC20D842008)
         CheckCursor(1, 1)
@@ -2408,7 +2403,7 @@ fn pub_fn_insert_text() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    let mut app = App::debug(60, 10, script).build().unwrap();
     app.add_window(MyWin::new());
     app.run();
 }
@@ -2460,7 +2455,7 @@ fn pub_fn_move_set_cursor_position() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    let mut app = App::debug(60, 10, script).build().unwrap();
     app.add_window(MyWin::new());
     app.run();
 }
@@ -2512,7 +2507,7 @@ fn pub_fn_move_set_cursor_position_2() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    let mut app = App::debug(60, 10, script).build().unwrap();
     app.add_window(MyWin::new());
     app.run();
 }
@@ -2560,7 +2555,7 @@ fn pub_fn_remove_text() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    let mut app = App::debug(60, 10, script).build().unwrap();
     app.add_window(MyWin::new());
     app.run();
 }
@@ -2612,7 +2607,7 @@ fn pub_fn_select_text() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    let mut app = App::debug(60, 10, script).build().unwrap();
     app.add_window(MyWin::new());
     app.run();
 }
@@ -2664,7 +2659,7 @@ fn pub_fn_delete_selection() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    let mut app = App::debug(60, 10, script).build().unwrap();
     app.add_window(MyWin::new());
     app.run();
 }
