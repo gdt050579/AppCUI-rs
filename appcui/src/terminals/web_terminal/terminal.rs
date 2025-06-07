@@ -1,7 +1,7 @@
 use crate::{
-    prelude::{CharFlags, Color, ErrorKind, Size, Surface},
+    prelude::{CharFlags, Color, ErrorKind, Key, KeyCode, KeyModifier, MouseButton, MouseWheelDirection, Size, Surface},
     system::Error,
-    terminals::{SystemEvent, Terminal},
+    terminals::{KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent, MouseWheelEvent, SystemEvent, Terminal},
 };
 use std::sync::{mpsc::Sender, Arc, Mutex};
 use wasm_bindgen::{convert::FromWasmAbi, prelude::*, JsCast};
@@ -400,7 +400,7 @@ impl WebTerminal {
             for global_x in 0..width {
                 if let Some(cell) = &surface.char(global_x, global_y) {
                     if cell.background == Color::Transparent {
-                        web_sys::console::log_1(&format!("Skipping transparent cell at ({}, {})", global_x, global_y).into());
+                        // web_sys::console::log_1(&format!("Skipping transparent cell at ({}, {})", global_x, global_y).into());
                         continue;
                     }
                     let pos_x = global_x as f32 * cell_width;
@@ -509,7 +509,7 @@ impl WebTerminal {
             for global_x in 0..width {
                 if let Some(cell) = &surface.char(global_x, global_y) {
                     if cell.foreground == Color::Transparent {
-                        web_sys::console::log_1(&format!("Skipping transparent cell at ({}, {})", global_x, global_y).into());
+                        // web_sys::console::log_1(&format!("Skipping transparent cell at ({}, {})", global_x, global_y).into());
                         continue;
                     }
                     let pos_x = global_x as f64 * cell_width;
