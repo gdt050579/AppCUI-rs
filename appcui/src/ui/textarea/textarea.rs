@@ -38,19 +38,11 @@ impl TextPosition {
     }
 
     pub fn with_line_column(line: u32, column: u32) -> Self {
-        if line == 0 || column == 0 {
-            panic!("Line and column must be greater than 0");
-        }
-
         let v = (line as u64) << 32 | column as u64;
         TextPosition { line_and_collumn: Some(v), offset: None }
     }
 
     pub fn with_both(offset: u32, line: u32, column: u32) -> Self {
-        if line == 0 || column == 0 {
-            panic!("Line and column must be greater than 0");
-        }
-
         let v = (line as u64) << 32 | column as u64;
 
         TextPosition { line_and_collumn: Some(v), offset: Some(offset) }
@@ -492,6 +484,10 @@ impl TextArea {
         if let Some(bytes_index) = char_index {
             bytes_index
         }
+        else if line_text.chars().count() == cursor_offset {
+            // If the cursor is at the end of the line, we return the length of the line
+            line_text.len()
+        }
         else {
             usize::MAX
         }
@@ -674,7 +670,7 @@ impl TextArea {
         if !flags.contains(Flags::ShowLineNumber) {
             control.line_number_bar_size = 0;
         }
-
+        
         if !control.text.ends_with('\n') {
             control.text += "\n";
         }
@@ -682,6 +678,11 @@ impl TextArea {
         for line in text.lines() {
             control.line_sizes.push(line.len() as u32 + 1); // +1 for the \n we need to keep in mind
             control.line_character_counts.push(line.chars().count() as u32 + 1); // +1 for the \n we need to keep in mind
+        }
+
+        if text.ends_with("\n") {
+            control.line_sizes.push(0);
+            control.line_character_counts.push(0);
         }
 
         control.update_max_line_size();
@@ -1123,10 +1124,10 @@ impl TextArea {
         let offset_position;
         let absolute_position = self.get_absolute_position();
 
-        if Some(pos.offset()).is_some() {
+        if pos.offset.is_some() {
             offset_position = pos.offset().unwrap();
         }
-        else if Some(pos.line_and_collumn).is_some() {
+        else if pos.line_and_collumn.is_some() {
             let line = pos.line().unwrap();
             let collumn = pos.collumn().unwrap();
             (offset_position, _) = self.get_absolute_position_xy(collumn as usize, line as usize);
@@ -1175,6 +1176,11 @@ impl TextArea {
         self.line_sizes = line_sizes;
         self.line_character_counts = line_character_counts;
 
+        if text.ends_with("\n") {
+            self.line_sizes.push(0);
+            self.line_character_counts.push(0);
+        }
+
         self.update_max_line_size();
         self.update_line_number_tab_size();
         self.update_scrollbar_pos();
@@ -1188,6 +1194,7 @@ impl TextArea {
         if self.set_cursor_position(pos) {
             // Then we insert the text at the current cursor position
             self.insert_text_internal(text);
+            self.move_cursor_horizontal(text.chars().count() as i32);
         }
     }
 
@@ -1209,13 +1216,12 @@ impl TextArea {
         // First move the cursor to the start position
         if self.set_cursor_position(pos_start) {
             // Then we select the text at the current cursor position
-            let absolute_position = self.get_absolute_position() as usize;
-            let pos_end = absolute_position + size as usize;
-            if pos_end > self.text.len() {
-                return;
-            }
+            let absolute_position_inital = self.get_absolute_position() as usize;
+            
+            self.move_cursor_horizontal(size as i32);
+            let absolute_position_new = self.get_absolute_position() as usize;
 
-            self.update_selection(absolute_position, pos_end, SelectionDirection::Right);
+            self.update_selection(absolute_position_inital, absolute_position_new, SelectionDirection::Right);
         }
     }
 
@@ -1253,7 +1259,7 @@ impl TextArea {
     pub fn cursor_position(&mut self) -> TextPosition {
         let absolute_position = self.get_absolute_position();
 
-        TextPosition::with_both(absolute_position, self.cursor.pos_x as u32 + self.row_offset, self.cursor.pos_y as u32 + self.line_offset)
+        TextPosition::with_both(absolute_position, self.cursor.pos_y as u32 + self.line_offset, self.cursor.pos_x as u32 + self.row_offset)
     }
 
 }

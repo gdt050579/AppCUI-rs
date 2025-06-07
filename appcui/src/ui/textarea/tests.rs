@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, ui::textarea::textarea::TextPosition};
 
 #[test]
 fn check_move_left_right_1() {
@@ -2336,4 +2336,335 @@ fn scroll_with_scrollbars_and_linenumbers() {
     w.add(textarea);
     a.add_window(w);
     a.run();
+}
+
+#[test]
+fn pub_fn_set_text() {
+
+        let script = "
+        // Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0x5DC89E2D2B797708)
+    ";
+
+    let text_print = "Old text, new line\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
+    let mut textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::ShowLineNumber | textarea::Flags::ScrollBars);
+    
+    let mut app = App::debug(60, 11, script).build().unwrap();
+    let mut window = Window::new("TextArea public function test", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    textarea.set_text("New text, new line\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust");
+
+    window.add(textarea);
+    app.add_window(window);
+    app.run();
+}
+
+#[test]
+fn pub_fn_insert_text() {
+        let script = "
+        // Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0xA550C252F17F191B)
+
+        Mouse.Click(50, 8, right)
+        Paint('After Click')
+        CheckHash(0x4526D8FF8DB231D2)
+    ";
+
+    #[Window(events=ButtonEvents, internal=true)]
+    struct MyWin {
+        control: Handle<TextArea>,
+        button: Handle<Button>,
+    }
+        impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("TextArea public function test", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                control: Handle::None,
+                button: Handle::None
+            };
+            let text_initial = "Old text, new line\n";    
+            me.control = me.add(TextArea::new(text_initial, Layout::new("d:c,h:100%,"), textarea::Flags::None));
+            me.button = me.add(Button::new("Test", Layout::new("x:45,y:7,w:10"), button::Type::Normal));
+
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _button_handle: Handle<Button>) -> EventProcessStatus {
+            let text_insert = "Lorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";
+
+            // Insert text at position 18
+            // This will insert text at the end of the first line
+            let control_handle = self.control;
+            if let Some(textarea) = self.control_mut(control_handle) {
+
+                assert!(!textarea.is_read_only(), "TextArea should not be read-only");
+
+                textarea.insert_text(TextPosition::with_offset(19), text_insert);
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+    
+    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    app.add_window(MyWin::new());
+    app.run();
+}
+
+#[test]
+fn pub_fn_move_set_cursor_position() {
+        let script = "
+        // Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0xFC9B1C739735A9E6)
+
+        Mouse.Click(50, 8, right)
+        Paint('After Click')
+        CheckCursor(20, 1)
+    ";
+
+    #[Window(events=ButtonEvents, internal=true)]
+    struct MyWin {
+        control: Handle<TextArea>,
+        button: Handle<Button>,
+    }
+        impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("TextArea public function test", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                control: Handle::None,
+                button: Handle::None
+            };
+            let text_initial = "Text used to test the set_cursor_position function";    
+            me.control = me.add(TextArea::new(text_initial, Layout::new("d:c,h:100%,"), textarea::Flags::None));
+            me.button = me.add(Button::new("Test", Layout::new("x:45,y:7,w:10"), button::Type::Normal));
+
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _button_handle: Handle<Button>) -> EventProcessStatus {
+            
+            let control_handle = self.control;
+            if let Some(textarea) = self.control_mut(control_handle) {
+                textarea.set_cursor_position(TextPosition::with_offset(19));
+
+                let cursor_pos = textarea.cursor_position();
+                assert_eq!(cursor_pos.offset().unwrap(), 19, "Cursor position offset should be 19");
+                assert_eq!(cursor_pos.line().unwrap(), 0, "Cursor position line should be 0");
+                assert_eq!(cursor_pos.collumn().unwrap(), 19, "Cursor position collumn should be 19");
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+    
+    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    app.add_window(MyWin::new());
+    app.run();
+}
+
+#[test]
+fn pub_fn_move_set_cursor_position_2() {
+        let script = "
+        // Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0xFC9B1C739735A9E6)
+
+        Mouse.Click(50, 8, right)
+        Paint('After Click')
+        CheckCursor(20, 1)
+    ";
+
+    #[Window(events=ButtonEvents, internal=true)]
+    struct MyWin {
+        control: Handle<TextArea>,
+        button: Handle<Button>,
+    }
+        impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("TextArea public function test", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                control: Handle::None,
+                button: Handle::None
+            };
+            let text_initial = "Text used to test the set_cursor_position function";    
+            me.control = me.add(TextArea::new(text_initial, Layout::new("d:c,h:100%,"), textarea::Flags::None));
+            me.button = me.add(Button::new("Test", Layout::new("x:45,y:7,w:10"), button::Type::Normal));
+
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _button_handle: Handle<Button>) -> EventProcessStatus {
+            
+            let control_handle = self.control;
+            if let Some(textarea) = self.control_mut(control_handle) {
+                textarea.set_cursor_position(TextPosition::with_line_column(0, 19));
+
+                let cursor_pos = textarea.cursor_position();
+                assert_eq!(cursor_pos.offset().unwrap(), 19, "Cursor position offset should be 19");
+                assert_eq!(cursor_pos.line().unwrap(), 0, "Cursor position line should be 0");
+                assert_eq!(cursor_pos.collumn().unwrap(), 19, "Cursor position collumn should be 19");
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+    
+    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    app.add_window(MyWin::new());
+    app.run();
+}
+
+#[test]
+fn pub_fn_remove_text() {
+        let script = "
+        // Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0xF4EC8573C7C30737)
+
+        Mouse.Click(50, 8, right)
+        Paint('After Click')
+        CheckCursor(23, 1)
+        CheckHash(0xE9B4911842E8EC73)
+    ";
+
+    #[Window(events=ButtonEvents, internal=true)]
+    struct MyWin {
+        control: Handle<TextArea>,
+        button: Handle<Button>,
+    }
+        impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("TextArea public function test", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                control: Handle::None,
+                button: Handle::None
+            };
+            let text_initial = "Text used to test the remove_text function";    
+            me.control = me.add(TextArea::new(text_initial, Layout::new("d:c,h:100%,"), textarea::Flags::None));
+            me.button = me.add(Button::new("Test", Layout::new("x:45,y:7,w:10"), button::Type::Normal));
+
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _button_handle: Handle<Button>) -> EventProcessStatus {
+            
+            let control_handle = self.control;
+            if let Some(textarea) = self.control_mut(control_handle) {
+                textarea.remove_text(TextPosition::with_offset(22), 11);
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+    
+    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    app.add_window(MyWin::new());
+    app.run();
+}
+
+#[test]
+fn pub_fn_select_text() {
+        let script = "
+        // Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0x9D189F8C9F4DBDE9)
+
+        Mouse.Click(50, 8, right)
+        Paint('After Click')
+        CheckCursor(34, 1)
+    ";
+
+    #[Window(events=ButtonEvents, internal=true)]
+    struct MyWin {
+        control: Handle<TextArea>,
+        button: Handle<Button>,
+    }
+        impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("TextArea public function test", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                control: Handle::None,
+                button: Handle::None
+            };
+            let text_initial = "Text used to test the select_text function";    
+            me.control = me.add(TextArea::new(text_initial, Layout::new("d:c,h:100%,"), textarea::Flags::None));
+            me.button = me.add(Button::new("Test", Layout::new("x:45,y:7,w:10"), button::Type::Normal));
+
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _button_handle: Handle<Button>) -> EventProcessStatus {
+            
+            let control_handle = self.control;
+            if let Some(textarea) = self.control_mut(control_handle) {
+                textarea.select_text(TextPosition::with_offset(22), 11);
+
+                let string_selection = textarea.selection();
+                assert!(string_selection.is_some(), "Selection should not be None");
+                let selected_text = string_selection.unwrap();
+                assert_eq!(selected_text, "select_text", "Selected text should be 'select_text'");
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+    
+    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    app.add_window(MyWin::new());
+    app.run();
+}
+
+#[test]
+fn pub_fn_delete_selection() {
+        let script = "
+        // Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0x6A2E29CB3FD2E685)
+
+        Mouse.Click(50, 8, right)
+        Paint('After Click')
+        CheckCursor(23, 1)
+        CheckHash(0xE9B4911842E8EC73)
+    ";
+
+    #[Window(events=ButtonEvents, internal=true)]
+    struct MyWin {
+        control: Handle<TextArea>,
+        button: Handle<Button>,
+    }
+        impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("TextArea public function test", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                control: Handle::None,
+                button: Handle::None
+            };
+            let text_initial = "Text used to test the delete_selection function";    
+            me.control = me.add(TextArea::new(text_initial, Layout::new("d:c,h:100%,"), textarea::Flags::None));
+            me.button = me.add(Button::new("Test", Layout::new("x:45,y:7,w:10"), button::Type::Normal));
+
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _button_handle: Handle<Button>) -> EventProcessStatus {
+            
+            let control_handle = self.control;
+            if let Some(textarea) = self.control_mut(control_handle) {
+                textarea.select_text(TextPosition::with_offset(22), 16);
+                textarea.delete_selection();
+
+                assert!(!textarea.has_selection(), "Textarea should not have a selection after deletion");
+                assert!(textarea.selection().is_none(), "Selection should be None after deletion");
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+    
+    let mut app = App::debug(60, 10, script).log_file("debug.log", true).build().unwrap();
+    app.add_window(MyWin::new());
+    app.run();
 }
