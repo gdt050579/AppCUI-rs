@@ -34,13 +34,14 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
-    
+
     - name: Install cargo-tarpaulin (if missing)
-      run: |
-        if (-not (Test-Path "$HOME/.cargo/bin/cargo-tarpaulin")) {
-          cargo install cargo-tarpaulin
-        }
       shell: pwsh
+      run: |
+        $binPath = "$env:USERPROFILE\.cargo\bin\cargo-tarpaulin.exe"
+        if (-not (Test-Path $binPath)) {
+          cargo install cargo-tarpaulin
+        } 
       
     - name: Run cargo-tarpaulin
       run: cargo tarpaulin -p appcui -o xml
