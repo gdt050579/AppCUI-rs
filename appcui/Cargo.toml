@@ -2,6 +2,15 @@
 name = "appcui"
 version = "0.1.0"
 edition = "2021"
+authors = ["Gavrilut Dragos <gavrilut.dragos@gmail.com>"]
+description = "A feature-rich and cross-platform TUI/CUI framework for Rust, enabling modern terminal-based applications on Windows, Linux, and macOS. Includes built-in UI components like buttons, menus, list views, tree views, checkboxes, and more. Perfect for building fast and interactive CLI tools and text-based interfaces."
+license = "MIT"
+repository = "https://github.com/gdt050579/AppCUI-rs"
+homepage = "https://gdt050579.github.io/AppCUI-rs/"
+documentation = "https://docs.rs/appcui"
+readme = "../README.md"
+keywords = ["tui", "cui", "ui", "terminal"]
+categories = ["gui", "tui", "cui", "command-line-utilities", ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
