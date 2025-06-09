@@ -3,6 +3,7 @@ use super::super::Character;
 use super::super::Color;
 use super::super::SpecialChar;
 
+#[cfg(not(feature = "TRUE_COLORS"))]
 const COLOR_TO_PIXEL: [u32; 16] = [
     0x000000, // Black
     0x000080, // DarkBlue
