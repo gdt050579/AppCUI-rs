@@ -294,10 +294,10 @@ impl Terminal for WindowsTerminal {
             let screen_char = &mut (self.chars[pos]);
             screen_char.attr = 0;
             if ch.foreground != Color::Transparent {
-                screen_char.attr = (ch.foreground as u8) as u16;
+                screen_char.attr = ch.foreground.as_color_index() as u16;
             }
             if ch.background != Color::Transparent {
-                screen_char.attr |= ((ch.background as u8) as u16) << 4;
+                screen_char.attr |= (ch.background.as_color_index() as u16) << 4;
             }
             if ch.flags.contains(CharFlags::Underline) {
                 screen_char.attr |= COMMON_LVB_UNDERSCORE;
