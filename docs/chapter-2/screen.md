@@ -32,7 +32,14 @@ The following collors are supported by AppCUI via `Color` enum from `AppCUI::gra
 
 Besides this list, a special enuma variant `Color::Transparent` can be used to draw without a color (or in simple terms to keep the existing color). For example, if the current character has a forenground color `Red` writing another character on the same position with color `Transparent` will keep the color `Red` for the character.
 
-**OBS**: Not all terminals support this exact set of colors. Further more, some terminals might allow changing the RGB color for certain colors in the pallete.
+Additionally, if the `TRUE_COLORS` feature is enabled, the following variant is supported:
+* `Color::RGB(r, g, b)` - this is a custom color that is defined by the RGB values.
+
+
+**REMARKS**: 
+1. Not all terminals support this exact set of colors. Further more, some terminals might allow changing the RGB color for certain colors in the pallete.
+2. Enabling `TRUE_COLORS` feature does not mean that the terminal supports 24-bit colors. It only means that the AppCUI framework will use 24-bit colors for the screen, but the terminal might still need to convert them to the terminal's color pallete.
+3. Enabling `TRUE_COLORS` feature will make the size of the `Color` enum to be 4 bytes (instead of 1 byte without this feature). If memory is a concern and you don't need true colors, it is recommended to NOT enable this feature.
 
 The list of attributes available in AppCUI are described by `CharFlags` enum from `AppCUI::graphics` module and include the following flags:
 * `Bold` - bolded character
