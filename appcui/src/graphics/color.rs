@@ -1,5 +1,4 @@
 /// Represents am enum with varians that can be used to describe the foreground and background colors of a character in a terminal or console application.
-#[repr(u8)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub enum Color {
     /// <table><tr><td style="background-color: #000000; width: 20px; height: 20px; border: 1px solid #000;"></td></tr></table>
@@ -53,6 +52,9 @@ pub enum Color {
 
     /// a marker for transparent color
     Transparent = 0x10,
+
+    #[cfg(feature="TRUE_COLORS")]
+    RGB(u8,u8,u8),
 }
 impl Color {
     pub fn from_value(value: i32) -> Option<Color> {
