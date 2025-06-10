@@ -591,13 +591,37 @@ fn check_mouse_wheel() {
     From: https://en.wikipedia.org/wiki/Rust_(programming_language)
     ";
 
-   
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
     let mut c = canvas!("'60x15',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
     c.clear_background();
     let s = c.drawing_surface_mut();
     s.write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+
+#[cfg(feature = "TRUE_COLORS")]
+#[test]
+fn check_true_colors_rendering() {
+    let script = "
+        //Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xBF4312A1691D7AD8)
+    ";
+    let mut a = App::debug(70, 20, script).build().unwrap();
+    let mut w = window!("Title,d:c");
+    let mut c = canvas!("'68x15',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    c.clear_background();
+    let s = c.drawing_surface_mut();
+    for i in 0..64 {
+        let v = (i * 4) as u8;
+        s.write_char(1 + i, 1, Character::new(' ', Color::Black, Color::RGB(v, 0, 0), CharFlags::None));
+        s.write_char(1 + i, 3, Character::new(' ', Color::Black, Color::RGB(0, v, 0), CharFlags::None));
+        s.write_char(1 + i, 5, Character::new(' ', Color::Black, Color::RGB(0, 0, v), CharFlags::None));
+        s.write_char(1 + i, 7, Character::new(' ', Color::Black, Color::RGB(v, v, v), CharFlags::None));
+    }
     w.add(c);
     a.add_window(w);
     a.run();
