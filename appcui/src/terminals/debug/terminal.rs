@@ -67,69 +67,28 @@ impl DebugTerminal {
             clipboard_text: String::new(),
         })
     }
-    // fn _forecolor_to_str(col: Color) -> &'static str {
-    //     match col {
-    //         Color::Black => "30",
-    //         Color::DarkRed => "31",
-    //         Color::DarkGreen => "32",
-    //         Color::Olive => "33",
-    //         Color::DarkBlue => "34",
-    //         Color::Magenta => "35",
-    //         Color::Teal => "36",
-    //         Color::Silver => "37",
-    //         Color::Gray => "90",
-    //         Color::Red => "91",
-    //         Color::Green => "92",
-    //         Color::Yellow => "93",
-    //         Color::Blue => "94",
-    //         Color::Pink => "95",
-    //         Color::Aqua => "96",
-    //         Color::White => "97",
-    //         _ => "37", /* default is silver */
-    //     }
-    // }
-    fn color_to_str(col: Color) -> &'static str {
+    fn color_to_str(col: Color) -> String {
         match col {
-            Color::Black => "0;0;0",
-            Color::DarkRed => "128;0;0",
-            Color::DarkGreen => "0;128;0",
-            Color::Olive => "128;128;0",
-            Color::DarkBlue => "0;0;128",
-            Color::Magenta => "128;0;128",
-            Color::Teal => "0;128;128",
-            Color::Silver => "196;196;196",
-            Color::Gray => "128;128;128",
-            Color::Red => "255;0;0",
-            Color::Green => "0;255;0",
-            Color::Yellow => "255;255;0",
-            Color::Blue => "0;0;255",
-            Color::Pink => "255;0;255",
-            Color::Aqua => "0;255;255",
-            Color::White => "255;255;255",
-            _ => "255;255;255", /* default is white */
+            Color::Black => String::from("0;0;0"),
+            Color::DarkRed => String::from("128;0;0"),
+            Color::DarkGreen => String::from("0;128;0"),
+            Color::Olive => String::from("128;128;0"),
+            Color::DarkBlue => String::from("0;0;128"),
+            Color::Magenta => String::from("128;0;128"),
+            Color::Teal => String::from("0;128;128"),
+            Color::Silver => String::from("196;196;196"),
+            Color::Gray => String::from("128;128;128"),
+            Color::Red => String::from("255;0;0"),
+            Color::Green => String::from("0;255;0"),
+            Color::Yellow => String::from("255;255;0"),
+            Color::Blue => String::from("0;0;255"),
+            Color::Pink => String::from("255;0;255"),
+            Color::Aqua => String::from("0;255;255"),
+            Color::White => String::from("255;255;255"),
+            Color::RGB(r, g, b) => format!("{};{};{}", r, g, b),
+            _ => String::from("255;255;255"), /* default is white */
         }
     }
-    // fn _backcolor_to_str(col: Color) -> &'static str {
-    //     match col {
-    //         Color::Black => "40",
-    //         Color::DarkRed => "41",
-    //         Color::DarkGreen => "42",
-    //         Color::Olive => "43",
-    //         Color::DarkBlue => "44",
-    //         Color::Magenta => "45",
-    //         Color::Teal => "46",
-    //         Color::Silver => "47",
-    //         Color::Gray => "100",
-    //         Color::Red => "101",
-    //         Color::Green => "102",
-    //         Color::Yellow => "103",
-    //         Color::Blue => "104",
-    //         Color::Pink => "105",
-    //         Color::Aqua => "106",
-    //         Color::White => "107",
-    //         _ => "40", /* default is black */
-    //     }
-    // }
     fn compute_surface_hash(surface: &Surface) -> u64 {
         // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
         let mut hash = 0xcbf29ce484222325u64;
@@ -329,9 +288,9 @@ impl Terminal for DebugTerminal {
                 back = ch.foreground;
             }
             self.temp_str.push_str("\x1b[38;2;");
-            self.temp_str.push_str(DebugTerminal::color_to_str(fore));
+            self.temp_str.push_str(DebugTerminal::color_to_str(fore).as_str());
             self.temp_str.push_str("m\x1b[48;2;");
-            self.temp_str.push_str(DebugTerminal::color_to_str(back));
+            self.temp_str.push_str(DebugTerminal::color_to_str(back).as_str());
             self.temp_str.push('m');
             if ch.code <= ' ' {
                 self.temp_str.push(' ');
