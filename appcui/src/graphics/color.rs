@@ -112,7 +112,7 @@ pub enum Color {
     /// a marker for transparent color
     Transparent = 0x10,
 
-    RGB(u8,u8,u8),
+    RGB(u8, u8, u8),
 }
 impl Color {
     pub fn from_value(value: i32) -> Option<Color> {
@@ -156,13 +156,13 @@ impl Color {
             Color::Yellow => "Yellow",
             Color::White => "White",
             Color::Transparent => "Transparent",
-            #[cfg(feature="TRUE_COLORS")]
-            Color::RGB(_,_,_) => "RGB",
+            #[cfg(feature = "TRUE_COLORS")]
+            Color::RGB(_, _, _) => "RGB",
         }
     }
-    #[cfg(feature="TRUE_COLORS")]
+    #[cfg(feature = "TRUE_COLORS")]
     #[inline(always)]
-    pub fn as_color_index(&self)->u8 {
+    pub(crate) fn as_color_index(&self) -> u8 {
         match self {
             Color::Black => 0,
             Color::DarkBlue => 1,
@@ -181,22 +181,51 @@ impl Color {
             Color::Yellow => 14,
             Color::White => 15,
             Color::Transparent => 16,
-            Color::RGB(r,g,b) => {
+            Color::RGB(r, g, b) => {
                 let mut index = 0;
-                if *r > 64 { index |= 0b100; }
-                if *g > 64 { index |= 0b010; }
-                if *b > 64 { index |= 0b001; }
+                if *r > 64 {
+                    index |= 0b100;
+                }
+                if *g > 64 {
+                    index |= 0b010;
+                }
+                if *b > 64 {
+                    index |= 0b001;
+                }
                 // 192 (0xc0) should remain like this so that we obtain th Silver
                 if *r >= 196 || *g >= 196 || *b >= 196 {
                     index |= 0b1000;
                 }
                 index
-            },
+            }
         }
     }
-    #[cfg(not(feature="TRUE_COLORS"))]
+    #[cfg(not(feature = "TRUE_COLORS"))]
     #[inline(always)]
-    pub fn as_color_index(&self)->u8 {
+    pub(crate) fn as_color_index(&self) -> u8 {
         self as u8
+    }
+    // #[cfg(feature = "TRUE_COLORS")]
+    // #[inline(always)]
+    // pub(crate) fn is_rgb(&self) -> bool {
+    //     matches!(self, Color::RGB(_, _, _))
+    // }
+    // #[cfg(not(feature = "TRUE_COLORS"))]
+    // #[inline(always)]
+    // pub(crate) fn is_rgb(&self) -> bool {
+    //     false
+    // }
+    #[cfg(feature = "TRUE_COLORS")]
+    #[inline(always)]
+    pub(crate) fn rgb(&self) -> Option<(u8,u8,u8)> {
+        match self {
+            Color::RGB(r, g, b) => Some((*r,*g,*b)),
+            _ => None
+        }
+    }
+    #[cfg(not(feature = "TRUE_COLORS"))]
+    #[inline(always)]
+    pub(crate) fn rgb(&self) -> Option<(u8,u8,u8)> {
+        None
     }
 }

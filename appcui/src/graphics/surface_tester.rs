@@ -135,6 +135,22 @@ impl SurfaceTester {
                 hash ^= b as u64;
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
             }
+            if let Some((r, g, b)) = ch.foreground.rgb() {
+                hash ^= r as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= g as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= b as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+            }
+            if let Some((r, g, b)) = ch.background.rgb() {
+                hash ^= r as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= g as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= b as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+            }            
         }
         hash
     }

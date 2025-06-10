@@ -23,7 +23,7 @@ const COLOR_TO_PIXEL: [u32; 16] = [
     0xFFFFFF, // White
 ];
 
-const COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
+static COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
     Color::Black,
     Color::Black,
     Color::Black,
