@@ -138,4 +138,4 @@ fn main() -> Result<(), appcui::system::Error> {
 Contributions, issues, and feature requests are welcome!  
 Check out [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
-Join the discussion in [GitHub Discussions](https://github.com/youruser/AppCUI/discussions).
+Join the discussion in [GitHub Discussions](https://github.com/youruser/AppCUI-rs/discussions).
