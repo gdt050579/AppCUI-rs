@@ -51,6 +51,9 @@ mod web_terminal;
 #[cfg(target_os = "windows")]
 mod windows_console;
 
+pub(crate) mod utils;
+
+
 #[cfg(test)]
 mod tests;
 

@@ -8,11 +8,11 @@ use crate::utils::GlyphParser;
 use super::super::SystemEvent;
 use super::super::SystemEventReader;
 use super::super::Terminal;
-use super::constants::*;
 use super::input::Input;
-use super::structs::*;
-use super::utils;
-use super::winapi;
+use super::super::utils::win32;
+use super::super::utils::win32::api;
+use crate::terminals::utils::win32::constants::*;
+use crate::terminals::utils::win32::structs::*;
 use crate::graphics::*;
 use crate::system::Error;
 
@@ -58,13 +58,13 @@ impl WindowsTerminal {
         let title_wtf16 = WindowsTerminal::string_to_wide(title)?;
 
         unsafe {
-            if winapi::SetConsoleTitleW(title_wtf16.as_ptr()) == FALSE {
+            if api::SetConsoleTitleW(title_wtf16.as_ptr()) == FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
                     format!(
                         "SetConsoleTitleW failed while attemting change the title of the console to '{}'. Error Code = {} !",
                         title,
-                        winapi::GetLastError()
+                        win32::api::GetLastError()
                     ),
                 ));
             }
@@ -98,14 +98,14 @@ impl WindowsTerminal {
             bottom: size.height as i16 - 1,
         };
         unsafe {
-            if winapi::SetConsoleWindowInfo(stdout, TRUE, &window_size) == FALSE {
+            if win32::api::SetConsoleWindowInfo(stdout, TRUE, &window_size) == FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
                     format!(
                         "SetConsoleWindowsInfo failed while attemting to resize console to {}x{}. Error Code = {} !",
                         size.width,
                         size.height,
-                        winapi::GetLastError()
+                        win32::api::GetLastError()
                     ),
                 ));
             }
@@ -115,14 +115,14 @@ impl WindowsTerminal {
             y: size.height as i16,
         };
         unsafe {
-            if winapi::SetConsoleScreenBufferSize(stdout, buffer_size) == FALSE {
+            if win32::api::SetConsoleScreenBufferSize(stdout, buffer_size) == FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
                     format!(
                         "SetConsoleScreenBufferSize failed while attemting to resize console buttef to {}x{}. Error Code = {} !",
                         size.width,
                         size.height,
-                        winapi::GetLastError()
+                        win32::api::GetLastError()
                     ),
                 ));
             }
@@ -131,8 +131,8 @@ impl WindowsTerminal {
     }
 
     pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
-        let stdin = utils::get_stdin_handle()?;
-        let stdout = utils::get_stdout_handle()?;
+        let stdin = win32::stdin_handle()?;
+        let stdout = win32::stdout_handle()?;
         let mut original_mode_flags = 0u32;
 
         if let Some(new_size) = builder.size {
@@ -143,20 +143,20 @@ impl WindowsTerminal {
         }
 
         unsafe {
-            if winapi::GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
+            if win32::api::GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
                     "GetConsoleMode failed to aquire original mode for current console !".to_string(),
                 ));
             }
-            if winapi::SetConsoleMode(stdin, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) == FALSE {
+            if win32::api::SetConsoleMode(stdin, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) == FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
-                    format!("Fail to set current console flags to 'ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS' via SetConsoleMode API.\nWindow code error: {} ",winapi::GetLastError()),
+                    format!("Fail to set current console flags to 'ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS' via SetConsoleMode API.\nWindow code error: {} ",win32::api::GetLastError()),
                 ));
             }
         }
-        let info = utils::get_console_screen_buffer_info(stdout)?;
+        let info = win32::console_screen_buffer_info(stdout)?;
         if (info.size.x < 1) || (info.size.y < 1) {
             return Err(Error::new(
                 ErrorKind::InitializationFailure,
@@ -164,7 +164,7 @@ impl WindowsTerminal {
                     "Invalid console size returned by GetConsoleScreenBufferInfo: width={},height={}\nWindow code error: {}",
                     info.size.x,
                     info.size.y,
-                    unsafe { winapi::GetLastError() }
+                    unsafe { win32::api::GetLastError() }
                 ),
             ));
         }
@@ -178,7 +178,7 @@ impl WindowsTerminal {
                     info.window.top,
                     info.window.right,
                     info.window.bottom,
-                    unsafe { winapi::GetLastError() }
+                    unsafe { win32::api::GetLastError() }
                 )
             ));
         }
@@ -191,7 +191,7 @@ impl WindowsTerminal {
                     info.window.top,
                     info.window.right,
                     info.window.bottom,
-                    unsafe { winapi::GetLastError() }
+                    unsafe { win32::api::GetLastError() }
                 )
             ));
         }
@@ -213,7 +213,7 @@ impl WindowsTerminal {
         //         let mut nr_read = 0u32;
 
         //         unsafe {
-        //             if (winapi::ReadConsoleInputW(stdin, &mut ir, 1, &mut nr_read) == TRUE) && (nr_read == 1) {
+        //             if (win32::api::ReadConsoleInputW(stdin, &mut ir, 1, &mut nr_read) == TRUE) && (nr_read == 1) {
         //                 if event_sender.send(ir).is_err() {
         //                     break;
         //                 }
@@ -357,7 +357,7 @@ impl Terminal for WindowsTerminal {
                         bottom: self.visible_region.top + y - 1,
                     };
                     unsafe {
-                        winapi::WriteConsoleOutputW(self.stdout, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
+                        win32::api::WriteConsoleOutputW(self.stdout, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
                     }
                     pos = 0;
                     start_y = y;
@@ -372,7 +372,7 @@ impl Terminal for WindowsTerminal {
                 y: self.size.height as i16,
             };
             unsafe {
-                winapi::WriteConsoleOutputW(self.stdout, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &self.visible_region);
+                win32::api::WriteConsoleOutputW(self.stdout, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &self.visible_region);
             }
         } else if start_y < y {
             let sz = COORD { x: w as i16, y: y - start_y };
@@ -383,7 +383,7 @@ impl Terminal for WindowsTerminal {
                 bottom: self.visible_region.top + y - 1,
             };
             unsafe {
-                winapi::WriteConsoleOutputW(self.stdout, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
+                win32::api::WriteConsoleOutputW(self.stdout, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
             }
         }
         // update the cursor
@@ -394,13 +394,13 @@ impl Terminal for WindowsTerminal {
             };
             let info = CONSOLE_CURSOR_INFO { size: 10, visible: TRUE };
             unsafe {
-                winapi::SetConsoleCursorPosition(self.stdout, pos);
-                winapi::SetConsoleCursorInfo(self.stdout, &info);
+                win32::api::SetConsoleCursorPosition(self.stdout, pos);
+                win32::api::SetConsoleCursorInfo(self.stdout, &info);
             }
         } else {
             let info = CONSOLE_CURSOR_INFO { size: 10, visible: FALSE };
             unsafe {
-                winapi::SetConsoleCursorInfo(self.stdout, &info);
+                win32::api::SetConsoleCursorInfo(self.stdout, &info);
             }
         }
     }
@@ -409,93 +409,14 @@ impl Terminal for WindowsTerminal {
     }
 
     fn get_clipboard_text(&self) -> Option<String> {
-        unsafe {
-            if winapi::OpenClipboard(0) == FALSE {
-                return None;
-            }
-
-            let hmem = winapi::GetClipboardData(CF_UNICODETEXT);
-            if hmem == 0 {
-                winapi::CloseClipboard();
-                return None;
-            }
-            let mut ptr = winapi::GlobalLock(hmem) as *mut u16;
-            if ptr.is_null() {
-                winapi::CloseClipboard();
-                return None;
-            }
-            let mut s = String::with_capacity(16);
-            while let Some(ch) = char::from_u32((*ptr) as u32) {
-                if (ch as u32) == 0 {
-                    break;
-                }
-                s.push(ch);
-                ptr = ptr.add(1);
-            }
-            winapi::GlobalUnlock(hmem);
-            winapi::CloseClipboard();
-            Some(s)
-        }
+        win32::clipboard_text()
     }
 
     fn set_clipboard_text(&mut self, text: &str) {
-        if text.is_empty() {
-            unsafe {
-                if winapi::OpenClipboard(0) != FALSE {
-                    winapi::EmptyClipboard();
-                    winapi::CloseClipboard();
-                }
-            }
-        } else {
-            unsafe {
-                if winapi::OpenClipboard(0) == FALSE {
-                    return;
-                }
-
-                winapi::EmptyClipboard();
-
-                let len = text.count_glyphs() + 1;
-                // alocate twice as much bytes (windows unicode)
-                let hmem = winapi::GlobalAlloc(GMEM_MOVEABLE, len * 2);
-                if hmem == 0 {
-                    winapi::CloseClipboard();
-                    return;
-                }
-
-                let mut ptr = winapi::GlobalLock(hmem) as *mut u16;
-                if ptr.is_null() {
-                    winapi::CloseClipboard();
-                    winapi::GlobalFree(hmem);
-                    return;
-                }
-
-                let mut pos = 0;
-                while let Some((ch, size)) = text.glyph(pos) {
-                    pos += size as usize;
-                    if ch as u32 <= 0xFFFFu32 {
-                        *ptr = ch as u16;
-                    } else {
-                        *ptr = b'?' as u16;
-                    }
-                    ptr = ptr.add(1);
-                }
-                // last null terminator character
-                *ptr = 0;
-
-                winapi::GlobalUnlock(hmem);
-
-                if winapi::SetClipboardData(CF_UNICODETEXT, hmem) == 0 {
-                    winapi::CloseClipboard();
-                    winapi::GlobalFree(hmem);
-                    return;
-                }
-
-                winapi::CloseClipboard();
-            }
-        }
+        win32::set_clipboard_text(text);
     }
 
     fn has_clipboard_text(&self) -> bool {
-        unsafe { (winapi::IsClipboardFormatAvailable(CF_TEXT) != FALSE) || (winapi::IsClipboardFormatAvailable(CF_UNICODETEXT) != FALSE) }
+        win32::has_clipboard_text()
     }
 }
