@@ -10,10 +10,11 @@ use crate::graphics::Size;
 use crate::input::KeyModifier;
 use crate::system::Error;
 use crate::system::{PaintMethods, RuntimeManager};
+use crate::terminals::utils::AnsiFormatter;
 
 pub(crate) struct DebugTerminal {
     size: Size,
-    temp_str: String,
+    ansi_buffer: AnsiFormatter,
     commands: VecDeque<Command>,
     sys_events: VecDeque<SystemEvent>,
     paint: bool,
@@ -53,7 +54,7 @@ impl DebugTerminal {
         let commands = DebugTerminal::build_commands(builder.debug_script.as_ref().unwrap().as_str());
         Ok(DebugTerminal {
             size: Size::new(w, h),
-            temp_str: String::with_capacity((w * h) as usize),
+            ansi_buffer: AnsiFormatter::with_capacity((w * h) as usize),
             commands,
             sys_events: VecDeque::with_capacity(8),
             paint: false,
@@ -67,28 +68,7 @@ impl DebugTerminal {
             clipboard_text: String::new(),
         })
     }
-    fn color_to_str(col: Color) -> String {
-        match col {
-            Color::Black => String::from("0;0;0"),
-            Color::DarkRed => String::from("128;0;0"),
-            Color::DarkGreen => String::from("0;128;0"),
-            Color::Olive => String::from("128;128;0"),
-            Color::DarkBlue => String::from("0;0;128"),
-            Color::Magenta => String::from("128;0;128"),
-            Color::Teal => String::from("0;128;128"),
-            Color::Silver => String::from("196;196;196"),
-            Color::Gray => String::from("128;128;128"),
-            Color::Red => String::from("255;0;0"),
-            Color::Green => String::from("0;255;0"),
-            Color::Yellow => String::from("255;255;0"),
-            Color::Blue => String::from("0;0;255"),
-            Color::Pink => String::from("255;0;255"),
-            Color::Aqua => String::from("0;255;255"),
-            Color::White => String::from("255;255;255"),
-            Color::RGB(r, g, b) => format!("{};{};{}", r, g, b),
-            _ => String::from("255;255;255"), /* default is white */
-        }
-    }
+
     fn compute_surface_hash(surface: &Surface) -> u64 {
         // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
         let mut hash = 0xcbf29ce484222325u64;
@@ -185,98 +165,99 @@ impl Terminal for DebugTerminal {
         self.paint = false;
 
         println!();
-        self.temp_str.clear();
+        self.ansi_buffer.clear();
         // firt border
         for _ in 0..=6 + self.size.width {
-            self.temp_str.push('=');
+            self.ansi_buffer.write_char('=');
         }
-        println!("+{}+", self.temp_str);
-        self.temp_str.clear();
+        println!("+{}+", self.ansi_buffer.text());
+        self.ansi_buffer.clear();
 
         // name
-        self.temp_str.push_str("| Name  : \x1b[93;40m");
-        self.temp_str.push_str(&self.paint_title);
-        while self.temp_str.len() < (self.size.width + 16) as usize {
-            self.temp_str.push(' ');
+        self.ansi_buffer.write_string("| Name  : ");
+        self.ansi_buffer.set_color(Color::Yellow, Color::Black);
+        self.ansi_buffer.write_string(&self.paint_title);
+        while self.ansi_buffer.text().len() < (self.size.width + 16) as usize {
+            self.ansi_buffer.write_char(' ');
         }
-        self.temp_str.push_str("\x1b[0m|");
-        println!("{}", &self.temp_str);
-        self.temp_str.clear();
+        self.ansi_buffer.reset_color();
+        println!("{}", &self.ansi_buffer.text());
+        self.ansi_buffer.clear();
 
         // hash
-        self.temp_str.push_str("| Hash  : \x1b[93;40m");
-        self.temp_str.push_str(format!("0x{:X}", surface_hash).as_str());
-        while self.temp_str.len() < (self.size.width + 16) as usize {
-            self.temp_str.push(' ');
+        self.ansi_buffer.write_string("| Hash  : ");
+        self.ansi_buffer.set_color(Color::Yellow, Color::Black);
+        self.ansi_buffer.write_string(format!("0x{:X}", surface_hash).as_str());
+        while self.ansi_buffer.text().len() < (self.size.width + 16) as usize {
+            self.ansi_buffer.write_char(' ');
         }
-        self.temp_str.push_str("\x1b[0m|");
-        println!("{}", &self.temp_str);
-        self.temp_str.clear();
+        self.ansi_buffer.reset_color();
+        println!("{}", &self.ansi_buffer.text());
+        self.ansi_buffer.clear();
 
         // cursor
-        self.temp_str.push_str("| Cursor: \x1b[93;40m");
+        self.ansi_buffer.write_string("| Cursor: ");
+        self.ansi_buffer.set_color(Color::Yellow, Color::Black);
         if !surface.cursor.is_visible() {
-            self.temp_str.push_str("Hidden");
+            self.ansi_buffer.write_string("Hidden");
         } else {
-            self.temp_str.push_str(format!("{},{}", cursor.x, cursor.y).as_str());
+            self.ansi_buffer.write_string(format!("{},{}", cursor.x, cursor.y).as_str());
         }
-        while self.temp_str.len() < (self.size.width + 16) as usize {
-            self.temp_str.push(' ');
+        while self.ansi_buffer.text().len() < (self.size.width + 16) as usize {
+            self.ansi_buffer.write_char(' ');
         }
-        self.temp_str.push_str("\x1b[0m|");
-        println!("{}", &self.temp_str);
-        self.temp_str.clear();
+        self.ansi_buffer.reset_color();
+        println!("{}", &self.ansi_buffer.text());
+        self.ansi_buffer.clear();
 
         // separator line
-        self.temp_str.push('|');
+        self.ansi_buffer.write_char('|');
         for _ in 0..=6 + self.size.width {
-            self.temp_str.push('-');
+            self.ansi_buffer.write_char('-');
         }
-        self.temp_str.push('|');
-        println!("{}", &self.temp_str);
-        self.temp_str.clear();
+        self.ansi_buffer.write_char('|');
+        println!("{}", &self.ansi_buffer.text());
+        self.ansi_buffer.clear();
 
         // second digit
-        self.temp_str.push_str("|    | ");
+        self.ansi_buffer.write_string("|    | ");
         for i in 0..self.size.width {
             let digit = ((i % 100) / 10) as u8;
             if (i as i32) == self.mouse_pos.x {
-                self.temp_str.push_str("\x1b[97m");
-                self.temp_str.push_str("\x1b[41m");
+                self.ansi_buffer.set_color(Color::White, Color::Red);
             } else {
-                self.temp_str.push_str("\x1b[0m");
+                self.ansi_buffer.reset_color();
             }
             if digit == 0 {
-                self.temp_str.push(' ');
+                self.ansi_buffer.write_char(' ');
             } else {
-                self.temp_str.push((48u8 + digit) as char);
+                self.ansi_buffer.write_char((48u8 + digit) as char);
             }
         }
-        println!("{}\x1b[0m |", self.temp_str);
-        self.temp_str.clear();
+        println!("{}\x1b[0m |", self.ansi_buffer.text());
+        self.ansi_buffer.clear();
 
         // last digit
-        self.temp_str.push_str("|    | ");
+        self.ansi_buffer.write_string("|    | ");
         for i in 0..self.size.width {
             if (i as i32) == self.mouse_pos.x {
-                self.temp_str.push_str("\x1b[97m");
-                self.temp_str.push_str("\x1b[41m");
+                self.ansi_buffer.set_color(Color::White, Color::Red);
             } else {
-                self.temp_str.push_str("\x1b[0m");
+                self.ansi_buffer.reset_color();
             }
-            self.temp_str.push((48u8 + ((i % 10) as u8)) as char);
+            self.ansi_buffer.write_char((48u8 + ((i % 10) as u8)) as char);
         }
-        println!("{}\x1b[0m |", self.temp_str);
-        self.temp_str.clear();
+        println!("{}\x1b[0m |", self.ansi_buffer.text());
+        self.ansi_buffer.clear();
 
         // separator line
-        self.temp_str.push('|');
+        self.ansi_buffer.write_char('|');
         for _ in 0..=6 + self.size.width {
-            self.temp_str.push('-');
+            self.ansi_buffer.write_char('-');
         }
-        self.temp_str.push('|');
-        println!("{}", &self.temp_str);
-        self.temp_str.clear();
+        self.ansi_buffer.write_char('|');
+        println!("{}", &self.ansi_buffer.text());
+        self.ansi_buffer.clear();
 
         let mut x = 0u32;
         let mut y = 0u32;
@@ -287,36 +268,32 @@ impl Terminal for DebugTerminal {
                 fore = ch.background;
                 back = ch.foreground;
             }
-            self.temp_str.push_str("\x1b[38;2;");
-            self.temp_str.push_str(DebugTerminal::color_to_str(fore).as_str());
-            self.temp_str.push_str("m\x1b[48;2;");
-            self.temp_str.push_str(DebugTerminal::color_to_str(back).as_str());
-            self.temp_str.push('m');
+            self.ansi_buffer.set_color(fore, back);
             if ch.code <= ' ' {
-                self.temp_str.push(' ');
+                self.ansi_buffer.write_char(' ');
             } else {
-                self.temp_str.push(ch.code);
+                self.ansi_buffer.write_char(ch.code);
             }
-            self.temp_str.push_str("\x1b[0m"); // reset to default color
+            self.ansi_buffer.reset_color();
             x += 1;
             if x == self.size.width {
                 if (y as i32) == self.mouse_pos.y {
-                    println!("|\x1b[97m\x1b[41m{:>3} \x1b[0m| {} |", y, &self.temp_str);
+                    println!("|\x1b[97m\x1b[41m{:>3} \x1b[0m| {} |", y, &self.ansi_buffer.text());
                 } else {
-                    println!("|{:>3} | {} |", y, &self.temp_str);
+                    println!("|{:>3} | {} |", y, &self.ansi_buffer.text());
                 }
-                self.temp_str.clear();
+                self.ansi_buffer.clear();
                 x = 0;
                 y += 1;
             }
         }
         // separator line
-        self.temp_str.push('|');
+        self.ansi_buffer.write_char('|');
         for _ in 0..=6 + self.size.width {
-            self.temp_str.push('-');
+            self.ansi_buffer.write_char('-');
         }
-        self.temp_str.push('|');
-        println!("{}", &self.temp_str);
+        self.ansi_buffer.write_char('|');
+        println!("{}", &self.ansi_buffer.text());
     }
 
     fn get_size(&self) -> Size {

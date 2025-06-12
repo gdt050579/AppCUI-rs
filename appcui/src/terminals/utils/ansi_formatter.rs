@@ -5,11 +5,6 @@ pub(crate) struct AnsiFormatter {
 }
 
 impl AnsiFormatter {  
-    pub(crate) fn new() -> Self {
-        Self {
-            text: String::new(),
-        }
-    }
     pub(crate) fn with_capacity(capacity: usize) -> Self {
         Self {
             text: String::with_capacity(capacity),
@@ -37,6 +32,10 @@ impl AnsiFormatter {
         self.text.push_str("\x1b[48;2;");
         self.write_color_as_rgb(color);
         self.text.push('m');
+    }
+    pub(crate) fn set_color(&mut self, foreground: Color, background: Color) {
+        self.set_foreground_color(foreground);
+        self.set_background_color(background);
     }
     pub(crate) fn reset_color(&mut self) {
         self.text.push_str("\x1b[0m");
