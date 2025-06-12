@@ -74,7 +74,7 @@ impl AnsiFormatter {
     fn write_number(&mut self, n: i32) {
         let mut n = n;
         if n < 0 {
-            self.text.push_str("-");
+            self.text.push('-');
             n = -n;
         }
         let mut buffer = [0u8; 16];

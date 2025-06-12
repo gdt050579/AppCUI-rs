@@ -82,13 +82,11 @@ impl Console {
                     format!("Fail to set current console flags to 'ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS' via SetConsoleMode API.\nWindow code error: {} ",api::GetLastError()),
                 ));
             }
-            if vt {
-                if api::SetConsoleMode(h_stdout, stdout_original_mode_flags | constants::ENABLE_VIRTUAL_TERMINAL_PROCESSING) == constants::FALSE {
-                    return Err(Error::new(
-                        ErrorKind::InitializationFailure,
-                        format!("Fail to set current console flags to 'ENABLE_VIRTUAL_TERMINAL_PROCESSING' via SetConsoleMode API.\nWindow code error: {} ",api::GetLastError()),
-                    ));
-                }
+            if vt && api::SetConsoleMode(h_stdout, stdout_original_mode_flags | constants::ENABLE_VIRTUAL_TERMINAL_PROCESSING) == constants::FALSE {
+                return Err(Error::new(
+                    ErrorKind::InitializationFailure,
+                    format!("Fail to set current console flags to 'ENABLE_VIRTUAL_TERMINAL_PROCESSING' via SetConsoleMode API.\nWindow code error: {} ",api::GetLastError()),
+                ));
             }
 
             let info = Self::screen_buffer_info(h_stdout)?;
@@ -246,51 +244,45 @@ impl Console {
         match evnt.event_flags {
             0 => {
                 if evnt.button_state != 0 {
-                    return Some(SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button }));
+                    Some(SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button }))
                 } else {
-                    return Some(SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button }));
+                    Some(SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button }))
                 }
             }
-            constants::DOUBLE_CLICK => {
-                return Some(SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button }));
-            }
-            constants::MOUSE_MOVED => {
-                return Some(SystemEvent::MouseMove(MouseMoveEvent { x, y, button }));
-            }
+            constants::DOUBLE_CLICK => Some(SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button })),
+            constants::MOUSE_MOVED => Some(SystemEvent::MouseMove(MouseMoveEvent { x, y, button })),
             constants::MOUSE_HWHEELED => {
                 //println!("HWHEEL {}", self.button_state);
                 if evnt.button_state >= 0x80000000 {
-                    return Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                    Some(SystemEvent::MouseWheel(MouseWheelEvent {
                         x,
                         y,
                         direction: MouseWheelDirection::Left,
-                    }));
+                    }))
                 } else {
-                    return Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                    Some(SystemEvent::MouseWheel(MouseWheelEvent {
                         x,
                         y,
                         direction: MouseWheelDirection::Right,
-                    }));
+                    }))
                 }
             }
             constants::MOUSE_WHEELED => {
                 if evnt.button_state >= 0x80000000 {
-                    return Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                    Some(SystemEvent::MouseWheel(MouseWheelEvent {
                         x,
                         y,
                         direction: MouseWheelDirection::Down,
-                    }));
+                    }))
                 } else {
-                    return Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                    Some(SystemEvent::MouseWheel(MouseWheelEvent {
                         x,
                         y,
                         direction: MouseWheelDirection::Up,
-                    }));
+                    }))
                 }
             }
-            _ => {
-                return None;
-            }
+            _ => None,
         }
     }
 
