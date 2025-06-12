@@ -1,5 +1,9 @@
-use crate::{input::{Key, KeyCode, KeyModifier}, terminals::{system_event::KeyModifierChangedEvent, KeyPressedEvent, SystemEvent}};
 use super::constants::*;
+use crate::{
+    input::{Key, KeyCode, KeyModifier, MouseButton, MouseWheelDirection},
+    prelude::Point,
+    terminals::{system_event::KeyModifierChangedEvent, KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseDoubleClickEvent, MouseMoveEvent, MouseWheelEvent, SystemEvent},
+};
 
 #[allow(clippy::upper_case_acronyms)]
 pub(crate) type HANDLE = usize;
@@ -147,7 +151,7 @@ impl KEY_EVENT_RECORD {
                 return None;
             }
             let old_state = *current_modifier;
-            *current_modifier= key_modifier;
+            *current_modifier = key_modifier;
             return Some(SystemEvent::KeyModifierChanged(KeyModifierChangedEvent {
                 new_state: key_modifier,
                 old_state,
@@ -157,5 +161,82 @@ impl KEY_EVENT_RECORD {
             key: Key::new(key_code, key_modifier),
             character,
         }));
+    }
+}
+
+impl MOUSE_EVENT_RECORD {
+    pub(crate) fn to_system_event(&self, origin: Point, last_mouse_pos: &mut Point) -> Option<SystemEvent> {
+        let x = (self.mouse_position.x as i32) - origin.x;
+        let y = (self.mouse_position.y as i32) - origin.y;
+        // for Windows 11
+        if self.event_flags == 0x01 {
+            if (x == last_mouse_pos.x) && (y == last_mouse_pos.y) {
+                return None;
+            }
+
+            *last_mouse_pos = Point::new(x, y);
+        }
+
+        let button = {
+            if (self.button_state & FROM_LEFT_1ST_BUTTON_PRESSED) != 0 {
+                MouseButton::Left
+            } else if (self.button_state & RIGHTMOST_BUTTON_PRESSED) != 0 {
+                MouseButton::Right
+            } else if self.button_state > 0 {
+                MouseButton::Center
+            } else {
+                MouseButton::None
+            }
+        };
+
+        match self.event_flags {
+            0 => {
+                if self.button_state != 0 {
+                    return Some(SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button }));
+                } else {
+                    return Some(SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button }));
+                }
+            }
+            DOUBLE_CLICK => {
+                return Some(SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button }));
+            }
+            MOUSE_MOVED => {
+                return Some(SystemEvent::MouseMove(MouseMoveEvent { x, y, button }));
+            }
+            MOUSE_HWHEELED => {
+                //println!("HWHEEL {}", self.button_state);
+                if self.button_state >= 0x80000000 {
+                    return Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                        x,
+                        y,
+                        direction: MouseWheelDirection::Left,
+                    }));
+                } else {
+                    return Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                        x,
+                        y,
+                        direction: MouseWheelDirection::Right,
+                    }));
+                }
+            }
+            MOUSE_WHEELED => {
+                if self.button_state >= 0x80000000 {
+                    return Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                        x,
+                        y,
+                        direction: MouseWheelDirection::Down,
+                    }));
+                } else {
+                    return Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                        x,
+                        y,
+                        direction: MouseWheelDirection::Up,
+                    }));
+                }
+            }
+            _ => {
+                return None;
+            }
+        }
     }
 }

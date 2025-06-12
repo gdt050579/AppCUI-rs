@@ -66,81 +66,12 @@ impl SystemEventReader for Input {
 
         // mouse processing
         if ir.event_type == MOUSE_EVENT {
-            unsafe {
-                let x = (ir.event.mouse_event.mouse_position.x as i32) - (self.visible_region.left as i32);
-                let y = (ir.event.mouse_event.mouse_position.y as i32) - (self.visible_region.top as i32);
-                // for Windows 11
-                if ir.event.mouse_event.event_flags == 0x01 {
-                    if (x == self.last_mouse_pos.x) && (y == self.last_mouse_pos.y) {
-                        return None;
-                    }
-
-                    self.last_mouse_pos.x = x;
-                    self.last_mouse_pos.y = y;
-                }
-
-                let button = {
-                    if (ir.event.mouse_event.button_state & FROM_LEFT_1ST_BUTTON_PRESSED) != 0 {
-                        MouseButton::Left
-                    } else if (ir.event.mouse_event.button_state & RIGHTMOST_BUTTON_PRESSED) != 0 {
-                        MouseButton::Right
-                    } else if ir.event.mouse_event.button_state > 0 {
-                        MouseButton::Center
-                    } else {
-                        MouseButton::None
-                    }
-                };
-
-                match ir.event.mouse_event.event_flags {
-                    0 => {
-                        if ir.event.mouse_event.button_state != 0 {
-                            return Some(SystemEvent::MouseButtonDown(MouseButtonDownEvent { x, y, button }));
-                        } else {
-                            return Some(SystemEvent::MouseButtonUp(MouseButtonUpEvent { x, y, button }));
-                        }
-                    }
-                    DOUBLE_CLICK => {
-                        return Some(SystemEvent::MouseDoubleClick(MouseDoubleClickEvent { x, y, button }));
-                    }
-                    MOUSE_MOVED => {
-                        return Some(SystemEvent::MouseMove(MouseMoveEvent { x, y, button }));
-                    }
-                    MOUSE_HWHEELED => {
-                        //println!("HWHEEL {}", ir.event.mouse_event.button_state);
-                        if ir.event.mouse_event.button_state >= 0x80000000 {
-                            return Some(SystemEvent::MouseWheel(MouseWheelEvent {
-                                x,
-                                y,
-                                direction: MouseWheelDirection::Left,
-                            }));
-                        } else {
-                            return Some(SystemEvent::MouseWheel(MouseWheelEvent {
-                                x,
-                                y,
-                                direction: MouseWheelDirection::Right,
-                            }));
-                        }
-                    }
-                    MOUSE_WHEELED => {
-                        if ir.event.mouse_event.button_state >= 0x80000000 {
-                            return Some(SystemEvent::MouseWheel(MouseWheelEvent {
-                                x,
-                                y,
-                                direction: MouseWheelDirection::Down,
-                            }));
-                        } else {
-                            return Some(SystemEvent::MouseWheel(MouseWheelEvent {
-                                x,
-                                y,
-                                direction: MouseWheelDirection::Up,
-                            }));
-                        }
-                    }
-                    _ => {
-                        return None;
-                    }
-                }
-            }
+            return unsafe {
+                ir.event.mouse_event.to_system_event(
+                    Point::new(self.visible_region.left as i32, self.visible_region.top as i32),
+                    &mut self.last_mouse_pos,
+                )
+            };
         }
 
         // resize
