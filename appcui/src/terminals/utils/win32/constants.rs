@@ -23,6 +23,7 @@ pub(crate) const SHIFT_PRESSED: u32 = 0x0010;
 pub(crate) const ENABLE_WINDOW_INPUT: u32 = 0x0008;
 pub(crate) const ENABLE_MOUSE_INPUT: u32 = 0x0010;
 pub(crate) const ENABLE_EXTENDED_FLAGS: u32 = 0x0080;
+pub(crate) const ENABLE_VIRTUAL_TERMINAL_PROCESSING : u32 = 0x0004;
 pub(crate) const CF_UNICODETEXT: u32 = 13;
 pub(crate) const CF_TEXT: u32 = 1;
 pub(crate) const GMEM_MOVEABLE: u32 = 0x0002;

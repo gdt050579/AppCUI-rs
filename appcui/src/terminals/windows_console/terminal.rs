@@ -3,28 +3,20 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use crate::prelude::ErrorKind;
-use crate::utils::GlyphParser;
 
 use super::super::SystemEvent;
 use super::super::SystemEventReader;
 use super::super::Terminal;
 use super::input::Input;
 use super::super::utils::win32;
-use super::super::utils::win32::api;
 use crate::terminals::utils::win32::constants::*;
 use crate::terminals::utils::win32::structs::*;
 use crate::graphics::*;
 use crate::system::Error;
 
 pub struct WindowsTerminal {
-    //stdin_handle: HANDLE, // to be moved
-    stdout: HANDLE,
-    size: Size,
+    console: win32::Console,
     chars: Vec<CHAR_INFO>,
-    //shift_state: KeyModifier, // to be moved
-    //last_mouse_pos: Point, // to be moved
-    visible_region: SMALL_RECT, // to be moved ?!?
-    _original_mode_flags: u32,
     shared_visible_region: Arc<Mutex<SMALL_RECT>>,
 }
 
@@ -33,229 +25,25 @@ impl WindowsTerminal {
     // if colors are present --> recolor
     // if font is present --> apply font & size
 
-    fn string_to_wide(text: &str) -> Result<Vec<u16>, Error> {
-        let mut result: Vec<u16> = Vec::with_capacity(text.len() + 1);
-        for c in text.chars() {
-            let unicode_id = c as u32;
-            if unicode_id >= 0xFFFF {
-                return Err(Error::new(
-                    ErrorKind::InvalidParameter,
-                    format!("Fail convert the string '{}' to windows WTF-16", text),
-                ));
-            }
-            if unicode_id == 0 {
-                return Err(Error::new(
-                    ErrorKind::InvalidParameter,
-                    format!("Found NULL (\\0 character) in title '{}'. This can not be accurately translated into windows WTF-16 that is NULL terminated !", text),
-                ));
-            }
-            result.push(unicode_id as u16);
-        }
-        result.push(0);
-        Ok(result)
-    }
-    fn set_title(title: &str) -> Result<(), Error> {
-        let title_wtf16 = WindowsTerminal::string_to_wide(title)?;
-
-        unsafe {
-            if api::SetConsoleTitleW(title_wtf16.as_ptr()) == FALSE {
-                return Err(Error::new(
-                    ErrorKind::InitializationFailure,
-                    format!(
-                        "SetConsoleTitleW failed while attemting change the title of the console to '{}'. Error Code = {} !",
-                        title,
-                        win32::api::GetLastError()
-                    ),
-                ));
-            }
-        }
-        Ok(())
-    }
-    fn resize(size: Size, stdout: HANDLE) -> Result<(), Error> {
-        // sanity check
-        if (size.width > 30000) || (size.width < 5) {
-            return Err(Error::new(
-                ErrorKind::InvalidParameter,
-                format!(
-                    "The width paramater for console resize shoule be between 5 and 30000. Current value is invalid: 'width={}'",
-                    size.width
-                ),
-            ));
-        }
-        if (size.height > 30000) || (size.height < 5) {
-            return Err(Error::new(
-                ErrorKind::InvalidParameter,
-                format!(
-                    "The height paramater for console resize shoule be between 5 and 30000. Current value is invalid: 'height={}'",
-                    size.height
-                ),
-            ));
-        }
-        let window_size = SMALL_RECT {
-            left: 0,
-            top: 0,
-            right: size.width as i16 - 1,
-            bottom: size.height as i16 - 1,
-        };
-        unsafe {
-            if win32::api::SetConsoleWindowInfo(stdout, TRUE, &window_size) == FALSE {
-                return Err(Error::new(
-                    ErrorKind::InitializationFailure,
-                    format!(
-                        "SetConsoleWindowsInfo failed while attemting to resize console to {}x{}. Error Code = {} !",
-                        size.width,
-                        size.height,
-                        win32::api::GetLastError()
-                    ),
-                ));
-            }
-        }
-        let buffer_size = COORD {
-            x: size.width as i16,
-            y: size.height as i16,
-        };
-        unsafe {
-            if win32::api::SetConsoleScreenBufferSize(stdout, buffer_size) == FALSE {
-                return Err(Error::new(
-                    ErrorKind::InitializationFailure,
-                    format!(
-                        "SetConsoleScreenBufferSize failed while attemting to resize console buttef to {}x{}. Error Code = {} !",
-                        size.width,
-                        size.height,
-                        win32::api::GetLastError()
-                    ),
-                ));
-            }
-        }
-        Ok(())
-    }
-
     pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
-        let stdin = win32::stdin_handle()?;
-        let stdout = win32::stdout_handle()?;
-        let mut original_mode_flags = 0u32;
-
-        if let Some(new_size) = builder.size {
-            WindowsTerminal::resize(new_size, stdout)?;
-        }
-        if let Some(title) = &builder.title {
-            WindowsTerminal::set_title(title)?;
-        }
-
-        unsafe {
-            if win32::api::GetConsoleMode(stdin, &mut original_mode_flags) == FALSE {
-                return Err(Error::new(
-                    ErrorKind::InitializationFailure,
-                    "GetConsoleMode failed to aquire original mode for current console !".to_string(),
-                ));
-            }
-            if win32::api::SetConsoleMode(stdin, ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS) == FALSE {
-                return Err(Error::new(
-                    ErrorKind::InitializationFailure,
-                    format!("Fail to set current console flags to 'ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS' via SetConsoleMode API.\nWindow code error: {} ",win32::api::GetLastError()),
-                ));
-            }
-        }
-        let info = win32::console_screen_buffer_info(stdout)?;
-        if (info.size.x < 1) || (info.size.y < 1) {
-            return Err(Error::new(
-                ErrorKind::InitializationFailure,
-                format!(
-                    "Invalid console size returned by GetConsoleScreenBufferInfo: width={},height={}\nWindow code error: {}",
-                    info.size.x,
-                    info.size.y,
-                    unsafe { win32::api::GetLastError() }
-                ),
-            ));
-        }
-        // analyze the visible (window) part
-        if (info.window.left > info.window.right) || (info.window.left < 0) {
-            return Err(Error::new(
-                ErrorKind::InitializationFailure,
-                format!(
-                    "Invalid console visible size returned by GetConsoleScreenBufferInfo: left={},top={},right={},bottom={}\nLeft value should be smaller tham the Right value\nWindow code error: {}",
-                    info.window.left,
-                    info.window.top,
-                    info.window.right,
-                    info.window.bottom,
-                    unsafe { win32::api::GetLastError() }
-                )
-            ));
-        }
-        if (info.window.top > info.window.bottom) || (info.window.top < 0) {
-            return Err(Error::new(
-                ErrorKind::InitializationFailure,
-                format!(
-                    "Invalid console visible size returned by GetConsoleScreenBufferInfo: left={},top={},right={},bottom={}\nTop value should be smaller tham the Bottom value\nWindow code error: {}",
-                    info.window.left,
-                    info.window.top,
-                    info.window.right,
-                    info.window.bottom,
-                    unsafe { win32::api::GetLastError() }
-                )
-            ));
-        }
-
-        let w = (info.window.right as u32) + 1 - (info.window.left as u32);
-        let h = (info.window.bottom as u32) + 1 - (info.window.top as u32);
-
-        // // create the comunication channel
-        // let (sender, receiver) = mpsc::channel::<INPUT_RECORD>();
-        // // create the thread that will read the input
-        // let event_sender = sender.clone();
-        // std::thread::spawn(move || {
-        //     let mut ir = INPUT_RECORD {
-        //         event_type: 0,
-        //         event: WindowsTerminalEvent { extra: 0 },
-        //     };
-        //     loop {
-        //         ir.event_type = 0;
-        //         let mut nr_read = 0u32;
-
-        //         unsafe {
-        //             if (win32::api::ReadConsoleInputW(stdin, &mut ir, 1, &mut nr_read) == TRUE) && (nr_read == 1) {
-        //                 if event_sender.send(ir).is_err() {
-        //                     break;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // });
-
+        let console = win32::Console::new(builder, false)?;
+        let visible_region = console.visible_region();
         let mut term = WindowsTerminal {
-            //stdin_handle: stdin,
-            stdout,
-            size: Size::new(w, h),
+            console,
             chars: Vec::with_capacity(1024),
-            //shift_state: KeyModifier::None,
-            //last_mouse_pos: Point::new(i32::MAX, i32::MAX),
-            visible_region: info.window,
-            _original_mode_flags: original_mode_flags,
-            shared_visible_region: Arc::new(Mutex::new(info.window)),
+            shared_visible_region: Arc::new(Mutex::new(visible_region)),
         };
         // println!("Start region: {:?}",term.visible_region);
         term.chars.resize(
-            (term.size.width as usize) * (term.size.height as usize) * 2,
+            (term.console.size().width as usize) * (term.console.size().height as usize) * 2,
             CHAR_INFO { code: 32, attr: 0 },
         );
         // start the event thread
-        Input::new(stdin, stdout, info.window, term.shared_visible_region.clone()).start(sender);
+        Input::new(console, term.shared_visible_region.clone()).start(sender);
         // all good - start the sender thread
         Ok(term)
     }
-    // fn update_size(&mut self) {
-    //     // if let Ok(info) = get_console_screen_buffer_info(self.stdout_handle) {
-    //     //     let w = (info.window.right as u32) + 1 - (info.window.left as u32);
-    //     //     let h = (info.window.bottom as u32) + 1 - (info.window.top as u32);
-    //     //     // println!(
-    //     //     //     "OnResize: \n - received:{:?}\n - actual:w={w},h={h}\n - visible:{:?}",
-    //     //     //     self.size, info.window
-    //     //     // );
-    //     //     self.visible_region = info.window;
-    //     //     self.chars.resize((w as usize) * (h as usize) * 2, CHAR_INFO { code: 32, attr: 0 });
-    //     //     self.size = Size::new(w, h);
-    //     // }
-    // }
+
 }
 
 impl Terminal for WindowsTerminal {
@@ -266,20 +54,20 @@ impl Terminal for WindowsTerminal {
         let w = new_size.width as usize;
         let h = new_size.height as usize;
         self.chars.resize(w * h * 2, CHAR_INFO { code: 32, attr: 0 });
-        self.size = new_size;
+        self.console.set_size(new_size);
         if let Ok(data) = self.shared_visible_region.lock() {
-            self.visible_region = *data;
+            self.console.set_visible_region(*data);
             //println!("OnResize: -> region: {:?}",self.visible_region);
         }
     }
     fn update_screen(&mut self, surface: &Surface) {
         // println!("Update the screen: capacity: {}, size: {:?}, region: {:?}, surface_size: {:?}",self.chars.len(),self.size,self.visible_region,surface.size);
         // safety check --> surface size should be the same as self.width/height size
-        if surface.size != self.size {
+        if surface.size != self.console.size() {
             panic!("Invalid size !!!");
         }
         // check if allocated space si twice the size (to account for surrogates)
-        if self.chars.len() != (self.size.width as usize) * (self.size.height as usize) * 2 {
+        if self.chars.len() != (self.console.size().width as usize) * (self.console.size().height as usize) * 2 {
             panic!("Invalid size for CHAR_INFO buffer !!!");
         }
 
@@ -351,13 +139,13 @@ impl Terminal for WindowsTerminal {
                 if surrogate_used > 0 {
                     let sz = COORD { x: w as i16, y: y - start_y };
                     let vis_region = SMALL_RECT {
-                        left: self.visible_region.left,
-                        top: self.visible_region.top + start_y,
-                        right: self.visible_region.right,
-                        bottom: self.visible_region.top + y - 1,
+                        left: self.console.visible_region().left,
+                        top: self.console.visible_region().top + start_y,
+                        right: self.console.visible_region().right,
+                        bottom: self.console.visible_region().top + y - 1,
                     };
                     unsafe {
-                        win32::api::WriteConsoleOutputW(self.stdout, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
+                        win32::api::WriteConsoleOutputW(self.console.stdout(), self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
                     }
                     pos = 0;
                     start_y = y;
@@ -368,55 +156,56 @@ impl Terminal for WindowsTerminal {
         if start_y == 0 {
             // no surrogates --> write the entire buffer
             let sz = COORD {
-                x: self.size.width as i16,
-                y: self.size.height as i16,
+                x: self.console.size().width as i16,
+                y: self.console.size().height as i16,
             };
             unsafe {
-                win32::api::WriteConsoleOutputW(self.stdout, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &self.visible_region);
+                win32::api::WriteConsoleOutputW(self.console.stdout(), self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &self.console.visible_region());
             }
         } else if start_y < y {
             let sz = COORD { x: w as i16, y: y - start_y };
             let vis_region = SMALL_RECT {
-                left: self.visible_region.left,
-                top: self.visible_region.top + start_y,
-                right: self.visible_region.right,
-                bottom: self.visible_region.top + y - 1,
+                left: self.console.visible_region().left,
+                top: self.console.visible_region().top + start_y,
+                right: self.console.visible_region().right,
+                bottom: self.console.visible_region().top + y - 1,
             };
             unsafe {
-                win32::api::WriteConsoleOutputW(self.stdout, self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
+                win32::api::WriteConsoleOutputW(self.console.stdout(), self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &vis_region);
             }
         }
         // update the cursor
         if surface.cursor.is_visible() {
             let pos = COORD {
-                x: (surface.cursor.x as i16) + self.visible_region.left,
-                y: (surface.cursor.y as i16) + self.visible_region.top,
+                x: (surface.cursor.x as i16) + self.console.visible_region().left,
+                y: (surface.cursor.y as i16) + self.console.visible_region().top,
             };
             let info = CONSOLE_CURSOR_INFO { size: 10, visible: TRUE };
             unsafe {
-                win32::api::SetConsoleCursorPosition(self.stdout, pos);
-                win32::api::SetConsoleCursorInfo(self.stdout, &info);
+                win32::api::SetConsoleCursorPosition(self.console.stdout(), pos);
+                win32::api::SetConsoleCursorInfo(self.console.stdout(), &info);
             }
         } else {
             let info = CONSOLE_CURSOR_INFO { size: 10, visible: FALSE };
             unsafe {
-                win32::api::SetConsoleCursorInfo(self.stdout, &info);
+                win32::api::SetConsoleCursorInfo(self.console.stdout(), &info);
             }
         }
     }
+    #[inline(always)]
     fn get_size(&self) -> Size {
-        self.size
+        self.console.size()
     }
 
     fn get_clipboard_text(&self) -> Option<String> {
-        win32::clipboard_text()
+        win32::Clipboard::text()
     }
 
     fn set_clipboard_text(&mut self, text: &str) {
-        win32::set_clipboard_text(text);
+        win32::Clipboard::set_text(text);
     }
 
     fn has_clipboard_text(&self) -> bool {
-        win32::has_clipboard_text()
+        win32::Clipboard::has_text()
     }
 }
