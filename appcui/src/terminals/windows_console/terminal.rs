@@ -1,7 +1,4 @@
 use std::sync::mpsc::Sender;
-use std::sync::Arc;
-use std::sync::Mutex;
-
 use super::super::SystemEvent;
 use super::super::SystemEventReader;
 use super::super::Terminal;
@@ -15,7 +12,6 @@ use crate::system::Error;
 pub struct WindowsTerminal {
     console: win32::Console,
     chars: Vec<CHAR_INFO>,
-    shared_visible_region: Arc<Mutex<SMALL_RECT>>,
 }
 
 impl WindowsTerminal {
@@ -25,11 +21,10 @@ impl WindowsTerminal {
 
     pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let console = win32::Console::new(builder, false)?;
-        let visible_region = console.visible_region();
+        let input_console = console.clone();
         let mut term = WindowsTerminal {
             console,
             chars: Vec::with_capacity(1024),
-            shared_visible_region: Arc::new(Mutex::new(visible_region)),
         };
         // println!("Start region: {:?}",term.visible_region);
         term.chars.resize(
@@ -37,7 +32,7 @@ impl WindowsTerminal {
             CHAR_INFO { code: 32, attr: 0 },
         );
         // start the event thread
-        Input::new(console, term.shared_visible_region.clone()).start(sender);
+        Input::new(input_console).start(sender);
         // all good - start the sender thread
         Ok(term)
     }
@@ -52,11 +47,7 @@ impl Terminal for WindowsTerminal {
         let w = new_size.width as usize;
         let h = new_size.height as usize;
         self.chars.resize(w * h * 2, CHAR_INFO { code: 32, attr: 0 });
-        self.console.set_size(new_size);
-        if let Ok(data) = self.shared_visible_region.lock() {
-            self.console.set_visible_region(*data);
-            //println!("OnResize: -> region: {:?}",self.visible_region);
-        }
+        self.console.on_resize(new_size);
     }
     fn update_screen(&mut self, surface: &Surface) {
         // println!("Update the screen: capacity: {}, size: {:?}, region: {:?}, surface_size: {:?}",self.chars.len(),self.size,self.visible_region,surface.size);
