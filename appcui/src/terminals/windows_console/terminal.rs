@@ -2,8 +2,6 @@ use std::sync::mpsc::Sender;
 use std::sync::Arc;
 use std::sync::Mutex;
 
-use crate::prelude::ErrorKind;
-
 use super::super::SystemEvent;
 use super::super::SystemEventReader;
 use super::super::Terminal;
