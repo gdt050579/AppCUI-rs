@@ -1,4 +1,4 @@
 mod input;
 mod terminal;
 
-pub(crate) use self::terminal::WindowsTerminal;
+pub(crate) use self::terminal::WindowsConsoleTerminal;

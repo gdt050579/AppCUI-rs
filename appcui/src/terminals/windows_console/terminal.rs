@@ -9,12 +9,12 @@ use crate::terminals::utils::win32::structs::*;
 use crate::graphics::*;
 use crate::system::Error;
 
-pub struct WindowsTerminal {
+pub struct WindowsConsoleTerminal {
     console: win32::Console,
     chars: Vec<CHAR_INFO>,
 }
 
-impl WindowsTerminal {
+impl WindowsConsoleTerminal {
     // if size is present -> resize
     // if colors are present --> recolor
     // if font is present --> apply font & size
@@ -22,7 +22,7 @@ impl WindowsTerminal {
     pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let console = win32::Console::new(builder, false)?;
         let input_console = console.clone();
-        let mut term = WindowsTerminal {
+        let mut term = WindowsConsoleTerminal {
             console,
             chars: Vec::with_capacity(1024),
         };
@@ -39,7 +39,7 @@ impl WindowsTerminal {
 
 }
 
-impl Terminal for WindowsTerminal {
+impl Terminal for WindowsConsoleTerminal {
     fn is_single_threaded(&self) -> bool {
         false
     }
