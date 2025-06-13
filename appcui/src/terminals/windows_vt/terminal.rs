@@ -1,14 +1,14 @@
-use std::sync::mpsc::Sender;
+use super::super::utils::win32;
 use super::super::SystemEvent;
 use super::super::SystemEventReader;
 use super::super::Terminal;
 use super::input::Input;
-use super::super::utils::win32;
-use crate::terminals::utils::win32::constants::*;
-use crate::terminals::utils::win32::structs::*;
 use crate::graphics::*;
 use crate::system::Error;
+use crate::terminals::utils::win32::constants::*;
+use crate::terminals::utils::win32::structs::*;
 use crate::terminals::utils::AnsiFormatter;
+use std::sync::mpsc::Sender;
 
 pub struct WindowsVTTerminal {
     console: win32::Console,
@@ -25,7 +25,6 @@ impl WindowsVTTerminal {
             ansi_formatter: AnsiFormatter::with_capacity(16384),
         })
     }
-
 }
 
 impl Terminal for WindowsVTTerminal {
@@ -37,30 +36,52 @@ impl Terminal for WindowsVTTerminal {
     }
     fn update_screen(&mut self, surface: &Surface) {
         // println!("Update the screen: capacity: {}, size: {:?}, region: {:?}, surface_size: {:?}",self.chars.len(),self.size,self.visible_region,surface.size);
-        // safety check --> surface size should be the same as self.width/height size 
+        // safety check --> surface size should be the same as self.width/height size
         if surface.size != self.console.size() {
             panic!("Invalid size !!!");
         }
 
         // draw characters using ANSI formatter
         self.ansi_formatter.clear();
+        let mut x = 0;
+        let mut y = 0;
+        let w = surface.size.width as i32;
+        let h = surface.size.height as i32;
+        let start_y = self.console.visible_region().top as i32;
+        while y < h {
+            self.ansi_formatter.set_cursor_position(0, y + start_y);
+            while x < w {
+                if let Some(ch) = surface.char(x, y) {
+                    self.ansi_formatter.set_color(ch.foreground, ch.background);
+                    self.ansi_formatter.write_char(ch.code);
+                }
+                x += 1;
+            }
+            y += 1;
+            x = 0;
+        }
         // update the cursor
         if surface.cursor.is_visible() {
-            let pos = COORD {
-                x: (surface.cursor.x as i16) + self.console.visible_region().left,
-                y: (surface.cursor.y as i16) + self.console.visible_region().top,
-            };
-            let info = CONSOLE_CURSOR_INFO { size: 10, visible: TRUE };
-            unsafe {
-                win32::api::SetConsoleCursorPosition(self.console.stdout(), pos);
-                win32::api::SetConsoleCursorInfo(self.console.stdout(), &info);
-            }
+            self.ansi_formatter.set_cursor_position(
+                surface.cursor.x as i32 + self.console.visible_region().left as i32,
+                surface.cursor.y as i32 + self.console.visible_region().top as i32,
+            );
+            self.ansi_formatter.show_cursor();
         } else {
-            let info = CONSOLE_CURSOR_INFO { size: 10, visible: FALSE };
-            unsafe {
-                win32::api::SetConsoleCursorInfo(self.console.stdout(), &info);
-            }
+            self.ansi_formatter.hide_cursor();
         }
+        // write the ANSI formatter to the console
+        // unsafe {
+        //     let mut written = 0;
+        //     win32::api::WriteFile(
+        //         self.console.stdout(),
+        //         self.ansi_formatter.text().as_ptr() as *const u8,
+        //         self.ansi_formatter.text().len() as u32,
+        //         &mut written,
+        //         std::ptr::null_mut(),
+        //     );
+        // }
+        print!("{}", self.ansi_formatter.text());
     }
     #[inline(always)]
     fn get_size(&self) -> Size {

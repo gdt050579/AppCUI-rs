@@ -1,7 +1,12 @@
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
+    #[cfg(target_os = "windows")]
+    let mut app = App::with_terminal(appcui::terminals::TerminalType::WindowsVT).build()?;
+    #[cfg(not(target_os = "windows"))]
     let mut app = App::new().build()?;
+
+
     let mut w = Window::new("True Colors", Layout::new("d:c,w:70,h:19"), window::Flags::None);
 
     let mut c = canvas!("'68x17',d:c,w:100%,h:100%");

@@ -4,7 +4,7 @@ pub(crate) struct AnsiFormatter {
     text: String,
 }
 
-impl AnsiFormatter {  
+impl AnsiFormatter {
     pub(crate) fn with_capacity(capacity: usize) -> Self {
         Self {
             text: String::with_capacity(capacity),
@@ -18,7 +18,11 @@ impl AnsiFormatter {
         self.text.clear();
     }
     pub(crate) fn write_char(&mut self, ch: char) {
-        self.text.push(ch);
+        if ch < ' ' {
+            self.text.push(' ');
+        } else {
+            self.text.push(ch);
+        }
     }
     pub(crate) fn write_string(&mut self, s: &str) {
         self.text.push_str(s);
@@ -39,6 +43,20 @@ impl AnsiFormatter {
     }
     pub(crate) fn reset_color(&mut self) {
         self.text.push_str("\x1b[0m");
+    }
+    pub(crate) fn set_cursor_position(&mut self, x: i32, y: i32) {
+        // x,y are 0-based, ANSI cursor position is 1-based
+        self.text.push_str("\x1b[");
+        self.write_number(y + 1);
+        self.text.push(';');
+        self.write_number(x + 1);
+        self.text.push('H');
+    }
+    pub(crate) fn hide_cursor(&mut self) {
+        self.text.push_str("\x1b[?25l");
+    }
+    pub(crate) fn show_cursor(&mut self) {
+        self.text.push_str("\x1b[?25h");
     }
 
     #[inline(always)]
@@ -68,7 +86,7 @@ impl AnsiFormatter {
                 self.write_number(g as i32);
                 self.text.push(';');
                 self.write_number(b as i32);
-            },
+            }
         }
     }
     fn write_number(&mut self, n: i32) {
@@ -91,6 +109,3 @@ impl AnsiFormatter {
         self.text.push_str(txt);
     }
 }
-
-
-
