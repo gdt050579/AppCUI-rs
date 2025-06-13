@@ -48,11 +48,20 @@ impl Terminal for WindowsVTTerminal {
         let w = surface.size.width as i32;
         let h = surface.size.height as i32;
         let start_y = self.console.visible_region().top as i32;
+        let mut f = None;
+        let mut b = None;
         while y < h {
             self.ansi_formatter.set_cursor_position(0, y + start_y);
             while x < w {
                 if let Some(ch) = surface.char(x, y) {
-                    self.ansi_formatter.set_color(ch.foreground, ch.background);
+                    if Some(ch.foreground) != f {
+                        self.ansi_formatter.set_foreground_color(ch.foreground);
+                        f = Some(ch.foreground);
+                    }
+                    if Some(ch.background) != b {
+                        self.ansi_formatter.set_background_color(ch.background);
+                        b = Some(ch.background);
+                    }                    
                     self.ansi_formatter.write_char(ch.code);
                 }
                 x += 1;
