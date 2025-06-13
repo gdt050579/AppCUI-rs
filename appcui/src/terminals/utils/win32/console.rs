@@ -82,10 +82,18 @@ impl Console {
                     format!("Fail to set current console flags to 'ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS' via SetConsoleMode API.\nWindow code error: {} ",api::GetLastError()),
                 ));
             }
-            if vt && api::SetConsoleMode(h_stdout, stdout_original_mode_flags | constants::ENABLE_VIRTUAL_TERMINAL_PROCESSING) == constants::FALSE {
+            if vt
+                && api::SetConsoleMode(
+                    h_stdout,
+                    stdout_original_mode_flags | constants::ENABLE_VIRTUAL_TERMINAL_PROCESSING | constants::ENABLE_PROCESSED_OUTPUT,
+                ) == constants::FALSE
+            {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
-                    format!("Fail to set current console flags to 'ENABLE_VIRTUAL_TERMINAL_PROCESSING' via SetConsoleMode API.\nWindow code error: {} ",api::GetLastError()),
+                    format!(
+                        "Fail to set current console flags to 'ENABLE_VIRTUAL_TERMINAL_PROCESSING' via SetConsoleMode API.\nWindow code error: {} ",
+                        api::GetLastError()
+                    ),
                 ));
             }
 

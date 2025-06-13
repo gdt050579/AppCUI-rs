@@ -8,6 +8,7 @@ use crate::system::Error;
 use crate::terminals::utils::win32::constants::*;
 use crate::terminals::utils::win32::structs::*;
 use crate::terminals::utils::AnsiFormatter;
+use std::io::Write;
 use std::sync::mpsc::Sender;
 
 pub struct WindowsVTTerminal {
@@ -61,7 +62,7 @@ impl Terminal for WindowsVTTerminal {
                     if Some(ch.background) != b {
                         self.ansi_formatter.set_background_color(ch.background);
                         b = Some(ch.background);
-                    }                    
+                    }
                     self.ansi_formatter.write_char(ch.code);
                 }
                 x += 1;
@@ -82,15 +83,12 @@ impl Terminal for WindowsVTTerminal {
         // write the ANSI formatter to the console
         // unsafe {
         //     let mut written = 0;
-        //     win32::api::WriteFile(
-        //         self.console.stdout(),
-        //         self.ansi_formatter.text().as_ptr() as *const u8,
-        //         self.ansi_formatter.text().len() as u32,
-        //         &mut written,
-        //         std::ptr::null_mut(),
-        //     );
+        //     let buf = self.ansi_formatter.text().as_bytes();
+        //     win32::api::WriteFile(self.console.stdout(), buf.as_ptr(), buf.len() as u32, &mut written, std::ptr::null_mut());
         // }
-        print!("{}", self.ansi_formatter.text());
+        //print!("{}", self.ansi_formatter.text());
+        let _ = std::io::stdout().write_all(self.ansi_formatter.text().as_bytes());
+        let _ = std::io::stdout().flush();
     }
     #[inline(always)]
     fn get_size(&self) -> Size {
