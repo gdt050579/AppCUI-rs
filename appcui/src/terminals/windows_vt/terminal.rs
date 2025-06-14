@@ -28,16 +28,23 @@ impl WindowsVTTerminal {
     }
     #[inline(always)]
     fn is_wide_char(ch: char) -> bool {
-        (ch >= '\u{1100}' && ch <= '\u{115F}') || // Hangul Jamo
-        (ch >= '\u{2329}' && ch <= '\u{232A}') || // Angle brackets
-        (ch >= '\u{2E80}' && ch <= '\u{A4CF}') || // CJK & radicals
-        (ch >= '\u{AC00}' && ch <= '\u{D7A3}') || // Hangul Syllables
-        (ch >= '\u{F900}' && ch <= '\u{FAFF}') || // CJK Compatibility Ideographs
-        (ch >= '\u{FE10}' && ch <= '\u{FE19}') || // Vertical punctuation
-        (ch >= '\u{FE30}' && ch <= '\u{FE6F}') || // More CJK symbols
-        (ch >= '\u{FF00}' && ch <= '\u{FF60}') || // Fullwidth ASCII variants
-        (ch >= '\u{FFE0}' && ch <= '\u{FFE6}') || // Fullwidth symbols
-        (ch >= '\u{1F300}' && ch <= '\u{1FAFF}') // Emojis & pictographs
+        match ch as u32 {
+            0x1100..=0x115F
+            | 0x2329..=0x232A
+            | 0x2E80..=0x303E
+            | 0x3040..=0xA4CF
+            | 0xAC00..=0xD7A3
+            | 0xF900..=0xFAFF
+            | 0xFE10..=0xFE19
+            | 0xFE30..=0xFE6F
+            | 0xFF00..=0xFF60
+            | 0xFFE0..=0xFFE6
+            | 0x1F300..=0x1F64F
+            | 0x1F900..=0x1F9FF
+            | 0x20000..=0x2FFFD
+            | 0x30000..=0x3FFFD => true,
+            _ => false,
+        }
     }
 }
 
@@ -80,11 +87,20 @@ impl Terminal for WindowsVTTerminal {
                     self.ansi_formatter.set_background_color(ch.background);
                     b = Some(ch.background);
                 }
-                self.ansi_formatter.write_char(ch.code);
                 if Self::is_wide_char(ch.code) {
+                    // 1. write two spaces
+                    self.ansi_formatter.write_string("  ");
+                    // 2. reposition the cursor
+                    self.ansi_formatter.set_cursor_position(x as i32, y as i32 + start_y);
+                    // 3. write the character   
+                    self.ansi_formatter.write_char(ch.code);
+                    // 4. skip next position and reposition the cursor
+                    x += 2;
+                    self.ansi_formatter.set_cursor_position(x as i32, y as i32 + start_y);
+                } else {
+                    self.ansi_formatter.write_char(ch.code);
                     x += 1;
                 }
-                x += 1;
             }
             y += 1;
             x = 0;
