@@ -3,6 +3,7 @@ use super::super::Character;
 use super::super::Color;
 use super::super::SpecialChar;
 
+#[cfg(not(feature = "TRUE_COLORS"))]
 const COLOR_TO_PIXEL: [u32; 16] = [
     0x000000, // Black
     0x000080, // DarkBlue
@@ -22,7 +23,7 @@ const COLOR_TO_PIXEL: [u32; 16] = [
     0xFFFFFF, // White
 ];
 
-const COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
+static COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
     Color::Black,
     Color::Black,
     Color::Black,
@@ -4263,11 +4264,11 @@ const ASCII_ART_CHARSET: &[char] = &[
 ];
 
 /// A pixel in the image.
-/// 
+///
 /// The pixel is a combination of red, green, and blue components, and an alpha component.
 /// The alpha component is the opacity of the pixel, and is used to determine how much of the pixel's color should be blended with the background.
 /// The red, green, and blue components are the color of the pixel.
-/// 
+///
 /// The pixel is used to represent a single pixel in the image.
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct Pixel {
@@ -4278,17 +4279,17 @@ pub struct Pixel {
 }
 impl Pixel {
     /// Create a new pixel with the given red, green, and blue components, and an alpha component.
-    /// 
+    ///
     /// The alpha component is the opacity of the pixel, and is used to determine how much of the pixel's color should be blended with the background.
     /// The red, green, and blue components are the color of the pixel.
-    /// 
+    ///
     /// The pixel is used to represent a single pixel in the image.
     pub fn new(red: u8, green: u8, blue: u8, alpha: u8) -> Self {
         Pixel { red, green, blue, alpha }
     }
-    
+
     /// Create a new pixel with the given red, green, and blue components.
-    /// 
+    ///
     /// The alpha component is set to 255, which means the pixel is fully opaque.
     pub fn with_rgb(red: u8, green: u8, blue: u8) -> Self {
         Pixel {
@@ -4298,6 +4299,7 @@ impl Pixel {
             alpha: 255,
         }
     }
+    #[cfg(not(feature = "TRUE_COLORS"))]
     pub fn with_color(color: Color) -> Self {
         let idx = color as u8;
         if idx >= 16 {
@@ -4315,6 +4317,29 @@ impl Pixel {
                 blue: ((u & 0xFF) as u8),
                 alpha: 255,
             }
+        }
+    }
+    #[cfg(feature = "TRUE_COLORS")]
+    pub fn with_color(color: Color) -> Self {
+        match color {
+            Color::Black => Pixel::with_rgb(0, 0, 0),
+            Color::DarkBlue => Pixel::with_rgb(0x00, 0x00, 0x80),
+            Color::DarkGreen => Pixel::with_rgb(0x00, 0x80, 0x00),
+            Color::Teal => Pixel::with_rgb(0x00, 0x80, 0x80),
+            Color::DarkRed => Pixel::with_rgb(0x80, 0x00, 0x00),
+            Color::Magenta => Pixel::with_rgb(0x80, 0x00, 0x80),
+            Color::Olive => Pixel::with_rgb(0x80, 0x80, 0x00),
+            Color::Silver => Pixel::with_rgb(0xC0, 0xC0, 0xC0),
+            Color::Gray => Pixel::with_rgb(0x80, 0x80, 0x80),
+            Color::Blue => Pixel::with_rgb(0x00, 0x00, 0xFF),
+            Color::Green => Pixel::with_rgb(0x00, 0xFF, 0x00),
+            Color::Aqua => Pixel::with_rgb(0x00, 0xFF, 0xFF),
+            Color::Red => Pixel::with_rgb(0xFF, 0x00, 0x00),
+            Color::Pink => Pixel::with_rgb(0xFF, 0x00, 0xFF),
+            Color::Yellow => Pixel::with_rgb(0xFF, 0xFF, 0x00),
+            Color::White => Pixel::with_rgb(0xFF, 0xFF, 0xFF),
+            Color::Transparent => Pixel::new(0,0,0,0),
+            Color::RGB(r, g, b) => Pixel::with_rgb(r, g, b),
         }
     }
     pub(super) fn as_color(&self) -> Color {

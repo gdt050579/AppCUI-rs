@@ -29,7 +29,7 @@ impl RootType {
             Self::Network => '🖧',
             Self::RamDisk => '▦',
             Self::CdRom => '📀',
-            Self::Unknown => '❓',
+            Self::Unknown => '?',
         }
     }
 }

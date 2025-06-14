@@ -1,6 +1,6 @@
 # AppCUI-rs
 
-<img src="./docs/chapter-1/img/logo.png" align="center" />
+<img src="https://raw.githubusercontent.com/gdt050579/AppCUI-rs/main/docs/chapter-1/img/logo.png" align="center" />
 
 ```                                                              
 ⯈ 𝗔𝗽𝗽𝗖𝗨𝗜-𝗿𝘀 🖳
@@ -28,10 +28,11 @@ AppCUI is a simple, easy-to-use and cross-platform library for creating text-bas
 - [x] color themes
 - [x] support for Unicode characters
 - [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc)
+- [x] true colors support (24 bits per pixel) for terminals that supports it.
 
 ## 📸 Screenshots 
 
-<img src="./docs/chapter-1/img/appcui-rs-demo.gif" align="center" />
+<img src="https://github.com/gdt050579/AppCUI-rs/raw/main/docs/chapter-1/img/appcui-rs-demo.gif" align="center" />
 
 ## 🚀 Quick Start
 

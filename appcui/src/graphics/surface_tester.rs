@@ -127,14 +127,30 @@ impl SurfaceTester {
             buf[1] = (((ch.code as u32) >> 8) & 0xFF) as u8;
             buf[2] = (((ch.code as u32) >> 16) & 0xFF) as u8;
             buf[3] = (((ch.code as u32) >> 24) & 0xFF) as u8;
-            buf[4] = ch.foreground as u8;
-            buf[5] = ch.background as u8;
+            buf[4] = ch.foreground.as_color_index();
+            buf[5] = ch.background.as_color_index();
             buf[6] = ((ch.flags.get_value() >> 8) & 0xFF) as u8;
             buf[7] = (ch.flags.get_value() & 0xFF) as u8;
             for b in buf {
                 hash ^= b as u64;
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
             }
+            if let Some((r, g, b)) = ch.foreground.rgb() {
+                hash ^= r as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= g as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= b as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+            }
+            if let Some((r, g, b)) = ch.background.rgb() {
+                hash ^= r as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= g as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= b as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+            }            
         }
         hash
     }

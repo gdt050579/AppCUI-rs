@@ -50,6 +50,12 @@ mod termios;
 mod web_terminal;
 #[cfg(target_os = "windows")]
 mod windows_console;
+#[cfg(target_os = "windows")]
+mod windows_vt;
+
+
+pub(crate) mod utils;
+
 
 #[cfg(test)]
 mod tests;
@@ -84,7 +90,9 @@ use self::termios::TermiosTerminal;
 #[cfg(target_arch = "wasm32")]
 use self::web_terminal::WebTerminal;
 #[cfg(target_os = "windows")]
-use self::windows_console::WindowsTerminal;
+use self::windows_console::WindowsConsoleTerminal;
+#[cfg(target_os = "windows")]
+use self::windows_vt::WindowsVTTerminal;
 
 pub(crate) trait Terminal {
     fn update_screen(&mut self, surface: &Surface);
@@ -104,6 +112,8 @@ pub(crate) trait Terminal {
 pub enum TerminalType {
     #[cfg(target_os = "windows")]
     WindowsConsole,
+    #[cfg(target_os = "windows")]
+    WindowsVT,
     #[cfg(target_family = "unix")]
     Termios,
     #[cfg(target_os = "linux")]
@@ -141,7 +151,12 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
     match terminal {
         #[cfg(target_os = "windows")]
         TerminalType::WindowsConsole => {
-            let term = WindowsTerminal::new(builder, sender)?;
+            let term = WindowsConsoleTerminal::new(builder, sender)?;
+            Ok(Box::new(term))
+        }
+        #[cfg(target_os = "windows")]
+        TerminalType::WindowsVT => {
+            let term = WindowsVTTerminal::new(builder, sender)?;
             Ok(Box::new(term))
         }
         #[cfg(target_family = "unix")]
@@ -169,7 +184,7 @@ fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<Syste
 
 #[cfg(target_os = "windows")]
 fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
-    let term = WindowsTerminal::new(builder, sender)?;
+    let term = WindowsConsoleTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "linux")]

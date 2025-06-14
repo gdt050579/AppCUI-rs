@@ -12,6 +12,7 @@
         - [Logging](chapter-2/logging.md)
     - [Terminals](chapter-2/terminals.md)
         - [Windows Console](chapter-2/terminals/windows_console.md)
+        - [Windows VT](chapter-2/terminals/windows_vt.md)
         - [NCurses](chapter-2/terminals/ncurses.md)
         - [Termios](chapter-2/terminals/termios.md)
         - [Web Terminal](chapter-2/terminals/web_terminal.md)

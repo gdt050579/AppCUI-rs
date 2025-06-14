@@ -1,6 +1,6 @@
 [package]
 name = "appcui"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Gavrilut Dragos <gavrilut.dragos@gmail.com>"]
 description = "A feature-rich and cross-platform TUI/CUI framework for Rust, enabling modern terminal-based applications on Windows, Linux, and macOS. Includes built-in UI components like buttons, menus, list views, tree views, checkboxes, and more. Perfect for building fast and interactive CLI tools and text-based interfaces."
@@ -70,6 +70,7 @@ default = []
 DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []
 EVENT_RECORDER = []
 GLOBAL_RUNTIME = []
+TRUE_COLORS = []
 
 
 [lints]

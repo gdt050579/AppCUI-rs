@@ -75,12 +75,12 @@ impl ColorPicker {
     }
 
     fn next_color(&mut self, expanded: bool, offset: i32) {
-        let mut result = ((self.color as u8) as i32) + offset;
+        let mut result = (self.color.as_color_index() as i32) + offset;
         if expanded {
             // specific cases
             // when the cursor is on the first line (the first 4 colors), it should be able to move to transparent checkbox
             // as well the logic below enphasize this
-            let transparent = (Color::Transparent as u8) as i32;
+            let transparent = (Color::Transparent.as_color_index()) as i32;
             if (result == COLOR_MATRIX_WIDTH) && (offset == ONE_POSITION_TO_RIGHT) {
                 result = transparent; // Move to the right with 1 position
             } else if (result == transparent + 1) && (offset == ONE_POSITION_TO_RIGHT) {
@@ -122,7 +122,7 @@ impl ColorPicker {
             return ((x - 1) / SPACES_PER_COLOR) + (y - (self.expanded_panel_y + 1)) * COLOR_MATRIX_WIDTH;
         }
         if (y == 1 + self.expanded_panel_y) && (TRANSPARENT_CHECKBOX_X_OFFSET..=TRANSPARENT_CHECKBOX_X_LAST_OFFSET).contains(&x) {
-            return (Color::Transparent as u8) as i32;
+            return (Color::Transparent.as_color_index()) as i32;
         }
         -1
     }
