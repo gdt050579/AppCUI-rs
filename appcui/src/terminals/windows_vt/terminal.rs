@@ -26,6 +26,19 @@ impl WindowsVTTerminal {
             ansi_formatter: AnsiFormatter::with_capacity(16384),
         })
     }
+    #[inline(always)]
+    fn is_wide_char(ch: char) -> bool {
+        (ch >= '\u{1100}' && ch <= '\u{115F}') || // Hangul Jamo
+        (ch >= '\u{2329}' && ch <= '\u{232A}') || // Angle brackets
+        (ch >= '\u{2E80}' && ch <= '\u{A4CF}') || // CJK & radicals
+        (ch >= '\u{AC00}' && ch <= '\u{D7A3}') || // Hangul Syllables
+        (ch >= '\u{F900}' && ch <= '\u{FAFF}') || // CJK Compatibility Ideographs
+        (ch >= '\u{FE10}' && ch <= '\u{FE19}') || // Vertical punctuation
+        (ch >= '\u{FE30}' && ch <= '\u{FE6F}') || // More CJK symbols
+        (ch >= '\u{FF00}' && ch <= '\u{FF60}') || // Fullwidth ASCII variants
+        (ch >= '\u{FFE0}' && ch <= '\u{FFE6}') || // Fullwidth symbols
+        (ch >= '\u{1F300}' && ch <= '\u{1FAFF}') // Emojis & pictographs
+    }
 }
 
 impl Terminal for WindowsVTTerminal {
@@ -44,26 +57,32 @@ impl Terminal for WindowsVTTerminal {
 
         // draw characters using ANSI formatter
         self.ansi_formatter.clear();
+        self.ansi_formatter.reset_color();
+        self.ansi_formatter.hide_cursor();
         let mut x = 0;
         let mut y = 0;
-        let w = surface.size.width as i32;
-        let h = surface.size.height as i32;
+        let w = surface.size.width;
+        let h = surface.size.height;
         let start_y = self.console.visible_region().top as i32;
         let mut f = None;
         let mut b = None;
+        let chars = &surface.chars;
         while y < h {
-            self.ansi_formatter.set_cursor_position(0, y + start_y);
+            self.ansi_formatter.set_cursor_position(0, y as i32 + start_y);
+            let ofs = y * w;
             while x < w {
-                if let Some(ch) = surface.char(x, y) {
-                    if Some(ch.foreground) != f {
-                        self.ansi_formatter.set_foreground_color(ch.foreground);
-                        f = Some(ch.foreground);
-                    }
-                    if Some(ch.background) != b {
-                        self.ansi_formatter.set_background_color(ch.background);
-                        b = Some(ch.background);
-                    }
-                    self.ansi_formatter.write_char(ch.code);
+                let ch = &chars[(ofs + x) as usize];
+                if Some(ch.foreground) != f {
+                    self.ansi_formatter.set_foreground_color(ch.foreground);
+                    f = Some(ch.foreground);
+                }
+                if Some(ch.background) != b {
+                    self.ansi_formatter.set_background_color(ch.background);
+                    b = Some(ch.background);
+                }
+                self.ansi_formatter.write_char(ch.code);
+                if Self::is_wide_char(ch.code) {
+                    x += 1;
                 }
                 x += 1;
             }

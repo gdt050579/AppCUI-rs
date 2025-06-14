@@ -85,7 +85,7 @@ impl Console {
             if vt
                 && api::SetConsoleMode(
                     h_stdout,
-                    stdout_original_mode_flags | constants::ENABLE_VIRTUAL_TERMINAL_PROCESSING | constants::ENABLE_PROCESSED_OUTPUT,
+                    stdout_original_mode_flags | constants::ENABLE_VIRTUAL_TERMINAL_PROCESSING,
                 ) == constants::FALSE
             {
                 return Err(Error::new(
