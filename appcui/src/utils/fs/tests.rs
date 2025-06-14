@@ -173,5 +173,5 @@ fn check_roottype_icon() {
     assert_eq!(RootType::Network.icon(), '🖧');
     assert_eq!(RootType::RamDisk.icon(), '▦');
     assert_eq!(RootType::CdRom.icon(), '📀');
-    assert_eq!(RootType::Unknown.icon(), '❓');
+    assert_eq!(RootType::Unknown.icon(), '?');
 }   

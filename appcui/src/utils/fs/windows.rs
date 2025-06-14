@@ -17,8 +17,8 @@ extern "system" {
     fn GetDriveTypeA(lpRootPathName: *const u8) -> u32;
 }
 
-const DRIVE_UNKNOWN: u32 = 0;
-const DRIVE_NO_ROOT_DIR: u32 = 1;
+// const DRIVE_UNKNOWN: u32 = 0;
+// const DRIVE_NO_ROOT_DIR: u32 = 1;
 const DRIVE_REMOVABLE: u32 = 2;
 const DRIVE_FIXED: u32 = 3;
 const DRIVE_REMOTE: u32 = 4;

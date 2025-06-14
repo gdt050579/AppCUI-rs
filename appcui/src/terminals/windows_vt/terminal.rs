@@ -5,8 +5,6 @@ use super::super::Terminal;
 use super::input::Input;
 use crate::graphics::*;
 use crate::system::Error;
-use crate::terminals::utils::win32::constants::*;
-use crate::terminals::utils::win32::structs::*;
 use crate::terminals::utils::AnsiFormatter;
 use std::io::Write;
 use std::sync::mpsc::Sender;
