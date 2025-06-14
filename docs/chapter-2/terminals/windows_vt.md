@@ -31,3 +31,29 @@ Keep in mind that the speed limitation can be mitigated by using a 3rd party ter
 * [RIO](https://rioterm.com/)
 * [Alacritty](https://alacritty.org/)
 
+## Usage
+
+Windows VT is not the default terminal on Windows. To use it, you need to specify the `WindowsVT` terminal type when creating the application:
+
+```rust
+use appcui::prelude::*;
+
+fn main() -> Result<(), appcui::system::Error> {
+    let app = App::with_terminal(appcui::terminals::TerminalType::WindowsVT).build()?;
+    // build your application here
+    Ok(())
+}
+```
+
+Further more, if you also want to use `true colors` you will need to enable the `TRUE_COLORS` feature when building the application:
+
+```toml
+[dependencies]
+appcui = { version = "*", features = ["TRUE_COLORS"] }
+```
+
+
+
+
+
+
