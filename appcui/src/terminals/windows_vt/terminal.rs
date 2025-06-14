@@ -26,8 +26,7 @@ impl WindowsVTTerminal {
     }
     #[inline(always)]
     fn is_wide_char(ch: char) -> bool {
-        match ch as u32 {
-            0x1100..=0x115F
+        matches!(ch as u32, 0x1100..=0x115F
             | 0x2329..=0x232A
             | 0x2E80..=0x303E
             | 0x3040..=0xA4CF
@@ -40,9 +39,7 @@ impl WindowsVTTerminal {
             | 0x1F300..=0x1F64F
             | 0x1F900..=0x1F9FF
             | 0x20000..=0x2FFFD
-            | 0x30000..=0x3FFFD => true,
-            _ => false,
-        }
+            | 0x30000..=0x3FFFD)
     }
 }
 

@@ -19,10 +19,10 @@ fn main() -> Result<(), appcui::system::Error> {
 
     for i in 0..64 {
         let v = (i * 4) as u8;
-        s.write_char(1 + i, 2, Character::new(' ', Color::Black, Color::RGB(v, 0, 0), CharFlags::None));
-        s.write_char(1 + i, 5, Character::new(' ', Color::Black, Color::RGB(0, v, 0), CharFlags::None));
-        s.write_char(1 + i, 8, Character::new(' ', Color::Black, Color::RGB(0, 0, v), CharFlags::None));
-        s.write_char(1 + i, 11, Character::new(' ', Color::Black, Color::RGB(v, v, v), CharFlags::None));
+        s.write_char(1 + i, 2, Character::new(' ', Color::Black, Color::from_rgb(v, 0, 0), CharFlags::None));
+        s.write_char(1 + i, 5, Character::new(' ', Color::Black, Color::from_rgb(0, v, 0), CharFlags::None));
+        s.write_char(1 + i, 8, Character::new(' ', Color::Black, Color::from_rgb(0, 0, v), CharFlags::None));
+        s.write_char(1 + i, 11, Character::new(' ', Color::Black, Color::from_rgb(v, v, v), CharFlags::None));
     }
 
     s.write_string(1, 13, "Make sure that you compile with the 'TRUE_COLORS' feature enabled.", CharAttribute::with_color(Color::Gray, Color::Black), false);

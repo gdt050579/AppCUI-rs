@@ -28,6 +28,7 @@ AppCUI is a simple, easy-to-use and cross-platform library for creating text-bas
 - [x] color themes
 - [x] support for Unicode characters
 - [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc)
+- [x] true colors support (24 bits per pixel) for terminals that supports it.
 
 ## 📸 Screenshots 
 

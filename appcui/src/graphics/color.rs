@@ -203,7 +203,25 @@ impl Color {
     #[cfg(not(feature = "TRUE_COLORS"))]
     #[inline(always)]
     pub(crate) fn as_color_index(&self) -> u8 {
-        self as u8
+        match self { 
+            Color::Black => 0,
+            Color::DarkBlue => 1,
+            Color::DarkGreen => 2,
+            Color::Teal => 3,
+            Color::DarkRed => 4,
+            Color::Magenta => 5,
+            Color::Olive => 6,
+            Color::Silver => 7,
+            Color::Gray => 8,
+            Color::Blue => 9,
+            Color::Green => 10,
+            Color::Aqua => 11,
+            Color::Red => 12,
+            Color::Pink => 13,
+            Color::Yellow => 14,
+            Color::White => 15,
+            Color::Transparent => 16,
+        }
     }
     // #[cfg(feature = "TRUE_COLORS")]
     // #[inline(always)]
@@ -227,5 +245,28 @@ impl Color {
     #[inline(always)]
     pub(crate) fn rgb(&self) -> Option<(u8,u8,u8)> {
         None
+    }
+
+    pub fn from_rgb(r: u8, g: u8, b: u8) -> Color {
+        #[cfg(feature = "TRUE_COLORS")]
+        return Color::RGB(r, g, b);
+        #[cfg(not(feature = "TRUE_COLORS"))]
+        {
+            let mut index = 0;
+            if r > 64 {
+                index |= 0b100;
+            }
+            if g > 64 {
+                index |= 0b010;
+            }
+            if b > 64 {
+                index |= 0b001;
+            }
+            // 192 (0xc0) should remain like this so that we obtain th Silver
+            if r >= 196 || g >= 196 || b >= 196 {
+                index |= 0b1000;
+            }
+            Color::from_value(index).unwrap()
+        }
     }
 }
