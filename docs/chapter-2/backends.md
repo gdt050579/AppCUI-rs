@@ -1,6 +1,6 @@
-# Terminals
+# Backends
 
-AppCUI supports various terminals (but each one comes with advantages and drawbacks).
+AppCUI supports various backends (but each one comes with advantages and drawbacks).
 
 ## OS Support
 
