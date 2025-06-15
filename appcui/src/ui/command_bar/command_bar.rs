@@ -1,8 +1,7 @@
 use crate::{
     graphics::{Character, Size, Surface},
     input::{Key, KeyCode, KeyModifier},
-    system::{Handle, Theme},
-    terminals::{MouseButtonDownEvent, MouseMoveEvent},
+    system::{Handle, Theme, MouseButtonDownEvent, MouseMoveEvent},
     ui::common::traits::CommandID,
 };
 

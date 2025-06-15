@@ -1,13 +1,13 @@
-use std::sync::mpsc::Sender;
-use super::super::SystemEvent;
-use super::super::SystemEventReader;
-use super::super::Terminal;
-use super::input::Input;
 use super::super::utils::win32;
-use crate::terminals::utils::win32::constants::*;
-use crate::terminals::utils::win32::structs::*;
+use super::super::SystemEventReader;
+use super::super::Backend;
+use super::input::Input;
+use crate::backend::utils::win32::constants::*;
+use crate::backend::utils::win32::structs::*;
 use crate::graphics::*;
 use crate::system::Error;
+use crate::system::SystemEvent;
+use std::sync::mpsc::Sender;
 
 pub struct WindowsConsoleTerminal {
     console: win32::Console,
@@ -36,10 +36,9 @@ impl WindowsConsoleTerminal {
         // all good - start the sender thread
         Ok(term)
     }
-
 }
 
-impl Terminal for WindowsConsoleTerminal {
+impl Backend for WindowsConsoleTerminal {
     fn is_single_threaded(&self) -> bool {
         false
     }
@@ -51,7 +50,7 @@ impl Terminal for WindowsConsoleTerminal {
     }
     fn update_screen(&mut self, surface: &Surface) {
         // println!("Update the screen: capacity: {}, size: {:?}, region: {:?}, surface_size: {:?}",self.chars.len(),self.size,self.visible_region,surface.size);
-        // safety check --> surface size should be the same as self.width/height size 
+        // safety check --> surface size should be the same as self.width/height size
         if surface.size != self.console.size() {
             panic!("Invalid size !!!");
         }
@@ -149,7 +148,13 @@ impl Terminal for WindowsConsoleTerminal {
                 y: self.console.size().height as i16,
             };
             unsafe {
-                win32::api::WriteConsoleOutputW(self.console.stdout(), self.chars.as_ptr(), sz, COORD { x: 0, y: 0 }, &self.console.visible_region());
+                win32::api::WriteConsoleOutputW(
+                    self.console.stdout(),
+                    self.chars.as_ptr(),
+                    sz,
+                    COORD { x: 0, y: 0 },
+                    &self.console.visible_region(),
+                );
             }
         } else if start_y < y {
             let sz = COORD { x: w as i16, y: y - start_y };

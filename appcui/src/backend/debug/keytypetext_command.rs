@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 
 use crate::{
     input::Key,
-    terminals::{KeyPressedEvent, SystemEvent},
+    system::{KeyPressedEvent, SystemEvent},
 };
 
 use super::command_parser::{CommandParser, ParserError};

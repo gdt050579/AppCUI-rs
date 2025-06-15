@@ -1,6 +1,6 @@
 use crate::{
     input::Key,
-    terminals::{KeyPressedEvent, SystemEvent},
+    system::{KeyPressedEvent, SystemEvent},
 };
 
 #[test]

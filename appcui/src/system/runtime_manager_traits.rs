@@ -3,10 +3,15 @@ use crate::ui::common::traits::*;
 use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::menu::Menu;
 use crate::input::*;
-use crate::terminals::*;
 use super::timer::TimerManager;
 use super::Handle;
 use super::Theme;
+use super::KeyPressedEvent;
+use super::MouseButtonDownEvent;
+use super::MouseWheelEvent;
+use super::MouseMoveEvent;
+use super::MouseDoubleClickEvent;
+use super::MouseButtonUpEvent;
 
 pub(crate) trait LayoutMethods {
     fn update_control_layout(&mut self, handle: Handle<()>, parent_layout: &ParentLayout);

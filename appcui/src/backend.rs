@@ -1,4 +1,4 @@
-//! # Terminals
+//! # Backends
 //!
 //! This module contains the different terminal implementations.
 //! The terminal is responsible for rendering the UI and handling user input.
@@ -12,7 +12,7 @@
 //! - **NCurses**: Unix-based terminal with good display and input capabilities
 //! - **Termios**: Basic Unix terminal with limited features
 //!
-//! ### Default Terminals by OS:
+//! ### Default Backends by OS:
 //! - Windows: Windows Console
 //! - Linux: NCurses
 //! - Mac/OSX: Termios
@@ -42,7 +42,6 @@
 mod debug;
 #[cfg(target_os = "linux")]
 mod ncurses;
-mod system_event;
 mod system_event_thread;
 #[cfg(target_family = "unix")]
 mod termios;
@@ -66,17 +65,7 @@ use super::graphics::Size;
 use super::graphics::Surface;
 use super::system::Error;
 use super::system::ErrorKind;
-
-pub(crate) use self::system_event::KeyPressedEvent;
-pub(crate) use self::system_event::MouseButtonDownEvent;
-pub(crate) use self::system_event::MouseButtonUpEvent;
-pub(crate) use self::system_event::MouseDoubleClickEvent;
-pub(crate) use self::system_event::MouseMoveEvent;
-pub(crate) use self::system_event::MouseWheelEvent;
-pub(crate) use self::system_event::SystemEvent;
-pub(crate) use self::system_event::TimerPausedEvent;
-pub(crate) use self::system_event::TimerStartEvent;
-pub(crate) use self::system_event::TimerTickUpdateEvent;
+use super::system::SystemEvent;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub(super) use self::system_event_thread::SystemEventReader;
@@ -94,7 +83,7 @@ use self::windows_console::WindowsConsoleTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_vt::WindowsVTTerminal;
 
-pub(crate) trait Terminal {
+pub(crate) trait Backend {
     fn update_screen(&mut self, surface: &Surface);
     fn on_resize(&mut self, new_size: Size);
     fn get_size(&self) -> Size;
@@ -109,7 +98,7 @@ pub(crate) trait Terminal {
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
-pub enum TerminalType {
+pub enum Type {
     #[cfg(target_os = "windows")]
     WindowsConsole,
     #[cfg(target_os = "windows")]
@@ -122,7 +111,7 @@ pub enum TerminalType {
     WebTerminal,
 }
 
-pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // check if terminal size if valid (if present)
     if let Some(sz) = builder.size.as_ref() {
         if (sz.width == 0) || (sz.height == 0) {
@@ -150,26 +139,26 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
     let terminal = *builder.terminal.as_ref().unwrap();
     match terminal {
         #[cfg(target_os = "windows")]
-        TerminalType::WindowsConsole => {
+        Type::WindowsConsole => {
             let term = WindowsConsoleTerminal::new(builder, sender)?;
             Ok(Box::new(term))
         }
         #[cfg(target_os = "windows")]
-        TerminalType::WindowsVT => {
+        Type::WindowsVT => {
             let term = WindowsVTTerminal::new(builder, sender)?;
             Ok(Box::new(term))
         }
         #[cfg(target_family = "unix")]
-        TerminalType::Termios => TermiosTerminal::new(builder, sender),
+        Type::Termios => TermiosTerminal::new(builder, sender),
 
         #[cfg(target_os = "linux")]
-        TerminalType::NcursesTerminal => {
+        Type::NcursesTerminal => {
             let term = NcursesTerminal::new(builder, sender)?;
             Ok(Box::new(term))
         }
 
         #[cfg(target_arch = "wasm32")]
-        TerminalType::WebTerminal => {
+        Type::WebTerminal => {
             let term = WebTerminal::new(builder, sender)?;
             return Ok(Box::new(term));
         }
@@ -177,28 +166,28 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
 }
 
 #[cfg(target_arch = "wasm32")]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     let term = WebTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 
 #[cfg(target_os = "windows")]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     let term = WindowsConsoleTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "linux")]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // TermiosTerminal::new(builder)
     let term = NcursesTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "macos")]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     TermiosTerminal::new(builder, sender)
 }
 #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos", target_arch = "wasm32")))]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Terminal>, Error> {
+fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // anything else
     TermiosTerminal::new(builder, sender)
 }

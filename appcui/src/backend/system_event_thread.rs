@@ -1,4 +1,4 @@
-use super::SystemEvent;
+use crate::system::SystemEvent;
 use std::{sync::mpsc::Sender, thread};
 
 #[allow(dead_code)]

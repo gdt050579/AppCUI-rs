@@ -1,16 +1,16 @@
 use std::collections::VecDeque;
 
 use super::super::Surface;
-use super::super::SystemEvent;
-use super::super::Terminal;
+use super::super::Backend;
 use super::command::Command;
+use crate::backend::utils::AnsiFormatter;
 use crate::graphics::Color;
 use crate::graphics::Point;
 use crate::graphics::Size;
 use crate::input::KeyModifier;
 use crate::system::Error;
+use crate::system::SystemEvent;
 use crate::system::{PaintMethods, RuntimeManager};
-use crate::terminals::utils::AnsiFormatter;
 
 pub(crate) struct DebugTerminal {
     size: Size,
@@ -106,7 +106,7 @@ impl DebugTerminal {
         hash
     }
 }
-impl Terminal for DebugTerminal {
+impl Backend for DebugTerminal {
     fn is_single_threaded(&self) -> bool {
         true
     }

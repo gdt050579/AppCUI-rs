@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use crate::graphics::Point;
-use crate::terminals::SystemEvent;
+use crate::system::SystemEvent;
 use crate::input::KeyModifier;
 
 use super::{

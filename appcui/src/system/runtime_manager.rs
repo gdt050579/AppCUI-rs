@@ -8,9 +8,9 @@ use super::background_task::BackgroundTaskManager;
 use super::runtime_manager_traits::*;
 use super::timer::TimerManager;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
+use crate::backend::{self, Backend};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
-use crate::terminals::*;
 use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
@@ -21,7 +21,7 @@ use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
-use crate::{prelude::*, terminals};
+use crate::prelude::*;
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -56,7 +56,7 @@ enum ExpandStatus {
 
 pub(crate) struct RuntimeManager {
     theme: Theme,
-    terminal: Box<dyn Terminal>,
+    terminal: Box<dyn Backend>,
     surface: Surface,
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
@@ -111,7 +111,7 @@ impl RuntimeManager {
         }
 
         let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
-        let term = terminals::new(&builder, sender.clone())?;
+        let term = backend::new(&builder, sender.clone())?;
         let term_sz = term.get_size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
@@ -227,10 +227,10 @@ impl RuntimeManager {
             },
         )
     }
-    pub(crate) fn terminal(&self) -> &dyn Terminal {
+    pub(crate) fn terminal(&self) -> &dyn Backend {
         self.terminal.as_ref()
     }
-    pub(crate) fn terminal_mut(&mut self) -> &mut dyn Terminal {
+    pub(crate) fn terminal_mut(&mut self) -> &mut dyn Backend {
         self.terminal.as_mut()
     }
 

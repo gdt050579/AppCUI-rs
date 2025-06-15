@@ -16,8 +16,8 @@ use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
 use crate::system::Clipboard;
-use crate::terminals::MouseButtonDownEvent;
-use crate::terminals::MouseMoveEvent;
+use crate::system::MouseButtonDownEvent;
+use crate::system::MouseMoveEvent;
 use crate::ui::command_bar::*;
 use crate::ui::common::traits::*;
 
@@ -354,6 +354,6 @@ fn check_create_app_with_default_terminal() {
 #[cfg(target_os = "windows")]
 #[test]
 fn check_create_app_with_windows_terminal() {
-    let _ = App::with_terminal(crate::terminals::TerminalType::WindowsConsole).build();
+    let _ = App::with_terminal(crate::backend::Type::WindowsConsole).build();
 }
 

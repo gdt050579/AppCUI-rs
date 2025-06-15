@@ -2,12 +2,12 @@ use super::super::SystemEvent;
 use super::super::Terminal;
 use super::ncursesapi::lib::ncurses_wcwidth;
 use super::ncursesapi::externs::*;
-use crate::terminals::ncurses::ncursesapi::input::Input;
+use crate::backends::ncurses::ncursesapi::input::Input;
 use std::sync::mpsc::Sender;
 
 use crate::graphics::*;
 use crate::system::Error;
-use crate::terminals::SystemEventReader;
+use crate::backends::SystemEventReader;
 
 use super::ncursesapi;
 use copypasta::ClipboardContext;

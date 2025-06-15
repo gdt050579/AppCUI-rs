@@ -1,13 +1,13 @@
 use super::super::utils::win32;
-use super::super::SystemEvent;
 use super::super::SystemEventReader;
-use super::super::Terminal;
+use super::super::Backend;
 use super::input::Input;
 use crate::graphics::*;
 use crate::system::Error;
-use crate::terminals::utils::AnsiFormatter;
+use crate::backend::utils::AnsiFormatter;
 use std::io::Write;
 use std::sync::mpsc::Sender;
+use crate::system::SystemEvent;
 
 pub struct WindowsVTTerminal {
     console: win32::Console,
@@ -43,7 +43,7 @@ impl WindowsVTTerminal {
     }
 }
 
-impl Terminal for WindowsVTTerminal {
+impl Backend for WindowsVTTerminal {
     fn is_single_threaded(&self) -> bool {
         false
     }

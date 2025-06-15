@@ -1,4 +1,8 @@
-use crate::{input::{Key, KeyModifier, MouseButton, MouseWheelDirection}, system::Handle};
+use crate::{
+    input::{Key, KeyModifier, MouseButton, MouseWheelDirection},
+    system::Handle,
+    graphics::Size,
+};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(crate) struct MouseButtonDownEvent {
@@ -86,7 +90,7 @@ pub(crate) enum SystemEvent {
     AppClose,
     KeyPressed(KeyPressedEvent),
     KeyModifierChanged(KeyModifierChangedEvent),
-    Resize(super::Size),
+    Resize(Size),
     MouseButtonDown(MouseButtonDownEvent),
     MouseButtonUp(MouseButtonUpEvent),
     MouseDoubleClick(MouseDoubleClickEvent),
@@ -103,7 +107,7 @@ pub(crate) enum SystemEvent {
 
 impl SystemEvent {
     #[inline(always)]
-    pub(super) fn should_close(&self) -> bool {
+    pub(crate) fn should_close(&self) -> bool {
         matches!(self, SystemEvent::AppClose)
     }
 }

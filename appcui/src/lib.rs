@@ -30,6 +30,6 @@ pub mod graphics;
 pub mod input;
 pub mod prelude;
 pub mod system;
-pub mod terminals;
+pub mod backend;
 pub mod ui;
 mod utils;

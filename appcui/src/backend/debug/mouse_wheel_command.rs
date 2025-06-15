@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use crate::{
     graphics::Point,
     input::{MouseButton, MouseWheelDirection},
-    terminals::{MouseMoveEvent, MouseWheelEvent, SystemEvent},
+    system::{MouseMoveEvent, MouseWheelEvent, SystemEvent},
 };
 
 use super::command_parser::{CommandParser, ParserError};

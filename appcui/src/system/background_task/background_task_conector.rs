@@ -1,5 +1,5 @@
 use super::{BackgroundTask, StatusUpdateRequest};
-use crate::{system::Handle, terminals::SystemEvent};
+use crate::system::{Handle, SystemEvent};
 use std::sync::{Arc, Condvar, Mutex};
 
 pub struct BackgroundTaskConector<T: Send + 'static, R: Send + 'static> {

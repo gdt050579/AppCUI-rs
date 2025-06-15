@@ -9,16 +9,16 @@ use crate::input::MouseButton;
 use crate::input::MouseWheelDirection;
 use crate::prelude::Point;
 use crate::prelude::Size;
-use crate::terminals::system_event::KeyModifierChangedEvent;
-use crate::terminals::Error;
-use crate::terminals::ErrorKind;
-use crate::terminals::KeyPressedEvent;
-use crate::terminals::MouseButtonDownEvent;
-use crate::terminals::MouseButtonUpEvent;
-use crate::terminals::MouseDoubleClickEvent;
-use crate::terminals::MouseMoveEvent;
-use crate::terminals::MouseWheelEvent;
-use crate::terminals::SystemEvent;
+use crate::system::Error;
+use crate::system::ErrorKind;
+use crate::system::KeyModifierChangedEvent;
+use crate::system::KeyPressedEvent;
+use crate::system::MouseButtonDownEvent;
+use crate::system::MouseButtonUpEvent;
+use crate::system::MouseDoubleClickEvent;
+use crate::system::MouseMoveEvent;
+use crate::system::MouseWheelEvent;
+use crate::system::SystemEvent;
 
 #[derive(Clone)]
 pub(crate) struct Console {
@@ -82,12 +82,7 @@ impl Console {
                     format!("Fail to set current console flags to 'ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS' via SetConsoleMode API.\nWindow code error: {} ",api::GetLastError()),
                 ));
             }
-            if vt
-                && api::SetConsoleMode(
-                    h_stdout,
-                    stdout_original_mode_flags | constants::ENABLE_VIRTUAL_TERMINAL_PROCESSING,
-                ) == constants::FALSE
-            {
+            if vt && api::SetConsoleMode(h_stdout, stdout_original_mode_flags | constants::ENABLE_VIRTUAL_TERMINAL_PROCESSING) == constants::FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
                     format!(

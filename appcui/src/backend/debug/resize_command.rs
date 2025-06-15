@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{graphics::Size, terminals::SystemEvent};
+use crate::{graphics::Size, system::SystemEvent};
 
 use super::command_parser::{CommandParser, ParserError};
 

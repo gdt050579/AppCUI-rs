@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{input::MouseButton, terminals::{SystemEvent, MouseMoveEvent}};
+use crate::{input::MouseButton, system::{SystemEvent, MouseMoveEvent}};
 
 use super::command_parser::{CommandParser, ParserError};
 

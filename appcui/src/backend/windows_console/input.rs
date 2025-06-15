@@ -1,6 +1,6 @@
-use super::super::SystemEvent;
-use crate::terminals::utils::win32;
-use crate::terminals::SystemEventReader;
+use crate::system::SystemEvent;
+use crate::backend::utils::win32;
+use crate::backend::SystemEventReader;
 
 
 pub(crate) struct Input {
