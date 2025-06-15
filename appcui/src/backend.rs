@@ -1,12 +1,12 @@
 //! # Backends
 //!
-//! This module contains the different terminal implementations.
-//! The terminal is responsible for rendering the UI and handling user input.
+//! This module contains the different backends implementations.
+//! The backend is responsible for rendering the UI and handling user input.
 //!
-//! The terminal is not created by the user, it is created by the system based on some parameters that are provided when an Application is being initialized.
+//! The backend is not created by the user, it is created by the system based on some parameters that are provided when an Application is being initialized.
 //! ## Terminal Support and Capabilities
 //!
-//! AppCUI supports multiple terminal implementations with varying capabilities across different operating systems:
+//! AppCUI supports multiple backends with varying capabilities across different operating systems:
 //!
 //! - **Windows Console**: Native Windows terminal with full keyboard/mouse support
 //! - **NCurses**: Unix-based terminal with good display and input capabilities
@@ -35,7 +35,7 @@
 //! - Window title control (Windows only)
 //! - Console dimension control (Windows/NCurses)
 //!
-//! Each terminal implementation provides these capabilities through the Terminal trait,
+//! Each backend implementation provides these capabilities through the Backend trait,
 //! allowing AppCUI to work consistently across different platforms while leveraging
 //! platform-specific features when available.
 
@@ -112,7 +112,7 @@ pub enum Type {
 }
 
 pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
-    // check if terminal size if valid (if present)
+    // check if backend size if valid (if present)
     if let Some(sz) = builder.size.as_ref() {
         if (sz.width == 0) || (sz.height == 0) {
             return Err(Error::new(
@@ -131,12 +131,12 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
     }
     // if no terminal is provided --> consider the default terminal (best approach)
     // this depends on the OS
-    if builder.terminal.is_none() {
+    if builder.backend.is_none() {
         // based on OS we should choose a terminal
         return build_default_terminal(builder, sender);
     }
     // finaly, based on the type, return a terminal
-    let terminal = *builder.terminal.as_ref().unwrap();
+    let terminal = *builder.backend.as_ref().unwrap();
     match terminal {
         #[cfg(target_os = "windows")]
         Type::WindowsConsole => {

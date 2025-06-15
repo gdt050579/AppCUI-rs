@@ -29,8 +29,8 @@ impl From<&ControlBase> for ParentLayout {
     }
 }
 impl From<&Box<dyn Backend>> for ParentLayout {
-    fn from(terminal: &Box<dyn Backend>) -> Self {
-        let sz = terminal.size();
+    fn from(backend: &Box<dyn Backend>) -> Self {
+        let sz = backend.size();
         ParentLayout {
             clip: ClipArea::new(0, 0, (sz.width as i32) - 1, (sz.height as i32) - 1),
             origin: Point::default(),

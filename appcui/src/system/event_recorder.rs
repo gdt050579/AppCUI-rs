@@ -5,11 +5,11 @@ use std::fs;
 
 use crate::graphics::*;
 use crate::input::*;
-use crate::terminals::MouseButtonDownEvent;
-use crate::terminals::MouseButtonUpEvent;
-use crate::terminals::MouseMoveEvent;
-use crate::terminals::MouseWheelEvent;
-use crate::terminals::{SystemEvent, Terminal};
+use crate::backends::MouseButtonDownEvent;
+use crate::backends::MouseButtonUpEvent;
+use crate::backends::MouseMoveEvent;
+use crate::backends::MouseWheelEvent;
+use crate::backends::{SystemEvent, backend};
 use appcui_proc_macro::*;
 
 use super::RuntimeManager;
@@ -118,13 +118,13 @@ impl EventRecorder {
         }
         let _ = fs::write("events.txt", content);
     }
-    pub(super) fn add(&mut self, sys_event: &SystemEvent, terminal: &mut Box<dyn Terminal>, surface: &Surface) {
+    pub(super) fn add(&mut self, sys_event: &SystemEvent, backend: &mut Box<dyn Backend>, surface: &Surface) {
         match sys_event {
             SystemEvent::None => {}
             SystemEvent::AppClose => {}
             SystemEvent::KeyPressed(event) => {
                 if self.add_keypressed(event.key) {
-                    self.save_state(terminal, surface);
+                    self.save_state(backend, surface);
                     RuntimeManager::get().request_update();
                 }
             }
@@ -307,7 +307,7 @@ impl EventRecorder {
             Character::new(']', Color::Gray, Color::DarkBlue, CharFlags::None),
         );
     }
-    fn save_state(&mut self, terminal: &mut Box<dyn Terminal>, surface: &Surface) {
+    fn save_state(&mut self, backend: &mut Box<dyn Backend>, surface: &Surface) {
         let sz = surface.size();
         let mut screen = Surface::new(sz.width, sz.height);
         let mut state_name = format!("State_{}", self.state_id);
@@ -342,9 +342,9 @@ impl EventRecorder {
             EventRecorder::print_hot_key("F8", "Clear All", 25, &mut screen);
             EventRecorder::print_hot_key("F9", &auto, 40, &mut screen);
 
-            terminal.update_screen(&screen);
+            backend.update_screen(&screen);
             // get the events
-            let sys_event = terminal.get_system_event();
+            let sys_event = backend.get_system_event();
             match sys_event {
                 SystemEvent::KeyPressed(evnt) => match evnt.key.value() {
                     key!("Escape") => {

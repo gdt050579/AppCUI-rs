@@ -55,7 +55,7 @@ impl App {
     /// for the current operating system.
     pub fn with_terminal(terminal: Type) -> crate::system::Builder {
         let mut builder = crate::system::Builder::new();
-        builder.terminal = Some(terminal);
+        builder.backend = Some(terminal);
         builder
     }
     /// Creates a builder designed for unit testing.

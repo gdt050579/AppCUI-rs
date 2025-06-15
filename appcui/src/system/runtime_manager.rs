@@ -211,7 +211,7 @@ impl RuntimeManager {
             unsafe { &mut *(mut_ref as *mut RuntimeManager) }
         })
     }
-    pub(crate) fn get_terminal_size(&self) -> Size {
+    pub(crate) fn terminal_size(&self) -> Size {
         self.backend.size()
     }
     pub(crate) fn get_desktop_rect(&self) -> Rect {
@@ -571,7 +571,7 @@ impl RuntimeManager {
             if let Some(sys_event) = event {
                 self.process_system_event(sys_event);
                 #[cfg(feature = "EVENT_RECORDER")]
-                self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
+                self.event_recorder.add(&sys_event, &mut self.backend, &self.surface);
             }
         }
 
@@ -1180,7 +1180,7 @@ impl LayoutMethods for RuntimeManager {
             } else if handle == self.expanded_control.handle {
                 // need to compute my expended size
                 // also I need to set my internal flags to expanded
-                let termsize = self.get_terminal_size();
+                let termsize = self.terminal_size();
                 if let Some(dir) = base.update_expanded_layout(self.expanded_control.prefered_size, self.expanded_control.min_size, termsize) {
                     base.set_expand_flag(true);
                     expand_status = match dir {

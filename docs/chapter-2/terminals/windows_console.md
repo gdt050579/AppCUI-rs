@@ -1,6 +1,6 @@
 # Windows Console
 
-This terminal replies on the following Windows API for various console related tasks:
+This backend replies on the following Windows API for various console related tasks:
 
 | API                               | Task(s)                                                            |
 | --------------------------------- | ------------------------------------------------------------------ |
@@ -21,7 +21,7 @@ For clipboard based operations, it relies on the following APIs:
 * GetClipboardData
 * IsClipboardFormatAvailable
 
-**Remarks**: For this type of terminal to work, there is no need for a 3rd party crate (everything is done via FFI and direct API calls).
+**Remarks**: For this type of backend to work, there is no need for a 3rd party crate (everything is done via FFI and direct API calls).
 
 ## Limitations
 

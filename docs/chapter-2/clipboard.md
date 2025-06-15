@@ -36,4 +36,4 @@ fn main() -> Result<(), appcui::system::Error> {
 
 ## Limitations
 
-Depending on the type of terminal, the clipboard comes with some limitations (for example in case of `WindowsConsole` terminal, the clipboard can not store unicode characters that are not in WTF-16 format - within the range 0..0xFFFF). 
+Depending on the type of terminal, the clipboard comes with some limitations (for example in case of `WindowsConsole` backend, the clipboard can not store unicode characters that are not in WTF-16 format - within the range 0..0xFFFF). 
