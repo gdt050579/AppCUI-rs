@@ -3,13 +3,14 @@ use std::fmt::Formatter;
 use std::fmt::Result;
 use std::fs;
 
+use crate::backend::Backend;
 use crate::graphics::*;
 use crate::input::*;
-use crate::backends::MouseButtonDownEvent;
-use crate::backends::MouseButtonUpEvent;
-use crate::backends::MouseMoveEvent;
-use crate::backends::MouseWheelEvent;
-use crate::backends::{SystemEvent, backend};
+use crate::system::MouseButtonDownEvent;
+use crate::system::MouseButtonUpEvent;
+use crate::system::MouseMoveEvent;
+use crate::system::MouseWheelEvent;
+use crate::system::SystemEvent;
 use appcui_proc_macro::*;
 
 use super::RuntimeManager;
@@ -120,7 +121,6 @@ impl EventRecorder {
     }
     pub(super) fn add(&mut self, sys_event: &SystemEvent, backend: &mut Box<dyn Backend>, surface: &Surface) {
         match sys_event {
-            SystemEvent::None => {}
             SystemEvent::AppClose => {}
             SystemEvent::KeyPressed(event) => {
                 if self.add_keypressed(event.key) {
@@ -135,6 +135,7 @@ impl EventRecorder {
             SystemEvent::MouseDoubleClick(_) => {}
             SystemEvent::MouseMove(evnt) => self.add_mouse_move(evnt),
             SystemEvent::MouseWheel(evnt) => self.add_mouse_wheel(evnt),
+            _ => {}
         }
     }
     pub(super) fn auto_update(&mut self, surface: &Surface) {
@@ -161,12 +162,28 @@ impl EventRecorder {
             buf[1] = (((ch.code as u32) >> 8) & 0xFF) as u8;
             buf[2] = (((ch.code as u32) >> 16) & 0xFF) as u8;
             buf[3] = (((ch.code as u32) >> 24) & 0xFF) as u8;
-            buf[4] = ch.foreground as u8;
-            buf[5] = ch.background as u8;
+            buf[4] = ch.foreground.as_color_index();
+            buf[5] = ch.background.as_color_index();
             buf[6] = ((ch.flags.get_value() >> 8) & 0xFF) as u8;
             buf[7] = (ch.flags.get_value() & 0xFF) as u8;
             for b in buf {
                 hash = hash ^ (b as u64);
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+            }
+            if let Some((r, g, b)) = ch.foreground.rgb() {
+                hash ^= r as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= g as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= b as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+            }
+            if let Some((r, g, b)) = ch.background.rgb() {
+                hash ^= r as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= g as u64;
+                hash = hash.wrapping_mul(0x00000100000001B3u64);
+                hash ^= b as u64;
                 hash = hash.wrapping_mul(0x00000100000001B3u64);
             }
         }
@@ -344,38 +361,39 @@ impl EventRecorder {
 
             backend.update_screen(&screen);
             // get the events
-            let sys_event = backend.get_system_event();
-            match sys_event {
-                SystemEvent::KeyPressed(evnt) => match evnt.key.value() {
-                    key!("Escape") => {
-                        return;
-                    }
-                    key!("Enter") => {
-                        self.state_id += 1;
-                        self.commands.push(Command::Paint(PaintCommand { state_name }));
-                        self.commands.push(Command::CheckHash(EventRecorder::compute_surface_hash(surface)));
-                        return;
-                    }
-                    key!("F8") => {
-                        self.commands.clear();
-                        comands = format!("Commands: {}", self.commands.len());
-                    }
-                    key!("F9") => {
-                        self.auto_mode = !self.auto_mode;
-                        auto.clear();
-                        auto.push_str(if self.auto_mode { "Auto:ON" } else { "Auto:OFF" });
-                    }
-                    key!("Backspace") => {
-                        // delete last character
-                        state_name.pop();
-                    }
-                    _ => {
-                        if evnt.character >= ' ' {
-                            state_name.push(evnt.character);
+            if let Some(sys_event) = backend.query_system_event() {
+                match sys_event {
+                    SystemEvent::KeyPressed(evnt) => match evnt.key.value() {
+                        key!("Escape") => {
+                            return;
                         }
-                    }
-                },
-                _ => {}
+                        key!("Enter") => {
+                            self.state_id += 1;
+                            self.commands.push(Command::Paint(PaintCommand { state_name }));
+                            self.commands.push(Command::CheckHash(EventRecorder::compute_surface_hash(surface)));
+                            return;
+                        }
+                        key!("F8") => {
+                            self.commands.clear();
+                            comands = format!("Commands: {}", self.commands.len());
+                        }
+                        key!("F9") => {
+                            self.auto_mode = !self.auto_mode;
+                            auto.clear();
+                            auto.push_str(if self.auto_mode { "Auto:ON" } else { "Auto:OFF" });
+                        }
+                        key!("Backspace") => {
+                            // delete last character
+                            state_name.pop();
+                        }
+                        _ => {
+                            if evnt.character >= ' ' {
+                                state_name.push(evnt.character);
+                            }
+                        }
+                    },
+                    _ => {}
+                }
             }
         }
     }

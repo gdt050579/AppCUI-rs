@@ -15,3 +15,15 @@ pub enum MouseButton {
     Right,
     Center
 }
+
+#[cfg(feature = "EVENT_RECORDER")]
+impl MouseButton {
+    pub(crate) fn name(&self)->&'static str {
+        match self {
+            MouseButton::None => "None",
+            MouseButton::Left => "Left",
+            MouseButton::Right => "Right",
+            MouseButton::Center => "Center",
+        }
+    }
+}
