@@ -56,7 +56,7 @@ enum ExpandStatus {
 
 pub(crate) struct RuntimeManager {
     theme: Theme,
-    terminal: Box<dyn Backend>,
+    backend: Box<dyn Backend>,
     surface: Surface,
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
@@ -111,12 +111,12 @@ impl RuntimeManager {
         }
 
         let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
-        let term = backend::new(&builder, sender.clone())?;
-        let term_sz = term.get_size();
+        let backend_term = backend::new(&builder, sender.clone())?;
+        let term_sz = backend_term.size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
             theme: builder.theme,
-            terminal: term,
+            backend: backend_term,
             event_receiver: receiver,
             event_sender: sender,
             surface,
@@ -212,10 +212,10 @@ impl RuntimeManager {
         })
     }
     pub(crate) fn get_terminal_size(&self) -> Size {
-        self.terminal.get_size()
+        self.backend.size()
     }
     pub(crate) fn get_desktop_rect(&self) -> Rect {
-        let sz = self.terminal.get_size();
+        let sz = self.backend.size();
         Rect::new(
             0,
             if self.menubar.is_some() { 1 } else { 0 },
@@ -227,11 +227,11 @@ impl RuntimeManager {
             },
         )
     }
-    pub(crate) fn terminal(&self) -> &dyn Backend {
-        self.terminal.as_ref()
+    pub(crate) fn backend(&self) -> &dyn Backend {
+        self.backend.as_ref()
     }
-    pub(crate) fn terminal_mut(&mut self) -> &mut dyn Backend {
-        self.terminal.as_mut()
+    pub(crate) fn backend_mut(&mut self) -> &mut dyn Backend {
+        self.backend.as_mut()
     }
 
     pub(crate) fn exit_execution_loop(&mut self) {
@@ -241,7 +241,7 @@ impl RuntimeManager {
         self.loop_status = LoopStatus::Normal;
     }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
-        self.tooltip.show(txt, rect, self.terminal.get_size(), &self.theme);
+        self.tooltip.show(txt, rect, self.backend.size(), &self.theme);
     }
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
@@ -467,7 +467,7 @@ impl RuntimeManager {
                 GenericMenuEvents::on_menu_open(ctrl.control(), menu);
             }
             // 4. compute the position and show
-            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.terminal.get_size());
+            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.backend.size());
             self.opened_menu_handle = handle;
         }
     }
@@ -558,7 +558,7 @@ impl RuntimeManager {
         self.event_recorder.auto_update(&self.surface);
 
         if single_threaded {
-            if let Some(sys_event) = self.terminal.query_system_event() {
+            if let Some(sys_event) = self.backend.query_system_event() {
                 self.process_system_event(sys_event);
             }
         } else {
@@ -605,10 +605,10 @@ impl RuntimeManager {
         self.recompute_parent_indexes = true;
         self.commandbar_event = None;
         self.menu_event = None;
-        let single_threaded = self.terminal.is_single_threaded();
+        let single_threaded = self.backend.is_single_threaded();
         // if first time an execution start
         if !self.desktop_os_start_called {
-            self.process_terminal_resize_event(self.terminal.get_size());
+            self.process_terminal_resize_event(self.backend.size());
             self.process_desktop_on_start();
             if self.single_window && self.get_controls_mut().desktop_mut().base().children.len() != 1 {
                 panic!("You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")
@@ -671,7 +671,7 @@ impl RuntimeManager {
             SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
             SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
             SystemEvent::Resize(new_size) => {
-                self.terminal.on_resize(new_size);
+                self.backend.on_resize(new_size);
                 self.process_terminal_resize_event(new_size);
             }
             SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
@@ -1153,7 +1153,7 @@ impl RuntimeManager {
 
 impl LayoutMethods for RuntimeManager {
     fn recompute_layouts(&mut self) {
-        let term_layout = ParentLayout::from(&self.terminal);
+        let term_layout = ParentLayout::from(&self.backend);
         self.update_control_layout(self.desktop_handle, &term_layout);
         let count = self.modal_windows.len();
         for index in 0..count {
@@ -1261,7 +1261,7 @@ impl PaintMethods for RuntimeManager {
             self.surface.reset();
             self.paint_menu(self.opened_menu_handle, true);
         }
-        self.terminal.update_screen(&self.surface);
+        self.backend.update_screen(&self.surface);
     }
     fn paint_control(&mut self, handle: Handle<()>) {
         let controls = unsafe { &mut *self.controls };

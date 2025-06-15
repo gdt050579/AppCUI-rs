@@ -296,7 +296,7 @@ impl Backend for DebugTerminal {
         println!("{}", &self.ansi_buffer.text());
     }
 
-    fn get_size(&self) -> Size {
+    fn size(&self) -> Size {
         self.size
     }
 
@@ -416,7 +416,7 @@ impl Backend for DebugTerminal {
         Some(SystemEvent::AppClose)
     }
 
-    fn get_clipboard_text(&self) -> Option<String> {
+    fn clipboard_text(&self) -> Option<String> {
         if self.clipboard_text.is_empty() {
             None
         } else {

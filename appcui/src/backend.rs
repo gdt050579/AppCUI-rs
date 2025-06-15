@@ -86,8 +86,8 @@ use self::windows_vt::WindowsVTTerminal;
 pub(crate) trait Backend {
     fn update_screen(&mut self, surface: &Surface);
     fn on_resize(&mut self, new_size: Size);
-    fn get_size(&self) -> Size;
-    fn get_clipboard_text(&self) -> Option<String>;
+    fn size(&self) -> Size;
+    fn clipboard_text(&self) -> Option<String>;
     fn set_clipboard_text(&mut self, text: &str);
     fn has_clipboard_text(&self) -> bool;
     fn query_system_event(&mut self) -> Option<SystemEvent> {

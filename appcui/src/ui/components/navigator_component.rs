@@ -619,7 +619,7 @@ where
     fn copy_text(&mut self) {
         if !self.selection.is_empty() {
             RuntimeManager::get()
-                .terminal_mut()
+                .backend_mut()
                 .set_clipboard_text(&self.input_path[self.selection.start..self.selection.end]);
         }
     }
@@ -630,7 +630,7 @@ where
         if !self.selection.is_empty() {
             self.delete_selection();
         }
-        if let Some(txt) = RuntimeManager::get().terminal().get_clipboard_text() {
+        if let Some(txt) = RuntimeManager::get().backend().clipboard_text() {
             self.input_path.insert_str(self.cursor, &txt);
             self.move_cursor_to(self.cursor + txt.len(), false, true);
         }
@@ -641,7 +641,7 @@ where
         }
         if !self.selection.is_empty() {
             RuntimeManager::get()
-                .terminal_mut()
+                .backend_mut()
                 .set_clipboard_text(&self.input_path[self.selection.start..self.selection.end]);
             self.delete_selection();
         }

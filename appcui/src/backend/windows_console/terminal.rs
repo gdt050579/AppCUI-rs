@@ -187,11 +187,11 @@ impl Backend for WindowsConsoleTerminal {
         }
     }
     #[inline(always)]
-    fn get_size(&self) -> Size {
+    fn size(&self) -> Size {
         self.console.size()
     }
 
-    fn get_clipboard_text(&self) -> Option<String> {
+    fn clipboard_text(&self) -> Option<String> {
         win32::Clipboard::text()
     }
 
