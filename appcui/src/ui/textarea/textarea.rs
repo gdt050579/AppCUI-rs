@@ -1529,7 +1529,7 @@ impl OnKeyPressed for TextArea {
                 if !self.flags.contains(Flags::ReadOnly) {
                     self.reposition_cursor();
 
-                    if let Some(clipboard_data) = RuntimeManager::get().terminal().get_clipboard_text() {
+                    if let Some(clipboard_data) = RuntimeManager::get().backend().clipboard_text() {
                         self.insert_text_internal(&clipboard_data);
                         self.move_cursor_horizontal(clipboard_data.chars().count() as i32);
                     }
@@ -1539,7 +1539,7 @@ impl OnKeyPressed for TextArea {
             key!("Ctrl+C") | key!("Ctrl+Shift+C") => {
                 if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
                     RuntimeManager::get()
-                            .terminal_mut()
+                            .backend_mut()
                             .set_clipboard_text(&self.text[self.selection.pos_start..self.selection.pos_end]);
                 }
                 return EventProcessStatus::Processed;

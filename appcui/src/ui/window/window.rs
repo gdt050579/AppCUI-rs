@@ -524,7 +524,7 @@ impl Window {
     }
 
     fn center_to_screen(&mut self) {
-        let screen_size = RuntimeManager::get().get_terminal_size();
+        let screen_size = RuntimeManager::get().terminal_size();
         let win_size = self.size();
         let x = (screen_size.width as i32 - win_size.width as i32) / 2;
         let y = (screen_size.height as i32 - win_size.height as i32) / 2;
@@ -538,7 +538,7 @@ impl Window {
     }
     fn move_window_pos_to(&mut self, add_x: i32, add_y: i32, keep_in_desktop_bounderies: bool) {
         let size = self.size();
-        let screen_size = RuntimeManager::get().get_terminal_size();
+        let screen_size = RuntimeManager::get().terminal_size();
         let mut pos = self.position();
         if keep_in_desktop_bounderies {
             pos.x = (pos.x + add_x).clamp(0, screen_size.width as i32 - size.width as i32);

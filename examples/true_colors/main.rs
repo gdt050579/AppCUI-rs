@@ -2,7 +2,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_os = "windows")]
-    let mut app = App::with_terminal(appcui::terminals::TerminalType::WindowsVT).build()?;
+    let mut app = App::with_backend(appcui::backend::Type::WindowsVT).build()?;
     #[cfg(not(target_os = "windows"))]
     let mut app = App::new().build()?;
 

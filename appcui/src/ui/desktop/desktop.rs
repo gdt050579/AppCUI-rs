@@ -29,7 +29,7 @@ impl Desktop {
 
     /// Returns the size of the terminal.
     pub fn terminal_size(&self) -> Size {
-        RuntimeManager::get().get_terminal_size()
+        RuntimeManager::get().terminal_size()
     }
 
     /// Returns the size of the desktop.

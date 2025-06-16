@@ -145,6 +145,5 @@ impl MenuEvents for MyDesktop {
 
 fn main() -> Result<(), appcui::system::Error> {
     App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build()?.run();
-    //App::with_terminal(appcui::terminals::TerminalType::WindowsVT).desktop(MyDesktop::new()).menu_bar().command_bar().build()?.run();
     Ok(())
 }

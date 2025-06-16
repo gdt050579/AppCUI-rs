@@ -8,9 +8,9 @@ use super::background_task::BackgroundTaskManager;
 use super::runtime_manager_traits::*;
 use super::timer::TimerManager;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
+use crate::backend::{self, Backend};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
-use crate::terminals::*;
 use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
@@ -21,7 +21,7 @@ use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
-use crate::{prelude::*, terminals};
+use crate::prelude::*;
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -56,7 +56,7 @@ enum ExpandStatus {
 
 pub(crate) struct RuntimeManager {
     theme: Theme,
-    terminal: Box<dyn Terminal>,
+    backend: Box<dyn Backend>,
     surface: Surface,
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
@@ -111,12 +111,12 @@ impl RuntimeManager {
         }
 
         let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
-        let term = terminals::new(&builder, sender.clone())?;
-        let term_sz = term.get_size();
+        let backend_term = backend::new(&builder, sender.clone())?;
+        let term_sz = backend_term.size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
             theme: builder.theme,
-            terminal: term,
+            backend: backend_term,
             event_receiver: receiver,
             event_sender: sender,
             surface,
@@ -211,11 +211,11 @@ impl RuntimeManager {
             unsafe { &mut *(mut_ref as *mut RuntimeManager) }
         })
     }
-    pub(crate) fn get_terminal_size(&self) -> Size {
-        self.terminal.get_size()
+    pub(crate) fn terminal_size(&self) -> Size {
+        self.backend.size()
     }
     pub(crate) fn get_desktop_rect(&self) -> Rect {
-        let sz = self.terminal.get_size();
+        let sz = self.backend.size();
         Rect::new(
             0,
             if self.menubar.is_some() { 1 } else { 0 },
@@ -227,11 +227,11 @@ impl RuntimeManager {
             },
         )
     }
-    pub(crate) fn terminal(&self) -> &dyn Terminal {
-        self.terminal.as_ref()
+    pub(crate) fn backend(&self) -> &dyn Backend {
+        self.backend.as_ref()
     }
-    pub(crate) fn terminal_mut(&mut self) -> &mut dyn Terminal {
-        self.terminal.as_mut()
+    pub(crate) fn backend_mut(&mut self) -> &mut dyn Backend {
+        self.backend.as_mut()
     }
 
     pub(crate) fn exit_execution_loop(&mut self) {
@@ -241,7 +241,7 @@ impl RuntimeManager {
         self.loop_status = LoopStatus::Normal;
     }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
-        self.tooltip.show(txt, rect, self.terminal.get_size(), &self.theme);
+        self.tooltip.show(txt, rect, self.backend.size(), &self.theme);
     }
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
@@ -467,7 +467,7 @@ impl RuntimeManager {
                 GenericMenuEvents::on_menu_open(ctrl.control(), menu);
             }
             // 4. compute the position and show
-            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.terminal.get_size());
+            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.backend.size());
             self.opened_menu_handle = handle;
         }
     }
@@ -558,7 +558,7 @@ impl RuntimeManager {
         self.event_recorder.auto_update(&self.surface);
 
         if single_threaded {
-            if let Some(sys_event) = self.terminal.query_system_event() {
+            if let Some(sys_event) = self.backend.query_system_event() {
                 self.process_system_event(sys_event);
             }
         } else {
@@ -571,7 +571,7 @@ impl RuntimeManager {
             if let Some(sys_event) = event {
                 self.process_system_event(sys_event);
                 #[cfg(feature = "EVENT_RECORDER")]
-                self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
+                self.event_recorder.add(&sys_event, &mut self.backend, &self.surface);
             }
         }
 
@@ -605,10 +605,10 @@ impl RuntimeManager {
         self.recompute_parent_indexes = true;
         self.commandbar_event = None;
         self.menu_event = None;
-        let single_threaded = self.terminal.is_single_threaded();
+        let single_threaded = self.backend.is_single_threaded();
         // if first time an execution start
         if !self.desktop_os_start_called {
-            self.process_terminal_resize_event(self.terminal.get_size());
+            self.process_terminal_resize_event(self.backend.size());
             self.process_desktop_on_start();
             if self.single_window && self.get_controls_mut().desktop_mut().base().children.len() != 1 {
                 panic!("You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")
@@ -671,7 +671,7 @@ impl RuntimeManager {
             SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
             SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
             SystemEvent::Resize(new_size) => {
-                self.terminal.on_resize(new_size);
+                self.backend.on_resize(new_size);
                 self.process_terminal_resize_event(new_size);
             }
             SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
@@ -1153,7 +1153,7 @@ impl RuntimeManager {
 
 impl LayoutMethods for RuntimeManager {
     fn recompute_layouts(&mut self) {
-        let term_layout = ParentLayout::from(&self.terminal);
+        let term_layout = ParentLayout::from(&self.backend);
         self.update_control_layout(self.desktop_handle, &term_layout);
         let count = self.modal_windows.len();
         for index in 0..count {
@@ -1180,7 +1180,7 @@ impl LayoutMethods for RuntimeManager {
             } else if handle == self.expanded_control.handle {
                 // need to compute my expended size
                 // also I need to set my internal flags to expanded
-                let termsize = self.get_terminal_size();
+                let termsize = self.terminal_size();
                 if let Some(dir) = base.update_expanded_layout(self.expanded_control.prefered_size, self.expanded_control.min_size, termsize) {
                     base.set_expand_flag(true);
                     expand_status = match dir {
@@ -1261,7 +1261,7 @@ impl PaintMethods for RuntimeManager {
             self.surface.reset();
             self.paint_menu(self.opened_menu_handle, true);
         }
-        self.terminal.update_screen(&self.surface);
+        self.backend.update_screen(&self.surface);
     }
     fn paint_control(&mut self, handle: Handle<()>) {
         let controls = unsafe { &mut *self.controls };

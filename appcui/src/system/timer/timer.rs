@@ -1,6 +1,6 @@
 use crate::system::runtime_manager_traits::TimerMethods;
 use crate::system::RuntimeManager;
-use crate::terminals::SystemEvent;
+use crate::system::SystemEvent;
 
 use super::Command;
 use super::{super::Handle, thread_logic::ThreadLogic};

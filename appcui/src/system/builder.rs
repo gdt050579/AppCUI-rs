@@ -1,12 +1,12 @@
 use crate::graphics::*;
 use crate::system::*;
-use crate::terminals::*;
 use crate::ui::common::traits::*;
 use crate::ui::common::*;
+use crate::backend;
 
 pub struct Builder {
     pub(crate) size: Option<Size>,
-    pub(crate) terminal: Option<TerminalType>,
+    pub(crate) backend: Option<backend::Type>,
     pub(crate) debug_script: Option<String>,
     pub(crate) title: Option<String>,
     pub(crate) desktop_manager: Option<ControlManager>,
@@ -23,7 +23,7 @@ impl Builder {
         Self {
             size: None,
             title: None,
-            terminal: None,
+            backend: None,
             debug_script: None,
             desktop_manager: None,
             has_menu_bar: false,

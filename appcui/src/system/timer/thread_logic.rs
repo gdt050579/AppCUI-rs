@@ -1,4 +1,4 @@
-use crate::terminals::*;
+use crate::system::{SystemEvent, TimerPausedEvent, TimerStartEvent, TimerTickUpdateEvent};
 
 use super::Command;
 use std::sync::mpsc::Sender;
