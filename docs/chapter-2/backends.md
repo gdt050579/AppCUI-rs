@@ -23,6 +23,23 @@ The following backends are supported:
 let mut a = App::with_backend(apcui::backend::/*type*/).build()?;
 ```
 
+where the `appcui::backend::Type` enum is defined as follows:
+
+```rust
+pub enum Type {
+    #[cfg(target_os = "windows")]
+    WindowsConsole,
+    #[cfg(target_os = "windows")]
+    WindowsVT,
+    #[cfg(target_family = "unix")]
+    Termios,
+    #[cfg(target_os = "linux")]
+    NcursesTerminal,
+    #[cfg(target_arch = "wasm32")]
+    WebTerminal,
+}
+```
+
 ## OS Support
 
 | OS      | Windows Console | Windows VT | NCurses | Termios | Web Terminal |

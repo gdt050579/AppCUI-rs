@@ -1,4 +1,4 @@
 mod helpers;
-mod terminal;
+mod implementation;
 
-pub(crate) use self::terminal::WebTerminal;
+pub(crate) use self::implementation::WebTerminal;

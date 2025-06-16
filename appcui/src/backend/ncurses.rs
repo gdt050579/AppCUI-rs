@@ -1,8 +1,8 @@
 #[cfg(target_family = "unix")]
-mod terminal;
+mod implementation;
 
 #[cfg(target_family = "unix")]
 pub (super) mod ncursesapi;
 
 #[cfg(target_family = "unix")]
-pub(crate) use self::terminal::NcursesTerminal;
+pub(crate) use self::implementation::NcursesTerminal;
