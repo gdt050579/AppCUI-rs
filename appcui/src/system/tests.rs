@@ -354,6 +354,6 @@ fn check_create_app_with_default_terminal() {
 #[cfg(target_os = "windows")]
 #[test]
 fn check_create_app_with_windows_terminal() {
-    let _ = App::with_terminal(crate::backend::Type::WindowsConsole).build();
+    let _ = App::with_backend(crate::backend::Type::WindowsConsole).build();
 }
 

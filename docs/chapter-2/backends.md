@@ -10,7 +10,18 @@ Each backend supported by AppCUI has the following properties:
 * **Input reading** - the backend is capable of identifying keyboard and mouse events and convert them to internal AppCUI events
 * **Clipboard support** - the backend interacts with the OS and provides functionality for Copy / Cut / Paste based on OS-es API
 
+The following backends are supported:
+1. Windows Console
+2. Windows VT (Virtual Terminal)
+3. NCurses
+4. Termios
+5. Web Terminal
 
+**Remarks**: These types are available via `appcui::backend::Type` and can be used to initialize an application
+
+```rust
+let mut a = App::with_backend(apcui::backend::/*type*/).build()?;
+```
 
 ## OS Support
 
@@ -74,22 +85,22 @@ Each backend supported by AppCUI has the following properties:
 
 ## Clipboard
 
-AppCUI provides clipboard support for copying and pasting text. The clipboard functionality is available on the following terminals:
+AppCUI provides clipboard support for copying and pasting text. The clipboard functionality is available on the following backends:
 
-| Terminal        | Clipboard Support | API Used        |
-| --------------- | ----------------- | --------------- |
-| Windows Console | Yes               | Windows API     |
-| Windows VT      | Yes               | Windows API     |
-| NCurses         | Yes               | copypasta crate |
-| Termios         | -                 | -               |
-| Web Terminal    | Yes               | Browser API     |
+| Backend         | Clipboard Support | API Used            |
+| --------------- | ----------------- | ------------------- |
+| Windows Console | Yes               | Windows API         |
+| Windows VT      | Yes               | Windows API         |
+| NCurses         | Yes               | via copypasta crate |
+| Termios         | -                 | -                   |
+| Web Terminal    | Yes               | Browser API         |
 
 ## Defaults
 
-By default, when using initializing a terminal, the folowing will be used:
+By default, when using initializing a backend, the folowing will be used:
 
-| OS      | Default terminal |
-| ------- | ---------------- |
-| Windows | Windows Console  |
-| Linux   | NCurses          |
-| Mac/OSX | Termios          |
+| OS      | Default backend |
+| ------- | --------------- |
+| Windows | Windows Console |
+| Linux   | NCurses         |
+| Mac/OSX | Termios         |

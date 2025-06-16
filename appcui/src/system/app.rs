@@ -53,9 +53,9 @@ impl App {
     }
     /// Creates a new builder object using a specified terminal from the list of terminals available
     /// for the current operating system.
-    pub fn with_terminal(terminal: Type) -> crate::system::Builder {
+    pub fn with_backend(backend: Type) -> crate::system::Builder {
         let mut builder = crate::system::Builder::new();
-        builder.backend = Some(terminal);
+        builder.backend = Some(backend);
         builder
     }
     /// Creates a builder designed for unit testing.
