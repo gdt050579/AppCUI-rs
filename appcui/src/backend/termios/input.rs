@@ -1,12 +1,12 @@
 use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::MouseButton;
-use crate::terminals::KeyPressedEvent;
-use crate::terminals::MouseButtonDownEvent;
-use crate::terminals::MouseButtonUpEvent;
-use crate::terminals::MouseMoveEvent;
-use crate::terminals::SystemEvent;
-use crate::terminals::SystemEventReader;
+use crate::system::KeyPressedEvent;
+use crate::system::MouseButtonDownEvent;
+use crate::system::MouseButtonUpEvent;
+use crate::system::MouseMoveEvent;
+use crate::system::SystemEvent;
+use crate::system::SystemEventReader;
 
 use super::api::io::AnsiKeyCode;
 use super::api::io::TermiosReader;
@@ -20,7 +20,7 @@ impl Input {
 }
 
 impl SystemEventReader for Input {
-    fn read(&mut self) -> Option<crate::terminals::SystemEvent> {
+    fn read(&mut self) -> Option<crate::System::SystemEvent> {
         #[cfg(target_family = "unix")]
         match TermiosReader::read_key() {
             Ok(ansi_key) => {

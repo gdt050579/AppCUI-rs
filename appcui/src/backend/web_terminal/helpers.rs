@@ -1,6 +1,7 @@
 use crate::{
     prelude::Color,
-    terminals::{Error, ErrorKind, WebTerminal},
+    system::{Error,ErrorKind},
+    backend::WebTerminal,
 };
 use web_sys::{WebGlProgram, WebGlRenderingContext as GL, WebGlShader};
 
