@@ -127,7 +127,9 @@ impl Backend for TermiosTerminal {
                 Color::Pink => self.screen_buffer.push_str("\x1b[95m"),
                 Color::Yellow => self.screen_buffer.push_str("\x1b[93m"),
                 Color::White => self.screen_buffer.push_str("\x1b[97m"),
-                Color::Transparent => {}
+                Color::Transparent => {},
+                #[cfg(feature = "TRUE_COLORS")]
+                Color::RGB(_,_,_) => {},
             }
 
             match c.background {
@@ -147,7 +149,9 @@ impl Backend for TermiosTerminal {
                 Color::Pink => self.screen_buffer.push_str("\x1b[105m"),
                 Color::Yellow => self.screen_buffer.push_str("\x1b[103m"),
                 Color::White => self.screen_buffer.push_str("\x1b[107m"),
-                Color::Transparent => {}
+                Color::Transparent => {},
+                #[cfg(feature = "TRUE_COLORS")]
+                Color::RGB(_,_,_) => {},
             }
 
             self.screen_buffer.push(c.code);

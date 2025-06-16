@@ -94,6 +94,24 @@ impl NcursesTerminal {
             Color::Aqua => 14,
             Color::White => 15,
             Color::Transparent => 0,
+            #[cfg(feature = "TRUE_COLORS")]
+            Color::RGB(r, g, b) => {
+                let mut index = 0;
+                if r > 64 {
+                    index |= 0b100;
+                }
+                if g > 64 {
+                    index |= 0b010;
+                }
+                if b > 64 {
+                    index |= 0b001;
+                }
+                // 192 (0xc0) should remain like this so that we obtain th Silver
+                if r >= 196 || g >= 196 || b >= 196 {
+                    index |= 0b1000;
+                }
+                index
+            }
         }
     }
 }
@@ -111,8 +129,8 @@ impl Backend for NcursesTerminal {
             if skip_chars > 0 {
                 skip_chars -= 1;
             } else {
-                let fc = ch.foreground as i16;
-                let bc = ch.background as i16;
+                let fc = ch.foreground.as_color_index() as i16;
+                let bc = ch.background.as_color_index() as i16;
                 let idx = fc + bc * 16;
                 ncursesapi::lib::ncurses_wattron(self.win, ncursesapi::lib::ncurses_COLOR_PAIR(idx));
 
