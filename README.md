@@ -34,6 +34,19 @@ AppCUI is a simple, easy-to-use and cross-platform library for creating text-bas
 
 <img src="https://github.com/gdt050579/AppCUI-rs/raw/main/docs/chapter-1/img/appcui-rs-demo.gif" align="center" />
 
+## 🖥️ Backends
+
+AppCUI supports various backends based on the operating system it is being used for:
+
+* **Windows Console** - based on Win32 low level API, design for clasical windows console
+* **Windows VT** - based on ANSI sequances, designed for modern windows virtual terminals
+* **NCurses** - based on NCurses API for linux envinronments
+* **Termios** - based on ANSI sequances and low level APIs for MAC OSX
+* **Web Terminal** - designed for Web implementation (based on webgl)
+
+More on the supported backends can be found [here](docs/chapter-2/backends.md)
+
+
 ## 🚀 Quick Start
 
 Add the following to your `Cargo.toml`:
