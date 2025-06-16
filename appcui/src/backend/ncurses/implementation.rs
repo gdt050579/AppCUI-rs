@@ -99,7 +99,7 @@ impl NcursesTerminal {
 }
 
 #[cfg(target_family = "unix")]
-impl Terminal for NcursesTerminal {
+impl Backend for NcursesTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         let mut x = 0;
         let mut y = 0;

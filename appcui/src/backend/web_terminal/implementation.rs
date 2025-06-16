@@ -575,7 +575,7 @@ impl WebTerminal {
     }
 }
 
-impl Terminal for WebTerminal {
+impl Backend for WebTerminal {
     fn on_resize(&mut self, new_size: Size) {
         self.webgl_canvas.set_width(new_size.width);
         self.webgl_canvas.set_height(new_size.height);
