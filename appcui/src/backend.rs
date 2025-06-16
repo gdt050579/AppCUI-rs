@@ -124,20 +124,20 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
             ));
         }
     }
-    // check if we have a debug script present --> if so ... we will create a Debug terminal
+    // check if we have a debug script present --> if so ... we will create a Debug backend
     if builder.debug_script.is_some() {
         let term = DebugTerminal::new(builder)?;
         return Ok(Box::new(term));
     }
-    // if no terminal is provided --> consider the default terminal (best approach)
+    // if no backend is provided --> consider the default backend (best approach)
     // this depends on the OS
     if builder.backend.is_none() {
-        // based on OS we should choose a terminal
-        return build_default_terminal(builder, sender);
+        // based on OS we should choose a backend
+        return build_default_backend(builder, sender);
     }
     // finaly, based on the type, return a terminal
-    let terminal = *builder.backend.as_ref().unwrap();
-    match terminal {
+    let backend = *builder.backend.as_ref().unwrap();
+    match backend {
         #[cfg(target_os = "windows")]
         Type::WindowsConsole => {
             let term = WindowsConsoleTerminal::new(builder, sender)?;
@@ -166,28 +166,28 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
 }
 
 #[cfg(target_arch = "wasm32")]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     let term = WebTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 
 #[cfg(target_os = "windows")]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     let term = WindowsConsoleTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "linux")]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // TermiosTerminal::new(builder)
     let term = NcursesTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "macos")]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     TermiosTerminal::new(builder, sender)
 }
 #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos", target_arch = "wasm32")))]
-fn build_default_terminal(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // anything else
     TermiosTerminal::new(builder, sender)
 }
