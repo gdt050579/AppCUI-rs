@@ -3,7 +3,7 @@ use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
 use crate::input::MouseWheelDirection;
-use crate::system::SystemEventReader;
+use crate::backend::SystemEventReader;
 use crate::system::KeyPressedEvent;
 use crate::system::SystemEvent;
 use crate::system::MouseButtonDownEvent;

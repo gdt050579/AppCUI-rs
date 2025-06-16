@@ -1,5 +1,5 @@
 use super::super::SystemEvent;
-use super::super::Terminal;
+use crate::backend::Backend;
 use super::ncursesapi::lib::ncurses_wcwidth;
 use super::ncursesapi::externs::*;
 use crate::backend::ncurses::ncursesapi::input::Input;

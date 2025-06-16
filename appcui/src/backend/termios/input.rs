@@ -6,7 +6,7 @@ use crate::system::MouseButtonDownEvent;
 use crate::system::MouseButtonUpEvent;
 use crate::system::MouseMoveEvent;
 use crate::system::SystemEvent;
-use crate::system::SystemEventReader;
+use crate::backend::SystemEventReader;
 
 use super::api::io::AnsiKeyCode;
 use super::api::io::TermiosReader;
@@ -20,7 +20,7 @@ impl Input {
 }
 
 impl SystemEventReader for Input {
-    fn read(&mut self) -> Option<crate::System::SystemEvent> {
+    fn read(&mut self) -> Option<crate::system::SystemEvent> {
         #[cfg(target_family = "unix")]
         match TermiosReader::read_key() {
             Ok(ansi_key) => {
