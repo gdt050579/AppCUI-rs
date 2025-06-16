@@ -165,14 +165,14 @@ impl Backend for TermiosTerminal {
         let _ = self.move_cursor(&surface.cursor);
     }
 
-    fn get_size(&self) -> Size {
+    fn size(&self) -> Size {
         self.size
     }
 
     fn query_system_event(&mut self) -> Option<SystemEvent> {
         None
     }
-    fn get_clipboard_text(&self) -> Option<String> {
+    fn clipboard_text(&self) -> Option<String> {
         todo!()
     }
 

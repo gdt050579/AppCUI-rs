@@ -147,11 +147,11 @@ impl Backend for NcursesTerminal {
         ncursesapi::lib::ncurses_wrefresh(self.win);
     }
 
-    fn get_size(&self) -> Size {
+    fn size(&self) -> Size {
         self.size
     }
 
-    fn get_clipboard_text(&self) -> Option<String> {
+    fn clipboard_text(&self) -> Option<String> {
         let mut ctx: ClipboardContext = ClipboardContext::new().ok()?;
         ctx.get_contents().ok()
     }
