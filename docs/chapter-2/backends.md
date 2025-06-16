@@ -1,6 +1,16 @@
 # Backends
 
 AppCUI supports various backends (but each one comes with advantages and drawbacks).
+A backend is the terminal that takes the information (characters) from the virtual screen of AppCUI and displays them.
+
+<img src="img/backend.png" width=400/>
+
+Each backend supported by AppCUI has the following properties:
+* **Output rendering** - each character from the AppCUI surface is display on the screen
+* **Input reading** - the backend is capable of identifying keyboard and mouse events and convert them to internal AppCUI events
+* **Clipboard support** - the backend interacts with the OS and provides functionality for Copy / Cut / Paste based on OS-es API
+
+
 
 ## OS Support
 
