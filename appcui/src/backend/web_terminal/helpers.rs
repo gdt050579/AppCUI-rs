@@ -1,7 +1,7 @@
 use crate::{
-    prelude::Color,
-    system::{Error,ErrorKind},
     backend::WebTerminal,
+    prelude::Color,
+    system::{Error, ErrorKind},
 };
 use web_sys::{WebGlProgram, WebGlRenderingContext as GL, WebGlShader};
 
@@ -52,6 +52,12 @@ impl WebTerminal {
             Color::Yellow => [255.0, 255.0, 0.0, 1.0],
             Color::White => [255.0, 255.0, 255.0, 1.0],
             Color::Transparent => [0.0, 0.0, 0.0, 0.0],
+            Color::RGB(r, g, b) => {
+                let r = r as f32 / 255.0;
+                let g = g as f32 / 255.0;
+                let b = b as f32 / 255.0;
+                [r, g, b, 1.0]
+            }
         }
     }
 }
