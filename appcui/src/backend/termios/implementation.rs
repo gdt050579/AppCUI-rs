@@ -1,9 +1,8 @@
 //! Module representing an `TermiosTerminal` abstraction over the ANSI protocol using the termios
 //! API to set it into raw mode. Targeted for UNIX systems, including `linux` and `mac`
 
-use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
-
 use libc::STDOUT_FILENO;
+use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
 
 use super::{
     super::SystemEvent,
@@ -11,8 +10,9 @@ use super::{
     input::Input,
     size_reader::SizeReader,
 };
+use crate::backend::utils::AnsiFormatter;
 use crate::{
-    backend::{termios::api::sizing::listen_for_resizes, SystemEventReader, Backend},
+    backend::{termios::api::sizing::listen_for_resizes, Backend, SystemEventReader},
     graphics::*,
     system::Error,
 };
@@ -31,7 +31,7 @@ pub struct TermiosTerminal {
     _orig_termios: Termios,
 
     stdout: File,
-    screen_buffer: String,
+    ansi_buffer: AnsiFormatter,
 }
 
 impl TermiosTerminal {
@@ -49,7 +49,7 @@ impl TermiosTerminal {
             size: Size::new(80, 30),
             _orig_termios,
             stdout,
-            screen_buffer: String::with_capacity(4096),
+            ansi_buffer: AnsiFormatter::with_capacity(16384),
         };
 
         if let Err(err) = listen_for_resizes() {
@@ -127,9 +127,9 @@ impl Backend for TermiosTerminal {
                 Color::Pink => self.screen_buffer.push_str("\x1b[95m"),
                 Color::Yellow => self.screen_buffer.push_str("\x1b[93m"),
                 Color::White => self.screen_buffer.push_str("\x1b[97m"),
-                Color::Transparent => {},
+                Color::Transparent => {}
                 #[cfg(feature = "TRUE_COLORS")]
-                Color::RGB(_,_,_) => {},
+                Color::RGB(_, _, _) => {}
             }
 
             match c.background {
@@ -149,9 +149,9 @@ impl Backend for TermiosTerminal {
                 Color::Pink => self.screen_buffer.push_str("\x1b[105m"),
                 Color::Yellow => self.screen_buffer.push_str("\x1b[103m"),
                 Color::White => self.screen_buffer.push_str("\x1b[107m"),
-                Color::Transparent => {},
+                Color::Transparent => {}
                 #[cfg(feature = "TRUE_COLORS")]
-                Color::RGB(_,_,_) => {},
+                Color::RGB(_, _, _) => {}
             }
 
             self.screen_buffer.push(c.code);
