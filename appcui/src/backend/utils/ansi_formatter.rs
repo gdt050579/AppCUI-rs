@@ -1,4 +1,4 @@
-use crate::graphics::Color;
+use crate::graphics::{Color,Point,Surface};
 
 pub(crate) struct AnsiFormatter {
     text: String,
@@ -59,6 +59,59 @@ impl AnsiFormatter {
         self.text.push_str("\x1b[?25h");
     }
 
+    pub(crate) fn render(&mut self, surface: &Surface, offset: Point) {
+        // draw characters using ANSI formatter
+        self.clear();
+        self.reset_color();
+        self.hide_cursor();
+        let mut x = 0;
+        let mut y = 0;
+        let w = surface.size.width;
+        let h = surface.size.height;
+        let start_y = offset.y;
+        let mut f = None;
+        let mut b = None;
+        let chars = &surface.chars;
+        while y < h {
+            self.set_cursor_position(0, y as i32 + start_y);
+            let ofs = y * w;
+            while x < w {
+                let ch = &chars[(ofs + x) as usize];
+                if Some(ch.foreground) != f {
+                    self.set_foreground_color(ch.foreground);
+                    f = Some(ch.foreground);
+                }
+                if Some(ch.background) != b {
+                    self.set_background_color(ch.background);
+                    b = Some(ch.background);
+                }
+                if Self::is_wide_char(ch.code) {
+                    // 1. write two spaces
+                    self.write_string("  ");
+                    // 2. reposition the cursor
+                    self.set_cursor_position(x as i32, y as i32 + start_y);
+                    // 3. write the character
+                    self.write_char(ch.code);
+                    // 4. skip next position and reposition the cursor
+                    x += 2;
+                    self.set_cursor_position(x as i32, y as i32 + start_y);
+                } else {
+                    self.write_char(ch.code);
+                    x += 1;
+                }
+            }
+            y += 1;
+            x = 0;
+        }
+        // update the cursor
+        if surface.cursor.is_visible() {
+            self.set_cursor_position(surface.cursor.x as i32 + offset.x, surface.cursor.y as i32 + offset.y);
+            self.show_cursor();
+        } else {
+            self.hide_cursor();
+        }
+    }
+
     #[inline(always)]
     fn write_color_as_rgb(&mut self, color: Color) {
         match color {
@@ -107,5 +160,23 @@ impl AnsiFormatter {
         }
         let txt = unsafe { std::str::from_utf8_unchecked(&buffer[i..]) };
         self.text.push_str(txt);
+    }
+
+    #[inline(always)]
+    fn is_wide_char(ch: char) -> bool {
+        matches!(ch as u32, 0x1100..=0x115F
+            | 0x2329..=0x232A
+            | 0x2E80..=0x303E
+            | 0x3040..=0xA4CF
+            | 0xAC00..=0xD7A3
+            | 0xF900..=0xFAFF
+            | 0xFE10..=0xFE19
+            | 0xFE30..=0xFE6F
+            | 0xFF00..=0xFF60
+            | 0xFFE0..=0xFFE6
+            | 0x1F300..=0x1F64F
+            | 0x1F900..=0x1F9FF
+            | 0x20000..=0x2FFFD
+            | 0x30000..=0x3FFFD)
     }
 }
