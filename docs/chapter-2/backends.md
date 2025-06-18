@@ -52,14 +52,44 @@ pub enum Type {
 
 ## Display
 
-| Display       | Windows Console     | Windows VT  | NCurses             | Termios             | Web Terminal        |
-| ------------- | ------------------- | ----------- | ------------------- | ------------------- | ------------------- |
-| Colors        | 16 (fore),16 (back) | True colors | 16 (fore),16 (back) | 16 (fore),16 (back) | 16 (fore),16 (back) |
-| Bold          | -                   | -           | Yes                 | -                   | -                   |
-| Underline     | Yes                 | -           | Yes                 | -                   | Yes                 |
-| Italic        | -                   | -           | -                   | -                   | -                   |
-| Character Set | Ascii,WTF-16        | Ascii,UTF-8 | Ascii,UTF-8         | Ascii,UTF-8         | Ascii,UTF-8         |
-| Cursor        | Yes                 | Yes         | Yes                 | -                   | Yes                 |
+Each backend comes with different support related to what can be displayed on the screen.
+* **16 colors** - support for 16 colors for foreground and background 
+* **True colors** - support for true colors (24-bit) for foreground and background
+* **Bold** - support for bold text
+* **Underline** - support for underline text
+* **Italic** - support for italic text
+* **UTF-8** - support for UTF-8 encoding
+* **Ascii** - support for ASCII encoding
+* **WTF-16** - support for WTF-16 encoding (a subset of UTF-8) - only for Windows
+* **Cursor** - support for cursor
+* **Cursor Blinking** - support for cursor blinking
+
+| Display         | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
+| --------------- | --------------- | ---------- | ------- | ------- | ------------ |
+| 16 colors       | Yes             | Yes        | Yes     | Yes     | Yes          |
+| True colors     | -               | Yes        | -       | Yes     | Yes          |
+| Bold            | -               | -          | Yes     | Yes     | -            |
+| Underline       | Yes             | -          | Yes     | -       | Yes          |
+| Italic          | -               | -          | -       | -       | -            |
+| ASCII           | Yes             | Yes        | Yes     | Yes     | Yes          |
+| WTF-16          | Yes             | Yes        | Yes     | Yes     | Yes          |
+| UTF-8           | -               | Yes        | -       | Yes     | Yes          |
+| Cursor          | Yes             | Yes        | Yes     | -       | Yes          |
+| Cursor Blinking | Yes             | Yes        | -       | -       | -            |
+
+**Remarks**:
+1. **True colors** support requires the feature `TRUE_COLORS` to be enabled (keep in mind that by doing this you also increase the size of your Color and Character structures - if you don't need this or your terminal does not support true colors, you will only allocate aditional space that will not be used).
+2. **Cursor blinking** is not supported by all terminals (the AppCUI can enable - show/hide the cursor, but it is the terminal job to make it blink)
+
+In terms of the output method, each backend uses a different approach:
+
+| Backend         | Output method                                                           |
+| --------------- | ----------------------------------------------------------------------- |
+| Windows Console | Direct output via Windows API                                           |
+| Windows VT      | ANSI sequences                                                          |
+| NCurses         | Direct output via NCurses API. NCurses must be installed on the system. |
+| Termios         | ANSI sequences                                                          |
+| Web Terminal    | HTML elements and browser APIs                                          |
 
 
 ## Keyboard

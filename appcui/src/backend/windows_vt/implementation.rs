@@ -6,7 +6,6 @@ use crate::backend::utils::AnsiFormatter;
 use crate::graphics::*;
 use crate::system::Error;
 use crate::system::SystemEvent;
-use std::fmt::Pointer;
 use std::io::Write;
 use std::sync::mpsc::Sender;
 
