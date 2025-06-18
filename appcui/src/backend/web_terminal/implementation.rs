@@ -1,8 +1,8 @@
 use crate::{
+    backend::Backend,
     prelude::{CharFlags, Color, ErrorKind, Key, KeyCode, KeyModifier, MouseButton, MouseWheelDirection, Size, Surface},
     system::Error,
     system::{KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent, MouseWheelEvent, SystemEvent},
-    backend::Backend,
 };
 use std::sync::{mpsc::Sender, Arc, Mutex};
 use wasm_bindgen::{convert::FromWasmAbi, prelude::*, JsCast};
@@ -599,11 +599,11 @@ impl Backend for WebTerminal {
         }
     }
 
-    fn get_size(&self) -> crate::prelude::Size {
+    fn size(&self) -> Size {
         self.size
     }
 
-    fn get_clipboard_text(&self) -> Option<String> {
+    fn clipboard_text(&self) -> Option<String> {
         self.clipboard_content.lock().unwrap().clone()
     }
 
