@@ -52,6 +52,8 @@ impl WebTerminal {
             Color::Yellow => [255.0, 255.0, 0.0, 1.0],
             Color::White => [255.0, 255.0, 255.0, 1.0],
             Color::Transparent => [0.0, 0.0, 0.0, 0.0],
+
+            #[cfg(feature = "TRUE_COLORS")]
             Color::RGB(r, g, b) => {
                 let r = r as f32 / 255.0;
                 let g = g as f32 / 255.0;
