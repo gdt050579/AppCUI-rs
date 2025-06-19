@@ -46,7 +46,7 @@ pub enum Type {
 | ------- | --------------- | ---------- | ------- | ------- | ------------ |
 | Windows | Yes             | Yes        | -       | -       | -            |
 | Linux   | -               | -          | Yes     | Yes     | -            |
-| Mac/OSX | -               | -          | Yes     | Yes     | -            |
+| Mac/OSX | -               | -          | -       | Yes     | -            |
 | Web     | -               | -          | -       | -       | Yes          |
 
 
@@ -92,11 +92,22 @@ In terms of the output method, each backend uses a different approach:
 | Web Terminal    | HTML elements and browser APIs                                          |
 
 
-## Keyboard
+## Input
+
+Capturing the input implies the following capabilites from any backend:
+* identifying keyboard events
+* identifying keyboard combinations such as `Alt`+Key or `Ctrl`+Key or `Alt+Ctrl`+Key
+* Identifying that the state of the `Shift`, `Ctrl` and `Alt` keys has changed (pressed or released)
+* Identifying mouse events
+* Identifying mouse combinations such as `Alt`+Mouse or `Ctrl`+Mouse or `Alt+Ctrl`+Mouse
+* Identifying mouse drag / move events
+* Identifying mouse wheel events
+
+### Keyboard
 
 | Keys               | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
 | ------------------ | --------------- | ---------- | ------- | ------- | ------------ |
-| Alt+Key            | Yes             | Yes        | Wip     | -       | Yes          |
+| Alt+Key            | Yes             | Yes        | Yes     | -       | Yes          |
 | Shift+Key          | Yes             | Yes        | Yes     | -       | Yes          |
 | Ctrl+Key           | Yes             | Yes        | Yes     | -       | Yes          |
 | Alt+Shift+Key      | Yes             | Yes        | -       | -       | -            |
@@ -107,7 +118,7 @@ In terms of the output method, each backend uses a different approach:
 | Shift pressed      | Yes             | Yes        | -       | -       | -            |
 | Ctrl pressed       | Yes             | Yes        | -       | -       | -            |
 
-## Mouse
+### Mouse
 
 | Mouse events | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
 | ------------ | --------------- | ---------- | ------- | ------- | ------------ |
@@ -115,13 +126,24 @@ In terms of the output method, each backend uses a different approach:
 | Move & Drag  | Yes             | Yes        | Yes     | Yes     | Yes          |
 | Wheel        | Yes             | Yes        | Yes     | -       | Yes          |
 
+**Remarks**: Input support is highlighly dependent on the terminal and the OS. AppCUI uses the following approach to intercept the input:
+
+| Backend         | Approach                                                                                           |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| Windows Console | Read the input directly from the console via Windows API                                           |
+| Windows VT      | Read the input directly from the console via Windows API                                           |
+| NCurses         | Read the input directly from the console via NCurses API. NCurses must be installed on the system. |
+| Termios         | Read the input directly from the console via Termios API                                           |
+| Web Terminal    | Read the input directly from the browser                                                           |
 
 ## System events
+
+System events are events that are not related to the keyboard or mouse, but are related to the system and indicate that the console has been changed in some way.
 
 | Events         | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
 | -------------- | --------------- | ---------- | ------- | ------- | ------------ |
 | Console Resize | Yes             | Yes        | Yes     | -       | Yes          |
-| Console closed | Yes             | Yes        | -       | -       | Yes          |
+| Console Closed | Yes             | Yes        | -       | -       | Yes          |
 
 ## Other capabilities
 
@@ -144,7 +166,7 @@ AppCUI provides clipboard support for copying and pasting text. The clipboard fu
 
 ## Defaults
 
-By default, when using initializing a backend, the folowing will be used:
+By default, when using initializing an `App` objct via `App::new()`, the folowing backend will be used :
 
 | OS      | Default backend |
 | ------- | --------------- |
