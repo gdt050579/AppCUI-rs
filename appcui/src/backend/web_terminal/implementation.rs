@@ -1,6 +1,6 @@
 use crate::{
     backend::Backend,
-    prelude::{CharFlags, Color, ErrorKind, Key, KeyCode, KeyModifier, MouseButton, MouseWheelDirection, Size, Surface},
+    prelude::{CharFlags, ErrorKind, Key, KeyCode, KeyModifier, MouseButton, MouseWheelDirection, Size, Surface},
     system::Error,
     system::{KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent, MouseWheelEvent, SystemEvent},
 };
@@ -56,7 +56,7 @@ impl WebTerminal {
         TerminalDomConfig {
             cols: Self::get_config(document, "terminal-cols", 211),
             rows: Self::get_config(document, "terminal-rows", 56),
-            font_family: Self::get_config(document, "terminal-font", "Consolas Mono, monospace".to_string()),
+            font_family: Self::get_config(document, "terminal-font", "Consolas".to_string()),
             font_size: font_size_val,
             cell_w: Self::get_config(document, "terminal-cell-width", 9),
             cell_h: Self::get_config(document, "terminal-cell-height", font_size_val),
@@ -399,11 +399,7 @@ impl WebTerminal {
 
         for global_y in 0..height {
             for global_x in 0..width {
-                if let Some(cell) = &surface.char(global_x, global_y) {
-                    if cell.background == Color::Transparent {
-                        // web_sys::console::log_1(&format!("Skipping transparent cell at ({}, {})", global_x, global_y).into());
-                        continue;
-                    }
+                if let Some(cell) = &surface.chars.get(global_y as usize * width as usize + global_x as usize) {
                     let pos_x = global_x as f32 * cell_width;
                     let pos_y = global_y as f32 * cell_height;
                     let bg_color = self.color_to_rgba(cell.background);
@@ -496,7 +492,6 @@ impl WebTerminal {
         let cell_width = self.cell_width_px as f64;
         let cell_height = self.cell_height_px as f64;
 
-        // clear entire canvas
         context.clear_rect(0.0, 0.0, canvas_width, canvas_height);
 
         context.save();
@@ -504,47 +499,64 @@ impl WebTerminal {
         context.set_text_baseline("top");
         context.set_text_align("center");
 
-        let width = surface.size.width as i32;
-        let height = surface.size.height as i32;
-        for global_y in 0..height {
-            for global_x in 0..width {
-                if let Some(cell) = &surface.char(global_x, global_y) {
-                    if cell.foreground == Color::Transparent {
-                        // web_sys::console::log_1(&format!("Skipping transparent cell at ({}, {})", global_x, global_y).into());
-                        continue;
-                    }
-                    let pos_x = global_x as f64 * cell_width;
-                    let pos_y = global_y as f64 * cell_height;
+        let width = surface.size.width as usize;
+        let height = surface.size.height as usize;
 
-                    let foreground = self.color_to_rgba(cell.foreground);
-                    let css_color = format!(
-                        "rgba({},{},{},{})",
-                        (foreground[0] * 255.0) as u8,
-                        (foreground[1] * 255.0) as u8,
-                        (foreground[2] * 255.0) as u8,
-                        foreground[3],
-                    );
-                    context.set_fill_style_str(&css_color);
-                    context.fill_text(&cell.code.to_string(), pos_x.into(), pos_y.into())?;
+        for y in 0..height {
+            let mut x = 0;
+            while x < width {
+                let index = y * width + x;
 
-                    if cell.flags.contains(CharFlags::Underline) {
-                        context.begin_path();
-                        context.set_stroke_style_str(&css_color);
-                        let x_start = pos_x + 1.0;
-                        let x_end = pos_x + cell_width - 1.0;
-                        let y_line = pos_y + cell_height - 1.0;
-                        context.move_to(x_start, y_line);
-                        context.line_to(x_end, y_line);
-                        context.stroke();
-                        // restore fill style for next character
-                        context.set_fill_style_str(&css_color);
-                    }
+                let Some(cell) = surface.chars.get(index) else {
+                    x += 1;
+                    continue;
+                };
+
+                let char_width_cells = if self.is_emoji(cell.code) { 2 } else { 1 };
+
+                let pos_x = x as f64 * cell_width;
+                let pos_y = y as f64 * cell_height;
+
+                let foreground = self.color_to_rgba(cell.foreground);
+                let css_color = format!("rgba({},{},{},{})", foreground[0], foreground[1], foreground[2], foreground[3],);
+
+                context.set_fill_style_str(&css_color);
+                context.set_stroke_style_str(&css_color);
+
+                let render_center_x = pos_x + (char_width_cells as f64 * cell_width) / 2.0;
+                context.fill_text(&cell.code.to_string(), render_center_x, pos_y)?;
+
+                if cell.flags.contains(CharFlags::Underline) {
+                    context.begin_path();
+                    let x_start = pos_x + 1.0;
+                    let underline_width_px = char_width_cells as f64 * cell_width;
+                    let x_end = pos_x + underline_width_px - 1.0;
+                    let y_line = pos_y + cell_height - 1.0;
+                    context.move_to(x_start, y_line);
+                    context.line_to(x_end, y_line);
+                    context.stroke();
                 }
+
+                x += char_width_cells;
             }
         }
 
         context.restore();
         Ok(())
+    }
+
+    fn is_emoji(&self, c: char) -> bool {
+        matches!(
+            c as u32,
+            0x2600..=0x27BF      // Miscellaneous Symbols and Dingbats
+            | 0x1F300..=0x1F5FF  // Miscellaneous Symbols and Pictographs
+            | 0x1F600..=0x1F64F  // Emoticons
+            | 0x1F900..=0x1F9FF  // Supplemental Symbols and Pictographs
+            | 0x2100..=0x214F    // Letterlike Symbols
+            | 0x2300..=0x23FF    // Miscellaneous Technical
+            | 0x2B00..=0x2BFF    // Miscellaneous Symbols and Arrows
+            | 0x1F1E6..=0x1F1FF  // Enclosed Alphanumeric Supplement (for flag emojis)
+        )
     }
 
     fn render_cursor(&self, surface: &Surface) -> Result<(), JsValue> {
