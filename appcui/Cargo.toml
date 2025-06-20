@@ -59,11 +59,9 @@ rayon = {version = "1.5", features = ["web_spin_lock"]}
 wasm-bindgen-futures = "0.4.45"
 futures = "0.3.31"
 
-[target.'cfg(target_os = "linux")'.dependencies]
-copypasta = "0.10.1"
-
 [target.'cfg(target_family = "unix")'.dependencies]
 libc = "0.2"
+copypasta = "0.10.1"
 
 [features]
 default = ["TRUE_COLORS"]

@@ -3,6 +3,8 @@
 
 use libc::STDOUT_FILENO;
 use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
+use copypasta::ClipboardContext;
+use copypasta::ClipboardProvider;
 
 use super::{
     super::SystemEvent,
@@ -180,15 +182,18 @@ impl Backend for TermiosTerminal {
         None
     }
     fn clipboard_text(&self) -> Option<String> {
-        todo!()
+        let mut ctx: ClipboardContext = ClipboardContext::new().ok()?;
+        ctx.get_contents().ok()
     }
 
-    fn set_clipboard_text(&mut self, _text: &str) {
-        todo!()
+    fn set_clipboard_text(&mut self, text: &str) {
+        let mut ctx: ClipboardContext = ClipboardContext::new().unwrap();
+        ctx.set_contents(text.to_owned()).unwrap();
     }
 
     fn has_clipboard_text(&self) -> bool {
-        todo!()
+        let mut ctx: ClipboardContext = ClipboardContext::new().unwrap();
+        ctx.get_contents().is_ok()
     }
 
     fn on_resize(&mut self, new_size: Size) {
