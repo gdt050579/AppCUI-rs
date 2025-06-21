@@ -2,6 +2,7 @@ use super::super::utils::win32;
 use super::super::Backend;
 use super::super::SystemEventReader;
 use super::input::Input;
+use crate::backend::utils::AnsiFlags;
 use crate::backend::utils::AnsiFormatter;
 use crate::graphics::*;
 use crate::system::Error;
@@ -21,7 +22,14 @@ impl WindowsVTTerminal {
         Input::new(input_console).start(sender);
         Ok(WindowsVTTerminal {
             console,
-            ansi_formatter: AnsiFormatter::with_capacity(16384),
+            ansi_formatter: AnsiFormatter::new(
+                16384,
+                if builder.use_color_schema {
+                    AnsiFlags::Use16ColorSchema
+                } else {
+                    AnsiFlags::None
+                },
+            ),
         })
     }
 }

@@ -1,10 +1,10 @@
 //! Module representing an `TermiosTerminal` abstraction over the ANSI protocol using the termios
 //! API to set it into raw mode. Targeted for UNIX systems, including `linux` and `mac`
 
-use libc::STDOUT_FILENO;
-use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
 use copypasta::ClipboardContext;
 use copypasta::ClipboardProvider;
+use libc::STDOUT_FILENO;
+use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
 
 use super::{
     super::SystemEvent,
@@ -51,7 +51,14 @@ impl TermiosTerminal {
             size: Size::new(80, 30),
             _orig_termios,
             stdout,
-            ansi_buffer: AnsiFormatter::with_capacity(16384),
+            ansi_buffer: AnsiFormatter::new(
+                16384,
+                if builder.use_color_schema {
+                    AnsiFlags::Use16ColorSchema
+                } else {
+                    AnsiFlags::None
+                },
+            ),
         };
 
         if let Err(err) = listen_for_resizes() {
@@ -105,7 +112,7 @@ impl TermiosTerminal {
 impl Backend for TermiosTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         //self.clear();
-        self.ansi_buffer.render(surface, Point::new(0,0));
+        self.ansi_buffer.render(surface, Point::new(0, 0));
         let _ = std::io::stdout().write_all(self.ansi_buffer.text().as_bytes());
         let _ = std::io::stdout().flush();
 

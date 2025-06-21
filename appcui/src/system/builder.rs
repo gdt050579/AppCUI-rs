@@ -17,6 +17,7 @@ pub struct Builder {
     pub(crate) max_timer_count: u8,
     pub(crate) log_file: Option<String>,
     pub(crate) log_append: bool,
+    pub(crate) use_color_schema: bool,
 }
 impl Builder {
     pub(crate) fn new() -> Self {
@@ -33,6 +34,7 @@ impl Builder {
             theme: Theme::new(Themes::Default),
             log_file: None,
             log_append: false,
+            use_color_schema: true,
         }
     }
     #[inline(always)]
@@ -86,6 +88,11 @@ impl Builder {
     pub fn log_file(mut self, name: &str, append: bool) -> Self {
         self.log_file = Some(String::from(name));
         self.log_append = append;
+        self
+    }
+    #[inline(always)]
+    pub fn color_schema(mut self, enabled: bool) -> Self {
+        self.use_color_schema = enabled;
         self
     }
 }

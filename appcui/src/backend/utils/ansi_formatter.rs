@@ -1,13 +1,21 @@
-use crate::graphics::{Color,Point,Surface};
+use crate::graphics::{Color, Point, Surface};
+use EnumBitFlags::EnumBitFlags;
+
+#[EnumBitFlags]
+pub(crate) enum AnsiFlags {
+    Use16ColorSchema = 1,
+}
 
 pub(crate) struct AnsiFormatter {
     text: String,
+    flags: AnsiFlags,
 }
 
 impl AnsiFormatter {
-    pub(crate) fn with_capacity(capacity: usize) -> Self {
+    pub(crate) fn new(capacity: usize, flags: AnsiFlags) -> Self {
         Self {
             text: String::with_capacity(capacity),
+            flags,
         }
     }
     #[inline(always)]
@@ -27,16 +35,27 @@ impl AnsiFormatter {
     pub(crate) fn write_string(&mut self, s: &str) {
         self.text.push_str(s);
     }
+    #[inline(always)]
     pub(crate) fn set_foreground_color(&mut self, color: Color) {
-        self.text.push_str("\x1b[38;2;");
-        self.write_color_as_rgb(color);
-        self.text.push('m');
+        if self.flags.contains_one(AnsiFlags::Use16ColorSchema) {
+            self.write_forenground_color_from_scheme(color);
+        } else {
+            self.text.push_str("\x1b[38;2;");
+            self.write_color_as_rgb(color);
+            self.text.push('m');
+        }
     }
+    #[inline(always)]
     pub(crate) fn set_background_color(&mut self, color: Color) {
-        self.text.push_str("\x1b[48;2;");
-        self.write_color_as_rgb(color);
-        self.text.push('m');
+        if self.flags.contains_one(AnsiFlags::Use16ColorSchema) {
+            self.write_background_color_from_scheme(color);
+        } else {
+            self.text.push_str("\x1b[48;2;");
+            self.write_color_as_rgb(color);
+            self.text.push('m');
+        }
     }
+    #[inline(always)]
     pub(crate) fn set_color(&mut self, foreground: Color, background: Color) {
         self.set_foreground_color(foreground);
         self.set_background_color(background);
@@ -109,6 +128,72 @@ impl AnsiFormatter {
             self.show_cursor();
         } else {
             self.hide_cursor();
+        }
+    }
+
+    #[inline(always)]
+    fn write_forenground_color_from_scheme(&mut self, color: Color) {
+        match color {
+            Color::Black => self.text.push_str("\x1b[30m"),
+            Color::DarkBlue => self.text.push_str("\x1b[34m"),
+            Color::DarkGreen => self.text.push_str("\x1b[32m"),
+            Color::Teal => self.text.push_str("\x1b[36m"),
+            Color::DarkRed => self.text.push_str("\x1b[31m"),
+            Color::Magenta => self.text.push_str("\x1b[35m"),
+            Color::Olive => self.text.push_str("\x1b[33m"),
+            Color::Silver => self.text.push_str("\x1b[37m"),
+            Color::Gray => self.text.push_str("\x1b[90m"),
+            Color::Blue => self.text.push_str("\x1b[94m"),
+            Color::Green => self.text.push_str("\x1b[92m"),
+            Color::Aqua => self.text.push_str("\x1b[96m"),
+            Color::Red => self.text.push_str("\x1b[91m"),
+            Color::Pink => self.text.push_str("\x1b[95m"),
+            Color::Yellow => self.text.push_str("\x1b[93m"),
+            Color::White => self.text.push_str("\x1b[97m"),
+            Color::Transparent => {}
+            #[cfg(feature = "TRUE_COLORS")]
+            Color::RGB(r, g, b) => {
+                self.text.push_str("\x1b[38;2;");
+                self.write_number(r as i32);
+                self.text.push(';');
+                self.write_number(g as i32);
+                self.text.push(';');
+                self.write_number(b as i32);
+                self.text.push('m');
+            }
+        }
+    }
+
+    #[inline(always)]
+    fn write_background_color_from_scheme(&mut self, color: Color) {
+        match color {
+            Color::Black => self.text.push_str("\x1b[40m"),
+            Color::DarkBlue => self.text.push_str("\x1b[44m"),
+            Color::DarkGreen => self.text.push_str("\x1b[42m"),
+            Color::Teal => self.text.push_str("\x1b[46m"),
+            Color::DarkRed => self.text.push_str("\x1b[41m"),
+            Color::Magenta => self.text.push_str("\x1b[45m"),
+            Color::Olive => self.text.push_str("\x1b[43m"),
+            Color::Silver => self.text.push_str("\x1b[47m"),
+            Color::Gray => self.text.push_str("\x1b[100m"),
+            Color::Blue => self.text.push_str("\x1b[104m"),
+            Color::Green => self.text.push_str("\x1b[102m"),
+            Color::Aqua => self.text.push_str("\x1b[106m"),
+            Color::Red => self.text.push_str("\x1b[101m"),
+            Color::Pink => self.text.push_str("\x1b[105m"),
+            Color::Yellow => self.text.push_str("\x1b[103m"),
+            Color::White => self.text.push_str("\x1b[107m"),
+            Color::Transparent => {}
+            #[cfg(feature = "TRUE_COLORS")]
+            Color::RGB(r, g, b) => {
+                self.text.push_str("\x1b[48;2;");
+                self.write_number(r as i32);
+                self.text.push(';');
+                self.write_number(g as i32);
+                self.text.push(';');
+                self.write_number(b as i32);
+                self.text.push('m');
+            }
         }
     }
 
