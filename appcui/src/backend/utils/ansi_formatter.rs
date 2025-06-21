@@ -1,4 +1,4 @@
-use crate::graphics::{Color, Point, Surface};
+use crate::graphics::{CharFlags, Color, Point, Surface};
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags]
@@ -71,6 +71,25 @@ impl AnsiFormatter {
         self.write_number(x + 1);
         self.text.push('H');
     }
+    pub(crate) fn set_char_flags(&mut self, flags: CharFlags, old_flags: CharFlags) {
+        macro_rules! char_char_flag {
+            ($flag:ident, $set_value:expr, $reset_value:expr) => {
+                if flags.contains_one(CharFlags::$flag) {
+                    if !old_flags.contains_one(CharFlags::$flag) {
+                        self.text.push_str($set_value);
+                    }
+                } else {
+                    if old_flags.contains_one(CharFlags::$flag) {
+                        self.text.push_str($reset_value);
+                    }
+                }
+            };
+        }
+
+        char_char_flag!(Bold, "\x1b[1m", "\x1b[22m");
+        char_char_flag!(Italic, "\x1b[3m", "\x1b[23m");
+        char_char_flag!(Underline, "\x1b[4m", "\x1b[24m");
+    }
     pub(crate) fn hide_cursor(&mut self) {
         self.text.push_str("\x1b[?25l");
     }
@@ -90,6 +109,7 @@ impl AnsiFormatter {
         let start_y = offset.y;
         let mut f = None;
         let mut b = None;
+        let mut c_flags = CharFlags::None;
         let chars = &surface.chars;
         while y < h {
             self.set_cursor_position(0, y as i32 + start_y);
@@ -103,6 +123,10 @@ impl AnsiFormatter {
                 if Some(ch.background) != b {
                     self.set_background_color(ch.background);
                     b = Some(ch.background);
+                }
+                if ch.flags != c_flags {
+                    self.set_char_flags(ch.flags, c_flags);
+                    c_flags = ch.flags;
                 }
                 if Self::is_wide_char(ch.code) {
                     // 1. write two spaces

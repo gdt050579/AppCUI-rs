@@ -1,7 +1,11 @@
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
+    #[cfg(target_os = "windows")]
+    let mut app = App::with_backend(appcui::backend::Type::WindowsVT).color_schema(true).build()?;
+    #[cfg(not(target_os = "windows"))]
     let mut app = App::new().build()?;
+
 
     let mut win = window!("Title:'Character Formatting Demo',d:c,w:60,h:20,flags:Sizeable");
     let mut c = canvas!("'60x20',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
