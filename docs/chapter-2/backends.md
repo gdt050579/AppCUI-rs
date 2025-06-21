@@ -68,9 +68,9 @@ Each backend comes with different support related to what can be displayed on th
 | --------------- | --------------- | ---------- | ------- | ------- | ------------ |
 | 16 colors       | Yes             | Yes        | Yes     | Yes     | Yes          |
 | True colors     | -               | Yes        | -       | Yes     | Yes          |
-| Bold            | -               | -          | Yes     | Yes     | -            |
-| Underline       | Yes             | -          | Yes     | -       | Yes          |
-| Italic          | -               | -          | -       | -       | -            |
+| Bold            | -               | Yes        | Yes     | Yes     | -            |
+| Underline       | Yes             | Yes        | Yes     | Yes     | Yes          |
+| Italic          | -               | Yes        | -       | Yes     | -            |
 | ASCII           | Yes             | Yes        | Yes     | Yes     | Yes          |
 | WTF-16          | Yes             | Yes        | Yes     | Yes     | Yes          |
 | UTF-8           | -               | Yes        | -       | Yes     | Yes          |
