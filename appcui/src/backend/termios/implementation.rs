@@ -12,7 +12,7 @@ use super::{
     input::Input,
     size_reader::SizeReader,
 };
-use crate::backend::utils::AnsiFormatter;
+use crate::backend::utils::{AnsiFlags,AnsiFormatter};
 use crate::{
     backend::{termios::api::sizing::listen_for_resizes, Backend, SystemEventReader},
     graphics::*,
