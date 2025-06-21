@@ -64,7 +64,7 @@ libc = "0.2"
 copypasta = "0.10.1"
 
 [features]
-default = ["TRUE_COLORS"]
+default = []
 DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []
 EVENT_RECORDER = []
 GLOBAL_RUNTIME = []
