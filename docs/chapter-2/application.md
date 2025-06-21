@@ -33,6 +33,7 @@ Using `App::new` or `App::with_backend` creates a builder object that can furthe
 * `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in section [Themes](chapter-6/themes.md)
 * `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
 * `.log_file(path,append)` to set up a log file where logs will be displayed. This option will only be valid in **debug mode**. Once the file was specified, any call to [log!](logging.md) macro will be recorded in that file.
+* `.color_schema(enabled)` if set this flag will try to use the terminal color schema, otherwise it will use AppCUI predefined values (e.g. for `Color::DarkBlue` will use `RGB(0,0,128)`). This flag is enabled by default.
 
 After setting up the configuration for an application, just call the `build()` method to create an application. This methods returns a result of type `Result<App,Error>` from where the appcui application can be obtained via several methods such as:
 * `unwrap()` or `expect(...)` methods
@@ -45,6 +46,7 @@ let mut a = App::new().size(Size::new(80,40))       // size should be 80x25 char
                       .menu_bar()                   // top menu bar should be enabled
                       .command_bar()                // command bar should be enabled
                       .log_file("debug.log", false) // log into debug.log
+                      .color_schema(false)          // use AppCUI predefined colors
                       .build()
                       .expect("Fail to create an AppCUI application");
 ```

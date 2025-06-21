@@ -3,3 +3,4 @@ mod ansi_formatter;
 pub(crate) mod win32;
 
 pub(crate) use ansi_formatter::AnsiFormatter;
+pub(crate) use ansi_formatter::AnsiFlags;

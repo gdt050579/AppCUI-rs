@@ -1,9 +1,10 @@
 //! Module representing an `TermiosTerminal` abstraction over the ANSI protocol using the termios
 //! API to set it into raw mode. Targeted for UNIX systems, including `linux` and `mac`
 
-use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
-
+use copypasta::ClipboardContext;
+use copypasta::ClipboardProvider;
 use libc::STDOUT_FILENO;
+use std::{fs::File, io::Write, os::unix::io::FromRawFd, sync::mpsc::Sender};
 
 use super::{
     super::SystemEvent,
@@ -11,8 +12,9 @@ use super::{
     input::Input,
     size_reader::SizeReader,
 };
+use crate::backend::utils::{AnsiFlags,AnsiFormatter};
 use crate::{
-    backend::{termios::api::sizing::listen_for_resizes, SystemEventReader, Backend},
+    backend::{termios::api::sizing::listen_for_resizes, Backend, SystemEventReader},
     graphics::*,
     system::Error,
 };
@@ -31,7 +33,7 @@ pub struct TermiosTerminal {
     _orig_termios: Termios,
 
     stdout: File,
-    screen_buffer: String,
+    ansi_buffer: AnsiFormatter,
 }
 
 impl TermiosTerminal {
@@ -39,7 +41,7 @@ impl TermiosTerminal {
         let Ok(_orig_termios) = Termios::enable_raw_mode() else {
             return Err(Error::new(
                 crate::prelude::ErrorKind::InitializationFailure,
-                "Cannot enable raw mode in Termios Terminal to get input from stdin".to_string(),
+                "Cannot enable raw mode in Termios backend to get input from stdin".to_string(),
             ));
         };
 
@@ -49,7 +51,14 @@ impl TermiosTerminal {
             size: Size::new(80, 30),
             _orig_termios,
             stdout,
-            screen_buffer: String::with_capacity(4096),
+            ansi_buffer: AnsiFormatter::new(
+                16384,
+                if builder.use_color_schema {
+                    AnsiFlags::Use16ColorSchema
+                } else {
+                    AnsiFlags::None
+                },
+            ),
         };
 
         if let Err(err) = listen_for_resizes() {
@@ -84,89 +93,28 @@ impl TermiosTerminal {
         Ok(Box::new(t))
     }
 
-    fn clear(&mut self) {
-        let _ = self.stdout.write("\x1b[2J".as_bytes());
-    }
+    // fn clear(&mut self) {
+    //     let _ = self.stdout.write("\x1b[2J".as_bytes());
+    // }
 
-    fn move_cursor(&mut self, to: &Cursor) -> Result<(), std::io::Error> {
-        if !to.is_visible() {
-            return Ok(());
-        };
+    // fn move_cursor(&mut self, to: &Cursor) -> Result<(), std::io::Error> {
+    //     if !to.is_visible() {
+    //         return Ok(());
+    //     };
 
-        self.stdout
-            .write_all(format!("\x1b[{};{}H", to.y.saturating_add(1), to.x.saturating_add(1)).as_bytes())?;
+    //     self.stdout
+    //         .write_all(format!("\x1b[{};{}H", to.y.saturating_add(1), to.x.saturating_add(1)).as_bytes())?;
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 }
 
 impl Backend for TermiosTerminal {
     fn update_screen(&mut self, surface: &Surface) {
-        self.clear();
-
-        let chars = &surface.chars;
-
-        self.screen_buffer.clear();
-        let mut x = 0;
-        let width = surface.size().width;
-        for c in chars {
-            match c.foreground {
-                Color::Black => self.screen_buffer.push_str("\x1b[30m"),
-                Color::DarkBlue => self.screen_buffer.push_str("\x1b[34m"),
-                Color::DarkGreen => self.screen_buffer.push_str("\x1b[32m"),
-                Color::Teal => self.screen_buffer.push_str("\x1b[36m"),
-                Color::DarkRed => self.screen_buffer.push_str("\x1b[31m"),
-                Color::Magenta => self.screen_buffer.push_str("\x1b[35m"),
-                Color::Olive => self.screen_buffer.push_str("\x1b[33m"),
-                Color::Silver => self.screen_buffer.push_str("\x1b[37m"),
-                Color::Gray => self.screen_buffer.push_str("\x1b[90m"),
-                Color::Blue => self.screen_buffer.push_str("\x1b[94m"),
-                Color::Green => self.screen_buffer.push_str("\x1b[92m"),
-                Color::Aqua => self.screen_buffer.push_str("\x1b[96m"),
-                Color::Red => self.screen_buffer.push_str("\x1b[91m"),
-                Color::Pink => self.screen_buffer.push_str("\x1b[95m"),
-                Color::Yellow => self.screen_buffer.push_str("\x1b[93m"),
-                Color::White => self.screen_buffer.push_str("\x1b[97m"),
-                Color::Transparent => {},
-                #[cfg(feature = "TRUE_COLORS")]
-                Color::RGB(_,_,_) => {},
-            }
-
-            match c.background {
-                Color::Black => self.screen_buffer.push_str("\x1b[40m"),
-                Color::DarkBlue => self.screen_buffer.push_str("\x1b[44m"),
-                Color::DarkGreen => self.screen_buffer.push_str("\x1b[42m"),
-                Color::Teal => self.screen_buffer.push_str("\x1b[46m"),
-                Color::DarkRed => self.screen_buffer.push_str("\x1b[41m"),
-                Color::Magenta => self.screen_buffer.push_str("\x1b[45m"),
-                Color::Olive => self.screen_buffer.push_str("\x1b[43m"),
-                Color::Silver => self.screen_buffer.push_str("\x1b[47m"),
-                Color::Gray => self.screen_buffer.push_str("\x1b[100m"),
-                Color::Blue => self.screen_buffer.push_str("\x1b[104m"),
-                Color::Green => self.screen_buffer.push_str("\x1b[102m"),
-                Color::Aqua => self.screen_buffer.push_str("\x1b[106m"),
-                Color::Red => self.screen_buffer.push_str("\x1b[101m"),
-                Color::Pink => self.screen_buffer.push_str("\x1b[105m"),
-                Color::Yellow => self.screen_buffer.push_str("\x1b[103m"),
-                Color::White => self.screen_buffer.push_str("\x1b[107m"),
-                Color::Transparent => {},
-                #[cfg(feature = "TRUE_COLORS")]
-                Color::RGB(_,_,_) => {},
-            }
-
-            self.screen_buffer.push(c.code);
-            self.screen_buffer.push_str("\x1b[0m");
-
-            x += 1;
-            if x >= width {
-                self.screen_buffer.push('\n');
-                x = 0;
-            }
-        }
-        let buf = self.screen_buffer.as_bytes();
-        let _ = self.stdout.write_all(&buf[..buf.len() - 1]);
-
-        let _ = self.move_cursor(&surface.cursor);
+        //self.clear();
+        self.ansi_buffer.render(surface, Point::new(0, 0));
+        let _ = std::io::stdout().write_all(self.ansi_buffer.text().as_bytes());
+        let _ = std::io::stdout().flush();
     }
 
     fn size(&self) -> Size {
@@ -177,15 +125,18 @@ impl Backend for TermiosTerminal {
         None
     }
     fn clipboard_text(&self) -> Option<String> {
-        todo!()
+        let mut ctx: ClipboardContext = ClipboardContext::new().ok()?;
+        ctx.get_contents().ok()
     }
 
-    fn set_clipboard_text(&mut self, _text: &str) {
-        todo!()
+    fn set_clipboard_text(&mut self, text: &str) {
+        let mut ctx: ClipboardContext = ClipboardContext::new().unwrap();
+        ctx.set_contents(text.to_owned()).unwrap();
     }
 
     fn has_clipboard_text(&self) -> bool {
-        todo!()
+        let mut ctx: ClipboardContext = ClipboardContext::new().unwrap();
+        ctx.get_contents().is_ok()
     }
 
     fn on_resize(&mut self, new_size: Size) {

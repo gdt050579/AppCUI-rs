@@ -1,8 +1,9 @@
 use std::collections::VecDeque;
 
-use super::super::Surface;
 use super::super::Backend;
+use super::super::Surface;
 use super::command::Command;
+use crate::backend::utils::AnsiFlags;
 use crate::backend::utils::AnsiFormatter;
 use crate::graphics::Color;
 use crate::graphics::Point;
@@ -54,7 +55,14 @@ impl DebugTerminal {
         let commands = DebugTerminal::build_commands(builder.debug_script.as_ref().unwrap().as_str());
         Ok(DebugTerminal {
             size: Size::new(w, h),
-            ansi_buffer: AnsiFormatter::with_capacity((w * h) as usize),
+            ansi_buffer: AnsiFormatter::new(
+                (w * h) as usize,
+                if builder.use_color_schema {
+                    AnsiFlags::Use16ColorSchema
+                } else {
+                    AnsiFlags::None
+                },
+            ),
             commands,
             sys_events: VecDeque::with_capacity(8),
             paint: false,

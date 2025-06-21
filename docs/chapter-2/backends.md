@@ -46,27 +46,68 @@ pub enum Type {
 | ------- | --------------- | ---------- | ------- | ------- | ------------ |
 | Windows | Yes             | Yes        | -       | -       | -            |
 | Linux   | -               | -          | Yes     | Yes     | -            |
-| Mac/OSX | -               | -          | Yes     | Yes     | -            |
+| Mac/OSX | -               | -          | -       | Yes     | -            |
 | Web     | -               | -          | -       | -       | Yes          |
 
 
 ## Display
 
-| Display       | Windows Console     | Windows VT  | NCurses             | Termios             | Web Terminal        |
-| ------------- | ------------------- | ----------- | ------------------- | ------------------- | ------------------- |
-| Colors        | 16 (fore),16 (back) | True colors | 16 (fore),16 (back) | 16 (fore),16 (back) | 16 (fore),16 (back) |
-| Bold          | -                   | -           | Yes                 | -                   | -                   |
-| Underline     | Yes                 | -           | Yes                 | -                   | Yes                 |
-| Italic        | -                   | -           | -                   | -                   | -                   |
-| Character Set | Ascii,WTF-16        | Ascii,UTF-8 | Ascii,UTF-8         | Ascii,UTF-8         | Ascii,UTF-8         |
-| Cursor        | Yes                 | Yes         | Yes                 | -                   | Yes                 |
+Each backend comes with different support related to what can be displayed on the screen.
+* **16 colors** - support for 16 colors for foreground and background 
+* **True colors** - support for true colors (24-bit) for foreground and background
+* **Bold** - support for bold text
+* **Underline** - support for underline text
+* **Italic** - support for italic text
+* **UTF-8** - support for UTF-8 encoding
+* **Ascii** - support for ASCII encoding
+* **WTF-16** - support for WTF-16 encoding (a subset of UTF-8) - only for Windows
+* **Cursor** - support for cursor
+* **Cursor Blinking** - support for cursor blinking
+
+| Display         | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
+| --------------- | --------------- | ---------- | ------- | ------- | ------------ |
+| 16 colors       | Yes             | Yes        | Yes     | Yes     | Yes          |
+| True colors     | -               | Yes        | -       | Yes     | Yes          |
+| Bold            | -               | Yes        | Yes     | Yes     | -            |
+| Underline       | Yes             | Yes        | Yes     | Yes     | Yes          |
+| Italic          | -               | Yes        | -       | Yes     | -            |
+| ASCII           | Yes             | Yes        | Yes     | Yes     | Yes          |
+| WTF-16          | Yes             | Yes        | Yes     | Yes     | Yes          |
+| UTF-8           | -               | Yes        | -       | Yes     | Yes          |
+| Cursor          | Yes             | Yes        | Yes     | -       | Yes          |
+| Cursor Blinking | Yes             | Yes        | -       | -       | -            |
+
+**Remarks**:
+1. **True colors** support requires the feature `TRUE_COLORS` to be enabled (keep in mind that by doing this you also increase the size of your Color and Character structures - if you don't need this or your terminal does not support true colors, you will only allocate aditional space that will not be used).
+2. **Cursor blinking** is not supported by all terminals (the AppCUI can enable - show/hide the cursor, but it is the terminal job to make it blink)
+
+In terms of the output method, each backend uses a different approach:
+
+| Backend         | Output method                                                           |
+| --------------- | ----------------------------------------------------------------------- |
+| Windows Console | Direct output via Windows API                                           |
+| Windows VT      | ANSI sequences                                                          |
+| NCurses         | Direct output via NCurses API. NCurses must be installed on the system. |
+| Termios         | ANSI sequences                                                          |
+| Web Terminal    | HTML elements and browser APIs                                          |
 
 
-## Keyboard
+## Input
+
+Capturing the input implies the following capabilites from any backend:
+* identifying keyboard events
+* identifying keyboard combinations such as `Alt`+Key or `Ctrl`+Key or `Alt+Ctrl`+Key
+* Identifying that the state of the `Shift`, `Ctrl` and `Alt` keys has changed (pressed or released)
+* Identifying mouse events
+* Identifying mouse combinations such as `Alt`+Mouse or `Ctrl`+Mouse or `Alt+Ctrl`+Mouse
+* Identifying mouse drag / move events
+* Identifying mouse wheel events
+
+### Keyboard
 
 | Keys               | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
 | ------------------ | --------------- | ---------- | ------- | ------- | ------------ |
-| Alt+Key            | Yes             | Yes        | Wip     | -       | Yes          |
+| Alt+Key            | Yes             | Yes        | Yes     | -       | Yes          |
 | Shift+Key          | Yes             | Yes        | Yes     | -       | Yes          |
 | Ctrl+Key           | Yes             | Yes        | Yes     | -       | Yes          |
 | Alt+Shift+Key      | Yes             | Yes        | -       | -       | -            |
@@ -77,7 +118,7 @@ pub enum Type {
 | Shift pressed      | Yes             | Yes        | -       | -       | -            |
 | Ctrl pressed       | Yes             | Yes        | -       | -       | -            |
 
-## Mouse
+### Mouse
 
 | Mouse events | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
 | ------------ | --------------- | ---------- | ------- | ------- | ------------ |
@@ -85,13 +126,24 @@ pub enum Type {
 | Move & Drag  | Yes             | Yes        | Yes     | Yes     | Yes          |
 | Wheel        | Yes             | Yes        | Yes     | -       | Yes          |
 
+**Remarks**: Input support is highlighly dependent on the terminal and the OS. AppCUI uses the following approach to intercept the input:
+
+| Backend         | Approach                                                                                           |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| Windows Console | Read the input directly from the console via Windows API                                           |
+| Windows VT      | Read the input directly from the console via Windows API                                           |
+| NCurses         | Read the input directly from the console via NCurses API. NCurses must be installed on the system. |
+| Termios         | Read the input directly from the console via Termios API                                           |
+| Web Terminal    | Read the input directly from the browser                                                           |
 
 ## System events
+
+System events are events that are not related to the keyboard or mouse, but are related to the system and indicate that the console has been changed in some way.
 
 | Events         | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
 | -------------- | --------------- | ---------- | ------- | ------- | ------------ |
 | Console Resize | Yes             | Yes        | Yes     | -       | Yes          |
-| Console closed | Yes             | Yes        | -       | -       | Yes          |
+| Console Closed | Yes             | Yes        | -       | -       | Yes          |
 
 ## Other capabilities
 
@@ -114,7 +166,7 @@ AppCUI provides clipboard support for copying and pasting text. The clipboard fu
 
 ## Defaults
 
-By default, when using initializing a backend, the folowing will be used:
+By default, when using initializing an `App` objct via `App::new()`, the folowing backend will be used :
 
 | OS      | Default backend |
 | ------- | --------------- |
