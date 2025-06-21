@@ -71,8 +71,8 @@ impl AnsiFormatter {
         self.write_number(x + 1);
         self.text.push('H');
     }
-    pub(crate) fn set_char_flags(&mut self, flags: CharFlags, old_flags: CharFlags) {
-        macro_rules! char_char_flag {
+    pub(crate) fn update_char_flags(&mut self, flags: CharFlags, old_flags: CharFlags) {
+        macro_rules! update_ansi_flag {
             ($flag:ident, $set_value:expr, $reset_value:expr) => {
                 if flags.contains_one(CharFlags::$flag) {
                     if !old_flags.contains_one(CharFlags::$flag) {
@@ -86,9 +86,23 @@ impl AnsiFormatter {
             };
         }
 
-        char_char_flag!(Bold, "\x1b[1m", "\x1b[22m");
-        char_char_flag!(Italic, "\x1b[3m", "\x1b[23m");
-        char_char_flag!(Underline, "\x1b[4m", "\x1b[24m");
+        update_ansi_flag!(Bold, "\x1b[1m", "\x1b[22m");
+        update_ansi_flag!(Italic, "\x1b[3m", "\x1b[23m");
+        update_ansi_flag!(Underline, "\x1b[4m", "\x1b[24m");
+    }
+    pub(crate) fn set_char_flags(&mut self, flags: CharFlags) {
+        macro_rules! set_ansi_flag {
+            ($flag:ident, $set_value:expr, $reset_value:expr) => {
+                if flags.contains_one(CharFlags::$flag) {
+                    self.text.push_str($set_value);
+                } else {
+                    self.text.push_str($reset_value);
+                }
+            };
+        }
+        set_ansi_flag!(Bold, "\x1b[1m", "\x1b[22m");
+        set_ansi_flag!(Italic, "\x1b[3m", "\x1b[23m");
+        set_ansi_flag!(Underline, "\x1b[4m", "\x1b[24m");        
     }
     pub(crate) fn hide_cursor(&mut self) {
         self.text.push_str("\x1b[?25l");
@@ -125,7 +139,7 @@ impl AnsiFormatter {
                     b = Some(ch.background);
                 }
                 if ch.flags != c_flags {
-                    self.set_char_flags(ch.flags, c_flags);
+                    self.update_char_flags(ch.flags, c_flags);
                     c_flags = ch.flags;
                 }
                 if Self::is_wide_char(ch.code) {

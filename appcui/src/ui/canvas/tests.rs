@@ -606,7 +606,7 @@ fn check_mouse_wheel() {
 #[test]
 fn check_true_colors_rendering() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0xBF4312A1691D7AD8)
     ";
@@ -624,5 +624,92 @@ fn check_true_colors_rendering() {
     }
     w.add(c);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_char_flags() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xCF13E28C3D4AADA9)
+    ";
+    let mut a = App::debug(70, 20, script).build().unwrap();
+
+    let mut win = window!("Title:'Character Formatting Demo',d:c,w:60,h:20,flags:Sizeable");
+    let mut c = canvas!("'60x20',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    let s = c.drawing_surface_mut();
+
+    let normal_attr = charattr!("white,black");
+    let bold_attr = charattr!("white,black,attr:Bold");
+    let italic_attr = charattr!("white,black,attr:Italic");
+    let underline_attr = charattr!("white,black,attr:Underline");
+    let bold_italic_attr = charattr!("white,black,attr:Bold+Italic");
+    let bold_underline_attr = charattr!("white,black,attr:Bold+Underline");
+    let italic_underline_attr = charattr!("white,black,attr:Italic+Underline");
+    let all_formats_attr = charattr!("white,black,attr:Bold+Italic+Underline");
+
+    s.write_string(3, 2, "This is normal text", normal_attr, false);
+    s.write_string(3, 4, "This is bold text", bold_attr, false);
+    s.write_string(3, 6, "This is italic text", italic_attr, false);
+    s.write_string(3, 8, "This is underlined text", underline_attr, false);
+    s.write_string(3, 10, "Bold + Italic", bold_italic_attr, false);
+    s.write_string(3, 12, "Bold + Underline", bold_underline_attr, false);
+    s.write_string(3, 14, "Italic + Underline", italic_underline_attr, false);
+    s.write_string(3, 16, "All three formats (Bold + Italic + Underline)", all_formats_attr, false);
+
+    win.add(c);
+    a.add_window(win);
+    a.run();
+}
+
+#[test]
+fn check_colors_schema_false() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x29C1D764587643BE)
+    ";
+    let mut a = App::debug(70, 20, script).color_schema(false).build().unwrap();
+
+    let mut win = window!("Title:'Colors',d:c,w:60,h:20,flags:Sizeable");
+    let mut c = canvas!("'60x20',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    let s = c.drawing_surface_mut();
+    for b in 0..16 {
+        let back = Color::from_value(b).unwrap();
+        for f in 0..16 {
+            let fore = Color::from_value(f).unwrap();
+            s.write_string(f * 2 + 2, b + 1, "()", CharAttribute::with_color(fore, back), false);
+        }
+    }
+
+    win.add(c);
+    a.add_window(win);
+    a.run();
+}
+
+
+#[test]
+fn check_colors_schema_true() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x29C1D764587643BE)
+    ";
+    let mut a = App::debug(70, 20, script).color_schema(true).build().unwrap();
+
+    let mut win = window!("Title:'Colors',d:c,w:60,h:20,flags:Sizeable");
+    let mut c = canvas!("'60x20',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    let s = c.drawing_surface_mut();
+    for b in 0..16 {
+        let back = Color::from_value(b).unwrap();
+        for f in 0..16 {
+            let fore = Color::from_value(f).unwrap();
+            s.write_string(f * 2 + 2, b + 1, "()", CharAttribute::with_color(fore, back), false);
+        }
+    }
+
+    win.add(c);
+    a.add_window(win);
     a.run();
 }

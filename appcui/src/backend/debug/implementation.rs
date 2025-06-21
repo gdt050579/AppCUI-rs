@@ -9,6 +9,7 @@ use crate::graphics::Color;
 use crate::graphics::Point;
 use crate::graphics::Size;
 use crate::input::KeyModifier;
+use crate::prelude::CharFlags;
 use crate::system::Error;
 use crate::system::SystemEvent;
 use crate::system::{PaintMethods, RuntimeManager};
@@ -277,12 +278,14 @@ impl Backend for DebugTerminal {
                 back = ch.foreground;
             }
             self.ansi_buffer.set_color(fore, back);
+            self.ansi_buffer.set_char_flags(ch.flags);
             if ch.code <= ' ' {
                 self.ansi_buffer.write_char(' ');
             } else {
                 self.ansi_buffer.write_char(ch.code);
             }
             self.ansi_buffer.reset_color();
+            self.ansi_buffer.set_char_flags(CharFlags::None);
             x += 1;
             if x == self.size.width {
                 if (y as i32) == self.mouse_pos.y {
