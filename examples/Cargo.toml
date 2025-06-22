@@ -260,3 +260,7 @@ path = "flappy/main.rs"
 [[example]]
 name = "true_colors"
 path = "true_colors/main.rs"
+
+[[example]]
+name = "emoticons"
+path = "emoticons/main.rs"
