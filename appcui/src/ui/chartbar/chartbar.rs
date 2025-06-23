@@ -489,7 +489,7 @@ impl OnMouseEvent for ChartBar {
                         if let Some((prev_top, prev_bottom)) = prev_val {
                             let val_pos = h - val - self.top_view - 1;
 
-                            let (current_top, current_bottom) = if prev_top < val_pos {
+                            let (current_bottom, current_top) = if prev_top < val_pos {
                                 (val_pos, prev_top + 1)
                             } else if prev_top >= val_pos && prev_bottom <= val_pos {
                                 (val_pos, val_pos)
@@ -497,7 +497,7 @@ impl OnMouseEvent for ChartBar {
                                 (prev_bottom - 1, val_pos)
                             };
 
-                            if is_over_rectangle(point, x as i32, current_bottom, x as i32, current_top) {
+                            if is_over_rectangle(point, x as i32, current_top, x as i32, current_bottom) {
                                 self.show_tooltip_on_point(format!("{},{}", c.value(), c.label()).as_str(), point.x, point.y);
                                 return EventProcessStatus::Processed;
                             } else {
