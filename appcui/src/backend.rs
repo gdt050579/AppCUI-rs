@@ -94,6 +94,7 @@ pub(crate) trait Backend {
         None
     }
     fn is_single_threaded(&self) -> bool;
+    fn on_close(&mut self) {}
 }
 
 #[repr(u8)]

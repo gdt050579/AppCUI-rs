@@ -24,8 +24,8 @@ use crate::system::SystemEvent;
 pub(crate) struct Console {
     stdin: structs::HANDLE,
     stdout: structs::HANDLE,
-    _stdin_original_mode_flags: u32,
-    _stdout_original_mode_flags: u32,
+    stdin_original_mode_flags: u32,
+    stdout_original_mode_flags: u32,
     size: Size,
     visible_region: structs::SMALL_RECT,
     shift_state: KeyModifier,
@@ -138,8 +138,8 @@ impl Console {
                 stdin: h_stdin,
                 stdout: h_stdout,
                 size: Size::new(w, h),
-                _stdin_original_mode_flags: stdin_original_mode_flags,
-                _stdout_original_mode_flags: stdout_original_mode_flags,
+                stdin_original_mode_flags,
+                stdout_original_mode_flags,
                 visible_region: info.window,
                 shift_state: KeyModifier::None,
                 last_mouse_pos: Point::new(i32::MAX, i32::MAX),
@@ -334,6 +334,13 @@ impl Console {
         if let Ok(data) = self.shared_visible_region.lock() {
             self.visible_region = *data;
             //println!("OnResize: -> region: {:?}",self.visible_region);
+        }
+    }
+
+    pub(crate) fn on_close(&mut self) {
+        unsafe {
+            let _ = api::SetConsoleMode(self.stdin, self.stdin_original_mode_flags);
+            let _ = api::SetConsoleMode(self.stdout, self.stdout_original_mode_flags);
         }
     }
 
