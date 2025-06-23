@@ -1,0 +1,90 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  coverage:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Cache Cargo and Binaries
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-bin-
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+
+    - name: Install cargo-tarpaulin (if missing)
+      shell: pwsh
+      run: |
+        $binPath = "$env:USERPROFILE\.cargo\bin\cargo-tarpaulin.exe"
+        if (-not (Test-Path $binPath)) {
+          cargo install cargo-tarpaulin
+        } 
+      
+    - name: Run cargo-tarpaulin
+      run: cargo tarpaulin -p appcui -o xml
+              
+    - name: Generate coverage summary
+      id: coverage_summary
+      shell: pwsh
+      run: |
+        $xml = [xml](Get-Content 'cobertura.xml')
+        $lineRate = [double]$xml.coverage.GetAttribute('line-rate')
+        $coveragePct = $lineRate * 100
+        $coverageInt = [math]::Round($coveragePct)
+        "coverage=$coverageInt" >> $env:GITHUB_OUTPUT
+    
+    - name: Create Coverage Badge
+      uses: emibcn/badge-action@v2
+      with:
+        label: 'coverage'
+        status: ${{ steps.coverage_summary.outputs.coverage }}%
+        color: ${{ steps.coverage_summary.outputs.coverage >= 80 && 'green' || steps.coverage_summary.outputs.coverage >= 70 && 'yellow' || steps.coverage_summary.outputs.coverage >= 60 && 'orange' || 'red' }}
+        path: coverage.svg
+      
+
+    - name: Upload badge to Gist
+      if: github.ref == 'refs/heads/main'
+      uses: exuanbo/actions-deploy-gist@v1
+      with:
+        token: ${{ secrets.GIST_CODECOVERAGE }}
+        gist_id: f7d7e7d56b2725a3b33a265e8a9d8e9c
+        file_path: coverage.svg
+        file_type: binary
+              
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-coverage-report
+        path: |
+          cobertura.xml
+          coverage.svg
+        
+    - name: Add Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      if: github.event_name == 'pull_request'
+      with:
+        recreate: true
+        path: code-coverage-results.md 

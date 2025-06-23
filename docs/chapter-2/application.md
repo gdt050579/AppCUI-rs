@@ -5,23 +5,25 @@ An application in `AppCUI` is the **context** that holds all of the framework da
 To create an application three APIs can be used:
 1. `App::new()`. This will create an application and chose the best fit terminal available on the current operating system. The result of `new()` method is a `Builder` object that can further be used to configure how the terminal looks like.
 
-2. `App::with_terminal(terminal_type)`. This will create `Builder` object, but you will chose the terminal to be used instead of having one chosed for you automatically. You can check more on terminals availability and types on section [Terminals](terminals.md)
+2. `App::with_backend(backend_type)`. This will create `Builder` object, but you will chose the backend to be used instead of having one chosed for you automatically. You can check more on backends availability and types on section [Backends](backends.md)
 
 3. `App::debug(width, height, script)`. This is designed to help you with unit testing (see more on this way of initializing `AppCUI` on section [Debug scenarios](debug_scenarious.md)) 
 
-**Example** (using the default terminal):
+**Example** (using the default backend):
 ```rs
 let mut a = App::new().build().expect("Fail to create an AppCUI application");
 ```
 
-**Example** (using the windows terminal):
+**Example** (using the windows console backend):
 ```rs
-let mut a = App::with_terminal(TerminalType::WindowsConsole).build().expect("Fail to create an AppCUI application with WindowsConsole terminal");
+let mut a = App::with_backend(apcui::backend::WindowsConsole)
+                 .build()
+                 .expect("Fail to create an AppCUI application with WindowsConsole backend");
 ```
 
 ## Builder
 
-Using `App::new` or `App::with_terminal` creates a builder object that can further be used set up how the application will be constructed. For example, you can change the terminal size, colors, font, etc using this object. Keep in mind that not all settings apply for each terminal, and using the wrong configuration might led to an initialization error. Curently, the Builder supports the following methods:
+Using `App::new` or `App::with_backend` creates a builder object that can further be used set up how the application will be constructed. For example, you can change the terminal size, colors, font, etc using this object. Keep in mind that not all settings apply for each terminal, and using the wrong configuration might led to an initialization error. Curently, the Builder supports the following methods:
 * `.size(terminal_size)` to set up a terminal size
 * `.title(terminal_title)` to set up a terminal title
 * `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one
@@ -31,6 +33,7 @@ Using `App::new` or `App::with_terminal` creates a builder object that can furth
 * `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in section [Themes](chapter-6/themes.md)
 * `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
 * `.log_file(path,append)` to set up a log file where logs will be displayed. This option will only be valid in **debug mode**. Once the file was specified, any call to [log!](logging.md) macro will be recorded in that file.
+* `.color_schema(enabled)` if set this flag will try to use the terminal color schema, otherwise it will use AppCUI predefined values (e.g. for `Color::DarkBlue` will use `RGB(0,0,128)`). This flag is enabled by default.
 
 After setting up the configuration for an application, just call the `build()` method to create an application. This methods returns a result of type `Result<App,Error>` from where the appcui application can be obtained via several methods such as:
 * `unwrap()` or `expect(...)` methods
@@ -43,6 +46,7 @@ let mut a = App::new().size(Size::new(80,40))       // size should be 80x25 char
                       .menu_bar()                   // top menu bar should be enabled
                       .command_bar()                // command bar should be enabled
                       .log_file("debug.log", false) // log into debug.log
+                      .color_schema(false)          // use AppCUI predefined colors
                       .build()
                       .expect("Fail to create an AppCUI application");
 ```
@@ -50,8 +54,8 @@ let mut a = App::new().size(Size::new(80,40))       // size should be 80x25 char
 ## Errors
 
 If the `.build()` method from the `Builder` object fails, an error is returned. You can use `.kind` member to identify the type of error. Curently, the following error class are provided:
-* `ErrorKind::InitializationFailure` a failure occured when initializing the terminal (this is usually due to some OS constranits). 
-* `ErrorKind::InvalidFeature` an invalid feature (configuration option) that is not compatible with the current terminal was used. For example, an attemp to set up DirectX for NCurses terminal will be invalid.
+* `ErrorKind::InitializationFailure` a failure occured when initializing the backend API (this is usually due to some OS constranits). 
+* `ErrorKind::InvalidFeature` an invalid feature (configuration option) that is not compatible with the current terminal was used. For example, an attemp to set up DirectX for NCurses backend will be invalid.
 * `ErrorKind::InvalidParameter` a valid feature but with invalid parameters was used. For example, an attempt to instantiate a terminal with the size of **(0x0)** will trigger such an error.
 
 To get a more detailed description of the Error, use the `description()` method from class `Error` just like in the next code snipped:

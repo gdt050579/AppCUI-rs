@@ -84,7 +84,7 @@ use appcui::prelude::*;
 use <path_to_cheese_file>::Chess;
 use <path_to_cheese_file>::chess::*;
 
-#[Window(custom_event: ChessEvents)]
+#[Window(custom_events: ChessEvents)]
 struct MyWin {
     // data members
     table: Handle<Chess>

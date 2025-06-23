@@ -1,5 +1,5 @@
 use crate::{
-    ui::common::{ControlManager, UIElement},
+    ui::common::ControlManager,
     utils::HandleManager,
 };
 
@@ -15,11 +15,11 @@ impl ControlHandleManager {
         }
     }
     #[inline(always)]
-    pub(crate) fn get_mut(&mut self, handle: Handle<UIElement>) -> Option<&mut ControlManager> {
+    pub(crate) fn get_mut(&mut self, handle: Handle<()>) -> Option<&mut ControlManager> {
         self.manager.get_mut(handle.cast())
     }
     #[inline(always)]
-    pub(crate) fn get(&self, handle: Handle<UIElement>) -> Option<&ControlManager> {
+    pub(crate) fn get(&self, handle: Handle<()>) -> Option<&ControlManager> {
         self.manager.get(handle.cast())
     }
     #[inline(always)]
@@ -27,7 +27,7 @@ impl ControlHandleManager {
         self.manager.element_mut(0).unwrap()
     }
     #[inline(always)]
-    pub(crate) fn remove(&mut self, handle: Handle<UIElement>) -> bool {
+    pub(crate) fn remove(&mut self, handle: Handle<()>) -> bool {
         self.manager.remove(handle.cast())
     }
     pub(crate) fn clean_marked_for_focus(&mut self) {
@@ -39,7 +39,7 @@ impl ControlHandleManager {
         }
     }
     #[inline(always)]
-    pub(crate) fn add(&mut self, manager: ControlManager) -> Handle<UIElement> {
+    pub(crate) fn add(&mut self, manager: ControlManager) -> Handle<()> {
         self.manager.add(manager).cast()
     }
 }

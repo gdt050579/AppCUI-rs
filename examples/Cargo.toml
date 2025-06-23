@@ -5,15 +5,15 @@ publish = false
 edition = "2021"
 
 [dev-dependencies]
-appcui = { version = "1.0.0", path = "../appcui" }
-AppCUIProcMacro = { version = "1.0.0", path = "../appcui-proc-macro"}
+appcui = { path = "../appcui" }
+appcui_proc_macro = { path = "../appcui-proc-macro"}
 chrono = "0.4.38"
+rand = "0.8.5"
 
 
 [[example]]
 name = "test"
 path = "dev_test.rs"
-
 
 
 [[example]]
@@ -25,12 +25,24 @@ name = "canvas"
 path = "canvas/main.rs"
 
 [[example]]
+name = "char_format"
+path = "char_format/main.rs"
+
+[[example]]
 name = "checkboxes"
 path = "checkboxes/main.rs"
 
 [[example]]
+name = "checkboxes_types"
+path = "checkboxes_types/main.rs"
+
+[[example]]
 name = "radioboxes"
 path = "radioboxes/main.rs"
+
+[[example]]
+name = "radioboxes_types"
+path = "radioboxes_types/main.rs"
 
 [[example]]
 name = "colorpicker"
@@ -171,3 +183,84 @@ path = "timer/main.rs"
 [[example]]
 name = "treeview"
 path = "treeview/main.rs"
+
+[[example]]
+name = "background_task"
+path = "background_task/main.rs"
+
+[[example]]
+name = "logo"
+path = "logo/main.rs"
+
+[[example]]
+name = "demo_app"
+path = "demo_app/main.rs"
+
+[[example]]
+name = "editor"
+path = "editor/main.rs"
+
+[[example]]
+name = "painter"
+path = "painter/main.rs"
+
+[[example]]
+name = "snake"
+path = "snake/main.rs"
+
+[[example]]
+name = "matrix"
+path = "matrix/main.rs"
+
+[[example]]
+name = "fractals"
+path = "fractals/main.rs"
+
+[[example]]
+name = "spiral"
+path = "spiral/main.rs"
+
+[[example]]
+name = "counter"
+path = "counter/main.rs"
+
+[[example]]
+name = "window_toolbar_button"
+path = "window_toolbar_button/main.rs"
+
+[[example]]
+name = "window_toolbar_checkbox"
+path = "window_toolbar_checkbox/main.rs"
+
+[[example]]
+name = "window_toolbar_label"
+path = "window_toolbar_label/main.rs"
+
+[[example]]
+name = "window_toolbar_single_choice"
+path = "window_toolbar_single_choice/main.rs"
+
+
+[[example]]
+name = "threestatebox_types"
+path = "threestatebox_types/main.rs"
+
+[[example]]
+name = "ramit"
+path = "ramit/main.rs"
+
+[[example]]
+name = "minesweeper"
+path = "minesweeper/main.rs"
+
+[[example]]
+name = "flappy"
+path = "flappy/main.rs"
+
+[[example]]
+name = "true_colors"
+path = "true_colors/main.rs"
+
+[[example]]
+name = "emoticons"
+path = "emoticons/main.rs"

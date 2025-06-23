@@ -3,8 +3,9 @@ use crate::utils::Caption;
 use super::CharAttribute;
 use EnumBitFlags::EnumBitFlags;
 
+/// Represents the alignment of the text. It can be Left, Center or Right.
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq, Default)]
+#[derive(Copy, Clone, Debug, PartialEq, Default, Eq)]
 pub enum TextAlignament {
     #[default]
     Left,
@@ -12,6 +13,13 @@ pub enum TextAlignament {
     Right,
 }
 
+
+/// Represents the wrap type of the text. It can be WordWrap, CharacterWrap, MultiLine, SingleLine or SingleLineWrap.
+/// - `WordWrap`: The text will be wrapped to the next line if it exceeds the width.
+/// - `CharacterWrap`: The text will be wrapped to the next line if it exceeds the width, but it will not break words.
+/// - `MultiLine`: The text will be wrapped to the next line if a line break is encountered.
+/// - `SingleLine`: The text will not be wrapped (line break is ignored). This is the default value.
+/// - `SingleLineWrap`: The text will be clipped to a specific width.
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub enum WrapType {
@@ -121,6 +129,17 @@ impl TextFormat {
 }
 
 impl Default for TextFormat {
+    /// Creates a new instance of the TextFormat with default values.
+    /// The default values are:
+    /// - `flags`: None
+    /// - `x`: 0
+    /// - `y`: 0
+    /// - `char_attr`: Default::default()
+    /// - `hotkey_attr`: Default::default()
+    /// - `hotkey_pos`: 0
+    /// - `chars_count`: 0
+    /// - `align`: TextAlignament::Left
+    /// - `wrap_type`: WrapType::SingleLine 
     fn default() -> Self {
         Self {
             flags: TextFormatFlags::None,
@@ -136,6 +155,20 @@ impl Default for TextFormat {
     }
 }
 
+/// A builder for the [TextFormat] struct.
+/// This builder allows you to create a TextFormat instance starting from the default values and modify it step by step.
+/// 
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+/// 
+/// let format = TextFormatBuilder::new()
+///                     .position(10, 20)
+///                     .attribute(CharAttribute::with_color(Color::White, Color::Black))
+///                     .align(TextAlignament::Center)
+///                     .wrap_type(WrapType::WordWrap(50))
+///                     .build();
+/// ```
 pub struct TextFormatBuilder {
     format: TextFormat,
 }

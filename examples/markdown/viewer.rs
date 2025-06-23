@@ -12,21 +12,21 @@ pub struct Viewer {
 }
 
 impl Viewer {
-    pub fn new(base_path: String) -> Self {
-        let initial_path = format!(r"{}\{}", base_path, "introduction.md");
+    pub fn new(base_path: String, filename: &str) -> Self {
+        let initial_path = format!(r"{}\{}", base_path, filename);
 
         let window = Window::new(&initial_path, Layout::new("d:c, w:50, h: 15"), Flags::Sizeable);
         let mut w: Viewer = Self {
             base: window,
             base_path,
             navigator: MarkdownNavigator::new(),
-            h_md: Handle::None
+            h_md: Handle::None,
         };
-        
+
         let content = MarkdownLoader::load(&initial_path);
-        
+
         if let Some(text) = content {
-            w.navigator.open("introduction.md".to_string());
+            w.navigator.open(filename.to_string());
             let m: Markdown = Markdown::new(&text, Layout::new("d: c"), markdown::Flags::ScrollBars);
             w.h_md = w.add(m);
         }
@@ -41,11 +41,14 @@ impl Viewer {
 
     fn go_back(&mut self) {
         let handle = self.h_md;
+
         if let Some(current_path) = self.navigator.go_back() {
             let full_path = self.full_path(&current_path);
+
             if let Some(file_content) = MarkdownLoader::load(&full_path) {
                 if let Some(md) = self.control_mut(handle) {
                     md.set_content(&file_content);
+                    self.base.set_title(&full_path);
                 }
             } else if let Some(md) = self.control_mut(handle) {
                 md.set_content(&format!("Could not load file at {}", current_path));
@@ -53,7 +56,6 @@ impl Viewer {
         }
     }
 }
-
 
 impl ToolBarEvents for Viewer {
     fn on_button_clicked(&mut self, _: Handle<toolbar::Button>) -> EventProcessStatus {

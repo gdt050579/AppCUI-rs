@@ -1,27 +1,75 @@
 [package]
 name = "appcui"
-version = "1.0.0"
+version = "0.1.3"
 edition = "2021"
+authors = ["Gavrilut Dragos <gavrilut.dragos@gmail.com>"]
+description = "A feature-rich and cross-platform TUI/CUI framework for Rust, enabling modern terminal-based applications on Windows, Linux, and macOS. Includes built-in UI components like buttons, menus, list views, tree views, checkboxes, and more. Perfect for building fast and interactive CLI tools and text-based interfaces."
+license = "MIT"
+repository = "https://github.com/gdt050579/AppCUI-rs"
+homepage = "https://gdt050579.github.io/AppCUI-rs/"
+documentation = "https://docs.rs/appcui"
+readme = "../README.md"
+keywords = ["tui", "cui", "ui", "terminal"]
+categories = ["gui", "command-line-interface", "command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 EnumBitFlags = "1.0.10"
 flat_string = "1.0.0"
-chrono = "0.4.38"
-AppCUIProcMacro = {path = "../appcui-proc-macro"}
+chrono = {version = "0.4.38", features = ["wasmbind"]}
+appcui_proc_macro = "0.1.0"
 
-[target.'cfg(target_os = "linux")'.dependencies]
-copypasta = "0.10.1"
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = [
+    "Blob",
+    "BlobPropertyBag",
+    "Url",
+    "KeyboardEvent",
+    "WheelEvent",
+    "Worker", 
+    "WebGlUniformLocation",
+    "Window", 
+    "Document", 
+    "DomRect",
+    "Navigator",
+    "Clipboard",
+    "HtmlCanvasElement", 
+    "HtmlElement",
+    "CssStyleDeclaration", 
+    "WebGlRenderingContext", 
+    "WebGl2RenderingContext",
+    "WebGlBuffer", 
+    "WebGlProgram", 
+    "WebGlShader", 
+    "WebGlTexture", 
+    "MouseEvent", 
+    "console", 
+    "CanvasRenderingContext2d",
+    "TextMetrics"]}
+js-sys = "0.3"
+console_error_panic_hook = "0.1"
+web-time = {version = "1.1.0"}
+wasm-bindgen-rayon = { version = "1.2", features = ["no-bundler"] }
+rayon = {version = "1.5", features = ["web_spin_lock"]}
+wasm-bindgen-futures = "0.4.45"
+futures = "0.3.31"
 
 [target.'cfg(target_family = "unix")'.dependencies]
 libc = "0.2"
+copypasta = "0.10.1"
 
 [features]
 default = []
 DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []
 EVENT_RECORDER = []
 GLOBAL_RUNTIME = []
+TRUE_COLORS = []
+
 
 [lints]
 workspace = true

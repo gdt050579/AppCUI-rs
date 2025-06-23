@@ -1,5 +1,4 @@
 use self::control_event_wrapper::CustomEventData;
-use crate::system::TimerMethods;
 use super::control_manager::ParentLayout;
 use crate::graphics::*;
 use crate::input::*;
@@ -7,6 +6,7 @@ use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::system::Theme;
 use crate::system::ThemeMethods;
 use crate::system::Timer;
+use crate::system::TimerMethods;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
@@ -46,11 +46,11 @@ pub(crate) struct Margins {
 pub struct ControlBase {
     pub(crate) layout: ControlLayout,
     pub(crate) margins: Margins,
-    pub(crate) handle: Handle<UIElement>,
-    pub(crate) parent: Handle<UIElement>,
+    pub(crate) handle: Handle<()>,
+    pub(crate) parent: Handle<()>,
     pub(crate) timer_handle: Handle<Timer>,
-    pub(crate) event_processor: Handle<UIElement>,
-    pub(crate) children: Vec<Handle<UIElement>>,
+    pub(crate) event_processor: Handle<()>,
+    pub(crate) children: Vec<Handle<()>>,
     pub(crate) focused_child_index: VectorIndex,
     pub(crate) parent_index: VectorIndex,
     status_flags: StatusFlags,
@@ -62,6 +62,7 @@ pub struct ControlBase {
 }
 
 impl ControlBase {
+    /// Creates a new control with the specified layout. The argument `accept_input` specifies if the control can receive input or not. 
     pub fn new(layout: Layout, accept_input: bool) -> Self {
         ControlBase::with_status_flags(
             layout,
@@ -70,6 +71,19 @@ impl ControlBase {
             } else {
                 StatusFlags::Enabled | StatusFlags::Visible
             },
+        )
+    }
+    /// Creates a new control with the specified layout that has support for focused overlay.
+    /// When such a control is created if it has focus it will increase its bottom and right margins by one character.
+    /// This provides aditional space for the focused control to be drawn (usually a scrollbar).
+    pub fn with_focus_overlay(layout: Layout) -> Self {
+        ControlBase::with_status_flags( 
+            layout,
+            StatusFlags::AcceptInput
+                | StatusFlags::Enabled
+                | StatusFlags::Visible
+                | StatusFlags::IncreaseBottomMarginOnFocus
+                | StatusFlags::IncreaseRightMarginOnFocus,
         )
     }
     pub(crate) fn with_status_flags(layout: Layout, status_flags: StatusFlags) -> Self {
@@ -123,7 +137,7 @@ impl ControlBase {
     /// This method has no effect on a Desktop control.
     #[inline(always)]
     pub fn set_size(&mut self, width: u16, height: u16) {
-        if self.status_flags.contains(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
+        if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
             return;
         }
         self.layout.layout_resize(width, height);
@@ -142,13 +156,14 @@ impl ControlBase {
     /// Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignament properties will be removed.
     /// This method has no effect on a Desktop control.
     pub fn set_position(&mut self, x: i32, y: i32) {
-        if self.status_flags.contains(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
+        if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
             return;
         }
         self.layout.layout_set_position(x, y);
         RuntimeManager::get().request_recompute_layout();
     }
 
+    /// Sets the enabled state of a control. This method has no effect on a Desktop or a Window control that will always be enabled.
     #[inline(always)]
     pub fn set_enabled(&mut self, enabled: bool) {
         if enabled {
@@ -213,7 +228,7 @@ impl ControlBase {
         self.status_flags.contains(StatusFlags::MarkedForFocus)
     }
     #[inline(always)]
-    pub(crate) fn get_focused_control(&self) -> Handle<UIElement> {
+    pub(crate) fn get_focused_control(&self) -> Handle<()> {
         if self.focused_child_index.in_range(self.children.len()) {
             return self.children[self.focused_child_index.index()];
         }
@@ -593,7 +608,7 @@ impl ControlBase {
         RuntimeManager::get().hide_tooltip();
     }
 
-    pub(crate) fn notify_children_of_selection(&self, requester: Handle<UIElement>) {
+    pub(crate) fn notify_children_of_selection(&self, requester: Handle<()>) {
         let controls = RuntimeManager::get().get_controls_mut();
         for h_child in &self.children {
             if let Some(c) = controls.get_mut(*h_child) {

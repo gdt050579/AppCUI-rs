@@ -3,7 +3,7 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
 use crate::ui::ControlBase;
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 #[derive(Copy, Clone, Default, PartialEq)]
 enum SelectedComponent {
@@ -476,6 +476,10 @@ impl ColumnsHeader {
     #[inline(always)]
     pub fn columns(&self) -> &Vec<Column> {
         &self.columns
+    }
+    #[inline(always)]
+    pub (crate) fn columns_mut(&mut self) -> &mut Vec<Column> {
+        &mut self.columns
     }
     pub fn sort_column(&self) -> Option<u16> {
         if self.selected_column_index as usize >= self.columns.len() {

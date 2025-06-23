@@ -7,8 +7,6 @@ use crate::{
     },
 };
 
-use super::UIElement;
-
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum EventProcessStatus {
@@ -68,7 +66,7 @@ pub trait OnWindowRegistered {
 }
 pub trait OnSiblingSelected {
     #[allow(private_interfaces)]
-    fn on_sibling_selected(&mut self, _handle: Handle<UIElement>) {}
+    fn on_sibling_selected(&mut self, _handle: Handle<()>) {}
 }
 pub trait CustomEvents {
     #[allow(private_interfaces)]
@@ -91,6 +89,22 @@ pub trait TimerEvents {
         EventProcessStatus::Ignored
     }
 }
+
+pub trait GenericBackgroundTaskEvents {
+    fn on_start(&mut self, _handle: Handle<()>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_update(&mut self, _handle: Handle<()>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_finish(&mut self, _handle: Handle<()>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_query(&mut self, _handle: Handle<()>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+
 
 pub trait Control:
     OnPaint
@@ -130,6 +144,7 @@ pub trait Control:
     + TimerEvents
     + GenericTreeViewEvents
     + MarkdownEvents
+    + GenericBackgroundTaskEvents
 {
 }
 

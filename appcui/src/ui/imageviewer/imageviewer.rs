@@ -16,6 +16,47 @@ pub struct ImageViewer {
     scrollbars: ScrollBars,
 }
 impl ImageViewer {
+    /// Creates a new image viewer with the specified image, layout and flags.
+    /// The flags can be a combination of the following values:
+    /// * `imageviewer::Flags::ScrollBars` - if set, the image viewer will have horizontal and vertical scrollbars
+    /// 
+    /// the render type method can be one of the following:
+    /// * `image::RendererType::SmallBlocks` - if set, the image will be rendered with small blocks
+    /// * `image::RendererType::LargeBlocks64Colors` - if set, the image will be rendered with large blocks
+    /// * `image::RendererType::GrayScale` - if set, the image will be rendered with gray scale
+    /// * `image::RendererType::AsciiArt` - if set, the image will be rendered as ascii art
+    /// 
+    /// the scale can be one of the following:
+    /// * `image::Scale::None` - if set, the image will be rendered with no scaling (as it is)
+    /// * `image::Scale::Scale5` - 5% scale
+    /// * `image::Scale::Scale10` - 10% scale
+    /// * `image::Scale::Scale20` - 20% scale
+    /// * `image::Scale::Scale25` - 25% scale
+    /// * `image::Scale::Scale33` - 33% scale
+    /// * `image::Scale::Scale50` - 50% scale
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// 
+    /// let heart = Image::with_str(r#"
+    ///     |.............|
+    ///     |...rr...rr...|
+    ///     |..rrrr.rrrr..|
+    ///     |.rrrrrrrrrrr.|
+    ///     |.raaaaaaaaar.|
+    ///     |..ryyyyyyyr..|
+    ///     |   rwwwwwr   |
+    ///     |....rwwwr....|
+    ///     |.....rwr.....|
+    ///     |......r......|
+    /// "#).unwrap();
+    /// let iv = ImageViewer::new(heart, Layout::new("d:c"),
+    ///                           image::RendererType::SmallBlocks,
+    ///                           image::Scale::NoScale,
+    ///                           imageviewer::Flags::None);
+    /// ```
     pub fn new(image: Image, layout: Layout, render_method: image::RendererType, scale: image::Scale, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(
@@ -45,22 +86,43 @@ impl ImageViewer {
         }
         obj
     }
+    /// Sets a new image to the image viewer.
     pub fn set_image(&mut self, image: Image) {
         self.image = image;
         self.update_surface();
     }
+
+    /// Returns the image scale
     #[inline(always)]
     pub fn scale(&self) -> image::Scale {
         self.scale
     }
+
+    /// Sets the image scale (it can be one of the following values):
+    /// * `image::Scale::None` - if set, the image will be rendered with no scaling (as it is)
+    /// * `image::Scale::Scale5` - 5% scale
+    /// * `image::Scale::Scale10` - 10% scale
+    /// * `image::Scale::Scale20` - 20% scale
+    /// * `image::Scale::Scale25` - 25% scale
+    /// * `image::Scale::Scale33` - 33% scale
+    /// * `image::Scale::Scale50` - 50% scale
     pub fn set_scale(&mut self, scale: image::Scale) {
         self.scale = scale;
         self.update_surface();
     }
+
+    /// Gets the rendeering method used to draw the image
     #[inline(always)]
     pub fn render_method(&self) -> image::RendererType {
         self.render_method
     }
+
+    /// Sets the rendering method used to draw the image.
+    /// It can be one of the following values:
+    /// * `image::RendererType::SmallBlocks` - if set, the image will be rendered with small blocks
+    /// * `image::RendererType::LargeBlocks64Colors` - if set, the image will be rendered with large blocks
+    /// * `image::RendererType::GrayScale` - if set, the image will be rendered with gray scale
+    /// * `image::RendererType::AsciiArt` - if set, the image will be rendered as ascii art
     pub fn set_render_method(&mut self, render_method: image::RendererType) {
         self.render_method = render_method;
         self.update_surface();
@@ -75,9 +137,13 @@ impl ImageViewer {
         self.move_scroll_to(self.x, self.y);
     }
 
+    /// Sets the image viewer background character.
+    /// The background character is used to fill the empty space in the image viewer (e.g. if the image is smaller than the drawing area).
     pub fn set_backgound(&mut self, backgroud_char: Character) {
         self.background = Some(backgroud_char);
     }
+
+    /// Clears the image viewer background character.
     pub fn clear_background(&mut self) {
         self.background = None;
     }
@@ -224,7 +290,6 @@ impl OnMouseEvent for ImageViewer {
             }
             MouseEvent::Wheel(dir) => {
                 match dir {
-                    MouseWheelDirection::None => {}
                     MouseWheelDirection::Left => self.move_scroll_to(self.x + 1, self.y),
                     MouseWheelDirection::Right => self.move_scroll_to(self.x - 1, self.y),
                     MouseWheelDirection::Up => self.move_scroll_to(self.x, self.y + 1),

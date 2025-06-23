@@ -9,7 +9,7 @@ pub(crate) struct ClipArea {
 
 impl ClipArea {
     #[inline]
-    pub fn new(left: i32, top: i32, right: i32, bottom: i32) -> ClipArea {
+    pub(crate) fn new(left: i32, top: i32, right: i32, bottom: i32) -> ClipArea {
         ClipArea {
             left,
             top,
@@ -19,11 +19,11 @@ impl ClipArea {
         }
     }
     #[inline]
-    pub fn with_size(x: i32, y: i32, width: u16, height: u16) -> ClipArea {
+    pub(crate) fn with_size(x: i32, y: i32, width: u16, height: u16) -> ClipArea {
         ClipArea::new(x, y, x + (width as i32) - 1, y + (height as i32) - 1)
     }
     #[inline]
-    pub fn set(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+    pub(crate) fn set(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.left = left;
         self.top = top;
         self.right = right;
@@ -31,23 +31,23 @@ impl ClipArea {
         self.visible = (left <= right) && (top <= bottom);
     }
     #[inline]
-    pub fn set_with_size(&mut self, x: i32, y: i32, width: u16, height: u16) {
+    pub(crate) fn set_with_size(&mut self, x: i32, y: i32, width: u16, height: u16) {
         self.set(x, y, x + (width as i32) - 1, y + (height as i32) - 1);
     }
     #[inline(always)]
-    pub fn is_visible(&self) -> bool {
+    pub(crate) fn is_visible(&self) -> bool {
         self.visible
     }
     #[inline(always)]
-    pub fn contains(&self, x: i32, y: i32) -> bool {
+    pub(crate) fn contains(&self, x: i32, y: i32) -> bool {
         self.visible && (x >= self.left) && (x <= self.right) && (y >= self.top) && (y <= self.bottom)
     }
     #[inline]
-    pub fn contains_y(&self, y: i32) -> bool {
+    pub(crate) fn contains_y(&self, y: i32) -> bool {
         self.visible && (y >= self.top) && (y <= self.bottom)
     }
     #[inline]
-    pub fn intersect_with(&mut self, clip: &ClipArea) {
+    pub(crate) fn intersect_with(&mut self, clip: &ClipArea) {
         self.set(
             i32::max(self.left, clip.left),
             i32::max(self.top, clip.top),
@@ -56,7 +56,7 @@ impl ClipArea {
         )
     }
     #[inline]
-    pub fn reduce_margins(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+    pub(crate) fn reduce_margins(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.left += left;
         self.right -= right;
         self.top += top;

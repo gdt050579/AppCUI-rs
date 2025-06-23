@@ -3,6 +3,9 @@ use super::pixel::Pixel;
 use super::RendererType;
 use super::Scale;
 
+/// A structure representing a raster image with RGBA pixels.
+/// 
+/// Images are stored in memory as a vector of pixels with a specified width and height.
 #[derive(Clone)]
 pub struct Image {
     width: u32,
@@ -11,6 +14,17 @@ pub struct Image {
 }
 
 impl Image {
+    /// Creates a new empty image with the specified dimensions.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - Width of the image in pixels
+    /// * `height` - Height of the image in pixels
+    ///
+    /// # Returns
+    ///
+    /// * `Some(Image)` - If the dimensions are valid
+    /// * `None` - If either dimension is 0 or exceeds 0xF000
     pub fn new(width: u32, height: u32) -> Option<Image> {
         if (width < 1) || (height < 1) {
             return None;
@@ -30,6 +44,52 @@ impl Image {
         }
         Some(img)
     }
+    /// Creates an image from a string representation.
+    ///
+    /// The string format uses pipe characters `|` to delimit rows, and single characters
+    /// to represent different colored pixels.
+    ///
+    /// # Color Codes
+    ///
+    /// | Color       | Character Codes                |
+    /// |-------------|--------------------------------|
+    /// | Black       | '0', ' ' (space), '.'         |
+    /// | Dark Blue   | 'B', '1'                      |
+    /// | Dark Green  | 'G', '2'                      |
+    /// | Teal        | 'T', '3'                      |
+    /// | Dark Red    | 'R', '4'                      |
+    /// | Magenta     | 'M', 'm', '5'                 |
+    /// | Olive       | '6', 'o', 'O'                 |
+    /// | Silver      | 'S', '7'                      |
+    /// | Gray        | 's', '8'                      |
+    /// | Blue        | 'b', '9'                      |
+    /// | Green       | 'g'                           |
+    /// | Aqua        | 'A', 'a', 't'                 |
+    /// | Red         | 'r'                           |
+    /// | Pink        | 'P', 'p'                      |
+    /// | Yellow      | 'Y', 'y'                      |
+    /// | White       | 'W', 'w'                      |
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// // Create a 3x2 image with specific colors
+    /// let image_str = "|RGB| |YWr|";
+    /// let img = Image::with_str(image_str).unwrap();
+    /// assert_eq!(img.width(), 3);
+    /// assert_eq!(img.height(), 2);
+    /// ```
+    ///
+    /// # Arguments
+    ///
+    /// * `image` - String representation of the image
+    ///
+    /// # Returns
+    ///
+    /// * `Some(Image)` - If the string represents a valid image
+    /// * `None` - If the format is invalid
     pub fn with_str(image: &str) -> Option<Image> {
         let buf = image.as_bytes();
         let mut w = 0u32;
@@ -88,17 +148,42 @@ impl Image {
         }
         Some(img)
     }
+    /// Clears the entire image with the specified pixel color.
+    ///
+    /// # Arguments
+    ///
+    /// * `pixel` - The pixel value to fill the image with
     pub fn clear(&mut self, pixel: Pixel) {
         for px in &mut self.pixels {
             *px = pixel;
         }
     }
+    /// Sets a pixel at the specified coordinates.
+    ///
+    /// If the coordinates are outside the image dimensions, the operation is silently ignored.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - X coordinate (0 is leftmost)
+    /// * `y` - Y coordinate (0 is topmost)
+    /// * `pixel` - The pixel value to set
     #[inline]
     pub fn set_pixel(&mut self, x: u32, y: u32, pixel: Pixel) {
         if (x < self.width) && (y < self.height) {
             self.pixels[(y as usize) * (self.width as usize) + (x as usize)] = pixel;
         }
     }
+    /// Gets the pixel at the specified coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `x` - X coordinate (0 is leftmost)
+    /// * `y` - Y coordinate (0 is topmost)
+    ///
+    /// # Returns
+    ///
+    /// * `Some(Pixel)` - If the coordinates are within the image dimensions
+    /// * `None` - If the coordinates are outside the image
     #[inline]
     pub fn pixel(&self, x: u32, y: u32) -> Option<Pixel> {
         if (x < self.width) && (y < self.height) {
@@ -106,18 +191,31 @@ impl Image {
         }
         None
     }
+    /// Returns the width of the image in pixels.
     #[inline]
     pub fn width(&self) -> u32 {
         self.width
     }
+    /// Returns the height of the image in pixels.
     #[inline]
     pub fn height(&self) -> u32 {
         self.height
     }
+    /// Returns the size (width and height) of the image as a Size object.
     #[inline]
     pub fn size(&self) -> Size {
         Size::new(self.width, self.height)
     }
+    /// Calculates the rendered size of the image based on the rendering method and scaling.
+    ///
+    /// # Arguments
+    ///
+    /// * `rendering_method` - The method used to render the image (blocks, ASCII, etc.)
+    /// * `scale_method` - The scaling method applied to the image
+    ///
+    /// # Returns
+    ///
+    /// The resulting Size object after applying the rendering and scaling methods
     #[inline]
     pub fn render_size(&self, rendering_method: RendererType, scale_method: Scale) -> Size {
         let rap = scale_method as u32;

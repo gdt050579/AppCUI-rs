@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use super::CharClass;
 
 #[test]
 fn check_move_left_right() {
@@ -1225,4 +1226,17 @@ fn check_copy_cut() {
     w.add(textfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();
+}
+
+#[test]
+fn check_char_class() {
+    assert_eq!(CharClass::from('('), CharClass::Bracket);
+    assert_eq!(CharClass::from(')'), CharClass::Bracket);
+    assert_eq!(CharClass::from('['), CharClass::Bracket);
+    assert_eq!(CharClass::from(']'), CharClass::Bracket);
+    assert_eq!(CharClass::from('{'), CharClass::Bracket);
+    assert_eq!(CharClass::from('}'), CharClass::Bracket);
+    assert_eq!(CharClass::from('"'), CharClass::String);
+    assert_eq!(CharClass::from('\''), CharClass::String);
+    assert_eq!(CharClass::from(1u8 as char), CharClass::Other);
 }

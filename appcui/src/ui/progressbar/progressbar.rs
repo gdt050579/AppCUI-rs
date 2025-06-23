@@ -1,6 +1,10 @@
 use super::initialization_flags::Flags;
 use crate::prelude::*;
+#[cfg(not(target_arch = "wasm32"))]
 use std::time::{Duration, Instant};
+
+#[cfg(target_arch = "wasm32")]
+use web_time::{Duration, Instant};
 
 #[CustomControl(overwrite=OnPaint, internal=true)]
 pub struct ProgressBar {
@@ -16,6 +20,16 @@ pub struct ProgressBar {
     paused: bool,
 }
 impl ProgressBar {
+    /// Creates a new ProgressBar control with the maximum number of items to be processed, layout and flags.
+    /// The flags can be a combination of the following values:
+    /// * `progressbar::Flags::HidePercentage` - if set, the percentage will not be displayed
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"),progressbar::Flags::None);
+    /// ```
     pub fn new(items_count: u64, layout: Layout, flags: Flags) -> Self {
         let mut me = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),

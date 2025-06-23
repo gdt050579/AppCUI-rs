@@ -1,4 +1,4 @@
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 use super::App;
 use super::Theme;
@@ -15,8 +15,9 @@ use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
 use crate::input::MouseButton;
-use crate::terminals::MouseButtonDownEvent;
-use crate::terminals::MouseMoveEvent;
+use crate::system::Clipboard;
+use crate::system::MouseButtonDownEvent;
+use crate::system::MouseMoveEvent;
 use crate::ui::command_bar::*;
 use crate::ui::common::traits::*;
 
@@ -286,5 +287,73 @@ fn check_mouse_keymodifier_mouse() {
     w.add(TestControl::new());
     a.add_window(w);
     a.run();
+}
+
+#[test]
+fn check_clipboard_api() {
+    let a = App::debug(60, 10, "Paint.Enable(false)").build().unwrap();
+    Clipboard::set_text("Hello, world!");
+    assert_eq!(Clipboard::text(), Some("Hello, world!".to_string()));
+    assert!(Clipboard::has_text());
+    Clipboard::clear();
+    assert_eq!(Clipboard::text(), None);
+    assert!(!Clipboard::has_text());
+    a.run();
+}
+
+
+#[test]
+fn check_clipboard_api_without_app_initialization() {
+    Clipboard::set_text("Hello, world!");
+    assert_eq!(Clipboard::text(), None);
+    assert!(!Clipboard::has_text());
+    assert_eq!(Clipboard::text(), None);
+    Clipboard::clear();
+    assert_eq!(Clipboard::text(), None);
+    assert!(!Clipboard::has_text());
+}
+
+#[test]
+fn check_app_create_with_title() {
+    let a = App::debug(60, 10, "Paint.Enable(false)").title("Some title").build().unwrap();
+    a.run();
+}
+
+#[test]
+fn check_app_create_with_size() {
+    let a = App::debug(60, 10, "Paint.Enable(false)").size(Size::new(60, 10)).build().unwrap();
+    a.run();
+}
+
+#[test]
+fn check_app_create_with_invalid_size() {
+    let a = App::debug(60, 10, "Paint.Enable(false)").size(Size::new(0, 0)).build();
+    assert!(a.is_err());
+    let err: crate::system::Error = a.err().unwrap();
+    assert_eq!(err.kind, crate::system::ErrorKind::InvalidParameter);
+    // assert_eq!(
+    //     err.description(),
+    //     "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !"
+    // );
+    let desc = format!("{}", err);
+    assert_eq!(desc, "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !");
+}
+
+#[test]
+fn check_app_create_with_timers_count() {
+    let a = App::debug(60, 10, "Paint.Enable(false)").timers_count(10).build().unwrap();
+    a.run();
+}
+
+#[cfg(target_os = "windows")]
+#[test]
+fn check_create_app_with_default_terminal() {
+    let _ = App::new().build();
+}
+
+#[cfg(target_os = "windows")]
+#[test]
+fn check_create_app_with_windows_terminal() {
+    let _ = App::with_backend(crate::backend::Type::WindowsConsole).build();
 }
 

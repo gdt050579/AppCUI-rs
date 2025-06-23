@@ -233,7 +233,7 @@ fn check_submenus_open() {
         }
     }
     let script = "
-    Paint.Enable(false)
+    Paint.Enable(false)    
     Paint('initial state')
     CheckHash(0xf51c6661294d459a)
     Mouse.Move(3,0)
@@ -796,58 +796,58 @@ fn check_popup_menu() {
     let script = "
             Paint.Enable(false)
             Paint('initial_state')
-            CheckHash(0xca08a561329e08e0)
+            CheckHash(0xD8785911D8A3E144)
             Mouse.Move(39,13)
             Mouse.Click(39,13,right)
             Paint('popup menu on top')
-            CheckHash(0xbc698d1fff6c047c)
+            CheckHash(0x27E1510C1208B360)
             Mouse.Move(48,5)
             Mouse.Click(48,5,left)
             Paint('color is aqua')
-            CheckHash(0xbadca93818a37db4)
+            CheckHash(0xE159A8823308D660)
             Mouse.Move(43,13)
             Mouse.Click(43,13,right)
             Paint('menu again')
-            CheckHash(0x614a550849150d1f)
+            CheckHash(0x154B1288966A77AB)
             Mouse.Move(53,8)
             Mouse.Click(53,8,left)
             Mouse.Move(53,7)
             Paint('menu is blue')
-            CheckHash(0xdeb1cb68b9415d4)
+            CheckHash(0x1A5B4549FC2ACC0)
             Mouse.Move(39,7)
             Mouse.Drag(39,7,39,2)
             Paint('window moved on top')
-            CheckHash(0x7daeebcf9fc73b54)
+            CheckHash(0x5E2E275A2BEC81C0)
             Mouse.Move(40,8)
             Mouse.Click(40,8,right)
             Paint('now menu is on bottom')
-            CheckHash(0x4c2e4aa471f44b21)
+            CheckHash(0xB391F5104AC11BDD)
             Mouse.Move(35,8)
             Mouse.Click(35,8,left)
             Mouse.Move(28,8)
             Paint('no menu showed')
-            CheckHash(0x7daeebcf9fc73b54)
+            CheckHash(0x5E2E275A2BEC81C0)
             Mouse.Move(5,5)
             Mouse.Click(5,5,left)
             Paint('enable small menus')
-            CheckHash(0xca41721d2facc991)
+            CheckHash(0x2055B958836FA86E)
             Mouse.Move(38,8)
             Mouse.Click(38,8,right)
             Paint('small menu with 3 items')
-            CheckHash(0xcd82bea014628957)
+            CheckHash(0x2B309344AE720CA4)
             Mouse.Move(47,12)
             Mouse.Click(47,12,left)
             Paint('scroll one item')
-            CheckHash(0xae6744d7d3a78b88)
+            CheckHash(0xABBE597E9C0F7D53)
             Mouse.Move(47,10)
             Mouse.Click(47,10,left)
             Paint('menu is now black')
-            CheckHash(0x496f95b6093f7b49)
+            CheckHash(0xCEAD492B41918786)
             Mouse.Move(21,5)
             Mouse.Click(21,5,left)
             Mouse.Move(22,5)
             Paint('remove the limit of 3 items')
-            CheckHash(0x8c66b5179d508670)
+            CheckHash(0xE2E7E5BCDEB2414)
             Mouse.Move(40,2)
             Mouse.Drag(40,2,40,7)
             Mouse.Move(38,13)
@@ -859,15 +859,15 @@ fn check_popup_menu() {
             Mouse.Click(35,12,right)
             Mouse.Click(35,12,right)
             Paint('menu on top, but scrolled (up to light red)')
-            CheckHash(0x4191bdc942455569)
+            CheckHash(0xC729D9D22633EBC5)
             Mouse.Move(44,12)
             Mouse.Click(44,12,left)
             Paint('menu on top scrolled (up to light green)')
-            CheckHash(0xd8069e838766bdfb)
+            CheckHash(0x9B59E08491100CA7)
             Mouse.Move(43,11)
             Mouse.Click(43,11,left)
             Paint('color is light green')
-            CheckHash(0x8997a3906f032270)    
+            CheckHash(0x8A597798E864C55C)    
         ";
     let mut a = App::debug(80, 24, script).menu_bar().build().unwrap();
     a.add_window(MyWindow::new());
@@ -991,31 +991,31 @@ fn check_popup_menu_with_keys() {
     let script = "
             Paint.Enable(false)
             Paint('initial_state')
-            CheckHash(0xca08a561329e08e0)
+            CheckHash(0xD8785911D8A3E144)
             Mouse.Click(39,13,right)
             Paint('popup menu on top')
-            CheckHash(0xBC698D1FFF6C047C)
+            CheckHash(0x27E1510C1208B360)
             Key.Pressed('G')
             Paint('Green color selected')
-            CheckHash(0x1AECE5B91EDFACD0)
+            CheckHash(0xEA78E87B12F04C0C)
             Mouse.Click(39,13,right)
             Key.Pressed('M')
             Paint('Magenta color selected')
-            CheckHash(0x60580F11EE435534)
+            CheckHash(0xE67A114A46E98160)
             Mouse.Click(39,13,right)
             Key.Pressed(Down,3)
             Paint('Black selected')
-            CheckHash(0x23506C27C5D8377F)
+            CheckHash(0xDE77E1A4F67D5A0B)
             Key.Pressed(Enter)
             Paint('Black color selected')
-            CheckHash(0x6D59577FB15D2468)
+            CheckHash(0xC71AEEECAC9C2C54)
             Mouse.Click(39,13,right)
             Key.Pressed(Down,5)
             Paint('Magenta selected')
-            CheckHash(0x360C3880A88E84EB)
+            CheckHash(0xEC93049622378D37)
             Key.Pressed(Escape)
             Paint('Normal state')
-            CheckHash(0x6D59577FB15D2468)
+            CheckHash(0xC71AEEECAC9C2C54)
 
         ";
     let mut a = App::debug(80, 24, script).menu_bar().build().unwrap();
@@ -1443,4 +1443,252 @@ fn check_menubar_recursive_shortcuts() {
     let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
     a.add_window(MyWindow::new());
     a.run();
+}
+
+#[test]
+fn check_menu_checkbox_methods() {
+    #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
+    struct MyDesktop {
+        m_desktop: Handle<Menu>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                m_desktop: Handle::None,
+            }
+        }
+    }
+
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            let m = menu!(
+                "Desktop,class:MyDesktop,items=[
+                    {&A,cmd:A, checked: true},
+                    {&B,cmd:B, checked: false},
+                    {&C,cmd:C, checked: true}
+                ]"
+            );
+            self.m_desktop = self.register_menu(m);
+        }
+    }
+    impl MenuEvents for MyDesktop {
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.m_desktop);
+        }
+
+        fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, _: mydesktop::Commands, _: bool) {
+            if let Some(i) = self.menuitem_mut(menu, item) {
+                assert!(i.is_checked());
+                assert!(i.is_enabled());
+                assert_eq!(i.caption(), "B");
+                i.set_caption("B is checked");
+                i.set_enabled(false);
+                i.set_shortcut(key!("Ctrl+B"));
+                assert_eq!(i.shortcut(), Key::new(KeyCode::B, KeyModifier::Ctrl));
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Initial state')
+        CheckHash(0x769320EBFCBC2E03)
+        Mouse.Click(4,0,left)
+        Paint('2.Menu open')
+        CheckHash(0xD1BCA6516F85A1E7)
+        Mouse.Move(4,3)
+        Paint('3.Move over B')
+        CheckHash(0x88D7FBBBE7F71D1F)
+        Mouse.Click(4,3,left)
+        Paint('4.Click over B')
+        CheckHash(0x769320EBFCBC2E03)
+        Mouse.Click(4,0,left)
+        Paint('5.Menu open again (all are checked and B title is <B is checked>, B is disabled, B shortcut is Ctrl+B)')
+        CheckHash(0xC5EB204AA2303162)
+    ";
+    App::debug(60, 15, script).desktop(MyDesktop::new()).menu_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_menu_singlechoice_methods() {
+    #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
+    struct MyDesktop {
+        m_desktop: Handle<Menu>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                m_desktop: Handle::None,
+            }
+        }
+    }
+
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            let m = menu!(
+                "Desktop,class:MyDesktop,items=[
+                    {&A,cmd:A, selected: true},
+                    {&B,cmd:B, selected: false},
+                    {&C,cmd:C, selected: false}
+                ]"
+            );
+            self.m_desktop = self.register_menu(m);
+        }
+    }
+    impl MenuEvents for MyDesktop {
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.m_desktop);
+        }
+
+        fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, _: mydesktop::Commands) {
+            if let Some(i) = self.menuitem_mut(menu, item) {
+                assert!(i.is_selected());
+                assert!(i.is_enabled());
+                assert_eq!(i.caption(), "B");
+                i.set_caption("B is selected");
+                i.set_enabled(false);
+                i.set_shortcut(key!("Ctrl+B"));
+                assert_eq!(i.shortcut(), Key::new(KeyCode::B, KeyModifier::Ctrl));
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Initial state')
+        CheckHash(0x769320EBFCBC2E03)
+        Mouse.Click(4,0,left)
+        Paint('2.Menu open')
+        CheckHash(0xA65B33445CC2260D)
+        Mouse.Move(4,3)
+        Paint('3.Move over B')
+        CheckHash(0xF2F67373DCFDD2F6)
+        Mouse.Click(4,3,left)
+        Paint('4.Click over B')
+        CheckHash(0x769320EBFCBC2E03)
+        Mouse.Click(4,0,left)
+        Paint('5.Menu open again (B title is <B is selected>, B is disabled, B shortcut is Ctrl+B)')
+        CheckHash(0x66D7A77E4F1A6760)
+    ";
+    App::debug(60, 15, script).desktop(MyDesktop::new()).menu_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_menu_set_status_checkbox_and_singlechoice() {
+    #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
+    struct MyDesktop {
+        m_desktop: Handle<Menu>,
+        m_cb: Handle<menu::CheckBox>,
+        m_sc: Handle<menu::SingleChoice>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                m_desktop: Handle::None,
+                m_cb: Handle::None,
+                m_sc: Handle::None,
+            }
+        }
+    }
+
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            let mut m = Menu::new("Desktop");
+            self.m_cb = m.add(menu::CheckBox::new("Check Item", Key::None, mydesktop::Commands::A, false));
+            m.add(menu::Separator::new());
+            self.m_sc = m.add(menu::SingleChoice::new("Choice One", Key::None, mydesktop::Commands::B, false));
+            m.add(menu::SingleChoice::new("Choice Two", Key::None, mydesktop::Commands::C, false));
+            self.m_desktop = self.register_menu(m);
+        }
+    }
+    impl MenuEvents for MyDesktop {
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.m_desktop);
+        }
+
+        fn on_menu_open(&self, menu: &mut Menu) {
+            let h1 = self.m_cb;
+            let h2 = self.m_sc;
+            if let Some(i) = menu.get_mut(h1) {
+                i.set_checked(true);
+            }
+            if let Some(i) = menu.get_mut(h2) {
+                i.set_selected();
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Initial state')
+        CheckHash(0x769320EBFCBC2E03)
+        Mouse.Click(4,0,left)
+        Paint('2.Menu open (A is checked, B is selected)')
+        CheckHash(0x9078AC513ABAC7F5)
+        Mouse.Move(4,3)
+    ";
+    App::debug(60, 15, script).desktop(MyDesktop::new()).menu_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_menu_command_methods() {
+    #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
+    struct MyDesktop {
+        m_desktop: Handle<Menu>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                m_desktop: Handle::None,
+            }
+        }
+    }
+
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            let m = menu!(
+                "Desktop,class:MyDesktop,items=[
+                    {&A,cmd:A},
+                    {&B,cmd:B},
+                    {&C,cmd:C}
+                ]"
+            );
+            self.m_desktop = self.register_menu(m);
+        }
+    }
+    impl MenuEvents for MyDesktop {
+        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+            menubar.add(self.m_desktop);
+        }
+
+        fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mydesktop::Commands) {
+            if let Some(i) = self.menuitem_mut(menu, item) {
+                assert!(i.is_enabled());
+                assert_eq!(i.caption(), "B");
+                i.set_caption("B is pressed");
+                i.set_enabled(false);
+                i.set_shortcut(key!("Ctrl+B"));
+                assert_eq!(i.shortcut(), Key::new(KeyCode::B, KeyModifier::Ctrl));
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Initial state')
+        CheckHash(0x769320EBFCBC2E03)
+        Mouse.Click(4,0,left)
+        Paint('2.Menu open')
+        CheckHash(0x40BC654D81173EBF)
+        Mouse.Move(4,3)
+        Paint('3.Move over B')
+        CheckHash(0xF9B77C225B39E477)
+        Mouse.Click(4,3,left)
+        Paint('4.Click over B')
+        CheckHash(0x769320EBFCBC2E03)
+        Mouse.Click(4,0,left)
+        Paint('5.Menu open again (B title is <B is pressed>, B is disabled, B shortcut is Ctrl+B)')
+        CheckHash(0x3906086C97012BD3)
+    ";
+    App::debug(60, 15, script).desktop(MyDesktop::new()).menu_bar().build().unwrap().run();
 }

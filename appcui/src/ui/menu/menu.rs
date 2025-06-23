@@ -7,14 +7,119 @@ use crate::{
     input::{Key, KeyCode, MouseWheelDirection},
     prelude::KeyModifier,
     system::{Handle, HandleSupport, RuntimeManager, Theme},
-    ui::common::{traits::EventProcessStatus, UIElement},
+    ui::common::traits::EventProcessStatus,
     utils::{Caption, ExtractHotKeyMethod, Strategy, VectorIndex},
 };
 use std::sync::atomic::{AtomicUsize, Ordering};
-use AppCUIProcMacro::key;
+use appcui_proc_macro::key;
 const MAX_ITEMS: usize = 128;
 static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 
+/// A container for menu items that can be displayed over existing controls.
+/// 
+/// A menu is a list of items (commands, checkboxes, single choice elements) that 
+/// can be displayed over existing controls. Menus can be added to a menu bar or 
+/// displayed as popup menus.
+///
+/// # Examples
+///
+/// Creating a menu with various items:
+///
+/// ```
+/// use appcui::prelude::*;
+///
+/// // Define a window with menu events and commands
+/// #[Window(events = MenuEvents, commands = New+Open+Save+Exit)]
+/// struct MyWindow {
+///     file_menu: Handle<Menu>,
+/// }
+///
+/// impl MyWindow {
+///     fn new() -> Self {
+///         let mut w = MyWindow {
+///             base: window!("Example,d:c,w:40,h:10"),
+///             file_menu: Handle::None,
+///         };
+///         
+///         // Create a menu and add items to it
+///         let mut file_menu = Menu::new("&File");
+///         file_menu.add(menu::Command::new("&New", key!("Ctrl+N"), mywindow::Commands::New));
+///         file_menu.add(menu::Command::new("&Open", key!("Ctrl+O"), mywindow::Commands::Open));
+///         file_menu.add(menu::Command::new("&Save", key!("Ctrl+S"), mywindow::Commands::Save));
+///         file_menu.add(menu::Separator::new());
+///         file_menu.add(menu::Command::new("E&xit", key!("Alt+F4"), mywindow::Commands::Exit));
+///         
+///         // Register the menu with the window
+///         w.file_menu = w.register_menu(file_menu);
+///         
+///         w
+///     }
+/// }
+///
+/// // Implement menu event handlers
+/// impl MenuEvents for MyWindow {
+///     fn on_update_menubar(&self, menubar: &mut MenuBar) {
+///         // Add the menu to the menu bar
+///         menubar.add(self.file_menu);
+///     }
+///     
+///     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mywindow::Commands) {
+///         match command {
+///             mywindow::Commands::New => { /* Handle New command */ },
+///             mywindow::Commands::Open => { /* Handle Open command */ },
+///             mywindow::Commands::Save => { /* Handle Save command */ },
+///             mywindow::Commands::Exit => { /* Handle Exit command */ },
+///         }
+///     }
+/// }
+/// ```
+///
+/// Using the `menu!` macro for more concise menu creation:
+///
+/// ```
+/// use appcui::prelude::*;
+///
+/// #[Window(events = MenuEvents, commands = New+Open+Save+Exit)]
+/// struct MyWindow {
+///     file_menu: Handle<Menu>,
+/// }
+///
+/// impl MyWindow {
+///     fn new() -> Self {
+///         let mut w = MyWindow {
+///             base: window!("Example,d:c,w:40,h:10"),
+///             file_menu: Handle::None,
+///         };
+///         
+///         // Create a menu using the menu! macro
+///         w.file_menu = w.register_menu(menu!("&File,class:MyWindow,items=[
+///             { &New,Ctrl+N,cmd:New },
+///             { &Open,Ctrl+O,cmd:Open },
+///             { &Save,Ctrl+S,cmd:Save },
+///             { --- },
+///             { E&xit,Alt+F4,cmd:Exit }
+///         ]"));
+///         
+///         w
+///     }
+/// }
+/// // Implement menu event handlers
+/// impl MenuEvents for MyWindow {
+///     fn on_update_menubar(&self, menubar: &mut MenuBar) {
+///         // Add the menu to the menu bar
+///         menubar.add(self.file_menu);
+///     }
+///     
+///     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mywindow::Commands) {
+///         match command {
+///             mywindow::Commands::New => { /* Handle New command */ },
+///             mywindow::Commands::Open => { /* Handle Open command */ },
+///             mywindow::Commands::Save => { /* Handle Save command */ },
+///             mywindow::Commands::Exit => { /* Handle Exit command */ },
+///         }
+///     }
+/// }
+/// ```
 pub struct Menu {
     pub(super) caption: Caption,
     pub(super) items: Vec<MenuItemWrapper>,
@@ -28,10 +133,21 @@ pub struct Menu {
     pub(super) clip: ClipArea,
     pub(super) handle: Handle<Menu>,
     pub(super) parent_handle: Handle<Menu>,
-    pub(super) receiver_control_handle: Handle<UIElement>,
+    pub(super) receiver_control_handle: Handle<()>,
 }
 
 impl Menu {
+    /// Creates a new menu with the specified name.
+    ///
+    /// The name can include the special character `&`, which designates the next 
+    /// character as a hotkey to activate the menu (e.g., "&File" makes 'F' the hotkey,
+    /// typically activated with Alt+F).
+    ///
+    /// # Parameters
+    /// * `name` - The text to display for the menu. If empty, a default caption is used.
+    ///
+    /// # Returns
+    /// A new `Menu` instance.
     pub fn new(name: &str) -> Self {
         Self {
             caption: if name.is_empty() {
@@ -54,6 +170,15 @@ impl Menu {
         }
     }
 
+    /// Adds a new menu item to the existing menu.
+    ///
+    /// # Parameters
+    /// * `menuitem` - The menu item to add. This can be a Command, CheckBox, 
+    ///   SingleChoice, Separator, or SubMenu.
+    ///
+    /// # Returns
+    /// A handle to the added menu item, which can be used to access or modify 
+    /// the item later.
     #[allow(private_bounds)]
     pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T>
     where
@@ -66,6 +191,14 @@ impl Menu {
         h
     }
 
+    /// Gets an immutable reference to a menu item by its handle.
+    ///
+    /// # Parameters
+    /// * `menuitem_hamdle` - Handle to the menu item to retrieve.
+    ///
+    /// # Returns
+    /// An `Option` containing a reference to the menu item if found, or `None` if
+    /// the item doesn't exist or the handle is invalid.
     #[allow(private_bounds)]
     pub fn get<T>(&self, menuitem_hamdle: Handle<T>) -> Option<&T>
     where
@@ -88,6 +221,14 @@ impl Menu {
         }
     }
 
+    /// Gets a mutable reference to a menu item by its handle.
+    ///
+    /// # Parameters
+    /// * `menuitem_hamdle` - Handle to the menu item to retrieve.
+    ///
+    /// # Returns
+    /// An `Option` containing a mutable reference to the menu item if found, or `None` if
+    /// the item doesn't exist or the handle is invalid.
     #[allow(private_bounds)]
     pub fn get_mut<T>(&mut self, menuitem_hamdle: Handle<T>) -> Option<&mut T>
     where
@@ -114,8 +255,14 @@ impl Menu {
         MousePositionInfo::new(x - self.clip.left, y - self.clip.top, self).is_on_menu
     }
     #[inline(always)]
-    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;
+    }
+
+    pub(crate) fn update_menuitems_menu_handle(&mut self) {
+        for item in self.items.iter_mut() {
+            item.update_menu_handle(self.handle);
+        }
     }
 
     fn update_first_visible_item(&mut self) {
@@ -199,7 +346,7 @@ impl Menu {
         self.update_first_visible_item();
     }
 
-    pub(super) fn process_shortcut(&mut self, key: Key, receiver_control_handle: Handle<UIElement>) -> bool {
+    pub(super) fn process_shortcut(&mut self, key: Key, receiver_control_handle: Handle<()>) -> bool {
         for (index, item) in self.items.iter_mut().enumerate() {
             if !item.is_enabled() {
                 continue;
@@ -417,7 +564,7 @@ impl Menu {
     fn close(&mut self) {
         RuntimeManager::get().activate_opened_menu_parent();
     }
-    fn run_item_action(&mut self, index: usize, receiver_control_handle: Handle<UIElement>) {
+    fn run_item_action(&mut self, index: usize, receiver_control_handle: Handle<()>) {
         if index >= self.items.len() {
             return;
         }

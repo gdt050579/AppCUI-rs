@@ -1,7 +1,7 @@
 use crate::utils::NavigatorRoot;
 use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug,Eq,PartialEq)]
 pub(crate) enum RootType {
     Fixed,
     Removable,
@@ -29,7 +29,7 @@ impl RootType {
             Self::Network => '🖧',
             Self::RamDisk => '▦',
             Self::CdRom => '📀',
-            Self::Unknown => '❓',
+            Self::Unknown => '?',
         }
     }
 }

@@ -176,13 +176,13 @@ fn check_scrollbars_on_arrows_and_click() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xD0BE94DEA66EE381)
+        CheckHash(0x5EC4171CCE8C9EA9)
         Key.Pressed(Right,5)
         Paint('2. bottom scrollbar moved with keys')
-        CheckHash(0x6C410318B795F49F)
+        CheckHash(0xB63A094AC561BACF)
         Key.Pressed(Down,3)
         Paint('3. vertical scrollbar moved with keys')
-        CheckHash(0x2022FBDCEF6E8DF7)
+        CheckHash(0x9B4BF0FBAFDA353F)
         Key.Pressed(Left,3)
         Key.Pressed(Right,20)
         Key.Pressed(Up,1)
@@ -194,7 +194,7 @@ fn check_scrollbars_on_arrows_and_click() {
         Mouse.Click(31,13,left)
         Mouse.Move(44,16)
         Paint('5. scroll bars moved with mouse')
-        CheckHash(0xCD06DB42F28CBE04) 
+        CheckHash(0xB7F2FEFDD0647BF4) 
 ";
     let m = markdown!("'
     # My Markdown Example\r\n\r\n\
@@ -258,20 +258,20 @@ fn check_scrollbars_on_drag_and_weel() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x9FDE78EBFCEB11B1)
+        CheckHash(0x93FD8A2AF6052839)
         Mouse.Wheel(5,5,down,5)
         Paint('2. Scroll weel down')
-        CheckHash(0xDEEE9DEB22896715)
+        CheckHash(0x64BD055E27582B91)
         Mouse.Wheel(5,5,up,5)
         Paint('3. scroll weel up')
-        CheckHash(0x9FDE78EBFCEB11B1)
+        CheckHash(0x93FD8A2AF6052839)
         Mouse.Drag(5,5,5,3)
         Paint('4. drag mouse up (scroll down)')
-        CheckHash(0xCEF639CC66412132)
+        CheckHash(0xA70336B5C3B4EC86)
         Mouse.Drag(5,5,5,12)
         Paint('5. drag mouse down (scroll up)')
-        CheckHash(0x9FDE78EBFCEB11B1)
-";
+        CheckHash(0x93FD8A2AF6052839)
+    ";
     let m = markdown!("'
     # My Markdown Example\r\n\r\n\
     Welcome to this **Markdown** example! This file *demonstrates* basic Markdown syntax.\r\n\r\n\
@@ -333,12 +333,12 @@ fn check_move_to_section_on_link_click() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xE2BF3C6FAAA8C1B8)
+        CheckHash(0x173C84B9116601C0)
         Mouse.Move(3,2)
         Mouse.Click(3,2,left)
         Paint('2. scroll bars moved with mouse')
         CheckHash(0x19DD90B0FD257FA9) 
-";
+    ";
     let m = markdown!("'
     [Go to end](#end-link)\r\n\r\n\
     Some testing for links back \r\n\r\n\

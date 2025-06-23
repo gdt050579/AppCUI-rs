@@ -12,10 +12,13 @@ pub enum ArrangeWindowsMethod {
 pub struct Desktop {}
 
 impl Desktop {
+    /// Creates a new desktop object. This is something that the AppCUI does automatically unless a custom Desktop is provided.
+    /// The desktop object is the main control of the application and it is used to manage the windows and controls.
     pub fn new() -> Self {
         if RuntimeManager::is_instantiated() {
             panic!("A desktop object can only be created once (when the application is started) !");
         }
+
         Self {
             base: ControlBase::with_status_flags(
                 Layout::new("x:0,y:0,w:100%,h:100%"),
@@ -23,12 +26,19 @@ impl Desktop {
             ),
         }
     }
+
+    /// Returns the size of the terminal.
     pub fn terminal_size(&self) -> Size {
-        RuntimeManager::get().get_terminal_size()
+        RuntimeManager::get().terminal_size()
     }
+
+    /// Returns the size of the desktop.
+    /// This is the size of the terminal minus the size of the status bar and the command bar (if they are present).
     pub fn desktop_rect(&self) -> Rect {
         RuntimeManager::get().get_desktop_rect()
     }
+
+    /// Closes the application.
     pub fn close(&mut self) {
         RuntimeManager::get().close();
     }
@@ -53,7 +63,7 @@ impl Desktop {
             }
         }
     }
-    fn reposition_child(&self, handle: Handle<UIElement>, new_poz: Rect) {
+    fn reposition_child(&self, handle: Handle<()>, new_poz: Rect) {
         if let Some(control) = RuntimeManager::get().get_controls_mut().get_mut(handle) {
             let base = control.base_mut();
             base.set_position(new_poz.left(), new_poz.top());
@@ -158,6 +168,8 @@ impl Desktop {
             ArrangeWindowsMethod::Grid => self.arrange_grid(r),
         }
     }
+
+    /// Adds a new window to the desktop. The window will be displayed on top of all other windows.
     pub fn add_window<T>(&mut self, window: T) -> Handle<T>
     where
         T: Control + WindowControl + NotModalWindow + 'static,

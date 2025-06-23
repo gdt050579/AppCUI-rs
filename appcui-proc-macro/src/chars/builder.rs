@@ -25,6 +25,8 @@ static CHAR_NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("backcolor", "back", ParamType::Color),
     NamedParameter::new("attr", "attr", ParamType::Flags),
     NamedParameter::new("attributes", "attr", ParamType::Flags),
+    NamedParameter::new("flags", "attr", ParamType::Flags),
+    NamedParameter::new("charflags", "attr", ParamType::Flags),
     NamedParameter::new("code", "code", ParamType::String),
     NamedParameter::new("unicode", "code", ParamType::String),
 ];
@@ -43,6 +45,8 @@ static CHARATTR_NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("backcolor", "back", ParamType::Color),
     NamedParameter::new("attr", "attr", ParamType::Flags),
     NamedParameter::new("attributes", "attr", ParamType::Flags),
+    NamedParameter::new("flags", "attr", ParamType::Flags),
+    NamedParameter::new("charflags", "attr", ParamType::Flags),
 ];
 
 fn get_color(param_name: &str, dict: &mut NamedParamsMap) -> Color {

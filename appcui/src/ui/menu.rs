@@ -1,3 +1,8 @@
+//! A menu UI control that provides hierarchical command options.
+//!
+//! The Menu control displays a list of commands or options that users can select.
+//! It supports nested submenus, separators, and keyboard shortcuts for navigation.
+
 mod menu;
 mod menu_bar;
 mod menu_bar_item;

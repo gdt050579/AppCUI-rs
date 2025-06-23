@@ -7,9 +7,10 @@ use crate::prelude::*;
 use crate::utils::glyphs::GlyphParser;
 use std::marker::PhantomData;
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", all(target_arch = "wasm32", wasm_windows)))]
 const PLATFORM_SEPARATOR_CHARACTER: char = '\\';
-#[cfg(target_family = "unix")]
+
+#[cfg(any(target_family = "unix", all(target_arch = "wasm32", wasm_unix)))]
 const PLATFORM_SEPARATOR_CHARACTER: char = '/';
 
 struct NavigatorDataCacher<T, E, R>
@@ -618,7 +619,7 @@ where
     fn copy_text(&mut self) {
         if !self.selection.is_empty() {
             RuntimeManager::get()
-                .terminal_mut()
+                .backend_mut()
                 .set_clipboard_text(&self.input_path[self.selection.start..self.selection.end]);
         }
     }
@@ -629,7 +630,7 @@ where
         if !self.selection.is_empty() {
             self.delete_selection();
         }
-        if let Some(txt) = RuntimeManager::get().terminal().get_clipboard_text() {
+        if let Some(txt) = RuntimeManager::get().backend().clipboard_text() {
             self.input_path.insert_str(self.cursor, &txt);
             self.move_cursor_to(self.cursor + txt.len(), false, true);
         }
@@ -640,7 +641,7 @@ where
         }
         if !self.selection.is_empty() {
             RuntimeManager::get()
-                .terminal_mut()
+                .backend_mut()
                 .set_clipboard_text(&self.input_path[self.selection.start..self.selection.end]);
             self.delete_selection();
         }

@@ -1,7 +1,6 @@
 use textfield::TextField;
 
 use super::traits::{Control, CustomEvents, EventProcessStatus};
-use super::UIElement;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
 use crate::prelude::{
@@ -49,8 +48,8 @@ pub(crate) enum ControlEventData {
 }
 
 pub(crate) struct ControlEvent {
-    pub(crate) emitter: Handle<UIElement>,
-    pub(crate) receiver: Handle<UIElement>,
+    pub(crate) emitter: Handle<()>,
+    pub(crate) receiver: Handle<()>,
     pub(crate) data: ControlEventData,
 }
 
@@ -140,7 +139,7 @@ impl ControlEvent {
                     MarkdownEvents::on_backspace_navigation(receiver, self.emitter.cast())
                 },
                 markdown::events::Data::LinkClickEvent(link) => {
-                    MarkdownEvents::on_external_link(receiver, self.emitter.cast(), &link)
+                    MarkdownEvents::on_external_link(receiver, self.emitter.cast(), link)
                 },
             }
         }

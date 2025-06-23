@@ -10,10 +10,6 @@
         - [Debug scenarios](chapter-2/debug_scenarious.md)
         - [Recording events](chapter-2/event_recording.md)
         - [Logging](chapter-2/logging.md)
-    - [Terminals](chapter-2/terminals.md)
-        - [Windows Console](chapter-2/terminals/windows_console.md)
-        - [NCurses](chapter-2/terminals/ncurses.md)
-        - [Termios](chapter-2/terminals/termios.md)
     - [Screen area and sizes](chapter-2/screen.md)
     - [Surface](chapter-2/surface.md)
         - [Clipping and origin point](chapter-2/surface/clipping.md)
@@ -27,6 +23,12 @@
         - [Mouse](chapter-2/mouse.md)
         - [Keyboard](chapter-2/keyboard.md)
     - [Clipboard](chapter-2/clipboard.md)
+    - [Backends](chapter-2/backends.md)
+        - [Windows Console](chapter-2/backends/windows_console.md)
+        - [Windows VT](chapter-2/backends/windows_vt.md)
+        - [NCurses](chapter-2/backends/ncurses.md)
+        - [Termios](chapter-2/backends/termios.md)
+        - [Web Terminal](chapter-2/backends/web_terminal.md)
 
 - [Controls](chapter-3/controls.md)
     - [Layout](chapter-3/layout.md)
@@ -68,10 +70,9 @@
         - [ProgressBar](chapter-3/stock-controls/progressbar.md)
         - [RadioBox](chapter-3/stock-controls/radiobox.md)
         - [Selector](chapter-3/stock-controls/selector.md)
-        - [Slider]()
         - [Tab](chapter-3/stock-controls/tab.md)
+        - [TextArea](chapter-3/stock-controls/textarea.md)
         - [TextField](chapter-3/stock-controls/textfield.md)
-        - [TextArea]() <!-- (chapter-3/stock-controls/textarea.md) -->
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
         - [ToggleButton](chapter-3/stock-controls/togglebutton.md)
         - [TreeView](chapter-3/stock-controls/treeview.md)
@@ -80,9 +81,11 @@
     - [Custom controls](chapter-3/custom_controls.md)
         - [Overwriteable traits](chapter-3/custon-controls/overwriteable_traits.md)
         - [Emitting events](chapter-3/custon-controls/emitting_events.md)
-        - [ScrollBars]()
+        - [Overlay on Focus support](chapter-3/custon-controls/focus_overlay.md)
+        - [ScrollBars](chapter-3/custon-controls/scrollbars.md)
     - [Object Traits](chapter-3/object_traits.rs)
         - [ListItem](chapter-3/object-traits/listitem.md)
+        - [EnumSelector](chapter-3/object-traits/enumselector.md)
 
 - [Desktop](chapter-4/desktop.md)
     - [Custom desktops](chapter-4/custom_desktop.md)
@@ -103,7 +106,6 @@
     - [Notifications dialogs](chapter-5/notification_dialogs.md)
     - [Open/Save dialog](chapter-5/opensave_dialogs.md)
     - [Folder selection dialog](chapter-5/folder_selection_dialogs.md)
-    - [Window manager dialog]()
 
 - [Themes](chapter-6/themes.md)
     - [Predefined Themes](chapter-6/predefined_themes.md)
@@ -111,4 +113,4 @@
 
 - [Multi-Threading](chapter-7/multi-threading.md)
     - [Timers](chapter-7/timers.md)
-    - [Background tasks]()<!--(chapter-7/background_tasks.md)-->
+    - [Background tasks](chapter-7/background_tasks.md)

@@ -1,7 +1,7 @@
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::*;
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 use super::scrollbars_components::ProcessEventResult;
 

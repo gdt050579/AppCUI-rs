@@ -1,10 +1,8 @@
 use crate::{
     graphics::{Character, Size, Surface},
     input::{Key, KeyCode, KeyModifier},
-    system::{Handle, Theme},
-    terminals::{MouseButtonDownEvent, MouseMoveEvent},
+    system::{Handle, Theme, MouseButtonDownEvent, MouseMoveEvent},
     ui::common::traits::CommandID,
-    ui::common::UIElement,
 };
 
 use super::events::CommandBarEvent;
@@ -22,7 +20,7 @@ struct Item {
     command: u32,
     version: u32,
     size: u16,
-    receiver_control: Handle<UIElement>,
+    receiver_control: Handle<()>,
 }
 pub struct CommandBar {
     width: u32,
@@ -34,7 +32,7 @@ pub struct CommandBar {
     has_shifts: [bool; MAX_SHIFT_STATES],
     hovered_index: u32,
     pressed_index: u32,
-    receiver_control_handle: Handle<UIElement>,
+    receiver_control_handle: Handle<()>,
 }
 
 impl CommandBar {
@@ -96,7 +94,7 @@ impl CommandBar {
     }
 
     #[inline(always)]
-    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;
     }
 

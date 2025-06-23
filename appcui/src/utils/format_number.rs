@@ -114,6 +114,9 @@ impl FormatNumber {
     }
     #[inline(always)]
     pub(crate) const fn representation_digits(mut self, value: u8) -> Self {
+        if value == 0 {
+            panic!("Invalid number of representation digits for FormatNumber (expected a number greater than 0)");
+        }
         match self.base {
             2 => {
                 if value > 128 {
@@ -195,16 +198,16 @@ impl FormatNumber {
             if value == 0.into() {
                 break;
             }
-            pos -= 1;
             if pos == 0 {
                 return None;
             }
+            pos -= 1;
             if self.group_size > 0 && digits % self.group_size == 0 {
                 buffer[pos] = self.separator_char;
-                pos -= 1;
                 if pos == 0 {
                     return None;
                 }
+                pos -= 1;
             }
         }
         if digits < self.representation_digits {
@@ -214,10 +217,10 @@ impl FormatNumber {
             pos -= 1;
             if self.group_size > 0 && digits % self.group_size == 0 {
                 buffer[pos] = self.separator_char;
-                pos -= 1;
                 if pos == 0 {
                     return None;
                 }
+                pos -= 1;
             }
             loop {
                 buffer[pos] = b'0';
@@ -225,16 +228,17 @@ impl FormatNumber {
                 if digits == self.representation_digits {
                     break;
                 }
-                pos -= 1;
                 if pos == 0 {
                     return None;
                 }
+                pos -= 1;
+
                 if self.group_size > 0 && digits % self.group_size == 0 {
                     buffer[pos] = self.separator_char;
-                    pos -= 1;
                     if pos == 0 {
                         return None;
                     }
+                    pos -= 1;
                 }
             }
         }
@@ -462,6 +466,7 @@ macro_rules! IMPL_FOR_SIGNED {
     };
 }
 
+IMPL_FOR_UNSIGNED!(u8);
 IMPL_FOR_UNSIGNED!(u16);
 IMPL_FOR_UNSIGNED!(u32);
 IMPL_FOR_UNSIGNED!(u64);

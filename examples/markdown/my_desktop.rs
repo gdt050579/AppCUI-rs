@@ -102,7 +102,12 @@ impl MenuEvents for MyDesktop {
                     dialogs::OpenFileDialogFlags::Icons,
                 ) {
                     if let Some(parent_dir) = std::path::Path::new(&file_path).parent() {
-                        self.add_window(Viewer::new(parent_dir.to_string_lossy().to_string())); 
+                        if let Some(filename) = std::path::Path::new(&file_path).file_name() {
+                            self.add_window(Viewer::new(
+                                parent_dir.to_string_lossy().to_string(),
+                                filename.to_string_lossy().as_ref(),
+                            ));
+                        }
                     }
                 }
             }

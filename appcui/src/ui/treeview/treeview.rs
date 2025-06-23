@@ -1,7 +1,7 @@
 use super::events::EventData;
 use super::{Flags, FoldStatus, Item, TreeDataManager};
 use components::listitem::render_method::RenderData;
-use AppCUIProcMacro::*;
+use appcui_proc_macro::*;
 
 use crate::prelude::*;
 
@@ -1178,7 +1178,6 @@ where
                     MouseWheelDirection::Right => {
                         OnKeyPressed::on_key_pressed(self, Key::new(KeyCode::Right, KeyModifier::None), 0 as char);
                     }
-                    _ => {}
                 }
                 true
             }

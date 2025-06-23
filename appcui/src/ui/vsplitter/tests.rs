@@ -444,9 +444,35 @@ Multiple convolutional and pooling layers are stacked together, allowing the net
     let mut w = window!("Test,x:0,y:0,w:60,h:10,flags: Sizeable");
     let mut vs = VSplitter::new(5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
     let mut c = canvas!("'80x300',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
-    let s = c.get_drawing_surface();
+    let s = c.drawing_surface_mut();
     s.write_string(0, 0, CNN, CharAttribute::with_color(Color::White, Color::Black), true);
     vs.add(vsplitter::Panel::Right, c);
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_mouse_wheel_and_doubleclicked() {
+    let script = "
+        Paint.Enable(false)
+        // ┌─ Left ─────────────┐
+        // ┌─ Right ────────────┐
+        Paint('1. Initial state')   
+        CheckHash(0xD1DEEDEB85046D1)
+        Mouse.Wheel(30,8,left,1)
+        Paint('2. Nothing changes')   
+        CheckHash(0x7DAA05CFF05C4721)
+        Mouse.DoubleClick(30,8,left)
+        Paint('3. Nothing changes')   
+        CheckHash(0x7DAA05CFF05C4721)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:c,w:51,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(0.5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
     a.add_window(w);
     a.run();

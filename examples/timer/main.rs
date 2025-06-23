@@ -29,7 +29,7 @@ impl MyWin {
         let attr_two_points = theme.text.inactive;
         let c = self.c;
         if let Some(c) = self.control_mut(c) {
-            let s = c.get_drawing_surface();
+            let s = c.drawing_surface_mut();
             s.clear(back);
             let sec = seconds % 60;
             let min = seconds / 60;

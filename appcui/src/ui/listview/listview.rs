@@ -3,9 +3,9 @@ use std::cmp::Ordering;
 use super::events::*;
 use super::{Flags, Group, GroupInformation, Item, ListItem, ViewMode};
 use crate::utils;
-use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
+use appcui_proc_macro::*;
 use components::listitem::render_method::RenderData;
-use AppCUIProcMacro::*;
+use components::{Column, ColumnsHeader, ColumnsHeaderAction, ListScrollBars};
 
 #[derive(Clone, Copy)]
 enum CheckMode {
@@ -32,6 +32,18 @@ enum HoverStatus {
     OverItemCheckMark(i32, usize),
     OverGroupCheckMark(i32, usize),
     OverGroupFoldButton(i32, usize),
+}
+
+struct TextLine {
+    x: i32,
+    y: i32,
+    width: u32,
+}
+impl TextLine {
+    #[inline(always)]
+    fn new(x: i32, y: i32, width: u32) -> Self {
+        Self { x, y, width }
+    }
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
@@ -588,6 +600,17 @@ where
         self.selected_items_count
     }
 
+    /// Returns a reference to a column at the specified index or None if the index is out of bounds
+    pub fn column(&self, index: usize) -> Option<&Column> {
+        self.header.columns().get(index)
+    }
+
+    /// Returns a mutable reference to a column at the specified index or None if the index is out of bounds
+    pub fn column_mut(&mut self, index: usize) -> Option<&mut Column> {
+        self.header.columns_mut().get_mut(index)
+    }
+
+
     fn goto_element(&mut self, element: Element, emit_event: bool) -> bool {
         for (index, item) in self.filter.iter().enumerate() {
             if *item == element {
@@ -997,74 +1020,78 @@ where
             _ => false,
         }
     }
-    fn paint_group(&self, gi: &GroupInformation, x: i32, y: i32, width: u32, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
-        let w = width;
-        surface.draw_horizontal_line_with_size(x, y, w, LineType::Single, attr.unwrap_or(theme.lines.focused));
-        let mut left = x + 1;
+    fn paint_group(&self, gi: &GroupInformation, tl: TextLine, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
+        let w = tl.width;
+        surface.draw_horizontal_line_with_size(tl.x, tl.y, w, LineType::Single, attr.unwrap_or(theme.lines.focused));
+        let mut left = tl.x + 1;
         if gi.is_collapsed() {
             surface.write_char(
                 left,
-                y,
+                tl.y,
                 Character::with_attributes(SpecialChar::TriangleRight, attr.unwrap_or(theme.symbol.arrows)),
             );
         } else {
             surface.write_char(
                 left,
-                y,
+                tl.y,
                 Character::with_attributes(SpecialChar::TriangleDown, attr.unwrap_or(theme.symbol.arrows)),
             );
         }
         left += 2;
-        if self.flags.contains(Flags::CheckBoxes) && left + 4 < x + w as i32 {
-            surface.write_string(left, y, "[ ]", attr.unwrap_or(theme.text.focused), false);
+        if self.flags.contains(Flags::CheckBoxes) && left + 4 < tl.x + w as i32 {
+            surface.write_string(left, tl.y, "[ ]", attr.unwrap_or(theme.text.focused), false);
             let count = gi.items_count();
             let checked = gi.items_checked_count();
             if (count == checked) && (count > 0) {
                 surface.write_char(
                     left + 1,
-                    y,
+                    tl.y,
                     Character::with_attributes(SpecialChar::CheckMark, attr.unwrap_or(theme.symbol.checked)),
                 );
             } else if checked == 0 {
-                surface.write_char(left + 1, y, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
+                surface.write_char(left + 1, tl.y, Character::with_attributes('x', attr.unwrap_or(theme.symbol.unchecked)));
             } else {
-                surface.write_char(left + 1, y, Character::with_attributes('?', attr.unwrap_or(theme.symbol.unknown)));
+                surface.write_char(left + 1, tl.y, Character::with_attributes('?', attr.unwrap_or(theme.symbol.unknown)));
             }
             left += 4;
         }
         let items_in_group = gi.items_count();
         let digits = utils::FormatNumber::number_of_digits(items_in_group as u64) as i32;
-        let right = if (x + w as i32) - digits - 8 >= left {
-            (x + w as i32) - digits - 3
+        let right = if (tl.x + w as i32) - digits - 8 >= left {
+            (tl.x + w as i32) - digits - 3
         } else {
-            x + w as i32
+            tl.x + w as i32
         };
         if left + 3 < right {
             let txwidth = gi.name_chars_count() as i32;
             let space_width = if left + 3 + txwidth <= right { txwidth } else { right - left - 3 };
             let format = TextFormatBuilder::new()
-                .position(left + 1, y)
+                .position(left + 1, tl.y)
                 .align(TextAlignament::Left)
                 .attribute(attr.unwrap_or(theme.text.hovered))
                 .wrap_type(WrapType::SingleLineWrap(space_width as u16))
                 .build();
             surface.write_text(gi.name(), &format);
-            surface.write_char(left, y, Character::with_attributes(' ', attr.unwrap_or(theme.text.focused)));
+            surface.write_char(left, tl.y, Character::with_attributes(' ', attr.unwrap_or(theme.text.focused)));
             surface.write_char(
                 left + space_width + 1,
-                y,
+                tl.y,
                 Character::with_attributes(' ', attr.unwrap_or(theme.text.focused)),
             );
             if left + txwidth + 3 > right {
-                surface.write_char(left + space_width, y, Character::with_char(SpecialChar::ThreePointsHorizontal));
+                surface.write_char(left + space_width, tl.y, Character::with_char(SpecialChar::ThreePointsHorizontal));
             }
         }
-        if right + digits + 3 <= x + w as i32 {
-            surface.write_char(right, y, Character::with_attributes('[', attr.unwrap_or(theme.text.focused)));
-            surface.write_char(right + digits + 1, y, Character::with_attributes(']', attr.unwrap_or(theme.text.focused)));
+        if right + digits + 3 <= tl.x + w as i32 {
+            surface.write_char(right, tl.y, Character::with_attributes('[', attr.unwrap_or(theme.text.focused)));
+            surface.write_char(
+                right + digits + 1,
+                tl.y,
+                Character::with_attributes(']', attr.unwrap_or(theme.text.focused)),
+            );
             let mut temp_buf: [u8; 40] = [0; 40];
             let to_print_buf = utils::FormatNumber::write_to_buffer(items_in_group as u64, &mut temp_buf);
-            surface.write_ascii(right + 1, y, to_print_buf, attr.unwrap_or(theme.text.normal), false);
+            surface.write_ascii(right + 1, tl.y, to_print_buf, attr.unwrap_or(theme.text.normal), false);
         }
     }
     fn paint_groups(&self, surface: &mut Surface, theme: &Theme) {
@@ -1096,7 +1123,7 @@ where
         while (item_count < visible_items) && (idx < max_idx) {
             match self.filter[idx] {
                 Element::Group(group_id) => {
-                    self.paint_group(&self.groups[group_id as usize], x, y, item_size, surface, theme, attr);
+                    self.paint_group(&self.groups[group_id as usize], TextLine::new(x, y, item_size), surface, theme, attr);
                     // paint group
                     if is_enabled {
                         if (has_focus) && (idx == self.pos) {
@@ -1232,24 +1259,15 @@ where
             }
         }
     }
-    fn paint_item_for_fist_column(
-        &self,
-        item: &Item<T>,
-        x: i32,
-        y: i32,
-        width: u32,
-        surface: &mut Surface,
-        theme: &Theme,
-        attr: Option<CharAttribute>,
-    ) {
+    fn paint_item_for_fist_column(&self, item: &Item<T>, tl: TextLine, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
         // assume that x and y are valid and possitve (this will be ensured by the caller)
         let c = &self.header.columns()[0];
-        let l = x + if self.flags.contains(Flags::ShowGroups) { 2 } else { 0 };
-        let r = x + width.saturating_sub(1) as i32;
+        let l = tl.x + if self.flags.contains(Flags::ShowGroups) { 2 } else { 0 };
+        let r = tl.x + tl.width.saturating_sub(1) as i32;
         let mut extra = 0;
 
-        surface.set_relative_clip(l, y, r, y);
-        surface.set_origin(l, y);
+        surface.set_relative_clip(l, tl.y, r, tl.y);
+        surface.set_origin(l, tl.y);
         if self.flags.contains(Flags::CheckBoxes) {
             if item.is_checked() {
                 surface.write_char(
@@ -1269,8 +1287,8 @@ where
         }
         if l + extra < r {
             if extra > 0 {
-                surface.set_relative_clip(l + extra, y, r, y);
-                surface.set_origin(l + extra, y);
+                surface.set_relative_clip(l + extra, tl.y, r, tl.y);
+                surface.set_origin(l + extra, tl.y);
             }
             let item_render_width = (r + 1 - l - extra) as u16;
             if let Some(render_method) = ListItem::render_method(item.value(), 0) {
@@ -1342,7 +1360,7 @@ where
                     let item = &self.data[index as usize];
                     match self.view_mode {
                         ViewMode::Details => self.paint_item(item, y, surface, theme, attr),
-                        ViewMode::Columns(_) => self.paint_item_for_fist_column(item, x, y, item_size, surface, theme, attr),
+                        ViewMode::Columns(_) => self.paint_item_for_fist_column(item, TextLine::new(x, y, item_size), surface, theme, attr),
                     };
                     if (item.is_checked()) && (has_focus) && (!self.flags.contains(Flags::CheckBoxes)) {
                         surface.reset_clip();
@@ -1740,7 +1758,6 @@ where
                     MouseWheelDirection::Right => {
                         OnKeyPressed::on_key_pressed(self, Key::new(KeyCode::Right, KeyModifier::None), 0 as char);
                     }
-                    _ => {}
                 }
                 true
             }

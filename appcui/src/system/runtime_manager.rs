@@ -4,23 +4,24 @@ use std::sync::mpsc::{Receiver, Sender};
 use self::layout::ControlLayout;
 use self::menu::events::MousePressedMenuResult;
 
+use super::background_task::BackgroundTaskManager;
 use super::runtime_manager_traits::*;
 use super::timer::TimerManager;
 use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
+use crate::backend::{self, Backend};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
-use crate::terminals::*;
 use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
+use crate::ui::common::ControlManager;
 use crate::ui::common::{traits::*, ControlEvent};
-use crate::ui::common::{ControlManager, UIElement};
 use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
-use crate::{prelude::*, terminals};
+use crate::prelude::*;
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -33,14 +34,14 @@ enum LoopStatus {
 #[derive(Clone, Copy)]
 enum MouseLockedObject {
     None,
-    Control(Handle<UIElement>),
+    Control(Handle<()>),
     CommandBar,
     MenuBar,
 }
 
 #[derive(Default)]
 struct ExpandedControlInfo {
-    handle: Handle<UIElement>,
+    handle: Handle<()>,
     min_size: Size,
     prefered_size: Size,
 }
@@ -55,12 +56,13 @@ enum ExpandStatus {
 
 pub(crate) struct RuntimeManager {
     theme: Theme,
-    terminal: Box<dyn Terminal>,
+    backend: Box<dyn Backend>,
     surface: Surface,
     controls: *mut ControlHandleManager,
     menus: *mut MenuHandleManager,
     timers_manager: TimerManager,
-    desktop_handle: Handle<UIElement>,
+    task_manager: BackgroundTaskManager,
+    desktop_handle: Handle<()>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
     menubar: Option<MenuBar>,
@@ -74,19 +76,19 @@ pub(crate) struct RuntimeManager {
     request_update_timer_threads: bool,
     single_window: bool,
     loop_status: LoopStatus,
-    request_focus: Option<Handle<UIElement>>,
-    current_focus: Option<Handle<UIElement>>,
-    request_default_action: Option<Handle<UIElement>>,
+    request_focus: Option<Handle<()>>,
+    current_focus: Option<Handle<()>>,
+    request_default_action: Option<Handle<()>>,
     expanded_control: ExpandedControlInfo,
-    mouse_over_control: Handle<UIElement>,
-    focus_chain: Vec<Handle<UIElement>>,
+    mouse_over_control: Handle<()>,
+    focus_chain: Vec<Handle<()>>,
     events: Vec<ControlEvent>,
     commandbar_event: Option<CommandBarEvent>,
     menu_event: Option<MenuEvent>,
     mouse_locked_object: MouseLockedObject,
     opened_menu_handle: Handle<Menu>,
-    modal_windows: Vec<Handle<UIElement>>,
-    to_remove_list: Vec<Handle<UIElement>>,
+    modal_windows: Vec<Handle<()>>,
+    to_remove_list: Vec<Handle<()>>,
     event_receiver: Receiver<SystemEvent>,
     event_sender: Sender<SystemEvent>,
     #[cfg(feature = "EVENT_RECORDER")]
@@ -109,12 +111,12 @@ impl RuntimeManager {
         }
 
         let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
-        let term = terminals::new(&builder, sender.clone())?;
-        let term_sz = term.get_size();
+        let backend_term = backend::new(&builder, sender.clone())?;
+        let term_sz = backend_term.size();
         let surface = Surface::new(term_sz.width, term_sz.height);
         let mut manager = RuntimeManager {
             theme: builder.theme,
-            terminal: term,
+            backend: backend_term,
             event_receiver: receiver,
             event_sender: sender,
             surface,
@@ -143,6 +145,7 @@ impl RuntimeManager {
             menu_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             timers_manager: TimerManager::new(builder.max_timer_count),
+            task_manager: BackgroundTaskManager::new(),
             menus: Box::into_raw(Box::new(MenuHandleManager::new())),
             loop_status: LoopStatus::Normal,
             mouse_locked_object: MouseLockedObject::None,
@@ -188,27 +191,31 @@ impl RuntimeManager {
     }
     pub(crate) fn is_instantiated() -> bool {
         #[cfg(feature = "GLOBAL_RUNTIME")]
-        unsafe { RUNTIME_MANAGER.is_some() }
+        unsafe {
+            RUNTIME_MANAGER.is_some()
+        }
 
         #[cfg(not(feature = "GLOBAL_RUNTIME"))]
         RUNTIME_MANAGER.with(|manager| manager.borrow().is_some())
     }
     pub(crate) fn get() -> &'static mut RuntimeManager {
         #[cfg(feature = "GLOBAL_RUNTIME")]
-        unsafe { RUNTIME_MANAGER.as_mut().unwrap() }
-        
-        #[cfg(not(feature = "GLOBAL_RUNTIME"))]        
+        unsafe {
+            RUNTIME_MANAGER.as_mut().unwrap()
+        }
+
+        #[cfg(not(feature = "GLOBAL_RUNTIME"))]
         RUNTIME_MANAGER.with(|manager| {
             let mut binding = manager.borrow_mut();
             let mut_ref = binding.as_mut().expect("RuntimeManager is not initialized");
             unsafe { &mut *(mut_ref as *mut RuntimeManager) }
         })
     }
-    pub(crate) fn get_terminal_size(&self) -> Size {
-        self.terminal.get_size()
+    pub(crate) fn terminal_size(&self) -> Size {
+        self.backend.size()
     }
     pub(crate) fn get_desktop_rect(&self) -> Rect {
-        let sz = self.terminal.get_size();
+        let sz = self.backend.size();
         Rect::new(
             0,
             if self.menubar.is_some() { 1 } else { 0 },
@@ -220,11 +227,11 @@ impl RuntimeManager {
             },
         )
     }
-    pub(crate) fn terminal(&self) -> &dyn Terminal {
-        self.terminal.as_ref()
+    pub(crate) fn backend(&self) -> &dyn Backend {
+        self.backend.as_ref()
     }
-    pub(crate) fn terminal_mut(&mut self) -> &mut dyn Terminal {
-        self.terminal.as_mut()
+    pub(crate) fn backend_mut(&mut self) -> &mut dyn Backend {
+        self.backend.as_mut()
     }
 
     pub(crate) fn exit_execution_loop(&mut self) {
@@ -234,7 +241,7 @@ impl RuntimeManager {
         self.loop_status = LoopStatus::Normal;
     }
     pub(crate) fn show_tooltip(&mut self, txt: &str, rect: &Rect) {
-        self.tooltip.show(txt, rect, self.terminal.get_size(), &self.theme);
+        self.tooltip.show(txt, rect, self.backend.size(), &self.theme);
     }
     pub(crate) fn hide_tooltip(&mut self) {
         self.tooltip.hide();
@@ -301,13 +308,13 @@ impl RuntimeManager {
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
     }
-    pub(crate) fn request_focus_for_control(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn request_focus_for_control(&mut self, handle: Handle<()>) {
         self.request_focus = Some(handle);
     }
-    pub(crate) fn request_default_action_for_control(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn request_default_action_for_control(&mut self, handle: Handle<()>) {
         self.request_default_action = Some(handle);
     }
-    pub(crate) fn request_expand_for_control(&mut self, handle: Handle<UIElement>, min_size: Size, prefered_size: Size) {
+    pub(crate) fn request_expand_for_control(&mut self, handle: Handle<()>, min_size: Size, prefered_size: Size) {
         self.expanded_control.handle = handle;
         self.expanded_control.min_size = min_size;
         self.expanded_control.prefered_size = prefered_size;
@@ -319,12 +326,12 @@ impl RuntimeManager {
         self.repaint = true;
         self.recompute_layout = true;
     }
-    pub(crate) fn request_remove(&mut self, handle: Handle<UIElement>) {
+    pub(crate) fn request_remove(&mut self, handle: Handle<()>) {
         if !handle.is_none() {
             self.to_remove_list.push(handle);
         }
     }
-    fn set_event_processors(&mut self, control_handle: Handle<UIElement>, event_processor: Handle<UIElement>) {
+    fn set_event_processors(&mut self, control_handle: Handle<()>, event_processor: Handle<()>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(control_handle) {
             let base = control.base_mut();
@@ -429,6 +436,10 @@ impl RuntimeManager {
     pub(crate) fn get_system_event_sender(&self) -> std::sync::mpsc::Sender<SystemEvent> {
         self.event_sender.clone()
     }
+    #[inline(always)]
+    pub(crate) fn get_background_task_manager(&mut self) -> &mut BackgroundTaskManager {
+        &mut self.task_manager
+    }
 
     #[inline(always)]
     pub(crate) fn get_menus(&mut self) -> &mut MenuHandleManager {
@@ -441,11 +452,22 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
-    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<UIElement>, x: i32, y: i32, max_size: Option<Size>) {
+    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {
         let menus = unsafe { &mut *self.menus };
+        let controls = unsafe { &mut *self.controls };
         if let Some(menu) = menus.get_mut(handle) {
-            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.terminal.get_size());
+            // 1. make sure that the receiver control is set up for the menu
             menu.set_receiver_control_handle(receiver_control_handle);
+            // 2. update menu items handles (link them to the menu parent)
+            menu.update_menuitems_menu_handle();
+            // 3. call on_menu_opened here
+            // we need to call this first because if on_menu_open changes the size of the menu
+            // we can recompute its position after this
+            if let Some(ctrl) = controls.get(receiver_control_handle) {
+                GenericMenuEvents::on_menu_open(ctrl.control(), menu);
+            }
+            // 4. compute the position and show
+            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.backend.size());
             self.opened_menu_handle = handle;
         }
     }
@@ -474,99 +496,172 @@ impl RuntimeManager {
             DesktopEvents::on_update_window_count(desktop.control_mut(), count);
         }
     }
+
+    pub(crate) fn tick(&mut self, single_threaded: bool) {
+        // 1. Process events from command bar
+        if let Some(event) = self.commandbar_event {
+            self.process_commandbar_event(event);
+        }
+
+        // 2. Process events from menu
+        if let Some(event) = self.menu_event {
+            self.process_menu_event(event);
+        }
+
+        // 3. Process events from controls
+        if !self.events.is_empty() {
+            self.process_events_queue();
+        }
+
+        // 4. if there is a control that was removed (due to the previously fired events) remove it
+        if !self.to_remove_list.is_empty() {
+            self.remove_deleted_controls();
+            self.recompute_parent_indexes = true;
+            self.request_update_command_and_menu_bars = true;
+        }
+
+        // If we reach this point, there should not be any change in the logic of controls
+        if self.recompute_parent_indexes {
+            self.update_parent_indexes(self.get_root_control_handle());
+            self.recompute_parent_indexes = false;
+        }
+
+        if let Some(handle) = self.request_focus {
+            self.update_focus(handle);
+            self.request_focus = None;
+            self.request_default_action = None;
+            self.repaint = true;
+            self.request_update_command_and_menu_bars = true;
+        }
+
+        if self.recompute_layout {
+            self.recompute_layouts();
+        }
+        if self.request_update_command_and_menu_bars {
+            self.update_command_and_menu_bars();
+        }
+        if self.repaint || self.recompute_layout {
+            self.paint();
+        }
+
+        self.recompute_layout = false;
+        self.repaint = false;
+
+        // timer threads update
+        if self.request_update_timer_threads {
+            self.timers_manager.update_threads();
+            self.request_update_timer_threads = false;
+        }
+
+        // auto save changes
+        #[cfg(feature = "EVENT_RECORDER")]
+        self.event_recorder.auto_update(&self.surface);
+
+        if single_threaded {
+            if let Some(sys_event) = self.backend.query_system_event() {
+                self.process_system_event(sys_event);
+            }
+        } else {
+            let event = if cfg!(target_arch = "wasm32") {
+                self.event_receiver.try_recv().ok()
+            } else {
+                self.event_receiver.recv().ok()
+            };
+
+            if let Some(sys_event) = event {
+                self.process_system_event(sys_event);
+                #[cfg(feature = "EVENT_RECORDER")]
+                self.event_recorder.add(&sys_event, &mut self.backend, &self.surface);
+            }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            if self.loop_status == LoopStatus::ExitCurrentLoop {
+                self.exit_loop();
+            }
+        }
+    }
+
+    fn exit_loop(&mut self) {
+        // if we are in a modal loop --> we just need to change loop_statup
+        // and delete the window and its children (mark them for deleteion)
+        if let Some(modal_handle) = self.modal_windows.pop() {
+            self.request_remove(modal_handle);
+        }
+        // also we need to change focus to the previous window in the loop or desktop
+        if let Some(previous_modal_handle) = self.modal_windows.last() {
+            self.request_focus_for_control(*previous_modal_handle);
+        } else {
+            self.request_focus_for_control(self.desktop_handle);
+        }
+        self.loop_status = LoopStatus::Normal;
+        self.request_update();
+    }
+
     pub(crate) fn run(&mut self) {
         self.recompute_layout = true;
         self.repaint = true;
         self.recompute_parent_indexes = true;
         self.commandbar_event = None;
         self.menu_event = None;
-        let single_threaded = self.terminal.is_single_threaded();
+        let single_threaded = self.backend.is_single_threaded();
         // if first time an execution start
         if !self.desktop_os_start_called {
-            self.process_terminal_resize_event(self.terminal.get_size());
+            self.process_terminal_resize_event(self.backend.size());
             self.process_desktop_on_start();
             if self.single_window && self.get_controls_mut().desktop_mut().base().children.len() != 1 {
                 panic!("You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")
             }
         }
-        while self.loop_status == LoopStatus::Normal {
-            // 1. Process events from command bar
-            if let Some(event) = self.commandbar_event {
-                self.process_commandbar_event(event);
-            }
-            // 2. Process events from menu
-            if let Some(event) = self.menu_event {
-                self.process_menu_event(event);
-            }
-            // 3. Process events from controls
-            if !self.events.is_empty() {
-                self.process_events_queue();
-            }
-            // 4. if there is a control that was removed (due to the previously fired events) remove it
-            if !self.to_remove_list.is_empty() {
-                self.remove_deleted_controls();
-                self.recompute_parent_indexes = true;
-                self.request_update_command_and_menu_bars = true;
-            }
 
-            // If we reach this point, there should not be any change in the logic of controls
-            if self.recompute_parent_indexes {
-                self.update_parent_indexes(self.get_root_control_handle());
-                self.recompute_parent_indexes = false;
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            while self.loop_status == LoopStatus::Normal {
+                self.tick(single_threaded);
             }
-            if let Some(handle) = self.request_focus {
-                self.update_focus(handle);
-                self.request_focus = None;
-                self.request_default_action = None;
-                self.repaint = true;
-                self.request_update_command_and_menu_bars = true;
-            }
-            if self.recompute_layout {
-                self.recompute_layouts();
-            }
-            if self.request_update_command_and_menu_bars {
-                self.update_command_and_menu_bars();
-            }
-            if self.repaint || self.recompute_layout {
-                self.paint();
-            }
-            self.recompute_layout = false;
-            self.repaint = false;
-
-            // timer threads update
-            if self.request_update_timer_threads {
-                self.timers_manager.update_threads();
-                self.request_update_timer_threads = false;
-            }
-            // auto save changes
-            #[cfg(feature = "EVENT_RECORDER")]
-            self.event_recorder.auto_update(&self.surface);
-
-            if single_threaded {
-                if let Some(sys_event) = self.terminal.query_system_event() {
-                    self.process_system_event(sys_event);
-                }
-            } else if let Ok(sys_event) = self.event_receiver.recv() {
-                self.process_system_event(sys_event);
-                #[cfg(feature = "EVENT_RECORDER")]
-                self.event_recorder.add(&sys_event, &mut self.terminal, &self.surface);
+            // loop has ended
+            if self.loop_status == LoopStatus::ExitCurrentLoop {
+                self.exit_loop();
             }
         }
-        // loop has ended
-        if self.loop_status == LoopStatus::ExitCurrentLoop {
-            // if we are in a modal loop --> we just need to change loop_statup
-            // and delete the window and its children (mark them for deleteion)
-            if let Some(modal_handle) = self.modal_windows.pop() {
-                self.request_remove(modal_handle);
-            }
-            // also we need to change focus to the previous window in the loop or desktop
-            if let Some(previous_modal_handle) = self.modal_windows.last() {
-                self.request_focus_for_control(*previous_modal_handle);
-            } else {
-                self.request_focus_for_control(self.desktop_handle);
-            }
-            self.loop_status = LoopStatus::Normal;
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            use crate::system::App;
+            use std::{cell::RefCell, rc::Rc};
+            use wasm_bindgen::{closure::Closure, JsCast};
+            use web_sys::window;
+
             self.request_update();
+
+            let window = window().expect("No global `window` exists");
+            let window_clone = window.clone();
+
+            let callback_holder = Rc::new(RefCell::new(None::<Closure<dyn FnMut()>>));
+            let callback_holder_clone = callback_holder.clone();
+
+            // Create the closure that represents one tick of the animation loop
+            *callback_holder.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+                let rt = RuntimeManager::get();
+                rt.tick(single_threaded);
+
+                if rt.loop_status == LoopStatus::Normal {
+                    // Continue the animation loop
+                    window_clone
+                        .request_animation_frame(callback_holder_clone.borrow().as_ref().unwrap().as_ref().unchecked_ref())
+                        .expect("Failed to request animation frame");
+                } else if rt.loop_status == LoopStatus::ExitCurrentLoop {
+                    rt.exit_loop();
+                    App::drop_app();
+                } else {
+                    App::drop_app();
+                }
+            }) as Box<dyn FnMut()>));
+
+            window
+                .request_animation_frame(callback_holder.borrow().as_ref().unwrap().as_ref().unchecked_ref())
+                .expect("Failed to request animation frame");
         }
     }
     #[inline(always)]
@@ -576,7 +671,7 @@ impl RuntimeManager {
             SystemEvent::KeyPressed(event) => self.process_keypressed_event(event),
             SystemEvent::KeyModifierChanged(event) => self.process_key_modifier_changed_event(event.new_state),
             SystemEvent::Resize(new_size) => {
-                self.terminal.on_resize(new_size);
+                self.backend.on_resize(new_size);
                 self.process_terminal_resize_event(new_size);
             }
             SystemEvent::MouseButtonDown(event) => self.process_mousebuttondown_event(event),
@@ -587,14 +682,18 @@ impl RuntimeManager {
             SystemEvent::TimerTickUpdate(event) => self.process_timer_tick_update_event(event.id, event.tick.value()),
             SystemEvent::TimerStart(event) => self.process_timer_start_event(event.id, event.tick.value()),
             SystemEvent::TimerPaused(event) => self.process_timer_paused_event(event.id, event.tick.value()),
+            SystemEvent::BackgroundTaskStart(h) => BackgroundTaskMethods::on_start(self, h),
+            SystemEvent::BackgroundTaskEnd(h) => BackgroundTaskMethods::on_finish(self, h),
+            SystemEvent::BackgroundTaskNotify(h) => BackgroundTaskMethods::on_notify(self, h),
+            SystemEvent::BackgroundTaskQuery(h) => BackgroundTaskMethods::on_query(self, h),
         }
     }
-    fn remove_control(&mut self, handle: Handle<UIElement>, unlink_from_parent: bool) -> (Handle<UIElement>, bool) {
+    fn remove_control(&mut self, handle: Handle<()>, unlink_from_parent: bool) -> (Handle<()>, bool) {
         if handle.is_none() {
             return (Handle::None, false);
         }
         let controls = unsafe { &mut *self.controls };
-        let mut parent: Handle<UIElement> = Handle::None;
+        let mut parent: Handle<()> = Handle::None;
         let mut has_focus = false;
         let mut is_window_control = false;
         let mut timer_handle: Handle<Timer> = Handle::None;
@@ -673,21 +772,21 @@ impl RuntimeManager {
         menus.get_mut(self.opened_menu_handle)
     }
     #[inline(always)]
-    fn get_root_control_handle(&self) -> Handle<UIElement> {
+    fn get_root_control_handle(&self) -> Handle<()> {
         if self.modal_windows.is_empty() {
             self.desktop_handle
         } else {
             self.modal_windows[self.modal_windows.len() - 1]
         }
     }
-    // pub(crate) fn get_parent_handle(&self, handle: Handle<UIElement>) -> Handle<UIElement> {
+    // pub(crate) fn get_parent_handle(&self, handle: Handle<()>) -> Handle<()> {
     //     let controls = unsafe { &mut *self.controls };
     //     if let Some(ctrl) = controls.get(handle) {
     //         return ctrl.get_base().parent;
     //     }
     //     return Handle::None;
     // }
-    pub(crate) fn get_focused_control_for_parent(&self, parent_handle: Handle<UIElement>) -> Option<Handle<UIElement>> {
+    pub(crate) fn get_focused_control_for_parent(&self, parent_handle: Handle<()>) -> Option<Handle<()>> {
         let controls = unsafe { &mut *self.controls };
         if let Some(ctrl) = controls.get(parent_handle) {
             let base = ctrl.base();
@@ -707,7 +806,7 @@ impl RuntimeManager {
         }
         None
     }
-    fn get_focused_control(&self) -> Handle<UIElement> {
+    fn get_focused_control(&self) -> Handle<()> {
         self.get_focused_control_for_parent(self.get_root_control_handle()).unwrap()
         // let controls = unsafe { &mut *self.controls };
         // if let Some(ctrl) = controls.get(parent_handle) {
@@ -822,7 +921,7 @@ impl RuntimeManager {
         self.request_update_command_and_menu_bars = false;
     }
 
-    fn find_last_leaf(&mut self, handle: Handle<UIElement>) -> Handle<UIElement> {
+    fn find_last_leaf(&mut self, handle: Handle<()>) -> Handle<()> {
         let controls = unsafe { &mut *self.controls };
         let mut result = Handle::None;
         let mut handle = handle;
@@ -842,7 +941,7 @@ impl RuntimeManager {
         result
     }
 
-    fn is_nth_child(&mut self, parent: Handle<UIElement>, child: Handle<UIElement>, focusable: bool) -> bool {
+    fn is_nth_child(&mut self, parent: Handle<()>, child: Handle<()>, focusable: bool) -> bool {
         if child.is_none() || parent.is_none() {
             return false;
         }
@@ -872,7 +971,7 @@ impl RuntimeManager {
         false
     }
 
-    fn update_focus(&mut self, handle: Handle<UIElement>) {
+    fn update_focus(&mut self, handle: Handle<()>) {
         // if an expanded control exists --> pack it
         if !self.expanded_control.handle.is_none() {
             self.request_expand_for_control(Handle::None, Size::default(), Size::default());
@@ -964,7 +1063,7 @@ impl RuntimeManager {
         }
     }
 
-    fn update_parent_indexes(&mut self, handle: Handle<UIElement>) {
+    fn update_parent_indexes(&mut self, handle: Handle<()>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base_mut();
@@ -1001,7 +1100,7 @@ impl RuntimeManager {
         self.recompute_layout = true;
     }
 
-    // fn debug_print(&self, handle: Handle<UIElement>, depth: i32) {
+    // fn debug_print(&self, handle: Handle<()>, depth: i32) {
     //     println!("----------------------------- Control Tree -----------------------------");
     //     for _ in 0..depth {
     //         print!(" ");
@@ -1054,7 +1153,7 @@ impl RuntimeManager {
 
 impl LayoutMethods for RuntimeManager {
     fn recompute_layouts(&mut self) {
-        let term_layout = ParentLayout::from(&self.terminal);
+        let term_layout = ParentLayout::from(&self.backend);
         self.update_control_layout(self.desktop_handle, &term_layout);
         let count = self.modal_windows.len();
         for index in 0..count {
@@ -1062,7 +1161,7 @@ impl LayoutMethods for RuntimeManager {
             self.update_control_layout(handle, &term_layout);
         }
     }
-    fn update_control_layout(&mut self, handle: Handle<UIElement>, parent_layout: &ParentLayout) {
+    fn update_control_layout(&mut self, handle: Handle<()>, parent_layout: &ParentLayout) {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base_mut();
@@ -1081,7 +1180,7 @@ impl LayoutMethods for RuntimeManager {
             } else if handle == self.expanded_control.handle {
                 // need to compute my expended size
                 // also I need to set my internal flags to expanded
-                let termsize = self.get_terminal_size();
+                let termsize = self.terminal_size();
                 if let Some(dir) = base.update_expanded_layout(self.expanded_control.prefered_size, self.expanded_control.min_size, termsize) {
                     base.set_expand_flag(true);
                     expand_status = match dir {
@@ -1162,9 +1261,9 @@ impl PaintMethods for RuntimeManager {
             self.surface.reset();
             self.paint_menu(self.opened_menu_handle, true);
         }
-        self.terminal.update_screen(&self.surface);
+        self.backend.update_screen(&self.surface);
     }
-    fn paint_control(&mut self, handle: Handle<UIElement>) {
+    fn paint_control(&mut self, handle: Handle<()>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(element) = controls.get_mut(handle) {
             let base = element.base();
@@ -1247,7 +1346,7 @@ impl KeyboardMethods for RuntimeManager {
             }
         }
     }
-    fn process_control_keypressed_event(&mut self, handle: Handle<UIElement>, key: Key, character: char) -> EventProcessStatus {
+    fn process_control_keypressed_event(&mut self, handle: Handle<()>, key: Key, character: char) -> EventProcessStatus {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base();
@@ -1281,7 +1380,7 @@ impl KeyboardMethods for RuntimeManager {
     }
 }
 impl MouseMethods for RuntimeManager {
-    fn coordinates_to_child_control(&mut self, handle: Handle<UIElement>, x: i32, y: i32, ignore_expanded: bool) -> Handle<UIElement> {
+    fn coordinates_to_child_control(&mut self, handle: Handle<()>, x: i32, y: i32, ignore_expanded: bool) -> Handle<()> {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base_mut();
@@ -1350,7 +1449,7 @@ impl MouseMethods for RuntimeManager {
         }
         Handle::None
     }
-    fn coordinates_to_control(&mut self, x: i32, y: i32, ignore_expanded: bool) -> Handle<UIElement> {
+    fn coordinates_to_control(&mut self, x: i32, y: i32, ignore_expanded: bool) -> Handle<()> {
         // if an expanded control exists --> check it first
         if !self.expanded_control.handle.is_none() {
             let handle = self.coordinates_to_child_control(self.expanded_control.handle, x, y, ignore_expanded);
@@ -1459,33 +1558,6 @@ impl MouseMethods for RuntimeManager {
                 }
             }
         }
-
-        /*
-        void ApplicationImpl::ProcessMenuMouseClick(Controls::Menu* mnu, int x, int y)
-        {
-
-            switch (result)
-            {
-            case MousePressedResult::None:
-                break;
-            case MousePressedResult::Repaint:
-                RepaintStatus |= REPAINT_STATUS_DRAW;
-                break;
-            case MousePressedResult::CheckParent:
-                if (mcx->Parent)
-                    ProcessMenuMouseClick(mcx->Parent, x, y);
-                else
-                    this->CloseContextualMenu();
-                break;
-            case MousePressedResult::Activate:
-                RepaintStatus |= REPAINT_STATUS_DRAW;
-                ShowContextualMenu(mnu);
-                break;
-            }
-        }
-
-
-        */
     }
 
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
@@ -1509,7 +1581,7 @@ impl MouseMethods for RuntimeManager {
             }
         }
     }
-    fn process_mousedrag(&mut self, handle: Handle<UIElement>, event: MouseMoveEvent) {
+    fn process_mousedrag(&mut self, handle: Handle<()>, event: MouseMoveEvent) {
         self.hide_tooltip();
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
@@ -1736,7 +1808,7 @@ impl ThemeMethods for RuntimeManager {
         }
     }
 
-    fn update_theme_for_control(&mut self, handle: Handle<UIElement>) {
+    fn update_theme_for_control(&mut self, handle: Handle<()>) {
         let controls = unsafe { &mut *self.controls };
         if let Some(element) = controls.get_mut(handle) {
             OnThemeChanged::on_theme_changed(element.control_mut(), &self.theme);
@@ -1814,6 +1886,52 @@ impl TimerMethods for RuntimeManager {
         } else {
             // invalid control (should terminate the timer)
             self.timers_manager.terminate_thread(id as usize);
+        }
+    }
+}
+
+impl BackgroundTaskMethods for RuntimeManager {
+    #[inline(always)]
+    fn background_task_handle_to_control(&mut self, backgroundtask_handle: Handle<()>) -> Option<&mut ControlManager> {
+        //log!("RM","background_task_handle_to_control({:?})",backgroundtask_handle);
+        if let Some(h) = self.task_manager.receiver_control_handle(backgroundtask_handle.index()) {
+            let controls = unsafe { &mut *self.controls };
+            controls.get_mut(h.cast())
+        } else {
+            None
+        }
+    }
+
+    fn on_start(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_start(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+    }
+
+    fn on_notify(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_update(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+    }
+
+    fn on_finish(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_finish(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
+        }
+        self.task_manager.remove_task(backgroundtask_handle);
+    }
+
+    fn on_query(&mut self, backgroundtask_handle: Handle<()>) {
+        if let Some(c) = self.background_task_handle_to_control(backgroundtask_handle) {
+            if GenericBackgroundTaskEvents::on_query(c.control_mut(), backgroundtask_handle) == EventProcessStatus::Processed {
+                self.repaint = true;
+            }
         }
     }
 }

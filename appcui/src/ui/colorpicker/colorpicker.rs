@@ -39,6 +39,16 @@ pub struct ColorPicker {
     mouse_on_color_index: i32,
 }
 impl ColorPicker {
+    
+    /// Creates a new color picker with the specified color and layout.
+    /// The color can be any of the predefined colors in the `Color` enum.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut color_picker = ColorPicker::new(Color::Red, Layout::new("x:1,y:1,w:20,h:1"));
+    /// ```
     pub fn new(color: Color, layout: Layout) -> Self {
         let mut cp = ColorPicker {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -50,22 +60,27 @@ impl ColorPicker {
         cp.set_size_bounds(7, 1, u16::MAX, 1);
         cp
     }
+    
+    /// Returns the selected color from the color picker.
     #[inline(always)]
     pub fn color(&self) -> Color {
         self.color
     }
+    
+    /// Sets the selected color in the color picker.
+    /// The color can be any of the predefined colors in the `Color` enum.
     #[inline(always)]
     pub fn set_color(&mut self, color: Color) {
         self.color = color;
     }
 
     fn next_color(&mut self, expanded: bool, offset: i32) {
-        let mut result = ((self.color as u8) as i32) + offset;
+        let mut result = (self.color.as_color_index() as i32) + offset;
         if expanded {
             // specific cases
             // when the cursor is on the first line (the first 4 colors), it should be able to move to transparent checkbox
             // as well the logic below enphasize this
-            let transparent = (Color::Transparent as u8) as i32;
+            let transparent = (Color::Transparent.as_color_index()) as i32;
             if (result == COLOR_MATRIX_WIDTH) && (offset == ONE_POSITION_TO_RIGHT) {
                 result = transparent; // Move to the right with 1 position
             } else if (result == transparent + 1) && (offset == ONE_POSITION_TO_RIGHT) {
@@ -107,7 +122,7 @@ impl ColorPicker {
             return ((x - 1) / SPACES_PER_COLOR) + (y - (self.expanded_panel_y + 1)) * COLOR_MATRIX_WIDTH;
         }
         if (y == 1 + self.expanded_panel_y) && (TRANSPARENT_CHECKBOX_X_OFFSET..=TRANSPARENT_CHECKBOX_X_LAST_OFFSET).contains(&x) {
-            return (Color::Transparent as u8) as i32;
+            return (Color::Transparent.as_color_index()) as i32;
         }
         -1
     }

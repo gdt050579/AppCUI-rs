@@ -2,14 +2,14 @@ use super::image;
 use super::Renderer;
 
 use super::CharAttribute;
-use super::Rect;
-use super::Size;
 use super::Character;
 use super::ClipArea;
 use super::Cursor;
 use super::Image;
 use super::LineType;
 use super::Point;
+use super::Rect;
+use super::Size;
 use super::TextAlignament;
 use super::TextFormat;
 
@@ -39,13 +39,17 @@ impl From<char> for CharacterType {
 const MAX_SURFACE_WIDTH: u32 = 10000;
 const MAX_SURFACE_HEIGHT: u32 = 10000;
 
+/// A structure that represents a 2D surface for drawing characters and images.
+/// The surface is defined as a matrix (width x height) of characters, where each character is of type [Character].
+/// The surface has a size, an origin point, a clip area, and a cursor position.
+/// The size of the surface is maximum 10000 x 10000 characters.
 pub struct Surface {
     pub(crate) size: Size,
     pub(crate) chars: Vec<Character>,
     pub(crate) cursor: Cursor,
     origin: Point,
-    base_origin: Point,
     clip: ClipArea,
+    base_origin: Point,
     base_clip: ClipArea,
     right_most: i32,
     bottom_most: i32,
@@ -318,7 +322,7 @@ impl Surface {
 
     /// Fills a vertical line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.
     /// if the height is bigger than 0, this method will call `fill_vertical_line` method
-    pub fn fill_vertical_line_width_size(&mut self, x: i32, y: i32, height: u32, ch: Character) {
+    pub fn fill_vertical_line_with_size(&mut self, x: i32, y: i32, height: u32, ch: Character) {
         if height > 0 {
             self.fill_vertical_line(x, y, y + ((height - 1) as i32), ch);
         }
@@ -774,9 +778,8 @@ impl Surface {
                     text.chars().count() as u16
                 };
                 self.write_text_single_line(text, format.y, chars_count, 0, format, width);
-            }
-            // TextWrap::Character => self.write_text_multi_line_character_wrap(text, format),
-            // TextWrap::Word => self.write_text_multi_line_word_wrap(text, format),
+            } // TextWrap::Character => self.write_text_multi_line_character_wrap(text, format),
+              // TextWrap::Word => self.write_text_multi_line_word_wrap(text, format),
         }
         // if format.is_multi_line() {
         //     if format.has_width() {

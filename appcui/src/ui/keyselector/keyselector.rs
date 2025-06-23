@@ -7,6 +7,23 @@ pub struct KeySelector {
     key: Key,
 }
 impl KeySelector {
+
+    /// Creates a new KeySelector object with the specified key, layout and flags.
+    /// The flags can be a combination of the following values:
+    /// * `keyselector::Flags::AcceptEnter` - if set, the Enter key will be accepted
+    /// * `keyselector::Flags::AcceptEscape` - if set, the Escape key will be accepted
+    /// * `keyselector::Flags::AcceptTab` - if set, the Tab key will be accepted
+    /// * `keyselector::Flags::ReadOnly` - if set, the KeySelector will be read-only and will not accept any key
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut keyselector = KeySelector::new(Key::from(KeyCode::F1), 
+    ///                                        Layout::new("x:1,y:1,w:30"), 
+    ///                                        keyselector::Flags::AcceptEnter | 
+    ///                                        keyselector::Flags::AcceptEscape);
+    /// ```
     pub fn new(key: Key, layout: Layout, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -16,10 +33,14 @@ impl KeySelector {
         obj.set_size_bounds(5, 1, u16::MAX, 1);
         obj
     }
+
+    /// Returns the current key selected by the KeySelector.
     #[inline(always)]
     pub fn key(&self) -> Key {
         self.key
     }
+
+    /// Manually sets the key selected by the KeySelector.
     #[inline(always)]
     pub fn set_key(&mut self, key: Key) {
         self.key = key;

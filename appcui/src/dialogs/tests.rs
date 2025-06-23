@@ -478,6 +478,7 @@ fn check_validate_or_cancel() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_save_dialog_select_existent() {
     let script = "
@@ -514,6 +515,7 @@ fn check_save_dialog_select_existent() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_save_dialog_cancelt_existent() {
     let script = "
@@ -550,6 +552,7 @@ fn check_save_dialog_cancelt_existent() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_save_dialog_select_existent_with_validate_overwrite() {
     let script = "
@@ -591,6 +594,7 @@ fn check_save_dialog_select_existent_with_validate_overwrite() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_hardcoded_relative_path() {
     let script = "
@@ -614,6 +618,7 @@ fn check_open_dialog_hardcoded_relative_path() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_hardcoded_absolute_path() {
     let script = "
@@ -637,6 +642,7 @@ fn check_open_dialog_hardcoded_absolute_path() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_invalid_path_with_validation_flag() {
     let script = "
@@ -666,6 +672,7 @@ fn check_open_dialog_invalid_path_with_validation_flag() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_last_path() {
     let script = "
@@ -700,6 +707,7 @@ fn check_open_dialog_last_path() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_select_drive() {
     let script = "
@@ -727,6 +735,7 @@ fn check_open_dialog_select_drive() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_open_dialog_change_path_manually() {
     let script = "
@@ -757,6 +766,99 @@ fn check_open_dialog_change_path_manually() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
+#[test]
+fn check_open_dialog_select_drive_with_mouse() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show open dialog');
+        CheckHash(0x2328A3E49BBF7A06)    
+        Key.Pressed(Alt+D)
+        Paint('3. Drive selection window is chosen');
+        CheckHash(0xB3EBC64EAA555682) 
+        Mouse.Click(45,20,left)
+        Paint('4. Back to open dialog');
+        CheckHash(0x6EA9497308742D9A) 
+        Mouse.Click(10,7,left)    
+        Paint('5. Back to drive selection dialog');
+        CheckHash(0xB3EBC64EAA555682)  
+        Mouse.Click(22,13,left)
+        Mouse.Click(30,20,left)          
+        Paint('6. Now the folder is D:\');
+        CheckHash(0x9C98C24AA885FA47) 
+    ";
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::open_all(
+        "Open",
+        "myfile.exe",
+        dialogs::Location::Last,
+        OpenFileDialogFlags::None,
+    ));
+    a.run();
+}
+
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
+#[test]
+fn check_save_dialog_navigate() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x6D6E678D8633D6C1)   
+        Key.Pressed(Tab,6) 
+        Paint('3. Focus on file list');
+        CheckHash(0x78626038BB410A89)
+        Key.Pressed(Enter)  
+        Paint('4. Now path is C:\\');
+        CheckHash(0x680204A38D010F47)
+        Key.Pressed(Alt+T)
+        Paint('5. Open type list');
+        CheckHash(0x787D5122AD4B01F4)
+        Key.Pressed(Down,4)
+        Paint('6. Select all files');
+        CheckHash(0x8F25B539CF9D5528)
+        Key.Pressed(Enter)
+        Key.Pressed(Tab,4)
+        Paint('7. File list has focus');
+        CheckHash(0x3235F6FF0D20FA17)
+        Key.Pressed(Enter)
+        Paint('8. C:\\Program Files selected');
+        CheckHash(0x492F4FCA68F37B10)
+        Key.Pressed(End)
+        Key.Pressed(Enter)
+        Paint('9. Check is readme.txt can be overwritten');
+        CheckHash(0xCA110EB5BB5ADEAA)  
+        Key.Pressed(Escape)
+        Key.TypeText('run')
+        Paint('10. Now focus on runme.exe');
+        CheckHash(0xC00E126B14811E14)   
+        Key.Pressed(Enter)
+        Paint('11. Ask to overwrite Runme.exe');
+        CheckHash(0xCA110EB5BB5ADEAA)
+        Key.Pressed(Left)
+        Key.Pressed(Enter)
+        Key.Pressed(Tab)
+        Paint('12. Return with Runme.exe as selection');
+        CheckHash(0xEB21471DE6FDA1EA)
+    ";
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "myfile.exe",
+        dialogs::Location::Last,
+        SaveFileDialogFlags::Icons | SaveFileDialogFlags::ValidateOverwrite,
+    ));
+    a.run();
+}
+
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_create_folder_select_dialog() {
     let script = "
@@ -781,6 +883,7 @@ fn check_create_folder_select_dialog() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_expand_collapse_select_dialog() {
     let script = "
@@ -821,6 +924,7 @@ fn check_expand_collapse_select_dialog() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_with_icons() {
     let script = "
@@ -833,10 +937,14 @@ fn check_folder_select_dialog_with_icons() {
         CheckHash(0x541A8C33A6975193)
     ";
     let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(FolderSelectDialog::new("C:\\Program Files\\Windows\\System32\\drivers", SelectFolderDialogFlags::Icons));
+    a.add_window(FolderSelectDialog::new(
+        "C:\\Program Files\\Windows\\System32\\drivers",
+        SelectFolderDialogFlags::Icons,
+    ));
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_cancel() {
     let script = "
@@ -861,6 +969,7 @@ fn check_folder_select_dialog_cancel() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_cancel_via_button() {
     let script = "
@@ -886,6 +995,7 @@ fn check_folder_select_dialog_cancel_via_button() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_ok_via_button() {
     let script = "
@@ -911,6 +1021,7 @@ fn check_folder_select_dialog_ok_via_button() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_navigator() {
     let script = "
@@ -939,6 +1050,7 @@ fn check_folder_select_dialog_navigator() {
     a.run();
 }
 
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
 #[test]
 fn check_folder_select_dialog_mouse_usage() {
     let script = "
@@ -965,23 +1077,38 @@ fn check_folder_select_dialog_mouse_usage() {
 fn check_file_mask_errors() {
     let fm = FileMask::parse("abc");
     assert!(fm.is_err());
-    assert!(fm.err().unwrap().starts_with("Unexpecting end of file mask definition. Expecting a assignment operator ('=' or ':')"));
+    assert!(fm
+        .err()
+        .unwrap()
+        .starts_with("Unexpecting end of file mask definition. Expecting a assignment operator ('=' or ':')"));
 
     let fm = FileMask::parse("###");
     assert!(fm.is_err());
-    assert!(fm.err().unwrap().starts_with("Expected word character (A-Z, a-z, 0-9, _, -, .) but got invalid character"));
+    assert!(fm
+        .err()
+        .unwrap()
+        .starts_with("Expected word character (A-Z, a-z, 0-9, _, -, .) but got invalid character"));
 
     let fm = FileMask::parse("test:123");
     assert!(fm.is_err());
-    assert!(fm.err().unwrap().starts_with("Expected open square bracket ('[') but got word character (A-Z, a-z, 0-9, _, -, .)"));
+    assert!(fm
+        .err()
+        .unwrap()
+        .starts_with("Expected open square bracket ('[') but got word character (A-Z, a-z, 0-9, _, -, .)"));
 
     let fm = FileMask::parse("test:[1,,3]");
     assert!(fm.is_err());
-    assert!(fm.err().unwrap().starts_with("Expected comma (',') separator or close square bracket (']') but got word character (A-Z, a-z, 0-9, _, -, .)"));
+    assert!(fm
+        .err()
+        .unwrap()
+        .starts_with("Expected comma (',') separator or close square bracket (']') but got word character (A-Z, a-z, 0-9, _, -, .)"));
 
     let fm = FileMask::parse("test:[1,");
-    assert!(fm.is_err());    
-    assert!(fm.err().unwrap().starts_with("Unexpecting end of file mask definition. Expecting either a comma (',') separator or a close square bracket (']')"));
+    assert!(fm.is_err());
+    assert!(fm
+        .err()
+        .unwrap()
+        .starts_with("Unexpecting end of file mask definition. Expecting either a comma (',') separator or a close square bracket (']')"));
 
     // println!("{}",fm.err().unwrap());
 }
@@ -992,7 +1119,7 @@ fn check_file_mask_empty() {
     assert!(fm.is_ok());
     assert!(fm.ok().unwrap().is_empty());
     let fm = FileMask::parse("   ").unwrap();
-    assert!(fm.is_empty());    
+    assert!(fm.is_empty());
 
     let fm = FileMask::parse("key = []").unwrap();
     assert!(fm.len() == 1);
@@ -1009,11 +1136,11 @@ fn check_file_mask_empty() {
 #[test]
 fn check_file_mask_array() {
     let fm = FileMask::parse("  first key = [value1,  value2 , value3  ], key2 = [1,2,3,4,5]").unwrap();
-    assert_eq!(fm.len(),2);
-    assert_eq!(fm[0].name(),"first key");
-    assert_eq!(fm[0].extensions_hash.len(),3);
-    assert_eq!(fm[1].name(),"key2");
-    assert_eq!(fm[1].extensions_hash.len(),5);
+    assert_eq!(fm.len(), 2);
+    assert_eq!(fm[0].name(), "first key");
+    assert_eq!(fm[0].extensions_hash.len(), 3);
+    assert_eq!(fm[1].name(), "key2");
+    assert_eq!(fm[1].extensions_hash.len(), 5);
 }
 
 #[test]
@@ -1027,5 +1154,5 @@ fn check_file_mask_ignore_case() {
     assert!(fm[0].matches("test.jpg"));
     assert!(fm[0].matches("test.JPG"));
     assert!(!fm[0].matches("test.png123"));
-    assert!(!fm[0].matches("test.JpG123")); 
+    assert!(!fm[0].matches("test.JpG123"));
 }

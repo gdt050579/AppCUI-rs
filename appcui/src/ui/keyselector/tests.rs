@@ -210,3 +210,25 @@ fn check_events() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_api() {
+    let script = "
+        Paint.Enable(false)
+        Paint('tests')   
+        CheckHash(0xDD6F824143FF6353)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("test,d:c,w:40,h:10");
+    let mut ks = KeySelector::new(
+        Key::new(KeyCode::F1, KeyModifier::Ctrl),
+        Layout::new("x:1,y:1,w:35,h:1"),
+        keyselector::Flags::None,
+    );
+    assert_eq!(ks.key(),Key::new(KeyCode::F1, KeyModifier::Ctrl));
+    ks.set_key(Key::new(KeyCode::F2, KeyModifier::Alt));
+    assert_eq!(ks.key(),Key::new(KeyCode::F2, KeyModifier::Alt));
+    w.add(ks);
+    a.add_window(w);
+    a.run();
+}

@@ -3,7 +3,7 @@ use crate::{
     graphics::{ClipArea, Point},
     prelude::RuntimeManager,
     system::{Handle, HandleSupport},
-    terminals::Terminal,
+    backend::Backend,
     ui::common::traits::Control,
 };
 use std::ptr::NonNull;
@@ -28,9 +28,9 @@ impl From<&ControlBase> for ParentLayout {
         pl
     }
 }
-impl From<&Box<dyn Terminal>> for ParentLayout {
-    fn from(terminal: &Box<dyn Terminal>) -> Self {
-        let sz = terminal.get_size();
+impl From<&Box<dyn Backend>> for ParentLayout {
+    fn from(backend: &Box<dyn Backend>) -> Self {
+        let sz = backend.size();
         ParentLayout {
             clip: ClipArea::new(0, 0, (sz.width as i32) - 1, (sz.height as i32) - 1),
             origin: Point::default(),

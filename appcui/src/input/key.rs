@@ -3,21 +3,60 @@ use std::fmt::Display;
 use super::KeyCode;
 use super::KeyModifier;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+/// Represents a keyboard key and its modifier.
+/// 
+/// This struct contains a `KeyCode` and a `KeyModifier`.
+/// 
+/// # Fields
+/// * `code` - The code of the key.
+/// * `modifier` - The modifier of the key.
+#[derive(Copy, Clone, PartialEq, Debug, Eq)]
 pub struct Key {
     pub code: KeyCode,
     pub modifier: KeyModifier,
 }
 
 impl Key {
+    /// Represents a non-existent key.
     #[allow(non_upper_case_globals)]
     pub const None: Key = Key {
         code: KeyCode::None,
         modifier: KeyModifier::None,
     };
+    /// Creates a new key with the given code and modifier.
+    /// 
+    /// # Arguments
+    /// * `code` - The code of the key.
+    /// * `modifier` - The modifier of the key.
+    /// 
+    /// # Returns
+    /// A new key created from the code and modifier.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let key = Key::new(KeyCode::A, KeyModifier::Shift|KeyModifier::Alt);
+    /// ``` 
     pub fn new(code: KeyCode, modifier: KeyModifier) -> Key {
         Key { code, modifier }
     }
+    
+    /// Creates a new key from a character and a modifier.
+    /// 
+    /// # Arguments
+    /// * `character` - The character to create the key from.
+    /// * `modifier` - The modifier of the key.
+    /// 
+    /// # Returns
+    /// A new key created from the character and modifier.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let key = Key::create_hotkey('a', KeyModifier::Alt);
+    /// ```
     pub fn create_hotkey(character: char, modifier: KeyModifier) -> Key {
         let code = match character {
             'a' | 'A' => KeyCode::A,
@@ -67,6 +106,18 @@ impl Key {
             Key { code, modifier }
         }
     }
+    /// Returns the value of the key as a u16. This is usually used in combination with the macro `key!` in a match statement.
+    /// 
+    /// # Returns
+    /// The value of the key as a u16.
+    /// 
+    /// # Example
+    /// ```rust     
+    /// use appcui::prelude::*;
+    /// 
+    /// let key = Key::new(KeyCode::A, KeyModifier::Shift);
+    /// let value = key.value();
+    /// ``` 
     pub fn value(&self) -> u16 {
         ((self.code as u8) as u16) | ((self.modifier.get_value() as u16) << 8)
     }
@@ -81,6 +132,13 @@ impl Default for Key {
     }
 }
 impl From<KeyCode> for Key {
+    /// Creates a new key from a `KeyCode`.
+    /// 
+    /// # Arguments
+    /// * `value` - The `KeyCode` to create the key from.
+    /// 
+    /// # Returns
+    /// A new key created from the `KeyCode`.
     fn from(value: KeyCode) -> Self {
         Self {
             code: value,
@@ -89,6 +147,21 @@ impl From<KeyCode> for Key {
     }
 }
 impl From<u16> for Key {
+    /// Creates a new key from a u16 (that was obtained from the `value` method).
+    /// If the u16 is not a valid key, the function will return `Key::None`.    
+    /// 
+    /// # Arguments
+    /// * `value` - The u16 to create the key from.
+    /// 
+    /// # Returns
+    /// A new key created from the u16.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let key = Key::from(0x0010);
+    /// ```
     fn from(value: u16) -> Self {
         let k = (value & 0xFF) as u8;
         let m = (value >> 8) as u8;
@@ -103,6 +176,20 @@ impl From<u16> for Key {
     }
 }
 impl From<char> for Key {
+    /// Creates a new key from a character.
+    /// 
+    /// # Arguments
+    /// * `value` - The character to create the key from.
+    /// 
+    /// # Returns
+    /// A new key created from the character.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// 
+    /// let key = Key::from('a');
+    /// ``` 
     fn from(value: char) -> Self {
         match value {
             // capital

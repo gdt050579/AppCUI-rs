@@ -2,89 +2,35 @@ use crate::prelude::*;
 
 use super::EnumSelector;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, EnumSelector)]
 enum Options {
     A,
     B,
     C,
 }
-impl EnumSelector for Options {
-    const COUNT: u32 = 3;
 
-    fn from_index(index: u32) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        match index {
-            0 => Some(Options::A),
-            1 => Some(Options::B),
-            2 => Some(Options::C),
-            _ => None,
-        }
-    }
-
-    fn name(&self) -> &'static str {
-        match self {
-            Options::A => "A",
-            Options::B => "B",
-            Options::C => "C",
-        }
-    }
-}
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, EnumSelector)]
 enum Cars {
+    #[VariantInfo(description="list of cars :)")]
     Dacia,
+    #[VariantInfo(description="list of cars :)")]
     Toyota,
+    #[VariantInfo(description="list of cars :)", name: "BMW")]
     Bmw,
+    #[VariantInfo(description="list of cars :)")]
     Mazda,
+    #[VariantInfo(description="list of cars :)")]
     Mercedes,
+    #[VariantInfo(description="list of cars :)")]
     Ford,
+    #[VariantInfo(description="list of cars :)")]
     Ferrari,
+    #[VariantInfo(description="list of cars :)")]
     Lamborghini,
+    #[VariantInfo(description="list of cars :)")]
     Skoda,
+    #[VariantInfo(description="list of cars :)")]
     Renault,
-}
-impl EnumSelector for Cars {
-    const COUNT: u32 = 10;
-
-    fn from_index(index: u32) -> Option<Self>
-    where
-        Self: Sized,
-    {
-        match index {
-            0 => Some(Cars::Dacia),
-            1 => Some(Cars::Toyota),
-            2 => Some(Cars::Bmw),
-            3 => Some(Cars::Mazda),
-            4 => Some(Cars::Mercedes),
-            5 => Some(Cars::Ford),
-            6 => Some(Cars::Ferrari),
-            7 => Some(Cars::Lamborghini),
-            8 => Some(Cars::Skoda),
-            9 => Some(Cars::Renault),
-
-            _ => None,
-        }
-    }
-
-    fn name(&self) -> &'static str {
-        match self {
-            Cars::Dacia => "Dacia",
-            Cars::Toyota => "Toyota",
-            Cars::Bmw => "BMW",
-            Cars::Mazda => "Mazda",
-            Cars::Mercedes => "Mercedes",
-            Cars::Ford => "Ford",
-            Cars::Ferrari => "Ferrari",
-            Cars::Lamborghini => "Lamborghini",
-            Cars::Skoda => "Skoda",
-            Cars::Renault => "Renault",
-        }
-    }
-
-    fn description(&self) -> &'static str {
-        "list of cars :)"
-    }
 }
 
 #[test]
@@ -685,6 +631,230 @@ fn check_description_on_hover() {
     let mut w = window!("Title,x:0,y:0,w:36,h:7");
     w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
     w.add(selector!("enum: Options,x:1,y:3,w:20,flags: AllowNoneVariant"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_value_set_value_clear_value() {
+    #[derive(Copy, Clone, Eq, PartialEq, EnumSelector)]
+    enum TestEnum {
+        #[VariantInfo(description = "First option", name = "First")]
+        Option1,
+        
+        #[VariantInfo(description = "Second option", name = "Second")]
+        Option2,
+        
+        #[VariantInfo(description = "Third option", name = "Third")]
+        Option3,
+    }
+    
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state with Option2 (Second) selected')
+        CheckHash(0x70EB221DBE8E6B0D)
+        Key.Pressed(F1)
+        Paint('Value changed to Option1 (First)')
+        CheckHash(0x9FD131F018F686AE)
+        Key.Pressed(F2)
+        Paint('Value changed to Option3 (Third)')
+        CheckHash(0x48FE8E14449A2776)
+        Key.Pressed(F3)
+        Paint('Value cleared (None selected)')
+        CheckHash(0xB31AEF8F0870D4EA)
+        Key.Pressed(F4)
+        Paint('Value set back to Option2 (Second)')
+        CheckHash(0x70EB221DBE8E6B0D)
+    ";
+
+    #[Window(events=CommandBarEvents+SelectorEvents<TestEnum>,commands:A+B+C+D, internal:true)]
+    struct MyWin {
+        selector_handle: Handle<Selector<TestEnum>>,
+        info_handle: Handle<Label>,
+    }
+    
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,x:1,y:1,w:78,h:10"),
+                selector_handle: Handle::None,
+                info_handle: Handle::None,
+            };
+            
+            // Create selector with Option2 as initial value and AllowNoneVariant flag
+            let sel = Selector::<TestEnum>::new(
+                Some(TestEnum::Option2),
+                Layout::new("x:1,y:1,w:30"),
+                selector::Flags::AllowNoneVariant
+            );
+            
+            // Create a label to display value information
+            let l = Label::new("", Layout::new("x:1,y:3,w:76,h:5"));
+            
+            w.selector_handle = w.add(sel);
+            w.info_handle = w.add(l);
+            
+            // Update the info label with initial values
+            w.update_info_label();
+            
+            w
+        }
+        
+        fn update_info_label(&mut self) {
+            let h = self.selector_handle;
+            let mut info_text = String::new();
+            
+            if let Some(sel) = self.control(h) {
+                // Check if we have a value using try_value()
+                match sel.try_value() {
+                    Some(value) => {
+                        // We have a value, so we can also use value() safely
+                        info_text.push_str(&format!("try_value(): Some({})\n", value.name()));
+                        info_text.push_str(&format!("value(): {}\n", sel.value().name()));
+                        info_text.push_str(&format!("Description: {}", value.description()));
+                    },
+                    None => {
+                        info_text.push_str("try_value(): None\n");
+                        info_text.push_str("value(): Would panic!\n");
+                        info_text.push_str("Description: N/A");
+                    }
+                }
+            } else {
+                info_text = "Error: Selector not found".to_string();
+            }
+            
+            // Update the label
+            let h = self.info_handle;
+            if let Some(label) = self.control_mut(h) {
+                label.set_caption(&info_text);
+            }
+        }
+        
+        // Set value to Option1
+        fn set_to_option1(&mut self) {
+            let h = self.selector_handle;
+            if let Some(sel) = self.control_mut(h) {
+                sel.set_value(TestEnum::Option1);
+            }
+            self.update_info_label();
+        }
+        
+        // Set value to Option3
+        fn set_to_option3(&mut self) {
+            let h = self.selector_handle;
+            if let Some(sel) = self.control_mut(h) {
+                sel.set_value(TestEnum::Option3);
+            }
+            self.update_info_label();
+        }
+        
+        // Clear the value
+        fn clear_value(&mut self) {
+            let h = self.selector_handle;
+            if let Some(sel) = self.control_mut(h) {
+                sel.clear_value();
+            }
+            self.update_info_label();
+        }
+        
+        // Set value back to Option2
+        fn set_to_option2(&mut self) {
+            let h = self.selector_handle;
+            if let Some(sel) = self.control_mut(h) {
+                sel.set_value(TestEnum::Option2);
+            }
+            self.update_info_label();
+        }
+    }
+    
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Set Option1", mywin::Commands::A);
+            commandbar.set(key!("F2"), "Set Option3", mywin::Commands::B);
+            commandbar.set(key!("F3"), "Clear Value", mywin::Commands::C);
+            commandbar.set(key!("F4"), "Set Option2", mywin::Commands::D);
+        }
+        
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            match command_id {
+                mywin::Commands::A => self.set_to_option1(),
+                mywin::Commands::B => self.set_to_option3(),
+                mywin::Commands::C => self.clear_value(),
+                mywin::Commands::D => self.set_to_option2(),
+            }
+        }
+    }
+    
+    impl SelectorEvents<TestEnum> for MyWin {
+        fn on_selection_changed(&mut self, _handle: Handle<Selector<TestEnum>>, _value: Option<TestEnum>) -> EventProcessStatus {
+            self.update_info_label();
+            EventProcessStatus::Processed
+        }
+    }
+    
+    let mut a = App::debug(80, 12, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+
+#[test]
+#[should_panic(expected = "You can not instantiate a selector with `None` value without setting the flags `AllowNoneVariant`. Have you forgot to do this ?")]
+fn check_create_with_panic() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0x0)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:36,h:7");
+    let s = Selector::<Options>::new(
+        None,
+        Layout::new("x:1,y:1,w:10"),
+        selector::Flags::None,
+    );
+    w.add(s);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+#[should_panic(expected = "You can not clear the value of a selector unless flag `AllowNoneVariant` was set. Have you forgot to do this ?")]
+fn check_clear_value_with_panic() {
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')   
+        CheckHash(0x0)
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,d:c,w:36,h:7");
+    let mut s = Selector::<Options>::new(
+        Some(Options::B),
+        Layout::new("x:1,y:1,w:10"),
+        selector::Flags::None,
+    );
+    s.clear_value(); // should panic here
+    w.add(s);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_on_default_action() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (closed)')   
+        CheckHash(0x686CC81380DCE865) 
+        Key.Pressed(Alt+S)
+        Paint('2. Selector is opened (default action)')   
+        CheckHash(0xEFFDEFE5806F6E75) 
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Title,x:0,y:0,w:36,h:7");
+    let mut s = selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant");
+    s.set_hotkey(key!("Alt+S"));
+    w.add(s);
+    w.add(button!("Button,x:1,y:2,w:10"));
     a.add_window(w);
     a.run();
 }

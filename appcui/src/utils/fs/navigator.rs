@@ -1,6 +1,6 @@
 use super::{Entry, EntryType, Root};
-use crate::utils::NavigatorEntry;
 use crate::prelude::*;
+use crate::utils::NavigatorEntry;
 use chrono::DateTime;
 use chrono::NaiveDateTime;
 use std::fs;
@@ -15,7 +15,7 @@ pub(crate) struct Navigator {
 impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     #[cfg(target_os = "windows")]
     fn entries(&self, path: &PathBuf) -> Vec<Entry> {
-        log!("FS","entries({})", path.display()); 
+        log!("FS", "entries({})", path.display());
         if path.as_os_str().is_empty() {
             return vec![];
         }
@@ -43,6 +43,16 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     #[cfg(target_family = "unix")]
     fn new() -> Self {
         Self { windows_model: false }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn new() -> Self {
+        unimplemented!("Navigator is not implemented for wasm32");
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn entries(&self, path: &PathBuf) -> Vec<Entry> {
+        unimplemented!("Navigator entries are not implemented for wasm32");
     }
 
     fn join(&self, path: &PathBuf, entry: &Entry) -> Option<PathBuf> {
@@ -90,10 +100,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     }
 
     fn exists(&self, path: &PathBuf) -> Option<bool> {
-        match path.try_exists() {
-            Ok(v) => Some(v),
-            _ => None,
-        }
+        path.try_exists().ok()
     }
     fn current_dir(&self) -> PathBuf {
         std::env::current_dir().unwrap_or_default()
@@ -102,7 +109,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
 
 impl Navigator {
     fn get_folder_listing(path: &Path) -> std::io::Result<Vec<Entry>> {
-        log!("FS","get_folder_listing({})", path.display());    
+        log!("FS", "get_folder_listing({})", path.display());
         let mut result: Vec<Entry> = vec![];
         // Read the directory entries
         for dir_entry in fs::read_dir(path)? {
@@ -150,6 +157,7 @@ impl Navigator {
         }
     }
 
+    #[cfg(target_os = "windows")]
     fn normalize_windows_root(path: &Path) -> Option<PathBuf> {
         let buf = path.as_os_str().as_encoded_bytes();
         if buf.len() == 2 && buf[1] == b':' && ((buf[0] >= b'A' && buf[0] <= b'Z') || (buf[0] >= b'a' && buf[0] <= b'z')) {

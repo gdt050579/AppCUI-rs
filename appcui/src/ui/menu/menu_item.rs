@@ -1,14 +1,14 @@
 use crate::{
     graphics::{Surface, TextFormat},
     input::{Key, KeyCode},
-    system::{Handle, MenuTheme}, prelude::common::UIElement,
+    system::{Handle, MenuTheme}, 
 };
 
 use super::{CheckBox, Command, Menu, Separator, SingleChoice, SubMenu};
 
 pub(crate) trait MenuItem {
     fn into_menuitem(self) -> MenuItemWrapper;
-    fn update_handles(&mut self, parent: Handle<Menu>, me: Handle<UIElement>);
+    fn update_handles(&mut self, parent: Handle<Menu>, me: Handle<()>);
 }
 
 pub(crate) enum MenuItemWrapper {
@@ -115,13 +115,23 @@ impl MenuItemWrapper {
         }
     }
     #[inline(always)]
-    pub(super) fn get_handle(&self) -> Handle<UIElement> {
+    pub(super) fn get_handle(&self) -> Handle<()> {
         match self {
             MenuItemWrapper::Command(item) => item.handle.cast(),
             MenuItemWrapper::CheckBox(item) => item.handle.cast(),
             MenuItemWrapper::SingleChoice(item) => item.handle.cast(),
             MenuItemWrapper::Separator(item) => item.handle.cast(),
             MenuItemWrapper::SubMenu(item) => item.handle.cast(),
+        }
+    }
+    #[inline(always)]
+    pub(super) fn update_menu_handle(&mut self, parent: Handle<Menu>) {
+        match self {
+            MenuItemWrapper::Command(item) => item.update_handles(parent, item.handle.cast()),
+            MenuItemWrapper::CheckBox(item) => item.update_handles(parent, item.handle.cast()),
+            MenuItemWrapper::SingleChoice(item) => item.update_handles(parent, item.handle.cast()),
+            MenuItemWrapper::Separator(item) => item.update_handles(parent, item.handle.cast()),
+            MenuItemWrapper::SubMenu(item) => item.update_handles(parent, item.handle.cast()),
         }
     }
 }

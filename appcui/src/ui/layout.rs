@@ -1,3 +1,8 @@
+//! A layout system for positioning and sizing UI controls.
+//!
+//! The Layout component provides tools for arranging controls within containers.
+//! It supports anchoring, docking, proportional sizing, and alignment options.
+
 mod alignament;
 mod anchors;
 mod coordonate16;

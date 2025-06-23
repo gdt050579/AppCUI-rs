@@ -62,7 +62,7 @@ impl GenericAlertDialog {
         Button::new(text, Layout::new(&s), button::Type::Normal)
     }
     pub(super) fn new(title: &str, caption: &str, buttons: DialogButtons, win_type: window::Type) -> Self {
-        let size = RuntimeManager::get().get_terminal_size();
+        let size = RuntimeManager::get().terminal_size();
         // the minimum size of the window should contain at least all buttons
         let min_window_width = buttons.count() * GenericAlertDialog::BUTTON_SIZE + 3;
         // maximum size should not be bigger than 80% of the window

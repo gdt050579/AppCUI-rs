@@ -32,7 +32,14 @@ The following collors are supported by AppCUI via `Color` enum from `AppCUI::gra
 
 Besides this list, a special enuma variant `Color::Transparent` can be used to draw without a color (or in simple terms to keep the existing color). For example, if the current character has a forenground color `Red` writing another character on the same position with color `Transparent` will keep the color `Red` for the character.
 
-**OBS**: Not all terminals support this exact set of colors. Further more, some terminals might allow changing the RGB color for certain colors in the pallete.
+Additionally, if the `TRUE_COLORS` feature is enabled, the following variant is supported:
+* `Color::RGB(r, g, b)` - this is a custom color that is defined by the RGB values.
+
+
+**REMARKS**: 
+1. Not all terminals support this exact set of colors. Further more, some terminals might allow changing the RGB color for certain colors in the pallete.
+2. Enabling `TRUE_COLORS` feature does not mean that the terminal supports 24-bit colors. It only means that the AppCUI framework will use 24-bit colors for the screen, but the terminal might still need to convert them to the terminal's color pallete.
+3. Enabling `TRUE_COLORS` feature will make the size of the `Color` enum to be 4 bytes (instead of 1 byte without this feature). If memory is a concern and you don't need true colors, it is recommended to NOT enable this feature.
 
 The list of attributes available in AppCUI are described by `CharFlags` enum from `AppCUI::graphics` module and include the following flags:
 * `Bold` - bolded character
@@ -45,7 +52,7 @@ These flags can be used with `|` operator if you want to combine them. For examp
 
 As previously explained, a character is the basic unit of AppCUI (we can say that it is similar to what a pixel is for a regular UX system).
 The following method can be used to build a character:
-```rust
+```rust,no_compile
 pub fn new<T>(code: T, fore: Color, back: Color, flags: CharFlags) -> Character
 ```
 where:
@@ -124,19 +131,19 @@ The list of all special characters that are supported by AppCUI (as described in
 
 Besides `Character::new(...)` the following constructors are also available:
 
-1. ```rust 
+1. ```rust, no_compile
     pub fn with_char<T>(code: T) -> Character
     ``` 
     this is the same as calling:
-    ```rust 
+    ```rust, no_compile
     Character::new(code, Color::Transparent, Color::Transparent, CharFlags::None)
     ```
 
-2. ```rust 
+2. ```rust, no_compile 
     pub fn with_color(fore: Color, back: Color) -> Character
     ``` 
     this is the same as calling:
-    ```rust 
+    ```rust, no_compile 
     Character::new(0, fore, fore, CharFlags::None)
     ```
     **Note**: Using the character with code 0 means keeping the existing character but chainging the colors and attributes.
@@ -207,7 +214,7 @@ Sometimes, you might want to use a character with a specific color and attribute
 AppCUI provides a specific structure called `CharAttribute` that allows you to define colors and attributes for a character. 
 To create a `CharAttribute` you can use the following methods:
 
-```rust
+```rust,no_compile
 impl CharAttribute {
     pub fn new(fore: Color, back: Color, flags: CharFlags) -> CharAttribute {...}
     pub fn with_color(fore: Color, back: Color) -> CharAttribute {...}
@@ -235,63 +242,63 @@ and the named parameters:
 # Examples
 
 **Example 1**: Letter `A` with a Red color on an Yellow background:
-```rust
+```rust,no_compile
 Character::new('A',Color::Red,Color::Yellow,CharFlags::None)
 ```
 or
-```rs
+```rs,no_compile
 char!("A,red,yellow")
 ```
 or
-```rs
+```rs,no_compile
 char!("A,r,y")
 ```
 
 
 **Example 2**: Letter `A` (bolded and underlined) with a White color on a Dark blue background:
-```rust
+```rust,no_compile
 Character::new('A',Color::White,Color::DarkBlue,CharFlags::Bold | CharFlags::Underline)
 ```
 or
-```rs
+```rs,no_compile
 char!("A,fore=White,back=DarkBlue,attr=[Bold,Underline]")
 ```
 or
-```rs
+```rs,no_compile
 char!("A,w,db,attr=Bold+Underline")
 ```
 
 
 **Example 3**: An arrow towards left a Red color while keeping the current background:
-```rust
+```rust,no_compile
 Character::new(SpecialCharacter::ArrowLeft,Color::Red,Color::Transparent,CharFlags::None)
 ```
 or
-```rs
+```rs,no_compile
 char!("ArrowLeft,fore=Red,back=Transparent")
 ```
 or
-```rs
+```rs,no_compile
 char!("<-,red")
 ```
 or
-```rs
+```rs,no_compile
 char!("<-,r")
 ```
 
 
 **Example 4**: An arrow towards left a DarkGreen color, Bolded and Underlined while keeping the current background. We will use a CharAttribute for this example:
-```rust
+```rust,no_compile
 let attr = CharAttribute::new(Color::DarkGreen,Color::Transparent,CharFlags::Bold | CharFlags::Underline);  
 let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr);
 ```
 or
-```rs
+```rs,no_compile
 let attr = charattr!("DarkGreen,Transparent,attr:Bold+Underline");
 let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr));
 ```
 or
-```rs
+```rs,no_compile
 let attr = charattr!("dg,?,attr:Bold+Underline");
 let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr);
 ```
