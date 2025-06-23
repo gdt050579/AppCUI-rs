@@ -30,7 +30,7 @@ pub struct TermiosTerminal {
     size: Size,
     // We keep the original `Termios` structure, such that before the application exits, we return
     // the terminal as the user had it initially.
-    _orig_termios: Termios,
+    orig_termios: Termios,
 
     stdout: File,
     ansi_buffer: AnsiFormatter,
@@ -38,7 +38,7 @@ pub struct TermiosTerminal {
 
 impl TermiosTerminal {
     pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
-        let Ok(_orig_termios) = Termios::enable_raw_mode() else {
+        let Ok(orig_termios) = Termios::enable_raw_mode() else {
             return Err(Error::new(
                 crate::prelude::ErrorKind::InitializationFailure,
                 "Cannot enable raw mode in Termios backend to get input from stdin".to_string(),
@@ -49,7 +49,7 @@ impl TermiosTerminal {
 
         let mut t = TermiosTerminal {
             size: Size::new(80, 30),
-            _orig_termios,
+            orig_termios,
             stdout,
             ansi_buffer: AnsiFormatter::new(
                 16384,
@@ -141,6 +141,10 @@ impl Backend for TermiosTerminal {
 
     fn on_resize(&mut self, new_size: Size) {
         self.size = new_size;
+    }
+
+    fn on_close(&mut self) {
+        self.orig_termios.restore();
     }
 
     fn is_single_threaded(&self) -> bool {
