@@ -41,6 +41,9 @@ impl Backend for WindowsVTTerminal {
     fn on_resize(&mut self, new_size: Size) {
         self.console.on_resize(new_size);
     }
+    fn on_close(&mut self) {
+        self.console.on_close();
+    }    
     fn update_screen(&mut self, surface: &Surface) {
         // println!("Update the screen: capacity: {}, size: {:?}, region: {:?}, surface_size: {:?}",self.chars.len(),self.size,self.visible_region,surface.size);
         // safety check --> surface size should be the same as self.width/height size
