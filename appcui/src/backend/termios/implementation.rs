@@ -32,7 +32,7 @@ pub struct TermiosTerminal {
     // the terminal as the user had it initially.
     orig_termios: Termios,
 
-    stdout: File,
+    //stdout: File,
     ansi_buffer: AnsiFormatter,
 }
 
@@ -45,12 +45,12 @@ impl TermiosTerminal {
             ));
         };
 
-        let stdout = unsafe { File::from_raw_fd(STDOUT_FILENO) };
+        //let stdout = unsafe { File::from_raw_fd(STDOUT_FILENO) };
 
         let mut t = TermiosTerminal {
             size: Size::new(80, 30),
             orig_termios,
-            stdout,
+            //stdout,
             ansi_buffer: AnsiFormatter::new(
                 16384,
                 if builder.use_color_schema {
@@ -86,7 +86,10 @@ impl TermiosTerminal {
             }
         }
 
-        let _ = t.stdout.write("\x1b[?1003h".as_bytes()); // capture mouse events
+        t.ansi_buffer.clear();
+        t.ansi_buffer.enable_mouse_events();
+        let _ = std::io::stdout().write_all(t.ansi_buffer.text().as_bytes());
+        let _ = std::io::stdout().flush();
 
         Input::new().start(sender.clone());
         SizeReader::new(get_resize_notification().clone()).start(sender);
@@ -144,6 +147,10 @@ impl Backend for TermiosTerminal {
     }
 
     fn on_close(&mut self) {
+        self.ansi_buffer.clear();
+        self.ansi_buffer.disable_mouse_events();
+        let _ = std::io::stdout().write_all(self.ansi_buffer.text().as_bytes());
+        let _ = std::io::stdout().flush();        
         self.orig_termios.restore();
     }
 

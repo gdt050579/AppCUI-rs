@@ -35,6 +35,12 @@ impl AnsiFormatter {
     pub(crate) fn write_string(&mut self, s: &str) {
         self.text.push_str(s);
     }
+    pub(crate) fn enable_mouse_events(&mut self) {
+        self.text.push_str("\x1b[?1003h");
+    }
+    pub(crate) fn disable_mouse_events(&mut self) {
+        self.text.push_str("\x1b[?1003l");
+    }
     #[inline(always)]
     pub(crate) fn set_foreground_color(&mut self, color: Color) {
         if self.flags.contains_one(AnsiFlags::Use16ColorSchema) {
