@@ -47,6 +47,23 @@ pub(crate) struct CONSOLE_SCREEN_BUFFER_INFO {
 #[allow(non_camel_case_types)]
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Default, Copy, Clone, Debug)]
+pub(crate) struct CONSOLE_SCREEN_BUFFER_INFOEX {
+    pub structure_size: u32,
+    pub size: COORD,
+    pub cursor_pos: COORD,
+    pub attributes: u16,
+    pub window: SMALL_RECT,
+    pub max_size: COORD,
+    pub popup_attr: u16,
+    pub supports_full_screen: BOOL,
+    pub color_table: [u32;16]
+}
+
+
+#[repr(C)]
+#[allow(non_camel_case_types)]
+#[allow(clippy::upper_case_acronyms)]
+#[derive(Default, Copy, Clone, Debug)]
 pub(crate) struct CONSOLE_CURSOR_INFO {
     pub size: u32,
     pub visible: BOOL,
