@@ -23,8 +23,8 @@ extern "system" {
     );
     // #[warn(non_camel_case_types)]
     // pub(crate) fn WriteFile(handle: HANDLE, lpBuffer: *const u8, nNumberOfBytesToWrite: u32, lpNumberOfBytesWritten: &mut u32, lpOverlapped: *mut ()) -> BOOL;
-    #[warn(non_camel_case_types)]
-    pub(crate) fn GetConsoleScreenBufferInfo(handle: HANDLE, lpConsoleScreenBufferInfo: &mut CONSOLE_SCREEN_BUFFER_INFO) -> BOOL;
+    // #[warn(non_camel_case_types)]
+    // pub(crate) fn GetConsoleScreenBufferInfo(handle: HANDLE, lpConsoleScreenBufferInfo: &mut CONSOLE_SCREEN_BUFFER_INFO) -> BOOL;
 
     #[warn(non_camel_case_types)]
     pub(crate) fn SetConsoleScreenBufferInfoEx(handle: HANDLE, lpConsoleScreenBufferInfoEx: &CONSOLE_SCREEN_BUFFER_INFOEX) -> BOOL;
