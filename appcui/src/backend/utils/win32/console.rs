@@ -92,7 +92,7 @@ impl Console {
                 ));
             }
 
-            let info = Self::screen_buffer_info(h_stdout)?;
+            let mut info = Self::screen_buffer_info(h_stdout)?;
             if (info.size.x < 1) || (info.size.y < 1) {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
@@ -133,6 +133,19 @@ impl Console {
             }
             let w = (info.window.right as u32) + 1 - (info.window.left as u32);
             let h = (info.window.bottom as u32) + 1 - (info.window.top as u32);
+            if !builder.use_color_schema {
+                // set the color schema to match AppCUI colors
+                info.color_table = constants::APPCUI_COLOR_SCEHMA;
+                if api::SetConsoleScreenBufferInfoEx(h_stdout, &info) == constants::FALSE {
+                    return Err(Error::new(
+                        ErrorKind::InitializationFailure,
+                        format!(
+                            "SetConsoleScreenBufferInfoEx failed to sey a new color schema on current console !\nWindow code error: {}",
+                            api::GetLastError()
+                        ),
+                    ));                    
+                }
+            }
 
             Ok(Self {
                 stdin: h_stdin,
@@ -344,14 +357,15 @@ impl Console {
         }
     }
 
-    fn screen_buffer_info(stdout: structs::HANDLE) -> Result<structs::CONSOLE_SCREEN_BUFFER_INFO, Error> {
+    fn screen_buffer_info(stdout: structs::HANDLE) -> Result<structs::CONSOLE_SCREEN_BUFFER_INFOEX, Error> {
         unsafe {
-            let mut cbuf = structs::CONSOLE_SCREEN_BUFFER_INFO::default();
-            if api::GetConsoleScreenBufferInfo(stdout, &mut cbuf) == constants::FALSE {
+            let mut cbuf = structs::CONSOLE_SCREEN_BUFFER_INFOEX::default();
+            cbuf.structure_size = 0x60;
+            if api::GetConsoleScreenBufferInfoEx(stdout, &mut cbuf) == constants::FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
                     format!(
-                        "GetConsoleScreenBufferInfo failed to get information on current console !\nWindow code error: {}",
+                        "GetConsoleScreenBufferInfoEx failed to get information on current console !\nWindow code error: {}",
                         api::GetLastError()
                     ),
                 ));
