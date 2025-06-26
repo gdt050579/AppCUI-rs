@@ -512,7 +512,7 @@ impl WebTerminal {
                     continue;
                 };
 
-                let char_width_cells = if self.is_emoji(cell.code) { 2 } else { 1 };
+                let char_width_cells = self.is_emoji(cell.code) as usize + 1; // Emoji take 2 cells, others take 1
 
                 let pos_x = x as f64 * cell_width;
                 let pos_y = y as f64 * cell_height;
