@@ -55,9 +55,10 @@ impl WebTerminal {
 
             #[cfg(feature = "TRUE_COLORS")]
             Color::RGB(r, g, b) => {
-                let r = r as f32 / 255.0;
-                let g = g as f32 / 255.0;
-                let b = b as f32 / 255.0;
+                // ensure values are in the range [0, 255]
+                let r = r.clamp(0, 255) as f32;
+                let g = g.clamp(0, 255) as f32;
+                let b = b.clamp(0, 255) as f32;
                 [r, g, b, 1.0]
             }
         }

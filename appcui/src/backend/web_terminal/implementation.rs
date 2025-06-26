@@ -518,7 +518,7 @@ impl WebTerminal {
                 let pos_y = y as f64 * cell_height;
 
                 let foreground = self.color_to_rgba(cell.foreground);
-                let css_color = format!("rgba({},{},{},{})", foreground[0], foreground[1], foreground[2], foreground[3],);
+                let css_color = format!("rgba({},{},{},{})", foreground[0], foreground[1], foreground[2], foreground[3]);
 
                 context.set_fill_style_str(&css_color);
                 context.set_stroke_style_str(&css_color);
