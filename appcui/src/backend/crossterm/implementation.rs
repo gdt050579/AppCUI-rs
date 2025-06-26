@@ -1,9 +1,14 @@
 use std::sync::mpsc::Sender;
-
 use crate::{
     backend::Backend,
     system::{Error, SystemEvent},
 };
+use crossterm::{
+    execute,
+    style::Print,
+    terminal::{enable_raw_mode, disable_raw_mode},
+};
+use super::input::Input;
 
 pub(crate) struct CrossTerm {}
 
