@@ -11,7 +11,7 @@ use crossterm::{
     style::{Color as CrosstermColor, Print, ResetColor, SetBackgroundColor, SetForegroundColor},
     terminal::{disable_raw_mode, enable_raw_mode, size, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use std::io::{stdout, Write};
+use std::io::stdout;
 use std::sync::mpsc::Sender;
 
 pub(crate) struct CrossTerm {

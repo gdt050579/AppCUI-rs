@@ -166,13 +166,13 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
         #[cfg(target_arch = "wasm32")]
         Type::WebTerminal => {
             let term = WebTerminal::new(builder, sender)?;
-            return Ok(Box::new(term));
+            Ok(Box::new(term))
         }
 
         #[cfg(feature = "CROSSTERM")]
         Type::CrossTerm => {
             let term = CrossTerm::new(builder, sender)?;
-            return Ok(Box::new(term));
+            Ok(Box::new(term))
         }
     }
 }
