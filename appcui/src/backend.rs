@@ -51,7 +51,8 @@ mod web_terminal;
 mod windows_console;
 #[cfg(target_os = "windows")]
 mod windows_vt;
-
+#[cfg(feature = "CROSSTERM")]
+mod crossterm;
 
 pub(crate) mod utils;
 
@@ -82,6 +83,8 @@ use self::web_terminal::WebTerminal;
 use self::windows_console::WindowsConsoleTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_vt::WindowsVTTerminal;
+#[cfg(feature = "CROSSTERM")]  
+use self::crossterm::CrossTerm;
 
 pub(crate) trait Backend {
     fn update_screen(&mut self, surface: &Surface);
@@ -110,6 +113,8 @@ pub enum Type {
     NcursesTerminal,
     #[cfg(target_arch = "wasm32")]
     WebTerminal,
+    #[cfg(feature = "CROSSTERM")]
+    CrossTerm,
 }
 
 pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
@@ -161,6 +166,12 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
         #[cfg(target_arch = "wasm32")]
         Type::WebTerminal => {
             let term = WebTerminal::new(builder, sender)?;
+            return Ok(Box::new(term));
+        }
+
+        #[cfg(feature = "CROSSTERM")]
+        Type::CrossTerm => {
+            let term = CrossTerm::new(builder, sender)?;
             return Ok(Box::new(term));
         }
     }
