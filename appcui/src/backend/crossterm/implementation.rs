@@ -1,6 +1,8 @@
 use super::input::Input;
 use crate::{
-    backend::{Backend, SystemEventReader}, graphics::{Color, Size, Surface}, prelude::{CharAttribute, CharFlags}, system::{Error, SystemEvent}
+    backend::{Backend, SystemEventReader},
+    graphics::{CharFlags, Color, Size, Surface},
+    system::{Error, SystemEvent},
 };
 use crossterm::event::EnableMouseCapture;
 use crossterm::{
@@ -11,6 +13,14 @@ use crossterm::{
 };
 use std::io::stdout;
 use std::sync::mpsc::Sender;
+
+#[cfg(target_os = "windows")]
+use crate::backend::utils::win32;
+
+#[cfg(target_family = "unix")]
+use copypasta::ClipboardContext;
+#[cfg(target_family = "unix")]
+use copypasta::ClipboardProvider;
 
 pub(crate) struct CrossTerm {
     size: Size,
@@ -153,15 +163,42 @@ impl Backend for CrossTerm {
     }
 
     fn clipboard_text(&self) -> Option<String> {
-        None
+        #[cfg(target_os = "windows")]
+        {
+            win32::Clipboard::text()
+        }
+
+        #[cfg(target_family = "unix")]
+        {
+            let mut ctx: ClipboardContext = ClipboardContext::new().ok()?;
+            ctx.get_contents().ok()
+        }
     }
 
-    fn set_clipboard_text(&mut self, _text: &str) {}
+    fn set_clipboard_text(&mut self, text: &str) {
+        #[cfg(target_os = "windows")]
+        {
+            win32::Clipboard::set_text(text);
+        }
+
+        #[cfg(target_family = "unix")]
+        {
+            let mut ctx: ClipboardContext = ClipboardContext::new().unwrap();
+            ctx.set_contents(text.to_owned()).unwrap();
+        }
+    }
 
     fn has_clipboard_text(&self) -> bool {
-        false
+        #[cfg(target_os = "windows")]
+        {
+            win32::Clipboard::has_text()
+        }
+        #[cfg(target_family = "unix")]
+        {
+            let mut ctx: ClipboardContext = ClipboardContext::new().unwrap();
+            ctx.get_contents().is_ok()
+        }
     }
-
     fn is_single_threaded(&self) -> bool {
         false
     }
