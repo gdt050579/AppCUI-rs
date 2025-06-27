@@ -12,6 +12,7 @@ use super::Rect;
 use super::Size;
 use super::TextAlignament;
 use super::TextFormat;
+use super::Color;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -837,5 +838,72 @@ impl Surface {
         self.size.width = w;
         self.size.height = h;
         self.reset();
+    }
+
+
+    fn serialize_color(color: Color, output: &mut Vec<u8>) {
+        match color {
+            Color::Black => output.push(0),
+            Color::DarkBlue => output.push(1),
+            Color::DarkGreen => output.push(2),
+            Color::Teal => output.push(3),
+            Color::DarkRed => output.push(4),
+            Color::Magenta => output.push(5),
+            Color::Olive => output.push(6),
+            Color::Silver => output.push(7),
+            Color::Gray => output.push(8),
+            Color::Blue => output.push(9),
+            Color::Green => output.push(10),
+            Color::Aqua => output.push(11),
+            Color::Red => output.push(12),
+            Color::Pink => output.push(13),
+            Color::Yellow => output.push(14),
+            Color::White => output.push(15),
+            Color::Transparent => output.push(16),  
+            #[cfg(feature = "TRUE_COLORS")]
+            Color::TrueColor(r, g, b) => {
+                output.push(17);
+                output.extend_from_slice(&r.to_le_bytes());
+                output.extend_from_slice(&g.to_le_bytes());
+                output.extend_from_slice(&b.to_le_bytes());
+            }          
+        }
+    }
+    /// Serializes the surface to a byte buffer. The buffer will contain the magic number, version, size, and character buffer.
+    /// The format is as follows:
+    /// - Magic number: 3 bytes (SRF)
+    /// - Version: 1 byte
+    /// - Size: 8 bytes (width and height, each 4 bytes, little-endian)
+    /// - Character buffer: for each character:
+    ///    - Code: 4 bytes (u32, little-endian)
+    ///    - Flags: 2 bytes (u16, little-endian)
+    ///    - Foreground color: 1 byte (u8) - in case of RGB colors it will be 17, followed by 3 bytes for the RGB values
+    ///    - Background color: 1 byte (u8) - in case of RGB colors it will be 17, followed by 3 bytes for the RGB values
+    pub fn serialize_to_buffer(&self, output: &mut Vec<u8>) {
+        output.clear();
+        // magic
+        output.push(b'S');
+        output.push(b'R');
+        output.push(b'F');
+        // version
+        output.push(1);
+        // size
+        output.extend_from_slice(self.size.width.to_le_bytes().as_slice());
+        output.extend_from_slice(self.size.height.to_le_bytes().as_slice());
+        // character buffer
+        for ch in &self.chars {
+            output.extend_from_slice((ch.code as u32).to_le_bytes().as_slice());
+            output.extend_from_slice(ch.flags.get_value().to_le_bytes().as_slice());
+            Self::serialize_color(ch.foreground, output);
+            Self::serialize_color(ch.background, output);
+        }
+    }
+
+    /// Serializes the surface to a byte buffer and saves it to the specified file path.
+    pub fn save(&self, path: &str) -> Result<(), std::io::Error> {
+        let mut output = Vec::new();
+        self.serialize_to_buffer(&mut output);
+        std::fs::write(path, output)?;
+        Ok(())
     }
 }
