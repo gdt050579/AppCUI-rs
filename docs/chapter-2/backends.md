@@ -16,6 +16,7 @@ The following backends are supported:
 3. NCurses
 4. Termios
 5. Web Terminal
+6. CrossTerm
 
 **Remarks**: These types are available via `appcui::backend::Type` and can be used to initialize an application
 
@@ -37,17 +38,18 @@ pub enum Type {
     NcursesTerminal,
     #[cfg(target_arch = "wasm32")]
     WebTerminal,
+    CrossTerm
 }
 ```
 
 ## OS Support
 
-| OS      | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
-| ------- | --------------- | ---------- | ------- | ------- | ------------ |
-| Windows | Yes             | Yes        | -       | -       | -            |
-| Linux   | -               | -          | Yes     | Yes     | -            |
-| Mac/OSX | -               | -          | -       | Yes     | -            |
-| Web     | -               | -          | -       | -       | Yes          |
+| OS      | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
+| ------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
+| Windows | Yes             | Yes        | -       | -       | -            | Yes       |
+| Linux   | -               | -          | Yes     | Yes     | -            | Yes       |
+| Mac/OSX | -               | -          | -       | Yes     | -            | Yes       |
+| Web     | -               | -          | -       | -       | Yes          | -         |
 
 
 ## Display
@@ -64,18 +66,18 @@ Each backend comes with different support related to what can be displayed on th
 * **Cursor** - support for cursor
 * **Cursor Blinking** - support for cursor blinking
 
-| Display         | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
-| --------------- | --------------- | ---------- | ------- | ------- | ------------ |
-| 16 colors       | Yes             | Yes        | Yes     | Yes     | Yes          |
-| True colors     | -               | Yes        | -       | Yes     | Yes          |
-| Bold            | -               | Yes        | Yes     | Yes     | -            |
-| Underline       | Yes             | Yes        | Yes     | Yes     | Yes          |
-| Italic          | -               | Yes        | -       | Yes     | -            |
-| ASCII           | Yes             | Yes        | Yes     | Yes     | Yes          |
-| WTF-16          | Yes             | Yes        | Yes     | Yes     | Yes          |
-| UTF-8           | -               | Yes        | -       | Yes     | Yes          |
-| Cursor          | Yes             | Yes        | Yes     | -       | Yes          |
-| Cursor Blinking | Yes             | Yes        | -       | -       | -            |
+| Display         | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
+| --------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
+| 16 colors       | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| True colors     | -               | Yes        | -       | Yes     | Yes          | Yes       |
+| Bold            | -               | Yes        | Yes     | Yes     | -            | Yes       |
+| Underline       | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| Italic          | -               | Yes        | -       | Yes     | -            | Yes       |
+| ASCII           | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| WTF-16          | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| UTF-8           | -               | Yes        | -       | Yes     | Yes          | Yes       |
+| Cursor          | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
+| Cursor Blinking | Yes             | Yes        | -       | -       | -            | Yes       |
 
 **Remarks**:
 1. **True colors** support requires the feature `TRUE_COLORS` to be enabled (keep in mind that by doing this you also increase the size of your Color and Character structures - if you don't need this or your terminal does not support true colors, you will only allocate aditional space that will not be used).
@@ -90,6 +92,7 @@ In terms of the output method, each backend uses a different approach:
 | NCurses         | Direct output via NCurses API. NCurses must be installed on the system. |
 | Termios         | ANSI sequences                                                          |
 | Web Terminal    | HTML elements and browser APIs                                          |
+| CrossTerm       | ANSI sequences (directly via the `crossterm` crate API)                 |
 
 
 ## Input
@@ -105,26 +108,26 @@ Capturing the input implies the following capabilites from any backend:
 
 ### Keyboard
 
-| Keys               | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
-| ------------------ | --------------- | ---------- | ------- | ------- | ------------ |
-| Alt+Key            | Yes             | Yes        | Yes     | -       | Yes          |
-| Shift+Key          | Yes             | Yes        | Yes     | -       | Yes          |
-| Ctrl+Key           | Yes             | Yes        | Yes     | -       | Yes          |
-| Alt+Shift+Key      | Yes             | Yes        | -       | -       | -            |
-| Ctrl+Shift+Key     | Yes             | Yes        | -       | -       | -            |
-| Ctrl+Alt+Key       | Yes             | Yes        | -       | -       | -            |
-| Ctrl+Alt+Shift+Key | Yes             | Yes        | -       | -       | -            |
-| Alt pressed        | Yes             | Yes        | -       | -       | -            |
-| Shift pressed      | Yes             | Yes        | -       | -       | -            |
-| Ctrl pressed       | Yes             | Yes        | -       | -       | -            |
+| Keys               | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
+| ------------------ | --------------- | ---------- | ------- | ------- | ------------ | --------- |
+| Alt+Key            | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
+| Shift+Key          | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
+| Ctrl+Key           | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
+| Alt+Shift+Key      | Yes             | Yes        | -       | -       | -            | -         |
+| Ctrl+Shift+Key     | Yes             | Yes        | -       | -       | -            | -         |
+| Ctrl+Alt+Key       | Yes             | Yes        | -       | -       | -            | -         |
+| Ctrl+Alt+Shift+Key | Yes             | Yes        | -       | -       | -            | -         |
+| Alt pressed        | Yes             | Yes        | -       | -       | -            | -         |
+| Shift pressed      | Yes             | Yes        | -       | -       | -            | -         |
+| Ctrl pressed       | Yes             | Yes        | -       | -       | -            | -         |
 
 ### Mouse
 
-| Mouse events | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
-| ------------ | --------------- | ---------- | ------- | ------- | ------------ |
-| Click        | Yes             | Yes        | Yes     | Yes     | Yes          |
-| Move & Drag  | Yes             | Yes        | Yes     | Yes     | Yes          |
-| Wheel        | Yes             | Yes        | Yes     | -       | Yes          |
+| Mouse events | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
+| ------------ | --------------- | ---------- | ------- | ------- | ------------ | --------- |
+| Click        | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| Move & Drag  | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| Wheel        | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
 
 **Remarks**: Input support is highlighly dependent on the terminal and the OS. AppCUI uses the following approach to intercept the input:
 
@@ -135,34 +138,37 @@ Capturing the input implies the following capabilites from any backend:
 | NCurses         | Read the input directly from the console via NCurses API. NCurses must be installed on the system. |
 | Termios         | Read the input directly from the console via Termios API                                           |
 | Web Terminal    | Read the input directly from the browser                                                           |
+| CrossTerm       | Read the input via the `crossterm` crate API                                                       |
+
 
 ## System events
 
 System events are events that are not related to the keyboard or mouse, but are related to the system and indicate that the console has been changed in some way.
 
-| Events         | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
-| -------------- | --------------- | ---------- | ------- | ------- | ------------ |
-| Console Resize | Yes             | Yes        | Yes     | -       | Yes          |
-| Console Closed | Yes             | Yes        | -       | -       | Yes          |
+| Events         | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
+| -------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
+| Console Resize | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
+| Console Closed | Yes             | Yes        | -       | -       | Yes          | -         |
 
 ## Other capabilities
 
-| Capabilities  | Windows Console | Windows VT | NCurses | Termios | Web Terminal |
-| ------------- | --------------- | ---------- | ------- | ------- | ------------ |
-| Set dimension | Yes             | Yes        | -       | -       | Yes          |
-| Set title     | Yes             | Yes        | -       | -       | Yes          |
+| Capabilities  | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
+| ------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
+| Set dimension | Yes             | Yes        | -       | -       | Yes          | -         |
+| Set title     | Yes             | Yes        | -       | -       | Yes          | -         |
 
 ## Clipboard
 
 AppCUI provides clipboard support for copying and pasting text. The clipboard functionality is available on the following backends:
 
-| Backend         | Clipboard Support | API Used            |
-| --------------- | ----------------- | ------------------- |
-| Windows Console | Yes               | Windows API         |
-| Windows VT      | Yes               | Windows API         |
-| NCurses         | Yes               | via copypasta crate |
-| Termios         | -                 | -                   |
-| Web Terminal    | Yes               | Browser API         |
+| Backend         | Clipboard Support | API Used                                                |
+| --------------- | ----------------- | ------------------------------------------------------- |
+| Windows Console | Yes               | Windows API                                             |
+| Windows VT      | Yes               | Windows API                                             |
+| NCurses         | Yes               | via copypasta crate                                     |
+| Termios         | -                 | -                                                       |
+| Web Terminal    | Yes               | Browser API                                             |
+| CrossTerm       | Yes               | via copypasta crate (Linux/Mac) or Windows API (Window) |
 
 ## Defaults
 

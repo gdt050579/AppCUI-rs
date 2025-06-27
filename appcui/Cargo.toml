@@ -63,12 +63,17 @@ futures = "0.3.31"
 libc = "0.2"
 copypasta = "0.10.1"
 
+[dependencies.crossterm]
+version = "0.29"    
+optional = true
+
 [features]
 default = []
 DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []
 EVENT_RECORDER = []
 GLOBAL_RUNTIME = []
 TRUE_COLORS = []
+CROSSTERM = ["crossterm"]
 
 
 [lints]
