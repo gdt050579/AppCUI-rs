@@ -962,8 +962,7 @@ impl Surface {
             let code = u32::from_le_bytes([buffer[pos], buffer[pos + 1], buffer[pos + 2], buffer[pos + 3]]);
             ch.code = char::from_u32(code).expect("Invalid UTF-8 character");
             let flags = u16::from_le_bytes([buffer[pos + 4], buffer[pos + 5]]);
-            ch.flags = CharFlags::try_from(flags).expect("Invalid combination of flags");
-
+            ch.flags = CharFlags::from_value(flags).expect("Invalid combination of flags");
             pos += 6;
             if pos >= len {
                 return Err("Buffer is too small for foreground character colors".to_string());
