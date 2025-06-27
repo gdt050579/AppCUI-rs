@@ -6,7 +6,7 @@ use crate::{
 };
 use std::{
     fmt::Write,
-    sync::{mpsc::Sender, Arc, LazyLock, Mutex},
+    sync::{mpsc::Sender, Arc, Mutex},
 };
 use wasm_bindgen::{convert::FromWasmAbi, prelude::*, JsCast};
 use wasm_bindgen_futures::JsFuture;
@@ -17,7 +17,6 @@ use web_sys::{
 
 const CURSOR_COLOR: &str = "rgba(255, 255, 255, 0.5)";
 const DEFAULT_COLOR: &str = "rgba(0, 0, 0, 0)";
-static RGBA_STRING: LazyLock<Mutex<String>> = LazyLock::new(|| Mutex::new(String::with_capacity(32)));
 
 struct TerminalDomConfig {
     cols: u32,
@@ -50,6 +49,7 @@ pub struct WebTerminal {
     cell_width_px: f32,
     cell_height_px: f32,
     clipboard_content: Arc<Mutex<Option<String>>>,
+    rgba_color: String,
 }
 
 unsafe impl Send for WebTerminal {}
@@ -131,6 +131,7 @@ impl WebTerminal {
             cell_width_px: dom_config.cell_w as f32,
             cell_height_px: dom_config.cell_h as f32,
             clipboard_content: Arc::new(Mutex::new(None)),
+            rgba_color: String::with_capacity(32),
         };
 
         term.setup_input_listeners(&document, sender)
@@ -485,7 +486,7 @@ impl WebTerminal {
         self.gl.draw_arrays(GL::TRIANGLES, 0, vertex_count);
     }
 
-    fn render_text(&self, surface: &Surface) -> Result<(), JsValue> {
+    fn render_text(&mut self, surface: &Surface) -> Result<(), JsValue> {
         let context = self
             .text_canvas
             .get_context("2d")?
@@ -522,22 +523,20 @@ impl WebTerminal {
                 let pos_x = x as f64 * cell_width;
                 let pos_y = y as f64 * cell_height;
 
-                let mut css_color = RGBA_STRING.lock().unwrap();
-                css_color.clear();
                 let foreground = self.color_to_rgba(cell.foreground);
+                self.rgba_color.clear();
 
                 write!(
-                    &mut *css_color,
+                    &mut self.rgba_color,
                     "rgba({}, {}, {}, {})",
                     foreground[0], foreground[1], foreground[2], foreground[3]
                 )
                 .unwrap_or_else(|_| {
-                    web_sys::console::error_1(&"Failed to format RGBA string".into());
-                    *css_color = DEFAULT_COLOR.to_string();
+                    self.rgba_color = DEFAULT_COLOR.to_string();
                 });
 
-                context.set_fill_style_str(&css_color);
-                context.set_stroke_style_str(&css_color);
+                context.set_fill_style_str(&self.rgba_color);
+                context.set_stroke_style_str(&self.rgba_color);
 
                 let render_center_x = pos_x + (char_width_cells as f64 * cell_width) / 2.0;
                 context.fill_text(&cell.code.to_string(), render_center_x, pos_y)?;
