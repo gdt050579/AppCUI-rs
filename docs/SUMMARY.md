@@ -29,6 +29,7 @@
         - [NCurses](chapter-2/backends/ncurses.md)
         - [Termios](chapter-2/backends/termios.md)
         - [Web Terminal](chapter-2/backends/web_terminal.md)
+        - [CrossTerm](chapter-2/backends/crossterm.md)
 
 - [Controls](chapter-3/controls.md)
     - [Layout](chapter-3/layout.md)
