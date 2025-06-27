@@ -38,6 +38,32 @@ impl Desktop {
         RuntimeManager::get().get_desktop_rect()
     }
 
+    /// Returns a handle to the current focused window.
+    pub fn active_window_handle(&self) -> Option<Handle<Window>> {
+        if self.base.focused_child_index.in_range(self.base.children.len()) {
+            return Some(self.base.children[self.base.focused_child_index.index()].cast());
+        }
+        None
+    }
+
+    /// Returns a reference to a window by its handle.
+    /// If the handle is not valid or the window is not found, it returns None.
+    pub fn windowt<T>(&self, handle: Handle<T>) -> Option<&T>
+    where
+        T: Control + WindowControl + 'static,
+    {
+        RuntimeManager::get().get_control(handle)
+    }    
+
+    /// Returns a mutable reference to a window by its handle.
+    /// If the handle is not valid or the window is not found, it returns None. 
+    pub fn window_mut<T>(&mut self, handle: Handle<T>) -> Option<&mut T>
+    where
+        T: Control + WindowControl + 'static,
+    {
+        RuntimeManager::get().get_control_mut(handle)
+    }    
+
     /// Closes the application.
     pub fn close(&mut self) {
         RuntimeManager::get().close();

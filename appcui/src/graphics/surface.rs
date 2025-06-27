@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::prelude::CharFlags;
 
 use super::image;
@@ -933,7 +935,7 @@ impl Surface {
     }
 
     /// Serializes the surface to a byte buffer and saves it to the specified file path.
-    pub fn save(&self, path: &str) -> Result<(), std::io::Error> {
+    pub fn save(&self, path: &Path) -> Result<(), std::io::Error> {
         let mut output = Vec::new();
         self.serialize_to_buffer(&mut output);
         std::fs::write(path, output)?;
@@ -978,5 +980,9 @@ impl Surface {
             pos += sz;
         }
         Ok(surface)
+    }
+    pub fn from_file(path: &Path) -> Result<Surface, String> {
+        let buffer = std::fs::read(path).map_err(|e| e.to_string())?;
+        Self::from_buffer(&buffer)
     }
 }

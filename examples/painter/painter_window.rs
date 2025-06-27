@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use appcui::prelude::*;
 use super::painter_control::PainterControl;
 
@@ -11,7 +13,7 @@ pub struct PainterWindow {
 }
 
 impl PainterWindow {
-    pub fn new(name: &str) -> Self {
+    fn inner_new(name: &str, path: Option<&Path>) -> Result<Self, String>  {
         let mut w = Self {
             base: Window::new(name, Layout::new("d:c,w:60,h:20"), window::Flags::Sizeable),
             painter: Handle::None,
@@ -38,8 +40,31 @@ impl PainterWindow {
 
         w.clear_button = w.add(button!("Clear,t:0,l:46,w:9,h:1,type: Flat"));
 
-        w.painter = w.add(PainterControl::new(Layout::new("t:1,l:0,r:0,b:0")));
-        w
+        let mut p = PainterControl::new(Layout::new("t:1,l:0,r:0,b:0"));
+
+        if let Some(path) = path {
+            p.load_from_file(path)?;
+            
+        } 
+        w.painter = w.add(p);
+        Ok(w)
+    }
+
+    pub fn new(name: &str) -> Self {
+        Self::inner_new(name, None).unwrap()
+    }
+
+    pub fn from_file(file: &Path) -> Result<Self, String> {
+        Self::inner_new("Painter", Some(file))
+    }
+
+    pub fn save_to_file(&self, path: &Path) -> Result<(), String> {
+        let h = self.painter;
+        if let Some(p) = self.control(h) {
+            p.save_to_file(path)
+        } else {
+            Err("Painter control not found".to_string())
+        }
     }
 
     pub fn set_drawing_char(&mut self, ch: char) {
