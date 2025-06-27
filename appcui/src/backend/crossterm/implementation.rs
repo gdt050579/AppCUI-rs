@@ -1,8 +1,6 @@
 use super::input::Input;
 use crate::{
-    backend::{Backend, SystemEventReader},
-    graphics::{Color, Size, Surface},
-    system::{Error, SystemEvent},
+    backend::{Backend, SystemEventReader}, graphics::{Color, Size, Surface}, prelude::{CharAttribute, CharFlags}, system::{Error, SystemEvent}
 };
 use crossterm::event::EnableMouseCapture;
 use crossterm::{
@@ -101,6 +99,7 @@ impl Backend for CrossTerm {
 
         let mut current_fg = None;
         let mut current_bg = None;
+        let mut flags = CharFlags::None;
 
         for ch in surface.chars.iter() {
             if Some(ch.foreground) != current_fg {
@@ -110,6 +109,19 @@ impl Backend for CrossTerm {
             if Some(ch.background) != current_bg {
                 queue!(stdout, SetBackgroundColor(self.convert_color(ch.background))).unwrap();
                 current_bg = Some(ch.background);
+            }
+            if ch.flags != flags {
+                queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::Reset)).unwrap();
+                if ch.flags.contains(CharFlags::Bold) {
+                    queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::Bold)).unwrap();
+                }
+                if ch.flags.contains(CharFlags::Italic) {
+                    queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::Italic)).unwrap();
+                }
+                if ch.flags.contains(CharFlags::Underline) {
+                    queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::Underlined)).unwrap();
+                }
+                flags = ch.flags;
             }
             queue!(stdout, Print(ch.code)).unwrap();
 
