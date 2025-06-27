@@ -976,3 +976,25 @@ fn check_write_ascii_multi_line() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xDE250FB0D21B6412);
 }
+
+#[test]
+fn check_serialization_to_buffer() {
+    let mut s = Surface::new(5, 2);
+    s.write_string(0, 0, "Hello", CharAttribute::with_color(Color::White, Color::DarkRed), false);
+    s.write_string(0, 1, "World", CharAttribute::new(Color::Green, Color::DarkRed, CharFlags::Bold), false);
+    let mut buffer = Vec::new();
+    s.serialize_to_buffer(&mut buffer);
+    const RESULT: [u8; 92] = [
+        // Magic
+        83, 82, 70, 
+        // Version
+        1, 
+        // Width and Height
+        5, 0, 0, 0, 2, 0, 0, 0, 
+        // Character data
+        72, 0, 0, 0, 0, 0, 15, 4, 101, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 111, 0,
+        0, 0, 0, 0, 15, 4, 87, 0, 0, 0, 1, 0, 10, 4, 111, 0, 0, 0, 1, 0, 10, 4, 114, 0, 0, 0, 1, 0, 10, 4, 108, 0, 0, 0, 1, 0, 10, 4, 100, 0, 0, 0,
+        1, 0, 10, 4,
+    ];
+    assert_eq!(buffer, RESULT);
+}

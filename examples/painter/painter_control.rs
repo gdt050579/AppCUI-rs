@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use appcui::prelude::*;
 
 #[CustomControl(overwrite = OnPaint + OnMouseEvent + OnResize + OnKeyPressed)]
@@ -33,6 +35,23 @@ impl PainterControl {
 
     pub fn clear_surface(&mut self) {
         self.surface.clear(char!("' ',black,black"));
+    }
+
+    pub fn load_from_file(&mut self, file: &Path) -> Result<(), String> {
+        if let Ok(surface) = Surface::from_file(file) {
+            self.surface = surface;
+            self.scrollbars
+                .resize(self.surface.size().width as u64, self.surface.size().height as u64, &self.base);
+            Ok(())
+        } else {
+            Err(format!("Failed to load surface from file '{}'", file.display()))
+        }
+    }
+
+    pub fn save_to_file(&self, path: &Path) -> Result<(), String> {
+        self.surface
+            .save(path)
+            .map_err(|e| format!("Failed to save surface to file '{}': {}", path.display(), e))
     }
 }
 
@@ -91,9 +110,8 @@ impl OnKeyPressed for PainterControl {
                     .set_indexes(self.scrollbars.horizontal_index() + 1, self.scrollbars.vertical_index());
                 EventProcessStatus::Processed
             }
-            _ => EventProcessStatus::Ignored
+            _ => EventProcessStatus::Ignored,
         }
-        
     }
 }
 
