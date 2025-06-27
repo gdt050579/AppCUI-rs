@@ -4,7 +4,10 @@ use crate::{
     system::Error,
     system::{KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent, MouseWheelEvent, SystemEvent},
 };
-use std::sync::{mpsc::Sender, Arc, Mutex};
+use std::{
+    fmt::Write,
+    sync::{mpsc::Sender, Arc, LazyLock, Mutex},
+};
 use wasm_bindgen::{convert::FromWasmAbi, prelude::*, JsCast};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{
@@ -13,6 +16,8 @@ use web_sys::{
 };
 
 const CURSOR_COLOR: &str = "rgba(255, 255, 255, 0.5)";
+const DEFAULT_COLOR: &str = "rgba(0, 0, 0, 0)";
+static RGBA_STRING: LazyLock<Mutex<String>> = LazyLock::new(|| Mutex::new(String::with_capacity(32)));
 
 struct TerminalDomConfig {
     cols: u32,
@@ -517,8 +522,19 @@ impl WebTerminal {
                 let pos_x = x as f64 * cell_width;
                 let pos_y = y as f64 * cell_height;
 
+                let mut css_color = RGBA_STRING.lock().unwrap();
+                css_color.clear();
                 let foreground = self.color_to_rgba(cell.foreground);
-                let css_color = format!("rgba({},{},{},{})", foreground[0], foreground[1], foreground[2], foreground[3]);
+
+                write!(
+                    &mut *css_color,
+                    "rgba({}, {}, {}, {})",
+                    foreground[0], foreground[1], foreground[2], foreground[3]
+                )
+                .unwrap_or_else(|_| {
+                    web_sys::console::error_1(&"Failed to format RGBA string".into());
+                    *css_color = DEFAULT_COLOR.to_string();
+                });
 
                 context.set_fill_style_str(&css_color);
                 context.set_stroke_style_str(&css_color);
