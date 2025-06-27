@@ -1,9 +1,12 @@
+use crate::prelude::CharFlags;
+
 use super::image;
 use super::Renderer;
 
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
+use super::Color;
 use super::Cursor;
 use super::Image;
 use super::LineType;
@@ -12,7 +15,6 @@ use super::Rect;
 use super::Size;
 use super::TextAlignament;
 use super::TextFormat;
-use super::Color;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -840,7 +842,6 @@ impl Surface {
         self.reset();
     }
 
-
     fn serialize_color(color: Color, output: &mut Vec<u8>) {
         match color {
             Color::Black => output.push(0),
@@ -859,14 +860,46 @@ impl Surface {
             Color::Pink => output.push(13),
             Color::Yellow => output.push(14),
             Color::White => output.push(15),
-            Color::Transparent => output.push(16),  
+            Color::Transparent => output.push(16),
             #[cfg(feature = "TRUE_COLORS")]
             Color::TrueColor(r, g, b) => {
                 output.push(17);
                 output.extend_from_slice(&r.to_le_bytes());
                 output.extend_from_slice(&g.to_le_bytes());
                 output.extend_from_slice(&b.to_le_bytes());
-            }          
+            }
+        }
+    }
+    fn deserialize_color(buffer: &[u8]) -> Option<(Color, usize)> {
+        match buffer[0] {
+            0 => Some((Color::Black, 1)),
+            1 => Some((Color::DarkBlue, 1)),
+            2 => Some((Color::DarkGreen, 1)),
+            3 => Some((Color::Teal, 1)),
+            4 => Some((Color::DarkRed, 1)),
+            5 => Some((Color::Magenta, 1)),
+            6 => Some((Color::Olive, 1)),
+            7 => Some((Color::Silver, 1)),
+            8 => Some((Color::Gray, 1)),
+            9 => Some((Color::Blue, 1)),
+            10 => Some((Color::Green, 1)),
+            11 => Some((Color::Aqua, 1)),
+            12 => Some((Color::Red, 1)),
+            13 => Some((Color::Pink, 1)),
+            14 => Some((Color::Yellow, 1)),
+            15 => Some((Color::White, 1)),
+            16 => Some((Color::Transparent, 1)),
+            17 => {
+                if buffer.len() < 4 {
+                    None
+                } else {
+                    let r = buffer[1];
+                    let g = buffer[2];
+                    let b = buffer[3];
+                    Some((Color::from_rgb(r, g, b), 4))
+                }
+            }
+            _ => None,
         }
     }
     /// Serializes the surface to a byte buffer. The buffer will contain the magic number, version, size, and character buffer.
@@ -905,5 +938,46 @@ impl Surface {
         self.serialize_to_buffer(&mut output);
         std::fs::write(path, output)?;
         Ok(())
+    }
+
+    pub fn from_buffer(buffer: &[u8]) -> Result<Surface, String> {
+        if buffer.len() < 12 {
+            return Err("Buffer is too small to be a valid surface".to_string());
+        }
+        if buffer[0] != b'S' || buffer[1] != b'R' || buffer[2] != b'F' {
+            return Err("Invalid magic number".to_string());
+        }
+        if buffer[3] != 1 {
+            return Err("Unsupported version".to_string());
+        }
+        let width = u32::from_le_bytes([buffer[4], buffer[5], buffer[6], buffer[7]]);
+        let height = u32::from_le_bytes([buffer[8], buffer[9], buffer[10], buffer[11]]);
+        let mut surface = Surface::new(width, height);
+        let mut pos = 12;
+        let len = buffer.len();
+        for ch in &mut surface.chars {
+            if pos + 6 >= len {
+                return Err("Buffer is too small for character data".to_string());
+            }
+            let code = u32::from_le_bytes([buffer[pos], buffer[pos + 1], buffer[pos + 2], buffer[pos + 3]]);
+            ch.code = char::from_u32(code).expect("Invalid UTF-8 character");
+            let flags = u16::from_le_bytes([buffer[pos + 4], buffer[pos + 5]]);
+            ch.flags = CharFlags::try_from(flags).expect("Invalid combination of flags");
+
+            pos += 6;
+            if pos >= len {
+                return Err("Buffer is too small for foreground character colors".to_string());
+            }
+            let (fore, sz) = Self::deserialize_color(&buffer[pos..]).expect("Invalid foreground color");
+            ch.foreground = fore;
+            pos += sz;
+            if pos >= len {
+                return Err("Buffer is too small for background character colors".to_string());
+            }   
+            let (back, sz) = Self::deserialize_color(&buffer[pos..]).expect("Invalid background color");
+            ch.background = back;
+            pos += sz;
+        }
+        Ok(surface)
     }
 }
