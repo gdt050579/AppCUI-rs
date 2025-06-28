@@ -1,3 +1,6 @@
+use appcui_proc_macro::EnumSelector;
+use crate::ui::selector::EnumSelector;
+
 pub(super) struct LineTypeChars {
     pub(super) corner_top_left: char,
     pub(super) horizontal_on_top: char,
@@ -107,14 +110,21 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
 
 /// LineType is an enum that represents the type of line to be drawn (single, double, thick, etc)
 #[repr(u8)]
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, EnumSelector)]
 pub enum LineType {
-    Single = 0,
+    #[VariantInfo(name = "Single Lines", description = "Single lines with corners and vertical/horizontal lines")]
+    Single,
+    #[VariantInfo(name = "Double Lines", description = "Double lines with corners and vertical/horizontal lines")]
     Double,
+    #[VariantInfo(name = "Single Thick Lines", description = "Single thick lines with corners and vertical/horizontal lines")]
     SingleThick,
+    #[VariantInfo(name = "Border", description = "A border style with thick lines")]
     Border,
+    #[VariantInfo(name = "Ascii", description = "ASCII characters for lines")]
     Ascii,
+    #[VariantInfo(name = "Ascii Round", description = "ASCII characters with rounded corners")]
     AsciiRound,
+    #[VariantInfo(name = "Single Round", description = "Single lines with rounded corners")]
     SingleRound,
 }
 
