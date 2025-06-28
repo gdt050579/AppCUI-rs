@@ -5,6 +5,7 @@
 mod accordion;
 mod accordion_panel;
 mod initialization_flags;
+pub mod events;
 #[cfg(test)]
 mod tests;
 

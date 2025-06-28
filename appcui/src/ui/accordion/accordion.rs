@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::ui::accordion::events::EventData;
 use crate::ui::accordion::Flags;
 
 #[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed+OnResize, internal=true)]
@@ -8,11 +9,10 @@ pub struct Accordion {
     hovered_page_idx: Option<usize>,
 }
 impl Accordion {
-
     /// Creates a new Accordion control with the specified `layout` and `flags`.
     /// The flags parameter is a bitmask tthat contains the following flags:
     /// - `TransparentBackground`: If set, the background of the accordion will be transparent.
-    /// 
+    ///
     /// # Examples
     /// ```rust,no_run
     /// use appcui::prelude::*;
@@ -143,7 +143,11 @@ impl Accordion {
     }
     /// Sets the current panel to the one with the given `index` parameter.
     /// The `index` parameter must be a valid index of the accordion panels.
-    pub fn set_current_panel(&mut self, index: usize) {
+    pub fn set_current_panel__(&mut self, index: usize) {
+        self.internal_set_current_panel(index, false);
+    }
+
+    pub fn internal_set_current_panel(&mut self, index: usize, emit_event: bool) {
         // Q: what is the tab is disabled ? can it still change a page
         // for the moment we will not allow this behavior
         // meaning that the tab must be able to receive focus (be visibale and enabled) in order to be able to change the page
@@ -151,6 +155,7 @@ impl Accordion {
             return;
         }
         let mut idx = None;
+        let current_index = self.base.focused_child_index.index();
         if (index < self.base.children.len()) && (index != self.base.focused_child_index.index()) {
             // its a different page (valid)
             let cm = RuntimeManager::get().get_controls_mut();
@@ -166,6 +171,16 @@ impl Accordion {
         }
         if let Some(index) = idx {
             self.update_margins_for(index);
+            if emit_event {
+                self.raise_event(ControlEvent {
+                    emitter: self.handle,
+                    receiver: self.event_processor,
+                    data: ControlEventData::Accordion(EventData {
+                        new_panel_index: index as u32,
+                        old_panel_index: current_index as u32,
+                    }),
+                });
+            }
         }
     }
 
@@ -213,7 +228,7 @@ impl OnPaint for Accordion {
             format.set_chars_count(page.chars_count() as u16);
             format.set_attribute(text_attr);
             format.set_hotkey_from_caption(hotkey_attr, page);
-            
+
             // position
             if index <= cidx {
                 format.y = index as i32;
@@ -254,7 +269,7 @@ impl OnMouseEvent for Accordion {
                 let idx = self.mouse_position_to_index(ev.x, ev.y);
                 if let Some(index) = idx {
                     if index != self.base.focused_child_index.index() {
-                        self.set_current_panel(index);
+                        self.internal_set_current_panel(index, true);
                         EventProcessStatus::Processed
                     } else {
                         EventProcessStatus::Ignored
@@ -276,13 +291,13 @@ impl OnKeyPressed for Accordion {
             key!("Ctrl+Tab") => {
                 let mut idx = self.base.focused_child_index;
                 idx.add(1, self.base.children.len(), Strategy::RotateFromInvalidState);
-                self.set_current_panel(idx.index());
+                self.internal_set_current_panel(idx.index(), true);
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Shift+Tab") => {
                 let mut idx = self.base.focused_child_index;
                 idx.sub(1, self.base.children.len(), Strategy::RotateFromInvalidState);
-                self.set_current_panel(idx.index());
+                self.internal_set_current_panel(idx.index(), true);
                 return EventProcessStatus::Processed;
             }
             _ => {}
@@ -291,7 +306,7 @@ impl OnKeyPressed for Accordion {
             // check if a new tab was selected
             for (index, elem) in self.panels.iter().enumerate() {
                 if elem.hotkey() == key {
-                    self.set_current_panel(index);
+                    self.internal_set_current_panel(index, true);
                     return EventProcessStatus::Processed;
                 }
             }
