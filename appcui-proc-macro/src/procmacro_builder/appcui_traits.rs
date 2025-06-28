@@ -51,6 +51,7 @@ pub(crate) enum AppCUITrait {
     GenericTreeViewEvents = 42,
     MarkdownEvents = 43,
     GenericBackgroundTaskEvents = 44,
+    AccordionEvents = 45,
 }
 
 #[repr(u8)]
@@ -112,6 +113,7 @@ impl AppCUITrait {
             AppCUITrait::GenericTreeViewEvents => "TreeViewEvents", // important to be without Generic
             AppCUITrait::MarkdownEvents => "MarkdownEvents",
             AppCUITrait::GenericBackgroundTaskEvents => "BackgroundTaskEvents", // important to be without Generic
+            AppCUITrait::AccordionEvents => "AccordionEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -164,6 +166,7 @@ impl AppCUITrait {
             AppCUITrait::GenericTreeViewEvents => TraitType::ControlEvent,
             AppCUITrait::MarkdownEvents => TraitType::ControlEvent,
             AppCUITrait::GenericBackgroundTaskEvents => TraitType::ControlEvent,
+            AppCUITrait::AccordionEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -216,6 +219,7 @@ impl AppCUITrait {
             AppCUITrait::GenericTreeViewEvents => "",
             AppCUITrait::MarkdownEvents => "",
             AppCUITrait::GenericBackgroundTaskEvents => "",
+            AppCUITrait::AccordionEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -268,6 +272,7 @@ impl AppCUITrait {
             AppCUITrait::GenericTreeViewEvents => "impl$(TEMPLATE_TYPE) GenericTreeViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::MarkdownEvents => "impl$(TEMPLATE_TYPE) MarkdownEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericBackgroundTaskEvents => "impl$(TEMPLATE_TYPE) GenericBackgroundTaskEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::AccordionEvents => "impl$(TEMPLATE_TYPE) AccordionEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -321,6 +326,7 @@ impl AppCUITrait {
             "TreeViewEvents" | "TreeView" => Some(AppCUITrait::GenericTreeViewEvents),
             "MarkdownEvents" | "Markdown" => Some(AppCUITrait::MarkdownEvents),
             "BackgroundTaskEvents" | "BackgroundTask" => Some(AppCUITrait::GenericBackgroundTaskEvents),
+            "AccordionEvents" | "Accordion" => Some(AppCUITrait::AccordionEvents),
             _ => None,
         }
     }
@@ -374,6 +380,7 @@ impl AppCUITrait {
             42 => Some(AppCUITrait::GenericTreeViewEvents),
             43 => Some(AppCUITrait::MarkdownEvents),
             44 => Some(AppCUITrait::GenericBackgroundTaskEvents),
+            45 => Some(AppCUITrait::AccordionEvents),
             _ => None,
         };
         result?;

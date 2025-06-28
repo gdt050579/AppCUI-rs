@@ -101,6 +101,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MarkdownEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -186,6 +187,8 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MarkdownEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AccordionEvents, TraitImplementation::Default);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
@@ -245,6 +248,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MarkdownEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AccordionEvents, TraitImplementation::Default);
 
 
 
@@ -331,6 +335,8 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MarkdownEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
+
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);

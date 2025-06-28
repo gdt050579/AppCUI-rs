@@ -13,6 +13,8 @@ pub use super::graphics::*;
 pub use super::input::*;
 pub use super::log;
 pub use super::system::*;
+pub use super::ui::accordion;
+pub use super::ui::accordion::events::AccordionEvents;
 pub use super::ui::button;
 pub use super::ui::button::events::ButtonEvents;
 pub use super::ui::canvas;
