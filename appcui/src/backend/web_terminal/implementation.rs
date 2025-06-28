@@ -4,7 +4,10 @@ use crate::{
     system::Error,
     system::{KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent, MouseWheelEvent, SystemEvent},
 };
-use std::sync::{mpsc::Sender, Arc, Mutex};
+use std::{
+    fmt::Write,
+    sync::{mpsc::Sender, Arc, Mutex},
+};
 use wasm_bindgen::{convert::FromWasmAbi, prelude::*, JsCast};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{
@@ -13,6 +16,7 @@ use web_sys::{
 };
 
 const CURSOR_COLOR: &str = "rgba(255, 255, 255, 0.5)";
+const DEFAULT_COLOR: &str = "rgba(0, 0, 0, 0)";
 
 struct TerminalDomConfig {
     cols: u32,
@@ -45,6 +49,7 @@ pub struct WebTerminal {
     cell_width_px: f32,
     cell_height_px: f32,
     clipboard_content: Arc<Mutex<Option<String>>>,
+    rgba_color: String,
 }
 
 unsafe impl Send for WebTerminal {}
@@ -126,6 +131,7 @@ impl WebTerminal {
             cell_width_px: dom_config.cell_w as f32,
             cell_height_px: dom_config.cell_h as f32,
             clipboard_content: Arc::new(Mutex::new(None)),
+            rgba_color: String::with_capacity(32),
         };
 
         term.setup_input_listeners(&document, sender)
@@ -480,7 +486,7 @@ impl WebTerminal {
         self.gl.draw_arrays(GL::TRIANGLES, 0, vertex_count);
     }
 
-    fn render_text(&self, surface: &Surface) -> Result<(), JsValue> {
+    fn render_text(&mut self, surface: &Surface) -> Result<(), JsValue> {
         let context = self
             .text_canvas
             .get_context("2d")?
@@ -512,16 +518,25 @@ impl WebTerminal {
                     continue;
                 };
 
-                let char_width_cells = if self.is_emoji(cell.code) { 2 } else { 1 };
+                let char_width_cells = self.is_emoji(cell.code) as usize + 1; // Emoji take 2 cells, others take 1
 
                 let pos_x = x as f64 * cell_width;
                 let pos_y = y as f64 * cell_height;
 
                 let foreground = self.color_to_rgba(cell.foreground);
-                let css_color = format!("rgba({},{},{},{})", foreground[0], foreground[1], foreground[2], foreground[3],);
+                self.rgba_color.clear();
 
-                context.set_fill_style_str(&css_color);
-                context.set_stroke_style_str(&css_color);
+                write!(
+                    &mut self.rgba_color,
+                    "rgba({}, {}, {}, {})",
+                    foreground[0], foreground[1], foreground[2], foreground[3]
+                )
+                .unwrap_or_else(|_| {
+                    self.rgba_color = DEFAULT_COLOR.to_string();
+                });
+
+                context.set_fill_style_str(&self.rgba_color);
+                context.set_stroke_style_str(&self.rgba_color);
 
                 let render_center_x = pos_x + (char_width_cells as f64 * cell_width) / 2.0;
                 context.fill_text(&cell.code.to_string(), render_center_x, pos_y)?;
