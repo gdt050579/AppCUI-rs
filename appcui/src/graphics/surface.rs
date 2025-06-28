@@ -864,7 +864,7 @@ impl Surface {
             Color::White => output.push(15),
             Color::Transparent => output.push(16),
             #[cfg(feature = "TRUE_COLORS")]
-            Color::TrueColor(r, g, b) => {
+            Color::RGB(r, g, b) => {
                 output.push(17);
                 output.extend_from_slice(&r.to_le_bytes());
                 output.extend_from_slice(&g.to_le_bytes());
