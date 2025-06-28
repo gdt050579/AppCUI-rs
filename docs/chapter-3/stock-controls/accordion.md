@@ -34,7 +34,21 @@ let t2 = accordion!("panels:[A,B,C],flags:TransparentBackground,d:c,w:100%,h:100
 ```
 
 ## Events
-This control does not emits any events.
+
+To intercept events from an accordion, the following trait has to be implemented to the Window that processes the event loop:
+
+```rs
+pub trait AccordionEvents {
+    fn on_panel_changed(&mut self, handle: Handle<Accordion>, 
+                                   new_panel_index: u32, 
+                                   old_panel_index: u32) -> EventProcessStatus 
+    {
+        // This method is called when the current panel of the accordion is changed.
+        // The `handle` parameter is the handle of the accordion control.
+        EventProcessStatus::Ignored
+    }
+}
+```
 
 ## Methods
 
