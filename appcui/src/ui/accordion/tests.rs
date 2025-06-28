@@ -319,7 +319,6 @@ fn check_not_process_input() {
     let mut ac = Accordion::new(Layout::new("l:0,t:0,r:0,b:0"), accordion::Flags::None);
     assert_eq!(ac.current_panel(), None);
 
-
     ac.add_panel("Panel &1");
     ac.add_panel("Panel &2");
     ac.add_panel("Panel &3");
@@ -335,5 +334,75 @@ fn check_not_process_input() {
 
     w.add(ac);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_events() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state with first panel selected')   
+        CheckHash(0xA4066CC38F5343F2)
+        Key.Pressed(Alt+3)
+        Paint('2. 3rd panel selected (New:2, Old:0)')   
+        CheckHash(0x74301CAF6DB078D5)
+        Mouse.Click(20,4,left)
+        Paint('3. 2nd panel selected (New:1, Old:2)')   
+        CheckHash(0x784FFF55A62C24F5)
+        Key.Pressed(Alt+2)
+        Paint('4. Nothing changed')   
+        CheckHash(0x784FFF55A62C24F5)
+    ";
+
+    #[Window(events=AccordionEvents,internal:true)]
+    struct MyWin {
+        accordion_handle: Handle<Accordion>,
+        info_handle: Handle<Label>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,x:1,y:1,w:78,h:15"),
+                accordion_handle: Handle::None,
+                info_handle: Handle::None,
+            };
+
+            let mut acc = Accordion::new(Layout::new("x:1,y:1,w:70,h:10"), accordion::Flags::None);
+            acc.add_panel("Panel &1");
+            acc.add_panel("Panel &2");
+            acc.add_panel("Panel &3");
+            acc.add_panel("Panel &4");
+
+            // Add some content to each panel
+            acc.add(0, Button::new("P1", Layout::new("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(1, Button::new("P2", Layout::new("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(2, Button::new("Pa", Layout::new("x:2,y:2,w:10"), button::Type::Flat));
+            acc.add(2, Button::new("Pb", Layout::new("x:14,y:2,w:10"), button::Type::Flat));
+            acc.add(3, Button::new("PX", Layout::new("x:2,y:2,w:20"), button::Type::Flat));
+
+            // Create a label to display panel information
+            let l = Label::new("", Layout::new("x:1,y:12,w:70,h:2"));
+
+            w.accordion_handle = w.add(acc);
+            w.info_handle = w.add(l);
+
+            w
+        }
+    }
+
+    impl AccordionEvents for MyWin {
+        fn on_panel_changed(&mut self, _handle: Handle<Accordion>, new_panel_index: u32, old_panel_index: u32) -> EventProcessStatus {
+            let s= format!("New: {}, Old: {}", new_panel_index, old_panel_index);
+            let h = self.info_handle;
+            if let Some(label) = self.control_mut(h) {
+                label.set_caption(&s);
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
