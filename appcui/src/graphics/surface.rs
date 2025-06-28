@@ -932,6 +932,20 @@ impl Surface {
             Self::serialize_color(ch.foreground, output);
             Self::serialize_color(ch.background, output);
         }
+        /*
+        Alternativ:
+        - caracterul e scris UTF-8 (1-4 bytes)
+        - 1 caracter (primii 3 biti)
+            0 - culoare pe 1 byte (16 cu 16) / 
+            1 - culoare pe 2 bytes (16 si 16), 
+            2 - culoarea exact ca precedentul, 
+            4 - acelasi foreground
+            5 - acelasi background
+        - urmatorii 3 biti sunt flags:
+            0 - pe un singur octet
+            1 - pe 2 octeti
+            2 - la fel ca precedentul
+         */
     }
 
     /// Serializes the surface to a byte buffer and saves it to the specified file path.
