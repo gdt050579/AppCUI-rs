@@ -82,7 +82,10 @@ impl ControlEvent {
                         } else {
                             EventProcessStatus::Ignored
                         }
-                    } //textfield::events::TextFieldEventsType::OnTextChanged => todo!(),
+                    } 
+                    textfield::events::TextFieldEventsType::OnTextChanged => {
+                        TextFieldEvents::on_text_changed(receiver, self.emitter.cast())
+                    }
                 }
             }
             ControlEventData::Custom(data) => CustomEvents::on_event(receiver, self.emitter.cast(), data.class_hash, data.event_id),
