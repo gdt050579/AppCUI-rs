@@ -20,19 +20,18 @@ pub struct TextField {
     flags: Flags,
 }
 impl TextField {
-    
     /// Creates a new TextField control with the specified text, layout and flags.
     /// The flags can be a combination of the following values:
     /// * `Flags::Readonly` - if set, the text field will be readonly
     /// * `Flags::ProcessEnter` - if set, the text field will process the Enter key and raise an event
     /// * `Flags::DisableAutoSelectOnFocus` - if set, the text field will not select all text when it gets focus
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
-    /// let mut textfield = TextField::new("Hello World", 
-    ///                                    Layout::new("x:1,y:1,w:20,h:1"), 
+    ///
+    /// let mut textfield = TextField::new("Hello World",
+    ///                                    Layout::new("x:1,y:1,w:20,h:1"),
     ///                                    textfield::Flags::None);
     /// ```
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {
@@ -48,7 +47,7 @@ impl TextField {
         obj.cursor.pos = obj.glyphs.len();
         obj
     }
-    
+
     /// Returns **true** if the TextField control is readonly, **false** otherwise.
     #[inline(always)]
     pub fn is_readonly(&self) -> bool {
@@ -82,7 +81,12 @@ impl TextField {
             return;
         }
         let sz = self.size();
-        let visible_glyphs = (if sz.width>2 { ((sz.width as usize) - 2) * (sz.height as usize) } else { 0 }).max(1);
+        let visible_glyphs = (if sz.width > 2 {
+            ((sz.width as usize) - 2) * (sz.height as usize)
+        } else {
+            0
+        })
+        .max(1);
 
         if self.cursor.pos < self.cursor.start {
             // scroll to the left
@@ -226,31 +230,39 @@ impl TextField {
         self.selection.update(0, self.glyphs.len());
         self.move_cursor_to(self.glyphs.len(), true, false);
     }
-    fn delete_selection(&mut self) {
+    // true if the text was changed, false otherwise
+    fn delete_selection(&mut self) -> bool {
         if !self.selection.is_empty() {
             let new_pos = self.selection.start;
             self.glyphs.replace_range(self.selection.start..self.selection.end, "");
             self.selection = Selection::NONE;
             self.move_cursor_to(new_pos, false, true);
+            true
+        } else {
+            false
         }
     }
-    fn delete_current_character(&mut self) {
+    // true if the text was changed, false otherwise
+    fn delete_current_character(&mut self) -> bool {
         if self.is_readonly() {
-            return;
+            return false;
         }
         if self.selection.is_empty() {
             let next_pos = self.glyphs.next_pos(self.cursor.pos, 1);
             if self.cursor.pos < next_pos {
                 self.glyphs.replace_range(self.cursor.pos..next_pos, "");
                 self.update_scroll_view(true);
+                return true;
             }
+            false
         } else {
-            self.delete_selection();
+            self.delete_selection()
         }
     }
-    fn delete_previous_character(&mut self) {
+    // true if the text was changed, false otherwise
+    fn delete_previous_character(&mut self) -> bool {
         if self.is_readonly() {
-            return;
+            return false;
         }
         if self.selection.is_empty() {
             let prev_pos = self.glyphs.previous_pos(self.cursor.pos, 1);
@@ -258,20 +270,23 @@ impl TextField {
                 let end_pos = self.cursor.pos;
                 self.glyphs.replace_range(prev_pos..end_pos, "");
                 self.move_cursor_to(prev_pos, false, true);
+                return true;
             }
+            false
         } else {
-            self.delete_selection();
+            self.delete_selection()
         }
     }
-    fn add_char(&mut self, character: char) {
+    fn add_char(&mut self, character: char) -> bool {
         if self.is_readonly() {
-            return;
+            return false;
         }
         if !self.selection.is_empty() {
             self.delete_selection();
         }
         self.glyphs.insert(self.cursor.pos, character);
         self.move_cursor_with(1, false);
+        true
     }
     fn select_word(&mut self, offset: usize) {
         if let Some((start, end)) = self.glyphs.word_range(offset, |c| CharClass::from(c) == CharClass::Word) {
@@ -293,6 +308,16 @@ impl TextField {
             std::cmp::Ordering::Equal => Some(self.cursor.start),
             std::cmp::Ordering::Greater => Some(self.glyphs.next_pos(self.cursor.start, glyphs_count as usize)),
         }
+    }
+
+    fn notify_text_changed(&mut self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::TextField(EventData {
+                evtype: TextFieldEventsType::OnTextChanged,
+            }),
+        });
     }
 }
 impl OnResize for TextField {
@@ -400,6 +425,7 @@ impl OnKeyPressed for TextField {
                 self.copy_text();
                 return EventProcessStatus::Processed;
             }
+            // start checking if the text was changed
             key!("Ctrl+X") | key!("Shift+Del") => {
                 self.cut_text();
                 return EventProcessStatus::Processed;
@@ -421,11 +447,15 @@ impl OnKeyPressed for TextField {
                 return EventProcessStatus::Processed;
             }
             key!("Delete") => {
-                self.delete_current_character();
+                if self.delete_current_character() {
+                    self.notify_text_changed();
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Back") => {
-                self.delete_previous_character();
+                if self.delete_previous_character() {
+                    self.notify_text_changed();
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Enter") => {
@@ -444,7 +474,9 @@ impl OnKeyPressed for TextField {
             _ => {}
         }
         if (character as u32) > 0 {
-            self.add_char(character);
+            if self.add_char(character) {
+                self.notify_text_changed();
+            }
             return EventProcessStatus::Processed;
         }
         EventProcessStatus::Ignored
