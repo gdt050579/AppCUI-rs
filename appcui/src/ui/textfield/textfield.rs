@@ -183,32 +183,40 @@ impl TextField {
                 .set_clipboard_text(&self.glyphs[self.selection.start..self.selection.end]);
         }
     }
-    fn paste_text(&mut self) {
+    // true if the text was changed, false otherwise
+    fn paste_text(&mut self) -> bool {
         if self.is_readonly() {
-            return;
+            return false;
         }
+        let mut text_was_modified = false;
         if !self.selection.is_empty() {
-            self.delete_selection();
+            text_was_modified = self.delete_selection();
         }
         if let Some(txt) = RuntimeManager::get().backend().clipboard_text() {
             self.glyphs.insert_str(self.cursor.pos, &txt);
+            text_was_modified |= !txt.is_empty();
             self.move_cursor_to(self.cursor.pos + txt.len(), false, true);
         }
+        text_was_modified
     }
-    fn cut_text(&mut self) {
+    // true if the text was changed, false otherwise
+    fn cut_text(&mut self) -> bool {
         if self.is_readonly() {
-            return;
+            return false;
         }
         if !self.selection.is_empty() {
             RuntimeManager::get()
                 .backend_mut()
                 .set_clipboard_text(&self.glyphs[self.selection.start..self.selection.end]);
-            self.delete_selection();
+            self.delete_selection()
+        } else {
+            false
         }
     }
-    fn convert_selection_or_word(&mut self, callback: fn(text: &str) -> String) {
+    // true if the text was changed, false otherwise
+    fn convert_selection_or_word(&mut self, callback: fn(text: &str) -> String) -> bool {
         if self.is_readonly() {
-            return;
+            return false;
         }
         if self.selection.is_empty() {
             self.select_word(self.cursor.pos);
@@ -216,12 +224,16 @@ impl TextField {
 
         if !self.selection.is_empty() {
             let s = callback(&self.glyphs[self.selection.start..self.selection.end]);
+            let text_changed = s != self.glyphs[self.selection.start..self.selection.end];
             self.glyphs.replace_range(self.selection.start..self.selection.end, &s);
             let start = self.selection.start;
             let count = s.count_glyphs();
             self.selection = Selection::NONE;
             self.cursor.pos = start;
             self.move_cursor_with(count as i32, true);
+            text_changed
+        } else {
+            false
         }
     }
 
@@ -427,19 +439,27 @@ impl OnKeyPressed for TextField {
             }
             // start checking if the text was changed
             key!("Ctrl+X") | key!("Shift+Del") => {
-                self.cut_text();
+                if self.cut_text() {
+                    self.notify_text_changed();
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+V") | key!("Shift+Insert") => {
-                self.paste_text();
+                if self.paste_text() {
+                    self.notify_text_changed();
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Shift+U") => {
-                self.convert_selection_or_word(|s| s.to_uppercase());
+                if self.convert_selection_or_word(|s| s.to_uppercase()) {
+                    self.notify_text_changed();
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+U") => {
-                self.convert_selection_or_word(|s| s.to_lowercase());
+                if self.convert_selection_or_word(|s| s.to_lowercase()) {
+                    self.notify_text_changed();
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+A") => {
