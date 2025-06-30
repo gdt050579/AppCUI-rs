@@ -15,19 +15,26 @@ impl Clipboard {
                 api::CloseClipboard();
                 return None;
             }
-            let mut ptr = api::GlobalLock(hmem) as *mut u16;
+            let ptr = api::GlobalLock(hmem) as *mut u16;
             if ptr.is_null() {
                 api::CloseClipboard();
                 return None;
             }
-            let mut s = String::with_capacity(16);
-            while let Some(ch) = char::from_u32((*ptr) as u32) {
-                if (ch as u32) == 0 {
-                    break;
-                }
-                s.push(ch);
-                ptr = ptr.add(1);
+            let mut len = 0;
+            let mut p = ptr;
+            while *p !=0 {
+                len += 1;
+                p = p.add(1);
             }
+            let s = String::from_utf16_lossy(std::slice::from_raw_parts(ptr as *const u16, len));
+            // let mut s = String::with_capacity(16);
+            // while let Some(ch) = char::from_u32((*ptr) as u32) {
+            //     if (ch as u32) == 0 {
+            //         break;
+            //     }
+            //     s.push(ch);
+            //     ptr = ptr.add(1);
+            // }
             api::GlobalUnlock(hmem);
             api::CloseClipboard();
             Some(s)
