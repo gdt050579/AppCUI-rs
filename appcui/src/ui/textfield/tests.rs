@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use super::CharClass;
+use crate::prelude::*;
 
 #[test]
 fn check_move_left_right() {
@@ -253,7 +253,6 @@ fn check_home_end() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_delete() {
@@ -785,7 +784,6 @@ fn check_move_to_next_word() {
     a.run();
 }
 
-
 #[test]
 fn check_move_to_previous_word() {
     let script = "
@@ -976,7 +974,6 @@ fn check_validation_event() {
     a.run();
 }
 
-
 #[test]
 fn check_mouse_click() {
     let script = "
@@ -1114,7 +1111,6 @@ fn check_double_click_selection() {
     a.run();
 }
 
-
 #[test]
 fn check_select_word_for_upper_and_lowercase() {
     let script = "
@@ -1239,4 +1235,75 @@ fn check_char_class() {
     assert_eq!(CharClass::from('"'), CharClass::String);
     assert_eq!(CharClass::from('\''), CharClass::String);
     assert_eq!(CharClass::from(1u8 as char), CharClass::Other);
+}
+
+#[test]
+fn check_text_changed_event() {
+    #[Window(events = TextFieldEvents, internal=true)]
+    struct MyWin {
+        info: Handle<Label>,
+        txt: Handle<TextField>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Win,d:c,w:47,h:7"),
+                info: Handle::None,
+                txt: Handle::None,
+            };
+            me.info = me.add(label!("'',x:1,y:1,w:35"));
+            me.txt = me.add(textfield!("x:1,y:3,w:35"));
+            me
+        }
+        fn set_info(&mut self, txt: &str) {
+            let h_label = self.info;
+            if let Some(label) = self.control_mut(h_label) {
+                label.set_caption(txt);
+            }
+        }
+    }
+    impl TextFieldEvents for MyWin {
+        fn on_text_changed(&mut self, handle: Handle<TextField>) -> EventProcessStatus {
+            let str = self.control(handle).unwrap().text().to_string();
+            self.set_info(&str);
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x615B7D42C0680A1E)   
+        Key.TypeText('Hello world')
+        Paint('2. Hello world') 
+        CheckHash(0x5E0D88141ECF26FD) 
+        Key.Pressed(Backspace)
+        Paint('3. Hello worl') 
+        CheckHash(0x8C6972D30372F2AA) 
+        Key.Pressed(Home)
+        Paint('4. Text is Hello worl, cursor is at the beginning (nothing changes)') 
+        CheckHash(0x8C6972D30372F2AA) 
+        Key.Pressed(Delete)
+        Paint('5. ello worl') 
+        CheckHash(0xF7B9289AAF4525D5) 
+        Key.Pressed(Ctrl+A)
+        Paint('6. ello worl, but all text is selected') 
+        CheckHash(0xDB2AC48D9D6CAB1E) 
+        Key.Pressed(X)
+        Paint('7. X') 
+        CheckHash(0xB49BA2DB881E7B59) 
+        Key.Pressed(Ctrl+A)
+        Key.Pressed(Ctrl+C)
+        Key.Pressed(Right)
+        Key.Pressed(Ctrl+V)
+        Paint('8. XX') 
+        CheckHash(0x903AC255130E95E)         
+        Key.Pressed(Ctrl+A)
+        Key.Pressed(Ctrl+X)
+        Paint('9. Empty text') 
+        CheckHash(0x615B7D42C0680A1E)         
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
 }
