@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use super::CharClass;
+use crate::prelude::*;
 
 #[test]
 fn check_move_left_right() {
@@ -253,7 +253,6 @@ fn check_home_end() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_delete() {
@@ -785,7 +784,6 @@ fn check_move_to_next_word() {
     a.run();
 }
 
-
 #[test]
 fn check_move_to_previous_word() {
     let script = "
@@ -976,7 +974,6 @@ fn check_validation_event() {
     a.run();
 }
 
-
 #[test]
 fn check_mouse_click() {
     let script = "
@@ -1114,7 +1111,6 @@ fn check_double_click_selection() {
     a.run();
 }
 
-
 #[test]
 fn check_select_word_for_upper_and_lowercase() {
     let script = "
@@ -1239,4 +1235,158 @@ fn check_char_class() {
     assert_eq!(CharClass::from('"'), CharClass::String);
     assert_eq!(CharClass::from('\''), CharClass::String);
     assert_eq!(CharClass::from(1u8 as char), CharClass::Other);
+}
+
+#[test]
+fn check_text_changed_event() {
+    #[Window(events = TextFieldEvents, internal=true)]
+    struct MyWin {
+        info: Handle<Label>,
+        txt: Handle<TextField>,
+        count: i32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Win,d:c,w:47,h:7"),
+                info: Handle::None,
+                txt: Handle::None,
+                count: 0,
+            };
+            me.info = me.add(label!("'',x:1,y:1,w:35"));
+            me.txt = me.add(textfield!("x:1,y:3,w:35"));
+            me
+        }
+        fn set_info(&mut self, txt: &str) {
+            let h_label = self.info;
+            if let Some(label) = self.control_mut(h_label) {
+                label.set_caption(txt);
+            }
+        }
+    }
+    impl TextFieldEvents for MyWin {
+        fn on_text_changed(&mut self, handle: Handle<TextField>) -> EventProcessStatus {
+            self.count += 1;
+            let cnt = self.count;
+            let str = format!("{cnt}:{}",self.control(handle).unwrap().text());
+            self.set_info(&str);
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x615B7D42C0680A1E)   
+        Key.TypeText('Hello world')
+        Paint('2. 11:Hello world (hello world was updated 11 times)') 
+        CheckHash(0xEC65162F99699A74) 
+        Key.Pressed(Backspace)
+        Paint('3. 12:Hello worl') 
+        CheckHash(0x57B615AC74ED6928) 
+        Key.Pressed(Home)
+        Paint('4. Text is 12:Hello worl, cursor is at the beginning (nothing changes)') 
+        CheckHash(0x57B615AC74ED6928) 
+        Key.Pressed(Delete)
+        Paint('5. 13:ello worl') 
+        CheckHash(0x3024CC92A7830B3A) 
+        Key.Pressed(Ctrl+A)
+        Paint('6. 13:ello worl, but all text is selected') 
+        CheckHash(0xFFFD8D6EAD8415F9) 
+        Key.Pressed(X)
+        Paint('7. 14:X') 
+        CheckHash(0x4BFAE92C5E194B69) 
+        Key.Pressed(Ctrl+A)
+        Key.Pressed(Ctrl+C)
+        Key.Pressed(Right)
+        Key.Pressed(Ctrl+V)
+        Paint('8. 15:XX') 
+        CheckHash(0x3157F67D23B8B843)         
+        Key.Pressed(Ctrl+A)
+        Key.Pressed(Ctrl+X)
+        Paint('9. Empty text (16:)') 
+        CheckHash(0x283F94E44E7C1378)  
+        Key.Pressed(Delete)
+        Key.Pressed(Backspace)    
+        Paint('10. Empty text (16:) - nothing changes') 
+        CheckHash(0x283F94E44E7C1378)             
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_text_changed_event_readonly() {
+    #[Window(events = TextFieldEvents, internal=true)]
+    struct MyWin {
+        info: Handle<Label>,
+        txt: Handle<TextField>,
+        count: i32,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Win,d:c,w:47,h:7"),
+                info: Handle::None,
+                txt: Handle::None,
+                count: 0,
+            };
+            me.info = me.add(label!("'',x:1,y:1,w:35"));
+            me.txt = me.add(textfield!("x:1,y:3,w:35,flags: Readonly"));
+            me
+        }
+        fn set_info(&mut self, txt: &str) {
+            let h_label = self.info;
+            if let Some(label) = self.control_mut(h_label) {
+                label.set_caption(txt);
+            }
+        }
+    }
+    impl TextFieldEvents for MyWin {
+        fn on_text_changed(&mut self, handle: Handle<TextField>) -> EventProcessStatus {
+            self.count += 1;
+            let cnt = self.count;
+            let str = format!("{cnt}:{}",self.control(handle).unwrap().text());
+            self.set_info(&str);
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x615B7D42C0680A1E)   
+        Key.TypeText('Hello world')
+        Paint('2. Nothing changes, text is read-only') 
+        CheckHash(0x615B7D42C0680A1E) 
+        Key.Pressed(Backspace)
+        Paint('3. Nothing changes, text is read-only') 
+        CheckHash(0x615B7D42C0680A1E) 
+        Key.Pressed(Home)
+        Paint('4. Nothing changes, text is read-only') 
+        CheckHash(0x615B7D42C0680A1E) 
+        Key.Pressed(Delete)
+        Paint('5. Nothing changes, text is read-only') 
+        CheckHash(0x615B7D42C0680A1E) 
+        Key.Pressed(Ctrl+A)
+        Paint('6. Nothing changes, text is read-only') 
+        CheckHash(0x615B7D42C0680A1E) 
+        Key.Pressed(X)
+        Paint('7. Nothing changes, text is read-only') 
+        CheckHash(0x615B7D42C0680A1E) 
+        Key.Pressed(Ctrl+A)
+        Key.Pressed(Ctrl+C)
+        Key.Pressed(Right)
+        Key.Pressed(Ctrl+V)
+        Paint('8. Nothing changes, text is read-only') 
+        CheckHash(0x615B7D42C0680A1E) 
+        Key.Pressed(Ctrl+A)
+        Key.Pressed(Ctrl+X)
+        Paint('9. Nothing changes, text is read-only') 
+        CheckHash(0x615B7D42C0680A1E) 
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
 }
