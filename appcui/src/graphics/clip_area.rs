@@ -15,7 +15,7 @@ impl ClipArea {
             top,
             right,
             bottom,
-            visible: (left <= right) && (top < bottom),
+            visible: (left <= right) && (top <= bottom),
         }
     }
     #[inline]
