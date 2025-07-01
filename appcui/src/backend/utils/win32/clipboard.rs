@@ -1,5 +1,4 @@
 use super::{api, constants};
-use crate::utils::GlyphParser;
 
 pub(crate) struct Clipboard;
 
@@ -22,19 +21,11 @@ impl Clipboard {
             }
             let mut len = 0;
             let mut p = ptr;
-            while *p !=0 {
+            while *p != 0 {
                 len += 1;
                 p = p.add(1);
             }
             let s = String::from_utf16_lossy(std::slice::from_raw_parts(ptr as *const u16, len));
-            // let mut s = String::with_capacity(16);
-            // while let Some(ch) = char::from_u32((*ptr) as u32) {
-            //     if (ch as u32) == 0 {
-            //         break;
-            //     }
-            //     s.push(ch);
-            //     ptr = ptr.add(1);
-            // }
             api::GlobalUnlock(hmem);
             api::CloseClipboard();
             Some(s)
@@ -57,8 +48,9 @@ impl Clipboard {
 
                 api::EmptyClipboard();
 
-                let len = text.count_glyphs() + 1;
-                // alocate twice as much bytes (windows unicode)
+                let buffer: Vec<u16> = text.encode_utf16().collect();
+                let len = buffer.len() + 1;
+
                 let hmem = api::GlobalAlloc(constants::GMEM_MOVEABLE, len * 2);
                 if hmem == 0 {
                     api::CloseClipboard();
@@ -72,17 +64,10 @@ impl Clipboard {
                     return;
                 }
 
-                let mut pos = 0;
-                while let Some((ch, size)) = text.glyph(pos) {
-                    pos += size as usize;
-                    if ch as u32 <= 0xFFFFu32 {
-                        *ptr = ch as u16;
-                    } else {
-                        *ptr = b'?' as u16;
-                    }
+                for value in buffer {
+                    *ptr = value;
                     ptr = ptr.add(1);
                 }
-                // last null terminator character
                 *ptr = 0;
 
                 api::GlobalUnlock(hmem);
