@@ -174,8 +174,76 @@ impl Rect {
         (self.bottom + self.top) / 2
     }
 
+    /// Returns true if the rectangle contains the given point.
     #[inline(always)]
     pub fn contains(&self, point: Point) -> bool {
         (point.x >= self.left) && (point.x <= self.right) && (point.y >= self.top) && (point.y <= self.bottom)
+    }
+
+    /// Returns the center point of the rectangle.
+    #[inline(always)]
+    pub fn center(&self) -> Point {
+        Point {
+            x: self.center_x(),
+            y: self.center_y(),
+        }
+    }
+
+    /// Returns the top-left corner of the rectangle.
+    #[inline(always)]
+    pub fn top_left(&self) -> Point {
+        Point {
+            x: self.left,
+            y: self.top,
+        }
+    }
+
+    /// Returns the top-right corner of the rectangle.
+    #[inline(always)]
+    pub fn top_right(&self) -> Point {
+        Point {
+            x: self.right,
+            y: self.top,
+        }
+    }
+
+    /// Returns the bottom-right corner of the rectangle.
+    #[inline(always)]
+    pub fn bottom_right(&self) -> Point {
+        Point {
+            x: self.right,
+            y: self.bottom,
+        }
+    }
+
+    /// Returns the bottom-left corner of the rectangle.
+    #[inline(always)]
+    pub fn bottom_left(&self) -> Point {
+        Point {
+            x: self.left,
+            y: self.bottom,
+        }
+    }
+
+    /// Inflates the rectangle by the given amount in left, top, right, bottom.
+    /// if the margins cross each other (e.g. there is a right margin becomes smaller than the left margin) the rights margin will be clamped to the left margin.
+    #[inline(always)]
+    pub fn inflate_width(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        self.left -= left;
+        self.top -= top;
+        self.right = self.left.max(self.right + right);
+        self.bottom = self.top.max(self.bottom + bottom);
+    }
+
+    /// Returns true if the rectangle is empty (width and height are 0)
+    #[inline(always)]
+    pub fn is_empty(&self) -> bool {
+        self.width() == 0 || self.height() == 0
+    }
+
+    /// Returns true if the rectangle is valid (width and height are greater than 0)
+    #[inline(always)]
+    pub fn is_valid(&self) -> bool {
+        self.width() > 0 && self.height() > 0
     }
 }
