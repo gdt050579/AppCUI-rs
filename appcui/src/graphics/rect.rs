@@ -3,7 +3,7 @@ use super::{Point, Size};
 /// Alignament enum represents the alignment of a rectangle in a 2D space.
 /// It is used to specify how a rectangle or other rectangular objects should be positioned relative to a given point.
 #[repr(u8)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Eq)]
 pub enum Alignament {
     /// The top-left corner of the rectangle.
     /// This is the default alignment.
@@ -44,7 +44,7 @@ pub enum Alignament {
 
 /// A rectangle defined by its left, top, right, and bottom coordinates.
 /// The coordinates are automatically adjusted to ensure that left <= right and top <= bottom.
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub struct Rect {
     left: i32,
     top: i32,
@@ -192,19 +192,13 @@ impl Rect {
     /// Returns the top-left corner of the rectangle.
     #[inline(always)]
     pub fn top_left(&self) -> Point {
-        Point {
-            x: self.left,
-            y: self.top,
-        }
+        Point { x: self.left, y: self.top }
     }
 
     /// Returns the top-right corner of the rectangle.
     #[inline(always)]
     pub fn top_right(&self) -> Point {
-        Point {
-            x: self.right,
-            y: self.top,
-        }
+        Point { x: self.right, y: self.top }
     }
 
     /// Returns the bottom-right corner of the rectangle.
@@ -229,21 +223,9 @@ impl Rect {
     /// if the margins cross each other (e.g. there is a right margin becomes smaller than the left margin) the rights margin will be clamped to the left margin.
     #[inline(always)]
     pub fn inflate_width(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
-        self.left -= left;
-        self.top -= top;
+        self.left = self.right.min(self.left - left);
+        self.top = self.bottom.min(self.top - top);
         self.right = self.left.max(self.right + right);
         self.bottom = self.top.max(self.bottom + bottom);
-    }
-
-    /// Returns true if the rectangle is empty (width and height are 0)
-    #[inline(always)]
-    pub fn is_empty(&self) -> bool {
-        self.width() == 0 || self.height() == 0
-    }
-
-    /// Returns true if the rectangle is valid (width and height are greater than 0)
-    #[inline(always)]
-    pub fn is_valid(&self) -> bool {
-        self.width() > 0 && self.height() > 0
     }
 }

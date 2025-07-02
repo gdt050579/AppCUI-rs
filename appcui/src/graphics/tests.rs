@@ -998,3 +998,60 @@ fn check_serialization_to_buffer() {
     ];
     assert_eq!(buffer, RESULT);
 }
+
+#[test]
+fn check_rect_contains() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert!(r.contains(Point::new(1, 2)));
+    assert!(r.contains(Point::new(2, 3)));
+    assert!(r.contains(Point::new(3, 4)));
+    assert!(r.contains(Point::new(1, 4)));
+    assert!(r.contains(Point::new(3, 2)));
+    assert!(!r.contains(Point::new(0, 2)));
+    assert!(!r.contains(Point::new(4, 2)));
+}
+
+
+#[test]
+fn check_rect_inflate_width() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.inflate_width(1, 1, 1, 1);
+    assert_eq!(r, Rect::new(0, 1, 4, 5));
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.inflate_width(-1, -1, -1, -1);
+    assert_eq!(r, Rect::new(2, 3, 2, 3));
+    r.inflate_width(-1, -1, -1, -1);
+    assert_eq!(r, Rect::new(2, 3, 2, 3));
+    r.inflate_width(-1, -1, -1, -1);
+    assert_eq!(r, Rect::new(2, 3, 2, 3));
+}
+
+#[test]
+fn check_rect_top_left() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.top_left(), Point::new(1, 2));
+}
+
+#[test]
+fn check_rect_top_right() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.top_right(), Point::new(3, 2));
+}
+
+#[test]
+fn check_rect_bottom_right() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.bottom_right(), Point::new(3, 4));
+}
+
+#[test]
+fn check_rect_bottom_left() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.bottom_left(), Point::new(1, 4));
+}
+
+#[test]
+fn check_rect_center() {
+    let r = Rect::new(1, 1, 5, 5);
+    assert_eq!(r.center(), Point::new(3, 3));
+}
