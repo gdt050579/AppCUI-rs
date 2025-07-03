@@ -115,6 +115,23 @@ pub enum Color {
     RGB(u8, u8, u8),
 }
 impl Color {
+    #[inline(always)]
+    pub fn contrast_color(&self) -> Self {
+        match self {
+            Color::Black | Color::DarkBlue | Color::DarkGreen | Color::Teal | Color::DarkRed | Color::Magenta | Color::Olive | Color::Gray | Color::Blue | Color::Red => Color::White,
+            Color::Silver | Color::Green | Color::Aqua | Color::Pink | Color::Yellow | Color::White => Color::Black,
+
+            Color::Transparent => Color::Transparent,
+            #[cfg(feature = "TRUE_COLORS")]
+            Color::RGB(r, g, b) => {
+                if (2126 * (r as i32) + 7152 * (g as i32) + 722 * (b as i32)) > 1275000 {
+                    Color::Black
+                } else {
+                    Color::White
+                }
+            }
+        }
+    }
     pub fn from_value(value: i32) -> Option<Color> {
         match value {
             0 => Some(Color::Black),
@@ -203,7 +220,7 @@ impl Color {
     #[cfg(not(feature = "TRUE_COLORS"))]
     #[inline(always)]
     pub(crate) fn as_color_index(&self) -> u8 {
-        match self { 
+        match self {
             Color::Black => 0,
             Color::DarkBlue => 1,
             Color::DarkGreen => 2,
@@ -235,15 +252,15 @@ impl Color {
     // }
     #[cfg(feature = "TRUE_COLORS")]
     #[inline(always)]
-    pub(crate) fn rgb(&self) -> Option<(u8,u8,u8)> {
+    pub(crate) fn rgb(&self) -> Option<(u8, u8, u8)> {
         match self {
-            Color::RGB(r, g, b) => Some((*r,*g,*b)),
-            _ => None
+            Color::RGB(r, g, b) => Some((*r, *g, *b)),
+            _ => None,
         }
     }
     #[cfg(not(feature = "TRUE_COLORS"))]
     #[inline(always)]
-    pub(crate) fn rgb(&self) -> Option<(u8,u8,u8)> {
+    pub(crate) fn rgb(&self) -> Option<(u8, u8, u8)> {
         None
     }
 

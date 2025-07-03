@@ -1055,3 +1055,28 @@ fn check_rect_center() {
     let r = Rect::new(1, 1, 5, 5);
     assert_eq!(r.center(), Point::new(3, 3));
 }
+
+
+#[test]
+fn check_color_contrast() {
+    assert_eq!(Color::Black.contrast_color(), Color::White);
+    assert_eq!(Color::White.contrast_color(), Color::Black);
+    assert_eq!(Color::Red.contrast_color(), Color::White);
+    assert_eq!(Color::Green.contrast_color(), Color::Black);
+    assert_eq!(Color::Blue.contrast_color(), Color::White);
+    assert_eq!(Color::Yellow.contrast_color(), Color::Black);
+    assert_eq!(Color::Magenta.contrast_color(), Color::White);
+    assert_eq!(Color::Aqua.contrast_color(), Color::Black);
+    assert_eq!(Color::Gray.contrast_color(), Color::White);
+    assert_eq!(Color::Silver.contrast_color(), Color::Black);
+    assert_eq!(Color::Transparent.contrast_color(), Color::Transparent);
+    assert_eq!(Color::DarkRed.contrast_color(), Color::White);
+    assert_eq!(Color::DarkGreen.contrast_color(), Color::White);
+    assert_eq!(Color::DarkBlue.contrast_color(), Color::White);
+    assert_eq!(Color::Transparent.contrast_color(), Color::Transparent);
+    #[cfg(feature = "TRUE_COLORS")]
+    {
+        assert_eq!(Color::RGB(1, 1, 1).contrast_color(), Color::Black);
+        assert_eq!(Color::RGB(254, 254, 254).contrast_color(), Color::White);
+    }
+}
