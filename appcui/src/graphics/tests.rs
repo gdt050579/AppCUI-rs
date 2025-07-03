@@ -998,3 +998,132 @@ fn check_serialization_to_buffer() {
     ];
     assert_eq!(buffer, RESULT);
 }
+
+#[test]
+fn check_rect_contains() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert!(r.contains(Point::new(1, 2)));
+    assert!(r.contains(Point::new(2, 3)));
+    assert!(r.contains(Point::new(3, 4)));
+    assert!(r.contains(Point::new(1, 4)));
+    assert!(r.contains(Point::new(3, 2)));
+    assert!(!r.contains(Point::new(0, 2)));
+    assert!(!r.contains(Point::new(4, 2)));
+}
+
+
+#[test]
+fn check_rect_inflate_width() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.inflate_width(1, 1, 1, 1);
+    assert_eq!(r, Rect::new(0, 1, 4, 5));
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.inflate_width(-1, -1, -1, -1);
+    assert_eq!(r, Rect::new(2, 3, 2, 3));
+    r.inflate_width(-1, -1, -1, -1);
+    assert_eq!(r, Rect::new(2, 3, 2, 3));
+    r.inflate_width(-1, -1, -1, -1);
+    assert_eq!(r, Rect::new(2, 3, 2, 3));
+}
+
+#[test]
+fn check_rect_top_left() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.top_left(), Point::new(1, 2));
+}
+
+#[test]
+fn check_rect_top_right() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.top_right(), Point::new(3, 2));
+}
+
+#[test]
+fn check_rect_bottom_right() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.bottom_right(), Point::new(3, 4));
+}
+
+#[test]
+fn check_rect_bottom_left() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.bottom_left(), Point::new(1, 4));
+}
+
+#[test]
+fn check_rect_center() {
+    let r = Rect::new(1, 1, 5, 5);
+    assert_eq!(r.center(), Point::new(3, 3));
+}
+
+
+#[test]
+fn check_color_contrast() {
+    assert_eq!(Color::Black.contrast_color(), Color::White);
+    assert_eq!(Color::White.contrast_color(), Color::Black);
+    assert_eq!(Color::Red.contrast_color(), Color::White);
+    assert_eq!(Color::Green.contrast_color(), Color::Black);
+    assert_eq!(Color::Blue.contrast_color(), Color::White);
+    assert_eq!(Color::Yellow.contrast_color(), Color::Black);
+    assert_eq!(Color::Magenta.contrast_color(), Color::White);
+    assert_eq!(Color::Aqua.contrast_color(), Color::Black);
+    assert_eq!(Color::Gray.contrast_color(), Color::White);
+    assert_eq!(Color::Silver.contrast_color(), Color::Black);
+    assert_eq!(Color::Transparent.contrast_color(), Color::Transparent);
+    assert_eq!(Color::DarkRed.contrast_color(), Color::White);
+    assert_eq!(Color::DarkGreen.contrast_color(), Color::White);
+    assert_eq!(Color::DarkBlue.contrast_color(), Color::White);
+    assert_eq!(Color::Transparent.contrast_color(), Color::Transparent);
+    #[cfg(feature = "TRUE_COLORS")]
+    {
+        assert_eq!(Color::RGB(1, 1, 1).contrast_color(), Color::Black);
+        assert_eq!(Color::RGB(254, 254, 254).contrast_color(), Color::White);
+    }
+}
+
+#[test]
+fn check_color_inverse() {
+    assert_eq!(Color::Black.inverse_color(), Color::White);
+    assert_eq!(Color::DarkBlue.inverse_color(), Color::Yellow);
+    assert_eq!(Color::DarkGreen.inverse_color(), Color::Pink);
+    assert_eq!(Color::Teal.inverse_color(), Color::Red);
+    assert_eq!(Color::DarkRed.inverse_color(), Color::Aqua);
+    assert_eq!(Color::Magenta.inverse_color(), Color::Green);
+    assert_eq!(Color::Olive.inverse_color(), Color::Blue);
+    assert_eq!(Color::Silver.inverse_color(), Color::Gray);
+    assert_eq!(Color::Gray.inverse_color(), Color::Silver);
+    assert_eq!(Color::Blue.inverse_color(), Color::Olive);
+    assert_eq!(Color::Green.inverse_color(), Color::Magenta);
+    assert_eq!(Color::Aqua.inverse_color(), Color::DarkRed);
+    assert_eq!(Color::Red.inverse_color(), Color::Teal);
+    assert_eq!(Color::Pink.inverse_color(), Color::DarkGreen);
+    assert_eq!(Color::Yellow.inverse_color(), Color::DarkBlue);
+    assert_eq!(Color::White.inverse_color(), Color::Black);
+    assert_eq!(Color::Transparent.inverse_color(), Color::Transparent);
+    #[cfg(feature = "TRUE_COLORS")]
+    {
+        assert_eq!(Color::RGB(1, 1, 1).inverse_color(), Color::RGB(254, 254, 254));
+        assert_eq!(Color::RGB(254, 254, 254).inverse_color(), Color::RGB(1, 1, 1));
+    }
+}
+
+#[test]
+fn check_color_as_color_index() {
+    assert_eq!(Color::Black.as_color_index(), 0);
+    assert_eq!(Color::DarkBlue.as_color_index(), 1);
+    assert_eq!(Color::DarkGreen.as_color_index(), 2);
+    assert_eq!(Color::Teal.as_color_index(), 3);
+    assert_eq!(Color::DarkRed.as_color_index(), 4);
+    assert_eq!(Color::Magenta.as_color_index(), 5);
+    assert_eq!(Color::Olive.as_color_index(), 6);
+    assert_eq!(Color::Silver.as_color_index(), 7);
+    assert_eq!(Color::Gray.as_color_index(), 8);
+    assert_eq!(Color::Blue.as_color_index(), 9);
+    assert_eq!(Color::Green.as_color_index(), 10);
+    assert_eq!(Color::Aqua.as_color_index(), 11);
+    assert_eq!(Color::Red.as_color_index(), 12);
+    assert_eq!(Color::Pink.as_color_index(), 13);
+    assert_eq!(Color::Yellow.as_color_index(), 14);
+    assert_eq!(Color::White.as_color_index(), 15);
+    assert_eq!(Color::Transparent.as_color_index(), 16);
+}

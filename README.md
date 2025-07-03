@@ -43,6 +43,7 @@ AppCUI supports various backends based on the operating system it is being used 
 * **NCurses** - based on NCurses API for linux envinronments
 * **Termios** - based on ANSI sequances and low level APIs for MAC OSX
 * **Web Terminal** - designed for Web implementation (based on webgl)
+* **CrossTerm** - based on the `crossterm` crate, but enabled via a feature flag
 
 More on the supported backends can be found [here](docs/chapter-2/backends.md)
 

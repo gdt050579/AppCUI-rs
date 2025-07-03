@@ -115,6 +115,49 @@ pub enum Color {
     RGB(u8, u8, u8),
 }
 impl Color {
+    #[inline(always)]
+    pub fn contrast_color(&self) -> Self {
+        match self {
+            Color::Black | Color::DarkBlue | Color::DarkGreen | Color::Teal | Color::DarkRed | Color::Magenta | Color::Olive | Color::Gray | Color::Blue | Color::Red => Color::White,
+            Color::Silver | Color::Green | Color::Aqua | Color::Pink | Color::Yellow | Color::White => Color::Black,
+
+            Color::Transparent => Color::Transparent,
+            #[cfg(feature = "TRUE_COLORS")]
+            Color::RGB(r, g, b) => {
+                if (2126 * (r as i32) + 7152 * (g as i32) + 722 * (b as i32)) > 1275000 {
+                    Color::Black
+                } else {
+                    Color::White
+                }
+            }
+        }
+    }
+    #[inline(always)]
+    pub fn inverse_color(&self) -> Self {
+        match self {
+            Color::Black       => Color::White,        // #000000 → #FFFFFF
+            Color::DarkBlue    => Color::Yellow,       // #000080 → #FFFF7F
+            Color::DarkGreen   => Color::Pink,         // #008000 → #FF7FFF
+            Color::Teal        => Color::Red,          // #008080 → #FF7F7F
+            Color::DarkRed     => Color::Aqua,         // #800000 → #7FFFFF
+            Color::Magenta     => Color::Green,        // #800080 → #7FFF7F
+            Color::Olive       => Color::Blue,         // #808000 → #7F7FFF
+            Color::Silver      => Color::Gray,         // #C0C0C0 → #3F3F3F
+            Color::Gray        => Color::Silver,       // #808080 → #7F7F7F
+            Color::Blue        => Color::Olive,        // #0000FF → #FFFF00
+            Color::Green       => Color::Magenta,      // #00FF00 → #FF00FF
+            Color::Aqua        => Color::DarkRed,      // #00FFFF → #FF0000
+            Color::Red         => Color::Teal,         // #FF0000 → #00FFFF
+            Color::Pink        => Color::DarkGreen,    // #FF00FF → #00FF00
+            Color::Yellow      => Color::DarkBlue,     // #FFFF00 → #0000FF
+            Color::White       => Color::Black,        // #FFFFFF → #000000
+            Color::Transparent => Color::Transparent,
+            #[cfg(feature = "TRUE_COLORS")]
+            Color::RGB(r, g, b) => {
+                Color::from_rgb(255 - *r, 255 - *g, 255 - *b)
+            }
+        }
+    }
     pub fn from_value(value: i32) -> Option<Color> {
         match value {
             0 => Some(Color::Black),
@@ -203,7 +246,7 @@ impl Color {
     #[cfg(not(feature = "TRUE_COLORS"))]
     #[inline(always)]
     pub(crate) fn as_color_index(&self) -> u8 {
-        match self { 
+        match self {
             Color::Black => 0,
             Color::DarkBlue => 1,
             Color::DarkGreen => 2,
@@ -235,15 +278,15 @@ impl Color {
     // }
     #[cfg(feature = "TRUE_COLORS")]
     #[inline(always)]
-    pub(crate) fn rgb(&self) -> Option<(u8,u8,u8)> {
+    pub(crate) fn rgb(&self) -> Option<(u8, u8, u8)> {
         match self {
-            Color::RGB(r, g, b) => Some((*r,*g,*b)),
-            _ => None
+            Color::RGB(r, g, b) => Some((*r, *g, *b)),
+            _ => None,
         }
     }
     #[cfg(not(feature = "TRUE_COLORS"))]
     #[inline(always)]
-    pub(crate) fn rgb(&self) -> Option<(u8,u8,u8)> {
+    pub(crate) fn rgb(&self) -> Option<(u8, u8, u8)> {
         None
     }
 

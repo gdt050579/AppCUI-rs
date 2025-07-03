@@ -1,34 +1,34 @@
-use super::{Size, Point};
+use super::{Point, Size};
 
 /// Alignament enum represents the alignment of a rectangle in a 2D space.
 /// It is used to specify how a rectangle or other rectangular objects should be positioned relative to a given point.
 #[repr(u8)]
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Eq)]
 pub enum Alignament {
     /// The top-left corner of the rectangle.
     /// This is the default alignment.
     TopLeft = 0,
-    
+
     /// The top-center of the rectangle.
     /// This alignment is used to center the rectangle horizontally at the top.
     Top,
-    
+
     /// The top-right corner of the rectangle.
     /// This alignment is used to position the rectangle at the top-right corner.
     TopRight,
-    
+
     /// The right-center of the rectangle.
     /// This alignment is used to center the rectangle vertically on the right side.
     Right,
-    
+
     /// The bottom-right corner of the rectangle.
     /// This alignment is used to position the rectangle at the bottom-right corner.
     BottomRight,
-    
+
     /// The bottom-center of the rectangle.
     /// This alignment is used to center the rectangle horizontally at the bottom.
     Bottom,
-    
+
     /// The bottom-left corner of the rectangle.
     /// This alignment is used to position the rectangle at the bottom-left corner.
     BottomLeft,
@@ -44,7 +44,7 @@ pub enum Alignament {
 
 /// A rectangle defined by its left, top, right, and bottom coordinates.
 /// The coordinates are automatically adjusted to ensure that left <= right and top <= bottom.
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub struct Rect {
     left: i32,
     top: i32,
@@ -63,7 +63,7 @@ impl Rect {
         }
     }
 
-    /// Creates a new rectangle with the specified coordinates and size. 
+    /// Creates a new rectangle with the specified coordinates and size.
     pub fn with_size(x: i32, y: i32, width: u16, height: u16) -> Self {
         Self {
             left: x,
@@ -117,7 +117,7 @@ impl Rect {
 
     /// Creates a new rectangle with the specified coordinates and size.
     /// The coordonates are represented by a Point and are considered the top-left corner of the rectangle.
-    pub fn with_point_and_size(point: Point, size: Size)->Self {
+    pub fn with_point_and_size(point: Point, size: Size) -> Self {
         Rect {
             left: point.x,
             top: point.y,
@@ -127,50 +127,105 @@ impl Rect {
     }
 
     /// Returns the rectangle left coordinate.
-    #[inline]
+    #[inline(always)]
     pub fn left(&self) -> i32 {
         self.left
     }
 
     /// Returns the rectangle right coordinate.
-    #[inline]
+    #[inline(always)]
     pub fn right(&self) -> i32 {
         self.right
     }
 
     /// Returns the rectangle top coordinate.
-    #[inline]
+    #[inline(always)]
     pub fn top(&self) -> i32 {
         self.top
     }
 
     /// Returns the rectangle bottom coordinate.
-    #[inline]
+    #[inline(always)]
     pub fn bottom(&self) -> i32 {
         self.bottom
     }
 
     /// Returns the rectangle width.
-    #[inline]
+    #[inline(always)]
     pub fn width(&self) -> u32 {
         ((self.right - self.left) as u32) + 1u32
     }
 
     /// Returns the rectangle height.
-    #[inline]
+    #[inline(always)]
     pub fn height(&self) -> u32 {
         ((self.bottom - self.top) as u32) + 1u32
     }
 
     /// Returns the rectangle X-axis center.
-    #[inline]
+    #[inline(always)]
     pub fn center_x(&self) -> i32 {
-        (self.right+self.left)/2
+        (self.right + self.left) / 2
     }
 
     /// Returns the rectangle Y-axis center.
-    #[inline]
+    #[inline(always)]
     pub fn center_y(&self) -> i32 {
-        (self.bottom+self.top)/2
+        (self.bottom + self.top) / 2
+    }
+
+    /// Returns true if the rectangle contains the given point.
+    #[inline(always)]
+    pub fn contains(&self, point: Point) -> bool {
+        (point.x >= self.left) && (point.x <= self.right) && (point.y >= self.top) && (point.y <= self.bottom)
+    }
+
+    /// Returns the center point of the rectangle.
+    #[inline(always)]
+    pub fn center(&self) -> Point {
+        Point {
+            x: self.center_x(),
+            y: self.center_y(),
+        }
+    }
+
+    /// Returns the top-left corner of the rectangle.
+    #[inline(always)]
+    pub fn top_left(&self) -> Point {
+        Point { x: self.left, y: self.top }
+    }
+
+    /// Returns the top-right corner of the rectangle.
+    #[inline(always)]
+    pub fn top_right(&self) -> Point {
+        Point { x: self.right, y: self.top }
+    }
+
+    /// Returns the bottom-right corner of the rectangle.
+    #[inline(always)]
+    pub fn bottom_right(&self) -> Point {
+        Point {
+            x: self.right,
+            y: self.bottom,
+        }
+    }
+
+    /// Returns the bottom-left corner of the rectangle.
+    #[inline(always)]
+    pub fn bottom_left(&self) -> Point {
+        Point {
+            x: self.left,
+            y: self.bottom,
+        }
+    }
+
+    /// Inflates the rectangle by the given amount in left, top, right, bottom.
+    /// if the margins cross each other (e.g. there is a right margin becomes smaller than the left margin) the rights margin will be clamped to the left margin.
+    #[inline(always)]
+    pub fn inflate_width(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
+        self.left = self.right.min(self.left - left);
+        self.top = self.bottom.min(self.top - top);
+        self.right = self.left.max(self.right + right);
+        self.bottom = self.top.max(self.bottom + bottom);
     }
 }
