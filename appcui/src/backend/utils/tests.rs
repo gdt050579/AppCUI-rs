@@ -123,14 +123,37 @@ fn check_ansi_char_flags() {
     a.update_char_flags(CharFlags::Bold,CharFlags::None);
     a.update_char_flags(CharFlags::None, CharFlags::Bold);
     assert_eq!(a.text(),"\x1b[1m\x1b[22m");
+
     a.clear();
     a.update_char_flags(CharFlags::Italic, CharFlags::None);
     a.update_char_flags(CharFlags::None, CharFlags::Italic);
     assert_eq!(a.text(),"\x1b[3m\x1b[23m");
+
     a.clear();
     a.update_char_flags(CharFlags::Underline, CharFlags::None);
     a.update_char_flags(CharFlags::None, CharFlags::Underline);
     assert_eq!(a.text(),"\x1b[4m\x1b[24m");
+
+    a.clear();
+    a.update_char_flags(CharFlags::DoubleUnderline, CharFlags::None);
+    a.update_char_flags(CharFlags::None, CharFlags::DoubleUnderline);
+    assert_eq!(a.text(),"\x1b[21m\x1b[24m");
+
+    a.clear();
+    a.update_char_flags(CharFlags::CurlyUnderline, CharFlags::None);
+    a.update_char_flags(CharFlags::None, CharFlags::CurlyUnderline);
+    assert_eq!(a.text(),"\x1b[4:3m\x1b[24m");
+
+    a.clear();
+    a.update_char_flags(CharFlags::DottedUnderline, CharFlags::None);
+    a.update_char_flags(CharFlags::None, CharFlags::DottedUnderline);
+    assert_eq!(a.text(),"\x1b[4:4m\x1b[24m");
+
+    a.clear();
+    a.update_char_flags(CharFlags::StrikeThrough, CharFlags::None);
+    a.update_char_flags(CharFlags::None, CharFlags::StrikeThrough);
+    assert_eq!(a.text(),"\x1b[9m\x1b[29m");
+
 }
 
 #[test]
