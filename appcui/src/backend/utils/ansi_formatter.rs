@@ -97,6 +97,10 @@ impl AnsiFormatter {
         update_ansi_flag!(Bold, "\x1b[1m", "\x1b[22m");
         update_ansi_flag!(Italic, "\x1b[3m", "\x1b[23m");
         update_ansi_flag!(Underline, "\x1b[4m", "\x1b[24m");
+        update_ansi_flag!(StrikeThrough, "\x1b[9m", "\x1b[29m");
+        update_ansi_flag!(DoubleUnderline, "\x1b[21m", "\x1b[24m");
+        update_ansi_flag!(DottedUnderline, "\x1b[4:4m", "\x1b[24m");
+        update_ansi_flag!(CurlyUnderline, "\x1b[4:3m", "\x1b[24m");        
     }
     pub(crate) fn set_char_flags(&mut self, flags: CharFlags) {
         macro_rules! set_ansi_flag {
@@ -111,6 +115,10 @@ impl AnsiFormatter {
         set_ansi_flag!(Bold, "\x1b[1m", "\x1b[22m");
         set_ansi_flag!(Italic, "\x1b[3m", "\x1b[23m");
         set_ansi_flag!(Underline, "\x1b[4m", "\x1b[24m");        
+        set_ansi_flag!(StrikeThrough, "\x1b[9m", "\x1b[29m");
+        set_ansi_flag!(DoubleUnderline, "\x1b[21m", "\x1b[24m");
+        set_ansi_flag!(DottedUnderline, "\x1b[4:4m", "\x1b[24m");
+        set_ansi_flag!(CurlyUnderline, "\x1b[4:3m", "\x1b[24m");        
     }
     pub(crate) fn hide_cursor(&mut self) {
         self.text.push_str("\x1b[?25l");

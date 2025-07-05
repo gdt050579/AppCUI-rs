@@ -901,6 +901,38 @@ fn check_charattr_macro() {
         charattr!("?,r,attr: Bold+Italic"),
         CharAttribute::new(Color::Transparent, Color::Red, CharFlags::Bold | CharFlags::Italic)
     );
+    assert_eq!(
+        charattr!("?,r,attr: Bold+Italic+StrikeThrough"),
+        CharAttribute::new(
+            Color::Transparent,
+            Color::Red,
+            CharFlags::Bold | CharFlags::Italic | CharFlags::StrikeThrough
+        )
+    );
+    assert_eq!(
+        charattr!("?,r,attr: Bold+DoubleUnderline+StrikeThrough"),
+        CharAttribute::new(
+            Color::Transparent,
+            Color::Red,
+            CharFlags::Bold | CharFlags::DoubleUnderline | CharFlags::StrikeThrough
+        )
+    );    
+    assert_eq!(
+        charattr!("?,r,attr: Bold+CurlyUnderline+StrikeThrough"),
+        CharAttribute::new(
+            Color::Transparent,
+            Color::Red,
+            CharFlags::Bold | CharFlags::CurlyUnderline | CharFlags::StrikeThrough
+        )
+    );  
+    assert_eq!(
+        charattr!("aqua,pink,attr: Bold+DottedUnderline+StrikeThrough"),
+        CharAttribute::new(
+            Color::Aqua,
+            Color::Pink,
+            CharFlags::Bold | CharFlags::DottedUnderline | CharFlags::StrikeThrough
+        )
+    );    
 }
 
 #[test]
@@ -986,15 +1018,11 @@ fn check_serialization_to_buffer() {
     s.serialize_to_buffer(&mut buffer);
     const RESULT: [u8; 92] = [
         // Magic
-        83, 82, 70, 
-        // Version
-        1, 
-        // Width and Height
-        5, 0, 0, 0, 2, 0, 0, 0, 
-        // Character data
-        72, 0, 0, 0, 0, 0, 15, 4, 101, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 111, 0,
-        0, 0, 0, 0, 15, 4, 87, 0, 0, 0, 1, 0, 10, 4, 111, 0, 0, 0, 1, 0, 10, 4, 114, 0, 0, 0, 1, 0, 10, 4, 108, 0, 0, 0, 1, 0, 10, 4, 100, 0, 0, 0,
-        1, 0, 10, 4,
+        83, 82, 70, // Version
+        1, // Width and Height
+        5, 0, 0, 0, 2, 0, 0, 0, // Character data
+        72, 0, 0, 0, 0, 0, 15, 4, 101, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 111, 0, 0, 0, 0, 0, 15, 4, 87, 0,
+        0, 0, 1, 0, 10, 4, 111, 0, 0, 0, 1, 0, 10, 4, 114, 0, 0, 0, 1, 0, 10, 4, 108, 0, 0, 0, 1, 0, 10, 4, 100, 0, 0, 0, 1, 0, 10, 4,
     ];
     assert_eq!(buffer, RESULT);
 }
@@ -1010,7 +1038,6 @@ fn check_rect_contains() {
     assert!(!r.contains(Point::new(0, 2)));
     assert!(!r.contains(Point::new(4, 2)));
 }
-
 
 #[test]
 fn check_rect_inflate_width() {
@@ -1055,7 +1082,6 @@ fn check_rect_center() {
     let r = Rect::new(1, 1, 5, 5);
     assert_eq!(r.center(), Point::new(3, 3));
 }
-
 
 #[test]
 fn check_color_contrast() {

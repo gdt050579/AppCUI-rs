@@ -45,6 +45,10 @@ The list of attributes available in AppCUI are described by `CharFlags` enum fro
 * `Bold` - bolded character
 * `Underline` - underlined character
 * `Italic` - italic character
+* `DoubleUnderline` - a character that is undelined twice
+* `CurlyUnderline` - a character with a curly underline
+* `DottedUnderline` - a character with a dotted undeline
+* `StrikeThrough` - strike through character
 
 These flags can be used with `|` operator if you want to combine them. For example: `CharFlags::Bold | CharFlags::Underline` means a character that is both bolded and underlined.
 

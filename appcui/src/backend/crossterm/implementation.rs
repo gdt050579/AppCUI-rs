@@ -131,6 +131,19 @@ impl Backend for CrossTerm {
                 if ch.flags.contains(CharFlags::Underline) {
                     queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::Underlined)).unwrap();
                 }
+                if ch.flags.contains(CharFlags::DoubleUnderline) {
+                    queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::DoubleUnderlined)).unwrap();
+                }
+                if ch.flags.contains(CharFlags::CurlyUnderline) {
+                    queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::Undercurled)).unwrap();
+                }
+                if ch.flags.contains(CharFlags::DottedUnderline) {
+                    queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::Underdotted)).unwrap();
+                }
+                if ch.flags.contains(CharFlags::StrikeThrough) {
+                    queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::CrossedOut)).unwrap();
+                }
+            
                 flags = ch.flags;
             }
             queue!(stdout, Print(ch.code)).unwrap();
