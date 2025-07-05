@@ -5,7 +5,7 @@ use crate::{
 use proc_macro::*;
 use std::str::FromStr;
 
-static CHAR_ATTR: &[&str] = &["Bold", "Italic", "Underline"];
+static CHAR_ATTR: &[&str] = &["Bold", "Italic", "Underline", "StrikeThrough", "CurlyUnderline", "DoubleUnderline", "DottedUnderline"];
 
 static CHAR_POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("value", ParamType::String),
@@ -110,9 +110,17 @@ fn add_attr(output: &mut String, dict: &mut NamedParamsMap, param_list: &str) {
                         output.push_str(flag);
                         add_or_operator = true;
                     } else {
+                        let mut all_char_attributes = String::with_capacity(256);
+                        for (index,attr) in CHAR_ATTR.iter().enumerate() {
+                            all_char_attributes.push_str(*attr);
+                            if (index+1) < all_char_attributes.len() {
+                                all_char_attributes.push_str(", ");
+                            }
+                        }
+                        
                         Error::new(
                             param_list,
-                            format!("Unknwon character attribute: {} !", name.get_string()).as_str(),
+                            format!("Unknwon character attribute: {} ! Available attributes are: {}", name.get_string(), all_char_attributes).as_str(),
                             name.get_start_pos(),
                             name.get_end_pos(),
                         )

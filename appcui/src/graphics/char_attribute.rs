@@ -6,6 +6,10 @@ pub enum CharFlags {
     Bold = 0x0001,
     Italic = 0x0002,
     Underline = 0x0004,
+    DoubleUnderline = 0x0008,
+    CurlyUnderline = 0x0010,
+    DottedUnderline = 0x0020,
+    StrikeThrough = 0x0040, 
 }
 
 /// Represents attributes of a character such as foreground color, background color, and flags.
