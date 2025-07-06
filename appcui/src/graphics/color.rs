@@ -118,13 +118,22 @@ impl Color {
     #[inline(always)]
     pub fn contrast_color(&self) -> Self {
         match self {
-            Color::Black | Color::DarkBlue | Color::DarkGreen | Color::Teal | Color::DarkRed | Color::Magenta | Color::Olive | Color::Gray | Color::Blue | Color::Red => Color::White,
+            Color::Black
+            | Color::DarkBlue
+            | Color::DarkGreen
+            | Color::Teal
+            | Color::DarkRed
+            | Color::Magenta
+            | Color::Olive
+            | Color::Gray
+            | Color::Blue
+            | Color::Red => Color::White,
             Color::Silver | Color::Green | Color::Aqua | Color::Pink | Color::Yellow | Color::White => Color::Black,
 
             Color::Transparent => Color::Transparent,
             #[cfg(feature = "TRUE_COLORS")]
             Color::RGB(r, g, b) => {
-                if (2126 * (r as i32) + 7152 * (g as i32) + 722 * (b as i32)) > 1275000 {
+                if (2126 * (*r as i32) + 7152 * (*g as i32) + 722 * (*b as i32)) > 1275000 {
                     Color::Black
                 } else {
                     Color::White
@@ -135,27 +144,25 @@ impl Color {
     #[inline(always)]
     pub fn inverse_color(&self) -> Self {
         match self {
-            Color::Black       => Color::White,        // #000000 → #FFFFFF
-            Color::DarkBlue    => Color::Yellow,       // #000080 → #FFFF7F
-            Color::DarkGreen   => Color::Pink,         // #008000 → #FF7FFF
-            Color::Teal        => Color::Red,          // #008080 → #FF7F7F
-            Color::DarkRed     => Color::Aqua,         // #800000 → #7FFFFF
-            Color::Magenta     => Color::Green,        // #800080 → #7FFF7F
-            Color::Olive       => Color::Blue,         // #808000 → #7F7FFF
-            Color::Silver      => Color::Gray,         // #C0C0C0 → #3F3F3F
-            Color::Gray        => Color::Silver,       // #808080 → #7F7F7F
-            Color::Blue        => Color::Olive,        // #0000FF → #FFFF00
-            Color::Green       => Color::Magenta,      // #00FF00 → #FF00FF
-            Color::Aqua        => Color::DarkRed,      // #00FFFF → #FF0000
-            Color::Red         => Color::Teal,         // #FF0000 → #00FFFF
-            Color::Pink        => Color::DarkGreen,    // #FF00FF → #00FF00
-            Color::Yellow      => Color::DarkBlue,     // #FFFF00 → #0000FF
-            Color::White       => Color::Black,        // #FFFFFF → #000000
+            Color::Black => Color::White,     // #000000 → #FFFFFF
+            Color::DarkBlue => Color::Yellow, // #000080 → #FFFF7F
+            Color::DarkGreen => Color::Pink,  // #008000 → #FF7FFF
+            Color::Teal => Color::Red,        // #008080 → #FF7F7F
+            Color::DarkRed => Color::Aqua,    // #800000 → #7FFFFF
+            Color::Magenta => Color::Green,   // #800080 → #7FFF7F
+            Color::Olive => Color::Blue,      // #808000 → #7F7FFF
+            Color::Silver => Color::Gray,     // #C0C0C0 → #3F3F3F
+            Color::Gray => Color::Silver,     // #808080 → #7F7F7F
+            Color::Blue => Color::Olive,      // #0000FF → #FFFF00
+            Color::Green => Color::Magenta,   // #00FF00 → #FF00FF
+            Color::Aqua => Color::DarkRed,    // #00FFFF → #FF0000
+            Color::Red => Color::Teal,        // #FF0000 → #00FFFF
+            Color::Pink => Color::DarkGreen,  // #FF00FF → #00FF00
+            Color::Yellow => Color::DarkBlue, // #FFFF00 → #0000FF
+            Color::White => Color::Black,     // #FFFFFF → #000000
             Color::Transparent => Color::Transparent,
             #[cfg(feature = "TRUE_COLORS")]
-            Color::RGB(r, g, b) => {
-                Color::from_rgb(255 - *r, 255 - *g, 255 - *b)
-            }
+            Color::RGB(r, g, b) => Color::from_rgb(255 - *r, 255 - *g, 255 - *b),
         }
     }
     pub fn from_value(value: i32) -> Option<Color> {
