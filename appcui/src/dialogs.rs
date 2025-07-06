@@ -58,6 +58,7 @@ mod dialog_result;
 mod file_mask;
 mod folder_select_dialog;
 mod generic_alert_dialog;
+mod input_dialog;
 mod open_save_dialog;
 mod root_select_dialog;
 #[cfg(test)]
@@ -74,6 +75,7 @@ use dialog_result::DialogResult;
 use file_mask::FileMask;
 use folder_select_dialog::{FolderExplorer, FolderSelectionDialogResult};
 use generic_alert_dialog::GenericAlertDialog;
+use input_dialog::StringImputDialog;
 use open_save_dialog::{FileExplorer, OpenSaveDialogResult};
 use EnumBitFlags::EnumBitFlags;
 
@@ -500,4 +502,11 @@ pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Op
 /// ```
 pub fn select_folder(title: &str, location: Location, flags: SelectFolderDialogFlags) -> Option<PathBuf> {
     inner_select_folder(title, location, flags, utils::fs::Navigator::new())
+}
+
+pub fn input<T>(title: &str, text: &str, value: Option<T>, validation: Option<fn(T) -> Result<T, String>>) -> Option<T>
+where
+    T: for<'a> From<&'a str> + Sized + 'static,
+{
+    StringImputDialog::new(title, text, value, validation).show()
 }
