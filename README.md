@@ -11,6 +11,8 @@
 ![MacOS Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/macos.yml/badge.svg)
 ![Code Coverage](https://gist.githubusercontent.com/gdt050579/f7d7e7d56b2725a3b33a265e8a9d8e9c/raw/coverage.svg)
 ![License](https://img.shields.io/github/license/gdt050579/AppCUI-rs)
+[![Crates.io](https://img.shields.io/crates/v/appcui.svg)](https://crates.io/crates/appcui)
+[![Docs.rs](https://docs.rs/appcui/badge.svg)](https://docs.rs/appcui)
 
 AppCUI is a simple, easy-to-use and cross-platform library for creating text-based user interfaces in Rust:
 * [Book](https://gdt050579.github.io/AppCUI-rs/)
