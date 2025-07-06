@@ -916,7 +916,7 @@ fn check_charattr_macro() {
             Color::Red,
             CharFlags::Bold | CharFlags::DoubleUnderline | CharFlags::StrikeThrough
         )
-    );    
+    );
     assert_eq!(
         charattr!("?,r,attr: Bold+CurlyUnderline+StrikeThrough"),
         CharAttribute::new(
@@ -924,7 +924,7 @@ fn check_charattr_macro() {
             Color::Red,
             CharFlags::Bold | CharFlags::CurlyUnderline | CharFlags::StrikeThrough
         )
-    );  
+    );
     assert_eq!(
         charattr!("aqua,pink,attr: Bold+DottedUnderline+StrikeThrough"),
         CharAttribute::new(
@@ -932,7 +932,7 @@ fn check_charattr_macro() {
             Color::Pink,
             CharFlags::Bold | CharFlags::DottedUnderline | CharFlags::StrikeThrough
         )
-    );    
+    );
 }
 
 #[test]
@@ -1019,7 +1019,7 @@ fn check_serialization_to_buffer() {
     const RESULT: [u8; 92] = [
         // Magic
         83, 82, 70, // Version
-        1, // Width and Height
+        1,  // Width and Height
         5, 0, 0, 0, 2, 0, 0, 0, // Character data
         72, 0, 0, 0, 0, 0, 15, 4, 101, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 111, 0, 0, 0, 0, 0, 15, 4, 87, 0,
         0, 0, 1, 0, 10, 4, 111, 0, 0, 0, 1, 0, 10, 4, 114, 0, 0, 0, 1, 0, 10, 4, 108, 0, 0, 0, 1, 0, 10, 4, 100, 0, 0, 0, 1, 0, 10, 4,
@@ -1102,8 +1102,8 @@ fn check_color_contrast() {
     assert_eq!(Color::Transparent.contrast_color(), Color::Transparent);
     #[cfg(feature = "TRUE_COLORS")]
     {
-        assert_eq!(Color::RGB(1, 1, 1).contrast_color(), Color::Black);
-        assert_eq!(Color::RGB(254, 254, 254).contrast_color(), Color::White);
+        assert_eq!(Color::RGB(1, 1, 1).contrast_color(), Color::White);
+        assert_eq!(Color::RGB(254, 254, 254).contrast_color(), Color::Black);
     }
 }
 
