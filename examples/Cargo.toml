@@ -9,6 +9,7 @@ appcui = { path = "../appcui" }
 appcui_proc_macro = { path = "../appcui-proc-macro"}
 chrono = "0.4.38"
 rand = "0.8.5"
+tempfile = "3.0"
 
 
 [[example]]
@@ -264,3 +265,7 @@ path = "true_colors/main.rs"
 [[example]]
 name = "emoticons"
 path = "emoticons/main.rs"
+
+[[example]]
+name = "surface_serialization"
+path = "surface_serialization/main.rs"
