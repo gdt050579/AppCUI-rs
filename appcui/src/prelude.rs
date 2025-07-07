@@ -77,5 +77,5 @@ pub use super::ui::window::toolbar;
 pub use super::ui::*;
 pub use appcui_proc_macro::*;
 
-#[cfg(all(not(target_arch = "wasm32"), debug_assertions))]
+#[cfg(debug_assertions)]
 pub use super::utils::log::write_log_to_file;
