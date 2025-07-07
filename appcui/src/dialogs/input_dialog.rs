@@ -3,18 +3,18 @@ use crate::prelude::*;
 #[ModalWindow(internal: true, response: T, events: ButtonEvents+TextFieldEvents)]
 pub(super) struct StringImputDialog<T>
 where
-    T: for<'a> From<&'a str> + Sized + std::fmt::Display + 'static,
+    T: for<'a> From<&'a str> + Sized + for<'a> TryFrom<&'a str> + std::fmt::Display + 'static,
 {
-    validation: Option<fn(T) -> Result<T, String>>,
+    validation: Option<fn(&T) -> Result<(), String>>,
     txt: Handle<TextField>,
     btn_ok: Handle<Button>,
 }
 
 impl<T> StringImputDialog<T>
 where
-    T: for<'a> From<&'a str> + Sized + std::fmt::Display + 'static,
+    T: for<'a> From<&'a str> + Sized + for<'a> TryFrom<&'a str> + std::fmt::Display + 'static,
 {
-    pub(super) fn new(title: &str, text: &str, value: Option<T>, validation: Option<fn(T) -> Result<T, String>>) -> Self {
+    pub(super) fn new(title: &str, text: &str, value: Option<T>, validation: Option<fn(&T) -> Result<(), String>>) -> Self {
         let chars_count = text.chars().count();
         let height = ((chars_count / 36) + 1).clamp(1, 6);
         let format_str = format!("d:c,w:40,h:{}", height + 8);
@@ -36,18 +36,37 @@ where
         me.txt = me.add(TextField::new(&content, Layout::new("l:1,r:1,b:4,h:1"), textfield::Flags::ProcessEnter));
         me
     }
-    fn validate(&self) {}
+    fn validate(&mut self) {
+        if let Some(tf) = self.control(self.txt) {
+            let text = tf.text();
+            let result = if let Ok(value) = T::try_from(text) {
+                if let Some(validation) = self.validation {
+                    validation(&value).map(|()| value)
+                } else {
+                    // all good
+                    Ok(value)
+                }
+            } else {
+                let msg = format!("Invalid value: '{}'", text);
+                Err(msg)
+            };
+            match result {
+                Ok(value) => self.exit_with(value),
+                Err(err) => dialogs::error("Error", err.as_str()),
+            }
+        }
+    }
 }
 
 impl<T> ButtonEvents for StringImputDialog<T>
 where
-    T: for<'a> From<&'a str> + Sized + std::fmt::Display + 'static,
+    T: for<'a> From<&'a str> + Sized + for<'a> TryFrom<&'a str> + std::fmt::Display + 'static,
 {
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
         if handle == self.btn_ok {
             self.validate();
         } else {
-            self.close();
+            self.exit();
         }
         EventProcessStatus::Processed
     }
@@ -55,7 +74,7 @@ where
 
 impl<T> TextFieldEvents for StringImputDialog<T>
 where
-    T: for<'a> From<&'a str> + Sized + std::fmt::Display + 'static,
+    T: for<'a> From<&'a str> + for<'a> TryFrom<&'a str> + Sized + std::fmt::Display + 'static,
 {
     fn on_validate(&mut self, _: Handle<TextField>, _: &str) -> EventProcessStatus {
         self.validate();
