@@ -148,7 +148,7 @@ fn main() -> Result<(), appcui::system::Error> {
 - [x] Basic set of widgets and support for Windows, Linux and MacOS
 - [x] WebGL support
 - [ ] OpenGL / SDL / Vulkan support
-- [ ] TextArea suport for code highlighting
+- [ ] TextArea support for code highlighting
 
 ## 🤝 Contributing
 
