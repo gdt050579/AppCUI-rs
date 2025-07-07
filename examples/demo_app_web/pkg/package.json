@@ -1,0 +1,15 @@
+{
+  "name": "demo_licenta",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "demo_licenta_bg.wasm",
+    "demo_licenta.js",
+    "demo_licenta.d.ts"
+  ],
+  "main": "demo_licenta.js",
+  "types": "demo_licenta.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
