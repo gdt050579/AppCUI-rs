@@ -506,7 +506,7 @@ pub fn select_folder(title: &str, location: Location, flags: SelectFolderDialogF
 
 pub fn input<T>(title: &str, text: &str, value: Option<T>, validation: Option<fn(T) -> Result<T, String>>) -> Option<T>
 where
-    T: for<'a> From<&'a str> + Sized + 'static,
+    T: for<'a> From<&'a str> + Sized + std::fmt::Display + 'static,
 {
     StringImputDialog::new(title, text, value, validation).show()
 }
