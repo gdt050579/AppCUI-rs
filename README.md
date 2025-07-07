@@ -145,10 +145,10 @@ fn main() -> Result<(), appcui::system::Error> {
 
 ## 🛣️ Roadmap
 
-- [x] Basic set of widgets and support for Windows, Linux and MaxOS
+- [x] Basic set of widgets and support for Windows, Linux and MacOS
 - [x] WebGL support
 - [ ] OpenGL / SDL / Vulkan support
-- [ ] TextArea suuport for code highlighting
+- [ ] TextArea suport for code highlighting
 
 ## 🤝 Contributing
 
