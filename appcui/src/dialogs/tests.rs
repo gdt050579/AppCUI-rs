@@ -1156,3 +1156,35 @@ fn check_file_mask_ignore_case() {
     assert!(!fm[0].matches("test.png123"));
     assert!(!fm[0].matches("test.JpG123"));
 }
+
+#[test]
+fn check_input() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0xDC27AD6BE7A637F4)
+    ";
+
+    #[Window(events = ButtonEvents, internal: true)]
+    struct MyWin {}
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Test,d:c,w:50,h:8")
+            };
+            me.add(button!("Click,d:c,w:15"));
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let res = dialogs::input::<i32>("i32","Enter a i32 value bigger than 10 and smaller than 100", None, None);
+            EventProcessStatus::Processed
+        }
+    }
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(FolderSelectDialog::new("D:\\Windows", SelectFolderDialogFlags::None));
+    a.run();
+}
