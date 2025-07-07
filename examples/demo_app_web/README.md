@@ -1,1 +1,0 @@
-To run this example just serve the index.html file with server.py, then go the http://localhost:5000/index.html

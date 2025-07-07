@@ -307,7 +307,3 @@ path = "emoticons/main.rs"
 [[example]]
 name = "surface_serialization"
 path = "surface_serialization/main.rs"
-
-[[example]]
-name = "demo_app_web"
-path = "demo_app_web/lib.rs"
