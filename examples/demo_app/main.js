@@ -1,7 +1,7 @@
 console.log("SharedArrayBuffer available:", typeof SharedArrayBuffer !== "undefined");
 
 
-import init, * as wasm from "./pkg/demo_licenta.js";
+import init, * as wasm from "./pkg/demo.js";
 
 init({ 
   module: new URL("./pkg/demo_licenta.wasm", import.meta.url),
