@@ -1,5 +1,5 @@
 use std::str::FromStr;
-
+use super::InputCallback;
 use crate::prelude::*;
 
 #[ModalWindow(internal: true, response: T, events: ButtonEvents+TextFieldEvents)]
@@ -7,7 +7,7 @@ pub(super) struct StringImputDialog<T>
 where
     T: FromStr + Sized + std::fmt::Display + 'static,
 {
-    validation: Option<fn(&T) -> Result<(), String>>,
+    validation: Option<InputCallback<T>>,
     txt: Handle<TextField>,
     btn_ok: Handle<Button>,
 }
@@ -16,7 +16,7 @@ impl<T> StringImputDialog<T>
 where
     T: FromStr + Sized + std::fmt::Display + 'static,
 {
-    pub(super) fn new(title: &str, text: &str, value: Option<T>, validation: Option<fn(&T) -> Result<(), String>>) -> Self {
+    pub(super) fn new(title: &str, text: &str, value: Option<T>, validation: Option<InputCallback<T>>) -> Self {
         let chars_count = text.chars().count();
         let height = ((chars_count / 36) + 1).clamp(1, 6);
         let format_str = format!("d:c,w:40,h:{}", height + 8);
@@ -31,7 +31,7 @@ where
         me.btn_ok = me.add(Button::new("&Ok", Layout::new("l:5,b:0,w:13"), button::Type::Normal));
         me.add(Button::new("&Cancel", Layout::new("l:21,b:0,w:13"), button::Type::Normal));
         let content = if let Some(value) = value {
-            format! {"{}",value}
+            format! {"{value}"}
         } else {
             String::new()
         };
@@ -49,7 +49,7 @@ where
                     Ok(value)
                 }
             } else {
-                let msg = format!("Invalid value: '{}'", text);
+                let msg = format!("Invalid value: '{text}'");
                 Err(msg)
             };
             match result {

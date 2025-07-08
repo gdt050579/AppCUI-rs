@@ -13,7 +13,7 @@ pub struct Viewer {
 
 impl Viewer {
     pub fn new(base_path: String, filename: &str) -> Self {
-        let initial_path = format!(r"{}\{}", base_path, filename);
+        let initial_path = format!(r"{base_path}\{filename}");
 
         let window = Window::new(&initial_path, Layout::new("d:c, w:50, h: 15"), Flags::Sizeable);
         let mut w: Viewer = Self {
@@ -51,7 +51,7 @@ impl Viewer {
                     self.base.set_title(&full_path);
                 }
             } else if let Some(md) = self.control_mut(handle) {
-                md.set_content(&format!("Could not load file at {}", current_path));
+                md.set_content(&format!("Could not load file at {current_path}"));
             }
         }
     }
@@ -75,7 +75,7 @@ impl MarkdownEvents for Viewer {
                 md.set_content(&file_content);
             }
         } else if let Some(md) = self.control_mut(_handle) {
-            md.set_content(&format!("Could not load file at {}", full_path));
+            md.set_content(&format!("Could not load file at {full_path}"));
         }
         EventProcessStatus::Processed
     }

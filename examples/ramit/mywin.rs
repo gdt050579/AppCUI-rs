@@ -31,7 +31,7 @@ impl RamItGameEvents for MyWin {
         };
         let h = self.score;
         if let Some(score) = self.toolbar().get_mut(h) {
-            score.set_content(format!("Score: {}", sc).as_str());
+            score.set_content(format!("Score: {sc}").as_str());
         }
         EventProcessStatus::Processed
     }

@@ -502,7 +502,10 @@ pub fn select_folder(title: &str, location: Location, flags: SelectFolderDialogF
     inner_select_folder(title, location, flags, utils::fs::Navigator::new())
 }
 
-pub fn input<T>(title: &str, text: &str, value: Option<T>, validation: Option<fn(&T) -> Result<(), String>>) -> Option<T>
+
+type InputCallback<T> = fn(&T) -> Result<(), String>;
+
+pub fn input<T>(title: &str, text: &str, value: Option<T>, validation: Option<InputCallback<T>>) -> Option<T>
 where
     T: FromStr + Sized + std::fmt::Display + 'static,
 {

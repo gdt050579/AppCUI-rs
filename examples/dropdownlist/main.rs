@@ -36,7 +36,7 @@ impl MyWin {
             if let Some(op) = self.control(h) {
                 if let Some(result) = op.selected_item() {
                     let r = result.run(&numbers);
-                    let msg = format!("Result: {}", r);
+                    let msg = format!("Result: {r}");
                     dialogs::message("Rsult", &msg);
                 }
             }

@@ -21,7 +21,7 @@ impl MyWin {
         };
         win.b1 = win.add(button!("'Show modal &window',x:50%,y:2,a:c,w:30"));
         win.b2 = win.add(Button::new(
-            format!("Counter = {}", counter).as_str(),
+            format!("Counter = {counter}").as_str(),
             Layout::new("x:50%,y:4,a:c,w:30"),
             button::Type::Normal,
         ));
@@ -33,7 +33,7 @@ impl MyWin {
         let handle = self.b2;
         let counter = self.counter;
         if let Some(b2) = self.control_mut(handle) {
-            b2.set_caption(format!("Counter = {}", counter).as_str());
+            b2.set_caption(format!("Counter = {counter}").as_str());
         }
     }
 }
@@ -49,7 +49,7 @@ impl ButtonEvents for MyWin {
             let response = MyWin::new(format!("{}", self.counter + 1).as_str(), self.counter + 1).show();
             let handle = self.lb;
             if let (Some(r), Some(lb)) = (response, self.control_mut(handle)) {
-                lb.set_caption(format!("Reponse from modal window: {}", r).as_str());
+                lb.set_caption(format!("Reponse from modal window: {r}").as_str());
             } else if response.is_none() {
                 if let Some(lb) = self.control_mut(handle) {
                     lb.set_caption("Exit with None from modal window !");

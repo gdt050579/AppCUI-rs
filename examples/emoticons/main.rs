@@ -8,7 +8,7 @@ struct EmoticonsWindow {
     current_index: usize,
 }
 
-static EMOTICONS: &[(&'static str, &'static str)] = &[
+static EMOTICONS: &[(&str, &str)] = &[
     // Smileys and emotions
     ("😀", "Grinning Face"),
     ("😃", "Grinning Face with Big Eyes"),

@@ -121,7 +121,7 @@ impl LayoutMode {
                 LayoutMode::AllAnchors(AllAnchorsLayout::new(&params_list))
             }
             _ => {
-                panic!("Invalid format: {} --> this combination can not be used to create a layout for a control ", format);
+                panic!("Invalid format: {format} --> this combination can not be used to create a layout for a control ");
             }
         }
     }
