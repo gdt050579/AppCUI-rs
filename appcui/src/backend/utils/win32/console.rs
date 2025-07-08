@@ -359,8 +359,10 @@ impl Console {
 
     fn screen_buffer_info(stdout: structs::HANDLE) -> Result<structs::CONSOLE_SCREEN_BUFFER_INFOEX, Error> {
         unsafe {
-            let mut cbuf = structs::CONSOLE_SCREEN_BUFFER_INFOEX::default();
-            cbuf.structure_size = 0x60;
+            let mut cbuf = structs::CONSOLE_SCREEN_BUFFER_INFOEX {
+                structure_size: 0x60,
+                ..Default::default()
+            };
             if api::GetConsoleScreenBufferInfoEx(stdout, &mut cbuf) == constants::FALSE {
                 return Err(Error::new(
                     ErrorKind::InitializationFailure,
