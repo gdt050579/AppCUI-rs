@@ -1,0 +1,15 @@
+cargo-features = ["edition2024"]
+[package]
+name = "surface_load_web"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+
+[dependencies]
+console_error_panic_hook = "0.1"
+appcui = { version = "*"}
+wasm-bindgen = {version = "0.2"}
+web-sys = {version = "*", features = ["console"]}
