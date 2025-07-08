@@ -27,15 +27,15 @@ where
             btn_ok: Handle::None,
             validation,
         };
-        me.add(Label::new(text, Layout::new("l:1,t:1,r:1,b:6")));
-        me.btn_ok = me.add(Button::new("&Ok", Layout::new("x:12,a:b,w:12"), button::Type::Normal));
-        me.add(Button::new("&Cancel", Layout::new("x:28,a:b,w:12"), button::Type::Normal));
+        me.add(Label::new(text, Layout::new("l:1,t:1,r:1,b:5")));
+        me.btn_ok = me.add(Button::new("&Ok", Layout::new("l:5,b:0,w:13"), button::Type::Normal));
+        me.add(Button::new("&Cancel", Layout::new("l:21,b:0,w:13"), button::Type::Normal));
         let content = if let Some(value) = value {
             format! {"{}",value}
         } else {
             String::new()
         };
-        me.txt = me.add(TextField::new(&content, Layout::new("l:1,r:1,b:4,h:1"), textfield::Flags::ProcessEnter));
+        me.txt = me.add(TextField::new(&content, Layout::new("l:1,r:1,b:3,h:1"), textfield::Flags::ProcessEnter));
         me
     }
     fn validate(&mut self) {

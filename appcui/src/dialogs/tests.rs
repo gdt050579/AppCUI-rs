@@ -1158,11 +1158,57 @@ fn check_file_mask_ignore_case() {
 }
 
 #[test]
-fn check_input() {
+fn check_input_no_validation() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')   
-        CheckHash(0xDC27AD6BE7A637F4)
+        CheckHash(0x126FE1C3874DA20C)
+        Key.Pressed(Space)
+        Paint('2. InputBox opened')   
+        CheckHash(0xFDF1E1D1B8DDE540)
+        Key.TypeText('123')
+        Paint('3. <123> value added')   
+        CheckHash(0x43B3BF19A2CA7D30)
+        Key.Pressed(Enter)
+        Paint('4. Back to main window (title is 123)')   
+        CheckHash(0x1E02C66F2D12D285)
+        Key.Pressed(Space)
+        Paint('5. InputBox opened')   
+        CheckHash(0xFDF1E1D1B8DDE540)
+        Key.Pressed(Escape)
+        Paint('6. Back to main window (title is canceled)')   
+        CheckHash(0x42E05DD410E2F1AD)
+        Key.Pressed(Space)
+        Paint('7. InputBox opened')   
+        CheckHash(0xFDF1E1D1B8DDE540)
+        Key.TypeText('blablabla')
+        Paint('8. <blablabla> invalid value added')   
+        CheckHash(0x41A0D938CD104527)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('9. Conversion error showed')   
+        CheckHash(0xC1D875ED3682CBF8)
+        Key.Pressed(Enter)
+        Paint('10. Back to the input box')   
+        CheckHash(0xC038D5EFF53F966E)
+        Key.Pressed(Tab,2)
+        Key.Pressed(Ctrl+A)
+        Key.TypeText('-1234')
+        Paint('11. <-1234> invalid value added')   
+        CheckHash(0x3D95BDAB623C7CD5)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('12. Back to main window (title is -1234)')   
+        CheckHash(0x925677BC32B5898)
+        Key.Pressed(Enter)
+        Paint('13. Input dialog showed')   
+        CheckHash(0xFDF1E1D1B8DDE540)
+        Key.Pressed(Tab,2)
+        Paint('14. Focus on cancel button')   
+        CheckHash(0x534E994BE4EED6C9)
+        Key.Pressed(Enter)
+        Paint('15. Back to main window (title is canceled)')   
+        CheckHash(0x42E05DD410E2F1AD)
     ";
 
     #[Window(events = ButtonEvents, internal: true)]
@@ -1171,7 +1217,7 @@ fn check_input() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:50,h:8")
+                base: window!("Test,d:c,w:30,h:7"),
             };
             me.add(button!("Click,d:c,w:15"));
             me
@@ -1179,12 +1225,121 @@ fn check_input() {
     }
     impl ButtonEvents for MyWin {
         fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
-            let res = dialogs::input::<i32>("i32","Enter a i32 value bigger than 10 and smaller than 100", None, None);
+            let s = if let Some(res) = dialogs::input::<i32>("i32", "Enter a i32 value bigger in the textfield below and press enter", None, None) {
+                format!("{}", res)
+            } else {
+                "canceled".to_string()
+            };
+            self.set_title(&s);
             EventProcessStatus::Processed
         }
     }
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
-    a.add_window(FolderSelectDialog::new("D:\\Windows", SelectFolderDialogFlags::None));
+    let mut a = App::debug(80, 12, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_input_validation() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x126FE1C3874DA20C)
+        Key.Pressed(Space)
+        Paint('2. InputBox opened')   
+        CheckHash(0x97A2D438E0E074B1)
+        Key.TypeText('123')
+        Paint('3. <123> value added')   
+        CheckHash(0xAEA3A85BCAAAE961)
+        Key.Pressed(Enter)
+        Paint('4. Validation fails with error')   
+        CheckHash(0xA3ED5C76A4A16AF6)
+        Key.Pressed(Enter)
+        Paint('5. Back to input window')   
+        CheckHash(0x117DCE6F7053870E)
+        Key.TypeText(50)
+        Key.Pressed(Enter)
+        Paint('6. Back t original window (title is 50)')   
+        CheckHash(0x635EC263AD67AB3)
+    ";
+
+    #[Window(events = ButtonEvents, internal: true)]
+    struct MyWin {}
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Test,d:c,w:30,h:7"),
+            };
+            me.add(button!("Click,d:c,w:15"));
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let s = if let Some(res) = dialogs::input::<i32>(
+                "i32",
+                "Enter a i32 value bigger than 10 and smaller than 100",
+                None,
+                Some(|x: &i32| {
+                    if *x > 10 && *x < 100 {
+                        Ok(())
+                    } else {
+                        Err("Value should be between 10 and 123".to_string())
+                    }
+                }),
+            ) {
+                format!("{}", res)
+            } else {
+                "canceled".to_string()
+            };
+            self.set_title(&s);
+            EventProcessStatus::Processed
+        }
+    }
+
+    let mut a = App::debug(80, 12, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_input_with_initial_value() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x126FE1C3874DA20C)
+        Key.Pressed(Space)
+        Paint('2. InputBox opened (with value 95 written)')   
+        CheckHash(0xD718042D771F9CCC)
+    ";
+
+    #[Window(events = ButtonEvents, internal: true)]
+    struct MyWin {}
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Test,d:c,w:30,h:7"),
+            };
+            me.add(button!("Click,d:c,w:15"));
+            me
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let s = if let Some(res) = dialogs::input::<i32>("i32", "Enter a value:", Some(95), None) {
+                format!("{}", res)
+            } else {
+                "canceled".to_string()
+            };
+            self.set_title(&s);
+            EventProcessStatus::Processed
+        }
+    }
+
+    let mut a = App::debug(80, 12, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
