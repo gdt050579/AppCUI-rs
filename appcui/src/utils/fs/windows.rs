@@ -64,5 +64,5 @@ pub(super) fn get_os_roots() -> Vec<Root> {
 #[test]
 fn test_os_roots() {
     let roots = get_os_roots();
-    println!("{:?}", roots);
+    println!("{roots:?}");
 }

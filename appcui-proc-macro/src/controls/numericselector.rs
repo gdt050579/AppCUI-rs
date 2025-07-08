@@ -38,7 +38,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     );
     let is_float = matches!(type_name, "f32" | "f64");
     if !accepted {
-        panic!("Invalid type for NumericSelector: '{}' - only the following numeric types are accepted: i8, i16, i32, i64, i128, u8, u16, u32, u64, u128, isize, usize, f32, f64", type_name);
+        panic!("Invalid type for NumericSelector: '{type_name}' - only the following numeric types are accepted: i8, i16, i32, i64, i128, u8, u16, u32, u64, u128, isize, usize, f32, f64");
     }
 
     // all good --> lets add parameters

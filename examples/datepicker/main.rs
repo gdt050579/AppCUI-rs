@@ -19,7 +19,7 @@ impl MyWin{
 
 impl DatePickerEvents for MyWin{
     fn on_date_change(&mut self, _handle: Handle<DatePicker>, date: chrono::prelude::NaiveDate) -> EventProcessStatus {
-        self.base.set_title(&format!("Date: {}", date));
+        self.base.set_title(&format!("Date: {date}"));
         EventProcessStatus::Processed                                                                        
     }
 }

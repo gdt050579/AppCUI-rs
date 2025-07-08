@@ -125,7 +125,7 @@ impl Win {
         } else {
             (0, 0)
         };
-        let data = format!("{}/{}", checked, total);
+        let data = format!("{checked}/{total}");
         let h = self.lb;
         if let Some(lb) = self.toolbar().get_mut(h) {
             lb.set_content(data.as_str());

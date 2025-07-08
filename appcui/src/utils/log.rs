@@ -21,7 +21,7 @@ pub fn write_log_to_file(tag: &str, message: &str) {
         use chrono::Local;
         use std::io::Write;
         let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
-        let log_entry = format!("[{}] [{}] {}\n", timestamp, tag, message);
+        let log_entry = format!("[{timestamp}] [{tag}] {message}\n");
         if let Ok(mut guard) = LOG_FILE.lock() {
             if let Some(file) = guard.get_mut() {
                 file.write_all(log_entry.as_bytes()).unwrap();

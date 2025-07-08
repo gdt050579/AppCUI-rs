@@ -127,10 +127,10 @@ fn add_command_id(s: &mut String, dict: &mut NamedParamsMap, class: Option<&str>
                 panic!("Unknwon class nane (or empty) for command. Either specify it in the `class` attribute (e.g. class=MyWin) or specify the command with its full qualifier (e.g. command='mywin::Command::<name>').");
             }
             if let Err(desc) = crate::utils::validate_name(c, true) {
-                panic!("Invalid class name '{}' => {}", c, desc);
+                panic!("Invalid class name '{c}' => {desc}");
             }
             if let Err(desc) = crate::utils::validate_name(id, false) {
-                panic!("Invalid command name '{}' => {}", id, desc);
+                panic!("Invalid command name '{id}' => {desc}");
             }
             // add the module name (the class) first (lowercase)
             for ch in c.chars() {
@@ -203,7 +203,7 @@ fn get_class(dict: &mut NamedParamsMap, inherit: Option<&str>) -> Option<String>
             panic!("Unknwon class nane (or empty) for command. Either specify it in the `class` attribute (e.g. class=MyWin) or specify the command with its full qualifier (e.g. command='mywin::Command::<name>').");
         }
         if let Err(desc) = crate::utils::validate_name(c, true) {
-            panic!("Invalid class name '{}' => {}", c, desc);
+            panic!("Invalid class name '{c}' => {desc}");
         }
         Some(String::from(c))
     } else if let Some(name) = inherit {

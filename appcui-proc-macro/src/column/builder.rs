@@ -48,7 +48,7 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
     if let Some(value) = dict.get("width") {
         // compute the value
         if let Ok(width) = value.get_string().parse::<u8>() {
-            write!(res, "{},", width).unwrap();
+            write!(res, "{width},").unwrap();
         } else {
             panic!("Invalid value for the width of the column: '{}'",value.get_string());
         }

@@ -485,7 +485,7 @@ fn check_events() {
                 let h = self.log;
                 if let Some(log) = self.control_mut(h) {
                     let idx = log.count() + 1;
-                    log.add(&format!("{} => Current item changed to index: {}", idx, index));
+                    log.add(&format!("{idx} => Current item changed to index: {index}"));
                 }
             }
             EventProcessStatus::Processed
@@ -550,7 +550,7 @@ fn check_autoscroll() {
             let h = self.log;
             if let Some(log) = self.control_mut(h) {
                 let idx = log.count() + 1;
-                log.add(&format!("Item {}", idx));
+                log.add(&format!("Item {idx}"));
             }
             EventProcessStatus::Processed
         }
@@ -897,7 +897,7 @@ fn check_items_checked_with_mouse() {
                         index,
                         if checked { "checked" } else { "unchecked" }
                     ));
-                    log.add(&format!("Total checked items: {}", cnt));
+                    log.add(&format!("Total checked items: {cnt}"));
                     
                 }
             }

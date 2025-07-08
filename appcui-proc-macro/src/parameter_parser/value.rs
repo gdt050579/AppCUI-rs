@@ -198,8 +198,7 @@ impl<'a> Value<'a> {
                 return Err(Error::new(
                     param_list,
                     format!(
-                        "The value for parameter '{}' should be between -30000 and 30000. Current value is {} !",
-                        display_param_name, value
+                        "The value for parameter '{display_param_name}' should be between -30000 and 30000. Current value is {value} !"
                     )
                     .as_str(),
                     self.start,
@@ -213,8 +212,7 @@ impl<'a> Value<'a> {
                 return Err(Error::new(
                     param_list,
                     format!(
-                        "The value for parameter '{}' should be between -300% and 300%. Current value is {}% !",
-                        display_param_name, value
+                        "The value for parameter '{display_param_name}' should be between -300% and 300%. Current value is {value}% !"
                     )
                     .as_str(),
                     self.start,
@@ -242,8 +240,7 @@ impl<'a> Value<'a> {
             return Err(Error::new(
                 param_list,
                 format!(
-                    "Expecting a flag value for parameter '{}' (a string, a word or a list [...]), but got parameter list '{{...}}'",
-                    display_param_name
+                    "Expecting a flag value for parameter '{display_param_name}' (a string, a word or a list [...]), but got parameter list '{{...}}'"
                 )
                 .as_str(),
                 self.start,
@@ -261,8 +258,7 @@ impl<'a> Value<'a> {
                 return Err(Error::new(
                     param_list,
                     format!(
-                        "Invalid flag format for parameter '{}'. Expecting a flags name formed out of th following characters: 0-9, a-z, A-Z and underline.",
-                        display_param_name
+                        "Invalid flag format for parameter '{display_param_name}'. Expecting a flags name formed out of th following characters: 0-9, a-z, A-Z and underline."
                     )
                     .as_str(),
                     self.start+pos,

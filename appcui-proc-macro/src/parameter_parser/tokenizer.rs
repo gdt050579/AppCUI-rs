@@ -344,7 +344,7 @@ impl Tokenizer {
             // else we have an internal error ==> in theory we should not reach this step
             return Err(Error::new(
                 text,
-                format!("Internal error (1) - next_pos={},pos={},end={}",next_pos,pos,end).as_str(),
+                format!("Internal error (1) - next_pos={next_pos},pos={pos},end={end}").as_str(),
                 self.tokens[pos].start,
                 self.tokens[pos + 2].end,
             ));

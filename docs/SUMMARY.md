@@ -107,6 +107,7 @@
     - [Notifications dialogs](chapter-5/notification_dialogs.md)
     - [Open/Save dialog](chapter-5/opensave_dialogs.md)
     - [Folder selection dialog](chapter-5/folder_selection_dialogs.md)
+    - [Input dialog](chapter-5/input_dialog.md)
 
 - [Themes](chapter-6/themes.md)
     - [Predefined Themes](chapter-6/predefined_themes.md)

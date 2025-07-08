@@ -51,15 +51,15 @@ impl NumberFormatsWindow {
         let h = self.decimal_label;
         let number = self.number;
         if let Some(label) = self.toolbar().get_mut(h) {
-            label.set_content(&format!("Dec:{}", number));
+            label.set_content(&format!("Dec:{number}"));
         }
         let h = self.hex_label;
         if let Some(label) = self.toolbar().get_mut(h) {
-            label.set_content(&format!("Hex:{:X}", number));
+            label.set_content(&format!("Hex:{number:X}"));
         }
         let h = self.binary_label;
         if let Some(label) = self.toolbar().get_mut(h) {
-            label.set_content(&format!("Bin:{:b}", number));
+            label.set_content(&format!("Bin:{number:b}"));
         }
     }
 }

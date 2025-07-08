@@ -56,45 +56,43 @@ where
         self.free.push(idx as u32);
         true
     }
+
+    #[inline(always)]
     pub(crate) fn get(&self, handle: Handle<T>) -> Option<&T> {
-        if handle.is_none() {
-            return None;
-        }
         let idx = handle.index();
-        if idx < self.objects.len() {
-            let m = self.objects[idx].as_ref();
-            if m.is_some() && m.as_ref().unwrap().handle() == handle {
-                return m;
+        self.objects.get(idx).and_then(|opt_obj| {
+            if let Some(obj) = opt_obj {
+                if obj.handle() == handle {
+                    return Some(obj);
+                }
             }
-        }
-        None
-    }
-    pub(crate) fn get_mut(&mut self, handle: Handle<T>) -> Option<&mut T> {
-        if handle.is_none() {
-            return None;
-        }
-        let idx = handle.index();
-        if idx < self.objects.len() {
-            let m = self.objects[idx].as_mut();
-            if m.is_some() && m.as_ref().unwrap().handle() == handle {
-                return m;
-            }
-        }
-        None
-    }
-    pub(crate) fn element(&self, index: usize) -> Option<&T> {
-        if index < self.objects.len() {
-            return self.objects[index].as_ref();
-        }
-        None
-    }
-    pub(crate) fn element_mut(&mut self, index: usize) -> Option<&mut T> {
-        if index < self.objects.len() {
-            return self.objects[index].as_mut();
-        }
-        None
+            None
+        })        
     }
 
+    #[inline(always)]
+    pub(crate) fn get_mut(&mut self, handle: Handle<T>) -> Option<&mut T> {
+        let idx = handle.index();
+        self.objects.get_mut(idx).and_then(|opt_obj| {
+            if let Some(obj) = opt_obj {
+                if obj.handle() == handle {
+                    return Some(obj);
+                }
+            }
+            None
+        })
+    }
+    
+    #[inline(always)]
+    pub(crate) fn element(&self, index: usize) -> Option<&T> {
+        self.objects.get(index).and_then(|x| x.as_ref())
+    }
+    #[inline(always)]
+    pub(crate) fn element_mut(&mut self, index: usize) -> Option<&mut T> {
+        self.objects.get_mut(index).and_then(|x| x.as_mut())
+    }
+
+    #[inline(always)]
     pub(crate) fn allocated_objects(&self) -> usize {
         self.objects.len()
     }

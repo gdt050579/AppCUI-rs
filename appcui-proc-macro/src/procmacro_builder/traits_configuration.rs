@@ -49,8 +49,7 @@ impl TraitsConfig {
         }
         if self.list[idx] != TraitImplementation::None {
             panic!(
-                "Trait {:?} with index {} was already set up. Check to see if there are two traits with the same index !",
-                appcui_trait, idx
+                "Trait {appcui_trait:?} with index {idx} was already set up. Check to see if there are two traits with the same index !"
             );
         }
         self.list[idx] = implementation_mode;

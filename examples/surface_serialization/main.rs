@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     surface.save(srf_path)?;
     println!("Surface saved to: {}", srf_path.display());
 
-    let loaded_surface = Surface::from_file(srf_path).map_err(|e| format!("Failed to load surface: {}", e))?;
+    let loaded_surface = Surface::from_file(srf_path).map_err(|e| format!("Failed to load surface: {e}"))?;
     println!("Surface loaded from: {}", srf_path.display());
 
     let mut win = Window::new(

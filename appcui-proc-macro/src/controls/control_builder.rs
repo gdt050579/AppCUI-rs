@@ -110,14 +110,14 @@ impl<'a> ControlBuilder<'a> {
     }
     fn add_coordonate(&mut self, value: Coordonate) {
         match value {
-            Coordonate::Absolute(v) => write!(self.content, "{}i32", v).unwrap(),
-            Coordonate::Percentage(v) => write!(self.content, "{}f32", v).unwrap(),
+            Coordonate::Absolute(v) => write!(self.content, "{v}i32").unwrap(),
+            Coordonate::Percentage(v) => write!(self.content, "{v}f32").unwrap(),
         };
     }
     fn add_dimension(&mut self, value: Dimension) {
         match value {
-            Dimension::Absolute(v) => write!(self.content, "{}u32", v).unwrap(),
-            Dimension::Percentage(v) => write!(self.content, "{}f32", v).unwrap(),
+            Dimension::Absolute(v) => write!(self.content, "{v}u32").unwrap(),
+            Dimension::Percentage(v) => write!(self.content, "{v}f32").unwrap(),
         };
     }
     pub(super) fn init_control(&mut self, method: &str) {
@@ -131,8 +131,7 @@ impl<'a> ControlBuilder<'a> {
             let name = value.get_string();
             if name.is_empty() {
                 panic!(
-                    "Parameter `{}` can not be an empty string. It should be a generic/template type to be used !",
-                    template_param
+                    "Parameter `{template_param}` can not be an empty string. It should be a generic/template type to be used !"
                 );
             }
             self.content.push_str(name);
@@ -141,8 +140,7 @@ impl<'a> ControlBuilder<'a> {
             self.content.push('(');
         } else {
             panic!(
-                "Parameter `{}` is mandatory and must express the generic/template type to be used !",
-                template_param
+                "Parameter `{template_param}` is mandatory and must express the generic/template type to be used !"
             );
         }
     }
@@ -158,8 +156,7 @@ impl<'a> ControlBuilder<'a> {
             }
         } else {
             panic!(
-                "Parameter '{}' is mandatory ! (you need to provided it as part of macro initialization)",
-                param_name
+                "Parameter '{param_name}' is mandatory ! (you need to provided it as part of macro initialization)"
             );
         }
     }
@@ -175,8 +172,7 @@ impl<'a> ControlBuilder<'a> {
             self.add_text(default_value);
         } else {
             panic!(
-                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                param_name
+                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
             );
         }
     }
@@ -190,8 +186,7 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str(default_value);
         } else {
             panic!(
-                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                param_name
+                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
             );
         }
     }
@@ -204,8 +199,7 @@ impl<'a> ControlBuilder<'a> {
             self.add_coordonate(default_value);
         } else {
             panic!(
-                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                param_name
+                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
             );
         }
     }
@@ -218,8 +212,7 @@ impl<'a> ControlBuilder<'a> {
             self.add_dimension(default_value);
         } else {
             panic!(
-                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                param_name
+                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
             );
         }
     }
@@ -232,8 +225,7 @@ impl<'a> ControlBuilder<'a> {
             self.add_bool(default_value);
         } else {
             panic!(
-                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                param_name
+                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
             );
         }
     }
@@ -246,8 +238,7 @@ impl<'a> ControlBuilder<'a> {
             self.add_size(default_value);
         } else {
             panic!(
-                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                param_name
+                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
             );
         }
     }
@@ -296,7 +287,7 @@ impl<'a> ControlBuilder<'a> {
             if tsm < 0 {
                 panic!("Top scroll margin can not be a negative number");
             }
-            self.add_line(format!("control.set_components_toolbar_margins({},{});", lsm, tsm).as_str());
+            self.add_line(format!("control.set_components_toolbar_margins({lsm},{tsm});").as_str());
         }
     }
 
@@ -340,8 +331,7 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str(default_value);
         } else {
             panic!(
-                "Parameter {} is mandatory ! (you need to provided it as part of macro initialization)",
-                param_name
+                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
             );
         }
     }
@@ -380,7 +370,7 @@ impl<'a> ControlBuilder<'a> {
                     }
                 }
             } else {
-                panic!("Parameter '{}' should contain some flags !", param_name);
+                panic!("Parameter '{param_name}' should contain some flags !");
             }
         } else {
             self.content.push_str(flag_name);

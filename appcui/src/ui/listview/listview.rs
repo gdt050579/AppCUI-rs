@@ -273,7 +273,7 @@ where
     pub fn add_item(&mut self, mut item: Item<T>) {
         let gid = item.group_id() as usize;
         if gid >= self.groups.len() {
-            panic!("Invalid group id `{}`. Have you reused a group id from a previous instantiation ?", gid);
+            panic!("Invalid group id `{gid}`. Have you reused a group id from a previous instantiation ?");
         }
         let count = self.groups[gid].items_count();
         self.groups[gid].set_items_count(count + 1);

@@ -95,7 +95,7 @@ impl Structure {
             format!("{}.{}", prefix, Self::token_to_string(&tokens[index]))
         };
         if attr.contains_key(&key) {
-            return Err(format!("Duplicated attribute: '{}'", key));
+            return Err(format!("Duplicated attribute: '{key}'"));
         }
         index += 1;
         if index >= tokens.len() {
@@ -283,7 +283,7 @@ impl Structure {
                                 skip_next = true;
                                 None
                             }
-                            _ => Some(format!("{}", value)),
+                            _ => Some(format!("{value}")),
                         }
                     }
                     TokenTree::Literal(literal) => Some(literal.to_string()),
@@ -304,7 +304,7 @@ impl Structure {
                     Err(format!("Unexpected token: '{:?}' -> Expecting a brace '{{' !", group.delimiter()))
                 }
             }
-            _ => Err(format!("Unexpected token: '{}' -> Expecting a brace '{{' !", token)),
+            _ => Err(format!("Unexpected token: '{token}' -> Expecting a brace '{{' !")),
         }
     }
     fn parse_field_type(tokens: &[TokenTree], start: usize) -> Result<usize, String> {
@@ -363,7 +363,7 @@ impl Structure {
                     break;
                 }
                 _ => {
-                    return Err(format!("Expecting a valid field definition but found: '{:?}'", token));
+                    return Err(format!("Expecting a valid field definition but found: '{token:?}'"));
                 }
             }
         }
@@ -373,7 +373,7 @@ impl Structure {
         let token = &tokens[index];
         let token_type = TokenType::from(token);
         if token_type != TokenType::TwoPoints {
-            return Err(format!("Expecting a colon (:) after the field name but found: '{:?}'", token));
+            return Err(format!("Expecting a colon (:) after the field name but found: '{token:?}'"));
         }
         index += 1;
         if index >= tokens.len() {
@@ -449,8 +449,7 @@ impl Structure {
                 }
                 _ => {
                     return Err(format!(
-                        "Expecting a valid structure definition (with the keyword 'struct'), but found: '{:?}'",
-                        token
+                        "Expecting a valid structure definition (with the keyword 'struct'), but found: '{token:?}'"
                     ));
                 }
             }

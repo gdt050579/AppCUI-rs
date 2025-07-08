@@ -58,12 +58,13 @@ mod dialog_result;
 mod file_mask;
 mod folder_select_dialog;
 mod generic_alert_dialog;
+mod input_dialog;
 mod open_save_dialog;
 mod root_select_dialog;
 #[cfg(test)]
 mod tests;
 
-use std::path::{Path, PathBuf};
+use std::{path::{Path, PathBuf}, str::FromStr};
 
 use crate::{
     prelude::{window, ModalWindowMethods},
@@ -74,6 +75,7 @@ use dialog_result::DialogResult;
 use file_mask::FileMask;
 use folder_select_dialog::{FolderExplorer, FolderSelectionDialogResult};
 use generic_alert_dialog::GenericAlertDialog;
+use input_dialog::StringImputDialog;
 use open_save_dialog::{FileExplorer, OpenSaveDialogResult};
 use EnumBitFlags::EnumBitFlags;
 
@@ -361,8 +363,7 @@ where
         }
         Err(err_msg) => {
             panic!(
-                "Error parsing file mask: '{}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{}",
-                ext_mask, err_msg
+                "Error parsing file mask: '{ext_mask}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{err_msg}"
             );
         }
     }
@@ -399,8 +400,7 @@ where
         }
         Err(err_msg) => {
             panic!(
-                "Error parsing file mask: '{}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{}",
-                ext_mask, err_msg
+                "Error parsing file mask: '{ext_mask}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{err_msg}"
             );
         }
     }
@@ -500,4 +500,31 @@ pub fn open(title: &str, file_name: &str, location: Location, extension_mask: Op
 /// ```
 pub fn select_folder(title: &str, location: Location, flags: SelectFolderDialogFlags) -> Option<PathBuf> {
     inner_select_folder(title, location, flags, utils::fs::Navigator::new())
+}
+
+
+type InputCallback<T> = fn(&T) -> Result<(), String>;
+
+/// Opens an input dialog for entering a value of type T and returns the value entered by the user or None if the user canceled the operation.
+/// # Arguments
+/// * `title` - The title of the dialog.
+/// * `text` - The text to display in the dialog.
+/// * `value` - An optional value to pre-fill the input field with.
+/// * `validation` - An optional validation function that can be used to validate the input value.
+///
+/// # Example
+/// ```rust,no_run
+/// use appcui::dialogs;
+///
+/// if let Some(res) = dialogs::input::<i32>("Title", "Enter a value", None, None) {
+///     // res value contains the selected value
+/// } else {
+///     // the user canceled the dialog
+/// }
+/// ```
+pub fn input<T>(title: &str, text: &str, value: Option<T>, validation: Option<InputCallback<T>>) -> Option<T>
+where
+    T: FromStr + Sized + std::fmt::Display + 'static,
+{
+    StringImputDialog::new(title, text, value, validation).show()
 }

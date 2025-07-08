@@ -833,7 +833,7 @@ fn check_change_item_event_change() {
             let c = self.counter;
             if let Some(tv) = self.control_mut(handle) {
                 if let Some(item) = tv.item_mut(item_handle) {
-                    item.value_mut().name.push_str(format!("{},", c).as_str());
+                    item.value_mut().name.push_str(format!("{c},").as_str());
                 }
             }
             EventProcessStatus::Processed
@@ -1024,7 +1024,7 @@ fn check_on_item_dynamic_colapse_expanded() {
             if let Some(tv) = self.control_mut(handle) {
                 for _ in 0..3 {
                     c += 1;
-                    let item = treeview::Item::expandable(TestData::new(format!("Item {}", c).as_str()), true);
+                    let item = treeview::Item::expandable(TestData::new(format!("Item {c}").as_str()), true);
                     tv.add_item_to_parent(item, item_handle);
                 }
             }
@@ -1362,7 +1362,7 @@ fn check_on_item_dynamic_colapse_expanded_recursively() {
             } else if let Some(tv) = self.control_mut(handle) {
                 for _ in 0..3 {
                     c += 1;
-                    let item = treeview::Item::expandable(TestData::new(format!("Item {}", c).as_str()), true);
+                    let item = treeview::Item::expandable(TestData::new(format!("Item {c}").as_str()), true);
                     tv.add_item_to_parent(item, item_handle);
                 }
             }
@@ -1726,7 +1726,7 @@ fn check_select_and_count_method() {
                 let idx = self.idx;
                 if let Some(tv) = self.control_mut(h) {
                     if let Some(current) = tv.current_item_handle() {
-                        tv.add_to_parent(Course::new(format!("Item {}", idx).as_str(), (idx * 7) % 3 + 1, (idx * 11) % 5 + 1), current);
+                        tv.add_to_parent(Course::new(format!("Item {idx}").as_str(), (idx * 7) % 3 + 1, (idx * 11) % 5 + 1), current);
                     }
                 }
             }

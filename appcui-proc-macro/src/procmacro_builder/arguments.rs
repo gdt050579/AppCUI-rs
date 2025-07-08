@@ -170,11 +170,11 @@ impl Arguments {
         let mut h = HashSet::with_capacity(self.values.len() * 2);
         for command_name in &self.values {
             if let Err(desc) = crate::utils::validate_name(command_name.as_str(), false) {
-                panic!("Invalid ID: '{}' => {}", command_name, desc);
+                panic!("Invalid ID: '{command_name}' => {desc}");
             }
             let hash = crate::utils::compute_hash(command_name);
             if h.contains(&hash) {
-                panic!("Commands must be unique. Duplicate command: {}", command_name);
+                panic!("Commands must be unique. Duplicate command: {command_name}");
             }
             h.insert(hash);
         }
@@ -185,11 +185,11 @@ impl Arguments {
         let mut h = HashSet::with_capacity(self.values.len() * 2);
         for event_name in &self.values {
             if let Err(desc) = crate::utils::validate_name(event_name.as_str(), false) {
-                panic!("Invalid Evenat name:: '{}' => {}", event_name, desc);
+                panic!("Invalid Evenat name:: '{event_name}' => {desc}");
             }
             let hash = crate::utils::compute_hash(event_name);
             if h.contains(&hash) {
-                panic!("Events name must be unique. Duplicate event name: {}", event_name);
+                panic!("Events name must be unique. Duplicate event name: {event_name}");
             }
             h.insert(hash);
         }
@@ -200,7 +200,7 @@ impl Arguments {
         let mut h = HashSet::with_capacity(self.values.len() * 2);
         for trait_name in &self.values {
             if let Err(desc) = crate::utils::validate_name(trait_name.as_str(), false) {
-                panic!("Invalid trait name: '{}' => {}", trait_name, desc);
+                panic!("Invalid trait name: '{trait_name}' => {desc}");
             }
             // analyze format
             if !trait_name.ends_with("Events") {
@@ -208,7 +208,7 @@ impl Arguments {
             }
             let hash = crate::utils::compute_hash(trait_name);
             if h.contains(&hash) {
-                panic!("Custom events trait names must be unique. Duplicate trait name: {}", trait_name);
+                panic!("Custom events trait names must be unique. Duplicate trait name: {trait_name}");
             }
             h.insert(hash);
         }
@@ -266,7 +266,7 @@ impl Arguments {
             self.values.clear();
             self.expect_next = ExpectNext::Equal;
         } else {
-            panic!("Expecting a key (a-zA-Z0-9) but got: `{}`", token);
+            panic!("Expecting a key (a-zA-Z0-9) but got: `{token}`");
         }
     }
     fn validate_expect_equal(&mut self, token: TokenTree) {
@@ -276,7 +276,7 @@ impl Arguments {
             }
             self.expect_next = ExpectNext::Value;
         } else {
-            panic!("Expecting asign ('=' or ':') symbol but got: {}", token);
+            panic!("Expecting asign ('=' or ':') symbol but got: {token}");
         }
     }
     fn validate_expect_value(&mut self, token: TokenTree) {
@@ -316,7 +316,7 @@ impl Arguments {
                 self.expect_next = ExpectNext::Comma;
             }
             _ => {
-                panic!("Expecting a value (a-zA-Z0-9) but got: `{}`", token);
+                panic!("Expecting a value (a-zA-Z0-9) but got: `{token}`");
             }
         }
     }
@@ -440,7 +440,7 @@ impl Arguments {
             self.validate_key_value_pair(config);
             self.expect_next = ExpectNext::Key;
         } else {
-            panic!("Expecting a punctuation symbol (e.g. ',' comma), but got:{}", token);
+            panic!("Expecting a punctuation symbol (e.g. ',' comma), but got:{token}");
         }
     }
     pub(crate) fn parse(&mut self, input: TokenStream, config: &mut TraitsConfig) {

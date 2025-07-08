@@ -118,7 +118,7 @@ impl Enum {
             format!("{}.{}", prefix, Self::token_to_string(&tokens[index]))
         };
         if attr.contains_key(&key) {
-            return Err(format!("Duplicated attribute: '{}'", key));
+            return Err(format!("Duplicated attribute: '{key}'"));
         }
         index += 1;
         if index >= tokens.len() {
@@ -251,7 +251,7 @@ impl Enum {
         let name_token = &tokens[index];
         let token_type = TokenType::from(name_token);
         if token_type != TokenType::Name {
-            return Err(format!("Expecting variant name but found: '{:?}'", name_token));
+            return Err(format!("Expecting variant name but found: '{name_token:?}'"));
         }
         let name = Self::token_to_string(name_token);
         index += 1;

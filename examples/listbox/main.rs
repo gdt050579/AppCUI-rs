@@ -31,7 +31,7 @@ impl ListBoxEvents for MyWin {
             let h = self.log;
             if let Some(log) = self.control_mut(h) {
                 let idx = log.count() + 1;
-                log.add(&format!("{} => Current item changed to index: {}", idx, index));
+                log.add(&format!("{idx} => Current item changed to index: {index}"));
             }
         }
         EventProcessStatus::Processed

@@ -3880,7 +3880,7 @@ fn check_on_change_current_item_event() {
             } else {
                 "None".to_string()
             };
-            self.set_title(&format!("Person: {}", name));
+            self.set_title(&format!("Person: {name}"));
             EventProcessStatus::Processed
         }
     }
@@ -5629,7 +5629,7 @@ fn check_select_item_method() {
                 lv.select_item(index, !status);
                 let count = lv.items_count();
                 let count_selected = lv.selected_items_count();
-                format!("{}/{}", count_selected, count)
+                format!("{count_selected}/{count}")
             } else {
                 "?".to_string()
             };

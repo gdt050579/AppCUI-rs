@@ -65,7 +65,7 @@ impl MenuEvents for PainterDesktop {
                         let h: Handle<PainterWindow> = unsafe { window.unsafe_cast() };
                         if let Some(painter) = self.window_mut(h) {
                             if let Err(err) = painter.save_to_file(&path) {
-                                dialogs::error("Error", &format!("Failed to save the painting file: {}", err));
+                                dialogs::error("Error", &format!("Failed to save the painting file: {err}"));
                             }
                         }   
                     }

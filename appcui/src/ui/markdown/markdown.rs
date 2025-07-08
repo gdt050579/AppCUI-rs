@@ -171,9 +171,9 @@ impl Markdown {
             let content_str = element.to_string();
             let formatted_content = if i == 0 {
                 if let Some(ref prefix) = prefix {
-                    format!("{} {}", prefix, content_str)
+                    format!("{prefix} {content_str}")
                 } else {
-                    format!("○ {}", content_str)
+                    format!("○ {content_str}")
                 }
             } else {
                 content_str
@@ -224,7 +224,7 @@ impl Markdown {
                                 indent,
                                 p,
                                 xlsurface,
-                                Some(format!("{}.", index)),
+                                Some(format!("{index}.")),
                                 link_registry,
                                 theme,
                                 inactive,
@@ -259,7 +259,7 @@ impl Markdown {
         };
 
         for line in code_lines {
-            let formatted_line = format!(" {:width$} ", line, width = max_width);
+            let formatted_line = format!(" {line:max_width$} ");
             surface.write_string(self.x + left_padding - 1, *y_pos, &Self::replace_tabs(&formatted_line), attr, false);
             *y_pos += 1;
         }
@@ -436,7 +436,7 @@ impl Markdown {
 
                 let formatted_content = if i == 0 {
                     let prefix = "•";
-                    format!("{} {}", prefix, content_str).to_string()
+                    format!("{prefix} {content_str}").to_string()
                 } else {
                     content_str
                 };
@@ -504,7 +504,7 @@ impl Markdown {
                 let formatted_content = if i == 0 {
                     let prefix = index;
                     index += 1;
-                    format!("{}. {}", prefix, content_str).to_string()
+                    format!("{prefix}. {content_str}").to_string()
                 } else {
                     content_str
                 };
