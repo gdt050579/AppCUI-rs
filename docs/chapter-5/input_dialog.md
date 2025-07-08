@@ -38,5 +38,42 @@ If the validation function is provided, it will be called with the input value a
 
 If the validation function returns an error, the dialog will show the error message and the user will be able to try again.
 
+## Examples
 
+Some examples of how to use the `input` function are shown below:
 
+1. Simple input dialog:
+   
+    ```rust
+    if let Some(res) = dialogs::input::<i32>("Title", "Enter a value", None, None) {
+        // res value contains the selected value
+    } else {
+        // the user canceled the dialog
+    };
+    ```
+
+2. Input dialog with validation (the value must be positive):
+   
+    ```rust
+    if let Some(res) = dialogs::input::<i32>("Title", "Enter a positivevalue", None, Some(|&value| {
+        if value < 0 {
+            Err("Value must be positive".to_string())
+        } else {
+            Ok(())
+        }
+    })) {
+        // res value contains the selected value
+    } else {
+        // the user canceled the dialog
+    };
+    ```
+
+3. Input dialog with a pre-filled value:
+   
+       ```rust
+    if let Some(res) = dialogs::input::<i32>("Title", "Enter a value", Some(10), None) {
+        // res value contains the selected value
+    } else {
+        // the user canceled the dialog
+    };
+    ```
