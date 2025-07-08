@@ -505,6 +505,23 @@ pub fn select_folder(title: &str, location: Location, flags: SelectFolderDialogF
 
 type InputCallback<T> = fn(&T) -> Result<(), String>;
 
+/// Opens an input dialog for entering a value of type T and returns the value entered by the user or None if the user canceled the operation.
+/// # Arguments
+/// * `title` - The title of the dialog.
+/// * `text` - The text to display in the dialog.
+/// * `value` - An optional value to pre-fill the input field with.
+/// * `validation` - An optional validation function that can be used to validate the input value.
+///
+/// # Example
+/// ```rust,no_run
+/// use appcui::dialogs;
+///
+/// if let Some(res) = dialogs::input::<i32>("Title", "Enter a value", None, None) {
+///     // res value contains the selected value
+/// } else {
+///     // the user canceled the dialog
+/// }
+/// ```
 pub fn input<T>(title: &str, text: &str, value: Option<T>, validation: Option<InputCallback<T>>) -> Option<T>
 where
     T: FromStr + Sized + std::fmt::Display + 'static,
