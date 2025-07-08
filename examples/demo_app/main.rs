@@ -5,6 +5,9 @@ mod image_win;
 mod animation;
 mod tree_example;
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+
 const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
     "▒▒█████┐▒▒██████┐▒▒██████┐▒▒",
@@ -143,7 +146,17 @@ impl MenuEvents for MyDesktop {
     }
 }
 
+
+#[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), appcui::system::Error> {
     App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build()?.run();
     Ok(())
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen(start)]
+pub fn main() {    
+    // Important for WASM: the project must be a lib that should be built with `wasm-pack build --target web`
+    let app = App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build().unwrap();
+    app.run();
 }

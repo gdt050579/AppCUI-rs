@@ -23,5 +23,7 @@ jobs:
       run: cargo test -- --test-threads=1
     #- name: Clippy
     #  run: cargo clippy --verbose -- -D warnings
+    - name: Run tests TRUE_COLOR
+      run: cargo test --features TRUE_COLORS -- --test-threads=1 
     - name: Audit
       run: cargo audit

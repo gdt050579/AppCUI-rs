@@ -89,6 +89,29 @@ impl Surface {
         s
     }
 
+    /// Creates a new surface from a string with the specified size.
+    /// The string will be written to the surface starting at position (0, 0).
+    /// All characters will have white foreground and black background.
+    /// If the string is longer than the surface area, it will be truncated.
+    /// If the string is shorter than the surface area, the remaining area will be filled with spaces.
+    ///
+    /// # Arguments
+    /// * `text` - The string to render on the surface
+    /// * `size` - The size of the surface to create
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::{Surface, Size};
+    ///
+    /// let surface = Surface::from_string("Hello World!", Size::new(20, 5));
+    /// ```
+    pub fn from_string(text: &str, size: Size) -> Surface {
+        let mut surface = Surface::new(size.width, size.height);
+        let attr = CharAttribute::with_color(Color::White, Color::Black);
+        surface.write_string(0, 0, text, attr, true);
+        surface
+    }
+
     /// Returns the size of the surface (width and height).
     #[inline]
     pub fn size(&self) -> Size {
@@ -936,9 +959,9 @@ impl Surface {
         Alternativ:
         - caracterul e scris UTF-8 (1-4 bytes)
         - 1 caracter (primii 3 biti)
-            0 - culoare pe 1 byte (16 cu 16) / 
-            1 - culoare pe 2 bytes (16 si 16), 
-            2 - culoarea exact ca precedentul, 
+            0 - culoare pe 1 byte (16 cu 16) /
+            1 - culoare pe 2 bytes (16 si 16),
+            2 - culoarea exact ca precedentul,
             4 - acelasi foreground
             5 - acelasi background
         - urmatorii 3 biti sunt flags:
@@ -988,7 +1011,7 @@ impl Surface {
             pos += sz;
             if pos >= len {
                 return Err("Buffer is too small for background character colors".to_string());
-            }   
+            }
             let (back, sz) = Self::deserialize_color(&buffer[pos..]).expect("Invalid background color");
             ch.background = back;
             pos += sz;

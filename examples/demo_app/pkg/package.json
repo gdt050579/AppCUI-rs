@@ -1,0 +1,15 @@
+{
+  "name": "demo",
+  "type": "module",
+  "version": "0.0.1",
+  "files": [
+    "demo_bg.wasm",
+    "demo.js",
+    "demo.d.ts"
+  ],
+  "main": "demo.js",
+  "types": "demo.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

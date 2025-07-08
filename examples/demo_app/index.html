@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Web Terminal Test</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    #canvas, #textCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #textCanvas {
+        pointer-events: none;
+    }
+    canvas, #canvas, #textCanvas {
+      background: transparent;
+    }
+    body {
+        background: transparent;
+    }
+    .config {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <canvas id="textCanvas"></canvas>
+
+  <div class="config">
+    <span id="terminal-cols">240</span>
+    <span id="terminal-rows">67</span>
+    <span id="terminal-font">Consolas</span>
+    <span id="terminal-font-size">19</span>
+    <span id="terminal-cell-width">9</span>
+    <span id="terminal-cell-height">20</span>
+  </div>
+
+  <script type="module", src="main.js"></script>
+</body>
+</html>
+
+
+<!-- 
+<div class="config">
+    <span id="terminal-cols">300</span>
+    <span id="terminal-rows">100</span>
+    <span id="terminal-font">Consolas</span>
+    <span id="terminal-font-size">10</span>
+    <span id="terminal-cell-width">6</span>
+    <span id="terminal-cell-height">14</span>
+  </div> -->

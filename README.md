@@ -11,6 +11,8 @@
 ![MacOS Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/macos.yml/badge.svg)
 ![Code Coverage](https://gist.githubusercontent.com/gdt050579/f7d7e7d56b2725a3b33a265e8a9d8e9c/raw/coverage.svg)
 ![License](https://img.shields.io/github/license/gdt050579/AppCUI-rs)
+[![Crates.io](https://img.shields.io/crates/v/appcui.svg)](https://crates.io/crates/appcui)
+[![Docs.rs](https://docs.rs/appcui/badge.svg)](https://docs.rs/appcui)
 
 AppCUI is a simple, easy-to-use and cross-platform library for creating text-based user interfaces in Rust:
 * [Book](https://gdt050579.github.io/AppCUI-rs/)
@@ -65,7 +67,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
     let mut win = window!("Test,d:c,w:30,h:9");
-    win.add(label!("'Hello World !',d:c,w:13,h:1")));
+    win.add(label!("'Hello World !',d:c,w:13,h:1"));
     app.add_window(win);
     app.run();
     Ok(())
@@ -143,10 +145,10 @@ fn main() -> Result<(), appcui::system::Error> {
 
 ## 🛣️ Roadmap
 
-- [x] Basic set of widgets and support for Windows, Linux and MaxOS
+- [x] Basic set of widgets and support for Windows, Linux and MacOS
 - [x] WebGL support
 - [ ] OpenGL / SDL / Vulkan support
-- [ ] TextArea suuport for code highlighting
+- [ ] TextArea support for code highlighting
 
 ## 🤝 Contributing
 
