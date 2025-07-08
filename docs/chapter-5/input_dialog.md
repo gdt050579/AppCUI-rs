@@ -2,6 +2,9 @@
 
 An input dialog is a dialog that allows the user to enter a value of a generic type T and returns the value as an optional.
 
+<img src="img/input_dialog.png" width=500/>
+
+
 To create an input dialog, use the `dialogs::input` function, defined as follows:
 
 ```rust
