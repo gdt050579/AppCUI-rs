@@ -126,7 +126,7 @@ impl ButtonEvents for OpenSaveTestWindow<'_> {
                 dialogs::inner_open(self.title.as_str(), self.file_name.as_str(), self.location.clone(), self.mask, flags, nav)
             }
         };
-        let txt = format!("{:?}", result);
+        let txt = format!("{result:?}");
         let h = self.info;
         if let Some(info) = self.control_mut(h) {
             info.set_caption(&txt);
@@ -161,7 +161,7 @@ impl ButtonEvents for FolderSelectDialog {
             _ => dialogs::Location::Path(&p),
         };
         if let Some(result) = dialogs::inner_select_folder("Folder", loc, self.flags, nav) {
-            self.set_title(&format!("{:?}", result));
+            self.set_title(&format!("{result:?}"));
         } else {
             self.set_title("Folder selection canceled !");
         }
@@ -1226,7 +1226,7 @@ fn check_input_no_validation() {
     impl ButtonEvents for MyWin {
         fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
             let s = if let Some(res) = dialogs::input::<i32>("i32", "Enter a i32 value bigger in the textfield below and press enter", None, None) {
-                format!("{}", res)
+                format!("{res}")
             } else {
                 "canceled".to_string()
             };
@@ -1290,7 +1290,7 @@ fn check_input_validation() {
                     }
                 }),
             ) {
-                format!("{}", res)
+                format!("{res}")
             } else {
                 "canceled".to_string()
             };
@@ -1330,7 +1330,7 @@ fn check_input_with_initial_value() {
     impl ButtonEvents for MyWin {
         fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
             let s = if let Some(res) = dialogs::input::<i32>("i32", "Enter a value:", Some(95), None) {
-                format!("{}", res)
+                format!("{res}")
             } else {
                 "canceled".to_string()
             };

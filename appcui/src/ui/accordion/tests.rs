@@ -236,7 +236,7 @@ fn check_panel_caption_methods() {
             let info_text = if let Some(accordion) = self.control_mut(h) {
                 // Get current panel
                 let current = match accordion.current_panel() {
-                    Some(idx) => format!("Current panel: {}", idx),
+                    Some(idx) => format!("Current panel: {idx}"),
                     None => "No current panel".to_string(),
                 };
 
@@ -248,7 +248,7 @@ fn check_panel_caption_methods() {
                     }
                 }
 
-                format!("{}\n{}", current, captions)
+                format!("{current}\n{captions}")
             } else {
                 "Error: Accordion not found".to_string()
             };
@@ -393,7 +393,7 @@ fn check_events() {
 
     impl AccordionEvents for MyWin {
         fn on_panel_changed(&mut self, _handle: Handle<Accordion>, new_panel_index: u32, old_panel_index: u32) -> EventProcessStatus {
-            let s= format!("New: {}, Old: {}", new_panel_index, old_panel_index);
+            let s= format!("New: {new_panel_index}, Old: {old_panel_index}");
             let h = self.info_handle;
             if let Some(label) = self.control_mut(h) {
                 label.set_caption(&s);

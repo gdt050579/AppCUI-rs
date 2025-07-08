@@ -335,7 +335,7 @@ fn check_app_create_with_invalid_size() {
     //     err.description(),
     //     "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !"
     // );
-    let desc = format!("{}", err);
+    let desc = format!("{err}");
     assert_eq!(desc, "Invalid size for a terminal (0x0). Both width and height must be bigger than 0 !");
 }
 

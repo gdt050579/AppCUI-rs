@@ -257,7 +257,7 @@ fn check_button_methods() {
             let c = self.count;
             let h = self.b;
             if let Some(b) = self.control_mut(h) {
-                b.set_caption(format!("Pressed {} times", c).as_str());
+                b.set_caption(format!("Pressed {c} times").as_str());
                 assert!(b.caption().ends_with("times"));
             }
             EventProcessStatus::Processed

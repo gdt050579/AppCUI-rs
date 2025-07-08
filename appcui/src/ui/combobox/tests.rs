@@ -485,7 +485,7 @@ fn check_value_and_try_value() {
             let h = self.combo_handle;
             let output_text = if let Some(combo) = self.control_mut(h) {
                 let try_value_result = match combo.try_value() {
-                    Some(value) => format!("try_value(): Some(\"{}\")", value),
+                    Some(value) => format!("try_value(): Some(\"{value}\")"),
                     None => "try_value(): None".to_string(),
                 };
                 
@@ -495,7 +495,7 @@ fn check_value_and_try_value() {
                     "value(): would panic!".to_string()
                 };
                 
-                format!("{}\n{}", value_result, try_value_result)
+                format!("{value_result}\n{try_value_result}")
             } else {
                 "Error: ComboBox not found".to_string()
             };
@@ -605,7 +605,7 @@ fn check_selected_item_and_index() {
                     "selected_item_mut(): Would return None"
                 };
                 
-                format!("index(): {:?}\n{}\n{}", index, selected_item_result, selected_item_mut_result)
+                format!("index(): {index:?}\n{selected_item_result}\n{selected_item_mut_result}")
             } else {
                 "Error: ComboBox not found".to_string()
             };
