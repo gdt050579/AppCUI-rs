@@ -1,9 +1,11 @@
+use std::str::FromStr;
+
 use crate::prelude::*;
 
 #[ModalWindow(internal: true, response: T, events: ButtonEvents+TextFieldEvents)]
 pub(super) struct StringImputDialog<T>
 where
-    T: for<'a> From<&'a str> + Sized + for<'a> TryFrom<&'a str> + std::fmt::Display + 'static,
+    T: FromStr + Sized + std::fmt::Display + 'static,
 {
     validation: Option<fn(&T) -> Result<(), String>>,
     txt: Handle<TextField>,
@@ -12,7 +14,7 @@ where
 
 impl<T> StringImputDialog<T>
 where
-    T: for<'a> From<&'a str> + Sized + for<'a> TryFrom<&'a str> + std::fmt::Display + 'static,
+    T: FromStr + Sized + std::fmt::Display + 'static,
 {
     pub(super) fn new(title: &str, text: &str, value: Option<T>, validation: Option<fn(&T) -> Result<(), String>>) -> Self {
         let chars_count = text.chars().count();
@@ -39,7 +41,7 @@ where
     fn validate(&mut self) {
         if let Some(tf) = self.control(self.txt) {
             let text = tf.text();
-            let result = if let Ok(value) = T::try_from(text) {
+            let result = if let Ok(value) = T::from_str(text) {
                 if let Some(validation) = self.validation {
                     validation(&value).map(|()| value)
                 } else {
@@ -60,7 +62,7 @@ where
 
 impl<T> ButtonEvents for StringImputDialog<T>
 where
-    T: for<'a> From<&'a str> + Sized + for<'a> TryFrom<&'a str> + std::fmt::Display + 'static,
+    T: FromStr + Sized + std::fmt::Display + 'static,
 {
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
         if handle == self.btn_ok {
@@ -74,7 +76,7 @@ where
 
 impl<T> TextFieldEvents for StringImputDialog<T>
 where
-    T: for<'a> From<&'a str> + for<'a> TryFrom<&'a str> + Sized + std::fmt::Display + 'static,
+    T: FromStr + Sized + std::fmt::Display + 'static,
 {
     fn on_validate(&mut self, _: Handle<TextField>, _: &str) -> EventProcessStatus {
         self.validate();

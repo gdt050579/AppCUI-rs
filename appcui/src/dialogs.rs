@@ -64,7 +64,7 @@ mod root_select_dialog;
 #[cfg(test)]
 mod tests;
 
-use std::path::{Path, PathBuf};
+use std::{path::{Path, PathBuf}, str::FromStr};
 
 use crate::{
     prelude::{window, ModalWindowMethods},
@@ -506,7 +506,7 @@ pub fn select_folder(title: &str, location: Location, flags: SelectFolderDialogF
 
 pub fn input<T>(title: &str, text: &str, value: Option<T>, validation: Option<fn(&T) -> Result<(), String>>) -> Option<T>
 where
-    T: for<'a> From<&'a str> + Sized + std::fmt::Display + 'static,
+    T: FromStr + Sized + std::fmt::Display + 'static,
 {
     StringImputDialog::new(title, text, value, validation).show()
 }
