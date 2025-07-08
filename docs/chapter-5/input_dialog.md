@@ -5,13 +5,20 @@ An input dialog is a dialog that allows the user to enter a value of a generic t
 To create an input dialog, use the `dialogs::input` function, defined as follows:
 
 ```rust
-pub fn input<T>(title: &str, text: &str, value: Option<T>, validation: Option<fn(&T) -> Result<(), String>>) -> Option<T>
+pub fn input<T>(title: &str, text: &str, value: Option<T>, validation: Option<InputCallback<T>>) -> Option<T>
 where
     T: FromStr + Sized + std::fmt::Display + 'static,
 {
     ...
 }
 ```
+
+where `InputCallback<T>` is defined as follows:
+
+```rust
+    type InputCallback<T> = fn(&T) -> Result<(), String>;
+```
+
 
 The function takes the following parameters:
 
