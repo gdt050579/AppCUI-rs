@@ -77,7 +77,7 @@ fn unicode_number_to_value(text: &str) -> u32 {
             value = value * 16 + ((ch as u32 - 'A' as u32) + 10);
             continue;
         }
-        panic!("Invalid hexadecimal number: {} for character code !", text);
+        panic!("Invalid hexadecimal number: {text} for character code !");
     }
     value
 }
@@ -112,7 +112,7 @@ fn add_attr(output: &mut String, dict: &mut NamedParamsMap, param_list: &str) {
                     } else {
                         let mut all_char_attributes = String::with_capacity(256);
                         for (index,attr) in CHAR_ATTR.iter().enumerate() {
-                            all_char_attributes.push_str(*attr);
+                            all_char_attributes.push_str(attr);
                             if (index+1) < all_char_attributes.len() {
                                 all_char_attributes.push_str(", ");
                             }
@@ -143,7 +143,7 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
     res.push_str("Character::new(");
     if let Some(value) = dict.get("code") {
         let code_value = unicode_number_to_value(value.get_string());
-        res.push_str(format! {"'\\u{{{:x}}}'",code_value}.as_str());
+        res.push_str(format! {"'\\u{{{code_value:x}}}'"}.as_str());
     } else {
         let val = dict
             .get("value")
@@ -163,7 +163,7 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
                     res.push_str("SpecialChar::");
                     res.push_str(special_char.get_name());
                 } else {
-                    panic!("Unknown representation '{}' for a special character !", char_value);
+                    panic!("Unknown representation '{char_value}' for a special character !");
                 }
             }
         }

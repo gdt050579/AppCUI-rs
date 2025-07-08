@@ -65,7 +65,7 @@ impl Key {
                     }
                 }
             } else {
-                panic!("Unknwon key or modifiert: '{}'", text);
+                panic!("Unknwon key or modifiert: '{text}'");
             }
         }
         k

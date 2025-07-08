@@ -39,11 +39,11 @@ pub enum InlineElement {
 impl fmt::Display for InlineElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            InlineElement::Link(text, _) => write!(f, "{}", text),
+            InlineElement::Link(text, _) => write!(f, "{text}"),
             InlineElement::Text(content) |
             InlineElement::Bold(content) |
             InlineElement::Italic(content) |
-            InlineElement::Code(content) => write!(f, "{}", content),
+            InlineElement::Code(content) => write!(f, "{content}"),
         }
     }
 }

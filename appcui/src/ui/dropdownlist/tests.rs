@@ -285,7 +285,7 @@ fn check_selected_item_and_index_methods() {
             let info_text = if let Some(ddl) = self.control(h) {
                 // Get index information
                 let index_info = match ddl.index() {
-                    Some(idx) => format!("index(): Some({})", idx),
+                    Some(idx) => format!("index(): Some({idx})"),
                     None => "index(): None".to_string(),
                 };
 
@@ -303,8 +303,7 @@ fn check_selected_item_and_index_methods() {
                 };
 
                 format!(
-                    "{}\n{}\n\nselected_item_mut() can be used to modify the selected item",
-                    index_info, selected_item_info
+                    "{index_info}\n{selected_item_info}\n\nselected_item_mut() can be used to modify the selected item"
                 )
             } else {
                 "Error: DropDownList not found".to_string()
@@ -476,7 +475,7 @@ fn check_has_selection_and_count_with_mouse() {
                     None => "No item selected".to_string(),
                 };
 
-                format!("has_selection(): {}\ncount(): {}\n\n{}", has_selection, count, selected_item_info)
+                format!("has_selection(): {has_selection}\ncount(): {count}\n\n{selected_item_info}")
             } else {
                 "Error: DropDownList not found".to_string()
             };
@@ -493,7 +492,7 @@ fn check_has_selection_and_count_with_mouse() {
             let h = self.dropdownlist_handle;
             if let Some(ddl) = self.control_mut(h) {
                 let new_id = ddl.count() + 1;
-                ddl.add(CountItem::new(new_id, &format!("New Item {}", new_id)));
+                ddl.add(CountItem::new(new_id, &format!("New Item {new_id}")));
             }
             self.update_info_label();
         }
@@ -646,7 +645,7 @@ fn check_item_and_item_mut_methods() {
             if let Some(ddl) = self.control(h) {
                 // Get count information
                 let count = ddl.count();
-                info_text.push_str(&format!("Total items: {}\n\n", count));
+                info_text.push_str(&format!("Total items: {count}\n\n"));
                 
                 // Show all items if any
                 if count > 0 {
@@ -709,7 +708,7 @@ fn check_item_and_item_mut_methods() {
                         output.push_str(&format!("Item at index {}: {} (ID: {}, Value: {:.2})\n", 
                             i, item.name, item.id, item.value));
                     } else {
-                        output.push_str(&format!("Item at index {}: None (should not happen)\n", i));
+                        output.push_str(&format!("Item at index {i}: None (should not happen)\n"));
                     }
                 }
             }
@@ -738,8 +737,8 @@ fn check_item_and_item_mut_methods() {
                 
                 // Try to access at out-of-bounds index
                 match ddl.item(count) {
-                    Some(_) => output.push_str(&format!("item({}): Some - Invalid\n", count)),
-                    None => output.push_str(&format!("item({}): None - Correctly returns None\n", count)),
+                    Some(_) => output.push_str(&format!("item({count}): Some - Invalid\n")),
+                    None => output.push_str(&format!("item({count}): None - Correctly returns None\n")),
                 }
                 
                 // Try to access at another out-of-bounds index

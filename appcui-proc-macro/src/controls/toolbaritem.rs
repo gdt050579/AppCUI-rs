@@ -17,7 +17,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("toolbaritem", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, false);
     if let Some(item_type) = cb.get_enum_value("type", &TYPES) {
-        let init_type = format!("toolbar::{}::new", item_type);
+        let init_type = format!("toolbar::{item_type}::new");
         let is_checkbox = item_type == "CheckBox";
         cb.init_control(init_type.as_str());
         cb.add_string_parameter("caption", None);        

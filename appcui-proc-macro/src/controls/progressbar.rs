@@ -30,7 +30,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     if cb.has_parameter("count") {
         let value = cb.get_i32("count").unwrap_or(-1);
         if value >= 0 {
-            cb.add_line(format!("control.reset({});", value).as_str());
+            cb.add_line(format!("control.reset({value});").as_str());
         } else {
             panic!("Invalid 'count' parameter (should be a positive number) for progress bar !");
         }
@@ -38,14 +38,14 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     if cb.has_parameter("value") {
         let value = cb.get_i32("value").unwrap_or(-1);
         if value >= 0 {
-            cb.add_line(format!("control.update_progress({});", value).as_str());
+            cb.add_line(format!("control.update_progress({value});").as_str());
         } else {
             panic!("Invalid 'value' parameter (should be a positive number) for progress bar !");
         }
     }
     if cb.has_parameter("text") {
         let value = cb.get_value("text").unwrap_or("").to_string();
-        cb.add_line(format!("control.update_text(\"{}\");", value).as_str());
+        cb.add_line(format!("control.update_text(\"{value}\");").as_str());
     }
     if cb.has_parameter("pause") {
         let should_paused = cb.get_bool("pause").unwrap_or(false);

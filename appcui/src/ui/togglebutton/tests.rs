@@ -114,9 +114,9 @@ fn check_events() {
     impl ToggleButtonEvents for MyWin {
         fn on_selection_changed(&mut self, handle: Handle<ToggleButton>, selected: bool) -> EventProcessStatus {
             if handle == self.but1 {
-                self.set_info(format!("Button <> was pressed -> {}", selected).as_str());
+                self.set_info(format!("Button <> was pressed -> {selected}").as_str());
             } else if handle == self.but2 {
-                self.set_info(format!("Button () was pressed -> {}", selected).as_str());
+                self.set_info(format!("Button () was pressed -> {selected}").as_str());
             }
             EventProcessStatus::Ignored
         }

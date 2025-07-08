@@ -381,13 +381,13 @@ impl Console {
             if unicode_id >= 0xFFFF {
                 return Err(Error::new(
                     ErrorKind::InvalidParameter,
-                    format!("Fail convert the string '{}' to windows WTF-16", text),
+                    format!("Fail convert the string '{text}' to windows WTF-16"),
                 ));
             }
             if unicode_id == 0 {
                 return Err(Error::new(
                     ErrorKind::InvalidParameter,
-                    format!("Found NULL (\\0 character) in title '{}'. This can not be accurately translated into windows WTF-16 that is NULL terminated !", text),
+                    format!("Found NULL (\\0 character) in title '{text}'. This can not be accurately translated into windows WTF-16 that is NULL terminated !"),
                 ));
             }
             result.push(unicode_id as u16);

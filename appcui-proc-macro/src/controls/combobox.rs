@@ -34,7 +34,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     if cb.has_parameter("index") {
         let value = cb.get_i32("index").unwrap_or(-1);
         if value>=0 {
-            cb.add_line(format!("control.set_index({});",value).as_str());
+            cb.add_line(format!("control.set_index({value});").as_str());
         } else {
             panic!("Invalid index (should be a positive number) for combo box selection index parameter !");
         }

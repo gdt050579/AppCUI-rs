@@ -363,8 +363,7 @@ where
         }
         Err(err_msg) => {
             panic!(
-                "Error parsing file mask: '{}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{}",
-                ext_mask, err_msg
+                "Error parsing file mask: '{ext_mask}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{err_msg}"
             );
         }
     }
@@ -401,8 +400,7 @@ where
         }
         Err(err_msg) => {
             panic!(
-                "Error parsing file mask: '{}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{}",
-                ext_mask, err_msg
+                "Error parsing file mask: '{ext_mask}'. It should be in the format 'name1 = [ext1, ext2, ... extn], name2 = [...], ...'.\n{err_msg}"
             );
         }
     }

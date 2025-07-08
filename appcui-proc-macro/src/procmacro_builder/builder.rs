@@ -112,7 +112,7 @@ pub(crate) fn generate_custom_event_traits(a: &mut Arguments) -> String {
     for trait_name in a.custom_events.iter() {
         // at this point the trait name does not have the Events part at its end
         let hash = utils::compute_hash(trait_name);
-        write!(temp, "0x{:X} => {{", hash).unwrap();
+        write!(temp, "0x{hash:X} => {{").unwrap();
         temp.push_str(templates::CUSTOM_EVENT_CONVERTOR);
         temp.push_str("}\n");
         temp = temp

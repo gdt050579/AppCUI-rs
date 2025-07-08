@@ -128,14 +128,12 @@ impl Backend for DebugTerminal {
             if hash_to_test != surface_hash {
                 if self.errors_disabled {
                     println!(
-                        "\x1b[91;40m[Error] Invalid hash: (expecting: 0x{:X} but found 0x{:X})\x1b[0m",
-                        hash_to_test, surface_hash
+                        "\x1b[91;40m[Error] Invalid hash: (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})\x1b[0m"
                     );
                     //println!("        at: {}",&self.paint_title);
                 } else {
                     panic!(
-                        "Invalid hash for surface (expecting: 0x{:X} but found 0x{:X})",
-                        hash_to_test, surface_hash
+                        "Invalid hash for surface (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})"
                     );
                 }
             }
@@ -153,13 +151,11 @@ impl Backend for DebugTerminal {
                 let point_repr = if point.x < 0 { "Hidden" } else { point_pos.as_str() };
                 if self.errors_disabled {
                     println!(
-                        "\x1b[91;40m[Error] Invalid cursor position. Expectig the cursor to be {}, but found {}\x1b[0m",
-                        point_repr, cursor_repr
+                        "\x1b[91;40m[Error] Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}\x1b[0m"
                     );
                 } else {
                     panic!(
-                        "Invalid cursor position. Expectig the cursor to be {}, but found {}",
-                        point_repr, cursor_repr
+                        "Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}"
                     );
                 }
             }
@@ -196,7 +192,7 @@ impl Backend for DebugTerminal {
         // hash
         self.ansi_buffer.write_string("| Hash  : ");
         self.ansi_buffer.set_color(Color::Yellow, Color::Black);
-        self.ansi_buffer.write_string(format!("0x{:X}", surface_hash).as_str());
+        self.ansi_buffer.write_string(format!("0x{surface_hash:X}").as_str());
         while self.ansi_buffer.text().len() < (self.size.width + 16) as usize {
             self.ansi_buffer.write_char(' ');
         }
