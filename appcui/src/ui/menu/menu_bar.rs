@@ -39,6 +39,8 @@ impl MenuBar {
         }
     }
     pub(crate) fn update_positions(&mut self) {
+        // sort the data first
+        self.items.sort_by_key(|i| i.order);
         let mut x = 0;
         for (idx, item) in self.items.iter_mut().enumerate() {
             if idx >= self.count {
