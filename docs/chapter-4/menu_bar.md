@@ -40,8 +40,12 @@ You can always request an update to the command bar if by calling the method `.r
 
 A menu bar has only one method:
 ```rs
-pub fn add(&mut self, handle: Handle<Menu>) { ... }
+pub fn add(&mut self, handle: Handle<Menu>, order: u8) { ... }
 ```
+
+where `order` represents the order of the meniu in the meniu bar (starting from left - the lowest value to the right). This is usefull if you want to keep a specific menu in the left side of the menu bar:
+* to keep the **File** menu the left most position if it is created by the desktop, use value **0** for the order
+* to keep the **Help** menu to the right most position, use value **u8::MAX** or **255** for the order parameter
 
 This method is typically used to link a menu handle to a menu bar. This also implies that you have to register a menu first, save its handle and only then add it to the menu bar. A typical template of these flows look like this:
 
@@ -65,7 +69,7 @@ impl MyWin {
 impl MenuEvents for MyWin {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
         menubar.add(self.menu_1, 0); // add first menu to the menu bar
-        menubar.add(self.menu_2, 0); // add the second menu to the menu bar
+        menubar.add(self.menu_2, 1); // add the second menu to the menu bar
     }
 }
 ```
@@ -120,8 +124,8 @@ impl MyWin {
 impl MenuEvents for MyWin {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
         menubar.add(self.m_file, 0);
-        menubar.add(self.m_edit, 0);
-        menubar.add(self.m_help, 0);
+        menubar.add(self.m_edit, 1);
+        menubar.add(self.m_help, 2);
     }
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: mywin::Commands) {
         match command {
