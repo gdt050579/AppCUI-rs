@@ -125,9 +125,9 @@ impl MenuEvents for MyDesktop {
     }
 
     fn on_update_menubar(&self,menubar: &mut MenuBar) {
-        menubar.add(self.menu_examples);
-        menubar.add(self.menu_arrange);
-        menubar.add(self.menu_theme);
+        menubar.add(self.menu_examples, 0);
+        menubar.add(self.menu_arrange, 0);
+        menubar.add(self.menu_theme, 0);
     }
     
     fn on_command(&mut self,_:Handle<Menu>,_:Handle<menu::Command>,command:mydesktop::Commands){

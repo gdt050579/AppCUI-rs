@@ -74,9 +74,9 @@ impl MenuEvents for MyWindow {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_file);
-        menubar.add(self.h_edit);
-        menubar.add(self.h_help);
+        menubar.add(self.h_file, 0);
+        menubar.add(self.h_edit, 0);
+        menubar.add(self.h_help, 0);
     }
 }
 

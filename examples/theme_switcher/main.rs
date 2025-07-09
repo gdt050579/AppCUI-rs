@@ -133,8 +133,8 @@ impl MenuEvents for MyWindow {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_file);
-        menubar.add(self.h_theme);
+        menubar.add(self.h_file, 0);
+        menubar.add(self.h_theme, 0);
     }
 }
 

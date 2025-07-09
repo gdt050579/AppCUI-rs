@@ -39,6 +39,8 @@ impl MenuBar {
         }
     }
     pub(crate) fn update_positions(&mut self) {
+        // sort the data first
+        self.items.sort_by_key(|i| i.order);
         let mut x = 0;
         for (idx, item) in self.items.iter_mut().enumerate() {
             if idx >= self.count {
@@ -78,7 +80,8 @@ impl MenuBar {
     ///
     /// # Parameters
     /// * `handle` - A handle to the menu to add.
-    pub fn add(&mut self, handle: Handle<Menu>) {
+    /// * `order` - The order of the menu in the menu bar (lower values are displayed to the left)
+    pub fn add(&mut self, handle: Handle<Menu>, order: u8) {
         if self.receiver_control_handle.is_none() {
             return;
         }
@@ -86,8 +89,9 @@ impl MenuBar {
             if self.count < self.items.len() {
                 // overwrite an existing item
                 self.items[self.count].set(handle, self.receiver_control_handle, &menu.caption);
+                self.items[self.count].set_order(order);
             } else {
-                self.items.push(MenuBarItem::new(handle, self.receiver_control_handle, &menu.caption));
+                self.items.push(MenuBarItem::new(handle, self.receiver_control_handle, &menu.caption, order));
             }
             self.count += 1;
         }

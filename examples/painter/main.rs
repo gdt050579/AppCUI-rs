@@ -75,7 +75,7 @@ impl MenuEvents for PainterDesktop {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_file);
+        menubar.add(self.menu_file, 0);
     }
 }
 

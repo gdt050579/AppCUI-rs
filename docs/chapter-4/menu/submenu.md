@@ -100,7 +100,7 @@ impl MyWin {
 }
 impl MenuEvents for MyWin {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.m_submenus);
+        menubar.add(self.m_submenus, 0);
     }
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: mywin::Commands) {
         match command {

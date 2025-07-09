@@ -174,7 +174,7 @@ impl WindowWithTheme {
 }
 impl MenuEvents for WindowWithTheme {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_file);
+        menubar.add(self.h_file, 0);
     }
 }
 

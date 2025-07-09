@@ -7,9 +7,10 @@ pub(super) struct MenuBarItem {
     pub(super) x: i32,
     pub(super) handle: Handle<Menu>,
     pub(super) receiver_control_handle: Handle<()>,
+    pub(super) order: u8,
 }
 impl MenuBarItem {
-    pub(super) fn new(handle: Handle<Menu>, control_handle: Handle<()>, caption: &Caption) -> Self {
+    pub(super) fn new(handle: Handle<Menu>, control_handle: Handle<()>, caption: &Caption, order: u8) -> Self {
         Self {
             x: 0,
             handle,
@@ -19,6 +20,7 @@ impl MenuBarItem {
             } else {
                 caption.clone()
             },
+            order
         }
     }
     pub(super) fn set(&mut self, handle: Handle<Menu>, control_handle: Handle<()>, caption: &Caption) {
@@ -30,5 +32,8 @@ impl MenuBarItem {
         } else {
             self.caption.copy_from(caption);
         }
+    }
+    pub(super) fn set_order(&mut self, order: u8) {
+        self.order = order;
     }
 }

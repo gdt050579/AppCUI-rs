@@ -149,7 +149,7 @@ impl MenuEvents for MatrixDesktop {
         }
     }
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.main_menu);
+        menubar.add(self.main_menu, 0);
     }
 }
 

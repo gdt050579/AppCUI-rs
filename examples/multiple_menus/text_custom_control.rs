@@ -44,6 +44,6 @@ impl MenuEvents for TextCustomControl {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_menu);
+        menubar.add(self.h_menu, 0);
     }
 }

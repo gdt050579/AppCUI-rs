@@ -23,7 +23,7 @@ impl MyWin {
 }
 impl MenuEvents for MyWin {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.some_menu);
+        menubar.add(self.some_menu, 0);
     }
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
         if item == self.m_counter {
