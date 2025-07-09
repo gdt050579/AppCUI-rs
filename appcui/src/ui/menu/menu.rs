@@ -60,7 +60,7 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 /// impl MenuEvents for MyWindow {
 ///     fn on_update_menubar(&self, menubar: &mut MenuBar) {
 ///         // Add the menu to the menu bar
-///         menubar.add(self.file_menu);
+///         menubar.add(self.file_menu, 0);
 ///     }
 ///     
 ///     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mywindow::Commands) {
@@ -107,7 +107,7 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 /// impl MenuEvents for MyWindow {
 ///     fn on_update_menubar(&self, menubar: &mut MenuBar) {
 ///         // Add the menu to the menu bar
-///         menubar.add(self.file_menu);
+///         menubar.add(self.file_menu, 0);
 ///     }
 ///     
 ///     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mywindow::Commands) {

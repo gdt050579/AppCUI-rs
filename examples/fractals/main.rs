@@ -109,7 +109,7 @@ impl MenuEvents for FractalDesktop {
         }
     }
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.main_menu);
+        menubar.add(self.main_menu, 0);
     }
 }
 

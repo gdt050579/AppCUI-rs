@@ -42,9 +42,9 @@ fn check_view() {
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_file);
-            menubar.add(self.m_edit);
-            menubar.add(self.m_help);
+            menubar.add(self.m_file, 0);
+            menubar.add(self.m_edit, 0);
+            menubar.add(self.m_help, 0);
         }
     }
     let script = "
@@ -116,7 +116,7 @@ fn check_scroll_button_activation() {
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_file);
+            menubar.add(self.m_file, 0);
         }
     }
     let script = "
@@ -229,7 +229,7 @@ fn check_submenus_open() {
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_file);
+            menubar.add(self.m_file, 0);
         }
     }
     let script = "
@@ -329,7 +329,7 @@ fn check_dynamic_change_menu() {
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.some_menu);
+            menubar.add(self.some_menu, 0);
         }
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
             if item == self.m_counter {
@@ -397,7 +397,7 @@ fn check_dynamic_change_menu_2() {
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.some_menu);
+            menubar.add(self.some_menu, 0);
         }
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
             if item == self.m_counter {
@@ -519,7 +519,7 @@ fn check_menubar_update_multiple_menus() {
         }
         impl MenuEvents for MyWindow {
             fn on_update_menubar(&self, menubar: &mut MenuBar) {
-                menubar.add(self.h_menu);
+                menubar.add(self.h_menu, 0);
             }
         }
     }
@@ -567,7 +567,7 @@ fn check_menubar_update_multiple_menus() {
             }
 
             fn on_update_menubar(&self, menubar: &mut MenuBar) {
-                menubar.add(self.h_menu);
+                menubar.add(self.h_menu, 0);
             }
         }
     }
@@ -618,7 +618,7 @@ fn check_menubar_update_multiple_menus() {
             }
 
             fn on_update_menubar(&self, menubar: &mut MenuBar) {
-                menubar.add(self.h_menu);
+                menubar.add(self.h_menu, 0);
             }
         }
     }
@@ -1099,9 +1099,9 @@ fn check_menubar_with_keys() {
         }
 
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.h_file);
-            menubar.add(self.h_edit);
-            menubar.add(self.h_help);
+            menubar.add(self.h_file, 0);
+            menubar.add(self.h_edit, 0);
+            menubar.add(self.h_help, 0);
         }
     }
 
@@ -1358,9 +1358,9 @@ fn check_menubar_recursive_shortcuts() {
         }
 
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.h_file);
-            menubar.add(self.h_edit);
-            menubar.add(self.h_help);
+            menubar.add(self.h_file, 0);
+            menubar.add(self.h_edit, 0);
+            menubar.add(self.h_help, 0);
         }
     }
 
@@ -1474,7 +1474,7 @@ fn check_menu_checkbox_methods() {
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_desktop);
+            menubar.add(self.m_desktop, 0);
         }
 
         fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, _: mydesktop::Commands, _: bool) {
@@ -1538,7 +1538,7 @@ fn check_menu_singlechoice_methods() {
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_desktop);
+            menubar.add(self.m_desktop, 0);
         }
 
         fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, _: mydesktop::Commands) {
@@ -1604,7 +1604,7 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_desktop);
+            menubar.add(self.m_desktop, 0);
         }
 
         fn on_menu_open(&self, menu: &mut Menu) {
@@ -1659,7 +1659,7 @@ fn check_menu_command_methods() {
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_desktop);
+            menubar.add(self.m_desktop, 0);
         }
 
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mydesktop::Commands) {

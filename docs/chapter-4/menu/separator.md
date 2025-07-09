@@ -66,7 +66,7 @@ impl MyWin {
 }
 impl MenuEvents for MyWin {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.m_commands);
+        menubar.add(self.m_commands, 0);
     }
 }
 

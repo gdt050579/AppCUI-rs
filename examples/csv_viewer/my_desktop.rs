@@ -111,7 +111,7 @@ impl MenuEvents for MyDesktop {
 
     fn on_update_menubar(&self,menubar: &mut MenuBar)
     {
-        menubar.add(self.menu_file);
-        menubar.add(self.menu_arrange);
+        menubar.add(self.menu_file, 0);
+        menubar.add(self.menu_arrange, 0);
     }
 }

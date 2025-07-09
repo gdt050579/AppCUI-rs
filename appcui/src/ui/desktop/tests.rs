@@ -145,7 +145,7 @@ fn check_menus() {
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.file_menu);
+            menubar.add(self.file_menu, 0);
         }
     }
     let script = "

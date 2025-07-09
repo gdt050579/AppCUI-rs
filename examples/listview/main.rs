@@ -156,9 +156,9 @@ impl MenuEvents for MyDesktop {
     }
 
     fn on_update_menubar(&self,menubar: &mut MenuBar) {
-        menubar.add(self.menu_example);
-        menubar.add(self.menu_arrange);
-        menubar.add(self.menu_help);
+        menubar.add(self.menu_example, 0);
+        menubar.add(self.menu_arrange, 0);
+        menubar.add(self.menu_help, 0);
     }
 }
 

@@ -1746,7 +1746,7 @@ fn check_window_close_with_commandbar_and_menu() {
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.h_menu);
+            menubar.add(self.h_menu, 0);
         }
     }
     let script = "

@@ -70,7 +70,7 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 ///
 /// impl MenuEvents for MyWindow {
 ///     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-///         menubar.add(self.format_menu);
+///         menubar.add(self.format_menu, 0);
 ///     }
 ///     
 ///     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mywindow::Commands) {

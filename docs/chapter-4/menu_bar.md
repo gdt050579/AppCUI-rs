@@ -64,8 +64,8 @@ impl MyWin {
  }
 impl MenuEvents for MyWin {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_1); // add first menu to the menu bar
-        menubar.add(self.menu_2); // add the second menu to the menu bar
+        menubar.add(self.menu_1, 0); // add first menu to the menu bar
+        menubar.add(self.menu_2, 0); // add the second menu to the menu bar
     }
 }
 ```
@@ -119,9 +119,9 @@ impl MyWin {
 }
 impl MenuEvents for MyWin {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.m_file);
-        menubar.add(self.m_edit);
-        menubar.add(self.m_help);
+        menubar.add(self.m_file, 0);
+        menubar.add(self.m_edit, 0);
+        menubar.add(self.m_help, 0);
     }
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: mywin::Commands) {
         match command {

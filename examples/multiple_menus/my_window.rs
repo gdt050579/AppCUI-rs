@@ -22,6 +22,6 @@ impl MyWindow {
 }
 impl MenuEvents for MyWindow {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_menu);
+        menubar.add(self.h_menu, 0);
     }
 }

@@ -59,8 +59,8 @@ impl DesktopEvents for MyDesktop {
 
 impl MenuEvents for MyDesktop {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_windows);
-        menubar.add(self.menu_arrange);
+        menubar.add(self.menu_windows, 0);
+        menubar.add(self.menu_arrange, 0);
     }
 
     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mydesktop::Commands) {

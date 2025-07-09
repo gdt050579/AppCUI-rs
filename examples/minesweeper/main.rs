@@ -37,7 +37,7 @@ impl CommandBarEvents for MyDesktop {
 
 impl MenuEvents for MyDesktop {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_game);
+        menubar.add(self.menu_game, 0);
     }
     
     fn on_command(&mut self, _: Handle<Menu>, _: Handle<menu::Command>, command: mydesktop::Commands) {
