@@ -1,6 +1,6 @@
 [package]
 name = "appcui"
-version = "0.1.8"
+version = "0.1.9"
 edition = "2021"
 authors = ["Gavrilut Dragos <gavrilut.dragos@gmail.com>"]
 description = "A feature-rich and cross-platform TUI/CUI framework for Rust, enabling modern terminal-based applications on Windows, Linux, and macOS. Includes built-in UI components like buttons, menus, list views, tree views, checkboxes, and more. Perfect for building fast and interactive CLI tools and text-based interfaces."
@@ -18,7 +18,7 @@ categories = ["gui", "command-line-interface", "command-line-utilities"]
 EnumBitFlags = "1.0.10"
 flat_string = "1.0.0"
 chrono = {version = "0.4.38", features = ["wasmbind"]}
-appcui_proc_macro = "0.1.2"
+appcui_proc_macro = "0.1.3"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
