@@ -23,6 +23,7 @@ const COLOR_TO_PIXEL: [u32; 16] = [
     0xFFFFFF, // White
 ];
 
+#[cfg(not(feature = "TRUE_COLORS"))]
 static COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
     Color::Black,
     Color::Black,
@@ -4338,13 +4339,20 @@ impl Pixel {
             Color::Pink => Pixel::with_rgb(0xFF, 0x00, 0xFF),
             Color::Yellow => Pixel::with_rgb(0xFF, 0xFF, 0x00),
             Color::White => Pixel::with_rgb(0xFF, 0xFF, 0xFF),
-            Color::Transparent => Pixel::new(0,0,0,0),
+            Color::Transparent => Pixel::new(0, 0, 0, 0),
             Color::RGB(r, g, b) => Pixel::with_rgb(r, g, b),
         }
     }
     pub(super) fn as_color(&self) -> Color {
-        let index = (((self.red / 17) as usize) << 8) + (((self.green / 17) as usize) << 4) + (self.blue / 17) as usize;
-        COLORMAP_4096_QUANTIZATION[index]
+        #[cfg(feature = "TRUE_COLORS")]
+        {
+            Color::from_rgb(self.red, self.green, self.blue)
+        }
+        #[cfg(not(feature = "TRUE_COLORS"))]
+        {
+            let index = (((self.red / 17) as usize) << 8) + (((self.green / 17) as usize) << 4) + (self.blue / 17) as usize;
+            COLORMAP_4096_QUANTIZATION[index]
+        }
     }
     pub(super) fn as_character(&self) -> Character {
         let r = ((self.red as u32) + 32) / 64;
