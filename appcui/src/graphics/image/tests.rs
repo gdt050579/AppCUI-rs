@@ -43,7 +43,7 @@ fn check_draw_smallblocks() {
     let i = Image::with_str(HEART).unwrap();
     s.draw_image(1, 1, &i, RendererType::SmallBlocks, Scale::NoScale);
     //s.print();
-    assert_eq!(s.compute_hash(), 0x939D21530F9EB6A5);
+    assert_eq!(s.compute_hash(), 0x144DB3832E565465);
 }
 
 #[test]
@@ -52,7 +52,7 @@ fn check_draw_smallblocks_all_colors() {
     let i = Image::with_str(ALL_COLORS).unwrap();
     s.draw_image(1, 1, &i, RendererType::SmallBlocks, Scale::NoScale);
     //s.print();
-    assert_eq!(s.compute_hash(), 0xEBAE7CC6AE75A08D);
+    assert_eq!(s.compute_hash(), 0x6E59DA499DC1E9E6);
 }
 
 #[test]
@@ -62,7 +62,7 @@ fn check_draw_smallblocks_scale() {
     s.draw_image(1, 1, &i, RendererType::SmallBlocks, Scale::NoScale);
     s.draw_image(20, 1, &i, RendererType::SmallBlocks, Scale::Scale50);
     //s.print();
-    assert_eq!(s.compute_hash(), 0x438928E166B239E1);
+    assert_eq!(s.compute_hash(), 0xF20E17339AE46D7A);
 }
 
 #[test]

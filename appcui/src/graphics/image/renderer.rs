@@ -41,15 +41,7 @@ impl Renderer {
                     cp.background = img.compute_square_average_color(img_x, img_y + rap, rap).as_color();
                 }
 
-                if cp.background == cp.foreground {
-                    if cp.background == Color::Black {
-                        cp.code = ' ';
-                    } else {
-                        cp.code = char::from(SpecialChar::Block100);
-                    }
-                } else {
-                    cp.code = char::from(SpecialChar::BlockUpperHalf);
-                }
+                cp.code = if cp.background == cp.foreground { ' ' } else { char::from(SpecialChar::BlockUpperHalf) }
                 surface.write_char(px, py, cp);
                 img_x += x_step;
                 px += 1;
