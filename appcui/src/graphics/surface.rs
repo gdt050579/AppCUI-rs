@@ -3,8 +3,6 @@ use std::path::Path;
 use crate::prelude::CharFlags;
 
 use super::image;
-use super::Renderer;
-
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;

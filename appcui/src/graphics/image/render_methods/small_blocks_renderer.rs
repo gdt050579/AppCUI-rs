@@ -49,7 +49,8 @@ pub(crate) fn paint(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32
         ColorSchema::Auto => todo!(),
         ColorSchema::Color16 => render(surface, img, x, y, rap, |p| p.as_color()),
         ColorSchema::TrueColors => todo!(),
-        ColorSchema::GrayScale => todo!(),
+        ColorSchema::GrayScale4 => todo!(),
+        ColorSchema::GrayScaleTrueColors => todo!(),
         ColorSchema::BlackAndWhite => todo!(),
     }
 }

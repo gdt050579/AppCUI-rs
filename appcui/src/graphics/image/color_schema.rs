@@ -1,7 +1,9 @@
+#[derive(Copy, Clone)]
 pub enum ColorSchema {
     Auto,
     Color16,
     TrueColors,
-    GrayScale,
+    GrayScale4,
+    GrayScaleTrueColors,
     BlackAndWhite,
 }
