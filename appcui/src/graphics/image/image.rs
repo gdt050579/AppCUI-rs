@@ -1,10 +1,13 @@
-use super::super::{Color, Size};
+use crate::prelude::image::render_methods::small_blocks_renderer;
+
+use super::super::{Color, Size, Surface};
 use super::pixel::Pixel;
-use super::RendererType;
+use super::ColorSchema;
+use super::RenderMethod;
 use super::Scale;
 
 /// A structure representing a raster image with RGBA pixels.
-/// 
+///
 /// Images are stored in memory as a vector of pixels with a specified width and height.
 #[derive(Clone)]
 pub struct Image {
@@ -210,21 +213,49 @@ impl Image {
     ///
     /// # Arguments
     ///
-    /// * `rendering_method` - The method used to render the image (blocks, ASCII, etc.)
-    /// * `scale_method` - The scaling method applied to the image
+    /// * `method` - The method used to render the image (blocks, ASCII, etc.)
+    /// * `scale`  - The scaling method applied to the image
     ///
     /// # Returns
     ///
     /// The resulting Size object after applying the rendering and scaling methods
     #[inline]
-    pub fn render_size(&self, rendering_method: RendererType, scale_method: Scale) -> Size {
-        let rap = scale_method as u32;
-        match rendering_method { 
-            RendererType::SmallBlocks => Size::new(self.width.div_ceil(rap), self.height.div_ceil(2 * rap)),
-            RendererType::LargeBlocks64Colors => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
-            RendererType::GrayScale => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
-            RendererType::AsciiArt => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
+    pub fn render_size(&self, method: RenderMethod, scale: Scale) -> Size {
+        let unscale_size = match method {
+            RenderMethod::SmallBlocks => small_blocks_renderer::size(self),
+            RenderMethod::LargeBlock => todo!(),
+            RenderMethod::Braille => todo!(),
+            RenderMethod::AsciArt => todo!(),
+        };
+        let rap = scale as u32;
+        if rap == 1 {
+            unscale_size
+        } else {
+            Size::new(unscale_size.width.div_ceil(rap), unscale_size.height.div_ceil(rap))
         }
+        // match method {
+        //     RendererType::SmallBlocks => Size::new(self.width.div_ceil(rap), self.height.div_ceil(2 * rap)),
+        //     RendererType::LargeBlocks64Colors => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
+        //     RendererType::GrayScale => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
+        //     RendererType::AsciiArt => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
+        // }
+    }
+
+    #[inline(always)]
+    pub(crate) fn paint(&self, surface: &mut Surface, x: i32, y: i32, method: RenderMethod, color_schema: ColorSchema, scale: Scale) {
+        let rap = scale as u32;
+        match method {
+            RenderMethod::SmallBlocks => small_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
+            RenderMethod::LargeBlock => todo!(),
+            RenderMethod::Braille => todo!(),
+            RenderMethod::AsciArt => todo!(),
+        }
+        // match mwthod {
+        //     image::RendererType::SmallBlocks => Renderer::render_with_small_blocks(self, image, x, y, rap),
+        //     image::RendererType::LargeBlocks64Colors => Renderer::render_with_large_blocks_64(self, image, x, y, rap),
+        //     image::RendererType::GrayScale => Renderer::render_with_gray_scale(self, image, x, y, rap),
+        //     image::RendererType::AsciiArt => Renderer::render_ascii_art(self, image, x, y, rap),
+        // }
     }
 
     pub(super) fn compute_square_average_color(&self, x: u32, y: u32, sz: u32) -> Pixel {

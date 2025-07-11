@@ -23,6 +23,21 @@ pub enum RendererType_ {
     AsciiArt,
 }
 
+/*
+
+Pentru ce utilizez:
+- SmallBlocks
+    * 16 colos, TrueColors, Gray4, Gray256
+- LargeBlocks
+    * 16 colos, TrueColors, Gray4, Gray256
+- AsciiArt
+    * BlackAndWhite
+- Braille
+    * 
+
+
+*/
+
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RendererType {
