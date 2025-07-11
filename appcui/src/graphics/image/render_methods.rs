@@ -4,6 +4,7 @@ pub(super) mod small_blocks_renderer;
 pub enum RenderMethod {
     SmallBlocks,
     LargeBlock,
+    DitheredShades,
     Braille,
     AsciArt
 }

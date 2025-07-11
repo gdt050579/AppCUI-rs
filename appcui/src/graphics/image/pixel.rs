@@ -1,3 +1,5 @@
+use std::u8;
+
 use super::super::CharFlags;
 use super::super::Character;
 use super::super::Color;
@@ -23,7 +25,6 @@ const COLOR_TO_PIXEL: [u32; 16] = [
     0xFFFFFF, // White
 ];
 
-#[cfg(not(feature = "TRUE_COLORS"))]
 static COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
     Color::Black,
     Color::Black,
@@ -4297,7 +4298,7 @@ impl Pixel {
             red,
             green,
             blue,
-            alpha: 255,
+            alpha: u8::MAX,
         }
     }
     #[cfg(not(feature = "TRUE_COLORS"))]
@@ -4343,17 +4344,63 @@ impl Pixel {
             Color::RGB(r, g, b) => Pixel::with_rgb(r, g, b),
         }
     }
-    pub(super) fn as_color(&self) -> Color {
-        #[cfg(feature = "TRUE_COLORS")]
-        {
-            Color::from_rgb(self.red, self.green, self.blue)
-        }
-        #[cfg(not(feature = "TRUE_COLORS"))]
-        {
-            let index = (((self.red / 17) as usize) << 8) + (((self.green / 17) as usize) << 4) + (self.blue / 17) as usize;
-            COLORMAP_4096_QUANTIZATION[index]
+    #[inline(always)]
+    fn blend_alpha(&self) -> (u8, u8, u8) {
+        if self.alpha == u8::MAX {
+            (self.red, self.green, self.blue)
+        } else {
+            let alpha = self.alpha as u16;
+
+            let r = (self.red as u16 * alpha) / 255;
+            let g = (self.green as u16 * alpha) / 255;
+            let b = (self.blue as u16 * alpha) / 255;
+
+            (r as u8, g as u8, b as u8)
         }
     }
+    #[inline(always)]
+    fn luminance(&self) -> u8 {
+        let (r, g, b) = self.blend_alpha();
+        let luma = (13933u32 * r as u32 + 46871 * g as u32 + 4742 * b as u32) >> 16;
+        luma as u8
+    }
+    pub(super) fn as_color16(&self) -> Color {
+        let (r, g, b) = self.blend_alpha();
+        let index = (((r / 17) as usize) << 8) + (((g / 17) as usize) << 4) + (b / 17) as usize;
+        COLORMAP_4096_QUANTIZATION[index]
+    }
+    #[inline(always)]
+    pub(super) fn as_blackwhite(&self) -> Color {
+        if self.luminance() < 128 {
+            Color::Black
+        } else {
+            Color::White
+        }
+    }
+    #[inline(always)]
+    pub(super) fn as_grayscale4(&self) -> Color {
+        let l = self.luminance();
+        match l {
+            0..=63 => Color::Black,
+            64..=160 => Color::Gray,
+            161..=224 => Color::Silver,
+            _ => Color::White,
+        }
+    }
+
+    #[cfg(feature = "TRUE_COLORS")]
+    #[inline(always)]
+    pub(super) fn as_rgb_color(&self) -> Color {
+        Color::from_rgb(self.red, self.green, self.blue)
+    }
+    #[cfg(feature = "TRUE_COLORS")]
+    #[inline(always)]
+    pub(super) fn as_grayscale(&self) -> Color {
+        let l = self.luminance();
+        Color::RGB(l,l,l)
+    }
+
+
     pub(super) fn as_character(&self) -> Character {
         let r = ((self.red as u32) + 32) / 64;
         let g = ((self.green as u32) + 32) / 64;

@@ -224,6 +224,7 @@ impl Image {
         let unscale_size = match method {
             RenderMethod::SmallBlocks => small_blocks_renderer::size(self),
             RenderMethod::LargeBlock => todo!(),
+            RenderMethod::DitheredShades => todo!(),
             RenderMethod::Braille => todo!(),
             RenderMethod::AsciArt => todo!(),
         };
@@ -247,6 +248,7 @@ impl Image {
         match method {
             RenderMethod::SmallBlocks => small_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
             RenderMethod::LargeBlock => todo!(),
+            RenderMethod::DitheredShades => todo!(),
             RenderMethod::Braille => todo!(),
             RenderMethod::AsciArt => todo!(),
         }

@@ -15,13 +15,9 @@ fn render(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: fn(p:
             if rap == 1 {
                 cp.foreground = f(img.pixel(img_x, img_y).unwrap_or_default());
                 cp.background = f(img.pixel(img_x, img_y + 1).unwrap_or_default());
-                // cp.foreground = img.pixel(img_x, img_y).unwrap_or_default().as_color();
-                // cp.background = img.pixel(img_x, img_y + 1).unwrap_or_default().as_color();
             } else {
-                // cp.foreground = img.compute_square_average_color(img_x, img_y, rap).as_color();
-                // cp.background = img.compute_square_average_color(img_x, img_y + rap, rap).as_color();
                 cp.foreground = f(img.compute_square_average_color(img_x, img_y, rap));
-                cp.background = f(img.compute_square_average_color(img_x, img_y + rap, rap));
+                cp.background = f(img.compute_square_average_color(img_x, img_y + 1, rap));
             }
 
             cp.code = if cp.background == cp.foreground {
@@ -45,12 +41,19 @@ pub(crate) fn size(img: &Image) -> Size {
 
 #[inline(always)]
 pub(crate) fn paint(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, color_schema: ColorSchema) {
-    match color_schema {
-        ColorSchema::Auto => todo!(),
-        ColorSchema::Color16 => render(surface, img, x, y, rap, |p| p.as_color()),
-        ColorSchema::TrueColors => todo!(),
-        ColorSchema::GrayScale4 => todo!(),
-        ColorSchema::GrayScaleTrueColors => todo!(),
-        ColorSchema::BlackAndWhite => todo!(),
+    match color_schema {        
+        ColorSchema::Auto => {
+            #[cfg(feature = "TRUE_COLORS")]
+            { render(surface, img, x, y, rap, |p| p.as_rgb_color()) }
+            #[cfg(not(feature = "TRUE_COLORS"))]
+            { render(surface, img, x, y, rap, |p| p.as_color16()) }
+        }
+        ColorSchema::Color16 => render(surface, img, x, y, rap, |p| p.as_color16()),
+        #[cfg(feature = "TRUE_COLORS")]
+        ColorSchema::TrueColors => render(surface, img, x, y, rap, |p| p.as_rgb_color()),
+        ColorSchema::GrayScale4 => render(surface, img, x, y, rap, |p| p.as_grayscale4()),
+        #[cfg(feature = "TRUE_COLORS")]
+        ColorSchema::GrayScaleTrueColors => render(surface, img, x, y, rap, |p| p.as_grayscale()),
+        ColorSchema::BlackAndWhite => render(surface, img, x, y, rap, |p| p.as_blackwhite()),
     }
 }
