@@ -1,4 +1,4 @@
-use crate::prelude::image::render_methods::small_blocks_renderer;
+use crate::prelude::image::render_methods::{large_blocks_renderer, small_blocks_renderer};
 
 use super::super::{Color, Size, Surface};
 use super::pixel::Pixel;
@@ -223,7 +223,7 @@ impl Image {
     pub fn render_size(&self, method: RenderMethod, scale: Scale) -> Size {
         let unscale_size = match method {
             RenderMethod::SmallBlocks => small_blocks_renderer::size(self),
-            RenderMethod::LargeBlock => todo!(),
+            RenderMethod::LargeBlock => large_blocks_renderer::size(self),
             RenderMethod::DitheredShades => todo!(),
             RenderMethod::Braille => todo!(),
             RenderMethod::AsciArt => todo!(),
@@ -234,12 +234,6 @@ impl Image {
         } else {
             Size::new(unscale_size.width.div_ceil(rap), unscale_size.height.div_ceil(rap))
         }
-        // match method {
-        //     RendererType::SmallBlocks => Size::new(self.width.div_ceil(rap), self.height.div_ceil(2 * rap)),
-        //     RendererType::LargeBlocks64Colors => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
-        //     RendererType::GrayScale => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
-        //     RendererType::AsciiArt => Size::new((self.width * 2).div_ceil(rap), self.height.div_ceil(rap)),
-        // }
     }
 
     #[inline(always)]
@@ -247,17 +241,11 @@ impl Image {
         let rap = scale as u32;
         match method {
             RenderMethod::SmallBlocks => small_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
-            RenderMethod::LargeBlock => todo!(),
+            RenderMethod::LargeBlock => large_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
             RenderMethod::DitheredShades => todo!(),
             RenderMethod::Braille => todo!(),
             RenderMethod::AsciArt => todo!(),
         }
-        // match mwthod {
-        //     image::RendererType::SmallBlocks => Renderer::render_with_small_blocks(self, image, x, y, rap),
-        //     image::RendererType::LargeBlocks64Colors => Renderer::render_with_large_blocks_64(self, image, x, y, rap),
-        //     image::RendererType::GrayScale => Renderer::render_with_gray_scale(self, image, x, y, rap),
-        //     image::RendererType::AsciiArt => Renderer::render_ascii_art(self, image, x, y, rap),
-        // }
     }
 
     pub(super) fn compute_square_average_color(&self, x: u32, y: u32, sz: u32) -> Pixel {
