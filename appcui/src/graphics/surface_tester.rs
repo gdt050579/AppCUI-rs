@@ -26,10 +26,12 @@ impl SurfaceTester {
             tmp.write_char(ch.code);
             x += 1;
             if x == self.surface.size.width {
+                tmp.reset_color();
                 tmp.move_to_next_line();
                 x = 0;
             }
         }
+        tmp.reset_color();
         for _ in 0..self.surface.size.width {
             tmp.write_char('-');
         }
