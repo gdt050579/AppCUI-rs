@@ -4382,8 +4382,8 @@ impl Pixel {
         let l = self.luminance();
         match l {
             0..=63 => Color::Black,
-            64..=160 => Color::Gray,
-            161..=224 => Color::Silver,
+            64..=127 => Color::Gray,
+            128..=192 => Color::Silver,
             _ => Color::White,
         }
     }

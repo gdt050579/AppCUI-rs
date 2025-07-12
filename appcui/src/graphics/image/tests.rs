@@ -464,8 +464,8 @@ fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, met
     for (cs, h) in data {
         s.clear(Character::default());
         s.draw_image(0, 0, &img, method, *cs, Scale::NoScale);
-        s.print();
-        //assert_eq!(s.compute_hash(), *h);
+        //s.print(true);
+        assert_eq!(s.compute_hash(), *h);
     }
 }
 
@@ -528,7 +528,7 @@ fn check_draw_smallblocks_batch_heart() {
     let v: &[(ColorSchema, u64)] = &[
         (ColorSchema::Color16, 0xF47F1E17F4DE6715),
         (ColorSchema::BlackAndWhite, 0x7DC019CA803483B5),
-        (ColorSchema::GrayScale4, 0x7DC019CA803483B5),
+        (ColorSchema::GrayScale4, 0xBC3A4E19B076D3F5),
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::TrueColors, 0x7992E0349A4E8C2D),
         #[cfg(feature = "TRUE_COLORS")]
@@ -542,7 +542,10 @@ fn check_draw_smallblocks_auto() {
     let i = Image::with_str(HEART).unwrap();
     s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Auto, Scale::NoScale);
     //s.print();
+    #[cfg(not(feature = "TRUE_COLORS"))]
     assert_eq!(s.compute_hash(), 0x144DB3832E565465);
+    #[cfg(feature = "TRUE_COLORS")]
+    assert_eq!(s.compute_hash(), 6359112620195361997);
 }
 
 #[test]
@@ -550,7 +553,7 @@ fn check_draw_smallblocks_batch_flower() {
     let v: &[(ColorSchema, u64)] = &[
         (ColorSchema::Color16, 0x2FD9DE03367B1BB9),
         (ColorSchema::BlackAndWhite, 0x2B5C21A49521C66F),
-        (ColorSchema::GrayScale4, 0xDC8B7B490E2130EB),
+        (ColorSchema::GrayScale4, 0x5D6DB94C1D78F440),
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::TrueColors, 0xEB4014BA9EA355D5),
         #[cfg(feature = "TRUE_COLORS")]
@@ -564,60 +567,22 @@ fn check_draw_smallblocks_batch_flower() {
     );
 }
 
-/*
-#[test]
-fn check_draw_gray() {
-    let mut s = SurfaceTester::new(40, 15);
-    let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::GrayScale, Scale::NoScale);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x31B5363F572C0EA5);
-}
-#[test]
-fn check_draw_gray_scale() {
-    let mut s = SurfaceTester::new(50, 15);
-    let i = Image::with_str(HEART_RED).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::GrayScale, Scale::NoScale);
-    s.draw_image(30, 1, &i, RenderMethod::GrayScale, Scale::Scale50);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x3A46E9F1E2A046BD);
-}
 
 #[test]
-fn check_draw_large_chars_64() {
-    let mut s = SurfaceTester::new(40, 15);
-    let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::LargeBlocks64Colors, Scale::NoScale);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x69DCA4337155535D);
+fn check_draw_largeblocks_batch_flower() {
+    let v: &[(ColorSchema, u64)] = &[
+        (ColorSchema::Color16, 0x56F53EA18F979565),
+        (ColorSchema::BlackAndWhite, 0x6337977B69C86C25),
+        (ColorSchema::GrayScale4, 0x18369392815B6CA5),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::TrueColors, 0xEAF44E98BE3C9DDF),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::GrayScaleTrueColors, 0x75620856DE746435),
+    ];
+    batch_check(
+        v,
+        &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(),
+        Size::new(200, 50),
+        RenderMethod::LargeBlock,
+    );
 }
-#[test]
-fn check_draw_large_chars_64_scale() {
-    let mut s = SurfaceTester::new(50, 15);
-    let i = Image::with_str(HEART_RED).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::LargeBlocks64Colors, Scale::NoScale);
-    s.draw_image(30, 1, &i, RenderMethod::LargeBlocks64Colors, Scale::Scale50);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x1648702FD7AD361);
-}
-
-#[test]
-fn check_draw_ascii_art() {
-    let mut s = SurfaceTester::new(40, 15);
-    let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::AsciiArt, Scale::NoScale);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0xB493CD321C84CBA5);
-}
-#[test]
-fn check_draw_ascii_art_scale() {
-    let mut s = SurfaceTester::new(50, 15);
-    let i = Image::with_str(HEART_RED).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::AsciiArt, Scale::NoScale);
-    s.draw_image(30, 1, &i, RenderMethod::AsciiArt, Scale::Scale50);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0xFCF9279F2D7E525);
-}
-
-
-*/
