@@ -62,6 +62,7 @@ fn render(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: fn(p:
             let mut total_r = 0u32;
             let mut total_g = 0u32;
             let mut total_b = 0u32;
+            let mut total_a = 0u32;
             let mut pixel_count = 0u32;
             
             // Sample 8 pixels in a 2x4 grid pattern
@@ -76,10 +77,11 @@ fn render(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: fn(p:
                         img.compute_square_average_color(sample_x, sample_y, rap)
                     };
                     
-                    // Accumulate RGB values for averaging
+                    // Accumulate RGBA values for averaging
                     total_r += pixel.red as u32;
                     total_g += pixel.green as u32;
                     total_b += pixel.blue as u32;
+                    total_a += pixel.alpha as u32;
                     pixel_count += 1;
                     
                     // Determine if this dot should be visible based on luminance
@@ -98,7 +100,8 @@ fn render(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: fn(p:
                 let avg_r = (total_r / pixel_count) as u8;
                 let avg_g = (total_g / pixel_count) as u8;
                 let avg_b = (total_b / pixel_count) as u8;
-                let avg_pixel = Pixel::with_rgb(avg_r, avg_g, avg_b);
+                let avg_a = (total_a / pixel_count) as u8;
+                let avg_pixel = Pixel::new(avg_r, avg_g, avg_b, avg_a);
                 f(avg_pixel)
             } else {
                 Color::Black
