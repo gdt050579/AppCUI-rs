@@ -156,7 +156,7 @@ impl Image {
     ///
     /// # Arguments
     ///
-    /// * `buffer` - a &[u32] buffer that contains the pixels of the image. Each pixels is encoded as an ARGB value, meaening:
+    /// * `buffer` - a &[[u32]] buffer that contains the pixels of the image. Each pixels is encoded as an ARGB value, meaening:
     ///     - **blue** is encoded as the least significant 8 bits : (value & 0xFF)
     ///     - **green** is encoded as the next 8 bits : ((value >> 8) & 0xFF)
     ///     - **red** is the next 8 bits after green  : ((value >> 16) & 0xFF)

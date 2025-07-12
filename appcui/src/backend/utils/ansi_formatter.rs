@@ -25,6 +25,9 @@ impl AnsiFormatter {
     pub(crate) fn clear(&mut self) {
         self.text.clear();
     }
+    pub(crate) fn move_to_next_line(&mut self) {
+        self.text.push('\n');
+    }
     pub(crate) fn write_char(&mut self, ch: char) {
         if ch < ' ' {
             self.text.push(' ');

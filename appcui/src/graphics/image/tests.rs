@@ -117,7 +117,7 @@ fn check_draw_smallblocks_auto() {
     let i = Image::with_str(HEART).unwrap();
     s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Auto, Scale::NoScale);
     //s.print();
-    assert_eq!(s.compute_hash(), 0x144DB3832E565465);
+        assert_eq!(s.compute_hash(), 0x144DB3832E565465);
 }
 
 
