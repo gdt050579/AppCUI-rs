@@ -1,4 +1,4 @@
-use crate::prelude::image::character_set::{large_blocks_renderer, small_blocks_renderer};
+use crate::prelude::image::character_set::{large_blocks_renderer, small_blocks_renderer, braille_renderer};
 
 use super::super::{Color, Size, Surface};
 use super::pixel::Pixel;
@@ -267,7 +267,7 @@ impl Image {
             CharacterSet::SmallBlocks => small_blocks_renderer::size(self),
             CharacterSet::LargeBlock => large_blocks_renderer::size(self),
             CharacterSet::DitheredShades => todo!(),
-            CharacterSet::Braille => todo!(),
+            CharacterSet::Braille => braille_renderer::size(self),
             CharacterSet::AsciArt => todo!(),
         };
         let rap = scale as u32;
@@ -285,7 +285,7 @@ impl Image {
             CharacterSet::SmallBlocks => small_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
             CharacterSet::LargeBlock => large_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
             CharacterSet::DitheredShades => todo!(),
-            CharacterSet::Braille => todo!(),
+            CharacterSet::Braille => braille_renderer::paint(surface, self, x, y, rap, color_schema),
             CharacterSet::AsciArt => todo!(),
         }
     }

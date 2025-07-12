@@ -4359,7 +4359,7 @@ impl Pixel {
         }
     }
     #[inline(always)]
-    fn luminance(&self) -> u8 {
+    pub fn luminance(&self) -> u8 {
         let (r, g, b) = self.blend_alpha();
         let luma = (13933u32 * r as u32 + 46871 * g as u32 + 4742 * b as u32) >> 16;
         luma as u8
