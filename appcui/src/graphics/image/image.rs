@@ -151,6 +151,48 @@ impl Image {
         }
         Some(img)
     }
+
+    /// Creates a new image from a buffer of pixels raw values (the pixels are encoded as u32 value)
+    ///
+    /// # Arguments
+    ///
+    /// * `buffer` - a &[u32] buffer that contains the pixels of the image. Each pixels is encoded as an ARGB value, meaening:
+    ///     - **blue** is encoded as the least significant 8 bits : (value & 0xFF)
+    ///     - **green** is encoded as the next 8 bits : ((value >> 8) & 0xFF)
+    ///     - **red** is the next 8 bits after green  : ((value >> 16) & 0xFF)
+    ///     - **alpha** is the most significant 8 bits (value >> 24)
+    /// * `size` - The size of the image
+    /// 
+    /// # Remarks
+    /// 
+    /// The size of the image must be the same length as the raw pixels buffer (buffer.len() == size.width * size.height)
+    ///
+    /// # Returns
+    ///
+    /// * `Some(Image)` - If the dimensions are valid
+    /// * `None` - If either dimension is 0 or exceeds 0xF000
+    pub fn from_buffer(buffer: &[u32], size: Size) -> Option<Image> {
+        if (size.width < 1) || (size.height < 1) {
+            return None;
+        }
+        if (size.width > 0xF000) || (size.height > 0xF000) {
+            return None;
+        }
+        if ((size.width as usize) * (size.height as usize)) != buffer.len() {
+            return None;
+        }
+        // all good - create
+        let mut me = Self {
+            width: size.width,
+            height: size.height,
+            pixels: Vec::with_capacity(buffer.len())
+        };
+        for pixel_value in buffer {
+            me.pixels.push(Pixel::from(*pixel_value));
+        }
+        Some(me)
+    }
+
     /// Clears the entire image with the specified pixel color.
     ///
     /// # Arguments
