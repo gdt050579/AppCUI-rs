@@ -38,89 +38,6 @@ const ALL_COLORS: &str = r#"
         |.BGTRmoSsbgtrpyw|
 "#;
 
-#[test]
-fn check_draw_smallblocks() {
-    let mut s = SurfaceTester::new(40, 10);
-    let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
-    s.print();
-    assert_eq!(s.compute_hash(), 0x144DB3832E565465);
-}
-
-/*
-
-#[test]
-fn check_draw_smallblocks_all_colors() {
-    let mut s = SurfaceTester::new(40, 10);
-    let i = Image::with_str(ALL_COLORS).unwrap();
-    s.draw_image(1, 1, &i, RendererType::SmallBlocks, Scale::NoScale);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x6E59DA499DC1E9E6);
-}
-
-#[test]
-fn check_draw_smallblocks_scale() {
-    let mut s = SurfaceTester::new(40, 10);
-    let i = Image::with_str(HEART_RED).unwrap();
-    s.draw_image(1, 1, &i, RendererType::SmallBlocks, Scale::NoScale);
-    s.draw_image(20, 1, &i, RendererType::SmallBlocks, Scale::Scale50);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0xF20E17339AE46D7A);
-}
-
-#[test]
-fn check_draw_gray() {
-    let mut s = SurfaceTester::new(40, 15);
-    let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, RendererType::GrayScale, Scale::NoScale);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x31B5363F572C0EA5);
-}
-#[test]
-fn check_draw_gray_scale() {
-    let mut s = SurfaceTester::new(50, 15);
-    let i = Image::with_str(HEART_RED).unwrap();
-    s.draw_image(1, 1, &i, RendererType::GrayScale, Scale::NoScale);
-    s.draw_image(30, 1, &i, RendererType::GrayScale, Scale::Scale50);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x3A46E9F1E2A046BD);
-}
-
-#[test]
-fn check_draw_large_chars_64() {
-    let mut s = SurfaceTester::new(40, 15);
-    let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, RendererType::LargeBlocks64Colors, Scale::NoScale);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x69DCA4337155535D);
-}
-#[test]
-fn check_draw_large_chars_64_scale() {
-    let mut s = SurfaceTester::new(50, 15);
-    let i = Image::with_str(HEART_RED).unwrap();
-    s.draw_image(1, 1, &i, RendererType::LargeBlocks64Colors, Scale::NoScale);
-    s.draw_image(30, 1, &i, RendererType::LargeBlocks64Colors, Scale::Scale50);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0x1648702FD7AD361);
-}
-
-#[test]
-fn check_draw_ascii_art() {
-    let mut s = SurfaceTester::new(40, 15);
-    let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, RendererType::AsciiArt, Scale::NoScale);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0xB493CD321C84CBA5);
-}
-#[test]
-fn check_draw_ascii_art_scale() {
-    let mut s = SurfaceTester::new(50, 15);
-    let i = Image::with_str(HEART_RED).unwrap();
-    s.draw_image(1, 1, &i, RendererType::AsciiArt, Scale::NoScale);
-    s.draw_image(30, 1, &i, RendererType::AsciiArt, Scale::Scale50);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0xFCF9279F2D7E525);
-}
 
 #[test]
 fn check_image_with_invalid_size() {
@@ -147,5 +64,90 @@ fn check_clear() {
         }
     }
 }
+
+#[test]
+fn check_draw_smallblocks() {
+    let mut s = SurfaceTester::new(40, 10);
+    let i = Image::with_str(HEART).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x144DB3832E565465);
+}
+
+#[test]
+fn check_draw_smallblocks_all_colors() {
+    let mut s = SurfaceTester::new(40, 10);
+    let i = Image::with_str(ALL_COLORS).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x6E59DA499DC1E9E6);
+}
+
+#[test]
+fn check_draw_smallblocks_scale() {
+    let mut s = SurfaceTester::new(40, 10);
+    let i = Image::with_str(HEART_RED).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
+    s.draw_image(20, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::Scale50);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xF20E17339AE46D7A);
+}
+
+
+/*
+#[test]
+fn check_draw_gray() {
+    let mut s = SurfaceTester::new(40, 15);
+    let i = Image::with_str(HEART).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::GrayScale, Scale::NoScale);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x31B5363F572C0EA5);
+}
+#[test]
+fn check_draw_gray_scale() {
+    let mut s = SurfaceTester::new(50, 15);
+    let i = Image::with_str(HEART_RED).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::GrayScale, Scale::NoScale);
+    s.draw_image(30, 1, &i, RenderMethod::GrayScale, Scale::Scale50);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x3A46E9F1E2A046BD);
+}
+
+#[test]
+fn check_draw_large_chars_64() {
+    let mut s = SurfaceTester::new(40, 15);
+    let i = Image::with_str(HEART).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::LargeBlocks64Colors, Scale::NoScale);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x69DCA4337155535D);
+}
+#[test]
+fn check_draw_large_chars_64_scale() {
+    let mut s = SurfaceTester::new(50, 15);
+    let i = Image::with_str(HEART_RED).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::LargeBlocks64Colors, Scale::NoScale);
+    s.draw_image(30, 1, &i, RenderMethod::LargeBlocks64Colors, Scale::Scale50);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x1648702FD7AD361);
+}
+
+#[test]
+fn check_draw_ascii_art() {
+    let mut s = SurfaceTester::new(40, 15);
+    let i = Image::with_str(HEART).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::AsciiArt, Scale::NoScale);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xB493CD321C84CBA5);
+}
+#[test]
+fn check_draw_ascii_art_scale() {
+    let mut s = SurfaceTester::new(50, 15);
+    let i = Image::with_str(HEART_RED).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::AsciiArt, Scale::NoScale);
+    s.draw_image(30, 1, &i, RenderMethod::AsciiArt, Scale::Scale50);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0xFCF9279F2D7E525);
+}
+
 
 */

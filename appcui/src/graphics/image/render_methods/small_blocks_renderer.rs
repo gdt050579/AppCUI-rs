@@ -17,7 +17,7 @@ fn render(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: fn(p:
                 cp.background = f(img.pixel(img_x, img_y + 1).unwrap_or_default());
             } else {
                 cp.foreground = f(img.compute_square_average_color(img_x, img_y, rap));
-                cp.background = f(img.compute_square_average_color(img_x, img_y + 1, rap));
+                cp.background = f(img.compute_square_average_color(img_x, img_y + rap, rap));
             }
 
             cp.code = if cp.background == cp.foreground {
