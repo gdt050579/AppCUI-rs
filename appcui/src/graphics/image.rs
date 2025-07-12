@@ -43,12 +43,12 @@ mod image;
 mod pixel;
 mod scale;
 mod color_schema;
-mod render_methods;
+mod character_set;
 #[cfg(test)]
 mod tests;
 
 pub use scale::Scale;
 pub use pixel::Pixel;
 pub use image::Image;
-pub use render_methods::RenderMethod;
+pub use character_set::CharacterSet;
 pub use color_schema::ColorSchema;

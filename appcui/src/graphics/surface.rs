@@ -842,8 +842,8 @@ impl Surface {
     ///                            image::RendererType::LargeBlocks64Colors,
     ///                            image::Scale::NoScale);
     /// ```
-    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, method: image::RenderMethod, color_schema: image::ColorSchema, scale: image::Scale) {
-        image.paint(self, x, y, method, color_schema, scale);
+    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, char_set: image::CharacterSet, color_schema: image::ColorSchema, scale: image::Scale) {
+        image.paint(self, x, y, char_set, color_schema, scale);
     }
     pub(crate) fn resize(&mut self, size: Size) {
         let w = size.width.clamp(1, MAX_SURFACE_WIDTH);

@@ -6,7 +6,7 @@ use self::components::ScrollBars;
 pub struct ImageViewer {
     surface: Surface,
     image: Image,
-    render_method: image::RenderMethod,
+    render_method: image::CharacterSet,
     scale: image::Scale,
     color_schema: image::ColorSchema,
     x: i32,
@@ -58,7 +58,7 @@ impl ImageViewer {
     ///                           image::Scale::NoScale,
     ///                           imageviewer::Flags::None);
     /// ```
-    pub fn new(image: Image, layout: Layout, render_method: image::RenderMethod, scale: image::Scale, flags: Flags) -> Self {
+    pub fn new(image: Image, layout: Layout, render_method: image::CharacterSet, scale: image::Scale, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -115,7 +115,7 @@ impl ImageViewer {
 
     /// Gets the rendeering method used to draw the image
     #[inline(always)]
-    pub fn render_method(&self) -> image::RenderMethod {
+    pub fn render_method(&self) -> image::CharacterSet {
         self.render_method
     }
 
@@ -125,7 +125,7 @@ impl ImageViewer {
     /// * `image::RenderMethod::LargeBlocks64Colors` - if set, the image will be rendered with large blocks
     /// * `image::RenderMethod::GrayScale` - if set, the image will be rendered with gray scale
     /// * `image::RenderMethod::AsciiArt` - if set, the image will be rendered as ascii art
-    pub fn set_render_method(&mut self, render_method: image::RenderMethod) {
+    pub fn set_render_method(&mut self, render_method: image::CharacterSet) {
         self.render_method = render_method;
         self.update_surface();
     }

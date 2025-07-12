@@ -5,7 +5,7 @@ use super::super::SurfaceTester;
 use super::ColorSchema;
 use super::Image;
 use super::Pixel;
-use super::RenderMethod;
+use super::CharacterSet;
 use super::Scale;
 
 const HEART: &str = r#"
@@ -459,7 +459,7 @@ static FLOWER: [u32; 5000] = [
     0xFF1C4228, 0xFF1D4228, 0xFF1B4027, 0xFF1D4228, 0xFF1B3F27, 0xFF1C4028, 0xFF1B3E26, 0xFF1C4027,
 ];
 
-fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, method: RenderMethod) {
+fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, method: CharacterSet) {
     let mut s = SurfaceTester::new(surface_size.width, surface_size.height);
     for (cs, h) in data {
         s.clear(Character::default());
@@ -499,7 +499,7 @@ fn check_clear() {
 fn check_draw_smallblocks() {
     let mut s = SurfaceTester::new(40, 10);
     let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
+    s.draw_image(1, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
     //s.print();
     assert_eq!(s.compute_hash(), 0x144DB3832E565465);
 }
@@ -508,7 +508,7 @@ fn check_draw_smallblocks() {
 fn check_draw_smallblocks_all_colors() {
     let mut s = SurfaceTester::new(40, 10);
     let i = Image::with_str(ALL_COLORS).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
+    s.draw_image(1, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
     //s.print();
     assert_eq!(s.compute_hash(), 0x6E59DA499DC1E9E6);
 }
@@ -517,8 +517,8 @@ fn check_draw_smallblocks_all_colors() {
 fn check_draw_smallblocks_scale() {
     let mut s = SurfaceTester::new(40, 10);
     let i = Image::with_str(HEART_RED).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
-    s.draw_image(20, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::Scale50);
+    s.draw_image(1, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
+    s.draw_image(20, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Color16, Scale::Scale50);
     //s.print();
     assert_eq!(s.compute_hash(), 0xF20E17339AE46D7A);
 }
@@ -534,13 +534,13 @@ fn check_draw_smallblocks_batch_heart() {
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::GrayScaleTrueColors, 0x6E79249F07B082E1),
     ];
-    batch_check(v, &Image::with_str(HEART).unwrap(), Size::new(40, 10), RenderMethod::SmallBlocks);
+    batch_check(v, &Image::with_str(HEART).unwrap(), Size::new(40, 10), CharacterSet::SmallBlocks);
 }
 #[test]
 fn check_draw_smallblocks_auto() {
     let mut s = SurfaceTester::new(40, 10);
     let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Auto, Scale::NoScale);
+    s.draw_image(1, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Auto, Scale::NoScale);
     //s.print();
     #[cfg(not(feature = "TRUE_COLORS"))]
     assert_eq!(s.compute_hash(), 0x144DB3832E565465);
@@ -563,7 +563,7 @@ fn check_draw_smallblocks_batch_flower() {
         v,
         &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(),
         Size::new(100, 25),
-        RenderMethod::SmallBlocks,
+        CharacterSet::SmallBlocks,
     );
 }
 
@@ -583,6 +583,6 @@ fn check_draw_largeblocks_batch_flower() {
         v,
         &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(),
         Size::new(200, 50),
-        RenderMethod::LargeBlock,
+        CharacterSet::LargeBlock,
     );
 }

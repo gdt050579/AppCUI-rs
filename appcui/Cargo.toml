@@ -68,7 +68,7 @@ version = "0.29"
 optional = true
 
 [features]
-default = []
+default = ["TRUE_COLORS"]
 DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES = []
 EVENT_RECORDER = []
 GLOBAL_RUNTIME = []

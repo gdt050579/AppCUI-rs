@@ -1,9 +1,9 @@
-use crate::prelude::image::render_methods::{large_blocks_renderer, small_blocks_renderer};
+use crate::prelude::image::character_set::{large_blocks_renderer, small_blocks_renderer};
 
 use super::super::{Color, Size, Surface};
 use super::pixel::Pixel;
 use super::ColorSchema;
-use super::RenderMethod;
+use super::CharacterSet;
 use super::Scale;
 
 /// A structure representing a raster image with RGBA pixels.
@@ -262,13 +262,13 @@ impl Image {
     ///
     /// The resulting Size object after applying the rendering and scaling methods
     #[inline]
-    pub fn render_size(&self, method: RenderMethod, scale: Scale) -> Size {
+    pub fn render_size(&self, method: CharacterSet, scale: Scale) -> Size {
         let unscale_size = match method {
-            RenderMethod::SmallBlocks => small_blocks_renderer::size(self),
-            RenderMethod::LargeBlock => large_blocks_renderer::size(self),
-            RenderMethod::DitheredShades => todo!(),
-            RenderMethod::Braille => todo!(),
-            RenderMethod::AsciArt => todo!(),
+            CharacterSet::SmallBlocks => small_blocks_renderer::size(self),
+            CharacterSet::LargeBlock => large_blocks_renderer::size(self),
+            CharacterSet::DitheredShades => todo!(),
+            CharacterSet::Braille => todo!(),
+            CharacterSet::AsciArt => todo!(),
         };
         let rap = scale as u32;
         if rap == 1 {
@@ -279,14 +279,14 @@ impl Image {
     }
 
     #[inline(always)]
-    pub(crate) fn paint(&self, surface: &mut Surface, x: i32, y: i32, method: RenderMethod, color_schema: ColorSchema, scale: Scale) {
+    pub(crate) fn paint(&self, surface: &mut Surface, x: i32, y: i32, char_set: CharacterSet, color_schema: ColorSchema, scale: Scale) {
         let rap = scale as u32;
-        match method {
-            RenderMethod::SmallBlocks => small_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
-            RenderMethod::LargeBlock => large_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
-            RenderMethod::DitheredShades => todo!(),
-            RenderMethod::Braille => todo!(),
-            RenderMethod::AsciArt => todo!(),
+        match char_set {
+            CharacterSet::SmallBlocks => small_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
+            CharacterSet::LargeBlock => large_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
+            CharacterSet::DitheredShades => todo!(),
+            CharacterSet::Braille => todo!(),
+            CharacterSet::AsciArt => todo!(),
         }
     }
 
