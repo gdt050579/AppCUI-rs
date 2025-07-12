@@ -7,6 +7,6 @@ pub enum CharacterSet {
     SmallBlocks,
     LargeBlock,
     DitheredShades,
-    Braille,
+    Braille(u8),
     AsciArt
 }

@@ -603,6 +603,6 @@ fn check_draw_bfraille_flower() {
         v,
         &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(),
         Size::new(50, 13),
-        CharacterSet::Braille,
+        CharacterSet::Braille(48),
     );
 }
