@@ -1,3 +1,4 @@
+use crate::prelude::Character;
 use crate::prelude::Size;
 
 use super::super::SurfaceTester;
@@ -91,6 +92,32 @@ fn check_draw_smallblocks_scale() {
     s.draw_image(20, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Color16, Scale::Scale50);
     //s.print();
     assert_eq!(s.compute_hash(), 0xF20E17339AE46D7A);
+}
+
+#[test]
+fn check_draw_smallblocks_all() {
+    let mut s = SurfaceTester::new(40, 10);
+    let i = Image::with_str(HEART).unwrap();
+    let v: [(ColorSchema, u64);3] = [
+        (ColorSchema::Color16, 0x144DB3832E565465),
+        (ColorSchema::BlackAndWhite, 0x7808C8D32D82EA95),
+        (ColorSchema::GrayScale4, 0x8491CF453DF94285),
+    ];
+
+    for (cs, h) in v {
+        s.clear(Character::default());
+        s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, cs, Scale::NoScale);
+        s.print();
+        assert_eq!(s.compute_hash(), h);
+    }
+}
+#[test]
+fn check_draw_smallblocks_auto() {
+    let mut s = SurfaceTester::new(40, 10);
+    let i = Image::with_str(HEART).unwrap();
+    s.draw_image(1, 1, &i, RenderMethod::SmallBlocks, ColorSchema::Auto, Scale::NoScale);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x144DB3832E565465);
 }
 
 
