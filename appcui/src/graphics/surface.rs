@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use crate::prelude::CharFlags;
+use crate::prelude::RenderOptions;
 
 use super::image;
 use super::CharAttribute;
@@ -842,8 +843,8 @@ impl Surface {
     ///                            image::RendererType::LargeBlocks64Colors,
     ///                            image::Scale::NoScale);
     /// ```
-    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, char_set: image::CharacterSet, color_schema: image::ColorSchema, scale: image::Scale) {
-        image.paint(self, x, y, char_set, color_schema, scale);
+    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, render_options: &RenderOptions) {
+        image.paint(self, x, y, render_options);
     }
     pub(crate) fn resize(&mut self, size: Size) {
         let w = size.width.clamp(1, MAX_SURFACE_WIDTH);

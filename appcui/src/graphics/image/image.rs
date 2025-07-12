@@ -1,4 +1,5 @@
 use crate::prelude::image::character_set::{large_blocks_renderer, small_blocks_renderer, braille_renderer};
+use crate::prelude::RenderOptions;
 
 use super::super::{Color, Size, Surface};
 use super::pixel::Pixel;
@@ -267,7 +268,7 @@ impl Image {
             CharacterSet::SmallBlocks => small_blocks_renderer::size(self),
             CharacterSet::LargeBlock => large_blocks_renderer::size(self),
             CharacterSet::DitheredShades => todo!(),
-            CharacterSet::Braille(_) => braille_renderer::size(self),
+            CharacterSet::Braille => braille_renderer::size(self),
             CharacterSet::AsciArt => todo!(),
         };
         let rap = scale as u32;
@@ -279,13 +280,12 @@ impl Image {
     }
 
     #[inline(always)]
-    pub(crate) fn paint(&self, surface: &mut Surface, x: i32, y: i32, char_set: CharacterSet, color_schema: ColorSchema, scale: Scale) {
-        let rap = scale as u32;
-        match char_set {
-            CharacterSet::SmallBlocks => small_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
-            CharacterSet::LargeBlock => large_blocks_renderer::paint(surface, self, x, y, rap, color_schema),
+    pub(crate) fn paint(&self, surface: &mut Surface, x: i32, y: i32, render_options: &RenderOptions) {
+        match render_options.char_set {
+            CharacterSet::SmallBlocks => small_blocks_renderer::paint(surface, self, x, y, render_options),
+            CharacterSet::LargeBlock => large_blocks_renderer::paint(surface, self, x, y, render_options),
             CharacterSet::DitheredShades => todo!(),
-            CharacterSet::Braille(lmin) => braille_renderer::paint(surface, self, x, y, lmin, rap, color_schema),
+            CharacterSet::Braille => braille_renderer::paint(surface, self, x, y, render_options),
             CharacterSet::AsciArt => todo!(),
         }
     }

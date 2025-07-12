@@ -79,8 +79,10 @@ pub(crate) fn size(img: &Image) -> Size {
 }
 
 #[inline(always)]
-pub(crate) fn paint(surface: &mut Surface, img: &Image, x: i32, y: i32, lmin: u8, rap: u32, color_schema: ColorSchema) {
-    match color_schema {
+pub(crate) fn paint(surface: &mut Surface, img: &Image, x: i32, y: i32, render_options: &RenderOptions) {
+    let rap = render_options.scale as u32;
+    let lmin = render_options.luminance_threshold;
+    match render_options.color_schema {
         ColorSchema::Auto => {
             #[cfg(feature = "TRUE_COLORS")]
             {

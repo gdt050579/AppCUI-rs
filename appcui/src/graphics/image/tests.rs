@@ -1,11 +1,13 @@
 use crate::prelude::Character;
+use crate::prelude::RenderOptionsBuilder;
 use crate::prelude::Size;
 
 use super::super::SurfaceTester;
+use super::CharacterSet;
 use super::ColorSchema;
 use super::Image;
 use super::Pixel;
-use super::CharacterSet;
+use super::RenderOptions;
 use super::Scale;
 
 const HEART: &str = r#"
@@ -459,12 +461,13 @@ static FLOWER: [u32; 5000] = [
     0xFF1C4228, 0xFF1D4228, 0xFF1B4027, 0xFF1D4228, 0xFF1B3F27, 0xFF1C4028, 0xFF1B3E26, 0xFF1C4027,
 ];
 
-fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, method: CharacterSet) {
+fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, opt: &mut RenderOptions) {
     let mut s = SurfaceTester::new(surface_size.width, surface_size.height);
     for (cs, h) in data {
         s.clear(Character::default());
-        s.draw_image(0, 0, &img, method, *cs, Scale::NoScale);
-        s.print(false);
+        opt.color_schema = cs;
+        s.draw_image(0, 0, &img, opt);
+        s.print(true);
         //assert_eq!(s.compute_hash(), *h);
     }
 }
@@ -517,8 +520,17 @@ fn check_draw_smallblocks_all_colors() {
 fn check_draw_smallblocks_scale() {
     let mut s = SurfaceTester::new(40, 10);
     let i = Image::with_str(HEART_RED).unwrap();
-    s.draw_image(1, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
-    s.draw_image(20, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Color16, Scale::Scale50);
+    let ro = RenderOptionsBuilder::new()
+        .color_schema(ColorSchema::Color16)
+        .character_set(CharacterSet::SmallBlocks)
+        .build();
+    s.draw_image(1, 1, &i, &ro);
+    let ro = RenderOptionsBuilder::new()
+        .color_schema(ColorSchema::Color16)
+        .character_set(CharacterSet::SmallBlocks)
+        .scale(Scale::Scale50)
+        .build();    
+    s.draw_image(20, 1, &i, &ro);
     //s.print();
     assert_eq!(s.compute_hash(), 0xF20E17339AE46D7A);
 }
@@ -534,13 +546,14 @@ fn check_draw_smallblocks_batch_heart() {
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::GrayScaleTrueColors, 0x6E79249F07B082E1),
     ];
-    batch_check(v, &Image::with_str(HEART).unwrap(), Size::new(40, 10), CharacterSet::SmallBlocks);
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::SmallBlocks).build();
+    batch_check(v, &Image::with_str(HEART).unwrap(), Size::new(40, 10), &mut ro);
 }
 #[test]
 fn check_draw_smallblocks_auto() {
     let mut s = SurfaceTester::new(40, 10);
     let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Auto, Scale::NoScale);
+    s.draw_image(1, 1, &i, &RenderOptionsBuilder::new().character_set(CharacterSet::SmallBlocks).build());
     //s.print();
     #[cfg(not(feature = "TRUE_COLORS"))]
     assert_eq!(s.compute_hash(), 0x144DB3832E565465);
@@ -559,14 +572,9 @@ fn check_draw_smallblocks_batch_flower() {
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::GrayScaleTrueColors, 0x62E4A9AB3E1A2125),
     ];
-    batch_check(
-        v,
-        &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(),
-        Size::new(100, 25),
-        CharacterSet::SmallBlocks,
-    );
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::SmallBlocks).build();
+    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(100, 25), &mut ro);
 }
-
 
 #[test]
 fn check_draw_largeblocks_batch_flower() {
@@ -579,30 +587,24 @@ fn check_draw_largeblocks_batch_flower() {
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::GrayScaleTrueColors, 0x75620856DE746435),
     ];
-    batch_check(
-        v,
-        &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(),
-        Size::new(200, 50),
-        CharacterSet::LargeBlock,
-    );
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::LargeBlock).build();
+    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(200, 50), &mut ro);
 }
-
 
 #[test]
 fn check_draw_bfraille_flower() {
     let v: &[(ColorSchema, u64)] = &[
-        (ColorSchema::Color16, 0x56F53EA18F979565),
-        (ColorSchema::BlackAndWhite, 0x6337977B69C86C25),
-        (ColorSchema::GrayScale4, 0x18369392815B6CA5),
+        (ColorSchema::Color16, 0x14BECCC601437BFA),
+        (ColorSchema::BlackAndWhite, 0xEBA50C41AEDE5CE3),
+        (ColorSchema::GrayScale4, 0xF5380EFE088AC72B),
         #[cfg(feature = "TRUE_COLORS")]
-        (ColorSchema::TrueColors, 0xEAF44E98BE3C9DDF),
+        (ColorSchema::TrueColors, 0x94491620DD305E6),
         #[cfg(feature = "TRUE_COLORS")]
-        (ColorSchema::GrayScaleTrueColors, 0x75620856DE746435),
+        (ColorSchema::GrayScaleTrueColors, 0x691F00007BD54EF1),
     ];
-    batch_check(
-        v,
-        &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(),
-        Size::new(50, 13),
-        CharacterSet::Braille(48),
-    );
+    let mut ro = RenderOptionsBuilder::new()
+        .luminance_threshold(0.2)
+        .character_set(CharacterSet::Braille)
+        .build();
+    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(50, 13), &mut ro);
 }

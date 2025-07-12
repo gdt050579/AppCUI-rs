@@ -44,6 +44,7 @@ mod pixel;
 mod scale;
 mod color_schema;
 mod character_set;
+mod render_options;
 #[cfg(test)]
 mod tests;
 
@@ -52,3 +53,4 @@ pub use pixel::Pixel;
 pub use image::Image;
 pub use character_set::CharacterSet;
 pub use color_schema::ColorSchema;
+pub use render_options::{ RenderOptions, RenderOptionsBuilder };
