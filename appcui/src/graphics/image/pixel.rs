@@ -4259,12 +4259,6 @@ const COLORMAP_64_COLORS_PROC: [u8; 125] = [
     100, 100, 75, 75, 100, 75, 75, 50, 75, 100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
 ];
 
-const ASCII_ART_CHARSET: &[char] = &[
-    ' ', '.', '\'', '`', '^', '"', ',', ':', ';', 'I', 'l', '!', 'i', '>', '<', '~', '+', '_', '-', '?', ']', '[', '}', '{', '1', ')', '(', '|',
-    '\\', '/', 't', 'f', 'j', 'r', 'x', 'n', 'u', 'v', 'c', 'z', 'X', 'Y', 'U', 'J', 'C', 'L', 'Q', '0', 'O', 'Z', 'm', 'w', 'q', 'p', 'd', 'b', 'k',
-    'h', 'a', 'o', '*', '#', 'M', 'W', '&', '8', '%', 'B', '@', '$',
-];
-
 /// A pixel in the image.
 ///
 /// The pixel is a combination of red, green, and blue components, and an alpha component.
@@ -4416,14 +4410,7 @@ impl Pixel {
             _ => Character::default(),
         }
     }
-    pub(super) fn as_ascii_art(&self) -> Character {
-        let ch = {
-            let luminance = (0.299 * self.red as f64 + 0.587 * self.green as f64 + 0.114 * self.blue as f64) / 255.0;
-            let index = ((luminance * (ASCII_ART_CHARSET.len() as f64 - 1.0)).round() as usize).clamp(0, ASCII_ART_CHARSET.len() - 1);
-            ASCII_ART_CHARSET[index]
-        };
-        Character::new(ch, Color::White, Color::Black, CharFlags::None)
-    }
+
     pub(super) fn as_gray_scale_character(&self) -> Character {
         let val = ((self.blue as u32) + (self.red as u32) + (self.green as u32)) / 3;
         if val < 32 {
