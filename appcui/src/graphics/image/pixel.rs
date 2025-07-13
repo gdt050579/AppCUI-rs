@@ -1,5 +1,3 @@
-use std::u8;
-
 use super::super::CharFlags;
 use super::super::Character;
 use super::super::Color;

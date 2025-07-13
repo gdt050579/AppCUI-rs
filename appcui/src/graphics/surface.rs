@@ -2,8 +2,6 @@ use std::path::Path;
 
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
-
-use super::image;
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;

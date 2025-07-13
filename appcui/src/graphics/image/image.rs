@@ -3,9 +3,7 @@ use crate::prelude::RenderOptions;
 
 use super::super::{Color, Size, Surface};
 use super::pixel::Pixel;
-use super::ColorSchema;
 use super::CharacterSet;
-use super::Scale;
 
 /// A structure representing a raster image with RGBA pixels.
 ///
