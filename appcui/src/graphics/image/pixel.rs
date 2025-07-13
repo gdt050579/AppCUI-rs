@@ -4361,8 +4361,7 @@ impl Pixel {
     #[inline(always)]
     pub fn luminance(&self) -> u8 {
         let (r, g, b) = self.blend_alpha();
-        let luma = (13933u32 * r as u32 + 46871 * g as u32 + 4742 * b as u32) >> 16;
-        luma as u8
+        ((13933u32 * r as u32 + 46871 * g as u32 + 4742 * b as u32) >> 16) as u8
     }
     pub(super) fn as_color16(&self) -> Color {
         let (r, g, b) = self.blend_alpha();
@@ -4370,8 +4369,8 @@ impl Pixel {
         COLORMAP_4096_QUANTIZATION[index]
     }
     #[inline(always)]
-    pub(super) fn as_blackwhite(&self) -> Color {
-        if self.luminance() < 128 {
+    pub(super) fn as_blackwhite(&self, thredshold: u8) -> Color {
+        if self.luminance() < thredshold {
             Color::Black
         } else {
             Color::White

@@ -465,10 +465,10 @@ fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, opt
     let mut s = SurfaceTester::new(surface_size.width, surface_size.height);
     for (cs, h) in data {
         s.clear(Character::default());
-        opt.color_schema = cs;
+        opt.color_schema = *cs;
         s.draw_image(0, 0, &img, opt);
-        s.print(true);
-        //assert_eq!(s.compute_hash(), *h);
+        //s.print(false);
+        assert_eq!(s.compute_hash(), *h);
     }
 }
 
@@ -502,7 +502,15 @@ fn check_clear() {
 fn check_draw_smallblocks() {
     let mut s = SurfaceTester::new(40, 10);
     let i = Image::with_str(HEART).unwrap();
-    s.draw_image(1, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
+    s.draw_image(
+        1,
+        1,
+        &i,
+        &RenderOptionsBuilder::new()
+            .character_set(CharacterSet::SmallBlocks)
+            .color_schema(ColorSchema::Color16)
+            .build(),
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0x144DB3832E565465);
 }
@@ -511,9 +519,37 @@ fn check_draw_smallblocks() {
 fn check_draw_smallblocks_all_colors() {
     let mut s = SurfaceTester::new(40, 10);
     let i = Image::with_str(ALL_COLORS).unwrap();
-    s.draw_image(1, 1, &i, CharacterSet::SmallBlocks, ColorSchema::Color16, Scale::NoScale);
+    s.draw_image(
+        1,
+        1,
+        &i,
+        &RenderOptionsBuilder::new()
+            .character_set(CharacterSet::SmallBlocks)
+            .color_schema(ColorSchema::Color16)
+            .build(),
+    );
     //s.print();
     assert_eq!(s.compute_hash(), 0x6E59DA499DC1E9E6);
+}
+
+#[test]
+fn check_draw_smallblocks_heart_bw() {
+    let mut s = SurfaceTester::new(120, 10);
+    let i = Image::with_str(HEART).unwrap();
+    for t in 0..=4 {
+        s.draw_image(
+            t * 25,
+            1,
+            &i,
+            &RenderOptionsBuilder::new()
+                .character_set(CharacterSet::SmallBlocks)
+                .color_schema(ColorSchema::BlackAndWhite)
+                .luminance_threshold(0.01f64 * (t * t * t) as f64)
+                .build(),
+        );
+    }
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x88A31682A013D881);
 }
 
 #[test]
@@ -529,7 +565,7 @@ fn check_draw_smallblocks_scale() {
         .color_schema(ColorSchema::Color16)
         .character_set(CharacterSet::SmallBlocks)
         .scale(Scale::Scale50)
-        .build();    
+        .build();
     s.draw_image(20, 1, &i, &ro);
     //s.print();
     assert_eq!(s.compute_hash(), 0xF20E17339AE46D7A);
@@ -549,6 +585,7 @@ fn check_draw_smallblocks_batch_heart() {
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::SmallBlocks).build();
     batch_check(v, &Image::with_str(HEART).unwrap(), Size::new(40, 10), &mut ro);
 }
+
 #[test]
 fn check_draw_smallblocks_auto() {
     let mut s = SurfaceTester::new(40, 10);
@@ -592,15 +629,15 @@ fn check_draw_largeblocks_batch_flower() {
 }
 
 #[test]
-fn check_draw_bfraille_flower() {
+fn check_draw_braille_flower() {
     let v: &[(ColorSchema, u64)] = &[
-        (ColorSchema::Color16, 0x14BECCC601437BFA),
-        (ColorSchema::BlackAndWhite, 0xEBA50C41AEDE5CE3),
-        (ColorSchema::GrayScale4, 0xF5380EFE088AC72B),
+        (ColorSchema::Color16, 0x61AF40B086384EB8),
+        (ColorSchema::BlackAndWhite, 0x9459C5DB69F88D41),
+        (ColorSchema::GrayScale4, 0x349171F7825E25C9),
         #[cfg(feature = "TRUE_COLORS")]
-        (ColorSchema::TrueColors, 0x94491620DD305E6),
+        (ColorSchema::TrueColors, 0x30E5BB83F3CA9688),
         #[cfg(feature = "TRUE_COLORS")]
-        (ColorSchema::GrayScaleTrueColors, 0x691F00007BD54EF1),
+        (ColorSchema::GrayScaleTrueColors, 0x76A97D897998330B),
     ];
     let mut ro = RenderOptionsBuilder::new()
         .luminance_threshold(0.2)

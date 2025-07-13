@@ -6,9 +6,7 @@ use self::components::ScrollBars;
 pub struct ImageViewer {
     surface: Surface,
     image: Image,
-    render_method: image::CharacterSet,
-    scale: image::Scale,
-    color_schema: image::ColorSchema,
+    render_options: image::RenderOptions,
     x: i32,
     y: i32,
     background: Option<Character>,
@@ -58,7 +56,7 @@ impl ImageViewer {
     ///                           image::Scale::NoScale,
     ///                           imageviewer::Flags::None);
     /// ```
-    pub fn new(image: Image, layout: Layout, render_method: image::CharacterSet, scale: image::Scale, flags: Flags) -> Self {
+    pub fn new(image: Image, layout: Layout, render_options: image::RenderOptions, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -74,11 +72,9 @@ impl ImageViewer {
             y: 0,
             flags,
             image,
-            scale,
-            render_method,
+            render_options,
             background: None,
             drag_point: None,
-            color_schema: ColorSchema::Auto,
             scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
         };
         obj.update_surface();
@@ -97,7 +93,8 @@ impl ImageViewer {
     /// Returns the image scale
     #[inline(always)]
     pub fn scale(&self) -> image::Scale {
-        self.scale
+        todo!("update with new methods");
+        //self.scale
     }
 
     /// Sets the image scale (it can be one of the following values):
@@ -109,14 +106,16 @@ impl ImageViewer {
     /// * `image::Scale::Scale33` - 33% scale
     /// * `image::Scale::Scale50` - 50% scale
     pub fn set_scale(&mut self, scale: image::Scale) {
-        self.scale = scale;
+        todo!("update with new methods");
+        //self.scale = scale;
         self.update_surface();
     }
 
     /// Gets the rendeering method used to draw the image
     #[inline(always)]
     pub fn render_method(&self) -> image::CharacterSet {
-        self.render_method
+        todo!("update with new methods");
+        //self.render_method
     }
 
     /// Sets the rendering method used to draw the image.
@@ -126,13 +125,14 @@ impl ImageViewer {
     /// * `image::RenderMethod::GrayScale` - if set, the image will be rendered with gray scale
     /// * `image::RenderMethod::AsciiArt` - if set, the image will be rendered as ascii art
     pub fn set_render_method(&mut self, render_method: image::CharacterSet) {
-        self.render_method = render_method;
+        todo!("update with new methods");
+        //self.render_method = render_method;
         self.update_surface();
     }
     fn update_surface(&mut self) {
-        let sz = self.image.render_size(self.render_method, self.scale);
+        let sz = self.image.render_size(&self.render_options);
         self.surface.resize(sz);
-        self.surface.draw_image(0, 0, &self.image, self.render_method, self.color_schema, self.scale);
+        self.surface.draw_image(0, 0, &self.image, &self.render_options);
         let sz = self.surface.size();
         let control_size = self.size();
         self.scrollbars.update(sz.width as u64, sz.height as u64, control_size);

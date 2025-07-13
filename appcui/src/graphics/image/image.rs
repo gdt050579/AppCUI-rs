@@ -256,22 +256,21 @@ impl Image {
     ///
     /// # Arguments
     ///
-    /// * `method` - The method used to render the image (blocks, ASCII, etc.)
-    /// * `scale`  - The scaling method applied to the image
+    /// * `render_options` - The RenderOptions struct that would be used to draw theimage
     ///
     /// # Returns
     ///
     /// The resulting Size object after applying the rendering and scaling methods
     #[inline]
-    pub fn render_size(&self, method: CharacterSet, scale: Scale) -> Size {
-        let unscale_size = match method {
+    pub fn render_size(&self, render_options: &RenderOptions) -> Size {
+        let unscale_size = match render_options.char_set {
             CharacterSet::SmallBlocks => small_blocks_renderer::size(self),
             CharacterSet::LargeBlock => large_blocks_renderer::size(self),
             CharacterSet::DitheredShades => todo!(),
             CharacterSet::Braille => braille_renderer::size(self),
             CharacterSet::AsciArt => todo!(),
         };
-        let rap = scale as u32;
+        let rap = render_options.scale as u32;
         if rap == 1 {
             unscale_size
         } else {

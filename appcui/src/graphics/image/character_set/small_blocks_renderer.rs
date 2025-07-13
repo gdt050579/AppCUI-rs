@@ -1,6 +1,6 @@
 use crate::graphics::*;
 
-fn render(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: fn(p: Pixel) -> Color) {
+fn render<T>(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: T) where T: Fn(Pixel) -> Color {
     let w = img.width();
     let h = img.height();
     let x_step = rap;
@@ -55,6 +55,6 @@ pub(crate) fn paint(surface: &mut Surface, img: &Image, x: i32, y: i32, render_o
         ColorSchema::GrayScale4 => render(surface, img, x, y, rap, |p| p.as_grayscale4()),
         #[cfg(feature = "TRUE_COLORS")]
         ColorSchema::GrayScaleTrueColors => render(surface, img, x, y, rap, |p| p.as_grayscale()),
-        ColorSchema::BlackAndWhite => render(surface, img, x, y, rap, |p| p.as_blackwhite()),
+        ColorSchema::BlackAndWhite => render(surface, img, x, y, rap, |p| p.as_blackwhite(render_options.luminance_threshold)),
     }
 }
