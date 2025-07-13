@@ -467,7 +467,7 @@ fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, opt
         s.clear(Character::default());
         opt.color_schema = *cs;
         s.draw_image(0, 0, &img, opt);
-        //s.print(false);
+        //s.print(true);
         assert_eq!(s.compute_hash(), *h);
     }
 }
@@ -644,4 +644,34 @@ fn check_draw_braille_flower() {
         .character_set(CharacterSet::Braille)
         .build();
     batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(50, 13), &mut ro);
+}
+
+#[test]
+fn check_draw_asciiart_batch_heart() {
+    let v: &[(ColorSchema, u64)] = &[
+        (ColorSchema::Color16, 0xBD2927AE262DEB25),
+        (ColorSchema::BlackAndWhite, 0x157CF3A88CB1A625),
+        (ColorSchema::GrayScale4, 0x5D15615946FCD9A5),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::TrueColors, 0xCD30829FC775849D),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::GrayScaleTrueColors, 0x18992C9343BDF9E5),
+    ];
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::AsciArt).build();
+    batch_check(v, &Image::with_str(HEART).unwrap(), Size::new(30, 10), &mut ro);
+}
+
+#[test]
+fn check_draw_ascii_art_flower() {
+    let v: &[(ColorSchema, u64)] = &[
+        (ColorSchema::Color16, 0x703BEAAD3E6E865),
+        (ColorSchema::BlackAndWhite, 0xF468067E891B8F25),
+        (ColorSchema::GrayScale4, 0x4426FBD759A8C825),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::TrueColors, 0x2932BD99134D48CB),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::GrayScaleTrueColors, 0x9204C86005FA5D69),
+    ];
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::AsciArt).build();
+    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(200, 50), &mut ro);
 }

@@ -64,6 +64,6 @@ pub(crate) fn paint(surface: &mut Surface, img: &Image, x: i32, y: i32, render_o
         ColorSchema::GrayScale4 => render(surface, img, x, y, rap, |p| p.as_grayscale4()),
         #[cfg(feature = "TRUE_COLORS")]
         ColorSchema::GrayScaleTrueColors => render(surface, img, x, y, rap, |p| p.as_grayscale()),
-        ColorSchema::BlackAndWhite => render(surface, img, x, y, rap, |p| p.as_blackwhite(render_options.luminance_threshold)),
+        ColorSchema::BlackAndWhite => render(surface, img, x, y, rap, |_| Color::White),
     }
 }
