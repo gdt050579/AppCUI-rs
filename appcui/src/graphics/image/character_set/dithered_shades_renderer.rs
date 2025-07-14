@@ -1,6 +1,5 @@
 use crate::graphics::*;
 
-
 const COLORMAP_64_COLORS: [Color; 125] = [
     Color::Black,
     Color::Blue,
@@ -136,7 +135,7 @@ const COLORMAP_64_COLORS_PROC: [u8; 125] = [
     100, 100, 75, 75, 100, 75, 75, 50, 75, 100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
 ];
 
-fn pixel_to_character(p: Pixel) -> Character {
+fn pixel_to_16color_character(p: Pixel) -> Character {
     let (p_r, p_g, p_b) = p.blend_alpha();
     let r = ((p_r as u32) + 32) / 64;
     let g = ((p_g as u32) + 32) / 64;
@@ -154,20 +153,41 @@ fn pixel_to_character(p: Pixel) -> Character {
     }
 }
 
-fn render_large_blocks<T>(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: T) 
-where 
-    T: Fn(Pixel) -> Color 
+fn pixel_to_black_and_white(p: Pixel) -> Character {
+    let proc = ((p.luminance() as u32) + 32) >> 6;
+    match proc {
+        0 => Character::new(' ', Color::Black, Color::Black, CharFlags::None),
+        1 => Character::new(SpecialChar::Block25, Color::White, Color::Black, CharFlags::None),
+        2 => Character::new(SpecialChar::Block50, Color::White, Color::Black, CharFlags::None),
+        3 => Character::new(SpecialChar::Block75, Color::White, Color::Black, CharFlags::None),
+        _ => Character::new(' ', Color::White, Color::White, CharFlags::None),
+    }
+}
+fn pixel_to_gray(p: Pixel) -> Character {
+    let proc = ((p.luminance() as u32) + 32) >> 6;
+    match proc {
+        0 => Character::new(' ', Color::Black, Color::Black, CharFlags::None),
+        1 => Character::new(SpecialChar::Block25, Color::White, Color::Black, CharFlags::None),
+        2 => Character::new(SpecialChar::Block50, Color::White, Color::Black, CharFlags::None),
+        3 => Character::new(SpecialChar::Block75, Color::White, Color::Black, CharFlags::None),
+        _ => Character::new(' ', Color::White, Color::White, CharFlags::None),
+    }
+}
+
+fn render_large_blocks<T>(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: T)
+where
+    T: Fn(Pixel) -> Color,
 {
     let w = img.width();
     let h = img.height();
     let mut img_y = 0u32;
     let mut p_y = y;
     let mut ch = Character::new(' ', Color::Black, Color::Black, CharFlags::None);
-    
+
     while img_y < h {
         let mut p_x = x;
         let mut img_x = 0u32;
-        
+
         while img_x < w {
             ch.background = if rap == 1 {
                 f(img.pixel(img_x, img_y).unwrap_or_default())
@@ -185,7 +205,7 @@ where
 
 fn render_dithered<T>(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: T)
 where
-    T: Fn(Pixel) -> Color,
+    T: Fn(Pixel) -> Character,
 {
     let w = img.width();
     let h = img.height();
@@ -197,13 +217,11 @@ where
         let mut img_x = 0u32;
 
         while img_x < w {
-            let pixel = if rap == 1 {
-                img.pixel(img_x, img_y).unwrap_or_default()
+            let ch = if rap == 1 {
+                f(img.pixel(img_x, img_y).unwrap_or_default())
             } else {
-                img.compute_square_average_color(img_x, img_y, rap)
+                f(img.compute_square_average_color(img_x, img_y, rap))
             };
-            
-            let ch = pixel_to_character(pixel);
             surface.write_char(p_x, p_y, ch);
             surface.write_char(p_x + 1, p_y, ch);
 
@@ -232,15 +250,15 @@ pub(crate) fn paint(surface: &mut Surface, img: &Image, x: i32, y: i32, render_o
             }
             #[cfg(not(feature = "TRUE_COLORS"))]
             {
-                render_dithered(surface, img, x, y, rap, |p| p.as_color16())
+                render_dithered(surface, img, x, y, rap, pixel_to_16color_character)
             }
         }
-        ColorSchema::Color16 => render_dithered(surface, img, x, y, rap, |p| p.as_color16()),
+        ColorSchema::Color16 => render_dithered(surface, img, x, y, rap, pixel_to_16color_character),
         #[cfg(feature = "TRUE_COLORS")]
         ColorSchema::TrueColors => render_large_blocks(surface, img, x, y, rap, |p| p.as_rgb_color()),
-        ColorSchema::GrayScale4 => render_dithered(surface, img, x, y, rap, |p| p.as_grayscale4()),
+        ColorSchema::GrayScale4 => render_dithered(surface, img, x, y, rap, pixel_to_gray),
         #[cfg(feature = "TRUE_COLORS")]
         ColorSchema::GrayScaleTrueColors => render_large_blocks(surface, img, x, y, rap, |p| p.as_grayscale()),
-        ColorSchema::BlackAndWhite => render_dithered(surface, img, x, y, rap, |p| p.as_blackwhite(render_options.luminance_threshold)),
+        ColorSchema::BlackAndWhite => render_dithered(surface, img, x, y, rap, pixel_to_black_and_white),
     }
-} 
+}

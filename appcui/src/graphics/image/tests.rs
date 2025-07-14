@@ -703,13 +703,13 @@ fn check_draw_ascii_art_flower() {
 #[test]
 fn check_draw_dithered_batch_heart() {
     let v: &[(ColorSchema, u64)] = &[
-        (ColorSchema::Color16, 0xBD2927AE262DEB25),
-        (ColorSchema::BlackAndWhite, 0x157CF3A88CB1A625),
+        (ColorSchema::Color16, 0x4565BB4998A0A8AD),
+        (ColorSchema::BlackAndWhite, 0x99529F859EE20F6D),
         (ColorSchema::GrayScale4, 0x5D15615946FCD9A5),
         #[cfg(feature = "TRUE_COLORS")]
-        (ColorSchema::TrueColors, 0xCD30829FC775849D),
+        (ColorSchema::TrueColors, 0xA3624C685B635C0D),
         #[cfg(feature = "TRUE_COLORS")]
-        (ColorSchema::GrayScaleTrueColors, 0x18992C9343BDF9E5),
+        (ColorSchema::GrayScaleTrueColors, 0x880C9971C5DC72DD),
     ];
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::DitheredShades).build();
     batch_check(v, &Image::from_str(HEART).unwrap(), Size::new(30, 10), &mut ro);
