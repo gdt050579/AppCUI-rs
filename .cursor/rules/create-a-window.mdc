@@ -1,9 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-1. When you create a window, alwways use the #[Window(...)] as described in @docs\chapter-3\event-loop\window.md
-2. You do not need to add the `base` data member (as it will be automatically added by the proc-macro #[Window(...)])
-
-
