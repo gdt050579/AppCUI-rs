@@ -467,8 +467,8 @@ fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, opt
         s.clear(Character::default());
         opt.color_schema = *cs;
         s.draw_image(0, 0, &img, opt);
-        s.print(false);
-        //assert_eq!(s.compute_hash(), *h);
+        //s.print(true);
+        assert_eq!(s.compute_hash(), *h);
     }
 }
 
@@ -493,7 +493,7 @@ fn check_size() {
         assert_eq!(
             img.render_size(&RenderOptionsBuilder::new().character_set(cs).scale(s).build()),
             Size::new(w, h)
-        );       
+        );
     }
 }
 #[test]
@@ -705,7 +705,7 @@ fn check_draw_dithered_batch_heart() {
     let v: &[(ColorSchema, u64)] = &[
         (ColorSchema::Color16, 0x4565BB4998A0A8AD),
         (ColorSchema::BlackAndWhite, 0x99529F859EE20F6D),
-        (ColorSchema::GrayScale4, 0x5D15615946FCD9A5),
+        (ColorSchema::GrayScale4, 0xDA45DB0AA992938D),
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::TrueColors, 0xA3624C685B635C0D),
         #[cfg(feature = "TRUE_COLORS")]
@@ -714,3 +714,53 @@ fn check_draw_dithered_batch_heart() {
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::DitheredShades).build();
     batch_check(v, &Image::from_str(HEART).unwrap(), Size::new(30, 10), &mut ro);
 }
+
+#[test]
+fn check_draw_dithered_batch_flower() {
+    let v: &[(ColorSchema, u64)] = &[
+        (ColorSchema::Color16, 0x906B1B884BE67279),
+        (ColorSchema::BlackAndWhite, 0x84E620A0E0723911),
+        (ColorSchema::GrayScale4, 0x1518CF7B771DC2E1),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::TrueColors, 0xEAF44E98BE3C9DDF),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::GrayScaleTrueColors, 0x75620856DE746435),
+    ];
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::DitheredShades).build();
+    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(200, 50), &mut ro);
+}
+
+// #[test]
+// fn check_xxx() {
+//     let mut s = SurfaceTester::new(40, 10);
+//     let v: &[(char, Color)] = &[
+//         (' ', Color::Black),
+//         ('░', Color::Gray),
+//         ('▒', Color::Gray),
+//         ('░', Color::Silver),
+//         ('░', Color::White),
+//         ('▒', Color::Silver),
+//         ('▓', Color::Gray),
+//         ('▒', Color::White),
+//         ('▓', Color::Silver),
+//         ('▓', Color::White),
+//         ('█', Color::White),
+//     ];
+
+//     let mut x = 1;
+//     let mut idx = 48u8;
+//     for (ch, c) in v {
+//         let car = Character {
+//             code: *ch,
+//             foreground: *c,
+//             background: Color::Black,
+//             flags: CharFlags::None,
+//         };
+//         s.write_char(x, 1, car);
+//         s.write_char(x + 1, 1, car);
+//         s.write_char(x, 2, Character::new(idx, Color::Yellow, Color::Black, CharFlags::None));
+//         x += 2;
+//         idx += 1;
+//     }
+//     s.print(false);
+// }

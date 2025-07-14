@@ -135,6 +135,20 @@ const COLORMAP_64_COLORS_PROC: [u8; 125] = [
     100, 100, 75, 75, 100, 75, 75, 50, 75, 100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
 ];
 
+const GRAY_CHARS: [(char, Color); 11] = [
+    (' ', Color::Black),
+    ('░', Color::Gray),
+    ('▒', Color::Gray),
+    ('░', Color::Silver),
+    ('░', Color::White),
+    ('▒', Color::Silver),
+    ('▓', Color::Gray),
+    ('▒', Color::White),
+    ('▓', Color::Silver),
+    ('▓', Color::White),
+    ('█', Color::White),
+];
+
 fn pixel_to_16color_character(p: Pixel) -> Character {
     let (p_r, p_g, p_b) = p.blend_alpha();
     let r = ((p_r as u32) + 32) / 64;
@@ -164,14 +178,9 @@ fn pixel_to_black_and_white(p: Pixel) -> Character {
     }
 }
 fn pixel_to_gray(p: Pixel) -> Character {
-    let proc = ((p.luminance() as u32) + 32) >> 6;
-    match proc {
-        0 => Character::new(' ', Color::Black, Color::Black, CharFlags::None),
-        1 => Character::new(SpecialChar::Block25, Color::White, Color::Black, CharFlags::None),
-        2 => Character::new(SpecialChar::Block50, Color::White, Color::Black, CharFlags::None),
-        3 => Character::new(SpecialChar::Block75, Color::White, Color::Black, CharFlags::None),
-        _ => Character::new(' ', Color::White, Color::White, CharFlags::None),
-    }
+    let index = ((p.luminance() as usize) / 24).min(GRAY_CHARS.len() - 1);
+    let (ch,fore) = GRAY_CHARS[index];
+    Character::new(ch, fore, Color::Black, CharFlags::None)
 }
 
 fn render_large_blocks<T>(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: T)
