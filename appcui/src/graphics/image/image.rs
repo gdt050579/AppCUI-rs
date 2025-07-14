@@ -263,7 +263,7 @@ impl Image {
     pub fn render_size(&self, render_options: &RenderOptions) -> Size {
         let unscale_size = match render_options.char_set {
             CharacterSet::SmallBlocks => small_blocks_renderer::size(self),
-            CharacterSet::LargeBlock => large_blocks_renderer::size(self),
+            CharacterSet::LargeBlocks => large_blocks_renderer::size(self),
             CharacterSet::DitheredShades => todo!(),
             CharacterSet::Braille => braille_renderer::size(self),
             CharacterSet::AsciArt => ascii_art_renderer::size(self),
@@ -280,7 +280,7 @@ impl Image {
     pub(crate) fn paint(&self, surface: &mut Surface, x: i32, y: i32, render_options: &RenderOptions) {
         match render_options.char_set {
             CharacterSet::SmallBlocks => small_blocks_renderer::paint(surface, self, x, y, render_options),
-            CharacterSet::LargeBlock => large_blocks_renderer::paint(surface, self, x, y, render_options),
+            CharacterSet::LargeBlocks => large_blocks_renderer::paint(surface, self, x, y, render_options),
             CharacterSet::DitheredShades => todo!(),
             CharacterSet::Braille => braille_renderer::paint(surface, self, x, y, render_options),
             CharacterSet::AsciArt => ascii_art_renderer::paint(surface, self, x, y, render_options),

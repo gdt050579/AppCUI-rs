@@ -6,7 +6,7 @@ pub(super) mod ascii_art_renderer;
 #[derive(Copy,Clone)]
 pub enum CharacterSet {
     SmallBlocks,
-    LargeBlock,
+    LargeBlocks,
     DitheredShades,
     Braille,
     AsciArt

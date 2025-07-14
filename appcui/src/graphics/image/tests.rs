@@ -473,6 +473,28 @@ fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, opt
 }
 
 #[test]
+fn check_size() {
+    let img = Image::with_str(ALL_COLORS).unwrap();
+    assert_eq!(img.width(), 16);
+    assert_eq!(img.height(), 3);
+    let v: [(CharacterSet, Scale, u32, u32); 8] = [
+        (CharacterSet::SmallBlocks, Scale::NoScale, 16, 2),
+        (CharacterSet::LargeBlocks, Scale::NoScale, 32, 3),
+        (CharacterSet::AsciArt, Scale::NoScale, 32, 3),
+        (CharacterSet::Braille, Scale::NoScale, 8, 1),
+        (CharacterSet::SmallBlocks, Scale::Scale50, 8, 1),
+        (CharacterSet::LargeBlocks, Scale::Scale50, 16, 2),
+        (CharacterSet::AsciArt, Scale::Scale50, 16, 2),
+        (CharacterSet::Braille, Scale::Scale50, 4, 1),
+    ];
+    for (cs, s, w, h) in v {
+        assert_eq!(
+            img.render_size(&RenderOptionsBuilder::new().character_set(cs).scale(s).build()),
+            Size::new(w, h)
+        );       
+    }
+}
+#[test]
 fn check_image_with_invalid_size() {
     assert!(Image::new(0, 0).is_none());
     assert!(Image::new(100, 0).is_none());
@@ -624,7 +646,7 @@ fn check_draw_largeblocks_batch_flower() {
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::GrayScaleTrueColors, 0x75620856DE746435),
     ];
-    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::LargeBlock).build();
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::LargeBlocks).build();
     batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(200, 50), &mut ro);
 }
 

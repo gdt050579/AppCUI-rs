@@ -1,6 +1,9 @@
 use crate::graphics::*;
 
-fn render<T>(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: T) where T: Fn(Pixel) -> Color {
+fn render<T>(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: T)
+where
+    T: Fn(Pixel) -> Color,
+{
     let w = img.width();
     let h = img.height();
     let x_step = rap;
@@ -36,18 +39,22 @@ fn render<T>(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: T)
 
 #[inline(always)]
 pub(crate) fn size(img: &Image) -> Size {
-    Size::new(img.width(), img.height() / 2)
+    Size::new(img.width(), (img.height() + 1) >> 1)
 }
 
 #[inline(always)]
 pub(crate) fn paint(surface: &mut Surface, img: &Image, x: i32, y: i32, render_options: &RenderOptions) {
     let rap = render_options.scale as u32;
-    match render_options.color_schema {        
+    match render_options.color_schema {
         ColorSchema::Auto => {
             #[cfg(feature = "TRUE_COLORS")]
-            { render(surface, img, x, y, rap, |p| p.as_rgb_color()) }
+            {
+                render(surface, img, x, y, rap, |p| p.as_rgb_color())
+            }
             #[cfg(not(feature = "TRUE_COLORS"))]
-            { render(surface, img, x, y, rap, |p| p.as_color16()) }
+            {
+                render(surface, img, x, y, rap, |p| p.as_color16())
+            }
         }
         ColorSchema::Color16 => render(surface, img, x, y, rap, |p| p.as_color16()),
         #[cfg(feature = "TRUE_COLORS")]
