@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Every example project should be created in the folder example following the format used by other examples.
+Make sure that the cargo.toml file from the folder example is adjusted with the coresponding example.
+
+If an example contains multiple windows, every one of them will be created in a different file/module (in the example project folder) and will be referenced by main.rs

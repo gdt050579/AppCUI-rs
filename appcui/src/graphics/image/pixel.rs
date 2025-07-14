@@ -1,7 +1,4 @@
-use super::super::CharFlags;
-use super::super::Character;
 use super::super::Color;
-use super::super::SpecialChar;
 
 #[cfg(not(feature = "TRUE_COLORS"))]
 const COLOR_TO_PIXEL: [u32; 16] = [
@@ -4254,27 +4251,6 @@ impl Pixel {
     pub(super) fn as_grayscale(&self) -> Color {
         let l = self.luminance();
         Color::RGB(l,l,l)
-    }
-
-
-
-
-    pub(super) fn as_gray_scale_character(&self) -> Character {
-        let val = ((self.blue as u32) + (self.red as u32) + (self.green as u32)) / 3;
-        if val < 32 {
-            return Character::new(' ', Color::Black, Color::Black, CharFlags::None);
-        }
-        if val < 96 {
-            return Character::new(SpecialChar::Block25, Color::White, Color::Black, CharFlags::None);
-        }
-        if val < 160 {
-            return Character::new(SpecialChar::Block50, Color::White, Color::Black, CharFlags::None);
-        }
-        if val < 224 {
-            Character::new(SpecialChar::Block75, Color::White, Color::Black, CharFlags::None)
-        } else {
-            Character::new(' ', Color::White, Color::White, CharFlags::None)
-        }
     }
 }
 impl From<u32> for Pixel {
