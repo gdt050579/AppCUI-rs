@@ -4122,141 +4122,6 @@ static COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
     Color::White,
 ];
 
-const COLORMAP_64_COLORS: [Color; 125] = [
-    Color::Black,
-    Color::Blue,
-    Color::Blue,
-    Color::Blue,
-    Color::Blue,
-    Color::Green,
-    Color::Aqua,
-    Color::Blue,
-    Color::Blue,
-    Color::Blue,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Green,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Green,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Red,
-    Color::Pink,
-    Color::Blue,
-    Color::Blue,
-    Color::Blue,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::Blue,
-    Color::Blue,
-    Color::Green,
-    Color::White,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Green,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Green,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Yellow,
-    Color::White,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::Aqua,
-    Color::Red,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Red,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Red,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Red,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::Pink,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-];
-
-const COLORMAP_64_COLORS_PROC: [u8; 125] = [
-    0, 25, 50, 75, 100, 25, 25, 50, 75, 100, 50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100, 100, 75, 75, 100, 25, 25, 50, 75, 100, 25, 25, 25, 75, 100,
-    50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100, 100, 75, 75, 100, 50, 25, 50, 50, 75, 25, 25, 50, 50, 75, 50, 50, 50, 50, 50, 50, 50, 50, 75, 75,
-    75, 75, 50, 75, 100, 75, 75, 50, 75, 75, 75, 75, 50, 75, 75, 50, 50, 50, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 100, 100, 100, 75, 75, 100,
-    100, 100, 75, 75, 100, 75, 75, 50, 75, 100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
-];
-
 /// A pixel in the image.
 ///
 /// The pixel is a combination of red, green, and blue components, and an alpha component.
@@ -4337,7 +4202,7 @@ impl Pixel {
         }
     }
     #[inline(always)]
-    fn blend_alpha(&self) -> (u8, u8, u8) {
+    pub(super) fn blend_alpha(&self) -> (u8, u8, u8) {
         if self.alpha == u8::MAX {
             (self.red, self.green, self.blue)
         } else {
@@ -4392,22 +4257,7 @@ impl Pixel {
     }
 
 
-    pub(super) fn as_character(&self) -> Character {
-        let r = ((self.red as u32) + 32) / 64;
-        let g = ((self.green as u32) + 32) / 64;
-        let b = ((self.blue as u32) + 32) / 64;
-        let idx = (r * 25 + g * 5 + b) as usize;
-        let col = COLORMAP_64_COLORS[idx];
-        let proc = COLORMAP_64_COLORS_PROC[idx];
-        match proc {
-            0 => Character::new(' ', Color::Black, Color::Black, CharFlags::None),
-            25 => Character::new(SpecialChar::Block25, col, Color::Black, CharFlags::None),
-            50 => Character::new(SpecialChar::Block50, col, Color::Black, CharFlags::None),
-            75 => Character::new(SpecialChar::Block75, col, Color::Black, CharFlags::None),
-            100 => Character::new(' ', col, col, CharFlags::None),
-            _ => Character::default(),
-        }
-    }
+
 
     pub(super) fn as_gray_scale_character(&self) -> Character {
         let val = ((self.blue as u32) + (self.red as u32) + (self.green as u32)) / 3;

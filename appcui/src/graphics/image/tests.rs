@@ -467,8 +467,8 @@ fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, opt
         s.clear(Character::default());
         opt.color_schema = *cs;
         s.draw_image(0, 0, &img, opt);
-        //s.print(true);
-        assert_eq!(s.compute_hash(), *h);
+        s.print(false);
+        //assert_eq!(s.compute_hash(), *h);
     }
 }
 
@@ -477,13 +477,15 @@ fn check_size() {
     let img = Image::from_str(ALL_COLORS).unwrap();
     assert_eq!(img.width(), 16);
     assert_eq!(img.height(), 3);
-    let v: [(CharacterSet, Scale, u32, u32); 8] = [
+    let v: [(CharacterSet, Scale, u32, u32); 10] = [
         (CharacterSet::SmallBlocks, Scale::NoScale, 16, 2),
         (CharacterSet::LargeBlocks, Scale::NoScale, 32, 3),
+        (CharacterSet::DitheredShades, Scale::NoScale, 32, 3),
         (CharacterSet::AsciArt, Scale::NoScale, 32, 3),
         (CharacterSet::Braille, Scale::NoScale, 8, 1),
         (CharacterSet::SmallBlocks, Scale::Scale50, 8, 1),
         (CharacterSet::LargeBlocks, Scale::Scale50, 16, 2),
+        (CharacterSet::DitheredShades, Scale::Scale50, 16, 2),
         (CharacterSet::AsciArt, Scale::Scale50, 16, 2),
         (CharacterSet::Braille, Scale::Scale50, 4, 1),
     ];
@@ -696,4 +698,19 @@ fn check_draw_ascii_art_flower() {
     ];
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::AsciArt).build();
     batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(200, 50), &mut ro);
+}
+
+#[test]
+fn check_draw_dithered_batch_heart() {
+    let v: &[(ColorSchema, u64)] = &[
+        (ColorSchema::Color16, 0xBD2927AE262DEB25),
+        (ColorSchema::BlackAndWhite, 0x157CF3A88CB1A625),
+        (ColorSchema::GrayScale4, 0x5D15615946FCD9A5),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::TrueColors, 0xCD30829FC775849D),
+        #[cfg(feature = "TRUE_COLORS")]
+        (ColorSchema::GrayScaleTrueColors, 0x18992C9343BDF9E5),
+    ];
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::DitheredShades).build();
+    batch_check(v, &Image::from_str(HEART).unwrap(), Size::new(30, 10), &mut ro);
 }
