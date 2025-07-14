@@ -26,7 +26,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
 
     cb.init_control("ImageViewer::new");
     if cb.has_parameter("image") {
-        cb.add("Image::with_str(");
+        cb.add("Image::from_str(");
         cb.add_string_parameter("image", None);
         cb.add(").unwrap()");
     } else {

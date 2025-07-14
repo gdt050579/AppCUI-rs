@@ -474,7 +474,7 @@ fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, opt
 
 #[test]
 fn check_size() {
-    let img = Image::with_str(ALL_COLORS).unwrap();
+    let img = Image::from_str(ALL_COLORS).unwrap();
     assert_eq!(img.width(), 16);
     assert_eq!(img.height(), 3);
     let v: [(CharacterSet, Scale, u32, u32); 8] = [
@@ -499,13 +499,13 @@ fn check_image_with_invalid_size() {
     assert!(Image::new(0, 0).is_none());
     assert!(Image::new(100, 0).is_none());
     assert!(Image::new(0xFFFF, 0xFFFF).is_none());
-    assert!(Image::with_str("0000").is_none());
-    assert!(Image::with_str("||").is_none());
+    assert!(Image::from_str("0000").is_none());
+    assert!(Image::from_str("||").is_none());
 }
 
 #[test]
 fn check_size_of_image() {
-    let i = Image::with_str(HEART).unwrap();
+    let i = Image::from_str(HEART).unwrap();
     assert_eq!(i.size(), Size::new(14, 10));
 }
 
@@ -523,7 +523,7 @@ fn check_clear() {
 #[test]
 fn check_draw_smallblocks() {
     let mut s = SurfaceTester::new(40, 10);
-    let i = Image::with_str(HEART).unwrap();
+    let i = Image::from_str(HEART).unwrap();
     s.draw_image(
         1,
         1,
@@ -540,7 +540,7 @@ fn check_draw_smallblocks() {
 #[test]
 fn check_draw_smallblocks_all_colors() {
     let mut s = SurfaceTester::new(40, 10);
-    let i = Image::with_str(ALL_COLORS).unwrap();
+    let i = Image::from_str(ALL_COLORS).unwrap();
     s.draw_image(
         1,
         1,
@@ -557,7 +557,7 @@ fn check_draw_smallblocks_all_colors() {
 #[test]
 fn check_draw_smallblocks_heart_bw() {
     let mut s = SurfaceTester::new(120, 10);
-    let i = Image::with_str(HEART).unwrap();
+    let i = Image::from_str(HEART).unwrap();
     for t in 0..=4 {
         s.draw_image(
             t * 25,
@@ -577,7 +577,7 @@ fn check_draw_smallblocks_heart_bw() {
 #[test]
 fn check_draw_smallblocks_scale() {
     let mut s = SurfaceTester::new(40, 10);
-    let i = Image::with_str(HEART_RED).unwrap();
+    let i = Image::from_str(HEART_RED).unwrap();
     let ro = RenderOptionsBuilder::new()
         .color_schema(ColorSchema::Color16)
         .character_set(CharacterSet::SmallBlocks)
@@ -605,13 +605,13 @@ fn check_draw_smallblocks_batch_heart() {
         (ColorSchema::GrayScaleTrueColors, 0x6E79249F07B082E1),
     ];
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::SmallBlocks).build();
-    batch_check(v, &Image::with_str(HEART).unwrap(), Size::new(40, 10), &mut ro);
+    batch_check(v, &Image::from_str(HEART).unwrap(), Size::new(40, 10), &mut ro);
 }
 
 #[test]
 fn check_draw_smallblocks_auto() {
     let mut s = SurfaceTester::new(40, 10);
-    let i = Image::with_str(HEART).unwrap();
+    let i = Image::from_str(HEART).unwrap();
     s.draw_image(1, 1, &i, &RenderOptionsBuilder::new().character_set(CharacterSet::SmallBlocks).build());
     //s.print();
     #[cfg(not(feature = "TRUE_COLORS"))]
@@ -680,7 +680,7 @@ fn check_draw_asciiart_batch_heart() {
         (ColorSchema::GrayScaleTrueColors, 0x18992C9343BDF9E5),
     ];
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::AsciArt).build();
-    batch_check(v, &Image::with_str(HEART).unwrap(), Size::new(30, 10), &mut ro);
+    batch_check(v, &Image::from_str(HEART).unwrap(), Size::new(30, 10), &mut ro);
 }
 
 #[test]

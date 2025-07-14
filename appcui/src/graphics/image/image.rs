@@ -79,7 +79,7 @@ impl Image {
     ///
     /// // Create a 3x2 image with specific colors
     /// let image_str = "|RGB| |YWr|";
-    /// let img = Image::with_str(image_str).unwrap();
+    /// let img = Image::from_str(image_str).unwrap();
     /// assert_eq!(img.width(), 3);
     /// assert_eq!(img.height(), 2);
     /// ```
@@ -92,7 +92,7 @@ impl Image {
     ///
     /// * `Some(Image)` - If the string represents a valid image
     /// * `None` - If the format is invalid
-    pub fn with_str(image: &str) -> Option<Image> {
+    pub fn from_str(image: &str) -> Option<Image> {
         let buf = image.as_bytes();
         let mut w = 0u32;
         let mut h = 0u32;

@@ -796,7 +796,7 @@ fn check_create() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
-    let img = Image::with_str(
+    let img = Image::from_str(
         r#"
         |RR.........RR|
         |B..rr...rr..B|
@@ -852,14 +852,14 @@ fn check_smallbloacks_scaling() {
         |YYWWGGWW|
     "#;
     w.add(ImageViewer::new(
-        Image::with_str(s).unwrap(),
+        Image::from_str(s).unwrap(),
         Layout::new("x:0,y:0,w:8,h:4"),
         image::RenderMethod::SmallBlocks,
         image::Scale::NoScale,
         imageviewer::Flags::None,
     ));
     w.add(ImageViewer::new(
-        Image::with_str(s).unwrap(),
+        Image::from_str(s).unwrap(),
         Layout::new("x:10,y:0,w:16,h:8"),
         image::RenderMethod::SmallBlocks,
         image::Scale::Scale50,

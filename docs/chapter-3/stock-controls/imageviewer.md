@@ -6,7 +6,7 @@ Represent a image that is being rendered under a view-port:
 
 To create a image viewer use `ImageViewer::new` method (with 5 parameters: an image, a layout, a rendering method, scaling and initialization flags). To undestand more on how an image is being renedered or constructed read the [Images](../../chapter-2/images.md) chapter.
 ```rs
-let i = ImageViewer::new(Image::with_str(...).unwrap(), 
+let i = ImageViewer::new(Image::from_str(...).unwrap(), 
                          Layout::new("x:10,y:5,w:15"),
                          image::RendererType::SmallBlocks, 
                          image::Scale::NoScale, 
@@ -91,7 +91,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
     let mut w = window!("Heart,d:c,w:15,h:7");
-    let heart = Image::with_str(r#"
+    let heart = Image::from_str(r#"
         |.............|
         |...rr...rr...|
         |..rrrr.rrrr..|

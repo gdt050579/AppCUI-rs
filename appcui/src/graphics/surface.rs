@@ -836,7 +836,7 @@ impl Surface {
     ///         |..rrrrr..|
     ///         |...rrr...|
     ///         |....r....|"#;
-    /// let image = Image::with_str(heart).unwrap();
+    /// let image = Image::from_str(heart).unwrap();
     /// surface.draw_image(10, 10, &image,
     ///                            image::RendererType::LargeBlocks64Colors,
     ///                            image::Scale::NoScale);

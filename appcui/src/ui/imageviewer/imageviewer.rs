@@ -39,7 +39,7 @@ impl ImageViewer {
     /// use appcui::prelude::*;
     /// 
     /// 
-    /// let heart = Image::with_str(r#"
+    /// let heart = Image::from_str(r#"
     ///     |.............|
     ///     |...rr...rr...|
     ///     |..rrrr.rrrr..|

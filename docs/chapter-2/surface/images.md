@@ -4,7 +4,7 @@ While AppCUI is developed for CLI usage, it can still use images to some degree,
 
 To create an image, use the class `Image` with the following construction methods:
 1. `Image::new(width,height)` creates an image with a specific size. That image will be filled with a transparent pixel that you can later change
-2. `Image::with_str(...)` creates a 16 color image based on a string representation.
+2. `Image::from_str(...)` creates a 16 color image based on a string representation.
 
 
 ## Methods
@@ -127,7 +127,7 @@ let heart = r#"
     |...rrr...|
     |....r....|
 "#;
-let img = Image::with_str(heart);
+let img = Image::from_str(heart);
 ```
 
 ## Rendering images

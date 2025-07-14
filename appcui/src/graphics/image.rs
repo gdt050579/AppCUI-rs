@@ -17,7 +17,7 @@
 //! 
 //! // Create a 3x2 image with specific colors
 //! let image_str = "|RGB| |YWr|";
-//! let img = Image::with_str(image_str).unwrap();
+//! let img = Image::from_str(image_str).unwrap();
 //! ```
 //! 
 //! Creating an empty image and manipulating pixels:
