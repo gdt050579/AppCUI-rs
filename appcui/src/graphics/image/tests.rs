@@ -1,8 +1,4 @@
-use crate::prelude::Character;
-use crate::prelude::RenderOptionsBuilder;
-use crate::prelude::Size;
-
-use super::super::SurfaceTester;
+use super::super::{Character, Color, RenderOptionsBuilder, Size, SurfaceTester};
 use super::CharacterSet;
 use super::ColorSchema;
 use super::Image;
@@ -507,21 +503,35 @@ fn check_image_with_invalid_size() {
 
 #[test]
 fn check_image_from_buffer_invalid_size() {
-    assert!(Image::from_buffer(&[0,1,2], Size::new(0,0)).is_none());
-    assert!(Image::from_buffer(&[0,1,2], Size::new(0,2)).is_none());
-    assert!(Image::from_buffer(&[0,1,2], Size::new(2,0)).is_none());
-    // buf size is 3, the actual size is 2x2 = 4
-    assert!(Image::from_buffer(&[0,1,2], Size::new(2,2)).is_none());
-}
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0, 0)).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0, 2)).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(2, 0)).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0xFFFFFFFF, 1)).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(1, 0xFFFFFFFF)).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0xFFFFFFFF, 0xFFFFFFFF)).is_none());
 
+    // buf size is 3, the actual size is 2x2 = 4
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(2, 2)).is_none());
+}
 
 #[test]
 fn check_image_pixel() {
     let mut img = Image::from_str(HEART).unwrap();
-    assert!(img.pixel(100,100).is_none());
+    assert!(img.pixel(100, 100).is_none());
+    assert!(img.pixel(200, 200).is_none());
+    assert!(img.pixel(img.width(), img.height()).is_none());
+
     img.set_pixel(4, 4, Pixel::new(1, 2, 3, 4));
     let p = img.pixel(4, 4).unwrap();
-    assert_eq!(p, Pixel::new(1,2,3,4));
+    assert_eq!(p, Pixel::new(1, 2, 3, 4));
+}
+
+#[test]
+fn check_pixel_blendalpha() {
+    let p = Pixel::with_color(Color::Transparent);
+    assert_eq!(p.blend_alpha(), (0, 0, 0));
+    let p = Pixel::new(128, 128, 128, 128);
+    assert_eq!(p.blend_alpha(), (64, 64, 64));
 }
 
 #[test]

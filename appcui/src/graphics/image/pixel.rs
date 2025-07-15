@@ -4204,16 +4204,15 @@ impl Pixel {
             (self.red, self.green, self.blue)
         } else {
             let alpha = self.alpha as u16;
-
-            let r = (self.red as u16 * alpha) / 255;
-            let g = (self.green as u16 * alpha) / 255;
-            let b = (self.blue as u16 * alpha) / 255;
-
-            (r as u8, g as u8, b as u8)
+            (
+                ((self.red as u16 * alpha) / 255) as u8,
+                ((self.green as u16 * alpha) / 255) as u8,
+                ((self.blue as u16 * alpha) / 255) as u8,
+            )
         }
     }
     #[inline(always)]
-    pub fn luminance(&self) -> u8 {
+    pub(super) fn luminance(&self) -> u8 {
         let (r, g, b) = self.blend_alpha();
         ((13933u32 * r as u32 + 46871 * g as u32 + 4742 * b as u32) >> 16) as u8
     }
@@ -4250,7 +4249,7 @@ impl Pixel {
     #[inline(always)]
     pub(super) fn as_grayscale(&self) -> Color {
         let l = self.luminance();
-        Color::RGB(l,l,l)
+        Color::RGB(l, l, l)
     }
 }
 impl From<u32> for Pixel {
