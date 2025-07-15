@@ -1,5 +1,6 @@
 use super::{CharacterSet, ColorSchema, Scale};
 
+#[derive(Clone)]
 pub struct RenderOptions {
     pub(super) scale: Scale,
     pub(super) char_set: CharacterSet,
