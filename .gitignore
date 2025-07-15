@@ -1,6 +1,7 @@
 /target
 /Cargo.lock
 **/Cargo.lock
+**/*.tmp
 /.vscode
 /html
 test.bat

@@ -506,6 +506,25 @@ fn check_image_with_invalid_size() {
 }
 
 #[test]
+fn check_image_from_buffer_invalid_size() {
+    assert!(Image::from_buffer(&[0,1,2], Size::new(0,0)).is_none());
+    assert!(Image::from_buffer(&[0,1,2], Size::new(0,2)).is_none());
+    assert!(Image::from_buffer(&[0,1,2], Size::new(2,0)).is_none());
+    // buf size is 3, the actual size is 2x2 = 4
+    assert!(Image::from_buffer(&[0,1,2], Size::new(2,2)).is_none());
+}
+
+
+#[test]
+fn check_image_pixel() {
+    let mut img = Image::from_str(HEART).unwrap();
+    assert!(img.pixel(100,100).is_none());
+    img.set_pixel(4, 4, Pixel::new(1, 2, 3, 4));
+    let p = img.pixel(4, 4).unwrap();
+    assert_eq!(p, Pixel::new(1,2,3,4));
+}
+
+#[test]
 fn check_size_of_image() {
     let i = Image::from_str(HEART).unwrap();
     assert_eq!(i.size(), Size::new(14, 10));
