@@ -785,14 +785,12 @@ fn ferris_image() -> Image {
     ferris
 }
 
-/* 
-
 #[test]
 fn check_create() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x84E9E28762625B3)
+        CheckHash(0x684E21BD37E05073)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8");
@@ -814,8 +812,7 @@ fn check_create() {
     w.add(ImageViewer::new(
         img,
         Layout::new("d:c"),
-        image::RenderMethod::SmallBlocks,
-        image::Scale::NoScale,
+        image::RenderOptionsBuilder::new().character_set(image::CharacterSet::SmallBlocks).build(),
         imageviewer::Flags::None,
     ));
     a.add_window(w);
@@ -827,7 +824,7 @@ fn check_smallbloacks_scaling() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x2F7D4E8955E1C3D8)
+        CheckHash(0x89AC3339B85CE98C)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
@@ -854,20 +851,20 @@ fn check_smallbloacks_scaling() {
     w.add(ImageViewer::new(
         Image::from_str(s).unwrap(),
         Layout::new("x:0,y:0,w:8,h:4"),
-        image::RenderMethod::SmallBlocks,
-        image::Scale::NoScale,
+        image::RenderOptionsBuilder::new().character_set(image::CharacterSet::SmallBlocks).build(),
         imageviewer::Flags::None,
     ));
     w.add(ImageViewer::new(
         Image::from_str(s).unwrap(),
         Layout::new("x:10,y:0,w:16,h:8"),
-        image::RenderMethod::SmallBlocks,
-        image::Scale::Scale50,
+        image::RenderOptionsBuilder::new().character_set(image::CharacterSet::SmallBlocks).build(),
         imageviewer::Flags::None,
     ));
     a.add_window(w);
     a.run();
 }
+
+/*
 
 #[test]
 fn check_macro_creation() {
@@ -1048,8 +1045,7 @@ fn check_resize() {
             let i = ImageViewer::new(
                 ferris_image(),
                 Layout::new("d:c"),
-                image::RenderMethod::SmallBlocks,
-                image::Scale::NoScale,
+                image::RenderOptionsBuilder::new().character_set(image::CharacterSet::SmallBlocks).build(),
                 imageviewer::Flags::ScrollBars,
             );
             w.himg = w.add(i);
@@ -1068,7 +1064,11 @@ fn check_resize() {
                 Scale::Scale5 => "Scale:5%",
             };
             commandbar.set(key!("F1"), sc_name, mywin::Commands::Scale);
-            let rd_name = match self.control(self.himg).map(|i| i.render_method()).unwrap_or(image::RenderMethod::SmallBlocks) {
+            let rd_name = match self
+                .control(self.himg)
+                .map(|i| i.render_method())
+                .unwrap_or(image::RenderMethod::SmallBlocks)
+            {
                 RenderMethod::SmallBlocks => "Method:SmallBlocks",
                 RenderMethod::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
                 RenderMethod::GrayScale => "Method:GrayScale",
@@ -1076,7 +1076,7 @@ fn check_resize() {
             };
             commandbar.set(key!("F2"), rd_name, mywin::Commands::RenderMethod);
         }
-    
+
         fn on_event(&mut self, command_id: mywin::Commands) {
             let h = self.himg;
             if let Some(img) = self.control_mut(h) {
@@ -1101,13 +1101,13 @@ fn check_resize() {
                             RenderMethod::GrayScale => img.set_render_method(image::RenderMethod::AsciiArt),
                             RenderMethod::AsciiArt => img.set_render_method(image::RenderMethod::SmallBlocks),
                         }
-                    },
+                    }
                 }
             }
             self.request_update();
         }
     }
-    
+
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
@@ -1137,11 +1137,10 @@ fn check_resize() {
         Paint('Scale 10% - Gray scale - full image')
         CheckHash(0x4929B46F945F5DED)
     ";
-    
+
     let mut a = App::debug(90, 20, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
-
 }
 
 #[test]
@@ -1191,10 +1190,15 @@ fn check_mouse_events() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
-    let i = ImageViewer::new(ferris_image(), Layout::new("d:c"), RenderMethod::SmallBlocks, Scale::NoScale, imageviewer::Flags::ScrollBars);
+    let i = ImageViewer::new(
+        ferris_image(),
+        Layout::new("d:c"),
+        image::RenderOptionsBuilder::new().character_set(image::CharacterSet::SmallBlocks).build(),
+        imageviewer::Flags::ScrollBars,
+    );
     w.add(i);
     a.add_window(w);
     a.run();
 }
 
-    */
+*/

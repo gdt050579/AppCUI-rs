@@ -52,8 +52,12 @@ impl ImageViewer {
     ///     |......r......|
     /// "#).unwrap();
     /// let iv = ImageViewer::new(heart, Layout::new("d:c"),
-    ///                           image::RenderMethod::SmallBlocks,
-    ///                           image::Scale::NoScale,
+    ///                           image::RenderOptions::new()
+    ///                                                 .scale(image::Scale::Scale50)
+    ///                                                 .character_set(image::CharacterSet::Ascii)
+    ///                                                 .color_schema(image::ColorSchema::Grayscale)
+    ///                                                 .luminance_threshold(0.5)
+    ///                                                 .build(),
     ///                           imageviewer::Flags::None);
     /// ```
     pub fn new(image: Image, layout: Layout, render_options: image::RenderOptions, flags: Flags) -> Self {
@@ -90,45 +94,19 @@ impl ImageViewer {
         self.update_surface();
     }
 
-    /// Returns the image scale
+    /// Returns the render options of the image viewer.
     #[inline(always)]
-    pub fn scale(&self) -> image::Scale {
-        todo!("update with new methods");
-        //self.scale
+    pub fn render_options(&self) -> &image::RenderOptions {
+        &self.render_options
     }
 
-    /// Sets the image scale (it can be one of the following values):
-    /// * `image::Scale::None` - if set, the image will be rendered with no scaling (as it is)
-    /// * `image::Scale::Scale5` - 5% scale
-    /// * `image::Scale::Scale10` - 10% scale
-    /// * `image::Scale::Scale20` - 20% scale
-    /// * `image::Scale::Scale25` - 25% scale
-    /// * `image::Scale::Scale33` - 33% scale
-    /// * `image::Scale::Scale50` - 50% scale
-    pub fn set_scale(&mut self, scale: image::Scale) {
-        todo!("update with new methods");
-        //self.scale = scale;
+    /// Sets the render options of the image viewer.
+    #[inline(always)]
+    pub fn set_render_options(&mut self, render_options: image::RenderOptions) {
+        self.render_options = render_options;
         self.update_surface();
     }
 
-    /// Gets the rendeering method used to draw the image
-    #[inline(always)]
-    pub fn render_method(&self) -> image::CharacterSet {
-        todo!("update with new methods");
-        //self.render_method
-    }
-
-    /// Sets the rendering method used to draw the image.
-    /// It can be one of the following values:
-    /// * `image::RenderMethod::SmallBlocks` - if set, the image will be rendered with small blocks
-    /// * `image::RenderMethod::LargeBlocks64Colors` - if set, the image will be rendered with large blocks
-    /// * `image::RenderMethod::GrayScale` - if set, the image will be rendered with gray scale
-    /// * `image::RenderMethod::AsciiArt` - if set, the image will be rendered as ascii art
-    pub fn set_render_method(&mut self, render_method: image::CharacterSet) {
-        todo!("update with new methods");
-        //self.render_method = render_method;
-        self.update_surface();
-    }
     fn update_surface(&mut self) {
         let sz = self.image.render_size(&self.render_options);
         self.surface.resize(sz);
