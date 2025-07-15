@@ -972,7 +972,6 @@ fn check_keyboard() {
     a.run();
 }
 
-/*
 
 
 #[test]
@@ -980,50 +979,50 @@ fn check_keyboard_2() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x7E1A55A4EF19B93B)
+        CheckHash(0x332D4C4D4B6577CD)
         Key.Pressed(Ctrl+Right)
         Paint('2')
-        CheckHash(0xDF777EC8613B64D7)
+        CheckHash(0xF92DF9DB7BE7963B)
         Key.Pressed(Ctrl+Right)
         Paint('3')
-        CheckHash(0xA7DBAFAE1C99A4A2)
+        CheckHash(0x766DD8233B9CB842)
         Key.Pressed(Ctrl+Right)
         Paint('4 (reach right margin)')
-        CheckHash(0x13087BE7BACD4556)
+        CheckHash(0xB95CF2DE6175C7FC)
         Key.Pressed(Ctrl+Right)
         Paint('5 (already right margin)')
-        CheckHash(0x13087BE7BACD4556)
+        CheckHash(0xB95CF2DE6175C7FC)
         Key.Pressed(Ctrl+Down)
         Paint('6')
-        CheckHash(0x997641F7719B635A)
+        CheckHash(0x51A834E1ABD37D65)
         Key.Pressed(Ctrl+Down)
         Paint('7')
-        CheckHash(0xDD63003DDC15BD29)
+        CheckHash(0x457C06A0263040F9)
         Key.Pressed(Ctrl+Down)
         Paint('8 (reached bottom-right margin')
-        CheckHash(0x4CA8845B7CA98615)
+        CheckHash(0xE3546F93F98BFA47)
         Key.Pressed(Ctrl+Down)
         Paint('9 (already ay bottom-right margin')
-        CheckHash(0x4CA8845B7CA98615)
+        CheckHash(0xE3546F93F98BFA47)
         Key.Pressed(Ctrl+Left)
         Paint('10')
-        CheckHash(0x9AD092366D1F105A)
+        CheckHash(0x5D7385E8AFB42ECA)
         Key.Pressed(Ctrl+Left,2)
         Paint('11 (reached bottom-left margin)')
-        CheckHash(0x661B7011FB31F1D6)
+        CheckHash(0x862A514D24EE7320)
         Key.Pressed(Ctrl+Left)
         Paint('12 (already at bottom-left margin)')
-        CheckHash(0x661B7011FB31F1D6)
+        CheckHash(0x862A514D24EE7320)
         Key.Pressed(Ctrl+Up)
         Paint('13')
-        CheckHash(0x88FC6D76174940F7)
+        CheckHash(0x1AA3385C8B1E1C9A)
         Key.Pressed(Ctrl+Up,2)
         Paint('14 (initial state)')
-        CheckHash(0x7E1A55A4EF19B93B)
+        CheckHash(0x332D4C4D4B6577CD)
         Key.Pressed(Ctrl+Up,100)
         Paint('15 (already at initial state)')
-        CheckHash(0x7E1A55A4EF19B93B)
-";
+        CheckHash(0x332D4C4D4B6577CD)
+    ";
     let mut a = App::debug(40, 15, script).build().unwrap();
     let mut w = window!("Title,d:c");
     let mut i = imageviewer!("d:c,w:100%,h:100%,flags:ScrollBars");
@@ -1032,6 +1031,9 @@ fn check_keyboard_2() {
     a.add_window(w);
     a.run();
 }
+
+/*
+
 
 #[test]
 fn check_resize() {
