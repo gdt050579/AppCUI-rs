@@ -1,4 +1,6 @@
-use crate::prelude::image::character_set::{large_blocks_renderer, small_blocks_renderer, braille_renderer, ascii_art_renderer, dithered_shades_renderer};
+use crate::prelude::image::character_set::{
+    ascii_art_renderer, braille_renderer, dithered_shades_renderer, large_blocks_renderer, small_blocks_renderer,
+};
 use crate::prelude::RenderOptions;
 
 use super::super::{Color, Size, Surface};
@@ -161,9 +163,9 @@ impl Image {
     ///     - **red** is the next 8 bits after green  : ((value >> 16) & 0xFF)
     ///     - **alpha** is the most significant 8 bits (value >> 24)
     /// * `size` - The size of the image
-    /// 
+    ///
     /// # Remarks
-    /// 
+    ///
     /// The size of the image must be the same length as the raw pixels buffer (buffer.len() == size.width * size.height)
     ///
     /// # Returns
@@ -184,7 +186,7 @@ impl Image {
         let mut me = Self {
             width: size.width,
             height: size.height,
-            pixels: Vec::with_capacity(buffer.len())
+            pixels: Vec::with_capacity(buffer.len()),
         };
         for pixel_value in buffer {
             me.pixels.push(Pixel::from(*pixel_value));
@@ -287,6 +289,13 @@ impl Image {
         }
     }
 
+    /// Removes the alpha channel from all pixels
+    pub fn remove_alpha(&mut self) {
+        for p in &mut self.pixels {
+            p.alpha = u8::MAX;
+        }
+    }
+
     pub(super) fn compute_square_average_color(&self, x: u32, y: u32, sz: u32) -> Pixel {
         if (x >= self.width) || (y >= self.height) || (sz == 0) {
             return Pixel::default(); // nothing to compute
@@ -297,6 +306,7 @@ impl Image {
         let mut sum_r = 0u32;
         let mut sum_g = 0u32;
         let mut sum_b = 0u32;
+        let mut sum_a = 0u32;
         let mut pos = (y as usize) * (self.width as usize) + (x as usize);
         let mut p_y = y;
         while p_y < e_y {
@@ -304,11 +314,17 @@ impl Image {
                 sum_r += px.red as u32;
                 sum_g += px.green as u32;
                 sum_b += px.blue as u32;
+                sum_a += px.alpha as u32;
             }
             pos += self.width as usize;
             p_y += 1;
         }
         let nr_pixels = sz * sz;
-        Pixel::with_rgb((sum_r / nr_pixels) as u8, (sum_g / nr_pixels) as u8, (sum_b / nr_pixels) as u8)
+        Pixel::new(
+            (sum_r / nr_pixels) as u8,
+            (sum_g / nr_pixels) as u8,
+            (sum_b / nr_pixels) as u8,
+            (sum_a / nr_pixels) as u8,
+        )
     }
 }
