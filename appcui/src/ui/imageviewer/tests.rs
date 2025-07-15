@@ -864,14 +864,13 @@ fn check_smallbloacks_scaling() {
     a.run();
 }
 
-/*
 
 #[test]
 fn check_macro_creation() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x336411586F530FA4)
+        CheckHash(0x6BFC41C2BB0D0A64)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
@@ -885,7 +884,7 @@ fn check_macro_creation_2() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0xD4B545A31AC55161)
+        CheckHash(0x71D38C2B9819C1)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
@@ -901,11 +900,11 @@ fn check_ferris_ascii_art() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0xEB402B2A9B870617)
+        CheckHash(0xC6E8004AB9A5B3B3)
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
     let mut w = window!("Title,d:c");
-    let mut i = imageviewer!("d:c,w:100%,h:100%,scale:25%,render:AsciiArt,flags:ScrollBars");
+    let mut i = imageviewer!("d:c,w:100%,h:100%,scale:25%,charset:AsciiArt,flags:ScrollBars");
     i.set_image(ferris_image());
     w.add(i);
     a.add_window(w);
@@ -917,53 +916,53 @@ fn check_keyboard() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0xE687A7FF877E7CAD)
+        CheckHash(0x26356B3FED8EBC60)
         Key.Pressed(Right)
         Paint('2')
-        CheckHash(0xAEDA243436089AD1)
+        CheckHash(0xD087A7871011DEBC)
         Key.Pressed(Right,3)
         Paint('3')
-        CheckHash(0x6675A042BCB18785)
+        CheckHash(0x99F37C4D6FD56BE8)
         Key.Pressed(Right,2)
         Paint('4 (no changed)')
-        CheckHash(0x6675A042BCB18785)
+        CheckHash(0x99F37C4D6FD56BE8)
         Key.Pressed(Right,100)
         Paint('4 (already at margin)')
-        CheckHash(0x6675A042BCB18785)
+        CheckHash(0x99F37C4D6FD56BE8)
         Key.Pressed(Left,3)
         Paint('5')
-        CheckHash(0xE687A7FF877E7CAD)
+        CheckHash(0x26356B3FED8EBC60)
         Key.Pressed(Left,2)
         Paint('Back to initial state')
-        CheckHash(0xE687A7FF877E7CAD)
+        CheckHash(0x26356B3FED8EBC60)
         Key.Pressed(Down,2)
         Paint('6')
-        CheckHash(0xB186B00D9154AF51)
+        CheckHash(0x892504B25EBE8267)
         Key.Pressed(Down,4)
         Paint('7')
-        CheckHash(0x7D04E0FF30ADBD6D)
+        CheckHash(0xBD2C0389AE4D5402)
         Key.Pressed(Up,2)
         Paint('8')
-        CheckHash(0x58A6EECA36A86306)
+        CheckHash(0xDB8B912DB26845FB)
         Key.Pressed(Shift+Up)
         Paint('Back to initial state')
-        CheckHash(0xE687A7FF877E7CAD)
+        CheckHash(0x26356B3FED8EBC60)
         Key.Pressed(Shift+Right)
         Paint('Right top margin')
-        CheckHash(0x6675A042BCB18785)
+        CheckHash(0x99F37C4D6FD56BE8)
         Key.Pressed(Shift+Down)
         Paint('9')
-        CheckHash(0xED9975A640E4C422)
+        CheckHash(0x621FD41334546768)
         Key.Pressed(Shift+Left)
         Paint('10')
-        CheckHash(0xD05FD48F6B38C61A)
+        CheckHash(0xE674C2C496CD80)
         Key.Pressed(Home)
         Paint('Back to initial state')
-        CheckHash(0xE687A7FF877E7CAD)
+        CheckHash(0x26356B3FED8EBC60)
         Key.Pressed(End)
         Paint('11')
-        CheckHash(0xED9975A640E4C422)
-";
+        CheckHash(0x621FD41334546768)
+    ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Title,d:c");
     let mut i = imageviewer!("d:c,w:100%,h:100%,scale:50%,flags:ScrollBars");
@@ -972,6 +971,10 @@ fn check_keyboard() {
     a.add_window(w);
     a.run();
 }
+
+/*
+
+
 #[test]
 fn check_keyboard_2() {
     let script = "

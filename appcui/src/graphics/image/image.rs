@@ -266,7 +266,7 @@ impl Image {
             CharacterSet::LargeBlocks => large_blocks_renderer::size(self),
             CharacterSet::DitheredShades => dithered_shades_renderer::size(self),
             CharacterSet::Braille => braille_renderer::size(self),
-            CharacterSet::AsciArt => ascii_art_renderer::size(self),
+            CharacterSet::AsciiArt => ascii_art_renderer::size(self),
         };
         let rap = render_options.scale as u32;
         if rap == 1 {
@@ -283,7 +283,7 @@ impl Image {
             CharacterSet::LargeBlocks => large_blocks_renderer::paint(surface, self, x, y, render_options),
             CharacterSet::DitheredShades => dithered_shades_renderer::paint(surface, self, x, y, render_options),
             CharacterSet::Braille => braille_renderer::paint(surface, self, x, y, render_options),
-            CharacterSet::AsciArt => ascii_art_renderer::paint(surface, self, x, y, render_options),
+            CharacterSet::AsciiArt => ascii_art_renderer::paint(surface, self, x, y, render_options),
         }
     }
 

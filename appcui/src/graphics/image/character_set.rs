@@ -10,5 +10,5 @@ pub enum CharacterSet {
     LargeBlocks,
     DitheredShades,
     Braille,
-    AsciArt
+    AsciiArt
 }

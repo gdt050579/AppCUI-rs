@@ -477,12 +477,12 @@ fn check_size() {
         (CharacterSet::SmallBlocks, Scale::NoScale, 16, 2),
         (CharacterSet::LargeBlocks, Scale::NoScale, 32, 3),
         (CharacterSet::DitheredShades, Scale::NoScale, 32, 3),
-        (CharacterSet::AsciArt, Scale::NoScale, 32, 3),
+        (CharacterSet::AsciiArt, Scale::NoScale, 32, 3),
         (CharacterSet::Braille, Scale::NoScale, 8, 1),
         (CharacterSet::SmallBlocks, Scale::Scale50, 8, 1),
         (CharacterSet::LargeBlocks, Scale::Scale50, 16, 2),
         (CharacterSet::DitheredShades, Scale::Scale50, 16, 2),
-        (CharacterSet::AsciArt, Scale::Scale50, 16, 2),
+        (CharacterSet::AsciiArt, Scale::Scale50, 16, 2),
         (CharacterSet::Braille, Scale::Scale50, 4, 1),
     ];
     for (cs, s, w, h) in v {
@@ -710,7 +710,7 @@ fn check_draw_asciiart_batch_heart() {
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::GrayScaleTrueColors, 0x18992C9343BDF9E5),
     ];
-    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::AsciArt).build();
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::AsciiArt).build();
     batch_check(v, &Image::from_str(HEART).unwrap(), Size::new(30, 10), &mut ro);
 }
 
@@ -725,7 +725,7 @@ fn check_draw_ascii_art_flower() {
         #[cfg(feature = "TRUE_COLORS")]
         (ColorSchema::GrayScaleTrueColors, 0x9204C86005FA5D69),
     ];
-    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::AsciArt).build();
+    let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::AsciiArt).build();
     batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(200, 50), &mut ro);
 }
 
