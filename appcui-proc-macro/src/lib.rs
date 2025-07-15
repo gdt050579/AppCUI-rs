@@ -1024,34 +1024,42 @@ pub fn canvas(input: TokenStream) -> TokenStream {
     crate::controls::canvas::create(input)
 }
 
-/// Creates a new image viewer control for displaying images.
+/// Creates a new image viewer control for displaying images with various rendering options.
 /// The format is `imageviewer!("attributes")` where the attributes are pairs of key-value, separated by comma.
 /// 
 /// # Parameters
-/// * `image` - String representation of the image to display (optional). The string should be formatted as follows:
-///   - Each line represents a row of pixels
-///   - Each character represents a pixel with its color
-///   - Colors are represented by characters (e.g., 'R' for red, 'G' for green, 'B' for blue, 'Y' for yellow)
-///   - Use ' ' (space) for transparent pixels
-///   - Use '\n' for new lines
+/// * `image` (required) - The image to display. Can be:
+///   - A string representation using pipe characters `|` to delimit rows
+///   - Color codes: '0'/' ' (black), 'B'/'1' (dark blue), 'G'/'2' (dark green), etc.
+/// * `charset` or `char_set` - Character set for rendering (optional). Can be:
+///   - **SmallBlocks** (default) - Uses small block characters
+///   - **LargeBlocks** - Uses large block characters
+///   - **DitheredShades** - Uses dithered shading
+///   - **Braille** - Uses braille characters
+///   - **AsciiArt** - Uses ASCII art characters
+/// * `scale` - Scaling percentage (optional). Can be:
+///   - **100** (default) - No scaling
+///   - **50** - 50% scaling
+///   - **33** - 33% scaling
+///   - **25** - 25% scaling
+///   - **20** - 20% scaling
+///   - **10** - 10% scaling
+///   - **5** - 5% scaling
+/// * `color_schema` or `colorschema` or `cs` - Color schema (optional). Can be:
+///   - **Auto** (default) - Automatic color detection
+///   - **Color16** - 16-color mode
+///   - **TrueColors** - True color mode (if feature enabled)
+///   - **GrayScale4** - 4-level grayscale
+///   - **GrayScaleTrueColors** - True color grayscale (if feature enabled)
+///   - **BlackAndWhite** - Black and white mode
+/// * `luminance_threshold` or `lt` - Luminance threshold percentage (optional, 0-100)
+///   - Controls the threshold for black/white conversion
+///   - Default: 50%
 /// * `flags` - Control flags (optional). Can be:
-///   - **ScrollBars** - Shows scroll bars when image exceeds the viewer size
-/// * `render` or `rendermethod` or `rm` - Image rendering method (optional, defaults to SmallBlocks). Can be:
-///   - **SmallBlocks** - Uses small blocks for rendering
-///   - **LargeBlocks64Colors** - Uses large blocks with 64 colors
-///   - **GrayScale** - Renders in grayscale
-///   - **AsciiArt** - Renders as ASCII art
-/// * `scale` - Image scale percentage (optional, defaults to 100%). Supported values:
-///   - 100% (NoScale)
-///   - 50% (Scale50)
-///   - 33% (Scale33)
-///   - 25% (Scale25)
-///   - 20% (Scale20)
-///   - 10% (Scale10)
-///   - 5% (Scale5)
-/// * `background` or `back` - Background character and attributes (optional). Format: `{char,color,background_color}`
-/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
-/// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
+///   - **ScrollBars** - Shows horizontal and vertical scrollbars
+/// * `background` or `back` - Background character (optional)
+/// * `left-scroll-margin` or `lsm` - Left scroll margin (optional)
+/// * `top-scroll-margin` or `tsm` - Top scroll margin (optional)
 /// * Position and size:
 ///   - `x`, `y` - Position coordinates
 ///   - `width`/`w`, `height`/`h` - Control dimensions
@@ -1065,22 +1073,38 @@ pub fn canvas(input: TokenStream) -> TokenStream {
 /// ```rust,compile_fail
 /// use appcui::prelude::*;
 /// 
-/// // Basic image viewer with a smiley face
-/// let viewer = imageviewer!(
-///     "image: '|  YYYYY  |\n| Y     Y |\n|Y  Y Y  Y|\n|Y       Y|\n|Y  YYY  Y|\n| Y     Y |\n|  YYYYY  |',
-///     x=1, y=1, width=40, height=20"
+/// // Basic image viewer
+/// let iv = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|', x=1, y=1, width=20, height=10");
+/// 
+/// // Image viewer with custom rendering options
+/// let iv = imageviewer!(
+///     "image: '|BB..........BB|,|B..rr....rr..B|,|..rrrr..rrrr..|',
+///      charset: Braille,
+///      scale: 50%,
+///      color_schema: BlackAndWhite,
+///      luminance_threshold: 30%,
+///      flags: ScrollBars,
+///      x=2, y=2, width=40, height=20"
 /// );
 /// 
-/// // Image viewer with custom rendering and background
-/// let viewer = imageviewer!(
-///     "image: '|  YYYYY  |\n| Y     Y |\n|Y  Y Y  Y|\n|Y       Y|\n|Y  YYY  Y|\n| Y     Y |\n|  YYYYY  |',
-///     render: GrayScale,
-///     back: {' ', White, Blue},
-///     lsm: 2,
-///     tsm: 1,
-///     x=2, y=2, width=50, height=25"
+/// // Image viewer with ASCII art
+/// let iv = imageviewer!(
+///     "image: '|RGB|,|YWr|',
+///      charset: AsciiArt,
+///      scale: 25,
+///      color_schema: Color16,
+///      x=3, y=3, width=60, height=30"
 /// );
 /// ```
+/// 
+/// # Image Format
+/// Images are defined using a string format where:
+/// - Pipe characters `|` delimit rows
+/// - Single characters represent colored pixels
+/// - Color codes: '0'/' ' (black), 'B'/'1' (dark blue), 'G'/'2' (dark green), 'T'/'3' (teal),
+///   'R'/'4' (dark red), 'M'/'m'/'5' (magenta), '6'/'o'/'O' (olive), 'S'/'7' (silver),
+///   's'/'8' (gray), 'b'/'9' (blue), 'g' (green), 'A'/'a'/'t' (aqua), 'r' (red),
+///   'P'/'p' (pink), 'Y'/'y' (yellow), 'W'/'w' (white)
 #[proc_macro]
 pub fn imageviewer(input: TokenStream) -> TokenStream {
     crate::controls::imageviewer::create(input)
