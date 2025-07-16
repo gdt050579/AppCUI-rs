@@ -1,6 +1,8 @@
 use appcui::prelude::*;
 
-#[Window(events=CommandBarEvents,commands:[Scale,CharSet,ColorSchema])]
+const LUMINANCE_SEQUENCE: [u8; 9] = [5, 10, 25, 33, 50, 66, 75, 90, 95];
+
+#[Window(events=CommandBarEvents,commands:[Scale,CharSet,ColorSchema,Luminance])]
 pub struct MyWin {
     himg: Handle<ImageViewer>,
 }
@@ -28,13 +30,13 @@ impl CommandBarEvents for MyWin {
             .map(|i| i.render_options().scale())
             .unwrap_or(image::Scale::NoScale)
         {
-            Scale::NoScale => "Scale:100%",
-            Scale::Scale50 => "Scale:50%",
-            Scale::Scale33 => "Scale:33%",
-            Scale::Scale25 => "Scale:25%",
-            Scale::Scale20 => "Scale:20%",
-            Scale::Scale10 => "Scale:10%",
-            Scale::Scale5 => "Scale:5%",
+            image::Scale::NoScale => "Scale:100%",
+            image::Scale::Scale50 => "Scale:50%",
+            image::Scale::Scale33 => "Scale:33%",
+            image::Scale::Scale25 => "Scale:25%",
+            image::Scale::Scale20 => "Scale:20%",
+            image::Scale::Scale10 => "Scale:10%",
+            image::Scale::Scale5 => "Scale:5%",
         };
         commandbar.set(key!("F1"), sc_name, mywin::Commands::Scale);
         let chset = match self
@@ -42,11 +44,11 @@ impl CommandBarEvents for MyWin {
             .map(|i| i.render_options().character_set())
             .unwrap_or(image::CharacterSet::SmallBlocks)
         {
-            CharacterSet::SmallBlocks => "SmallBlocks",
-            CharacterSet::LargeBlocks => "LargeBlocks",
-            CharacterSet::DitheredShades => "DitheredShades",
-            CharacterSet::Braille => "Braille",
-            CharacterSet::AsciiArt => "AsciiArt",
+            image::CharacterSet::SmallBlocks => "SmallBlocks",
+            image::CharacterSet::LargeBlocks => "LargeBlocks",
+            image::CharacterSet::DitheredShades => "DitheredShades",
+            image::CharacterSet::Braille => "Braille",
+            image::CharacterSet::AsciiArt => "AsciiArt",
         };
         commandbar.set(key!("F2"), chset, mywin::Commands::CharSet);
 
@@ -55,16 +57,33 @@ impl CommandBarEvents for MyWin {
             .map(|i| i.render_options().color_schema())
             .unwrap_or(image::ColorSchema::Auto)
         {
-            ColorSchema::Auto => "Auto",
-            ColorSchema::Color16 => "16 Colors",
+            image::ColorSchema::Auto => "Auto",
+            image::ColorSchema::Color16 => "16 Colors",
             //#[cfg(feature = "TRUE_COLORS")]
-            ColorSchema::TrueColors => "True Colors",
-            ColorSchema::GrayScale4 => "Gray (4 colors)",
+            image::ColorSchema::TrueColors => "True Colors",
+            image::ColorSchema::GrayScale4 => "Gray (4 colors)",
             //#[cfg(feature = "TRUE_COLORS")]
-            ColorSchema::GrayScaleTrueColors => "Gray Scale",
-            ColorSchema::BlackAndWhite => "Black and White",
+            image::ColorSchema::GrayScaleTrueColors => "Gray Scale",
+            image::ColorSchema::BlackAndWhite => "Black and White",
         };
-        commandbar.set(key!("F3"), cschema, mywin::Commands::ColorSchema);        
+        commandbar.set(key!("F3"), cschema, mywin::Commands::ColorSchema);
+
+        let luminance = self.control(self.himg).map(|i| i.render_options().luminance_threshold()).unwrap_or(0.1);
+        let current_percent = (luminance * 100.0) as u8;
+
+        let closest_percent = LUMINANCE_SEQUENCE
+            .iter()
+            .min_by_key(|&&x| {
+                let diff = if current_percent >= x {
+                    current_percent - x
+                } else {
+                    x - current_percent
+                };
+                diff
+            })
+            .unwrap_or(&5);
+
+        commandbar.set(key!("F4"), format!("Luminance:{}%", closest_percent).as_str(), mywin::Commands::Luminance);
     }
 
     fn on_event(&mut self, command_id: mywin::Commands) {
@@ -74,13 +93,13 @@ impl CommandBarEvents for MyWin {
                 mywin::Commands::Scale => {
                     let sc = img.render_options().scale();
                     let new_scale = match sc {
-                        Scale::NoScale => image::Scale::Scale50,
-                        Scale::Scale50 => image::Scale::Scale33,
-                        Scale::Scale33 => image::Scale::Scale25,
-                        Scale::Scale25 => image::Scale::Scale20,
-                        Scale::Scale20 => image::Scale::Scale10,
-                        Scale::Scale10 => image::Scale::Scale5,
-                        Scale::Scale5 => image::Scale::NoScale,
+                        image::Scale::NoScale => image::Scale::Scale50,
+                        image::Scale::Scale50 => image::Scale::Scale33,
+                        image::Scale::Scale33 => image::Scale::Scale25,
+                        image::Scale::Scale25 => image::Scale::Scale20,
+                        image::Scale::Scale20 => image::Scale::Scale10,
+                        image::Scale::Scale10 => image::Scale::Scale5,
+                        image::Scale::Scale5 => image::Scale::NoScale,
                     };
                     let mut opt = img.render_options().clone();
                     opt.set_scale(new_scale);
@@ -89,11 +108,11 @@ impl CommandBarEvents for MyWin {
                 mywin::Commands::CharSet => {
                     let chset = img.render_options().character_set();
                     let new_chset = match chset {
-                        CharacterSet::SmallBlocks => CharacterSet::LargeBlocks,
-                        CharacterSet::LargeBlocks => CharacterSet::DitheredShades,
-                        CharacterSet::DitheredShades => CharacterSet::Braille,
-                        CharacterSet::Braille => CharacterSet::AsciiArt,
-                        CharacterSet::AsciiArt => CharacterSet::SmallBlocks,
+                        image::CharacterSet::SmallBlocks => image::CharacterSet::LargeBlocks,
+                        image::CharacterSet::LargeBlocks => image::CharacterSet::DitheredShades,
+                        image::CharacterSet::DitheredShades => image::CharacterSet::Braille,
+                        image::CharacterSet::Braille => image::CharacterSet::AsciiArt,
+                        image::CharacterSet::AsciiArt => image::CharacterSet::SmallBlocks,
                     };
                     let mut opt = img.render_options().clone();
                     opt.set_character_set(new_chset);
@@ -102,15 +121,42 @@ impl CommandBarEvents for MyWin {
                 mywin::Commands::ColorSchema => {
                     let cs = img.render_options().color_schema();
                     let new_cs = match cs {
-                        ColorSchema::Auto => ColorSchema::Color16,
-                        ColorSchema::Color16 => ColorSchema::TrueColors,
-                        ColorSchema::TrueColors => ColorSchema::GrayScale4,
-                        ColorSchema::GrayScale4 => ColorSchema::GrayScaleTrueColors,
-                        ColorSchema::GrayScaleTrueColors => ColorSchema::BlackAndWhite ,
-                        ColorSchema::BlackAndWhite => ColorSchema::Auto,
+                        image::ColorSchema::Auto => image::ColorSchema::Color16,
+                        image::ColorSchema::Color16 => image::ColorSchema::TrueColors,
+                        image::ColorSchema::TrueColors => image::ColorSchema::GrayScale4,
+                        image::ColorSchema::GrayScale4 => image::ColorSchema::GrayScaleTrueColors,
+                        image::ColorSchema::GrayScaleTrueColors => image::ColorSchema::BlackAndWhite,
+                        image::ColorSchema::BlackAndWhite => image::ColorSchema::Auto,
                     };
                     let mut opt = img.render_options().clone();
                     opt.set_color_schema(new_cs);
+                    img.set_render_options(opt);
+                }
+                mywin::Commands::Luminance => {
+                    let current_luminance = img.render_options().luminance_threshold();
+                    let current_percent = (current_luminance * 100.0) as u8;
+
+                    let closest_percent = LUMINANCE_SEQUENCE
+                        .iter()
+                        .min_by_key(|&&x| {
+                            let diff = if current_percent >= x {
+                                current_percent - x
+                            } else {
+                                x - current_percent
+                            };
+                            diff
+                        })
+                        .unwrap_or(&5);
+
+                    let next_percent = if let Some(current_index) = LUMINANCE_SEQUENCE.iter().position(|&x| x == *closest_percent) {
+                        let next_index = (current_index + 1) % LUMINANCE_SEQUENCE.len();
+                        LUMINANCE_SEQUENCE[next_index]
+                    } else {
+                        5
+                    };
+
+                    let mut opt = img.render_options().clone();
+                    opt.set_luminance_threshold(next_percent as f64 / 100.0);
                     img.set_render_options(opt);
                 }
             }
