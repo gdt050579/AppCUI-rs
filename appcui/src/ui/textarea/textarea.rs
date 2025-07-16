@@ -137,16 +137,12 @@ impl TextArea {
         let first_byte = bytes[position];
     
         // Determine the number of bytes in the character
-        let char_len = if first_byte & 0x80 == 0x00 {
-            1 // 1-byte (ASCII)
-        } else if first_byte & 0xE0 == 0xC0 {
-            2 // 2-byte character
-        } else if first_byte & 0xF0 == 0xE0 {
-            3 // 3-byte character
-        } else if first_byte & 0xF8 == 0xF0 {
-            4 // 4-byte character
-        } else {
-            return None; // Invalid UTF-8 sequence start
+        let char_len = match first_byte {
+            0x00..=0x7F => 1, // 1-byte (ASCII)
+            0xC2..=0xDF => 2, // 2-byte character
+            0xE0..=0xEF => 3, // 3-byte character
+            0xF0..=0xF4 => 4, // 4-byte character
+            _ => return None, // Invalid UTF-8 sequence start
         };
     
         if position + char_len > bytes.len() {
@@ -417,6 +413,10 @@ impl TextArea {
             if current_row == self.line_character_counts.len() as u32 {
                 current_row = self.line_character_counts.len() as u32 - 1;
                 new_position = self.line_character_counts[current_row as usize] as i32 - 1;
+
+                if new_position < 0 {
+                    new_position = 0;
+                }
             }
 
             // Updating the line offset, which will be 0 if the text fits enterely on the screen, otherwise last_line - line_capacity 
@@ -584,6 +584,16 @@ impl TextArea {
     }
 
     #[inline(always)]
+    fn ensure_line_sizes(&mut self) {
+        // If the line sizes are empty, we need to add a new line
+        if self.line_sizes.is_empty() {
+            self.text = "\n".to_string();
+            self.line_sizes.push(1);
+            self.line_character_counts.push(1);
+        }
+    }
+
+    #[inline(always)]
     fn update_line_number_tab_size(&mut self) {
         if !self.flags.contains(Flags::ShowLineNumber) {
             return;
@@ -685,6 +695,7 @@ impl TextArea {
             control.line_character_counts.push(0);
         }
 
+        control.ensure_line_sizes();
         control.update_max_line_size();
         control.update_line_number_tab_size();
         control.update_window_width();
@@ -871,6 +882,9 @@ impl TextArea {
         let mut position_end_x = 0;
         let mut position_end_y = 0;
 
+        let mut start_line_position = 0;
+        let mut end_line_position = 0;
+
         let mut counter = 0;
         let mut line_iterator = 0;
 
@@ -878,7 +892,11 @@ impl TextArea {
             
             if counter <= pos_start && pos_start < counter + self.line_sizes[line_iterator] as usize {
                 position_start_y = line_iterator;
-                position_start_x = pos_start - counter; 
+                position_start_x = pos_start - counter;
+            }
+
+            if counter < pos_start {
+                start_line_position +=  self.line_sizes[line_iterator];
             }
 
             if counter <= pos_end && pos_end < counter + self.line_sizes[line_iterator] as usize {
@@ -887,18 +905,27 @@ impl TextArea {
             }
 
             counter += self.line_sizes[line_iterator] as usize;
+
+            if counter < pos_end {
+                end_line_position += self.line_sizes[line_iterator];
+            }
+
             line_iterator += 1;
         }
 
         // If the deletion is requested on a single line
         if position_start_y == position_end_y {
             self.line_sizes[position_start_y] -= (position_end_x - position_start_x) as u32;
+
+            // Update the character count for the line
+            let number_chars = self.text[pos_start..pos_end].chars().count() as u32;
+            self.line_character_counts[position_start_y] -= number_chars;
         }
         // The deletion request is multiline
         else {
             // Cut the first line to 0..position_start_x
             self.line_sizes[position_start_y] = position_start_x as u32;
-
+            
             // Cut the last line to [position_end_x..]
             self.line_sizes[position_end_y] -= position_end_x as u32;
 
@@ -908,6 +935,21 @@ impl TextArea {
             // Merge the two lines together
             self.line_sizes[position_start_y] += self.line_sizes[position_start_y + 1];
             self.line_sizes.remove(position_start_y + 1);
+
+            // Update the character count for the lines
+
+            // Cut the first line to 0..position_start_x, converted to chars
+            self.line_character_counts[position_start_y] = self.text[start_line_position as usize..(start_line_position as usize + position_start_x)].chars().count() as u32;
+
+            // Cut the last line to [position_end_x..]
+            self.line_character_counts[position_end_y] -= self.text[end_line_position as usize..(end_line_position as usize + position_end_x)].chars().count() as u32;
+
+            // Remove the lines in between
+            self.line_character_counts.drain(position_start_y + 1..position_end_y);
+
+            // Merge the two lines together
+            self.line_character_counts[position_start_y] += self.line_character_counts[position_start_y + 1];
+            self.line_character_counts.remove(position_start_y + 1);
         }
         // Remove the selected text
         self.text.drain(pos_start..pos_end);
@@ -958,7 +1000,10 @@ impl TextArea {
     
     /// Inserts the text at the current cursor position within the text area.
     fn insert_text_internal(&mut self, text: &str) {
-        if text.contains('\n') {
+
+        let _text = text.replace('\t', "    ").replace("\r\n", "\n");
+
+        if _text.contains('\n') {
             // We need to calculate the absolute position in the text for the cursor and the position in line
             let cursor_absolute_position;
             let byte_index_in_line;
@@ -969,16 +1014,18 @@ impl TextArea {
 
             log!("Info", "Insert text after: {}", &self.text[0 .. cursor_absolute_position as usize]);
             // Adding the text given as parameter
-            self.text.insert_str(cursor_absolute_position as usize, text);
+            self.text.insert_str(cursor_absolute_position as usize, &_text);
 
             // First we parse the text in lines
             let mut line_sizes : Vec<u32> = Vec::new();
             let mut line_character_counts : Vec<u32> = Vec::new();
-            self.parse_text_in_lines(text, &mut line_sizes, &mut line_character_counts);
+            self.parse_text_in_lines(&_text, &mut line_sizes, &mut line_character_counts);
 
-            for it in 0..line_sizes.len() {
-                log!("Info", "Line size {}: {}", it, line_sizes[it]);
-                log!("Info", "Line char count {}: {}", it, line_character_counts[it]);
+            if byte_index_in_line == self.text.len() as u32 && !_text.ends_with('\n') {
+                let line_count = line_character_counts.len();
+                
+                line_sizes[line_count - 1] += 1;
+                line_character_counts[line_count - 1] += 1;
             }
 
             TextArea::update_lines_after_insert(&mut self.line_sizes, line_index, byte_index_in_line, &line_sizes);
@@ -989,12 +1036,12 @@ impl TextArea {
             let line_index = self.line_offset as usize + self.cursor.pos_y;
 
             // Adding the text given as parameter
-            self.text.insert_str(cursor_absolute_position as usize, text);
+            self.text.insert_str(cursor_absolute_position as usize, &_text);
 
-            self.line_sizes[line_index] += text.len() as u32;
-            self.line_character_counts[line_index] += text.chars().count() as u32;
+            self.line_sizes[line_index] += _text.len() as u32;
+            self.line_character_counts[line_index] += _text.chars().count() as u32;
 
-            log!("Info", "Moving cursor by {} horizontal", text.chars().count());
+            log!("Info", "Moving cursor by {} horizontal", _text.chars().count());
         }
 
         self.update_max_line_size();
@@ -1180,7 +1227,14 @@ impl TextArea {
             self.line_sizes.push(0);
             self.line_character_counts.push(0);
         }
+        else {
+            let line_count = self.line_character_counts.len();
+                
+            self.line_sizes[line_count - 1] += 1;
+            self.line_character_counts[line_count - 1] += 1;
+        }
 
+        self.ensure_line_sizes();
         self.update_max_line_size();
         self.update_line_number_tab_size();
         self.update_scrollbar_pos();
@@ -1323,10 +1377,13 @@ impl OnPaint for TextArea {
                 
 
                 if self.row_offset < current_line.len() as u32 {
-                    let current_line_view = &current_line[self.row_offset as usize .. ];
+                    let current_line_view = current_line;
                 
                     let mut counter = x as usize;
                     for (ch_index, ch) in current_line_view.char_indices() {
+                        if ch_index < self.row_offset as usize {
+                            continue;
+                        }
                         
                         if counter >= max_line_size + self.line_number_bar_size as usize {
                             break;
