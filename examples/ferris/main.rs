@@ -780,7 +780,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().command_bar().build()?;
     let mut w = window!("Image,d:c,w:100%,h:100%,flags: Sizeable");
     w.add(ImageViewer::new(
-        Image::from_buffer(FERRIS_PIXELS, Size::new(120,90)).unwrap(),
+        Image::from_buffer(FERRIS_PIXELS, Size::new(120,90), false).unwrap(),
         Layout::new("d:c"),
         image::RenderOptionsBuilder::new().build(),
         imageviewer::Flags::ScrollBars,

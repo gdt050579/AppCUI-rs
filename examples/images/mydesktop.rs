@@ -23,9 +23,7 @@ impl MyDesktop {
         }
     }
     fn create_image(width: u32, height: u32, buf: &[u32]) -> Image {
-        let mut img = Image::from_buffer(buf, Size::new(width,height)).unwrap();
-        img.remove_alpha();
-        img
+        Image::from_buffer(buf, Size::new(width,height), false).unwrap()
     }
 }
 

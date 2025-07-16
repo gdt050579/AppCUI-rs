@@ -163,6 +163,7 @@ impl Image {
     ///     - **red** is the next 8 bits after green  : ((value >> 16) & 0xFF)
     ///     - **alpha** is the most significant 8 bits (value >> 24)
     /// * `size` - The size of the image
+    /// * `store_alpha_channel` - true if the alpha channel shold be stored, or false otherwise. If false the alpha will be consider be be 255 for all pixels (each pixel will be opaque)
     ///
     /// # Remarks
     ///
@@ -172,7 +173,7 @@ impl Image {
     ///
     /// * `Some(Image)` - If the dimensions are valid
     /// * `None` - If either dimension is 0 or exceeds 0xF000
-    pub fn from_buffer(buffer: &[u32], size: Size) -> Option<Image> {
+    pub fn from_buffer(buffer: &[u32], size: Size, store_alpha_channel: bool) -> Option<Image> {
         if (size.width < 1) || (size.height < 1) {
             return None;
         }
@@ -190,6 +191,9 @@ impl Image {
         };
         for pixel_value in buffer {
             me.pixels.push(Pixel::from(*pixel_value));
+        }
+        if !store_alpha_channel {
+            me.remove_alpha();
         }
         Some(me)
     }

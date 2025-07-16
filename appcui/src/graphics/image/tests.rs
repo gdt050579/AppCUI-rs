@@ -503,15 +503,15 @@ fn check_image_with_invalid_size() {
 
 #[test]
 fn check_image_from_buffer_invalid_size() {
-    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0, 0)).is_none());
-    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0, 2)).is_none());
-    assert!(Image::from_buffer(&[0, 1, 2], Size::new(2, 0)).is_none());
-    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0xFFFFFFFF, 1)).is_none());
-    assert!(Image::from_buffer(&[0, 1, 2], Size::new(1, 0xFFFFFFFF)).is_none());
-    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0xFFFFFFFF, 0xFFFFFFFF)).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0, 0), true).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0, 2), true).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(2, 0), true).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0xFFFFFFFF, 1), true).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(1, 0xFFFFFFFF), true).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(0xFFFFFFFF, 0xFFFFFFFF), true).is_none());
 
     // buf size is 3, the actual size is 2x2 = 4
-    assert!(Image::from_buffer(&[0, 1, 2], Size::new(2, 2)).is_none());
+    assert!(Image::from_buffer(&[0, 1, 2], Size::new(2, 2), true).is_none());
 }
 
 #[test]
@@ -663,7 +663,12 @@ fn check_draw_smallblocks_batch_flower() {
         (ColorSchema::GrayScaleTrueColors, 0x62E4A9AB3E1A2125),
     ];
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::SmallBlocks).build();
-    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(100, 25), &mut ro);
+    batch_check(
+        v,
+        &Image::from_buffer(&FLOWER, Size::new(100, 50), true).unwrap(),
+        Size::new(100, 25),
+        &mut ro,
+    );
 }
 
 #[test]
@@ -678,7 +683,12 @@ fn check_draw_largeblocks_batch_flower() {
         (ColorSchema::GrayScaleTrueColors, 0x75620856DE746435),
     ];
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::LargeBlocks).build();
-    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(200, 50), &mut ro);
+    batch_check(
+        v,
+        &Image::from_buffer(&FLOWER, Size::new(100, 50), true).unwrap(),
+        Size::new(200, 50),
+        &mut ro,
+    );
 }
 
 #[test]
@@ -696,7 +706,12 @@ fn check_draw_braille_flower() {
         .luminance_threshold(0.2)
         .character_set(CharacterSet::Braille)
         .build();
-    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(50, 13), &mut ro);
+    batch_check(
+        v,
+        &Image::from_buffer(&FLOWER, Size::new(100, 50), true).unwrap(),
+        Size::new(50, 13),
+        &mut ro,
+    );
 }
 
 #[test]
@@ -726,7 +741,12 @@ fn check_draw_ascii_art_flower() {
         (ColorSchema::GrayScaleTrueColors, 0x9204C86005FA5D69),
     ];
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::AsciiArt).build();
-    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(200, 50), &mut ro);
+    batch_check(
+        v,
+        &Image::from_buffer(&FLOWER, Size::new(100, 50), true).unwrap(),
+        Size::new(200, 50),
+        &mut ro,
+    );
 }
 
 #[test]
@@ -756,7 +776,12 @@ fn check_draw_dithered_batch_flower() {
         (ColorSchema::GrayScaleTrueColors, 0x75620856DE746435),
     ];
     let mut ro = RenderOptionsBuilder::new().character_set(CharacterSet::DitheredShades).build();
-    batch_check(v, &Image::from_buffer(&FLOWER, Size::new(100, 50)).unwrap(), Size::new(200, 50), &mut ro);
+    batch_check(
+        v,
+        &Image::from_buffer(&FLOWER, Size::new(100, 50), true).unwrap(),
+        Size::new(200, 50),
+        &mut ro,
+    );
 }
 
 // #[test]
