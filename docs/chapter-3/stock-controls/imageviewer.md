@@ -25,17 +25,17 @@ let i2 = imageviewer!("image:'|R..|,|.R.|,|..R|',x:10,y:5,w:15");
 
 An image viewer supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name                     | Type         | Positional parameter | Purpose                                                                                                                                                                                         |
-| ---------------------------------- | ------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `image`                            | String       | **No**               | A string representation of an image as described in [Images (Building from a string)](../../chapter-2/surface/images.md#building-from-a-string) chapter                                                 |
-| `scale`                            | Percentage   | **No**               | The scaling percentage. Acceptable values are: `100%`, `50%`, `33%`, `25%`, `20%`, `10%` and `5%`                                                                                               |
-| `charset` or `char_set`            | Enum values  | **No**               | The character set for rendering. Can be: `SmallBlocks`, `LargeBlocks`, `DitheredShades`, `Braille`, `AsciiArt`                                                                                   |
-| `color_schema` or `colorschema` or `cs` | Enum values | **No**               | The color schema for rendering. Can be: `Auto`, `Color16`, `TrueColors`, `GrayScale4`, `GrayScaleTrueColors`, `BlackAndWhite`                                                                   |
-| `luminance_threshold` or `lt`      | Percentage   | **No**               | The luminance threshold percentage (0-100) for black/white conversion                                                                                                                             |
-| `flags`                            | String       | **No**               | Image viewer initialization flags                                                                                                                                                               |
-| `back` or `background`             | char! format | **No**               | A character as described in [Macro Builds](../../chapter-2/screen.md#macro-builds) - the same as with the `char!` macro format                                                                 |
-| `lsm` or `left-scroll-margin`      | Numeric      | **No**               | The left margin of the bottom scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `Scrollbars` was set up. |
-| `tsm` or `top-scroll-margin`       | Numeric      | **No**               | The top margin of the right scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `Scrollbars` was set up.   |
+| Parameter name                          | Type         | Positional parameter | Purpose                                                                                                                                                                                         |
+| --------------------------------------- | ------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `image`                                 | String       | **No**               | A string representation of an image as described in [Images (Building from a string)](../../chapter-2/surface/images.md#building-from-a-string) chapter                                         |
+| `scale`                                 | Percentage   | **No**               | The scaling percentage. Acceptable values are: `100%`, `50%`, `33%`, `25%`, `20%`, `10%` and `5%`                                                                                               |
+| `charset` or `char_set`                 | Enum values  | **No**               | The character set for rendering. Can be: `SmallBlocks`, `LargeBlocks`, `DitheredShades`, `Braille`, `AsciiArt`                                                                                  |
+| `color_schema` or `colorschema` or `cs` | Enum values  | **No**               | The color schema for rendering. Can be: `Auto`, `Color16`, `TrueColors`, `GrayScale4`, `GrayScaleTrueColors`, `BlackAndWhite`                                                                   |
+| `luminance_threshold` or `lt`           | Percentage   | **No**               | The luminance threshold percentage (0-100) for black/white conversion                                                                                                                           |
+| `flags`                                 | String       | **No**               | Image viewer initialization flags                                                                                                                                                               |
+| `back` or `background`                  | char! format | **No**               | A character as described in [Macro Builds](../../chapter-2/screen.md#macro-builds) - the same as with the `char!` macro format                                                                  |
+| `lsm` or `left-scroll-margin`           | Numeric      | **No**               | The left margin of the bottom scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `Scrollbars` was set up. |
+| `tsm` or `top-scroll-margin`            | Numeric      | **No**               | The top margin of the right scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `Scrollbars` was set up.   |
 
 An image viewer supports the following initialization flags:
 * `imageviewer::Flags::ScrollBars` or `ScrollBars` (for macro initialization) - this enables a set of scrollbars that can be used to change the view of the inner surface, but only when the control has focus, as described in [Components](../components.md) section.
@@ -66,13 +66,13 @@ An image viewer control emits no events.
 
 Besides the [Common methods for all Controls](../common_methods.md) an image viewer also has the following additional methods:
 
-| Method                   | Purpose                                                                                              |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `set_image(...)`         | Sets a new image to be displayed in the image viewer                                                 |
-| `render_options()`       | Returns the current render options of the image viewer                                               |
-| `set_render_options(...)` | Sets new render options for the image viewer                                                        |
-| `set_background(...)`    | Sets the character used for background                                                               |
-| `clear_background()`     | Remove the background character making the background transparent.                                   |
+| Method                    | Purpose                                                            |
+| ------------------------- | ------------------------------------------------------------------ |
+| `set_image(...)`          | Sets a new image to be displayed in the image viewer               |
+| `render_options()`        | Returns the current render options of the image viewer             |
+| `set_render_options(...)` | Sets new render options for the image viewer                       |
+| `set_background(...)`     | Sets the character used for background                             |
+| `clear_background()`      | Remove the background character making the background transparent. |
 
 ## Key association
 
