@@ -796,9 +796,6 @@ impl Win {
         w.himg = w.add(i);
         w
     }
-    fn create_image(width: u32, height: u32, buf: &[u32]) -> Image {
-        Image::from_buffer(buf, Size::new(width, height), false).unwrap()
-    }
 }
 impl CommandBarEvents for Win {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
