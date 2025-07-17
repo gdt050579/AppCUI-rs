@@ -2308,6 +2308,114 @@ fn out_ouf_bounds_mouse_click() {
 }
 
 #[test]
+fn test_empty_file() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Key.Pressed(Right, 5)
+        Key.Pressed(Left, 5)
+
+        Paint('After movement')
+
+        CheckHash(0x8E9825D0A94B134)
+        CheckCursor(1, 1)
+    ";
+
+    let text_print = "";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Empty file", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn test_paste_ascii_art() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Clipboard.SetText('  █████╗ ██████╗ ██████╗\\n██╔══██╗██╔══██╗██╔════╝\\n███████║██████╔╝██║\\n██╔══██║██╔══██╗██║\\n██║  ██║██████╔╝╚██████╗\\n╚═╝  ╚═╝╚═════╝  ╚═════╝')
+        Key.Pressed(Ctrl+V)
+
+        Paint('After Paste')
+
+        CheckHash(0xDBB8C89D945A64C8)
+        CheckCursor(25, 6)
+    ";
+
+    let text_print = "";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Empty file", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn test_paste_ascii_art_crlf() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Clipboard.SetText('  █████╗ ██████╗ ██████╗\r\\n██╔══██╗██╔══██╗██╔════╝\r\\n███████║██████╔╝██║\r\\n██╔══██║██╔══██╗██║\r\\n██║  ██║██████╔╝╚██████╗\r\\n╚═╝  ╚═╝╚═════╝  ╚═════╝')
+        Key.Pressed(Ctrl+V)
+
+        Paint('After Paste')
+
+        CheckHash(0xDBB8C89D945A64C8)
+        CheckCursor(25, 6)
+    ";
+
+    let text_print = "";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Empty file", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn test_paste_ascii_art_crlf_ctrl_back() {
+    let script = "
+        
+        // Paint.Enable(false)
+
+        Clipboard.SetText('  █████╗ ██████╗ ██████╗\r\\n██╔══██╗██╔══██╗██╔════╝\r\\n███████║██████╔╝██║\r\\n██╔══██║██╔══██╗██║\r\\n██║  ██║██████╔╝╚██████╗\r\\n╚═╝  ╚═╝╚═════╝  ╚═════╝')
+        Key.Pressed(Ctrl+V)
+
+        Key.Pressed(Ctrl+Backspace, 1)
+
+        Paint('After Delete, empty file')
+
+        Key.Pressed(Right, 5)
+
+        CheckHash(0x8E9825D0A94B134)
+        CheckCursor(1, 1)
+    ";
+
+    let text_print = "";    
+    let textarea = TextArea::new(text_print, Layout::new("d:c,h:100%,"), textarea::Flags::None);
+    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Empty file", Layout::new("d:c,w:100%,h:100%"), window::Flags::None);
+    
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn scroll_with_scrollbars_and_linenumbers() {
     let script = "
         // Paint.Enable(false)
