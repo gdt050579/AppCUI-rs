@@ -183,6 +183,7 @@ fn pixel_to_gray(p: Pixel) -> Character {
     Character::new(ch, fore, Color::Black, CharFlags::None)
 }
 
+#[cfg(feature = "TRUE_COLORS")]
 fn render_large_blocks<T>(surface: &mut Surface, img: &Image, x: i32, y: i32, rap: u32, f: T)
 where
     T: Fn(Pixel) -> Color,
