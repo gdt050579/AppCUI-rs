@@ -843,18 +843,8 @@ impl CommandBarEvents for Win {
 
         let luminance = self.control(self.himg).map(|i| i.render_options().luminance_threshold()).unwrap_or(0.1);
         let current_percent = (luminance * 100.0) as u8;
-        let closest_percent = LUMINANCE_SEQUENCE
-            .iter()
-            .min_by_key(|&&x| {
-                let diff = if current_percent >= x {
-                    current_percent - x
-                } else {
-                    x - current_percent
-                };
-                diff
-            })
-            .unwrap_or(&5);
-        commandbar.set(key!("F4"), format!("Luminance:{}%", closest_percent).as_str(), win::Commands::Luminance);
+        let closest_percent = LUMINANCE_SEQUENCE.iter().min_by_key(|&&x| current_percent.abs_diff(x)).unwrap_or(&5);
+        commandbar.set(key!("F4"), format!("Luminance:{closest_percent}%").as_str(), win::Commands::Luminance);
     }
 
     fn on_event(&mut self, command_id: win::Commands) {
@@ -907,17 +897,7 @@ impl CommandBarEvents for Win {
                     let current_luminance = img.render_options().luminance_threshold();
                     let current_percent = (current_luminance * 100.0) as u8;
 
-                    let closest_percent = LUMINANCE_SEQUENCE
-                        .iter()
-                        .min_by_key(|&&x| {
-                            let diff = if current_percent >= x {
-                                current_percent - x
-                            } else {
-                                x - current_percent
-                            };
-                            diff
-                        })
-                        .unwrap_or(&5);
+                    let closest_percent = LUMINANCE_SEQUENCE.iter().min_by_key(|&&x| current_percent.abs_diff(x)).unwrap_or(&5);
 
                     let next_percent = if let Some(current_index) = LUMINANCE_SEQUENCE.iter().position(|&x| x == *closest_percent) {
                         let next_index = (current_index + 1) % LUMINANCE_SEQUENCE.len();

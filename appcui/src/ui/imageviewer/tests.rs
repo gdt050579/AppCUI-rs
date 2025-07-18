@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::str::FromStr;
 
 // image taken from https://www.rustacean.net/assets/cuddlyferris.svg
 const FERRIS_PIXELS: &[u32] = &[

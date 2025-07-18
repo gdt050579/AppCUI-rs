@@ -77,7 +77,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         if let Some(perc) = cb.get_percentage("luminance_threshold") {
             let perc = perc.round();
             if !(0.0..=100.0).contains(&perc) {
-                panic!("luminance_threshold must be a percentage between 0 and 100, got {}", perc);
+                panic!("luminance_threshold must be a percentage between 0 and 100, got {perc}");
             }
             let value = perc / 100.0;
             cb.add(".luminance_threshold(");

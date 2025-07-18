@@ -5,6 +5,7 @@ use super::Image;
 use super::Pixel;
 use super::RenderOptions;
 use super::Scale;
+use std::str::FromStr;
 
 const HEART: &str = r#"
         |BB..........BB|
@@ -462,7 +463,7 @@ fn batch_check(data: &[(ColorSchema, u64)], img: &Image, surface_size: Size, opt
     for (cs, h) in data {
         s.clear(Character::default());
         opt.color_schema = *cs;
-        s.draw_image(0, 0, &img, opt);
+        s.draw_image(0, 0, img, opt);
         //s.print(true);
         assert_eq!(s.compute_hash(), *h);
     }
@@ -497,8 +498,8 @@ fn check_image_with_invalid_size() {
     assert!(Image::new(0, 0).is_none());
     assert!(Image::new(100, 0).is_none());
     assert!(Image::new(0xFFFF, 0xFFFF).is_none());
-    assert!(Image::from_str("0000").is_none());
-    assert!(Image::from_str("||").is_none());
+    assert!(Image::from_str("0000").is_err());
+    assert!(Image::from_str("||").is_err());
 }
 
 #[test]

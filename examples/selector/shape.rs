@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use std::str::FromStr;
 
 #[derive(Copy,Clone,PartialEq,Eq)]
 pub(crate) enum Shape {
