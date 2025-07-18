@@ -1102,6 +1102,7 @@ fn check_resize() {
                 Layout::new("d:c"),
                 image::RenderOptionsBuilder::new()
                     .character_set(image::CharacterSet::SmallBlocks)
+                    .color_schema(ColorSchema::Color16)
                     .luminance_threshold(0.01)
                     .build(),
                 imageviewer::Flags::ScrollBars,
