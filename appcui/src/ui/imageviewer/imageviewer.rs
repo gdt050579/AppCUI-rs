@@ -37,7 +37,7 @@ impl ImageViewer {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    /// use std::str::FromStr;
     /// 
     /// let heart = Image::from_str(r#"
     ///     |.............|
@@ -52,10 +52,10 @@ impl ImageViewer {
     ///     |......r......|
     /// "#).unwrap();
     /// let iv = ImageViewer::new(heart, Layout::new("d:c"),
-    ///                           image::RenderOptions::new()
+    ///                           image::RenderOptionsBuilder::new()
     ///                                                 .scale(image::Scale::Scale50)
-    ///                                                 .character_set(image::CharacterSet::Ascii)
-    ///                                                 .color_schema(image::ColorSchema::Grayscale)
+    ///                                                 .character_set(image::CharacterSet::SmallBlocks)
+    ///                                                 .color_schema(image::ColorSchema::Color16)
     ///                                                 .luminance_threshold(0.5)
     ///                                                 .build(),
     ///                           imageviewer::Flags::None);

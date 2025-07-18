@@ -14,6 +14,7 @@
 //! 
 //! ```rust
 //! use appcui::prelude::*;
+//! use std::str::FromStr;
 //! 
 //! // Create a 3x2 image with specific colors
 //! let image_str = "|RGB| |YWr|";

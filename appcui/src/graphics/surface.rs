@@ -821,13 +821,13 @@ impl Surface {
         // }
     }
 
-    /// Draws an image at the specified position. The image will be drawn using the specified renderer type and scale method.
-    /// The rendering method can be `SmallBlocks`, `LargeBlocks64Colors`, `GrayScale` or `AsciiArt`.
+    /// Draws an image at the specified position using a RenderOptions structure to decide how to paint it.
     ///
     /// Example:
     /// ```rust
     /// use appcui::prelude::*;
-    ///
+    /// use std::str::FromStr;
+    /// 
     /// let mut surface = Surface::new(100, 50);
     /// let heart = r#"
     ///         |..rr.rr..|
@@ -837,9 +837,10 @@ impl Surface {
     ///         |...rrr...|
     ///         |....r....|"#;
     /// let image = Image::from_str(heart).unwrap();
-    /// surface.draw_image(10, 10, &image,
-    ///                            image::RendererType::LargeBlocks64Colors,
-    ///                            image::Scale::NoScale);
+    /// let opt = RenderOptionsBuilder::new()
+    ///                                .character_set(image::CharacterSet::LargeBlocks)
+    ///                                .build();
+    /// surface.draw_image(10, 10, &image, &opt);
     /// ```
     pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, render_options: &RenderOptions) {
         image.paint(self, x, y, render_options);
