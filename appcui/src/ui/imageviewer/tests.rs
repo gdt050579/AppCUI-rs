@@ -822,7 +822,7 @@ fn check_smallbloacks_scaling() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x89AC3339B85CE98C)
+        CheckHash(0x4332083E0CD9C530)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
@@ -839,13 +839,19 @@ fn check_smallbloacks_scaling() {
     w.add(ImageViewer::new(
         Image::from_str(s).unwrap(),
         Layout::new("x:0,y:0,w:8,h:4"),
-        image::RenderOptionsBuilder::new().character_set(image::CharacterSet::SmallBlocks).build(),
+        image::RenderOptionsBuilder::new()
+            .character_set(image::CharacterSet::SmallBlocks)
+            .color_schema(ColorSchema::Color16)
+            .build(),
         imageviewer::Flags::None,
     ));
     w.add(ImageViewer::new(
         Image::from_str(s).unwrap(),
         Layout::new("x:10,y:0,w:16,h:8"),
-        image::RenderOptionsBuilder::new().character_set(image::CharacterSet::SmallBlocks).build(),
+        image::RenderOptionsBuilder::new()
+            .character_set(image::CharacterSet::SmallBlocks)
+            .color_schema(ColorSchema::GrayScale4)
+            .build(),
         imageviewer::Flags::None,
     ));
     a.add_window(w);
@@ -857,11 +863,11 @@ fn check_macro_creation() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x6BFC41C2BB0D0A64)
+        CheckHash(0x30560D8DDECA6294)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
-    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%"));
+    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%,cs:Color16"));
     a.add_window(w);
     a.run();
 }
@@ -871,12 +877,12 @@ fn check_macro_creation_2() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x71D38C2B9819C1)
+        CheckHash(0x7BFA1CEEF2BAD91)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
     w.add(imageviewer!(
-        "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, flags: Scrollbars, back: {char: *, fore: Yellow, back: Green}"
+        "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
     ));
     a.add_window(w);
     a.run();
@@ -903,56 +909,56 @@ fn check_keyboard() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x26356B3FED8EBC60)
+        CheckHash(0x94D17F66BF54FEE5)
         Key.Pressed(Right)
         Paint('2')
-        CheckHash(0xD087A7871011DEBC)
+        CheckHash(0x7EE878283B359509)
         Key.Pressed(Right,3)
         Paint('3')
-        CheckHash(0x99F37C4D6FD56BE8)
+        CheckHash(0x5296F3AFE641F43D)
         Key.Pressed(Right,2)
         Paint('4 (no changed)')
-        CheckHash(0x99F37C4D6FD56BE8)
+        CheckHash(0x5296F3AFE641F43D)
         Key.Pressed(Right,100)
         Paint('4 (already at margin)')
-        CheckHash(0x99F37C4D6FD56BE8)
+        CheckHash(0x5296F3AFE641F43D)
         Key.Pressed(Left,3)
         Paint('5')
-        CheckHash(0x26356B3FED8EBC60)
+        CheckHash(0x94D17F66BF54FEE5)
         Key.Pressed(Left,2)
         Paint('Back to initial state')
-        CheckHash(0x26356B3FED8EBC60)
+        CheckHash(0x94D17F66BF54FEE5)
         Key.Pressed(Down,2)
         Paint('6')
-        CheckHash(0x892504B25EBE8267)
+        CheckHash(0x1DFAA0414C283D59)
         Key.Pressed(Down,4)
         Paint('7')
-        CheckHash(0xBD2C0389AE4D5402)
+        CheckHash(0x1E45A6115FEC15FD)
         Key.Pressed(Up,2)
         Paint('8')
-        CheckHash(0xDB8B912DB26845FB)
+        CheckHash(0xC2578DA73AEE46E5)
         Key.Pressed(Shift+Up)
         Paint('Back to initial state')
-        CheckHash(0x26356B3FED8EBC60)
+        CheckHash(0x94D17F66BF54FEE5)
         Key.Pressed(Shift+Right)
         Paint('Right top margin')
-        CheckHash(0x99F37C4D6FD56BE8)
+        CheckHash(0x5296F3AFE641F43D)
         Key.Pressed(Shift+Down)
         Paint('9')
-        CheckHash(0x621FD41334546768)
+        CheckHash(0x52BF4FAAE6446859)
         Key.Pressed(Shift+Left)
         Paint('10')
-        CheckHash(0xE674C2C496CD80)
+        CheckHash(0x121A6149F0F96621)
         Key.Pressed(Home)
         Paint('Back to initial state')
-        CheckHash(0x26356B3FED8EBC60)
+        CheckHash(0x94D17F66BF54FEE5)
         Key.Pressed(End)
         Paint('11')
-        CheckHash(0x621FD41334546768)
+        CheckHash(0x52BF4FAAE6446859)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Title,d:c");
-    let mut i = imageviewer!("d:c,w:100%,h:100%,scale:50%,flags:ScrollBars");
+    let mut i = imageviewer!("d:c,w:100%,h:100%,scale:50%,flags:ScrollBars,cs:Color16");
     i.set_image(ferris_image());
     w.add(i);
     a.add_window(w);
@@ -964,53 +970,53 @@ fn check_keyboard_2() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x332D4C4D4B6577CD)
+        CheckHash(0x60098108CD0E3264)
         Key.Pressed(Ctrl+Right)
         Paint('2')
-        CheckHash(0xF92DF9DB7BE7963B)
+        CheckHash(0xBDD4D382150CE403)
         Key.Pressed(Ctrl+Right)
         Paint('3')
-        CheckHash(0x766DD8233B9CB842)
+        CheckHash(0xC24A272BCAEAD1A2)
         Key.Pressed(Ctrl+Right)
         Paint('4 (reach right margin)')
-        CheckHash(0xB95CF2DE6175C7FC)
+        CheckHash(0x8B8EDFA9A280DE46)
         Key.Pressed(Ctrl+Right)
         Paint('5 (already right margin)')
-        CheckHash(0xB95CF2DE6175C7FC)
+        CheckHash(0x8B8EDFA9A280DE46)
         Key.Pressed(Ctrl+Down)
         Paint('6')
-        CheckHash(0x51A834E1ABD37D65)
+        CheckHash(0x16C704A015E2F159)
         Key.Pressed(Ctrl+Down)
         Paint('7')
-        CheckHash(0x457C06A0263040F9)
+        CheckHash(0xEA880B193F3C9EE1)
         Key.Pressed(Ctrl+Down)
         Paint('8 (reached bottom-right margin')
-        CheckHash(0xE3546F93F98BFA47)
+        CheckHash(0x87E2AAEA69FC94D6)
         Key.Pressed(Ctrl+Down)
         Paint('9 (already ay bottom-right margin')
-        CheckHash(0xE3546F93F98BFA47)
+        CheckHash(0x87E2AAEA69FC94D6)
         Key.Pressed(Ctrl+Left)
         Paint('10')
-        CheckHash(0x5D7385E8AFB42ECA)
+        CheckHash(0xDBBA5B4A45BE839)
         Key.Pressed(Ctrl+Left,2)
         Paint('11 (reached bottom-left margin)')
-        CheckHash(0x862A514D24EE7320)
+        CheckHash(0x8A98F61F935C6D)
         Key.Pressed(Ctrl+Left)
         Paint('12 (already at bottom-left margin)')
-        CheckHash(0x862A514D24EE7320)
+        CheckHash(0x8A98F61F935C6D)
         Key.Pressed(Ctrl+Up)
         Paint('13')
-        CheckHash(0x1AA3385C8B1E1C9A)
+        CheckHash(0xD4C7CB5BC2EF6CF0)
         Key.Pressed(Ctrl+Up,2)
         Paint('14 (initial state)')
-        CheckHash(0x332D4C4D4B6577CD)
+        CheckHash(0x60098108CD0E3264)
         Key.Pressed(Ctrl+Up,100)
         Paint('15 (already at initial state)')
-        CheckHash(0x332D4C4D4B6577CD)
+        CheckHash(0x60098108CD0E3264)
     ";
     let mut a = App::debug(40, 15, script).build().unwrap();
     let mut w = window!("Title,d:c");
-    let mut i = imageviewer!("d:c,w:100%,h:100%,flags:ScrollBars");
+    let mut i = imageviewer!("d:c,w:100%,h:100%,flags:ScrollBars,cs:color16");
     i.set_image(ferris_image());
     w.add(i);
     a.add_window(w);
@@ -1022,11 +1028,11 @@ fn check_clear_background() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x6BFC41C2BB0D0A64)
+        CheckHash(0x30560D8DDECA6294)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
-    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, back: {X,Red}");
+    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, back: {X,Red}, cs:Color16");
     i.clear_background();
     w.add(i);
     a.add_window(w);
@@ -1038,36 +1044,39 @@ fn check_mouse_events() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0xFA81677A76315616)
+        CheckHash(0xED76A422E6CB3285)
         Mouse.Drag(56,8,5,1)
         Paint('Image dragged')
-        CheckHash(0x6D4D8014AD588AAF)
+        CheckHash(0x17BAE689F1E3CB60)
         Mouse.Wheel(56,8,right,10)
         Paint('Image Scrolled to Right')
-        CheckHash(0x5B85DA7D639B217B)
+        CheckHash(0xCF76DD326D61240C)
         Mouse.Wheel(56,8,down,10)
         Paint('Image Scrolled to Bottom')
-        CheckHash(0xAA94D3EDA6FE4EF3)
+        CheckHash(0x61C0591EDE7E5719)
         Mouse.Drag(59,4,59,7)
         Paint('Full scroll to bottom-right corner')
-        CheckHash(0xE1D47ED404F08152)
+        CheckHash(0xA297AF7162A3F19D)
         Mouse.Move(58,0)
         Paint('Mouse over [X] button')
-        CheckHash(0xE108A89D8EBC479A)
+        CheckHash(0x7BFD5A8867DC230A)
         Mouse.Wheel(56,8,up,2)
         Mouse.Wheel(56,8,left,2)
         Paint('Scroll 2 position towards top-left corner')
-        CheckHash(0xE05E433CD4ABF2AB)
+        CheckHash(0xF13E7EE85932A59C)
         Mouse.DoubleClick(30,10,left)
         Paint('Double clicked on image - nothing happens')
-        CheckHash(0xE05E433CD4ABF2AB)
+        CheckHash(0xF13E7EE85932A59C)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
     let i = ImageViewer::new(
         ferris_image(),
         Layout::new("d:c"),
-        image::RenderOptionsBuilder::new().character_set(image::CharacterSet::SmallBlocks).build(),
+        image::RenderOptionsBuilder::new()
+            .character_set(image::CharacterSet::SmallBlocks)
+            .color_schema(ColorSchema::Color16)
+            .build(),
         imageviewer::Flags::ScrollBars,
     );
     w.add(i);
