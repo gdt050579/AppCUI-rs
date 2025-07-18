@@ -68,7 +68,8 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     }
     // Color schema (enum)
     if cb.has_parameter("color_schema") {
-        cb.add_enum_parameter("color_schema", ".color_schema(image::ColorSchema", &COLOR_SCHEMAS, None);
+        cb.add(".color_schema(");
+        cb.add_enum_parameter("color_schema", "image::ColorSchema", &COLOR_SCHEMAS, None);
         cb.add(")");
     }
     // Luminance threshold
