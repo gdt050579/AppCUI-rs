@@ -1,7 +1,4 @@
-use super::super::CharFlags;
-use super::super::Character;
 use super::super::Color;
-use super::super::SpecialChar;
 
 #[cfg(not(feature = "TRUE_COLORS"))]
 const COLOR_TO_PIXEL: [u32; 16] = [
@@ -4122,147 +4119,6 @@ static COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
     Color::White,
 ];
 
-const COLORMAP_64_COLORS: [Color; 125] = [
-    Color::Black,
-    Color::Blue,
-    Color::Blue,
-    Color::Blue,
-    Color::Blue,
-    Color::Green,
-    Color::Aqua,
-    Color::Blue,
-    Color::Blue,
-    Color::Blue,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Green,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Green,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Red,
-    Color::Pink,
-    Color::Blue,
-    Color::Blue,
-    Color::Blue,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::Blue,
-    Color::Blue,
-    Color::Green,
-    Color::White,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Green,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Green,
-    Color::Green,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Aqua,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Yellow,
-    Color::White,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::Aqua,
-    Color::Red,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Red,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Red,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Red,
-    Color::Red,
-    Color::Pink,
-    Color::Pink,
-    Color::Pink,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::Pink,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-    Color::White,
-    Color::Yellow,
-    Color::Yellow,
-    Color::Yellow,
-    Color::White,
-    Color::White,
-];
-
-const COLORMAP_64_COLORS_PROC: [u8; 125] = [
-    0, 25, 50, 75, 100, 25, 25, 50, 75, 100, 50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100, 100, 75, 75, 100, 25, 25, 50, 75, 100, 25, 25, 25, 75, 100,
-    50, 25, 50, 50, 75, 75, 75, 50, 75, 75, 100, 100, 75, 75, 100, 50, 25, 50, 50, 75, 25, 25, 50, 50, 75, 50, 50, 50, 50, 50, 50, 50, 50, 75, 75,
-    75, 75, 50, 75, 100, 75, 75, 50, 75, 75, 75, 75, 50, 75, 75, 50, 50, 50, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 75, 100, 100, 100, 75, 75, 100,
-    100, 100, 75, 75, 100, 75, 75, 50, 75, 100, 75, 75, 75, 75, 100, 100, 100, 100, 100, 100,
-];
-
-const ASCII_ART_CHARSET: &[char] = &[
-    ' ', '.', '\'', '`', '^', '"', ',', ':', ';', 'I', 'l', '!', 'i', '>', '<', '~', '+', '_', '-', '?', ']', '[', '}', '{', '1', ')', '(', '|',
-    '\\', '/', 't', 'f', 'j', 'r', 'x', 'n', 'u', 'v', 'c', 'z', 'X', 'Y', 'U', 'J', 'C', 'L', 'Q', '0', 'O', 'Z', 'm', 'w', 'q', 'p', 'd', 'b', 'k',
-    'h', 'a', 'o', '*', '#', 'M', 'W', '&', '8', '%', 'B', '@', '$',
-];
-
 /// A pixel in the image.
 ///
 /// The pixel is a combination of red, green, and blue components, and an alpha component.
@@ -4296,7 +4152,7 @@ impl Pixel {
             red,
             green,
             blue,
-            alpha: 255,
+            alpha: u8::MAX,
         }
     }
     #[cfg(not(feature = "TRUE_COLORS"))]
@@ -4338,54 +4194,62 @@ impl Pixel {
             Color::Pink => Pixel::with_rgb(0xFF, 0x00, 0xFF),
             Color::Yellow => Pixel::with_rgb(0xFF, 0xFF, 0x00),
             Color::White => Pixel::with_rgb(0xFF, 0xFF, 0xFF),
-            Color::Transparent => Pixel::new(0,0,0,0),
+            Color::Transparent => Pixel::new(0, 0, 0, 0),
             Color::RGB(r, g, b) => Pixel::with_rgb(r, g, b),
         }
     }
-    pub(super) fn as_color(&self) -> Color {
-        let index = (((self.red / 17) as usize) << 8) + (((self.green / 17) as usize) << 4) + (self.blue / 17) as usize;
+    #[inline(always)]
+    pub(super) fn blend_alpha(&self) -> (u8, u8, u8) {
+        if self.alpha == u8::MAX {
+            (self.red, self.green, self.blue)
+        } else {
+            let alpha = self.alpha as u16;
+            (
+                ((self.red as u16 * alpha) / 255) as u8,
+                ((self.green as u16 * alpha) / 255) as u8,
+                ((self.blue as u16 * alpha) / 255) as u8,
+            )
+        }
+    }
+    #[inline(always)]
+    pub(super) fn luminance(&self) -> u8 {
+        let (r, g, b) = self.blend_alpha();
+        ((13933u32 * r as u32 + 46871 * g as u32 + 4742 * b as u32) >> 16) as u8
+    }
+    pub(super) fn as_color16(&self) -> Color {
+        let (r, g, b) = self.blend_alpha();
+        let index = (((r / 17) as usize) << 8) + (((g / 17) as usize) << 4) + (b / 17) as usize;
         COLORMAP_4096_QUANTIZATION[index]
     }
-    pub(super) fn as_character(&self) -> Character {
-        let r = ((self.red as u32) + 32) / 64;
-        let g = ((self.green as u32) + 32) / 64;
-        let b = ((self.blue as u32) + 32) / 64;
-        let idx = (r * 25 + g * 5 + b) as usize;
-        let col = COLORMAP_64_COLORS[idx];
-        let proc = COLORMAP_64_COLORS_PROC[idx];
-        match proc {
-            0 => Character::new(' ', Color::Black, Color::Black, CharFlags::None),
-            25 => Character::new(SpecialChar::Block25, col, Color::Black, CharFlags::None),
-            50 => Character::new(SpecialChar::Block50, col, Color::Black, CharFlags::None),
-            75 => Character::new(SpecialChar::Block75, col, Color::Black, CharFlags::None),
-            100 => Character::new(' ', col, col, CharFlags::None),
-            _ => Character::default(),
-        }
-    }
-    pub(super) fn as_ascii_art(&self) -> Character {
-        let ch = {
-            let luminance = (0.299 * self.red as f64 + 0.587 * self.green as f64 + 0.114 * self.blue as f64) / 255.0;
-            let index = ((luminance * (ASCII_ART_CHARSET.len() as f64 - 1.0)).round() as usize).clamp(0, ASCII_ART_CHARSET.len() - 1);
-            ASCII_ART_CHARSET[index]
-        };
-        Character::new(ch, Color::White, Color::Black, CharFlags::None)
-    }
-    pub(super) fn as_gray_scale_character(&self) -> Character {
-        let val = ((self.blue as u32) + (self.red as u32) + (self.green as u32)) / 3;
-        if val < 32 {
-            return Character::new(' ', Color::Black, Color::Black, CharFlags::None);
-        }
-        if val < 96 {
-            return Character::new(SpecialChar::Block25, Color::White, Color::Black, CharFlags::None);
-        }
-        if val < 160 {
-            return Character::new(SpecialChar::Block50, Color::White, Color::Black, CharFlags::None);
-        }
-        if val < 224 {
-            Character::new(SpecialChar::Block75, Color::White, Color::Black, CharFlags::None)
+    #[inline(always)]
+    pub(super) fn as_blackwhite(&self, thredshold: u8) -> Color {
+        if self.luminance() < thredshold {
+            Color::Black
         } else {
-            Character::new(' ', Color::White, Color::White, CharFlags::None)
+            Color::White
         }
+    }
+    #[inline(always)]
+    pub(super) fn as_grayscale4(&self) -> Color {
+        let l = self.luminance();
+        match l {
+            0..=63 => Color::Black,
+            64..=127 => Color::Gray,
+            128..=192 => Color::Silver,
+            _ => Color::White,
+        }
+    }
+
+    #[cfg(feature = "TRUE_COLORS")]
+    #[inline(always)]
+    pub(super) fn as_rgb_color(&self) -> Color {
+        Color::from_rgb(self.red, self.green, self.blue)
+    }
+    #[cfg(feature = "TRUE_COLORS")]
+    #[inline(always)]
+    pub(super) fn as_grayscale(&self) -> Color {
+        let l = self.luminance();
+        Color::RGB(l, l, l)
     }
 }
 impl From<u32> for Pixel {

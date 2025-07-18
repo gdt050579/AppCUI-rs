@@ -777,19 +777,12 @@ const FERRIS_PIXELS: &[u32] = &[
 ];
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().command_bar().build()?;
-    let mut w = window!("Image,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut ferris = Image::new(120, 90).unwrap();
-    for y in 0..90 {
-        for x in 0..120 {
-            ferris.set_pixel(x, y, Pixel::from(FERRIS_PIXELS[(y * 120 + x) as usize]));
-        }
-    }
+    let mut a = App::new().single_window().build()?;
+    let mut w = window!("Ferris,d:c");
     w.add(ImageViewer::new(
-        ferris,
+        Image::from_buffer(FERRIS_PIXELS, Size::new(120,90), false).unwrap(),
         Layout::new("d:c"),
-        image::RendererType::SmallBlocks,
-        image::Scale::NoScale,
+        image::RenderOptionsBuilder::new().build(),
         imageviewer::Flags::ScrollBars,
     ));
     a.add_window(w);

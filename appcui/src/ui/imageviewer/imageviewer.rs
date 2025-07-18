@@ -6,8 +6,7 @@ use self::components::ScrollBars;
 pub struct ImageViewer {
     surface: Surface,
     image: Image,
-    render_method: image::RendererType,
-    scale: image::Scale,
+    render_options: image::RenderOptions,
     x: i32,
     y: i32,
     background: Option<Character>,
@@ -21,10 +20,10 @@ impl ImageViewer {
     /// * `imageviewer::Flags::ScrollBars` - if set, the image viewer will have horizontal and vertical scrollbars
     /// 
     /// the render type method can be one of the following:
-    /// * `image::RendererType::SmallBlocks` - if set, the image will be rendered with small blocks
-    /// * `image::RendererType::LargeBlocks64Colors` - if set, the image will be rendered with large blocks
-    /// * `image::RendererType::GrayScale` - if set, the image will be rendered with gray scale
-    /// * `image::RendererType::AsciiArt` - if set, the image will be rendered as ascii art
+    /// * `image::RenderMethod::SmallBlocks` - if set, the image will be rendered with small blocks
+    /// * `image::RenderMethod::LargeBlocks64Colors` - if set, the image will be rendered with large blocks
+    /// * `image::RenderMethod::GrayScale` - if set, the image will be rendered with gray scale
+    /// * `image::RenderMethod::AsciiArt` - if set, the image will be rendered as ascii art
     /// 
     /// the scale can be one of the following:
     /// * `image::Scale::None` - if set, the image will be rendered with no scaling (as it is)
@@ -38,9 +37,9 @@ impl ImageViewer {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
+    /// use std::str::FromStr;
     /// 
-    /// 
-    /// let heart = Image::with_str(r#"
+    /// let heart = Image::from_str(r#"
     ///     |.............|
     ///     |...rr...rr...|
     ///     |..rrrr.rrrr..|
@@ -53,11 +52,15 @@ impl ImageViewer {
     ///     |......r......|
     /// "#).unwrap();
     /// let iv = ImageViewer::new(heart, Layout::new("d:c"),
-    ///                           image::RendererType::SmallBlocks,
-    ///                           image::Scale::NoScale,
+    ///                           image::RenderOptionsBuilder::new()
+    ///                                                 .scale(image::Scale::Scale50)
+    ///                                                 .character_set(image::CharacterSet::SmallBlocks)
+    ///                                                 .color_schema(image::ColorSchema::Color16)
+    ///                                                 .luminance_threshold(0.5)
+    ///                                                 .build(),
     ///                           imageviewer::Flags::None);
     /// ```
-    pub fn new(image: Image, layout: Layout, render_method: image::RendererType, scale: image::Scale, flags: Flags) -> Self {
+    pub fn new(image: Image, layout: Layout, render_options: image::RenderOptions, flags: Flags) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -73,8 +76,7 @@ impl ImageViewer {
             y: 0,
             flags,
             image,
-            scale,
-            render_method,
+            render_options,
             background: None,
             drag_point: None,
             scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
@@ -92,45 +94,23 @@ impl ImageViewer {
         self.update_surface();
     }
 
-    /// Returns the image scale
+    /// Returns the render options of the image viewer.
     #[inline(always)]
-    pub fn scale(&self) -> image::Scale {
-        self.scale
+    pub fn render_options(&self) -> &image::RenderOptions {
+        &self.render_options
     }
 
-    /// Sets the image scale (it can be one of the following values):
-    /// * `image::Scale::None` - if set, the image will be rendered with no scaling (as it is)
-    /// * `image::Scale::Scale5` - 5% scale
-    /// * `image::Scale::Scale10` - 10% scale
-    /// * `image::Scale::Scale20` - 20% scale
-    /// * `image::Scale::Scale25` - 25% scale
-    /// * `image::Scale::Scale33` - 33% scale
-    /// * `image::Scale::Scale50` - 50% scale
-    pub fn set_scale(&mut self, scale: image::Scale) {
-        self.scale = scale;
+    /// Sets the render options of the image viewer.
+    #[inline(always)]
+    pub fn set_render_options(&mut self, render_options: image::RenderOptions) {
+        self.render_options = render_options;
         self.update_surface();
     }
 
-    /// Gets the rendeering method used to draw the image
-    #[inline(always)]
-    pub fn render_method(&self) -> image::RendererType {
-        self.render_method
-    }
-
-    /// Sets the rendering method used to draw the image.
-    /// It can be one of the following values:
-    /// * `image::RendererType::SmallBlocks` - if set, the image will be rendered with small blocks
-    /// * `image::RendererType::LargeBlocks64Colors` - if set, the image will be rendered with large blocks
-    /// * `image::RendererType::GrayScale` - if set, the image will be rendered with gray scale
-    /// * `image::RendererType::AsciiArt` - if set, the image will be rendered as ascii art
-    pub fn set_render_method(&mut self, render_method: image::RendererType) {
-        self.render_method = render_method;
-        self.update_surface();
-    }
     fn update_surface(&mut self) {
-        let sz = self.image.render_size(self.render_method, self.scale);
+        let sz = self.image.render_size(&self.render_options);
         self.surface.resize(sz);
-        self.surface.draw_image(0, 0, &self.image, self.render_method, self.scale);
+        self.surface.draw_image(0, 0, &self.image, &self.render_options);
         let sz = self.surface.size();
         let control_size = self.size();
         self.scrollbars.update(sz.width as u64, sz.height as u64, control_size);

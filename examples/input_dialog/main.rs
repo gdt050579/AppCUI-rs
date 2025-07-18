@@ -35,7 +35,7 @@ impl MyWin {
     
     fn show_simple_input(&mut self) {
         if let Some(number) = dialogs::input::<i32>("Enter Number", "Please enter a number:", None, None) {
-            self.update_result(&format!("Value : {}", number));
+            self.update_result(&format!("Value : {number}"));
         } else {
             self.update_result("Input was cancelled");
         }
@@ -43,7 +43,7 @@ impl MyWin {
     
     fn show_input_with_default(&mut self) {
         if let Some(number) = dialogs::input::<i32>("Enter Number", "Please enter a number:", Some(42), None) {
-            self.update_result(&format!("Value : {}", number));
+            self.update_result(&format!("Value : {number}"));
         } else {
             self.update_result("Input was cancelled");
         }
@@ -60,7 +60,7 @@ impl MyWin {
         };
         
         if let Some(number) = dialogs::input::<i32>("Enter Number", "Please enter a number between 1 and 100:", None, Some(validation)) {
-            self.update_result(&format!("Value : {} (validated)", number));
+            self.update_result(&format!("Value : {number} (validated)"));
         } else {
             self.update_result("Input was cancelled");
         }

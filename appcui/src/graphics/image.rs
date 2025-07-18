@@ -14,10 +14,11 @@
 //! 
 //! ```rust
 //! use appcui::prelude::*;
+//! use std::str::FromStr;
 //! 
 //! // Create a 3x2 image with specific colors
 //! let image_str = "|RGB| |YWr|";
-//! let img = Image::with_str(image_str).unwrap();
+//! let img = Image::from_str(image_str).unwrap();
 //! ```
 //! 
 //! Creating an empty image and manipulating pixels:
@@ -41,13 +42,16 @@
 
 mod image;
 mod pixel;
-mod renderer;
 mod scale;
+mod color_schema;
+mod character_set;
+mod render_options;
 #[cfg(test)]
 mod tests;
 
-pub(super) use renderer::Renderer;
-pub use renderer::RendererType;
 pub use scale::Scale;
 pub use pixel::Pixel;
 pub use image::Image;
+pub use character_set::CharacterSet;
+pub use color_schema::ColorSchema;
+pub use render_options::{ RenderOptions, RenderOptionsBuilder };

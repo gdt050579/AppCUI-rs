@@ -5,7 +5,7 @@ publish = false
 edition = "2021"
 
 [dev-dependencies]
-appcui = { path = "../appcui" }
+appcui = { path = "../appcui", features = ["TRUE_COLORS"] }
 appcui_proc_macro = { path = "../appcui-proc-macro"}
 chrono = "0.4.38"
 rand = "0.8.5"

@@ -1,10 +1,7 @@
 use std::path::Path;
 
 use crate::prelude::CharFlags;
-
-use super::image;
-use super::Renderer;
-
+use crate::prelude::RenderOptions;
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
@@ -824,13 +821,13 @@ impl Surface {
         // }
     }
 
-    /// Draws an image at the specified position. The image will be drawn using the specified renderer type and scale method.
-    /// The rendering method can be `SmallBlocks`, `LargeBlocks64Colors`, `GrayScale` or `AsciiArt`.
+    /// Draws an image at the specified position using a RenderOptions structure to decide how to paint it.
     ///
     /// Example:
     /// ```rust
     /// use appcui::prelude::*;
-    ///
+    /// use std::str::FromStr;
+    /// 
     /// let mut surface = Surface::new(100, 50);
     /// let heart = r#"
     ///         |..rr.rr..|
@@ -839,19 +836,14 @@ impl Surface {
     ///         |..rrrrr..|
     ///         |...rrr...|
     ///         |....r....|"#;
-    /// let image = Image::with_str(heart).unwrap();
-    /// surface.draw_image(10, 10, &image,
-    ///                            image::RendererType::LargeBlocks64Colors,
-    ///                            image::Scale::NoScale);
+    /// let image = Image::from_str(heart).unwrap();
+    /// let opt = RenderOptionsBuilder::new()
+    ///                                .character_set(image::CharacterSet::LargeBlocks)
+    ///                                .build();
+    /// surface.draw_image(10, 10, &image, &opt);
     /// ```
-    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, rendering_method: image::RendererType, scale_method: image::Scale) {
-        let rap = scale_method as u32;
-        match rendering_method {
-            image::RendererType::SmallBlocks => Renderer::render_with_small_blocks(self, image, x, y, rap),
-            image::RendererType::LargeBlocks64Colors => Renderer::render_with_large_blocks_64(self, image, x, y, rap),
-            image::RendererType::GrayScale => Renderer::render_with_gray_scale(self, image, x, y, rap),
-            image::RendererType::AsciiArt => Renderer::render_ascii_art(self, image, x, y, rap),
-        }
+    pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, render_options: &RenderOptions) {
+        image.paint(self, x, y, render_options);
     }
     pub(crate) fn resize(&mut self, size: Size) {
         let w = size.width.clamp(1, MAX_SURFACE_WIDTH);

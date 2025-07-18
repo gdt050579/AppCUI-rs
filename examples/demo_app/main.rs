@@ -4,6 +4,7 @@ mod base_controls;
 mod image_win;
 mod animation;
 mod tree_example;
+mod color_palette;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -28,7 +29,7 @@ const LOGO: [&str; 15] = [
 
 #[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [Lists, BaseControls, Images, Animation, TreeExample, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme, LightTheme])]
+          commands  = [Lists, BaseControls, Images, Animation, TreeExample, ColorPalette, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme, LightTheme])]
 struct MyDesktop {
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
     menu_arrange: Handle<Menu>,
@@ -74,7 +75,8 @@ impl DesktopEvents for MyDesktop {
                 { 'Base Controls', cmd: BaseControls},
                 { Images, cmd: Images},
                 { Animation, cmd: Animation},
-                { 'Tree Example', cmd: TreeExample}
+                { 'Tree Example', cmd: TreeExample},
+                { 'Color Palette', cmd: ColorPalette}
             ]
         "));
         self.menu_arrange = self.register_menu(menu!("
@@ -137,6 +139,7 @@ impl MenuEvents for MyDesktop {
             mydesktop::Commands::BaseControls => { self.add_window(base_controls::Win::new()); },
             mydesktop::Commands::Animation => { self.add_window(animation::Win::new()); },
             mydesktop::Commands::TreeExample => { self.add_window(tree_example::Win::new()); },
+            mydesktop::Commands::ColorPalette => { self.add_window(color_palette::Win::new()); },
             _ => {}
         }
         let m = self.arrange_method;
@@ -149,6 +152,15 @@ impl MenuEvents for MyDesktop {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), appcui::system::Error> {
+    #[cfg(target_family = "windows")]
+    App::with_backend(appcui::backend::Type::WindowsVT)
+        .desktop(MyDesktop::new())
+        .menu_bar()
+        .command_bar()
+        .build()?
+        .run();
+
+    #[cfg(not(target_family = "windows"))]
     App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build()?.run();
     Ok(())
 }

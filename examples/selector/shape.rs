@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use std::str::FromStr;
 
 #[derive(Copy,Clone,PartialEq,Eq)]
 pub(crate) enum Shape {
@@ -16,7 +17,7 @@ impl Shape {
             Shape::Triangle => "|........|,|...BB...|,|...BB...|,|..BBBB..|,|..BBBB..|,|.BBBBBB.|,|.BBBBBB.|,|........|",
             Shape::Circle => "|..wwww..|,|.wwwwww.|,|wwwwwwww|,|wwwwwwww|,|wwwwwwww|,|wwwwwwww|,|.wwwwww.|,|..wwww..|",
         };
-        Image::with_str(s).unwrap()
+        Image::from_str(s).unwrap()
     }
 }
 

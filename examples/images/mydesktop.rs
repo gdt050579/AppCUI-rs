@@ -23,13 +23,7 @@ impl MyDesktop {
         }
     }
     fn create_image(width: u32, height: u32, buf: &[u32]) -> Image {
-        let mut img = Image::new(width, height).unwrap();
-        for y in 0..height {
-            for x in 0..width {
-                img.set_pixel(x, y, Pixel::from(buf[(y * width + x) as usize]));
-            }
-        }
-        img
+        Image::from_buffer(buf, Size::new(width,height), false).unwrap()
     }
 }
 
