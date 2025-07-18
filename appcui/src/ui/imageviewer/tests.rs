@@ -1085,12 +1085,9 @@ fn check_mouse_events() {
     a.run();
 }
 
-/*
-
-
 #[test]
 fn check_resize() {
-    #[Window(events=CommandBarEvents,commands:[Scale,RenderMethod], internal: true)]
+    #[Window(events=CommandBarEvents,commands:[Scale,CharSet], internal: true)]
     struct MyWin {
         himg: Handle<ImageViewer>,
     }
@@ -1103,7 +1100,10 @@ fn check_resize() {
             let i = ImageViewer::new(
                 ferris_image(),
                 Layout::new("d:c"),
-                image::RenderOptionsBuilder::new().character_set(image::CharacterSet::SmallBlocks).build(),
+                image::RenderOptionsBuilder::new()
+                    .character_set(image::CharacterSet::SmallBlocks)
+                    .luminance_threshold(0.01)
+                    .build(),
                 imageviewer::Flags::ScrollBars,
             );
             w.himg = w.add(i);
@@ -1112,7 +1112,11 @@ fn check_resize() {
     }
     impl CommandBarEvents for MyWin {
         fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-            let sc_name = match self.control(self.himg).map(|i| i.scale()).unwrap_or(image::Scale::NoScale) {
+            let sc_name = match self
+                .control(self.himg)
+                .map(|i| i.render_options().scale())
+                .unwrap_or(image::Scale::NoScale)
+            {
                 Scale::NoScale => "Scale:100%",
                 Scale::Scale50 => "Scale:50%",
                 Scale::Scale33 => "Scale:33%",
@@ -1124,15 +1128,16 @@ fn check_resize() {
             commandbar.set(key!("F1"), sc_name, mywin::Commands::Scale);
             let rd_name = match self
                 .control(self.himg)
-                .map(|i| i.render_method())
-                .unwrap_or(image::RenderMethod::SmallBlocks)
+                .map(|i| i.render_options().character_set())
+                .unwrap_or(image::CharacterSet::SmallBlocks)
             {
-                RenderMethod::SmallBlocks => "Method:SmallBlocks",
-                RenderMethod::LargeBlocks64Colors => "Method:LargeBlocks (64 colors)",
-                RenderMethod::GrayScale => "Method:GrayScale",
-                RenderMethod::AsciiArt => "Method:AsciiArt",
+                image::CharacterSet::SmallBlocks => "Method:SmallBlocks",
+                image::CharacterSet::LargeBlocks => "Method:LargeBlocks",
+                image::CharacterSet::DitheredShades => "Method:DitheredShades",
+                image::CharacterSet::AsciiArt => "Method:AsciiArt",
+                image::CharacterSet::Braille => "Method:Braille",
             };
-            commandbar.set(key!("F2"), rd_name, mywin::Commands::RenderMethod);
+            commandbar.set(key!("F2"), rd_name, mywin::Commands::CharSet);
         }
 
         fn on_event(&mut self, command_id: mywin::Commands) {
@@ -1140,25 +1145,32 @@ fn check_resize() {
             if let Some(img) = self.control_mut(h) {
                 match command_id {
                     mywin::Commands::Scale => {
-                        let sc = img.scale();
-                        match sc {
-                            Scale::NoScale => img.set_scale(image::Scale::Scale50),
-                            Scale::Scale50 => img.set_scale(image::Scale::Scale33),
-                            Scale::Scale33 => img.set_scale(image::Scale::Scale25),
-                            Scale::Scale25 => img.set_scale(image::Scale::Scale20),
-                            Scale::Scale20 => img.set_scale(image::Scale::Scale10),
-                            Scale::Scale10 => img.set_scale(image::Scale::Scale5),
-                            Scale::Scale5 => img.set_scale(image::Scale::NoScale),
-                        }
+                        let sc = img.render_options().scale();
+                        let new_scale = match sc {
+                            image::Scale::NoScale => image::Scale::Scale50,
+                            image::Scale::Scale50 => image::Scale::Scale33,
+                            image::Scale::Scale33 => image::Scale::Scale25,
+                            image::Scale::Scale25 => image::Scale::Scale20,
+                            image::Scale::Scale20 => image::Scale::Scale10,
+                            image::Scale::Scale10 => image::Scale::Scale5,
+                            image::Scale::Scale5 => image::Scale::NoScale,
+                        };
+                        let mut opt = img.render_options().clone();
+                        opt.set_scale(new_scale);
+                        img.set_render_options(opt);
                     }
-                    mywin::Commands::RenderMethod => {
-                        let m = img.render_method();
-                        match m {
-                            RenderMethod::SmallBlocks => img.set_render_method(image::RenderMethod::LargeBlocks64Colors),
-                            RenderMethod::LargeBlocks64Colors => img.set_render_method(image::RenderMethod::GrayScale),
-                            RenderMethod::GrayScale => img.set_render_method(image::RenderMethod::AsciiArt),
-                            RenderMethod::AsciiArt => img.set_render_method(image::RenderMethod::SmallBlocks),
-                        }
+                    mywin::Commands::CharSet => {
+                        let chset = img.render_options().character_set();
+                        let new_chset = match chset {
+                            image::CharacterSet::SmallBlocks => image::CharacterSet::LargeBlocks,
+                            image::CharacterSet::LargeBlocks => image::CharacterSet::DitheredShades,
+                            image::CharacterSet::DitheredShades => image::CharacterSet::Braille,
+                            image::CharacterSet::Braille => image::CharacterSet::AsciiArt,
+                            image::CharacterSet::AsciiArt => image::CharacterSet::SmallBlocks,
+                        };
+                        let mut opt = img.render_options().clone();
+                        opt.set_character_set(new_chset);
+                        img.set_render_options(opt);
                     }
                 }
             }
@@ -1169,35 +1181,42 @@ fn check_resize() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')
-        CheckHash(0x254C230E20162366)
+        CheckHash(0xDBFA88F598B502BA)
         Key.Pressed(End);
         Paint('Bottom-right view')
-        CheckHash(0x83968372270053CA)
+        CheckHash(0xA56EF6CC91E81FBD)
         Key.Pressed(F1)
         Paint('Scale 50% - still right-bottom corner')
-        CheckHash(0x47C7A4F7921EBA48)
+        CheckHash(0x5C34A89DAFC2FBE0)
         Key.Pressed(F1)
         Paint('Scale 33% - full image')
-        CheckHash(0x3352D0A5F5CF681E)
+        CheckHash(0x1922A63CED49D756)
         Key.Pressed(F2,2)
-        Paint('Scale 33% - Gray scale')
-        CheckHash(0xDA77D4E54A3D71CA)
+        Paint('Scale 33% - Dithered')
+        CheckHash(0x79C0A19A6402DB04)
         Key.Pressed(End)
-        Paint('Scale 33% - Gray scale - right-bottom corner')
-        CheckHash(0x81EC3DC991F1D7AA)
+        Paint('Scale 33% - Dithered - right-bottom corner')
+        CheckHash(0x3F9AD72804C3B080)
         Key.Pressed(F1)
-        Paint('Scale 25% - Gray scale - right bottom corner')
-        CheckHash(0xD11EF0A644DBD149)
+        Paint('Scale 25% - Dithered - right bottom corner')
+        CheckHash(0x5AEA3AE234C60C4B)
         Key.Pressed(F1)
-        Paint('Scale 20% - Gray scale - right bottom corner')
-        CheckHash(0xB2742B8A5C81CEC4)
+        Paint('Scale 20% - Dithered - right bottom corner')
+        CheckHash(0x6FC57DB6B79141A6)
         Key.Pressed(F1)
-        Paint('Scale 10% - Gray scale - full image')
-        CheckHash(0x4929B46F945F5DED)
+        Paint('Scale 10% - Dithered - full image')
+        CheckHash(0x625A032508153453)
+        Key.Pressed(F2)
+        Key.Pressed(F1,2)
+        Paint('Scale 100% - Braille - full image')
+        CheckHash(0xA63ACEF5DC372010)
+        Key.Pressed(F2)
+        Key.Pressed(F1,3)
+        Paint('Scale 25% - Ascii')
+        CheckHash(0x2B595BD9AB869F26)
     ";
 
     let mut a = App::debug(90, 20, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
-*/
