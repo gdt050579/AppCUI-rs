@@ -44,7 +44,7 @@ jobs:
         } 
       
     - name: Run cargo-tarpaulin
-      run: cargo tarpaulin -p appcui -o xml
+      run: cargo tarpaulin -p appcui --features TRUE_COLORS -o xml
               
     - name: Generate coverage summary
       id: coverage_summary
