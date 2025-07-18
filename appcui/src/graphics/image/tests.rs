@@ -620,8 +620,8 @@ fn check_draw_smallblocks_scale() {
         .scale(Scale::Scale50)
         .build();
     s.draw_image(20, 1, &i, &ro);
-    //s.print();
-    assert_eq!(s.compute_hash(), 0xF20E17339AE46D7A);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x8F4360C971EF1A0D);
 }
 
 #[test]

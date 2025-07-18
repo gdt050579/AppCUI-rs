@@ -90,7 +90,7 @@ pub(crate) fn paint(surface: &mut Surface, img: &Image, x: i32, y: i32, render_o
             }
             #[cfg(not(feature = "TRUE_COLORS"))]
             {
-                render(surface, img, x, y, rap, |p| p.as_color16())
+                render(surface, img, x, y, lmin, rap, |p| p.as_color16())
             }
         }
         ColorSchema::Color16 => render(surface, img, x, y, lmin, rap, |p| p.as_color16()),
