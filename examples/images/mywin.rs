@@ -59,10 +59,8 @@ impl CommandBarEvents for MyWin {
         {
             image::ColorSchema::Auto => "Auto",
             image::ColorSchema::Color16 => "16 Colors",
-            //#[cfg(feature = "TRUE_COLORS")]
             image::ColorSchema::TrueColors => "True Colors",
             image::ColorSchema::GrayScale4 => "Gray (4 colors)",
-            //#[cfg(feature = "TRUE_COLORS")]
             image::ColorSchema::GrayScaleTrueColors => "Gray Scale",
             image::ColorSchema::BlackAndWhite => "Black and White",
         };
