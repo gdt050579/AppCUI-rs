@@ -1,5 +1,6 @@
 use super::anchors::Anchors;
 use super::Alignament;
+use super::Dock;
 use super::Coordonate16;
 use super::Parameter;
 use super::Dimension16;
@@ -16,7 +17,7 @@ pub(super) struct LayoutParameters {
     pub a_top: Option<Coordonate16>,
     pub a_bottom: Option<Coordonate16>,
     pub align: Option<Alignament>,
-    pub dock: Option<Alignament>,
+    pub dock: Option<Dock>,
 }
 impl Default for LayoutParameters {
     #[inline]
@@ -128,7 +129,7 @@ impl LayoutParameters {
                                 p.value, format
                             );
                         }
-                        if let Some(d) = Alignament::from_hash(p.value_hash) {
+                        if let Some(d) = Dock::from_hash(p.value_hash) {
                             inf.dock = Some(d);
                         } else {
                             panic!(

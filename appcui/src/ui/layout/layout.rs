@@ -1,8 +1,8 @@
-use super::LayoutBuilder;
+use super::LayoutParameters;
 
 pub(super) enum LayoutBuildFormat<'a> {
     String(&'a str),
-    Builder(LayoutBuilder),
+    Params(LayoutParameters),
 }
 /// Creates a new layout instance with the specified format string.
 ///
@@ -57,9 +57,16 @@ pub struct Layout<'a> {
 }
 
 impl Layout<'_> {
+    #[inline(always)]
     pub fn new(format: &str) -> Layout {
         Layout {
             format: LayoutBuildFormat::String(format),
+        }
+    }
+    #[inline(always)]
+    pub(super) fn with_layout_params(params: LayoutParameters) -> Self {
+        Self {
+            format: LayoutBuildFormat::Params(params),
         }
     }
 }

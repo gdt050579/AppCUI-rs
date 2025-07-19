@@ -19,17 +19,28 @@ fn check_window_just_title() {
 }
 
 #[test]
-fn check_window_using_layout_builder() {
+fn check_window_pos() {
     let script = "
         Paint.Enable(false)
-        // expect: ╔═════ 123456 ═════╗
-        Paint('123456 centered')
-        CheckHash(0x87AACF295BE859E6)
+        Paint('Centered')
+        CheckHash(0x361C1A2F695D024B)
     ";
-    let mut a = App::debug(20, 10, script).build().unwrap();
+    let mut a = App::debug(60, 14, script).build().unwrap();
+    a.add_window(Window::new("Centered", Layout::new("d:c,w:30,h:8"), window::Flags::NoCloseButton));
+    a.run();
+}
+
+#[test]
+fn check_window_pos_using_layout_builder() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Centered')
+        CheckHash(0x361C1A2F695D024B)
+    ";
+    let mut a = App::debug(60, 14, script).build().unwrap();
     a.add_window(Window::new(
-        "123456",
-        LayoutBuilder::new().width(20).height(10).dock(Alignament::Center).build(),
+        "Centered",
+        LayoutBuilder::new().width(30).height(8).dock(Dock::Center).build(),
         window::Flags::NoCloseButton,
     ));
     a.run();

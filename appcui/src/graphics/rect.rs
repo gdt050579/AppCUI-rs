@@ -1,10 +1,10 @@
 use super::{Point, Size};
 
-/// Alignament enum represents the alignment of a rectangle in a 2D space.
+/// RectAlignament enum represents the alignment of a rectangle in a 2D space.
 /// It is used to specify how a rectangle or other rectangular objects should be positioned relative to a given point.
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Debug, Eq)]
-pub enum Alignament {
+pub enum RectAlignament {
     /// The top-left corner of the rectangle.
     /// This is the default alignment.
     TopLeft = 0,
@@ -84,28 +84,28 @@ impl Rect {
     /// - `BottomLeft`: the x,y coordinates are the bottom-left corner of the rectangle
     /// - `Left`: the x,y coordinates are the left-center of the rectangle
     /// - `Center`: the x,y coordinates are the center of the rectangle
-    pub fn with_alignament(x: i32, y: i32, width: u16, height: u16, align: Alignament) -> Self {
+    pub fn with_alignament(x: i32, y: i32, width: u16, height: u16, align: RectAlignament) -> Self {
         let x = match align {
-            Alignament::TopLeft => x,
-            Alignament::Top => x - ((width as i32) / 2),
-            Alignament::TopRight => x - (width as i32) + 1,
-            Alignament::Right => x - (width as i32) + 1,
-            Alignament::BottomRight => x - (width as i32) + 1,
-            Alignament::Bottom => x - ((width as i32) / 2),
-            Alignament::BottomLeft => x,
-            Alignament::Left => x,
-            Alignament::Center => x - ((width as i32) / 2),
+            RectAlignament::TopLeft => x,
+            RectAlignament::Top => x - ((width as i32) / 2),
+            RectAlignament::TopRight => x - (width as i32) + 1,
+            RectAlignament::Right => x - (width as i32) + 1,
+            RectAlignament::BottomRight => x - (width as i32) + 1,
+            RectAlignament::Bottom => x - ((width as i32) / 2),
+            RectAlignament::BottomLeft => x,
+            RectAlignament::Left => x,
+            RectAlignament::Center => x - ((width as i32) / 2),
         };
         let y = match align {
-            Alignament::TopLeft => y,
-            Alignament::Top => y,
-            Alignament::TopRight => y,
-            Alignament::Right => y - ((height as i32) / 2),
-            Alignament::BottomRight => y - (height as i32) + 1,
-            Alignament::Bottom => y - (height as i32) + 1,
-            Alignament::BottomLeft => y - (height as i32) + 1,
-            Alignament::Left => y - ((height as i32) / 2),
-            Alignament::Center => y - ((height as i32) / 2),
+            RectAlignament::TopLeft => y,
+            RectAlignament::Top => y,
+            RectAlignament::TopRight => y,
+            RectAlignament::Right => y - ((height as i32) / 2),
+            RectAlignament::BottomRight => y - (height as i32) + 1,
+            RectAlignament::Bottom => y - (height as i32) + 1,
+            RectAlignament::BottomLeft => y - (height as i32) + 1,
+            RectAlignament::Left => y - ((height as i32) / 2),
+            RectAlignament::Center => y - ((height as i32) / 2),
         };
         Self {
             left: x,

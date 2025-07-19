@@ -123,7 +123,7 @@ impl<'a> From<Layout<'a>> for ControlLayout {
         Self {
             mode: match value.format {
                 super::layout::LayoutBuildFormat::String(str_format) => LayoutMode::new(str_format),
-                super::layout::LayoutBuildFormat::Builder(layout_builder) => LayoutMode::with_params(layout_builder.params)
+                super::layout::LayoutBuildFormat::Params(params) => LayoutMode::with_params(params)
             },
             x: 0,
             y: 0,

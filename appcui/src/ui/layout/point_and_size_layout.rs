@@ -1,5 +1,6 @@
 use super::should_not_use;
 use super::Alignament;
+use super::Dock;
 use super::ControlLayout;
 use super::Coordonate16;
 use super::LayoutParameters;
@@ -15,6 +16,21 @@ pub(super) struct PointAndSizeLayout {
     pub anchor: Alignament,
 }
 impl PointAndSizeLayout {
+    #[inline(always)]
+    fn dock_to_align(dock: Dock)->Option<Alignament> {
+        match dock {
+            Dock::TopLeft => Some(Alignament::TopLeft),
+            Dock::Top => Some(Alignament::Top),
+            Dock::TopRight => Some(Alignament::TopRight),
+            Dock::Right => Some(Alignament::Right),
+            Dock::BottomRight => Some(Alignament::BottomRight),
+            Dock::Bottom => Some(Alignament::Bottom),
+            Dock::BottomLeft => Some(Alignament::BottomLeft),
+            Dock::Left => Some(Alignament::Left),
+            Dock::Center => Some(Alignament::Center),
+            _ => None
+        }
+    }
     #[inline]
     pub(super) fn new_docked(params: &LayoutParameters) -> Self {
         should_not_use!(params.x, "When ('dock' or 'd') parameter is used,'x' parameter can not be used !");
@@ -40,19 +56,20 @@ impl PointAndSizeLayout {
             "When ('dock' or 'd') parameter is used,('align' or 'a') parameters can not be used !"
         );
 
+        let a = PointAndSizeLayout::dock_to_align(params.dock.unwrap()).unwrap();
         PointAndSizeLayout {
             x: Coordonate16::Absolute(0),
             y: Coordonate16::Absolute(0),
             width: params.width.unwrap_or(Dimension16::Percentage(10000)),
             height: params.height.unwrap_or(Dimension16::Percentage(10000)),
-            align: params.dock.unwrap(),
-            anchor: params.dock.unwrap(),
+            align: a,
+            anchor: a,
         }
     }
 
     #[inline]
     pub(super) fn new_xy_width_height(params: &LayoutParameters) -> Self {
-        // it is assume that DOCK|D is not set (as it was process early in ProcessDockedLayout)
+        // it is assume that DOCK|D is not set (as it was process early in ProcessAlignamentedLayout)
         // if X and Y are set --> Left, Right, Top and Bottom should not be set
         should_not_use!(
             params.a_left,

@@ -1,3 +1,5 @@
+use crate::ui::Dock;
+
 use super::Alignament;
 use super::Coordonate16;
 use super::Dimension16;
@@ -52,7 +54,7 @@ impl LayoutBuilder {
         self
     }
 
-    pub fn dock(mut self, dock: Alignament) -> Self {
+    pub fn dock(mut self, dock: Dock) -> Self {
         self.params.dock = Some(dock);
         self
     }
@@ -90,7 +92,6 @@ impl LayoutBuilder {
     }
 
     pub fn build(self) -> Layout<'static> {
-        //Layout::new(self)
-        todo!()
+        Layout::with_layout_params(self.params)
     }
 }

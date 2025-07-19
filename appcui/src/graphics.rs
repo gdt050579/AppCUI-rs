@@ -35,7 +35,7 @@ pub use self::image::*;
 pub use self::line_type::LineType;
 pub use self::point::Point;
 pub use self::rect::Rect;
-pub use self::rect::Alignament;
+pub use self::rect::RectAlignament;
 pub use self::size::Size;
 pub use self::surface::Surface;
 pub use self::text_format::TextAlignament;
