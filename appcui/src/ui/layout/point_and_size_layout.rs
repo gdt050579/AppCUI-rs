@@ -4,8 +4,8 @@ use super::ControlLayout;
 use super::Coordonate16;
 use super::Dimension16;
 use super::Dock;
-use super::Pivot;
 use super::LayoutParameters;
+use super::Pivot;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct PointAndSizeLayout {
@@ -43,28 +43,54 @@ impl PointAndSizeLayout {
         );
 
         match params.dock.unwrap() {
-            Dock::Left => PointAndSizeLayout {
-                x: Coordonate16::Absolute(0),
-                y: Coordonate16::Absolute(0),
-                width: params.width.unwrap_or(Dimension16::Percentage(10000)),
-                height: Dimension16::Percentage(10000),
-                align: a,
-                anchor: a,
+            Dock::Left => {
+                should_not_use!(
+                    params.height,
+                    "When ('dock' or 'd') parameter is used with the value 'Left', the 'height' parameter can not be used !"
+                );
+                PointAndSizeLayout {
+                    x: Coordonate16::Absolute(0),
+                    y: Coordonate16::Absolute(0),
+                    width: params.width.unwrap_or(Dimension16::Percentage(10000)),
+                    height: Dimension16::Percentage(10000),
+                    align: Alignament::TopLeft,
+                    anchor: Alignament::TopLeft,
+                }
+            }
+            Dock::Right => {
+                should_not_use!(
+                    params.height,
+                    "When ('dock' or 'd') parameter is used with the value 'Right', the 'height' parameter can not be used !"
+                );
+                PointAndSizeLayout {
+                    x: Coordonate16::Percentage(10000),
+                    y: Coordonate16::Absolute(0),
+                    width: params.width.unwrap_or(Dimension16::Percentage(10000)),
+                    height: Dimension16::Percentage(10000),
+                    align: Alignament::TopRight,
+                    anchor: Alignament::TopRight,
+                }
             },
-            Dock::Right => todo!(),
             Dock::Top => todo!(),
             Dock::Bottom => todo!(),
-            Dock::Fill => todo!(),
-        }
-
-        let a = PointAndSizeLayout::dock_to_align(params.dock.unwrap()).unwrap();
-        PointAndSizeLayout {
-            x: Coordonate16::Absolute(0),
-            y: Coordonate16::Absolute(0),
-            width: params.width.unwrap_or(Dimension16::Percentage(10000)),
-            height: params.height.unwrap_or(Dimension16::Percentage(10000)),
-            align: a,
-            anchor: a,
+            Dock::Fill => {
+                should_not_use!(
+                    params.height,
+                    "When ('dock' or 'd') parameter is used with the value 'Fill', the 'height' parameter can not be used !"
+                );
+                should_not_use!(
+                    params.height,
+                    "When ('dock' or 'd') parameter is used with the value 'Fill', the 'width' parameter can not be used !"
+                );
+                PointAndSizeLayout {
+                    x: Coordonate16::Absolute(0),
+                    y: Coordonate16::Absolute(0),
+                    width: Dimension16::Percentage(10000),
+                    height: Dimension16::Percentage(10000),
+                    align: Alignament::TopLeft,
+                    anchor: Alignament::TopLeft,
+                }
+            }
         }
     }
 
@@ -99,7 +125,7 @@ impl PointAndSizeLayout {
             align: params.align.unwrap(),
             anchor: params.align.unwrap(),
         }
-    }    
+    }
 
     #[inline]
     pub(super) fn new_xy_width_height(params: &LayoutParameters) -> Self {

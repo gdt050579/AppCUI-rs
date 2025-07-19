@@ -45,6 +45,7 @@ impl LayoutMode {
             if (params_list.width.is_some())
                 && (params_list.height.is_some())
                 && (params_list.align.is_none())
+                && (params_list.pivot.is_none())
                 && (params_list.a_top.is_none())
                 && (params_list.a_left.is_none())
                 && (params_list.a_bottom.is_none())

@@ -30,7 +30,6 @@ mod all_anchors_layout;
 #[cfg(test)]
 mod tests;
 
-use alignament::Alignament;
 use anchors::Anchors;
 use layout_parameters::LayoutParameters;
 use layout_mode::LayoutMode;
@@ -51,6 +50,7 @@ pub use coordonate::Coordonate;
 pub use dimension::Dimension;
 pub use dock::Dock;
 pub use pivot::Pivot;
+pub use alignament::Alignament;
 pub (in crate) use dimension16::Dimension16;
 pub (in crate) use coordonate16::Coordonate16;
 pub (in crate) use control_layout::ControlLayout;

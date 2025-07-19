@@ -1,6 +1,6 @@
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub(crate) enum Dock {
+pub enum Dock {
     Left = 0,
     Right = 1,
     Top = 2,
