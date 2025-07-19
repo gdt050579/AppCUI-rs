@@ -25,7 +25,7 @@ The alignament in the third method is defined as follows:
 ```rust
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub enum Alignament {
+pub enum RectAlignament {
     TopLeft = 0,
     Top,
     TopRight,
