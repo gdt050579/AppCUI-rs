@@ -1,108 +1,91 @@
 use super::Alignament;
-use super::Coordonate;
-use super::Dimension;
+use super::Coordonate16;
+use super::Dimension16;
 use super::Layout;
+use super::LayoutParameters;
 
 pub struct LayoutBuilder {
-    pub(super) x: Option<Coordonate>,
-    pub(super) y: Option<Coordonate>,
-    pub(super) width: Option<Dimension>,
-    pub(super) height: Option<Dimension>,
-    pub(super) alignament: Option<Alignament>,
-    pub(super) dock: Option<Alignament>,
-    pub(super) left_anchor: Option<Dimension>,
-    pub(super) right_anchor: Option<Dimension>,
-    pub(super) top_anchor: Option<Dimension>,
-    pub(super) bottom_anchor: Option<Dimension>,
+    pub(super) params: LayoutParameters,
 }
 
 impl LayoutBuilder {
     pub fn new() -> Self {
         Self {
-            x: None,
-            y: None,
-            width: None,
-            height: None,
-            alignament: None,
-            dock: None,
-            left_anchor: None,
-            right_anchor: None,
-            top_anchor: None,
-            bottom_anchor: None,
+            params: LayoutParameters::default(),
         }
     }
 
     pub fn x<T>(mut self, x: T) -> Self
     where
-        Coordonate: From<T>,
+        Coordonate16: From<T>,
     {
-        self.x = Some(x.into());
+        self.params.x = Some(x.into());
         self
     }
 
     pub fn y<T>(mut self, y: T) -> Self
     where
-        Coordonate: From<T>,
+        Coordonate16: From<T>,
     {
-        self.y = Some(y.into());
+        self.params.y = Some(y.into());
         self
     }
 
     pub fn width<T>(mut self, width: T) -> Self
     where
-        Dimension: From<T>,
+        Dimension16: From<T>,
     {
-        self.width = Some(width.into());
+        self.params.width = Some(width.into());
         self
     }
 
     pub fn height<T>(mut self, height: T) -> Self
     where
-        Dimension: From<T>,
+        Dimension16: From<T>,
     {
-        self.height = Some(height.into());
+        self.params.height = Some(height.into());
         self
     }
 
     pub fn alignament(mut self, alignament: Alignament) -> Self {
-        self.alignament = Some(alignament);
+        self.params.align = Some(alignament);
         self
     }
 
     pub fn dock(mut self, dock: Alignament) -> Self {
-        self.dock = Some(dock);
+        self.params.dock = Some(dock);
         self
     }
 
     pub fn left_anchor<T>(mut self, left_anchor: T) -> Self
     where
-        Dimension: From<T>,
+        Coordonate16: From<T>,
     {
-        self.left_anchor = Some(left_anchor.into());
+        self.params.a_left = Some(left_anchor.into());
         self
     }
 
     pub fn right_anchor<T>(mut self, right_anchor: T) -> Self
     where
-        Dimension: From<T>,
+        Coordonate16: From<T>,
     {
-        self.right_anchor = Some(right_anchor.into());
+        self.params.a_right = Some(right_anchor.into());
         self
     }
 
     pub fn top_anchor<T>(mut self, top_anchor: T) -> Self
     where
-        Dimension: From<T>,
+        Coordonate16: From<T>,
     {
-        self.top_anchor = Some(top_anchor.into());
+        self.params.a_top = Some(top_anchor.into());
         self
     }
 
     pub fn bottom_anchor<T>(mut self, bottom_anchor: T) -> Self
     where
-        Dimension: From<T>,
+        Coordonate16: From<T>,
     {
-        self.bottom_anchor = Some(bottom_anchor.into());
+        self.params.a_bottom = Some(bottom_anchor.into());
         self
     }
 

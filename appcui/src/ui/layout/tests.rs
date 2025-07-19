@@ -612,14 +612,14 @@ fn check_layout_builder() {
         .right_anchor(0.25)
         .top_anchor(5)
         .bottom_anchor(7);
-    assert_eq!(lb.x, Some(Coordonate::Absolute(100)));
-    assert_eq!(lb.y, Some(Coordonate::Percentage(1.25)));
-    assert_eq!(lb.width, Some(Dimension::Absolute(100)));
-    assert_eq!(lb.height, Some(Dimension::Percentage(1.0)));
-    assert_eq!(lb.alignament, Some(Alignament::Center));
-    assert_eq!(lb.dock, Some(Alignament::TopLeft));
-    assert_eq!(lb.left_anchor, Some(Dimension::Percentage(0.5)));
-    assert_eq!(lb.right_anchor, Some(Dimension::Percentage(0.25)));
-    assert_eq!(lb.top_anchor, Some(Dimension::Absolute(5)));
-    assert_eq!(lb.bottom_anchor, Some(Dimension::Absolute(7)));
+    assert_eq!(lb.params.x, Some(Coordonate16::Absolute(100)));
+    assert_eq!(lb.params.y, Some(Coordonate16::Percentage(12500)));
+    assert_eq!(lb.params.width, Some(Dimension16::Absolute(100)));
+    assert_eq!(lb.params.height, Some(Dimension16::Percentage(10000)));
+    assert_eq!(lb.params.align, Some(Alignament::Center));
+    assert_eq!(lb.params.dock, Some(Alignament::TopLeft));
+    assert_eq!(lb.params.a_left, Some(Coordonate16::Percentage(5000)));
+    assert_eq!(lb.params.a_right, Some(Coordonate16::Percentage(2500)));
+    assert_eq!(lb.params.a_top, Some(Coordonate16::Absolute(5)));
+    assert_eq!(lb.params.a_bottom, Some(Coordonate16::Absolute(7)));
 }
