@@ -1,6 +1,7 @@
 use crate::ui::Dock;
 
 use super::Alignament;
+use super::Pivot;
 use super::Coordonate16;
 use super::Dimension16;
 use super::Layout;
@@ -51,6 +52,11 @@ impl LayoutBuilder {
 
     pub fn alignament(mut self, alignament: Alignament) -> Self {
         self.params.align = Some(alignament);
+        self
+    }
+
+    pub fn pivot(mut self, pivot: Pivot) -> Self {
+        self.params.pivot = Some(pivot);
         self
     }
 

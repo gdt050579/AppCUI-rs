@@ -1,6 +1,7 @@
 use super::anchors::Anchors;
 use super::Alignament;
 use super::Dock;
+use super::Pivot;
 use super::Coordonate16;
 use super::Parameter;
 use super::Dimension16;
@@ -17,6 +18,7 @@ pub(super) struct LayoutParameters {
     pub a_top: Option<Coordonate16>,
     pub a_bottom: Option<Coordonate16>,
     pub align: Option<Alignament>,
+    pub pivot: Option<Pivot>,
     pub dock: Option<Dock>,
 }
 impl Default for LayoutParameters {
@@ -33,6 +35,7 @@ impl Default for LayoutParameters {
             a_bottom: None,
             align: None,
             dock: None,
+            pivot: None,
         }
     }
 }
@@ -122,6 +125,22 @@ impl LayoutParameters {
                             );
                         }
                     }
+                    Parameter::Pivot => {
+                        if p.value_type != ValueType::String {
+                            panic!(
+                                "Invalid value for 'pivot' parameter: {} in layout: {}",
+                                p.value, format
+                            );
+                        }
+                        if let Some(p) = Pivot::from_hash(p.value_hash) {
+                            inf.pivot = Some(p);
+                        } else {
+                            panic!(
+                                "Invalid value for 'pivot' parameter: {} in layout: {}",
+                                p.value, format
+                            );
+                        }
+                    }                    
                     Parameter::Dock => {
                         if p.value_type != ValueType::String {
                             panic!(

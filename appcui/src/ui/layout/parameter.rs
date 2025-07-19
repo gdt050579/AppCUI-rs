@@ -12,6 +12,7 @@ pub (super) enum Parameter
     Height = 7,
     Align  = 8,
     Dock   = 9,
+    Pivot  = 10,
 }
 
 static HASH_TO_PARAMETER: [Option<Parameter>; 47] = [

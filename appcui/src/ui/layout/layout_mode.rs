@@ -35,7 +35,11 @@ impl LayoutMode {
         if params_list.dock.is_some() {
             return LayoutMode::PointAndSize(PointAndSizeLayout::new_docked(&params_list));
         }
-        // Step 2 ==> check (X,Y) + (W,H) + (optional align)
+        // Step 2 ==> if align option is present
+        if params_list.align.is_some() {
+            return LayoutMode::PointAndSize(PointAndSizeLayout::new_aligned(&params_list));
+        }        
+        // Step 2 ==> check (X,Y) + (W,H) + (optional pivot)
         if params_list.x.is_some() && params_list.y.is_some() {
             // if all we have is (X,Y) + (W,H) check to see if it is an absolute layout
             if (params_list.width.is_some())

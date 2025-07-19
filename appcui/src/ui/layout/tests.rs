@@ -608,7 +608,7 @@ fn check_layout_builder() {
         .width(100)
         .height(1.0)
         .alignament(Alignament::Center)
-        .dock(Dock::TopLeft)
+        .dock(Dock::Top)
         .left_anchor(0.5)
         .right_anchor(0.25)
         .top_anchor(5)
@@ -618,7 +618,7 @@ fn check_layout_builder() {
     assert_eq!(lb.params.width, Some(Dimension16::Absolute(100)));
     assert_eq!(lb.params.height, Some(Dimension16::Percentage(10000)));
     assert_eq!(lb.params.align, Some(Alignament::Center));
-    assert_eq!(lb.params.dock, Some(Dock::TopLeft));
+    assert_eq!(lb.params.dock, Some(Dock::Top));
     assert_eq!(lb.params.a_left, Some(Coordonate16::Percentage(5000)));
     assert_eq!(lb.params.a_right, Some(Coordonate16::Percentage(2500)));
     assert_eq!(lb.params.a_top, Some(Coordonate16::Absolute(5)));
