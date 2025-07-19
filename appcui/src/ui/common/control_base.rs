@@ -95,7 +95,7 @@ impl ControlBase {
             children: Vec::new(),
             focused_child_index: VectorIndex::Invalid,
             parent_index: VectorIndex::Invalid,
-            layout: ControlLayout::new(layout.format),
+            layout: ControlLayout::from(layout),
             margins: Margins {
                 left: 0,
                 right: 0,

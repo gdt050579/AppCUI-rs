@@ -9,6 +9,7 @@ use super::Dimension;
 use super::Dimension16;
 use super::LayoutBuilder;
 use super::PointAndSizeLayout;
+use super::Layout;
 
 use super::LayoutMode;
 
@@ -30,7 +31,7 @@ macro_rules! validate_abs {
 
 macro_rules! validate_pos {
     ($text:literal, $parent_width:expr, $parent_height:expr, $x:expr,$y:expr,$w:expr,$h:expr) => {
-        let mut cl = ControlLayout::new($text);
+        let mut cl = ControlLayout::from(Layout::new($text));
         cl.update($parent_width, $parent_height);
         assert_eq!(cl.get_width(), $w);
         assert_eq!(cl.get_height(), $h);
