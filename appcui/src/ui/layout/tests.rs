@@ -8,6 +8,7 @@ use super::PointAndSizeLayout;
 use super::Dimension16;
 use super::Dimension;
 use super::Anchors;
+use super::LayoutBuilder;
 
 use super::LayoutMode;
 
@@ -601,4 +602,11 @@ fn check_coordonate_update_with_absolute_value() {
     c.update_with_absolute_value(10, 20);
     assert_eq!(c, Coordonate::Percentage(0.5f32));
 
+}
+
+#[test]
+fn check_layout_builder() {
+    let lb = LayoutBuilder::new().x(100).y(1.25);
+    assert_eq!(lb.x, Some(Coordonate::Absolute(100)));
+    assert_eq!(lb.y, Some(Coordonate::Percentage(1.25)));
 }
