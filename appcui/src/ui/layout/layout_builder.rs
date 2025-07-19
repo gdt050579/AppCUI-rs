@@ -1,8 +1,7 @@
+use super::Alignament;
 use super::Coordonate;
 use super::Dimension;
-use super::Alignament;
 use super::Layout;
-
 
 pub struct LayoutBuilder {
     pub(super) x: Option<Coordonate>,
@@ -33,23 +32,35 @@ impl LayoutBuilder {
         }
     }
 
-    pub fn x(mut self, x: Coordonate) -> Self {
-        self.x = Some(x);
+    pub fn x<T>(mut self, x: T) -> Self
+    where
+        Coordonate: From<T>,
+    {
+        self.x = Some(x.into());
         self
     }
 
-    pub fn y(mut self, y: Coordonate) -> Self {
-        self.y = Some(y);
+    pub fn y<T>(mut self, y: T) -> Self
+    where
+        Coordonate: From<T>,
+    {
+        self.y = Some(y.into());
         self
     }
 
-    pub fn width(mut self, width: Dimension) -> Self {
-        self.width = Some(width);
+    pub fn width<T>(mut self, width: T) -> Self
+    where
+        Dimension: From<T>,
+    {
+        self.width = Some(width.into());
         self
     }
 
-    pub fn height(mut self, height: Dimension) -> Self {
-        self.height = Some(height);
+    pub fn height<T>(mut self, height: T) -> Self
+    where
+        Dimension: From<T>,
+    {
+        self.height = Some(height.into());
         self
     }
 
@@ -63,23 +74,35 @@ impl LayoutBuilder {
         self
     }
 
-    pub fn left_anchor(mut self, left_anchor: Dimension) -> Self {
-        self.left_anchor = Some(left_anchor);
+    pub fn left_anchor<T>(mut self, left_anchor: T) -> Self
+    where
+        Dimension: From<T>,
+    {
+        self.left_anchor = Some(left_anchor.into());
         self
     }
 
-    pub fn right_anchor(mut self, right_anchor: Dimension) -> Self {
-        self.right_anchor = Some(right_anchor);
+    pub fn right_anchor<T>(mut self, right_anchor: T) -> Self
+    where
+        Dimension: From<T>,
+    {
+        self.right_anchor = Some(right_anchor.into());
         self
     }
 
-    pub fn top_anchor(mut self, top_anchor: Dimension) -> Self {
-        self.top_anchor = Some(top_anchor);
+    pub fn top_anchor<T>(mut self, top_anchor: T) -> Self
+    where
+        Dimension: From<T>,
+    {
+        self.top_anchor = Some(top_anchor.into());
         self
     }
 
-    pub fn bottom_anchor(mut self, bottom_anchor: Dimension) -> Self {
-        self.bottom_anchor = Some(bottom_anchor);
+    pub fn bottom_anchor<T>(mut self, bottom_anchor: T) -> Self
+    where
+        Dimension: From<T>,
+    {
+        self.bottom_anchor = Some(bottom_anchor.into());
         self
     }
 
