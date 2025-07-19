@@ -91,6 +91,7 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
     let top = params.contains("top");
     let bottom = params.contains("bottom");
     let align = params.contains("align");
+    let pivot = params.contains("pivot");
     let dock = params.contains("dock");
     let width = params.contains("width");
     let height = params.contains("height");
@@ -117,6 +118,29 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
         );
         return;
     }
+    // align
+    if align {
+        should_not_use!(x, "When ('align' or 'a') parameter is used,'x' parameter can not be used !");
+        should_not_use!(y, "When ('align' or 'a') parameter is used,'y' parameter can not be used !");
+        should_not_use!(top, "When ('align' or 'a') parameter is used,('top' or 't') parameters can not be used !");
+        should_not_use!(
+            bottom,
+            "When ('align' or 'a') parameter is used,('bottom' or 'b') parameters can not be used !"
+        );
+        should_not_use!(
+            left,
+            "When ('align' or 'a') parameter is used,('left' or 'l') parameters can not be used !"
+        );
+        should_not_use!(
+            right,
+            "When ('align' or 'a') parameter is used,('right' or 'r') parameters can not be used !"
+        );
+        should_not_use!(
+            dock,
+            "When ('align' or 'a') parameter is used,('dock' or 'd') parameters can not be used !"
+        );
+        return;
+    }
     // x , y
     if x && y {
         should_not_use!(left, "When (x,y) parameters are used, ('left' or 'l') parameter can not be used !");
@@ -133,8 +157,7 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
 
             if let Some(value) = params.get("align") {
                 match value.to_align() {
-                    Alignament::Top | Alignament::Center | Alignament::Bottom => {
-                    }
+                    Alignament::Top | Alignament::Center | Alignament::Bottom => {}
                     _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) alignament values are allowed !"),
                 }
             }
@@ -145,8 +168,7 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
 
             if let Some(value) = params.get("align") {
                 match value.to_align() {
-                    Alignament::Top | Alignament::Center | Alignament::Bottom => {
-                    }
+                    Alignament::Top | Alignament::Center | Alignament::Bottom => {}
                     _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) alignament values are allowed !"),
                 }
             }
@@ -204,16 +226,29 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
             );
         }
         Anchors::All => {
-            should_not_use!(x, "When (left,top,right,bottom) parameters are used together, 'X' parameter can not be used");
-            should_not_use!(y, "When (left,top,right,bottom) parameters are used together, 'Y' parameter can not be used");
-            should_not_use!(height, "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used");
-            should_not_use!(width, "When (left,top,right,bottom) parameters are used together, 'widyj' parameter can not be used");
-            should_not_use!(align, "When (left,top,right,bottom) parameters are used together, 'align' parameter can not be used");
-    
-        },
+            should_not_use!(
+                x,
+                "When (left,top,right,bottom) parameters are used together, 'X' parameter can not be used"
+            );
+            should_not_use!(
+                y,
+                "When (left,top,right,bottom) parameters are used together, 'Y' parameter can not be used"
+            );
+            should_not_use!(
+                height,
+                "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used"
+            );
+            should_not_use!(
+                width,
+                "When (left,top,right,bottom) parameters are used together, 'widyj' parameter can not be used"
+            );
+            should_not_use!(
+                align,
+                "When (left,top,right,bottom) parameters are used together, 'align' parameter can not be used"
+            );
+        }
         _ => {
             panic!("Invalid layout format --> this combination can not be used to create a layout for a control ");
-
         }
     }
 }
