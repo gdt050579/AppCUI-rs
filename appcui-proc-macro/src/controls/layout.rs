@@ -1,6 +1,6 @@
 use crate::parameter_parser::{alignament::Alignament, NamedParamsMap};
 
-static LAYOUT_PARAMS: [&str; 10] = ["x", "y", "left", "top", "right", "bottom", "align", "dock", "width", "height"];
+static LAYOUT_PARAMS: [&str; 11] = ["x", "y", "left", "top", "right", "bottom", "align", "dock", "pivot", "width", "height"];
 
 macro_rules! should_not_use {
     ($param:expr, $msg:literal) => {
@@ -116,6 +116,10 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
             align,
             "When ('dock' or 'd') parameter is used,('align' or 'a') parameters can not be used !"
         );
+        should_not_use!(
+            align,
+            "When ('dock' or 'd') parameter is used,('pivot' or 'p') parameters can not be used !"
+        );
         return;
     }
     // align
@@ -139,6 +143,10 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
             dock,
             "When ('align' or 'a') parameter is used,('dock' or 'd') parameters can not be used !"
         );
+        should_not_use!(
+            pivot,
+            "When ('align' or 'a') parameter is used,('pivot' or 'p') parameters can not be used !"
+        );        
         return;
     }
     // x , y

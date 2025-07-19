@@ -299,7 +299,7 @@ fn check_mouse_on_scrollbars() {
     let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
-    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
+    w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
     a.add_window(w);
     a.run();
 }
@@ -375,7 +375,7 @@ fn check_mouse_on_scrollbars_resize() {
     let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
-    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
+    w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
     a.add_window(w);
     a.run();
 }
@@ -407,7 +407,7 @@ fn check_macro_init_1() {
     let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
-    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
+    w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
     a.add_window(w);
     a.run();
 }
@@ -428,7 +428,7 @@ fn check_macro_init_2() {
     let s = c.drawing_surface_mut();
     s.clear(char!("<->,r,black"));
     w.add(c);
-    w.add(button!("Test,l:1,t:1,a:tl,w:10"));
+    w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
     a.add_window(w);
     a.run();
 }
@@ -524,7 +524,7 @@ fn check_resize_surface() {
             let s = c.drawing_surface_mut();
             s.write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
             win.viewer = win.add(c);
-            win.add(button!("Test,l:1,t:1,a:tl,w:10"));
+            win.add(button!("Test,l:1,t:1,w:10")); // removed: a:tl,
             win
         }
     }

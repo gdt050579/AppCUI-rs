@@ -25,7 +25,7 @@ impl MyWin {
         w.h_op = w.add(db);
         w.add(label!("Numbers,x:1,y:3,w:15"));
         w.h_txt = w.add(textfield!("'1,2,3,4',x:20,y:3,w:26,flags:ProcessEnter"));
-        w.add(button!("&Calculate,x:50%,y:100%,a:b,w:20"));
+        w.add(button!("&Calculate,x:50%,y:100%,p:b,w:20"));
         w
     }
     fn compute(&self) {

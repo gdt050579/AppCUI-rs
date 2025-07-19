@@ -45,7 +45,7 @@ impl MyWin {
         w.p2_human = pnl.add(radiobox!("Human,x:20,y:3,w:12,selected:true"));
         t.add(0, pnl);
 
-        t.add(0, button!("'&Start Game',x:50%,y:100%,a:b,w:21"));
+        t.add(0, button!("'&Start Game',x:50%,y:100%,p:b,w:21"));
 
         w.board = t.add(1, Board::new());
         w.tab = w.add(t);

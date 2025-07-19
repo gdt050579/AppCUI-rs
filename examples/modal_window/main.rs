@@ -19,13 +19,13 @@ impl MyWin {
             lb: Handle::None,
             counter,
         };
-        win.b1 = win.add(button!("'Show modal &window',x:50%,y:2,a:c,w:30"));
+        win.b1 = win.add(button!("'Show modal &window',x:50%,y:2,p:c,w:30"));
         win.b2 = win.add(Button::new(
             format!("Counter = {counter}").as_str(),
             Layout::new("x:50%,y:4,a:c,w:30"),
             button::Type::Normal,
         ));
-        win.b3 = win.add(button!("E&xit,x:50%,y:6,a:c,w:30"));
+        win.b3 = win.add(button!("E&xit,x:50%,y:6,p:c,w:30"));
         win.lb = win.add(Label::new("", Layout::new("x:0,y:0,w:100%")));
         win
     }
