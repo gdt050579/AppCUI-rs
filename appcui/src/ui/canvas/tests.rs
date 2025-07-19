@@ -611,7 +611,7 @@ fn check_true_colors_rendering() {
         CheckHash(0xBF4312A1691D7AD8)
     ";
     let mut a = App::debug(70, 20, script).build().unwrap();
-    let mut w = window!("Title,d:c");
+    let mut w = window!("Title,a:c");
     let mut c = canvas!("'68x15',a:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
     c.clear_background();
     let s = c.drawing_surface_mut();

@@ -121,7 +121,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
     let mut w = window!("Animals,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("l:1,t:1,b:1,r:1");
-    let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+    let mut l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
     l.add_item(listbox::Item::new("Dog (man best friend)", false));
     l.add_item(listbox::Item::new("Cat (independent)", true));
     l.add_item(listbox::Item::new("Elephant (the largest land animal)", false));

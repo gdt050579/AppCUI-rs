@@ -11,7 +11,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("d:c,w:50,h:10,caption:Win"),
+            base: window!("a:c,w:50,h:10,caption:Win"),
             h_txt: Handle::None,
             h_op: Handle::None,
         };

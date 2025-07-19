@@ -36,7 +36,7 @@ fn check_create_with_macro_1() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+    let mut l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
     for i in 0..100 {
         l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
@@ -57,7 +57,7 @@ fn check_create_with_macro_2() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
+    let l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
     p.add(l);
     w.add(p);
     a.add_window(w);
@@ -73,7 +73,7 @@ fn check_create_with_macro_3() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,index:3,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
+    let l = listbox!("a:c,w:100%,h:100%,index:3,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -88,7 +88,7 @@ fn check_create_with_macro_4() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,index:3,flags: SearchBar, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
+    let l = listbox!("a:c,w:100%,h:100%,index:3,flags: SearchBar, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -413,7 +413,7 @@ fn check_search_ignore_case() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light GREEn',White,'Special GrEeN',Black,Orange,Yellow,Purple]");
+    let l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light GREEn',White,'Special GrEeN',Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -442,7 +442,7 @@ fn check_search_use_space() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light green',White,'Special Greeb',Black,Orange,Yellow,Purple]");
+    let l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light green',White,'Special Greeb',Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -466,11 +466,11 @@ fn check_events() {
             w.lbox = vs.add(
                 vsplitter::Panel::Left,
                 listbox!(
-                    "d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
+                    "a:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
                 ),
             );
             let mut p = panel!("caption:'Event logs',a:c,w:100%,h:100%,type: TopBar");
-            w.log = p.add(listbox!("d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
+            w.log = p.add(listbox!("a:c,w:100%,h:100%,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
             vs.add(vsplitter::Panel::Right, p);
             w.add(vs);
             w
@@ -641,7 +641,7 @@ fn check_autoscroll_on_create() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+AutoScroll, lsm:2, items:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]");
+    let l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars+AutoScroll, lsm:2, items:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -662,7 +662,7 @@ fn check_empty_list_message() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
-    let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+    let mut l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
     l.set_empty_message("No items in the list. Insert some items by pressing the 'Add' button.");
     p.add(l);
     w.add(p);
@@ -686,7 +686,7 @@ fn check_empty_list_message_with_macro() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, em='No items in the list. Insert some items by pressing the <Add> button.'");
+    let l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, em='No items in the list. Insert some items by pressing the <Add> button.'");
     p.add(l);
     w.add(p);
     w.add(button!("Add,x:1,y:1,w:7,type:flat"));
@@ -818,7 +818,7 @@ fn check_empty_highlight_selected_when_inactive() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+HighlightSelectedItemWhenInactive, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
+    let l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars+HighlightSelectedItemWhenInactive, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
     p.add(l);
     w.add(p);
     w.add(button!("Add,x:1,y:1,w:7,type:flat"));
@@ -846,7 +846,7 @@ fn check_empty_highlight_selected_when_inactive_2() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+HighlightSelectedItemWhenInactive+CheckBoxes, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
+    let l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars+HighlightSelectedItemWhenInactive+CheckBoxes, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
     p.add(l);
     w.add(p);
     w.add(button!("Add,x:1,y:1,w:7,type:flat"));
@@ -872,11 +872,11 @@ fn check_items_checked_with_mouse() {
             w.lbox = vs.add(
                 vsplitter::Panel::Left,
                 listbox!(
-                    "d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
+                    "a:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
                 ),
             );
             let mut p = panel!("caption:'Event logs',a:c,w:100%,h:100%,type: TopBar");
-            w.log = p.add(listbox!("d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
+            w.log = p.add(listbox!("a:c,w:100%,h:100%,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
             vs.add(vsplitter::Panel::Right, p);
             w.add(vs);
             w
@@ -952,7 +952,7 @@ fn check_scroll_from_scrollbar() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Test,a:c,w:20,h:8,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
+    let l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -982,7 +982,7 @@ fn check_scroll_from_mouse_wheel() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Test,a:c,w:20,h:8,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
+    let l = listbox!("a:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();

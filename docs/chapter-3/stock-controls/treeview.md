@@ -247,7 +247,7 @@ impl MyItem {
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Tree,d:c");
+    let mut w = window!("Tree,a:c");
     let mut tv = treeview!("MyItem,a:c,flags: ScrollBars+SearchBar+HideHeader");
     let h1 = tv.add(MyItem::new("Root Item 1"));    
     let h2 = tv.add(MyItem::new("Root Item 2"));

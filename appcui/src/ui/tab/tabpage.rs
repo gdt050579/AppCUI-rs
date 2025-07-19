@@ -6,7 +6,7 @@ impl TabPage {
     pub(super) fn new(visible: bool) -> Self {
         Self {
             base: ControlBase::with_status_flags(
-                Layout::new("x:0,y:0,w:100%,h:100%,a:tl"),
+                LayoutBuilder::new().x(0).y(0).width(1.0f32).height(1.0f32).build(),
                 if visible {
                     StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput
                 } else {

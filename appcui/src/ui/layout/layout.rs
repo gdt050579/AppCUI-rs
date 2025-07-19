@@ -22,7 +22,7 @@ pub(super) enum LayoutBuildFormat<'a> {
 ///
 /// 3. **Docking** (`dock` or `d`):
 ///    - Docks control to parent edges or corners
-///    - Example: `"d:c,w:30,h:50%"`
+///    - Example: `"a:c,w:30,h:50%"`
 ///    - Aliases: `d` for `dock`
 ///
 /// Additional parameters:

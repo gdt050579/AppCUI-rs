@@ -99,7 +99,7 @@ impl WindowWithTheme {
         ]"
         ));
 
-        let mut splitter = vsplitter!("d:c,w:100%,h:100%,pos:55");
+        let mut splitter = vsplitter!("a:c,w:100%,h:100%,pos:55");
         let mut p_basic = panel!("'Basic controls',l:1,t:1,r:1,h:8");
         p_basic.add(checkbox!("'Checkbox unchecked',x:1,y:1,w:23"));
         p_basic.add(checkbox!("'Checkbox &selected',x:1,y:2,w:23,checked:true"));

@@ -87,7 +87,7 @@ impl GenericAlertDialog {
         let window_height = nr_lines + 7;
 
         // lets create the window
-        let w_format = format!("d:c,w:{window_width},h:{window_height}");
+        let w_format = format!("a:c,w:{window_width},h:{window_height}");
         let mut w = Self {
             base: ModalWindow::with_type(title, Layout::new(&w_format), window::Flags::NoCloseButton, win_type),
             b_ok: Handle::None,

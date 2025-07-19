@@ -58,7 +58,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Test,d:c");
+    let mut w = window!("Test,a:c");
     let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:30,h:2"), progressbar::Flags::None);
     p.update_text("Copying ...");
     w.add(p);

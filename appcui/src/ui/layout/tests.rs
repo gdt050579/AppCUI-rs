@@ -465,25 +465,25 @@ fn layout_mode_anchor_tlr_dont_allow_allign() {
 #[should_panic]
 fn layout_mode_dock_dont_allow_left() {
     // this code should panic because 'l' can not be used in a Top-Left-Right layout mode
-    validate_pos!("d:c,w:100%,h:100%,l:1", 50, 30, 5, 0, 38, 10);
+    validate_pos!("a:c,w:100%,h:100%,l:1", 50, 30, 5, 0, 38, 10);
 }
 #[test]
 #[should_panic]
 fn layout_mode_dock_dont_allow_right() {
     // this code should panic because 'r' can not be used in a Top-Left-Right layout mode
-    validate_pos!("d:c,w:100%,h:100%,r:1", 50, 30, 5, 0, 38, 10);
+    validate_pos!("a:c,w:100%,h:100%,r:1", 50, 30, 5, 0, 38, 10);
 }
 #[test]
 #[should_panic]
 fn layout_mode_dock_dont_allow_top() {
     // this code should panic because 'lt' can not be used in a Top-Left-Right layout mode
-    validate_pos!("d:c,w:100%,h:100%,t:1", 50, 30, 5, 0, 38, 10);
+    validate_pos!("a:c,w:100%,h:100%,t:1", 50, 30, 5, 0, 38, 10);
 }
 #[test]
 #[should_panic]
 fn layout_mode_dock_dont_allow_bottom() {
     // this code should panic because 'b' can not be used in a Top-Left-Right layout mode
-    validate_pos!("d:c,w:100%,h:100%,b:1", 50, 30, 5, 0, 38, 10);
+    validate_pos!("a:c,w:100%,h:100%,b:1", 50, 30, 5, 0, 38, 10);
 }
 
 #[test]

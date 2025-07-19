@@ -10,7 +10,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("d:c,w:30,h:12,caption:Win"),
+            base: window!("a:c,w:30,h:12,caption:Win"),
             h_img: Handle::None,
         };
         let mut img = ImageViewer::new(

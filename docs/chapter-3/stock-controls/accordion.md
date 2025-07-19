@@ -11,8 +11,8 @@ let a1 = Accordion::new(Layout::new("a:c,w:15,h:10"),accordion::Flags::None);
 
 or the macro `accordion!`
 ```rs
-let a2 = accordion!("d:c,w:15,h:10,panels:[First,Second,Third]");
-let a3 = accordion!("d:c,w:15,h:10,panels:[A,B,C],flags:TransparentBackground");
+let a2 = accordion!("a:c,w:15,h:10,panels:[First,Second,Third]");
+let a3 = accordion!("a:c,w:15,h:10,panels:[A,B,C],flags:TransparentBackground");
 ```
 
 The caption of each accordion may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a accordion panel with the following caption `&Start` will set up the text of the accordion to `Start` and will set up character `S` as the hot key to activate that accordion panel.

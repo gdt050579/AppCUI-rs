@@ -12,8 +12,8 @@ let t2 = Tab::with_type(Layout::new("a:c,w:15,h:10"),tab::Flags::None, tab::Type
 ```
 or the macro `tab!`
 ```rs
-let t3 = tab!("d:c,w:15,h:10,tabs:[First,Second,Third],type:OnBottom");
-let t4 = tab!("d:c,w:15,h:10,tabs:[A,B,C],flags:TabsBar");
+let t3 = tab!("a:c,w:15,h:10,tabs:[First,Second,Third],type:OnBottom");
+let t4 = tab!("a:c,w:15,h:10,tabs:[A,B,C],flags:TabsBar");
 ```
 
 The caption of each tab may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a tab with the following caption `&Start` will set up the text of the tab to `Start` and will set up character `S` as the hot key to activate that tab.

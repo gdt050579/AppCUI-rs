@@ -19,7 +19,7 @@ where
     pub(super) fn new(title: &str, text: &str, value: Option<T>, validation: Option<InputCallback<T>>) -> Self {
         let chars_count = text.chars().count();
         let height = ((chars_count / 36) + 1).clamp(1, 6);
-        let format_str = format!("d:c,w:40,h:{}", height + 8);
+        let format_str = format!("a:c,w:40,h:{}", height + 8);
         let layout = Layout::new(format_str.as_str());
         let mut me = Self {
             base: ModalWindow::new(title, layout, window::Flags::NoCloseButton),

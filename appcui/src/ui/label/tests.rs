@@ -9,14 +9,14 @@ fn check_label_position() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("TopLeft", Layout::new("d:tl,w:7,h:1")));
-    w.add(Label::new("Top", Layout::new("d:t,w:3,h:1")));
-    w.add(Label::new("TopRight", Layout::new("d:tr,w:8,h:1")));
-    w.add(Label::new("Right", Layout::new("d:r,w:5,h:1")));
-    w.add(Label::new("BottomRight", Layout::new("d:br,w:11,h:1")));
-    w.add(Label::new("Bottom", Layout::new("d:b,w:6,h:1")));
-    w.add(Label::new("BottomLeft", Layout::new("d:bl,w:10,h:1")));
-    w.add(Label::new("Left", Layout::new("d:l,w:4,h:1")));
+    w.add(Label::new("TopLeft", Layout::new("a:tl,w:7,h:1")));
+    w.add(Label::new("Top", Layout::new("a:t,w:3,h:1")));
+    w.add(Label::new("TopRight", Layout::new("a:tr,w:8,h:1")));
+    w.add(Label::new("Right", Layout::new("a:r,w:5,h:1")));
+    w.add(Label::new("BottomRight", Layout::new("a:br,w:11,h:1")));
+    w.add(Label::new("Bottom", Layout::new("a:b,w:6,h:1")));
+    w.add(Label::new("BottomLeft", Layout::new("a:bl,w:10,h:1")));
+    w.add(Label::new("Left", Layout::new("a:l,w:4,h:1")));
     w.add(Label::new("Center", Layout::new("a:c,w:6,h:1")));
 
     a.add_window(w);
@@ -31,7 +31,7 @@ fn check_label_multiline() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("This is a multi-line label", Layout::new("d:tl,w:10,h:3")));
+    w.add(Label::new("This is a multi-line label", Layout::new("a:tl,w:10,h:3")));
     a.add_window(w);
     a.run();
 }
@@ -44,7 +44,7 @@ fn check_label_with_hotkey() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("A &hot key label", Layout::new("d:tl,w:30")));
+    w.add(Label::new("A &hot key label", Layout::new("a:tl,w:30")));
     a.add_window(w);
     a.run();
 }
@@ -58,7 +58,7 @@ fn check_label_with_nacro() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:9");
-    w.add(label!("Caption='A label build with label! moacro',d:tl,w:30"));
+    w.add(label!("Caption='A label build with label! moacro',a:tl,w:30"));
     w.add(label!("my_label,x:0,y:1,w:30"));
     a.add_window(w);
     a.run();
@@ -73,7 +73,7 @@ fn check_label_caption() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    let l = Label::new("Some &Text", Layout::new("d:tl,w:10,h:3"));
+    let l = Label::new("Some &Text", Layout::new("a:tl,w:10,h:3"));
     assert_eq!(l.caption(), "Some Text");
     w.add(l);
     a.add_window(w);
