@@ -114,7 +114,7 @@ fn main() -> Result<(), appcui::system::Error> {
     "#).unwrap();
     w.add(ImageViewer::new(
         heart,
-        Layout::new("d:c"),
+        Layout::new("a:c"),
         image::RenderOptionsBuilder::new()
             .scale(image::Scale::Scale50)
             .character_set(image::CharacterSet::AsciiArt)

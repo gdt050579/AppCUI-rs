@@ -51,7 +51,7 @@ impl ImageViewer {
     ///     |.....rwr.....|
     ///     |......r......|
     /// "#).unwrap();
-    /// let iv = ImageViewer::new(heart, Layout::new("d:c"),
+    /// let iv = ImageViewer::new(heart, Layout::new("a:c"),
     ///                           image::RenderOptionsBuilder::new()
     ///                                                 .scale(image::Scale::Scale50)
     ///                                                 .character_set(image::CharacterSet::SmallBlocks)

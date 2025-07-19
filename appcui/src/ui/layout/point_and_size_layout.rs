@@ -117,6 +117,10 @@ impl PointAndSizeLayout {
             params.dock,
             "When ('align' or 'a') parameter is used,('dock' or 'd') parameters can not be used !"
         );
+        should_not_use!(
+            params.pivot,
+            "When ('align' or 'a') parameter is used,('pivot' or 'p') parameters can not be used !"
+        );
         PointAndSizeLayout {
             x: Coordonate16::Absolute(0),
             y: Coordonate16::Absolute(0),

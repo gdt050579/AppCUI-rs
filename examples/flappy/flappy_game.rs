@@ -42,7 +42,7 @@ pub struct FlappyGame {
 impl FlappyGame {
     pub fn new() -> Self {
         let mut o = Self {
-            base: ControlBase::new(Layout::new("d:c"), true),
+            base: ControlBase::new(Layout::new("a:c"), true),
             state: GameState::Menu,
             bird_y: GAME_HEIGHT as f32 / 2.0,
             bird_velocity: 0.0,

@@ -781,7 +781,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut w = window!("Ferris,d:c");
     w.add(ImageViewer::new(
         Image::from_buffer(FERRIS_PIXELS, Size::new(120,90), false).unwrap(),
-        Layout::new("d:c"),
+        Layout::new("a:c"),
         image::RenderOptionsBuilder::new().build(),
         imageviewer::Flags::ScrollBars,
     ));

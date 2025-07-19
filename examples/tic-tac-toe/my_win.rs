@@ -16,7 +16,7 @@ pub struct MyWin {
 impl MyWin {
     pub fn new() -> Self {
         let mut w = Self {
-            base: Window::new("Tic Tac Toe", Layout::new("d:c"), window::Flags::None),
+            base: Window::new("Tic Tac Toe", Layout::new("a:c"), window::Flags::None),
             p1_computer: Handle::None,
             p1_human: Handle::None,
             p1_name: Handle::None,
