@@ -120,19 +120,19 @@ impl ControlLayout {
 
 impl<'a> From<Layout<'a>> for ControlLayout {
     fn from(value: Layout) -> Self {
-        match value.format {
-            super::layout::LayoutBuildFormat::String(str_format) => Self {
-                mode: LayoutMode::new(str_format),
-                x: 0,
-                y: 0,
-                width: 0,
-                height: 0,
-                min_width: 1,
-                min_height: 1,
-                max_width: u16::MAX,
-                max_height: u16::MAX,
+        Self {
+            mode: match value.format {
+                super::layout::LayoutBuildFormat::String(str_format) => LayoutMode::new(str_format),
+                super::layout::LayoutBuildFormat::Builder(layout_builder) => LayoutMode::with_params(layout_builder.params)
             },
-            super::layout::LayoutBuildFormat::Builder(layout_builder) => todo!(),
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0,
+            min_width: 1,
+            min_height: 1,
+            max_width: u16::MAX,
+            max_height: u16::MAX,
         }
     }
 }
