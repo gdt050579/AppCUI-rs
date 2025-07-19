@@ -74,7 +74,7 @@ struct MyWindow {
 impl MyWindow {
     fn new(title: &str) -> Self {
         MyWindow {
-            base: Window::new(title, Layout::new("d:c,w:40,h:20"), window::Flags::None);
+            base: Window::new(title, Layout::new("a:c,w:40,h:20"), window::Flags::None);
             value1: 0,
             value2: 1
         }

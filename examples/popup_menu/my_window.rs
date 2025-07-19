@@ -8,7 +8,7 @@ pub struct MyWindow {
 impl MyWindow {
     pub fn new() -> Self {
         let mut w = MyWindow {
-            base: Window::new("Test", Layout::new("d:c,w:76,h:10"), window::Flags::None),
+            base: Window::new("Test", Layout::new("a:c,w:76,h:10"), window::Flags::None),
             hc: Handle::None,
             cb: Handle::None,
         };

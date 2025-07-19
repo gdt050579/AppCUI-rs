@@ -15,7 +15,7 @@ pub struct PainterWindow {
 impl PainterWindow {
     fn inner_new(name: &str, path: Option<&Path>) -> Result<Self, String>  {
         let mut w = Self {
-            base: Window::new(name, Layout::new("d:c,w:60,h:20"), window::Flags::Sizeable),
+            base: Window::new(name, Layout::new("a:c,w:60,h:20"), window::Flags::Sizeable),
             painter: Handle::None,
             menu: Handle::None,
             fg_color_picker: Handle::None,

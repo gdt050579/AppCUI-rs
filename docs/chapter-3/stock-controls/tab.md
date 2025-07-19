@@ -7,8 +7,8 @@ Represent tabulator (tab control) where you can select the visible page:
 
 To create a tab use `Tab::new` ,  `Tab::with_type` methods:
 ```rs
-let t1 = Tab::new(Layout::new("d:c,w:15,h:10"),tab::Flags::None);
-let t2 = Tab::with_type(Layout::new("d:c,w:15,h:10"),tab::Flags::None, tab::Type::OnLeft);
+let t1 = Tab::new(Layout::new("a:c,w:15,h:10"),tab::Flags::None);
+let t2 = Tab::with_type(Layout::new("a:c,w:15,h:10"),tab::Flags::None, tab::Type::OnLeft);
 ```
 or the macro `tab!`
 ```rs

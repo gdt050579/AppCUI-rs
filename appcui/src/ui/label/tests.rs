@@ -8,7 +8,7 @@ fn check_label_position() {
         CheckHash(0xF7D704CAB062ED5C)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     w.add(Label::new("TopLeft", Layout::new("d:tl,w:7,h:1")));
     w.add(Label::new("Top", Layout::new("d:t,w:3,h:1")));
     w.add(Label::new("TopRight", Layout::new("d:tr,w:8,h:1")));
@@ -17,7 +17,7 @@ fn check_label_position() {
     w.add(Label::new("Bottom", Layout::new("d:b,w:6,h:1")));
     w.add(Label::new("BottomLeft", Layout::new("d:bl,w:10,h:1")));
     w.add(Label::new("Left", Layout::new("d:l,w:4,h:1")));
-    w.add(Label::new("Center", Layout::new("d:c,w:6,h:1")));
+    w.add(Label::new("Center", Layout::new("a:c,w:6,h:1")));
 
     a.add_window(w);
     a.run();
@@ -30,7 +30,7 @@ fn check_label_multiline() {
         CheckHash(0xD4FE75C904BD13F9)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     w.add(Label::new("This is a multi-line label", Layout::new("d:tl,w:10,h:3")));
     a.add_window(w);
     a.run();
@@ -43,7 +43,7 @@ fn check_label_with_hotkey() {
         CheckHash(0xEC4CCF3D77022900)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     w.add(Label::new("A &hot key label", Layout::new("d:tl,w:30")));
     a.add_window(w);
     a.run();
@@ -72,7 +72,7 @@ fn check_label_caption() {
         CheckHash(0xC4C7983EC13953E2)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     let l = Label::new("Some &Text", Layout::new("d:tl,w:10,h:3"));
     assert_eq!(l.caption(), "Some Text");
     w.add(l);

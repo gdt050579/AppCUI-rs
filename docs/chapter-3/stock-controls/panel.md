@@ -55,7 +55,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:10"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:10"), window::Flags::None);
     w.add(Panel::new("Options", Layout::new("l:1,t:1,r:1,b:2"),panel::Type::Border));
     app.add_window(w);
     app.run();

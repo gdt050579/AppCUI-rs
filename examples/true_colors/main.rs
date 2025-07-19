@@ -7,7 +7,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
 
 
-    let mut w = Window::new("True Colors", Layout::new("d:c,w:70,h:19"), window::Flags::None);
+    let mut w = Window::new("True Colors", Layout::new("a:c,w:70,h:19"), window::Flags::None);
 
     let mut c = canvas!("'68x17',a:c,w:100%,h:100%");
     c.clear_background();

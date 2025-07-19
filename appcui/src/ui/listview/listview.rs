@@ -88,7 +88,7 @@ where
     ///    grade: u32
     /// }
     ///
-    /// let lv: ListView::<Student> = ListView::new(Layout::new("d:c,w:100%,h:100%"), listview::Flags::ScrollBars);
+    /// let lv: ListView::<Student> = ListView::new(Layout::new("a:c,w:100%,h:100%"), listview::Flags::ScrollBars);
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(16, layout, flags)
@@ -107,7 +107,7 @@ where
     ///   grade: u32
     /// }
     ///
-    /// let mut lv: ListView::<Student> = ListView::with_capacity(100, Layout::new("d:c,w:100%,h:100%"), listview::Flags::ScrollBars);
+    /// let mut lv: ListView::<Student> = ListView::with_capacity(100, Layout::new("a:c,w:100%,h:100%"), listview::Flags::ScrollBars);
     /// lv.add(Student { name: "John", grade: 10 });
     /// lv.add(Student { name: "Alice", grade: 9 });
     /// lv.add(Student { name: "Bob", grade: 8 });

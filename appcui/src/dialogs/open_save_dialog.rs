@@ -58,7 +58,7 @@ where
 {
     pub(super) fn new(file_name: &str, title: &str, location: Location, extension_mask: Vec<FileMask>, nav: T, flags: InnerFlags) -> Self {
         let mut w = Self {
-            base: ModalWindow::new(title, Layout::new("d:c,w:70,h:20"), window::Flags::Sizeable),
+            base: ModalWindow::new(title, Layout::new("a:c,w:70,h:20"), window::Flags::Sizeable),
             list: Handle::None,
             details: Handle::None,
             columns: Handle::None,
@@ -102,7 +102,7 @@ where
         w.path_viewer = w.add(pf);
         let mut p = panel!("l:1,t:3,r:1,b:5");
         let mut lv: ListView<Entry> = ListView::new(
-            Layout::new("d:c,w:100%,h:100%"),
+            Layout::new("a:c,w:100%,h:100%"),
             listview::Flags::SearchBar
                 | listview::Flags::ScrollBars
                 | if flags.contains(InnerFlags::Icons) {

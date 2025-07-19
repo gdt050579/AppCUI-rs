@@ -35,7 +35,7 @@ struct MyCustomControl {
 impl MyCustomControl {
     fn new() -> Self {
         let mut w = MyCustomControl {
-            base: ControlBase::new(Layout::new("d:c,w:8,h:2"), true),
+            base: ControlBase::new(Layout::new("a:c,w:8,h:2"), true),
             popup_menu: Handle::None,
         };
         // construct a popup menu

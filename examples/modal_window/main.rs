@@ -12,7 +12,7 @@ struct MyWin {
 impl MyWin {
     fn new(title: &str, counter: i32) -> Self {
         let mut win = MyWin {
-            base: ModalWindow::new(title, Layout::new("d:c,w:40,h:9"), window::Flags::None),
+            base: ModalWindow::new(title, Layout::new("a:c,w:40,h:9"), window::Flags::None),
             b1: Handle::None,
             b2: Handle::None,
             b3: Handle::None,

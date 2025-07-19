@@ -41,7 +41,7 @@ where
 {
     pub(super) fn new(title: &str, location: Location, nav: T, flags: SelectFolderDialogFlags) -> Self {
         let mut w = Self {
-            base: ModalWindow::new(title, Layout::new("d:c,w:70,h:20"), window::Flags::Sizeable),
+            base: ModalWindow::new(title, Layout::new("a:c,w:70,h:20"), window::Flags::Sizeable),
             tv: Handle::None,
             b_ok: Handle::None,
             b_cancel: Handle::None,
@@ -78,7 +78,7 @@ where
         let mut p = panel!("l:1,t:2,r:1,b:3");
         let mut tv = TreeView::with_capacity(
             256,
-            Layout::new("d:c,w:100%,h:100%"),
+            Layout::new("a:c,w:100%,h:100%"),
             treeview::Flags::HideHeader
                 | treeview::Flags::ScrollBars
                 | treeview::Flags::SearchBar

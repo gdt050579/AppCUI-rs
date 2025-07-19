@@ -783,7 +783,7 @@ pub struct Win {
 impl Win {
     pub fn new() -> Self {
         let mut w = Self {
-            base: Window::new("Image Viewer", Layout::new("d:c,w:50%,h:50%"), window::Flags::Sizeable),
+            base: Window::new("Image Viewer", Layout::new("a:c,w:50%,h:50%"), window::Flags::Sizeable),
             himg: Handle::None,
         };
 

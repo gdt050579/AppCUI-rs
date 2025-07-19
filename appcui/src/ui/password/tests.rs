@@ -31,7 +31,7 @@ fn check_behavior() {
         CheckHash(0x4DDE3EBA59D1D595)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     w.add(Password::new(Layout::new("x:1,y:1,w:30")));
 
     a.add_window(w);
@@ -54,7 +54,7 @@ fn check_macro() {
         CheckHash(0xA761B1792C262886)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     w.add(password!("x:1,y:1,w:30"));
     w.add(password!("x:1,y:3,w:30,pass:123"));
 
@@ -72,7 +72,7 @@ fn check_events() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                base: Window::new("Win-1", Layout::new("a:c,w:47,h:7"), window::Flags::None),
                 info: Handle::None,
                 pass: Handle::None,
             };
@@ -156,7 +156,7 @@ fn check_enter_leave_control() {
         CheckHash(0xE7D1F03B892A5765)        
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     w.add(password!("x:1,y:3,w:30,pass:123"));
 
     a.add_window(w);
@@ -174,7 +174,7 @@ fn check_invalid_keys() {
         CheckHash(0x4EEF18715284B1DF)  
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     // width is 5 so that the control will be resized
     // the password is 1234567890, so the control will recompute the visible with on paint
     w.add(password!("x:1,y:3,w:5,pass:1234567890"));
@@ -197,7 +197,7 @@ fn check_no_events_implementation() {
         CheckHash(0xE7D1F03B892A5765)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     w.add(password!("x:1,y:3,w:30,pass:123"));
 
     a.add_window(w);

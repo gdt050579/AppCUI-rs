@@ -228,7 +228,7 @@ fn check_mouse_keymodifier_mouse() {
     impl TestControl {
         fn new() -> Self {
             Self {
-                base: ControlBase::new(Layout::new("d:c,w:100%,h:100%"), true),
+                base: ControlBase::new(Layout::new("a:c,w:100%,h:100%"), true),
                 txt: String::new(),
             }
         }

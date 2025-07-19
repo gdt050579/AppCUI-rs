@@ -11,7 +11,7 @@ fn check_button_control() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                base: Window::new("Win-1", Layout::new("a:c,w:47,h:7"), window::Flags::None),
                 info: Handle::None,
                 but1: Handle::None,
                 but2: Handle::None,
@@ -80,7 +80,7 @@ fn check_button_control_2() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: Window::new("My Win", Layout::new("d:c,w:40,h:6"), window::Flags::None),
+                base: Window::new("My Win", Layout::new("a:c,w:40,h:6"), window::Flags::None),
                 add: Handle::None,
                 reset: Handle::None,
                 counter: 0,
@@ -141,7 +141,7 @@ fn check_button_control_with_macro() {
         CheckHash(0xC656986DBDA863BA)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = Window::new("Macro Test", Layout::new("d:c,w:40,h:10"), window::Flags::None);
+    let mut w = Window::new("Macro Test", Layout::new("a:c,w:40,h:10"), window::Flags::None);
     w.add(button!("Start,x:2,y:3,w:15"));
     w.add(button!("Disabled,x:20,y:3,w:15,enable:false"));
     w.add(button!("caption:'Not Visible',x:0,y:0,w:100%,visible:false"));
@@ -162,7 +162,7 @@ fn check_button_control_hotkey() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("d:c,w:40,h:7"), window::Flags::None),
+                base: Window::new("Win", Layout::new("a:c,w:40,h:7"), window::Flags::None),
                 info: Handle::None,
                 but: Handle::None,
                 state: 0,
@@ -243,7 +243,7 @@ fn check_button_methods() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                base: Window::new("Win-1", Layout::new("a:c,w:47,h:7"), window::Flags::None),
                 b: Handle::None,
                 count: 0,
             };
@@ -335,7 +335,7 @@ fn check_visible() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                base: Window::new("Win-1", Layout::new("a:c,w:47,h:7"), window::Flags::None),
                 but1: Handle::None,
                 but2: Handle::None,
             };

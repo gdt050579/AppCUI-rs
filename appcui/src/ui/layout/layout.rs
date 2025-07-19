@@ -47,7 +47,7 @@ pub(super) enum LayoutBuildFormat<'a> {
 /// let layout = Layout::new("t:10,r:20,w:50,h:20");
 ///
 /// // Docking with short alias
-/// let layout = Layout::new("d:c,w:30,h:50%");
+/// let layout = Layout::new("a:c,w:30,h:50%");
 ///
 /// // Full anchors with short aliases
 /// let layout = Layout::new("l:20,t:7,r:10,b:10");

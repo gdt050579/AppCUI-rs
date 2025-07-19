@@ -11,7 +11,7 @@ pub struct Viewer {
 impl Viewer {
     pub fn new(path: &Path, csv: CSVFile) -> Self {
         let mut w = Self {
-            base: Window::new(path.to_str().unwrap_or("???"), Layout::new("d:c,w:50%,h:50%"), window::Flags::Sizeable),
+            base: Window::new(path.to_str().unwrap_or("???"), Layout::new("a:c,w:50%,h:50%"), window::Flags::Sizeable),
         };
         let mut lv = listview!("CSVEntry,a:c,w:100%,h:100%,flags: SearchBar+ScrollBars,lsm:2");
         for h in &csv.headers {

@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut win = Window::new(
         "Surface Serialization Demo",
-        Layout::new("d:c,w:100%,h:100%"),
+        Layout::new("a:c,w:100%,h:100%"),
         window::Flags::NoCloseButton,
     );
 

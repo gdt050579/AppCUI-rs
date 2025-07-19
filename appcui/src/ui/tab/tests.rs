@@ -225,7 +225,7 @@ fn check_page_width() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                base: Window::new("Win-1", Layout::new("a:c,w:100%,h:100%"), window::Flags::None),
                 info: Handle::None,
                 plus: Handle::None,
                 minus: Handle::None,
@@ -396,7 +396,7 @@ fn check_page_width_on_left() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                base: Window::new("Win-1", Layout::new("a:c,w:100%,h:100%"), window::Flags::None),
                 info: Handle::None,
                 plus: Handle::None,
                 minus: Handle::None,
@@ -567,7 +567,7 @@ fn check_hiddentabs_changepage() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+                base: Window::new("Win", Layout::new("a:c,w:100%,h:100%"), window::Flags::None),
                 info: Handle::None,
                 plus: Handle::None,
                 minus: Handle::None,

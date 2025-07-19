@@ -12,7 +12,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut me = Self {
-            base: Window::new("Toolbars", Layout::new("d:c,w:100%,h:100%"), window::Flags::None),
+            base: Window::new("Toolbars", Layout::new("a:c,w:100%,h:100%"), window::Flags::None),
             lb1: Handle::None,
             cb1: Handle::None,
             cb2: Handle::None,

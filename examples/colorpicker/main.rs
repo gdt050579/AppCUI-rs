@@ -32,7 +32,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("ColorPicker example", Layout::new("d:c,w:40,h:10"), window::Flags::None),
+            base: Window::new("ColorPicker example", Layout::new("a:c,w:40,h:10"), window::Flags::None),
             fore: Handle::None,
             back: Handle::None,
             ct: Handle::None,

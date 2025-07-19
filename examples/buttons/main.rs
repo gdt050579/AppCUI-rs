@@ -11,7 +11,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("Buttons example", Layout::new("d:c,w:40,h:7"), window::Flags::None),
+            base: Window::new("Buttons example", Layout::new("a:c,w:40,h:7"), window::Flags::None),
             //..Default::default()
             b1: Handle::None,
             b2: Handle::None,

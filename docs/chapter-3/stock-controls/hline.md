@@ -52,7 +52,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
     
     w.add(HLine::new("Hello world !", Layout::new("x:1,y:3,w:30"), 
                                       hline::Flags::DoubleLine | hline::Flags::HasTitle));

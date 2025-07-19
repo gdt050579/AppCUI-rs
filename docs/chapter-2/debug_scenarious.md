@@ -103,7 +103,7 @@ fn check_if_window_can_be_moved() {
         CheckHash(0x419533D4BBEFE538)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::None);
+    let w = Window::new("Title", Layout::new("a:c,w:20,h:5"), window::Flags::None);
     a.add_window(w);
     a.run();
 }
@@ -184,7 +184,7 @@ fn check_if_window_can_be_moved() {
         CheckHash(0x419533D4BBEFE538)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let w = Window::new("Title", Layout::new("d:c,w:20,h:5"), window::Flags::None);
+    let w = Window::new("Title", Layout::new("a:c,w:20,h:5"), window::Flags::None);
     a.add_window(w);
     a.run();
 }

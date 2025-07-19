@@ -9,7 +9,7 @@ pub struct MyWin {
 impl MyWin {
     pub fn new(title: &str, image: Image) -> Self {
         let mut w = Self {
-            base: Window::new(title, Layout::new("d:c,w:50%,h:50%"), window::Flags::Sizeable),
+            base: Window::new(title, Layout::new("a:c,w:50%,h:50%"), window::Flags::Sizeable),
             himg: Handle::None,
         };
 

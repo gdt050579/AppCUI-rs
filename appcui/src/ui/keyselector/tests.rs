@@ -169,7 +169,7 @@ fn check_events() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("d:c,w:57,h:7"), window::Flags::None),
+                base: Window::new("Win", Layout::new("a:c,w:57,h:7"), window::Flags::None),
                 info: Handle::None,
                 ks: Handle::None,
             };

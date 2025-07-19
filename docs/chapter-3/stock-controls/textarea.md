@@ -85,11 +85,11 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:11"), window::Flags::None);
-    w.add(TextArea::new("I ❤️ Rust Language", Layout::new("d:c,h:100%"), textarea::Flags::None));
-    w.add(TextArea::new("Read only text", Layout::new("d:c,h:100%"), textarea::Flags::ReadOnly));
-    w.add(TextArea::new("Line Numbers tab functional", Layout::new("d:c,h:100%"), textarea::Flags::ShowLineNumber | textarea::Flags::ReadOnly));
-    w.add(TextArea::new("I also have scrollbars ❤️", Layout::new("d:c,h:100%"), textarea::Flags::ScrollBars));
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:11"), window::Flags::None);
+    w.add(TextArea::new("I ❤️ Rust Language", Layout::new("a:c,h:100%"), textarea::Flags::None));
+    w.add(TextArea::new("Read only text", Layout::new("a:c,h:100%"), textarea::Flags::ReadOnly));
+    w.add(TextArea::new("Line Numbers tab functional", Layout::new("a:c,h:100%"), textarea::Flags::ShowLineNumber | textarea::Flags::ReadOnly));
+    w.add(TextArea::new("I also have scrollbars ❤️", Layout::new("a:c,h:100%"), textarea::Flags::ScrollBars));
     a.add_window(w);
     a.run();
     Ok(())

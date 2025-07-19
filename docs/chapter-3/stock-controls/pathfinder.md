@@ -81,7 +81,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:11"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:11"), window::Flags::None);
     w.add(pathfinder!("path: 'C:\\Program Files',x:1,y:1,w:36,h:1"));
     w.add(pathfinder!("'C:\\Program Files',x:1,y:3,w:36,h:1, flags: ReadOnly"));
     w.add(pathfinder!("path:'C:\\Program Files\\Țambal.exe',x:1,y:5,w:36,h:1,enable: false"));

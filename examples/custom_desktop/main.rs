@@ -81,7 +81,7 @@ impl CommandBarEvents for MyDesktop {
             mydesktop::Commands::AddWindow => {
                 let name = format!("Win─{}", self.index);
                 self.index += 1;
-                self.add_window(Window::new(&name, Layout::new("d:c,w:20,h:10"), window::Flags::None));
+                self.add_window(Window::new(&name, Layout::new("a:c,w:20,h:10"), window::Flags::None));
             }
             mydesktop::Commands::Exit => self.close(), 
             _ => {}

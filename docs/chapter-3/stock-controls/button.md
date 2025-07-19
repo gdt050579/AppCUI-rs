@@ -78,7 +78,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("My Win", Layout::new("d:c,w:40,h:6"), window::Flags::None),
+            base: Window::new("My Win", Layout::new("a:c,w:40,h:6"), window::Flags::None),
             add: Handle::None,
             reset: Handle::None,
             counter: 0,

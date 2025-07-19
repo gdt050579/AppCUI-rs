@@ -63,7 +63,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("Test", Layout::new("d:c,w:40,h:10"), window::Flags::None),
+            base: Window::new("Test", Layout::new("a:c,w:40,h:10"), window::Flags::None),
             c: Handle::None,
             l: Handle::None,
         };

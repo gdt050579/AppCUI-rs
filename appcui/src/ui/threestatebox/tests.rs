@@ -130,7 +130,7 @@ fn check_threestatebox_plusminus_mode() {
         CheckCursor(7,7)
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=PlusMinus,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=PlusMinus,state=Checked"));
     w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=PlusMinus,state:Unchecked, enabled:false"));
@@ -151,7 +151,7 @@ fn check_threestatebox_ascii_mode() {
         CheckCursor(8,7)
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Ascii,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=Ascii,state=Checked"));
     w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Ascii,state:Unchecked, enabled:false"));
@@ -171,7 +171,7 @@ fn check_threestatebox_checkbox_mode() {
         CheckCursor(7,7)
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkbox,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkbox,state=Checked"));
     w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkbox,state:Unchecked, enabled:false"));
@@ -191,7 +191,7 @@ fn check_threestatebox_checkmark_mode() {
         CheckCursor(7,7)
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkmark,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkmark,state=Checked"));
     w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkmark,state:Unchecked, enabled:false"));
@@ -211,7 +211,7 @@ fn check_threestatebox_fill_mode() {
         CheckCursor(7,7)
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=FilledBox,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=FilledBox,state=Checked"));
     w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=FilledBox,state:Unchecked, enabled:false"));
@@ -231,7 +231,7 @@ fn check_threestatebox_yes_no_mode() {
         CheckCursor(8,7)
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("d:c,w:50,h:10"), window::Flags::None);
+    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=YesNo,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=YesNo,state=Checked"));
     w.add(threestatebox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=YesNo,state:Unchecked, enabled:false"));
