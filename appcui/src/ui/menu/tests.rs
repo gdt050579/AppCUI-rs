@@ -772,7 +772,7 @@ fn check_popup_menu() {
                 hc: Handle::None,
                 cb: Handle::None,
             };
-            w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:50%,y:6,a:c,w:16,h:4")));
+            w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:50%,y:6,p:c,w:16,h:4")));
             w.add(label!(
                 "'Press the right mouse button on the square below to show a popup menu',x:37,y:1,p:c,w:70,h:1"
             ));
@@ -967,7 +967,7 @@ fn check_popup_menu_with_keys() {
                 hc: Handle::None,
                 cb: Handle::None,
             };
-            w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:50%,y:6,a:c,w:16,h:4")));
+            w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:50%,y:6,p:c,w:16,h:4")));
             w.add(label!(
                 "'Press the right mouse button on the square below to show a popup menu',x:37,y:1,p:c,w:70,h:1"
             ));

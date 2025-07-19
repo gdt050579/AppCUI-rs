@@ -85,8 +85,8 @@ fn check_button_control_2() {
                 reset: Handle::None,
                 counter: 0,
             };
-            win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), button::Type::Normal));
-            win.reset = win.add(Button::new("Reset", Layout::new("x:75%,y:2,w:13,a:c"), button::Type::Normal));
+            win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,p:c"), button::Type::Normal));
+            win.reset = win.add(Button::new("Reset", Layout::new("x:75%,y:2,w:13,p:c"), button::Type::Normal));
             win
         }
         fn update_add_button(&mut self) {
