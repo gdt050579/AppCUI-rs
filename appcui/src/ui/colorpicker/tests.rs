@@ -268,7 +268,7 @@ fn check_colorpicker_window_move() {
         CheckHash(0x21C93A3BEEFA875F)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:t,w:50,h:6");
+    let mut w = window!("Title,a:t,w:50,h:6");
     w.add(colorpicker!("Transparent,x:1,y:1,w:15"));
     a.add_window(w);
     a.run();

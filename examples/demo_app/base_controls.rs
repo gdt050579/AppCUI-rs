@@ -30,7 +30,7 @@ impl Win {
         me.add(tabs);
         
         // Add a button docked at the bottom center of the window
-        me.add(button!("'Click Me!',d:b,w:20"));
+        me.add(button!("'Click Me!',a:b,w:20"));
         
         me
     }

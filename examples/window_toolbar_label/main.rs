@@ -27,7 +27,7 @@ impl NumberFormatsWindow {
         };
 
         // Add the increase button
-        win.increase_button = win.add(button!("'Increase',w:15,d:l"));
+        win.increase_button = win.add(button!("'Increase',w:15,a:l"));
 
         // Add checkboxes to control visibility
         win.show_decimal = win.add(checkbox!("'Show decimal',x:20,y:2,w:16,checked:true"));

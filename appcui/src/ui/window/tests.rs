@@ -1067,7 +1067,7 @@ fn check_window_toolbar_item_visibility() {
                 number: 24,
             };
             // add the increasebutton
-            win.increase_button = win.add(button!("Increase,w:15,d:l"));
+            win.increase_button = win.add(button!("Increase,w:15,a:l"));
             // add checkboxes
             win.show_dec = win.add(checkbox!("'Show decimal',x:20,y:1,w:16,checked:true"));
             win.show_hex = win.add(checkbox!("'Show hex',x:20,y:2,w:16,checked:true"));

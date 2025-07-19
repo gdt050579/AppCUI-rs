@@ -885,7 +885,7 @@ impl Window {
     ///    use appcui::prelude::*;
     ///    let mut app = App::new().build().unwrap();
     ///    let mut w = window!("Title,a:c,w:20,h:10");
-    ///    let handle_b = w.add(button!("Button,d:C,w:10"));
+    ///    let handle_b = w.add(button!("Button,a:C,w:10"));
     ///    Window::update_control(handle_b, |button| { button.set_caption("New text"); });
     /// ```
     pub fn update_control<T: Control + 'static>(handle: Handle<T>, run: fn(&mut T)) {

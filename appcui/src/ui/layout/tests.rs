@@ -79,137 +79,137 @@ fn layout_mode_xywh() {
     );
 }
 #[test]
-fn layout_mode_align_center() {
-    validate_abs!("x:0,y:0,w:12,h:15,a:center", 0, 0, 12, 15, Center, TopLeft);
-    validate_abs!("x:0,y:0,w:12,h:15,a:c", 0, 0, 12, 15, Center, TopLeft);
-    validate_abs!("x:0,y:0,w:12,h:15,align:c", 0, 0, 12, 15, Center, TopLeft);
-    validate_abs!("x:0,y:0,w:12,h:15,align:center", 0, 0, 12, 15, Center, TopLeft);
+fn layout_mode_pivot_center() {
+    validate_abs!("x:0,y:0,w:12,h:15,p:center", 0, 0, 12, 15, Center, TopLeft);
+    validate_abs!("x:0,y:0,w:12,h:15,p:c", 0, 0, 12, 15, Center, TopLeft);
+    validate_abs!("x:0,y:0,w:12,h:15,pivot:c", 0, 0, 12, 15, Center, TopLeft);
+    validate_abs!("x:0,y:0,w:12,h:15,pivot:center", 0, 0, 12, 15, Center, TopLeft);
 }
 #[test]
-fn layout_mode_align_top_left() {
-    validate_abs!("x:0,y:0,w:12,h:15,a:tl", 0, 0, 12, 15, TopLeft, TopLeft);
-    validate_abs!("x:0,y:0,w:12,h:15,a:lt", 0, 0, 12, 15, TopLeft, TopLeft);
-    validate_abs!("x:0,y:0,w:12,h:15,align:topleft", 0, 0, 12, 15, TopLeft, TopLeft);
-    validate_abs!("x:0,y:0,w:12,h:15,align:lefttop", 0, 0, 12, 15, TopLeft, TopLeft);
+fn layout_mode_pivot_top_left() {
+    validate_abs!("x:0,y:0,w:12,h:15,p:tl", 0, 0, 12, 15, TopLeft, TopLeft);
+    validate_abs!("x:0,y:0,w:12,h:15,p:lt", 0, 0, 12, 15, TopLeft, TopLeft);
+    validate_abs!("x:0,y:0,w:12,h:15,pivot:topleft", 0, 0, 12, 15, TopLeft, TopLeft);
+    validate_abs!("x:0,y:0,w:12,h:15,pivot:lefttop", 0, 0, 12, 15, TopLeft, TopLeft);
 }
 #[test]
-fn layout_mode_align_top_right() {
-    validate_abs!("x:1,y:0,w:12,h:15,a:tr", 1, 0, 12, 15, TopRight, TopLeft);
-    validate_abs!("x:2,y:0,w:12,h:15,a:rt", 2, 0, 12, 15, TopRight, TopLeft);
-    validate_abs!("x:3,y:0,w:12,h:15,align:topright", 3, 0, 12, 15, TopRight, TopLeft);
-    validate_abs!("x:4,y:0,w:12,h:15,align:righttop", 4, 0, 12, 15, TopRight, TopLeft);
+fn layout_mode_pivot_top_right() {
+    validate_abs!("x:1,y:0,w:12,h:15,p:tr", 1, 0, 12, 15, TopRight, TopLeft);
+    validate_abs!("x:2,y:0,w:12,h:15,p:rt", 2, 0, 12, 15, TopRight, TopLeft);
+    validate_abs!("x:3,y:0,w:12,h:15,pivot:topright", 3, 0, 12, 15, TopRight, TopLeft);
+    validate_abs!("x:4,y:0,w:12,h:15,pivot:righttop", 4, 0, 12, 15, TopRight, TopLeft);
 }
 #[test]
-fn layout_mode_align_bottom_right() {
-    validate_abs!("x:1,y:-2,w:12,h:15,a:br", 1, -2, 12, 15, BottomRight, TopLeft);
-    validate_abs!("x:2,y:-1,w:12,h:15,a:rb", 2, -1, 12, 15, BottomRight, TopLeft);
-    validate_abs!("x:3,y: 1,w:12,h:15,align:bottomright", 3, 1, 12, 15, BottomRight, TopLeft);
-    validate_abs!("x:4,y: 2,w:12,h:15,align:rightbottom", 4, 2, 12, 15, BottomRight, TopLeft);
+fn layout_mode_pivot_bottom_right() {
+    validate_abs!("x:1,y:-2,w:12,h:15,p:br", 1, -2, 12, 15, BottomRight, TopLeft);
+    validate_abs!("x:2,y:-1,w:12,h:15,p:rb", 2, -1, 12, 15, BottomRight, TopLeft);
+    validate_abs!("x:3,y: 1,w:12,h:15,pivot:bottomright", 3, 1, 12, 15, BottomRight, TopLeft);
+    validate_abs!("x:4,y: 2,w:12,h:15,pivot:rightbottom", 4, 2, 12, 15, BottomRight, TopLeft);
 }
 #[test]
-fn layout_mode_align_bottom_left() {
-    validate_abs!("x:1,y:-2,w:12,h:15,a:bl", 1, -2, 12, 15, BottomLeft, TopLeft);
-    validate_abs!("x:2,y:-1,w:12,h:15,a:lb", 2, -1, 12, 15, BottomLeft, TopLeft);
-    validate_abs!("x:3,y: 1,w:12,h:15,align:bottomleft", 3, 1, 12, 15, BottomLeft, TopLeft);
-    validate_abs!("x:4,y: 2,w:12,h:15,align:leftbottom", 4, 2, 12, 15, BottomLeft, TopLeft);
+fn layout_mode_pivot_bottom_left() {
+    validate_abs!("x:1,y:-2,w:12,h:15,p:bl", 1, -2, 12, 15, BottomLeft, TopLeft);
+    validate_abs!("x:2,y:-1,w:12,h:15,p:lb", 2, -1, 12, 15, BottomLeft, TopLeft);
+    validate_abs!("x:3,y: 1,w:12,h:15,pivot:bottomleft", 3, 1, 12, 15, BottomLeft, TopLeft);
+    validate_abs!("x:4,y: 2,w:12,h:15,pivot:leftbottom", 4, 2, 12, 15, BottomLeft, TopLeft);
 }
 #[test]
-fn layout_mode_align_left() {
-    validate_abs!("w:12,h:15,x:1,y:-2,a:l", 1, -2, 12, 15, Left, TopLeft);
-    validate_abs!("y: 1,x:3,w:12,h:15,a:left", 3, 1, 12, 15, Left, TopLeft);
-    validate_abs!("x:4,w:12,y: 2,h:15,align:left", 4, 2, 12, 15, Left, TopLeft);
+fn layout_mode_pivot_left() {
+    validate_abs!("w:12,h:15,x:1,y:-2,p:l", 1, -2, 12, 15, Left, TopLeft);
+    validate_abs!("y: 1,x:3,w:12,h:15,p:left", 3, 1, 12, 15, Left, TopLeft);
+    validate_abs!("x:4,w:12,y: 2,h:15,pivot:left", 4, 2, 12, 15, Left, TopLeft);
 }
 #[test]
-fn layout_mode_align_right() {
-    validate_abs!("w:12,h:15,x:1,y:-2,a:r", 1, -2, 12, 15, Right, TopLeft);
-    validate_abs!("y: 1,x:3,width:12,height:15,a:right", 3, 1, 12, 15, Right, TopLeft);
-    validate_abs!("x:4,w:12,y: 2,h:15,align:right", 4, 2, 12, 15, Right, TopLeft);
+fn layout_mode_pivot_right() {
+    validate_abs!("w:12,h:15,x:1,y:-2,p:r", 1, -2, 12, 15, Right, TopLeft);
+    validate_abs!("y: 1,x:3,width:12,height:15,p:right", 3, 1, 12, 15, Right, TopLeft);
+    validate_abs!("x:4,w:12,y: 2,h:15,pivot:right", 4, 2, 12, 15, Right, TopLeft);
 }
 #[test]
-fn layout_mode_align_top() {
-    validate_abs!("w:12,h:15,x:1,y:-2,a:t", 1, -2, 12, 15, Top, TopLeft);
-    validate_abs!("y: 1,x:3,width:12,height:15,a:top", 3, 1, 12, 15, Top, TopLeft);
-    validate_abs!("x:4,w:12,y: 2,h:15,align:top", 4, 2, 12, 15, Top, TopLeft);
+fn layout_mode_pivot_top() {
+    validate_abs!("w:12,h:15,x:1,y:-2,p:t", 1, -2, 12, 15, Top, TopLeft);
+    validate_abs!("y: 1,x:3,width:12,height:15,p:top", 3, 1, 12, 15, Top, TopLeft);
+    validate_abs!("x:4,w:12,y: 2,h:15,pivot:top", 4, 2, 12, 15, Top, TopLeft);
 }
 #[test]
-fn layout_mode_align_bottom() {
-    validate_abs!("width:12,h:15,x:1,y:-2,a:b", 1, -2, 12, 15, Bottom, TopLeft);
-    validate_abs!("y: 1,x:3,width:12,height:15,a:bottom", 3, 1, 12, 15, Bottom, TopLeft);
-    validate_abs!("x:4,w:12,y: 2,HEIGHT:15,align:bottom", 4, 2, 12, 15, Bottom, TopLeft);
+fn layout_mode_pivot_bottom() {
+    validate_abs!("width:12,h:15,x:1,y:-2,p:b", 1, -2, 12, 15, Bottom, TopLeft);
+    validate_abs!("y: 1,x:3,width:12,height:15,p:bottom", 3, 1, 12, 15, Bottom, TopLeft);
+    validate_abs!("x:4,w:12,y: 2,HEIGHT:15,pivot:bottom", 4, 2, 12, 15, Bottom, TopLeft);
 }
 #[test]
 fn layout_mode_dock_center() {
-    validate_pos!("d:c", 50, 30, 0, 0, 50, 30);
-    validate_pos!("d:center,w:20,h:10", 50, 30, 15, 10, 20, 10);
-    validate_pos!("d:Center,w:20", 50, 30, 15, 0, 20, 30);
-    validate_pos!("d:CENTER,h:10", 50, 30, 0, 10, 50, 10);
-    validate_pos!("d:cEnTeR,w:50%,h:25%", 60, 40, 15, 15, 30, 10);
+    validate_pos!("a:c", 50, 30, 0, 0, 50, 30);
+    validate_pos!("a:center,w:20,h:10", 50, 30, 15, 10, 20, 10);
+    validate_pos!("a:Center,w:20", 50, 30, 15, 0, 20, 30);
+    validate_pos!("a:CENTER,h:10", 50, 30, 0, 10, 50, 10);
+    validate_pos!("a:cEnTeR,w:50%,h:25%", 60, 40, 15, 15, 30, 10);
 }
 #[test]
 fn layout_mode_dock_top_left() {
-    validate_pos!("d:tl", 50, 30, 0, 0, 50, 30);
-    validate_pos!("d:lt,w:20,h:10", 50, 30, 0, 0, 20, 10);
-    validate_pos!("d:topleft,w:20", 50, 30, 0, 0, 20, 30);
-    validate_pos!("d:lefttop,h:10", 50, 30, 0, 0, 50, 10);
-    validate_pos!("d:TopLeft,w:50%,h:25%", 60, 40, 0, 0, 30, 10);
+    validate_pos!("a:tl", 50, 30, 0, 0, 50, 30);
+    validate_pos!("a:lt,w:20,h:10", 50, 30, 0, 0, 20, 10);
+    validate_pos!("a:topleft,w:20", 50, 30, 0, 0, 20, 30);
+    validate_pos!("a:lefttop,h:10", 50, 30, 0, 0, 50, 10);
+    validate_pos!("a:TopLeft,w:50%,h:25%", 60, 40, 0, 0, 30, 10);
 }
 #[test]
 fn layout_mode_dock_bottom_left() {
-    validate_pos!("d:lb", 50, 30, 0, 0, 50, 30);
-    validate_pos!("d:bl,w:20,h:10", 50, 30, 0, 20, 20, 10);
-    validate_pos!("d:lb,w:20", 50, 30, 0, 0, 20, 30);
-    validate_pos!("d:bottomleft,h:10", 50, 30, 0, 20, 50, 10);
-    validate_pos!("d:leftbottom,w:50%,h:25%", 60, 40, 0, 30, 30, 10);
+    validate_pos!("a:lb", 50, 30, 0, 0, 50, 30);
+    validate_pos!("a:bl,w:20,h:10", 50, 30, 0, 20, 20, 10);
+    validate_pos!("a:lb,w:20", 50, 30, 0, 0, 20, 30);
+    validate_pos!("a:bottomleft,h:10", 50, 30, 0, 20, 50, 10);
+    validate_pos!("a:leftbottom,w:50%,h:25%", 60, 40, 0, 30, 30, 10);
 }
 #[test]
 fn layout_mode_dock_bottom_right() {
-    validate_pos!("d:rb", 50, 30, 0, 0, 50, 30);
-    validate_pos!("d:br,w:20,h:10", 50, 30, 30, 20, 20, 10);
-    validate_pos!("d:rb,w:20", 50, 30, 30, 0, 20, 30);
-    validate_pos!("d:bottomright,h:10", 50, 30, 0, 20, 50, 10);
-    validate_pos!("d:rightbottom,w:50%,h:25%", 60, 40, 30, 30, 30, 10);
+    validate_pos!("a:rb", 50, 30, 0, 0, 50, 30);
+    validate_pos!("a:br,w:20,h:10", 50, 30, 30, 20, 20, 10);
+    validate_pos!("a:rb,w:20", 50, 30, 30, 0, 20, 30);
+    validate_pos!("a:bottomright,h:10", 50, 30, 0, 20, 50, 10);
+    validate_pos!("a:rightbottom,w:50%,h:25%", 60, 40, 30, 30, 30, 10);
 }
 #[test]
 fn layout_mode_dock_top_right() {
-    validate_pos!("d:tr", 50, 30, 0, 0, 50, 30);
-    validate_pos!("d:rt,w:20,h:10", 50, 30, 30, 0, 20, 10);
-    validate_pos!("d:TopRight,w:20", 50, 30, 30, 0, 20, 30);
-    validate_pos!("d:rightTop,h:10", 50, 30, 0, 0, 50, 10);
-    validate_pos!("d:topright,w:50%,h:25%", 60, 40, 30, 0, 30, 10);
+    validate_pos!("a:tr", 50, 30, 0, 0, 50, 30);
+    validate_pos!("a:rt,w:20,h:10", 50, 30, 30, 0, 20, 10);
+    validate_pos!("a:TopRight,w:20", 50, 30, 30, 0, 20, 30);
+    validate_pos!("a:rightTop,h:10", 50, 30, 0, 0, 50, 10);
+    validate_pos!("a:topright,w:50%,h:25%", 60, 40, 30, 0, 30, 10);
 }
 #[test]
 fn layout_mode_dock_left() {
-    validate_pos!("d:l", 50, 30, 0, 0, 50, 30);
-    validate_pos!("d:left,w:20,h:10", 50, 30, 0, 10, 20, 10);
-    validate_pos!("d:Left,w:20", 50, 30, 00, 0, 20, 30);
-    validate_pos!("d:l,h:10", 50, 30, 0, 10, 50, 10);
-    validate_pos!("d:LeFt,w:50%,h:25%", 60, 40, 0, 15, 30, 10);
+    validate_pos!("a:l", 50, 30, 0, 0, 50, 30);
+    validate_pos!("a:left,w:20,h:10", 50, 30, 0, 10, 20, 10);
+    validate_pos!("a:Left,w:20", 50, 30, 00, 0, 20, 30);
+    validate_pos!("a:l,h:10", 50, 30, 0, 10, 50, 10);
+    validate_pos!("a:LeFt,w:50%,h:25%", 60, 40, 0, 15, 30, 10);
 }
 
 #[test]
 fn layout_mode_dock_top() {
-    validate_pos!("d:t", 50, 30, 0, 0, 50, 30);
-    validate_pos!("d:top,w:20,h:10", 50, 30, 15, 0, 20, 10);
-    validate_pos!("d:Top,w:20", 50, 30, 15, 0, 20, 30);
-    validate_pos!("d:t,h:10", 50, 30, 0, 0, 50, 10);
-    validate_pos!("d:ToP,w:50%,h:25%", 60, 40, 15, 0, 30, 10);
+    validate_pos!("a:t", 50, 30, 0, 0, 50, 30);
+    validate_pos!("a:top,w:20,h:10", 50, 30, 15, 0, 20, 10);
+    validate_pos!("a:Top,w:20", 50, 30, 15, 0, 20, 30);
+    validate_pos!("a:t,h:10", 50, 30, 0, 0, 50, 10);
+    validate_pos!("a:ToP,w:50%,h:25%", 60, 40, 15, 0, 30, 10);
 }
 
 #[test]
 fn layout_mode_dock_right() {
-    validate_pos!("d:r", 50, 30, 0, 0, 50, 30);
-    validate_pos!("d:Right,w:20,h:10", 50, 30, 30, 10, 20, 10);
-    validate_pos!("d:right,w:20", 50, 30, 30, 0, 20, 30);
-    validate_pos!("d:r,h:10", 50, 30, 0, 10, 50, 10);
-    validate_pos!("d:rIgHt,w:50%,h:25%", 60, 40, 30, 15, 30, 10);
+    validate_pos!("a:r", 50, 30, 0, 0, 50, 30);
+    validate_pos!("a:Right,w:20,h:10", 50, 30, 30, 10, 20, 10);
+    validate_pos!("a:right,w:20", 50, 30, 30, 0, 20, 30);
+    validate_pos!("a:r,h:10", 50, 30, 0, 10, 50, 10);
+    validate_pos!("a:rIgHt,w:50%,h:25%", 60, 40, 30, 15, 30, 10);
 }
 #[test]
 fn layout_mode_dock_bottom() {
-    validate_pos!("d:b", 50, 30, 0, 0, 50, 30);
-    validate_pos!("d:bottom,w:20,h:10", 50, 30, 15, 20, 20, 10);
-    validate_pos!("d:Bottom,w:20", 50, 30, 15, 0, 20, 30);
-    validate_pos!("d:b,h:10", 50, 30, 0, 20, 50, 10);
-    validate_pos!("d:BoTtOm,w:50%,h:25%", 60, 40, 15, 30, 30, 10);
+    validate_pos!("a:b", 50, 30, 0, 0, 50, 30);
+    validate_pos!("a:bottom,w:20,h:10", 50, 30, 15, 20, 20, 10);
+    validate_pos!("a:Bottom,w:20", 50, 30, 15, 0, 20, 30);
+    validate_pos!("a:b,h:10", 50, 30, 0, 20, 50, 10);
+    validate_pos!("a:BoTtOm,w:50%,h:25%", 60, 40, 15, 30, 30, 10);
 }
 #[test]
 fn layout_mode_anchor_lrtb() {
@@ -533,7 +533,7 @@ fn check_panic_on_invalid_anchor_variant() {
 #[should_panic]
 fn check_panic_on_invalid_dock_variant() {
     // this code should panic because 'd' can not be 'blablablab'
-    validate_pos!("d:blablabla", 50, 30, 5, 0, 38, 10);
+    validate_pos!("a:blablabla", 50, 30, 5, 0, 38, 10);
 }
 
 #[test]

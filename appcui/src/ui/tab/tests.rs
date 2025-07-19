@@ -36,7 +36,7 @@ fn check_control_reposition() {
     tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
     tab.add(1, button!("Page2-B,a:c,w:14"));
     tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
-    tab.add(2, button!("Page3-B,d:l,w:20"));
+    tab.add(2, button!("Page3-B,a:l,w:20"));
 
     w.add(tab);
     a.add_window(w);
@@ -88,7 +88,7 @@ fn check_key_control() {
     tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
     tab.add(1, button!("Page2-B,a:c,w:14"));
     tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
-    tab.add(2, button!("Page3-B,d:l,w:20"));
+    tab.add(2, button!("Page3-B,a:l,w:20"));
 
     w.add(tab);
     a.add_window(w);
@@ -128,7 +128,7 @@ fn check_switch_between_tabcontrols() {
     tab1.add(1, button!("T1-2-A,r:1,b:0,w:14,type:flat"));
     tab1.add(1, button!("T1-2-B,a:c,w:14,type:flat"));
     tab1.add(2, button!("T1-3-A,r:1,b:0,w:20,type:flat"));
-    tab1.add(2, button!("T1-3-B,d:l,w:20,type:flat"));
+    tab1.add(2, button!("T1-3-B,a:l,w:20,type:flat"));
     w.add(tab1);
 
     let mut tab2 = Tab::new(Layout::new("l:50,t:0,r:0,b:2"), tab::Flags::None);
@@ -140,7 +140,7 @@ fn check_switch_between_tabcontrols() {
     tab2.add(1, button!("T2-2-A,r:1,b:0,w:14,type:flat"));
     tab2.add(1, button!("T2-2-B,a:c,w:14,type:flat"));
     tab2.add(2, button!("T2-3-A,r:1,b:0,w:20,type:flat"));
-    tab2.add(2, button!("T2-3-B,d:l,w:20,type:flat"));
+    tab2.add(2, button!("T2-3-B,a:l,w:20,type:flat"));
     w.add(tab2);
 
     w.add(button!("OK,r:0,b:0,w:10, type: flat"));
@@ -528,7 +528,7 @@ fn check_tab_caption() {
     tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
     tab.add(1, button!("Page2-B,a:c,w:14"));
     tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
-    tab.add(2, button!("Page3-B,d:l,w:20"));
+    tab.add(2, button!("Page3-B,a:l,w:20"));
 
     w.add(tab);
     a.add_window(w);
