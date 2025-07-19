@@ -6,7 +6,7 @@ use crate::ferris::FERRIS_PIXELS;
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
     let mut w = window!("'Splitter Example', d:c,w:60,h:20, flags: Sizeable");
-    let mut vs = vsplitter!("pos:50%,d:c,w:100%,h:100%");
+    let mut vs = vsplitter!("pos:50%,a:c,w:100%,h:100%");
     let mut iv_1 = ImageViewer::new(
         Image::from_buffer(FERRIS_PIXELS, Size::new(172, 122), false).unwrap(),
         Layout::new("d:c"),

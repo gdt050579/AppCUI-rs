@@ -21,11 +21,11 @@ pub(crate) struct Win {
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("'Animal Kingdom Classification',d:c,w:70,h:20,flags:Sizeable"),
+            base: window!("'Animal Kingdom Classification',a:c,w:70,h:20,flags:Sizeable"),
         };
 
         // Create a tree control
-        let mut tree = treeview!("TreeItem,d:c,flags:ScrollBars+SearchBar+LargeIcons");
+        let mut tree = treeview!("TreeItem,a:c,flags:ScrollBars+SearchBar+LargeIcons");
         
         // Add root items (Kingdoms)
         let animalia = tree.add_item(treeview::Item::new(

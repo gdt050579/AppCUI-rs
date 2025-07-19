@@ -104,7 +104,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Test,d:c,w:60,h:10");
+    let mut w = window!("Test,a:c,w:60,h:10");
     let tg1 = ToggleButton::new(
         "Aa", 
         "Case sensitive", 

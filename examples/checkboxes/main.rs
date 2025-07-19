@@ -11,7 +11,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("Checkboxes,d:c,w:40,h:10"),
+            base: window!("Checkboxes,a:c,w:40,h:10"),
             c1: Handle::None,
             c2: Handle::None,
             c3: Handle::None,

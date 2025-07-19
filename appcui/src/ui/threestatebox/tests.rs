@@ -8,7 +8,7 @@ fn check_three_state_box_simple() {
         CheckHash(0xD52344AB78EF21D2)   
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:78,h:11");
+    let mut w = window!("Title,a:c,w:78,h:11");
     w.add(ThreeStateBox::new(
         "Options",
         Layout::new("x:1,y:1,w:16,h:4"),
@@ -36,7 +36,7 @@ fn check_three_state_box_macro() {
         CheckHash(0xC4D48739A6B596DE)   
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:78,h:11");
+    let mut w = window!("Title,a:c,w:78,h:11");
     w.add(threestatebox!("Options,x:1,y:1,w:16,h:4,state=unchecked"));
     w.add(threestatebox!("Options,x:1,y:2,w:16,h:4,state=checked"));
     w.add(threestatebox!("Options,x:1,y:3,w:16,h:4,state=unknown"));
@@ -56,7 +56,7 @@ fn check_three_state_box_events() {
 impl MyWindow {
     fn new() -> MyWindow {
         let mut w = MyWindow{
-            base:window!("title,d:c,w:40,h:8"),
+            base:window!("title,a:c,w:40,h:8"),
             ts: Handle::None,
             lb:Handle::None,
         };
@@ -108,7 +108,7 @@ fn check_methods() {
         CheckHash(0x3FA2ED544BE2898A)   
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:78,h:11");
+    let mut w = window!("Title,a:c,w:78,h:11");
     let mut t = threestatebox!("Options,x:1,y:1,w:16,h:4,state=unchecked");
     assert_eq!(t.caption(),"Options");
     assert_eq!(t.state(),threestatebox::State::Unchecked);
@@ -250,7 +250,7 @@ fn check_three_state_box_hot_key() {
         CheckHash(0xC8C53061F55AA476)   
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:78,h:11");
+    let mut w = window!("Title,a:c,w:78,h:11");
     w.add(threestatebox!("&Options,x:1,y:1,w:16,h:4,state=unchecked"));
     w.add(threestatebox!("O&ptions,x:1,y:2,w:16,h:4,state=checked"));
     w.add(threestatebox!("Op&tions,x:1,y:3,w:16,h:4,state=unknown"));
@@ -276,7 +276,7 @@ fn check_mouse_events() {
         CheckHash(0xB6BB128869977206)
     ";
     let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:78,h:11");
+    let mut w = window!("Title,a:c,w:78,h:11");
     w.add(threestatebox!("'&Options with a lot of text',x:1,y:1,w:16,h:4,state=unchecked"));
     a.add_window(w);
     a.run();

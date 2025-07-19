@@ -10,13 +10,13 @@ struct MyWindow {
 impl MyWindow {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("Test,d:c,w:40,h:8"),
+            base: window!("Test,a:c,w:40,h:8"),
             h_file: Handle::None,
             h_edit: Handle::None,
             h_help: Handle::None,
             lb: Handle::None,
         };
-        w.lb = w.add(label!("None,d:c,w:30,h:1"));
+        w.lb = w.add(label!("None,a:c,w:30,h:1"));
         // construct a popup menu
         w.h_file = w.register_menu(menu!(
             "&File,class: MyWindow, items=[

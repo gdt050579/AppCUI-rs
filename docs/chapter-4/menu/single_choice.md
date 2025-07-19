@@ -96,7 +96,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = MyWin {
-            base: window!("Test,d:c,w:40,h:8"),
+            base: window!("Test,a:c,w:40,h:8"),
             m_commands: Handle::None,
         };
         let mut m = Menu::new("Single choices");

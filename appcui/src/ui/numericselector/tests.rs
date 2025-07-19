@@ -11,7 +11,7 @@ fn check_creation() {
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:68,h:9");
+    let mut w = window!("Title,a:c,w:68,h:9");
     w.add(NumericSelector::<i32>::new(
         5,
         1,
@@ -96,7 +96,7 @@ fn check_create_procmacro() {
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:68,h:9");
+    let mut w = window!("Title,a:c,w:68,h:9");
 
     w.add(numericselector!("i32,5,1,8,1,x:1,y:1,w:10"));
     w.add(numericselector!("u32,5,1,8,1,x:1,y:3,w:15,flags:HideButtons"));
@@ -121,7 +121,7 @@ fn check_create_procmacro_defaults() {
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:68,h:9");
+    let mut w = window!("Title,a:c,w:68,h:9");
 
     w.add(numericselector!("i32,5,x:1,y:1,w:10"));
     w.add(numericselector!("u32,5,x:1,y:3,w:15,flags:HideButtons"));

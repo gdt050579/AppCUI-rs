@@ -789,7 +789,7 @@ fn check_create() {
         CheckHash(0x63C1CCFA05E9F034)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:8");
+    let mut w = window!("Title,a:c,w:40,h:8");
     let img = Image::from_str(
         r#"
         |RR.........RR|
@@ -868,7 +868,7 @@ fn check_macro_creation() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
-    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%,cs:Color16"));
+    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',a:c,w:100%,h:100%,cs:Color16"));
     a.add_window(w);
     a.run();
 }
@@ -883,7 +883,7 @@ fn check_macro_creation_2() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
     w.add(imageviewer!(
-        "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
+        "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',a:c,w:100%,h:100%, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
     ));
     a.add_window(w);
     a.run();
@@ -1033,7 +1033,7 @@ fn check_clear_background() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:c");
-    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, back: {X,Red}, cs:Color16");
+    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',a:c,w:100%,h:100%, back: {X,Red}, cs:Color16");
     i.clear_background();
     w.add(i);
     a.add_window(w);

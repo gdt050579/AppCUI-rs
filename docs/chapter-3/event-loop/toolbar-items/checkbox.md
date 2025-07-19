@@ -74,7 +74,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'My Win',d:c,w:40,h:6"),
+            base: window!("'My Win',a:c,w:40,h:6"),
             cb1: Handle::None,
             cb2: Handle::None,
             text: Handle::None,
@@ -85,7 +85,7 @@ impl MyWin {
         win.cb1 = win.toolbar().add(g, toolbar::CheckBox::new("Opt-1",false));
         win.cb2 = win.toolbar().add(g, toolbar::CheckBox::new("Opt-2",false));
         // add a label
-        win.text = win.add(label!("'',d:c,w:20,h:1"));
+        win.text = win.add(label!("'',a:c,w:20,h:1"));
         win
     }
 }

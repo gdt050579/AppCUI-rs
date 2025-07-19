@@ -10,7 +10,7 @@ pub struct MyWin {
 impl MyWin {
     pub fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'Flappy Birds',d:c,w:60,h:20"),
+            base: window!("'Flappy Birds',a:c,w:60,h:20"),
             game: Handle::None,
             score: Handle::None,
         };

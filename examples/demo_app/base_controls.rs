@@ -7,7 +7,7 @@ pub(crate) struct Win {
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("'Controls Demo',d:c,w:50,h:14,flags:Sizeable"),
+            base: window!("'Controls Demo',a:c,w:50,h:14,flags:Sizeable"),
         };
 
         // Create tab control

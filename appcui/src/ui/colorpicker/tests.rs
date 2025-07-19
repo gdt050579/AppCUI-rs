@@ -19,7 +19,7 @@ fn check_colorpicker_header_size() {
         CheckHash(0x292A2027DCD39746)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:50,h:11");
+    let mut w = window!("Title,a:c,w:50,h:11");
     w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:3,w:16")));
     w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:5,w:15")));
     w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:7,w:10")));
@@ -72,7 +72,7 @@ fn check_colorpicker_expand() {
         CheckHash(0xFF26EBFE96A11715)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:50,h:11");
+    let mut w = window!("Title,a:c,w:50,h:11");
     w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:1,w:46")));
     w.add(colorpicker!("Red,x:1,y:3,w:12"));
     w.add(colorpicker!("Black,x:1,y:5,w:7"));
@@ -137,7 +137,7 @@ fn check_colorpicker_keys() {
         CheckHash(0xF0CE1F2D9AF9C7A1)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:50,h:11");
+    let mut w = window!("Title,a:c,w:50,h:11");
     w.add(colorpicker!("Red,x:1,y:1,w:15"));
     a.add_window(w);
     a.run();
@@ -164,7 +164,7 @@ fn check_colorpicker_cursor_on_transparent() {
         CheckCursor(hidden)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:50,h:11");
+    let mut w = window!("Title,a:c,w:50,h:11");
     w.add(colorpicker!("Transparent,x:1,y:1,w:15"));
     a.add_window(w);
     a.run();
@@ -237,7 +237,7 @@ fn check_colorpicker_mouse() {
         CheckHash(0xDF9C98AEDE4BBC7)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:50,h:11");
+    let mut w = window!("Title,a:c,w:50,h:11");
     w.add(colorpicker!("Transparent,x:1,y:1,w:15"));
     w.add(colorpicker!("Red,x:30,y:1,w:15"));
     w.add(colorpicker!("Blue,x:1,y:7,w:30"));
@@ -347,7 +347,7 @@ fn check_colorpicker_tooltip() {
         CheckHash(0xD2E4C4A915F660B6)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:50,h:11");
+    let mut w = window!("Title,a:c,w:50,h:11");
     w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:1,w:46")));
     w.add(colorpicker!("Red,x:1,y:3,w:12"));
     w.add(colorpicker!("Black,x:1,y:5,w:7"));

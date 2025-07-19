@@ -2,7 +2,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut win = window!("'Radiobox types',d:c,w:80,h:15, flags:Sizeable");
+    let mut win = window!("'Radiobox types',a:c,w:80,h:15, flags:Sizeable");
     let mut acc = accordion!("d:c,w:100%,h:100%,panels:['&Standard', '&Circle', '&Diamond', '&Ascii']");
     
     // Standard

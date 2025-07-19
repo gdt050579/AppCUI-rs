@@ -115,11 +115,11 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'My Win',d:c,w:40,h:16"),
+            base: window!("'My Win',a:c,w:40,h:16"),
             text: Handle::None,
             value: 1,
         };
-        win.text = win.add(label!("'Value=10',d:c,w:24,h:1"));
+        win.text = win.add(label!("'Value=10',a:c,w:24,h:1"));
         win.add(button!("Double,d:b,w:15"));
         win
     }

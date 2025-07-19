@@ -117,7 +117,7 @@ static EMOTICONS: &[(&str, &str)] = &[
 impl EmoticonsWindow {
     fn new() -> Self {
         let mut win = Self {
-            base: window!("'Emoticons',d:c,w:50,h:12"),
+            base: window!("'Emoticons',a:c,w:50,h:12"),
             canvas: Handle::None,
             next_button: Handle::None,
             prev_button: Handle::None,

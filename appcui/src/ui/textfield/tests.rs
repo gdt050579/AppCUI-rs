@@ -1248,7 +1248,7 @@ fn check_text_changed_event() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Win,d:c,w:47,h:7"),
+                base: window!("Win,a:c,w:47,h:7"),
                 info: Handle::None,
                 txt: Handle::None,
                 count: 0,
@@ -1327,7 +1327,7 @@ fn check_text_changed_event_readonly() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Win,d:c,w:47,h:7"),
+                base: window!("Win,a:c,w:47,h:7"),
                 info: Handle::None,
                 txt: Handle::None,
                 count: 0,

@@ -76,7 +76,7 @@ fn check_shortkeys() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: window!("'My Win',d:c,w:60,h:14"),
+                base: window!("'My Win',a:c,w:60,h:14"),
                 g1_r1: Handle::None,
                 g1_r2: Handle::None,
                 g1_r3: Handle::None,

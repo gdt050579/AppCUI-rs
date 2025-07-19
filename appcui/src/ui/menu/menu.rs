@@ -37,7 +37,7 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 /// impl MyWindow {
 ///     fn new() -> Self {
 ///         let mut w = MyWindow {
-///             base: window!("Example,d:c,w:40,h:10"),
+///             base: window!("Example,a:c,w:40,h:10"),
 ///             file_menu: Handle::None,
 ///         };
 ///         
@@ -87,7 +87,7 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 /// impl MyWindow {
 ///     fn new() -> Self {
 ///         let mut w = MyWindow {
-///             base: window!("Example,d:c,w:40,h:10"),
+///             base: window!("Example,a:c,w:40,h:10"),
 ///             file_menu: Handle::None,
 ///         };
 ///         

@@ -21,7 +21,7 @@ pub(crate) struct Win {
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("Files,d:c,w:70,h:10,flags: Sizeable"),
+            base: window!("Files,a:c,w:70,h:10,flags: Sizeable"),
             l: Handle::None,
             details: Handle::None,
             columns: Handle::None,

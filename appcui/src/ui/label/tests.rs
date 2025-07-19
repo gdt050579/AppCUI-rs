@@ -57,7 +57,7 @@ fn check_label_with_nacro() {
         CheckHash(0x9AC98702D1913E96)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:9");
+    let mut w = window!("Title,a:c,w:40,h:9");
     w.add(label!("Caption='A label build with label! moacro',d:tl,w:30"));
     w.add(label!("my_label,x:0,y:1,w:30"));
     a.add_window(w);

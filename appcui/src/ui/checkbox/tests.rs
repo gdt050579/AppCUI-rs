@@ -35,7 +35,7 @@ fn check_checkbox_events() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: window!("Checkboxes,d:c,w:40,h:10"),
+                base: window!("Checkboxes,a:c,w:40,h:10"),
                 c1: Handle::None,
                 c2: Handle::None,
                 c3: Handle::None,
@@ -115,7 +115,7 @@ fn check_checkbox_set_checked() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Win-1,d:c,w:40,h:8"), 
+                base: window!("Win-1,a:c,w:40,h:8"), 
                 b: Handle::None,
                 c: Handle::None,
             };
@@ -187,7 +187,7 @@ fn check_checkbox_key_pressed() {
         CheckHash(0x26DF8C4F9A5A4F70)  
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:11");
+    let mut w = window!("Title,a:c,w:40,h:11");
     w.add(checkbox!("'option outside panel',x:1,y:8,w:35,checked:true"));
     a.add_window(w);
     a.run();

@@ -10,7 +10,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'Key Selector example',d:c,w:40,h:9"),
+            base: window!("'Key Selector example',a:c,w:40,h:9"),
             reset: Handle::None,
             ks: Handle::None,
             lb: Handle::None,

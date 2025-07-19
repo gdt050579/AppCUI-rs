@@ -291,7 +291,7 @@ fn check_tool_tip() {
         CheckHash(0xCB2F5888BC193B75)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:40,h:10");
+    let mut w = window!("Test,a:c,w:40,h:10");
     w.add(button!("'A realy large text for a button',x:2,y:3,w:15"));
     a.add_window(w);
     a.run();
@@ -318,7 +318,7 @@ fn check_mouse_drag_test() {
         CheckHash(0xB10F054B07F2FF0)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:40,h:10");
+    let mut w = window!("Test,a:c,w:40,h:10");
     w.add(button!("'Test',x:2,y:3,w:15"));
     a.add_window(w);
     a.run();

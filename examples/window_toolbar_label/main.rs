@@ -15,7 +15,7 @@ struct NumberFormatsWindow {
 impl NumberFormatsWindow {
     fn new() -> Self {
         let mut win = NumberFormatsWindow {
-            base: window!("'Number Formats',d:c,w:40,h:10"),
+            base: window!("'Number Formats',a:c,w:40,h:10"),
             increase_button: Handle::None,
             decimal_label: Handle::None,
             hex_label: Handle::None,

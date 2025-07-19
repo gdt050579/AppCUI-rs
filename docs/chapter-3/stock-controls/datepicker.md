@@ -93,7 +93,7 @@ struct MyWin {
 impl MyWin{
     fn new() -> Self{
         let mut win = MyWin{
-            base: window!("Dates,d:c,w:25,h:6"),
+            base: window!("Dates,a:c,w:25,h:6"),
             dp: Handle::None,
         };
         win.dp = win.add(datepicker!("2024-06-13,x:1,y:1,w:19"));

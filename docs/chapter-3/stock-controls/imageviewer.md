@@ -99,7 +99,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Heart,d:c,w:15,h:7");
+    let mut w = window!("Heart,a:c,w:15,h:7");
     let heart = Image::from_str(r#"
         |.............|
         |...rr...rr...|

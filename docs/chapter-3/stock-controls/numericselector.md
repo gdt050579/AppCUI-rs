@@ -102,7 +102,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'Convert',d:c,w:40,h:8"),
+            base: window!("'Convert',a:c,w:40,h:8"),
             celsius: Handle::None,
             fahrenheit: Handle::None,
         };

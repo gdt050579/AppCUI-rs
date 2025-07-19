@@ -565,7 +565,7 @@ fn check_auto_hotkey_on_desktop() {
         }
 
         fn on_event(&mut self, _: mydesktop::Commands) {
-            self.add_window(window!("Test,d:c,w:20,h:10,hotkey:auto"));
+            self.add_window(window!("Test,a:c,w:20,h:10,hotkey:auto"));
         }
     }
     let script = "

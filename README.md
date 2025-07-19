@@ -66,8 +66,8 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut win = window!("Test,d:c,w:30,h:9");
-    win.add(label!("'Hello World !',d:c,w:13,h:1"));
+    let mut win = window!("Test,a:c,w:30,h:9");
+    win.add(label!("'Hello World !',a:c,w:13,h:1"));
     app.add_window(win);
     app.run();
     Ok(())
@@ -102,7 +102,7 @@ impl CounterWindow {
     fn new() -> Self {
         let mut w = Self {
             // set up the window title and position
-            base: window!("'Counter window',d:c,w:30,h:5"),
+            base: window!("'Counter window',a:c,w:30,h:5"),
             // initial counter is 1
             counter: 1            
         };

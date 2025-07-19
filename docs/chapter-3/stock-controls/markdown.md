@@ -112,7 +112,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
 
-    let mut w = window!("Markdown,d:c,w:50,h:15,flags:sizeable");
+    let mut w = window!("Markdown,a:c,w:50,h:15,flags:sizeable");
     let m = markdown!(
         "'''
         \r\n\

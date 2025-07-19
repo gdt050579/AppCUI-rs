@@ -68,7 +68,7 @@ impl MyWindow {
         splitter.add(vsplitter::Panel::Right, tab);
 
         let mut p_list = panel!("'Lists',l:1,t:7,r:1,h:6");
-        let mut lv = listview!("class: FileInformation,d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+LargeIcons+Checkboxes,lsm:2");
+        let mut lv = listview!("class: FileInformation,a:c,w:100%,h:100%,flags: ScrollBars+SearchBar+LargeIcons+Checkboxes,lsm:2");
         lv.add_item(listview::Item::new(
             FileInformation {
                 name: "Applicatons",

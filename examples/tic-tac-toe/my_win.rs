@@ -26,7 +26,7 @@ impl MyWin {
             board: Handle::None,
             tab: Handle::None,
         };
-        let mut t = tab!("tabs:[MainPage,Game],d:c,type:HiddenTabs,flags:TransparentBackground");
+        let mut t = tab!("tabs:[MainPage,Game],a:c,type:HiddenTabs,flags:TransparentBackground");
         // first player
         let mut pnl = panel!("'Player One (X)',l:1,t:1,r:1,h:7");
         pnl.add(label!("Name,x:1,y:1,w:4"));

@@ -676,7 +676,7 @@ fn check_window_toolbar_button_click() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: window!("'My Win',d:c,w:40,h:6"),
+                base: window!("'My Win',a:c,w:40,h:6"),
                 increase_button: Handle::None,
                 decrease_button: Handle::None,
                 text: Handle::None,
@@ -688,7 +688,7 @@ fn check_window_toolbar_button_click() {
             win.increase_button = win.toolbar().add(g, toolbaritem!("'+',type:button,tooltip:'Click to increase'"));
             win.decrease_button = win.toolbar().add(g, toolbar::Button::new("-"));
             // add a label
-            win.text = win.add(label!("10,d:c,w:2,h:1"));
+            win.text = win.add(label!("10,a:c,w:2,h:1"));
             win
         }
     }
@@ -1058,7 +1058,7 @@ fn check_window_toolbar_item_visibility() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: window!("'My Win',d:c,w:40,h:6"),
+                base: window!("'My Win',a:c,w:40,h:6"),
                 increase_button: Handle::None,
                 dec: Handle::None,
                 hex: Handle::None,
@@ -1446,7 +1446,7 @@ fn check_window_on_cancel_callback() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: window!("Test,d:c,w:30,h:6"),
+                base: window!("Test,a:c,w:30,h:6"),
                 txt: Handle::None,
                 count: 4,
             };
@@ -1499,9 +1499,9 @@ fn check_window_enter_resize_mode() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: window!("Test,d:c,w:30,h:6"),
+                base: window!("Test,a:c,w:30,h:6"),
             };
-            win.add(button!("ResizeMe,d:c,w:16"));
+            win.add(button!("ResizeMe,a:c,w:16"));
             win
         }
     }
@@ -1577,7 +1577,7 @@ fn check_window_keybeforechildren() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: window!("Test,d:c,w:40,h:6"),
+                base: window!("Test,a:c,w:40,h:6"),
             };
             win.add(MyCustomControl::new());
             win
@@ -1648,9 +1648,9 @@ fn check_window_close() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:30,h:8"),
+                base: window!("Test,a:c,w:30,h:8"),
             };
-            me.add(button!("Close,d:c,w:14,h:1"));
+            me.add(button!("Close,a:c,w:14,h:1"));
             me
         }
     }
@@ -1687,9 +1687,9 @@ fn check_modal_window_close() {
                 value,
             };
             if value % 2 == 0 {
-                me.add(button!("Close,d:c,w:24,h:1"));
+                me.add(button!("Close,a:c,w:24,h:1"));
             } else {
-                me.add(button!("Exit,d:c,w:24,h:1"));
+                me.add(button!("Exit,a:c,w:24,h:1"));
             }
             me
         }
@@ -1712,10 +1712,10 @@ fn check_modal_window_close() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:30,h:8"),
+                base: window!("Test,a:c,w:30,h:8"),
                 value: 0,
             };
-            me.add(button!("Run,d:c,w:14,h:1"));
+            me.add(button!("Run,a:c,w:14,h:1"));
             me
         }
     }
@@ -1758,7 +1758,7 @@ fn check_window_close_with_commandbar_and_menu() {
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("Test,d:c,w:30,h:8"),
+                base: window!("Test,a:c,w:30,h:8"),
                 h_menu: Handle::None,
             };
             w.h_menu = w.register_menu(menu!("File,class:MyWin,items=[{New,cmd:A}]"));
@@ -1802,7 +1802,7 @@ fn check_procmacro_tag() {
         CheckHash(0x68F0A3E0FB3C4F91)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    a.add_window(window!("Test,d:c,w:30,h:8,tag:'myWin'"));
+    a.add_window(window!("Test,a:c,w:30,h:8,tag:'myWin'"));
     a.run();
 }
 
@@ -2043,7 +2043,7 @@ fn check_resize_mode_keys() {
         CheckHash(0xE0A5BFC25FE43E2E)   
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:8,flags: Sizeable");
+    let mut w = window!("Title,a:c,w:40,h:8,flags: Sizeable");
     w.set_tag("XYZ");
     assert_eq!(w.tag(), Some("XYZ"));
     assert_eq!(w.title(), "Title");

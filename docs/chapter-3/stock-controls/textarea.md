@@ -11,8 +11,8 @@ let tx = TextArea::new("Some text", Layout::new("x:10,y:5,w:15"), textarea::Flag
 
 or use the macro `textarea!()`
 ```rs
-let textarea1 = textarea!("text='some text to edit',d:c,h:100%");
-let textarea2 = textarea!("'some text to print',d:c,h:100%,flags:ReadOnly");
+let textarea1 = textarea!("text='some text to edit',a:c,h:100%");
+let textarea2 = textarea!("'some text to print',a:c,h:100%,flags:ReadOnly");
 ```
 
 A textarea supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:

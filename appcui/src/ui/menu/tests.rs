@@ -11,7 +11,7 @@ fn check_view() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:40,h:8"),
+                base: window!("Test,a:c,w:40,h:8"),
                 m_file: Handle::None,
                 m_help: Handle::None,
                 m_edit: Handle::None,
@@ -91,7 +91,7 @@ fn check_scroll_button_activation() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:40,h:8"),
+                base: window!("Test,a:c,w:40,h:8"),
                 m_file: Handle::None,
             };
             let m = menu!(
@@ -165,7 +165,7 @@ fn check_submenus_open() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:40,h:8"),
+                base: window!("Test,a:c,w:40,h:8"),
                 m_file: Handle::None,
             };
             let m = menu!(
@@ -315,7 +315,7 @@ fn check_dynamic_change_menu() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:40,h:8"),
+                base: window!("Test,a:c,w:40,h:8"),
                 m_counter: Handle::None,
                 some_menu: Handle::None,
                 counter: 0,
@@ -383,7 +383,7 @@ fn check_dynamic_change_menu_2() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:40,h:8"),
+                base: window!("Test,a:c,w:40,h:8"),
                 m_counter: Handle::None,
                 some_menu: Handle::None,
                 counter: 0,
@@ -1035,13 +1035,13 @@ fn check_menubar_with_keys() {
     impl MyWindow {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("Test,d:c,w:40,h:8"),
+                base: window!("Test,a:c,w:40,h:8"),
                 h_file: Handle::None,
                 h_edit: Handle::None,
                 h_help: Handle::None,
                 lb: Handle::None,
             };
-            w.lb = w.add(label!("None,d:c,w:30,h:1"));
+            w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
             w.h_file = w.register_menu(menu!(
                 "&File,class: MyWindow, items=[
@@ -1294,13 +1294,13 @@ fn check_menubar_recursive_shortcuts() {
     impl MyWindow {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("Test,d:c,w:40,h:8"),
+                base: window!("Test,a:c,w:40,h:8"),
                 h_file: Handle::None,
                 h_edit: Handle::None,
                 h_help: Handle::None,
                 lb: Handle::None,
             };
-            w.lb = w.add(label!("None,d:c,w:30,h:1"));
+            w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
             w.h_file = w.register_menu(menu!(
                 "&File,class: MyWindow, items=[
@@ -1704,7 +1704,7 @@ fn check_menubar_order_parameter() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:40,h:8"),
+                base: window!("Test,a:c,w:40,h:8"),
                 m_file: Handle::None,
                 m_help: Handle::None,
                 m_edit: Handle::None,
@@ -1799,7 +1799,7 @@ fn check_menubar_order_parameter_multi_controls() {
         impl MyWindow {
             pub fn new() -> Self {
                 let mut w = MyWindow {
-                    base: window!("Test,d:c,w:30,h:10"),
+                    base: window!("Test,a:c,w:30,h:10"),
                     h_menu: Handle::None,
                     hc: Handle::None,
                 };
@@ -1932,7 +1932,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
         impl MyWindow {
             pub fn new() -> Self {
                 let mut w = MyWindow {
-                    base: window!("Test,d:c,w:30,h:10"),
+                    base: window!("Test,a:c,w:30,h:10"),
                     h_menu: Handle::None,
                     hc: Handle::None,
                 };

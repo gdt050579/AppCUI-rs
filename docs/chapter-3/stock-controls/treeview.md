@@ -248,7 +248,7 @@ impl MyItem {
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
     let mut w = window!("Tree,d:c");
-    let mut tv = treeview!("MyItem,d:c,flags: ScrollBars+SearchBar+HideHeader");
+    let mut tv = treeview!("MyItem,a:c,flags: ScrollBars+SearchBar+HideHeader");
     let h1 = tv.add(MyItem::new("Root Item 1"));    
     let h2 = tv.add(MyItem::new("Root Item 2"));
     let h1_1 = tv.add_to_parent(MyItem::new("First Child of Root Item 1"), h1);

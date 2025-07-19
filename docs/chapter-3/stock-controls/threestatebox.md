@@ -92,7 +92,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'My Win',d:c,w:40,h:6"),
+            base: window!("'My Win',a:c,w:40,h:6"),
             c: Handle::None,
             l: Handle::None,
         };

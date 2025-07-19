@@ -212,7 +212,7 @@ fn check_macro() {
         CheckHash(0xF35890A91AA2DA45)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:9");
+    let mut w = window!("Title,a:c,w:40,h:9");
     let mut c = progressbar!("value: 2, x:1,y:1,w:36,h:2, total: 10, text: 'Running...'");
     c.update_eta_with_elapsed_time(1);
     w.add(c);
@@ -228,7 +228,7 @@ fn check_hide_percentage() {
         CheckHash(0xA5C51B4854FAD972)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:9");
+    let mut w = window!("Title,a:c,w:40,h:9");
     let mut c = progressbar!("value: 2, x:1,y:1,w:36,h:2, total: 10, text: 'Running...', flags: HidePercentage");
     c.update_eta_with_elapsed_time(1);
     w.add(c);
@@ -244,7 +244,7 @@ fn check_paused() {
         CheckHash(0x6316D1E95B82EFCB)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:9");
+    let mut w = window!("Title,a:c,w:40,h:9");
     let c = progressbar!("value: 2, x:1,y:1,w:36,h:2, total: 10, text: 'Running...', paused: true");
     assert!(c.is_paused());
     w.add(c);
@@ -260,7 +260,7 @@ fn check_resume() {
         CheckHash(0x560946B21ADA059E)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:9");
+    let mut w = window!("Title,a:c,w:40,h:9");
     let mut c = progressbar!("value: 2, x:1,y:1,w:36,h:2, total: 10, text: 'Running...', paused: true");
     c.update_progress(5); // should call resume
     c.update_eta_with_elapsed_time(10);

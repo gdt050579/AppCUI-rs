@@ -71,7 +71,7 @@ pub(crate) struct Win {}
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("Students,d:c,w:70,h:10,flags: Sizeable"),
+            base: window!("Students,a:c,w:70,h:10,flags: Sizeable"),
         };
         me.add(label!("'Use the following patter to filter the list: <, <=, >, >=, =, or the name of the student.\n\nFor example: >5 will show only students with grade greater than 5',x:0,y:0,w:40%,h:100%"));
         let mut lv = listview!("class: Student,x:50%,y:0,w:100%,h:100%,flags: SearchBar+CustomFilter, columns:[{&Name,15,l},{&Grade,12,r}]");

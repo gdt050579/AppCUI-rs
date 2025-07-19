@@ -26,7 +26,7 @@ fn check_control_reposition() {
         CheckHash(0x2D8DF67B09FC3F82)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     let mut ac = Accordion::new(Layout::new("l:0,t:0,r:0,b:0"), accordion::Flags::None);
     ac.add_panel("Panel &1");
     ac.add_panel("Panel &2");
@@ -69,7 +69,7 @@ fn check_keys() {
         CheckHash(0x6C08EA349DACC442)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     let mut ac = Accordion::new(Layout::new("l:0,t:0,r:0,b:0"), accordion::Flags::None);
     ac.add_panel("Panel &1");
     ac.add_panel("Panel &2");
@@ -94,7 +94,7 @@ fn check_focus() {
         CheckHash(0xF8B8FB1A7C6A4324)
     ";
     let mut a = App::debug(80, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:75,h:12,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:75,h:12,flags: Sizeable");
     let mut ac1 = Accordion::new(Layout::new("x:1,y:1,w:20,h:8"), accordion::Flags::None);
     ac1.add_panel("Panel &1");
     ac1.add_panel("Panel &2");
@@ -131,7 +131,7 @@ fn check_macro() {
         CheckHash(0xA450FC3636F665B2)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     let mut ac = accordion!("l:0,t:0,r:0,b:0,panels:['Panel &1','Panel &2','Panel &3']");
     ac.add(0, button!("P-1-A,r:1,b:0,w:10,type:flat"));
     ac.add(0, button!("P-1-B,l:1,t:1,w:10,type:flat"));
@@ -153,7 +153,7 @@ fn check_transparent_background() {
         CheckHash(0xA1CFB89BF40E15DA)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     let mut ac = accordion!("l:0,t:0,r:0,b:0,panels:['Panel &1','Panel &2','Panel &3'],flags: TransparentBackground");
     ac.add(0, button!("P-1-A,r:1,b:1,w:10,type:flat"));
     ac.add(0, button!("P-1-B,l:1,t:1,w:10,type:flat"));
@@ -315,7 +315,7 @@ fn check_not_process_input() {
         CheckHash(0x59375A32B72A3ACA)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     let mut ac = Accordion::new(Layout::new("l:0,t:0,r:0,b:0"), accordion::Flags::None);
     assert_eq!(ac.current_panel(), None);
 

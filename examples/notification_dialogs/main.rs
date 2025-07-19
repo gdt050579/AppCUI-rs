@@ -29,7 +29,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'Select',d:c,w:43,h:14"),
+            base: window!("'Select',a:c,w:43,h:14"),
             rb_error: Handle::None,
             rb_retry: Handle::None,
             rb_alert: Handle::None,

@@ -27,7 +27,7 @@ pub(super) struct Win {
 impl Win {
     pub(super) fn new() -> Self {
         let mut w = Self {
-            base: window!("Animation,d:c,w:50,h:10"),
+            base: window!("Animation,a:c,w:50,h:10"),
             bars: Vec::with_capacity(100),
             c: Handle::None,
         };

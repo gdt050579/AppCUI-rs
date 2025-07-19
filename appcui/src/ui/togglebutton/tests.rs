@@ -20,7 +20,7 @@ fn check_keyboard_normal() {
         CheckHash(0x4A798672ABE15E48)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:40,h:10");
+    let mut w = window!("Test,a:c,w:40,h:10");
     w.add(togglebutton!("text:AB,desc:'Push Me',x:2,y:2,w:2"));
     w.add(togglebutton!("CD,'Push Me',x:5,y:2,w:2"));
     w.add(button!("'Test',x:2,y:6,w:15"));
@@ -48,7 +48,7 @@ fn check_keyboard_underlined() {
         CheckHash(0x84C7AA7D2395DF10)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:40,h:10");
+    let mut w = window!("Test,a:c,w:40,h:10");
     w.add(togglebutton!("text:AB,desc:'Push Me',x:2,y:2,w:2,type:Underlined"));
     w.add(togglebutton!("CD,'Push Me',x:5,y:2,w:2,type:Underlined"));
     w.add(button!("'Test',x:2,y:6,w:15"));
@@ -70,7 +70,7 @@ fn check_mouse_hover_normal() {
         CheckHash(0xEF3CCBA28E4FB9BD)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:40,h:10");
+    let mut w = window!("Test,a:c,w:40,h:10");
     w.add(togglebutton!("text:AB,desc:'Push Me',x:2,y:2,w:2"));
     w.add(togglebutton!("CD,'Push Me',x:5,y:2,w:2"));
     w.add(button!("'Test',x:2,y:6,w:15"));
@@ -171,7 +171,7 @@ fn check_events_single_selection() {
         CheckHash(0xBEFCBDB7BF12FF5D)  
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%");
+    let mut w = window!("Test,a:c,w:100%,h:100%");
     w.add(togglebutton!("<>,'Some button',x:1,y:3,w:2, group: true, type: Underlined"));
     w.add(togglebutton!("(),'Some button 2',x:4,y:3,w:2, group: true, type: Underlined"));
     w.add(togglebutton!("'{}','Some button 3',x:7,y:3,w:2, single_selection: true, type: Underlined"));

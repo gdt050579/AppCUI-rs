@@ -179,7 +179,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("'Background Task',d:c,w:50,h:8,flags:sizeable"),
+            base: window!("'Background Task',a:c,w:50,h:8,flags:sizeable"),
             p: Handle::None,
         };
         w.p = w.add(progressbar!("l:1,t:1,r:1,h:2"));

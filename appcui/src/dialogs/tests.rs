@@ -15,10 +15,10 @@ struct CallbackWin {
 impl CallbackWin {
     fn new(f: fn()) -> Self {
         let mut w = Self {
-            base: window!("Test,d:c,w:20,h:6"),
+            base: window!("Test,a:c,w:20,h:6"),
             f,
         };
-        w.add(button!("'Press Me',d:c,w:15"));
+        w.add(button!("'Press Me',a:c,w:15"));
         w
     }
 }
@@ -81,7 +81,7 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
             mask: Some(FILE_MASK),
         };
-        w.add(button!("'Press Me',d:c,w:14"));
+        w.add(button!("'Press Me',a:c,w:14"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
@@ -95,7 +95,7 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
             mask: Some(FILE_MASK),
         };
-        w.add(button!("'Press Me',d:c,w:14"));
+        w.add(button!("'Press Me',a:c,w:14"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
@@ -109,7 +109,7 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
             mask: None,
         };
-        w.add(button!("'Press Me',d:c,w:14"));
+        w.add(button!("'Press Me',a:c,w:14"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
@@ -147,7 +147,7 @@ impl FolderSelectDialog {
             loc: loc.to_string(),
             flags,
         };
-        w.add(button!("Press,d:c,w:14"));
+        w.add(button!("Press,a:c,w:14"));
         w
     }
 }
@@ -1217,9 +1217,9 @@ fn check_input_no_validation() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:30,h:7"),
+                base: window!("Test,a:c,w:30,h:7"),
             };
-            me.add(button!("Click,d:c,w:15"));
+            me.add(button!("Click,a:c,w:15"));
             me
         }
     }
@@ -1270,9 +1270,9 @@ fn check_input_validation() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:30,h:7"),
+                base: window!("Test,a:c,w:30,h:7"),
             };
-            me.add(button!("Click,d:c,w:15"));
+            me.add(button!("Click,a:c,w:15"));
             me
         }
     }
@@ -1321,9 +1321,9 @@ fn check_input_with_initial_value() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:30,h:7"),
+                base: window!("Test,a:c,w:30,h:7"),
             };
-            me.add(button!("Click,d:c,w:15"));
+            me.add(button!("Click,a:c,w:15"));
             me
         }
     }

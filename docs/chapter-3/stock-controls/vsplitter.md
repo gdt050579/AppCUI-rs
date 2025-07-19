@@ -69,8 +69,8 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("'Vertical Splitter',d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = vsplitter!("50%,d:c,w:100%,h:100%,resize:PreserveRightPanelSize");
+    let mut w = window!("'Vertical Splitter',a:c,w:50,h:10,flags: Sizeable");
+    let mut vs = vsplitter!("50%,a:c,w:100%,h:100%,resize:PreserveRightPanelSize");
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
