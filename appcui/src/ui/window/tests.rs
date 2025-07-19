@@ -17,6 +17,24 @@ fn check_window_just_title() {
     a.add_window(Window::new("123456", Layout::new("d:c,w:20,h:10"), window::Flags::NoCloseButton));
     a.run();
 }
+
+#[test]
+fn check_window_using_layout_builder() {
+    let script = "
+        Paint.Enable(false)
+        // expect: ╔═════ 123456 ═════╗
+        Paint('123456 centered')
+        CheckHash(0x87AACF295BE859E6)
+    ";
+    let mut a = App::debug(20, 10, script).build().unwrap();
+    a.add_window(Window::new(
+        "123456",
+        LayoutBuilder::new().width(20).height(10).dock(Alignament::Center).build(),
+        window::Flags::NoCloseButton,
+    ));
+    a.run();
+}
+
 #[test]
 fn check_window_just_large_title() {
     let script = "
@@ -571,7 +589,7 @@ fn check_window_toolbar_label() {
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
     let g = w.toolbar().create_group(GroupPosition::BottomLeft);
     let l = toolbar::Label::new("Label 1");
-    assert_eq!(l.caption(),"Label 1");
+    assert_eq!(l.caption(), "Label 1");
     w.toolbar().add(g, l);
     w.toolbar().add(g, toolbar::Label::new("Label 2"));
     let g = w.toolbar().create_group(GroupPosition::BottomRight);
@@ -580,8 +598,6 @@ fn check_window_toolbar_label() {
     a.add_window(w);
     a.run();
 }
-
-
 
 #[test]
 fn check_window_toolbar_label_tooltip() {
@@ -1859,7 +1875,9 @@ fn check_single_window_with_menu_and_command_bar() {
 }
 
 #[test]
-#[should_panic(expected = "When `single_window(...)` is being used to initialized an application, you can only use add_window(...) method once (to add the first and single window) !")]
+#[should_panic(
+    expected = "When `single_window(...)` is being used to initialized an application, you can only use add_window(...) method once (to add the first and single window) !"
+)]
 fn check_single_window_panic_on_multiple_add_window() {
     let script = "
         Paint.Enable(false)
@@ -1874,7 +1892,9 @@ fn check_single_window_panic_on_multiple_add_window() {
 }
 
 #[test]
-#[should_panic(expected = "A window used in a single window mode (via App::build().single_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !")]
+#[should_panic(
+    expected = "A window used in a single window mode (via App::build().single_window()) can not be sizeable as it will always have the same size as the desktop. Remove the Sizeable flag and try again !"
+)]
 fn check_single_window_panic_on_sizeable_flags() {
     let script = "
         Paint.Enable(false)
@@ -1888,7 +1908,9 @@ fn check_single_window_panic_on_sizeable_flags() {
 }
 
 #[test]
-#[should_panic(expected = "You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")]
+#[should_panic(
+    expected = "You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?"
+)]
 fn check_single_window_panic_no_window() {
     let script = "
         Paint.Enable(false)
@@ -1901,7 +1923,9 @@ fn check_single_window_panic_no_window() {
 }
 
 #[test]
-#[should_panic(expected = "When `single_window(...)` is being used to initialized an application, you can not use `.desktop(...)` command to provide a custom desktop !")]
+#[should_panic(
+    expected = "When `single_window(...)` is being used to initialized an application, you can not use `.desktop(...)` command to provide a custom desktop !"
+)]
 fn check_single_window_panic_no_custom_desktop() {
     #[Desktop(overwrite = OnPaint, internal = true)]
     struct MyDesktop {}
@@ -1957,19 +1981,19 @@ fn check_window_toolbar_single_choice_caption() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = Window::new("Title", Layout::new("d:c,w:40,h:8"), window::Flags::None);
-    
+
     // Create toolbar with single choice items
     let g = w.toolbar().create_group(GroupPosition::BottomLeft);
     // Add items to toolbar
     let h1 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &1"));
     let h2 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &2"));
-    
+
     // Verify initial state
     assert_eq!(w.toolbar().get(h1).unwrap().caption(), "Option 1");
     assert_eq!(w.toolbar().get(h2).unwrap().caption(), "Option 2");
     assert!(!w.toolbar().get(h1).unwrap().is_selected());
     assert!(!w.toolbar().get(h2).unwrap().is_selected());
-    
+
     a.add_window(w);
     a.run();
 }
@@ -2008,8 +2032,8 @@ fn check_resize_mode_keys() {
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Title,d:c,w:40,h:8,flags: Sizeable");
     w.set_tag("XYZ");
-    assert_eq!(w.tag(),Some("XYZ"));
-    assert_eq!(w.title(),"Title");
+    assert_eq!(w.tag(), Some("XYZ"));
+    assert_eq!(w.title(), "Title");
     a.add_window(w);
     a.run();
 }

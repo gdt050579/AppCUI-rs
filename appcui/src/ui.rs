@@ -143,6 +143,7 @@ pub use combobox::ComboBox;
 pub use dropdownlist::DropDownList;
 pub use command_bar::CommandBar;
 pub use layout::Layout;
+pub use layout::LayoutBuilder;
 pub use numericselector::NumericSelector;
 pub use vsplitter::VSplitter;
 pub use hsplitter::HSplitter;
