@@ -5,7 +5,7 @@
 
 mod alignament;
 mod anchors;
-mod coordonate16;
+mod coordinate16;
 mod coordonate;
 mod dimension16;
 mod dimension;
@@ -52,7 +52,7 @@ pub use dock::Dock;
 pub use pivot::Pivot;
 pub use alignament::Alignament;
 pub (in crate) use dimension16::Dimension16;
-pub (in crate) use coordonate16::Coordonate16;
+pub (in crate) use coordinate16::Coordinate16;
 pub (in crate) use control_layout::ControlLayout;
 
 

@@ -2,7 +2,7 @@ use crate::ui::Dock;
 
 use super::Alignament;
 use super::Pivot;
-use super::Coordonate16;
+use super::Coordinate16;
 use super::Dimension16;
 use super::Layout;
 use super::LayoutParameters;
@@ -20,7 +20,7 @@ impl LayoutBuilder {
 
     pub fn x<T>(mut self, x: T) -> Self
     where
-        Coordonate16: From<T>,
+        Coordinate16: From<T>,
     {
         self.params.x = Some(x.into());
         self
@@ -28,7 +28,7 @@ impl LayoutBuilder {
 
     pub fn y<T>(mut self, y: T) -> Self
     where
-        Coordonate16: From<T>,
+        Coordinate16: From<T>,
     {
         self.params.y = Some(y.into());
         self
@@ -67,7 +67,7 @@ impl LayoutBuilder {
 
     pub fn left_anchor<T>(mut self, left_anchor: T) -> Self
     where
-        Coordonate16: From<T>,
+        Coordinate16: From<T>,
     {
         self.params.a_left = Some(left_anchor.into());
         self
@@ -75,7 +75,7 @@ impl LayoutBuilder {
 
     pub fn right_anchor<T>(mut self, right_anchor: T) -> Self
     where
-        Coordonate16: From<T>,
+        Coordinate16: From<T>,
     {
         self.params.a_right = Some(right_anchor.into());
         self
@@ -83,7 +83,7 @@ impl LayoutBuilder {
 
     pub fn top_anchor<T>(mut self, top_anchor: T) -> Self
     where
-        Coordonate16: From<T>,
+        Coordinate16: From<T>,
     {
         self.params.a_top = Some(top_anchor.into());
         self
@@ -91,7 +91,7 @@ impl LayoutBuilder {
 
     pub fn bottom_anchor<T>(mut self, bottom_anchor: T) -> Self
     where
-        Coordonate16: From<T>,
+        Coordinate16: From<T>,
     {
         self.params.a_bottom = Some(bottom_anchor.into());
         self

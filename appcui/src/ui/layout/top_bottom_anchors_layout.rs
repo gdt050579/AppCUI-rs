@@ -1,15 +1,15 @@
 use super::should_not_use;
 use super::Pivot;
 use super::ControlLayout;
-use super::Coordonate16;
+use super::Coordinate16;
 use super::Dimension16;
 use super::LayoutParameters;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopBottomAnchorsLayout {
-    pub top: Coordonate16,
-    pub bottom: Coordonate16,
-    pub x: Coordonate16,
+    pub top: Coordinate16,
+    pub bottom: Coordinate16,
+    pub x: Coordinate16,
     pub width: Dimension16,
     pub pivot: Pivot,
 }
@@ -29,7 +29,7 @@ impl TopBottomAnchorsLayout {
         TopBottomAnchorsLayout {
             top: params.a_top.unwrap(),
             bottom: params.a_bottom.unwrap(),
-            x: params.x.unwrap_or(Coordonate16::Absolute(0)),
+            x: params.x.unwrap_or(Coordinate16::Absolute(0)),
             width: params.width.unwrap_or(Dimension16::Absolute(1)),
             pivot: params.pivot.unwrap_or(Pivot::Center),
         }

@@ -1,7 +1,7 @@
 use super::should_not_use;
 use super::Alignament;
 use super::ControlLayout;
-use super::Coordonate16;
+use super::Coordinate16;
 use super::Dimension16;
 use super::Dock;
 use super::LayoutParameters;
@@ -9,8 +9,8 @@ use super::Pivot;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct PointAndSizeLayout {
-    pub x: Coordonate16,
-    pub y: Coordonate16,
+    pub x: Coordinate16,
+    pub y: Coordinate16,
     pub width: Dimension16,
     pub height: Dimension16,
     pub align: Alignament,
@@ -49,8 +49,8 @@ impl PointAndSizeLayout {
                     "When ('dock' or 'd') parameter is used with the value 'Left', the 'height' parameter can not be used !"
                 );
                 PointAndSizeLayout {
-                    x: Coordonate16::Absolute(0),
-                    y: Coordonate16::Absolute(0),
+                    x: Coordinate16::Absolute(0),
+                    y: Coordinate16::Absolute(0),
                     width: params.width.unwrap_or(Dimension16::Percentage(10000)),
                     height: Dimension16::Percentage(10000),
                     align: Alignament::TopLeft,
@@ -63,8 +63,8 @@ impl PointAndSizeLayout {
                     "When ('dock' or 'd') parameter is used with the value 'Right', the 'height' parameter can not be used !"
                 );
                 PointAndSizeLayout {
-                    x: Coordonate16::Percentage(10000),
-                    y: Coordonate16::Absolute(0),
+                    x: Coordinate16::Percentage(10000),
+                    y: Coordinate16::Absolute(0),
                     width: params.width.unwrap_or(Dimension16::Percentage(10000)),
                     height: Dimension16::Percentage(10000),
                     align: Alignament::TopRight,
@@ -83,8 +83,8 @@ impl PointAndSizeLayout {
                     "When ('dock' or 'd') parameter is used with the value 'Fill', the 'width' parameter can not be used !"
                 );
                 PointAndSizeLayout {
-                    x: Coordonate16::Absolute(0),
-                    y: Coordonate16::Absolute(0),
+                    x: Coordinate16::Absolute(0),
+                    y: Coordinate16::Absolute(0),
                     width: Dimension16::Percentage(10000),
                     height: Dimension16::Percentage(10000),
                     align: Alignament::TopLeft,
@@ -122,8 +122,8 @@ impl PointAndSizeLayout {
             "When ('align' or 'a') parameter is used,('pivot' or 'p') parameters can not be used !"
         );
         PointAndSizeLayout {
-            x: Coordonate16::Absolute(0),
-            y: Coordonate16::Absolute(0),
+            x: Coordinate16::Absolute(0),
+            y: Coordinate16::Absolute(0),
             width: params.width.unwrap_or(Dimension16::Percentage(10000)),
             height: params.height.unwrap_or(Dimension16::Percentage(10000)),
             align: params.align.unwrap(),

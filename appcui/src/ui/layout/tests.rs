@@ -5,7 +5,7 @@ use crate::prelude::*;
 use super::Alignament;
 use super::Anchors;
 use super::ControlLayout;
-use super::Coordonate16;
+use super::Coordinate16;
 use super::Dimension;
 use super::Dimension16;
 use super::Dock;
@@ -19,8 +19,8 @@ macro_rules! validate_abs {
         assert_eq!(
             LayoutMode::new($text),
             LayoutMode::PointAndSize(PointAndSizeLayout {
-                x: Coordonate16::Absolute($x),
-                y: Coordonate16::Absolute($y),
+                x: Coordinate16::Absolute($x),
+                y: Coordinate16::Absolute($y),
                 align: Alignament::$a,
                 anchor: Alignament::$anc,
                 width: Dimension16::Absolute($w),
@@ -57,8 +57,8 @@ fn layout_mode_xywh() {
     assert_eq!(
         l2,
         LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: Coordonate16::Absolute(-4),
-            y: Coordonate16::Percentage(1000),
+            x: Coordinate16::Absolute(-4),
+            y: Coordinate16::Percentage(1000),
             align: Alignament::TopLeft,
             anchor: Alignament::TopLeft,
             width: Dimension16::Percentage(1000),
@@ -69,8 +69,8 @@ fn layout_mode_xywh() {
     assert_eq!(
         l3,
         LayoutMode::PointAndSize(PointAndSizeLayout {
-            x: Coordonate16::Absolute(0),
-            y: Coordonate16::Absolute(0),
+            x: Coordinate16::Absolute(0),
+            y: Coordinate16::Absolute(0),
             align: Alignament::Center,
             anchor: Alignament::TopLeft,
             width: Dimension16::Percentage(10000),
@@ -616,14 +616,14 @@ fn check_layout_builder() {
         .right_anchor(0.25)
         .top_anchor(5)
         .bottom_anchor(7);
-    assert_eq!(lb.params.x, Some(Coordonate16::Absolute(100)));
-    assert_eq!(lb.params.y, Some(Coordonate16::Percentage(12500)));
+    assert_eq!(lb.params.x, Some(Coordinate16::Absolute(100)));
+    assert_eq!(lb.params.y, Some(Coordinate16::Percentage(12500)));
     assert_eq!(lb.params.width, Some(Dimension16::Absolute(100)));
     assert_eq!(lb.params.height, Some(Dimension16::Percentage(10000)));
     assert_eq!(lb.params.align, Some(Alignament::Center));
     assert_eq!(lb.params.dock, Some(Dock::Top));
-    assert_eq!(lb.params.a_left, Some(Coordonate16::Percentage(5000)));
-    assert_eq!(lb.params.a_right, Some(Coordonate16::Percentage(2500)));
-    assert_eq!(lb.params.a_top, Some(Coordonate16::Absolute(5)));
-    assert_eq!(lb.params.a_bottom, Some(Coordonate16::Absolute(7)));
+    assert_eq!(lb.params.a_left, Some(Coordinate16::Percentage(5000)));
+    assert_eq!(lb.params.a_right, Some(Coordinate16::Percentage(2500)));
+    assert_eq!(lb.params.a_top, Some(Coordinate16::Absolute(5)));
+    assert_eq!(lb.params.a_bottom, Some(Coordinate16::Absolute(7)));
 }

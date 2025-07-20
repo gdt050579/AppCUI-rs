@@ -1,14 +1,14 @@
 use super::should_not_use;
 use super::ControlLayout;
-use super::Coordonate16;
+use super::Coordinate16;
 use super::LayoutParameters;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct AllAnchorsLayout {
-    pub left: Coordonate16,
-    pub top: Coordonate16,
-    pub right: Coordonate16,
-    pub bottom: Coordonate16,
+    pub left: Coordinate16,
+    pub top: Coordinate16,
+    pub right: Coordinate16,
+    pub bottom: Coordinate16,
 }
 
 impl AllAnchorsLayout {
