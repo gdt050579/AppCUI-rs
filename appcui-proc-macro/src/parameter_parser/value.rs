@@ -1,4 +1,5 @@
 use super::alignament::Alignament;
+use super::dock::Dock;
 use super::coordonate::Coordonate;
 use super::dimension::Dimension;
 use super::color::Color;
@@ -14,6 +15,7 @@ pub(super) enum ValueType<'a> {
     Percentage(f32),
     Size(Size),
     Alignament(Alignament),
+    Dock(Dock),
     Color(Color),
     List(Vec<Value<'a>>),
     Dict(NamedParamsMap<'a>),
@@ -135,6 +137,19 @@ impl<'a> Value<'a> {
         }
         None
     }
+    pub(crate) fn get_dock(&mut self) -> Option<Dock> {
+        if !self.is_value() {
+            return None;
+        }
+        if let ValueType::Dock(value) = &self.data_type {
+            return Some(*value);
+        }
+        if let Some(value) = Dock::from_hash(utils::compute_hash(self.raw_data)) {
+            self.data_type = ValueType::Dock(value);
+            return Some(value);
+        }
+        None
+    }    
     pub(crate) fn get_color(&mut self) -> Option<Color> {
         if !self.is_value() {
             return None;
@@ -299,6 +314,21 @@ impl<'a> Value<'a> {
             self.end,
         ))
     }
+    fn validate_dock(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if self.get_dock().is_some() {
+            return Ok(());
+        }
+        Err(Error::new(
+            param_list,
+            format!(
+                "Expecting an dock constant (left,top,right,bottom or fill) for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ))
+    }    
     fn validate_color(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_color().is_some() {
             return Ok(());
@@ -426,6 +456,7 @@ impl<'a> Value<'a> {
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
             super::ParamType::Flags => self.validate_flags(display_param_name, param_list)?,
             super::ParamType::Alignament => self.validate_alignament(display_param_name, param_list)?,
+            super::ParamType::Dock => self.validate_dock(display_param_name, param_list)?,
             super::ParamType::Color => self.validate_color(display_param_name, param_list)?,
             super::ParamType::Layout => self.validate_layout(display_param_name, param_list)?,
             super::ParamType::Size => self.validate_size(display_param_name, param_list)?,

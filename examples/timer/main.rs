@@ -13,7 +13,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("Timer, d:c,w:36,h:13"),
+            base: window!("Timer, a:c,w:36,h:13"),
             ..Default::default()
         };
         w.c = w.add(canvas!("x:1,y:1,w:32,h:7,size:32x7,back:{' ',white,black},enable:false"));

@@ -178,19 +178,4 @@ impl Parameter {
         }
         return HASH_TO_PARAMETER[entry_index];
     }
-    pub fn get_name(&self) -> &'static str {
-        match self {
-            Parameter::X => "X",
-            Parameter::Y => "Y",
-            Parameter::Left => "Left",
-            Parameter::Right => "Right",
-            Parameter::Top => "Top",
-            Parameter::Bottom => "Bottom",
-            Parameter::Width => "Width",
-            Parameter::Height => "Height",
-            Parameter::Align => "Align",
-            Parameter::Dock => "Dock",
-            Parameter::Pivot => "Pivot",
-        }
-    }
 }

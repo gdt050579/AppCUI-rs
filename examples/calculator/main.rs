@@ -36,7 +36,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("Calculator, d:c, w:47, h:17"),
+            base: window!("Calculator, a:c, w:47, h:17"),
             b_0: Handle::None,
             b_1: Handle::None,
             b_2: Handle::None,

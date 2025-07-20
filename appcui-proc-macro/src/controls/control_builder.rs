@@ -34,8 +34,8 @@ static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
     NamedParameter::new("align", "align", ParamType::Alignament),
     NamedParameter::new("a", "align", ParamType::Alignament),
     NamedParameter::new("alignament", "align", ParamType::Alignament),
-    NamedParameter::new("dock", "dock", ParamType::Alignament),
-    NamedParameter::new("d", "dock", ParamType::Alignament),
+    NamedParameter::new("dock", "dock", ParamType::Dock),
+    NamedParameter::new("d", "dock", ParamType::Dock),
     NamedParameter::new("pivot", "pivot", ParamType::Alignament),
     NamedParameter::new("p", "pivot", ParamType::Alignament),
 ];
