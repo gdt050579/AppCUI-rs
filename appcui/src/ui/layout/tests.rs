@@ -1,12 +1,10 @@
 use crate::ui::layout::absolute_layout::AbsoluteLayout;
-use crate::ui::layout::Coordonate;
+use crate::ui::layout::Coordinate;
 use crate::prelude::*;
 
 use super::Alignament;
-use super::Anchors;
 use super::ControlLayout;
 use super::Coordinate16;
-use super::Dimension;
 use super::Dimension16;
 use super::Dock;
 use super::LayoutBuilder;
@@ -594,13 +592,13 @@ fn check_default_layout_modes() {
 
 #[test]
 fn check_coordonate_update_with_absolute_value() {
-    let mut c = Coordonate::Absolute(0);
+    let mut c = Coordinate::Absolute(0);
     c.update_with_absolute_value(10, 20);
-    assert_eq!(c, Coordonate::Absolute(10));
+    assert_eq!(c, Coordinate::Absolute(10));
 
-    let mut c = Coordonate::Percentage(0.0f32);
+    let mut c = Coordinate::Percentage(0.0f32);
     c.update_with_absolute_value(10, 20);
-    assert_eq!(c, Coordonate::Percentage(0.5f32));
+    assert_eq!(c, Coordinate::Percentage(0.5f32));
 }
 
 #[test]

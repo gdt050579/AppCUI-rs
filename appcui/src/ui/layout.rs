@@ -6,7 +6,7 @@
 mod alignament;
 mod anchors;
 mod coordinate16;
-mod coordonate;
+mod coordinate;
 mod dimension16;
 mod dimension;
 mod layout_parameters;
@@ -46,7 +46,7 @@ use all_anchors_layout::AllAnchorsLayout;
 use macros::should_not_use;
 pub use layout::Layout;
 pub use layout_builder::LayoutBuilder;
-pub use coordonate::Coordonate;
+pub use coordinate::Coordinate;
 pub use dimension::Dimension;
 pub use dock::Dock;
 pub use pivot::Pivot;
