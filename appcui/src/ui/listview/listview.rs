@@ -88,7 +88,8 @@ where
     ///    grade: u32
     /// }
     ///
-    /// let lv: ListView::<Student> = ListView::new(Layout::new("a:c,w:100%,h:100%"), listview::Flags::ScrollBars);
+    /// let lv: ListView::<Student> = ListView::new(LayoutBuilder::new().dock(Dock::Fill).build(),
+    ///                                             listview::Flags::ScrollBars);
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(16, layout, flags)
@@ -107,7 +108,10 @@ where
     ///   grade: u32
     /// }
     ///
-    /// let mut lv: ListView::<Student> = ListView::with_capacity(100, Layout::new("a:c,w:100%,h:100%"), listview::Flags::ScrollBars);
+    /// let mut lv: ListView::<Student> = ListView::with_capacity(
+    ///              100,
+    ///              LayoutBuilder::new().dock(Dock::Fill).build(),
+    ///              listview::Flags::ScrollBars);
     /// lv.add(Student { name: "John", grade: 10 });
     /// lv.add(Student { name: "Alice", grade: 9 });
     /// lv.add(Student { name: "Bob", grade: 8 });
@@ -172,7 +176,7 @@ where
     ///     grade: u32
     /// }
     ///
-    /// let mut lv = listview!("Student, d:c,w:100%,h:100%,flags:ShowGroups");
+    /// let mut lv = listview!("Student, d:f,flags:ShowGroups");
     /// let group = lv.add_group("Group 1");
     /// let students = vec![Student { name: "John", grade: 10 },
     ///                     Student { name: "Alice", grade: 9 }];
@@ -210,7 +214,7 @@ where
     ///    }
     /// }
     ///
-    /// let mut lv = listview!("Student, d:c,w:100%,h:100%");
+    /// let mut lv = listview!("Student, dock:fill");
     /// lv.add_column(Column::new("Name", 10, TextAlignament::Left));
     /// lv.add_column(Column::new("Grade", 6, TextAlignament::Right));
     /// ```
@@ -232,7 +236,7 @@ where
     ///    grade: u32
     /// }
     ///
-    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
+    /// let mut lv = listview!("type: Student, dock:fill");
     /// lv.add(Student { name: "John", grade: 10 });
     /// lv.add(Student { name: "Alice", grade: 9 });
     /// ```
@@ -255,7 +259,7 @@ where
     ///    grade: u32
     /// }
     ///
-    /// let mut lv = listview!("type: Student, d:c, flags: ShowGroups+LargeIcons");
+    /// let mut lv = listview!("type: Student, dock:fill, flags: ShowGroups+LargeIcons");
     /// lv.add_item(listview::Item::new(
     ///                       Student { name: "John", grade: 10 },
     ///                       false,
@@ -300,7 +304,7 @@ where
     ///    grade: u32
     /// }
     ///
-    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
+    /// let mut lv = listview!("type: Student, dock:fill");
     /// let items = vec![
     ///         Student { name: "John", grade: 10 },
     ///         Student { name: "Alice", grade: 9 },
@@ -327,7 +331,7 @@ where
     ///    grade: u32
     /// }
     ///
-    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
+    /// let mut lv = listview!("type: Student, dock:fill");
     /// let items = vec![
     ///         Student { name: "John", grade: 10 },
     ///         Student { name: "Alice", grade: 9 },
@@ -368,7 +372,7 @@ where
     ///    grade: u32
     /// }
     ///
-    /// let mut lv = listview!("type: Student, d:c,w:100%,h:100%");
+    /// let mut lv = listview!("type: Student, dock:fill");
     /// lv.add_batch(|lv| {
     ///    lv.add(Student { name: "John", grade: 10 });
     ///    lv.add(Student { name: "Alice", grade: 9 });
@@ -609,7 +613,6 @@ where
     pub fn column_mut(&mut self, index: usize) -> Option<&mut Column> {
         self.header.columns_mut().get_mut(index)
     }
-
 
     fn goto_element(&mut self, element: Element, emit_event: bool) -> bool {
         for (index, item) in self.filter.iter().enumerate() {

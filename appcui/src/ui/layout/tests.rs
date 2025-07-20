@@ -262,19 +262,19 @@ fn layout_mode_anchor_lr_invalid_alignament() {
 
 #[test]
 fn layout_mode_anchor_tb() {
-    validate_pos!("t:5,b:7,x:0,w:10,a:l", 30, 50, 0, 5, 10, 38);
-    validate_pos!("t:5,b:7,x:10,w:10,a:c", 30, 50, 5, 5, 10, 38);
-    validate_pos!("t:5,b:7,x:20,w:10,a:r", 30, 50, 10, 5, 10, 38);
+    validate_pos!("t:5,b:7,x:0,w:10,p:l", 30, 50, 0, 5, 10, 38);
+    validate_pos!("t:5,b:7,x:10,w:10,p:c", 30, 50, 5, 5, 10, 38);
+    validate_pos!("t:5,b:7,x:20,w:10,p:r", 30, 50, 10, 5, 10, 38);
     // no alignament - default is center
     validate_pos!("t:5,b:7,x:0,w:10", 30, 50, -5, 5, 10, 38);
 
-    validate_pos!("t:10%,a:l,x:50%,b:20%,w:4", 30, 50, 15, 5, 4, 35);
-    validate_pos!("t:10%,a:c,x:50%,b:20%,w:4", 30, 50, 13, 5, 4, 35);
-    validate_pos!("t:10%,a:r,x:50%,b:20%,w:4", 30, 50, 11, 5, 4, 35);
+    validate_pos!("t:10%,p:l,x:50%,b:20%,w:4", 30, 50, 15, 5, 4, 35);
+    validate_pos!("t:10%,p:c,x:50%,b:20%,w:4", 30, 50, 13, 5, 4, 35);
+    validate_pos!("t:10%,p:r,x:50%,b:20%,w:4", 30, 50, 11, 5, 4, 35);
 
-    validate_pos!("t:10%,a:l,x:50%,b:20%,w:50%", 30, 50, 15, 5, 15, 35);
-    validate_pos!("t:10%,a:c,x:50%,b:20%,w:50%", 30, 50, 8, 5, 15, 35);
-    validate_pos!("t:10%,a:r,x:50%,b:20%,w:50%", 30, 50, 0, 5, 15, 35);
+    validate_pos!("t:10%,p:l,x:50%,b:20%,w:50%", 30, 50, 15, 5, 15, 35);
+    validate_pos!("t:10%,p:c,x:50%,b:20%,w:50%", 30, 50, 8, 5, 15, 35);
+    validate_pos!("t:10%,p:r,x:50%,b:20%,w:50%", 30, 50, 0, 5, 15, 35);
 }
 
 #[test]
