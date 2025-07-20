@@ -1,6 +1,6 @@
-use std::str::FromStr;
 use super::InputCallback;
 use crate::prelude::*;
+use std::str::FromStr;
 
 #[ModalWindow(internal: true, response: T, events: ButtonEvents+TextFieldEvents)]
 pub(super) struct StringImputDialog<T>
@@ -18,9 +18,8 @@ where
 {
     pub(super) fn new(title: &str, text: &str, value: Option<T>, validation: Option<InputCallback<T>>) -> Self {
         let chars_count = text.chars().count();
-        let height = ((chars_count / 36) + 1).clamp(1, 6);
-        let format_str = format!("a:c,w:40,h:{}", height + 8);
-        let layout = layout!(format_str.as_str());
+        let height = ((chars_count / 36) + 1).clamp(1, 6) as u32;
+        let layout = LayoutBuilder::new().alignament(Alignament::Center).width(40).height(height + 8).build();
         let mut me = Self {
             base: ModalWindow::new(title, layout, window::Flags::NoCloseButton),
             txt: Handle::None,

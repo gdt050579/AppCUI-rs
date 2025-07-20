@@ -63,12 +63,12 @@
 //!     // Create a window with centered layout and specific size
 //!     let mut win = Window::new(
 //!         "First Window", 
-//!         layout!("dock:center,width:30,height:9"), 
+//!         LayoutBuilder::new().alignament(Alignament::Center).width(30).height(9).build(), 
 //!         window::Flags::Sizeable
 //!     );
 //!     
 //!     // Add a label to the window
-//!     win.add(Label::new("Hello World !", layout!("dock:center,width:13,height:1")));
+//!     win.add(Label::new("Hello World !", layout!("a:center,width:13,height:1")));
 //!     
 //!     // Add the window to the application and run
 //!     app.add_window(win);

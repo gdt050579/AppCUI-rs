@@ -31,7 +31,7 @@ impl ThreeStateBox {
     /// # Example
     /// 
     /// ```rust,no_run
-    /// use appcui::ui::*;
+    /// use appcui::prelude::*;
     /// 
     /// let threestatebox = ThreeStateBox::with_type("This is a &test", 
     ///                                              layout!("a:c,w:10,h:1"), 

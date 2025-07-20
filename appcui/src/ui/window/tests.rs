@@ -546,9 +546,9 @@ fn check_window_on_activate_deactivate() {
         info: Handle<Label>,
     }
     impl MyWin {
-        fn new(layout: &str) -> Self {
+        fn new(layout: Layout) -> Self {
             let mut me = Self {
-                base: Window::new("Win", layout!(layout), window::Flags::None),
+                base: Window::new("Win", layout, window::Flags::None),
                 info: Handle::None,
             };
             me.info = me.add(Label::new("<no-state>", layout!("x:1,y:1,w:16")));
@@ -583,8 +583,8 @@ fn check_window_on_activate_deactivate() {
         CheckHash(0xBFA2B90246E3753C)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new("x:1,y:1,w:25,h:6"));
-    a.add_window(MyWin::new("x:30,y:1,w:25,h:6"));
+    a.add_window(MyWin::new(layout!("x:1,y:1,w:25,h:6")));
+    a.add_window(MyWin::new(layout!("x:30,y:1,w:25,h:6")));
     a.run();
 }
 
