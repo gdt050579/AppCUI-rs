@@ -8,16 +8,16 @@ fn check_label_position() {
         CheckHash(0xF7D704CAB062ED5C)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("TopLeft", Layout::new("a:tl,w:7,h:1")));
-    w.add(Label::new("Top", Layout::new("a:t,w:3,h:1")));
-    w.add(Label::new("TopRight", Layout::new("a:tr,w:8,h:1")));
-    w.add(Label::new("Right", Layout::new("a:r,w:5,h:1")));
-    w.add(Label::new("BottomRight", Layout::new("a:br,w:11,h:1")));
-    w.add(Label::new("Bottom", Layout::new("a:b,w:6,h:1")));
-    w.add(Label::new("BottomLeft", Layout::new("a:bl,w:10,h:1")));
-    w.add(Label::new("Left", Layout::new("a:l,w:4,h:1")));
-    w.add(Label::new("Center", Layout::new("a:c,w:6,h:1")));
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(Label::new("TopLeft", layout!("a:tl,w:7,h:1")));
+    w.add(Label::new("Top", layout!("a:t,w:3,h:1")));
+    w.add(Label::new("TopRight", layout!("a:tr,w:8,h:1")));
+    w.add(Label::new("Right", layout!("a:r,w:5,h:1")));
+    w.add(Label::new("BottomRight", layout!("a:br,w:11,h:1")));
+    w.add(Label::new("Bottom", layout!("a:b,w:6,h:1")));
+    w.add(Label::new("BottomLeft", layout!("a:bl,w:10,h:1")));
+    w.add(Label::new("Left", layout!("a:l,w:4,h:1")));
+    w.add(Label::new("Center", layout!("a:c,w:6,h:1")));
 
     a.add_window(w);
     a.run();
@@ -30,8 +30,8 @@ fn check_label_multiline() {
         CheckHash(0xD4FE75C904BD13F9)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("This is a multi-line label", Layout::new("a:tl,w:10,h:3")));
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(Label::new("This is a multi-line label", layout!("a:tl,w:10,h:3")));
     a.add_window(w);
     a.run();
 }
@@ -43,8 +43,8 @@ fn check_label_with_hotkey() {
         CheckHash(0xEC4CCF3D77022900)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("A &hot key label", Layout::new("a:tl,w:30")));
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(Label::new("A &hot key label", layout!("a:tl,w:30")));
     a.add_window(w);
     a.run();
 }
@@ -72,8 +72,8 @@ fn check_label_caption() {
         CheckHash(0xC4C7983EC13953E2)   
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    let l = Label::new("Some &Text", Layout::new("a:tl,w:10,h:3"));
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    let l = Label::new("Some &Text", layout!("a:tl,w:10,h:3"));
     assert_eq!(l.caption(), "Some Text");
     w.add(l);
     a.add_window(w);

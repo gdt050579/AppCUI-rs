@@ -11,7 +11,7 @@ use self::dimension::Dimension;
 
 use super::layout;
 
-static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
+pub(crate) static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
     // generic characteristics
     NamedParameter::new("visible", "visible", ParamType::Bool),
     NamedParameter::new("enabled", "enabled", ParamType::Bool),

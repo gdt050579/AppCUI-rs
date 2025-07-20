@@ -7,8 +7,8 @@ Renders a horizontal splitter that allows the user to resize the two panels it s
 To create a horizontal splitter use `HSplitter::new` method or the `hsplitter!` macro.
 
 ```rust
-let vs_1 = HSplitter::new(0.5,Layout::new("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
-let vs_2 = HSplitter::new(20,Layout::new("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
+let vs_1 = HSplitter::new(0.5,layout!("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
+let vs_2 = HSplitter::new(20,layout!("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
 ```
 
 or

@@ -5,9 +5,9 @@ pub struct ShowTabModal {}
 impl ShowTabModal {
     pub fn new(tab_type: tab::Type, tab_flags: tab::Flags, tab_width: u8) -> Self {
         let mut w = Self {
-            base: ModalWindow::new("Example", Layout::new("a:c,w:70,h:10"), window::Flags::None),
+            base: ModalWindow::new("Example", layout!("a:c,w:70,h:10"), window::Flags::None),
         };
-        let mut t = Tab::with_type(Layout::new("l:1,t:1,r:1,b:3"), tab_flags, tab_type);
+        let mut t = Tab::with_type(layout!("l:1,t:1,r:1,b:3"), tab_flags, tab_type);
         t.set_tab_width(tab_width);
         t.add_tab("&First");
         t.add_tab("&Second");

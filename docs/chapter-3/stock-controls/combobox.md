@@ -7,8 +7,8 @@ A combobox is a drop down list control that allows you to select a variant from 
 It can be created using `ComboBox::new(...)` or the `combobox!` macro. 
 
 ```rs
-let c1 = ComboBox::new(Layout::new("..."),combobox::Flags::None);
-let c2 = ComboBox::new(Layout::new("..."),combobox::Flags::ShowDescription);
+let c1 = ComboBox::new(layout!("..."),combobox::Flags::None);
+let c2 = ComboBox::new(layout!("..."),combobox::Flags::ShowDescription);
 let c3 = combobox!("x:1,y:1,w:20,items=['Red','Greem','Blue']");
 let c3 = combobox!("x:1,y:1,w:20,items=['Red','Greem','Blue'],index:2");
 ```
@@ -107,7 +107,7 @@ impl MyWin {
             base: window!("x:1,y:1,w:34,h:6,caption:Win"),
         };
         w.add(label!("'Select animal',x:1,y:1,w:30"));
-        let mut c = ComboBox::new(Layout::new("x:1,y:2,w:30"), combobox::Flags::ShowDescription);
+        let mut c = ComboBox::new(layout!("x:1,y:2,w:30"), combobox::Flags::ShowDescription);
         // data from https://en.wikipedia.org/wiki/Fastest_animals
         c.add_item(combobox::Item::new("Cheetah","(120 km/h)"));
         c.add_item(combobox::Item::new("Swordfish","(97 km/h)"));

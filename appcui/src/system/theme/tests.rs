@@ -11,7 +11,7 @@ fn check_theme_update() {
     impl TestControl {
         fn new() -> Self {
             let mut obj = Self {
-                base: ControlBase::new(Layout::new("l:1,r:1,t:1,b:1"), true),
+                base: ControlBase::new(layout!("l:1,r:1,t:1,b:1"), true),
                 attr: CharAttribute::default(),
             };
             obj.attr = obj.theme().window.normal;

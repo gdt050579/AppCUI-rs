@@ -28,7 +28,7 @@ fn check_move_left_right() {
         CheckCursor(24,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello world',x:1,y:1,w:38,h:1"));
     a.add_window(w);
     a.run();
@@ -53,7 +53,7 @@ fn check_select_all() {
         CheckCursor(24,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello world',x:1,y:1,w:38,h:1"));
     a.add_window(w);
     a.run();
@@ -92,7 +92,7 @@ fn check_select_left_right() {
         CheckCursor(13,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'123❤️╬▶-〓GDT',x:1,y:1,w:38,h:1"));
     a.add_window(w);
     a.run();
@@ -170,7 +170,7 @@ fn check_move_up_down() {
         CheckCursor(22,5)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:3"));
     a.add_window(w);
     a.run();
@@ -223,7 +223,7 @@ fn check_scroll_left_right() {
         CheckCursor(22,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -248,7 +248,7 @@ fn check_home_end() {
         CheckCursor(22,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -313,7 +313,7 @@ fn check_delete() {
         CheckCursor(15,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -337,7 +337,7 @@ fn check_delete_from_end() {
         CheckCursor(21,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -363,7 +363,7 @@ fn check_delete_after_selection() {
         CheckCursor(15,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -412,7 +412,7 @@ fn check_backspace() {
         CheckCursor(22,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -485,7 +485,7 @@ fn check_backspace_from_end() {
         CheckCursor(13,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -511,7 +511,7 @@ fn check_backspace_after_selection() {
         CheckCursor(13,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -546,7 +546,7 @@ fn check_write_text() {
         CheckCursor(18,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("x:1,y:1,w:8,h:1"));
     a.add_window(w);
     a.run();
@@ -581,7 +581,7 @@ fn check_write_unicode_text() {
         CheckCursor(18,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("x:1,y:1,w:8,h:1"));
     a.add_window(w);
     a.run();
@@ -623,7 +623,7 @@ fn check_write_multiline_text() {
         CheckCursor(13,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("x:1,y:1,w:8,h:3"));
     a.add_window(w);
     a.run();
@@ -656,7 +656,7 @@ fn check_insert_text() {
         CheckCursor(22,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -697,7 +697,7 @@ fn check_insert_text_over_selection() {
         CheckCursor(22,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
@@ -778,7 +778,7 @@ fn check_move_to_next_word() {
         CheckCursor(45,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
     a.add_window(w);
     a.run();
@@ -859,7 +859,7 @@ fn check_move_to_previous_word() {
         CheckCursor(13,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'  Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
     a.add_window(w);
     a.run();
@@ -895,7 +895,7 @@ fn check_readonly_flag() {
         CheckCursor(24,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello   world',x:1,y:1,w:20,h:1,flags: ReadOnly"));
     a.add_window(w);
     a.run();
@@ -918,7 +918,7 @@ fn check_autoselect_on_focus() {
         CheckHash(0xBD293603FEBD93F4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Text-1',x:1,y:1,w:30,h:1,flags: ReadOnly"));
     w.add(textfield!("'Text-2',x:1,y:3,w:30,h:1"));
     w.add(textfield!("'Text-3',x:1,y:5,w:30,h:1,flags: DisableAutoSelectOnFocus"));
@@ -936,7 +936,7 @@ fn check_validation_event() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("a:c,w:47,h:7"), window::Flags::None),
+                base: Window::new("Win", layout!("a:c,w:47,h:7"), window::Flags::None),
                 info: Handle::None,
                 txt: Handle::None,
             };
@@ -999,7 +999,7 @@ fn check_mouse_click() {
         CheckCursor(16,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
     a.add_window(w);
     a.run();
@@ -1030,7 +1030,7 @@ fn check_mouse_click_multi_line() {
         CheckCursor(17,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello w❤️rl❤️d',x:1,y:1,w:10,h:3"));
     a.add_window(w);
     a.run();
@@ -1061,7 +1061,7 @@ fn check_mouse_click_outside_bounds() {
         CheckCursor(25,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
     a.add_window(w);
     a.run();
@@ -1085,7 +1085,7 @@ fn check_mouse_selection() {
         CheckCursor(13,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:10,h:3"));
     a.add_window(w);
     a.run();
@@ -1105,7 +1105,7 @@ fn check_double_click_selection() {
         CheckCursor(21,5)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:14,h:3"));
     a.add_window(w);
     a.run();
@@ -1130,7 +1130,7 @@ fn check_select_word_for_upper_and_lowercase() {
         CheckCursor(24,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello wOrLd, I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();
@@ -1159,7 +1159,7 @@ fn check_mouse_hover() {
         CheckHash(0xAC1C531E6045ADEE)
     ";
     let mut a = App::debug(60, 13, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:11"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
     w.add(textfield!("'Hello world !',x:1,y:1,w:36,h:1"));
     w.add(textfield!("'Read onlye text',x:1,y:3,w:36,h:1, flags: Readonly"));
     w.add(textfield!("Inactive,x:1,y:5,w:36,h:1,enable: false"));
@@ -1188,7 +1188,7 @@ fn check_paste() {
         CheckCursor(34,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();
@@ -1218,7 +1218,7 @@ fn check_copy_cut() {
         CheckClipboardText('Hello')
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(textfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();

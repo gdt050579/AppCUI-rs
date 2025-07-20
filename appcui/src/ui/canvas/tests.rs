@@ -54,7 +54,7 @@ fn check_keyboard() {
 ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
-    let mut c = Canvas::new(Size::new(20, 10), Layout::new("x:1,y:1,w:15,h:4"), canvas::Flags::None);
+    let mut c = Canvas::new(Size::new(20, 10), layout!("x:1,y:1,w:15,h:4"), canvas::Flags::None);
     let s = c.drawing_surface_mut();
     s.write_string(
         0,
@@ -138,7 +138,7 @@ fn check_keyboard_2() {
 ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
-    let mut c = Canvas::new(Size::new(20, 10), Layout::new("x:1,y:1,w:4,h:3"), canvas::Flags::None);
+    let mut c = Canvas::new(Size::new(20, 10), layout!("x:1,y:1,w:4,h:3"), canvas::Flags::None);
     let s = c.drawing_surface_mut();
     s.write_string(
         0,
@@ -191,7 +191,7 @@ fn check_background_char() {
 ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
-    let mut c = Canvas::new(Size::new(2, 2), Layout::new("x:1,y:1,w:15,h:4"), canvas::Flags::None);
+    let mut c = Canvas::new(Size::new(2, 2), layout!("x:1,y:1,w:15,h:4"), canvas::Flags::None);
     let s = c.drawing_surface_mut();
     s.clear(Character::new('X', Color::Yellow, Color::DarkRed, CharFlags::None));
     c.set_background(Character::new('.', Color::White, Color::Black, CharFlags::None));
@@ -295,7 +295,7 @@ fn check_mouse_on_scrollbars() {
 ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
-    let mut c = Canvas::new(Size::new(30, 10), Layout::new("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
+    let mut c = Canvas::new(Size::new(30, 10), layout!("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
     let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
     w.add(c);
@@ -370,7 +370,7 @@ fn check_mouse_on_scrollbars_resize() {
 ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
-    let mut c = Canvas::new(Size::new(30, 10), Layout::new("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
+    let mut c = Canvas::new(Size::new(30, 10), layout!("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
     c.set_components_toolbar_margins(2, 1);
     let s = c.drawing_surface_mut();
     s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
@@ -520,7 +520,7 @@ fn check_resize_surface() {
                 base: window!("'My Win',a:c,w:40,h:16"),
                 viewer: Handle::None,
             };
-            let mut c = Canvas::new(Size::new(6, 3), Layout::new("l:15,t:0,b:0,r:0"), canvas::Flags::ScrollBars);
+            let mut c = Canvas::new(Size::new(6, 3), layout!("l:15,t:0,b:0,r:0"), canvas::Flags::ScrollBars);
             let s = c.drawing_surface_mut();
             s.write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
             win.viewer = win.add(c);

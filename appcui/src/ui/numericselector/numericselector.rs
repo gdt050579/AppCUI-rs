@@ -48,7 +48,7 @@ where
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let ns = NumericSelector::<i32>::new(10, 0, 100, 1, Layout::new("x:1,y:1,w:20"), numericselector::Flags::None);
+    /// let ns = NumericSelector::<i32>::new(10, 0, 100, 1, layout!("x:1,y:1,w:20"), numericselector::Flags::None);
     /// 
     pub fn new(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags) -> Self {
         Self::with_format(value, min, max, step, layout, flags, Format::Decimal)
@@ -71,7 +71,7 @@ where
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let ns = NumericSelector::<i32>::with_format(10, 0, 100, 1, Layout::new("x:1,y:1,w:20"), numericselector::Flags::None, numericselector::Format::Size);
+    /// let ns = NumericSelector::<i32>::with_format(10, 0, 100, 1, layout!("x:1,y:1,w:20"), numericselector::Flags::None, numericselector::Format::Size);
     /// ```
     pub fn with_format(value: T, min: T, max: T, step: T, layout: Layout, flags: Flags, format: Format) -> Self {
         let v_min = if min < max { min } else { max };

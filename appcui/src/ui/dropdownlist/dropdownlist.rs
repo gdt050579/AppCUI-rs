@@ -58,7 +58,7 @@ where
     ///   fn symbol(&self) -> &str { "" }
     /// }
     /// 
-    /// let mut db = DropDownList::<MyObject>::new(Layout::new("x:1,y:1,w:30"), dropdownlist::Flags::ShowDescription);
+    /// let mut db = DropDownList::<MyObject>::new(layout!("x:1,y:1,w:30"), dropdownlist::Flags::ShowDescription);
     /// db.add(MyObject { name: "Item 1".to_string(), description: "Description 1".to_string() });
     /// db.add(MyObject { name: "Item 2".to_string(), description: "Description 2".to_string() });
     /// db.add(MyObject { name: "Item 3".to_string(), description: "Description 3".to_string() });
@@ -87,7 +87,7 @@ where
     ///   fn symbol(&self) -> &str { self.symbol }
     /// }
     /// 
-    /// let mut db = DropDownList::<MyObject>::with_symbol(1, Layout::new("x:1,y:1,w:30"), dropdownlist::Flags::None); 
+    /// let mut db = DropDownList::<MyObject>::with_symbol(1, layout!("x:1,y:1,w:30"), dropdownlist::Flags::None); 
     /// db.add(MyObject { name: "Sum".to_string(), symbol: "∑" });
     /// db.add(MyObject { name: "Product".to_string(), symbol: "∏" });
     /// db.add(MyObject { name: "Integral".to_string(), symbol: "∫" });
@@ -135,7 +135,7 @@ where
     ///    fn symbol(&self) -> &str { &self.symbol }
     /// }
     ///
-    /// let mut db = DropDownList::<MyObject>::new(Layout::new("x:1,y:1,w:20"), dropdownlist::Flags::None);
+    /// let mut db = DropDownList::<MyObject>::new(layout!("x:1,y:1,w:20"), dropdownlist::Flags::None);
     /// db.add(MyObject::new("Heart", "Symbol of love", "❤"));
     /// db.add(MyObject::new("Star", "Symbol of hope", "⭐"));
     /// db.add(MyObject::new("Sun", "Symbol of light", "☀"));

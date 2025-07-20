@@ -34,7 +34,7 @@ fn check_symbol_paint() {
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:56,h:7");
-    let mut db = DropDownList::<MathOp>::with_symbol(1, Layout::new("x:1,y:1,w:50"), dropdownlist::Flags::ShowDescription);
+    let mut db = DropDownList::<MathOp>::with_symbol(1, layout!("x:1,y:1,w:50"), dropdownlist::Flags::ShowDescription);
     db.add(MathOp::Sum);
     db.add(MathOp::Product);
     db.add(MathOp::Integral);
@@ -146,7 +146,7 @@ fn check_events() {
             let mut w = Self {
                 base: window!("Title,x:0,y:0,w:56,h:7"),
             };
-            let mut db = DropDownList::<MathOp>::with_symbol(1, Layout::new("x:1,y:1,w:50"), dropdownlist::Flags::ShowDescription);
+            let mut db = DropDownList::<MathOp>::with_symbol(1, layout!("x:1,y:1,w:50"), dropdownlist::Flags::ShowDescription);
             db.add(MathOp::Sum);
             db.add(MathOp::Product);
             db.add(MathOp::Integral);
@@ -260,7 +260,7 @@ fn check_selected_item_and_index_methods() {
                 info_handle: Handle::None,
             };
 
-            let mut ddl = DropDownList::<TestItem>::new(Layout::new("x:1,y:1,w:60"), dropdownlist::Flags::ShowDescription);
+            let mut ddl = DropDownList::<TestItem>::new(layout!("x:1,y:1,w:60"), dropdownlist::Flags::ShowDescription);
 
             // Add test items
             ddl.add(TestItem::new("Item One", "First test item"));
@@ -269,7 +269,7 @@ fn check_selected_item_and_index_methods() {
             ddl.add(TestItem::new("Item Four", "Fourth test item"));
 
             // Create a label to display information about selected item and index
-            let l = Label::new("", Layout::new("x:1,y:3,w:70,h:7"));
+            let l = Label::new("", layout!("x:1,y:3,w:70,h:7"));
 
             w.dropdownlist_handle = w.add(ddl);
             w.info_handle = w.add(l);
@@ -441,7 +441,7 @@ fn check_has_selection_and_count_with_mouse() {
                 info_handle: Handle::None,
             };
 
-            let mut ddl = DropDownList::<CountItem>::new(Layout::new("x:1,y:1,w:60"), dropdownlist::Flags::None);
+            let mut ddl = DropDownList::<CountItem>::new(layout!("x:1,y:1,w:60"), dropdownlist::Flags::None);
 
             // Add initial items
             ddl.add(CountItem::new(1, "Item One"));
@@ -449,7 +449,7 @@ fn check_has_selection_and_count_with_mouse() {
             ddl.add(CountItem::new(3, "Item Three"));
 
             // Create a label to display information about has_selection and count
-            let l = Label::new("", Layout::new("x:1,y:3,w:70,h:7"));
+            let l = Label::new("", layout!("x:1,y:3,w:70,h:7"));
 
             w.dropdownlist_handle = w.add(ddl);
             w.info_handle = w.add(l);
@@ -619,7 +619,7 @@ fn check_item_and_item_mut_methods() {
                 output_handle: Handle::None,
             };
             
-            let mut ddl = DropDownList::<ItemTest>::new(Layout::new("x:1,y:1,w:60"), dropdownlist::Flags::None);
+            let mut ddl = DropDownList::<ItemTest>::new(layout!("x:1,y:1,w:60"), dropdownlist::Flags::None);
             
             // Add initial items
             ddl.add(ItemTest::new(1, "Item One", 10.5));
@@ -627,7 +627,7 @@ fn check_item_and_item_mut_methods() {
             ddl.add(ItemTest::new(3, "Item Three", 30.2));
             
             // Create a label to display results
-            let l = Label::new("", Layout::new("x:1,y:3,w:76,h:10"));
+            let l = Label::new("", layout!("x:1,y:3,w:76,h:10"));
             
             w.dropdownlist_handle = w.add(ddl);
             w.output_handle = w.add(l);

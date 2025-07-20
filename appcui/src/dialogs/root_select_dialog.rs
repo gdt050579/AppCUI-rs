@@ -12,7 +12,7 @@ pub(super) struct RootSelectDialog {
 impl RootSelectDialog {
     pub(super) fn new(roots_list: Vec<Root>, icons: bool) -> Self {
         let mut w = Self {
-            base: ModalWindow::new("Devices", Layout::new("a:c,w:50,h:15"), window::Flags::None),
+            base: ModalWindow::new("Devices", layout!("a:c,w:50,h:15"), window::Flags::None),
             list: Handle::None,
             b_ok: Handle::None,
             b_cancel: Handle::None,
@@ -20,7 +20,7 @@ impl RootSelectDialog {
         w.b_ok = w.add(button!("&Ok,l:11,b:0,w:11"));
         w.b_cancel = w.add(button!("&Cancel,l:25,b:0,w:11"));
         let mut lv = ListView::<Root>::new(
-            Layout::new("a:c,w:100%,h:100%"),
+            layout!("a:c,w:100%,h:100%"),
             if icons { listview::Flags::LargeIcons } else { listview::Flags::None },
         );
         if icons {

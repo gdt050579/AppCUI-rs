@@ -34,7 +34,7 @@ impl ThreeStateBox {
     /// use appcui::ui::*;
     /// 
     /// let threestatebox = ThreeStateBox::with_type("This is a &test", 
-    ///                                              Layout::new("a:c,w:10,h:1"), 
+    ///                                              layout!("a:c,w:10,h:1"), 
     ///                                              threestatebox::State::Unchecked, 
     ///                                              threestatebox::Type::Ascii);
     /// ```

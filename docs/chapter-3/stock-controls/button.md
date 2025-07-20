@@ -6,7 +6,7 @@ Represent a clickable button control:
 
 To create a button use `Button::new` method (with 3 parameters: a caption, a layout and initialization flags).
 ```rs
-let b = Button::new("&Start", Layout::new("x:10,y:5,w:15"),button::Flags::None);
+let b = Button::new("&Start", layout!("x:10,y:5,w:15"),button::Flags::None);
 ```
 or the macro `button!`
 ```rs
@@ -78,13 +78,13 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("My Win", Layout::new("a:c,w:40,h:6"), window::Flags::None),
+            base: Window::new("My Win", layout!("a:c,w:40,h:6"), window::Flags::None),
             add: Handle::None,
             reset: Handle::None,
             counter: 0,
         };
-        win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), button::Type::Normal));
-        win.reset = win.add(Button::new("&Reset", Layout::new("x:75%,y:2,w:13,a:c",), button::Type::Normal));
+        win.add = win.add(Button::new("Add (0)", layout!("x:25%,y:2,w:13,a:c"), button::Type::Normal));
+        win.reset = win.add(Button::new("&Reset", layout!("x:75%,y:2,w:13,a:c",), button::Type::Normal));
         win
     }
     fn update_add_button_caption(&mut self) {

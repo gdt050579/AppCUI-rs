@@ -11,8 +11,8 @@ fn check_create(){
     let mut a = App::debug(60, 40, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:25,flags:Sizeable");
 
-    w.add(VLine::new( Layout::new("x:1,y:1,h:10"), Flags::None));
-    w.add(VLine::new( Layout::new("x:3,y:1,h:20"), Flags::DoubleLine));
+    w.add(VLine::new( layout!("x:1,y:1,h:10"), Flags::None));
+    w.add(VLine::new( layout!("x:3,y:1,h:20"), Flags::DoubleLine));
     a.add_window(w);
     a.run();
 }

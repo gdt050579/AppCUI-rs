@@ -783,13 +783,13 @@ pub struct Win {
 impl Win {
     pub fn new() -> Self {
         let mut w = Self {
-            base: Window::new("Image Viewer", Layout::new("a:c,w:50%,h:50%"), window::Flags::Sizeable),
+            base: Window::new("Image Viewer", layout!("a:c,w:50%,h:50%"), window::Flags::Sizeable),
             himg: Handle::None,
         };
 
         let i = ImageViewer::new(
             Image::from_buffer(FERRIS_PIXELS, Size::new(120, 90), false).unwrap(),
-            Layout::new("a:c"),
+            layout!("a:c"),
             image::RenderOptionsBuilder::new().luminance_threshold(0.1).build(),
             imageviewer::Flags::ScrollBars,
         );

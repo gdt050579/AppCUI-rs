@@ -14,7 +14,7 @@ impl Password {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut password = Password::new(Layout::new("x:1,y:1,w:20,h:1"));
+    /// let mut password = Password::new(layout!("x:1,y:1,w:20,h:1"));
     /// ```
     pub fn new(layout: Layout) -> Self {
         let mut p = Self {

@@ -6,7 +6,7 @@ struct MyWin {}
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("TextField example", Layout::new("a:c,w:60,h:18"), window::Flags::None),
+            base: Window::new("TextField example", layout!("a:c,w:60,h:18"), window::Flags::None),
         };
         win.add(label!("'A normal text that can be edited',x:1,y:1,w:100%"));
         win.add(textfield!("l:1,t:2,r:1,h:1"));

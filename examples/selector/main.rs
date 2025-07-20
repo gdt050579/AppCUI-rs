@@ -15,7 +15,7 @@ impl MyWin {
         };
         let mut img = ImageViewer::new(
             Shape::Square.image(),
-            Layout::new("x:1,y:3,w:26,h:7"),
+            layout!("x:1,y:3,w:26,h:7"),
             image::RenderOptionsBuilder::new().character_set(CharacterSet::SmallBlocks).build(),
             imageviewer::Flags::None,
         );

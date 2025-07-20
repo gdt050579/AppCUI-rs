@@ -12,7 +12,7 @@ struct MyWin {
 impl MyWin {
     fn new(title: &str, counter: i32) -> Self {
         let mut win = MyWin {
-            base: ModalWindow::new(title, Layout::new("a:c,w:40,h:9"), window::Flags::None),
+            base: ModalWindow::new(title, layout!("a:c,w:40,h:9"), window::Flags::None),
             b1: Handle::None,
             b2: Handle::None,
             b3: Handle::None,
@@ -22,11 +22,11 @@ impl MyWin {
         win.b1 = win.add(button!("'Show modal &window',x:50%,y:2,p:c,w:30"));
         win.b2 = win.add(Button::new(
             format!("Counter = {counter}").as_str(),
-            Layout::new("x:50%,y:4,a:c,w:30"),
+            layout!("x:50%,y:4,a:c,w:30"),
             button::Type::Normal,
         ));
         win.b3 = win.add(button!("E&xit,x:50%,y:6,p:c,w:30"));
-        win.lb = win.add(Label::new("", Layout::new("x:0,y:0,w:100%")));
+        win.lb = win.add(Label::new("", layout!("x:0,y:0,w:100%")));
         win
     }
     fn update_counter(&mut self) {

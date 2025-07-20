@@ -6,7 +6,7 @@ Represent a panel (a container that can have multiple children):
 
 To create a panel use `Panel::new` method (with 3 parameters: a title, a layout and a type).
 ```rs
-let b = Panel::new("My panel", Layout::new("x:10,y:5,w:15"), panel::Type::Border);
+let b = Panel::new("My panel", layout!("x:10,y:5,w:15"), panel::Type::Border);
 ```
 or the macro `panel!`
 ```rs
@@ -55,8 +55,8 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:10"), window::Flags::None);
-    w.add(Panel::new("Options", Layout::new("l:1,t:1,r:1,b:2"),panel::Type::Border));
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:10"), window::Flags::None);
+    w.add(Panel::new("Options", layout!("l:1,t:1,r:1,b:2"),panel::Type::Border));
     app.add_window(w);
     app.run();
     Ok(())

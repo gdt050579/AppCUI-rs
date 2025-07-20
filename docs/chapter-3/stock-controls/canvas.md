@@ -6,7 +6,7 @@ Represent a surface that can be drawn under a view-port:
 
 To create a canvas use `Canvas::new` method (with 3 parameters: a size, a layout and initialization flags).
 ```rs
-let b = Canvas::new(Size::new(30,10), Layout::new("x:10,y:5,w:15"),canvas::Flags::None);
+let b = Canvas::new(Size::new(30,10), layout!("x:10,y:5,w:15"),canvas::Flags::None);
 ```
 or the macro `canvas!`
 ```rs

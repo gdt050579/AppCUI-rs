@@ -18,7 +18,7 @@ impl CheckBox {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut checkbox = CheckBox::new("Check me", Layout::new("x:1,y:1,w:20,h:1"), false);
+    /// let mut checkbox = CheckBox::new("Check me", layout!("x:1,y:1,w:20,h:1"), false);
     /// ```
     pub fn new(caption: &str, layout: Layout, checked: bool) -> Self {
         Self::with_type(caption, layout, checked, Type::Standard)

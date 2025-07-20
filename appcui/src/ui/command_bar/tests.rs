@@ -24,10 +24,10 @@ fn check_commands() {
     impl MyWin1 {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("x:1,y:1,w:20,h:7"), window::Flags::None),
+                base: Window::new("Win-1", layout!("x:1,y:1,w:20,h:7"), window::Flags::None),
                 info: Handle::None,
             };
-            me.info = me.add(Label::new("<none>", Layout::new("x:0,y:0,w:18")));
+            me.info = me.add(Label::new("<none>", layout!("x:0,y:0,w:18")));
             me
         }
         fn set_info(&mut self, txt: &str) {

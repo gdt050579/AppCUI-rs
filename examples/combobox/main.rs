@@ -8,7 +8,7 @@ impl MyWin {
             base: window!("x:1,y:1,w:34,h:6,caption:Win"),
         };
         w.add(label!("'Select animal',x:1,y:1,w:30"));
-        let mut c = ComboBox::new(Layout::new("x:1,y:2,w:30"), combobox::Flags::ShowDescription);
+        let mut c = ComboBox::new(layout!("x:1,y:2,w:30"), combobox::Flags::ShowDescription);
         // data from https://en.wikipedia.org/wiki/Fastest_animals
         c.add_item(combobox::Item::new("Cheetah","(120 km/h)"));
         c.add_item(combobox::Item::new("Swordfish","(97 km/h)"));

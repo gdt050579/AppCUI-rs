@@ -7,8 +7,8 @@ A listbox is a control that displays a list of items.
 It can be created using `ListBox::new(...)` and `ListBox::with_capacity(...)` methods or with the `listbox!` macro. 
 
 ```rs
-let l1 = ListBox::new(Layout::new("..."),listbox::Flags::None);
-let l2 = ListBox::with_capacity(10,Layout::new("..."),listbox::Flags::ScrollBars);
+let l1 = ListBox::new(layout!("..."),listbox::Flags::None);
+let l2 = ListBox::with_capacity(10,layout!("..."),listbox::Flags::ScrollBars);
 let l3 = listbox!("x:1,y:1,w:20,h:10,items=['Red','Greem','Blue']");
 let l4 = listbox!("x:1,y:1,w:20,h:10,items=['Red','Greem','Blue'],index:2");
 let l5 = listbox!("x:1,y:1,w:20,h:10,items=['Red','Greem','Blue'],index:2, flags: ScrollBars+SearchBar");

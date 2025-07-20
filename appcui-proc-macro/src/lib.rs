@@ -2124,3 +2124,9 @@ pub fn progressbar(input: TokenStream) -> TokenStream {
 pub fn textarea(input: TokenStream) -> TokenStream {
     crate::controls::textarea::create(input)
 }
+
+
+#[proc_macro]
+pub fn layout(input: TokenStream) -> TokenStream {
+    crate::controls::layout::create(input)
+}

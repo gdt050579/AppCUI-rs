@@ -20,7 +20,7 @@ impl KeySelector {
     /// use appcui::prelude::*;
     /// 
     /// let mut keyselector = KeySelector::new(Key::from(KeyCode::F1), 
-    ///                                        Layout::new("x:1,y:1,w:30"), 
+    ///                                        layout!("x:1,y:1,w:30"), 
     ///                                        keyselector::Flags::AcceptEnter | 
     ///                                        keyselector::Flags::AcceptEscape);
     /// ```

@@ -28,7 +28,7 @@ impl ProgressBar {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"),progressbar::Flags::None);
+    /// let mut p = ProgressBar::new(100,layout!("x:1,y:1,w:20"),progressbar::Flags::None);
     /// ```
     pub fn new(items_count: u64, layout: Layout, flags: Flags) -> Self {
         let mut me = Self {
@@ -55,7 +55,7 @@ impl ProgressBar {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"),progressbar::Flags::None);
+    /// let mut p = ProgressBar::new(100,layout!("x:1,y:1,w:20"),progressbar::Flags::None);
     /// p.update_text("Running ...");
     /// ```
     pub fn update_text(&mut self, text: &str) {
@@ -71,7 +71,7 @@ impl ProgressBar {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:20"),progressbar::Flags::None);
+    /// let mut p = ProgressBar::new(100,layout!("x:1,y:1,w:20"),progressbar::Flags::None);
     /// p.update_progress(85);
     /// ```
     pub fn update_progress(&mut self, processed_items: u64) {

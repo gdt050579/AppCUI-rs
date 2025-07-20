@@ -20,19 +20,19 @@ fn check_colorpicker_header_size() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Title,a:c,w:50,h:11");
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:3,w:16")));
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:5,w:15")));
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:7,w:10")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:3,w:16")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:5,w:15")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:7,w:10")));
 
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:20,y:3,w:9")));
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:20,y:5,w:8")));
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:20,y:7,w:7")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:20,y:3,w:9")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:20,y:5,w:8")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:20,y:7,w:7")));
 
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:35,y:3,w:6")));
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:35,y:5,w:5")));
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:35,y:7,w:4")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:35,y:3,w:6")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:35,y:5,w:5")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:35,y:7,w:4")));
 
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:1,w:20")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:1,w:20")));
     a.add_window(w);
     a.run();
 }
@@ -73,7 +73,7 @@ fn check_colorpicker_expand() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Title,a:c,w:50,h:11");
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:1,w:46")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:1,w:46")));
     w.add(colorpicker!("Red,x:1,y:3,w:12"));
     w.add(colorpicker!("Black,x:1,y:5,w:7"));
     w.add(colorpicker!("color:pink,x:1,y:7,w:20"));
@@ -285,7 +285,7 @@ fn check_colorpicker_events() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: Window::new("Test", Layout::new("a:c,w:40,h:10"), window::Flags::None),
+                base: Window::new("Test", layout!("a:c,w:40,h:10"), window::Flags::None),
                 c: Handle::None,
                 l: Handle::None,
             };
@@ -348,7 +348,7 @@ fn check_colorpicker_tooltip() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Title,a:c,w:50,h:11");
-    w.add(ColorPicker::new(Color::DarkGreen, Layout::new("x:1,y:1,w:46")));
+    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:1,w:46")));
     w.add(colorpicker!("Red,x:1,y:3,w:12"));
     w.add(colorpicker!("Black,x:1,y:5,w:7"));
     w.add(colorpicker!("color:pink,x:1,y:7,w:20"));

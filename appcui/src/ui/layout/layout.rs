@@ -41,16 +41,16 @@ pub(super) enum LayoutBuildFormat<'a> {
 /// use appcui::prelude::*;
 ///
 /// // Absolute positioning with alignment
-/// let layout = Layout::new("x:8,y:5,w:33%,h:6,a:tl");
+/// let layout = layout!("x:8,y:5,w:33%,h:6,a:tl");
 ///
 /// // Anchors with short aliases
-/// let layout = Layout::new("t:10,r:20,w:50,h:20");
+/// let layout = layout!("t:10,r:20,w:50,h:20");
 ///
 /// // Docking with short alias
-/// let layout = Layout::new("a:c,w:30,h:50%");
+/// let layout = layout!("a:c,w:30,h:50%");
 ///
 /// // Full anchors with short aliases
-/// let layout = Layout::new("l:20,t:7,r:10,b:10");
+/// let layout = layout!("l:20,t:7,r:10,b:10");
 /// ```
 pub struct Layout<'a> {
     pub(super) format: LayoutBuildFormat<'a>,

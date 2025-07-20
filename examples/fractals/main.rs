@@ -26,7 +26,7 @@ impl FractalDesktop {
     fn add_new_window(&mut self) {
         self.window_count += 1;
         let title = format!("Fractal Window {}", self.window_count);
-        let win = Window::new(&title, Layout::new("a:c,w:40,h:15"), window::Flags::None);
+        let win = Window::new(&title, layout!("a:c,w:40,h:15"), window::Flags::None);
         self.add_window(win);
     }
 }

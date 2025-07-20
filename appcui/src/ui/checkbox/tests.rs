@@ -9,12 +9,12 @@ fn check_checkbox_creation() {
         CheckCursor(13,5) 
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    w.add(CheckBox::new("Single line", Layout::new("x:1,y:1,w:20"), false));
-    w.add(CheckBox::new("Single line (checked initially)", Layout::new("x:1,y:2,w:40"), true));
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(CheckBox::new("Single line", layout!("x:1,y:1,w:20"), false));
+    w.add(CheckBox::new("Single line (checked initially)", layout!("x:1,y:2,w:40"), true));
     w.add(CheckBox::new(
         "A &multi line checkbox that can be checked or not",
-        Layout::new("x:1,y:3,w:20,h:3"),
+        layout!("x:1,y:3,w:20,h:3"),
         true,
     ));
 
@@ -44,7 +44,7 @@ fn check_checkbox_events() {
             win.c1 = win.add(checkbox!("'A &Single line checkbox',x:2,y:2,w:40"));
             win.c2 = win.add(checkbox!("Caption='&Inactive checkbox',x:2,y:3,w:15,enabled:false"));
             win.c3 = win.add(checkbox!("Text='A &multi line checkbox that is enabled',x:2,y:4,w:20,h:3,checked:true"));
-            win.lb = win.add(Label::new("", Layout::new("x:2,y:0,w:35")));
+            win.lb = win.add(Label::new("", layout!("x:2,y:0,w:35")));
             win
         }
         fn set_label_text(&mut self, txt: &str) {
@@ -166,8 +166,8 @@ fn check_checkbox_mouse_click() {
         CheckHash(0x2B9842F2F866679D) 
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
-    w.add(CheckBox::new("Single line", Layout::new("x:1,y:1,w:20"), false));
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(CheckBox::new("Single line", layout!("x:1,y:1,w:20"), false));
     a.add_window(w);
     a.run();
 }
@@ -203,7 +203,7 @@ fn check_checkbox_ascii_mode() {
         CheckCursor(8,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Ascii,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Ascii,checked:true"));
     w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Ascii,checked:false, enabled:false"));
@@ -221,7 +221,7 @@ fn check_checkbox_checkmark_mode() {
         CheckCursor(7,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkmark,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkmark,checked:true"));
     w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkmark,checked:false, enabled:false"));
@@ -239,7 +239,7 @@ fn check_checkbox_checkbox_mode() {
         CheckCursor(7,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkbox,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkbox,checked:true"));
     w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=Checkbox,checked:false, enabled:false"));
@@ -257,7 +257,7 @@ fn check_checkbox_fillbox_mode() {
         CheckCursor(7,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=FilledBox,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=FilledBox,checked:true"));
     w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=FilledBox,checked:false, enabled:false"));
@@ -275,7 +275,7 @@ fn check_checkbox_yesno_mode() {
         CheckCursor(8,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=YesNo,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=YesNo,checked:true"));
     w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=YesNo,checked:false, enabled:false"));
@@ -293,7 +293,7 @@ fn check_checkbox_plusminux_mode() {
         CheckCursor(7,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=PlusMinus,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=PlusMinus,checked:true"));
     w.add(checkbox!("'Option 3 (disabled and not-checked)',x:1,y:3,w:40,type=PlusMinus,checked:false, enabled:false"));
@@ -311,8 +311,8 @@ fn check_checkbox_caption() {
         CheckCursor(8,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", Layout::new("a:c,w:50,h:9"), window::Flags::None);
-    let mut cb = CheckBox::new("Caption test", Layout::new("x:1,y:1,w:40"), false);
+    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+    let mut cb = CheckBox::new("Caption test", layout!("x:1,y:1,w:40"), false);
     assert_eq!(cb.caption(), "Caption test");
     cb.set_caption("&New caption");
     assert_eq!(cb.caption(), "New caption");

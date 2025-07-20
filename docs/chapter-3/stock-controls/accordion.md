@@ -6,7 +6,7 @@ An accordion control is a graphical user interface element that consists of a ve
 
 To create an accordion use `Accordion::new` methods:
 ```rs
-let a1 = Accordion::new(Layout::new("a:c,w:15,h:10"),accordion::Flags::None);
+let a1 = Accordion::new(layout!("a:c,w:15,h:10"),accordion::Flags::None);
 ```
 
 or the macro `accordion!`

@@ -14,7 +14,7 @@ impl Label {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut label = Label::new("My Label", Layout::new("x:1,y:1,w:30"));
+    /// let mut label = Label::new("My Label", layout!("x:1,y:1,w:30"));
     /// ```
     pub fn new(caption: &str, layout: Layout) -> Self {
         Label {

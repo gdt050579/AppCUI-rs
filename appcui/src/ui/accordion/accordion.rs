@@ -16,7 +16,7 @@ impl Accordion {
     /// # Examples
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// let mut ac = Accordion::new(Layout::new("x:1,y:1,w:15,h:10"), accordion::Flags::None);
+    /// let mut ac = Accordion::new(layout!("x:1,y:1,w:15,h:10"), accordion::Flags::None);
     /// ac.add_panel("Panel 1");
     /// ac.add_panel("Panel 2");
     /// ac.add_panel("Panel 3");

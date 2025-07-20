@@ -15,7 +15,7 @@ pub struct PainterWindow {
 impl PainterWindow {
     fn inner_new(name: &str, path: Option<&Path>) -> Result<Self, String>  {
         let mut w = Self {
-            base: Window::new(name, Layout::new("a:c,w:60,h:20"), window::Flags::Sizeable),
+            base: Window::new(name, layout!("a:c,w:60,h:20"), window::Flags::Sizeable),
             painter: Handle::None,
             menu: Handle::None,
             fg_color_picker: Handle::None,
@@ -35,12 +35,12 @@ impl PainterWindow {
         w.add(label!("'ForeColor:',t:0,l:0,w:10,h:1"));
         w.add(label!("'BackColor:',t:0,l:23,w:10,h:1"));
 
-        w.fg_color_picker = w.add(ColorPicker::new(Color::White, Layout::new("t:0,l:10,w:8,h:1")));
-        w.bg_color_picker = w.add(ColorPicker::new(Color::Black, Layout::new("t:0,l:33,w:8,h:1")));
+        w.fg_color_picker = w.add(ColorPicker::new(Color::White, layout!("t:0,l:10,w:8,h:1")));
+        w.bg_color_picker = w.add(ColorPicker::new(Color::Black, layout!("t:0,l:33,w:8,h:1")));
 
         w.clear_button = w.add(button!("Clear,t:0,l:46,w:9,h:1,type: Flat"));
 
-        let mut p = PainterControl::new(Layout::new("t:1,l:0,r:0,b:0"));
+        let mut p = PainterControl::new(layout!("t:1,l:0,r:0,b:0"));
 
         if let Some(path) = path {
             p.load_from_file(path)?;

@@ -32,7 +32,7 @@ macro_rules! validate_abs {
 
 macro_rules! validate_pos {
     ($text:literal, $parent_width:expr, $parent_height:expr, $x:expr,$y:expr,$w:expr,$h:expr) => {
-        let mut cl = ControlLayout::from(Layout::new($text));
+        let mut cl = ControlLayout::from(layout!($text));
         cl.update($parent_width, $parent_height);
         assert_eq!(cl.get_width(), $w);
         assert_eq!(cl.get_height(), $h);
@@ -586,7 +586,7 @@ fn check_tr_anchor() {
 
 #[test]
 fn check_default_layout_modes() {
-    assert_eq!(LayoutMode::default(), LayoutMode::Absolute(AbsoluteLayout::new(0, 0, 0, 0)));
+    assert_eq!(LayoutMode::default(), LayoutMode::Absolute(Absolutelayout!(0, 0, 0, 0)));
 }
 
 #[test]

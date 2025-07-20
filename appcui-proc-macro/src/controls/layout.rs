@@ -1,4 +1,9 @@
+use crate::controls::control_builder;
 use crate::parameter_parser::{alignament::Alignament, NamedParamsMap};
+use crate::parameter_parser;
+use crate::token_stream_to_string::TokenStreamToString;
+use proc_macro::*;
+use std::str::FromStr;
 
 static LAYOUT_PARAMS: [&str; 11] = ["x", "y", "left", "top", "right", "bottom", "align", "dock", "pivot", "width", "height"];
 
@@ -265,4 +270,15 @@ pub(super) fn add_layout(s: &mut String, params: &NamedParamsMap) {
     analyze_layout_validity(params);
     copy_layout_params(s, params);
     s.push_str("\")");
+}
+
+pub(crate) fn create(input: TokenStream) -> TokenStream {
+    let s = input.validate_one_string_parameter("layout");
+    let mut d = parameter_parser::parse(&s).unwrap();
+    if let Err(e) = d.validate_named_parameters(&s, control_builder::CONTROL_NAMED_PARAMATERS) {
+        e.panic();
+    }
+    let mut res = String::with_capacity(128);
+    add_layout(&mut res, &d);
+    TokenStream::from_str(&res).expect("Fail to convert 'layout!' macro content to token stream")    
 }

@@ -12,7 +12,7 @@ fn check_create() {
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("a:c,w:100%,h:100%"),
+        layout!("a:c,w:100%,h:100%"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {
@@ -142,7 +142,7 @@ fn check_movement_keys() {
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("a:c,w:100%,h:100%"),
+        layout!("a:c,w:100%,h:100%"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {
@@ -188,7 +188,7 @@ fn check_horizontal_scroll_keys() {
     let mut w = window!("Test,a:c,w:35,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("a:c,w:100%,h:100%"),
+        layout!("a:c,w:100%,h:100%"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {
@@ -233,7 +233,7 @@ fn check_horizontal_scroll_keys_no_checkboxes() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:35,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = ListBox::new(Layout::new("a:c,w:100%,h:100%"), listbox::Flags::ScrollBars);
+    let mut l = ListBox::new(layout!("a:c,w:100%,h:100%"), listbox::Flags::ScrollBars);
     for i in 0..100 {
         l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
@@ -304,7 +304,7 @@ fn check_search() {
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("a:c,w:100%,h:100%"),
+        layout!("a:c,w:100%,h:100%"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {
@@ -371,7 +371,7 @@ fn check_resize() {
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("a:c,w:100%,h:100%"),
+        layout!("a:c,w:100%,h:100%"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {

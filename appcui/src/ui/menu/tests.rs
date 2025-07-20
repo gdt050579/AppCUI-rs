@@ -668,11 +668,11 @@ fn check_menubar_update_multiple_menus() {
             CheckHash(0x6ec113e98df3ca14)
             ";
     let mut a = App::debug(60, 24, script).menu_bar().build().unwrap();
-    let mut w1 = mywin::MyWindow::new("Win-1", Layout::new("x:1,y:2,w:18,h:10"));
-    w1.add(colorcustomcontrol::ColorCustomControl::new(Layout::new("x:1,y:1,w:10")));
+    let mut w1 = mywin::MyWindow::new("Win-1", layout!("x:1,y:2,w:18,h:10"));
+    w1.add(colorcustomcontrol::ColorCustomControl::new(layout!("x:1,y:1,w:10")));
     w1.add(button!("Button,x:1,y:3,w:10"));
-    let mut w2 = mywin::MyWindow::new("Win-2", Layout::new("x:20,y:2,w:18,h:15"));
-    w2.add(textcustomcontrol::TextCustomControl::new(Layout::new("x:1,y:1,w:10")));
+    let mut w2 = mywin::MyWindow::new("Win-2", layout!("x:20,y:2,w:18,h:15"));
+    w2.add(textcustomcontrol::TextCustomControl::new(layout!("x:1,y:1,w:10")));
     w2.add(button!("Button,x:1,y:3,w:10"));
     a.add_window(w1);
     a.add_window(w2);
@@ -768,11 +768,11 @@ fn check_popup_menu() {
     impl MyWindow {
         pub fn new() -> Self {
             let mut w = MyWindow {
-                base: Window::new("Test", Layout::new("a:c,w:76,h:10"), window::Flags::None),
+                base: Window::new("Test", layout!("a:c,w:76,h:10"), window::Flags::None),
                 hc: Handle::None,
                 cb: Handle::None,
             };
-            w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:50%,y:6,p:c,w:16,h:4")));
+            w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:50%,y:6,p:c,w:16,h:4")));
             w.add(label!(
                 "'Press the right mouse button on the square below to show a popup menu',x:37,y:1,p:c,w:70,h:1"
             ));
@@ -963,11 +963,11 @@ fn check_popup_menu_with_keys() {
     impl MyWindow {
         pub fn new() -> Self {
             let mut w = MyWindow {
-                base: Window::new("Test", Layout::new("a:c,w:76,h:10"), window::Flags::None),
+                base: Window::new("Test", layout!("a:c,w:76,h:10"), window::Flags::None),
                 hc: Handle::None,
                 cb: Handle::None,
             };
-            w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:50%,y:6,p:c,w:16,h:4")));
+            w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:50%,y:6,p:c,w:16,h:4")));
             w.add(label!(
                 "'Press the right mouse button on the square below to show a popup menu',x:37,y:1,p:c,w:70,h:1"
             ));
@@ -1811,7 +1811,7 @@ fn check_menubar_order_parameter_multi_controls() {
                     ]"
                 );
                 w.h_menu = w.register_menu(m);
-                w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:1,y:1,w:10,h:5")));
+                w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
         }
@@ -1944,7 +1944,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                     ]"
                 );
                 w.h_menu = w.register_menu(m);
-                w.hc = w.add(mycustomcontrol::MyCustomControl::new(Layout::new("x:1,y:1,w:10,h:5")));
+                w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
         }

@@ -8,10 +8,10 @@ To create a radiobox use `RadioBox::new` method (with 3 parameters: a caption, a
 
 ```rs
 let b1 = RadioBox::new("A radiobox", 
-                       Layout::new("x:10,y:5,w:15"),
+                       layout!("x:10,y:5,w:15"),
                        true);
 let b2 = RadioBox::with_type("Another radiobox", 
-                             Layout::new("x:10,y:5,w:15"),
+                             layout!("x:10,y:5,w:15"),
                              false,
                              radiobox::Type::Circle);
 ```

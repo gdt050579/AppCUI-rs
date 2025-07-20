@@ -21,8 +21,8 @@ It can be create using `NumericSelector::new(...)`, `NumericSelector::with_forma
 Assuming we want to create a NumeicSelector for `i32` type, we can do it as follows:
 
 ```rs
-let n1: NumericSelector<i32> = NumericSelector::new(Layout::new("..."),numericselector::Flags::None);
-let n2: NumericSelector<i32> = NumericSelector::with_format(1,Layout::new("..."),numericselector::Flags::None, numericselector::Format::Percentage);
+let n1: NumericSelector<i32> = NumericSelector::new(layout!("..."),numericselector::Flags::None);
+let n2: NumericSelector<i32> = NumericSelector::with_format(1,layout!("..."),numericselector::Flags::None, numericselector::Format::Percentage);
 let n3 = numericselector!("class:i32,value:5,min:0,max:10,step:1,x:1,y:1,w:20");
 let n4 = numericselector!("u32,5,0,10,step:1,x:1,y:1,w:20,format:Percentage");
 let n5 = numericselector!("i32,5,0,10,step:1,x:1,y:1,w:20,flags:ReadOnly,format:Percentage");

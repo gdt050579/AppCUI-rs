@@ -807,7 +807,7 @@ fn check_create() {
     .unwrap();
     w.add(ImageViewer::new(
         img,
-        Layout::new("a:c"),
+        layout!("a:c"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::Color16)
@@ -839,7 +839,7 @@ fn check_smallbloacks_scaling() {
     "#;
     w.add(ImageViewer::new(
         Image::from_str(s).unwrap(),
-        Layout::new("x:0,y:0,w:8,h:4"),
+        layout!("x:0,y:0,w:8,h:4"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::Color16)
@@ -848,7 +848,7 @@ fn check_smallbloacks_scaling() {
     ));
     w.add(ImageViewer::new(
         Image::from_str(s).unwrap(),
-        Layout::new("x:10,y:0,w:16,h:8"),
+        layout!("x:10,y:0,w:16,h:8"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::GrayScale4)
@@ -1073,7 +1073,7 @@ fn check_mouse_events() {
     let mut w = window!("Title,a:c");
     let i = ImageViewer::new(
         ferris_image(),
-        Layout::new("a:c"),
+        layout!("a:c"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::Color16)
@@ -1099,7 +1099,7 @@ fn check_resize() {
             };
             let i = ImageViewer::new(
                 ferris_image(),
-                Layout::new("a:c"),
+                layout!("a:c"),
                 image::RenderOptionsBuilder::new()
                     .character_set(image::CharacterSet::SmallBlocks)
                     .color_schema(ColorSchema::Color16)

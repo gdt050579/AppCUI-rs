@@ -6,7 +6,7 @@ Represent a control that can be used to select a key (including modifiers such a
 
 To create a keyselector use `KeySelector::new` method (with 3 parameters: a key, a layout and initialization flags).
 ```rs
-let k = KeySelector::new(Key::from(KeyCode::F1), Layout::new("x:10,y:5,w:15"),keyselector::Flags::None);
+let k = KeySelector::new(Key::from(KeyCode::F1), layout!("x:10,y:5,w:15"),keyselector::Flags::None);
 ```
 or the macro `keyselector!`
 ```rs

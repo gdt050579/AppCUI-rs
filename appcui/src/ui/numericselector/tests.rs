@@ -17,7 +17,7 @@ fn check_creation() {
         1,
         8,
         1,
-        Layout::new("x:1,y:1,w:10"),
+        layout!("x:1,y:1,w:10"),
         numericselector::Flags::None,
     ));
     w.add(NumericSelector::<u32>::new(
@@ -25,7 +25,7 @@ fn check_creation() {
         1,
         8,
         1,
-        Layout::new("x:1,y:3,w:15"),
+        layout!("x:1,y:3,w:15"),
         numericselector::Flags::HideButtons,
     ));
     w.add(NumericSelector::<f32>::new(
@@ -33,7 +33,7 @@ fn check_creation() {
         1.0,
         8.0,
         0.5,
-        Layout::new("x:1,y:5,w:16"),
+        layout!("x:1,y:5,w:16"),
         numericselector::Flags::None,
     ));
 
@@ -42,7 +42,7 @@ fn check_creation() {
         1000,
         8000,
         100,
-        Layout::new("x:22,y:1,w:20"),
+        layout!("x:22,y:1,w:20"),
         numericselector::Flags::None,
         numericselector::Format::DigitGrouping,
     ));
@@ -51,7 +51,7 @@ fn check_creation() {
         0,
         100,
         1,
-        Layout::new("x:22,y:3,w:20"),
+        layout!("x:22,y:3,w:20"),
         numericselector::Flags::None,
         numericselector::Format::Percentage,
     ));
@@ -60,7 +60,7 @@ fn check_creation() {
         -100,
         100,
         1,
-        Layout::new("x:22,y:5,w:20"),
+        layout!("x:22,y:5,w:20"),
         numericselector::Flags::ReadOnly,
         numericselector::Format::Decimal,
     ));
@@ -70,7 +70,7 @@ fn check_creation() {
         1000,
         80_000_000,
         1024,
-        Layout::new("x:43,y:1,w:20"),
+        layout!("x:43,y:1,w:20"),
         numericselector::Flags::None,
         numericselector::Format::Size,
     ));
@@ -79,7 +79,7 @@ fn check_creation() {
         0,
         100000,
         1,
-        Layout::new("x:43,y:3,w:20"),
+        layout!("x:43,y:3,w:20"),
         numericselector::Flags::None,
         numericselector::Format::Hex,
     ));

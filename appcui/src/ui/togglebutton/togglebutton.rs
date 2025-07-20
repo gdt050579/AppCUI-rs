@@ -19,7 +19,7 @@ impl ToggleButton {
     /// use appcui::prelude::*;
     /// let mut button = ToggleButton::new("🐼", 
     ///                                    "Enable Panda Mode", 
-    ///                                    Layout::new("x:1,y:1,w:2"), 
+    ///                                    layout!("x:1,y:1,w:2"), 
     ///                                    false, 
     ///                                    togglebutton::Type::Normal);
     /// ```
@@ -36,12 +36,12 @@ impl ToggleButton {
     /// use appcui::prelude::*;
     /// let panda = ToggleButton::with_single_selection("🐼",
     ///                                                 "Enable Panda Mode",
-    ///                                                 Layout::new("x:1,y:1,w:2"),
+    ///                                                 layout!("x:1,y:1,w:2"),
     ///                                                 false,
     ///                                                 togglebutton::Type::Normal);
     /// let dog = ToggleButton::with_single_selection("🐶",
     ///                                               "Enable Dog Mode",
-    ///                                               Layout::new("x:3,y:1,w:2"),
+    ///                                               layout!("x:3,y:1,w:2"),
     ///                                               true,
     ///                                               togglebutton::Type::Normal);
     /// ```

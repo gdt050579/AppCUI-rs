@@ -41,7 +41,7 @@ where
 {
     pub(super) fn new(title: &str, location: Location, nav: T, flags: SelectFolderDialogFlags) -> Self {
         let mut w = Self {
-            base: ModalWindow::new(title, Layout::new("a:c,w:70,h:20"), window::Flags::Sizeable),
+            base: ModalWindow::new(title, layout!("a:c,w:70,h:20"), window::Flags::Sizeable),
             tv: Handle::None,
             b_ok: Handle::None,
             b_cancel: Handle::None,
@@ -69,7 +69,7 @@ where
         w.add(label!("&Path,x:1,y:1,w:4"));
         let mut pf = GenericPathFinder::with_navigator(
             w.path.as_path().as_os_str().to_str().unwrap_or(""),
-            Layout::new("l:6,t:1,r:1"),
+            layout!("l:6,t:1,r:1"),
             pathfinder::Flags::None,
             nav,
         );
@@ -78,7 +78,7 @@ where
         let mut p = panel!("l:1,t:2,r:1,b:3");
         let mut tv = TreeView::with_capacity(
             256,
-            Layout::new("a:c,w:100%,h:100%"),
+            layout!("a:c,w:100%,h:100%"),
             treeview::Flags::HideHeader
                 | treeview::Flags::ScrollBars
                 | treeview::Flags::SearchBar

@@ -363,7 +363,7 @@ impl RuntimeManager {
                 base.set_singlewindow_flag();
                 let top = self.menubar.is_some();
                 let bottom = self.commandbar.is_some();
-                base.layout = ControlLayout::from(Layout::new(match () {
+                base.layout = ControlLayout::from(layout!(match () {
                     _ if (!top) && (!bottom) => "l:0,t:0,r:0,b:0",
                     _ if (!top) && (bottom) => "l:0,t:0,r:0,b:1",
                     _ if (top) && (!bottom) => "l:0,t:1,r:0,b:0",

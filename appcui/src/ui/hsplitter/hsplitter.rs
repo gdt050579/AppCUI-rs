@@ -39,7 +39,7 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = HSplitter::new(0.5,Layout::new("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// ```
@@ -70,7 +70,7 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,Layout::new("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));   
     /// ```
@@ -95,7 +95,7 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,Layout::new("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 2 chars from Top

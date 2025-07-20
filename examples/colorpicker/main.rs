@@ -9,7 +9,7 @@ struct ColoredText {
 impl ColoredText {
     fn new()->Self {
         Self {
-            base: ControlBase::new(Layout::new("l:1,y:6,r:1,h:3"),false),
+            base: ControlBase::new(layout!("l:1,y:6,r:1,h:3"),false),
             fore: Color::White,
             back: Color::Black
         }
@@ -32,7 +32,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("ColorPicker example", Layout::new("a:c,w:40,h:10"), window::Flags::None),
+            base: Window::new("ColorPicker example", layout!("a:c,w:40,h:10"), window::Flags::None),
             fore: Handle::None,
             back: Handle::None,
             ct: Handle::None,

@@ -26,7 +26,7 @@ struct MyControl {
 impl MyControl {
     fn new() -> Self {
         let mut obj = Self {
-            base: ControlBase::new(Layout::new("l:1,r:1,t:1,b:1"), true),
+            base: ControlBase::new(layout!("l:1,r:1,t:1,b:1"), true),
             attr: CharAttribute::default(),
         };
         // we set up  the attribute based on the current theme

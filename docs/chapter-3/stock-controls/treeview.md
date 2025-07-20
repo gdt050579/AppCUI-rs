@@ -7,8 +7,8 @@ A TreeView is a templetize (generics based) control that allows you to view a li
 It can be created using `TreeView::new(...)` and `TreeView::with_capacity(...)` methods or with the `treeview!` macro. 
 
 ```rs
-let l1: TreeView<T> = TreeView::new(Layout::new("..."),treeview::Flags::None);
-let l2: TreeView<T> = TreeView::with_capacity(10,Layout::new("..."),treeview::Flags::ScrollBars);
+let l1: TreeView<T> = TreeView::new(layout!("..."),treeview::Flags::None);
+let l2: TreeView<T> = TreeView::with_capacity(10,layout!("..."),treeview::Flags::ScrollBars);
 let l3 = treeview!("class: T, flags: Scrollbar, d:c, w:100%, h:100%");
 let l4 = treeview!("type: T, flags: Scrollbar, d:c, view:Columns(3)");
 let l5 = treeview!("T, d:c, columns:[{Name,10,left},{Age,5,right},{City,20,center}]");
@@ -206,7 +206,7 @@ To add items to a tree view, you can use the `add` and `add_to_parent` methods. 
 The following example shows how to add items to a tree view:
 
 ```rs
-let mut treeview = TreeView::new(Layout::new("a:c"),treeview::Flags::ScrollBars);
+let mut treeview = TreeView::new(layout!("a:c"),treeview::Flags::ScrollBars);
 // add two items to the root of the tree view
 let handle_item_1 = treeview.add(...);
 let handle_item_2 = treeview.add(...);

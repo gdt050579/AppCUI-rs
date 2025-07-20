@@ -12,8 +12,8 @@ fn check_create() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     
-    w.add(HLine::new("", Layout::new("x:1,y:1,w:10"), Flags::None));
-    w.add(HLine::new("TestLine", Layout::new("x:1,y:3,w:30"), Flags::DoubleLine | Flags::HasTitle));
+    w.add(HLine::new("", layout!("x:1,y:1,w:10"), Flags::None));
+    w.add(HLine::new("TestLine", layout!("x:1,y:3,w:30"), Flags::DoubleLine | Flags::HasTitle));
     a.add_window(w);
     a.run();
 }
@@ -28,7 +28,7 @@ fn check_title_too_large() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     
-    w.add(HLine::new("ThisIsAVeryLargeTitle", Layout::new("x:1,y:3,w:20"), Flags::DoubleLine | Flags::HasTitle));
+    w.add(HLine::new("ThisIsAVeryLargeTitle", layout!("x:1,y:3,w:20"), Flags::DoubleLine | Flags::HasTitle));
     a.add_window(w);
     a.run();
 }
@@ -44,7 +44,7 @@ fn check_title_with_line_too_small() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     
-    w.add(HLine::new("ThisIsAVeryLargeTitle", Layout::new("x:1,y:3,w:4"), Flags::DoubleLine | Flags::HasTitle));
+    w.add(HLine::new("ThisIsAVeryLargeTitle", layout!("x:1,y:3,w:4"), Flags::DoubleLine | Flags::HasTitle));
     a.add_window(w);
     a.run();
 }

@@ -6,8 +6,8 @@ Represent a horizontal line:
 
 To create a horizontal line use `HLine::new` method (with 3 parameters: a title, a layout and a set of flags). The flags let you choose if the line has text or if it is a double line.
 ```rs
-let a = HLine::new("TestLine", Layout::new("x:1,y:3,w:30"), Flags::None);
-let b = HLine::new("TestLine", Layout::new("x:1,y:3,w:30"), Flags::DoubleLine | Flags::HasTitle);
+let a = HLine::new("TestLine", layout!("x:1,y:3,w:30"), Flags::None);
+let b = HLine::new("TestLine", layout!("x:1,y:3,w:30"), Flags::DoubleLine | Flags::HasTitle);
 ```
 or the macro `hline!`
 ```rs
@@ -52,9 +52,9 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = Window::new("Title", Layout::new("a:c,w:40,h:9"), window::Flags::None);
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     
-    w.add(HLine::new("Hello world !", Layout::new("x:1,y:3,w:30"), 
+    w.add(HLine::new("Hello world !", layout!("x:1,y:3,w:30"), 
                                       hline::Flags::DoubleLine | hline::Flags::HasTitle));
     app.add_window(w);
     app.run();

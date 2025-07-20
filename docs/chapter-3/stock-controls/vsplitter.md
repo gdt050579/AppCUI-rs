@@ -7,8 +7,8 @@ Renders a vertical splitter that allows the user to resize the two panes it sepa
 To create a vertical splitter use `VSplitter::new` method or the `vsplitter!` macro.
 
 ```rust
-let vs_1 = VSplitter::new(0.5,Layout::new("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
-let vs_2 = VSplitter::new(20,Layout::new("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+let vs_1 = VSplitter::new(0.5,layout!("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+let vs_2 = VSplitter::new(20,layout!("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
 ```
 
 or

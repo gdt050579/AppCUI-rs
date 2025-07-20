@@ -47,7 +47,7 @@ impl ColorPicker {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut color_picker = ColorPicker::new(Color::Red, Layout::new("x:1,y:1,w:20,h:1"));
+    /// let mut color_picker = ColorPicker::new(Color::Red, layout!("x:1,y:1,w:20,h:1"));
     /// ```
     pub fn new(color: Color, layout: Layout) -> Self {
         let mut cp = ColorPicker {

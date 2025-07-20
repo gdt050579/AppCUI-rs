@@ -90,13 +90,13 @@ fn check_events() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("a:c,w:47,h:7"), window::Flags::None),
+                base: Window::new("Win-1", layout!("a:c,w:47,h:7"), window::Flags::None),
                 info: Handle::None,
                 but1: Handle::None,
                 but2: Handle::None,
                 but3: Handle::None,
             };
-            me.info = me.add(Label::new("<none>", Layout::new("x:0,y:0,w:35")));
+            me.info = me.add(Label::new("<none>", layout!("x:0,y:0,w:35")));
             me.but1 = me.add(togglebutton!("<>,'Some button',x:1,y:3,w:2"));
             me.but2 = me.add(togglebutton!("(),'Some button 2',x:4,y:3,w:2"));
             let mut b3 = togglebutton!("Update,'Some button 2',x:10,y:3,w:8");

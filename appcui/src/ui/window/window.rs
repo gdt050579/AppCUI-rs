@@ -210,8 +210,8 @@ impl Window {
     ///     use appcui::prelude::*;
     ///
     ///     let mut a = App::new().build().unwrap();
-    ///     let mut w = Window::new("Title", Layout::new("a:c,w:20,h:10"), window::Flags::None);
-    ///     w.add(Button::new("Press me",Layout::new("x:1,y:1,w:10"),button::Type::Normal));
+    ///     let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+    ///     w.add(Button::new("Press me",layout!("x:1,y:1,w:10"),button::Type::Normal));
     /// ```    
     ///
     /// You can not add a Window as a child to another Window nor can you add a Desktop
@@ -221,8 +221,8 @@ impl Window {
     ///     use appcui::prelude::*;
     ///
     ///     let mut a = App::new().build().unwrap();
-    ///     let mut w = Window::new("Title", Layout::new("a:c,w:20,h:10"), window::Flags::None);
-    ///     w.add(Window::new("aaa",Layout::new("a:c,w:20,h:10"),window::Flags::None));
+    ///     let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+    ///     w.add(Window::new("aaa",layout!("a:c,w:20,h:10"),window::Flags::None));
     /// ```    
     pub fn add<T>(&mut self, control: T) -> Handle<T>
     where

@@ -22,7 +22,7 @@ impl Tab {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut tab = Tab::new(Layout::new("x:1,y:1,w:20,h:10"),
+    /// let mut tab = Tab::new(layout!("x:1,y:1,w:20,h:10"),
     ///                       tab::Flags::TabsBar);
     /// tab.add_tab("Tab &1");
     /// tab.add_tab("Tab &2");
@@ -55,7 +55,7 @@ impl Tab {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut tab = Tab::with_type(Layout::new("x:1,y:1,w:20,h:10"), 
+    /// let mut tab = Tab::with_type(layout!("x:1,y:1,w:20,h:10"), 
     ///                              tab::Flags::TabsBar, 
     ///                              tab::Type::OnTop);
     /// tab.add_tab("Tab &1");
@@ -91,9 +91,9 @@ impl Tab {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut tab = Tab::new(Layout::new("x:1,y:1,w:20,h:10"), tab::Flags::TabsBar);
+    /// let mut tab = Tab::new(layout!("x:1,y:1,w:20,h:10"), tab::Flags::TabsBar);
     /// let idx = tab.add_tab("Tab 1");
-    /// let handle = tab.add(idx, Button::new("Button 1", Layout::new("x:1,y:1,w:20,h:1"), button::Type::Flat));
+    /// let handle = tab.add(idx, Button::new("Button 1", layout!("x:1,y:1,w:20,h:1"), button::Type::Flat));
     /// ```
     #[inline(always)]
     pub fn add<T>(&mut self, tabindex: u32, control: T) -> Handle<T>

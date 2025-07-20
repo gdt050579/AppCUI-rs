@@ -6,7 +6,7 @@ Represent a control with three states (checked, unckehed or unknown):
 
 To create a threestatebox use `ThreeStateBox::new` method (with 3 parameters: a caption, a layout and a state (**checked**, **unchecked** or **unknown**)).
 ```rs
-let b = ThreeStateBox::new("A ThreeStateBox", Layout::new("x:10,y:5,w:15"),threestatebox::State::Checked);
+let b = ThreeStateBox::new("A ThreeStateBox", layout!("x:10,y:5,w:15"),threestatebox::State::Checked);
 ```
 or the macro `threestatebox!`
 ```rs

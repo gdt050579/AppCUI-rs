@@ -27,7 +27,7 @@ fn check_control_reposition() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:7,flags: Sizeable");
-    let mut tab = Tab::new(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None);
+    let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
     tab.add_tab("Page &1");
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
@@ -79,7 +79,7 @@ fn check_key_control() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:7,flags: Sizeable");
-    let mut tab = Tab::new(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None);
+    let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
     tab.add_tab("Page &1");
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
@@ -119,7 +119,7 @@ fn check_switch_between_tabcontrols() {
     ";
     let mut a = App::debug(100, 10, script).build().unwrap();
     let mut w = window!("Test,a:c,w:100%,h:100%");
-    let mut tab1 = Tab::new(Layout::new("l:0,t:0,r:52,b:2"), tab::Flags::None);
+    let mut tab1 = Tab::new(layout!("l:0,t:0,r:52,b:2"), tab::Flags::None);
     tab1.add_tab("Page &1");
     tab1.add_tab("Page &2");
     tab1.add_tab("Page &3");
@@ -131,7 +131,7 @@ fn check_switch_between_tabcontrols() {
     tab1.add(2, button!("T1-3-B,a:l,w:20,type:flat"));
     w.add(tab1);
 
-    let mut tab2 = Tab::new(Layout::new("l:50,t:0,r:0,b:2"), tab::Flags::None);
+    let mut tab2 = Tab::new(layout!("l:50,t:0,r:0,b:2"), tab::Flags::None);
     tab2.add_tab("Page &1");
     tab2.add_tab("Page &2");
     tab2.add_tab("Page &3");
@@ -159,7 +159,7 @@ fn check_tab_on_top() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:7");
-    let mut tab = Tab::with_type(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::OnTop);
+    let mut tab = Tab::with_type(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::OnTop);
     tab.add_tab("Page &1");
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
@@ -185,7 +185,7 @@ fn check_tab_on_bottom() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:7");
-    let mut tab = Tab::with_type(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::OnBottom);
+    let mut tab = Tab::with_type(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::OnBottom);
     tab.add_tab("Page &1");
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
@@ -225,7 +225,7 @@ fn check_page_width() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("a:c,w:100%,h:100%"), window::Flags::None),
+                base: Window::new("Win-1", layout!("a:c,w:100%,h:100%"), window::Flags::None),
                 info: Handle::None,
                 plus: Handle::None,
                 minus: Handle::None,
@@ -396,7 +396,7 @@ fn check_page_width_on_left() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("a:c,w:100%,h:100%"), window::Flags::None),
+                base: Window::new("Win-1", layout!("a:c,w:100%,h:100%"), window::Flags::None),
                 info: Handle::None,
                 plus: Handle::None,
                 minus: Handle::None,
@@ -491,7 +491,7 @@ fn check_tab_caption() {
     ";
     let mut a = App::debug(80, 20, script).build().unwrap();
     let mut w = window!("Test,a:c,w:70,h:17,flags: Sizeable");
-    let mut tab = Tab::new(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None);
+    let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
     
     // Add initial tabs
     tab.add_tab("Page &1");
@@ -544,7 +544,7 @@ fn check_hidden_tabs() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:7");
-    let mut tab = Tab::with_type(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::HiddenTabs);
+    let mut tab = Tab::with_type(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::HiddenTabs);
     tab.add_tab("Page &1");
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
@@ -567,7 +567,7 @@ fn check_hiddentabs_changepage() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("a:c,w:100%,h:100%"), window::Flags::None),
+                base: Window::new("Win", layout!("a:c,w:100%,h:100%"), window::Flags::None),
                 info: Handle::None,
                 plus: Handle::None,
                 minus: Handle::None,
@@ -669,7 +669,7 @@ fn check_tab_mouse_events() {
     ";
     let mut a = App::debug(80, 10, script).build().unwrap();
     let mut w = window!("Test,a:c,w:70,h:7,flags: Sizeable");
-    let mut tab = Tab::new(Layout::new("l:0,t:0,r:0,b:0"), tab::Flags::None);
+    let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
     
     // Add tabs with wider width to make empty space more obvious
     tab.add_tab("Page 1");

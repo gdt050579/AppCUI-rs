@@ -58,7 +58,7 @@ where
 {
     pub(super) fn new(file_name: &str, title: &str, location: Location, extension_mask: Vec<FileMask>, nav: T, flags: InnerFlags) -> Self {
         let mut w = Self {
-            base: ModalWindow::new(title, Layout::new("a:c,w:70,h:20"), window::Flags::Sizeable),
+            base: ModalWindow::new(title, layout!("a:c,w:70,h:20"), window::Flags::Sizeable),
             list: Handle::None,
             details: Handle::None,
             columns: Handle::None,
@@ -95,14 +95,14 @@ where
         w.b_drive = w.add(button!("&Drive,x:1,y:1,w:7,type:Flat"));
         let pf = GenericPathFinder::with_navigator(
             w.path.as_path().as_os_str().to_str().unwrap_or(""),
-            Layout::new("l:9,t:1,r:1"),
+            layout!("l:9,t:1,r:1"),
             pathfinder::Flags::None,
             nav,
         );
         w.path_viewer = w.add(pf);
         let mut p = panel!("l:1,t:3,r:1,b:5");
         let mut lv: ListView<Entry> = ListView::new(
-            Layout::new("a:c,w:100%,h:100%"),
+            layout!("a:c,w:100%,h:100%"),
             listview::Flags::SearchBar
                 | listview::Flags::ScrollBars
                 | if flags.contains(InnerFlags::Icons) {
@@ -123,12 +123,12 @@ where
         w.list = p.add(lv);
         w.add(p);
         w.add(label!("&Name,l:1,b:3,w:4"));
-        let mut fname = TextField::new(file_name, Layout::new("l:6,b:3,r:11"), textfield::Flags::None);
+        let mut fname = TextField::new(file_name, layout!("l:6,b:3,r:11"), textfield::Flags::None);
         fname.set_hotkey(key!("Alt+N"));
         w.name = w.add(fname);
         w.b_ok = w.add(button!("&OK,r:1,b:2,w:9"));
         w.add(label!("&Type,l:1,b:1,w:4"));
-        let mut mask = ComboBox::new(Layout::new("l:6,b:1,r:11"), combobox::Flags::None);
+        let mut mask = ComboBox::new(layout!("l:6,b:1,r:11"), combobox::Flags::None);
         for m in &w.extension_mask {
             mask.add(m.name());
         }

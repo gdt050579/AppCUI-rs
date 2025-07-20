@@ -9,7 +9,7 @@ fn check_create() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:51,h:11,flags: Sizeable");
-    let mut hs = HSplitter::new(0.5,Layout::new("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut hs = HSplitter::new(0.5,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
     hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
     w.add(hs);
@@ -61,7 +61,7 @@ fn check_keyboard_movement() {
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = HSplitter::new(14,Layout::new("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut hs = HSplitter::new(14,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
     hs.set_min_height(hsplitter::Panel::Top, 5);
     hs.set_min_height(hsplitter::Panel::Bottom, 4);
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
@@ -127,7 +127,7 @@ fn check_mouse_buttons() {
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = HSplitter::new(14,Layout::new("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut hs = HSplitter::new(14,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
     hs.set_min_height(hsplitter::Panel::Top, 5);
     hs.set_min_height(hsplitter::Panel::Bottom, 4);
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
@@ -173,7 +173,7 @@ fn check_mouse_drag() {
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = HSplitter::new(14,Layout::new("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut hs = HSplitter::new(14,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
     hs.set_min_height(hsplitter::Panel::Top, 5);
     hs.set_min_height(hsplitter::Panel::Bottom, 4);
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));

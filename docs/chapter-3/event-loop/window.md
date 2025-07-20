@@ -9,7 +9,7 @@ To create a Window use:
 * `Window::with_type` method (with 4 parameters: a title, a layout , initialization flags and a type)
 * macro `window!`. 
 ```rs
-let w = Window::new("Title", Layout::new("x:10,y:5,w:15,h:9"),window::Flags::None);
+let w = Window::new("Title", layout!("x:10,y:5,w:15,h:9"),window::Flags::None);
 let w2 = window!("Title,a:c,w:10,h:10");
 let w3 = window!("title='Some Title',a:c,w:30,h:10,flags=[Sizeable])");
 let w4 = window!("title='WithTag',a:c,w:30,h:10,tag:MyTag)");

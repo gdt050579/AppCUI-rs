@@ -167,10 +167,10 @@ impl PresentationWindow {
     fn new() -> Self {
         let mut win = Window::new(
             "Web Terminal Presentation",
-            Layout::new("a:c,w:100%,h:100%"),
+            layout!("a:c,w:100%,h:100%"),
             window::Flags::NoCloseButton,
         );
-        let ctl = win.add(PresentationControl::new(Layout::new("a:c,w:100%,h:100%")));
+        let ctl = win.add(PresentationControl::new(layout!("a:c,w:100%,h:100%")));
         PresentationWindow {
             base:         win,
             presentation: ctl,
