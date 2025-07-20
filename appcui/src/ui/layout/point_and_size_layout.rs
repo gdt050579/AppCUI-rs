@@ -38,7 +38,7 @@ impl PointAndSizeLayout {
             "When ('dock' or 'd') parameter is used,('right' or 'r') parameters can not be used !"
         );
         should_not_use!(
-            params.align,
+            params.pivot,
             "When ('dock' or 'd') parameter is used,('align' or 'a') parameters can not be used !"
         );
 
@@ -149,12 +149,23 @@ impl PointAndSizeLayout {
             "When (x,y) parameters are used, ('bottom' or 'b') parameter can not be used !"
         );
 
+        let a = match params.pivot.unwrap_or(Pivot::TopLeft) {
+            Pivot::TopLeft => Alignament::TopLeft,
+            Pivot::Top => Alignament::Top,
+            Pivot::TopRight => Alignament::TopRight,
+            Pivot::Right => Alignament::Right,
+            Pivot::BottomRight => Alignament::BottomRight,
+            Pivot::Bottom => Alignament::Bottom,
+            Pivot::BottomLeft => Alignament::BottomLeft,
+            Pivot::Left => Alignament::Left,
+            Pivot::Center => Alignament::Center,
+        };
         PointAndSizeLayout {
             x: params.x.unwrap(),
             y: params.y.unwrap(),
             width: params.width.unwrap_or(Dimension16::Absolute(1)),
             height: params.height.unwrap_or(Dimension16::Absolute(1)),
-            align: params.align.unwrap_or(Alignament::TopLeft),
+            align: a,
             anchor: Alignament::TopLeft,
         }
     }

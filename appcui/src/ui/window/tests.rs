@@ -1219,7 +1219,7 @@ fn check_modal_window() {
             win.b1 = win.add(button!("'Show modal &window',x:50%,y:2,p:c,w:30"));
             win.b2 = win.add(Button::new(
                 format!("Counter = {counter}").as_str(),
-                Layout::new("x:50%,y:4,a:c,w:30"),
+                Layout::new("x:50%,y:4,p:c,w:30"),
                 button::Type::Normal,
             ));
             win.b3 = win.add(button!("E&xit,x:50%,y:6,p:c,w:30"));

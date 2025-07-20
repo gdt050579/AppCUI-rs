@@ -50,8 +50,8 @@ impl LayoutBuilder {
         self
     }
 
-    pub fn alignament(mut self, alignament: Alignament) -> Self {
-        self.params.align = Some(alignament);
+    pub fn alignament(mut self, align: Alignament) -> Self {
+        self.params.align = Some(align);
         self
     }
 

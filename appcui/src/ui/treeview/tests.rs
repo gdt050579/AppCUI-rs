@@ -214,7 +214,7 @@ fn check_init_with_macro() {
     ";
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Test,a:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = treeview!("type:Course, d:c,flags: ScrollBars+SearchBar");
+    let mut tv = treeview!("type:Course,a:c,flags: ScrollBars+SearchBar");
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
