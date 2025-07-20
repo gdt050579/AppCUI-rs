@@ -138,7 +138,7 @@ fn generate_dropdownlist_events(a: &mut Arguments) -> String {
 }
 fn generate_numeric_selector_events(a: &mut Arguments) -> String {
     if !a.template_events.contains_key(&AppCUITrait::GenericNumericSelectorEvents) {
-        panic!("Missing generic type for NumericSelectorEvents event (Have you used evets=NumericSelectorEvents<Type> ?)");
+        panic!("Missing generic type for NumericSelectorEvents event (Have you used events=NumericSelectorEvents<Type> ?)");
     }
     let mut s = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericNumericSelectorEvents].iter() {
