@@ -17,6 +17,14 @@ enum ExpectNext {
     Comma,
     Template,
 }
+
+enum ExpectNextInArry {
+    Item,
+    CommaOrTemplate,
+    Comma,
+    TemplateItem(u32),
+}
+
 pub(crate) struct Arguments {
     pub base_control_type: BaseControlType,
     pub root: &'static str,
@@ -288,22 +296,76 @@ impl Arguments {
                         self.key
                     );
                 }
-                let mut expect_value = true;
+                let mut arr_state = ExpectNextInArry::Item;
+                let mut current_item = String::with_capacity(32);
                 for inner_token in group.stream() {
-                    if expect_value {
-                        if let TokenTree::Ident(val) = inner_token {
-                            self.values.push(val.to_string());
-                        } else {
-                            panic!("Expecting a proper format for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token)
+                    match arr_state {
+                        ExpectNextInArry::Item => {
+                            if let TokenTree::Ident(val) = inner_token {
+                                current_item.push_str(val.to_string().as_str());
+                                arr_state = ExpectNextInArry::CommaOrTemplate;
+                            } else {
+                                panic!("Expecting a proper format for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token)
+                            }
                         }
-                    } else if let TokenTree::Punct(p) = inner_token {
-                        if p.as_char() != ',' {
-                            panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,p)
+                        ExpectNextInArry::CommaOrTemplate => {
+                            if let TokenTree::Punct(p) = inner_token {
+                                if p.as_char() == '<' {
+                                    self.values.push(current_item.clone());
+                                    current_item.clear();
+                                    self.template_content.clear();
+                                    self.template_content.push_str(&current_item);
+                                    arr_state = ExpectNextInArry::TemplateItem(1);
+                                } else if p.as_char() == ',' {
+                                    self.values.push(current_item.clone());
+                                    current_item.clear();
+                                    arr_state = ExpectNextInArry::Item;
+                                } else {
+                                    panic!("Expecting a punctuation separator ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,p)
+                                }
+                            } else {
+                                panic!("Expecting a separator ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token)
+                            }
                         }
-                    } else {
-                        panic!("Expecting a separatoe ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token)
+                        ExpectNextInArry::Comma => {
+                            if let TokenTree::Punct(p) = inner_token {
+                                if p.as_char() != ',' {
+                                    panic!("Expecting a punctuation separator ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,p)
+                                }
+                                if !current_item.is_empty() {
+                                    self.values.push(current_item.clone());
+                                }
+                                arr_state = ExpectNextInArry::Item;
+                            } else {
+                                panic!("Expecting a punctuation separator ',' for the list associated with the key: '{}'. It should use this format `[value-1, value-2, ... value-n]` but found `{}`",self.key,inner_token)
+                            }
+                        }
+                        ExpectNextInArry::TemplateItem(idx) => {
+                            self.template_content.push_str(inner_token.to_string().as_str());
+
+                            if let TokenTree::Punct(p) = inner_token {
+                                match p.as_char() {
+                                    '<' => arr_state = ExpectNextInArry::TemplateItem(idx + 1),
+                                    '>' => {
+                                        arr_state = if idx == 1 {
+                                            if self.template_content.len() > 0 {
+                                                self.template_content.remove(self.template_content.len() - 1);
+                                            }
+                                            self.validate_template();
+                                            current_item.clear();
+                                            ExpectNextInArry::Comma
+                                        } else {
+                                            ExpectNextInArry::TemplateItem(idx - 1)
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
                     }
-                    expect_value = !expect_value;
+                }
+                if !current_item.is_empty() {
+                    self.values.push(current_item);
                 }
                 self.expect_next = ExpectNext::Comma;
             }
@@ -372,10 +434,7 @@ impl Arguments {
                 }
             }
             // add to a hash map
-            self.template_events
-                .entry(last_control)
-                .or_default()
-                .push(self.template_content.clone());
+            self.template_events.entry(last_control).or_default().push(self.template_content.clone());
         } else {
             // do nothing --> upon validation the template is not valid !! and error will occur anyway !
         }
@@ -383,11 +442,7 @@ impl Arguments {
     fn validate_expect_template(&mut self, token: TokenTree) {
         match token {
             TokenTree::Group(g) => {
-                panic!(
-                    "Invalid group delimiter {} in a template definition : {}",
-                    g,
-                    self.template_content
-                );
+                panic!("Invalid group delimiter {} in a template definition : {}", g, self.template_content);
             }
             TokenTree::Ident(id) => {
                 if !self.template_content.is_empty() {
