@@ -174,8 +174,8 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
 
             if let Some(value) = params.get("align") {
                 match value.to_align() {
-                    Alignment::Top | Alignment::Center | Alignment::Bottom => {}
-                    _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) alignment values are allowed !"),
+                    Alignment::TopCenter | Alignment::Center | Alignment::BottomCenter => {}
+                    _ => panic!("When (left,right) are provided, only TopCenter(t), Center(c) and BottomCenter(b) alignment values are allowed !"),
                 }
             }
         }
@@ -185,7 +185,7 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
 
             if let Some(value) = params.get("align") {
                 match value.to_align() {
-                    Alignment::Top | Alignment::Center | Alignment::Bottom => {}
+                    Alignment::TopCenter | Alignment::Center | Alignment::BottomCenter => {}
                     _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) alignment values are allowed !"),
                 }
             }

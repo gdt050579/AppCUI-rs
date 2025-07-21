@@ -113,27 +113,27 @@ fn layout_mode_pivot_bottom_left() {
 }
 #[test]
 fn layout_mode_pivot_left() {
-    validate_abs!("w:12,h:15,x:1,y:-2,p:l", 1, -2, 12, 15, Left, TopLeft);
-    validate_abs!("y: 1,x:3,w:12,h:15,p:left", 3, 1, 12, 15, Left, TopLeft);
-    validate_abs!("x:4,w:12,y: 2,h:15,pivot:left", 4, 2, 12, 15, Left, TopLeft);
+    validate_abs!("w:12,h:15,x:1,y:-2,p:l", 1, -2, 12, 15, CenterLeft, TopLeft);
+    validate_abs!("y: 1,x:3,w:12,h:15,p:left", 3, 1, 12, 15, CenterLeft, TopLeft);
+    validate_abs!("x:4,w:12,y: 2,h:15,pivot:left", 4, 2, 12, 15, CenterLeft, TopLeft);
 }
 #[test]
 fn layout_mode_pivot_right() {
-    validate_abs!("w:12,h:15,x:1,y:-2,p:r", 1, -2, 12, 15, Right, TopLeft);
-    validate_abs!("y: 1,x:3,width:12,height:15,p:right", 3, 1, 12, 15, Right, TopLeft);
-    validate_abs!("x:4,w:12,y: 2,h:15,pivot:right", 4, 2, 12, 15, Right, TopLeft);
+    validate_abs!("w:12,h:15,x:1,y:-2,p:r", 1, -2, 12, 15, CenterRight, TopLeft);
+    validate_abs!("y: 1,x:3,width:12,height:15,p:right", 3, 1, 12, 15, CenterRight, TopLeft);
+    validate_abs!("x:4,w:12,y: 2,h:15,pivot:right", 4, 2, 12, 15, CenterRight, TopLeft);
 }
 #[test]
 fn layout_mode_pivot_top() {
-    validate_abs!("w:12,h:15,x:1,y:-2,p:t", 1, -2, 12, 15, Top, TopLeft);
-    validate_abs!("y: 1,x:3,width:12,height:15,p:top", 3, 1, 12, 15, Top, TopLeft);
-    validate_abs!("x:4,w:12,y: 2,h:15,pivot:top", 4, 2, 12, 15, Top, TopLeft);
+    validate_abs!("w:12,h:15,x:1,y:-2,p:t", 1, -2, 12, 15, TopCenter, TopLeft);
+    validate_abs!("y: 1,x:3,width:12,height:15,p:top", 3, 1, 12, 15, TopCenter, TopLeft);
+    validate_abs!("x:4,w:12,y: 2,h:15,pivot:top", 4, 2, 12, 15, TopCenter, TopLeft);
 }
 #[test]
 fn layout_mode_pivot_bottom() {
-    validate_abs!("width:12,h:15,x:1,y:-2,p:b", 1, -2, 12, 15, Bottom, TopLeft);
-    validate_abs!("y: 1,x:3,width:12,height:15,p:bottom", 3, 1, 12, 15, Bottom, TopLeft);
-    validate_abs!("x:4,w:12,y: 2,HEIGHT:15,pivot:bottom", 4, 2, 12, 15, Bottom, TopLeft);
+    validate_abs!("width:12,h:15,x:1,y:-2,p:b", 1, -2, 12, 15, BottomCenter, TopLeft);
+    validate_abs!("y: 1,x:3,width:12,height:15,p:bottom", 3, 1, 12, 15, BottomCenter, TopLeft);
+    validate_abs!("x:4,w:12,y: 2,HEIGHT:15,pivot:bottom", 4, 2, 12, 15, BottomCenter, TopLeft);
 }
 #[test]
 fn layout_mode_dock_center() {

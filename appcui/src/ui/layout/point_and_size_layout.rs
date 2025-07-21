@@ -151,13 +151,13 @@ impl PointAndSizeLayout {
 
         let a = match params.pivot.unwrap_or(Pivot::TopLeft) {
             Pivot::TopLeft => Alignment::TopLeft,
-            Pivot::Top => Alignment::Top,
+            Pivot::Top => Alignment::TopCenter,
             Pivot::TopRight => Alignment::TopRight,
-            Pivot::Right => Alignment::Right,
+            Pivot::Right => Alignment::CenterRight,
             Pivot::BottomRight => Alignment::BottomRight,
-            Pivot::Bottom => Alignment::Bottom,
+            Pivot::Bottom => Alignment::BottomCenter,
             Pivot::BottomLeft => Alignment::BottomLeft,
-            Pivot::Left => Alignment::Left,
+            Pivot::Left => Alignment::CenterLeft,
             Pivot::Center => Alignment::Center,
         };
         PointAndSizeLayout {
@@ -208,9 +208,9 @@ impl PointAndSizeLayout {
         // compute (x,y) based on anchor
         match self.anchor {
             Alignment::TopLeft => {}
-            Alignment::Top => x = (parent_width / 2) as i32,
+            Alignment::TopCenter => x = (parent_width / 2) as i32,
             Alignment::TopRight => x = (parent_width as i32) - x,
-            Alignment::Right => {
+            Alignment::CenterRight => {
                 x = (parent_width as i32) - x;
                 y = (parent_height / 2) as i32;
             }
@@ -218,12 +218,12 @@ impl PointAndSizeLayout {
                 x = (parent_width as i32) - x;
                 y = (parent_height as i32) - y;
             }
-            Alignment::Bottom => {
+            Alignment::BottomCenter => {
                 x = (parent_width / 2) as i32;
                 y = (parent_height as i32) - y;
             }
             Alignment::BottomLeft => y = (parent_height as i32) - y,
-            Alignment::Left => y = (parent_height / 2) as i32,
+            Alignment::CenterLeft => y = (parent_height / 2) as i32,
             Alignment::Center => {
                 x = (parent_width / 2) as i32;
                 y = (parent_height / 2) as i32;
@@ -232,9 +232,9 @@ impl PointAndSizeLayout {
         // align (x,y) from the current position based on Width/Height
         match self.align {
             Alignment::TopLeft => {}
-            Alignment::Top => x -= (control_layout.get_width() / 2) as i32,
+            Alignment::TopCenter => x -= (control_layout.get_width() / 2) as i32,
             Alignment::TopRight => x -= control_layout.get_width() as i32,
-            Alignment::Right => {
+            Alignment::CenterRight => {
                 x -= control_layout.get_width() as i32;
                 y -= (control_layout.get_height() / 2) as i32;
             }
@@ -242,12 +242,12 @@ impl PointAndSizeLayout {
                 x -= control_layout.get_width() as i32;
                 y -= control_layout.get_height() as i32;
             }
-            Alignment::Bottom => {
+            Alignment::BottomCenter => {
                 x -= (control_layout.get_width() / 2) as i32;
                 y -= control_layout.get_height() as i32;
             }
             Alignment::BottomLeft => y -= control_layout.get_height() as i32,
-            Alignment::Left => y -= (control_layout.get_height() / 2) as i32,
+            Alignment::CenterLeft => y -= (control_layout.get_height() / 2) as i32,
             Alignment::Center => {
                 x -= (control_layout.get_width() / 2) as i32;
                 y -= (control_layout.get_height() / 2) as i32;
