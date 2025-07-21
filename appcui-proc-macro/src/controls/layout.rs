@@ -15,6 +15,31 @@ macro_rules! should_not_use {
         }
     };
 }
+
+struct ParamConstraints {
+    min_i32: i32,
+    max_i32: i32,
+    min_f32: f32,
+    max_f32: f32,
+    allow_negative: bool,
+}
+
+const POSITION_CONSTRAINTS: ParamConstraints = ParamConstraints {
+    min_i32: -3000,
+    max_i32: 3000,
+    min_f32: -300.0f32,
+    max_f32: 300.0f32,
+    allow_negative: true,
+};
+const SIZE_CONSTRAINTS: ParamConstraints = ParamConstraints {
+    min_i32: 0,
+    max_i32: 3000,
+    min_f32: 0.0f32,
+    max_f32: 300.0f32,
+    allow_negative: false,
+};
+
+
 #[repr(u8)]
 #[derive(Copy, Clone)]
 pub(super) enum Anchors {
@@ -267,20 +292,25 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
         }
     }
 }
-fn add_number(output: &mut String, method: &'static str, key: &'static str, params: &mut NamedParamsMap, should_be_positive: bool) {
+fn add_number(output: &mut String, method: &'static str, key: &'static str, params: &mut NamedParamsMap, constraints: &ParamConstraints) {
     if let Some(v) = params.get_mut(key) {
         output.push_str(method);
         output.push('(');
         if let Some(value) = v.get_i32() {
-            if should_be_positive {
+            if !constraints.allow_negative {
                 if value < 0 {
                     panic!("Negative values are not permitted for parameter `{key}` --> (you have used the following value: '{value}'")
                 }
             }
+            if (value < constraints.min_i32) || (value > constraints.max_i32) {
+                panic!(
+                    "Invalid value for parameter `{key}` - should be between `{}` and `{}` but got `{value}`",
+                    constraints.min_i32, constraints.max_i32
+                )
+            }
             let _ = write!(output, "{value}");
-        }
-        if let Some(proc) = v.get_percentage() {
-            if should_be_positive {
+        } else if let Some(proc) = v.get_percentage() {
+            if !constraints.allow_negative {
                 if proc < 0.0f32 {
                     panic!(
                         "Negative percentages are not permitted for parameter `{key}` --> (you have used the following percentage: '{}'",
@@ -288,7 +318,15 @@ fn add_number(output: &mut String, method: &'static str, key: &'static str, para
                     )
                 }
             }
-            let _ = write!(output, "{proc}f32");
+            if (proc < constraints.min_f32) || (proc > constraints.max_f32) {
+                panic!(
+                    "Invalid percentage for parameter `{key}` - should be between `{}`% and `{}`% but got `{}`",
+                    (constraints.min_f32 * 100.0) as i32,
+                    (constraints.max_f32 * 100.0) as i32,
+                    v.get_string()
+                )
+            }
+            let _ = write!(output, "{}f32", proc/100.0f32);
         } else {
             panic!("Invalid value for parameter `{key}` -> expecting either a number (e.g. {key}: 10) or a percentage (e.g. {key}: 7.5%) but got the following value: '{}')",v.get_string());
         }
@@ -301,10 +339,10 @@ pub(super) fn add_layout(output: &mut String, params: &mut NamedParamsMap) {
     // copy_layout_params(s, params);
     // s.push_str("\")");
     output.push_str("LayoutBuilder::new()");
-    add_number(output, ".x", "x", params, false);
-    add_number(output, ".y", "y", params, false);
-    add_number(output, ".width", "width", params, true);
-    add_number(output, ".height", "height", params, true);
+    add_number(output, ".x", "x", params, &POSITION_CONSTRAINTS);
+    add_number(output, ".y", "y", params, &POSITION_CONSTRAINTS);
+    add_number(output, ".width", "width", params, &SIZE_CONSTRAINTS);
+    add_number(output, ".height", "height", params, &SIZE_CONSTRAINTS);
     output.push_str(".build()");
 }
 
