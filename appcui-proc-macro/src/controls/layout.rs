@@ -1,8 +1,9 @@
 use crate::controls::control_builder;
-use crate::parameter_parser::{alignament::Alignament, NamedParamsMap};
 use crate::parameter_parser;
+use crate::parameter_parser::{alignament::Alignament, NamedParamsMap};
 use crate::token_stream_to_string::TokenStreamToString;
 use proc_macro::*;
+use std::fmt::Write;
 use std::str::FromStr;
 
 static LAYOUT_PARAMS: [&str; 11] = ["x", "y", "left", "top", "right", "bottom", "align", "dock", "pivot", "width", "height"];
@@ -43,6 +44,7 @@ pub(super) enum Anchors {
     // All
     All = 0x0F,
 }
+
 impl Anchors {
     fn new(left: bool, top: bool, right: bool, bottom: bool) -> Anchors {
         let mut flags = 0u8;
@@ -151,7 +153,7 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
         should_not_use!(
             pivot,
             "When ('align' or 'a') parameter is used,('pivot' or 'p') parameters can not be used !"
-        );        
+        );
         return;
     }
     // x , y
@@ -265,11 +267,45 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
         }
     }
 }
-pub(super) fn add_layout(s: &mut String, params: &NamedParamsMap) {
-    s.push_str("Layout::new(\"");
-    analyze_layout_validity(params);
-    copy_layout_params(s, params);
-    s.push_str("\")");
+fn add_number(output: &mut String, method: &'static str, key: &'static str, params: &mut NamedParamsMap, should_be_positive: bool) {
+    if let Some(v) = params.get_mut(key) {
+        output.push_str(method);
+        output.push('(');
+        if let Some(value) = v.get_i32() {
+            if should_be_positive {
+                if value < 0 {
+                    panic!("Negative values are not permitted for parameter `{key}` --> (you have used the following value: '{value}'")
+                }
+            }
+            let _ = write!(output, "{value}");
+        }
+        if let Some(proc) = v.get_percentage() {
+            if should_be_positive {
+                if proc < 0.0f32 {
+                    panic!(
+                        "Negative percentages are not permitted for parameter `{key}` --> (you have used the following percentage: '{}'",
+                        v.get_string()
+                    )
+                }
+            }
+            let _ = write!(output, "{proc}f32");
+        } else {
+            panic!("Invalid value for parameter `{key}` -> expecting either a number (e.g. {key}: 10) or a percentage (e.g. {key}: 7.5%) but got the following value: '{}')",v.get_string());
+        }
+        output.push(')');
+    }
+}
+pub(super) fn add_layout(output: &mut String, params: &mut NamedParamsMap) {
+    // s.push_str("Layout::new(\"");
+    // analyze_layout_validity(params);
+    // copy_layout_params(s, params);
+    // s.push_str("\")");
+    output.push_str("LayoutBuilder::new()");
+    add_number(output, ".x", "x", params, false);
+    add_number(output, ".y", "y", params, false);
+    add_number(output, ".width", "width", params, true);
+    add_number(output, ".height", "height", params, true);
+    output.push_str(".build()");
 }
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
@@ -279,6 +315,6 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         e.panic();
     }
     let mut res = String::with_capacity(128);
-    add_layout(&mut res, &d);
-    TokenStream::from_str(&res).expect("Fail to convert 'layout!' macro content to token stream")    
+    add_layout(&mut res, &mut d);
+    TokenStream::from_str(&res).expect("Fail to convert 'layout!' macro content to token stream")
 }

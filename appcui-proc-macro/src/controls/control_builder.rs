@@ -246,7 +246,7 @@ impl<'a> ControlBuilder<'a> {
     }
     pub(super) fn add_layout(&mut self) {
         self.add_comma();
-        layout::add_layout(&mut self.content, &self.parser);
+        layout::add_layout(&mut self.content, &mut self.parser);
     }
     pub(super) fn add_toolbaritem_operations(&mut self) {
         if let Some(tooltip_value) = self.parser.get("tooltip") {
