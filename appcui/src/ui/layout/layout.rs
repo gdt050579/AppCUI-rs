@@ -1,9 +1,11 @@
+use crate::ui::LayoutBuilder;
+
 use super::anchors::Anchors;
 use super::Alignment;
-use super::Dock;
-use super::Pivot;
 use super::Coordinate16;
 use super::Dimension16;
+use super::Dock;
+use super::Pivot;
 
 /// Creates a new layout instance with the specified format string.
 ///
@@ -69,6 +71,15 @@ pub struct Layout {
 }
 
 impl Layout {
+    pub fn absolute(x: i32, y: i32, width: u32, height: u32) -> Self {
+        LayoutBuilder::new().x(x).y(y).width(width).height(height).build()
+    }
+    pub fn fill() -> Self {
+        LayoutBuilder::new().dock(Dock::Fill).build()
+    }
+    pub fn pivot(x: i32, y: i32, width: u32, height: u32, pivot: Pivot) -> Self {
+        LayoutBuilder::new().x(x).y(y).width(width).height(height).pivot(pivot).build()
+    }
     pub(super) fn get_anchors(&self) -> Anchors {
         Anchors::new(
             self.a_left.is_some(),
@@ -76,5 +87,5 @@ impl Layout {
             self.a_right.is_some(),
             self.a_bottom.is_some(),
         )
-    }    
+    }
 }
