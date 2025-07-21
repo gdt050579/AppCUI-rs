@@ -3,7 +3,7 @@
 //! The Layout component provides tools for arranging controls within containers.
 //! It supports anchoring, docking, proportional sizing, and alignment options.
 
-mod alignament;
+mod alignment;
 mod anchors;
 mod coordinate16;
 mod coordinate;
@@ -50,7 +50,7 @@ pub use coordinate::Coordinate;
 pub use dimension::Dimension;
 pub use dock::Dock;
 pub use pivot::Pivot;
-pub use alignament::Alignament;
+pub use alignment::Alignment;
 pub (in crate) use dimension16::Dimension16;
 pub (in crate) use coordinate16::Coordinate16;
 pub (in crate) use control_layout::ControlLayout;

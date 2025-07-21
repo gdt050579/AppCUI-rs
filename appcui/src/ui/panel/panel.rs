@@ -81,7 +81,7 @@ impl Panel {
             let format = TextFormatBuilder::new()
                 .position(3, 0)
                 .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .wrap_type(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();
@@ -106,7 +106,7 @@ impl Panel {
             let mut format = TextFormatBuilder::new()
                 .position(3, 0)
                 .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .wrap_type(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();
@@ -148,7 +148,7 @@ impl Panel {
             let mut format = TextFormatBuilder::new()
                 .position(3, 0)
                 .attribute(if self.is_enabled() { theme.tab.text.normal } else { theme.text.inactive })
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .wrap_type(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();

@@ -265,7 +265,7 @@ where
                 let mut format = TextFormatBuilder::new()
                     .position(1, self.header_y_ofs)
                     .attribute(col_text)
-                    .align(TextAlignament::Left)
+                    .align(TextAlignment::Left)
                     .build();
                 if self.symbol_size > 0 {
                     format.set_wrap_type(WrapType::SingleLineWrap(self.symbol_size as u16));
@@ -322,12 +322,12 @@ where
                 let mut format = TextFormatBuilder::new()
                     .position(2, self.expanded_panel_y + 1)
                     .attribute(col_text)
-                    .align(TextAlignament::Left)
+                    .align(TextAlignment::Left)
                     .build();
                 let mut format_symbol = TextFormatBuilder::new()
                     .position(2, self.expanded_panel_y + 1)
                     .attribute(theme.menu.symbol.normal)
-                    .align(TextAlignament::Left)
+                    .align(TextAlignment::Left)
                     .wrap_type(WrapType::SingleLineWrap(self.symbol_size as u16))
                     .build();
                 if self.symbol_size > 0 {

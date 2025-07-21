@@ -90,7 +90,7 @@ impl GenericAlertDialog {
             base: ModalWindow::with_type(
                 title,
                 LayoutBuilder::new()
-                    .alignament(Alignament::Center)
+                    .alignment(Alignment::Center)
                     .width(window_width)
                     .height(window_height)
                     .build(),

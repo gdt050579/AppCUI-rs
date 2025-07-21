@@ -1,4 +1,4 @@
-use super::alignament::Alignament;
+use super::alignment::Alignment;
 use super::color::Color;
 use super::coordonate::Coordonate;
 use super::dimension::Dimension;
@@ -14,7 +14,7 @@ pub(super) enum ValueType<'a> {
     Integer(i32),
     Percentage(f32),
     Size(Size),
-    Alignament(Alignament),
+    Alignment(Alignment),
     Dock(Dock),
     Color(Color),
     List(Vec<Value<'a>>),
@@ -118,21 +118,21 @@ impl<'a> Value<'a> {
         }
         None
     }
-    pub(crate) fn to_align(&self) -> Alignament {
-        if let ValueType::Alignament(value) = &self.data_type {
+    pub(crate) fn to_align(&self) -> Alignment {
+        if let ValueType::Alignment(value) = &self.data_type {
             return *value;
         }
-        panic!("Invalid alignament value: {}", self.raw_data);
+        panic!("Invalid alignment value: {}", self.raw_data);
     }
-    pub(crate) fn get_alignament(&mut self) -> Option<Alignament> {
+    pub(crate) fn get_alignment(&mut self) -> Option<Alignment> {
         if !self.is_value() {
             return None;
         }
-        if let ValueType::Alignament(value) = &self.data_type {
+        if let ValueType::Alignment(value) = &self.data_type {
             return Some(*value);
         }
-        if let Some(value) = Alignament::from_hash(utils::compute_hash(self.raw_data)) {
-            self.data_type = ValueType::Alignament(value);
+        if let Some(value) = Alignment::from_hash(utils::compute_hash(self.raw_data)) {
+            self.data_type = ValueType::Alignment(value);
             return Some(value);
         }
         None
@@ -347,14 +347,14 @@ impl<'a> Value<'a> {
         self.data_type = ValueType::List(v);
         Ok(())
     }
-    fn validate_alignament(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
-        if self.get_alignament().is_some() {
+    fn validate_alignment(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if self.get_alignment().is_some() {
             return Ok(());
         }
         Err(Error::new(
             param_list,
             format!(
-                "Expecting an alignament constant (left,topleft,top,topright,right,bottomright,bottom,bottomleft,center) for parameter '{}' but found '{}'",
+                "Expecting an alignment constant (left,topleft,top,topright,right,bottomright,bottom,bottomleft,center) for parameter '{}' but found '{}'",
                 display_param_name, self.raw_data
             )
             .as_str(),
@@ -503,7 +503,7 @@ impl<'a> Value<'a> {
             super::ParamType::String => { /* always possible */ }
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
             super::ParamType::Flags => self.validate_flags(display_param_name, param_list)?,
-            super::ParamType::Alignament => self.validate_alignament(display_param_name, param_list)?,
+            super::ParamType::Alignment => self.validate_alignment(display_param_name, param_list)?,
             super::ParamType::Dock => self.validate_dock(display_param_name, param_list)?,
             super::ParamType::Color => self.validate_color(display_param_name, param_list)?,
             super::ParamType::Layout => self.validate_layout(display_param_name, param_list)?,

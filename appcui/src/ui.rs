@@ -63,7 +63,7 @@
 //!     // Create a window with centered layout and specific size
 //!     let mut win = Window::new(
 //!         "First Window", 
-//!         LayoutBuilder::new().alignament(Alignament::Center).width(30).height(9).build(), 
+//!         LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(), 
 //!         window::Flags::Sizeable
 //!     );
 //!     
@@ -145,7 +145,7 @@ pub use command_bar::CommandBar;
 pub use layout::Layout;
 pub use layout::LayoutBuilder;
 pub use layout::Dock;
-pub use layout::Alignament;
+pub use layout::Alignment;
 pub use layout::Pivot;
 pub use numericselector::NumericSelector;
 pub use vsplitter::VSplitter;

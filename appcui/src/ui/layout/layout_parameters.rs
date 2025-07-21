@@ -1,5 +1,5 @@
 use super::anchors::Anchors;
-use super::Alignament;
+use super::Alignment;
 use super::Dock;
 use super::Pivot;
 use super::Coordinate16;
@@ -17,7 +17,7 @@ pub(super) struct LayoutParameters {
     pub a_right: Option<Coordinate16>,
     pub a_top: Option<Coordinate16>,
     pub a_bottom: Option<Coordinate16>,
-    pub align: Option<Alignament>,
+    pub align: Option<Alignment>,
     pub pivot: Option<Pivot>,
     pub dock: Option<Dock>,
 }
@@ -116,7 +116,7 @@ impl LayoutParameters {
                                 p.value, format
                             );
                         }
-                        if let Some(a) = Alignament::from_hash(p.value_hash) {
+                        if let Some(a) = Alignment::from_hash(p.value_hash) {
                             inf.align = Some(a);
                         } else {
                             panic!(

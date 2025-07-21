@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Surface, TextAlignament, TextFormatBuilder, WrapType},
+    graphics::{Surface, TextAlignment, TextFormatBuilder, WrapType},
     system::{Handle, Theme},
     utils::{Caption, ExtractHotKeyMethod},
 };
@@ -146,7 +146,7 @@ impl Button {
         let mut format = TextFormatBuilder::new()
             .position(self.base.get_left(), self.base.get_y())
             .attribute(st.get_button_attr(theme))
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
             .build();
         if self.caption.has_hotkey() {

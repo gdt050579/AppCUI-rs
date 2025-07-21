@@ -255,7 +255,7 @@ impl OnPaint for DatePicker {
         let mut format = TextFormatBuilder::new()
             .position(1, self.header_y_ofs)
             .attribute(col_text)
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .wrap_type(WrapType::SingleLineWrap((size.width - MIN_WIDTH_FOR_DATE_NAME) as u16))
             .build();
         surface.fill_horizontal_line(0, self.header_y_ofs, (size.width - MINSPACE_FOR_DATE_DRAWING) as i32, space_char);

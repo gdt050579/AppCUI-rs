@@ -263,7 +263,7 @@ impl Tab {
         let mut format = TextFormatBuilder::new()
             .position(1, y)
             .wrap_type(WrapType::SingleLineWrap(self.tab_width as u16 - 2))
-            .align(TextAlignament::Center)
+            .align(TextAlignment::Center)
             .build();
 
         let sz = self.size();
@@ -313,7 +313,7 @@ impl Tab {
         let mut format = TextFormatBuilder::new()
             .position(1, 1)
             .wrap_type(WrapType::SingleLineWrap(self.tab_width as u16 - 2))
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .build();
 
         for (index, page) in self.pages.iter().enumerate() {

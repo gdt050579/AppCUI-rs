@@ -1,6 +1,6 @@
 use crate::controls::control_builder;
 use crate::parameter_parser;
-use crate::parameter_parser::{alignament::Alignament, NamedParamsMap};
+use crate::parameter_parser::{alignment::Alignment, NamedParamsMap};
 use crate::token_stream_to_string::TokenStreamToString;
 use proc_macro::*;
 use std::fmt::Write;
@@ -174,8 +174,8 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
 
             if let Some(value) = params.get("align") {
                 match value.to_align() {
-                    Alignament::Top | Alignament::Center | Alignament::Bottom => {}
-                    _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) alignament values are allowed !"),
+                    Alignment::Top | Alignment::Center | Alignment::Bottom => {}
+                    _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) alignment values are allowed !"),
                 }
             }
         }
@@ -185,8 +185,8 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
 
             if let Some(value) = params.get("align") {
                 match value.to_align() {
-                    Alignament::Top | Alignament::Center | Alignament::Bottom => {}
-                    _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) alignament values are allowed !"),
+                    Alignment::Top | Alignment::Center | Alignment::Bottom => {}
+                    _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) alignment values are allowed !"),
                 }
             }
         }
@@ -283,10 +283,10 @@ fn add_number(output: &mut String, method: &'static str, key: &'static str, para
         output.push(')');
     }
 }
-fn add_alignament(output: &mut String, method: &'static str, enum_name: &'static str, key: &'static str, params: &mut NamedParamsMap) {
+fn add_alignment(output: &mut String, method: &'static str, enum_name: &'static str, key: &'static str, params: &mut NamedParamsMap) {
     if let Some(v) = params.get_mut(key) {
         let _ = write!(output, "{method}({enum_name}::");
-        if let Some(a) = v.get_alignament() {
+        if let Some(a) = v.get_alignment() {
             output.push_str(a.name());
         }
         output.push(')');
@@ -315,8 +315,8 @@ pub(super) fn add_layout(output: &mut String, params: &mut NamedParamsMap) {
     add_number(output, ".right_anchor", "right", params);
     add_number(output, ".top_anchor", "top", params);
     add_number(output, ".bottom_anchor", "bottom", params);
-    add_alignament(output, ".alignament", "Alignament", "align", params);
-    add_alignament(output, ".pivot", "Pivot", "pivot", params);
+    add_alignment(output, ".alignment", "Alignment", "align", params);
+    add_alignment(output, ".pivot", "Pivot", "pivot", params);
     add_dock(output, params);
     output.push_str(".build()");
 }

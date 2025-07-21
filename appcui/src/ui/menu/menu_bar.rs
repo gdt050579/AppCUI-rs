@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Character, Surface, TextAlignament},
+    graphics::{Character, Surface, TextAlignment},
     input::{Key, KeyCode, KeyModifier},
     prelude::TextFormatBuilder,
     system::{Handle, RuntimeManager, Theme},
@@ -227,7 +227,7 @@ impl MenuBar {
         let mut format = TextFormatBuilder::new()
             .position(0, self.y)
             .attribute(theme.menu.text.normal)
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .build();
         let open_idx = self.opened_item.index();
         let hover_idx = self.hovered_item.index();

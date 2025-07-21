@@ -2,7 +2,7 @@ use crate::ui::layout::absolute_layout::AbsoluteLayout;
 use crate::ui::layout::Coordinate;
 use crate::prelude::*;
 
-use super::Alignament;
+use super::Alignment;
 use super::ControlLayout;
 use super::Coordinate16;
 use super::Dimension16;
@@ -19,8 +19,8 @@ macro_rules! validate_abs {
             LayoutMode::PointAndSize(PointAndSizeLayout {
                 x: Coordinate16::Absolute($x),
                 y: Coordinate16::Absolute($y),
-                align: Alignament::$a,
-                anchor: Alignament::$anc,
+                align: Alignment::$a,
+                anchor: Alignment::$anc,
                 width: Dimension16::Absolute($w),
                 height: Dimension16::Absolute($h)
             })
@@ -57,8 +57,8 @@ fn layout_mode_xywh() {
         LayoutMode::PointAndSize(PointAndSizeLayout {
             x: Coordinate16::Absolute(-4),
             y: Coordinate16::Percentage(1000),
-            align: Alignament::TopLeft,
-            anchor: Alignament::TopLeft,
+            align: Alignment::TopLeft,
+            anchor: Alignment::TopLeft,
             width: Dimension16::Percentage(1000),
             height: Dimension16::Absolute(8)
         })
@@ -69,8 +69,8 @@ fn layout_mode_xywh() {
         LayoutMode::PointAndSize(PointAndSizeLayout {
             x: Coordinate16::Absolute(0),
             y: Coordinate16::Absolute(0),
-            align: Alignament::Center,
-            anchor: Alignament::TopLeft,
+            align: Alignment::Center,
+            anchor: Alignment::TopLeft,
             width: Dimension16::Percentage(10000),
             height: Dimension16::Percentage(2500)
         })
@@ -233,7 +233,7 @@ fn layout_mode_anchor_lr() {
     validate_pos!("l:5,r:7,y:0,h:10,p:t", 50, 30, 5, 0, 38, 10);
     validate_pos!("l:5,r:7,y:10,h:10,p:c", 50, 30, 5, 5, 38, 10);
     validate_pos!("l:5,r:7,y:20,h:10,p:b", 50, 30, 5, 10, 38, 10);
-    // no alignament - default is center
+    // no alignment - default is center
     validate_pos!("l:5,r:7,y:0,h:10", 50, 30, 5, -5, 38, 10);
 
     validate_pos!("l:10%,p:t,y:50%,r:20%,h:4", 50, 30, 5, 15, 35, 4);
@@ -254,8 +254,8 @@ fn layout_mode_anchor_lr_dont_allow_x() {
 }
 #[test]
 #[should_panic]
-fn layout_mode_anchor_lr_invalid_alignament() {
-    // this code should panic because only (top,bottom and center) alignaments can not be used in a Left-Right layout mode
+fn layout_mode_anchor_lr_invalid_alignment() {
+    // this code should panic because only (top,bottom and center) alignments can not be used in a Left-Right layout mode
     validate_pos!("l:5,r:7,y:0,h:10,a:left", 50, 30, 5, 0, 38, 10);
 }
 
@@ -264,7 +264,7 @@ fn layout_mode_anchor_tb() {
     validate_pos!("t:5,b:7,x:0,w:10,p:l", 30, 50, 0, 5, 10, 38);
     validate_pos!("t:5,b:7,x:10,w:10,p:c", 30, 50, 5, 5, 10, 38);
     validate_pos!("t:5,b:7,x:20,w:10,p:r", 30, 50, 10, 5, 10, 38);
-    // no alignament - default is center
+    // no alignment - default is center
     validate_pos!("t:5,b:7,x:0,w:10", 30, 50, -5, 5, 10, 38);
 
     validate_pos!("t:10%,p:l,x:50%,b:20%,w:4", 30, 50, 15, 5, 4, 35);
@@ -284,8 +284,8 @@ fn layout_mode_anchor_tb_dont_allow_y() {
 }
 #[test]
 #[should_panic]
-fn layout_mode_anchor_td_invalid_alignament() {
-    // this code should panic because only (left,right and center) alignaments can not be used in a Top-Down layout mode
+fn layout_mode_anchor_td_invalid_alignment() {
+    // this code should panic because only (left,right and center) alignments can not be used in a Top-Down layout mode
     validate_pos!("t:5,b:7,x:0,w:10,a:top", 30, 50, 0, 5, 10, 38);
 }
 
@@ -608,7 +608,7 @@ fn check_layout_builder() {
         .y(1.25)
         .width(100)
         .height(1.0)
-        .alignament(Alignament::Center)
+        .alignment(Alignment::Center)
         .dock(Dock::Top)
         .left_anchor(0.5)
         .right_anchor(0.25)
@@ -618,7 +618,7 @@ fn check_layout_builder() {
     assert_eq!(lb.params.y, Some(Coordinate16::Percentage(12500)));
     assert_eq!(lb.params.width, Some(Dimension16::Absolute(100)));
     assert_eq!(lb.params.height, Some(Dimension16::Percentage(10000)));
-    assert_eq!(lb.params.align, Some(Alignament::Center));
+    assert_eq!(lb.params.align, Some(Alignment::Center));
     assert_eq!(lb.params.dock, Some(Dock::Top));
     assert_eq!(lb.params.a_left, Some(Coordinate16::Percentage(5000)));
     assert_eq!(lb.params.a_right, Some(Coordinate16::Percentage(2500)));

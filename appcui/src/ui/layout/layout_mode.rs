@@ -1,5 +1,5 @@
 use super::AbsoluteLayout;
-use super::Alignament;
+use super::Alignment;
 use super::AllAnchorsLayout;
 use super::Anchors;
 use super::LayoutParameters;
@@ -68,10 +68,10 @@ impl LayoutMode {
 
         let anchors = params_list.get_anchors();
         match anchors {
-            Anchors::TopLeft => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&params_list, Alignament::TopLeft)),
-            Anchors::TopRight => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&params_list, Alignament::TopRight)),
-            Anchors::BottomRight => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&params_list, Alignament::BottomRight)),
-            Anchors::BottomLeft => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&params_list, Alignament::BottomLeft)),
+            Anchors::TopLeft => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&params_list, Alignment::TopLeft)),
+            Anchors::TopRight => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&params_list, Alignment::TopRight)),
+            Anchors::BottomRight => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&params_list, Alignment::BottomRight)),
+            Anchors::BottomLeft => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&params_list, Alignment::BottomLeft)),
             Anchors::LeftRight => LayoutMode::LeftRightAnchors(LeftRightAnchorsLayout::new(&params_list)),
             Anchors::TopBottom => LayoutMode::TopBottomAnchors(TopBottomAnchorsLayout::new(&params_list)),
             Anchors::LeftTopRight => LayoutMode::LeftTopRightAnchors(LeftTopRightAnchorsLayout::new(&params_list)),

@@ -1,21 +1,21 @@
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
-pub(crate) enum TextAlignament {
+pub(crate) enum TextAlignment {
     Left = 0,
     Right = 1,
     Center = 2,
 }
 
-static HASH_TO_ALIGNAMENT: [Option<TextAlignament>; 9] = [
-    Some(TextAlignament::Center),
+static HASH_TO_ALIGNAMENT: [Option<TextAlignment>; 9] = [
+    Some(TextAlignment::Center),
     None,
-    Some(TextAlignament::Right),
-    Some(TextAlignament::Left),
+    Some(TextAlignment::Right),
+    Some(TextAlignment::Left),
     None,
-    Some(TextAlignament::Center),
-    Some(TextAlignament::Left),
+    Some(TextAlignment::Center),
+    Some(TextAlignment::Left),
     None,
-    Some(TextAlignament::Right),
+    Some(TextAlignment::Right),
 ];
 
 static HASH_COLISION_VALIDATOR: [u64; 9] = [
@@ -30,8 +30,8 @@ static HASH_COLISION_VALIDATOR: [u64; 9] = [
     0xAF63EF4C86020CD5,
 ];
 
-impl TextAlignament {
-    pub(super) fn from_hash(hash: u64) -> Option<TextAlignament> {
+impl TextAlignment {
+    pub(super) fn from_hash(hash: u64) -> Option<TextAlignment> {
         let entry_index = (hash % 9) as usize;
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
@@ -40,9 +40,9 @@ impl TextAlignament {
     }
     pub fn get_name(&self) -> &'static str {
         match self {
-            TextAlignament::Left => "Left",
-            TextAlignament::Right => "Right",
-            TextAlignament::Center => "Center",
+            TextAlignment::Left => "Left",
+            TextAlignment::Right => "Right",
+            TextAlignment::Center => "Center",
         }
     }
 }

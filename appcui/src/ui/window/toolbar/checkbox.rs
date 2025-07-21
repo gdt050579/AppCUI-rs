@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Character, SpecialChar, Surface, TextAlignament, TextFormatBuilder, WrapType},
+    graphics::{Character, SpecialChar, Surface, TextAlignment, TextFormatBuilder, WrapType},
     system::{Handle, Theme},
     utils::Caption,
     utils::ExtractHotKeyMethod
@@ -168,7 +168,7 @@ impl CheckBox {
         let mut format = TextFormatBuilder::new()
             .position(x + 2, y)
             .attribute(text_attr)
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
             .build();
         if self.caption.has_hotkey() {

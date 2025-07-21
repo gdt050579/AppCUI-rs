@@ -40,7 +40,7 @@ fn check_window_pos_using_layout_builder() {
     let mut a = App::debug(60, 14, script).build().unwrap();
     a.add_window(Window::new(
         "Centered",
-        LayoutBuilder::new().width(30).height(8).alignament(Alignament::Center).build(),
+        LayoutBuilder::new().width(30).height(8).alignment(Alignment::Center).build(),
         window::Flags::NoCloseButton,
     ));
     a.run();

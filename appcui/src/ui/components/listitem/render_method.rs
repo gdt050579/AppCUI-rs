@@ -11,7 +11,7 @@ const MAX_RATING_STARS: u8 = 10;
 
 pub(crate) struct RenderData<'a> {
     pub(crate) theme: &'a Theme,
-    pub(crate) alignment: TextAlignament,
+    pub(crate) alignment: TextAlignment,
     pub(crate) width: u16,
     pub(crate) attr: Option<CharAttribute>,
 }
@@ -46,9 +46,9 @@ impl<'a> RenderMethod<'a> {
         let format = TextFormatBuilder::new()
             .position(
                 match rd.alignment {
-                    TextAlignament::Left => 0,
-                    TextAlignament::Center => (rd.width as i32) / 2,
-                    TextAlignament::Right => (rd.width as i32) - 1,
+                    TextAlignment::Left => 0,
+                    TextAlignment::Center => (rd.width as i32) / 2,
+                    TextAlignment::Right => (rd.width as i32) - 1,
                 },
                 0,
             )
@@ -63,9 +63,9 @@ impl<'a> RenderMethod<'a> {
         let format = TextFormatBuilder::new()
             .position(
                 match rd.alignment {
-                    TextAlignament::Left => 0,
-                    TextAlignament::Center => (rd.width as i32) / 2,
-                    TextAlignament::Right => (rd.width as i32) - 1,
+                    TextAlignment::Left => 0,
+                    TextAlignment::Center => (rd.width as i32) / 2,
+                    TextAlignment::Right => (rd.width as i32) - 1,
                 },
                 0,
             )

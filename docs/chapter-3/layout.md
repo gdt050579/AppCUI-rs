@@ -84,7 +84,7 @@ Where key can be one of the following:
 | width   | w    | numerical or percentage  | the width of the control                                 |
 | height  | h    | numerical or percentage  | the height of the control                                |
 | dock    | d    | docking value            | the way the entire control is docked on its parent       |
-| align   | a    | alignament value         | the way the entire control is aligne against a fix point |
+| align   | a    | alignment value         | the way the entire control is aligne against a fix point |
 
 **Remarks**
 * Key aliases can be use to provide a shorter format for a layout. In other words, the following two formats are identical: ``x:10,y:10,width:30,height:30`` and ``x:10,y:10,w:30,h:30``

@@ -6,7 +6,7 @@ use EnumBitFlags::EnumBitFlags;
 /// Represents the alignment of the text. It can be Left, Center or Right.
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq, Default, Eq)]
-pub enum TextAlignament {
+pub enum TextAlignment {
     #[default]
     Left,
     Center,
@@ -48,7 +48,7 @@ pub struct TextFormat {
     pub(super) hotkey_attr: CharAttribute,
     pub(super) hotkey_pos: u32,
     pub(super) chars_count: u16,
-    pub(crate) align: TextAlignament,
+    pub(crate) align: TextAlignment,
     pub(crate) wrap_type: WrapType,
 }
 
@@ -64,7 +64,7 @@ impl TextFormat {
     
     /// Sets the alignment of the text. It can be Left, Center or Right.
     #[inline(always)]
-    pub fn set_align(&mut self, align: TextAlignament) {
+    pub fn set_align(&mut self, align: TextAlignment) {
         self.align = align;
     }
 
@@ -138,7 +138,7 @@ impl Default for TextFormat {
     /// - `hotkey_attr`: Default::default()
     /// - `hotkey_pos`: 0
     /// - `chars_count`: 0
-    /// - `align`: TextAlignament::Left
+    /// - `align`: TextAlignment::Left
     /// - `wrap_type`: WrapType::SingleLine 
     fn default() -> Self {
         Self {
@@ -149,7 +149,7 @@ impl Default for TextFormat {
             hotkey_attr: Default::default(),
             hotkey_pos: 0,
             chars_count: 0,
-            align: TextAlignament::Left,
+            align: TextAlignment::Left,
             wrap_type: WrapType::SingleLine,
         }
     }
@@ -165,7 +165,7 @@ impl Default for TextFormat {
 /// let format = TextFormatBuilder::new()
 ///                     .position(10, 20)
 ///                     .attribute(CharAttribute::with_color(Color::White, Color::Black))
-///                     .align(TextAlignament::Center)
+///                     .align(TextAlignment::Center)
 ///                     .wrap_type(WrapType::WordWrap(50))
 ///                     .build();
 /// ```
@@ -204,7 +204,7 @@ impl TextFormatBuilder {
 
     /// Sets the alignment of the text. It can be Left, Center or Right.
     #[inline(always)]
-    pub fn align(mut self, align: TextAlignament) -> Self {
+    pub fn align(mut self, align: TextAlignment) -> Self {
         self.format.align = align;
         self
     }

@@ -1,5 +1,5 @@
 use super::should_not_use;
-use super::Alignament;
+use super::Alignment;
 use super::ControlLayout;
 use super::Coordinate16;
 use super::Dimension16;
@@ -13,8 +13,8 @@ pub(super) struct PointAndSizeLayout {
     pub y: Coordinate16,
     pub width: Dimension16,
     pub height: Dimension16,
-    pub align: Alignament,
-    pub anchor: Alignament,
+    pub align: Alignment,
+    pub anchor: Alignment,
 }
 impl PointAndSizeLayout {
     #[inline]
@@ -53,8 +53,8 @@ impl PointAndSizeLayout {
                     y: Coordinate16::Absolute(0),
                     width: params.width.unwrap_or(Dimension16::Percentage(10000)),
                     height: Dimension16::Percentage(10000),
-                    align: Alignament::TopLeft,
-                    anchor: Alignament::TopLeft,
+                    align: Alignment::TopLeft,
+                    anchor: Alignment::TopLeft,
                 }
             }
             Dock::Right => {
@@ -67,8 +67,8 @@ impl PointAndSizeLayout {
                     y: Coordinate16::Absolute(0),
                     width: params.width.unwrap_or(Dimension16::Percentage(10000)),
                     height: Dimension16::Percentage(10000),
-                    align: Alignament::TopRight,
-                    anchor: Alignament::TopRight,
+                    align: Alignment::TopRight,
+                    anchor: Alignment::TopRight,
                 }
             },
             Dock::Top => todo!(),
@@ -87,8 +87,8 @@ impl PointAndSizeLayout {
                     y: Coordinate16::Absolute(0),
                     width: Dimension16::Percentage(10000),
                     height: Dimension16::Percentage(10000),
-                    align: Alignament::TopLeft,
-                    anchor: Alignament::TopLeft,
+                    align: Alignment::TopLeft,
+                    anchor: Alignment::TopLeft,
                 }
             }
         }
@@ -133,7 +133,7 @@ impl PointAndSizeLayout {
 
     #[inline]
     pub(super) fn new_xy_width_height(params: &LayoutParameters) -> Self {
-        // it is assume that DOCK|D is not set (as it was process early in ProcessAlignamentedLayout)
+        // it is assume that DOCK|D is not set (as it was process early in ProcessAlignmentedLayout)
         // if X and Y are set --> Left, Right, Top and Bottom should not be set
         should_not_use!(
             params.a_left,
@@ -150,15 +150,15 @@ impl PointAndSizeLayout {
         );
 
         let a = match params.pivot.unwrap_or(Pivot::TopLeft) {
-            Pivot::TopLeft => Alignament::TopLeft,
-            Pivot::Top => Alignament::Top,
-            Pivot::TopRight => Alignament::TopRight,
-            Pivot::Right => Alignament::Right,
-            Pivot::BottomRight => Alignament::BottomRight,
-            Pivot::Bottom => Alignament::Bottom,
-            Pivot::BottomLeft => Alignament::BottomLeft,
-            Pivot::Left => Alignament::Left,
-            Pivot::Center => Alignament::Center,
+            Pivot::TopLeft => Alignment::TopLeft,
+            Pivot::Top => Alignment::Top,
+            Pivot::TopRight => Alignment::TopRight,
+            Pivot::Right => Alignment::Right,
+            Pivot::BottomRight => Alignment::BottomRight,
+            Pivot::Bottom => Alignment::Bottom,
+            Pivot::BottomLeft => Alignment::BottomLeft,
+            Pivot::Left => Alignment::Left,
+            Pivot::Center => Alignment::Center,
         };
         PointAndSizeLayout {
             x: params.x.unwrap(),
@@ -166,12 +166,12 @@ impl PointAndSizeLayout {
             width: params.width.unwrap_or(Dimension16::Absolute(1)),
             height: params.height.unwrap_or(Dimension16::Absolute(1)),
             align: a,
-            anchor: Alignament::TopLeft,
+            anchor: Alignment::TopLeft,
         }
     }
 
     #[inline]
-    pub(super) fn new_corner_anchor(params: &LayoutParameters, anchor: Alignament) -> Self {
+    pub(super) fn new_corner_anchor(params: &LayoutParameters, anchor: Alignment) -> Self {
         should_not_use!(
             params.x,
             "When a corner anchor is being use (top,left,righ,bottom), 'x' can bot be used !"
@@ -183,13 +183,13 @@ impl PointAndSizeLayout {
 
         PointAndSizeLayout {
             x: match anchor {
-                Alignament::TopLeft | Alignament::BottomLeft => params.a_left.unwrap(),
-                Alignament::TopRight | Alignament::BottomRight => params.a_right.unwrap(),
+                Alignment::TopLeft | Alignment::BottomLeft => params.a_left.unwrap(),
+                Alignment::TopRight | Alignment::BottomRight => params.a_right.unwrap(),
                 _ => unreachable!("Internal error --> this point should not ne reached"),
             },
             y: match anchor {
-                Alignament::TopLeft | Alignament::TopRight => params.a_top.unwrap(),
-                Alignament::BottomLeft | Alignament::BottomRight => params.a_bottom.unwrap(),
+                Alignment::TopLeft | Alignment::TopRight => params.a_top.unwrap(),
+                Alignment::BottomLeft | Alignment::BottomRight => params.a_bottom.unwrap(),
                 _ => unreachable!("Internal error --> this point should not ne reached"),
             },
             width: params.width.unwrap_or(Dimension16::Absolute(1)),
@@ -207,48 +207,48 @@ impl PointAndSizeLayout {
 
         // compute (x,y) based on anchor
         match self.anchor {
-            Alignament::TopLeft => {}
-            Alignament::Top => x = (parent_width / 2) as i32,
-            Alignament::TopRight => x = (parent_width as i32) - x,
-            Alignament::Right => {
+            Alignment::TopLeft => {}
+            Alignment::Top => x = (parent_width / 2) as i32,
+            Alignment::TopRight => x = (parent_width as i32) - x,
+            Alignment::Right => {
                 x = (parent_width as i32) - x;
                 y = (parent_height / 2) as i32;
             }
-            Alignament::BottomRight => {
+            Alignment::BottomRight => {
                 x = (parent_width as i32) - x;
                 y = (parent_height as i32) - y;
             }
-            Alignament::Bottom => {
+            Alignment::Bottom => {
                 x = (parent_width / 2) as i32;
                 y = (parent_height as i32) - y;
             }
-            Alignament::BottomLeft => y = (parent_height as i32) - y,
-            Alignament::Left => y = (parent_height / 2) as i32,
-            Alignament::Center => {
+            Alignment::BottomLeft => y = (parent_height as i32) - y,
+            Alignment::Left => y = (parent_height / 2) as i32,
+            Alignment::Center => {
                 x = (parent_width / 2) as i32;
                 y = (parent_height / 2) as i32;
             }
         }
         // align (x,y) from the current position based on Width/Height
         match self.align {
-            Alignament::TopLeft => {}
-            Alignament::Top => x -= (control_layout.get_width() / 2) as i32,
-            Alignament::TopRight => x -= control_layout.get_width() as i32,
-            Alignament::Right => {
+            Alignment::TopLeft => {}
+            Alignment::Top => x -= (control_layout.get_width() / 2) as i32,
+            Alignment::TopRight => x -= control_layout.get_width() as i32,
+            Alignment::Right => {
                 x -= control_layout.get_width() as i32;
                 y -= (control_layout.get_height() / 2) as i32;
             }
-            Alignament::BottomRight => {
+            Alignment::BottomRight => {
                 x -= control_layout.get_width() as i32;
                 y -= control_layout.get_height() as i32;
             }
-            Alignament::Bottom => {
+            Alignment::Bottom => {
                 x -= (control_layout.get_width() / 2) as i32;
                 y -= control_layout.get_height() as i32;
             }
-            Alignament::BottomLeft => y -= control_layout.get_height() as i32,
-            Alignament::Left => y -= (control_layout.get_height() / 2) as i32,
-            Alignament::Center => {
+            Alignment::BottomLeft => y -= control_layout.get_height() as i32,
+            Alignment::Left => y -= (control_layout.get_height() / 2) as i32,
+            Alignment::Center => {
                 x -= (control_layout.get_width() / 2) as i32;
                 y -= (control_layout.get_height() / 2) as i32;
             }

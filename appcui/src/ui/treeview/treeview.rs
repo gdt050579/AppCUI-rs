@@ -600,7 +600,7 @@ where
         let mut extra = 0;
         let mut rd = RenderData {
             theme,
-            alignment: TextAlignament::Left,
+            alignment: TextAlignment::Left,
             width: 0,
             attr: if item.is_visible_because_of_children() {
                 Some(theme.text.inactive)

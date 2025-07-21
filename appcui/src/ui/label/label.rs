@@ -36,7 +36,7 @@ impl OnPaint for Label {
         let mut format = TextFormatBuilder::new()
             .position(0, 0)
             .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .chars_count(self.caption.chars_count() as u16)
             .build();
 

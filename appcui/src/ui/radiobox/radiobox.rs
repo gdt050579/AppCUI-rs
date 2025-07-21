@@ -118,7 +118,7 @@ impl OnPaint for RadioBox {
             let mut format = TextFormatBuilder::new()
                 .position(self.symbol_width as i32, 0)
                 .attribute(attr_text)
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .chars_count(self.caption.chars_count() as u16)
                 .build();
             if sz.height > 1 {

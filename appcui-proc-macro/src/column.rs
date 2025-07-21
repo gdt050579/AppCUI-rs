@@ -1,6 +1,6 @@
-mod text_alignament;
+mod text_alignment;
 pub(crate) mod builder;
 
 
-use self::text_alignament::TextAlignament;
+use self::text_alignment::TextAlignment;
 pub(crate) use builder::create;

@@ -181,7 +181,7 @@ impl OnPaint for RamItGame {
                 let format = TextFormatBuilder::new()
                     .position(x as i32, y as i32)
                     .attribute(CharAttribute::with_color(Color::White, Color::Black))
-                    .align(TextAlignament::Center)
+                    .align(TextAlignment::Center)
                     .wrap_type(WrapType::SingleLine)
                     .build();
                 surface.write_text(&text, &format);

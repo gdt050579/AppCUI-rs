@@ -5826,7 +5826,7 @@ fn check_column_methods() {
     assert_eq!(l.column(2).unwrap().name(), "Stars");
     assert_eq!(l.column(7), None);
     assert_eq!(l.column(1).unwrap().width(), 12);
-    assert_eq!(l.column(4).unwrap().alignment(), TextAlignament::Center);
+    assert_eq!(l.column(4).unwrap().alignment(), TextAlignment::Center);
     assert_eq!(l.column(1).unwrap().tooltip(), "");
     // set a new name for the first column
     l.column_mut(0).unwrap().set_name("Server2");
@@ -5835,8 +5835,8 @@ fn check_column_methods() {
     l.column_mut(0).unwrap().set_tooltip("Server2 tooltip");
     assert_eq!(l.column(0).unwrap().tooltip(), "Server2 tooltip");
     // set right alignment for column with index 6
-    l.column_mut(6).unwrap().set_alignment(TextAlignament::Right);
-    assert_eq!(l.column(6).unwrap().alignment(), TextAlignament::Right);
+    l.column_mut(6).unwrap().set_alignment(TextAlignment::Right);
+    assert_eq!(l.column(6).unwrap().alignment(), TextAlignment::Right);
     w.add(l);
     a.add_window(w);
     a.run();

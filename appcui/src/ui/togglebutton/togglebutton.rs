@@ -136,7 +136,7 @@ impl OnPaint for ToggleButton {
         let format = TextFormatBuilder::new()
             .position((w / 2) as i32, 0)
             .attribute(col_text)
-            .align(TextAlignament::Center)
+            .align(TextAlignment::Center)
             .chars_count(self.caption.chars_count() as u16)
             .wrap_type(WrapType::SingleLineWrap(w as u16))
             .build();

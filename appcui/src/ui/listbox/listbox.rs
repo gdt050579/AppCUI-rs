@@ -351,7 +351,7 @@ impl OnPaint for ListBox {
             let format = TextFormatBuilder::new()
                 .position(w / 2, h / 2)
                 .attribute(empty_attr)
-                .align(TextAlignament::Center)
+                .align(TextAlignment::Center)
                 .wrap_type(WrapType::WordWrap(w as u16))
                 .build();
             surface.write_text(&self.empty_message, &format);

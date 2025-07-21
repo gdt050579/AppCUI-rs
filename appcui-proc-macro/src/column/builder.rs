@@ -1,4 +1,4 @@
-use super::TextAlignament;
+use super::TextAlignment;
 use crate::{
     parameter_parser::{self, *},
     token_stream_to_string::TokenStreamToString,
@@ -25,7 +25,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     // align
     NamedParameter::new("align", "align", ParamType::String),
     NamedParameter::new("a", "align", ParamType::String),
-    NamedParameter::new("alignament", "align", ParamType::String),
+    NamedParameter::new("alignment", "align", ParamType::String),
     // type
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("datatype", "type", ParamType::String),
@@ -57,14 +57,14 @@ pub(crate) fn create_from_dict(param_list: &str, dict: &mut NamedParamsMap) -> S
         let width = dict.get("caption").unwrap().get_string().chars().count().min(100);
         write!(res, "{},", width + 2).unwrap();
     }
-    // add alignament
-    res.push_str("TextAlignament::");
+    // add alignment
+    res.push_str("TextAlignment::");
     if let Some(value) = dict.get("align") {
-        if let Some(align) = TextAlignament::from_hash(crate::utils::compute_hash(value.get_string())) {
+        if let Some(align) = TextAlignment::from_hash(crate::utils::compute_hash(value.get_string())) {
             res.push_str(align.get_name());
             res.push(',');
         } else {
-            panic!("Invalid alignament value for column ! Available options are: Left or L, Right or R, Center or C");
+            panic!("Invalid alignment value for column ! Available options are: Left or L, Right or R, Center or C");
         }
     } else {
         // default to Left

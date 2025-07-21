@@ -215,8 +215,8 @@ where
     /// }
     ///
     /// let mut lv = listview!("Student, dock:fill");
-    /// lv.add_column(Column::new("Name", 10, TextAlignament::Left));
-    /// lv.add_column(Column::new("Grade", 6, TextAlignament::Right));
+    /// lv.add_column(Column::new("Name", 10, TextAlignment::Left));
+    /// lv.add_column(Column::new("Grade", 6, TextAlignment::Right));
     /// ```
     pub fn add_column(&mut self, column: Column) {
         self.header.add(column);
@@ -1070,7 +1070,7 @@ where
             let space_width = if left + 3 + txwidth <= right { txwidth } else { right - left - 3 };
             let format = TextFormatBuilder::new()
                 .position(left + 1, tl.y)
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .attribute(attr.unwrap_or(theme.text.hovered))
                 .wrap_type(WrapType::SingleLineWrap(space_width as u16))
                 .build();
@@ -1189,7 +1189,7 @@ where
         let mut extra = 0;
         let mut rd = RenderData {
             theme,
-            alignment: TextAlignament::Left,
+            alignment: TextAlignment::Left,
             width: 0,
             attr: None,
         };

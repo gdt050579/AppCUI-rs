@@ -98,10 +98,10 @@ impl listview::ListItem for Entry {
 
     fn column(index: u16) -> Column {
         match index {
-            0 => Column::new("&Name", 28, TextAlignament::Left),
-            1 => Column::new("&Size", 12, TextAlignament::Right),
-            2 => Column::new("&Created", 16, TextAlignament::Center),
-            _ => Column::new("", 10, TextAlignament::Left),
+            0 => Column::new("&Name", 28, TextAlignment::Left),
+            1 => Column::new("&Size", 12, TextAlignment::Right),
+            2 => Column::new("&Created", 16, TextAlignment::Center),
+            _ => Column::new("", 10, TextAlignment::Left),
         }
     }
 

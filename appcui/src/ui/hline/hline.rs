@@ -61,7 +61,7 @@ impl OnPaint for HLine {
             let format = TextFormatBuilder::new()
                 .position(w as i32 / 2, 0)
                 .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
-                .align(TextAlignament::Center)
+                .align(TextAlignment::Center)
                 .wrap_type(WrapType::SingleLineWrap(w as u16 - 4))
                 .build();
             surface.write_text(&self.title, &format);

@@ -36,6 +36,6 @@ All controls have a set of common parameters that are required for layout or to 
 | Parameter names                                                                 | Type                                               | Puspose                                     |
 | ------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------- |
 | `x`, `y`, `width`, `height`, `left`, `right`, `top`, `bottom` and their aliases | Numerical or percentage                            | Used for control layout                     |
-| `align` , `dock` and their aliases                                              | Alignament value (left, topleft, top, center, ...) | Used for control layout                     |
+| `align` , `dock` and their aliases                                              | Alignment value (left, topleft, top, center, ...) | Used for control layout                     |
 | `enabled` or `enable`                                                           | bool (**true** or **false**)                       | Use to set up the enable state of a control |
 | `visible`                                                                       | bool (**true** or **false**)                       | Use to set up the visibility of a control   |

@@ -210,7 +210,7 @@ impl OnPaint for Accordion {
         //     x: 1,
         //     y: 1,
         //     width: Some(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 }),
-        //     align: TextAlignament::Left,
+        //     align: TextAlignment::Left,
         //     text_wrap: TextWrap::Character,
         //     multi_line: false,
         //     ..Default::default()
@@ -218,7 +218,7 @@ impl OnPaint for Accordion {
         let mut format = TextFormatBuilder::new()
             .position(1, 1)
             .wrap_type(WrapType::SingleLineWrap(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 }))
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .build();
 
         let cidx = self.base.focused_child_index.index();

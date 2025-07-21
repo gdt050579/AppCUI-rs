@@ -4,7 +4,7 @@ mod parser;
 mod signature;
 mod named_params_map;
 mod flags_signature;
-pub(crate) mod alignament;
+pub(crate) mod alignment;
 pub(crate) mod dock;
 pub(crate) mod color;
 pub(crate) mod size;

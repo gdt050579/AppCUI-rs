@@ -7,7 +7,7 @@ use crate::utils::*;
 pub struct Column {
     pub(crate) name: Caption,
     pub(crate) width: u8,
-    pub(crate) alignment: TextAlignament,
+    pub(crate) alignment: TextAlignment,
     pub(crate) tooltip: String,
     pub(crate) x: i32,
 }
@@ -15,7 +15,7 @@ pub struct Column {
 impl Column {
     /// Creates a new column with the specified name, width and alignment.
     /// The tooltip is empty, but can further be set using the `set_tooltip` method.
-    pub fn new(name: &str, width: u8, alignment: TextAlignament) -> Self {
+    pub fn new(name: &str, width: u8, alignment: TextAlignment) -> Self {
         Self {
             name: Caption::new(name, ExtractHotKeyMethod::CtrlPlusKey),
             width,
@@ -37,7 +37,7 @@ impl Column {
     }
 
     /// Sets the alignment of the column (left, center or right).
-    pub fn set_alignment(&mut self, alignment: TextAlignament) {
+    pub fn set_alignment(&mut self, alignment: TextAlignment) {
         self.alignment = alignment;
     }
     /// Returns the name (caption) of the column.
@@ -52,7 +52,7 @@ impl Column {
     }
     /// Returns the alignment of the column (left, center or right).
     #[inline(always)]
-    pub fn alignment(&self) -> TextAlignament {
+    pub fn alignment(&self) -> TextAlignment {
         self.alignment
     }
     /// Returns the width of the column in characters.
@@ -66,9 +66,9 @@ impl Column {
             return;
         }
         let x = match self.alignment {
-            TextAlignament::Left => self.x + 1,
-            TextAlignament::Center => self.x + 1 + (w / 2),
-            TextAlignament::Right => self.x + w,
+            TextAlignment::Left => self.x + 1,
+            TextAlignment::Center => self.x + 1 + (w / 2),
+            TextAlignment::Right => self.x + w,
         };
         if fill {
             surface.fill_horizontal_line_with_size(self.x, 0, self.width as u32, Character::with_attributes(' ', char_attr));

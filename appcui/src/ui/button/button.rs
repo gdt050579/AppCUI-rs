@@ -84,7 +84,7 @@ impl OnPaint for Button {
         let mut format = TextFormatBuilder::new()
             .position(x, 0)
             .attribute(col_text)
-            .align(TextAlignament::Center)
+            .align(TextAlignment::Center)
             .chars_count(self.caption.chars_count() as u16)
             .wrap_type(WrapType::SingleLineWrap(w as u16))
             .build();

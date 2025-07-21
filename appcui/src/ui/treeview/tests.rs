@@ -30,7 +30,7 @@ impl ListItem for TestData {
         1
     }
     fn column(_: u16) -> crate::prelude::Column {
-        crate::prelude::Column::new("", 50, crate::prelude::TextAlignament::Left)
+        crate::prelude::Column::new("", 50, crate::prelude::TextAlignment::Left)
     }
         
     fn matches(&self, text: &str) -> bool {

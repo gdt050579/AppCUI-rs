@@ -223,7 +223,7 @@ where
                 let mut format = TextFormatBuilder::new()
                     .position(l + 1, 0)
                     .attribute(attr)
-                    .align(TextAlignament::Left)
+                    .align(TextAlignment::Left)
                     .build();
                 if chars_count <= vis_chars {
                     format.set_chars_count(chars_count as u16);
@@ -241,7 +241,7 @@ where
                 let format = TextFormatBuilder::new()
                     .position((l + r + 1) / 2, 0)
                     .attribute(attr)
-                    .align(TextAlignament::Center)
+                    .align(TextAlignment::Center)
                     .chars_count(self.txtlen as u16)
                     .wrap_type(WrapType::SingleLineWrap((r - (l + 1)) as u16))
                     .build();

@@ -721,7 +721,7 @@ pub fn charattr(input: TokenStream) -> TokenStream {
 /// 
 /// * `caption`, `name`, `text` - The text displayed in the column header
 /// * `width`, `w` - The width of the column in characters (if not specified, uses caption length + 2)
-/// * `align`, `a`, `alignament` - Text alignment in the column (Left, Right, or Center)
+/// * `align`, `a`, `alignment` - Text alignment in the column (Left, Right, or Center)
 /// 
 /// # Text Alignment Values
 /// 
@@ -760,7 +760,7 @@ pub fn headercolumn(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias)
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes: 
+/// * Alignment attributes: 
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -793,7 +793,7 @@ pub fn button(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias), `height` or `h` (alias), 
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)   
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -818,7 +818,7 @@ pub fn checkbox(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias), `height` or `h` (alias), 
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)   
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -842,7 +842,7 @@ pub fn radiobox(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -871,7 +871,7 @@ pub fn label(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -895,7 +895,7 @@ pub fn panel(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -925,7 +925,7 @@ pub fn toolbaritem(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias),
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -953,7 +953,7 @@ pub fn colorpicker(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -1240,7 +1240,7 @@ pub fn accordion(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias), 
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -1268,7 +1268,7 @@ pub fn keyselector(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias), `height` or `h` (alias),
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
@@ -1917,7 +1917,7 @@ pub fn togglebutton(input: TokenStream) -> TokenStream {
 /// * position attributes: `x` and  `y`,
 /// * size attributes: `width` or `w` (alias),
 /// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)   
-/// * Alignament attributes:
+/// * Alignment attributes:
 ///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 ///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
 /// * State attributes: `enabled`, `visible`
