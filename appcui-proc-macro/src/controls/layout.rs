@@ -292,6 +292,15 @@ fn add_alignament(output: &mut String, method: &'static str, enum_name: &'static
         output.push(')');
     }
 }
+fn add_dock(output: &mut String, params: &mut NamedParamsMap) {
+    if let Some(v) = params.get_mut("dock") {
+        output.push_str(".dock(Dock::");
+        if let Some(d) = v.get_dock() {
+            output.push_str(d.name());
+        }
+        output.push(')');
+    }
+}
 pub(super) fn add_layout(output: &mut String, params: &mut NamedParamsMap) {
     // s.push_str("Layout::new(\"");
     // copy_layout_params(s, params);
@@ -308,6 +317,7 @@ pub(super) fn add_layout(output: &mut String, params: &mut NamedParamsMap) {
     add_number(output, ".bottom_anchor", "bottom", params);
     add_alignament(output, ".alignament", "Alignament", "align", params);
     add_alignament(output, ".pivot", "Pivot", "pivot", params);
+    add_dock(output, params);
     output.push_str(".build()");
 }
 

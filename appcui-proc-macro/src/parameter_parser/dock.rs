@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub(crate) enum Dock {
     Left = 0,
     Right = 1,
@@ -8,7 +8,7 @@ pub(crate) enum Dock {
     Fill = 4,
 }
 
-static HASH_TO_DOCK: [Option<Dock>; 19] = [
+static HASH_TO_VALUE: [Option<Dock>; 19] = [
     None,
     None,
     Some(Dock::Fill),
@@ -58,6 +58,15 @@ impl Dock {
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        return HASH_TO_DOCK[entry_index];
+        return HASH_TO_VALUE[entry_index];
+    }
+    pub(crate) fn name(&self) -> &'static str {
+        match self {
+            Dock::Left => "Left",
+            Dock::Right => "Right",
+            Dock::Top => "Top",
+            Dock::Bottom => "Bottom",
+            Dock::Fill => "Fill",
+        }
     }
 }
