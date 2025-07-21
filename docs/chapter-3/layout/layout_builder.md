@@ -51,7 +51,7 @@ For example:
 - `Pivot::Center` → `(x, y)` will be the center of the control.
 - `Pivot::BottomRight` → `(x, y)` will be the bottom-right corner.
 
-The possible pivot values are defined by the [`Pivot`] enum:
+The possible pivot values are defined by the `Pivot` enum:
 - `Pivot::TopLeft`      – Align the top-left corner.
 - `Pivot::TopCenter`    – Align the top edge centered horizontally.
 - `Pivot::TopRight`     – Align the top-right corner.
@@ -78,7 +78,7 @@ let layout = LayoutBuilder::new()
 ### 3. Alignment Layout
 
 Position controls at predefined locations within the parent container (such as top-left, center, or bottom-right) while keeping its size fixed.
-The possible alignment values are defined by the [`Alignment`] enum:
+The possible alignment values are defined by the `Alignment` enum:
 - `Alignment::TopLeft`     – Control is positioned at the top-left corner of the parent.
 - `Alignment::TopCenter`   – Control is horizontally centered at the top edge.
 - `Alignment::TopRight`    – Control is positioned at the top-right corner.
@@ -111,7 +111,7 @@ let layout = LayoutBuilder::new()
 ### 4. Dock Layout
 
 Attach controls to edges of the parent container with automatic stretching. The control is resized automatically when the parent is resized.
-The possible docking options are defined by the [`Dock`] enum:
+The possible docking options are defined by the `Dock` enum:
 - `Dock::Left`   – Control is attached to the left edge of the parent and stretches vertically.
 - `Dock::Right`  – Control is attached to the right edge of the parent and stretches vertically.
 - `Dock::Top`    – Control is attached to the top edge of the parent and stretches horizontally.
