@@ -33,6 +33,9 @@
 
 - [Controls](chapter-3/controls.md)
     - [Layout](chapter-3/layout.md)
+        - [Layout structure](chapter-3/layout/layout_structure.md)
+        - [Layout builder](chapter-3/layout/layout_builder.md)
+        - [Layout proc-macro](chapter-3/layout/layout_procmacro.md)
         - [Absolute position](chapter-3/layout/absolute_position.md)
         - [Docking](chapter-3/layout/docking.md)
         - [Anchors](chapter-3/layout/anchors.md)
