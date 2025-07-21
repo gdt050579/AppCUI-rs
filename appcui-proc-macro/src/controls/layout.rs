@@ -6,8 +6,6 @@ use proc_macro::*;
 use std::fmt::Write;
 use std::str::FromStr;
 
-static LAYOUT_PARAMS: [&str; 11] = ["x", "y", "left", "top", "right", "bottom", "align", "dock", "pivot", "width", "height"];
-
 macro_rules! should_not_use {
     ($param:expr, $msg:literal) => {
         if $param {
@@ -74,20 +72,6 @@ impl Anchors {
             0x0F => Anchors::All,
 
             _ => Anchors::None,
-        }
-    }
-}
-fn copy_layout_params(s: &mut String, params: &NamedParamsMap) {
-    let mut one_added = false;
-    for p in LAYOUT_PARAMS {
-        if let Some(value) = params.get(p) {
-            if one_added {
-                s.push_str(" , ");
-            }
-            s.push_str(p);
-            s.push(':');
-            s.push_str(value.get_string());
-            one_added = true;
         }
     }
 }

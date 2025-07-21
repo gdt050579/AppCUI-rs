@@ -3,10 +3,7 @@ use super::Alignment;
 use super::Dock;
 use super::Pivot;
 use super::Coordinate16;
-use super::Parameter;
 use super::Dimension16;
-use crate::utils::KeyValueParser;
-use crate::utils::ValueType;
 
 #[derive(Debug,Eq,PartialEq)]
 pub(super) struct LayoutParameters {
