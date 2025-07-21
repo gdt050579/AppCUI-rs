@@ -21,7 +21,7 @@ impl TopBottomAnchorsLayout {
 
         if let Some(pivot) = params.pivot {
             match pivot {
-                Pivot::Left | Pivot::Center | Pivot::Right => {}
+                Pivot::CenterLeft | Pivot::Center | Pivot::CenterRight => {}
                 _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) pivot values are allowed !"),
             }
         }
@@ -44,8 +44,8 @@ impl TopBottomAnchorsLayout {
             ((parent_height as i32) - (top + bottom)).clamp(1, 0xFFFF) as u16,
         );
         match self.pivot {
-            Pivot::Left => control_layout.set_position(x, top),
-            Pivot::Right => control_layout.set_position(x - (control_layout.get_width() as i32), top),
+            Pivot::CenterLeft => control_layout.set_position(x, top),
+            Pivot::CenterRight => control_layout.set_position(x - (control_layout.get_width() as i32), top),
             Pivot::Center => control_layout.set_position(x - ((control_layout.get_width() / 2) as i32), top),
             _ => unreachable!("This code should not be reached --> internal error"),
         }

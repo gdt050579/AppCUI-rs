@@ -24,7 +24,7 @@ impl LeftRightAnchorsLayout {
 
         if let Some(pivot) = params.pivot {
             match pivot {
-                Pivot::Top|Pivot::Center|Pivot::Bottom => {},
+                Pivot::TopCenter|Pivot::Center|Pivot::BottomCenter => {},
                 _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) pivot values are allowed !")
             }
         }
@@ -52,8 +52,8 @@ impl LeftRightAnchorsLayout {
             self.height.absolute(parent_height),
         );
         match self.align {
-            Pivot::Top => control_layout.set_position(left, y),
-            Pivot::Bottom => control_layout.set_position(left, y - (control_layout.get_height() as i32)),
+            Pivot::TopCenter => control_layout.set_position(left, y),
+            Pivot::BottomCenter => control_layout.set_position(left, y - (control_layout.get_height() as i32)),
             Pivot::Center => control_layout.set_position(left, y - ((control_layout.get_height()/2) as i32)),
             _ => unreachable!("This code should not be reached --> internal error")
         }

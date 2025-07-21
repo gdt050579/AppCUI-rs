@@ -151,13 +151,13 @@ impl PointAndSizeLayout {
 
         let a = match params.pivot.unwrap_or(Pivot::TopLeft) {
             Pivot::TopLeft => Alignment::TopLeft,
-            Pivot::Top => Alignment::TopCenter,
+            Pivot::TopCenter => Alignment::TopCenter,
             Pivot::TopRight => Alignment::TopRight,
-            Pivot::Right => Alignment::CenterRight,
+            Pivot::CenterRight => Alignment::CenterRight,
             Pivot::BottomRight => Alignment::BottomRight,
-            Pivot::Bottom => Alignment::BottomCenter,
+            Pivot::BottomCenter => Alignment::BottomCenter,
             Pivot::BottomLeft => Alignment::BottomLeft,
-            Pivot::Left => Alignment::CenterLeft,
+            Pivot::CenterLeft => Alignment::CenterLeft,
             Pivot::Center => Alignment::Center,
         };
         PointAndSizeLayout {
