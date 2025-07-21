@@ -4,7 +4,7 @@ data = {}
 
 template_values = r"""
 #[repr(u8)]
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub(crate) enum ${NAME}
 {
 	${VALUES}
@@ -13,7 +13,7 @@ pub(crate) enum ${NAME}
 template = r"""
 ${ENUM}
 
-static HASH_TO_ALIGNAMENT: [Option<${NAME}>; ${DEVIDER}] = [
+static HASH_TO_VALUE: [Option<${NAME}>; ${DEVIDER}] = [
 	${TABLE_VALUES}
 ];
 
@@ -28,9 +28,9 @@ impl ${NAME}
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        return HASH_TO_ALIGNAMENT[entry_index];
+        return HASH_TO_VALUE[entry_index];
     }	
-    pub fn get_name(&self) -> &'static str {
+    pub(crate) fn name(&self) -> &'static str {
 	match self {
 		${TO_STRING}
 	}

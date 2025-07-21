@@ -16,29 +16,6 @@ macro_rules! should_not_use {
     };
 }
 
-struct ParamConstraints {
-    min_i32: i32,
-    max_i32: i32,
-    min_f32: f32,
-    max_f32: f32,
-    allow_negative: bool,
-}
-
-const POSITION_CONSTRAINTS: ParamConstraints = ParamConstraints {
-    min_i32: -3000,
-    max_i32: 3000,
-    min_f32: -300.0f32,
-    max_f32: 300.0f32,
-    allow_negative: true,
-};
-const SIZE_CONSTRAINTS: ParamConstraints = ParamConstraints {
-    min_i32: 0,
-    max_i32: 3000,
-    min_f32: 0.0f32,
-    max_f32: 300.0f32,
-    allow_negative: false,
-};
-
 
 #[repr(u8)]
 #[derive(Copy, Clone)]
@@ -292,40 +269,13 @@ fn analyze_layout_validity(params: &NamedParamsMap) {
         }
     }
 }
-fn add_number(output: &mut String, method: &'static str, key: &'static str, params: &mut NamedParamsMap, constraints: &ParamConstraints) {
+fn add_number(output: &mut String, method: &'static str, key: &'static str, params: &mut NamedParamsMap) {
     if let Some(v) = params.get_mut(key) {
         output.push_str(method);
         output.push('(');
         if let Some(value) = v.get_i32() {
-            if !constraints.allow_negative {
-                if value < 0 {
-                    panic!("Negative values are not permitted for parameter `{key}` --> (you have used the following value: '{value}'")
-                }
-            }
-            if (value < constraints.min_i32) || (value > constraints.max_i32) {
-                panic!(
-                    "Invalid value for parameter `{key}` - should be between `{}` and `{}` but got `{value}`",
-                    constraints.min_i32, constraints.max_i32
-                )
-            }
             let _ = write!(output, "{value}");
         } else if let Some(proc) = v.get_percentage() {
-            if !constraints.allow_negative {
-                if proc < 0.0f32 {
-                    panic!(
-                        "Negative percentages are not permitted for parameter `{key}` --> (you have used the following percentage: '{}'",
-                        v.get_string()
-                    )
-                }
-            }
-            if (proc < constraints.min_f32) || (proc > constraints.max_f32) {
-                panic!(
-                    "Invalid percentage for parameter `{key}` - should be between `{}`% and `{}`% but got `{}`",
-                    (constraints.min_f32 * 100.0) as i32,
-                    (constraints.max_f32 * 100.0) as i32,
-                    v.get_string()
-                )
-            }
             let _ = write!(output, "{}f32", proc/100.0f32);
         } else {
             panic!("Invalid value for parameter `{key}` -> expecting either a number (e.g. {key}: 10) or a percentage (e.g. {key}: 7.5%) but got the following value: '{}')",v.get_string());
@@ -333,16 +283,31 @@ fn add_number(output: &mut String, method: &'static str, key: &'static str, para
         output.push(')');
     }
 }
+fn add_alignament(output: &mut String, method: &'static str, key: &'static str, params: &mut NamedParamsMap) {
+    if let Some(v) = params.get_mut(key) {
+        output.push_str(method);
+        output.push_str("(Alignament::");
+        if let Some(a) = v.get_alignament() {
+            output.push_str(a.name());
+        }
+        output.push(')');
+    }
+}
 pub(super) fn add_layout(output: &mut String, params: &mut NamedParamsMap) {
     // s.push_str("Layout::new(\"");
-    // analyze_layout_validity(params);
     // copy_layout_params(s, params);
     // s.push_str("\")");
+    analyze_layout_validity(params);
     output.push_str("LayoutBuilder::new()");
-    add_number(output, ".x", "x", params, &POSITION_CONSTRAINTS);
-    add_number(output, ".y", "y", params, &POSITION_CONSTRAINTS);
-    add_number(output, ".width", "width", params, &SIZE_CONSTRAINTS);
-    add_number(output, ".height", "height", params, &SIZE_CONSTRAINTS);
+    add_number(output, ".x", "x", params);
+    add_number(output, ".y", "y", params);
+    add_number(output, ".width", "width", params);
+    add_number(output, ".height", "height", params);
+    add_number(output, ".left_anchor", "left", params);
+    add_number(output, ".right_anchor", "right", params);
+    add_number(output, ".top_anchor", "top", params);
+    add_number(output, ".bottom_anchor", "bottom", params);
+    add_alignament(output, ".alignament", "align", params);
     output.push_str(".build()");
 }
 

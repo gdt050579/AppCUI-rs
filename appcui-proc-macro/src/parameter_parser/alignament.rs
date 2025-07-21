@@ -1,18 +1,18 @@
 #[repr(u8)]
-#[derive(Copy,Clone,PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub(crate) enum Alignament {
     TopLeft = 0,
-    Top,
-    TopRight,
-    Right,
-    BottomRight,
-    Bottom,
-    BottomLeft,
-    Left,
-    Center,
+    TopRight = 1,
+    BottomLeft = 2,
+    BottomRight = 3,
+    Left = 4,
+    Right = 5,
+    Top = 6,
+    Bottom = 7,
+    Center = 8,
 }
 
-static HASH_TO_ALIGNAMENT: [Option<Alignament>; 95] = [
+static HASH_TO_VALUE: [Option<Alignament>; 95] = [
     None,
     None,
     None,
@@ -214,6 +214,19 @@ impl Alignament {
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        HASH_TO_ALIGNAMENT[entry_index]
+        return HASH_TO_VALUE[entry_index];
+    }
+    pub(crate) fn name(&self) -> &'static str {
+        match self {
+            Alignament::TopLeft => "TopLeft",
+            Alignament::TopRight => "TopRight",
+            Alignament::BottomLeft => "BottomLeft",
+            Alignament::BottomRight => "BottomRight",
+            Alignament::Left => "Left",
+            Alignament::Right => "Right",
+            Alignament::Top => "Top",
+            Alignament::Bottom => "Bottom",
+            Alignament::Center => "Center",
+        }
     }
 }
