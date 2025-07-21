@@ -146,6 +146,7 @@ pub use layout::Layout;
 pub use layout::LayoutBuilder;
 pub use layout::Dock;
 pub use layout::Alignament;
+pub use layout::Pivot;
 pub use numericselector::NumericSelector;
 pub use vsplitter::VSplitter;
 pub use hsplitter::HSplitter;

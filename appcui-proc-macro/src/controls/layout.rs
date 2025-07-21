@@ -283,10 +283,9 @@ fn add_number(output: &mut String, method: &'static str, key: &'static str, para
         output.push(')');
     }
 }
-fn add_alignament(output: &mut String, method: &'static str, key: &'static str, params: &mut NamedParamsMap) {
+fn add_alignament(output: &mut String, method: &'static str, enum_name: &'static str, key: &'static str, params: &mut NamedParamsMap) {
     if let Some(v) = params.get_mut(key) {
-        output.push_str(method);
-        output.push_str("(Alignament::");
+        let _ = write!(output, "{method}({enum_name}::");
         if let Some(a) = v.get_alignament() {
             output.push_str(a.name());
         }
@@ -307,7 +306,8 @@ pub(super) fn add_layout(output: &mut String, params: &mut NamedParamsMap) {
     add_number(output, ".right_anchor", "right", params);
     add_number(output, ".top_anchor", "top", params);
     add_number(output, ".bottom_anchor", "bottom", params);
-    add_alignament(output, ".alignament", "align", params);
+    add_alignament(output, ".alignament", "Alignament", "align", params);
+    add_alignament(output, ".pivot", "Pivot", "pivot", params);
     output.push_str(".build()");
 }
 
