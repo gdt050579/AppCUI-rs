@@ -1,4 +1,9 @@
-use super::LayoutParameters;
+use super::anchors::Anchors;
+use super::Alignment;
+use super::Dock;
+use super::Pivot;
+use super::Coordinate16;
+use super::Dimension16;
 
 /// Creates a new layout instance with the specified format string.
 ///
@@ -50,12 +55,26 @@ use super::LayoutParameters;
 /// ```
 #[derive(Debug, Eq, PartialEq)]
 pub struct Layout {
-    pub(super) params: LayoutParameters,
+    pub(super) x: Option<Coordinate16>,
+    pub(super) y: Option<Coordinate16>,
+    pub(super) width: Option<Dimension16>,
+    pub(super) height: Option<Dimension16>,
+    pub(super) a_left: Option<Coordinate16>,
+    pub(super) a_right: Option<Coordinate16>,
+    pub(super) a_top: Option<Coordinate16>,
+    pub(super) a_bottom: Option<Coordinate16>,
+    pub(super) align: Option<Alignment>,
+    pub(super) pivot: Option<Pivot>,
+    pub(super) dock: Option<Dock>,
 }
 
 impl Layout {
-    #[inline(always)]
-    pub(super) fn with_layout_params(params: LayoutParameters) -> Self {
-        Self { params }
-    }
+    pub(super) fn get_anchors(&self) -> Anchors {
+        Anchors::new(
+            self.a_left.is_some(),
+            self.a_top.is_some(),
+            self.a_right.is_some(),
+            self.a_bottom.is_some(),
+        )
+    }    
 }

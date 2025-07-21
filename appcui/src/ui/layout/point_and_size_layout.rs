@@ -4,7 +4,7 @@ use super::ControlLayout;
 use super::Coordinate16;
 use super::Dimension16;
 use super::Dock;
-use super::LayoutParameters;
+use super::Layout;
 use super::Pivot;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -18,7 +18,7 @@ pub(super) struct PointAndSizeLayout {
 }
 impl PointAndSizeLayout {
     #[inline]
-    pub(super) fn new_docked(params: &LayoutParameters) -> Self {
+    pub(super) fn new_docked(params: &Layout) -> Self {
         should_not_use!(params.x, "When ('dock' or 'd') parameter is used,'x' parameter can not be used !");
         should_not_use!(params.y, "When ('dock' or 'd') parameter is used,'y' parameter can not be used !");
         should_not_use!(
@@ -94,7 +94,7 @@ impl PointAndSizeLayout {
         }
     }
 
-    pub(super) fn new_aligned(params: &LayoutParameters) -> Self {
+    pub(super) fn new_aligned(params: &Layout) -> Self {
         should_not_use!(params.x, "When ('align' or 'a') parameter is used,'x' parameter can not be used !");
         should_not_use!(params.y, "When ('align' or 'a') parameter is used,'y' parameter can not be used !");
         should_not_use!(
@@ -132,7 +132,7 @@ impl PointAndSizeLayout {
     }
 
     #[inline]
-    pub(super) fn new_xy_width_height(params: &LayoutParameters) -> Self {
+    pub(super) fn new_xy_width_height(params: &Layout) -> Self {
         // it is assume that DOCK|D is not set (as it was process early in ProcessAlignmentedLayout)
         // if X and Y are set --> Left, Right, Top and Bottom should not be set
         should_not_use!(
@@ -171,7 +171,7 @@ impl PointAndSizeLayout {
     }
 
     #[inline]
-    pub(super) fn new_corner_anchor(params: &LayoutParameters, anchor: Alignment) -> Self {
+    pub(super) fn new_corner_anchor(params: &Layout, anchor: Alignment) -> Self {
         should_not_use!(
             params.x,
             "When a corner anchor is being use (top,left,righ,bottom), 'x' can bot be used !"

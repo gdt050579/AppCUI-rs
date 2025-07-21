@@ -1,20 +1,31 @@
 use crate::ui::Dock;
 
 use super::Alignment;
-use super::Pivot;
 use super::Coordinate16;
 use super::Dimension16;
 use super::Layout;
-use super::LayoutParameters;
+use super::Pivot;
 
 pub struct LayoutBuilder {
-    pub(super) params: LayoutParameters,
+    pub(super) inner_layout: Layout,
 }
 
 impl LayoutBuilder {
     pub fn new() -> Self {
         Self {
-            params: LayoutParameters::default(),
+            inner_layout: Layout {
+                x: None,
+                y: None,
+                width: None,
+                height: None,
+                a_left: None,
+                a_right: None,
+                a_top: None,
+                a_bottom: None,
+                align: None,
+                pivot: None,
+                dock: None,
+            },
         }
     }
 
@@ -22,7 +33,7 @@ impl LayoutBuilder {
     where
         Coordinate16: From<T>,
     {
-        self.params.x = Some(x.into());
+        self.inner_layout.x = Some(x.into());
         self
     }
 
@@ -30,7 +41,7 @@ impl LayoutBuilder {
     where
         Coordinate16: From<T>,
     {
-        self.params.y = Some(y.into());
+        self.inner_layout.y = Some(y.into());
         self
     }
 
@@ -38,7 +49,7 @@ impl LayoutBuilder {
     where
         Dimension16: From<T>,
     {
-        self.params.width = Some(width.into());
+        self.inner_layout.width = Some(width.into());
         self
     }
 
@@ -46,22 +57,22 @@ impl LayoutBuilder {
     where
         Dimension16: From<T>,
     {
-        self.params.height = Some(height.into());
+        self.inner_layout.height = Some(height.into());
         self
     }
 
     pub fn alignment(mut self, align: Alignment) -> Self {
-        self.params.align = Some(align);
+        self.inner_layout.align = Some(align);
         self
     }
 
     pub fn pivot(mut self, pivot: Pivot) -> Self {
-        self.params.pivot = Some(pivot);
+        self.inner_layout.pivot = Some(pivot);
         self
     }
 
     pub fn dock(mut self, dock: Dock) -> Self {
-        self.params.dock = Some(dock);
+        self.inner_layout.dock = Some(dock);
         self
     }
 
@@ -69,7 +80,7 @@ impl LayoutBuilder {
     where
         Coordinate16: From<T>,
     {
-        self.params.a_left = Some(left_anchor.into());
+        self.inner_layout.a_left = Some(left_anchor.into());
         self
     }
 
@@ -77,7 +88,7 @@ impl LayoutBuilder {
     where
         Coordinate16: From<T>,
     {
-        self.params.a_right = Some(right_anchor.into());
+        self.inner_layout.a_right = Some(right_anchor.into());
         self
     }
 
@@ -85,7 +96,7 @@ impl LayoutBuilder {
     where
         Coordinate16: From<T>,
     {
-        self.params.a_top = Some(top_anchor.into());
+        self.inner_layout.a_top = Some(top_anchor.into());
         self
     }
 
@@ -93,11 +104,11 @@ impl LayoutBuilder {
     where
         Coordinate16: From<T>,
     {
-        self.params.a_bottom = Some(bottom_anchor.into());
+        self.inner_layout.a_bottom = Some(bottom_anchor.into());
         self
     }
 
     pub fn build(self) -> Layout {
-        Layout::with_layout_params(self.params)
+        self.inner_layout
     }
 }

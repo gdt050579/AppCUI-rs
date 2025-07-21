@@ -121,7 +121,7 @@ impl ControlLayout {
 impl From<Layout> for ControlLayout {
     fn from(value: Layout) -> Self {
         Self {
-            mode: LayoutMode::with_params(value.params),
+            mode: LayoutMode::with_params(value),
             x: 0,
             y: 0,
             width: 0,

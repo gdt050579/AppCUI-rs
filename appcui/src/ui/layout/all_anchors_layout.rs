@@ -1,7 +1,7 @@
 use super::should_not_use;
 use super::ControlLayout;
 use super::Coordinate16;
-use super::LayoutParameters;
+use super::Layout;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct AllAnchorsLayout {
@@ -12,7 +12,7 @@ pub(super) struct AllAnchorsLayout {
 }
 
 impl AllAnchorsLayout {
-    pub(super) fn new(params: &LayoutParameters) -> Self {
+    pub(super) fn new(params: &Layout) -> Self {
         should_not_use!(params.x, "When (left,top,right,bottom) parameters are used together, 'X' parameter can not be used");
         should_not_use!(params.y, "When (left,top,right,bottom) parameters are used together, 'Y' parameter can not be used");
         should_not_use!(params.height, "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used");

@@ -3,7 +3,7 @@ use super::Pivot;
 use super::ControlLayout;
 use super::Coordinate16;
 use super::Dimension16;
-use super::LayoutParameters;
+use super::Layout;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopBottomAnchorsLayout {
@@ -15,7 +15,7 @@ pub(super) struct TopBottomAnchorsLayout {
 }
 
 impl TopBottomAnchorsLayout {
-    pub(super) fn new(params: &LayoutParameters) -> Self {
+    pub(super) fn new(params: &Layout) -> Self {
         should_not_use!(params.y, "When (top,bottom) parameters are used together, 'Y' parameter can not be used");
         should_not_use!(params.height,"When (top,bottom) parameters are used toghere, ('height' or 'h') parameters can not be used as the width is deduced from bottom-top difference");
 

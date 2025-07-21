@@ -9,7 +9,6 @@ mod coordinate16;
 mod coordinate;
 mod dimension16;
 mod dimension;
-mod layout_parameters;
 mod layout_mode;
 mod layout_builder;
 mod layout;
@@ -30,7 +29,6 @@ mod all_anchors_layout;
 mod tests;
 
 use anchors::Anchors;
-use layout_parameters::LayoutParameters;
 use layout_mode::LayoutMode;
 use absolute_layout::AbsoluteLayout;
 use point_and_size_layout::PointAndSizeLayout;

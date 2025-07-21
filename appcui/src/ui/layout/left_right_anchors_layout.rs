@@ -2,7 +2,7 @@ use super::should_not_use;
 use super::Pivot;
 use super::ControlLayout;
 use super::Coordinate16;
-use super::LayoutParameters;
+use super::Layout;
 use super::Dimension16;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -15,7 +15,7 @@ pub(super) struct LeftRightAnchorsLayout {
 }
 
 impl LeftRightAnchorsLayout {
-    pub(super) fn new(params: &LayoutParameters) -> Self {
+    pub(super) fn new(params: &Layout) -> Self {
         should_not_use!(
             params.x,
             "When (left,right) parameters are used together, 'X' parameter can not be used"
