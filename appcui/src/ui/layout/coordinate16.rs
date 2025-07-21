@@ -4,7 +4,7 @@ const MAX_COORDONATE: i32 = 30000;
 const MIN_COORDONATE: i32 = -30000;
 
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Eq)]
 pub enum Coordinate16 {
     Absolute(i16),
     Percentage(i16),
@@ -20,13 +20,6 @@ impl Coordinate16 {
         match self {
             Coordinate16::Absolute(v) => (*v) as i32,
             Coordinate16::Percentage(v) => ((*v) as i32) * (parent_size as i32) / 10000i32,
-        }
-    }
-    pub(super) fn new(value: &KeyValuePair) -> Option<Self> {
-        match value.value_type {
-            ValueType::Number => Some(Coordinate16::Absolute(value.numerical_value.clamp(MIN_COORDONATE, MAX_COORDONATE) as i16)),
-            ValueType::Percentage => Some(Coordinate16::Percentage(value.numerical_value.clamp(MIN_COORDONATE, MAX_COORDONATE) as i16)),
-            _ => None,
         }
     }
 }

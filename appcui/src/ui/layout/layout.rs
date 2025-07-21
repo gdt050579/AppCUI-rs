@@ -1,9 +1,5 @@
 use super::LayoutParameters;
 
-pub(super) enum LayoutBuildFormat<'a> {
-    String(&'a str),
-    Params(LayoutParameters),
-}
 /// Creates a new layout instance with the specified format string.
 ///
 /// The format string defines how a control should be positioned and sized within its parent container.
@@ -52,21 +48,14 @@ pub(super) enum LayoutBuildFormat<'a> {
 /// // Full anchors with short aliases
 /// let layout = layout!("l:20,t:7,r:10,b:10");
 /// ```
-pub struct Layout<'a> {
-    pub(super) format: LayoutBuildFormat<'a>,
+#[derive(Debug, Eq, PartialEq)]
+pub struct Layout {
+    pub(super) params: LayoutParameters,
 }
 
-impl Layout<'_> {
-    #[inline(always)]
-    pub fn new(format: &str) -> Layout {
-        Layout {
-            format: LayoutBuildFormat::String(format),
-        }
-    }
+impl Layout {
     #[inline(always)]
     pub(super) fn with_layout_params(params: LayoutParameters) -> Self {
-        Self {
-            format: LayoutBuildFormat::Params(params),
-        }
+        Self { params }
     }
 }

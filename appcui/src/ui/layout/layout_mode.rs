@@ -26,9 +26,9 @@ pub(super) enum LayoutMode {
     AllAnchors(AllAnchorsLayout),
 }
 impl LayoutMode {
-    pub(super) fn new(format: &str) -> LayoutMode {
-        Self::with_params(LayoutParameters::new(format))
-    }
+    // pub(super) fn new(format: &str) -> LayoutMode {
+    //     Self::with_params(LayoutParameters::new(format))
+    // }
     pub(super) fn with_params(params_list: LayoutParameters) -> LayoutMode {
         // check if layout params are OK
         // Step 1 ==> if dock option is present

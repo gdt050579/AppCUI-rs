@@ -118,13 +118,10 @@ impl ControlLayout {
     }
 }
 
-impl<'a> From<Layout<'a>> for ControlLayout {
+impl From<Layout> for ControlLayout {
     fn from(value: Layout) -> Self {
         Self {
-            mode: match value.format {
-                super::layout::LayoutBuildFormat::String(str_format) => LayoutMode::new(str_format),
-                super::layout::LayoutBuildFormat::Params(params) => LayoutMode::with_params(params)
-            },
+            mode: LayoutMode::with_params(value.params),
             x: 0,
             y: 0,
             width: 0,

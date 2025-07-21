@@ -97,7 +97,7 @@ impl LayoutBuilder {
         self
     }
 
-    pub fn build(self) -> Layout<'static> {
+    pub fn build(self) -> Layout {
         Layout::with_layout_params(self.params)
     }
 }
