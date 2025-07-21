@@ -11,6 +11,8 @@ pub struct LayoutBuilder {
 }
 
 impl LayoutBuilder {
+    /// Creates a new layout builder instance without any settings.
+    /// You still need to call any other method to set the layout.
     pub fn new() -> Self {
         Self {
             inner_layout: Layout {
