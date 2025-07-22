@@ -71,7 +71,7 @@ impl LayoutMode {
             Anchors::TopRight => PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopRight).map(|layout| LayoutMode::PointAndSize(layout)),
             Anchors::BottomRight => PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomRight).map(|layout| LayoutMode::PointAndSize(layout)),
             Anchors::BottomLeft => PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomLeft).map(|layout| LayoutMode::PointAndSize(layout)),
-            Anchors::LeftRight => LayoutMode::LeftRightAnchors(LeftRightAnchorsLayout::new(&layout)),
+            Anchors::LeftRight => LeftRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftRightAnchors(layout)),
             Anchors::TopBottom => LayoutMode::TopBottomAnchors(TopBottomAnchorsLayout::new(&layout)),
             Anchors::LeftTopRight => LeftTopRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftTopRightAnchors(layout)),
             Anchors::LeftBottomRight => LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout::new(&layout)),

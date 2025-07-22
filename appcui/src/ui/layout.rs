@@ -40,7 +40,7 @@ use left_bottom_right_anchors_layout::LeftBottomRightAnchorsLayout;
 use top_left_bottom_anchors_layout::TopLeftBottomAnchorsLayout;
 use top_right_bottom_anchors_layout::TopRightBottomAnchorsLayout;
 use all_anchors_layout::AllAnchorsLayout;
-use macros::should_not_use;
+use macros::{should_not_use, should_use};
 use error::Error;
 pub use layout::Layout;
 pub use layout_builder::LayoutBuilder;
