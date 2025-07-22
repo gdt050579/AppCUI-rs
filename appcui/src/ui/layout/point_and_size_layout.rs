@@ -142,7 +142,8 @@ impl PointAndSizeLayout {
     pub(super) fn new_corner_anchor(params: &Layout, anchor: Alignment) -> Result<Self, Error> {
         should_not_use!(params.x, Error::CornerAnchorParameterUsedWithXY);
         should_not_use!(params.y, Error::CornerAnchorParameterUsedWithXY);
-
+        should_not_use!(params.pivot, Error::CornerAnchorParameterUsedWithPivot);
+        
         Ok(PointAndSizeLayout {
             x: match anchor {
                 Alignment::TopLeft | Alignment::BottomLeft => params.a_left.unwrap(),

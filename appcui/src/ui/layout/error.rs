@@ -15,6 +15,7 @@ pub enum Error {
     DockParameterUsedWithAlign,
     AnchorParameterUsedWithXY,
     CornerAnchorParameterUsedWithXY,
+    CornerAnchorParameterUsedWithPivot,
     NoParameters,
     InvalidLayoutRule
 }
@@ -36,6 +37,7 @@ impl Error {
             Error::DockParameterUsedWithAlign => "When ('align') parameter is used, 'dock' parameter can not be used !",
             Error::AnchorParameterUsedWithXY => "When ('x' and 'y') parameters are used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !",
             Error::CornerAnchorParameterUsedWithXY => "When a corner anchor is provided - e.g ('top' with `left`, 'top' with `right`, 'bottom' with `left` or 'bottom' with `right`) - 'x' and 'y' parameters can not be used as they are infered from the anchor !",
+            Error::CornerAnchorParameterUsedWithPivot => "When a corner anchor is provided - e.g ('top' with `left`, 'top' with `right`, 'bottom' with `left` or 'bottom' with `right`) - 'pivot' parameter can not be used as it is infered from the anchor !",
             Error::InvalidLayoutRule => "The layout rule (combination of parameters) is invalid !",
         }
     }
