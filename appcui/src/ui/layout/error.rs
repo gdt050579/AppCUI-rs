@@ -30,6 +30,11 @@ pub enum Error {
     LeftBottomRightAnchorsUsedWithXY,
     LeftBottomRightAnchorsUsedWithWidth,
     LeftBottomRightAnchorsUsedWithPivot,
+    TopBottomAnchorsUsedWithY,
+    TopBottomAnchorsUsedWithHeight,
+    TopBottomAnchorsUsedWithoutX,
+    TopBottomAnchorsUsedWithoutPivot,
+    TopBottomAnchorsUsedWithInvalidPivot,
     NoParameters,
     InvalidLayoutRule
 }
@@ -67,6 +72,11 @@ impl Error {
             Error::LeftBottomRightAnchorsUsedWithXY => "When (left,bottom,right) anchors are used together, 'x' and 'y' parameter can not be used as they are infered from the anchors !",
             Error::LeftBottomRightAnchorsUsedWithWidth => "When (left,bottom,right) anchors are used together, 'width' parameter can not be used as it is infered from the anchors !",
             Error::LeftBottomRightAnchorsUsedWithPivot => "When (left,bottom,right) anchors are used together, 'pivot' parameter can not be used as it is infered from the anchors !",
+            Error::TopBottomAnchorsUsedWithY => "When (top,bottom) anchors are used together, 'y' parameter can not be used as it is infered from the anchors !",
+            Error::TopBottomAnchorsUsedWithHeight => "When (top,bottom) anchors are used together, 'height' parameter can not be used as it is infered from the anchors !",
+            Error::TopBottomAnchorsUsedWithoutX => "When (top,bottom) anchors are used together, 'x' parameter must be provided !",
+            Error::TopBottomAnchorsUsedWithoutPivot => "When (top,bottom) anchors are used together, 'pivot' parameter must be provided !",
+            Error::TopBottomAnchorsUsedWithInvalidPivot => "When (top,bottom) anchors are used together, only Pivot::LeftCenter, Pivot::Center and Pivot::RightCenter pivot values are allowed !",
         }
     }
 }   

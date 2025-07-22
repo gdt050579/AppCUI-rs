@@ -1,9 +1,10 @@
-use super::should_not_use;
+use super::{should_not_use, should_use};
 use super::Pivot;
 use super::ControlLayout;
 use super::Coordinate16;
 use super::Dimension16;
 use super::Layout;
+use super::Error;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopBottomAnchorsLayout {
@@ -15,24 +16,26 @@ pub(super) struct TopBottomAnchorsLayout {
 }
 
 impl TopBottomAnchorsLayout {
-    pub(super) fn new(params: &Layout) -> Self {
-        should_not_use!(params.y, "When (top,bottom) parameters are used together, 'Y' parameter can not be used");
-        should_not_use!(params.height,"When (top,bottom) parameters are used toghere, ('height' or 'h') parameters can not be used as the width is deduced from bottom-top difference");
+    pub(super) fn new(params: &Layout) -> Result<Self, Error> {
+        should_not_use!(params.y, Error::TopBottomAnchorsUsedWithY);
+        should_not_use!(params.height, Error::TopBottomAnchorsUsedWithHeight);
+        should_use!(params.x, Error::TopBottomAnchorsUsedWithoutX);
+        should_use!(params.pivot, Error::TopBottomAnchorsUsedWithoutPivot);
 
         if let Some(pivot) = params.pivot {
             match pivot {
                 Pivot::CenterLeft | Pivot::Center | Pivot::CenterRight => {}
-                _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) pivot values are allowed !"),
+                _ => return Err(Error::TopBottomAnchorsUsedWithInvalidPivot),
             }
         }
 
-        TopBottomAnchorsLayout {
+        Ok(TopBottomAnchorsLayout {
             top: params.a_top.unwrap(),
             bottom: params.a_bottom.unwrap(),
-            x: params.x.unwrap_or(Coordinate16::Absolute(0)),
+            x: params.x.unwrap(),
             width: params.width.unwrap_or(Dimension16::Absolute(1)),
-            pivot: params.pivot.unwrap_or(Pivot::Center),
-        }
+            pivot: params.pivot.unwrap(),
+        })
     }
     #[inline]
     pub(super) fn update_control_layout(&self, control_layout: &mut ControlLayout, parent_width: u16, parent_height: u16) {
