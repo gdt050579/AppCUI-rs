@@ -76,7 +76,7 @@ impl LayoutMode {
             Anchors::LeftTopRight => LeftTopRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftTopRightAnchors(layout)),
             Anchors::LeftBottomRight => LeftBottomRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftBottomRightAnchors(layout)),
             Anchors::TopLeftBottom => TopLeftBottomAnchorsLayout::new(&layout).map(|layout| LayoutMode::TopLeftBottomAnchors(layout)),
-            Anchors::TopRightBottom => LayoutMode::TopRightBottomAnchors(TopRightBottomAnchorsLayout::new(&layout)),
+            Anchors::TopRightBottom => TopRightBottomAnchorsLayout::new(&layout).map(|layout| LayoutMode::TopRightBottomAnchors(layout)),
             Anchors::All => AllAnchorsLayout::new(&layout).map(|layout| LayoutMode::AllAnchors(layout)),
             _ => {
                 // different errors

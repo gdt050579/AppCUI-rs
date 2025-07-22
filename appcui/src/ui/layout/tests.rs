@@ -233,8 +233,8 @@ fn layout_mode_anchor_lr() {
     validate_pos!("l:5,r:7,y:0,h:10,p:t", 50, 30, 5, 0, 38, 10);
     validate_pos!("l:5,r:7,y:10,h:10,p:c", 50, 30, 5, 5, 38, 10);
     validate_pos!("l:5,r:7,y:20,h:10,p:b", 50, 30, 5, 10, 38, 10);
-    // no alignment - default is center
-    validate_pos!("l:5,r:7,y:0,h:10", 50, 30, 5, -5, 38, 10);
+
+    validate_pos!("l:5,r:7,y:0,h:10,pivot:center", 50, 30, 5, -5, 38, 10);
 
     validate_pos!("l:10%,p:t,y:50%,r:20%,h:4", 50, 30, 5, 15, 35, 4);
     validate_pos!("l:10%,p:c,y:50%,r:20%,h:4", 50, 30, 5, 13, 35, 4);
