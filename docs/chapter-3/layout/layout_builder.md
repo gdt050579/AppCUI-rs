@@ -252,3 +252,21 @@ The `build()` method performs validation and will **panic** if conflicting layou
 - Using `alignment()` with anchors
 - Conflicting size specifications
 
+The `try_build()` method is similar to `build()`, but it returns a `Result` instead of a `Layout`.
+If the layout is invalid, an error is returned explaining the issue. This method is useful
+when you want to build a layout dynamically and want to check for errors.
+
+```rust
+use appcui::prelude::*;
+
+// invalid layout - Dock and Alignment can not be used together
+if let Ok(layout) = LayoutBuilder::new()
+    .dock(Dock::Fill)
+    .alignment(Alignment::Center)
+    .try_build() 
+{
+    // valid layout
+} else {
+    // invalid layout
+}
+```
