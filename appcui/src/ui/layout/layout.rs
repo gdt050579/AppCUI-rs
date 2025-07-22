@@ -25,7 +25,7 @@ use super::Pivot;
 /// // Full anchors with short aliases
 /// let layout = layout!("l:20,t:7,r:10,b:10");
 /// ```
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Layout {
     pub(super) x: Option<Coordinate16>,
     pub(super) y: Option<Coordinate16>,

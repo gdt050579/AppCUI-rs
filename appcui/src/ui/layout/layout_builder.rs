@@ -1,10 +1,11 @@
-use crate::ui::Dock;
-
 use super::Alignment;
 use super::Coordinate16;
 use super::Dimension16;
+use super::Error;
 use super::Layout;
+use super::LayoutMode;
 use super::Pivot;
+use crate::ui::Dock;
 
 pub struct LayoutBuilder {
     pub(super) inner_layout: Layout,
@@ -725,5 +726,29 @@ impl LayoutBuilder {
     /// ```
     pub fn build(self) -> Layout {
         self.inner_layout
+    }
+
+    /// This method is similar to `build()`, but it returns a `Result` instead of a `Layout`.
+    /// If the layout is invalid, an error is returned explaining the issue. This method is useful
+    /// when you want to build a layout dynamically and want to check for errors.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// // invalid layout - Dock and Alignment can not be used together
+    /// if let Ok(layout) = LayoutBuilder::new()
+    ///     .dock(Dock::Fill)
+    ///     .alignment(Alignment::Center)
+    ///     .try_build() 
+    /// {
+    ///     println!("Layout is valid");
+    /// } else {
+    ///     println!("Layout is invalid");
+    /// }
+    /// ```
+    pub fn try_build(self) -> Result<Layout, Error> {
+        let _ = LayoutMode::new(self.inner_layout.clone())?;
+        Ok(self.inner_layout)
     }
 }
