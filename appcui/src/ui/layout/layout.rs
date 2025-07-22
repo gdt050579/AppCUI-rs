@@ -161,7 +161,7 @@ impl Layout {
     pub fn aligned(align: Alignment, width: u32, height: u32) -> Self {
         LayoutBuilder::new().width(width).height(height).alignment(align).build()
     }
-    pub(super) fn get_anchors(&self) -> Anchors {
+    pub(super) fn anchors(&self) -> Anchors {
         Anchors::new(
             self.a_left.is_some(),
             self.a_top.is_some(),

@@ -15,7 +15,7 @@ use super::LayoutMode;
 macro_rules! validate_abs {
     ($text:literal, $x:expr,$y:expr,$w:expr,$h:expr,$a:tt,$anc:tt) => {
         assert_eq!(
-            LayoutMode::with_params(layout!($text)),
+            LayoutMode::new(layout!($text)),
             LayoutMode::PointAndSize(PointAndSizeLayout {
                 x: Coordinate16::Absolute($x),
                 y: Coordinate16::Absolute($y),
@@ -41,7 +41,7 @@ macro_rules! validate_pos {
 
 #[test]
 fn layout_mode_xywh() {
-    let l1 = LayoutMode::with_params(layout!("x:1,y:1,w:10,h:8"));
+    let l1 = LayoutMode::new(layout!("x:1,y:1,w:10,h:8"));
     assert_eq!(
         l1,
         LayoutMode::Absolute(AbsoluteLayout {
@@ -51,7 +51,7 @@ fn layout_mode_xywh() {
             height: 8
         })
     );
-    let l2 = LayoutMode::with_params(layout!("x:-4,y:10%,w:10%,h:8"));
+    let l2 = LayoutMode::new(layout!("x:-4,y:10%,w:10%,h:8"));
     assert_eq!(
         l2,
         LayoutMode::PointAndSize(PointAndSizeLayout {
@@ -63,7 +63,7 @@ fn layout_mode_xywh() {
             height: Dimension16::Absolute(8)
         })
     );
-    let l3 = LayoutMode::with_params(layout!("x:0,y:0,w:100%,h:25%,p:c"));
+    let l3 = LayoutMode::new(layout!("x:0,y:0,w:100%,h:25%,p:c"));
     assert_eq!(
         l3,
         LayoutMode::PointAndSize(PointAndSizeLayout {

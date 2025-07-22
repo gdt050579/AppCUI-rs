@@ -4,6 +4,7 @@ use super::ControlLayout;
 use super::Coordinate16;
 use super::Dimension16;
 use super::Dock;
+use super::Error;
 use super::Layout;
 use super::Pivot;
 
@@ -18,78 +19,72 @@ pub(super) struct PointAndSizeLayout {
 }
 impl PointAndSizeLayout {
     #[inline]
-    pub(super) fn new_docked(params: &Layout) -> Self {
-        should_not_use!(params.x, "When ('dock' or 'd') parameter is used,'x' parameter can not be used !");
-        should_not_use!(params.y, "When ('dock' or 'd') parameter is used,'y' parameter can not be used !");
-        should_not_use!(
-            params.a_top,
-            "When ('dock' or 'd') parameter is used,('top' or 't') parameters can not be used !"
-        );
-        should_not_use!(
-            params.a_bottom,
-            "When ('dock' or 'd') parameter is used,('bottom' or 'b') parameters can not be used !"
-        );
-        should_not_use!(
-            params.a_left,
-            "When ('dock' or 'd') parameter is used,('left' or 'l') parameters can not be used !"
-        );
-        should_not_use!(
-            params.a_right,
-            "When ('dock' or 'd') parameter is used,('right' or 'r') parameters can not be used !"
-        );
-        should_not_use!(
-            params.pivot,
-            "When ('dock' or 'd') parameter is used,('align' or 'a') parameters can not be used !"
-        );
+    pub(super) fn new_docked(params: &Layout) -> Result<Self, Error> {
+        should_not_use!(params.x, Error::XYParameterUsedWithDock);
+        should_not_use!(params.y, Error::XYParameterUsedWithDock);
+        should_not_use!(params.a_top, Error::AnchorParameterUsedWithDock);
+        should_not_use!(params.a_bottom, Error::AnchorParameterUsedWithDock);
+        should_not_use!(params.a_left, Error::AnchorParameterUsedWithDock);
+        should_not_use!(params.a_right, Error::AnchorParameterUsedWithDock);
+        should_not_use!(params.pivot, Error::PivotParameterUsedWithDock);
+        should_not_use!(params.align, Error::AlignParameterUsedWithDock);
 
         match params.dock.unwrap() {
             Dock::Left => {
-                should_not_use!(
-                    params.height,
-                    "When ('dock' or 'd') parameter is used with the value 'Left', the 'height' parameter can not be used !"
-                );
-                PointAndSizeLayout {
+                should_not_use!(params.height, Error::HeightParameterUsedWithLeftOrRightDock);
+                Ok(PointAndSizeLayout {
                     x: Coordinate16::Absolute(0),
                     y: Coordinate16::Absolute(0),
                     width: params.width.unwrap_or(Dimension16::Percentage(10000)),
                     height: Dimension16::Percentage(10000),
                     align: Alignment::TopLeft,
                     anchor: Alignment::TopLeft,
-                }
+                })
             }
             Dock::Right => {
-                should_not_use!(
-                    params.height,
-                    "When ('dock' or 'd') parameter is used with the value 'Right', the 'height' parameter can not be used !"
-                );
-                PointAndSizeLayout {
+                should_not_use!(params.height, Error::HeightParameterUsedWithLeftOrRightDock);
+                Ok(PointAndSizeLayout {
                     x: Coordinate16::Percentage(10000),
                     y: Coordinate16::Absolute(0),
                     width: params.width.unwrap_or(Dimension16::Percentage(10000)),
                     height: Dimension16::Percentage(10000),
                     align: Alignment::TopRight,
                     anchor: Alignment::TopRight,
-                }
-            },
-            Dock::Top => todo!(),
-            Dock::Bottom => todo!(),
+                })
+            }
+            Dock::Top => {
+                should_not_use!(params.width, Error::WidthParameterUsedWithTopOrBottomDock);
+                Ok(PointAndSizeLayout {
+                    x: Coordinate16::Absolute(0),
+                    y: Coordinate16::Absolute(0),
+                    width: Dimension16::Percentage(10000),
+                    height: params.height.unwrap_or(Dimension16::Percentage(10000)),
+                    align: Alignment::TopLeft,
+                    anchor: Alignment::TopLeft,
+                })
+            }
+            Dock::Bottom => {
+                should_not_use!(params.width, Error::WidthParameterUsedWithTopOrBottomDock);
+                Ok(PointAndSizeLayout {
+                    x: Coordinate16::Absolute(0),
+                    y: Coordinate16::Percentage(10000),
+                    width: Dimension16::Percentage(10000),
+                    height: params.height.unwrap_or(Dimension16::Percentage(10000)),
+                    align: Alignment::BottomLeft,
+                    anchor: Alignment::BottomLeft,
+                })
+            }
             Dock::Fill => {
-                should_not_use!(
-                    params.height,
-                    "When ('dock' or 'd') parameter is used with the value 'Fill', the 'height' parameter can not be used !"
-                );
-                should_not_use!(
-                    params.height,
-                    "When ('dock' or 'd') parameter is used with the value 'Fill', the 'width' parameter can not be used !"
-                );
-                PointAndSizeLayout {
+                should_not_use!(params.height, Error::WidthOrHeightParameterUsedWithDockFill);
+                should_not_use!(params.height, Error::WidthOrHeightParameterUsedWithDockFill);
+                Ok(PointAndSizeLayout {
                     x: Coordinate16::Absolute(0),
                     y: Coordinate16::Absolute(0),
                     width: Dimension16::Percentage(10000),
                     height: Dimension16::Percentage(10000),
                     align: Alignment::TopLeft,
                     anchor: Alignment::TopLeft,
-                }
+                })
             }
         }
     }

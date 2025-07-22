@@ -1,7 +1,7 @@
 macro_rules! should_not_use {
-    ($param:expr, $msg:literal) => {
+    ($param:expr, $error:expr) => {
         if $param.is_some() {
-            panic!($msg);
+            return Err($error);
         }
     };
 }
