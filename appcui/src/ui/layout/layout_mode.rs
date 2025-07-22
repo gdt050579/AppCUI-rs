@@ -67,10 +67,10 @@ impl LayoutMode {
 
         let anchors = layout.anchors();
         match anchors {
-            Anchors::TopLeft => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopLeft)),
-            Anchors::TopRight => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopRight)),
-            Anchors::BottomRight => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomRight)),
-            Anchors::BottomLeft => LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomLeft)),
+            Anchors::TopLeft => PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopLeft).map(|layout| LayoutMode::PointAndSize(layout)),
+            Anchors::TopRight => PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopRight).map(|layout| LayoutMode::PointAndSize(layout)),
+            Anchors::BottomRight => PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomRight).map(|layout| LayoutMode::PointAndSize(layout)),
+            Anchors::BottomLeft => PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomLeft).map(|layout| LayoutMode::PointAndSize(layout)),
             Anchors::LeftRight => LayoutMode::LeftRightAnchors(LeftRightAnchorsLayout::new(&layout)),
             Anchors::TopBottom => LayoutMode::TopBottomAnchors(TopBottomAnchorsLayout::new(&layout)),
             Anchors::LeftTopRight => LayoutMode::LeftTopRightAnchors(LeftTopRightAnchorsLayout::new(&layout)),

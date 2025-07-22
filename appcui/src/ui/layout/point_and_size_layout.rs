@@ -139,17 +139,11 @@ impl PointAndSizeLayout {
     }
 
     #[inline]
-    pub(super) fn new_corner_anchor(params: &Layout, anchor: Alignment) -> Self {
-        should_not_use!(
-            params.x,
-            "When a corner anchor is being use (top,left,righ,bottom), 'x' can bot be used !"
-        );
-        should_not_use!(
-            params.y,
-            "When a corner anchor is being use (top,left,righ,bottom), 'y' can bot be used !"
-        );
+    pub(super) fn new_corner_anchor(params: &Layout, anchor: Alignment) -> Result<Self, Error> {
+        should_not_use!(params.x, Error::CornerAnchorParameterUsedWithXY);
+        should_not_use!(params.y, Error::CornerAnchorParameterUsedWithXY);
 
-        PointAndSizeLayout {
+        Ok(PointAndSizeLayout {
             x: match anchor {
                 Alignment::TopLeft | Alignment::BottomLeft => params.a_left.unwrap(),
                 Alignment::TopRight | Alignment::BottomRight => params.a_right.unwrap(),
@@ -164,7 +158,7 @@ impl PointAndSizeLayout {
             height: params.height.unwrap_or(Dimension16::Absolute(1)),
             align: anchor,
             anchor,
-        }
+        })
     }
 
     #[inline]
