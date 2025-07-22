@@ -74,7 +74,7 @@ impl LayoutMode {
             Anchors::LeftRight => LeftRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftRightAnchors(layout)),
             Anchors::TopBottom => LayoutMode::TopBottomAnchors(TopBottomAnchorsLayout::new(&layout)),
             Anchors::LeftTopRight => LeftTopRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftTopRightAnchors(layout)),
-            Anchors::LeftBottomRight => LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout::new(&layout)),
+            Anchors::LeftBottomRight => LeftBottomRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftBottomRightAnchors(layout)),
             Anchors::TopLeftBottom => LayoutMode::TopLeftBottomAnchors(TopLeftBottomAnchorsLayout::new(&layout)),
             Anchors::TopRightBottom => LayoutMode::TopRightBottomAnchors(TopRightBottomAnchorsLayout::new(&layout)),
             Anchors::All => AllAnchorsLayout::new(&layout).map(|layout| LayoutMode::AllAnchors(layout)),
