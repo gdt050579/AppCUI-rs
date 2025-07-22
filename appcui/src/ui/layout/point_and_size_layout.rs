@@ -109,22 +109,13 @@ impl PointAndSizeLayout {
     }
 
     #[inline]
-    pub(super) fn new_xy_width_height(params: &Layout) -> Self {
+    pub(super) fn new_xy(params: &Layout) -> Result<Self, Error> {
         // it is assume that DOCK|D is not set (as it was process early in ProcessAlignmentedLayout)
         // if X and Y are set --> Left, Right, Top and Bottom should not be set
-        should_not_use!(
-            params.a_left,
-            "When (x,y) parameters are used, ('left' or 'l') parameter can not be used !"
-        );
-        should_not_use!(
-            params.a_right,
-            "When (x,y) parameters are used, ('right' or 'r') parameter can not be used !"
-        );
-        should_not_use!(params.a_top, "When (x,y) parameters are used, ('top' or 't') parameter can not be used !");
-        should_not_use!(
-            params.a_bottom,
-            "When (x,y) parameters are used, ('bottom' or 'b') parameter can not be used !"
-        );
+        should_not_use!(params.a_left, Error::AnchorParameterUsedWithXY);
+        should_not_use!(params.a_right, Error::AnchorParameterUsedWithXY);
+        should_not_use!(params.a_top, Error::AnchorParameterUsedWithXY);
+        should_not_use!(params.a_bottom, Error::AnchorParameterUsedWithXY);
 
         let a = match params.pivot.unwrap_or(Pivot::TopLeft) {
             Pivot::TopLeft => Alignment::TopLeft,
@@ -137,14 +128,14 @@ impl PointAndSizeLayout {
             Pivot::CenterLeft => Alignment::CenterLeft,
             Pivot::Center => Alignment::Center,
         };
-        PointAndSizeLayout {
+        Ok(PointAndSizeLayout {
             x: params.x.unwrap(),
             y: params.y.unwrap(),
             width: params.width.unwrap_or(Dimension16::Absolute(1)),
             height: params.height.unwrap_or(Dimension16::Absolute(1)),
             align: a,
             anchor: Alignment::TopLeft,
-        }
+        })
     }
 
     #[inline]

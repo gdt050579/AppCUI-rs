@@ -35,7 +35,7 @@ impl LayoutMode {
         }
         // Step 2 ==> if align option is present
         if layout.align.is_some() {
-            return LayoutMode::PointAndSize(PointAndSizeLayout::new_aligned(&layout));
+            return PointAndSizeLayout::new_aligned(&layout).map(|layout| LayoutMode::PointAndSize(layout));
         }
         // Step 2 ==> check (X,Y) + (W,H) + (optional pivot)
         if layout.x.is_some() && layout.y.is_some() {
@@ -44,6 +44,7 @@ impl LayoutMode {
                 && (layout.height.is_some())
                 && (layout.align.is_none())
                 && (layout.pivot.is_none())
+                && (layout.dock.is_none())
                 && (layout.a_top.is_none())
                 && (layout.a_left.is_none())
                 && (layout.a_bottom.is_none())
@@ -57,11 +58,11 @@ impl LayoutMode {
                     let w = w.absolute(0);
                     let h = h.absolute(0);
                     if (w > 0) && (h > 0) {
-                        return LayoutMode::Absolute(AbsoluteLayout::new(x.absolute(0), y.absolute(0), w, h));
+                        return Ok(LayoutMode::Absolute(AbsoluteLayout::new(x.absolute(0), y.absolute(0), w, h)));
                     }
                 }
             }
-            return LayoutMode::PointAndSize(PointAndSizeLayout::new_xy_width_height(&layout));
+            return PointAndSizeLayout::new_xy(&layout).map(|layout| LayoutMode::PointAndSize(layout));
         }
 
         let anchors = layout.anchors();
@@ -90,7 +91,7 @@ impl LayoutMode {
                 {
                     return Err(Error::NoParameters);
                 }
-                return Err(Error::InvalidLayoutRule(layout.to_string()));
+                return Err(Error::InvalidLayoutRule);
             }
         }
     }
