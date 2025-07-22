@@ -19,6 +19,10 @@ pub enum Error {
     AllAnchorsParameterUsedWithXY,
     AllAnchorsParameterUsedWithSize,
     AllAnchorsParameterUsedWithPivot,
+    LeftTopRightAnchorsUsedWithXY,
+    LeftTopRightAnchorsUsedWithWidth,
+    LeftTopRightAnchorsUsedWithPivot,
+
     NoParameters,
     InvalidLayoutRule
 }
@@ -45,6 +49,10 @@ impl Error {
             Error::AllAnchorsParameterUsedWithXY => "When all anchor parameters ('left', 'top', 'right' and 'bottom') are used, 'x' and 'y' parameters can not be used as they are infered from the anchors !",
             Error::AllAnchorsParameterUsedWithSize => "When all anchor parameters ('left', 'top', 'right' and 'bottom') are used, 'width' and 'height' parameters can not be used as they are infered from the anchors !",
             Error::AllAnchorsParameterUsedWithPivot => "When all anchor parameters ('left', 'top', 'right' and 'bottom') are used, 'pivot' parameter can not be used as it is infered from the anchors !",
+            Error::LeftTopRightAnchorsUsedWithXY => "When (left,top,right) anchors are used together, 'x' and 'y' parameter can not be used as they are infered from the anchors !",
+            Error::LeftTopRightAnchorsUsedWithWidth => "When (left,top,right) anchors are used together, 'width' parameter can not be used as it is infered from the anchors !",
+            Error::LeftTopRightAnchorsUsedWithPivot => "When (left,top,right) anchors are used together, 'pivot' parameter can not be used as it is infered from the anchors !",
+
         }
     }
 }   
