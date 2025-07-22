@@ -9,6 +9,10 @@ pub enum Error {
     WidthParameterUsedWithTopOrBottomDock,
     HeightParameterUsedWithLeftOrRightDock,
     WidthOrHeightParameterUsedWithDockFill,
+    XYParameterUsedWithAlign,
+    AnchorParameterUsedWithAlign,
+    PivotParameterUsedWithAlign,
+    DockParameterUsedWithAlign,
     NoParameters,
 }
 
@@ -23,6 +27,10 @@ impl Error {
             Error::WidthParameterUsedWithTopOrBottomDock => "When ('dock') parameter is used with the value 'Dock:Top' or 'Dock:Bottom', the 'width' parameter can not be used as it is infered from the parent's width !",
             Error::HeightParameterUsedWithLeftOrRightDock => "When ('dock') parameter is used with the value 'Dock:Left' or 'Dock:Right', the 'height' parameter can not be used as it is infered from the parent's height !",
             Error::WidthOrHeightParameterUsedWithDockFill => "When ('dock') parameter is used with the value 'Dock:Fill', the 'width' and 'height' parameters can not be used as they are infered from the parent's width and height !",
+            Error::XYParameterUsedWithAlign => "When ('align') parameter is used,'x' and 'y' parameters can not be used !",
+            Error::AnchorParameterUsedWithAlign => "When ('align') parameter is used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !",
+            Error::PivotParameterUsedWithAlign => "When ('align') parameter is used, 'pivot' parameter can not be used !",
+            Error::DockParameterUsedWithAlign => "When ('align') parameter is used, 'dock' parameter can not be used !",
         }
     }
 }   

@@ -89,41 +89,23 @@ impl PointAndSizeLayout {
         }
     }
 
-    pub(super) fn new_aligned(params: &Layout) -> Self {
-        should_not_use!(params.x, "When ('align' or 'a') parameter is used,'x' parameter can not be used !");
-        should_not_use!(params.y, "When ('align' or 'a') parameter is used,'y' parameter can not be used !");
-        should_not_use!(
-            params.a_top,
-            "When ('align' or 'a') parameter is used,('top' or 't') parameters can not be used !"
-        );
-        should_not_use!(
-            params.a_bottom,
-            "When ('align' or 'a') parameter is used,('bottom' or 'b') parameters can not be used !"
-        );
-        should_not_use!(
-            params.a_left,
-            "When ('align' or 'a') parameter is used,('left' or 'l') parameters can not be used !"
-        );
-        should_not_use!(
-            params.a_right,
-            "When ('align' or 'a') parameter is used,('right' or 'r') parameters can not be used !"
-        );
-        should_not_use!(
-            params.dock,
-            "When ('align' or 'a') parameter is used,('dock' or 'd') parameters can not be used !"
-        );
-        should_not_use!(
-            params.pivot,
-            "When ('align' or 'a') parameter is used,('pivot' or 'p') parameters can not be used !"
-        );
-        PointAndSizeLayout {
+    pub(super) fn new_aligned(params: &Layout) -> Result<Self, Error> {
+        should_not_use!(params.x, Error::XYParameterUsedWithAlign);
+        should_not_use!(params.y, Error::XYParameterUsedWithAlign);
+        should_not_use!(params.a_top, Error::AnchorParameterUsedWithAlign);
+        should_not_use!(params.a_bottom, Error::AnchorParameterUsedWithAlign);
+        should_not_use!(params.a_left, Error::AnchorParameterUsedWithAlign);
+        should_not_use!(params.a_right, Error::AnchorParameterUsedWithAlign);
+        should_not_use!(params.dock, Error::DockParameterUsedWithAlign);
+        should_not_use!(params.pivot, Error::PivotParameterUsedWithAlign);
+        Ok(PointAndSizeLayout {
             x: Coordinate16::Absolute(0),
             y: Coordinate16::Absolute(0),
             width: params.width.unwrap_or(Dimension16::Percentage(10000)),
             height: params.height.unwrap_or(Dimension16::Percentage(10000)),
             align: params.align.unwrap(),
             anchor: params.align.unwrap(),
-        }
+        })
     }
 
     #[inline]
