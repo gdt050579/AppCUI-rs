@@ -2,6 +2,7 @@ use super::should_not_use;
 use super::ControlLayout;
 use super::Coordinate16;
 use super::Layout;
+use super::Error;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct AllAnchorsLayout {
@@ -12,19 +13,19 @@ pub(super) struct AllAnchorsLayout {
 }
 
 impl AllAnchorsLayout {
-    pub(super) fn new(params: &Layout) -> Self {
-        should_not_use!(params.x, "When (left,top,right,bottom) parameters are used together, 'X' parameter can not be used");
-        should_not_use!(params.y, "When (left,top,right,bottom) parameters are used together, 'Y' parameter can not be used");
-        should_not_use!(params.height, "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used");
-        should_not_use!(params.width, "When (left,top,right,bottom) parameters are used together, 'widyj' parameter can not be used");
-        should_not_use!(params.align, "When (left,top,right,bottom) parameters are used together, 'align' parameter can not be used");
+    pub(super) fn new(params: &Layout) -> Result<Self, Error> {
+        should_not_use!(params.x, Error::AllAnchorsParameterUsedWithXY);
+        should_not_use!(params.y, Error::AllAnchorsParameterUsedWithXY);
+        should_not_use!(params.height, Error::AllAnchorsParameterUsedWithSize);
+        should_not_use!(params.width, Error::AllAnchorsParameterUsedWithSize);
+        should_not_use!(params.pivot, Error::AllAnchorsParameterUsedWithPivot);
 
-        AllAnchorsLayout {
+        Ok(AllAnchorsLayout {
             left: params.a_left.unwrap(),
             top: params.a_top.unwrap(),
             right: params.a_right.unwrap(),
             bottom: params.a_bottom.unwrap(),
-        }
+        })
     }
     #[inline]
     pub(super) fn update_control_layout(

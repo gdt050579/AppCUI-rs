@@ -77,7 +77,7 @@ impl LayoutMode {
             Anchors::LeftBottomRight => LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout::new(&layout)),
             Anchors::TopLeftBottom => LayoutMode::TopLeftBottomAnchors(TopLeftBottomAnchorsLayout::new(&layout)),
             Anchors::TopRightBottom => LayoutMode::TopRightBottomAnchors(TopRightBottomAnchorsLayout::new(&layout)),
-            Anchors::All => LayoutMode::AllAnchors(AllAnchorsLayout::new(&layout)),
+            Anchors::All => AllAnchorsLayout::new(&layout).map(|layout| LayoutMode::AllAnchors(layout)),
             _ => {
                 // different errors
                 if layout.x.is_none()

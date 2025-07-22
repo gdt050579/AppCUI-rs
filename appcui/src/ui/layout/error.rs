@@ -16,6 +16,9 @@ pub enum Error {
     AnchorParameterUsedWithXY,
     CornerAnchorParameterUsedWithXY,
     CornerAnchorParameterUsedWithPivot,
+    AllAnchorsParameterUsedWithXY,
+    AllAnchorsParameterUsedWithSize,
+    AllAnchorsParameterUsedWithPivot,
     NoParameters,
     InvalidLayoutRule
 }
@@ -39,6 +42,9 @@ impl Error {
             Error::CornerAnchorParameterUsedWithXY => "When a corner anchor is provided - e.g ('top' with `left`, 'top' with `right`, 'bottom' with `left` or 'bottom' with `right`) - 'x' and 'y' parameters can not be used as they are infered from the anchor !",
             Error::CornerAnchorParameterUsedWithPivot => "When a corner anchor is provided - e.g ('top' with `left`, 'top' with `right`, 'bottom' with `left` or 'bottom' with `right`) - 'pivot' parameter can not be used as it is infered from the anchor !",
             Error::InvalidLayoutRule => "The layout rule (combination of parameters) is invalid !",
+            Error::AllAnchorsParameterUsedWithXY => "When all anchor parameters ('left', 'top', 'right' and 'bottom') are used, 'x' and 'y' parameters can not be used as they are infered from the anchors !",
+            Error::AllAnchorsParameterUsedWithSize => "When all anchor parameters ('left', 'top', 'right' and 'bottom') are used, 'width' and 'height' parameters can not be used as they are infered from the anchors !",
+            Error::AllAnchorsParameterUsedWithPivot => "When all anchor parameters ('left', 'top', 'right' and 'bottom') are used, 'pivot' parameter can not be used as it is infered from the anchors !",
         }
     }
 }   
