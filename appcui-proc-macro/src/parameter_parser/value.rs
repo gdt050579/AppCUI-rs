@@ -124,6 +124,12 @@ impl<'a> Value<'a> {
         }
         panic!("Invalid alignment value: {}", self.raw_data);
     }
+    pub(crate) fn to_dock(&self) -> Dock {
+        if let ValueType::Dock(value) = &self.data_type {
+            return *value;
+        }
+        panic!("Invalid dock value: {}", self.raw_data);
+    }      
     pub(crate) fn get_alignment(&mut self) -> Option<Alignment> {
         if !self.is_value() {
             return None;

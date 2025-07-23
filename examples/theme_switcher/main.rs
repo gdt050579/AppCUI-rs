@@ -50,7 +50,7 @@ impl MyWindow {
         p_basic.add(radiobox!("'RadioBox &2',x:27,y:2,w:15"));
         p_basic.add(radiobox!("'RadioBox disabled',x:27,y:3,w:202,enabled:false"));
         p_basic.add(label!("'A text field editor:',x:1,y:5,w:23"));
-        p_basic.add(textfield!("'Text field',l:26,y:5,r:1"));
+        p_basic.add(textfield!("'Text field',l:26,y:5,r:1,p:c"));
         splitter.add(vsplitter::Panel::Left, p_basic);
 
         let mut p_selectors = panel!("'Selectors',l:1,t:10,r:1,h:7");

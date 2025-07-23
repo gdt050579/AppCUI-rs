@@ -9,7 +9,7 @@ struct ColoredText {
 impl ColoredText {
     fn new()->Self {
         Self {
-            base: ControlBase::new(layout!("l:1,y:6,r:1,h:3"),false),
+            base: ControlBase::new(layout!("l:1,y:6,r:1,h:3,p:c"),false),
             fore: Color::White,
             back: Color::Black
         }
