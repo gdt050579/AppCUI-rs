@@ -29,6 +29,7 @@ Let's consider that we want to position a control with its top-left corner the c
 ```rs
 Layout::absolute(8,5,18,6)
 ```
+or
 ```rs
 LayoutBuilder::new().x(8)
                     .y(5)
@@ -36,6 +37,7 @@ LayoutBuilder::new().x(8)
                     .height(6)
                     .build()
 ```
+or
 ```
 layout!("x:8,y:5,w:18,h:6")
 ```
