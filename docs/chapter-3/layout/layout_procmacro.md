@@ -14,19 +14,19 @@ or
 
 Where `parameter` refects the following `LayoutBuilder` method and can be one of the following:
 
-| Parameter | Alias<br>(short) | LayoutBuilder<br>method | Value type              | Description                                                                             |
-| --------- | ---------------- | ----------------------- | ----------------------- | --------------------------------------------------------------------------------------- |
-| x         |                  | .x(...)                 | numerical or percentage | "X" coordonate                                                                          |
-| y         |                  | .y(...)                 | numerical or percentage | "Y" coordonate                                                                          |
-| left      | l                | .left_anchor(...)       | numerical or percentage | left anchor for the control<br>(the space between parent left margin and control)       |
-| right     | r                | .right_anchor(...)      | numerical or percentage | right anchor for the control<br>(the space between parent right margin and control)     |
-| top       | t                | .top_anchor(...)        | numerical or percentage | top anchor for the control<br>(the space between parent top margin and control)         |
-| bottom    | b                | .bottom_anchor(...)     | numerical or percentage | bottom anchor for the control<br>(the space between parent bottom margin and control)   |
-| width     | w                | .width(...)             | numerical or percentage | the width of the control                                                                |
-| height    | h                | .height(...)            | numerical or percentage | the height of the control                                                               |
-| dock      | d                | .dock(...)              | docking value           | the way the entire control is docked on its parent                                      |
-| align     | a                | .alignment(...)         | alignment value         | the way the entire control is aligned against a fix point                               |
-| pivot     | p                | .pivot(...)             | pivotig direction       | the way the entire control is aligned agains the point represented by (x,y) - the pivot |
+| Parameter | Alias<br>(short) | LayoutBuilder<br>method | Value type              | Description                                                                              |
+| --------- | ---------------- | ----------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| x         |                  | .x(...)                 | numerical or percentage | "X" coordonate                                                                           |
+| y         |                  | .y(...)                 | numerical or percentage | "Y" coordonate                                                                           |
+| left      | l                | .left_anchor(...)       | numerical or percentage | left anchor for the control<br>(the space between parent left margin and control)        |
+| right     | r                | .right_anchor(...)      | numerical or percentage | right anchor for the control<br>(the space between parent right margin and control)      |
+| top       | t                | .top_anchor(...)        | numerical or percentage | top anchor for the control<br>(the space between parent top margin and control)          |
+| bottom    | b                | .bottom_anchor(...)     | numerical or percentage | bottom anchor for the control<br>(the space between parent bottom margin and control)    |
+| width     | w                | .width(...)             | numerical or percentage | the width of the control                                                                 |
+| height    | h                | .height(...)            | numerical or percentage | the height of the control                                                                |
+| dock      | d                | .dock(...)              | docking value           | the way the entire control is docked on its parent                                       |
+| align     | a                | .alignment(...)         | alignment value         | the way the entire control is aligned against the margins of its parent                  |
+| pivot     | p                | .pivot(...)             | pivoting direction      | the way the entire control is aligned against the point represented by (x,y) - the pivot |
 
 **Remarks**
 * Key aliases can be use to provide a shorter format for a layout. In other words, the following two formats are identical: ``width:30,height:30`` and ``w:30,h:30``
@@ -54,7 +54,7 @@ Dock values can be one of the following:
 1. Dock the control at the left edge of its parent and set its width to 10:
    ```rs
    layout!("dock:left, width:10")
-   ```
+   ```  
    or
    ```rs
    layout!("d:l, w:10")

@@ -216,19 +216,26 @@ fn validate_left_right_layout(lp: &LayoutParams, params: &NamedParamsMap) {
 
     match params.get("pivot").unwrap().to_align() {
         Alignment::TopCenter | Alignment::Center | Alignment::BottomCenter => {}
-        _ => panic!("When (left,right) anchors are used together, only TopCenter (tc or t), Center (c) and BottomCenter(bc or b) pivot values are allowed !"),
+        _ => panic!(
+            "When (left,right) anchors are used together, only TopCenter (tc or t), Center (c) and BottomCenter(bc or b) pivot values are allowed !"
+        ),
     }
 }
 
 fn validate_top_bottom_layout(lp: &LayoutParams, params: &NamedParamsMap) {
-    should_not_use!(lp.y, "When (top,bottom) anchors are used together, 'Y' parameter can not be used as it is infered from the anchors !");
+    should_not_use!(
+        lp.y,
+        "When (top,bottom) anchors are used together, 'Y' parameter can not be used as it is infered from the anchors !"
+    );
     should_not_use!(lp.height, "When (top,bottom) anchors are used together, ('height' or 'h') parameter can not be used as the height is deduced from top-bottom difference");
     should_use!(lp.x, "When (top,bottom) anchors are used together, 'X' parameter is required !");
     should_use!(lp.pivot, "When (top,bottom) anchors are used together, 'pivot' parameter is required !");
 
     match params.get("pivot").unwrap().to_align() {
-        Alignment::CenterLeft    | Alignment::Center | Alignment::CenterRight => {}
-        _ => panic!("When (top,bottom) anchors are used together, only CenterLeft (cl or c), Center (c) and CenterRight(cr or c) pivot values are allowed !"),
+        Alignment::CenterLeft | Alignment::Center | Alignment::CenterRight => {}
+        _ => panic!(
+            "When (top,bottom) anchors are used together, only CenterLeft (cl or c), Center (c) and CenterRight(cr or c) pivot values are allowed !"
+        ),
     }
 }
 
@@ -238,39 +245,90 @@ fn validate_corner_anchor_layout(lp: &LayoutParams, params: &NamedParamsMap) {
 }
 
 fn validate_left_top_right_layout(lp: &LayoutParams, params: &NamedParamsMap) {
-    should_not_use!(lp.x, "When (left,top,right) anchors are used together, 'x' can bot be used as it is infered from the anchors !");
-    should_not_use!(lp.y, "When (left,top,right) anchors are used together, 'y' can bot be used as it is infered from the anchors !");
-    should_not_use!(lp.width, "When (left,top,right) anchors are used together, 'width' can bot be used as it is infered from the anchors !");
+    should_not_use!(
+        lp.x,
+        "When (left,top,right) anchors are used together, 'x' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (left,top,right) anchors are used together, 'y' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.width,
+        "When (left,top,right) anchors are used together, 'width' can bot be used as it is infered from the anchors !"
+    );
     should_not_use!(lp.pivot, "When (left,top,right) anchors are used together, 'pivot' can bot be used !");
 }
 
 fn validate_left_bottom_right_layout(lp: &LayoutParams, params: &NamedParamsMap) {
-    should_not_use!(lp.x, "When (left,bottom,right) anchors are used together, 'x' can bot be used as it is infered from the anchors !");
-    should_not_use!(lp.y, "When (left,bottom,right) anchors are used together, 'y' can bot be used as it is infered from the anchors !");
-    should_not_use!(lp.width, "When (left,bottom,right) anchors are used together, 'width' can bot be used as it is infered from the anchors !");
+    should_not_use!(
+        lp.x,
+        "When (left,bottom,right) anchors are used together, 'x' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (left,bottom,right) anchors are used together, 'y' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.width,
+        "When (left,bottom,right) anchors are used together, 'width' can bot be used as it is infered from the anchors !"
+    );
     should_not_use!(lp.pivot, "When (left,bottom,right) anchors are used together, 'pivot' can bot be used !");
 }
 
 fn validate_top_left_bottom_layout(lp: &LayoutParams, params: &NamedParamsMap) {
-    should_not_use!(lp.x, "When (top,left,bottom) anchors are used together, 'x' can bot be used as it is infered from the anchors !");
-    should_not_use!(lp.y, "When (top,left,bottom) anchors are used together, 'y' can bot be used as it is infered from the anchors !");
-    should_not_use!(lp.height, "When (top,left,bottom) anchors are used together, 'height' can bot be used as it is infered from the anchors !");
+    should_not_use!(
+        lp.x,
+        "When (top,left,bottom) anchors are used together, 'x' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (top,left,bottom) anchors are used together, 'y' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.height,
+        "When (top,left,bottom) anchors are used together, 'height' can bot be used as it is infered from the anchors !"
+    );
     should_not_use!(lp.pivot, "When (top,left,bottom) anchors are used together, 'pivot' can bot be used !");
 }
 
 fn validate_top_right_bottom_layout(lp: &LayoutParams, params: &NamedParamsMap) {
-    should_not_use!(lp.x, "When (top,right,bottom) anchors are used together, 'x' can bot be used as it is infered from the anchors !");
-    should_not_use!(lp.y, "When (top,right,bottom) anchors are used together, 'y' can bot be used as it is infered from the anchors !");
-    should_not_use!(lp.width, "When (top,right,bottom) anchors are used together, 'width' can bot be used as it is infered from the anchors !");
+    should_not_use!(
+        lp.x,
+        "When (top,right,bottom) anchors are used together, 'x' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (top,right,bottom) anchors are used together, 'y' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.width,
+        "When (top,right,bottom) anchors are used together, 'width' can bot be used as it is infered from the anchors !"
+    );
     should_not_use!(lp.pivot, "When (top,right,bottom) anchors are used together, 'pivot' can bot be used !");
 }
 
 fn validate_all_anchors_layout(lp: &LayoutParams, params: &NamedParamsMap) {
-    should_not_use!(lp.x, "When (left,top,right,bottom) parameters are used together, 'x' parameter can not be used as it is infered from the anchors !");
-    should_not_use!(lp.y, "When (left,top,right,bottom) parameters are used together, 'y' parameter can not be used as it is infered from the anchors !");
-    should_not_use!(lp.width, "When (left,top,right,bottom) parameters are used together, 'width' parameter can not be used as it is infered from the anchors !");
-    should_not_use!(lp.height, "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used as it is infered from the anchors !");
-    should_not_use!(lp.pivot, "When (left,top,right,bottom) parameters are used together, 'pivot' parameter can not be used !");
+    should_not_use!(
+        lp.x,
+        "When (left,top,right,bottom) parameters are used together, 'x' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (left,top,right,bottom) parameters are used together, 'y' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.width,
+        "When (left,top,right,bottom) parameters are used together, 'width' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.height,
+        "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.pivot,
+        "When (left,top,right,bottom) parameters are used together, 'pivot' parameter can not be used !"
+    );
 }
 
 fn validate_layout(params: &NamedParamsMap) {

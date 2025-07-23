@@ -37,6 +37,7 @@
         - [Layout builder](chapter-3/layout/layout_builder.md)
         - [Layout proc-macro](chapter-3/layout/layout_procmacro.md)
         - [Absolute position](chapter-3/layout/absolute_position.md)
+        - [Positioning using a pivot](chapter-3/layout/pivot_position.md)
         - [Docking](chapter-3/layout/docking.md)
         - [Anchors](chapter-3/layout/anchors.md)
     - [Instantiate via Macros](chapter-3/instantiate_via_macros.md)
