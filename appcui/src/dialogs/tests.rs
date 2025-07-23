@@ -143,7 +143,7 @@ struct FolderSelectDialog {
 impl FolderSelectDialog {
     fn new(loc: &str, flags: SelectFolderDialogFlags) -> Self {
         let mut w = Self {
-            base: window!("Test,a:c"),
+            base: window!("Test,d:f"),
             loc: loc.to_string(),
             flags,
         };

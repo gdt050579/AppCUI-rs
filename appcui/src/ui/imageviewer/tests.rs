@@ -826,7 +826,7 @@ fn check_smallbloacks_scaling() {
         CheckHash(0x4332083E0CD9C530)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c");
+    let mut w = window!("Title,d:f");
     let s = r#"
         |RRRRGGGG|
         |RRRRGGGG|
@@ -867,7 +867,7 @@ fn check_macro_creation() {
         CheckHash(0x30560D8DDECA6294)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c");
+    let mut w = window!("Title,d:f");
     w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',a:c,w:100%,h:100%,cs:Color16"));
     a.add_window(w);
     a.run();
@@ -881,7 +881,7 @@ fn check_macro_creation_2() {
         CheckHash(0x7BFA1CEEF2BAD91)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c");
+    let mut w = window!("Title,d:f");
     w.add(imageviewer!(
         "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',a:c,w:100%,h:100%, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
     ));
@@ -897,7 +897,7 @@ fn check_ferris_ascii_art() {
         CheckHash(0x36815E6258204EF7)
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
-    let mut w = window!("Title,a:c");
+    let mut w = window!("Title,d:f");
     let mut i = imageviewer!("a:c,w:100%,h:100%,scale:25%,charset:AsciiArt,flags:ScrollBars,cs:Color16");
     i.set_image(ferris_image());
     w.add(i);
@@ -958,7 +958,7 @@ fn check_keyboard() {
         CheckHash(0x52BF4FAAE6446859)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Title,a:c");
+    let mut w = window!("Title,d:f");
     let mut i = imageviewer!("a:c,w:100%,h:100%,scale:50%,flags:ScrollBars,cs:Color16");
     i.set_image(ferris_image());
     w.add(i);
@@ -1016,7 +1016,7 @@ fn check_keyboard_2() {
         CheckHash(0x60098108CD0E3264)
     ";
     let mut a = App::debug(40, 15, script).build().unwrap();
-    let mut w = window!("Title,a:c");
+    let mut w = window!("Title,d:f");
     let mut i = imageviewer!("a:c,w:100%,h:100%,flags:ScrollBars,cs:color16");
     i.set_image(ferris_image());
     w.add(i);
@@ -1032,7 +1032,7 @@ fn check_clear_background() {
         CheckHash(0x30560D8DDECA6294)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c");
+    let mut w = window!("Title,d:f");
     let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',a:c,w:100%,h:100%, back: {X,Red}, cs:Color16");
     i.clear_background();
     w.add(i);
@@ -1070,7 +1070,7 @@ fn check_mouse_events() {
         CheckHash(0xF13E7EE85932A59C)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c");
+    let mut w = window!("Title,d:f");
     let i = ImageViewer::new(
         ferris_image(),
         layout!("d:f"),
