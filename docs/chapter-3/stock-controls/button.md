@@ -83,8 +83,8 @@ impl MyWin {
             reset: Handle::None,
             counter: 0,
         };
-        win.add = win.add(Button::new("Add (0)", layout!("x:25%,y:2,w:13,a:c"), button::Type::Normal));
-        win.reset = win.add(Button::new("&Reset", layout!("x:75%,y:2,w:13,a:c",), button::Type::Normal));
+        win.add = win.add(Button::new("Add (0)", layout!("x:25%,y:2,w:13,d:f"), button::Type::Normal));
+        win.reset = win.add(Button::new("&Reset", layout!("x:75%,y:2,w:13,d:f",), button::Type::Normal));
         win
     }
     fn update_add_button_caption(&mut self) {

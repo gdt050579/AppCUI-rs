@@ -8,7 +8,7 @@ struct MyWindow {
 impl MyWindow {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("title:'Square root',a:c"),
+            base: window!("title:'Square root',d:f"),
             info: Handle::None,
             number: Handle::None,
         };
