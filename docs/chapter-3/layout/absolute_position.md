@@ -11,7 +11,7 @@ This layout mode positions a control using absolute coordinates relative to its 
 To create a control using this mode, you can use the following syntax:
 * `Layout::absolute(...)` - requires all four parameters (does not support percentages).
 * `LayoutBuilder` - and you will need to use the `x(...)`, `y(...)` and optionall `width(...)` and `height(...)` methods.
-* `layout!` procmacro - and you will need to provide the `x`, `y` and optionally `width` and `height` parameters.
+* `layout!` macro - and you will need to provide the `x`, `y` and optionally `width` and `height` parameters.
 
 **Remarks**:
 - using `Layout::absolute(...)` does not support percentages for any parameter (if these are needed, consider using `LayoutBuilder` or `layout!` procmacro)

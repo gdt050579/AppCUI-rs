@@ -15,8 +15,8 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="layout_abspos_xywh_center.svg"
-   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_abspos_xywh_center.png"
+   sodipodi:docname="layout_pivot_center.svg"
+   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_pivot_center.png"
    inkscape:export-xdpi="40.627281"
    inkscape:export-ydpi="40.627281">
   <defs
@@ -428,7 +428,7 @@
            x="-2045.7142"
            y="391.09113"
            style="fill:#000000" /></flowRegion><flowPara
-         id="flowPara823-5-5-3">align:center</flowPara><flowPara
+         id="flowPara823-5-5-3">pivot:center</flowPara><flowPara
          id="flowPara1833" /></flowRoot>    <path
        style="fill:none;stroke:#808080;stroke-width:2.25777793;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:2.00000006, 4.00000011;stroke-dashoffset:0"
        d="m -531.19326,-11.050598 h 245.79791"
