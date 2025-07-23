@@ -18,7 +18,7 @@ To create a control using this mode, you can use the following syntax:
 
 ## Visual representation
 
-Let's consider that we want to position a control with its top-left corner the coordonates (8,5) and the size of 18 characters width and 6 characters hight. We can create the layout for this control using three methods as follows:
+Let's consider that we want to position a control with its top-left corner the coordonates **(8,5)** and the size of **18 characters width** and **6 characters hight**. We can create the layout for this control using three methods as follows:
 
 
 <table>
