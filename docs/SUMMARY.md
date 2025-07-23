@@ -39,6 +39,7 @@
         - [Absolute position](chapter-3/layout/absolute_position.md)
         - [Positioning using a pivot](chapter-3/layout/pivot_position.md)
         - [Docking](chapter-3/layout/docking.md)
+        - [Aligning](chapter-3/layout/aligned.md)
         - [Anchors](chapter-3/layout/anchors.md)
     - [Instantiate via Macros](chapter-3/instantiate_via_macros.md)
     - [Common methods for all Controls](chapter-3/common_methods.md)
