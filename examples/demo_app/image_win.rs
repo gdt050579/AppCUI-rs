@@ -789,7 +789,7 @@ impl Win {
 
         let i = ImageViewer::new(
             Image::from_buffer(FERRIS_PIXELS, Size::new(120, 90), false).unwrap(),
-            layout!("a:c"),
+            layout!("d:f"),
             image::RenderOptionsBuilder::new().luminance_threshold(0.1).build(),
             imageviewer::Flags::ScrollBars,
         );

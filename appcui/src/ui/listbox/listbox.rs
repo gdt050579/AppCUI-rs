@@ -29,11 +29,11 @@ impl ListBox {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let lbox = ListBox::new(layout!("a:c"),
+    /// let lbox = ListBox::new(layout!("d:f"),
     ///                         listbox::Flags::ScrollBars |
     ///                         listbox::Flags::CheckBoxes |
     ///                         listbox::Flags::SearchBar);
-    /// let simple_lbox = ListBox::new(layout!("a:c"),listbox::Flags::None);
+    /// let simple_lbox = ListBox::new(layout!("d:f"),listbox::Flags::None);
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(0, layout, flags)
@@ -53,7 +53,7 @@ impl ListBox {
     ///
     /// // a listbox with a capacity of 100 items, with scrollbars
     /// let lbox = ListBox::with_capacity(100,
-    ///                                   layout!("a:c"),
+    ///                                   layout!("d:f"),
     ///                                   listbox::Flags::ScrollBars);
     /// ```   
     pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags) -> Self {

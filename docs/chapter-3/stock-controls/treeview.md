@@ -206,7 +206,7 @@ To add items to a tree view, you can use the `add` and `add_to_parent` methods. 
 The following example shows how to add items to a tree view:
 
 ```rs
-let mut treeview = TreeView::new(layout!("a:c"),treeview::Flags::ScrollBars);
+let mut treeview = TreeView::new(layout!("d:f"),treeview::Flags::ScrollBars);
 // add two items to the root of the tree view
 let handle_item_1 = treeview.add(...);
 let handle_item_2 = treeview.add(...);

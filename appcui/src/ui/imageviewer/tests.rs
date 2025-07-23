@@ -807,7 +807,7 @@ fn check_create() {
     .unwrap();
     w.add(ImageViewer::new(
         img,
-        layout!("a:c"),
+        layout!("d:f"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::Color16)
@@ -1073,7 +1073,7 @@ fn check_mouse_events() {
     let mut w = window!("Title,a:c");
     let i = ImageViewer::new(
         ferris_image(),
-        layout!("a:c"),
+        layout!("d:f"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::Color16)
@@ -1099,7 +1099,7 @@ fn check_resize() {
             };
             let i = ImageViewer::new(
                 ferris_image(),
-                layout!("a:c"),
+                layout!("d:f"),
                 image::RenderOptionsBuilder::new()
                     .character_set(image::CharacterSet::SmallBlocks)
                     .color_schema(ColorSchema::Color16)

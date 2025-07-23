@@ -15,7 +15,7 @@ impl MyWin {
 
         let i = ImageViewer::new(
             image,
-            layout!("a:c"),
+            layout!("d:f"),
             image::RenderOptionsBuilder::new().luminance_threshold(0.1).build(),
             imageviewer::Flags::ScrollBars,
         );

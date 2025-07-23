@@ -35,7 +35,7 @@ pub struct RamItGame {
 impl RamItGame {
     pub fn new() -> Self {
         let mut o = Self {
-            base: ControlBase::new(layout!("a:c"), true),
+            base: ControlBase::new(layout!("d:f"), true),
             state: GameState::Menu,
             player_row: NUM_ROWS / 2,
             left_bars: [0; NUM_ROWS],

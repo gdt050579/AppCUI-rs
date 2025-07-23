@@ -137,7 +137,7 @@ fn layout_mode_pivot_bottom() {
 }
 #[test]
 fn layout_mode_dock_center() {
-    validate_pos!("a:c", 50, 30, 0, 0, 50, 30);
+    validate_pos!("d:f", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:center,w:20,h:10", 50, 30, 15, 10, 20, 10);
     validate_pos!("a:Center,w:20", 50, 30, 15, 0, 20, 30);
     validate_pos!("a:CENTER,h:10", 50, 30, 0, 10, 50, 10);

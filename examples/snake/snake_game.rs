@@ -78,7 +78,7 @@ pub struct SnakeGame {
 impl SnakeGame {
     pub fn new() -> Self {
         let mut o = Self {
-            base: ControlBase::new(layout!("a:c"), true),
+            base: ControlBase::new(layout!("d:f"), true),
             snake: VecDeque::new(),
             direction: Direction::Right,
             food: Food::new(0, 0, FoodType::Regular),
