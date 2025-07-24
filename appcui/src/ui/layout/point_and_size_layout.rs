@@ -35,7 +35,7 @@ impl PointAndSizeLayout {
                 Ok(PointAndSizeLayout {
                     x: Coordinate16::Absolute(0),
                     y: Coordinate16::Absolute(0),
-                    width: params.width.unwrap_or(Dimension16::Percentage(10000)),
+                    width: params.width.unwrap_or(Dimension16::Absolute(0)),
                     height: Dimension16::Percentage(10000),
                     align: Alignment::TopLeft,
                     anchor: Alignment::TopLeft,
@@ -46,7 +46,7 @@ impl PointAndSizeLayout {
                 Ok(PointAndSizeLayout {
                     x: Coordinate16::Percentage(10000),
                     y: Coordinate16::Absolute(0),
-                    width: params.width.unwrap_or(Dimension16::Percentage(10000)),
+                    width: params.width.unwrap_or(Dimension16::Absolute(0)),
                     height: Dimension16::Percentage(10000),
                     align: Alignment::TopRight,
                     anchor: Alignment::TopRight,
@@ -58,7 +58,7 @@ impl PointAndSizeLayout {
                     x: Coordinate16::Absolute(0),
                     y: Coordinate16::Absolute(0),
                     width: Dimension16::Percentage(10000),
-                    height: params.height.unwrap_or(Dimension16::Percentage(10000)),
+                    height: params.height.unwrap_or(Dimension16::Absolute(0)),
                     align: Alignment::TopLeft,
                     anchor: Alignment::TopLeft,
                 })
@@ -69,7 +69,7 @@ impl PointAndSizeLayout {
                     x: Coordinate16::Absolute(0),
                     y: Coordinate16::Percentage(10000),
                     width: Dimension16::Percentage(10000),
-                    height: params.height.unwrap_or(Dimension16::Percentage(10000)),
+                    height: params.height.unwrap_or(Dimension16::Absolute(0)),
                     align: Alignment::BottomLeft,
                     anchor: Alignment::BottomLeft,
                 })
