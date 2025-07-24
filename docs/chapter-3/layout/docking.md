@@ -28,9 +28,83 @@ To create a control using this mode, you can use the following syntax:
 
 Here are some examples of how the layout will look like for different types of docking.
 
-| Layout                               | Outcome                                                   |
-|--------------------------------------|-----------------------------------------------------------|
-| **Layout::fill()**<br>or<br>**LayoutBuilder::new().dock(Dock::fill).build()**<br>or<br>**layout!("dock:fill")**                  | <img src="img/layout_dock_fill.png" />                       |
+<table>
+<tr>
+<td style="width:45%; vertical-align:top;">
+
+```rs
+Layout::fill()
+// or
+LayoutBuilder::new().dock(Dock::fill)
+                    .build()
+// or
+layout!("dock:fill")
+// or
+layout!("d:f")
+```
+
+</td>
+
+<td style="width:55%; vertical-align:center;">
+
+![Alt text for image](img/layout_dock_fill.png)
+
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td style="width:45%; vertical-align:top;">
+
+```rs
+LayoutBuilder::new().dock(Dock::Left)
+                    .width(0.5)
+                    .build()
+// or
+layout!("dock:left,width:50%")
+// or
+layout!("d:l,w:50%")
+```
+
+</td>
+
+<td style="width:55%; vertical-align:center;">
+
+![Alt text for image](img/layout_dock_left.png)
+
+
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td style="width:45%; vertical-align:top;">
+
+```rs
+LayoutBuilder::new()
+                  .dock(Dock::Bottom)
+                  .height(10)
+                  .build()
+// or
+layout!("dock:bottom,height:10")
+// or
+layout!("d:b,h:10")
+```
+
+</td>
+
+<td style="width:55%; vertical-align:center;">
+
+![Alt text for image](img/layout_dock_bottom.png)
+
+
+</td>
+</tr>
+</table>
+
 
 ## Examples
 
