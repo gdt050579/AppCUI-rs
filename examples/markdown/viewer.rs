@@ -27,7 +27,7 @@ impl Viewer {
 
         if let Some(text) = content {
             w.navigator.open(filename.to_string());
-            let m: Markdown = Markdown::new(&text, layout!("a: c"), markdown::Flags::ScrollBars);
+            let m: Markdown = Markdown::new(&text, layout!("d: f"), markdown::Flags::ScrollBars);
             w.h_md = w.add(m);
         }
         let group = w.toolbar().create_group(toolbar::GroupPosition::TopLeft);

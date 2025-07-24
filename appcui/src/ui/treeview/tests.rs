@@ -214,7 +214,7 @@ fn check_init_with_macro() {
     ";
     let mut a = App::debug(60, 25, script).build().unwrap();
     let mut w = window!("Test,a:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = treeview!("type:Course,a:c,flags: ScrollBars+SearchBar");
+    let mut tv = treeview!("type:Course,d:f,flags: ScrollBars+SearchBar");
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -1784,7 +1784,7 @@ fn check_custom_filter() {
     ";
     let mut a = App::debug(60, 14, script).build().unwrap();
     let mut w = window!("Test,a:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = treeview!("TestData,a:c,flags: [ScrollBars,SearchBar,CustomFilter]");
+    let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
     let h = tv.add(TestData::new("Alice"));
     tv.add_to_parent(TestData::new("Andra"), h);
     tv.add_to_parent(TestData::new("Boby"), h);
@@ -1943,7 +1943,7 @@ fn check_root_access_via_api() {
     ";
     let mut a = App::debug(60, 14, script).build().unwrap();
     let mut w = window!("Test,a:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = treeview!("TestData,a:c,flags: [ScrollBars,SearchBar,CustomFilter]");
+    let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
     assert!(tv.current_item().is_none());
     let h = tv.add(TestData::new("Alice"));
     tv.add_to_parent(TestData::new("Andra"), h);
@@ -1990,7 +1990,7 @@ fn check_mouse_select() {
     ";
     let mut a = App::debug(60, 14, script).build().unwrap();
     let mut w = window!("Test,a:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = treeview!("TestData,a:c,flags: [ScrollBars,SearchBar,CustomFilter]");
+    let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
     let h = tv.add(TestData::new("Alice"));
     tv.add_to_parent(TestData::new("Andra"), h);
     tv.add_to_parent(TestData::new("Boby"), h);

@@ -101,8 +101,10 @@ impl PointAndSizeLayout {
         Ok(PointAndSizeLayout {
             x: Coordinate16::Absolute(0),
             y: Coordinate16::Absolute(0),
-            width: params.width.unwrap_or(Dimension16::Percentage(10000)),
-            height: params.height.unwrap_or(Dimension16::Percentage(10000)),
+            // width: params.width.unwrap_or(Dimension16::Percentage(10000)),
+            // height: params.height.unwrap_or(Dimension16::Percentage(10000)),
+            width: params.width.unwrap_or(Dimension16::Absolute(0)),
+            height: params.height.unwrap_or(Dimension16::Absolute(0)),
             align: params.align.unwrap(),
             anchor: params.align.unwrap(),
         })

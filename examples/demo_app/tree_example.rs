@@ -25,7 +25,7 @@ impl Win {
         };
 
         // Create a tree control
-        let mut tree = treeview!("TreeItem,a:c,flags:ScrollBars+SearchBar+LargeIcons");
+        let mut tree = treeview!("TreeItem,d:f,flags:ScrollBars+SearchBar+LargeIcons");
         
         // Add root items (Kingdoms)
         let animalia = tree.add_item(treeview::Item::new(

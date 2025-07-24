@@ -242,7 +242,7 @@ fn check_scrollbars_on_arrows_and_click() {
     | - | --- |\r\n\
     | Cell 1, __Row 1__ | Cell 2, Row 1 |\r\n\
     | Cell 1, Row 2 | Cell 1, Row 2 |\r\n\r\n\
-    ', a:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(60, 20, script).build().unwrap();
@@ -318,7 +318,7 @@ fn check_scrollbars_on_drag_and_weel() {
     | - | --- |\r\n\
     | Cell 1, __Row 1__ | Cell 2, Row 1 |\r\n\
     | Cell 1, Row 2 | Cell 1, Row 2 |\r\n\r\n\
-    ', a:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(40, 8, script).build().unwrap();
@@ -378,7 +378,7 @@ fn check_move_to_section_on_link_click() {
     }\r\n\
     ```\r\n\
     ## End Link\r\n\
-    ', a:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(40, 8, script).build().unwrap();
@@ -423,7 +423,7 @@ fn check_inactive() {
     }\r\n\
     ```\r\n\
     ## End Link\r\n\
-    ', a:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(70, 30, script).build().unwrap();
@@ -465,7 +465,7 @@ fn check_set_content() {
     }\r\n\
     ```\r\n\
     ## End Link\r\n\
-    ', a:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(70, 30, script).build().unwrap();
