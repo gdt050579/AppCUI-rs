@@ -24,86 +24,15 @@ To create a control using this mode, you can use the following syntax:
 - For `Dock::Left` and `Dock::Right`, using `width` parameter will invalidate the layout.
 - For `Dock::Top` and `Dock::Bottom`, using `height` parameter will invalidate the layout.
 
-## Visual representation
+## Visual Representation
 
 Here are some examples of how the layout will look like for different types of docking.
 
-<table>
-<tr>
-<td style="width:45%; vertical-align:top;">
-
-```rs
-Layout::fill()
-// or
-LayoutBuilder::new().dock(Dock::fill)
-                    .build()
-// or
-layout!("dock:fill")
-// or
-layout!("d:f")
-```
-
-</td>
-
-<td style="width:55%; vertical-align:center;">
-
-![Alt text for image](img/layout_dock_fill.png)
-
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td style="width:45%; vertical-align:top;">
-
-```rs
-LayoutBuilder::new().dock(Dock::Left)
-                    .width(0.5)
-                    .build()
-// or
-layout!("dock:left,width:50%")
-// or
-layout!("d:l,w:50%")
-```
-
-</td>
-
-<td style="width:55%; vertical-align:center;">
-
-![Alt text for image](img/layout_dock_left.png)
-
-
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
-<td style="width:45%; vertical-align:top;">
-
-```rs
-LayoutBuilder::new()
-                  .dock(Dock::Bottom)
-                  .height(10)
-                  .build()
-// or
-layout!("dock:bottom,height:10")
-// or
-layout!("d:b,h:10")
-```
-
-</td>
-
-<td style="width:55%; vertical-align:center;">
-
-![Alt text for image](img/layout_dock_bottom.png)
-
-
-</td>
-</tr>
-</table>
+| Layout Description                                                                                                                     | Visual representation                               |
+| -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| A control that fills the entire parent container using `Dock::Fill`                                                                   | <img src="img/layout_dock_fill.png" width=800 />   |
+| A control docked to the left edge with **50%** width, stretching vertically to fill the parent height                                | <img src="img/layout_dock_left.png" width=800 />   |
+| A control docked to the bottom edge with **10** characters height, stretching horizontally to fill the parent width                  | <img src="img/layout_dock_bottom.png" width=800 /> |
 
 
 ## Examples
