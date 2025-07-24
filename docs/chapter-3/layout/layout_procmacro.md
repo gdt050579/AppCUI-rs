@@ -102,23 +102,23 @@ Dock values can be one of the following:
 <tr>
 <td style="width:50%; vertical-align:top;">
 
-![Alt text for image](img/layout_dock.png)
+![Alt text for image](img/layout_align_values.png)
 
 </td>
 
 <td style="width:50%; vertical-align:center;">
 
-| Value       | Alias               |
-| ----------- | ------------------- |
-| topleft     | lefttop, tl, lt     |
-| top         | t                   |
-| topright    | righttop, tr, rt    |
-| right       | r                   |
-| bottomright | rightbottom, br, rb |
-| bottom      | b                   |
-| bottomleft  | leftbottom, lb, bl  |
-| left        | l                   |
-| center      | c                   |
+| Value        | Alias                             |
+| ------------ | --------------------------------- |
+| topleft      | lefttop, tl, lt, top-left         |
+| topcenter    | t, tc, ct, top-center             |
+| topright     | righttop, tr, rt, top-right       |
+| centerright  | r, cr, rc, center-right           |
+| bottomright  | rightbottom, br, rb, bottom-right |
+| bottomcenter | b, bc, cb, bottom-center          |
+| bottomleft   | leftbottom, lb, bl, bottom-left   |
+| centerleft   | l, cl, lc, center-left            |
+| center       | c                                 |
 
 </td>
 
