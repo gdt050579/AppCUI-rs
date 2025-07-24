@@ -23,15 +23,15 @@ To create a control using this mode, you can use the following syntax:
 - Negative values for `x` and `y` are allowed and will position the control outside the parent.
 
 
-## Visual representation
+## Visual Representation
 
-Below is an example where a control is positioned with its top-left corner at coordinates `(8, 5)` and a size of `18×6` characters.
+Here are some examples of how the layout will look like for different types of pivot positioning.
 
-| Layout                                              | Result                                    |
-| --------------------------------------------------- | ----------------------------------------- |
-| `TopLeft Pivot`<br>**x:8,y:5,w:33%,h:6,p:tl**       | <img src="img/layout_pivot_tl.png" />     |
-| `BottomRight Pivot`<br>**x:30,y:20,w:33%,h:6,p:br** | <img src="img/layout_pivot_br.png" />     |
-| `Center Pivot`<br>**x:50%,y:50%,w:25,h:8,p:c**      | <img src="img/layout_pivot_center.png" /> |
+| Layout Description                                                                                                                     | Visual representation                               |
+| -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| A control with **TopLeft** pivot positioned at **(8, 5)** with `width` = **33%** of parent width and `height` = **6** characters       | <img src="img/layout_pivot_tl.png" width=800 />     |
+| A control with **BottomRight** pivot positioned at **(30, 20)** with `width` = **33%** of parent width and `height` = **6** characters | <img src="img/layout_pivot_br.png" width=800 />     |
+| A control with **Center** pivot positioned at **50%, 50%** of parent with `width` = **25** characters and `height` = **8** characters  | <img src="img/layout_pivot_center.png" width=800 /> |
 
 ## Examples
 
