@@ -102,7 +102,7 @@ where
         w.path_viewer = w.add(pf);
         let mut p = panel!("l:1,t:3,r:1,b:5");
         let mut lv: ListView<Entry> = ListView::new(
-            layout!("a:c,w:100%,h:100%"),
+            layout!("d:f"),
             listview::Flags::SearchBar
                 | listview::Flags::ScrollBars
                 | if flags.contains(InnerFlags::Icons) {

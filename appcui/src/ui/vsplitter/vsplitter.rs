@@ -40,7 +40,7 @@ impl VSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = VSplitter::new(0.5,layout!("a:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// let mut vs = VSplitter::new(0.5,layout!("d:f"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
     /// vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     /// vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     /// ``` 
@@ -71,7 +71,7 @@ impl VSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = VSplitter::new(0.5,layout!("a:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// let mut vs = VSplitter::new(0.5,layout!("d:f"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
     /// vs.add(vsplitter::Panel::Left,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(vsplitter::Panel::Right,button!("PressMe,x:1,y:1,w:12"));   
     /// ```
@@ -97,7 +97,7 @@ impl VSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = VSplitter::new(0.5,layout!("a:c,w:100%,h:100%"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// let mut vs = VSplitter::new(0.5,layout!("d:f"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
     /// vs.add(vsplitter::Panel::Left,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(vsplitter::Panel::Right,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 10 chars from left

@@ -41,7 +41,7 @@ impl MyWindow {
         ]"
         ));
 
-        let mut splitter = vsplitter!("a:c,w:100%,h:100%,pos:55");
+        let mut splitter = vsplitter!("d:f,pos:55");
         let mut p_basic = panel!("'Basic controls',l:1,t:1,r:1,h:8");
         p_basic.add(checkbox!("'Checkbox unchecked',x:1,y:1,w:23"));
         p_basic.add(checkbox!("'Checkbox &selected',x:1,y:2,w:23,checked:true"));
@@ -68,7 +68,7 @@ impl MyWindow {
         splitter.add(vsplitter::Panel::Right, tab);
 
         let mut p_list = panel!("'Lists',l:1,t:7,r:1,h:6");
-        let mut lv = listview!("class: FileInformation,a:c,w:100%,h:100%,flags: ScrollBars+SearchBar+LargeIcons+Checkboxes,lsm:2");
+        let mut lv = listview!("class: FileInformation,d:f,flags: ScrollBars+SearchBar+LargeIcons+Checkboxes,lsm:2");
         lv.add_item(listview::Item::new(
             FileInformation {
                 name: "Applicatons",

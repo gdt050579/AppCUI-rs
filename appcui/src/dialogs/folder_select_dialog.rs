@@ -78,7 +78,7 @@ where
         let mut p = panel!("l:1,t:2,r:1,b:3");
         let mut tv = TreeView::with_capacity(
             256,
-            layout!("a:c,w:100%,h:100%"),
+            layout!("d:f"),
             treeview::Flags::HideHeader
                 | treeview::Flags::ScrollBars
                 | treeview::Flags::SearchBar

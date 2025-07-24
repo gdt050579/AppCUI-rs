@@ -13,7 +13,7 @@ impl Viewer {
         let mut w = Self {
             base: Window::new(path.to_str().unwrap_or("???"), layout!("a:c,w:50%,h:50%"), window::Flags::Sizeable),
         };
-        let mut lv = listview!("CSVEntry,a:c,w:100%,h:100%,flags: SearchBar+ScrollBars,lsm:2");
+        let mut lv = listview!("CSVEntry,d:f,flags: SearchBar+ScrollBars,lsm:2");
         for h in &csv.headers {
             let column_width = (h.len() as u8).min(20);
             lv.add_column(Column::new(h, column_width + 2, TextAlignment::Left));

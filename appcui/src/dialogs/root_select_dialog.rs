@@ -20,7 +20,7 @@ impl RootSelectDialog {
         w.b_ok = w.add(button!("&Ok,l:11,b:0,w:11"));
         w.b_cancel = w.add(button!("&Cancel,l:25,b:0,w:11"));
         let mut lv = ListView::<Root>::new(
-            layout!("a:c,w:100%,h:100%"),
+            layout!("d:f"),
             if icons { listview::Flags::LargeIcons } else { listview::Flags::None },
         );
         if icons {

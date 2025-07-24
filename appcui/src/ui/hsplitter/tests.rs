@@ -9,7 +9,7 @@ fn check_create() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:51,h:11,flags: Sizeable");
-    let mut hs = HSplitter::new(0.5,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut hs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio);
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
     hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
     w.add(hs);
@@ -26,7 +26,7 @@ fn check_create_procmacro() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:51,h:11,flags: Sizeable");
-    let mut hs = hsplitter!("pos:50%,a:c,w:100%,h:100%");
+    let mut hs = hsplitter!("pos:50%,d:f");
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
     hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
     w.add(hs);
@@ -61,7 +61,7 @@ fn check_keyboard_movement() {
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = HSplitter::new(14,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut hs = HSplitter::new(14,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio);
     hs.set_min_height(hsplitter::Panel::Top, 5);
     hs.set_min_height(hsplitter::Panel::Bottom, 4);
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
@@ -98,7 +98,7 @@ fn check_keyboard_movement_with_procmacro() {
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = hsplitter!("pos:14,a:c,w:100%,h:100%,mth:5,mbh:4");
+    let mut hs = hsplitter!("pos:14,d:f,mth:5,mbh:4");
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
     hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
     w.add(hs);
@@ -127,7 +127,7 @@ fn check_mouse_buttons() {
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = HSplitter::new(14,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut hs = HSplitter::new(14,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio);
     hs.set_min_height(hsplitter::Panel::Top, 5);
     hs.set_min_height(hsplitter::Panel::Bottom, 4);
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
@@ -173,7 +173,7 @@ fn check_mouse_drag() {
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = HSplitter::new(14,layout!("a:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut hs = HSplitter::new(14,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio);
     hs.set_min_height(hsplitter::Panel::Top, 5);
     hs.set_min_height(hsplitter::Panel::Bottom, 4);
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
@@ -195,7 +195,7 @@ fn check_resize_preserve_aspect_ratio() {
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:20,flags: Sizeable");
-    w.add(hsplitter!("50%,a:c,w:100%,h:100%"));
+    w.add(hsplitter!("50%,d:f"));
     a.add_window(w);
     a.run();
 }
@@ -212,7 +212,7 @@ fn check_resize_preserve_bottom_size() {
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:20,flags: Sizeable");
-    w.add(hsplitter!("75%,a:c,w:100%,h:100%,rb:PreserveBottomPanelSize"));
+    w.add(hsplitter!("75%,d:f,rb:PreserveBottomPanelSize"));
     a.add_window(w);
     a.run();
 }
@@ -229,7 +229,7 @@ fn check_resize_preserve_top_size() {
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:20,flags: Sizeable");
-    w.add(hsplitter!("25%,a:c,w:100%,h:100%,rb:PreserveTopPanelSize"));
+    w.add(hsplitter!("25%,d:f,rb:PreserveTopPanelSize"));
     a.add_window(w);
     a.run();
 }

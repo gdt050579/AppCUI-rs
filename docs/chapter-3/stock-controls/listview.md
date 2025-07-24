@@ -342,7 +342,7 @@ struct DownloadItem {
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Download,a:c,w:100%,h:100%,flags: Sizeable");
+    let mut w = window!("Download,d:f,flags: Sizeable");
     let mut l = listview!("DownloadItem,a:c,view:Details,flags: ScrollBars+CheckBoxes");
     l.add(DownloadItem {
         name: "music.mp3",

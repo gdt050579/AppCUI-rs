@@ -151,7 +151,7 @@ impl ListBox {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut lbox = ListBox::new(layout!("a:c,w:100%,h:100%"), listbox::Flags::CheckBoxes);
+    /// let mut lbox = ListBox::new(layout!("d:f"), listbox::Flags::CheckBoxes);
     /// lbox.add_item(listbox::Item::new("Item 1", false));
     /// lbox.add_item(listbox::Item::new("Item 2", true));
     /// lbox.add_item(listbox::Item::new("Item 3", false));

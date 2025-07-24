@@ -301,7 +301,7 @@ to Addison in others._
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
     let mut win = window!("Title:'Pride and Prejudice',a:c,w:80,h:20,flags:Sizeable");
-    let mut c = canvas!("'80x300',a:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    let mut c = canvas!("'80x300',d:f,flags=ScrollBars,lsm:3,tsm:1");
     let s = c.drawing_surface_mut();
     s.write_string(0, 0, BOOK, CharAttribute::with_color(Color::White, Color::Black), true);
     win.add(c);

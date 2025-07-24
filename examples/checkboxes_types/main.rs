@@ -3,7 +3,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
     let mut w = window!("'Checkbox types',a:c,w:80,h:15, flags:Sizeable");
-    let mut a = accordion!("a:c,w:100%,h:100%,panels:['&Standard', '&Ascii', 'Check&Box', 'Check&Mark', '&FilledBox', '&Yes/No', '&PlusMinus']");
+    let mut a = accordion!("d:f,panels:['&Standard', '&Ascii', 'Check&Box', 'Check&Mark', '&FilledBox', '&Yes/No', '&PlusMinus']");
     
     // Standard
     a.add(0, checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,checked:false"));

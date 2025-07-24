@@ -39,8 +39,8 @@ and the following flags:
 
 Some examples that uses these paramateres:
 ```rs
-let t1 = tab!("type:OnBottom,tabs:[Tab1,Tab2,Tab&3],tw:10,flags:TabsBar,a:c,w:100%,h:100%");
-let t2 = tab!("type:OnLeft,tabs:[A,B,C],flags:TabsBar+TransparentBackground,a:c,w:100%,h:100%");
+let t1 = tab!("type:OnBottom,tabs:[Tab1,Tab2,Tab&3],tw:10,flags:TabsBar,d:f");
+let t2 = tab!("type:OnLeft,tabs:[A,B,C],flags:TabsBar+TransparentBackground,d:f");
 ```
 
 ## Events
@@ -82,7 +82,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = window!("Test,a:c,w:100%,h:100%");
+    let mut w = window!("Test,d:f");
     let mut t = tab!("l:1,t:1,r:1,b:3,tabs:['Tab &1','Tab &2','Tab &3']");
     t.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
     t.add(0, button!("T1-1-B,a:c,w:10,type:flat"));      

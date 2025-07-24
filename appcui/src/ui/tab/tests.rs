@@ -118,7 +118,7 @@ fn check_switch_between_tabcontrols() {
         CheckHash(0xFBE8E74E4A5AD143)           
     ";
     let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:100%,h:100%");
+    let mut w = window!("Test,d:f");
     let mut tab1 = Tab::new(layout!("l:0,t:0,r:52,b:2"), tab::Flags::None);
     tab1.add_tab("Page &1");
     tab1.add_tab("Page &2");
@@ -225,7 +225,7 @@ fn check_page_width() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", layout!("a:c,w:100%,h:100%"), window::Flags::None),
+                base: Window::new("Win-1", layout!("d:f"), window::Flags::None),
                 info: Handle::None,
                 plus: Handle::None,
                 minus: Handle::None,
@@ -396,7 +396,7 @@ fn check_page_width_on_left() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", layout!("a:c,w:100%,h:100%"), window::Flags::None),
+                base: Window::new("Win-1", layout!("d:f"), window::Flags::None),
                 info: Handle::None,
                 plus: Handle::None,
                 minus: Handle::None,
@@ -567,7 +567,7 @@ fn check_hiddentabs_changepage() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", layout!("a:c,w:100%,h:100%"), window::Flags::None),
+                base: Window::new("Win", layout!("d:f"), window::Flags::None),
                 info: Handle::None,
                 plus: Handle::None,
                 minus: Handle::None,

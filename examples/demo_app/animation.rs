@@ -31,7 +31,7 @@ impl Win {
             bars: Vec::with_capacity(100),
             c: Handle::None,
         };
-        w.c = w.add(canvas!("a:c,w:100%,h:100%,size:100x50"));
+        w.c = w.add(canvas!("d:f,size:100x50"));
         if let Some(timer) = w.timer() {
             timer.start(Duration::from_millis(300));
         }

@@ -31,7 +31,7 @@ pub struct MinesweeperGame {
 impl MinesweeperGame {
     pub fn new(width: usize, height: usize, num_mines: usize) -> Self {
         let mut game = Self {
-            base: ControlBase::new(layout!("a:c,w:100%,h:100%"), true),
+            base: ControlBase::new(layout!("d:f"), true),
             grid: Vec::new(),
             cursor_x: 0,
             cursor_y: 0,

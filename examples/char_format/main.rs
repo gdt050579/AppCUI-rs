@@ -8,7 +8,7 @@ fn main() -> Result<(), appcui::system::Error> {
 
 
     let mut win = window!("Title:'Character Formatting Demo',a:c,w:80,h:20,flags:Sizeable");
-    let mut c = canvas!("'80x20',a:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    let mut c = canvas!("'80x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
     let s = c.drawing_surface_mut();
     
     let normal_attr = charattr!("white,black");

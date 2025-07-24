@@ -868,7 +868,7 @@ fn check_macro_creation() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:f");
-    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',a:c,w:100%,h:100%,cs:Color16"));
+    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f,cs:Color16"));
     a.add_window(w);
     a.run();
 }
@@ -883,7 +883,7 @@ fn check_macro_creation_2() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:f");
     w.add(imageviewer!(
-        "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',a:c,w:100%,h:100%, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
+        "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
     ));
     a.add_window(w);
     a.run();
@@ -898,7 +898,7 @@ fn check_ferris_ascii_art() {
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
     let mut w = window!("Title,d:f");
-    let mut i = imageviewer!("a:c,w:100%,h:100%,scale:25%,charset:AsciiArt,flags:ScrollBars,cs:Color16");
+    let mut i = imageviewer!("d:f,scale:25%,charset:AsciiArt,flags:ScrollBars,cs:Color16");
     i.set_image(ferris_image());
     w.add(i);
     a.add_window(w);
@@ -959,7 +959,7 @@ fn check_keyboard() {
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Title,d:f");
-    let mut i = imageviewer!("a:c,w:100%,h:100%,scale:50%,flags:ScrollBars,cs:Color16");
+    let mut i = imageviewer!("d:f,scale:50%,flags:ScrollBars,cs:Color16");
     i.set_image(ferris_image());
     w.add(i);
     a.add_window(w);
@@ -1017,7 +1017,7 @@ fn check_keyboard_2() {
     ";
     let mut a = App::debug(40, 15, script).build().unwrap();
     let mut w = window!("Title,d:f");
-    let mut i = imageviewer!("a:c,w:100%,h:100%,flags:ScrollBars,cs:color16");
+    let mut i = imageviewer!("d:f,flags:ScrollBars,cs:color16");
     i.set_image(ferris_image());
     w.add(i);
     a.add_window(w);
@@ -1033,7 +1033,7 @@ fn check_clear_background() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Title,d:f");
-    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',a:c,w:100%,h:100%, back: {X,Red}, cs:Color16");
+    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, back: {X,Red}, cs:Color16");
     i.clear_background();
     w.add(i);
     a.add_window(w);

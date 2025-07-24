@@ -29,8 +29,8 @@ A accordion supports the following initialization flags:
 
 Some examples that uses these paramateres:
 ```rs
-let t1 = accordion!("panels:[Tab1,Tab2,Accordion&3],a:c,w:100%,h:100%");
-let t2 = accordion!("panels:[A,B,C],flags:TransparentBackground,a:c,w:100%,h:100%");
+let t1 = accordion!("panels:[Tab1,Tab2,Accordion&3],d:f");
+let t2 = accordion!("panels:[A,B,C],flags:TransparentBackground,d:f");
 ```
 
 ## Events
@@ -84,7 +84,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = window!("Test,a:c,w:100%,h:100%");
+    let mut w = window!("Test,d:f");
     let mut t = accordion!("l:1,t:1,r:1,b:3,panels:['Panel &1','Panel &2','Panel &3']");
     t.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
     t.add(0, button!("T1-1-B,a:c,w:10,type:flat"));      

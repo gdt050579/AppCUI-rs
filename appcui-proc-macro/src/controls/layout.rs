@@ -154,7 +154,7 @@ fn validate_dock_layout(lp: &LayoutParams, params: &NamedParamsMap) {
     }
 }
 
-fn validate_align_layout(lp: &LayoutParams, params: &NamedParamsMap) {
+fn validate_align_layout(lp: &LayoutParams, params: &mut NamedParamsMap) {
     should_not_use!(lp.x, "When ('align' or 'a') parameter is used,'x' parameter can not be used !");
     should_not_use!(lp.y, "When ('align' or 'a') parameter is used,'y' parameter can not be used !");
     should_not_use!(
@@ -181,6 +181,15 @@ fn validate_align_layout(lp: &LayoutParams, params: &NamedParamsMap) {
         lp.pivot,
         "When ('align' or 'a') parameter is used,('pivot' or 'p') parameters can not be used !"
     );
+    if lp.width && lp.height {
+        let w = params.get_mut("width").map(|v| { v.get_percentage().unwrap_or(0.0) }).unwrap_or(0.0);
+        let h = params.get_mut("height").map(|v| { v.get_percentage().unwrap_or(0.0) }).unwrap_or(0.0);
+        if (w==100.0f32) && (h==100.0f32) {
+            panic!("Using 'align' with a width and height of 100% of the parent is equivalent to using dock with the value 'fill'. Remove the `align`/`a`, `width`/`w` and `height`/`h` parameters and replace them with `dock:fill` ");
+        }
+    }
+
+    // temporary
     if !lp.width && !lp.height {
         panic!("Missig width or height for align !");
     }
@@ -334,7 +343,7 @@ fn validate_all_anchors_layout(lp: &LayoutParams, params: &NamedParamsMap) {
     );
 }
 
-fn validate_layout(params: &NamedParamsMap) {
+fn validate_layout(params: &mut NamedParamsMap) {
     let lp = LayoutParams {
         x: params.contains("x"),
         y: params.contains("y"),

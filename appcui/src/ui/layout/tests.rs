@@ -145,7 +145,7 @@ fn layout_mode_dock_center() {
 }
 #[test]
 fn layout_mode_dock_top_left() {
-    validate_pos!("a:tl,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
+    //validate_pos!("a:tl,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:lt,w:20,h:10", 50, 30, 0, 0, 20, 10);
     validate_pos!("a:topleft,w:20", 50, 30, 0, 0, 20, 30);
     validate_pos!("a:lefttop,h:10", 50, 30, 0, 0, 50, 10);
@@ -153,7 +153,7 @@ fn layout_mode_dock_top_left() {
 }
 #[test]
 fn layout_mode_dock_bottom_left() {
-    validate_pos!("a:lb,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
+    //validate_pos!("a:lb,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:bl,w:20,h:10", 50, 30, 0, 20, 20, 10);
     validate_pos!("a:lb,w:20", 50, 30, 0, 0, 20, 30);
     validate_pos!("a:bottomleft,h:10", 50, 30, 0, 20, 50, 10);
@@ -161,7 +161,7 @@ fn layout_mode_dock_bottom_left() {
 }
 #[test]
 fn layout_mode_dock_bottom_right() {
-    validate_pos!("a:rb,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
+    //validate_pos!("a:rb,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:br,w:20,h:10", 50, 30, 30, 20, 20, 10);
     validate_pos!("a:rb,w:20", 50, 30, 30, 0, 20, 30);
     validate_pos!("a:bottomright,h:10", 50, 30, 0, 20, 50, 10);
@@ -169,7 +169,7 @@ fn layout_mode_dock_bottom_right() {
 }
 #[test]
 fn layout_mode_dock_top_right() {
-    validate_pos!("a:tr,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
+    //validate_pos!("a:tr,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:rt,w:20,h:10", 50, 30, 30, 0, 20, 10);
     validate_pos!("a:TopRight,w:20", 50, 30, 30, 0, 20, 30);
     validate_pos!("a:rightTop,h:10", 50, 30, 0, 0, 50, 10);
@@ -177,7 +177,7 @@ fn layout_mode_dock_top_right() {
 }
 #[test]
 fn layout_mode_dock_left() {
-    validate_pos!("a:l,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
+    //validate_pos!("a:l,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:left,w:20,h:10", 50, 30, 0, 10, 20, 10);
     validate_pos!("a:Left,w:20", 50, 30, 00, 0, 20, 30);
     validate_pos!("a:l,h:10", 50, 30, 0, 10, 50, 10);
@@ -186,7 +186,7 @@ fn layout_mode_dock_left() {
 
 #[test]
 fn layout_mode_dock_top() {
-    validate_pos!("a:t,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
+    //validate_pos!("a:t,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:top,w:20,h:10", 50, 30, 15, 0, 20, 10);
     validate_pos!("a:Top,w:20", 50, 30, 15, 0, 20, 30);
     validate_pos!("a:t,h:10", 50, 30, 0, 0, 50, 10);
@@ -195,7 +195,7 @@ fn layout_mode_dock_top() {
 
 #[test]
 fn layout_mode_dock_right() {
-    validate_pos!("a:r,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
+    //validate_pos!("a:r,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:Right,w:20,h:10", 50, 30, 30, 10, 20, 10);
     validate_pos!("a:right,w:20", 50, 30, 30, 0, 20, 30);
     validate_pos!("a:r,h:10", 50, 30, 0, 10, 50, 10);
@@ -203,7 +203,7 @@ fn layout_mode_dock_right() {
 }
 #[test]
 fn layout_mode_dock_bottom() {
-    validate_pos!("a:b,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
+    //validate_pos!("a:b,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:bottom,w:20,h:10", 50, 30, 15, 20, 20, 10);
     validate_pos!("a:Bottom,w:20", 50, 30, 15, 0, 20, 30);
     validate_pos!("a:b,h:10", 50, 30, 0, 20, 50, 10);
@@ -464,25 +464,25 @@ fn layout_mode_anchor_tlr_dont_allow_allign() {
 #[should_panic]
 fn layout_mode_dock_dont_allow_left() {
     // this code should panic because 'l' can not be used in a Top-Left-Right layout mode
-    validate_pos!("a:c,w:100%,h:100%,l:1", 50, 30, 5, 0, 38, 10);
+    validate_pos!("d:f,l:1", 50, 30, 5, 0, 38, 10);
 }
 #[test]
 #[should_panic]
 fn layout_mode_dock_dont_allow_right() {
     // this code should panic because 'r' can not be used in a Top-Left-Right layout mode
-    validate_pos!("a:c,w:100%,h:100%,r:1", 50, 30, 5, 0, 38, 10);
+    validate_pos!("d:f,r:1", 50, 30, 5, 0, 38, 10);
 }
 #[test]
 #[should_panic]
 fn layout_mode_dock_dont_allow_top() {
     // this code should panic because 'lt' can not be used in a Top-Left-Right layout mode
-    validate_pos!("a:c,w:100%,h:100%,t:1", 50, 30, 5, 0, 38, 10);
+    validate_pos!("d:f,t:1", 50, 30, 5, 0, 38, 10);
 }
 #[test]
 #[should_panic]
 fn layout_mode_dock_dont_allow_bottom() {
     // this code should panic because 'b' can not be used in a Top-Left-Right layout mode
-    validate_pos!("a:c,w:100%,h:100%,b:1", 50, 30, 5, 0, 38, 10);
+    validate_pos!("d:f,b:1", 50, 30, 5, 0, 38, 10);
 }
 
 #[test]

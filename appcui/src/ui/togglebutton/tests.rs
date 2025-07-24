@@ -171,7 +171,7 @@ fn check_events_single_selection() {
         CheckHash(0xBEFCBDB7BF12FF5D)  
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:100%,h:100%");
+    let mut w = window!("Test,d:f");
     w.add(togglebutton!("<>,'Some button',x:1,y:3,w:2, group: true, type: Underlined"));
     w.add(togglebutton!("(),'Some button 2',x:4,y:3,w:2, group: true, type: Underlined"));
     w.add(togglebutton!("'{}','Some button 3',x:7,y:3,w:2, single_selection: true, type: Underlined"));
