@@ -190,9 +190,9 @@ fn validate_align_layout(lp: &LayoutParams, params: &mut NamedParamsMap) {
     }
 
     // temporary
-    if !lp.width && !lp.height {
-        panic!("Missig width or height for align !");
-    }
+    // if !lp.width || !lp.height {
+    //     panic!("Missig either width or height for align !");
+    // }
 }
 
 fn validate_xy_layout(lp: &LayoutParams, params: &NamedParamsMap) {

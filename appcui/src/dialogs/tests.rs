@@ -18,7 +18,7 @@ impl CallbackWin {
             base: window!("Test,a:c,w:20,h:6"),
             f,
         };
-        w.add(button!("'Press Me',a:c,w:15"));
+        w.add(button!("'Press Me',a:c,w:15,h:100%"));
         w
     }
 }
@@ -81,7 +81,7 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
             mask: Some(FILE_MASK),
         };
-        w.add(button!("'Press Me',a:c,w:14"));
+        w.add(button!("'Press Me',a:c,w:14,h:100%"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
@@ -95,7 +95,7 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
             mask: Some(FILE_MASK),
         };
-        w.add(button!("'Press Me',a:c,w:14"));
+        w.add(button!("'Press Me',a:c,w:14,h:100%"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
@@ -109,7 +109,7 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
             mask: None,
         };
-        w.add(button!("'Press Me',a:c,w:14"));
+        w.add(button!("'Press Me',a:c,w:14,h:100%"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
@@ -147,7 +147,7 @@ impl FolderSelectDialog {
             loc: loc.to_string(),
             flags,
         };
-        w.add(button!("Press,a:c,w:14"));
+        w.add(button!("Press,a:c,w:14,h:100%"));
         w
     }
 }
@@ -1219,7 +1219,7 @@ fn check_input_no_validation() {
             let mut me = Self {
                 base: window!("Test,a:c,w:30,h:7"),
             };
-            me.add(button!("Click,a:c,w:15"));
+            me.add(button!("Click,a:c,w:15,h:100%"));
             me
         }
     }
@@ -1272,7 +1272,7 @@ fn check_input_validation() {
             let mut me = Self {
                 base: window!("Test,a:c,w:30,h:7"),
             };
-            me.add(button!("Click,a:c,w:15"));
+            me.add(button!("Click,a:c,w:15,h:100%"));
             me
         }
     }
@@ -1323,7 +1323,7 @@ fn check_input_with_initial_value() {
             let mut me = Self {
                 base: window!("Test,a:c,w:30,h:7"),
             };
-            me.add(button!("Click,a:c,w:15"));
+            me.add(button!("Click,a:c,w:15,h:100%"));
             me
         }
     }

@@ -32,11 +32,11 @@ fn check_control_reposition() {
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10"));
+    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
     tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
-    tab.add(1, button!("Page2-B,a:c,w:14"));
+    tab.add(1, button!("Page2-B,a:c,w:14,h:100%"));
     tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
-    tab.add(2, button!("Page3-B,a:l,w:20"));
+    tab.add(2, button!("Page3-B,a:l,w:20,h:100%"));
 
     w.add(tab);
     a.add_window(w);
@@ -84,11 +84,11 @@ fn check_key_control() {
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10"));
+    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
     tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
-    tab.add(1, button!("Page2-B,a:c,w:14"));
+    tab.add(1, button!("Page2-B,a:c,w:14,h:100%"));
     tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
-    tab.add(2, button!("Page3-B,a:l,w:20"));
+    tab.add(2, button!("Page3-B,a:l,w:20,h:100%"));
 
     w.add(tab);
     a.add_window(w);
@@ -124,11 +124,11 @@ fn check_switch_between_tabcontrols() {
     tab1.add_tab("Page &2");
     tab1.add_tab("Page &3");
     tab1.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
-    tab1.add(0, button!("T1-1-B,a:c,w:10,type:flat"));
-    tab1.add(1, button!("T1-2-A,r:1,b:0,w:14,type:flat"));
-    tab1.add(1, button!("T1-2-B,a:c,w:14,type:flat"));
+    tab1.add(0, button!("T1-1-B,a:c,w:10,h:100%,type:flat"));
+    tab1.add(1, button!("T1-2-A,r:1,b:0,w:14,h:100%,type:flat"));
+    tab1.add(1, button!("T1-2-B,a:c,w:14,h:100%,type:flat"));
     tab1.add(2, button!("T1-3-A,r:1,b:0,w:20,type:flat"));
-    tab1.add(2, button!("T1-3-B,a:l,w:20,type:flat"));
+    tab1.add(2, button!("T1-3-B,a:l,w:20,h:100%,type:flat"));
     w.add(tab1);
 
     let mut tab2 = Tab::new(layout!("l:50,t:0,r:0,b:2"), tab::Flags::None);
@@ -136,11 +136,11 @@ fn check_switch_between_tabcontrols() {
     tab2.add_tab("Page &2");
     tab2.add_tab("Page &3");
     tab2.add(0, button!("T2-1-A,r:1,b:0,w:10,type:flat"));
-    tab2.add(0, button!("T2-1-B,a:c,w:10,type:flat"));
+    tab2.add(0, button!("T2-1-B,a:c,w:10,h:100%,type:flat"));
     tab2.add(1, button!("T2-2-A,r:1,b:0,w:14,type:flat"));
-    tab2.add(1, button!("T2-2-B,a:c,w:14,type:flat"));
+    tab2.add(1, button!("T2-2-B,a:c,w:14,h:100%,type:flat"));
     tab2.add(2, button!("T2-3-A,r:1,b:0,w:20,type:flat"));
-    tab2.add(2, button!("T2-3-B,a:l,w:20,type:flat"));
+    tab2.add(2, button!("T2-3-B,a:l,w:20,h:100%,type:flat"));
     w.add(tab2);
 
     w.add(button!("OK,r:0,b:0,w:10, type: flat"));
@@ -164,7 +164,7 @@ fn check_tab_on_top() {
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10"));
+    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
     w.add(tab);
     a.add_window(w);
     a.run();
@@ -190,7 +190,7 @@ fn check_tab_on_bottom() {
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10"));
+    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
     w.add(tab);
     a.add_window(w);
     a.run();
@@ -207,7 +207,7 @@ fn check_macro_build() {
     let mut w = window!("Test,a:c,w:50,h:7");
     let mut t = tab!("l:0,t:0,r:0,b:0,type: OnBottom,tabs=['Page &1','Page &2','Page &3']");
     t.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    t.add(0, button!("Page1-B,a:c,w:10"));
+    t.add(0, button!("Page1-B,a:c,w:10,h:100%"));
     w.add(t);
     a.add_window(w);
     a.run();
@@ -336,7 +336,7 @@ fn check_tab_on_left() {
     let mut w = window!("Test,a:c,w:50,h:7");
     let mut tab = tab!("l:0,t:0,r:0,b:0,type:OnLeft,tabs:['Page &1','Page &2','Page &2']");
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10"));
+    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
     w.add(tab);
     a.add_window(w);
     a.run();
@@ -524,11 +524,11 @@ fn check_tab_caption() {
     
     // Add controls to tabs
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10"));
+    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
     tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
-    tab.add(1, button!("Page2-B,a:c,w:14"));
+    tab.add(1, button!("Page2-B,a:c,w:14,h:100%"));
     tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
-    tab.add(2, button!("Page3-B,a:l,w:20"));
+    tab.add(2, button!("Page3-B,a:l,w:20,h:100%"));
 
     w.add(tab);
     a.add_window(w);
@@ -549,7 +549,7 @@ fn check_hidden_tabs() {
     tab.add_tab("Page &2");
     tab.add_tab("Page &3");
     tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10"));
+    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
     w.add(tab);
     a.add_window(w);
     a.run();

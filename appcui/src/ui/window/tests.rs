@@ -1067,7 +1067,7 @@ fn check_window_toolbar_item_visibility() {
                 number: 24,
             };
             // add the increasebutton
-            win.increase_button = win.add(button!("Increase,w:15,a:l"));
+            win.increase_button = win.add(button!("Increase,w:15,a:l,h:100%"));
             // add checkboxes
             win.show_dec = win.add(checkbox!("'Show decimal',x:20,y:1,w:16,checked:true"));
             win.show_hex = win.add(checkbox!("'Show hex',x:20,y:2,w:16,checked:true"));
@@ -1499,7 +1499,7 @@ fn check_window_enter_resize_mode() {
             let mut win = MyWin {
                 base: window!("Test,a:c,w:30,h:6"),
             };
-            win.add(button!("ResizeMe,a:c,w:16"));
+            win.add(button!("ResizeMe,a:c,w:16,h:100%"));
             win
         }
     }

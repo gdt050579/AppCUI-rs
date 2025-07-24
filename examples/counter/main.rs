@@ -11,7 +11,7 @@ impl CounterWindow {
             base: window!("'Counter window',a:c,w:30,h:5"),
             counter: 1            
         };
-        w.add(button!("'1',a:b,w:20"));
+        w.add(button!("'1',a:b,w:20,h:100%"));
         w
     }
 }

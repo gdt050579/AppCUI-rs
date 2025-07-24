@@ -44,7 +44,7 @@ fn check_label_with_hotkey() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("A &hot key label", layout!("a:tl,w:30")));
+    w.add(Label::new("A &hot key label", layout!("a:tl,w:30,h:100%")));
     a.add_window(w);
     a.run();
 }
@@ -58,7 +58,7 @@ fn check_label_with_nacro() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:9");
-    w.add(label!("Caption='A label build with label! moacro',a:tl,w:30"));
+    w.add(label!("Caption='A label build with label! moacro',a:tl,w:30,h:100%"));
     w.add(label!("my_label,x:0,y:1,w:30"));
     a.add_window(w);
     a.run();

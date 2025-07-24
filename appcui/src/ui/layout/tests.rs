@@ -139,48 +139,48 @@ fn layout_mode_pivot_bottom() {
 fn layout_mode_dock_center() {
     validate_pos!("d:f", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:center,w:20,h:10", 50, 30, 15, 10, 20, 10);
-    validate_pos!("a:Center,w:20", 50, 30, 15, 0, 20, 30);
-    validate_pos!("a:CENTER,h:10", 50, 30, 0, 10, 50, 10);
+    validate_pos!("a:Center,w:20,h:100%", 50, 30, 15, 0, 20, 30);
+    validate_pos!("a:CENTER,h:10,w:100%", 50, 30, 0, 10, 50, 10);
     validate_pos!("a:cEnTeR,w:50%,h:25%", 60, 40, 15, 15, 30, 10);
 }
 #[test]
 fn layout_mode_dock_top_left() {
     //validate_pos!("a:tl,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:lt,w:20,h:10", 50, 30, 0, 0, 20, 10);
-    validate_pos!("a:topleft,w:20", 50, 30, 0, 0, 20, 30);
-    validate_pos!("a:lefttop,h:10", 50, 30, 0, 0, 50, 10);
+    validate_pos!("a:topleft,w:20,h:100%", 50, 30, 0, 0, 20, 30);
+    validate_pos!("a:lefttop,h:10,w:100%", 50, 30, 0, 0, 50, 10);
     validate_pos!("a:TopLeft,w:50%,h:25%", 60, 40, 0, 0, 30, 10);
 }
 #[test]
 fn layout_mode_dock_bottom_left() {
     //validate_pos!("a:lb,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:bl,w:20,h:10", 50, 30, 0, 20, 20, 10);
-    validate_pos!("a:lb,w:20", 50, 30, 0, 0, 20, 30);
-    validate_pos!("a:bottomleft,h:10", 50, 30, 0, 20, 50, 10);
+    validate_pos!("a:lb,w:20,h:100%", 50, 30, 0, 0, 20, 30);
+    validate_pos!("a:bottomleft,h:10,w:100%", 50, 30, 0, 20, 50, 10);
     validate_pos!("a:leftbottom,w:50%,h:25%", 60, 40, 0, 30, 30, 10);
 }
 #[test]
 fn layout_mode_dock_bottom_right() {
     //validate_pos!("a:rb,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:br,w:20,h:10", 50, 30, 30, 20, 20, 10);
-    validate_pos!("a:rb,w:20", 50, 30, 30, 0, 20, 30);
-    validate_pos!("a:bottomright,h:10", 50, 30, 0, 20, 50, 10);
+    validate_pos!("a:rb,w:20,h:100%", 50, 30, 30, 0, 20, 30);
+    validate_pos!("a:bottomright,h:10,w:100%", 50, 30, 0, 20, 50, 10);
     validate_pos!("a:rightbottom,w:50%,h:25%", 60, 40, 30, 30, 30, 10);
 }
 #[test]
 fn layout_mode_dock_top_right() {
     //validate_pos!("a:tr,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:rt,w:20,h:10", 50, 30, 30, 0, 20, 10);
-    validate_pos!("a:TopRight,w:20", 50, 30, 30, 0, 20, 30);
-    validate_pos!("a:rightTop,h:10", 50, 30, 0, 0, 50, 10);
+    validate_pos!("a:TopRight,w:20,h:100%", 50, 30, 30, 0, 20, 30);
+    validate_pos!("a:rightTop,h:10,w:100%", 50, 30, 0, 0, 50, 10);
     validate_pos!("a:topright,w:50%,h:25%", 60, 40, 30, 0, 30, 10);
 }
 #[test]
 fn layout_mode_dock_left() {
     //validate_pos!("a:l,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:left,w:20,h:10", 50, 30, 0, 10, 20, 10);
-    validate_pos!("a:Left,w:20", 50, 30, 00, 0, 20, 30);
-    validate_pos!("a:l,h:10", 50, 30, 0, 10, 50, 10);
+    validate_pos!("a:Left,w:20,h:100%", 50, 30, 00, 0, 20, 30);
+    validate_pos!("a:l,h:10,w:100%", 50, 30, 0, 10, 50, 10);
     validate_pos!("a:LeFt,w:50%,h:25%", 60, 40, 0, 15, 30, 10);
 }
 
@@ -188,8 +188,8 @@ fn layout_mode_dock_left() {
 fn layout_mode_dock_top() {
     //validate_pos!("a:t,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:top,w:20,h:10", 50, 30, 15, 0, 20, 10);
-    validate_pos!("a:Top,w:20", 50, 30, 15, 0, 20, 30);
-    validate_pos!("a:t,h:10", 50, 30, 0, 0, 50, 10);
+    validate_pos!("a:Top,w:20,h:100%", 50, 30, 15, 0, 20, 30);
+    validate_pos!("a:t,h:10,w:100%", 50, 30, 0, 0, 50, 10);
     validate_pos!("a:ToP,w:50%,h:25%", 60, 40, 15, 0, 30, 10);
 }
 
@@ -197,16 +197,16 @@ fn layout_mode_dock_top() {
 fn layout_mode_dock_right() {
     //validate_pos!("a:r,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:Right,w:20,h:10", 50, 30, 30, 10, 20, 10);
-    validate_pos!("a:right,w:20", 50, 30, 30, 0, 20, 30);
-    validate_pos!("a:r,h:10", 50, 30, 0, 10, 50, 10);
+    validate_pos!("a:right,w:20,h:100%", 50, 30, 30, 0, 20, 30);
+    validate_pos!("a:r,h:10,w:100%", 50, 30, 0, 10, 50, 10);
     validate_pos!("a:rIgHt,w:50%,h:25%", 60, 40, 30, 15, 30, 10);
 }
 #[test]
 fn layout_mode_dock_bottom() {
     //validate_pos!("a:b,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:bottom,w:20,h:10", 50, 30, 15, 20, 20, 10);
-    validate_pos!("a:Bottom,w:20", 50, 30, 15, 0, 20, 30);
-    validate_pos!("a:b,h:10", 50, 30, 0, 20, 50, 10);
+    validate_pos!("a:Bottom,w:20,h:100%", 50, 30, 15, 0, 20, 30);
+    validate_pos!("a:b,h:10,w:100%", 50, 30, 0, 20, 50, 10);
     validate_pos!("a:BoTtOm,w:50%,h:25%", 60, 40, 15, 30, 30, 10);
 }
 #[test]
