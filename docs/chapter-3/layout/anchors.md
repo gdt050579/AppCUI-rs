@@ -13,8 +13,8 @@ If **width** or **height** are not specified , they will be defaulted to `1 char
 
 The combination of anchors also decides how (top,left) and (right,bottom) corners of a control are computed, as follows:
 
-| Combination              | Top-Left corner                                       | Bottom-Right corner                      |
-|--------------------------|-------------------------------------------------------|------------------------------------------|
+| Combination          | Top-Left corner                                       | Bottom-Right corner                      |
+| -------------------- | ----------------------------------------------------- | ---------------------------------------- |
 | `top` and `left`     | (left, top)                                           | (left+width, top+height)                 |
 | `top` and `right`    | (parentWidth-right-width, top)                        | (parentWidth-right, top+height)          |
 | `bottom` and `left`  | (left, parentHeight-bottom-height)                    | (left+width, parentHeight-bottom)        |
@@ -27,7 +27,7 @@ where:
 **Examples**
 
 | Layout                     | Result                                 |
-|----------------------------|----------------------------------------|
+| -------------------------- | -------------------------------------- |
 | **t:10,r:20,w:50,h:20**    | <img src="img/layout_anchor_tr.png" /> |
 | **b:10,r:20,w:33%,h:10**   | <img src="img/layout_anchor_br.png" /> |
 | **b:10%,l:50%,w:25%,h:10** | <img src="img/layout_anchor_bl.png" /> |
@@ -42,10 +42,10 @@ However, `height` parameter should be specified (if not specified it will be def
 **Examples**
 
 | Layout                         | Result                                   |
-|--------------------------------|------------------------------------------|
-| **l:10,r:20,h:20,y:80%,a:b**   | <img src="img/layout_anchor_lr_1.png" /> |
-| **l:10,r:20,h:100%,y:50%,a:c** | <img src="img/layout_anchor_lr_2.png" /> |
-| **l:10,r:20,h:50%,y:0,a:t**    | <img src="img/layout_anchor_lr_3.png" /> |
+| ------------------------------ | ---------------------------------------- |
+| **l:10,r:20,h:20,y:80%,p:b**   | <img src="img/layout_anchor_lr_1.png" /> |
+| **l:10,r:20,h:100%,y:50%,p:c** | <img src="img/layout_anchor_lr_2.png" /> |
+| **l:10,r:20,h:50%,y:0,p:t**    | <img src="img/layout_anchor_lr_3.png" /> |
 
 ## Using Top-Bottom anchors
 
@@ -56,10 +56,10 @@ However, `width` parameter should be specified (if not specified it will be defa
 **Examples**
 
 | Layout                         | Result                                   |
-|--------------------------------|------------------------------------------|
-| **t:10,b:20,w:90,x:80%,a:r**   | <img src="img/layout_anchor_tb_1.png" /> |
-| **t:10,b:20,w:100%,x:50%,a:c** | <img src="img/layout_anchor_tb_2.png" /> |
-| **t:10,b:20,w:50%,x:0,a:l**    | <img src="img/layout_anchor_tb_3.png" /> |
+| ------------------------------ | ---------------------------------------- |
+| **t:10,b:20,w:90,x:80%,p:r**   | <img src="img/layout_anchor_tb_1.png" /> |
+| **t:10,b:20,w:100%,x:50%,p:c** | <img src="img/layout_anchor_tb_2.png" /> |
+| **t:10,b:20,w:50%,x:0,p:l**    | <img src="img/layout_anchor_tb_3.png" /> |
 
 ## 3-margin anchors
 
@@ -67,10 +67,10 @@ When using 3 of the 4 anchors, the following keys can not be used: `x`, `y`, `al
 The following table reflects these dependencies:
 
 
-| Combination                            | Result                                      |
-|----------------------------------------|---------------------------------------------|
-| `left` and `top` and `right`<br>or<br>`left` and `bottom` and `right`     | `height` optional (see remarks)<br><br>`width` = parentWidth - (left+right)|
-| `top` and `left` and `bottom`<br>or<br>`top` and `right` and `bottom`     | `width` optional (see remarks)<br><br>`height` = parentHeight - (top+bottom)|
+| Combination                                                           | Result                                                                       |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `left` and `top` and `right`<br>or<br>`left` and `bottom` and `right` | `height` optional (see remarks)<br><br>`width` = parentWidth - (left+right)  |
+| `top` and `left` and `bottom`<br>or<br>`top` and `right` and `bottom` | `width` optional (see remarks)<br><br>`height` = parentHeight - (top+bottom) |
 
 **Remarks** 
 * if `height` or `width` are not present and can not be computed as a difference between two margins, they are defaulted to value 1. If limits are present (min Width or min Height) those limits are applied. This is usually usefull for controls that have a fixed width or height (e.g. a button, a combobox).
@@ -78,7 +78,7 @@ The following table reflects these dependencies:
 The position of the control is also computed based on the combination of the 3 anchors selectd, as shown in the next table:
 
 | Combination                     | Top-Left corner                    | Bottom-Right corner                      |
-|---------------------------------|------------------------------------|------------------------------------------|
+| ------------------------------- | ---------------------------------- | ---------------------------------------- |
 | `left` and `top` and `right`    | (left, top)                        | (parentWidth-right, top+height)          |
 | `left` and `bottom` and `right` | (left, parentHeight-bottom-height) | (parentWidth-right, parentHeight-bottom) |
 | `top` and `left` and `bottom`   | (left, top)                        | (left+width, parentHeight-bottom)        |
@@ -91,20 +91,20 @@ where:
 **Examples**
 
 
-| Layout                     | Result                                  |
-|----------------------------|-----------------------------------------|
-| **l:10,t:8,r:20,h:33%**    | <img src="img/layout_anchor_ltr.png" /> |
-| **l:20,b:5,r:10,h:33%**    | <img src="img/layout_anchor_lbr.png" /> |
-| **l:10,t:8,b:15,w:80%**    | <img src="img/layout_anchor_tlb.png" /> |
-| **r:30,t:8,b:20%,w:50%%**  | <img src="img/layout_anchor_trb.png" /> |
+| Layout                    | Result                                  |
+| ------------------------- | --------------------------------------- |
+| **l:10,t:8,r:20,h:33%**   | <img src="img/layout_anchor_ltr.png" /> |
+| **l:20,b:5,r:10,h:33%**   | <img src="img/layout_anchor_lbr.png" /> |
+| **l:10,t:8,b:15,w:80%**   | <img src="img/layout_anchor_tlb.png" /> |
+| **r:30,t:8,b:20%,w:50%%** | <img src="img/layout_anchor_trb.png" /> |
 
 
 ## 4-margin anchors
 
-When all of the 4 anchors, the rest of the keys ( `x`, `y`, `width`, `height`, `align` and `dock`) can not be used. Using them will reject the layout.
+When all of the 4 anchors, the rest of the keys ( `x`, `y`, `width`, `height`, `align`, `pivot` and `dock`) can not be used. Using them will reject the layout.
 
 **Example**
 
 | Layout                 | Result                                   |
-|------------------------|------------------------------------------|
+| ---------------------- | ---------------------------------------- |
 | **l:20,t:7,r:10,b:10** | <img src="img/layout_anchor_tlbr.png" /> |

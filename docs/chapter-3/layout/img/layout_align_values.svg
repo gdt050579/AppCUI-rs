@@ -15,8 +15,8 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="layout_dock.svg"
-   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_dock.png"
+   sodipodi:docname="layout_align_values.svg"
+   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_align_values.png"
    inkscape:export-xdpi="40.015827"
    inkscape:export-ydpi="40.015827">
   <defs
@@ -495,8 +495,8 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.5"
-     inkscape:cx="55.764163"
-     inkscape:cy="251.64696"
+     inkscape:cx="-183.23584"
+     inkscape:cy="253.64101"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -620,7 +620,7 @@
        xml:space="preserve"
        id="flowRoot3483"
        style="font-size:40.41800308px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.23740798,0,0,0.23740798,-426.41203,-11.401066)"><flowRegion
+       transform="matrix(0.23740798,0,0,0.23740798,-426.41203,-11.459632)"><flowRegion
          id="flowRegion3485"
          style="fill:#000000;stroke:#000000;stroke-width:1.88976383"><rect
            id="rect3487"
@@ -636,7 +636,7 @@
        xml:space="preserve"
        id="flowRoot3483-3"
        style="font-size:40.41800308px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.23740798,0,0,0.23740798,-359.26387,-5.4624073)"><flowRegion
+       transform="matrix(0.23740798,0,0,0.23740798,-359.26387,-11.459632)"><flowRegion
          id="flowRegion3485-6"
          style="fill:#000000;stroke:#000000;stroke-width:1.88976383"><rect
            id="rect3487-1"
@@ -646,7 +646,9 @@
            y="-563.24109"
            style="font-size:40.41800308px;line-height:125%;fill:#ffffff;stroke:none" /></flowRegion><flowPara
          id="flowPara3491-6"
-         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none">TOP</flowPara></flowRoot>    <flowRoot
+         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none">TOP</flowPara><flowPara
+         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none"
+         id="flowPara3094">CENTER</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot3483-4"
        style="font-size:40.41800308px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
@@ -666,7 +668,7 @@
        xml:space="preserve"
        id="flowRoot3483-4-2"
        style="font-size:40.41800308px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.23740798,0,0,0.23740798,-292.81946,48.760428)"><flowRegion
+       transform="matrix(0.23740798,0,0,0.23740798,-292.81946,42.763207)"><flowRegion
          id="flowRegion3485-7-9"
          style="fill:#000000;stroke:#000000;stroke-width:1.88976383"><rect
            id="rect3487-12-1"
@@ -678,11 +680,13 @@
          id="flowPara3489-6-2"
          style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none" /><flowPara
          id="flowPara3491-63-0"
-         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none">RIGHT</flowPara></flowRoot>    <flowRoot
+         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none">CENTER</flowPara><flowPara
+         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none"
+         id="flowPara3100">RIGHT</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot3483-4-4"
        style="font-size:40.41800308px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.23740798,0,0,0.23740798,-292.09139,120.97493)"><flowRegion
+       transform="matrix(0.23740798,0,0,0.23740798,-292.09139,121.03349)"><flowRegion
          id="flowRegion3485-7-3"
          style="fill:#000000;stroke:#000000;stroke-width:1.88976383"><rect
            id="rect3487-12-5"
@@ -698,7 +702,7 @@
        xml:space="preserve"
        id="flowRoot3483-4-4-5"
        style="font-size:40.41800308px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.23740798,0,0,0.23740798,-358.85066,126.97215)"><flowRegion
+       transform="matrix(0.23740798,0,0,0.23740798,-358.85066,121.03349)"><flowRegion
          id="flowRegion3485-7-3-7"
          style="fill:#000000;stroke:#000000;stroke-width:1.88976383"><rect
            id="rect3487-12-5-5"
@@ -708,7 +712,9 @@
            y="-563.24109"
            style="font-size:40.41800308px;line-height:125%;fill:#ffffff;stroke:none" /></flowRegion><flowPara
          id="flowPara3491-63-2-6"
-         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none">BOTTOM</flowPara></flowRoot>    <flowRoot
+         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none">BOTTOM</flowPara><flowPara
+         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none"
+         id="flowPara3096">CENTER</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot3483-4-4-2"
        style="font-size:40.41800308px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
@@ -728,7 +734,7 @@
        xml:space="preserve"
        id="flowRoot3483-8"
        style="font-size:40.41800308px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.23740798,0,0,0.23740798,-426.35441,60.754878)"><flowRegion
+       transform="matrix(0.23740798,0,0,0.23740798,-426.35441,54.81622)"><flowRegion
          id="flowRegion3485-2"
          style="fill:#000000;stroke:#000000;stroke-width:1.88976383"><rect
            id="rect3487-7"
@@ -738,7 +744,9 @@
            y="-563.24109"
            style="font-size:40.41800308px;line-height:125%;fill:#ffffff;stroke:none" /></flowRegion><flowPara
          id="flowPara3491-0"
-         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none">LEFT</flowPara></flowRoot>    <flowRoot
+         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none">CENTER</flowPara><flowPara
+         style="font-size:40.41800308px;text-align:center;line-height:125%;text-anchor:middle;fill:#ffffff;stroke:none"
+         id="flowPara3098">LEFT</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot3483-8-7"
        style="font-size:40.41800308px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"

@@ -15,8 +15,8 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="layout_dock_1.svg"
-   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_dock_1.png"
+   sodipodi:docname="layout_align_center.svg"
+   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_align_center.png"
    inkscape:export-xdpi="40.627281"
    inkscape:export-ydpi="40.627281">
   <defs
@@ -409,7 +409,7 @@
            y="659.75891"
            style="line-height:100%;fill:#333333" /></flowRegion><flowPara
          style="text-align:end;line-height:100%;text-anchor:end;fill:#333333"
-         id="flowPara3085-3">dock:center</flowPara></flowRoot>    <g
+         id="flowPara3085-3">align:center</flowPara></flowRoot>    <g
        id="g3912-3"
        style="fill:#999999;stroke:none"
        transform="matrix(0,0.64927487,-0.99999999,0,-349.667,240.87997)">

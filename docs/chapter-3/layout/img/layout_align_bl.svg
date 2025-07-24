@@ -15,8 +15,8 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="layout_dock_2.svg"
-   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_dock_2.png"
+   sodipodi:docname="layout_align_bl.svg"
+   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_align_bl.png"
    inkscape:export-xdpi="40.627281"
    inkscape:export-ydpi="40.627281">
   <defs
@@ -203,9 +203,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.70710678"
-     inkscape:cx="338.50286"
-     inkscape:cy="101.42096"
+     inkscape:zoom="1"
+     inkscape:cx="84.027582"
+     inkscape:cy="176.92569"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -293,7 +293,7 @@
            style="fill:#808080;" /></flowRegion><flowPara
          id="flowPara878">Parent Control</flowPara></flowRoot>    <g
        id="g927"
-       transform="matrix(1.3341838,0,0,2.793824,111.86152,17.484267)"
+       transform="matrix(1.3341838,0,0,2.3268383,111.86152,21.49693)"
        style="fill:#b3b3b3">
       <rect
          ry="1.0303146"
@@ -309,7 +309,7 @@
        xml:space="preserve"
        id="flowRoot872-8"
        style="font-size:40px;font-style:normal;font-weight:bold;line-height:100%;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.26458333,0,0,0.26458333,-590.20401,-231.38268)"><flowRegion
+       transform="matrix(0.26458333,0,0,0.26458333,-591.89734,-215.01379)"><flowRegion
          id="flowRegion874-6"
          style="fill:#333333"><rect
            id="rect876-3"
@@ -365,7 +365,7 @@
            x="-2045.7142"
            y="391.09113"
            style="line-height:125%;fill:#999999" /></flowRegion><flowPara
-         id="flowPara3083">height = 100%</flowPara></flowRoot>    <circle
+         id="flowPara3083">height = 80%</flowPara></flowRoot>    <circle
        sodipodi:ry="3.7797618"
        sodipodi:rx="3.7797618"
        sodipodi:cy="40.410511"
@@ -381,7 +381,7 @@
        xml:space="preserve"
        id="flowRoot872-8-2"
        style="font-size:40px;font-style:normal;font-weight:bold;line-height:100%;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.26458333,0,0,0.26458333,-619.58384,-145.23299)"><flowRegion
+       transform="matrix(0.26458333,0,0,0.26458333,-615.91496,-146.36187)"><flowRegion
          id="flowRegion874-6-2"
          style="fill:#333333"><rect
            id="rect876-3-6"
@@ -391,10 +391,10 @@
            y="659.75891"
            style="line-height:100%;fill:#333333" /></flowRegion><flowPara
          style="text-align:end;line-height:100%;text-anchor:end;fill:#333333"
-         id="flowPara3085-3">dock:bottom left</flowPara></flowRoot>    <g
+         id="flowPara3085-3">align: bottom-left</flowPara></flowRoot>    <g
        id="g3912-3"
        style="fill:#999999;stroke:none"
-       transform="matrix(0,1.1178675,-0.99999999,0,-387.18452,424.88572)">
+       transform="matrix(0,0.95702039,-0.99999999,0,-387.18452,369.39675)">
       <path
          style="font-size:medium;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;baseline-shift:baseline;color:#000000;fill:#999999;fill-opacity:1;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;font-family:Sans;-inkscape-font-specification:Sans"
          d="m -431.71875,12.90625 0,1 85.75,0 0,-1 -85.75,0 z"
