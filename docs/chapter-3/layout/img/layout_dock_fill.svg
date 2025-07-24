@@ -15,8 +15,8 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="layout_dock_3.svg"
-   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_dock_3.png"
+   sodipodi:docname="layout_dock_fill.svg"
+   inkscape:export-filename="E:\Lucru\Personal\AppCUI-rs\docs\chapter-3\layout\img\layout_dock_fill.png"
    inkscape:export-xdpi="40.627281"
    inkscape:export-ydpi="40.627281">
   <defs
@@ -349,7 +349,7 @@
        xml:space="preserve"
        id="flowRoot872-8-2"
        style="font-size:40px;font-style:normal;font-weight:bold;line-height:100%;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.26458333,0,0,0.26458333,-525.99069,-182.79199)"><flowRegion
+       transform="matrix(0.26458333,0,0,0.26458333,-545.74625,-180.53421)"><flowRegion
          id="flowRegion874-6-2"
          style="fill:#333333"><rect
            id="rect876-3-6"
@@ -359,7 +359,7 @@
            y="659.75891"
            style="line-height:100%;fill:#333333" /></flowRegion><flowPara
          style="text-align:end;line-height:100%;text-anchor:end;fill:#333333"
-         id="flowPara3085-3">dock:center</flowPara></flowRoot>    <g
+         id="flowPara3085-3">dock:fill</flowPara></flowRoot>    <g
        id="g3912-3"
        style="fill:#000000;stroke:none"
        transform="matrix(0,1.092132,-0.99999999,0,-288.60126,413.35059)">

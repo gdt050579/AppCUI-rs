@@ -26,7 +26,11 @@ To create a control using this mode, you can use the following syntax:
 
 ## Visual representation
 
+Here are some examples of how the layout will look like for different types of docking.
 
+| Layout                               | Outcome                                                   |
+|--------------------------------------|-----------------------------------------------------------|
+| **Layout::fill()**<br>or<br>**LayoutBuilder::new().dock(Dock::fill).build()**<br>or<br>**layout!("dock:fill")**                  | <img src="img/layout_dock_fill.png" />                       |
 
 ## Examples
 
