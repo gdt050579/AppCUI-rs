@@ -181,9 +181,6 @@ fn validate_align_layout(lp: &LayoutParams, params: &NamedParamsMap) {
         lp.pivot,
         "When ('align' or 'a') parameter is used,('pivot' or 'p') parameters can not be used !"
     );
-    // if (!lp.width) && (!lp.height) {
-    //     panic!("When layout is being used - at least one of width of height must be provided !");
-    // }
 }
 
 fn validate_xy_layout(lp: &LayoutParams, params: &NamedParamsMap) {
