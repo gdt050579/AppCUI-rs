@@ -17,43 +17,13 @@ To create a control using this mode, you can use the following syntax:
 - using `Layout::absolute(...)` does not support percentages for any parameter (if these are needed, consider using `LayoutBuilder` or `layout!` procmacro)
 - Negative values for `x` and `y` are allowed and will position the control outside the parent.
 
-## Visual representation
+## Visual Representation
 
 Below is an example where a control is positioned with its top-left corner at coordinates `(8, 5)` and a size of `18×6` characters.
 
-
-<table>
-<tr>
-<td style="width:45%; vertical-align:top;">
-
-
-```rs
-Layout::absolute(8,5,18,6)
-```
-or
-```rs
-LayoutBuilder::new().x(8)
-                    .y(5)
-                    .width(18)
-                    .height(6)
-                    .build()
-```
-or
-```
-layout!("x:8,y:5,w:18,h:6")
-```
-
-</td>
-
-<td style="width:55%; vertical-align:center;">
-
-![Alt text for image](img/layout_abspos.png)
-
-
-</td>
-
-</tr>
-</table>
+| Layout Description                                                                                                                     | Visual representation                               |
+| -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| A control positioned with its top-left corner at coordinates **(8, 5)** and a size of **18×6** characters                              | <img src="img/layout_abspos.png" width=800 />       |
 
 
 ## Examples
