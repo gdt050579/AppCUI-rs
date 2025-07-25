@@ -121,7 +121,10 @@ impl ControlLayout {
 impl From<Layout> for ControlLayout {
     fn from(value: Layout) -> Self {
         Self {
-            mode: LayoutMode::new(value).unwrap(),
+            mode: match LayoutMode::new(value) {
+                Ok(mode) => mode,
+                Err(e) => panic!("{e}"),
+            },
             x: 0,
             y: 0,
             width: 0,

@@ -92,6 +92,10 @@ name = "hello_world"
 path = "hello_world/main.rs"
 
 [[example]]
+name = "hello_world_procmacro"
+path = "hello_world_procmacro/main.rs"
+
+[[example]]
 name = "window_toolbar"
 path = "window_toolbar/main.rs"
 

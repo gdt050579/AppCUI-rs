@@ -66,6 +66,28 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
+    let mut win = Window::new(
+        "Test",
+        LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(),
+        window::Flags::Sizeable,
+    );
+    win.add(Label::new(
+        "Hello World !",
+        LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
+    ));
+    app.add_window(win);
+    app.run();
+    Ok(())
+}
+```
+
+or a more compat version using proc-macros:
+
+```rs
+use appcui::prelude::*;
+
+fn main() -> Result<(), appcui::system::Error> {
+    let mut app = App::new().build()?;
     let mut win = window!("Test,a:c,w:30,h:9");
     win.add(label!("'Hello World !',a:c,w:13,h:1"));
     app.add_window(win);
