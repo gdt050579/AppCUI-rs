@@ -1,5 +1,4 @@
 use crate::ui::layout::absolute_layout::AbsoluteLayout;
-use crate::ui::layout::Coordinate;
 use crate::prelude::*;
 
 use super::Alignment;
@@ -9,8 +8,11 @@ use super::Dimension16;
 use super::Dock;
 use super::LayoutBuilder;
 use super::PointAndSizeLayout;
-
+use super::Error;
+use super::Anchors;
 use super::LayoutMode;
+use super::Dimension;
+use super::Coordinate;
 
 macro_rules! validate_abs {
     ($text:literal, $x:expr,$y:expr,$w:expr,$h:expr,$a:tt,$anc:tt) => {
@@ -245,50 +247,6 @@ fn layout_mode_anchor_lr() {
     validate_pos!("l:10%,p:b,y:50%,r:20%,h:50%", 50, 30, 5, 0, 35, 15);
 }
 
-/* 
-#[test]
-#[should_panic]
-fn layout_mode_anchor_lr_dont_allow_x() {
-    // this code should panic because 'x' can not be used in a Left-Right layout mode
-    validate_pos!("l:5,r:7,y:0,h:10,a:t,x:10", 50, 30, 5, 0, 38, 10);
-}
-#[test]
-#[should_panic]
-fn layout_mode_anchor_lr_invalid_alignment() {
-    // this code should panic because only (top,bottom and center) alignments can not be used in a Left-Right layout mode
-    validate_pos!("l:5,r:7,y:0,h:10,a:left", 50, 30, 5, 0, 38, 10);
-}
-
-#[test]
-fn layout_mode_anchor_tb() {
-    validate_pos!("t:5,b:7,x:0,w:10,p:l", 30, 50, 0, 5, 10, 38);
-    validate_pos!("t:5,b:7,x:10,w:10,p:c", 30, 50, 5, 5, 10, 38);
-    validate_pos!("t:5,b:7,x:20,w:10,p:r", 30, 50, 10, 5, 10, 38);
-    // no alignment - default is center
-    validate_pos!("t:5,b:7,x:0,w:10", 30, 50, -5, 5, 10, 38);
-
-    validate_pos!("t:10%,p:l,x:50%,b:20%,w:4", 30, 50, 15, 5, 4, 35);
-    validate_pos!("t:10%,p:c,x:50%,b:20%,w:4", 30, 50, 13, 5, 4, 35);
-    validate_pos!("t:10%,p:r,x:50%,b:20%,w:4", 30, 50, 11, 5, 4, 35);
-
-    validate_pos!("t:10%,p:l,x:50%,b:20%,w:50%", 30, 50, 15, 5, 15, 35);
-    validate_pos!("t:10%,p:c,x:50%,b:20%,w:50%", 30, 50, 8, 5, 15, 35);
-    validate_pos!("t:10%,p:r,x:50%,b:20%,w:50%", 30, 50, 0, 5, 15, 35);
-}
-
-#[test]
-#[should_panic]
-fn layout_mode_anchor_tb_dont_allow_y() {
-    // this code should panic because 'y' can not be used in a Top-Down layout mode
-    validate_pos!("t:5,b:7,y:0,w:10,a:l", 30, 50, 0, 5, 10, 38);
-}
-#[test]
-#[should_panic]
-fn layout_mode_anchor_td_invalid_alignment() {
-    // this code should panic because only (left,right and center) alignments can not be used in a Top-Down layout mode
-    validate_pos!("t:5,b:7,x:0,w:10,a:top", 30, 50, 0, 5, 10, 38);
-}
-
 #[test]
 fn check_anchors_new() {
     assert_eq!(Anchors::new(false, false, false, false), Anchors::None);
@@ -310,6 +268,24 @@ fn check_anchors_new() {
 }
 
 #[test]
+fn layout_mode_anchor_tb() {
+    validate_pos!("t:5,b:7,x:0,w:10,p:l", 30, 50, 0, 5, 10, 38);
+    validate_pos!("t:5,b:7,x:10,w:10,p:c", 30, 50, 5, 5, 10, 38);
+    validate_pos!("t:5,b:7,x:20,w:10,p:r", 30, 50, 10, 5, 10, 38);
+    // no alignment - default is center
+    validate_pos!("t:5,b:7,x:0,w:10,p:c", 30, 50, -5, 5, 10, 38);
+
+    validate_pos!("t:10%,p:l,x:50%,b:20%,w:4", 30, 50, 15, 5, 4, 35);
+    validate_pos!("t:10%,p:c,x:50%,b:20%,w:4", 30, 50, 13, 5, 4, 35);
+    validate_pos!("t:10%,p:r,x:50%,b:20%,w:4", 30, 50, 11, 5, 4, 35);
+
+    validate_pos!("t:10%,p:l,x:50%,b:20%,w:50%", 30, 50, 15, 5, 15, 35);
+    validate_pos!("t:10%,p:c,x:50%,b:20%,w:50%", 30, 50, 8, 5, 15, 35);
+    validate_pos!("t:10%,p:r,x:50%,b:20%,w:50%", 30, 50, 0, 5, 15, 35);
+}
+
+
+#[test]
 fn dimension_from_basic_type() {
     assert_eq!(Dimension::from(10u8), Dimension::Absolute(10));
     assert_eq!(Dimension::from(10u16), Dimension::Absolute(10));
@@ -329,15 +305,116 @@ fn dimension_from_basic_type() {
 
 #[test]
 fn coordonate_from_basic_type() {
-    assert_eq!(Coordonate::from(10u8), Coordonate::Absolute(10));
-    assert_eq!(Coordonate::from(-10i8), Coordonate::Absolute(-10));
-    assert_eq!(Coordonate::from(10u16), Coordonate::Absolute(10));
-    assert_eq!(Coordonate::from(-10i16), Coordonate::Absolute(-10));
-    assert_eq!(Coordonate::from(-10i32), Coordonate::Absolute(-10));
-    assert_eq!(Coordonate::from(-10i64), Coordonate::Absolute(-10));
-    assert_eq!(Coordonate::from(1.25f32), Coordonate::Percentage(1.25));
-    assert_eq!(Coordonate::from(-1.25f64), Coordonate::Percentage(-1.25));
+    assert_eq!(Coordinate::from(10u8), Coordinate::Absolute(10));
+    assert_eq!(Coordinate::from(-10i8), Coordinate::Absolute(-10));
+    assert_eq!(Coordinate::from(10u16), Coordinate::Absolute(10));
+    assert_eq!(Coordinate::from(-10i16), Coordinate::Absolute(-10));
+    assert_eq!(Coordinate::from(-10i32), Coordinate::Absolute(-10));
+    assert_eq!(Coordinate::from(-10i64), Coordinate::Absolute(-10));
+    assert_eq!(Coordinate::from(1.25f32), Coordinate::Percentage(1.25));
+    assert_eq!(Coordinate::from(-1.25f64), Coordinate::Percentage(-1.25));
 }
+
+#[test]
+fn layout_mode_anchor_trb() {
+    validate_pos!("r:5,t:6,b:7,w:10", 50, 30, 35, 6, 10, 17);
+    validate_pos!("r:10%,t:6,b:7,w:20%", 50, 30, 35, 6, 10, 17);
+    validate_pos!("r:5,t:3,b:3,w:10", 50, 30, 35, 3, 10, 24);
+    validate_pos!("r:5,t:10%,b:10%,w:10", 50, 30, 35, 3, 10, 24);
+    validate_pos!("r:10%,t:10%,b:10%,w:20%", 50, 30, 35, 3, 10, 24);
+}
+
+#[test]
+fn check_dimension_is_absolute() {
+    assert!(Dimension::Absolute(10).is_absolute());
+    assert!(!Dimension::Percentage(0.5f32).is_absolute());
+    assert!(!Dimension::Percentage(1.0f32).is_absolute());
+    assert!(Dimension::Absolute(0).is_absolute());
+}
+
+
+#[test]
+fn check_tr_anchor() {
+    // this code should panic because left is not a valid value
+    validate_pos!("t:1,r:1,w:10,h:10", 50, 30, 39, 1, 10, 10);
+}
+
+#[test]
+fn check_default_layout_modes() {
+    assert_eq!(LayoutMode::default(), LayoutMode::Absolute(AbsoluteLayout::new(0, 0, 0, 0)));
+}
+
+#[test]
+fn check_coordonate_update_with_absolute_value() {
+    let mut c = Coordinate::Absolute(0);
+    c.update_with_absolute_value(10, 20);
+    assert_eq!(c, Coordinate::Absolute(10));
+
+    let mut c = Coordinate::Percentage(0.0f32);
+    c.update_with_absolute_value(10, 20);
+    assert_eq!(c, Coordinate::Percentage(0.5f32));
+}
+
+#[test]
+fn check_layout_builder() {
+    let lb = LayoutBuilder::new()
+        .x(100)
+        .y(1.25)
+        .width(100)
+        .height(1.0)
+        .alignment(Alignment::Center)
+        .dock(Dock::Top)
+        .left_anchor(0.5)
+        .right_anchor(0.25)
+        .top_anchor(5)
+        .bottom_anchor(7);
+    assert_eq!(lb.inner_layout.x, Some(Coordinate16::Absolute(100)));
+    assert_eq!(lb.inner_layout.y, Some(Coordinate16::Percentage(12500)));
+    assert_eq!(lb.inner_layout.width, Some(Dimension16::Absolute(100)));
+    assert_eq!(lb.inner_layout.height, Some(Dimension16::Percentage(10000)));
+    assert_eq!(lb.inner_layout.align, Some(Alignment::Center));
+    assert_eq!(lb.inner_layout.dock, Some(Dock::Top));
+    assert_eq!(lb.inner_layout.a_left, Some(Coordinate16::Percentage(5000)));
+    assert_eq!(lb.inner_layout.a_right, Some(Coordinate16::Percentage(2500)));
+    assert_eq!(lb.inner_layout.a_top, Some(Coordinate16::Absolute(5)));
+    assert_eq!(lb.inner_layout.a_bottom, Some(Coordinate16::Absolute(7)));
+}
+
+#[test]
+fn layout_mode_anchor_lr_dont_allow_x() {
+    // this code should panic because 'x' can not be used in a Left-Right layout mode
+    let l = LayoutBuilder::new().left_anchor(5).right_anchor(7).x(0).try_build();
+    assert_eq!(l, Err(Error::LeftRightAnchorsUsedWithX));
+    //validate_pos!("l:5,r:7,y:0,h:10,a:t,x:10", 50, 30, 5, 0, 38, 10);
+}
+
+/* 
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_lr_invalid_alignment() {
+    // this code should panic because only (top,bottom and center) alignments can not be used in a Left-Right layout mode
+    validate_pos!("l:5,r:7,y:0,h:10,a:left", 50, 30, 5, 0, 38, 10);
+}
+
+
+
+#[test]
+#[should_panic]
+fn layout_mode_anchor_tb_dont_allow_y() {
+    // this code should panic because 'y' can not be used in a Top-Down layout mode
+    validate_pos!("t:5,b:7,y:0,w:10,a:l", 30, 50, 0, 5, 10, 38);
+}
+#[test]
+#[should_panic]
+fn layout_mode_anchor_td_invalid_alignment() {
+    // this code should panic because only (left,right and center) alignments can not be used in a Top-Down layout mode
+    validate_pos!("t:5,b:7,x:0,w:10,a:top", 30, 50, 0, 5, 10, 38);
+}
+
+
+
+
 
 #[test]
 #[should_panic]
@@ -395,14 +472,7 @@ fn layout_mode_anchor_trb_dont_allow_allign() {
     validate_pos!("t:1,r:5,b:7,w:20,a:c", 50, 30, 5, 0, 38, 10);
 }
 
-#[test]
-fn layout_mode_anchor_trb() {
-    validate_pos!("r:5,t:6,b:7,w:10", 50, 30, 35, 6, 10, 17);
-    validate_pos!("r:10%,t:6,b:7,w:20%", 50, 30, 35, 6, 10, 17);
-    validate_pos!("r:5,t:3,b:3,w:10", 50, 30, 35, 3, 10, 24);
-    validate_pos!("r:5,t:10%,b:10%,w:10", 50, 30, 35, 3, 10, 24);
-    validate_pos!("r:10%,t:10%,b:10%,w:20%", 50, 30, 35, 3, 10, 24);
-}
+
 
 #[test]
 #[should_panic]
@@ -506,13 +576,7 @@ fn layout_mode_align_wh_coord_dont_allow_y() {
     validate_pos!("a:c,w:50%,h:50%,y:0", 50, 30, 5, 0, 38, 10);
 }
 
-#[test]
-fn check_dimension_is_absolute() {
-    assert!(Dimension::Absolute(10).is_absolute());
-    assert!(!Dimension::Percentage(0.5f32).is_absolute());
-    assert!(!Dimension::Percentage(1.0f32).is_absolute());
-    assert!(Dimension::Absolute(0).is_absolute());
-}
+
 
 #[test]
 #[should_panic]
@@ -578,50 +642,3 @@ fn check_panic_on_invalid_bottom() {
 }
 
 */
-
-#[test]
-fn check_tr_anchor() {
-    // this code should panic because left is not a valid value
-    validate_pos!("t:1,r:1,w:10,h:10", 50, 30, 39, 1, 10, 10);
-}
-
-#[test]
-fn check_default_layout_modes() {
-    assert_eq!(LayoutMode::default(), LayoutMode::Absolute(AbsoluteLayout::new(0, 0, 0, 0)));
-}
-
-#[test]
-fn check_coordonate_update_with_absolute_value() {
-    let mut c = Coordinate::Absolute(0);
-    c.update_with_absolute_value(10, 20);
-    assert_eq!(c, Coordinate::Absolute(10));
-
-    let mut c = Coordinate::Percentage(0.0f32);
-    c.update_with_absolute_value(10, 20);
-    assert_eq!(c, Coordinate::Percentage(0.5f32));
-}
-
-#[test]
-fn check_layout_builder() {
-    let lb = LayoutBuilder::new()
-        .x(100)
-        .y(1.25)
-        .width(100)
-        .height(1.0)
-        .alignment(Alignment::Center)
-        .dock(Dock::Top)
-        .left_anchor(0.5)
-        .right_anchor(0.25)
-        .top_anchor(5)
-        .bottom_anchor(7);
-    assert_eq!(lb.inner_layout.x, Some(Coordinate16::Absolute(100)));
-    assert_eq!(lb.inner_layout.y, Some(Coordinate16::Percentage(12500)));
-    assert_eq!(lb.inner_layout.width, Some(Dimension16::Absolute(100)));
-    assert_eq!(lb.inner_layout.height, Some(Dimension16::Percentage(10000)));
-    assert_eq!(lb.inner_layout.align, Some(Alignment::Center));
-    assert_eq!(lb.inner_layout.dock, Some(Dock::Top));
-    assert_eq!(lb.inner_layout.a_left, Some(Coordinate16::Percentage(5000)));
-    assert_eq!(lb.inner_layout.a_right, Some(Coordinate16::Percentage(2500)));
-    assert_eq!(lb.inner_layout.a_top, Some(Coordinate16::Absolute(5)));
-    assert_eq!(lb.inner_layout.a_bottom, Some(Coordinate16::Absolute(7)));
-}

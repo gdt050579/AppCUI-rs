@@ -1,6 +1,6 @@
 use std::fmt::*;
 
-#[derive(Debug)]
+#[derive(Debug,Eq,PartialEq)]
 pub enum Error {
     XYParameterUsedWithDock,
     AnchorParameterUsedWithDock,
