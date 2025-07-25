@@ -1,5 +1,3 @@
-use std::arch::x86_64;
-
 use appcui::prelude::*;
 
 #[CustomContainer(overwrite = OnPaint)]

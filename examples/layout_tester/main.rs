@@ -3,9 +3,13 @@ use std::fmt::Write;
 
 mod child_control;
 mod parent_control;
+mod value;
+
 
 use child_control::ChildControl;
 use parent_control::ParentControl;
+use value::Value;
+
 
 #[Window(events = TextFieldEvents + SelectorEvents<Alignment> + SelectorEvents<Dock> + SelectorEvents<Pivot>)]
 struct LayoutTesterWindow {
@@ -112,132 +116,37 @@ impl LayoutTesterWindow {
         }
     }
 
+
     fn update_child_layout(&mut self) {
         let mut layout_builder = LayoutBuilder::new();
-        let mut has_error = false;
         let mut error_msg = String::new();
 
-        // Parse position values
-        if let Some(tf) = self.control(self.x_field) {
-            let text = tf.text().trim();
-            if !text.is_empty() {
-                match text.parse::<i32>() {
-                    Ok(value) => {
-                        layout_builder = layout_builder.x(value);
+        macro_rules! parse_value {
+            ($field:expr, $field_name:literal, $should_be_positive:expr, $method:ident) => {
+                match Value::new(self.control($field).unwrap().text(), $field_name, $should_be_positive) {
+                    Value::None => {}
+                    Value::Percent(percent) => {
+                        layout_builder = layout_builder.$method(percent);
                     }
-                    Err(_) => {
-                        has_error = true;
-                        write!(&mut error_msg, "Invalid X value: {}. ", text).unwrap();
+                    Value::Integer(integer) => {
+                        layout_builder = layout_builder.$method(integer);
+                    }
+                    Value::Error(err) => {
+                        write!(&mut error_msg, "{}", err).unwrap();
                     }
                 }
-            }
+            };
         }
 
-        if let Some(tf) = self.control(self.y_field) {
-            let text = tf.text().trim();
-            if !text.is_empty() {
-                match text.parse::<i32>() {
-                    Ok(value) => {
-                        layout_builder = layout_builder.y(value);
-                    }
-                    Err(_) => {
-                        has_error = true;
-                        write!(&mut error_msg, "Invalid Y value: {}. ", text).unwrap();
-                    }
-                }
-            }
-        }
 
-        if let Some(tf) = self.control(self.width_field) {
-            let text = tf.text().trim();
-            if !text.is_empty() {
-                match text.parse::<u32>() {
-                    Ok(value) => {
-                        layout_builder = layout_builder.width(value);
-                    }
-                    Err(_) => {
-                        has_error = true;
-                        write!(&mut error_msg, "Invalid Width value: {}. ", text).unwrap();
-                    }
-                }
-            }
-        }
-
-        if let Some(tf) = self.control(self.height_field) {
-            let text = tf.text().trim();
-            if !text.is_empty() {
-                match text.parse::<u32>() {
-                    Ok(value) => {
-                        layout_builder = layout_builder.height(value);
-                    }
-                    Err(_) => {
-                        has_error = true;
-                        write!(&mut error_msg, "Invalid Height value: {}. ", text).unwrap();
-                    }
-                }
-            }
-        }
-
-        // Parse anchor values
-        if let Some(tf) = self.control(self.left_anchor_field) {
-            let text = tf.text().trim();
-            if !text.is_empty() {
-                match text.parse::<i32>() {
-                    Ok(value) => {
-                        layout_builder = layout_builder.left_anchor(value);
-                    }
-                    Err(_) => {
-                        has_error = true;
-                        write!(&mut error_msg, "Invalid Left Anchor value: {}. ", text).unwrap();
-                    }
-                }
-            }
-        }
-
-        if let Some(tf) = self.control(self.right_anchor_field) {
-            let text = tf.text().trim();
-            if !text.is_empty() {
-                match text.parse::<i32>() {
-                    Ok(value) => {
-                        layout_builder = layout_builder.right_anchor(value);
-                    }
-                    Err(_) => {
-                        has_error = true;
-                        write!(&mut error_msg, "Invalid Right Anchor value: {}. ", text).unwrap();
-                    }
-                }
-            }
-        }
-
-        if let Some(tf) = self.control(self.top_anchor_field) {
-            let text = tf.text().trim();
-            if !text.is_empty() {
-                match text.parse::<i32>() {
-                    Ok(value) => {
-                        layout_builder = layout_builder.top_anchor(value);
-                    }
-                    Err(_) => {
-                        has_error = true;
-                        write!(&mut error_msg, "Invalid Top Anchor value: {}. ", text).unwrap();
-                    }
-                }
-            }
-        }
-
-        if let Some(tf) = self.control(self.bottom_anchor_field) {
-            let text = tf.text().trim();
-            if !text.is_empty() {
-                match text.parse::<i32>() {
-                    Ok(value) => {
-                        layout_builder = layout_builder.bottom_anchor(value);
-                    }
-                    Err(_) => {
-                        has_error = true;
-                        write!(&mut error_msg, "Invalid Bottom Anchor value: {}. ", text).unwrap();
-                    }
-                }
-            }
-        }
+        parse_value!(self.x_field, "X", false, x);
+        parse_value!(self.y_field, "Y", false, y);
+        parse_value!(self.width_field, "Width", true, width);
+        parse_value!(self.height_field, "Height", true, height);
+        parse_value!(self.left_anchor_field, "Left Anchor", false, left_anchor);
+        parse_value!(self.right_anchor_field, "Right Anchor", false, right_anchor);
+        parse_value!(self.top_anchor_field, "Top Anchor", false, top_anchor);
+        parse_value!(self.bottom_anchor_field, "Bottom Anchor", false, bottom_anchor);
 
         // Handle enum selectors
         if let Some(selector) = self.control(self.align_selector) {
@@ -258,7 +167,7 @@ impl LayoutTesterWindow {
             }
         }
 
-        if has_error {
+        if !error_msg.is_empty() {
             self.set_error_message(&error_msg);
         } else {
             match layout_builder.try_build() {
