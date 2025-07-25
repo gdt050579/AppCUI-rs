@@ -107,7 +107,7 @@ impl ParentControl {
 
 impl OnPaint for ParentControl {
     fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
-        let size = self.client_size();
+        let size = self.size();
         let width = size.width as i32;
         let height = size.height as i32;
 
