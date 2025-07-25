@@ -2190,6 +2190,110 @@ pub fn textarea(input: TokenStream) -> TokenStream {
 }
 
 
+/// Creates a layout from a string description using the LayoutBuilder pattern.
+/// The format is `layout!("parameter:value, parameter:value, ...")` where parameters define how a control should be positioned and sized.
+/// 
+/// # Syntax
+/// 
+/// The macro accepts a string with comma-separated parameter-value pairs:
+/// ```no_compile
+/// layout!("parameter:value, parameter:value, ...")
+/// ```
+/// 
+/// or
+/// 
+/// ```no_compile
+/// layout!("parameter=value, parameter=value, ...")
+/// ```
+/// 
+/// # Parameters
+/// 
+/// | Parameter | Alias | LayoutBuilder Method | Value Type              | Description                                                                              |
+/// | --------- | ----- | -------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+/// | `x`       |       | `.x(...)`            | numerical or percentage | X coordinate                                                                             |
+/// | `y`       |       | `.y(...)`            | numerical or percentage | Y coordinate                                                                             |
+/// | `left`    | `l`   | `.left_anchor(...)`  | numerical or percentage | Left anchor (space between parent left margin and control)                              |
+/// | `right`   | `r`   | `.right_anchor(...)` | numerical or percentage | Right anchor (space between parent right margin and control)                            |
+/// | `top`     | `t`   | `.top_anchor(...)`   | numerical or percentage | Top anchor (space between parent top margin and control)                                |
+/// | `bottom`  | `b`   | `.bottom_anchor(...)` | numerical or percentage | Bottom anchor (space between parent bottom margin and control)                          |
+/// | `width`   | `w`   | `.width(...)`        | numerical or percentage | Width of the control                                                                     |
+/// | `height`  | `h`   | `.height(...)`       | numerical or percentage | Height of the control                                                                    |
+/// | `dock`    | `d`   | `.dock(...)`         | docking value           | How the control is docked to its parent                                                 |
+/// | `align`   | `a`   | `.alignment(...)`    | alignment value         | How the control is aligned against the margins of its parent                            |
+/// | `pivot`   | `p`   | `.pivot(...)`        | pivoting direction      | How the control is aligned against the point represented by (x,y) - the pivot          |
+/// 
+/// # Value Types
+/// 
+/// * **Numerical values**: Integer numbers between -30000 and 30000 (e.g., `x:100`)
+/// * **Percentage values**: Floating point numbers followed by `%` between -300% and 300% (e.g., `width:50%`)
+/// * All parameters are case-insensitive
+/// 
+/// # Dock Values
+/// 
+/// | Value    | Alias | Description                                                     | Required Parameter |
+/// | -------- | ----- | --------------------------------------------------------------- | ------------------ |
+/// | `left`   | `l`   | Docks control to the left edge of its parent                   | `width`            |
+/// | `right`  | `r`   | Docks control to the right edge of its parent                  | `width`            |
+/// | `top`    | `t`   | Docks control to the top edge of its parent                    | `height`           |
+/// | `bottom` | `b`   | Docks control to the bottom edge of its parent                 | `height`           |
+/// | `fill`   | `f`   | Control fills the entire space of its parent                   | none               |
+/// 
+/// # Align Values
+/// 
+/// | Value         | Aliases                               | Description                    |
+/// | ------------- | ------------------------------------- | ------------------------------ |
+/// | `topleft`     | `lefttop`, `tl`, `lt`, `top-left`     | Align to top-left corner       |
+/// | `topcenter`   | `t`, `tc`, `ct`, `top-center`         | Align to top center            |
+/// | `topright`    | `righttop`, `tr`, `rt`, `top-right`   | Align to top-right corner      |
+/// | `centerright` | `r`, `cr`, `rc`, `center-right`       | Align to center-right          |
+/// | `bottomright` | `rightbottom`, `br`, `rb`, `bottom-right` | Align to bottom-right corner   |
+/// | `bottomcenter`| `b`, `bc`, `cb`, `bottom-center`      | Align to bottom center         |
+/// | `bottomleft`  | `leftbottom`, `lb`, `bl`, `bottom-left` | Align to bottom-left corner    |
+/// | `centerleft`  | `l`, `cl`, `lc`, `center-left`        | Align to center-left           |
+/// | `center`      | `c`                                   | Align to center                |
+/// 
+/// # Pivot Values
+/// 
+/// Pivot values use the same names as align values but define how width and height extend from the (x,y) point:
+/// 
+/// | Value         | Aliases             | Top-Left Corner        | Bottom-Right Corner    |
+/// | ------------- | ------------------- | ---------------------- | ---------------------- |
+/// | `top-left`    | `lefttop`, `tl`, `lt` | (x,y)                  | (x+width,y+height)     |
+/// | `top-center`  | `top`, `t`          | (x-width/2,y)          | (x+width/2,y+height)   |
+/// | `top-right`   | `righttop`, `tr`, `rt` | (x-width,y)            | (x,y+height)           |
+/// | `center-right`| `right`, `r`        | (x-width,y-height/2)   | (x,y+height/2)         |
+/// | `bottom-right`| `rightbottom`, `br`, `rb` | (x-width,y-height)     | (x,y)                  |
+/// | `bottom-center`| `bottom`, `b`       | (x-width/2,y-height)   | (x+width/2,y)          |
+/// | `bottom-left` | `leftbottom`, `lb`, `bl` | (x,y-height)           | (x+width,y)            |
+/// | `center-left` | `left`, `l`         | (x,y-height/2)         | (x+width,y+height/2)   |
+/// | `center`      | `center`, `c`       | (x-width/2,y-height/2) | (x+width/2,y+height/2) |
+/// 
+/// # Examples
+/// 
+/// ```rust, no_compile
+/// use appcui::prelude::*;
+/// 
+/// // Dock to left with width of 10
+/// let layout = layout!("dock:left, width:10");
+/// let layout = layout!("d:l, w:10"); // Using aliases
+/// 
+/// // Position at coordinates with size
+/// let layout = layout!("x:50, y:20, width:100, height:50");
+/// 
+/// // Center alignment with percentage width
+/// let layout = layout!("align:center, width:50%, height:25%");
+/// 
+/// // Using anchors for responsive layout
+/// let layout = layout!("left:10, right:10, top:5, bottom:5");
+/// 
+/// // Pivot-based positioning
+/// let layout = layout!("x:100, y:50, width:80, height:40, pivot:center");
+/// 
+/// // Fill parent completely
+/// let layout = layout!("dock:fill");
+/// ```
+/// 
+/// The layout macro provides a more concise alternative to manually building layouts with LayoutBuilder methods.
 #[proc_macro]
 pub fn layout(input: TokenStream) -> TokenStream {
     crate::controls::layout::create(input)
