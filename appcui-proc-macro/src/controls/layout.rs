@@ -224,14 +224,7 @@ fn validate_left_right_layout(lp: &LayoutParams, params: &NamedParamsMap) {
         "When (left,right) anchors are used together, ('width' or 'w') parameter can not be used as the width is deduced from left-right difference"
     );
     should_use!(lp.y, "When (left,right) anchors are used together, 'Y' parameter is required !");
-    should_use!(lp.pivot, "When (left,right) anchors are used together, 'pivot' parameter is required !");
-
-    match params.get("pivot").unwrap().to_align() {
-        Alignment::TopCenter | Alignment::Center | Alignment::BottomCenter => {}
-        _ => panic!(
-            "When (left,right) anchors are used together, only TopCenter (tc or t), Center (c) and BottomCenter(bc or b) pivot values are allowed !"
-        ),
-    }
+    should_use!(lp.pivot, "When (left,right) anchors are used together, 'pivot' parameter is required !");    
 }
 
 fn validate_top_bottom_layout(lp: &LayoutParams, params: &NamedParamsMap) {

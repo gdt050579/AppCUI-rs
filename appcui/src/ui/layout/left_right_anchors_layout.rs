@@ -1,10 +1,10 @@
-use super::{should_not_use, should_use};
 use super::ControlLayout;
 use super::Coordinate16;
 use super::Dimension16;
 use super::Error;
 use super::Layout;
 use super::Pivot;
+use super::{should_not_use, should_use};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct LeftRightAnchorsLayout {
@@ -22,13 +22,6 @@ impl LeftRightAnchorsLayout {
         should_use!(params.pivot, Error::LeftRightAnchorsUsedWithoutPivot);
         should_use!(params.y, Error::LeftRightAnchorsUsedWithoutY);
 
-        if let Some(pivot) = params.pivot {
-            match pivot {
-                Pivot::TopCenter | Pivot::Center | Pivot::BottomCenter => {}
-                _ => return Err(Error::LeftRightAnchorsUsedWithInvalidPivot),
-            }
-        }
-
         Ok(LeftRightAnchorsLayout {
             left: params.a_left.unwrap(),
             right: params.a_right.unwrap(),
@@ -43,14 +36,31 @@ impl LeftRightAnchorsLayout {
         let right = self.right.absolute(parent_width);
         let y = self.y.absolute(parent_height);
         control_layout.resize(
-            ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
+            ((parent_width as i32) - (left + right)).clamp(0, 0xFFFF) as u16,
             self.height.absolute(parent_height),
         );
-        match self.pivot {
-            Pivot::TopCenter => control_layout.set_position(left, y),
-            Pivot::BottomCenter => control_layout.set_position(left, y - (control_layout.get_height() as i32)),
-            Pivot::Center => control_layout.set_position(left, y - ((control_layout.get_height() / 2) as i32)),
-            _ => unreachable!("This code should not be reached --> internal error"),
-        }
+        let new_h = control_layout.get_height() as i32;
+        let new_w = control_layout.get_width() as i32;
+        let l = left;
+        let r = (parent_width as i32).saturating_sub(right);
+        let (new_x, new_y) = match self.pivot {
+            Pivot::TopLeft => (l, y),
+            Pivot::TopRight => (r - new_w, y),
+            Pivot::TopCenter => ((l + r - new_w) / 2, y),
+            Pivot::BottomLeft => (l, y - new_h),
+            Pivot::BottomRight => (r - new_w, y - new_h),
+            Pivot::BottomCenter => ((l + r - new_w) / 2, y - new_h),
+            Pivot::CenterLeft => (l, y - new_h / 2),
+            Pivot::CenterRight => (r - new_w, y - new_h / 2),
+            Pivot::Center => ((l + r - new_w) / 2, y - new_h / 2),
+        };
+        control_layout.set_position(new_x, new_y);
+
+        // match self.pivot {
+        //     Pivot::TopCenter => control_layout.set_position(left, y),
+        //     Pivot::BottomCenter => control_layout.set_position(left, y - (control_layout.get_height() as i32)),
+        //     Pivot::Center => control_layout.set_position(left, y - ((control_layout.get_height() / 2) as i32)),
+        //     _ => unreachable!("This code should not be reached --> internal error"),
+        // }
     }
 }
