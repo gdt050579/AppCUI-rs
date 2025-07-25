@@ -315,3 +315,7 @@ path = "surface_serialization/main.rs"
 [[example]]
 name = "input_dialog"
 path = "input_dialog/main.rs"
+
+[[example]]
+name = "layout_tester"
+path = "layout_tester/main.rs"
