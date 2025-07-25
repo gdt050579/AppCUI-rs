@@ -11,7 +11,7 @@ struct MyCustomContainer {
 ```
 
 A custom container accepts the same attributes as custom controls (via `#[CustomContainer(...)]` macro):
-* `events` with two possible values or combinations: [MenuEvents](../chapter-4/menu.md) and/or [CommandBarEvents](../chapter-4/command_bar.md):
+* `events` with two possible values or combinations: [MenuEvents](../../chapter-4/menu.md) and/or [CommandBarEvents](../../chapter-4/command_bar.md):
     ```rs
     #[CustomContainer(events = MenuEvent+CommandBarEvent)]
     struct MyCustomContainer {
@@ -32,7 +32,7 @@ A custom container accepts the same attributes as custom controls (via `#[Custom
         // additional fields
     }
     ```
-* `commands` (as they are described in [Commands](../chapter-4/commands.md) section)
+* `commands` (as they are described in [Commands](../../chapter-4/commands.md) section)
 
 ## Difference between Custom Controls and Custom Containers
 
