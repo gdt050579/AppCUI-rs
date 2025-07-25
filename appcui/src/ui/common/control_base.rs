@@ -62,21 +62,21 @@ pub struct ControlBase {
 }
 
 impl ControlBase {
-    /// Creates a new control with the specified layout. The argument `accept_input` specifies if the control can receive input or not. 
-    pub fn new(layout: Layout, accept_input: bool) -> Self {
-        ControlBase::with_status_flags(
-            layout,
-            if accept_input {
-                StatusFlags::AcceptInput | StatusFlags::Enabled | StatusFlags::Visible
-            } else {
-                StatusFlags::Enabled | StatusFlags::Visible
-            },
-        )
-    }
-    /// Creates a new control with the specified layout that has support for focused overlay.
-    /// When such a control is created if it has focus it will increase its bottom and right margins by one character.
-    /// This provides aditional space for the focused control to be drawn (usually a scrollbar).
-    pub fn with_focus_overlay(layout: Layout) -> Self {
+        /// Creates a new control with the specified layout. The argument `accept_input` specifies if the control can receive input or not. 
+        pub fn new(layout: Layout, accept_input: bool) -> Self {
+            ControlBase::with_status_flags(
+                layout,
+                if accept_input {
+                    StatusFlags::AcceptInput | StatusFlags::Enabled | StatusFlags::Visible
+                } else {
+                    StatusFlags::Enabled | StatusFlags::Visible
+                },
+            )
+        }
+        /// Creates a new control with the specified layout that has support for focused overlay.
+        /// When such a control is created if it has focus it will increase its bottom and right margins by one character.
+        /// This provides aditional space for the focused control to be drawn (usually a scrollbar).
+        pub fn with_focus_overlay(layout: Layout) -> Self {
         ControlBase::with_status_flags( 
             layout,
             StatusFlags::AcceptInput

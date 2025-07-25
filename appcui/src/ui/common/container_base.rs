@@ -3,6 +3,7 @@ use std::ops::{Deref, DerefMut};
 use crate::{
     prelude::{Control, NotDesktop, NotWindow},
     system::Handle,
+    ui::Layout,
 };
 
 use super::ControlBase;
@@ -14,6 +15,20 @@ pub struct ContainerBase {
 }
 
 impl ContainerBase {
+    /// Creates a new container with the specified layout. The argument `accept_input` specifies if the container can receive input or not.
+    pub fn new(layout: Layout, accept_input: bool) -> Self {
+        Self {
+            control_base: ControlBase::new(layout, accept_input),
+        }
+    }
+    /// Creates a new container with the specified layout that has support for focused overlay.
+    /// When such a container is created if it has focus it will increase its bottom and right margins by one character.
+    /// This provides aditional space for the focused container to be drawn (usually a scrollbar).
+    pub fn with_focus_overlay(layout: Layout) -> Self {
+        Self {
+            control_base: ControlBase::with_focus_overlay(layout),
+        }
+    }
     #[inline(always)]
     pub fn add<T>(&mut self, control: T) -> Handle<T>
     where

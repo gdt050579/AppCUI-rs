@@ -1,6 +1,6 @@
 use appcui::prelude::*;
 
-#[CustomControl(overwrite = OnPaint)]
+#[CustomContainer(overwrite = OnPaint)]
 pub struct ParentControl {
     error_message: String,
     show_child: bool,
@@ -9,7 +9,7 @@ pub struct ParentControl {
 impl ParentControl {
     pub fn new(layout: Layout) -> Self {
         Self {
-            base: ControlBase::new(layout, true),
+            base: ContainerBase::new(layout, true),
             error_message: String::new(),
             show_child: true,
         }

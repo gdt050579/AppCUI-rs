@@ -121,6 +121,7 @@ pub mod textarea;
 
 // re-export
 pub use common::ControlBase;
+pub use common::ContainerBase;
 pub use desktop::Desktop;
 pub use checkbox::CheckBox;
 pub use radiobox::RadioBox;
