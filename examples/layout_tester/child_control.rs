@@ -10,12 +10,6 @@ impl ChildControl {
             base: ControlBase::new(layout, true),
         }
     }
-
-    pub fn set_layout(&mut self, layout: Layout) {
-        // For the layout tester, we'll recreate the control with the new layout
-        // This is a simplified approach for demonstration purposes
-        self.base = ControlBase::new(layout, true);
-    }
 }
 
 impl OnPaint for ChildControl {
