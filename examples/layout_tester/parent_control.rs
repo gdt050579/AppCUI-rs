@@ -1,3 +1,5 @@
+use std::arch::x86_64;
+
 use appcui::prelude::*;
 
 #[CustomContainer(overwrite = OnPaint)]
@@ -8,11 +10,12 @@ pub struct ParentControl {
 
 impl ParentControl {
     pub fn new(layout: Layout) -> Self {
-        Self {
+        let mut me = Self {
             base: ContainerBase::new(layout, true),
             error_message: String::new(),
             show_child: true,
-        }
+        };
+        me
     }
 
     pub fn set_error_message(&mut self, message: String) {
@@ -30,6 +33,83 @@ impl ParentControl {
     pub fn show_child(&mut self) {
         self.show_child = true;
     }
+    pub fn paint_horizontal_rule(&self, surface: &mut Surface) {
+        let w = self.size().width as i32;
+        let mut pos = 0;
+        let attr = charattr!("black,gray");
+        surface.draw_horizontal_line(4, 1, w, LineType::Single, attr);
+        while pos < w {
+            let x = pos + 4;
+            if pos < 10 {
+                surface.write_char(x, 0, Character::with_attributes(((pos + 48) as u8) as char, attr));
+            } else if pos < 100 {
+                surface.write_char(x, 0, Character::with_attributes(((pos / 10 + 48) as u8) as char, attr));
+                surface.write_char(x + 1, 0, Character::with_attributes(((pos % 10 + 48) as u8) as char, attr));
+            } else {
+                surface.write_char(x - 1, 0, Character::with_attributes(((pos / 100 + 48) as u8) as char, attr));
+                surface.write_char(x, 0, Character::with_attributes((((pos % 100) / 10 + 48) as u8) as char, attr));
+                surface.write_char(x + 1, 0, Character::with_attributes(((pos % 10 + 48) as u8) as char, attr));
+            }
+            surface.write_char(x, 1, Character::with_attributes('┬', attr));
+            pos += 5;
+        }
+    }
+    pub fn paint_vertical_rule(&self, surface: &mut Surface) {
+        let h = self.size().height as i32;
+        let mut pos = 0;
+        let attr = charattr!("black,gray");
+        surface.draw_vertical_line(3, 2, h, LineType::Single, attr);
+        while pos < h {
+            let y = pos + 2;
+            if pos < 10 {
+                surface.write_char(2, y, Character::with_attributes(((pos + 48) as u8) as char, attr));
+            } else if pos < 100 {
+                surface.write_char(1, y, Character::with_attributes(((pos / 10 + 48) as u8) as char, attr));
+                surface.write_char(2, y, Character::with_attributes(((pos % 10 + 48) as u8) as char, attr));
+            } else {
+                surface.write_char(0, y, Character::with_attributes(((pos / 100 + 48) as u8) as char, attr));
+                surface.write_char(1, y, Character::with_attributes((((pos % 100) / 10 + 48) as u8) as char, attr));
+                surface.write_char(2, y, Character::with_attributes(((pos % 10 + 48) as u8) as char, attr));
+            }
+            surface.write_char(3, y, Character::with_attributes('├', attr));
+            pos += 5;
+        }
+    }
+    pub fn paint_grid_lines(&self, surface: &mut Surface) {
+        let w = self.size().width as i32;
+        let h = self.size().height as i32;
+        let attr = charattr!("gray,black");
+        let mut pos = 0;
+        while pos < w {
+            surface.draw_vertical_line(pos + 4, 3, h, LineType::Single, attr);
+            pos += 5;
+        }
+        pos = 0;
+        while pos < h {
+            surface.draw_horizontal_line(5, pos + 2, w, LineType::Single, attr);
+            pos += 5;
+        }
+        let mut y = 0;
+        let ch = Character::new(SpecialChar::BoxCrossSingleLine, Color::Gray, Color::Black, CharFlags::None);
+        while y < h {
+            let mut x = 0;
+            while x < w {
+                surface.write_char(x + 4, y + 2, ch);
+                x += 5;
+            }
+            y += 5;
+        }
+    }
+    fn paint_error_message(&self, surface: &mut Surface) {
+        let sz = self.size();
+        let format = TextFormatBuilder::new()
+            .align(TextAlignment::Center)
+            .wrap_type(WrapType::WordWrap((sz.width as u16).saturating_sub(4)))
+            .position((sz.width as i32) / 2 + 2, (sz.height as i32) / 2 + 1)
+            .attribute(CharAttribute::with_color(Color::Red, Color::Black))
+            .build();
+        surface.write_text(&self.error_message, &format);
+    }
 }
 
 impl OnPaint for ParentControl {
@@ -38,103 +118,22 @@ impl OnPaint for ParentControl {
         let width = size.width as i32;
         let height = size.height as i32;
 
-        // Clear with black background
         surface.clear(Character::new(' ', Color::Black, Color::Black, CharFlags::None));
+        surface.fill_rect(Rect::new(0, 0, width, 1), char!("' ',black,gray"));
+        surface.fill_rect(Rect::new(0, 0, 3, height), char!("' ',black,gray"));
 
-        // Draw top ruler (horizontal)
-        for x in 0..width {
-            if x % 5 == 0 {
-                // Draw tick mark
-                surface.write_char(
-                    x, 0,
-                    Character::new('|', Color::Gray, Color::Black, CharFlags::None)
-                );
-                // Draw number every 10 units
-                if x % 10 == 0 && x > 0 {
-                    let num_str = x.to_string();
-                    for (i, ch) in num_str.chars().enumerate() {
-                        if x + (i as i32) < width {
-                            surface.write_char(
-                                x + i as i32, 1,
-                                Character::new(ch, Color::Gray, Color::Black, CharFlags::None)
-                            );
-                        }
-                    }
-                }
-            } else {
-                // Draw ruler line
-                surface.write_char(
-                    x, 0,
-                    Character::new('-', Color::Gray, Color::Black, CharFlags::None)
-                );
-            }
-        }
+        self.paint_horizontal_rule(surface);
+        self.paint_vertical_rule(surface);
+        surface.write_char(
+            3,
+            1,
+            Character::new(SpecialChar::BoxTopLeftCornerSingleLine, Color::Black, Color::Gray, CharFlags::None),
+        );
 
-        // Draw left ruler (vertical)
-        for y in 0..height {
-            if y % 5 == 0 && y > 0 {
-                // Draw tick mark
-                surface.write_char(
-                    0, y,
-                    Character::new('-', Color::Gray, Color::Black, CharFlags::None)
-                );
-                // Draw number every 10 units
-                if y % 10 == 0 {
-                    let num_str = y.to_string();
-                    for (i, ch) in num_str.chars().enumerate() {
-                        if i + 1 < width as usize {
-                            surface.write_char(
-                                1 + i as i32, y,
-                                Character::new(ch, Color::Gray, Color::Black, CharFlags::None)
-                            );
-                        }
-                    }
-                }
-            } else if y > 0 {
-                // Draw ruler line
-                surface.write_char(
-                    0, y,
-                    Character::new('|', Color::Gray, Color::Black, CharFlags::None)
-                );
-            }
-        }
-
-        // Draw grid lines every 5 units (faint)
-        for x in (5..width).step_by(5) {
-            for y in 3..height {
-                surface.write_char(
-                    x, y,
-                    Character::new('·', Color::Gray, Color::Black, CharFlags::None)
-                );
-            }
-        }
-
-        for y in (5..height).step_by(5) {
-            for x in 3..width {
-                surface.write_char(
-                    x, y,
-                    Character::new('·', Color::Gray, Color::Black, CharFlags::None)
-                );
-            }
-        }
-
-        // Display error message if there is one
-        if !self.error_message.is_empty() {
-            let lines: Vec<&str> = self.error_message.lines().collect();
-            for (i, line) in lines.iter().enumerate() {
-                let y = height / 2 + i as i32 - lines.len() as i32 / 2;
-                if y >= 0 && y < height {
-                    let x_start = std::cmp::max(5, (width - line.len() as i32) / 2);
-                    for (j, ch) in line.chars().enumerate() {
-                        if x_start + (j as i32) < width {
-                            surface.write_char(
-                                x_start + j as i32, y,
-                                Character::new(ch, Color::Red, Color::Black, CharFlags::None)
-                            );
-                        }
-                    }
-                }
-            }
+        if self.error_message.is_empty() {
+            self.paint_grid_lines(surface);
+        } else {
+            self.paint_error_message(surface);
         }
     }
-} 
+}

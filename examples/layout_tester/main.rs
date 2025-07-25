@@ -83,8 +83,7 @@ impl LayoutTesterWindow {
         win.pivot_selector = win.add(selector!("enum: Pivot,x:12,y:13,w:27,flags:AllowNoneVariant"));
 
         // Create right panel for display
-        win.add(label!("'Layout Preview',x:40,y:1,w:35,h:1"));
-        let mut p = ParentControl::new(layout!("x:40,y:3,w:55,h:25"));
+        let mut p = ParentControl::new(layout!("l:40,t:1,r:1,b:1"));
         win.child_control = p.add(ChildControl::new(layout!("x:5,y:5,w:20,h:10")));
         win.parent_control = win.add(p);
 
