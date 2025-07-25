@@ -2270,7 +2270,7 @@ pub fn textarea(input: TokenStream) -> TokenStream {
 /// 
 /// # Examples
 /// 
-/// ```rust, no_compile
+/// ```no_compile
 /// use appcui::prelude::*;
 /// 
 /// // Dock to left with width of 10
