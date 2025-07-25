@@ -214,7 +214,7 @@ fn validate_xy_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
     );
 }
 
-fn validate_left_right_layout(lp: &LayoutParams, params: &NamedParamsMap) {
+fn validate_left_right_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
     should_not_use!(
         lp.x,
         "When (left,right) anchors are used together, 'X' parameter can not be used as it is infered from the anchors !"
@@ -227,7 +227,7 @@ fn validate_left_right_layout(lp: &LayoutParams, params: &NamedParamsMap) {
     should_use!(lp.pivot, "When (left,right) anchors are used together, 'pivot' parameter is required !");    
 }
 
-fn validate_top_bottom_layout(lp: &LayoutParams, params: &NamedParamsMap) {
+fn validate_top_bottom_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
     should_not_use!(
         lp.y,
         "When (top,bottom) anchors are used together, 'Y' parameter can not be used as it is infered from the anchors !"
@@ -235,13 +235,6 @@ fn validate_top_bottom_layout(lp: &LayoutParams, params: &NamedParamsMap) {
     should_not_use!(lp.height, "When (top,bottom) anchors are used together, ('height' or 'h') parameter can not be used as the height is deduced from top-bottom difference");
     should_use!(lp.x, "When (top,bottom) anchors are used together, 'X' parameter is required !");
     should_use!(lp.pivot, "When (top,bottom) anchors are used together, 'pivot' parameter is required !");
-
-    match params.get("pivot").unwrap().to_align() {
-        Alignment::CenterLeft | Alignment::Center | Alignment::CenterRight => {}
-        _ => panic!(
-            "When (top,bottom) anchors are used together, only CenterLeft (cl or c), Center (c) and CenterRight(cr or c) pivot values are allowed !"
-        ),
-    }
 }
 
 fn validate_corner_anchor_layout(lp: &LayoutParams, _params: &NamedParamsMap) {

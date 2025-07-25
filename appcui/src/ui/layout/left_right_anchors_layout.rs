@@ -36,7 +36,7 @@ impl LeftRightAnchorsLayout {
         let right = self.right.absolute(parent_width);
         let y = self.y.absolute(parent_height);
         control_layout.resize(
-            ((parent_width as i32) - (left + right)).clamp(0, 0xFFFF) as u16,
+            ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
             self.height.absolute(parent_height),
         );
         let new_h = control_layout.get_height() as i32;
@@ -55,12 +55,5 @@ impl LeftRightAnchorsLayout {
             Pivot::Center => ((l + r - new_w) / 2, y - new_h / 2),
         };
         control_layout.set_position(new_x, new_y);
-
-        // match self.pivot {
-        //     Pivot::TopCenter => control_layout.set_position(left, y),
-        //     Pivot::BottomCenter => control_layout.set_position(left, y - (control_layout.get_height() as i32)),
-        //     Pivot::Center => control_layout.set_position(left, y - ((control_layout.get_height() / 2) as i32)),
-        //     _ => unreachable!("This code should not be reached --> internal error"),
-        // }
     }
 }

@@ -22,13 +22,6 @@ impl TopBottomAnchorsLayout {
         should_use!(params.x, Error::TopBottomAnchorsUsedWithoutX);
         should_use!(params.pivot, Error::TopBottomAnchorsUsedWithoutPivot);
 
-        if let Some(pivot) = params.pivot {
-            match pivot {
-                Pivot::CenterLeft | Pivot::Center | Pivot::CenterRight => {}
-                _ => return Err(Error::TopBottomAnchorsUsedWithInvalidPivot),
-            }
-        }
-
         Ok(TopBottomAnchorsLayout {
             top: params.a_top.unwrap(),
             bottom: params.a_bottom.unwrap(),
@@ -46,11 +39,25 @@ impl TopBottomAnchorsLayout {
             self.width.absolute(parent_width),
             ((parent_height as i32) - (top + bottom)).clamp(1, 0xFFFF) as u16,
         );
-        match self.pivot {
-            Pivot::CenterLeft => control_layout.set_position(x, top),
-            Pivot::CenterRight => control_layout.set_position(x - (control_layout.get_width() as i32), top),
-            Pivot::Center => control_layout.set_position(x - ((control_layout.get_width() / 2) as i32), top),
-            _ => unreachable!("This code should not be reached --> internal error"),
-        }
+        let new_h = control_layout.get_height() as i32;
+        let new_w = control_layout.get_width() as i32;
+        let t = top;
+        let b = (parent_height as i32).saturating_sub(bottom);
+
+        let (new_x, new_y) = match self.pivot {
+            Pivot::TopLeft => (x, t),
+            Pivot::CenterLeft => (x, (t + b - new_h) / 2),
+            Pivot::BottomLeft => (x, b - new_h),
+
+            Pivot::TopRight => (x - new_w, t),
+            Pivot::CenterRight => (x - new_w, (t + b - new_h) / 2),
+            Pivot::BottomRight => (x - new_w, t - new_h),
+
+            Pivot::TopCenter => (x- new_w / 2, t),
+            Pivot::BottomCenter => (x- new_w / 2, b - new_h),
+            Pivot::Center => (x- new_w / 2, (t + b - new_h) / 2),
+        };
+        control_layout.set_position(new_x, new_y);
+
     }
 }
