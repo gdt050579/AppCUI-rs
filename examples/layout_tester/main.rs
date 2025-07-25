@@ -90,6 +90,28 @@ impl LayoutTesterWindow {
         win
     }
 
+    fn set_error_message(&mut self, err: &str) {
+        let h = self.parent_control;
+        if let Some(p) = self.control_mut(h) {
+            p.set_error_message(err);
+        }
+        let h = self.child_control;
+        if let Some(c) = self.control_mut(h) {
+            c.set_visible(false);
+        }
+    }
+    fn set_child_layout(&mut self, layout: Layout) {
+        let h = self.parent_control;
+        if let Some(p) = self.control_mut(h) {
+            p.clear_error();
+        }
+        let h = self.child_control;
+        if let Some(c) = self.control_mut(h) {
+            c.set_visible(true);
+            c.update_layout(layout);
+        }
+    }
+
     fn update_child_layout(&mut self) {
         let mut layout_builder = LayoutBuilder::new();
         let mut has_error = false;
@@ -236,35 +258,16 @@ impl LayoutTesterWindow {
             }
         }
 
-        // Update parent control with error state
-        let parent_handle = self.parent_control;
-        let child_handle = self.child_control;
-
         if has_error {
-            if let Some(parent) = self.control_mut(parent_handle) {
-                parent.set_error_message(error_msg);
-                parent.hide_child();
-            }
+            self.set_error_message(&error_msg);
         } else {
             match layout_builder.try_build() {
-                Ok(l) => {
-                    if let Some(parent) = self.control_mut(parent_handle) {
-                        parent.clear_error();
-                        parent.show_child();
-                    }
-                    if let Some(child) = self.control_mut(child_handle) {
-                        child.update_layout(l);
-                    }
-                },
+                Ok(l) => self.set_child_layout(l),
                 Err(e) => {
                     let _ = write!(&mut error_msg, "{e}");
-                    if let Some(parent) = self.control_mut(parent_handle) {
-                        parent.set_error_message(error_msg);
-                        parent.hide_child();
-                    }                    
+                    self.set_error_message(&error_msg);
                 }
             }
-
         }
     }
 }

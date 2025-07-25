@@ -5,7 +5,6 @@ use appcui::prelude::*;
 #[CustomContainer(overwrite = OnPaint)]
 pub struct ParentControl {
     error_message: String,
-    show_child: bool,
 }
 
 impl ParentControl {
@@ -13,26 +12,19 @@ impl ParentControl {
         let mut me = Self {
             base: ContainerBase::new(layout, true),
             error_message: String::new(),
-            show_child: true,
         };
         me
     }
 
-    pub fn set_error_message(&mut self, message: String) {
-        self.error_message = message;
+    pub fn set_error_message(&mut self, message: &str) {
+        self.error_message.clear();
+        self.error_message.push_str(message);
     }
 
     pub fn clear_error(&mut self) {
         self.error_message.clear();
     }
 
-    pub fn hide_child(&mut self) {
-        self.show_child = false;
-    }
-
-    pub fn show_child(&mut self) {
-        self.show_child = true;
-    }
     pub fn paint_horizontal_rule(&self, surface: &mut Surface) {
         let w = self.size().width as i32;
         let mut pos = 0;
