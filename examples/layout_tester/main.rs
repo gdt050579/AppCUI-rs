@@ -61,7 +61,7 @@ impl LayoutTesterWindow {
         
         // Anchor parameters
         win.add(label!("'Left:',x:1,y:5,w:8,h:1"));
-        win.left_anchor_field = win.add(textfield!("'',x:10,y:5,w:10,h:1"));
+        win.left_anchor_field = win.add(textfield!("'',x:9,y:5,w:10,h:1"));
         
         win.add(label!("'Right:',x:21,y:5,w:8,h:1"));
         win.right_anchor_field = win.add(textfield!("'',x:29,y:5,w:10,h:1"));
@@ -84,13 +84,10 @@ impl LayoutTesterWindow {
 
         // Create right panel for display
         win.add(label!("'Layout Preview',x:40,y:1,w:35,h:1"));
+        let mut p = ParentControl::new(layout!("x:40,y:3,w:55,h:25"));
+        win.child_control = p.add(ChildControl::new(layout!("x:5,y:5,w:20,h:10")));
+        win.parent_control = win.add(p);
         
-        // Parent control with rulers
-        win.parent_control = win.add(ParentControl::new(layout!("x:40,y:3,w:55,h:25")));
-        
-        // Child control (will be managed by parent)
-        win.child_control = win.add(ChildControl::new(layout!("x:5,y:5,w:20,h:10")));
-
         win
     }
 
