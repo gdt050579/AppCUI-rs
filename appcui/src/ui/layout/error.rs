@@ -41,6 +41,10 @@ pub enum Error {
     TopRightBottomAnchorsUsedWithXY,
     TopRightBottomAnchorsUsedWithHeight,
     TopRightBottomAnchorsUsedWithPivot,
+    SingleAnchor,
+    XWithoutY,
+    YWithoutX,
+    PivotWithoutXorY,
     NoParameters,
     InvalidLayoutRule
 }
@@ -89,6 +93,10 @@ impl Error {
             Error::TopRightBottomAnchorsUsedWithXY => "When (top,right,bottom) anchors are used together, 'x' and 'y' parameter can not be used as they are infered from the anchors !",
             Error::TopRightBottomAnchorsUsedWithHeight => "When (top,right,bottom) anchors are used together, 'height' parameter can not be used as it is infered from the anchors !",
             Error::TopRightBottomAnchorsUsedWithPivot => "When (top,right,bottom) anchors are used together, 'pivot' parameter can not be used as it is infered from the anchors !",
+            Error::SingleAnchor => "Using a single anchor (left, right, top, bottom) is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height",
+            Error::XWithoutY => "You need to provide the 'y' parameter as well to create a point for an absolute or pivoting layout !",
+            Error::YWithoutX => "You need to provide the 'x' parameter as well to create a point for an absolute or pivoting layout !",
+            Error::PivotWithoutXorY => "You need to provide both 'x' and 'y' parameter if you provide a pivot value !",
         }
     }
 }   

@@ -357,6 +357,10 @@ fn validate_layout(params: &mut NamedParamsMap) {
         width: params.contains("width"),
         height: params.contains("height"),
     };
+    // all are missing
+    if !(lp.x || lp.y || lp.left || lp.top || lp.right || lp.bottom || lp.align || lp.pivot || lp.dock || lp.width || lp.height) {
+        panic!("You need to provide one or some combination of the following parameters: 'x', 'y', 'width'/'w', 'height'/'h', 'left'/'l', 'top'/'t', 'right'/'r', 'bottom'/'b', 'align'/'a', 'dock'/'d' or 'pivot'/'p' !");
+    }
     // same logic as the one from layout mode
     if lp.dock {
         validate_dock_layout(&lp, params);
@@ -383,7 +387,28 @@ fn validate_layout(params: &mut NamedParamsMap) {
         Anchors::TopLeftBottom => validate_top_left_bottom_layout(&lp, params),
         Anchors::TopRightBottom => validate_top_right_bottom_layout(&lp, params),
         Anchors::All => validate_all_anchors_layout(&lp, params),
-        _ => {
+        Anchors::Left => {
+            panic!("Using only the 'left'/'l' anchor is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height)");
+        } 
+        Anchors::Right => {
+            panic!("Using only the 'right'/'r' anchor is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height)");
+        } 
+        Anchors::Top => {
+            panic!("Using only the 'top'/'t' anchor is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height)");
+        }
+        Anchors::Bottom => {
+            panic!("Using only the 'bottom'/'b' anchor is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height)");
+        }
+        Anchors::None => {
+            if lp.x && !lp.y {
+                panic!("You need 'y' parameter as well if you want to define a pivot point or the top-left corner of a control !");
+            }
+            if !lp.x && lp.y {
+                panic!("You need 'x' parameter as well if you want to define a pivot point or the top-left corner of a control !");
+            }
+            if lp.pivot && !lp.x && !lp.y {
+                panic!("You can not use pivot standalone - you also need 'x' and 'y' parameters !");
+            }
             panic!("Invalid layout format --> this combination can not be used to create a layout for a control ");
         }
     }
