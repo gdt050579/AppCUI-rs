@@ -116,6 +116,70 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     procmacro_builder::build(args, input, BaseControlType::CustomControl, &mut config)
 }
 
+
+#[allow(non_snake_case)]
+#[proc_macro_attribute]
+pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
+    let mut config = TraitsConfig::new("CustomContainer");
+    // Deref is mandatory
+    config.set(AppCUITrait::Deref, TraitImplementation::BaseFallbackNonOverwritable);
+    config.set(AppCUITrait::Control, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::NotDesktop, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::NotWindow, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::OnWindowRegistered, TraitImplementation::DefaultNonOverwritable);
+    // Raw events (implemente by default)
+    config.set(AppCUITrait::OnPaint, TraitImplementation::Default);
+    config.set(AppCUITrait::OnResize, TraitImplementation::Default);
+    config.set(AppCUITrait::OnFocus, TraitImplementation::Default);
+    config.set(AppCUITrait::OnExpand, TraitImplementation::Default);
+    config.set(AppCUITrait::OnDefaultAction, TraitImplementation::Default);
+    config.set(AppCUITrait::OnKeyPressed, TraitImplementation::Default);
+    config.set(AppCUITrait::OnMouseEvent, TraitImplementation::Default);
+    config.set(AppCUITrait::OnSiblingSelected, TraitImplementation::Default);
+    config.set(AppCUITrait::OnThemeChanged, TraitImplementation::Default);
+
+    // control events
+    config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ThreeStateBoxEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::MarkdownEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // custom events
+    config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
+
+    // timer events
+    config.set(AppCUITrait::TimerEvents, TraitImplementation::Default);
+
+
+    // desktop
+    config.set(AppCUITrait::DesktopEvents, TraitImplementation::DefaultNonOverwritable);
+
+    procmacro_builder::build(args, input, BaseControlType::CustomContainer, &mut config)
+}
+
+
+
 /// Used to create a custom window that can process events from its controls
 /// The general format is: `#[Window(events = ...)]`
 /// Where the **events** parameter is a list of traits that can be overwritten:
