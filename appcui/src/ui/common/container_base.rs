@@ -36,6 +36,14 @@ impl ContainerBase {
     {
         self.add_child(control)
     }
+    // Sets the margins of the container (all childern of this control will be translated within this margins)
+    #[inline]
+    pub fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
+        self.margins.left = left;
+        self.margins.top = top;
+        self.margins.bottom = bottom;
+        self.margins.right = right;
+    }
 }
 
 impl Deref for ContainerBase {

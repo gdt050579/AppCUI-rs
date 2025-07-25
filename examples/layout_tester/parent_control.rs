@@ -13,6 +13,7 @@ impl ParentControl {
             base: ContainerBase::new(layout, true),
             error_message: String::new(),
         };
+        me.set_margins(4, 2, 0, 0);
         me
     }
 
@@ -111,8 +112,8 @@ impl OnPaint for ParentControl {
         let height = size.height as i32;
 
         surface.clear(Character::new(' ', Color::Black, Color::Black, CharFlags::None));
-        surface.fill_rect(Rect::new(0, 0, width, 1), char!("' ',black,gray"));
-        surface.fill_rect(Rect::new(0, 0, 3, height), char!("' ',black,gray"));
+        surface.fill_rect(Rect::new(0, 0, width + 1, 1), char!("' ',black,gray"));
+        surface.fill_rect(Rect::new(0, 0, 3, height + 1), char!("' ',black,gray"));
 
         self.paint_horizontal_rule(surface);
         self.paint_vertical_rule(surface);

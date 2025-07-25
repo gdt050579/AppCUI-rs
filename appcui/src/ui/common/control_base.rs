@@ -440,6 +440,7 @@ impl ControlBase {
         RuntimeManager::get().request_recompute_layout();
     }
 
+    // Sets the margins of the control (all childern of this control will be translated within this margins)
     #[inline]
     pub(crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
         self.margins.left = left;
