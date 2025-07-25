@@ -89,6 +89,7 @@
         - [Emitting events](chapter-3/custon-controls/emitting_events.md)
         - [Overlay on Focus support](chapter-3/custon-controls/focus_overlay.md)
         - [ScrollBars](chapter-3/custon-controls/scrollbars.md)
+        - [Containers](chapter-3/custon-controls/containers.md)
     - [Object Traits](chapter-3/object_traits.rs)
         - [ListItem](chapter-3/object-traits/listitem.md)
         - [EnumSelector](chapter-3/object-traits/enumselector.md)
