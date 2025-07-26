@@ -11,7 +11,7 @@ use parent_control::ParentControl;
 use value::Value;
 
 
-#[Window(events = TextFieldEvents + SelectorEvents<Alignment> + SelectorEvents<Dock> + SelectorEvents<Pivot>)]
+#[Window(events = TextFieldEvents + SelectorEvents<Alignment> + SelectorEvents<Dock> + SelectorEvents<Pivot> + NumericSelectorEvents<u16>)]
 struct LayoutTesterWindow {
     // Layout parameter controls
     x_field: Handle<TextField>,
@@ -226,6 +226,13 @@ impl SelectorEvents<Dock> for LayoutTesterWindow {
 
 impl SelectorEvents<Pivot> for LayoutTesterWindow {
     fn on_selection_changed(&mut self, _: Handle<Selector<Pivot>>, _value: Option<Pivot>) -> EventProcessStatus {
+        self.update_child_layout();
+        EventProcessStatus::Processed
+    }
+}
+
+impl NumericSelectorEvents<u16> for LayoutTesterWindow {
+    fn on_value_changed(&mut self, _handle: Handle<NumericSelector<u16>>, _: u16) -> EventProcessStatus {
         self.update_child_layout();
         EventProcessStatus::Processed
     }
