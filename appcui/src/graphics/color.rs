@@ -118,18 +118,8 @@ impl Color {
     #[inline(always)]
     pub fn contrast_color(&self) -> Self {
         match self {
-            Color::Black
-            | Color::DarkBlue
-            | Color::DarkGreen
-            | Color::Teal
-            | Color::DarkRed
-            | Color::Magenta
-            | Color::Olive
-            | Color::Gray
-            | Color::Blue
-            | Color::Red => Color::White,
+            Color::Black | Color::DarkBlue | Color::DarkGreen | Color::Teal | Color::DarkRed | Color::Magenta | Color::Olive | Color::Gray | Color::Blue | Color::Red => Color::White,
             Color::Silver | Color::Green | Color::Aqua | Color::Pink | Color::Yellow | Color::White => Color::Black,
-
             Color::Transparent => Color::Transparent,
             #[cfg(feature = "TRUE_COLORS")]
             Color::RGB(r, g, b) => {
@@ -210,7 +200,6 @@ impl Color {
             Color::RGB(_, _, _) => "RGB",
         }
     }
-    #[cfg(feature = "TRUE_COLORS")]
     #[inline(always)]
     pub(crate) fn as_color_index(&self) -> u8 {
         match self {
@@ -231,6 +220,7 @@ impl Color {
             Color::Yellow => 14,
             Color::White => 15,
             Color::Transparent => 16,
+            #[cfg(feature = "TRUE_COLORS")]
             Color::RGB(r, g, b) => {
                 let mut index = 0;
                 if *r > 64 {
@@ -250,29 +240,7 @@ impl Color {
             }
         }
     }
-    #[cfg(not(feature = "TRUE_COLORS"))]
-    #[inline(always)]
-    pub(crate) fn as_color_index(&self) -> u8 {
-        match self {
-            Color::Black => 0,
-            Color::DarkBlue => 1,
-            Color::DarkGreen => 2,
-            Color::Teal => 3,
-            Color::DarkRed => 4,
-            Color::Magenta => 5,
-            Color::Olive => 6,
-            Color::Silver => 7,
-            Color::Gray => 8,
-            Color::Blue => 9,
-            Color::Green => 10,
-            Color::Aqua => 11,
-            Color::Red => 12,
-            Color::Pink => 13,
-            Color::Yellow => 14,
-            Color::White => 15,
-            Color::Transparent => 16,
-        }
-    }
+
     // #[cfg(feature = "TRUE_COLORS")]
     // #[inline(always)]
     // pub(crate) fn is_rgb(&self) -> bool {

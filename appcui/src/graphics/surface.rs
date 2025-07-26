@@ -887,7 +887,7 @@ impl Surface {
             }
         }
     }
-    fn deserialize_color(buffer: &[u8]) -> Option<(Color, usize)> {
+    pub(super) fn deserialize_color(buffer: &[u8]) -> Option<(Color, usize)> {
         match buffer[0] {
             0 => Some((Color::Black, 1)),
             1 => Some((Color::DarkBlue, 1)),
@@ -971,6 +971,7 @@ impl Surface {
         Ok(())
     }
 
+    /// Creates a new surface from a byte buffer. The buffer must contain the magic number, version, size, and character buffer.
     pub fn from_buffer(buffer: &[u8]) -> Result<Surface, String> {
         if buffer.len() < 12 {
             return Err("Buffer is too small to be a valid surface".to_string());
@@ -1010,6 +1011,8 @@ impl Surface {
         }
         Ok(surface)
     }
+
+    /// Creates a new surface from a file. The file must contain the magic number, version, size, and character buffer.
     pub fn from_file(path: &Path) -> Result<Surface, String> {
         let buffer = std::fs::read(path).map_err(|e| e.to_string())?;
         Self::from_buffer(&buffer)

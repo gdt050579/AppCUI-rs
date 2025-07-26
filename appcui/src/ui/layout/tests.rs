@@ -1698,3 +1698,109 @@ fn layout_static_methods_edge_cases() {
         control_layout.update(100, 100);
     }
 }
+
+#[test]
+fn check_layout_builder_errors_2() {
+    assert_eq!(LayoutBuilder::new().try_build().err().unwrap(),Error::NoParameters);
+    // dock
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).x(1).try_build().err().unwrap(),Error::XYParameterUsedWithDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).y(1).try_build().err().unwrap(),Error::XYParameterUsedWithDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).left_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).right_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).top_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).bottom_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).pivot(Pivot::Center).try_build().err().unwrap(),Error::PivotParameterUsedWithDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).alignment(Alignment::Center).try_build().err().unwrap(),Error::AlignParameterUsedWithDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Top).width(1).try_build().err().unwrap(),Error::WidthParameterUsedWithTopOrBottomDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Bottom).width(1).try_build().err().unwrap(),Error::WidthParameterUsedWithTopOrBottomDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Left).height(1).try_build().err().unwrap(),Error::HeightParameterUsedWithLeftOrRightDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Right).height(1).try_build().err().unwrap(),Error::HeightParameterUsedWithLeftOrRightDock);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).width(1).try_build().err().unwrap(),Error::WidthOrHeightParameterUsedWithDockFill);
+    assert_eq!(LayoutBuilder::new().dock(Dock::Fill).height(1).try_build().err().unwrap(),Error::WidthOrHeightParameterUsedWithDockFill);
+
+    // align
+    assert_eq!(LayoutBuilder::new().alignment(Alignment::Center).x(1).try_build().err().unwrap(),Error::XYParameterUsedWithAlign);
+    assert_eq!(LayoutBuilder::new().alignment(Alignment::Center).y(1).try_build().err().unwrap(),Error::XYParameterUsedWithAlign);
+    assert_eq!(LayoutBuilder::new().alignment(Alignment::Center).left_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithAlign);
+    assert_eq!(LayoutBuilder::new().alignment(Alignment::Center).right_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithAlign);
+    assert_eq!(LayoutBuilder::new().alignment(Alignment::Center).top_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithAlign);
+    assert_eq!(LayoutBuilder::new().alignment(Alignment::Center).bottom_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithAlign);
+    assert_eq!(LayoutBuilder::new().alignment(Alignment::Center).pivot(Pivot::Center).try_build().err().unwrap(),Error::PivotParameterUsedWithAlign);
+
+    // x & Y
+    assert_eq!(LayoutBuilder::new().x(1).y(1).left_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().x(1).y(1).right_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().x(1).y(1).top_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().x(1).y(1).bottom_anchor(1).try_build().err().unwrap(),Error::AnchorParameterUsedWithXY);
+
+    // corner anchor
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).x(1).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).y(1).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).bottom_anchor(1).x(1).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).bottom_anchor(1).y(1).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).top_anchor(1).x(1).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).top_anchor(1).y(1).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).bottom_anchor(1).x(1).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).bottom_anchor(1).y(1).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithPivot);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).bottom_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithPivot);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).top_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithPivot);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).bottom_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::CornerAnchorParameterUsedWithPivot);
+    
+    // all anchors
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).right_anchor(1).bottom_anchor(1).x(1).try_build().err().unwrap(),Error::AllAnchorsParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).right_anchor(1).bottom_anchor(1).y(1).try_build().err().unwrap(),Error::AllAnchorsParameterUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).right_anchor(1).bottom_anchor(1).width(1).try_build().err().unwrap(),Error::AllAnchorsParameterUsedWithSize);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).right_anchor(1).bottom_anchor(1).height(1).try_build().err().unwrap(),Error::AllAnchorsParameterUsedWithSize);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).right_anchor(1).bottom_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::AllAnchorsParameterUsedWithPivot);
+
+    // ltr anchors
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).right_anchor(1).x(1).try_build().err().unwrap(),Error::LeftTopRightAnchorsUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).right_anchor(1).y(1).try_build().err().unwrap(),Error::LeftTopRightAnchorsUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).right_anchor(1).width(1).try_build().err().unwrap(),Error::LeftTopRightAnchorsUsedWithWidth);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).right_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::LeftTopRightAnchorsUsedWithPivot);
+
+    // lbr anchors
+    assert_eq!(LayoutBuilder::new().left_anchor(1).bottom_anchor(1).right_anchor(1).x(1).try_build().err().unwrap(),Error::LeftBottomRightAnchorsUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).bottom_anchor(1).right_anchor(1).y(1).try_build().err().unwrap(),Error::LeftBottomRightAnchorsUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).bottom_anchor(1).right_anchor(1).width(1).try_build().err().unwrap(),Error::LeftBottomRightAnchorsUsedWithWidth);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).bottom_anchor(1).right_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::LeftBottomRightAnchorsUsedWithPivot);
+
+    // tlb anchors
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).bottom_anchor(1).x(1).try_build().err().unwrap(),Error::TopLeftBottomAnchorsUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).bottom_anchor(1).y(1).try_build().err().unwrap(),Error::TopLeftBottomAnchorsUsedWithXY);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).bottom_anchor(1).height(1).try_build().err().unwrap(),Error::TopLeftBottomAnchorsUsedWithHeight);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).top_anchor(1).bottom_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::TopLeftBottomAnchorsUsedWithPivot);
+
+    // trb anchors
+    assert_eq!(LayoutBuilder::new().right_anchor(1).top_anchor(1).bottom_anchor(1).x(1).try_build().err().unwrap(),Error::TopRightBottomAnchorsUsedWithXY);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).top_anchor(1).bottom_anchor(1).y(1).try_build().err().unwrap(),Error::TopRightBottomAnchorsUsedWithXY);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).top_anchor(1).bottom_anchor(1).height(1).try_build().err().unwrap(),Error::TopRightBottomAnchorsUsedWithHeight);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).top_anchor(1).bottom_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::TopRightBottomAnchorsUsedWithPivot);
+
+    // lr anchors
+    assert_eq!(LayoutBuilder::new().left_anchor(1).right_anchor(1).x(1).try_build().err().unwrap(),Error::LeftRightAnchorsUsedWithX);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).right_anchor(1).width(1).try_build().err().unwrap(),Error::LeftRightAnchorsUsedWithWidth);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).right_anchor(1).y(1).try_build().err().unwrap(),Error::LeftRightAnchorsUsedWithoutPivot);
+    assert_eq!(LayoutBuilder::new().left_anchor(1).right_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::LeftRightAnchorsUsedWithoutY);
+
+    // tb anchors
+    assert_eq!(LayoutBuilder::new().top_anchor(1).bottom_anchor(1).y(1).try_build().err().unwrap(),Error::TopBottomAnchorsUsedWithY);
+    assert_eq!(LayoutBuilder::new().top_anchor(1).bottom_anchor(1).height(1).try_build().err().unwrap(),Error::TopBottomAnchorsUsedWithHeight);
+    assert_eq!(LayoutBuilder::new().top_anchor(1).bottom_anchor(1).x(1).try_build().err().unwrap(),Error::TopBottomAnchorsUsedWithoutPivot);
+    assert_eq!(LayoutBuilder::new().top_anchor(1).bottom_anchor(1).pivot(Pivot::Center).try_build().err().unwrap(),Error::TopBottomAnchorsUsedWithoutX);
+
+    // single anchors
+    assert_eq!(LayoutBuilder::new().left_anchor(1).try_build().err().unwrap(),Error::SingleAnchor);
+    assert_eq!(LayoutBuilder::new().top_anchor(1).try_build().err().unwrap(),Error::SingleAnchor);
+    assert_eq!(LayoutBuilder::new().bottom_anchor(1).try_build().err().unwrap(),Error::SingleAnchor);
+    assert_eq!(LayoutBuilder::new().right_anchor(1).try_build().err().unwrap(),Error::SingleAnchor);
+    
+    // x no y, or y no x
+    assert_eq!(LayoutBuilder::new().x(1).try_build().err().unwrap(),Error::XWithoutY);
+    assert_eq!(LayoutBuilder::new().y(1).try_build().err().unwrap(),Error::YWithoutX);
+
+    // pivot without x and y
+    assert_eq!(LayoutBuilder::new().pivot(Pivot::Center).try_build().err().unwrap(),Error::PivotWithoutXorY);
+
+}

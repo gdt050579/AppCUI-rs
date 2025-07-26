@@ -1028,6 +1028,65 @@ fn check_serialization_to_buffer() {
 }
 
 #[test]
+fn check_deserialization_from_buffer() {
+    const BUFFER: [u8; 92] = [
+        // Magic
+        83, 82, 70, // Version
+        1,  // Width and Height
+        5, 0, 0, 0, 2, 0, 0, 0, // Character data
+        72, 0, 0, 0, 0, 0, 15, 4, 101, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 108, 0, 0, 0, 0, 0, 15, 4, 111, 0, 0, 0, 0, 0, 15, 4, 87, 0,
+        0, 0, 1, 0, 10, 4, 111, 0, 0, 0, 1, 0, 10, 4, 114, 0, 0, 0, 1, 0, 10, 4, 108, 0, 0, 0, 1, 0, 10, 4, 100, 0, 0, 0, 1, 0, 10, 4,
+    ];
+    let s = Surface::from_buffer(&BUFFER).unwrap();
+    assert_eq!(*s.char(0, 0).unwrap(),char!("H,w,dr"));
+    assert_eq!(*s.char(1, 0).unwrap(),char!("e,w,dr"));
+    assert_eq!(*s.char(2, 0).unwrap(),char!("l,w,dr"));
+    assert_eq!(*s.char(3, 0).unwrap(),char!("l,w,dr"));
+    assert_eq!(*s.char(4, 0).unwrap(),char!("o,w,dr"));
+    assert_eq!(*s.char(0, 1).unwrap(),char!("W,green,dr,flags: Bold"));
+    assert_eq!(*s.char(1, 1).unwrap(),char!("o,green,dr,flags: Bold"));
+    assert_eq!(*s.char(2, 1).unwrap(),char!("r,green,dr,flags: Bold"));
+    assert_eq!(*s.char(3, 1).unwrap(),char!("l,green,dr,flags: Bold"));
+    assert_eq!(*s.char(4, 1).unwrap(),char!("d,green,dr,flags: Bold"));
+    assert_eq!(s.size(), Size::new(5, 2));
+}
+
+#[test]
+fn check_deserialize_color() {
+    assert_eq!(Surface::deserialize_color(&[0u8]), Some((Color::Black,1)));
+    assert_eq!(Surface::deserialize_color(&[1u8]), Some((Color::DarkBlue,1)));
+    assert_eq!(Surface::deserialize_color(&[2u8]), Some((Color::DarkGreen,1)));
+    assert_eq!(Surface::deserialize_color(&[3u8]), Some((Color::Teal,1)));
+    assert_eq!(Surface::deserialize_color(&[4u8]), Some((Color::DarkRed,1)));
+    assert_eq!(Surface::deserialize_color(&[5u8]), Some((Color::Magenta,1)));
+    assert_eq!(Surface::deserialize_color(&[6u8]), Some((Color::Olive,1)));
+    assert_eq!(Surface::deserialize_color(&[7u8]), Some((Color::Silver,1)));
+    assert_eq!(Surface::deserialize_color(&[8u8]), Some((Color::Gray,1)));
+    assert_eq!(Surface::deserialize_color(&[9u8]), Some((Color::Blue,1)));
+    assert_eq!(Surface::deserialize_color(&[10u8]), Some((Color::Green,1)));
+    assert_eq!(Surface::deserialize_color(&[11u8]), Some((Color::Aqua,1)));
+    assert_eq!(Surface::deserialize_color(&[12u8]), Some((Color::Red,1)));
+    assert_eq!(Surface::deserialize_color(&[13u8]), Some((Color::Pink,1)));
+    assert_eq!(Surface::deserialize_color(&[14u8]), Some((Color::Yellow,1)));
+    assert_eq!(Surface::deserialize_color(&[15u8]), Some((Color::White,1)));
+    assert_eq!(Surface::deserialize_color(&[16u8]), Some((Color::Transparent,1)));
+
+    let res = Surface::deserialize_color(&[17u8,0,1,2]);
+    assert!(res.is_some());
+    assert!(res.unwrap().1 == 4);
+
+    // not 4 elements
+    assert!(Surface::deserialize_color(&[17u8]).is_none());
+
+
+    let mut buf:[u8;1] = [0];
+    for i in 18..=255u8 {
+        buf[0] = i;
+        assert!(Surface::deserialize_color(&buf).is_none());
+    }
+}
+
+#[test]
 fn check_rect_contains() {
     let r = Rect::new(1, 2, 3, 4);
     assert!(r.contains(Point::new(1, 2)));
