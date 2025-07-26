@@ -65,17 +65,26 @@ where:
 
 ## Using Left-Right anchors
 
-When `left` and `right` anchors are used together, there are several restrictions. First of all, `width` and `x` parameters cannot be specified. Width is deduced as the difference between parent's width and the sum of left and right anchors. Left anchor will also be considered as the "x" coordinate.
-However, `height` parameter should be specified (if not specified it will be defaulted to `1 character` (unless a minimum height is specified for those controls - in which case that limit will be applied)).
-`align` parameter can also be specified, but only with the following values: `top`, `center` or `bottom`. If not specified it will be defaulted to `center`.
+When `left` and `right` anchors are used together, there are several restrictions. 
+1. `width` can not be specified, as it will be deduced as the difference between parent's width and the sum of left and right anchors.
+2. `x` parameter cannot be specified, as it will be deduced from the `pivot` position. For exameple:
+   - if `pivot` is set to `TopLeft`, `BottomLeft` or `CenterLeft`, the `x` coordinate will be equal to the `left` anchor value.
+   - if `pivot` is set to `TopRight`, `BottomRight` or `CenterRight`, the `x` coordinate will be equal to the difference between parent's width and the `right` anchor value.
+   - if `pivot` is set to `Center`, `TopCenter` or `BottomCenter` the `x` coordinate will be equal to the midle of the space between the  `left` and `right` anchors.
+3. `height` parameter should be specified (if not specified it will be defaulted to `1 character` (unless a minimum height is specified for those controls - in which case that limit will be applied)
+4. `y` parameter must be specified, and it will be considered reference point for the `pivot` position. For example:
+   - if `pivot` is set to `TopLeft`, `TopCenter`, or `TopRight`, the `y` coordinate will be equal to the `top` anchor value.
+   - if `pivot` is set to `BottomLeft`, `BottomCenter`, or `BottomRight`, the `y` coordinate will be equal to the difference between parent's height and the sum between `bottom` anchor value and the control's height.
+   - if `pivot` is set to `Center`, `CenterLeft` or `CenterRight` the control will be centered on the Y-axes around the `y` parameter value.
 
 ### Visual Representation
 
-| Layout Description                                                                                                                                         | Visual representation                              |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| A control with **left** and **right** anchors, positioned at `y` = **80%** of parent height with `height` = **20** characters and **bottom** pivot         | <img src="img/layout_anchor_lr_1.png" width=800 /> |
-| A control with **left** and **right** anchors, positioned at `y` = **50%** of parent height with `height` = **100%** of parent height and **center** pivot | <img src="img/layout_anchor_lr_2.png" width=800 /> |
-| A control with **left** and **right** anchors, positioned at `y` = **0** with `height` = **50%** of parent height and **top** pivot                        | <img src="img/layout_anchor_lr_3.png" width=800 /> |
+| Layout Description                                                                                                                                                                                                         | Visual representation                              |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| A control with **left** and **right** anchors, positioned at `y` = **80%** of parent height with `height` = **20** characters and **bottom** pivot                                                                         | <img src="img/layout_anchor_lr_1.png" width=800 /> |
+| A control with **left** and **right** anchors, positioned at `y` = **50%** of parent height with `height` = **100%** of parent height and **center** pivot                                                                 | <img src="img/layout_anchor_lr_2.png" width=800 /> |
+| A control with **left** and **right** anchors, positioned at `y` = **0** with `height` = **50%** of parent height and **top** pivot                                                                                        | <img src="img/layout_anchor_lr_3.png" width=800 /> |
+| A control with **left** and **right** anchors, positioned at `y` = **80** of teh parent height, with `height` = **50%** of parent height, a fix-width that can not be streched of 50 characters and **bottom-right** pivot | <img src="img/layout_anchor_lr_4.png" width=800 /> |
 
 ### Examples
 
@@ -111,17 +120,27 @@ However, `height` parameter should be specified (if not specified it will be def
 
 ## Using Top-Bottom anchors
 
-When `top` and `bottom` anchors are used together, there are several restrictions. First of all, `height` and `y` parameters cannot be specified. Height is deduced as the difference between parent's height and the sum of top and bottom anchors. Top anchor will also be considered as the "y" coordinate.
-However, `width` parameter should be specified (if not specified it will be defaulted to `1 character` (unless a minimum width is specified for those controls - in which case that limit will be applied)).
-`align` parameter can also be specified, but only with the following values: `left`, `center` or `right`. If not specified it will be defaulted to `center`.
+When `top` and `bottom` anchors are used together, there are several restrictions. 
+1. `height` can not be specified, as it will be deduced as the difference between parent's height and the sum of top and bottom anchors.
+2. `y` parameter cannot be specified, as it will be deduced from the `pivot` position. For example:
+   - if `pivot` is set to `TopLeft`, `TopCenter`, or `TopRight`, the `y` coordinate will be equal to the `top` anchor value.
+   - if `pivot` is set to `BottomLeft`, `BottomCenter`, or `BottomRight`, the `y` coordinate will be equal to the difference between parent's height and the sum of the  `bottom` anchor value with the controls height.
+   - if `pivot` is set to `Center`, `CenterLeft` or `CenterRight` the control will be centered on the Y-axes around the midle of the space between the top and bottom anchors.
+3. `width` parameter should be specified (if not specified it will be defaulted to `1 character` (unless a minimum width is specified for those controls - in which case that limit will be applied)
+4. `x` parameter must be specified, and it will be considered reference point for the `pivot` position. For example:
+   - if `pivot` is set to `TopLeft`, `CenterLeft`, or `BottomLeft`, the `x` coordinate will be equal to the `left` anchor value.
+   - if `pivot` is set to `TopRight`, `CenterRight`, or `BottomRight`, the `x` coordinate will be equal to the difference between parent's width and the sum of the  `right` anchor value with the controls width.
+   - if `pivot` is set to `Center`, `TopCenter` or `BottomCenter` the control will be centered on the X-axes around the midle of the space between the left and right anchors.
+
 
 ### Visual Representation
 
-| Layout Description                                                                                                                                      | Visual representation                              |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| A control with **top** and **bottom** anchors, positioned at `x` = **80%** of parent width with `width` = **90** characters and **right** pivot         | <img src="img/layout_anchor_tb_1.png" width=800 /> |
-| A control with **top** and **bottom** anchors, positioned at `x` = **50%** of parent width with `width` = **100%** of parent width and **center** pivot | <img src="img/layout_anchor_tb_2.png" width=800 /> |
-| A control with **top** and **bottom** anchors, positioned at `x` = **0** with `width` = **50%** of parent width and **left** pivot                      | <img src="img/layout_anchor_tb_3.png" width=800 /> |
+| Layout Description                                                                                                                                                                                | Visual representation                              |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| A control with **top** and **bottom** anchors, positioned at `x` = **80%** of parent width with `width` = **90** characters and **right** pivot                                                   | <img src="img/layout_anchor_tb_1.png" width=800 /> |
+| A control with **top** and **bottom** anchors, positioned at `x` = **50%** of parent width with `width` = **100%** of parent width and **center** pivot                                           | <img src="img/layout_anchor_tb_2.png" width=800 /> |
+| A control with **top** and **bottom** anchors, positioned at `x` = **0** with `width` = **50%** of parent width and **left** pivot                                                                | <img src="img/layout_anchor_tb_3.png" width=800 /> |
+| A control with **top** and **bottom** anchors, positioned at `x` = **70%** of parent width with `width` = **50%** of parent width, a fix height of **20 characters** and a **bottom-right** pivot | <img src="img/layout_anchor_tb_4.png" width=800 /> |
 
 ### Examples
 
