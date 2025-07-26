@@ -42,15 +42,15 @@ impl ControlLayout {
         self.y = y;
     }
     #[inline(always)]
-    pub(crate) fn get_width(&self) -> u16 {
+    pub(crate) fn width(&self) -> u16 {
         self.width
     }
     #[inline(always)]
-    pub(crate) fn get_height(&self) -> u16 {
+    pub(crate) fn height(&self) -> u16 {
         self.height
     }
     #[inline(always)]
-    pub(crate) fn get_size(&self) -> Size {
+    pub(crate) fn size(&self) -> Size {
         Size{
             width: self.width as u32,
             height: self.height as u32,
@@ -58,11 +58,11 @@ impl ControlLayout {
     }
 
     #[inline]
-    pub(crate) fn get_x(&self) -> i32 {
+    pub(crate) fn x(&self) -> i32 {
         self.x
     }
     #[inline]
-    pub(crate) fn get_y(&self) -> i32 {
+    pub(crate) fn y(&self) -> i32 {
         self.y
     }
     pub(crate) fn update(&mut self, parent_width: u16, parent_height: u16) {
@@ -112,7 +112,7 @@ impl ControlLayout {
                 layout.y = y;
             }
             _ => {
-                self.mode = LayoutMode::Absolute(AbsoluteLayout::new(x, y, self.get_width(), self.get_height()));
+                self.mode = LayoutMode::Absolute(AbsoluteLayout::new(x, y, self.width(), self.height()));
             }
         }
     }

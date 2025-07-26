@@ -36,6 +36,6 @@ impl LeftBottomRightAnchorsLayout {
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
             self.height.absolute(parent_height),
         );
-        control_layout.set_position(left, (parent_height as i32) - (bottom + (control_layout.get_height() as i32)));
+        control_layout.set_position(left, (parent_height as i32) - (bottom + (control_layout.height() as i32)));
     }
 }

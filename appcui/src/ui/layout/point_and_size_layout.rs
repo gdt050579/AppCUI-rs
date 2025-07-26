@@ -195,25 +195,25 @@ impl PointAndSizeLayout {
         // align (x,y) from the current position based on Width/Height
         match self.align {
             Alignment::TopLeft => {}
-            Alignment::TopCenter => x -= (control_layout.get_width() / 2) as i32,
-            Alignment::TopRight => x -= control_layout.get_width() as i32,
+            Alignment::TopCenter => x -= (control_layout.width() / 2) as i32,
+            Alignment::TopRight => x -= control_layout.width() as i32,
             Alignment::CenterRight => {
-                x -= control_layout.get_width() as i32;
-                y -= (control_layout.get_height() / 2) as i32;
+                x -= control_layout.width() as i32;
+                y -= (control_layout.height() / 2) as i32;
             }
             Alignment::BottomRight => {
-                x -= control_layout.get_width() as i32;
-                y -= control_layout.get_height() as i32;
+                x -= control_layout.width() as i32;
+                y -= control_layout.height() as i32;
             }
             Alignment::BottomCenter => {
-                x -= (control_layout.get_width() / 2) as i32;
-                y -= control_layout.get_height() as i32;
+                x -= (control_layout.width() / 2) as i32;
+                y -= control_layout.height() as i32;
             }
-            Alignment::BottomLeft => y -= control_layout.get_height() as i32,
-            Alignment::CenterLeft => y -= (control_layout.get_height() / 2) as i32,
+            Alignment::BottomLeft => y -= control_layout.height() as i32,
+            Alignment::CenterLeft => y -= (control_layout.height() / 2) as i32,
             Alignment::Center => {
-                x -= (control_layout.get_width() / 2) as i32;
-                y -= (control_layout.get_height() / 2) as i32;
+                x -= (control_layout.width() / 2) as i32;
+                y -= (control_layout.height() / 2) as i32;
             }
         }
         // set new position

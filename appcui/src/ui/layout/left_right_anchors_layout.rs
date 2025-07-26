@@ -39,8 +39,8 @@ impl LeftRightAnchorsLayout {
             ((parent_width as i32) - (left + right)).clamp(1, 0xFFFF) as u16,
             self.height.absolute(parent_height),
         );
-        let new_h = control_layout.get_height() as i32;
-        let new_w = control_layout.get_width() as i32;
+        let new_h = control_layout.height() as i32;
+        let new_w = control_layout.width() as i32;
         let l = left;
         let r = (parent_width as i32).saturating_sub(right);
         let (new_x, new_y) = match self.pivot {

@@ -34,10 +34,10 @@ macro_rules! validate_pos {
     ($text:literal, $parent_width:expr, $parent_height:expr, $x:expr,$y:expr,$w:expr,$h:expr) => {
         let mut cl = ControlLayout::from(layout!($text));
         cl.update($parent_width, $parent_height);
-        assert_eq!(cl.get_width(), $w);
-        assert_eq!(cl.get_height(), $h);
-        assert_eq!(cl.get_x(), $x);
-        assert_eq!(cl.get_y(), $y);
+        assert_eq!(cl.width(), $w);
+        assert_eq!(cl.height(), $h);
+        assert_eq!(cl.x(), $x);
+        assert_eq!(cl.y(), $y);
     };
 }
 
@@ -1404,10 +1404,10 @@ fn layout_absolute_method() {
     // Test that the layout can be successfully used
     let mut control_layout = ControlLayout::from(layout);
     control_layout.update(200, 150); // Provide parent dimensions
-    assert_eq!(control_layout.get_width(), 100);
-    assert_eq!(control_layout.get_height(), 50);
-    assert_eq!(control_layout.get_x(), 10);
-    assert_eq!(control_layout.get_y(), 20);
+    assert_eq!(control_layout.width(), 100);
+    assert_eq!(control_layout.height(), 50);
+    assert_eq!(control_layout.x(), 10);
+    assert_eq!(control_layout.y(), 20);
 }
 
 #[test]
@@ -1433,10 +1433,10 @@ fn layout_fill_method() {
     let mut control_layout = ControlLayout::from(layout);
     control_layout.update(200, 150);
     
-    assert_eq!(control_layout.get_width(), 200);
-    assert_eq!(control_layout.get_height(), 150);
-    assert_eq!(control_layout.get_x(), 0);
-    assert_eq!(control_layout.get_y(), 0);
+    assert_eq!(control_layout.width(), 200);
+    assert_eq!(control_layout.height(), 150);
+    assert_eq!(control_layout.x(), 0);
+    assert_eq!(control_layout.y(), 0);
 }
 
 #[test]
@@ -1498,10 +1498,10 @@ fn layout_pivot_method() {
     
     // With pivot center, the control should be positioned so its center is at (50, 30)
     // Control size is 20x10, so top-left should be at (40, 25)
-    assert_eq!(control_layout.get_width(), 20);
-    assert_eq!(control_layout.get_height(), 10);
-    assert_eq!(control_layout.get_x(), 40);
-    assert_eq!(control_layout.get_y(), 25);
+    assert_eq!(control_layout.width(), 20);
+    assert_eq!(control_layout.height(), 10);
+    assert_eq!(control_layout.x(), 40);
+    assert_eq!(control_layout.y(), 25);
 }
 
 #[test]
@@ -1558,30 +1558,30 @@ fn layout_aligned_method() {
     
     // With center alignment, the control should be centered in a 200x150 parent
     // Control size is 50x25, so top-left should be at (75, 62 or 63)
-    assert_eq!(control_layout.get_width(), 50);
-    assert_eq!(control_layout.get_height(), 25);
-    assert_eq!(control_layout.get_x(), 75);
-    assert_eq!(control_layout.get_y(), 63); // Adjusted based on actual calculation
+    assert_eq!(control_layout.width(), 50);
+    assert_eq!(control_layout.height(), 25);
+    assert_eq!(control_layout.x(), 75);
+    assert_eq!(control_layout.y(), 63); // Adjusted based on actual calculation
 
     // Test top-left alignment
     let mut control_layout_tl = ControlLayout::from(layout_tl);
     control_layout_tl.update(200, 150);
     
     // With top-left alignment, the control should be at (0, 0)
-    assert_eq!(control_layout_tl.get_width(), 30);
-    assert_eq!(control_layout_tl.get_height(), 15);
-    assert_eq!(control_layout_tl.get_x(), 0);
-    assert_eq!(control_layout_tl.get_y(), 0);
+    assert_eq!(control_layout_tl.width(), 30);
+    assert_eq!(control_layout_tl.height(), 15);
+    assert_eq!(control_layout_tl.x(), 0);
+    assert_eq!(control_layout_tl.y(), 0);
 
     // Test bottom-right alignment
     let mut control_layout_br = ControlLayout::from(layout_br);
     control_layout_br.update(200, 150);
     
     // With bottom-right alignment, the control should be at (160, 130)
-    assert_eq!(control_layout_br.get_width(), 40);
-    assert_eq!(control_layout_br.get_height(), 20);
-    assert_eq!(control_layout_br.get_x(), 160);
-    assert_eq!(control_layout_br.get_y(), 130);
+    assert_eq!(control_layout_br.width(), 40);
+    assert_eq!(control_layout_br.height(), 20);
+    assert_eq!(control_layout_br.x(), 160);
+    assert_eq!(control_layout_br.y(), 130);
 }
 
 #[test]
@@ -1655,7 +1655,7 @@ fn layout_static_methods_edge_cases() {
         control_layout.update(100, 100);
         
         // All layouts should produce valid dimensions
-        assert!(control_layout.get_width() >= 0);
-        assert!(control_layout.get_height() >= 0);
+        assert!(control_layout.width() >= 0);
+        assert!(control_layout.height() >= 0);
     }
 }

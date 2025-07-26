@@ -39,8 +39,8 @@ impl TopBottomAnchorsLayout {
             self.width.absolute(parent_width),
             ((parent_height as i32) - (top + bottom)).clamp(1, 0xFFFF) as u16,
         );
-        let new_h = control_layout.get_height() as i32;
-        let new_w = control_layout.get_width() as i32;
+        let new_h = control_layout.height() as i32;
+        let new_w = control_layout.width() as i32;
         let t = top;
         let b = (parent_height as i32).saturating_sub(bottom);
 
