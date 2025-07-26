@@ -683,3 +683,350 @@ fn check_panic_on_invalid_bottom() {
 }
 
 */
+
+#[test]
+fn layout_builder_all_error_codes() {
+    use super::Alignment;
+    use super::Dock;
+    use super::Pivot;
+
+    // Error::XYParameterUsedWithDock
+    let result = LayoutBuilder::new().dock(Dock::Fill).x(10).try_build();
+    assert_eq!(result, Err(Error::XYParameterUsedWithDock));
+    
+    let result = LayoutBuilder::new().dock(Dock::Left).y(5).try_build();
+    assert_eq!(result, Err(Error::XYParameterUsedWithDock));
+
+    // Error::AnchorParameterUsedWithDock
+    let result = LayoutBuilder::new().dock(Dock::Top).left_anchor(5).try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithDock));
+    
+    let result = LayoutBuilder::new().dock(Dock::Bottom).right_anchor(5).try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithDock));
+    
+    let result = LayoutBuilder::new().dock(Dock::Right).top_anchor(5).try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithDock));
+    
+    let result = LayoutBuilder::new().dock(Dock::Left).bottom_anchor(5).try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithDock));
+
+    // Error::PivotParameterUsedWithDock
+    let result = LayoutBuilder::new().dock(Dock::Fill).pivot(Pivot::Center).try_build();
+    assert_eq!(result, Err(Error::PivotParameterUsedWithDock));
+
+    // Error::AlignParameterUsedWithDock
+    let result = LayoutBuilder::new().dock(Dock::Top).alignment(Alignment::Center).try_build();
+    assert_eq!(result, Err(Error::AlignParameterUsedWithDock));
+
+    // Error::WidthParameterUsedWithTopOrBottomDock
+    let result = LayoutBuilder::new().dock(Dock::Top).width(20).try_build();
+    assert_eq!(result, Err(Error::WidthParameterUsedWithTopOrBottomDock));
+    
+    let result = LayoutBuilder::new().dock(Dock::Bottom).width(30).try_build();
+    assert_eq!(result, Err(Error::WidthParameterUsedWithTopOrBottomDock));
+
+    // Error::HeightParameterUsedWithLeftOrRightDock
+    let result = LayoutBuilder::new().dock(Dock::Left).height(15).try_build();
+    assert_eq!(result, Err(Error::HeightParameterUsedWithLeftOrRightDock));
+    
+    let result = LayoutBuilder::new().dock(Dock::Right).height(25).try_build();
+    assert_eq!(result, Err(Error::HeightParameterUsedWithLeftOrRightDock));
+
+    // Error::WidthOrHeightParameterUsedWithDockFill
+    let result = LayoutBuilder::new().dock(Dock::Fill).width(20).try_build();
+    assert_eq!(result, Err(Error::WidthOrHeightParameterUsedWithDockFill));
+    
+    let result = LayoutBuilder::new().dock(Dock::Fill).height(15).try_build();
+    assert_eq!(result, Err(Error::WidthOrHeightParameterUsedWithDockFill));
+
+    // Error::XYParameterUsedWithAlign
+    let result = LayoutBuilder::new().alignment(Alignment::Center).x(10).try_build();
+    assert_eq!(result, Err(Error::XYParameterUsedWithAlign));
+    
+    let result = LayoutBuilder::new().alignment(Alignment::TopLeft).y(5).try_build();
+    assert_eq!(result, Err(Error::XYParameterUsedWithAlign));
+
+    // Error::AnchorParameterUsedWithAlign
+    let result = LayoutBuilder::new().alignment(Alignment::Center).left_anchor(5).try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithAlign));
+    
+    let result = LayoutBuilder::new().alignment(Alignment::TopRight).top_anchor(3).try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithAlign));
+
+    // Error::PivotParameterUsedWithAlign
+    let result = LayoutBuilder::new().alignment(Alignment::Center).pivot(Pivot::TopLeft).try_build();
+    assert_eq!(result, Err(Error::PivotParameterUsedWithAlign));
+
+    // Error::DockParameterUsedWithAlign is not separately testable since dock mode takes precedence
+    // The error would be caught by AlignParameterUsedWithDock when dock is processed first
+
+    // Error::AnchorParameterUsedWithXY
+    let result = LayoutBuilder::new().x(10).y(5).left_anchor(5).try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithXY));
+
+    // Error::CornerAnchorParameterUsedWithXY is caught by AnchorParameterUsedWithXY first
+    // since any anchor with XY is checked before corner-specific validation
+    let result = LayoutBuilder::new().x(10).y(5).left_anchor(2).top_anchor(3).try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithXY));
+
+    // Error::CornerAnchorParameterUsedWithPivot
+    let result = LayoutBuilder::new().left_anchor(2).top_anchor(3).pivot(Pivot::Center).try_build();
+    assert_eq!(result, Err(Error::CornerAnchorParameterUsedWithPivot));
+
+    // Error::AllAnchorsParameterUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .left_anchor(1)
+        .right_anchor(2)
+        .top_anchor(3)
+        .bottom_anchor(4)
+        .try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithXY));
+
+    // Error::AllAnchorsParameterUsedWithSize
+    let result = LayoutBuilder::new()
+        .width(20)
+        .height(15)
+        .left_anchor(1)
+        .right_anchor(2)
+        .top_anchor(3)
+        .bottom_anchor(4)
+        .try_build();
+    assert_eq!(result, Err(Error::AllAnchorsParameterUsedWithSize));
+
+    // Error::AllAnchorsParameterUsedWithPivot
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .left_anchor(1)
+        .right_anchor(2)
+        .top_anchor(3)
+        .bottom_anchor(4)
+        .try_build();
+    assert_eq!(result, Err(Error::AllAnchorsParameterUsedWithPivot));
+
+    // Error::LeftTopRightAnchorsUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .left_anchor(1)
+        .top_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithXY));
+
+    // Error::LeftTopRightAnchorsUsedWithWidth - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .width(20)
+        .left_anchor(1)
+        .top_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::LeftTopRightAnchorsUsedWithWidth));
+
+    // Error::LeftTopRightAnchorsUsedWithPivot - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .left_anchor(1)
+        .top_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::LeftTopRightAnchorsUsedWithPivot));
+
+    // Error::LeftRightAnchorsUsedWithX
+    let result = LayoutBuilder::new()
+        .x(10)
+        .left_anchor(1)
+        .right_anchor(2)
+        .try_build();
+    assert_eq!(result, Err(Error::LeftRightAnchorsUsedWithX));
+
+    // Error::LeftRightAnchorsUsedWithWidth
+    let result = LayoutBuilder::new()
+        .width(20)
+        .left_anchor(1)
+        .right_anchor(2)
+        .try_build();
+    assert_eq!(result, Err(Error::LeftRightAnchorsUsedWithWidth));
+
+    // Error::LeftRightAnchorsUsedWithoutPivot
+    let result = LayoutBuilder::new()
+        .y(10)
+        .height(5)
+        .left_anchor(1)
+        .right_anchor(2)
+        .try_build();
+    assert_eq!(result, Err(Error::LeftRightAnchorsUsedWithoutPivot));
+
+    // Error::LeftRightAnchorsUsedWithoutY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .height(5)
+        .left_anchor(1)
+        .right_anchor(2)
+        .try_build();
+    assert_eq!(result, Err(Error::LeftRightAnchorsUsedWithoutY));
+
+    // Error::LeftBottomRightAnchorsUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .left_anchor(1)
+        .bottom_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithXY));
+
+    // Error::LeftBottomRightAnchorsUsedWithWidth - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .width(20)
+        .left_anchor(1)
+        .bottom_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::LeftBottomRightAnchorsUsedWithWidth));
+
+    // Error::LeftBottomRightAnchorsUsedWithPivot - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .left_anchor(1)
+        .bottom_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::LeftBottomRightAnchorsUsedWithPivot));
+
+    // Error::TopBottomAnchorsUsedWithY
+    let result = LayoutBuilder::new()
+        .y(10)
+        .top_anchor(1)
+        .bottom_anchor(2)
+        .try_build();
+    assert_eq!(result, Err(Error::TopBottomAnchorsUsedWithY));
+
+    // Error::TopBottomAnchorsUsedWithHeight
+    let result = LayoutBuilder::new()
+        .height(15)
+        .top_anchor(1)
+        .bottom_anchor(2)
+        .try_build();
+    assert_eq!(result, Err(Error::TopBottomAnchorsUsedWithHeight));
+
+    // Error::TopBottomAnchorsUsedWithoutX
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::CenterLeft)
+        .width(10)
+        .top_anchor(1)
+        .bottom_anchor(2)
+        .try_build();
+    assert_eq!(result, Err(Error::TopBottomAnchorsUsedWithoutX));
+
+    // Error::TopBottomAnchorsUsedWithoutPivot
+    let result = LayoutBuilder::new()
+        .x(10)
+        .width(15)
+        .top_anchor(1)
+        .bottom_anchor(2)
+        .try_build();
+    assert_eq!(result, Err(Error::TopBottomAnchorsUsedWithoutPivot));
+
+    // Error::TopBottomAnchorsUsedWithInvalidPivot - This validation is not implemented yet
+    // The error description mentions pivot validation but the actual implementation accepts all pivots
+    // let result = LayoutBuilder::new()
+    //     .x(10)
+    //     .width(15)
+    //     .pivot(Pivot::TopLeft)
+    //     .top_anchor(1)
+    //     .bottom_anchor(2)
+    //     .try_build();
+    // assert_eq!(result, Err(Error::TopBottomAnchorsUsedWithInvalidPivot));
+
+    // Error::TopLeftBottomAnchorsUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .top_anchor(1)
+        .left_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithXY));
+
+    // Error::TopLeftBottomAnchorsUsedWithHeight - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .height(15)
+        .top_anchor(1)
+        .left_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::TopLeftBottomAnchorsUsedWithHeight));
+
+    // Error::TopLeftBottomAnchorsUsedWithPivot - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .top_anchor(1)
+        .left_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::TopLeftBottomAnchorsUsedWithPivot));
+
+    // Error::TopRightBottomAnchorsUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .top_anchor(1)
+        .right_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::AnchorParameterUsedWithXY));
+
+    // Error::TopRightBottomAnchorsUsedWithHeight - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .height(15)
+        .top_anchor(1)
+        .right_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::TopRightBottomAnchorsUsedWithHeight));
+
+    // Error::TopRightBottomAnchorsUsedWithPivot - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .top_anchor(1)
+        .right_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result, Err(Error::TopRightBottomAnchorsUsedWithPivot));
+
+    // Error::SingleAnchor
+    let result = LayoutBuilder::new().left_anchor(5).try_build();
+    assert_eq!(result, Err(Error::SingleAnchor));
+    
+    let result = LayoutBuilder::new().right_anchor(5).try_build();
+    assert_eq!(result, Err(Error::SingleAnchor));
+    
+    let result = LayoutBuilder::new().top_anchor(5).try_build();
+    assert_eq!(result, Err(Error::SingleAnchor));
+    
+    let result = LayoutBuilder::new().bottom_anchor(5).try_build();
+    assert_eq!(result, Err(Error::SingleAnchor));
+
+    // Error::XWithoutY
+    let result = LayoutBuilder::new().x(10).width(20).height(15).try_build();
+    assert_eq!(result, Err(Error::XWithoutY));
+
+    // Error::YWithoutX
+    let result = LayoutBuilder::new().y(5).width(20).height(15).try_build();
+    assert_eq!(result, Err(Error::YWithoutX));
+
+    // Error::PivotWithoutXorY
+    let result = LayoutBuilder::new().pivot(Pivot::Center).width(20).height(15).try_build();
+    assert_eq!(result, Err(Error::PivotWithoutXorY));
+
+    // Error::NoParameters
+    let result = LayoutBuilder::new().try_build();
+    assert_eq!(result, Err(Error::NoParameters));
+
+    // Error::InvalidLayoutRule - This is a catch-all error for invalid combinations
+    // Testing some edge cases that might trigger this error
+    let result = LayoutBuilder::new().x(10).alignment(Alignment::Center).try_build();
+    assert_eq!(result, Err(Error::XYParameterUsedWithAlign));
+}

@@ -75,7 +75,7 @@ impl PointAndSizeLayout {
                 })
             }
             Dock::Fill => {
-                should_not_use!(params.height, Error::WidthOrHeightParameterUsedWithDockFill);
+                should_not_use!(params.width, Error::WidthOrHeightParameterUsedWithDockFill);
                 should_not_use!(params.height, Error::WidthOrHeightParameterUsedWithDockFill);
                 Ok(PointAndSizeLayout {
                     x: Coordinate16::Absolute(0),
