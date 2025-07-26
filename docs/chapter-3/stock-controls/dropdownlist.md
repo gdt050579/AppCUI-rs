@@ -46,9 +46,9 @@ impl DropDownListType for MyData { ... }
 then we can create a dropdown list object based on this type as follows:
 
 ```rs
-let d1: DropDownList<MyData> = DropDownList::new(Layout::new("..."),dropdownlist::Flags::None);
+let d1: DropDownList<MyData> = DropDownList::new(layout!("..."),dropdownlist::Flags::None);
 
-let d2: DropDownList<MyData> = DropDownList::with_symbol(1,Layout::new("..."),dropdownlist::Flags::AllowNoneSelection);
+let d2: DropDownList<MyData> = DropDownList::with_symbol(1,layout!("..."),dropdownlist::Flags::AllowNoneSelection);
 
 let d3 = dropdownlist!("class:MyData,x:1,y:1,w:20");
 
@@ -160,7 +160,7 @@ impl DropDownListType for MyObject {
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
     let mut w = window!("x:1,y:1,w:60,h:20,title:Win");
-    let mut db = DropDownList::<MyObject>::with_symbol(1, Layout::new("x:1,y:1,w:56"), dropdownlist::Flags::ShowDescription);
+    let mut db = DropDownList::<MyObject>::with_symbol(1, layout!("x:1,y:1,w:56"), dropdownlist::Flags::ShowDescription);
     db.add(MyObject::new("Heart", "(symbol of love)", "♥"));
     db.add(MyObject::new("Spade", "(used in a deck of cards)", "♠"));
     w.add(db);

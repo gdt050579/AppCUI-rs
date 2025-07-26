@@ -6,7 +6,7 @@ Represent a control from where you can choose a color:
 
 To create a color picker use `ColorPicker::new` method (with 2 parameters: a color and a layout).
 ```rs
-let c = ColorPicker::new(Color::Green, Layout::new("x:10,y:5,w:15"));
+let c = ColorPicker::new(Color::Green, layout!("x:10,y:5,w:15"));
 ```
 or the macro `colorpicker!`
 ```rs
@@ -63,7 +63,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("Test", Layout::new("d:c,w:40,h:10"), window::Flags::None),
+            base: Window::new("Test", layout!("a:c,w:40,h:10"), window::Flags::None),
             c: Handle::None,
             l: Handle::None,
         };

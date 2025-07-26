@@ -10,14 +10,14 @@ A toggle button is created using the `ToggleButton::new` and `ToggleButotn::with
 let tb1 = ToggleButton::new( 
         "Aa",                         // caption
         "Enable case sensitive",      // tooltip
-        Layout::new(...),             // layout
+        layout!(...),             // layout
         false,                        // initial state (on/off)
         togglebutton::Flags::Normal); // type
 
 let tb2 = ToggleButton::with_single_selection( 
         "Aa",                         // caption
         "Enable case sensitive",      // tooltip
-        Layout::new(...),             // layout
+        layout!(...),             // layout
         false,                        // initial state (on/off)
         togglebutton::Flags::Normal); // type        
 ```
@@ -104,24 +104,24 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Test,d:c,w:60,h:10");
+    let mut w = window!("Test,a:c,w:60,h:10");
     let tg1 = ToggleButton::new(
         "Aa", 
         "Case sensitive", 
-        Layout::new("x:1,y:1,w:2,h:1"), 
+        layout!("x:1,y:1,w:2,h:1"), 
         true, 
         togglebutton::Type::Underlined);
     let tg2 = ToggleButton::new(
         "..",
         "Match whole word",
-        Layout::new("x:4,y:1,w:2,h:1"),
+        layout!("x:4,y:1,w:2,h:1"),
         false,
         togglebutton::Type::Underlined,
     );
     let tg3 = ToggleButton::new(
         ".*", 
         "RegExp search", 
-        Layout::new("x:7,y:1,w:2,h:1"), 
+        layout!("x:7,y:1,w:2,h:1"), 
         true, 
         togglebutton::Type::Underlined);
     w.add(tg1);

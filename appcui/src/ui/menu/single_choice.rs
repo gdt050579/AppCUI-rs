@@ -35,7 +35,7 @@ use crate::{
 /// impl MyWindow {
 ///     fn new() -> Self {
 ///         let mut w = MyWindow {
-///             base: window!("Example,d:c,w:40,h:10"),
+///             base: window!("Example,a:c,w:40,h:10"),
 ///             format_menu: Handle::None,
 ///             text_size_small: Handle::None,
 ///             text_size_medium: Handle::None,

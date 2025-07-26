@@ -228,7 +228,7 @@ fn check_mouse_keymodifier_mouse() {
     impl TestControl {
         fn new() -> Self {
             Self {
-                base: ControlBase::new(Layout::new("d:c,w:100%,h:100%"), true),
+                base: ControlBase::new(layout!("d:f"), true),
                 txt: String::new(),
             }
         }
@@ -283,7 +283,7 @@ fn check_mouse_keymodifier_mouse() {
         CheckHash(0x6959C1EA263F8E6E)          
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c");
+    let mut w = window!("Test,d:f");
     w.add(TestControl::new());
     a.add_window(w);
     a.run();

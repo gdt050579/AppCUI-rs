@@ -14,16 +14,16 @@
 [![Crates.io](https://img.shields.io/crates/v/appcui.svg)](https://crates.io/crates/appcui)
 [![Docs.rs](https://docs.rs/appcui/badge.svg)](https://docs.rs/appcui)
 
-AppCUI is a simple, easy-to-use and cross-platform library for creating text-based user interfaces in Rust:
+AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based user interfaces (TUIs) with rich widgets, themes, and full Unicode support—an alternative to ncurses and other terminal UI frameworks.
 * [Book](https://gdt050579.github.io/AppCUI-rs/)
 * [Documentation](https://docs.rs/appcui)
 
 
 ## ✨ Features
-- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, combo boxes, date/time pickers, color pickers, etc.). 
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, combo boxes, date/time pickers, color pickers, tabs, accordeons, etc.). A full list of controls can be found [here](docs/chapter-3/stock_controls.md) 
 - [x] menus and toolbars
-- [x] multi-platform support (Windows via API, Linux via ncurses, MacOS via termios)
-- [x] multi-threading support
+- [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, MacOS via termios)
+- [x] multi-threading support to allow background tasks
 - [x] timers
 - [x] mouse support
 - [x] clipboard support
@@ -66,8 +66,30 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut win = window!("Test,d:c,w:30,h:9");
-    win.add(label!("'Hello World !',d:c,w:13,h:1"));
+    let mut win = Window::new(
+        "Test",
+        LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(),
+        window::Flags::Sizeable,
+    );
+    win.add(Label::new(
+        "Hello World !",
+        LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
+    ));
+    app.add_window(win);
+    app.run();
+    Ok(())
+}
+```
+
+or a more compact version using proc-macros:
+
+```rs
+use appcui::prelude::*;
+
+fn main() -> Result<(), appcui::system::Error> {
+    let mut app = App::new().build()?;
+    let mut win = window!("Test,a:c,w:30,h:9");
+    win.add(label!("'Hello World !',a:c,w:13,h:1"));
     app.add_window(win);
     app.run();
     Ok(())
@@ -78,12 +100,12 @@ Then run the project with `cargo run`. You should see a window with the title `T
 
 ## 🧪 Examples
 
-- 🌍 [Hello World](examples/hello_world/)
-- 🧮 [Calculator](examples/calculator/)
-- 🎨 [Color Picker](examples/colorpicker/)
-- 📋 [Menus](examples/menus/)
-
-Check out the [examples](examples) folder for more examples.
+AppCUI-rs comes with a set of examples to help you get started. You can find them in the [examples](examples) folder, including:
+- **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/) or [Ram it](examples/ramit/)
+- **Utilities** such as [Calculator](examples/calculator/), [CSV Viewer](examples/csv_viewer/), [Temperature Converter](examples/temperature_convertor/) or a [Timer](examples/timer/)
+- **Animations** such as [Matrix](examples/matrix/), [Fractals](examples/fractals/) or [Spiral](examples/spiral/)
+- **Controls**/**Widgets** such as [Button](examples/buttons/), [CheckBox](examples/checkboxes/), [ComboBox](examples/combobox/), [DatePicker](examples/datepicker/), [ListView](examples/listview/), [TreeView](examples/treeview/) and many more.
+- **Dialogs** such as [Notification](examples/notification_dialogs/) or [Input](examples/input_dialog/)
 
 ## 🛠️ A more complex example
 
@@ -102,7 +124,7 @@ impl CounterWindow {
     fn new() -> Self {
         let mut w = Self {
             // set up the window title and position
-            base: window!("'Counter window',d:c,w:30,h:5"),
+            base: window!("'Counter window',a:c,w:30,h:5"),
             // initial counter is 1
             counter: 1            
         };

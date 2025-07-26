@@ -315,8 +315,8 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot872-8"
-       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.26458333,0,0,0.26458333,-593.71137,-217.96402)"><flowRegion
+       style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#999999;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       transform="matrix(0.26458333,0,0,0.26458333,-478.3381,-190.84991)"><flowRegion
          id="flowRegion874-6"
          style="fill:#333333"><rect
            id="rect876-3"
@@ -324,10 +324,10 @@
            height="137"
            x="253"
            y="659.75891"
-           style="fill:#333333" /></flowRegion><flowPara
-         style="text-align:end;text-anchor:end;fill:#333333"
+           style="fill:#999999" /></flowRegion><flowPara
+         style="text-align:start;text-anchor:start;fill:#999999"
          id="flowPara7319">Current  </flowPara><flowPara
-         style="text-align:end;text-anchor:end;fill:#333333"
+         style="text-align:start;text-anchor:start;fill:#999999"
          id="flowPara8553">Control</flowPara></flowRoot>    <g
        id="g3912"
        style="fill:#999999;stroke:#999999;stroke-width:0.55976975"
@@ -385,7 +385,7 @@
        xml:space="preserve"
        id="flowRoot817-9-9-0"
        style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#999999;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
-       transform="matrix(0.26458333,0,0,0.26458333,17.764159,-137.49471)"><flowRegion
+       transform="matrix(0.26458333,0,0,0.26458333,16.934135,-138.87808)"><flowRegion
          id="flowRegion819-1-0-5"><rect
            id="rect821-13-3-7"
            width="465.71429"
@@ -394,7 +394,7 @@
            y="391.09113"
            style="fill:#999999" /></flowRegion><flowPara
          id="flowPara823-5-5-51"
-         style="fill:#000000">allign:left</flowPara></flowRoot>    <flowRoot
+         style="fill:#000000">pivot:center-left</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot817-9-9-3"
        style="font-size:40px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#999999;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"

@@ -4,6 +4,7 @@ pub(crate) enum BaseControlType {
     Desktop,
     ModalWindow,
     CustomControl,
+    CustomContainer,
 }
 impl BaseControlType {
     pub (crate) fn as_string(&self) -> String {
@@ -12,6 +13,7 @@ impl BaseControlType {
             BaseControlType::Desktop => "Desktop",
             BaseControlType::ModalWindow => "ModalWindow<()>",
             BaseControlType::CustomControl => "ControlBase",
+            BaseControlType::CustomContainer => "ContainerBase",
         })
     }
 }

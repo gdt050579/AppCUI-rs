@@ -1,6 +1,10 @@
-use crate::parameter_parser::{alignament::Alignament, NamedParamsMap};
-
-static LAYOUT_PARAMS: [&str; 10] = ["x", "y", "left", "top", "right", "bottom", "align", "dock", "width", "height"];
+use crate::controls::control_builder;
+use crate::parameter_parser;
+use crate::parameter_parser::NamedParamsMap;
+use crate::token_stream_to_string::TokenStreamToString;
+use proc_macro::*;
+use std::fmt::Write;
+use std::str::FromStr;
 
 macro_rules! should_not_use {
     ($param:expr, $msg:literal) => {
@@ -9,6 +13,14 @@ macro_rules! should_not_use {
         }
     };
 }
+macro_rules! should_use {
+    ($param:expr, $msg:literal) => {
+        if !$param {
+            panic!($msg);
+        }
+    };
+}
+
 #[repr(u8)]
 #[derive(Copy, Clone)]
 pub(super) enum Anchors {
@@ -38,6 +50,21 @@ pub(super) enum Anchors {
     // All
     All = 0x0F,
 }
+
+struct LayoutParams {
+    x: bool,
+    y: bool,
+    left: bool,
+    right: bool,
+    top: bool,
+    bottom: bool,
+    align: bool,
+    pivot: bool,
+    dock: bool,
+    width: bool,
+    height: bool,
+}
+
 impl Anchors {
     fn new(left: bool, top: bool, right: bool, bottom: bool) -> Anchors {
         let mut flags = 0u8;
@@ -68,158 +95,369 @@ impl Anchors {
         }
     }
 }
-fn copy_layout_params(s: &mut String, params: &NamedParamsMap) {
-    let mut one_added = false;
-    for p in LAYOUT_PARAMS {
-        if let Some(value) = params.get(p) {
-            if one_added {
-                s.push_str(" , ");
-            }
-            s.push_str(p);
-            s.push(':');
-            s.push_str(value.get_string());
-            one_added = true;
+
+fn validate_dock_layout(lp: &LayoutParams, params: &NamedParamsMap) {
+    should_not_use!(lp.x, "When ('dock' or 'd') parameter is used, 'x' paramete can not be used !");
+    should_not_use!(lp.y, "When ('dock' or 'd') parameter is used, 'y' paramete can not be used !");
+    should_not_use!(
+        lp.top,
+        "When ('dock' or 'd') parameter is used, ('top' or 't') parameter can not be used !"
+    );
+    should_not_use!(
+        lp.bottom,
+        "When ('dock' or 'd') parameter is used, ('bottom' or 'b') parameter can not be used !"
+    );
+    should_not_use!(
+        lp.left,
+        "When ('dock' or 'd') parameter is used, ('left' or 'l') parameter can not be used !"
+    );
+    should_not_use!(
+        lp.right,
+        "When ('dock' or 'd') parameter is used, ('right' or 'r') parameter can not be used !"
+    );
+    should_not_use!(
+        lp.align,
+        "When ('dock' or 'd') parameter is used, ('align' or 'a') parameter can not be used !"
+    );
+    should_not_use!(
+        lp.pivot,
+        "When ('dock' or 'd') parameter is used, ('pivot' or 'p') parameter can not be used !"
+    );
+    should_not_use!(
+        lp.align,
+        "When ('dock' or 'd') parameter is used, ('align' or 'a') parameter can not be used !"
+    );
+    let dock = params.get("dock").unwrap().to_dock();
+    match dock {
+        parameter_parser::dock::Dock::Left | parameter_parser::dock::Dock::Right => {
+            should_not_use!(
+                lp.height,
+                "When ('dock' or 'd') parameter is used with the value `left' or 'right` ('d:left' or 'd:right') the `height` parameter is not neccesary as the dock will expand the current control height to the height of its parent !"
+            );
+        }
+        parameter_parser::dock::Dock::Top | parameter_parser::dock::Dock::Bottom => {
+            should_not_use!(
+                lp.width,
+                "When ('dock' or 'd') parameter is used with the value `top' or 'bottom` ('d:top' or 'd:bottom') the `width` parameter is not neccesary as the dock will expand the current control width to the width of its parent !"
+            );
+        }
+        parameter_parser::dock::Dock::Fill => {
+            should_not_use!(
+                lp.width,
+                "When ('dock' or 'd') parameter is used with the value `fill` ('d:fill') the `width` parameter is not neccesary as the dock will expand the current control width to the width of its parent !"
+            );
+            should_not_use!(
+                lp.height,
+                "When ('dock' or 'd') parameter is used with the value `fill` ('d:fill') the `height` parameter is not neccesary as the dock will expand the current control height to the height of its parent !"
+            );
         }
     }
 }
 
-fn analyze_layout_validity(params: &NamedParamsMap) {
-    let x = params.contains("x");
-    let y = params.contains("y");
-    let left = params.contains("left");
-    let right = params.contains("right");
-    let top = params.contains("top");
-    let bottom = params.contains("bottom");
-    let align = params.contains("align");
-    let dock = params.contains("dock");
-    let width = params.contains("width");
-    let height = params.contains("height");
+fn validate_align_layout(lp: &LayoutParams, params: &mut NamedParamsMap) {
+    should_not_use!(lp.x, "When ('align' or 'a') parameter is used,'x' parameter can not be used !");
+    should_not_use!(lp.y, "When ('align' or 'a') parameter is used,'y' parameter can not be used !");
+    should_not_use!(
+        lp.top,
+        "When ('align' or 'a') parameter is used,('top' or 't') parameters can not be used !"
+    );
+    should_not_use!(
+        lp.bottom,
+        "When ('align' or 'a') parameter is used,('bottom' or 'b') parameters can not be used !"
+    );
+    should_not_use!(
+        lp.left,
+        "When ('align' or 'a') parameter is used,('left' or 'l') parameters can not be used !"
+    );
+    should_not_use!(
+        lp.right,
+        "When ('align' or 'a') parameter is used,('right' or 'r') parameters can not be used !"
+    );
+    should_not_use!(
+        lp.dock,
+        "When ('align' or 'a') parameter is used,('dock' or 'd') parameters can not be used !"
+    );
+    should_not_use!(
+        lp.pivot,
+        "When ('align' or 'a') parameter is used,('pivot' or 'p') parameters can not be used !"
+    );
+    if lp.width && lp.height {
+        let w = params.get_mut("width").map(|v| { v.get_percentage().unwrap_or(0.0) }).unwrap_or(0.0);
+        let h = params.get_mut("height").map(|v| { v.get_percentage().unwrap_or(0.0) }).unwrap_or(0.0);
+        if (w==100.0f32) && (h==100.0f32) {
+            panic!("Using 'align' with a width and height of 100% of the parent is equivalent to using dock with the value 'fill'. Remove the `align`/`a`, `width`/`w` and `height`/`h` parameters and replace them with `dock:fill` ");
+        }
+    }
+
+    // temporary
+    // if !lp.width || !lp.height {
+    //     panic!("Missig either width or height for align !");
+    // }
+}
+
+fn validate_xy_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
+    should_not_use!(
+        lp.left,
+        "When both (`x` and `y`) parameters are used, the left anchor parameter ('left' or 'l') can not be used !"
+    );
+    should_not_use!(
+        lp.right,
+        "When both (`x` and `y`) parameters are used, the right anchor parameter ('right' or 'r') can not be used !"
+    );
+    should_not_use!(
+        lp.top,
+        "When both (`x` and `y`) parameters are used, the top anchor parameter ('top' or 't') can not be used !"
+    );
+    should_not_use!(
+        lp.bottom,
+        "When both (`x` and `y`) parameters are used, the bottom anchor parameter ('bottom' or 'b') can not be used !"
+    );
+}
+
+fn validate_left_right_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
+    should_not_use!(
+        lp.x,
+        "When (left,right) anchors are used together, 'X' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.width,
+        "When (left,right) anchors are used together, ('width' or 'w') parameter can not be used as the width is deduced from left-right difference"
+    );
+    should_use!(lp.y, "When (left,right) anchors are used together, 'Y' parameter is required !");
+    should_use!(lp.pivot, "When (left,right) anchors are used together, 'pivot' parameter is required !");    
+}
+
+fn validate_top_bottom_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
+    should_not_use!(
+        lp.y,
+        "When (top,bottom) anchors are used together, 'Y' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(lp.height, "When (top,bottom) anchors are used together, ('height' or 'h') parameter can not be used as the height is deduced from top-bottom difference");
+    should_use!(lp.x, "When (top,bottom) anchors are used together, 'X' parameter is required !");
+    should_use!(lp.pivot, "When (top,bottom) anchors are used together, 'pivot' parameter is required !");
+}
+
+fn validate_corner_anchor_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
+    should_not_use!(lp.x, "When a corner anchor is being used (top,left,righ,bottom), 'x' can bot be used !");
+    should_not_use!(lp.y, "When a corner anchor is being used (top,left,righ,bottom), 'y' can bot be used !");
+}
+
+fn validate_left_top_right_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
+    should_not_use!(
+        lp.x,
+        "When (left,top,right) anchors are used together, 'x' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (left,top,right) anchors are used together, 'y' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.width,
+        "When (left,top,right) anchors are used together, 'width' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(lp.pivot, "When (left,top,right) anchors are used together, 'pivot' can bot be used !");
+}
+
+fn validate_left_bottom_right_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
+    should_not_use!(
+        lp.x,
+        "When (left,bottom,right) anchors are used together, 'x' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (left,bottom,right) anchors are used together, 'y' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.width,
+        "When (left,bottom,right) anchors are used together, 'width' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(lp.pivot, "When (left,bottom,right) anchors are used together, 'pivot' can bot be used !");
+}
+
+fn validate_top_left_bottom_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
+    should_not_use!(
+        lp.x,
+        "When (top,left,bottom) anchors are used together, 'x' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (top,left,bottom) anchors are used together, 'y' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.height,
+        "When (top,left,bottom) anchors are used together, 'height' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(lp.pivot, "When (top,left,bottom) anchors are used together, 'pivot' can bot be used !");
+}
+
+fn validate_top_right_bottom_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
+    should_not_use!(
+        lp.x,
+        "When (top,right,bottom) anchors are used together, 'x' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (top,right,bottom) anchors are used together, 'y' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.height,
+        "When (top,right,bottom) anchors are used together, 'height' can bot be used as it is infered from the anchors !"
+    );
+    should_not_use!(lp.pivot, "When (top,right,bottom) anchors are used together, 'pivot' can bot be used !");
+}
+
+fn validate_all_anchors_layout(lp: &LayoutParams, _params: &NamedParamsMap) {
+    should_not_use!(
+        lp.x,
+        "When (left,top,right,bottom) parameters are used together, 'x' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.y,
+        "When (left,top,right,bottom) parameters are used together, 'y' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.width,
+        "When (left,top,right,bottom) parameters are used together, 'width' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.height,
+        "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used as it is infered from the anchors !"
+    );
+    should_not_use!(
+        lp.pivot,
+        "When (left,top,right,bottom) parameters are used together, 'pivot' parameter can not be used !"
+    );
+}
+
+fn validate_layout(params: &mut NamedParamsMap) {
+    let lp = LayoutParams {
+        x: params.contains("x"),
+        y: params.contains("y"),
+        left: params.contains("left"),
+        right: params.contains("right"),
+        top: params.contains("top"),
+        bottom: params.contains("bottom"),
+        align: params.contains("align"),
+        pivot: params.contains("pivot"),
+        dock: params.contains("dock"),
+        width: params.contains("width"),
+        height: params.contains("height"),
+    };
+    // all are missing
+    if !(lp.x || lp.y || lp.left || lp.top || lp.right || lp.bottom || lp.align || lp.pivot || lp.dock || lp.width || lp.height) {
+        panic!("You need to provide one or some combination of the following parameters: 'x', 'y', 'width'/'w', 'height'/'h', 'left'/'l', 'top'/'t', 'right'/'r', 'bottom'/'b', 'align'/'a', 'dock'/'d' or 'pivot'/'p' !");
+    }
     // same logic as the one from layout mode
-    if dock {
-        should_not_use!(x, "When ('dock' or 'd') parameter is used,'x' parameter can not be used !");
-        should_not_use!(y, "When ('dock' or 'd') parameter is used,'y' parameter can not be used !");
-        should_not_use!(top, "When ('dock' or 'd') parameter is used,('top' or 't') parameters can not be used !");
-        should_not_use!(
-            bottom,
-            "When ('dock' or 'd') parameter is used,('bottom' or 'b') parameters can not be used !"
-        );
-        should_not_use!(
-            left,
-            "When ('dock' or 'd') parameter is used,('left' or 'l') parameters can not be used !"
-        );
-        should_not_use!(
-            right,
-            "When ('dock' or 'd') parameter is used,('right' or 'r') parameters can not be used !"
-        );
-        should_not_use!(
-            align,
-            "When ('dock' or 'd') parameter is used,('align' or 'a') parameters can not be used !"
-        );
+    if lp.dock {
+        validate_dock_layout(&lp, params);
+        return;
+    }
+    // align
+    if lp.align {
+        validate_align_layout(&lp, params);
         return;
     }
     // x , y
-    if x && y {
-        should_not_use!(left, "When (x,y) parameters are used, ('left' or 'l') parameter can not be used !");
-        should_not_use!(right, "When (x,y) parameters are used, ('right' or 'r') parameter can not be used !");
-        should_not_use!(top, "When (x,y) parameters are used, ('top' or 't') parameter can not be used !");
-        should_not_use!(bottom, "When (x,y) parameters are used, ('bottom' or 'b') parameter can not be used !");
+    if lp.x && lp.y {
+        validate_xy_layout(&lp, params);
         return;
     }
-    let anchors = Anchors::new(left, top, right, bottom);
+
+    let anchors = Anchors::new(lp.left, lp.top, lp.right, lp.bottom);
     match anchors {
-        Anchors::LeftRight => {
-            should_not_use!(x, "When (left,right) parameters are used together, 'X' parameter can not be used");
-            should_not_use!(width,"When (left,right) parameters are used toghere, ('width' or 'w') parameters can not be used as the width is deduced from left-right difference");
-
-            if let Some(value) = params.get("align") {
-                match value.to_align() {
-                    Alignament::Top | Alignament::Center | Alignament::Bottom => {
-                    }
-                    _ => panic!("When (left,right) are provided, only Top(t), Center(c) and Bottom(b) alignament values are allowed !"),
-                }
+        Anchors::LeftRight => validate_left_right_layout(&lp, params),
+        Anchors::TopBottom => validate_top_bottom_layout(&lp, params),
+        Anchors::TopLeft | Anchors::TopRight | Anchors::BottomLeft | Anchors::BottomRight => validate_corner_anchor_layout(&lp, params),
+        Anchors::LeftTopRight => validate_left_top_right_layout(&lp, params),
+        Anchors::LeftBottomRight => validate_left_bottom_right_layout(&lp, params),
+        Anchors::TopLeftBottom => validate_top_left_bottom_layout(&lp, params),
+        Anchors::TopRightBottom => validate_top_right_bottom_layout(&lp, params),
+        Anchors::All => validate_all_anchors_layout(&lp, params),
+        Anchors::Left => {
+            panic!("Using only the 'left'/'l' anchor is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height)");
+        } 
+        Anchors::Right => {
+            panic!("Using only the 'right'/'r' anchor is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height)");
+        } 
+        Anchors::Top => {
+            panic!("Using only the 'top'/'t' anchor is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height)");
+        }
+        Anchors::Bottom => {
+            panic!("Using only the 'bottom'/'b' anchor is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height)");
+        }
+        Anchors::None => {
+            if lp.x && !lp.y {
+                panic!("You need 'y' parameter as well if you want to define a pivot point or the top-left corner of a control !");
             }
-        }
-        Anchors::TopBottom => {
-            should_not_use!(y, "When (top,bottom) parameters are used together, 'Y' parameter can not be used");
-            should_not_use!(height,"When (top,bottom) parameters are used toghere, ('height' or 'h') parameters can not be used as the width is deduced from bottom-top difference");
-
-            if let Some(value) = params.get("align") {
-                match value.to_align() {
-                    Alignament::Top | Alignament::Center | Alignament::Bottom => {
-                    }
-                    _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) alignament values are allowed !"),
-                }
+            if !lp.x && lp.y {
+                panic!("You need 'x' parameter as well if you want to define a pivot point or the top-left corner of a control !");
             }
-        }
-        Anchors::TopLeft | Anchors::TopRight | Anchors::BottomLeft | Anchors::BottomRight => {
-            should_not_use!(x, "When a corner anchor is being use (top,left,righ,bottom), 'x' can bot be used !");
-            should_not_use!(y, "When a corner anchor is being use (top,left,righ,bottom), 'y' can bot be used !");
-        }
-        Anchors::LeftTopRight => {
-            should_not_use!(x, "When (left,top,right) parameters are used together, 'X' parameter can not be used");
-            should_not_use!(y, "When (left,top,right) parameters are used together, 'Y' parameter can not be used");
-            should_not_use!(
-                width,
-                "When (left,top,right) parameters are used together, 'width' parameter can not be used"
-            );
-            should_not_use!(
-                align,
-                "When (left,top,right) parameters are used together, 'align' parameter can not be used"
-            );
-        }
-        Anchors::LeftBottomRight => {
-            should_not_use!(x, "When (left,bottom,right) parameters are used together, 'X' parameter can not be used");
-            should_not_use!(y, "When (left,bottom,right) parameters are used together, 'Y' parameter can not be used");
-            should_not_use!(
-                width,
-                "When (left,bottom,right) parameters are used together, 'width' parameter can not be used"
-            );
-            should_not_use!(
-                align,
-                "When (left,bottom,right) parameters are used together, 'align' parameter can not be used"
-            );
-        }
-        Anchors::TopLeftBottom => {
-            should_not_use!(x, "When (top,left,bottom) parameters are used together, 'X' parameter can not be used");
-            should_not_use!(y, "When (top,left,bottom) parameters are used together, 'Y' parameter can not be used");
-            should_not_use!(
-                height,
-                "When (top,left,bottom) parameters are used together, 'height' parameter can not be used"
-            );
-            should_not_use!(
-                align,
-                "When (top,left,bottom) parameters are used together, 'align' parameter can not be used"
-            );
-        }
-        Anchors::TopRightBottom => {
-            should_not_use!(x, "When (top,right,bottom) parameters are used together, 'X' parameter can not be used");
-            should_not_use!(y, "When (top,right,bottom) parameters are used together, 'Y' parameter can not be used");
-            should_not_use!(
-                height,
-                "When (top,right,bottom) parameters are used together, 'height' parameter can not be used"
-            );
-            should_not_use!(
-                align,
-                "When (top,right,bottom) parameters are used together, 'align' parameter can not be used"
-            );
-        }
-        Anchors::All => {
-            should_not_use!(x, "When (left,top,right,bottom) parameters are used together, 'X' parameter can not be used");
-            should_not_use!(y, "When (left,top,right,bottom) parameters are used together, 'Y' parameter can not be used");
-            should_not_use!(height, "When (left,top,right,bottom) parameters are used together, 'height' parameter can not be used");
-            should_not_use!(width, "When (left,top,right,bottom) parameters are used together, 'widyj' parameter can not be used");
-            should_not_use!(align, "When (left,top,right,bottom) parameters are used together, 'align' parameter can not be used");
-    
-        },
-        _ => {
+            if lp.pivot && !lp.x && !lp.y {
+                panic!("You can not use pivot standalone - you also need 'x' and 'y' parameters !");
+            }
             panic!("Invalid layout format --> this combination can not be used to create a layout for a control ");
-
         }
     }
 }
-pub(super) fn add_layout(s: &mut String, params: &NamedParamsMap) {
-    s.push_str("Layout::new(\"");
-    analyze_layout_validity(params);
-    copy_layout_params(s, params);
-    s.push_str("\")");
+fn add_number(output: &mut String, method: &'static str, key: &'static str, params: &mut NamedParamsMap) {
+    if let Some(v) = params.get_mut(key) {
+        output.push_str(method);
+        output.push('(');
+        if let Some(value) = v.get_i32() {
+            let _ = write!(output, "{value}");
+        } else if let Some(proc) = v.get_percentage() {
+            let _ = write!(output, "{}f32", proc / 100.0f32);
+        } else {
+            panic!("Invalid value for parameter `{key}` -> expecting either a number (e.g. {key}: 10) or a percentage (e.g. {key}: 7.5%) but got the following value: '{}')",v.get_string());
+        }
+        output.push(')');
+    }
+}
+fn add_alignment(output: &mut String, method: &'static str, enum_name: &'static str, key: &'static str, params: &mut NamedParamsMap) {
+    if let Some(v) = params.get_mut(key) {
+        let _ = write!(output, "{method}({enum_name}::");
+        if let Some(a) = v.get_alignment() {
+            output.push_str(a.name());
+        }
+        output.push(')');
+    }
+}
+fn add_dock(output: &mut String, params: &mut NamedParamsMap) {
+    if let Some(v) = params.get_mut("dock") {
+        output.push_str(".dock(Dock::");
+        if let Some(d) = v.get_dock() {
+            output.push_str(d.name());
+        }
+        output.push(')');
+    }
+}
+pub(super) fn add_layout(output: &mut String, params: &mut NamedParamsMap) {
+    // s.push_str("Layout::new(\"");
+    // copy_layout_params(s, params);
+    // s.push_str("\")");
+    validate_layout(params);
+    output.push_str("LayoutBuilder::new()");
+    add_number(output, ".x", "x", params);
+    add_number(output, ".y", "y", params);
+    add_number(output, ".width", "width", params);
+    add_number(output, ".height", "height", params);
+    add_number(output, ".left_anchor", "left", params);
+    add_number(output, ".right_anchor", "right", params);
+    add_number(output, ".top_anchor", "top", params);
+    add_number(output, ".bottom_anchor", "bottom", params);
+    add_alignment(output, ".alignment", "Alignment", "align", params);
+    add_alignment(output, ".pivot", "Pivot", "pivot", params);
+    add_dock(output, params);
+    output.push_str(".build()");
+}
+
+pub(crate) fn create(input: TokenStream) -> TokenStream {
+    let s = input.validate_one_string_parameter("layout");
+    let mut d = parameter_parser::parse(&s).unwrap();
+    if let Err(e) = d.validate_named_parameters(&s, control_builder::CONTROL_NAMED_PARAMATERS) {
+        e.panic();
+    }
+    let mut res = String::with_capacity(128);
+    add_layout(&mut res, &mut d);
+    TokenStream::from_str(&res).expect("Fail to convert 'layout!' macro content to token stream")
 }

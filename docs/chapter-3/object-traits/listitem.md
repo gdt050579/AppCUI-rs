@@ -6,7 +6,7 @@ The `ListItem` trait is a trait design to provide controls like [ListView](../st
 pub trait ListItem {
     fn columns_count() -> u16 { 0 }
     fn column(index: u16) -> Column { 
-        Column::new("", 10, TextAlignament::Left) 
+        Column::new("", 10, TextAlignment::Left) 
     }
     fn paint(&self, column_index: u32, width: u16, surface: &mut Surface, theme: &Theme, attr: Option<CharAttribute>) {
         // paint the item in the surface
@@ -116,10 +116,10 @@ impl ListItem for Student {
     fn columns_count() -> u16 { 3 }
     fn column(index: u16) -> Column { 
         match index {
-            0 => Column::new("&Name", 20, TextAlignament::Left),
-            1 => Column::new("&Grade", 5, TextAlignament::Center),
-            2 => Column::new("&Stars", 5, TextAlignament::Center),
-            _ => Column::new("", 10, TextAlignament::Left),
+            0 => Column::new("&Name", 20, TextAlignment::Left),
+            1 => Column::new("&Grade", 5, TextAlignment::Center),
+            2 => Column::new("&Stars", 5, TextAlignment::Center),
+            _ => Column::new("", 10, TextAlignment::Left),
         }
     }
     fn render_method(&self, column_index: u16) -> Option<RenderMethod> {...}

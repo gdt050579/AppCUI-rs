@@ -1,38 +1,34 @@
-use super::should_not_use;
-use super::Alignament;
+use super::{should_not_use, should_use};
+use super::Pivot;
 use super::ControlLayout;
-use super::Coordonate16;
+use super::Coordinate16;
 use super::Dimension16;
-use super::LayoutParameters;
+use super::Layout;
+use super::Error;
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub(super) struct TopBottomAnchorsLayout {
-    pub top: Coordonate16,
-    pub bottom: Coordonate16,
-    pub x: Coordonate16,
+    pub top: Coordinate16,
+    pub bottom: Coordinate16,
+    pub x: Coordinate16,
     pub width: Dimension16,
-    pub align: Alignament,
+    pub pivot: Pivot,
 }
 
 impl TopBottomAnchorsLayout {
-    pub(super) fn new(params: &LayoutParameters) -> Self {
-        should_not_use!(params.y, "When (top,bottom) parameters are used together, 'Y' parameter can not be used");
-        should_not_use!(params.height,"When (top,bottom) parameters are used toghere, ('height' or 'h') parameters can not be used as the width is deduced from bottom-top difference");
+    pub(super) fn new(params: &Layout) -> Result<Self, Error> {
+        should_not_use!(params.y, Error::TopBottomAnchorsUsedWithY);
+        should_not_use!(params.height, Error::TopBottomAnchorsUsedWithHeight);
+        should_use!(params.x, Error::TopBottomAnchorsUsedWithoutX);
+        should_use!(params.pivot, Error::TopBottomAnchorsUsedWithoutPivot);
 
-        if let Some(align) = params.align {
-            match align {
-                Alignament::Left | Alignament::Center | Alignament::Right => {}
-                _ => panic!("When (top,bottom) are provided, only Left(l), Center(c) and Right(r) alignament values are allowed !"),
-            }
-        }
-
-        TopBottomAnchorsLayout {
+        Ok(TopBottomAnchorsLayout {
             top: params.a_top.unwrap(),
             bottom: params.a_bottom.unwrap(),
-            x: params.x.unwrap_or(Coordonate16::Absolute(0)),
+            x: params.x.unwrap(),
             width: params.width.unwrap_or(Dimension16::Absolute(1)),
-            align: params.align.unwrap_or(Alignament::Center),
-        }
+            pivot: params.pivot.unwrap(),
+        })
     }
     #[inline]
     pub(super) fn update_control_layout(&self, control_layout: &mut ControlLayout, parent_width: u16, parent_height: u16) {
@@ -43,11 +39,25 @@ impl TopBottomAnchorsLayout {
             self.width.absolute(parent_width),
             ((parent_height as i32) - (top + bottom)).clamp(1, 0xFFFF) as u16,
         );
-        match self.align {
-            Alignament::Left => control_layout.set_position(x, top),
-            Alignament::Right => control_layout.set_position(x - (control_layout.get_width() as i32), top),
-            Alignament::Center => control_layout.set_position(x - ((control_layout.get_width() / 2) as i32), top),
-            _ => unreachable!("This code should not be reached --> internal error"),
-        }
+        let new_h = control_layout.height() as i32;
+        let new_w = control_layout.width() as i32;
+        let t = top;
+        let b = (parent_height as i32).saturating_sub(bottom);
+
+        let (new_x, new_y) = match self.pivot {
+            Pivot::TopLeft => (x, t),
+            Pivot::CenterLeft => (x, (t + b - new_h) / 2),
+            Pivot::BottomLeft => (x, b - new_h),
+
+            Pivot::TopRight => (x - new_w, t),
+            Pivot::CenterRight => (x - new_w, (t + b - new_h) / 2),
+            Pivot::BottomRight => (x - new_w, b - new_h),
+
+            Pivot::TopCenter => (x- new_w / 2, t),
+            Pivot::BottomCenter => (x- new_w / 2, b - new_h),
+            Pivot::Center => (x- new_w / 2, (t + b - new_h) / 2),
+        };
+        control_layout.set_position(new_x, new_y);
+
     }
 }

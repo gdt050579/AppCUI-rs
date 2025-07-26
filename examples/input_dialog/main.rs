@@ -11,7 +11,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'InputDialog Example',d:c,w:50,h:11"),
+            base: window!("'InputDialog Example',a:c,w:50,h:11"),
             b_normal: Handle::None,
             b_default: Handle::None,
             b_validation: Handle::None,

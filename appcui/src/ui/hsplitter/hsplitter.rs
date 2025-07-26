@@ -3,7 +3,7 @@ use self::layout::Dimension;
 use super::ResizeBehavior;
 use super::SplitterPanel;
 use crate::prelude::*;
-use crate::ui::layout::Coordonate;
+use crate::ui::layout::Coordinate;
 
 #[derive(Eq, PartialEq, Copy, Clone)]
 enum State {
@@ -22,7 +22,7 @@ pub struct HSplitter {
     bottom: Handle<SplitterPanel>,
     min_left: Dimension,
     min_right: Dimension,
-    pos: Coordonate,
+    pos: Coordinate,
     preserve_pos: i32,
     resize_behavior: ResizeBehavior,
     state: State,
@@ -39,13 +39,13 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = HSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// ```
     pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior) -> Self
     where
-        Coordonate: From<T>,
+        Coordinate: From<T>,
     {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -70,7 +70,7 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));   
     /// ```
@@ -95,7 +95,7 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,Layout::new("d:c,w:100%,h:100%"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 2 chars from Top
@@ -122,14 +122,14 @@ impl HSplitter {
     /// Sets the position of the splitter. The value can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
     pub fn set_position<T>(&mut self, pos: T)
     where
-        Coordonate: From<T>,
+        Coordinate: From<T>,
     {
         // force type conversion
         self.pos = pos.into();
         // update the position of the splitter
         self.update_position(self.pos, true);
     }
-    fn update_position(&mut self, pos: Coordonate, upadate_preserve_position: bool) {
+    fn update_position(&mut self, pos: Coordinate, upadate_preserve_position: bool) {
         let bottom_most = self.size().height.saturating_sub(1) as u16;
         let mut abs_value = pos.absolute(bottom_most);
         let min_top_margin = self.min_left.absolute(bottom_most);
@@ -144,7 +144,7 @@ impl HSplitter {
             }
             ResizeBehavior::PreserveTopPanelSize | ResizeBehavior::PreserveBottomPanelSize => {
                 // if the position is preserverd, there is no need to keep the percentage
-                self.pos = Coordonate::Absolute(abs_value);
+                self.pos = Coordinate::Absolute(abs_value);
             }
         };
         self.update_panel_sizes(self.size());
@@ -235,23 +235,23 @@ impl OnKeyPressed for HSplitter {
             key!("Ctrl+Alt+UP") => {
                 let sz = self.size();
                 if sz.height > 0 {
-                    self.update_position(Coordonate::Absolute(self.pos.absolute(sz.height.saturating_sub(1) as u16) - 1), true);
+                    self.update_position(Coordinate::Absolute(self.pos.absolute(sz.height.saturating_sub(1) as u16) - 1), true);
                 }
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Alt+Down") => {
                 let sz = self.size();
                 if sz.height > 0 {
-                    self.update_position(Coordonate::Absolute(self.pos.absolute(sz.height.saturating_sub(1) as u16) + 1), true);
+                    self.update_position(Coordinate::Absolute(self.pos.absolute(sz.height.saturating_sub(1) as u16) + 1), true);
                 }
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Alt+Shift+Up") => {
-                self.update_position(Coordonate::Absolute(0), true);
+                self.update_position(Coordinate::Absolute(0), true);
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Alt+Shift+Down") => {
-                self.update_position(Coordonate::Absolute(self.size().height.saturating_sub(1) as i32), true);
+                self.update_position(Coordinate::Absolute(self.size().height.saturating_sub(1) as i32), true);
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
@@ -286,11 +286,11 @@ impl OnMouseEvent for HSplitter {
             MouseEvent::Released(evn) => {
                 let processed = match self.state {
                     State::ClickedOnTopButton => {
-                        self.update_position(Coordonate::Absolute(0), true);
+                        self.update_position(Coordinate::Absolute(0), true);
                         true
                     }
                     State::ClickedOnBottomButton => {
-                        self.update_position(Coordonate::Absolute(self.size().height.saturating_sub(1) as i32), true);
+                        self.update_position(Coordinate::Absolute(self.size().height.saturating_sub(1) as i32), true);
                         true
                     }
                     _ => false,
@@ -305,7 +305,7 @@ impl OnMouseEvent for HSplitter {
             }
             MouseEvent::Drag(evn) => {
                 if self.state == State::Dragging {
-                    self.update_position(Coordonate::Absolute(evn.y), true);
+                    self.update_position(Coordinate::Absolute(evn.y), true);
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
@@ -325,7 +325,7 @@ impl OnResize for HSplitter {
                 if (previous_width > 0) && (self.pos.is_absolute()) {
                     let ratio = self.pos.absolute(old_size.height.saturating_sub(1) as u16) as f32 / previous_width as f32;
                     let new_pos = (new_size.height as f32 * ratio) as i32;
-                    self.update_position(Coordonate::Absolute(new_pos), false);
+                    self.update_position(Coordinate::Absolute(new_pos), false);
                 } else {
                     // first time (initialization) or already a percentage
                     self.update_panel_sizes(new_size);
@@ -337,7 +337,7 @@ impl OnResize for HSplitter {
                     self.preserve_pos = self.pos.absolute(new_size.height.saturating_sub(1) as u16);
                     self.set_position(self.preserve_pos);
                 } else {
-                    self.update_position(Coordonate::Absolute(self.preserve_pos), false);
+                    self.update_position(Coordinate::Absolute(self.preserve_pos), false);
                 }
             }
             ResizeBehavior::PreserveBottomPanelSize => {
@@ -349,7 +349,7 @@ impl OnResize for HSplitter {
                     self.set_position(new_pos);
                 } else {
                     let new_pos = (new_size.height.saturating_sub(1) as i32 - self.preserve_pos).max(0);
-                    self.update_position(Coordonate::Absolute(new_pos), false);
+                    self.update_position(Coordinate::Absolute(new_pos), false);
                 }
             }
         }

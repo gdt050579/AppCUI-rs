@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Surface, TextAlignament, TextFormatBuilder, WrapType},
+    graphics::{Surface, TextAlignment, TextFormatBuilder, WrapType},
     system::{Handle, Theme},
     utils::{Caption, ExtractHotKeyMethod},
 };
@@ -34,7 +34,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 /// impl CounterWindow {
 ///     fn new() -> Self {
 ///         let mut win = CounterWindow {
-///             base: window!("'Counter',d:c,w:40,h:6"),
+///             base: window!("'Counter',a:c,w:40,h:6"),
 ///             increase_button: Handle::None,
 ///             decrease_button: Handle::None,
 ///             counter_label: Handle::None,
@@ -53,7 +53,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 ///         win.increase_button = win.toolbar().add(group, btn_plus);
 ///                
 ///         // Add a label to display the counter value
-///         win.counter_label = win.add(label!("0,d:c,w:10,h:1"));
+///         win.counter_label = win.add(label!("0,a:c,w:10,h:1"));
 ///         
 ///         win
 ///     }
@@ -146,7 +146,7 @@ impl Button {
         let mut format = TextFormatBuilder::new()
             .position(self.base.get_left(), self.base.get_y())
             .attribute(st.get_button_attr(theme))
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
             .build();
         if self.caption.has_hotkey() {

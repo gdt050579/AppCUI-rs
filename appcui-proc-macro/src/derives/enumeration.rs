@@ -268,11 +268,14 @@ impl Enum {
                 }
             }
         }
-        // A comma may follow the variant.
+        // A comma or equal may follow the variant.
         if index < tokens.len() {
             if let TokenTree::Punct(punct) = &tokens[index] {
-                if punct.as_char() == ',' {
-                    index += 1;
+                let ch = punct.as_char();
+                match ch {
+                    ',' => index += 1,
+                    '=' => return Err("Enums with default values for their paramteres are not allowed ! (if you have a variant such as 'field = value' remove the '= value' part to make it compatible with this derivation mode !".to_string()),
+                    _ => return Err(format!("Invalid punctuation character found in the enum: `{ch}`"))
                 }
             }
         }

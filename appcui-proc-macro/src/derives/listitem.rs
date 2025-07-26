@@ -10,7 +10,7 @@ impl components::listitem::ListItem for $(STRUCT_NAME) {
     fn column(index: u16) -> components::Column{ 
         match index {
             $(COLUMNS)
-            _ => components::Column::new("", 10, TextAlignament::Left)
+            _ => components::Column::new("", 10, TextAlignment::Left)
         }
     }
     fn render_method(&self, column_index: u16) -> Option<components::listitem::RenderMethod> {
@@ -370,11 +370,11 @@ impl Column {
                 continue;
             }
             match attr_name[7..].trim() {
-                "align" | "a" | "alignament" => {
+                "align" | "a" | "alignment" => {
                     align = Column::align(value);
                     if align.is_none() {
                         panic!(
-                            "Unknown alignament value: '{}' for field '{}'. Allowed values are 'left', 'right' or 'center' !",
+                            "Unknown alignment value: '{}' for field '{}'. Allowed values are 'left', 'right' or 'center' !",
                             value, field.name
                         );
                     }
@@ -459,7 +459,7 @@ impl Column {
     }
     fn to_column_code(&self, index: usize) -> String {
         format!(
-            "{} => components::Column::new(\"{}\", {}, TextAlignament::{}),\n",
+            "{} => components::Column::new(\"{}\", {}, TextAlignment::{}),\n",
             index, self.name, self.width, self.align
         )
     }

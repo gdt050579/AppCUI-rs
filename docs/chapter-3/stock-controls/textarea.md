@@ -6,13 +6,13 @@ Represent a control where you can add/modify a text:
 
 To create a textarea use `TextArea::new` method (with 3 parameters: a caption, a layout and initialization flags).
 ```rs
-let tx = TextArea::new("Some text", Layout::new("x:10,y:5,w:15"), textarea::Flags::None);
+let tx = TextArea::new("Some text", layout!("x:10,y:5,w:15"), textarea::Flags::None);
 ```
 
 or use the macro `textarea!()`
 ```rs
-let textarea1 = textarea!("text='some text to edit',d:c,h:100%");
-let textarea2 = textarea!("'some text to print',d:c,h:100%,flags:ReadOnly");
+let textarea1 = textarea!("text='some text to edit',a:c,h:100%");
+let textarea2 = textarea!("'some text to print',a:c,h:100%,flags:ReadOnly");
 ```
 
 A textarea supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
@@ -85,11 +85,11 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:11"), window::Flags::None);
-    w.add(TextArea::new("I ❤️ Rust Language", Layout::new("d:c,h:100%"), textarea::Flags::None));
-    w.add(TextArea::new("Read only text", Layout::new("d:c,h:100%"), textarea::Flags::ReadOnly));
-    w.add(TextArea::new("Line Numbers tab functional", Layout::new("d:c,h:100%"), textarea::Flags::ShowLineNumber | textarea::Flags::ReadOnly));
-    w.add(TextArea::new("I also have scrollbars ❤️", Layout::new("d:c,h:100%"), textarea::Flags::ScrollBars));
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
+    w.add(TextArea::new("I ❤️ Rust Language", layout!("a:c,h:100%"), textarea::Flags::None));
+    w.add(TextArea::new("Read only text", layout!("a:c,h:100%"), textarea::Flags::ReadOnly));
+    w.add(TextArea::new("Line Numbers tab functional", layout!("a:c,h:100%"), textarea::Flags::ShowLineNumber | textarea::Flags::ReadOnly));
+    w.add(TextArea::new("I also have scrollbars ❤️", layout!("a:c,h:100%"), textarea::Flags::ScrollBars));
     a.add_window(w);
     a.run();
     Ok(())

@@ -10,12 +10,12 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("d:c,w:30,h:12,caption:Win"),
+            base: window!("a:c,w:30,h:12,caption:Win"),
             h_img: Handle::None,
         };
         let mut img = ImageViewer::new(
             Shape::Square.image(),
-            Layout::new("x:1,y:3,w:26,h:7"),
+            layout!("x:1,y:3,w:26,h:7"),
             image::RenderOptionsBuilder::new().character_set(CharacterSet::SmallBlocks).build(),
             imageviewer::Flags::None,
         );

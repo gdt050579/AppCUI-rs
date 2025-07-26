@@ -27,11 +27,11 @@ pub(super) struct Win {
 impl Win {
     pub(super) fn new() -> Self {
         let mut w = Self {
-            base: window!("Animation,d:c,w:50,h:10"),
+            base: window!("Animation,a:c,w:50,h:10"),
             bars: Vec::with_capacity(100),
             c: Handle::None,
         };
-        w.c = w.add(canvas!("d:c,w:100%,h:100%,size:100x50"));
+        w.c = w.add(canvas!("d:f,size:100x50"));
         if let Some(timer) = w.timer() {
             timer.start(Duration::from_millis(300));
         }

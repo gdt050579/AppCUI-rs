@@ -43,16 +43,16 @@ impl MenuEvents for MyDesktop {
     fn on_command(&mut self, _: Handle<Menu>, _: Handle<menu::Command>, command: mydesktop::Commands) {
         match command {
             mydesktop::Commands::Easy => {
-                self.add_window(MyWin::new("Easy", Layout::new("d:c,w:23,h:14"), Size::new(5, 5), 3));
+                self.add_window(MyWin::new("Easy", layout!("a:c,w:23,h:14"), Size::new(5, 5), 3));
             },
             mydesktop::Commands::Medium => {
-                self.add_window(MyWin::new("Medium", Layout::new("d:c,w:31,h:18"), Size::new(7, 7), 10));
+                self.add_window(MyWin::new("Medium", layout!("a:c,w:31,h:18"), Size::new(7, 7), 10));
             },
             mydesktop::Commands::Hard => {
-                self.add_window(MyWin::new("Hard", Layout::new("d:c,w:43,h:24"), Size::new(10, 10), 25));
+                self.add_window(MyWin::new("Hard", layout!("a:c,w:43,h:24"), Size::new(10, 10), 25));
             },
             mydesktop::Commands::Extreme => {
-                self.add_window(MyWin::new("Extreme", Layout::new("d:c,w:83,h:24"), Size::new(20, 10), 80));
+                self.add_window(MyWin::new("Extreme", layout!("a:c,w:83,h:24"), Size::new(20, 10), 80));
             },
             mydesktop::Commands::Exit => self.close(),
         }

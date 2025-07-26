@@ -7,8 +7,8 @@ A ListView is a templetize (generics based) control that allows you to view a li
 It can be created using `ListView::new(...)` and `ListView::with_capacity(...)` methods or with the `listview!` macro. 
 
 ```rs
-let l1: ListView<T> = ListView::new(Layout::new("..."),listview::Flags::None);
-let l2: ListView<T> = ListView::with_capacity(10,Layout::new("..."),listview::Flags::ScrollBars);
+let l1: ListView<T> = ListView::new(layout!("..."),listview::Flags::None);
+let l2: ListView<T> = ListView::with_capacity(10,layout!("..."),listview::Flags::ScrollBars);
 let l3 = listview!("class: T, flags: Scrollbar, d:c, w:100%, h:100%");
 let l4 = listview!("type: T, flags: Scrollbar, d:c, view:Columns(3)");
 let l5 = listview!("T, d:c, view:Details, columns:[{Name,10,left},{Age,5,right},{City,20,center}]");
@@ -342,8 +342,8 @@ struct DownloadItem {
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Download,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut l = listview!("DownloadItem,d:c,view:Details,flags: ScrollBars+CheckBoxes");
+    let mut w = window!("Download,d:f,flags: Sizeable");
+    let mut l = listview!("DownloadItem,a:c,view:Details,flags: ScrollBars+CheckBoxes");
     l.add(DownloadItem {
         name: "music.mp3",
         age: 21,

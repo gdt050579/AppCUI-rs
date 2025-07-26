@@ -242,11 +242,11 @@ fn check_scrollbars_on_arrows_and_click() {
     | - | --- |\r\n\
     | Cell 1, __Row 1__ | Cell 2, Row 1 |\r\n\
     | Cell 1, Row 2 | Cell 1, Row 2 |\r\n\r\n\
-    ', d:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     w.add(m);
     a.add_window(w);
     a.run();
@@ -318,11 +318,11 @@ fn check_scrollbars_on_drag_and_weel() {
     | - | --- |\r\n\
     | Cell 1, __Row 1__ | Cell 2, Row 1 |\r\n\
     | Cell 1, Row 2 | Cell 1, Row 2 |\r\n\r\n\
-    ', d:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(40, 8, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     w.add(m);
     a.add_window(w);
     a.run();
@@ -378,11 +378,11 @@ fn check_move_to_section_on_link_click() {
     }\r\n\
     ```\r\n\
     ## End Link\r\n\
-    ', d:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(40, 8, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:8,flags:Sizeable");
+    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     w.add(m);
     a.add_window(w);
     a.run();
@@ -423,11 +423,11 @@ fn check_inactive() {
     }\r\n\
     ```\r\n\
     ## End Link\r\n\
-    ', d:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(70, 30, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:70,h:30,flags:Sizeable");
+    let mut w = window!("Title,a:c,w:70,h:30,flags:Sizeable");
     m.set_enabled(false);
     w.add(m);
     a.add_window(w);
@@ -465,11 +465,11 @@ fn check_set_content() {
     }\r\n\
     ```\r\n\
     ## End Link\r\n\
-    ', d:c, flags:ScrollBars"
+    ', d:f, flags:ScrollBars"
     );
 
     let mut a = App::debug(70, 30, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:70,h:30,flags:Sizeable");
+    let mut w = window!("Title,a:c,w:70,h:30,flags:Sizeable");
     m.set_enabled(false);
     m.set_content("# Empty markdown");
     w.add(m);

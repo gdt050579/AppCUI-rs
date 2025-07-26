@@ -9,13 +9,13 @@ pub struct MyWin {
 impl MyWin {
     pub fn new(title: &str, image: Image) -> Self {
         let mut w = Self {
-            base: Window::new(title, Layout::new("d:c,w:50%,h:50%"), window::Flags::Sizeable),
+            base: Window::new(title, layout!("a:c,w:50%,h:50%"), window::Flags::Sizeable),
             himg: Handle::None,
         };
 
         let i = ImageViewer::new(
             image,
-            Layout::new("d:c"),
+            layout!("d:f"),
             image::RenderOptionsBuilder::new().luminance_threshold(0.1).build(),
             imageviewer::Flags::ScrollBars,
         );

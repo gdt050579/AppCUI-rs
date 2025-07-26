@@ -10,12 +10,12 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'Key Selector example',d:c,w:40,h:9"),
+            base: window!("'Key Selector example',a:c,w:40,h:9"),
             reset: Handle::None,
             ks: Handle::None,
             lb: Handle::None,
         };
-        win.reset = win.add(button!("&Reset,x:50%,y:6,a:c,w:15"));
+        win.reset = win.add(button!("&Reset,x:50%,y:6,p:c,w:15"));
         win.ks = win.add(keyselector!("x:1,y:3,w:36"));
         win.lb = win.add(label!("<none>,x:1,y:1,w:35"));
         win

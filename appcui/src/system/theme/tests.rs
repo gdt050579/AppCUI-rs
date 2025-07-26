@@ -11,7 +11,7 @@ fn check_theme_update() {
     impl TestControl {
         fn new() -> Self {
             let mut obj = Self {
-                base: ControlBase::new(Layout::new("l:1,r:1,t:1,b:1"), true),
+                base: ControlBase::new(layout!("l:1,r:1,t:1,b:1"), true),
                 attr: CharAttribute::default(),
             };
             obj.attr = obj.theme().window.normal;
@@ -99,7 +99,7 @@ impl WindowWithTheme {
         ]"
         ));
 
-        let mut splitter = vsplitter!("d:c,w:100%,h:100%,pos:55");
+        let mut splitter = vsplitter!("d:f,pos:55");
         let mut p_basic = panel!("'Basic controls',l:1,t:1,r:1,h:8");
         p_basic.add(checkbox!("'Checkbox unchecked',x:1,y:1,w:23"));
         p_basic.add(checkbox!("'Checkbox &selected',x:1,y:2,w:23,checked:true"));
@@ -108,7 +108,7 @@ impl WindowWithTheme {
         p_basic.add(radiobox!("'RadioBox &2',x:27,y:2,w:15"));
         p_basic.add(radiobox!("'RadioBox disabled',x:27,y:3,w:202,enabled:false"));
         p_basic.add(label!("'A text field editor:',x:1,y:5,w:23"));
-        p_basic.add(textfield!("'Text field',l:26,y:5,r:1"));
+        p_basic.add(textfield!("'Text field',l:26,y:5,r:1,pivot:center"));
         splitter.add(vsplitter::Panel::Left, p_basic);
 
         let mut p_selectors = panel!("'Selectors',l:1,t:10,r:1,h:7");
@@ -126,7 +126,7 @@ impl WindowWithTheme {
         splitter.add(vsplitter::Panel::Right, tab);
 
         let mut p_list = panel!("'Lists',l:1,t:7,r:1,h:6");
-        let mut lv = listview!("class: FileInformation,d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+LargeIcons+Checkboxes,lsm:2");
+        let mut lv = listview!("class: FileInformation,d:f,flags: ScrollBars+SearchBar+LargeIcons+Checkboxes,lsm:2");
         lv.add_item(listview::Item::new(
             FileInformation {
                 name: "Applicatons",

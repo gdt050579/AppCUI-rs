@@ -5,11 +5,11 @@ use crate::ferris::FERRIS_PIXELS;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = window!("'Splitter Example', d:c,w:60,h:20, flags: Sizeable");
-    let mut vs = vsplitter!("pos:50%,d:c,w:100%,h:100%");
+    let mut w = window!("'Splitter Example', a:c,w:60,h:20, flags: Sizeable");
+    let mut vs = vsplitter!("pos:50%,d:f");
     let mut iv_1 = ImageViewer::new(
         Image::from_buffer(FERRIS_PIXELS, Size::new(172, 122), false).unwrap(),
-        Layout::new("d:c"),
+        layout!("d:f"),
         image::RenderOptionsBuilder::new()
             .character_set(CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::Color16)
@@ -20,7 +20,7 @@ fn main() -> Result<(), appcui::system::Error> {
     iv_1.set_components_toolbar_margins(3, 4);
     let iv_2 = ImageViewer::new(
         Image::from_buffer(FERRIS_PIXELS, Size::new(172, 122), false).unwrap(),
-        Layout::new("d:c"),
+        layout!("d:f"),
         image::RenderOptionsBuilder::new()
             .character_set(CharacterSet::AsciiArt)
             .scale(Scale::Scale25)

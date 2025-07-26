@@ -3028,7 +3028,7 @@ pub(crate) struct Win {}
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("Words,d:c,w:70,h:10,flags: Sizeable"),
+            base: window!("Words,a:c,w:70,h:10,flags: Sizeable"),
         };
         let mut lv = listview!("class: Word,x:0,y:0,w:100%,h:100%,view: Columns(3),flags: ScrollBars+SearchBar, columns:[{&Value,20,l}]");
         for word in WORDS {

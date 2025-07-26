@@ -26,8 +26,8 @@ fn check_control_reposition() {
         CheckHash(0x2D8DF67B09FC3F82)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
-    let mut ac = Accordion::new(Layout::new("l:0,t:0,r:0,b:0"), accordion::Flags::None);
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
+    let mut ac = Accordion::new(layout!("l:0,t:0,r:0,b:0"), accordion::Flags::None);
     ac.add_panel("Panel &1");
     ac.add_panel("Panel &2");
     ac.add_panel("Panel &3");
@@ -69,8 +69,8 @@ fn check_keys() {
         CheckHash(0x6C08EA349DACC442)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
-    let mut ac = Accordion::new(Layout::new("l:0,t:0,r:0,b:0"), accordion::Flags::None);
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
+    let mut ac = Accordion::new(layout!("l:0,t:0,r:0,b:0"), accordion::Flags::None);
     ac.add_panel("Panel &1");
     ac.add_panel("Panel &2");
     ac.add_panel("Panel &3");
@@ -94,20 +94,20 @@ fn check_focus() {
         CheckHash(0xF8B8FB1A7C6A4324)
     ";
     let mut a = App::debug(80, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:75,h:12,flags: Sizeable");
-    let mut ac1 = Accordion::new(Layout::new("x:1,y:1,w:20,h:8"), accordion::Flags::None);
+    let mut w = window!("Test,a:c,w:75,h:12,flags: Sizeable");
+    let mut ac1 = Accordion::new(layout!("x:1,y:1,w:20,h:8"), accordion::Flags::None);
     ac1.add_panel("Panel &1");
     ac1.add_panel("Panel &2");
     ac1.add_panel("Panel &3");
     ac1.add_panel("Panel &4");
     ac1.add_panel("Panel &5");
 
-    let mut ac2 = Accordion::new(Layout::new("x:25,y:1,w:20,h:8"), accordion::Flags::None);
+    let mut ac2 = Accordion::new(layout!("x:25,y:1,w:20,h:8"), accordion::Flags::None);
     ac2.add_panel("Panel &1");
     ac2.add_panel("Panel &2");
     ac2.add_panel("Panel &3");
 
-    let mut ac3 = Accordion::new(Layout::new("x:49,y:1,w:20,h:8"), accordion::Flags::None);
+    let mut ac3 = Accordion::new(layout!("x:49,y:1,w:20,h:8"), accordion::Flags::None);
     ac3.add_panel("Panel &1");
     ac3.add_panel("Panel &2");
     ac3.add_panel("Panel &3");
@@ -131,7 +131,7 @@ fn check_macro() {
         CheckHash(0xA450FC3636F665B2)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     let mut ac = accordion!("l:0,t:0,r:0,b:0,panels:['Panel &1','Panel &2','Panel &3']");
     ac.add(0, button!("P-1-A,r:1,b:0,w:10,type:flat"));
     ac.add(0, button!("P-1-B,l:1,t:1,w:10,type:flat"));
@@ -153,7 +153,7 @@ fn check_transparent_background() {
         CheckHash(0xA1CFB89BF40E15DA)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     let mut ac = accordion!("l:0,t:0,r:0,b:0,panels:['Panel &1','Panel &2','Panel &3'],flags: TransparentBackground");
     ac.add(0, button!("P-1-A,r:1,b:1,w:10,type:flat"));
     ac.add(0, button!("P-1-B,l:1,t:1,w:10,type:flat"));
@@ -206,21 +206,21 @@ fn check_panel_caption_methods() {
                 info_handle: Handle::None,
             };
 
-            let mut acc = Accordion::new(Layout::new("x:1,y:1,w:70,h:10"), accordion::Flags::None);
+            let mut acc = Accordion::new(layout!("x:1,y:1,w:70,h:10"), accordion::Flags::None);
             acc.add_panel("Panel &1");
             acc.add_panel("Panel &2");
             acc.add_panel("Panel &3");
             acc.add_panel("Panel &4");
 
             // Add some content to each panel
-            acc.add(0, Button::new("P1", Layout::new("x:2,y:2,w:20"), button::Type::Flat));
-            acc.add(1, Button::new("P2", Layout::new("x:2,y:2,w:20"), button::Type::Flat));
-            acc.add(2, Button::new("Pa", Layout::new("x:2,y:2,w:10"), button::Type::Flat));
-            acc.add(2, Button::new("Pb", Layout::new("x:14,y:2,w:10"), button::Type::Flat));
-            acc.add(3, Button::new("PX", Layout::new("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(0, Button::new("P1", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(1, Button::new("P2", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(2, Button::new("Pa", layout!("x:2,y:2,w:10"), button::Type::Flat));
+            acc.add(2, Button::new("Pb", layout!("x:14,y:2,w:10"), button::Type::Flat));
+            acc.add(3, Button::new("PX", layout!("x:2,y:2,w:20"), button::Type::Flat));
 
             // Create a label to display panel information
-            let l = Label::new("", Layout::new("x:1,y:12,w:70,h:2"));
+            let l = Label::new("", layout!("x:1,y:12,w:70,h:2"));
 
             w.accordion_handle = w.add(acc);
             w.info_handle = w.add(l);
@@ -315,8 +315,8 @@ fn check_not_process_input() {
         CheckHash(0x59375A32B72A3ACA)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:12,flags: Sizeable");
-    let mut ac = Accordion::new(Layout::new("l:0,t:0,r:0,b:0"), accordion::Flags::None);
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
+    let mut ac = Accordion::new(layout!("l:0,t:0,r:0,b:0"), accordion::Flags::None);
     assert_eq!(ac.current_panel(), None);
 
     ac.add_panel("Panel &1");
@@ -368,21 +368,21 @@ fn check_events() {
                 info_handle: Handle::None,
             };
 
-            let mut acc = Accordion::new(Layout::new("x:1,y:1,w:70,h:10"), accordion::Flags::None);
+            let mut acc = Accordion::new(layout!("x:1,y:1,w:70,h:10"), accordion::Flags::None);
             acc.add_panel("Panel &1");
             acc.add_panel("Panel &2");
             acc.add_panel("Panel &3");
             acc.add_panel("Panel &4");
 
             // Add some content to each panel
-            acc.add(0, Button::new("P1", Layout::new("x:2,y:2,w:20"), button::Type::Flat));
-            acc.add(1, Button::new("P2", Layout::new("x:2,y:2,w:20"), button::Type::Flat));
-            acc.add(2, Button::new("Pa", Layout::new("x:2,y:2,w:10"), button::Type::Flat));
-            acc.add(2, Button::new("Pb", Layout::new("x:14,y:2,w:10"), button::Type::Flat));
-            acc.add(3, Button::new("PX", Layout::new("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(0, Button::new("P1", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(1, Button::new("P2", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(2, Button::new("Pa", layout!("x:2,y:2,w:10"), button::Type::Flat));
+            acc.add(2, Button::new("Pb", layout!("x:14,y:2,w:10"), button::Type::Flat));
+            acc.add(3, Button::new("PX", layout!("x:2,y:2,w:20"), button::Type::Flat));
 
             // Create a label to display panel information
-            let l = Label::new("", Layout::new("x:1,y:12,w:70,h:2"));
+            let l = Label::new("", layout!("x:1,y:12,w:70,h:2"));
 
             w.accordion_handle = w.add(acc);
             w.info_handle = w.add(l);

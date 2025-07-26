@@ -11,16 +11,16 @@ fn check_button_control() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                base: Window::new("Win-1", layout!("a:c,w:47,h:7"), window::Flags::None),
                 info: Handle::None,
                 but1: Handle::None,
                 but2: Handle::None,
                 but3: Handle::None,
             };
-            me.info = me.add(Label::new("<none>", Layout::new("x:0,y:0,w:35")));
-            me.but1 = me.add(Button::new("Button &1", Layout::new("x:1,y:3,w:13"), button::Type::Normal));
-            me.but2 = me.add(Button::new("Button &2", Layout::new("x:16,y:3,w:13"), button::Type::Normal));
-            let mut b3 = Button::new("Button &3", Layout::new("x:31,y:3,w:13"), button::Type::Normal);
+            me.info = me.add(Label::new("<none>", layout!("x:0,y:0,w:35")));
+            me.but1 = me.add(Button::new("Button &1", layout!("x:1,y:3,w:13"), button::Type::Normal));
+            me.but2 = me.add(Button::new("Button &2", layout!("x:16,y:3,w:13"), button::Type::Normal));
+            let mut b3 = Button::new("Button &3", layout!("x:31,y:3,w:13"), button::Type::Normal);
             b3.set_enabled(false);
             me.but3 = me.add(b3);
             me
@@ -80,13 +80,13 @@ fn check_button_control_2() {
     impl MyWin {
         fn new() -> Self {
             let mut win = MyWin {
-                base: Window::new("My Win", Layout::new("d:c,w:40,h:6"), window::Flags::None),
+                base: Window::new("My Win", layout!("a:c,w:40,h:6"), window::Flags::None),
                 add: Handle::None,
                 reset: Handle::None,
                 counter: 0,
             };
-            win.add = win.add(Button::new("Add (0)", Layout::new("x:25%,y:2,w:13,a:c"), button::Type::Normal));
-            win.reset = win.add(Button::new("Reset", Layout::new("x:75%,y:2,w:13,a:c"), button::Type::Normal));
+            win.add = win.add(Button::new("Add (0)", layout!("x:25%,y:2,w:13,p:c"), button::Type::Normal));
+            win.reset = win.add(Button::new("Reset", layout!("x:75%,y:2,w:13,p:c"), button::Type::Normal));
             win
         }
         fn update_add_button(&mut self) {
@@ -141,12 +141,12 @@ fn check_button_control_with_macro() {
         CheckHash(0xC656986DBDA863BA)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = Window::new("Macro Test", Layout::new("d:c,w:40,h:10"), window::Flags::None);
+    let mut w = Window::new("Macro Test", layout!("a:c,w:40,h:10"), window::Flags::None);
     w.add(button!("Start,x:2,y:3,w:15"));
     w.add(button!("Disabled,x:20,y:3,w:15,enable:false"));
     w.add(button!("caption:'Not Visible',x:0,y:0,w:100%,visible:false"));
     w.add(button!("Flat,x:2,y:5,w:15,type:flat"));
-    w.add(button!("text:'Flat and disabled',x:2,y:7,w:30,a:tl,type:flat,enable:false"));
+    w.add(button!("text:'Flat and disabled',x:2,y:7,w:30,p:tl,type:flat,enable:false"));
     a.add_window(w);
     a.run();
 }
@@ -162,12 +162,12 @@ fn check_button_control_hotkey() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("d:c,w:40,h:7"), window::Flags::None),
+                base: Window::new("Win", layout!("a:c,w:40,h:7"), window::Flags::None),
                 info: Handle::None,
                 but: Handle::None,
                 state: 0,
             };
-            me.info = me.add(Label::new("<none>", Layout::new("x:0,y:0,w:35")));
+            me.info = me.add(Label::new("<none>", layout!("x:0,y:0,w:35")));
             me.but = me.add(button!("&Press,x:2,y:2,w:20"));
             me
         }
@@ -243,7 +243,7 @@ fn check_button_methods() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                base: Window::new("Win-1", layout!("a:c,w:47,h:7"), window::Flags::None),
                 b: Handle::None,
                 count: 0,
             };
@@ -291,7 +291,7 @@ fn check_tool_tip() {
         CheckHash(0xCB2F5888BC193B75)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:40,h:10");
+    let mut w = window!("Test,a:c,w:40,h:10");
     w.add(button!("'A realy large text for a button',x:2,y:3,w:15"));
     a.add_window(w);
     a.run();
@@ -318,7 +318,7 @@ fn check_mouse_drag_test() {
         CheckHash(0xB10F054B07F2FF0)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:40,h:10");
+    let mut w = window!("Test,a:c,w:40,h:10");
     w.add(button!("'Test',x:2,y:3,w:15"));
     a.add_window(w);
     a.run();
@@ -335,12 +335,12 @@ fn check_visible() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win-1", Layout::new("d:c,w:47,h:7"), window::Flags::None),
+                base: Window::new("Win-1", layout!("a:c,w:47,h:7"), window::Flags::None),
                 but1: Handle::None,
                 but2: Handle::None,
             };
-            me.but1 = me.add(Button::new("Button", Layout::new("x:1,y:3,w:13"), button::Type::Normal));
-            me.but2 = me.add(Button::new("Show/Hide", Layout::new("x:16,y:3,w:14"), button::Type::Normal));
+            me.but1 = me.add(Button::new("Button", layout!("x:1,y:3,w:13"), button::Type::Normal));
+            me.but2 = me.add(Button::new("Show/Hide", layout!("x:16,y:3,w:14"), button::Type::Normal));
             me
         }
     }

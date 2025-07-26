@@ -778,10 +778,10 @@ const FERRIS_PIXELS: &[u32] = &[
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().single_window().build()?;
-    let mut w = window!("Ferris,d:c");
+    let mut w = window!("Ferris,d:f");
     w.add(ImageViewer::new(
         Image::from_buffer(FERRIS_PIXELS, Size::new(120,90), false).unwrap(),
-        Layout::new("d:c"),
+        layout!("d:f"),
         image::RenderOptionsBuilder::new().build(),
         imageviewer::Flags::ScrollBars,
     ));

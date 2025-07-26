@@ -15,10 +15,10 @@ struct CallbackWin {
 impl CallbackWin {
     fn new(f: fn()) -> Self {
         let mut w = Self {
-            base: window!("Test,d:c,w:20,h:6"),
+            base: window!("Test,a:c,w:20,h:6"),
             f,
         };
-        w.add(button!("'Press Me',d:c,w:15"));
+        w.add(button!("'Press Me',a:c,w:15,h:100%"));
         w
     }
 }
@@ -73,7 +73,7 @@ struct OpenSaveTestWindow<'a> {
 impl<'a> OpenSaveTestWindow<'a> {
     fn save(title: &str, file_name: &str, location: dialogs::Location<'a>, save_flags: dialogs::SaveFileDialogFlags) -> Self {
         let mut w = Self {
-            base: window!("Test, d:c"),
+            base: window!("Test, d:f"),
             title: title.to_string(),
             location,
             file_name: file_name.to_string(),
@@ -81,13 +81,13 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
             mask: Some(FILE_MASK),
         };
-        w.add(button!("'Press Me',d:c,w:14"));
+        w.add(button!("'Press Me',a:c,w:14,h:100%"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
     fn open(title: &str, file_name: &str, location: dialogs::Location<'a>, open_flags: dialogs::OpenFileDialogFlags) -> Self {
         let mut w = Self {
-            base: window!("Test, d:c"),
+            base: window!("Test, d:f"),
             title: title.to_string(),
             location,
             file_name: file_name.to_string(),
@@ -95,13 +95,13 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
             mask: Some(FILE_MASK),
         };
-        w.add(button!("'Press Me',d:c,w:14"));
+        w.add(button!("'Press Me',a:c,w:14,h:100%"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
     fn open_all(title: &str, file_name: &str, location: dialogs::Location<'a>, open_flags: dialogs::OpenFileDialogFlags) -> Self {
         let mut w = Self {
-            base: window!("Test, d:c"),
+            base: window!("Test, d:f"),
             title: title.to_string(),
             location,
             file_name: file_name.to_string(),
@@ -109,7 +109,7 @@ impl<'a> OpenSaveTestWindow<'a> {
             info: Handle::None,
             mask: None,
         };
-        w.add(button!("'Press Me',d:c,w:14"));
+        w.add(button!("'Press Me',a:c,w:14,h:100%"));
         w.info = w.add(label!("'',x:0,y:0,w:100%,h:2"));
         w
     }
@@ -143,11 +143,11 @@ struct FolderSelectDialog {
 impl FolderSelectDialog {
     fn new(loc: &str, flags: SelectFolderDialogFlags) -> Self {
         let mut w = Self {
-            base: window!("Test,d:c"),
+            base: window!("Test,d:f"),
             loc: loc.to_string(),
             flags,
         };
-        w.add(button!("Press,d:c,w:14"));
+        w.add(button!("Press,a:c,w:14,h:100%"));
         w
     }
 }
@@ -1217,9 +1217,9 @@ fn check_input_no_validation() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:30,h:7"),
+                base: window!("Test,a:c,w:30,h:7"),
             };
-            me.add(button!("Click,d:c,w:15"));
+            me.add(button!("Click,a:c,w:15,h:100%"));
             me
         }
     }
@@ -1270,9 +1270,9 @@ fn check_input_validation() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:30,h:7"),
+                base: window!("Test,a:c,w:30,h:7"),
             };
-            me.add(button!("Click,d:c,w:15"));
+            me.add(button!("Click,a:c,w:15,h:100%"));
             me
         }
     }
@@ -1321,9 +1321,9 @@ fn check_input_with_initial_value() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: window!("Test,d:c,w:30,h:7"),
+                base: window!("Test,a:c,w:30,h:7"),
             };
-            me.add(button!("Click,d:c,w:15"));
+            me.add(button!("Click,a:c,w:15,h:100%"));
             me
         }
     }

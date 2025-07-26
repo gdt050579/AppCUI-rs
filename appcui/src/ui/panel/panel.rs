@@ -19,7 +19,7 @@ impl Panel {
     /// use appcui::prelude::*;
     ///
     /// let mut panel = Panel::new("Panel", 
-    ///                            Layout::new("x:1,y:1,w:20,h:10"), 
+    ///                            layout!("x:1,y:1,w:20,h:10"), 
     ///                            panel::Type::Border);
     /// ```
     pub fn new(caption: &str, layout: Layout, panel_type: Type) -> Self {
@@ -60,8 +60,8 @@ impl Panel {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut panel = Panel::new("Panel", Layout::new("x:1,y:1,w:10,h:10"), panel::Type::Border);
-    /// let handle_button = panel.add(Button::new("Button", Layout::new("x:1,y:1,w:8"), button::Type::Normal));
+    /// let mut panel = Panel::new("Panel", layout!("x:1,y:1,w:10,h:10"), panel::Type::Border);
+    /// let handle_button = panel.add(Button::new("Button", layout!("x:1,y:1,w:8"), button::Type::Normal));
     /// ```
     #[inline(always)]
     pub fn add<T>(&mut self, control: T) -> Handle<T>
@@ -81,7 +81,7 @@ impl Panel {
             let format = TextFormatBuilder::new()
                 .position(3, 0)
                 .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .wrap_type(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();
@@ -106,7 +106,7 @@ impl Panel {
             let mut format = TextFormatBuilder::new()
                 .position(3, 0)
                 .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .wrap_type(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();
@@ -148,7 +148,7 @@ impl Panel {
             let mut format = TextFormatBuilder::new()
                 .position(3, 0)
                 .attribute(if self.is_enabled() { theme.tab.text.normal } else { theme.text.inactive })
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .wrap_type(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();

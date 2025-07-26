@@ -42,7 +42,7 @@ pub struct FlappyGame {
 impl FlappyGame {
     pub fn new() -> Self {
         let mut o = Self {
-            base: ControlBase::new(Layout::new("d:c"), true),
+            base: ControlBase::new(layout!("d:f"), true),
             state: GameState::Menu,
             bird_y: GAME_HEIGHT as f32 / 2.0,
             bird_velocity: 0.0,
@@ -204,7 +204,7 @@ impl OnPaint for FlappyGame {
                 let format = TextFormatBuilder::new()
                     .position(x as i32, y as i32)
                     .attribute(CharAttribute::with_color(Color::White, Color::Black))
-                    .align(TextAlignament::Center)
+                    .align(TextAlignment::Center)
                     .wrap_type(WrapType::SingleLine)
                     .build();
                 surface.write_text(&text, &format);

@@ -9,12 +9,12 @@ To create a Window use:
 * `Window::with_type` method (with 4 parameters: a title, a layout , initialization flags and a type)
 * macro `window!`. 
 ```rs
-let w = Window::new("Title", Layout::new("x:10,y:5,w:15,h:9"),window::Flags::None);
-let w2 = window!("Title,d:c,w:10,h:10");
-let w3 = window!("title='Some Title',d:c,w:30,h:10,flags=[Sizeable])");
-let w4 = window!("title='WithTag',d:c,w:30,h:10,tag:MyTag)");
-let w5 = window!("Title,d:c,w:10,h:10,key:Alt+F10");
-let w6 = window!("Title,d:c,w:10,h:10,key:auto");
+let w = Window::new("Title", layout!("x:10,y:5,w:15,h:9"),window::Flags::None);
+let w2 = window!("Title,a:c,w:10,h:10");
+let w3 = window!("title='Some Title',a:c,w:30,h:10,flags=[Sizeable])");
+let w4 = window!("title='WithTag',a:c,w:30,h:10,tag:MyTag)");
+let w5 = window!("Title,a:c,w:10,h:10,key:Alt+F10");
+let w6 = window!("Title,a:c,w:10,h:10,key:auto");
 ```
 
 Keep in mind that window will **NOT** handle any events from its children. 
@@ -146,7 +146,7 @@ For example, the following code:
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut win = window!("Title,d:c,w:40,h:9");
+    let mut win = window!("Title,a:c,w:40,h:9");
     win.set_tag("TAG");
     app.add_window(win);
     app.run();
@@ -163,7 +163,7 @@ You can also associate a hot key to a window. A hot key allows you to quickly sw
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut win = window!("Title,d:c,w:40,h:9");
+    let mut win = window!("Title,a:c,w:40,h:9");
     win.set_hotkey(key!("Alt+7"));
     app.add_window(win);
     app.run();

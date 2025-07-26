@@ -21,11 +21,11 @@ impl RadioBox {
     /// use appcui::prelude::*;
     /// 
     /// let mut panel = Panel::new("Radioboxes group",
-    ///                            Layout::new("x:1,y:1,w:20,h:10"),
+    ///                            layout!("x:1,y:1,w:20,h:10"),
     ///                            panel::Type::Border);
-    /// panel.add(RadioBox::new("Select me &1", Layout::new("x:1,y:1,w:20,h:1"), false));
-    /// panel.add(RadioBox::new("Select me &2", Layout::new("x:1,y:2,w:20,h:1"), false));
-    /// panel.add(RadioBox::new("Select me &3", Layout::new("x:1,y:3,w:20,h:1"), true));
+    /// panel.add(RadioBox::new("Select me &1", layout!("x:1,y:1,w:20,h:1"), false));
+    /// panel.add(RadioBox::new("Select me &2", layout!("x:1,y:2,w:20,h:1"), false));
+    /// panel.add(RadioBox::new("Select me &3", layout!("x:1,y:3,w:20,h:1"), true));
     /// ```
     /// All o the obove radio boxes will be part of the same parent control (the panel).
     /// When one of them is selected, the others will be automatically deselected.
@@ -41,11 +41,11 @@ impl RadioBox {
     /// use appcui::prelude::*;
     /// 
     /// let mut panel = Panel::new("Radioboxes group",
-    ///                            Layout::new("x:1,y:1,w:20,h:10"),
+    ///                            layout!("x:1,y:1,w:20,h:10"),
     ///                            panel::Type::Border);
-    /// panel.add(RadioBox::with_type("Select me &1", Layout::new("x:1,y:1,w:20,h:1"), false, radiobox::Type::Circle));
-    /// panel.add(RadioBox::with_type("Select me &2", Layout::new("x:1,y:1,w:20,h:1"), false, radiobox::Type::Diamond));
-    /// panel.add(RadioBox::with_type("Select me &3", Layout::new("x:1,y:1,w:20,h:1"), true, radiobox::Type::Ascii));
+    /// panel.add(RadioBox::with_type("Select me &1", layout!("x:1,y:1,w:20,h:1"), false, radiobox::Type::Circle));
+    /// panel.add(RadioBox::with_type("Select me &2", layout!("x:1,y:1,w:20,h:1"), false, radiobox::Type::Diamond));
+    /// panel.add(RadioBox::with_type("Select me &3", layout!("x:1,y:1,w:20,h:1"), true, radiobox::Type::Ascii));
     /// ```
     pub fn with_type(caption: &str, layout: Layout, selected: bool, radio_type: Type) -> Self {
         let ss = Symbol::new(radio_type.selected_symbol());
@@ -118,7 +118,7 @@ impl OnPaint for RadioBox {
             let mut format = TextFormatBuilder::new()
                 .position(self.symbol_width as i32, 0)
                 .attribute(attr_text)
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .chars_count(self.caption.chars_count() as u16)
                 .build();
             if sz.height > 1 {

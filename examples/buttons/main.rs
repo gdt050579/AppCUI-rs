@@ -11,7 +11,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("Buttons example", Layout::new("d:c,w:40,h:7"), window::Flags::None),
+            base: Window::new("Buttons example", layout!("a:c,w:40,h:7"), window::Flags::None),
             //..Default::default()
             b1: Handle::None,
             b2: Handle::None,
@@ -21,7 +21,7 @@ impl MyWin {
         win.b1 = win.add(button!("&Button,x:2,y:2,w:15"));
         win.b2 = win.add(button!("'&Inactive',x:19,y:2,w:15,enabled:false"));
         win.b3 = win.add(button!("&Flat,x:2,y:4,w:32,type:flat"));
-        win.lb = win.add(Label::new("",Layout::new("x:2,y:0,w:35")));
+        win.lb = win.add(Label::new("",layout!("x:2,y:0,w:35")));
         win
     }
     fn set_label_text(&mut self, txt: &str) {

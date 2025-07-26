@@ -6,9 +6,9 @@ pub(crate) struct Win {}
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("'Color Palette',d:c,w:48,h:11,flags:Sizeable"),
+            base: window!("'Color Palette',a:c,w:48,h:11,flags:Sizeable"),
         };
-        let mut canvas = canvas!("d:c,w:100%,h:100%,flags:ScrollBars,size:256x64");
+        let mut canvas = canvas!("d:f,flags:ScrollBars,size:256x64");
         let surface = canvas.drawing_surface_mut();
         surface.clear(char!("' ',black,black"));
         for x in 0..43 {

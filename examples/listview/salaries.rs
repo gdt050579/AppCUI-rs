@@ -91,7 +91,7 @@ pub(crate) struct Win {
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("'Personal list',d:c,w:70,h:10,flags: Sizeable"),
+            base: window!("'Personal list',a:c,w:70,h:10,flags: Sizeable"),
             lb: Handle::None,
             lv: Handle::None,
         };

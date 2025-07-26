@@ -17,8 +17,15 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut win = Window::new("First Window", Layout::new("d:c,w:30,h:9"), window::Flags::None);
-    win.add(Label::new("Hello World !",Layout::new("d:c,w:13,h:1")));
+    let mut win = Window::new(
+        "First Window",
+        LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(),
+        window::Flags::Sizeable,
+    );
+    win.add(Label::new(
+        "Hello World !",
+        LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
+    ));
     app.add_window(win);
     app.run();
     Ok(())
@@ -30,8 +37,8 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut win = window!("'First Window',d:c,w:30,h:9");
-    win.add(label!("'Hello World !',d:c,w:13,h:1"));
+    let mut win = window!("'First Window',a:c,w:30,h:9");
+    win.add(label!("'Hello World !',a:c,w:13,h:1"));
     app.add_window(win);
     app.run();
     Ok(())

@@ -12,7 +12,7 @@ use super::LineType;
 use super::Point;
 use super::Rect;
 use super::Size;
-use super::TextAlignament;
+use super::TextAlignment;
 use super::TextFormat;
 
 #[repr(u8)]
@@ -587,15 +587,15 @@ impl Surface {
             return; // no need to draw
         }
         let mut x = match format.align {
-            TextAlignament::Left => format.x,
-            TextAlignament::Center => format.x - (chars_count / 2) as i32,
-            TextAlignament::Right => format.x + 1 - chars_count as i32,
+            TextAlignment::Left => format.x,
+            TextAlignment::Center => format.x - (chars_count / 2) as i32,
+            TextAlignment::Right => format.x + 1 - chars_count as i32,
         };
         let width = u16::min(width, chars_count);
         let left_margin = match format.align {
-            TextAlignament::Left => format.x,
-            TextAlignament::Center => format.x - (width / 2) as i32,
-            TextAlignament::Right => format.x + 1 - width as i32,
+            TextAlignment::Left => format.x,
+            TextAlignment::Center => format.x - (width / 2) as i32,
+            TextAlignment::Right => format.x + 1 - width as i32,
         };
         let right_margin = left_margin + (width as i32);
         let mut c = Character::with_attributes(' ', format.char_attr);
@@ -775,7 +775,7 @@ impl Surface {
     /// let format = TextFormatBuilder::new()
     ///                 .position(10, 10)
     ///                 .attribute(CharAttribute::with_color(Color::White, Color::Black))
-    ///                 .align(TextAlignament::Left)
+    ///                 .align(TextAlignment::Left)
     ///                 .build();
     /// surface.write_text("Hello World!", &format);
     /// ```
@@ -887,7 +887,7 @@ impl Surface {
             }
         }
     }
-    fn deserialize_color(buffer: &[u8]) -> Option<(Color, usize)> {
+    pub(super) fn deserialize_color(buffer: &[u8]) -> Option<(Color, usize)> {
         match buffer[0] {
             0 => Some((Color::Black, 1)),
             1 => Some((Color::DarkBlue, 1)),
@@ -971,6 +971,7 @@ impl Surface {
         Ok(())
     }
 
+    /// Creates a new surface from a byte buffer. The buffer must contain the magic number, version, size, and character buffer.
     pub fn from_buffer(buffer: &[u8]) -> Result<Surface, String> {
         if buffer.len() < 12 {
             return Err("Buffer is too small to be a valid surface".to_string());
@@ -1010,6 +1011,8 @@ impl Surface {
         }
         Ok(surface)
     }
+
+    /// Creates a new surface from a file. The file must contain the magic number, version, size, and character buffer.
     pub fn from_file(path: &Path) -> Result<Surface, String> {
         let buffer = std::fs::read(path).map_err(|e| e.to_string())?;
         Self::from_buffer(&buffer)

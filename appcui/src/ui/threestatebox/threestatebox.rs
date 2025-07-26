@@ -31,10 +31,10 @@ impl ThreeStateBox {
     /// # Example
     /// 
     /// ```rust,no_run
-    /// use appcui::ui::*;
+    /// use appcui::prelude::*;
     /// 
     /// let threestatebox = ThreeStateBox::with_type("This is a &test", 
-    ///                                              Layout::new("d:c,w:10,h:1"), 
+    ///                                              layout!("a:c,w:10,h:1"), 
     ///                                              threestatebox::State::Unchecked, 
     ///                                              threestatebox::Type::Ascii);
     /// ```
@@ -108,7 +108,7 @@ impl OnPaint for ThreeStateBox {
             let mut format = TextFormatBuilder::new()
                 .position(self.symbol_width as i32, 0)
                 .attribute(attr_text)
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .chars_count(self.caption.chars_count() as u16)
                 .build();
             if sz.height > 1 {

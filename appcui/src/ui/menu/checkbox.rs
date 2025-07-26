@@ -32,7 +32,7 @@ use crate::{
 /// impl MyWindow {
 ///     fn new() -> Self {
 ///         let mut w = MyWindow {
-///             base: window!("Example,d:c,w:40,h:10"),
+///             base: window!("Example,a:c,w:40,h:10"),
 ///             view_menu: Handle::None,
 ///             status_bar_checkbox: Handle::None,
 ///             toolbar_checkbox: Handle::None,

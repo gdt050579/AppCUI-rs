@@ -63,12 +63,12 @@
 //!     // Create a window with centered layout and specific size
 //!     let mut win = Window::new(
 //!         "First Window", 
-//!         Layout::new("dock:center,width:30,height:9"), 
+//!         LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(), 
 //!         window::Flags::Sizeable
 //!     );
 //!     
 //!     // Add a label to the window
-//!     win.add(Label::new("Hello World !", Layout::new("dock:center,width:13,height:1")));
+//!     win.add(Label::new("Hello World !", layout!("a:center,width:13,height:1")));
 //!     
 //!     // Add the window to the application and run
 //!     app.add_window(win);
@@ -121,6 +121,7 @@ pub mod textarea;
 
 // re-export
 pub use common::ControlBase;
+pub use common::ContainerBase;
 pub use desktop::Desktop;
 pub use checkbox::CheckBox;
 pub use radiobox::RadioBox;
@@ -143,6 +144,10 @@ pub use combobox::ComboBox;
 pub use dropdownlist::DropDownList;
 pub use command_bar::CommandBar;
 pub use layout::Layout;
+pub use layout::LayoutBuilder;
+pub use layout::Dock;
+pub use layout::Alignment;
+pub use layout::Pivot;
 pub use numericselector::NumericSelector;
 pub use vsplitter::VSplitter;
 pub use hsplitter::HSplitter;

@@ -8,10 +8,10 @@ To create a radiobox use `RadioBox::new` method (with 3 parameters: a caption, a
 
 ```rs
 let b1 = RadioBox::new("A radiobox", 
-                       Layout::new("x:10,y:5,w:15"),
+                       layout!("x:10,y:5,w:15"),
                        true);
 let b2 = RadioBox::with_type("Another radiobox", 
-                             Layout::new("x:10,y:5,w:15"),
+                             layout!("x:10,y:5,w:15"),
                              false,
                              radiobox::Type::Circle);
 ```
@@ -133,7 +133,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'My Win',d:c,w:60,h:14"),
+            base: window!("'My Win',a:c,w:60,h:14"),
             g1_r1: Handle::None,
             g1_r2: Handle::None,
             g1_r3: Handle::None,

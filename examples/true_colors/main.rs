@@ -7,9 +7,9 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
 
 
-    let mut w = Window::new("True Colors", Layout::new("d:c,w:70,h:19"), window::Flags::None);
+    let mut w = Window::new("True Colors", layout!("a:c,w:70,h:19"), window::Flags::None);
 
-    let mut c = canvas!("'68x17',d:c,w:100%,h:100%");
+    let mut c = canvas!("'68x17',d:f");
     c.clear_background();
     let s = c.drawing_surface_mut();
     s.write_string(1, 1, "Red pallete", CharAttribute::with_color(Color::White, Color::Black), false);

@@ -15,7 +15,7 @@ impl VLine {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vline = VLine::new(Layout::new("x:1,y:1,w:1,h:10"), 
+    /// let mut vline = VLine::new(layout!("x:1,y:1,w:1,h:10"), 
     ///                                        vline::Flags::DoubleLine);
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {

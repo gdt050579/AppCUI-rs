@@ -29,7 +29,7 @@ app.run()
     ```rs
     let mut a = App::new().single_window()..build()?;
     // the following line will panic as Sizeable flag is not allow on windows in Single Window mode
-    a.add_window(window!("Test,d:c,flags: Sizeable"));
+    a.add_window(window!("Test,a:c,flags: Sizeable"));
     a.run();
     ```
 * In a `Single Window` mode, the event loop will be associated with the single window. As such, not adding a window will result in a panic.

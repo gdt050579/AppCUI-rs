@@ -1,5 +1,5 @@
 use super::super::Column;
-use crate::graphics::{Surface, TextAlignament, CharAttribute};
+use crate::graphics::{Surface, TextAlignment, CharAttribute};
 use crate::system::Theme;
 use super::RenderMethod;
 use std::cmp::Ordering;
@@ -9,7 +9,7 @@ pub trait ListItem {
         0
     }
     fn column(_index: u16) -> Column {
-        Column::new("", 10, TextAlignament::Left)
+        Column::new("", 10, TextAlignment::Left)
     }
 
     fn paint(&self, _column_index: u32, _width: u16, _surface: &mut Surface, _theme: &Theme, _attr: Option<CharAttribute>) {}

@@ -31,7 +31,7 @@ impl TextField {
     /// use appcui::prelude::*;
     ///
     /// let mut textfield = TextField::new("Hello World",
-    ///                                    Layout::new("x:1,y:1,w:20,h:1"),
+    ///                                    layout!("x:1,y:1,w:20,h:1"),
     ///                                    textfield::Flags::None);
     /// ```
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {

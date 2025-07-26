@@ -60,7 +60,7 @@ macro_rules! IMPLEMENT_METHODS  {
             /// # Example
             /// ```rust, no_run
             /// use appcui::prelude::*;
-            /// let mut control = PathFinder::new("C:\\Program Files", Layout::new("x:1 , y:1 , width:40"), pathfinder::Flags::CaseSensitive);
+            /// let mut control = PathFinder::new("C:\\Program Files", layout!("x:1 , y:1 , width:40"), pathfinder::Flags::CaseSensitive);
             /// let path = control.path();
             /// ```
             pub fn path(&self) -> &Path {
@@ -73,7 +73,7 @@ macro_rules! IMPLEMENT_METHODS  {
             /// # Example
             /// ```rust, no_run
             /// use appcui::prelude::*;
-            /// let mut control = PathFinder::new("C:\\Program Files", Layout::new("x:1 , y:1 , width:40"), pathfinder::Flags::CaseSensitive);
+            /// let mut control = PathFinder::new("C:\\Program Files", layout!("x:1 , y:1 , width:40"), pathfinder::Flags::CaseSensitive);
             /// let path = control.set_path(std::path::Path::new("C:\\Windows"));
             /// ```
             pub fn set_path(&mut self, path: &Path) {
@@ -98,7 +98,7 @@ impl PathFinder {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut control = PathFinder::new("C:\\Program Files", Layout::new("x:1 , y:1 , width:40"), pathfinder::Flags::CaseSensitive);
+    /// let mut control = PathFinder::new("C:\\Program Files", layout!("x:1 , y:1 , width:40"), pathfinder::Flags::CaseSensitive);
     /// ```
     pub fn new(file_path: &str, layout: Layout, flags: Flags) -> Self {
         Self::with_navigator(file_path, layout, flags, fs::Navigator::new())

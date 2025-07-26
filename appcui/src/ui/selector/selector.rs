@@ -66,7 +66,7 @@ where
     /// 
     /// let mut selector: Selector<Shape> = Selector::new(
     ///                                 Some(Shape::Square),
-    ///                                 Layout::new("x:1,y:1,w:20,h:1"),
+    ///                                 layout!("x:1,y:1,w:20,h:1"),
     ///                                 selector::Flags::AllowNoneVariant);
     /// ```
     pub fn new(value: Option<T>, layout: Layout, flags: Flags) -> Self {

@@ -8,7 +8,7 @@ To create an image viewer use `ImageViewer::new` method (with 4 parameters: an i
 
 ```rs
 let i = ImageViewer::new(Image::from_str(...).unwrap(), 
-                         Layout::new("x:10,y:5,w:15"),
+                         layout!("x:10,y:5,w:15"),
                          image::RenderOptionsBuilder::new()
                              .scale(image::Scale::Scale50)
                              .character_set(image::CharacterSet::AsciiArt)
@@ -99,7 +99,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Heart,d:c,w:15,h:7");
+    let mut w = window!("Heart,a:c,w:15,h:7");
     let heart = Image::from_str(r#"
         |.............|
         |...rr...rr...|
@@ -114,7 +114,7 @@ fn main() -> Result<(), appcui::system::Error> {
     "#).unwrap();
     w.add(ImageViewer::new(
         heart,
-        Layout::new("d:c"),
+        layout!("d:f"),
         image::RenderOptionsBuilder::new()
             .scale(image::Scale::Scale50)
             .character_set(image::CharacterSet::AsciiArt)

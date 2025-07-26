@@ -19,7 +19,7 @@ impl ToggleButton {
     /// use appcui::prelude::*;
     /// let mut button = ToggleButton::new("🐼", 
     ///                                    "Enable Panda Mode", 
-    ///                                    Layout::new("x:1,y:1,w:2"), 
+    ///                                    layout!("x:1,y:1,w:2"), 
     ///                                    false, 
     ///                                    togglebutton::Type::Normal);
     /// ```
@@ -36,12 +36,12 @@ impl ToggleButton {
     /// use appcui::prelude::*;
     /// let panda = ToggleButton::with_single_selection("🐼",
     ///                                                 "Enable Panda Mode",
-    ///                                                 Layout::new("x:1,y:1,w:2"),
+    ///                                                 layout!("x:1,y:1,w:2"),
     ///                                                 false,
     ///                                                 togglebutton::Type::Normal);
     /// let dog = ToggleButton::with_single_selection("🐶",
     ///                                               "Enable Dog Mode",
-    ///                                               Layout::new("x:3,y:1,w:2"),
+    ///                                               layout!("x:3,y:1,w:2"),
     ///                                               true,
     ///                                               togglebutton::Type::Normal);
     /// ```
@@ -136,7 +136,7 @@ impl OnPaint for ToggleButton {
         let format = TextFormatBuilder::new()
             .position((w / 2) as i32, 0)
             .attribute(col_text)
-            .align(TextAlignament::Center)
+            .align(TextAlignment::Center)
             .chars_count(self.caption.chars_count() as u16)
             .wrap_type(WrapType::SingleLineWrap(w as u16))
             .build();

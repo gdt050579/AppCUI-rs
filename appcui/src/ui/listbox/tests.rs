@@ -9,10 +9,10 @@ fn check_create() {
         CheckHash(0x6063E984F2B99F35)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("d:c,w:100%,h:100%"),
+        layout!("d:f"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {
@@ -34,9 +34,9 @@ fn check_create_with_macro_1() {
         CheckHash(0x6063E984F2B99F35)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+    let mut l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
     for i in 0..100 {
         l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
@@ -55,9 +55,9 @@ fn check_create_with_macro_2() {
         CheckHash(0xB00B42A9B1771A31)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
+    let l = listbox!("d:f,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
     p.add(l);
     w.add(p);
     a.add_window(w);
@@ -72,8 +72,8 @@ fn check_create_with_macro_3() {
         CheckHash(0xE2D9A09340BE3EFD)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:40,h:8,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,index:3,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
+    let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
+    let l = listbox!("d:f,index:3,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -87,8 +87,8 @@ fn check_create_with_macro_4() {
         CheckHash(0xAD52FAF15DEBDF73)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:40,h:8,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,index:3,flags: SearchBar, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
+    let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
+    let l = listbox!("d:f,index:3,flags: SearchBar, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -139,10 +139,10 @@ fn check_movement_keys() {
         CheckHash(0x7D4E807C521DA5D)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("d:c,w:100%,h:100%"),
+        layout!("d:f"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {
@@ -185,10 +185,10 @@ fn check_horizontal_scroll_keys() {
         CheckHash(0xF552C5DD89A89A58)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:35,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:35,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("d:c,w:100%,h:100%"),
+        layout!("d:f"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {
@@ -231,9 +231,9 @@ fn check_horizontal_scroll_keys_no_checkboxes() {
         CheckHash(0xB5EF8D0830462D7F)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:35,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:35,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
-    let mut l = ListBox::new(Layout::new("d:c,w:100%,h:100%"), listbox::Flags::ScrollBars);
+    let mut l = ListBox::new(layout!("d:f"), listbox::Flags::ScrollBars);
     for i in 0..100 {
         l.add(&format!("My long {} textual item number {}", i % 11, i));
     }
@@ -301,10 +301,10 @@ fn check_search() {
         CheckHash(0x3900AF2CBDF4157D)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("d:c,w:100%,h:100%"),
+        layout!("d:f"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {
@@ -368,10 +368,10 @@ fn check_resize() {
         CheckCursor(hidden)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
-        Layout::new("d:c,w:100%,h:100%"),
+        layout!("d:f"),
         listbox::Flags::ScrollBars | listbox::Flags::CheckBoxes | listbox::Flags::SearchBar,
     );
     for i in 0..100 {
@@ -412,8 +412,8 @@ fn check_search_ignore_case() {
         CheckCursor(14,10)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light GREEn',White,'Special GrEeN',Black,Orange,Yellow,Purple]");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
+    let l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light GREEn',White,'Special GrEeN',Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -441,8 +441,8 @@ fn check_search_use_space() {
         CheckHash(0x9EC9834D8A0DDBB8)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light green',White,'Special Greeb',Black,Orange,Yellow,Purple]");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
+    let l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light green',White,'Special Greeb',Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -458,19 +458,19 @@ fn check_events() {
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("Title:'Colors',d:c,w:60,h:10,flags:Sizeable"),
+                base: window!("Title:'Colors',a:c,w:60,h:10,flags:Sizeable"),
                 lbox: Handle::None,
                 log: Handle::None,
             };
-            let mut vs = vsplitter!("25%,d:c,w:100%,h:100%");
+            let mut vs = vsplitter!("25%,d:f");
             w.lbox = vs.add(
                 vsplitter::Panel::Left,
                 listbox!(
-                    "d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
+                    "d:f,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
                 ),
             );
-            let mut p = panel!("caption:'Event logs',d:c,w:100%,h:100%,type: TopBar");
-            w.log = p.add(listbox!("d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
+            let mut p = panel!("caption:'Event logs',d:f,type: TopBar");
+            w.log = p.add(listbox!("d:f,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
             vs.add(vsplitter::Panel::Right, p);
             w.add(vs);
             w
@@ -537,7 +537,7 @@ fn check_autoscroll() {
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("Title:'AutoScroll',d:c,w:60,h:10"),
+                base: window!("Title:'AutoScroll',a:c,w:60,h:10"),
                 log: Handle::None,
             };
             w.log = w.add(listbox!("x:50%,y:0,w:50%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar+AutoScroll"));
@@ -587,7 +587,7 @@ fn check_clear() {
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("Title:'AutoScroll',d:c,w:60,h:10"),
+                base: window!("Title:'AutoScroll',a:c,w:60,h:10"),
                 log: Handle::None,
             };
             w.log = w.add(listbox!(
@@ -640,8 +640,8 @@ fn check_autoscroll_on_create() {
         CheckHash(0x64D5987E9F212984)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+AutoScroll, lsm:2, items:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
+    let l = listbox!("d:f,flags: ScrollBars+AutoScroll, lsm:2, items:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -660,9 +660,9 @@ fn check_empty_list_message() {
         CheckHash(0x3D264DF35A9248A9)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
-    let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+    let mut l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
     l.set_empty_message("No items in the list. Insert some items by pressing the 'Add' button.");
     p.add(l);
     w.add(p);
@@ -684,9 +684,9 @@ fn check_empty_list_message_with_macro() {
         CheckHash(0x36162E7E39B5F673)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, em='No items in the list. Insert some items by pressing the <Add> button.'");
+    let l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, em='No items in the list. Insert some items by pressing the <Add> button.'");
     p.add(l);
     w.add(p);
     w.add(button!("Add,x:1,y:1,w:7,type:flat"));
@@ -703,7 +703,7 @@ fn check_sort() {
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("Title:'Sort',d:c,w:60,h:10"),
+                base: window!("Title:'Sort',a:c,w:60,h:10"),
                 log: Handle::None,
             };
             w.log = w.add(listbox!(
@@ -755,7 +755,7 @@ fn check_sort_by() {
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("Title:'Sort',d:c,w:60,h:10"),
+                base: window!("Title:'Sort',a:c,w:60,h:10"),
                 log: Handle::None,
             };
             w.log = w.add(listbox!(
@@ -816,9 +816,9 @@ fn check_empty_highlight_selected_when_inactive() {
         CheckHash(0x791D611DAE470635)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+HighlightSelectedItemWhenInactive, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
+    let l = listbox!("d:f,flags: ScrollBars+HighlightSelectedItemWhenInactive, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
     p.add(l);
     w.add(p);
     w.add(button!("Add,x:1,y:1,w:7,type:flat"));
@@ -844,9 +844,9 @@ fn check_empty_highlight_selected_when_inactive_2() {
         CheckHash(0xABD626D0EDE05CAD)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+HighlightSelectedItemWhenInactive+CheckBoxes, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
+    let l = listbox!("d:f,flags: ScrollBars+HighlightSelectedItemWhenInactive+CheckBoxes, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
     p.add(l);
     w.add(p);
     w.add(button!("Add,x:1,y:1,w:7,type:flat"));
@@ -864,19 +864,19 @@ fn check_items_checked_with_mouse() {
     impl MyWin {
         fn new() -> Self {
             let mut w = Self {
-                base: window!("Title:'Colors',d:c,w:60,h:10,flags:Sizeable"),
+                base: window!("Title:'Colors',a:c,w:60,h:10,flags:Sizeable"),
                 lbox: Handle::None,
                 log: Handle::None,
             };
-            let mut vs = vsplitter!("25%,d:c,w:100%,h:100%");
+            let mut vs = vsplitter!("25%,d:f");
             w.lbox = vs.add(
                 vsplitter::Panel::Left,
                 listbox!(
-                    "d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
+                    "d:f,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"
                 ),
             );
-            let mut p = panel!("caption:'Event logs',d:c,w:100%,h:100%,type: TopBar");
-            w.log = p.add(listbox!("d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
+            let mut p = panel!("caption:'Event logs',d:f,type: TopBar");
+            w.log = p.add(listbox!("d:f,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
             vs.add(vsplitter::Panel::Right, p);
             w.add(vs);
             w
@@ -951,8 +951,8 @@ fn check_scroll_from_scrollbar() {
         CheckHash(0x9C13452BDE1FBA10)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:20,h:8,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
+    let mut w = window!("Test,a:c,w:20,h:8,flags: Sizeable");
+    let l = listbox!("d:f,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();
@@ -981,8 +981,8 @@ fn check_scroll_from_mouse_wheel() {
         CheckHash(0x77D7DB5C1EE81C58)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:20,h:8,flags: Sizeable");
-    let l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
+    let mut w = window!("Test,a:c,w:20,h:8,flags: Sizeable");
+    let l = listbox!("d:f,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
     a.add_window(w);
     a.run();

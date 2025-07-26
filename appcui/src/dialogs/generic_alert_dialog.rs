@@ -58,8 +58,7 @@ impl GenericAlertDialog {
         nr_lines
     }
     fn add_button(text: &str, x: i32, y: i32) -> Button {
-        let s = format!("x:{x},y:{y},w:11");
-        Button::new(text, Layout::new(&s), button::Type::Normal)
+        Button::new(text, LayoutBuilder::new().x(x).y(y).width(11).build(), button::Type::Normal)
     }
     pub(super) fn new(title: &str, caption: &str, buttons: DialogButtons, win_type: window::Type) -> Self {
         let size = RuntimeManager::get().terminal_size();
@@ -87,9 +86,17 @@ impl GenericAlertDialog {
         let window_height = nr_lines + 7;
 
         // lets create the window
-        let w_format = format!("d:c,w:{window_width},h:{window_height}");
         let mut w = Self {
-            base: ModalWindow::with_type(title, Layout::new(&w_format), window::Flags::NoCloseButton, win_type),
+            base: ModalWindow::with_type(
+                title,
+                LayoutBuilder::new()
+                    .alignment(Alignment::Center)
+                    .width(window_width)
+                    .height(window_height)
+                    .build(),
+                window::Flags::NoCloseButton,
+                win_type,
+            ),
             b_ok: Handle::None,
             b_yes: Handle::None,
             b_no: Handle::None,

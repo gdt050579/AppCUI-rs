@@ -9,17 +9,17 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("Title:'Colors',d:c,w:80,h:20,flags:Sizeable"),
+            base: window!("Title:'Colors',a:c,w:80,h:20,flags:Sizeable"),
             lbox: Handle::None,
             log: Handle::None,
         };
-        let mut vs = vsplitter!("50%,d:c,w:100%,h:100%");
+        let mut vs = vsplitter!("50%,d:f");
         w.lbox = vs.add(
             vsplitter::Panel::Left,
-            listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"),
+            listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar,items:['Red','Green','Blue','Yellow','Black','White'],tsm:4,lsm:1"),
         );
-        let mut p = panel!("caption:'Event logs',d:c,w:100%,h:100%,type: TopBar");
-        w.log = p.add(listbox!("d:c,w:100%,h:100%,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
+        let mut p = panel!("caption:'Event logs',d:f,type: TopBar");
+        w.log = p.add(listbox!("d:f,flags: ScrollBars+SearchBar+AutoScroll, lsm:1"));
         vs.add(vsplitter::Panel::Right, p);
         w.add(vs);
         w

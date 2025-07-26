@@ -11,7 +11,7 @@ use self::dimension::Dimension;
 
 use super::layout;
 
-static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
+pub(crate) static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
     // generic characteristics
     NamedParameter::new("visible", "visible", ParamType::Bool),
     NamedParameter::new("enabled", "enabled", ParamType::Bool),
@@ -27,15 +27,17 @@ static CONTROL_NAMED_PARAMATERS: &[NamedParameter] = &[
     NamedParameter::new("t", "top", ParamType::Layout),
     NamedParameter::new("bottom", "bottom", ParamType::Layout),
     NamedParameter::new("b", "bottom", ParamType::Layout),
-    NamedParameter::new("width", "width", ParamType::Layout),
-    NamedParameter::new("w", "width", ParamType::Layout),
-    NamedParameter::new("height", "height", ParamType::Layout),
-    NamedParameter::new("h", "height", ParamType::Layout),
-    NamedParameter::new("align", "align", ParamType::Alignament),
-    NamedParameter::new("a", "align", ParamType::Alignament),
-    NamedParameter::new("alignament", "align", ParamType::Alignament),
-    NamedParameter::new("dock", "dock", ParamType::Alignament),
-    NamedParameter::new("d", "dock", ParamType::Alignament),
+    NamedParameter::new("width", "width", ParamType::LayoutSize),
+    NamedParameter::new("w", "width", ParamType::LayoutSize),
+    NamedParameter::new("height", "height", ParamType::LayoutSize),
+    NamedParameter::new("h", "height", ParamType::LayoutSize),
+    NamedParameter::new("align", "align", ParamType::Alignment),
+    NamedParameter::new("a", "align", ParamType::Alignment),
+    NamedParameter::new("alignment", "align", ParamType::Alignment),
+    NamedParameter::new("dock", "dock", ParamType::Dock),
+    NamedParameter::new("d", "dock", ParamType::Dock),
+    NamedParameter::new("pivot", "pivot", ParamType::Alignment),
+    NamedParameter::new("p", "pivot", ParamType::Alignment),
 ];
 
 pub(super) struct ControlBuilder<'a> {
@@ -244,7 +246,7 @@ impl<'a> ControlBuilder<'a> {
     }
     pub(super) fn add_layout(&mut self) {
         self.add_comma();
-        layout::add_layout(&mut self.content, &self.parser);
+        layout::add_layout(&mut self.content, &mut self.parser);
     }
     pub(super) fn add_toolbaritem_operations(&mut self) {
         if let Some(tooltip_value) = self.parser.get("tooltip") {

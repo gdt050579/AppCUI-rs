@@ -11,17 +11,17 @@ use super::{ControlHandleManager, Handle, MenuHandleManager, Theme, ToolTip};
 use crate::backend::{self, Backend};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
+use crate::prelude::*;
 use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
 use crate::ui::common::ControlManager;
-use crate::ui::common::{traits::*, ControlEvent};
+use crate::ui::common::ControlEvent;
 use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
 use crate::ui::menu::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
-use crate::prelude::*;
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -363,12 +363,12 @@ impl RuntimeManager {
                 base.set_singlewindow_flag();
                 let top = self.menubar.is_some();
                 let bottom = self.commandbar.is_some();
-                base.layout = ControlLayout::new(match () {
-                    _ if (!top) && (!bottom) => "l:0,t:0,r:0,b:0",
-                    _ if (!top) && (bottom) => "l:0,t:0,r:0,b:1",
-                    _ if (top) && (!bottom) => "l:0,t:1,r:0,b:0",
-                    _ if (top) && (bottom) => "l:0,t:1,r:0,b:1",
-                    _ => "l:0,t:0,r:0,b:0",
+                base.layout = ControlLayout::from(match () {
+                    _ if (!top) && (!bottom) => layout!("l:0,t:0,r:0,b:0"),
+                    _ if (!top) && (bottom) => layout!("l:0,t:0,r:0,b:1"),
+                    _ if (top) && (!bottom) => layout!("l:0,t:1,r:0,b:0"),
+                    _ if (top) && (bottom) => layout!("l:0,t:1,r:0,b:1"),
+                    _ => layout!("l:0,t:0,r:0,b:0"),
                 });
             }
             // this must be called last as it will inactivate some flags on a window if in single window mode

@@ -1,7 +1,8 @@
-use super::alignament::Alignament;
+use super::alignment::Alignment;
+use super::color::Color;
 use super::coordonate::Coordonate;
 use super::dimension::Dimension;
-use super::color::Color;
+use super::dock::Dock;
 use super::named_params_map::NamedParamsMap;
 use super::size::Size;
 use super::Error;
@@ -13,7 +14,8 @@ pub(super) enum ValueType<'a> {
     Integer(i32),
     Percentage(f32),
     Size(Size),
-    Alignament(Alignament),
+    Alignment(Alignment),
+    Dock(Dock),
     Color(Color),
     List(Vec<Value<'a>>),
     Dict(NamedParamsMap<'a>),
@@ -116,21 +118,40 @@ impl<'a> Value<'a> {
         }
         None
     }
-    pub(crate) fn to_align(&self) -> Alignament {
-        if let ValueType::Alignament(value) = &self.data_type {
+    // pub(crate) fn to_align(&self) -> Alignment {
+    //     if let ValueType::Alignment(value) = &self.data_type {
+    //         return *value;
+    //     }
+    //     panic!("Invalid alignment value: {}", self.raw_data);
+    // }
+    pub(crate) fn to_dock(&self) -> Dock {
+        if let ValueType::Dock(value) = &self.data_type {
             return *value;
         }
-        panic!("Invalid alignament value: {}", self.raw_data);
-    }
-    pub(crate) fn get_alignament(&mut self) -> Option<Alignament> {
+        panic!("Invalid dock value: {}", self.raw_data);
+    }      
+    pub(crate) fn get_alignment(&mut self) -> Option<Alignment> {
         if !self.is_value() {
             return None;
         }
-        if let ValueType::Alignament(value) = &self.data_type {
+        if let ValueType::Alignment(value) = &self.data_type {
             return Some(*value);
         }
-        if let Some(value) = Alignament::from_hash(utils::compute_hash(self.raw_data)) {
-            self.data_type = ValueType::Alignament(value);
+        if let Some(value) = Alignment::from_hash(utils::compute_hash(self.raw_data)) {
+            self.data_type = ValueType::Alignment(value);
+            return Some(value);
+        }
+        None
+    }
+    pub(crate) fn get_dock(&mut self) -> Option<Dock> {
+        if !self.is_value() {
+            return None;
+        }
+        if let ValueType::Dock(value) = &self.data_type {
+            return Some(*value);
+        }
+        if let Some(value) = Dock::from_hash(utils::compute_hash(self.raw_data)) {
+            self.data_type = ValueType::Dock(value);
             return Some(value);
         }
         None
@@ -197,10 +218,7 @@ impl<'a> Value<'a> {
             if !(-30000..=30000).contains(&value) {
                 return Err(Error::new(
                     param_list,
-                    format!(
-                        "The value for parameter '{display_param_name}' should be between -30000 and 30000. Current value is {value} !"
-                    )
-                    .as_str(),
+                    format!("The value for parameter '{display_param_name}' should be between -30000 and 30000. Current value is {value} !").as_str(),
                     self.start,
                     self.end,
                 ));
@@ -211,10 +229,7 @@ impl<'a> Value<'a> {
             if !(-300.0f32..=300.0f32).contains(&value) {
                 return Err(Error::new(
                     param_list,
-                    format!(
-                        "The value for parameter '{display_param_name}' should be between -300% and 300%. Current value is {value}% !"
-                    )
-                    .as_str(),
+                    format!("The value for parameter '{display_param_name}' should be between -300% and 300%. Current value is {value}% !").as_str(),
                     self.start,
                     self.end,
                 ));
@@ -224,14 +239,68 @@ impl<'a> Value<'a> {
         Err(Error::new(
             param_list,
             format!(
-                "Expecting an integer value or a percentage for parameter '{}' but found '{}'",
-                display_param_name, self.raw_data
+                "Expecting an integer value (e.g. '{display_param_name}: 10') or a percentage value (e.g. '{display_param_name}: 50%`) for parameter '{display_param_name}' but found '{}'",
+                self.raw_data
             )
             .as_str(),
             self.start,
             self.end,
         ))
     }
+    fn validate_layout_size(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if let Some(value) = self.get_i32() {
+            if value < 0 {
+                return Err(Error::new(
+                    param_list,
+                    format!(
+                        "Negative values are not permitted for parameter '{display_param_name}' -> you have used the following value: '{value}' !"
+                    )
+                    .as_str(),
+                    self.start,
+                    self.end,
+                ));
+            }
+            if !(0..=30000).contains(&value) {
+                return Err(Error::new(
+                    param_list,
+                    format!("The value for parameter '{display_param_name}' should be a positive number smaller than 30000 --> you have used the following value: '{value}' !").as_str(),
+                    self.start,
+                    self.end,
+                ));
+            }
+            return Ok(());
+        }
+        if let Some(value) = self.get_percentage() {
+            if !(-300.0f32..=300.0f32).contains(&value) {
+                if value < 0.0f32 {
+                    return Err(Error::new(
+                        param_list,
+                        format!("Negative percentages are not permitted for parameter '{display_param_name}' -> you have used the following value: '{}' !", self.get_string()).as_str(),
+                        self.start,
+                        self.end,
+                    ));
+                }
+                return Err(Error::new(
+                    param_list,
+                    format!("The percentage value for parameter '{display_param_name}' should be between -300% and 300% -> you have used the following percentage: '{value}%' !").as_str(),
+                    self.start,
+                    self.end,
+                ));
+            }
+            return Ok(());
+        }
+        Err(Error::new(
+            param_list,
+            format!(
+                "Expecting an integer value (e.g. '{display_param_name}: 10') or a percentage value (e.g. '{display_param_name}: 50%`) for parameter '{display_param_name}' but found '{}'",
+                self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ))
+    }
+
     fn validate_flags(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.is_list() {
             return Ok(());
@@ -284,14 +353,29 @@ impl<'a> Value<'a> {
         self.data_type = ValueType::List(v);
         Ok(())
     }
-    fn validate_alignament(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
-        if self.get_alignament().is_some() {
+    fn validate_alignment(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if self.get_alignment().is_some() {
             return Ok(());
         }
         Err(Error::new(
             param_list,
             format!(
-                "Expecting an alignament constant (left,topleft,top,topright,right,bottomright,bottom,bottomleft,center) for parameter '{}' but found '{}'",
+                "Expecting an alignment constant (left,topleft,top,topright,right,bottomright,bottom,bottomleft,center) for parameter '{}' but found '{}'",
+                display_param_name, self.raw_data
+            )
+            .as_str(),
+            self.start,
+            self.end,
+        ))
+    }
+    fn validate_dock(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        if self.get_dock().is_some() {
+            return Ok(());
+        }
+        Err(Error::new(
+            param_list,
+            format!(
+                "Expecting an dock constant (left,top,right,bottom or fill) for parameter '{}' but found '{}'",
                 display_param_name, self.raw_data
             )
             .as_str(),
@@ -403,7 +487,7 @@ impl<'a> Value<'a> {
             self.start,
             self.end,
         ))
-    }   
+    }
     fn validate_coordonate(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_coordonate().is_some() {
             return Ok(());
@@ -418,21 +502,23 @@ impl<'a> Value<'a> {
             self.start,
             self.end,
         ))
-    }  
+    }
     pub(crate) fn validate(&mut self, param_list: &str, key_name: &str, expected_type: super::signature::ParamType) -> Result<(), Error> {
         let display_param_name = if !self.param_name.is_empty() { self.param_name } else { key_name };
         match expected_type {
             super::ParamType::String => { /* always possible */ }
             super::ParamType::Bool => self.validate_bool(display_param_name, param_list)?,
             super::ParamType::Flags => self.validate_flags(display_param_name, param_list)?,
-            super::ParamType::Alignament => self.validate_alignament(display_param_name, param_list)?,
+            super::ParamType::Alignment => self.validate_alignment(display_param_name, param_list)?,
+            super::ParamType::Dock => self.validate_dock(display_param_name, param_list)?,
             super::ParamType::Color => self.validate_color(display_param_name, param_list)?,
             super::ParamType::Layout => self.validate_layout(display_param_name, param_list)?,
+            super::ParamType::LayoutSize => self.validate_layout_size(display_param_name, param_list)?,
             super::ParamType::Size => self.validate_size(display_param_name, param_list)?,
             super::ParamType::Dict => self.validate_dict(display_param_name, param_list)?,
             super::ParamType::List => self.validate_list(display_param_name, param_list)?,
             super::ParamType::Integer => self.validate_i32(display_param_name, param_list)?,
-            super::ParamType::Percentage => self.validate_percentage(display_param_name, param_list)?,            
+            super::ParamType::Percentage => self.validate_percentage(display_param_name, param_list)?,
             super::ParamType::Dimension => self.validate_dimension(display_param_name, param_list)?,
             super::ParamType::Coordonate => self.validate_coordonate(display_param_name, param_list)?,
         }

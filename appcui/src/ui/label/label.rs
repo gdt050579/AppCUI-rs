@@ -14,7 +14,7 @@ impl Label {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut label = Label::new("My Label", Layout::new("x:1,y:1,w:30"));
+    /// let mut label = Label::new("My Label", layout!("x:1,y:1,w:30"));
     /// ```
     pub fn new(caption: &str, layout: Layout) -> Self {
         Label {
@@ -36,7 +36,7 @@ impl OnPaint for Label {
         let mut format = TextFormatBuilder::new()
             .position(0, 0)
             .attribute(if self.is_enabled() { theme.text.normal } else { theme.text.inactive })
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .chars_count(self.caption.chars_count() as u16)
             .build();
 

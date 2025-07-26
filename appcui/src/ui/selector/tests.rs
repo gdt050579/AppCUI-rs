@@ -62,15 +62,15 @@ fn check_creation() {
         CheckHash(0xBC99794D98A96264)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:36,h:7");
+    let mut w = window!("Title,a:c,w:36,h:7");
     w.add(Selector::<Options>::new(
         Some(Options::B),
-        Layout::new("x:1,y:1,w:10"),
+        layout!("x:1,y:1,w:10"),
         selector::Flags::None,
     ));
     w.add(Selector::<Options>::new(
         None,
-        Layout::new("x:1,y:3,w:10"),
+        layout!("x:1,y:3,w:10"),
         selector::Flags::AllowNoneVariant,
     ));
     a.add_window(w);
@@ -106,7 +106,7 @@ fn check_create_with_macro() {
         CheckHash(0xBC99794D98A96264)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:36,h:7");
+    let mut w = window!("Title,a:c,w:36,h:7");
     w.add(selector!("Options,value:B,x:1,y:1,w:10"));
     w.add(selector!("Options,x:1,y:3,w:10,flags: AllowNoneVariant"));
     a.add_window(w);
@@ -144,7 +144,7 @@ fn check_expand_pack() {
         CheckHash(0xE947715F06C97410)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:36,h:7");
+    let mut w = window!("Title,a:c,w:36,h:7");
     w.add(selector!("Options,value:B,x:1,y:1,w:20"));
     w.add(selector!("Cars,value:Ferrari,x:1,y:3,w:20"));
     a.add_window(w);
@@ -684,12 +684,12 @@ fn check_value_set_value_clear_value() {
             // Create selector with Option2 as initial value and AllowNoneVariant flag
             let sel = Selector::<TestEnum>::new(
                 Some(TestEnum::Option2),
-                Layout::new("x:1,y:1,w:30"),
+                layout!("x:1,y:1,w:30"),
                 selector::Flags::AllowNoneVariant
             );
             
             // Create a label to display value information
-            let l = Label::new("", Layout::new("x:1,y:3,w:76,h:5"));
+            let l = Label::new("", layout!("x:1,y:3,w:76,h:5"));
             
             w.selector_handle = w.add(sel);
             w.info_handle = w.add(l);
@@ -807,10 +807,10 @@ fn check_create_with_panic() {
         CheckHash(0x0)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:36,h:7");
+    let mut w = window!("Title,a:c,w:36,h:7");
     let s = Selector::<Options>::new(
         None,
-        Layout::new("x:1,y:1,w:10"),
+        layout!("x:1,y:1,w:10"),
         selector::Flags::None,
     );
     w.add(s);
@@ -827,10 +827,10 @@ fn check_clear_value_with_panic() {
         CheckHash(0x0)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:36,h:7");
+    let mut w = window!("Title,a:c,w:36,h:7");
     let mut s = Selector::<Options>::new(
         Some(Options::B),
-        Layout::new("x:1,y:1,w:10"),
+        layout!("x:1,y:1,w:10"),
         selector::Flags::None,
     );
     s.clear_value(); // should panic here

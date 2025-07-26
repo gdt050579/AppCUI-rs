@@ -62,7 +62,7 @@ pub struct ControlBase {
 }
 
 impl ControlBase {
-    /// Creates a new control with the specified layout. The argument `accept_input` specifies if the control can receive input or not. 
+    /// Creates a new control with the specified layout. The argument `accept_input` specifies if the control can receive input or not.
     pub fn new(layout: Layout, accept_input: bool) -> Self {
         ControlBase::with_status_flags(
             layout,
@@ -77,7 +77,7 @@ impl ControlBase {
     /// When such a control is created if it has focus it will increase its bottom and right margins by one character.
     /// This provides aditional space for the focused control to be drawn (usually a scrollbar).
     pub fn with_focus_overlay(layout: Layout) -> Self {
-        ControlBase::with_status_flags( 
+        ControlBase::with_status_flags(
             layout,
             StatusFlags::AcceptInput
                 | StatusFlags::Enabled
@@ -95,7 +95,7 @@ impl ControlBase {
             children: Vec::new(),
             focused_child_index: VectorIndex::Invalid,
             parent_index: VectorIndex::Invalid,
-            layout: ControlLayout::new(layout.format),
+            layout: ControlLayout::from(layout),
             margins: Margins {
                 left: 0,
                 right: 0,
@@ -115,8 +115,8 @@ impl ControlBase {
     #[inline(always)]
     pub fn size(&self) -> Size {
         Size {
-            width: self.layout.get_width() as u32,
-            height: self.layout.get_height() as u32,
+            width: self.layout.width() as u32,
+            height: self.layout.height() as u32,
         }
     }
 
@@ -125,15 +125,15 @@ impl ControlBase {
     pub fn client_size(&self) -> Size {
         let horizontal_margins = (self.margins.left as u32) + (self.margins.right as u32);
         let vertical_margins = (self.margins.top as u32) + (self.margins.bottom as u32);
-        let width = self.layout.get_width() as u32;
-        let height = self.layout.get_height() as u32;
+        let width = self.layout.width() as u32;
+        let height = self.layout.height() as u32;
         Size {
             width: width.saturating_sub(horizontal_margins),
             height: height.saturating_sub(vertical_margins),
         }
     }
 
-    /// Sets the new size for a control (to a specified size given by parameters `width` and `height`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by controls `x` and `y` coordonates) and the new provided size. Any dock or alignament properties will be removed.
+    /// Sets the new size for a control (to a specified size given by parameters `width` and `height`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by controls `x` and `y` coordonates) and the new provided size. Any dock or alignment properties will be removed.
     /// This method has no effect on a Desktop control.
     #[inline(always)]
     pub fn set_size(&mut self, width: u16, height: u16) {
@@ -148,12 +148,12 @@ impl ControlBase {
     #[inline(always)]
     pub fn position(&self) -> Point {
         Point {
-            x: self.layout.get_x(),
-            y: self.layout.get_y(),
+            x: self.layout.x(),
+            y: self.layout.y(),
         }
     }
 
-    /// Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignament properties will be removed.
+    /// Sets the new position for a control (to a specified coordonate given by parameters `x` and `y`). Keep in mind that this method will change the existing layout to an a layout based on top-left corner (given by coordonates `x` and `y`) and the controls current width and height. Any dock or alignment properties will be removed.
     /// This method has no effect on a Desktop control.
     pub fn set_position(&mut self, x: i32, y: i32) {
         if self.status_flags.contains_one(StatusFlags::DesktopControl | StatusFlags::SingleWindow) {
@@ -440,6 +440,7 @@ impl ControlBase {
         RuntimeManager::get().request_recompute_layout();
     }
 
+    // Sets the margins of the control (all childern of this control will be translated within this margins)
     #[inline]
     pub(crate) fn set_margins(&mut self, left: u8, top: u8, right: u8, bottom: u8) {
         self.margins.left = left;
@@ -464,19 +465,19 @@ impl ControlBase {
     }
     #[inline(always)]
     pub(crate) fn is_coord_in_control(&self, x: i32, y: i32) -> bool {
-        (x >= 0) && (y >= 0) && (x < (self.layout.get_width() as i32)) && (y < (self.layout.get_height() as i32))
+        (x >= 0) && (y >= 0) && (x < (self.layout.width() as i32)) && (y < (self.layout.height() as i32))
     }
 
     #[inline]
     pub(crate) fn update_control_layout_and_screen_origin(&mut self, parent_layout: &ParentLayout) {
         self.layout.update(parent_layout.client_width, parent_layout.client_height);
-        self.screen_origin.x = parent_layout.origin.x + self.layout.get_x();
-        self.screen_origin.y = parent_layout.origin.y + self.layout.get_y();
+        self.screen_origin.x = parent_layout.origin.x + self.layout.x();
+        self.screen_origin.y = parent_layout.origin.y + self.layout.y();
         self.screen_clip.set_with_size(
             self.screen_origin.x,
             self.screen_origin.y,
-            self.layout.get_width(),
-            self.layout.get_height(),
+            self.layout.width(),
+            self.layout.height(),
         );
         self.screen_clip.intersect_with(&parent_layout.clip);
     }
@@ -514,8 +515,8 @@ impl ControlBase {
         let mut c = ClipArea::with_size(
             self.screen_origin.x,
             self.screen_origin.y,
-            self.layout.get_width(),
-            self.layout.get_height(),
+            self.layout.width(),
+            self.layout.height(),
         );
         c.reduce_margins(
             self.margins.left as i32,
@@ -529,7 +530,7 @@ impl ControlBase {
 
     #[inline(always)]
     pub(crate) fn absolute_rect(&self) -> Rect {
-        Rect::with_point_and_size(self.screen_origin, self.layout.get_size())
+        Rect::with_point_and_size(self.screen_origin, self.layout.size())
     }
     pub(crate) fn prepare_paint(&self, surface: &mut Surface) -> bool {
         if !self.is_visible() || !self.screen_clip.is_visible() {
@@ -650,6 +651,12 @@ impl ControlBase {
     #[inline(always)]
     pub fn theme(&self) -> &Theme {
         RuntimeManager::get().theme()
+    }
+
+    /// Updates the layout of the current control
+    pub fn update_layout(&mut self, layout: Layout) {
+        self.layout = ControlLayout::from(layout);
+        RuntimeManager::get().request_update();
     }
 }
 // default implementations

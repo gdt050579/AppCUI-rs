@@ -39,7 +39,7 @@ impl ComboBox {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut cb = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::ShowDescription);
+    /// let mut cb = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::ShowDescription);
     /// cb.add("Item 1");
     /// cb.add("Item 2");
     /// cb.add("Item 3");
@@ -67,7 +67,7 @@ impl ComboBox {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut cb = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::None);
+    /// let mut cb = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
     /// cb.add("Item 1");
     /// cb.add("Item 2");
     /// cb.add("Item 3");
@@ -85,7 +85,7 @@ impl ComboBox {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut cb = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::None);
+    /// let mut cb = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
     /// cb.add("Item 1");
     /// cb.add("Item 2");
     /// cb.add("Item 3");
@@ -99,7 +99,7 @@ impl ComboBox {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut cb = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::ShowDescription);
+    /// let mut cb = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::ShowDescription);
     /// cb.add_item(combobox::Item::new("Item 1", "Description for item 1"));
     /// cb.add_item(combobox::Item::new("Item 2", "Description for item 2"));
     /// cb.add_item(combobox::Item::new("Item 3", "Description for item 3"));

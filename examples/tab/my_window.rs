@@ -17,7 +17,7 @@ pub struct MyWindow {
 impl MyWindow {
     pub fn new() -> Self {
         let mut w = Self {
-            base: window!("'Tab Example',d:c,w:40,h:20"),
+            base: window!("'Tab Example',a:c,w:40,h:20"),
             run: Handle::None,
             exit: Handle::None,
             ontop: Handle::None,

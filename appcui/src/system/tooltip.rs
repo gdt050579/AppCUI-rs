@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Character, Point, Rect, Size, SpecialChar, Surface, TextAlignament, WrapType},
+    graphics::{Character, Point, Rect, Size, SpecialChar, Surface, TextAlignment, WrapType},
     prelude::TextFormatBuilder,
 };
 
@@ -69,7 +69,7 @@ impl ToolTip {
             let format = TextFormatBuilder::new()
                 .position(1, 0)
                 .attribute(theme.tooltip.text)
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .chars_count(chars_count as u16)
                 .wrap_type(WrapType::WordWrap((best_width - 2) as u16))
                 .build();
@@ -92,7 +92,7 @@ impl ToolTip {
             let format = TextFormatBuilder::new()
                 .position(1, 0)
                 .attribute(theme.tooltip.text)
-                .align(TextAlignament::Left)
+                .align(TextAlignment::Left)
                 .chars_count(chars_count as u16)
                 .wrap_type(WrapType::WordWrap((best_width - 2) as u16))
                 .build();

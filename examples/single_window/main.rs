@@ -8,13 +8,13 @@ struct MyWindow {
 impl MyWindow {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("title:'Square root',d:c"),
+            base: window!("title:'Square root',d:f"),
             info: Handle::None,
             number: Handle::None,
         };
         w.number = w.add(textfield!("l:1,t:1,r:1,h:1"));
         w.info = w.add(label!("'',l:1,t:3,r:1,h:1"));
-        w.add(button!("Compute,x:50%,y:100%,w:20,a:b"));
+        w.add(button!("Compute,x:50%,y:100%,w:20,p:b"));
 
         w
     }

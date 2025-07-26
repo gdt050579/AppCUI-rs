@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{Character, SpecialChar, Surface, TextAlignament, TextFormatBuilder, WrapType},
+    graphics::{Character, SpecialChar, Surface, TextAlignment, TextFormatBuilder, WrapType},
     system::{Handle, Theme},
     utils::Caption,
     utils::ExtractHotKeyMethod
@@ -34,7 +34,7 @@ use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Gro
 /// impl CheckboxWindow {
 ///     fn new() -> Self {
 ///         let mut win = CheckboxWindow {
-///             base: window!("'Checkbox Demo',d:c,w:40,h:6"),
+///             base: window!("'Checkbox Demo',a:c,w:40,h:6"),
 ///             checkbox_one: Handle::None,
 ///             checkbox_two: Handle::None,
 ///             status_label: Handle::None,
@@ -53,7 +53,7 @@ use super::{AddToToolbar, ItemBase, PaintData, SymbolAttrState, ToolBarItem, Gro
 ///         win.checkbox_two = win.toolbar().add(group, cb2);
 ///         
 ///         // Add a label to display the checkbox states
-///         win.status_label = win.add(label!("'Select an option',d:c,w:30,h:1"));
+///         win.status_label = win.add(label!("'Select an option',a:c,w:30,h:1"));
 ///         
 ///         win
 ///     }
@@ -168,7 +168,7 @@ impl CheckBox {
         let mut format = TextFormatBuilder::new()
             .position(x + 2, y)
             .attribute(text_attr)
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
             .build();
         if self.caption.has_hotkey() {

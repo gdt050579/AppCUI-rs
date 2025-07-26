@@ -1,6 +1,6 @@
-use std::str::FromStr;
 use super::InputCallback;
 use crate::prelude::*;
+use std::str::FromStr;
 
 #[ModalWindow(internal: true, response: T, events: ButtonEvents+TextFieldEvents)]
 pub(super) struct StringImputDialog<T>
@@ -18,24 +18,23 @@ where
 {
     pub(super) fn new(title: &str, text: &str, value: Option<T>, validation: Option<InputCallback<T>>) -> Self {
         let chars_count = text.chars().count();
-        let height = ((chars_count / 36) + 1).clamp(1, 6);
-        let format_str = format!("d:c,w:40,h:{}", height + 8);
-        let layout = Layout::new(format_str.as_str());
+        let height = ((chars_count / 36) + 1).clamp(1, 6) as u32;
+        let layout = LayoutBuilder::new().alignment(Alignment::Center).width(40).height(height + 8).build();
         let mut me = Self {
             base: ModalWindow::new(title, layout, window::Flags::NoCloseButton),
             txt: Handle::None,
             btn_ok: Handle::None,
             validation,
         };
-        me.add(Label::new(text, Layout::new("l:1,t:1,r:1,b:5")));
-        me.btn_ok = me.add(Button::new("&Ok", Layout::new("l:5,b:0,w:13"), button::Type::Normal));
-        me.add(Button::new("&Cancel", Layout::new("l:21,b:0,w:13"), button::Type::Normal));
+        me.add(Label::new(text, layout!("l:1,t:1,r:1,b:5")));
+        me.btn_ok = me.add(Button::new("&Ok", layout!("l:5,b:0,w:13"), button::Type::Normal));
+        me.add(Button::new("&Cancel", layout!("l:21,b:0,w:13"), button::Type::Normal));
         let content = if let Some(value) = value {
             format! {"{value}"}
         } else {
             String::new()
         };
-        me.txt = me.add(TextField::new(&content, Layout::new("l:1,r:1,b:3,h:1"), textfield::Flags::ProcessEnter));
+        me.txt = me.add(TextField::new(&content, layout!("l:1,r:1,b:3,h:1"), textfield::Flags::ProcessEnter));
         me
     }
     fn validate(&mut self) {

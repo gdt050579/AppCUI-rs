@@ -17,15 +17,15 @@ pub struct Rect {
 A rectangle can be created using the following methods:
 1. `Rect::new(left, top, right, bottom)` - creates a new rectangle based on the provided coordinates.
 2. `Rect::with_size(left, top, width, height)` - creates a new rectangle based on the provided position and size.
-3. `Rect::with_alignament(x, y, width, height, align)` - creates a new rectangle based on the provided position, size and alignment.
+3. `Rect::with_alignment(x, y, width, height, align)` - creates a new rectangle based on the provided position, size and alignment.
 4. `Rect::with_point_and_size(point, size)` - creates a new rectangle based on the provided point and size. 
 
-The alignament in the third method is defined as follows:
+The alignment in the third method is defined as follows:
 
 ```rust
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub enum Alignament {
+pub enum RectAlignment {
     TopLeft = 0,
     Top,
     TopRight,
@@ -38,7 +38,7 @@ pub enum Alignament {
 }
 ```
 
-| Alignament    | Decription                                                | Preview                                   |
+| Alignment    | Decription                                                | Preview                                   |
 | ------------- | --------------------------------------------------------- | ----------------------------------------- |
 | `TopLeft`     | (X,Y) represents the top-left corner of the rectangle     | ![TopLeft](img/rect_top_left.png)         |
 | `Top`         | (X,Y) represents the top-center of the rectangle          | ![Top](img/rect_top.png)                  |

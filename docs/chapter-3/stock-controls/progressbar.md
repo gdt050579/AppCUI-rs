@@ -6,7 +6,7 @@ Represent a progress bar that can be used to show the progress of a task.
 
 To create a label use `ProgressBar::new` method (with 2 parameters: a caption and a layout).
 ```rs
-let pg1 = ProgressBar::new(1000, Layout::new("x:10,y:5,w:15"), progressbar::Flags::None);
+let pg1 = ProgressBar::new(1000, layout!("x:10,y:5,w:15"), progressbar::Flags::None);
 ```
 or the macro `progressbar!`
 ```rs
@@ -58,8 +58,8 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Test,d:c");
-    let mut p = ProgressBar::new(100,Layout::new("x:1,y:1,w:30,h:2"), progressbar::Flags::None);
+    let mut w = window!("Test,d:f");
+    let mut p = ProgressBar::new(100,layout!("x:1,y:1,w:30,h:2"), progressbar::Flags::None);
     p.update_text("Copying ...");
     w.add(p);
     a.add_window(w);

@@ -29,11 +29,11 @@ impl ListBox {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let lbox = ListBox::new(Layout::new("d:c"),
+    /// let lbox = ListBox::new(layout!("d:f"),
     ///                         listbox::Flags::ScrollBars |
     ///                         listbox::Flags::CheckBoxes |
     ///                         listbox::Flags::SearchBar);
-    /// let simple_lbox = ListBox::new(Layout::new("d:c"),listbox::Flags::None);
+    /// let simple_lbox = ListBox::new(layout!("d:f"),listbox::Flags::None);
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_capacity(0, layout, flags)
@@ -53,7 +53,7 @@ impl ListBox {
     ///
     /// // a listbox with a capacity of 100 items, with scrollbars
     /// let lbox = ListBox::with_capacity(100,
-    ///                                   Layout::new("d:c"),
+    ///                                   layout!("d:f"),
     ///                                   listbox::Flags::ScrollBars);
     /// ```   
     pub fn with_capacity(capacity: usize, layout: Layout, flags: Flags) -> Self {
@@ -151,7 +151,7 @@ impl ListBox {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut lbox = ListBox::new(Layout::new("d:c,w:100%,h:100%"), listbox::Flags::CheckBoxes);
+    /// let mut lbox = ListBox::new(layout!("d:f"), listbox::Flags::CheckBoxes);
     /// lbox.add_item(listbox::Item::new("Item 1", false));
     /// lbox.add_item(listbox::Item::new("Item 2", true));
     /// lbox.add_item(listbox::Item::new("Item 3", false));
@@ -351,7 +351,7 @@ impl OnPaint for ListBox {
             let format = TextFormatBuilder::new()
                 .position(w / 2, h / 2)
                 .attribute(empty_attr)
-                .align(TextAlignament::Center)
+                .align(TextAlignment::Center)
                 .wrap_type(WrapType::WordWrap(w as u16))
                 .build();
             surface.write_text(&self.empty_message, &format);

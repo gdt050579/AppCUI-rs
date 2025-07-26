@@ -9,14 +9,14 @@ fn check_create(){
     ";
     
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Dates,d:c,w:50,h:11");
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:3,w:16")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:5,w:14")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:7,w:10")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:1,w:23")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:3,w:7")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:5,w:6")));
+    let mut w = window!("Dates,a:c,w:50,h:11");
+    w.add(DatePicker::new("2024-06-13", layout!("x:1,y:1,w:19")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:1,y:3,w:16")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:1,y:5,w:14")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:1,y:7,w:10")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:23,y:1,w:23")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:23,y:3,w:7")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:23,y:5,w:6")));
     a.add_window(w);
     a.run();
 }
@@ -37,14 +37,14 @@ fn check_on_hover(){
     ";
  
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Dates,d:c,w:50,h:11");
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:3,w:16")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:5,w:14")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:1,y:7,w:10")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:1,w:23")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:3,w:7")));
-    w.add(DatePicker::new("2024-06-13", Layout::new("x:23,y:5,w:6")));
+    let mut w = window!("Dates,a:c,w:50,h:11");
+    w.add(DatePicker::new("2024-06-13", layout!("x:1,y:1,w:19")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:1,y:3,w:16")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:1,y:5,w:14")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:1,y:7,w:10")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:23,y:1,w:23")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:23,y:3,w:7")));
+    w.add(DatePicker::new("2024-06-13", layout!("x:23,y:5,w:6")));
     a.add_window(w);
     a.run();
 }
@@ -72,8 +72,8 @@ fn check_expand(){
     ";
     
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Dates,d:c,w:25,h:6");
-    w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
+    let mut w = window!("Dates,a:c,w:25,h:6");
+    w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);
     a.run();
 }
@@ -132,8 +132,8 @@ fn check_hovers(){
     ";
     
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Dates,d:c,w:25,h:6");
-    w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
+    let mut w = window!("Dates,a:c,w:25,h:6");
+    w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);
     a.run();
 }
@@ -147,7 +147,7 @@ fn check_procmacro(){
     ";
     
     let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Dates,d:c,w:50,h:11");
+    let mut w = window!("Dates,a:c,w:50,h:11");
     w.add(datepicker!("2024-06-13, x:1,y:1,w:19"));
     w.add(datepicker!("2024-06-13, x:1,y:3,w:16"));
     w.add(datepicker!("2024-06-13, x:1,y:5,w:14"));
@@ -219,8 +219,8 @@ fn check_buttons(){
     ";
     
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Dates,d:c,w:25,h:6");
-    w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
+    let mut w = window!("Dates,a:c,w:25,h:6");
+    w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);
     a.run();
 }
@@ -423,8 +423,8 @@ fn check_packed_keys(){
     ";
     
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Dates,d:c,w:25,h:6");
-    w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
+    let mut w = window!("Dates,a:c,w:25,h:6");
+    w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);
     a.run();
 }
@@ -518,8 +518,8 @@ fn check_expanded_keys(){
     ";
     
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Dates,d:c,w:25,h:6");
-    w.add(DatePicker::new("2024-06-13", Layout::new("d:c,w:19")));
+    let mut w = window!("Dates,a:c,w:25,h:6");
+    w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);
     a.run();
 }

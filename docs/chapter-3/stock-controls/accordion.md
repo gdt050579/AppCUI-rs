@@ -6,13 +6,13 @@ An accordion control is a graphical user interface element that consists of a ve
 
 To create an accordion use `Accordion::new` methods:
 ```rs
-let a1 = Accordion::new(Layout::new("d:c,w:15,h:10"),accordion::Flags::None);
+let a1 = Accordion::new(layout!("a:c,w:15,h:10"),accordion::Flags::None);
 ```
 
 or the macro `accordion!`
 ```rs
-let a2 = accordion!("d:c,w:15,h:10,panels:[First,Second,Third]");
-let a3 = accordion!("d:c,w:15,h:10,panels:[A,B,C],flags:TransparentBackground");
+let a2 = accordion!("a:c,w:15,h:10,panels:[First,Second,Third]");
+let a3 = accordion!("a:c,w:15,h:10,panels:[A,B,C],flags:TransparentBackground");
 ```
 
 The caption of each accordion may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a accordion panel with the following caption `&Start` will set up the text of the accordion to `Start` and will set up character `S` as the hot key to activate that accordion panel.
@@ -29,8 +29,8 @@ A accordion supports the following initialization flags:
 
 Some examples that uses these paramateres:
 ```rs
-let t1 = accordion!("panels:[Tab1,Tab2,Accordion&3],d:c,w:100%,h:100%");
-let t2 = accordion!("panels:[A,B,C],flags:TransparentBackground,d:c,w:100%,h:100%");
+let t1 = accordion!("panels:[Tab1,Tab2,Accordion&3],d:f");
+let t2 = accordion!("panels:[A,B,C],flags:TransparentBackground,d:f");
 ```
 
 ## Events
@@ -84,12 +84,12 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = window!("Test,d:c,w:100%,h:100%");
+    let mut w = window!("Test,d:f");
     let mut t = accordion!("l:1,t:1,r:1,b:3,panels:['Panel &1','Panel &2','Panel &3']");
     t.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
-    t.add(0, button!("T1-1-B,d:c,w:10,type:flat"));      
+    t.add(0, button!("T1-1-B,a:c,w:10,type:flat"));      
     t.add(1, button!("T1-2-A,r:1,b:0,w:14,type:flat"));
-    t.add(1, button!("T1-2-B,d:c,w:14,type:flat")); 
+    t.add(1, button!("T1-2-B,a:c,w:14,type:flat")); 
     t.add(2, button!("T1-3-A,r:1,b:0,w:20,type:flat"));
     t.add(2, button!("T1-3-B,d:l,w:20,type:flat"));  
     w.add(t); 

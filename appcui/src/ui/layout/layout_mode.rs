@@ -1,8 +1,9 @@
 use super::AbsoluteLayout;
-use super::Alignament;
+use super::Alignment;
 use super::AllAnchorsLayout;
 use super::Anchors;
-use super::LayoutParameters;
+use super::Error;
+use super::Layout;
 use super::LeftBottomRightAnchorsLayout;
 use super::LeftRightAnchorsLayout;
 use super::LeftTopRightAnchorsLayout;
@@ -26,104 +27,92 @@ pub(super) enum LayoutMode {
     AllAnchors(AllAnchorsLayout),
 }
 impl LayoutMode {
-    pub(super) fn new(format: &str) -> LayoutMode {
-        let params_list = LayoutParameters::new(format);
-
+    pub(super) fn new(layout: Layout) -> Result<LayoutMode, Error> {
         // check if layout params are OK
-        // Step 1 ==> if dock option is present
-        if params_list.dock.is_some() {
-            return LayoutMode::PointAndSize(PointAndSizeLayout::new_docked(&params_list));
+        let anchors = layout.anchors();
+
+        if layout.x.is_none()
+            && layout.y.is_none()
+            && layout.width.is_none()
+            && layout.height.is_none()
+            && layout.pivot.is_none()
+            && layout.align.is_none()
+            && layout.dock.is_none()
+            && anchors == Anchors::None
+        {
+            return Err(Error::NoParameters);
         }
-        // Step 2 ==> check (X,Y) + (W,H) + (optional align)
-        if params_list.x.is_some() && params_list.y.is_some() {
+        // Step 1 ==> if dock option is present
+        if layout.dock.is_some() {
+            return PointAndSizeLayout::new_docked(&layout).map(|layout| LayoutMode::PointAndSize(layout));
+        }
+        // Step 2 ==> if align option is present
+        if layout.align.is_some() {
+            return PointAndSizeLayout::new_aligned(&layout).map(|layout| LayoutMode::PointAndSize(layout));
+        }
+        // Step 3 ==> check (X,Y) + (W,H) + (optional pivot)
+        if layout.x.is_some() && layout.y.is_some() {
             // if all we have is (X,Y) + (W,H) check to see if it is an absolute layout
-            if (params_list.width.is_some())
-                && (params_list.height.is_some())
-                && (params_list.align.is_none())
-                && (params_list.a_top.is_none())
-                && (params_list.a_left.is_none())
-                && (params_list.a_bottom.is_none())
-                && (params_list.a_right.is_none())
+            if (layout.width.is_some())
+                && (layout.height.is_some())
+                && (layout.align.is_none())
+                && (layout.pivot.is_none())
+                && (layout.dock.is_none())
+                && (layout.a_top.is_none())
+                && (layout.a_left.is_none())
+                && (layout.a_bottom.is_none())
+                && (layout.a_right.is_none())
             {
-                let x = params_list.x.unwrap();
-                let y = params_list.y.unwrap();
-                let w = params_list.width.unwrap();
-                let h = params_list.height.unwrap();
+                let x = layout.x.unwrap();
+                let y = layout.y.unwrap();
+                let w = layout.width.unwrap();
+                let h = layout.height.unwrap();
                 if x.is_absolute() && y.is_absolute() && w.is_absolute() && h.is_absolute() {
                     let w = w.absolute(0);
                     let h = h.absolute(0);
                     if (w > 0) && (h > 0) {
-                        return LayoutMode::Absolute(AbsoluteLayout::new(
-                            x.absolute(0),
-                            y.absolute(0),
-                            w,
-                            h,
-                        ));
+                        return Ok(LayoutMode::Absolute(AbsoluteLayout::new(x.absolute(0), y.absolute(0), w, h)));
                     }
                 }
             }
-            return LayoutMode::PointAndSize(PointAndSizeLayout::new_xy_width_height(&params_list));
+            return PointAndSizeLayout::new_xy(&layout).map(|layout| LayoutMode::PointAndSize(layout));
         }
 
-        let anchors = params_list.get_anchors();
+        // step 4 ==> check anchors
         match anchors {
             Anchors::TopLeft => {
-                LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(
-                    &params_list,
-                    Alignament::TopLeft,
-                ))
+                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopLeft).map(|layout| LayoutMode::PointAndSize(layout))
             }
             Anchors::TopRight => {
-                LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(
-                    &params_list,
-                    Alignament::TopRight,
-                ))
+                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopRight).map(|layout| LayoutMode::PointAndSize(layout))
             }
             Anchors::BottomRight => {
-                LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(
-                    &params_list,
-                    Alignament::BottomRight,
-                ))
+                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomRight).map(|layout| LayoutMode::PointAndSize(layout))
             }
             Anchors::BottomLeft => {
-                LayoutMode::PointAndSize(PointAndSizeLayout::new_corner_anchor(
-                    &params_list,
-                    Alignament::BottomLeft,
-                ))
+                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomLeft).map(|layout| LayoutMode::PointAndSize(layout))
             }
-            Anchors::LeftRight => {
-                LayoutMode::LeftRightAnchors(LeftRightAnchorsLayout::new(&params_list))
-            }
-            Anchors::TopBottom => {
-                LayoutMode::TopBottomAnchors(TopBottomAnchorsLayout::new(&params_list))
-            }
-            Anchors::LeftTopRight => {
-                LayoutMode::LeftTopRightAnchors(LeftTopRightAnchorsLayout::new(
-                    &params_list,
-                ))
-            }
-            Anchors::LeftBottomRight => {
-                LayoutMode::LeftBottomRightAnchors(LeftBottomRightAnchorsLayout::new(
-                    &params_list,
-                ))
-            }
-            Anchors::TopLeftBottom => {
-                LayoutMode::TopLeftBottomAnchors(TopLeftBottomAnchorsLayout::new(
-                    &params_list,
-                ))
-            }
-            Anchors::TopRightBottom => {
-                LayoutMode::TopRightBottomAnchors(TopRightBottomAnchorsLayout::new(
-                    &params_list,
-                ))
-            }
-            Anchors::All => {
-                LayoutMode::AllAnchors(AllAnchorsLayout::new(&params_list))
-            }
-            _ => {
-                panic!("Invalid format: {format} --> this combination can not be used to create a layout for a control ");
-            }
+            Anchors::LeftRight => return LeftRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftRightAnchors(layout)),
+            Anchors::TopBottom => return TopBottomAnchorsLayout::new(&layout).map(|layout| LayoutMode::TopBottomAnchors(layout)),
+            Anchors::LeftTopRight => return LeftTopRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftTopRightAnchors(layout)),
+            Anchors::LeftBottomRight => return LeftBottomRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftBottomRightAnchors(layout)),
+            Anchors::TopLeftBottom => return TopLeftBottomAnchorsLayout::new(&layout).map(|layout| LayoutMode::TopLeftBottomAnchors(layout)),
+            Anchors::TopRightBottom => return TopRightBottomAnchorsLayout::new(&layout).map(|layout| LayoutMode::TopRightBottomAnchors(layout)),
+            Anchors::All => return AllAnchorsLayout::new(&layout).map(|layout| LayoutMode::AllAnchors(layout)),
+            Anchors::Left | Anchors::Right | Anchors::Top | Anchors::Bottom => return Err(Error::SingleAnchor),
+            Anchors::None => {}
         }
+        // diffrent errors
+        if layout.x.is_some() && layout.y.is_none() {
+            return Err(Error::XWithoutY);
+        }
+        if layout.x.is_none() && layout.y.is_some() {
+            return Err(Error::YWithoutX);
+        }
+        if layout.pivot.is_some() {
+            return Err(Error::PivotWithoutXorY)
+        }
+        return Err(Error::InvalidLayoutRule);
     }
 }
 

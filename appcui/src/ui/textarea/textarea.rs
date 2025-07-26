@@ -635,7 +635,7 @@ impl TextArea {
     /// use appcui::prelude::*;
     /// 
     /// let textarea = TextArea::new("Hello, world!", 
-    ///                              Layout::new("x:1,y:1,w:20,h:10"), 
+    ///                              layout!("x:1,y:1,w:20,h:10"), 
     ///                              textarea::Flags::ShowLineNumber);
     /// ```
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {

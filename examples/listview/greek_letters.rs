@@ -33,7 +33,7 @@ pub(crate) struct Win {
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("'Greek Letters',d:c,w:70,h:15,flags: Sizeable"),
+            base: window!("'Greek Letters',a:c,w:70,h:15,flags: Sizeable"),
             rb_detailed: Handle::None,
             rb_columns_2: Handle::None,
             rb_columns_3: Handle::None,

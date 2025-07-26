@@ -7,13 +7,13 @@ Represent tabulator (tab control) where you can select the visible page:
 
 To create a tab use `Tab::new` ,  `Tab::with_type` methods:
 ```rs
-let t1 = Tab::new(Layout::new("d:c,w:15,h:10"),tab::Flags::None);
-let t2 = Tab::with_type(Layout::new("d:c,w:15,h:10"),tab::Flags::None, tab::Type::OnLeft);
+let t1 = Tab::new(layout!("a:c,w:15,h:10"),tab::Flags::None);
+let t2 = Tab::with_type(layout!("a:c,w:15,h:10"),tab::Flags::None, tab::Type::OnLeft);
 ```
 or the macro `tab!`
 ```rs
-let t3 = tab!("d:c,w:15,h:10,tabs:[First,Second,Third],type:OnBottom");
-let t4 = tab!("d:c,w:15,h:10,tabs:[A,B,C],flags:TabsBar");
+let t3 = tab!("a:c,w:15,h:10,tabs:[First,Second,Third],type:OnBottom");
+let t4 = tab!("a:c,w:15,h:10,tabs:[A,B,C],flags:TabsBar");
 ```
 
 The caption of each tab may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a tab with the following caption `&Start` will set up the text of the tab to `Start` and will set up character `S` as the hot key to activate that tab.
@@ -39,8 +39,8 @@ and the following flags:
 
 Some examples that uses these paramateres:
 ```rs
-let t1 = tab!("type:OnBottom,tabs:[Tab1,Tab2,Tab&3],tw:10,flags:TabsBar,d:c,w:100%,h:100%");
-let t2 = tab!("type:OnLeft,tabs:[A,B,C],flags:TabsBar+TransparentBackground,d:c,w:100%,h:100%");
+let t1 = tab!("type:OnBottom,tabs:[Tab1,Tab2,Tab&3],tw:10,flags:TabsBar,d:f");
+let t2 = tab!("type:OnLeft,tabs:[A,B,C],flags:TabsBar+TransparentBackground,d:f");
 ```
 
 ## Events
@@ -82,12 +82,12 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = window!("Test,d:c,w:100%,h:100%");
+    let mut w = window!("Test,d:f");
     let mut t = tab!("l:1,t:1,r:1,b:3,tabs:['Tab &1','Tab &2','Tab &3']");
     t.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
-    t.add(0, button!("T1-1-B,d:c,w:10,type:flat"));      
+    t.add(0, button!("T1-1-B,a:c,w:10,type:flat"));      
     t.add(1, button!("T1-2-A,r:1,b:0,w:14,type:flat"));
-    t.add(1, button!("T1-2-B,d:c,w:14,type:flat")); 
+    t.add(1, button!("T1-2-B,a:c,w:14,type:flat")); 
     t.add(2, button!("T1-3-A,r:1,b:0,w:20,type:flat"));
     t.add(2, button!("T1-3-B,d:l,w:20,type:flat"));  
     w.add(t); 

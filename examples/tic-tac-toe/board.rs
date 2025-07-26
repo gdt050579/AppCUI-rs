@@ -51,7 +51,7 @@ pub struct Board {
 impl Board {
     pub fn new() -> Self {
         Self {
-            base: ControlBase::new(Layout::new("x:2,y:1,w:34,h:19"), true),
+            base: ControlBase::new(layout!("x:2,y:1,w:34,h:19"), true),
             cells: vec![None; 9],
             current_cell_index: usize::MAX,
             clicked: false,

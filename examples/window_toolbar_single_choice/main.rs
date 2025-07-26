@@ -10,7 +10,7 @@ struct SingleChoiceWindow {
 impl SingleChoiceWindow {
     fn new() -> Self {
         let mut win = SingleChoiceWindow {
-            base: window!("'Single Choice Demo',d:c,w:40,h:6"),
+            base: window!("'Single Choice Demo',a:c,w:40,h:6"),
             option_one: Handle::None,
             option_two: Handle::None,
             status_label: Handle::None,
@@ -35,7 +35,7 @@ impl SingleChoiceWindow {
         }
 
         // Add a label to display the selection state
-        win.status_label = win.add(label!("'Option 1 is selected',d:c,w:30,h:1"));
+        win.status_label = win.add(label!("'Option 1 is selected',a:c,w:30,h:1"));
 
         win
     }

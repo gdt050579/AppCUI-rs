@@ -3,7 +3,7 @@
 Writing text on a surface is a common task in GUI programming, that can be achieved using the following methods:
 1. `write_string(...)` - writes a string (`String` or `&str`) on the surface starting from a specific position, color and character attribute.
 2. `write_ascii(...)` - similar to **write_string**, but it writes only ASCII characters.
-3. `write_text(...)` - a more complex method that allows alignament, wrapping and text formatting.
+3. `write_text(...)` - a more complex method that allows alignment, wrapping and text formatting.
 
 ## Write a string
 
@@ -61,7 +61,7 @@ surface.write_ascii(10, 10,
 
 ## Write a formatted text
 
-In some cases, you may need to write a text that is formatted in a specific way (like alignament, wrapping, etc). The `write_text(...)` method allows you to do this. The method has the following signature:
+In some cases, you may need to write a text that is formatted in a specific way (like alignment, wrapping, etc). The `write_text(...)` method allows you to do this. The method has the following signature:
 
 ```rust
 pub fn write_text(&mut self, text: &str, format: &TextFormat)
@@ -75,7 +75,7 @@ where the `TextFormat` structure can be created using the `TextFormatBuilder` in
 | `position(...)`    | Sets the position where the text will be written (X and Y axes)                                                                    |
 | `attribute(...)`   | Sets the character attribute for the text (forecolor, backcolor and other attributes)                                              |
 | `hotkey(...)`      | Sets the hotkey attribute and position for the text (if any)                                                                       |
-| `align(...)`       | Sets the text alignament (left, right, center)                                                                                     |
+| `align(...)`       | Sets the text alignment (left, right, center)                                                                                     |
 | `wrap_type(...)`   | Sets the text wrapping type of the code (`WrapType` enum)                                                                          |
 | `chars_count(...)` | Sets the number of characters in the text (this is useful to optimize several operations especially if this value is aready known) |
 | `build()`          | Builds the `TextFormat` object                                                                                                     |
@@ -101,7 +101,7 @@ Once a `TextFormat` object is created, you can modify it and use it using the fo
 | `set_attribute(...)`   | Sets the character attribute for the text (forecolor, backcolor and other attributes)                                              |
 | `set_hotkey(...)`      | Sets the hotkey attribute and position for the text (if any)                                                                       |
 | `clear_hotkey()`       | Clears the hotkey attribute from the text                                                                                          |
-| `set_align(...)`       | Sets the text alignament (left, right, center)                                                                                     |
+| `set_align(...)`       | Sets the text alignment (left, right, center)                                                                                     |
 | `set_wrap_type(...)`   | Sets the text wrapping type of the code (`WrapType` enum)                                                                          |
 | `set_chars_count(...)` | Sets the number of characters in the text (this is useful to optimize several operations especially if this value is aready known) |
 

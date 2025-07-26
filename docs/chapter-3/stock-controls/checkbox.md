@@ -7,10 +7,10 @@ Represent a control with two states (checked and unckehed):
 To create a checkbox use `CheckBox::new` method (with 3 parameters: a caption, a layout and checked status (**true** or **false**)) or method `CheckBox::with_type` (with one aditional parameter - the type of the checblx).
 ```rs
 let b1 = CheckBox::new("A checkbox", 
-                       Layout::new("x:10,y:5,w:15"),
+                       layout!("x:10,y:5,w:15"),
                        true);
 let b2 = CheckBox::with_type("Another checkbox", 
-                             Layout::new("x:10,y:5,w:15"),
+                             layout!("x:10,y:5,w:15"),
                              false,
                              checkbox::Type::YesNo);
 ```
@@ -113,7 +113,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'My Win',d:c,w:40,h:6"),
+            base: window!("'My Win',a:c,w:40,h:6"),
             c: Handle::None,
             l: Handle::None,
         };

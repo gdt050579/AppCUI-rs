@@ -11,13 +11,13 @@ fn check_creation() {
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:68,h:9");
+    let mut w = window!("Title,a:c,w:68,h:9");
     w.add(NumericSelector::<i32>::new(
         5,
         1,
         8,
         1,
-        Layout::new("x:1,y:1,w:10"),
+        layout!("x:1,y:1,w:10"),
         numericselector::Flags::None,
     ));
     w.add(NumericSelector::<u32>::new(
@@ -25,7 +25,7 @@ fn check_creation() {
         1,
         8,
         1,
-        Layout::new("x:1,y:3,w:15"),
+        layout!("x:1,y:3,w:15"),
         numericselector::Flags::HideButtons,
     ));
     w.add(NumericSelector::<f32>::new(
@@ -33,7 +33,7 @@ fn check_creation() {
         1.0,
         8.0,
         0.5,
-        Layout::new("x:1,y:5,w:16"),
+        layout!("x:1,y:5,w:16"),
         numericselector::Flags::None,
     ));
 
@@ -42,7 +42,7 @@ fn check_creation() {
         1000,
         8000,
         100,
-        Layout::new("x:22,y:1,w:20"),
+        layout!("x:22,y:1,w:20"),
         numericselector::Flags::None,
         numericselector::Format::DigitGrouping,
     ));
@@ -51,7 +51,7 @@ fn check_creation() {
         0,
         100,
         1,
-        Layout::new("x:22,y:3,w:20"),
+        layout!("x:22,y:3,w:20"),
         numericselector::Flags::None,
         numericselector::Format::Percentage,
     ));
@@ -60,7 +60,7 @@ fn check_creation() {
         -100,
         100,
         1,
-        Layout::new("x:22,y:5,w:20"),
+        layout!("x:22,y:5,w:20"),
         numericselector::Flags::ReadOnly,
         numericselector::Format::Decimal,
     ));
@@ -70,7 +70,7 @@ fn check_creation() {
         1000,
         80_000_000,
         1024,
-        Layout::new("x:43,y:1,w:20"),
+        layout!("x:43,y:1,w:20"),
         numericselector::Flags::None,
         numericselector::Format::Size,
     ));
@@ -79,7 +79,7 @@ fn check_creation() {
         0,
         100000,
         1,
-        Layout::new("x:43,y:3,w:20"),
+        layout!("x:43,y:3,w:20"),
         numericselector::Flags::None,
         numericselector::Format::Hex,
     ));
@@ -96,7 +96,7 @@ fn check_create_procmacro() {
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:68,h:9");
+    let mut w = window!("Title,a:c,w:68,h:9");
 
     w.add(numericselector!("i32,5,1,8,1,x:1,y:1,w:10"));
     w.add(numericselector!("u32,5,1,8,1,x:1,y:3,w:15,flags:HideButtons"));
@@ -121,7 +121,7 @@ fn check_create_procmacro_defaults() {
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
     let mut a = App::debug(70, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:68,h:9");
+    let mut w = window!("Title,a:c,w:68,h:9");
 
     w.add(numericselector!("i32,5,x:1,y:1,w:10"));
     w.add(numericselector!("u32,5,x:1,y:3,w:15,flags:HideButtons"));

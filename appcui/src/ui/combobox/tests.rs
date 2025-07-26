@@ -12,7 +12,7 @@ fn check_empty_combobox() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:40,h:7");
-    let c = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::None);
+    let c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
     w.add(c);
     a.add_window(w);
     a.run();
@@ -30,7 +30,7 @@ fn check_show_description() {
     ";
     let mut a = App::debug(60, 12, script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:60,h:7");
-    let mut c = ComboBox::new(Layout::new("x:1,y:1,w:50"), combobox::Flags::ShowDescription);
+    let mut c = ComboBox::new(layout!("x:1,y:1,w:50"), combobox::Flags::ShowDescription);
     c.add_item(combobox::Item::new("Option 1", "(Description for option 1)"));
     c.add_item(combobox::Item::new("Option 2", "(Description for option 2)"));
     c.add_item(combobox::Item::new("Option 3", "(Description for option 3)"));
@@ -92,7 +92,7 @@ fn check_open_unselected_combobox() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:40,h:7");
-    let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::None);
+    let mut c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
     c.add("option 1");
     c.add("option 2");
     c.add("option 3");
@@ -116,7 +116,7 @@ fn check_select_item_from_unselected() {
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:40,h:7");
-    let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::None);
+    let mut c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
     c.add("option 1");
     c.add("option 2");
     c.add("option 3");
@@ -137,7 +137,7 @@ fn check_clear_items_when_closed() {
                 base: window!("Win,x:1,y:1,w:38,h:8"),
                 h: Handle::None,
             };
-            let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::None);
+            let mut c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
             c.add("option 1");
             c.add("option 2");
             c.add("option 3");
@@ -185,7 +185,7 @@ fn check_clear_items_when_opened() {
                 base: window!("Win,x:1,y:1,w:38,h:8"),
                 h: Handle::None,
             };
-            let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::None);
+            let mut c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
             c.add("option 1");
             c.add("option 2");
             c.add("option 3");
@@ -242,7 +242,7 @@ fn check_complex_behavior() {
                 base: window!("x:1,y:1,w:30,h:6,caption:Win"),
                 h: Handle::None,
             };
-            w.h = w.add(ComboBox::new(Layout::new("x:1,y:1,w:26"), combobox::Flags::None));
+            w.h = w.add(ComboBox::new(layout!("x:1,y:1,w:26"), combobox::Flags::None));
             w
         }
     }
@@ -463,14 +463,14 @@ fn check_value_and_try_value() {
                 output_handle: Handle::None,
             };
             
-            let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::None);
+            let mut c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
             c.add("option 1");
             c.add("option 2");
             c.add("option 3");
             c.set_index(1); // Select "option 2" initially
             
             // Create a label to display values from value() and try_value()
-            let l = Label::new("",Layout::new("x:1,y:3,w:36,h:4"));
+            let l = Label::new("",layout!("x:1,y:3,w:36,h:4"));
             
             w.combo_handle = w.add(c);
             w.output_handle = w.add(l);
@@ -571,14 +571,14 @@ fn check_selected_item_and_index() {
                 output_handle: Handle::None,
             };
             
-            let mut c = ComboBox::new(Layout::new("x:1,y:1,w:30"), combobox::Flags::ShowDescription);
+            let mut c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::ShowDescription);
             c.add_item(combobox::Item::new("option 1", "first item"));
             c.add_item(combobox::Item::new("option 2", "second item"));
             c.add_item(combobox::Item::new("option 3", "third item"));
             c.set_index(1); // Select "option 2" initially
             
             // Create a label to display info about selected_item and index
-            let l = Label::new("", Layout::new("x:1,y:3,w:76,h:5"));
+            let l = Label::new("", layout!("x:1,y:3,w:76,h:5"));
             
             w.combo_handle = w.add(c);
             w.output_handle = w.add(l);

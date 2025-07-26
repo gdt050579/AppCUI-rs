@@ -6,7 +6,7 @@ Represent a clickable password control:
 
 To create a password use `Password::new` method (with one parameter - the layout).
 ```rs
-let p = Password::new(Layout::new("x:10,y:5,w:15"));
+let p = Password::new(layout!("x:10,y:5,w:15"));
 ```
 or use the macro `password!`
 ```rs
@@ -76,7 +76,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("'Login',d:c,w:40,h:8"),
+            base: window!("'Login',a:c,w:40,h:8"),
             p: Handle::None,
             b_ok: Handle::None,
             b_cancel: Handle::None

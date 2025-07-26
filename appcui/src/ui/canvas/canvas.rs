@@ -23,7 +23,7 @@ impl Canvas {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut canvas = Canvas::new(Size::new(100, 100), Layout::new("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars); 
+    /// let mut canvas = Canvas::new(Size::new(100, 100), layout!("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars); 
     /// ```
     pub fn new(canvas_size: Size, layout: Layout, flags: Flags) -> Self {
         Self {
@@ -51,7 +51,7 @@ impl Canvas {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut canvas = Canvas::new(Size::new(100, 100), Layout::new("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars);
+    /// let mut canvas = Canvas::new(Size::new(100, 100), layout!("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars);
     /// canvas.resize_surface(Size::new(200, 200));
     /// ```
     pub fn resize_surface(&mut self, new_size: Size) {
@@ -71,7 +71,7 @@ impl Canvas {
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut canvas = Canvas::new(Size::new(100, 100), Layout::new("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars);
+    /// let mut canvas = Canvas::new(Size::new(100, 100), layout!("x:1,y:1,w:30,h:10"), canvas::Flags::ScrollBars);
     /// canvas.set_background(Character::new('*', Color::White, Color::Black, CharFlags::None));
     /// ```
     pub fn set_background(&mut self, backgroud_char: Character) {

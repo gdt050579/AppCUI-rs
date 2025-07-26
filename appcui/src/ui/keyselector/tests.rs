@@ -8,20 +8,20 @@ fn check_on_paint() {
         CheckHash(0x7309311AC45F730F)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("test,d:c,w:40,h:10");
+    let mut w = window!("test,a:c,w:40,h:10");
     w.add(KeySelector::new(
         Key::new(KeyCode::F1, KeyModifier::Ctrl),
-        Layout::new("x:1,y:1,w:35,h:1"),
+        layout!("x:1,y:1,w:35,h:1"),
         keyselector::Flags::None,
     ));
     w.add(KeySelector::new(
         Key::new(KeyCode::Insert, KeyModifier::Ctrl | KeyModifier::Alt),
-        Layout::new("x:1,y:3,w:35,h:1"),
+        layout!("x:1,y:3,w:35,h:1"),
         keyselector::Flags::None,
     ));
     let mut ks = KeySelector::new(
         Key::new(KeyCode::Escape, KeyModifier::Ctrl | KeyModifier::Shift),
-        Layout::new("x:1,y:5,w:35,h:1"),
+        layout!("x:1,y:5,w:35,h:1"),
         keyselector::Flags::AcceptEscape,
     );
     ks.set_enabled(false);
@@ -38,7 +38,7 @@ fn check_macro() {
         CheckHash(0x598A2D33EC5D8CF0)
     ";
     let mut a = App::debug(60, 14, script).build().unwrap();
-    let mut w = window!("test,d:c,w:40,h:14");
+    let mut w = window!("test,a:c,w:40,h:14");
     w.add(keyselector!("F1,x:1,y:1,w:35,h:1"));
     w.add(keyselector!("x:1,y:3,w:35,h:1,key:'Ctrl+Alt+Insert'"));
     w.add(keyselector!("Ctrl+Shift+Escape,x:1,y:5,w:35,h:1,enable:false,flags:AcceptEscape"));
@@ -79,7 +79,7 @@ fn check_tab_key() {
         CheckHash(0x3F7B3D010FD1DF02)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("test,d:c,w:40,h:10");
+    let mut w = window!("test,a:c,w:40,h:10");
     w.add(keyselector!("F1,x:1,y:1,w:35,h:1,flags:AcceptTab+ReadOnly"));
     w.add(keyselector!("x:1,y:3,w:35,h:1"));
     w.add(keyselector!("x:1,y:5,w:35,h:1,flags:AcceptTab"));
@@ -121,7 +121,7 @@ fn check_enter_key() {
         CheckHash(0xE96A44D9FC272DB6)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("test,d:c,w:40,h:10");
+    let mut w = window!("test,a:c,w:40,h:10");
     w.add(keyselector!("F1,x:1,y:1,w:35,h:1,flags:AcceptEnter"));
     w.add(keyselector!("x:1,y:3,w:35,h:1"));
     w.add(keyselector!("F2,x:1,y:5,w:35,h:1,flags:[AcceptEnter,ReadOnly]"));
@@ -151,7 +151,7 @@ fn check_esc_key() {
         CheckHash(0x734FECAF52FDE955)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("test,d:c,w:40,h:10");
+    let mut w = window!("test,a:c,w:40,h:10");
     w.add(keyselector!("F1,x:1,y:1,w:35,h:1,flags:AcceptEscape"));
     w.add(keyselector!("x:1,y:3,w:35,h:1"));
     w.add(keyselector!("F2,x:1,y:5,w:35,h:1,flags:[AcceptEscape,ReadOnly]"));
@@ -169,11 +169,11 @@ fn check_events() {
     impl MyWin {
         fn new() -> Self {
             let mut me = Self {
-                base: Window::new("Win", Layout::new("d:c,w:57,h:7"), window::Flags::None),
+                base: Window::new("Win", layout!("a:c,w:57,h:7"), window::Flags::None),
                 info: Handle::None,
                 ks: Handle::None,
             };
-            me.info = me.add(Label::new("<none>", Layout::new("x:1,y:1,w:55,h:2")));
+            me.info = me.add(Label::new("<none>", layout!("x:1,y:1,w:55,h:2")));
             me.ks = me.add(keyselector!("F1,x:1,y:3,w:35"));
             me
         }
@@ -219,10 +219,10 @@ fn check_api() {
         CheckHash(0xDD6F824143FF6353)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("test,d:c,w:40,h:10");
+    let mut w = window!("test,a:c,w:40,h:10");
     let mut ks = KeySelector::new(
         Key::new(KeyCode::F1, KeyModifier::Ctrl),
-        Layout::new("x:1,y:1,w:35,h:1"),
+        layout!("x:1,y:1,w:35,h:1"),
         keyselector::Flags::None,
     );
     assert_eq!(ks.key(),Key::new(KeyCode::F1, KeyModifier::Ctrl));

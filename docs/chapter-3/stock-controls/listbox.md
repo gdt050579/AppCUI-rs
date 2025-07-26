@@ -7,8 +7,8 @@ A listbox is a control that displays a list of items.
 It can be created using `ListBox::new(...)` and `ListBox::with_capacity(...)` methods or with the `listbox!` macro. 
 
 ```rs
-let l1 = ListBox::new(Layout::new("..."),listbox::Flags::None);
-let l2 = ListBox::with_capacity(10,Layout::new("..."),listbox::Flags::ScrollBars);
+let l1 = ListBox::new(layout!("..."),listbox::Flags::None);
+let l2 = ListBox::with_capacity(10,layout!("..."),listbox::Flags::ScrollBars);
 let l3 = listbox!("x:1,y:1,w:20,h:10,items=['Red','Greem','Blue']");
 let l4 = listbox!("x:1,y:1,w:20,h:10,items=['Red','Greem','Blue'],index:2");
 let l5 = listbox!("x:1,y:1,w:20,h:10,items=['Red','Greem','Blue'],index:2, flags: ScrollBars+SearchBar");
@@ -119,9 +119,9 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("Animals,d:c,w:50,h:11,flags: Sizeable");
+    let mut w = window!("Animals,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("l:1,t:1,b:1,r:1");
-    let mut l = listbox!("d:c,w:100%,h:100%,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+    let mut l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
     l.add_item(listbox::Item::new("Dog (man best friend)", false));
     l.add_item(listbox::Item::new("Cat (independent)", true));
     l.add_item(listbox::Item::new("Elephant (the largest land animal)", false));

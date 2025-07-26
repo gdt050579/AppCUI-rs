@@ -30,7 +30,7 @@ impl ListItem for TestData {
         1
     }
     fn column(_: u16) -> crate::prelude::Column {
-        crate::prelude::Column::new("", 50, crate::prelude::TextAlignament::Left)
+        crate::prelude::Column::new("", 50, crate::prelude::TextAlignment::Left)
     }
         
     fn matches(&self, text: &str) -> bool {
@@ -190,8 +190,8 @@ fn check_init() {
         CheckHash(0xEBF7B023783A3585)  
     ";
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -213,8 +213,8 @@ fn check_init_with_macro() {
         CheckHash(0xEBF7B023783A3585)  
     ";
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = treeview!("type:Course, d:c,flags: ScrollBars+SearchBar");
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = treeview!("type:Course,d:f,flags: ScrollBars+SearchBar");
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -244,8 +244,8 @@ fn check_key_movement_left_right() {
         CheckHash(0x461AC404AD7793D0) 
     ";
     let mut a = App::debug(40, 12, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -284,8 +284,8 @@ fn check_key_movement_up_down() {
         CheckHash(0xB43934B962A84918) 
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -327,8 +327,8 @@ fn check_key_movement_pageup_pagedown() {
         CheckHash(0xB43934B962A84918) 
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -367,8 +367,8 @@ fn check_key_movement_scroll_up_down() {
         CheckHash(0xA3A7B2F7F66BA9AC) 
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -396,8 +396,8 @@ fn check_column_sort() {
         CheckHash(0xDEBE625515EF7278) 
     ";
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -425,8 +425,8 @@ fn check_column_sort_by_mouse() {
         CheckHash(0xCB769FD963C7F0DD) 
     ";
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -465,8 +465,8 @@ fn check_key_movement_up_down_without_header() {
         CheckHash(0xDF48D35D7AEBD3B6) 
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -490,8 +490,8 @@ fn check_key_mouse_does_not_work_on_columns_on_hide_header_flag() {
         CheckHash(0xDF48D35D7AEBD3B6) 
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
     Course::populate_with_courses(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -525,8 +525,8 @@ fn check_hover_over_fold_button() {
         CheckHash(0x75A6E85CF8407EAE) 
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -566,8 +566,8 @@ fn check_fold_button_with_mouse() {
         CheckHash(0x2BF6024818A131A7) 
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -597,8 +597,8 @@ fn check_fold_using_space() {
         CheckHash(0x408F23B73C4E37C6) 
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -614,8 +614,8 @@ fn check_inactive() {
         CheckHash(0x674C02FC96FC3BC9) 
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
     tv.set_enabled(false);
     Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
@@ -643,8 +643,8 @@ fn check_filter() {
         CheckHash(0x6D6BDBD3081248C1) 
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -681,8 +681,8 @@ fn check_column_resize() {
         CheckHash(0x9BF79D529343665A) 
     ";
     let mut a = App::debug(60, 25, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -712,8 +712,8 @@ fn check_mouse_wheel() {
         CheckHash(0x5D9406DE9A1F664E) 
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
     Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -732,8 +732,8 @@ fn check_small_icons() {
         CheckHash(0x4CDB8F4C685DFC7C) 
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::SmallIcons);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SmallIcons);
     Course::populate_with_icons(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -752,8 +752,8 @@ fn check_larger_icons() {
         CheckHash(0x25A50B0D5E4C7061) 
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::LargeIcons);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::LargeIcons);
     Course::populate_with_icons(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -767,9 +767,9 @@ fn check_change_item_event() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+                base: window!("Test,d:f,flags: Sizeable"),
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::None);
             Course::populate_with_icons(&mut tv);
             w.add(tv);
             w
@@ -818,10 +818,10 @@ fn check_change_item_event_change() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+                base: window!("Test,d:f,flags: Sizeable"),
                 counter: 0,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::None);
             Course::populate_with_icons(&mut tv);
             w.add(tv);
             w
@@ -872,9 +872,9 @@ fn check_on_item_action_event() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+                base: window!("Test,d:f,flags: Sizeable"),
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::None);
             Course::populate_with_icons(&mut tv);
             w.add(tv);
             w
@@ -925,9 +925,9 @@ fn check_on_item_colapse_expanded() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+                base: window!("Test,d:f,flags: Sizeable"),
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::None);
             Course::populate_with_icons(&mut tv);
             w.add(tv);
             w
@@ -991,10 +991,10 @@ fn check_on_item_dynamic_colapse_expanded() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+                base: window!("Test,d:f,flags: Sizeable"),
                 count: 0,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::None);
             tv.add_item(treeview::Item::expandable(TestData::new("Root"), false));
             w.add(tv);
             w
@@ -1074,7 +1074,7 @@ fn check_delete_item() {
                 base: window!("Test,x:0,y:0,w:100%,h:19,flags: Sizeable"),
                 tv: Handle::None,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::None);
             Course::populate_with_icons(&mut tv);
             w.tv = w.add(tv);
             w
@@ -1145,7 +1145,7 @@ fn check_clear() {
                 base: window!("Test,x:0,y:0,w:100%,h:9,flags: Sizeable"),
                 tv: Handle::None,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
             Course::populate_with_icons(&mut tv);
             w.tv = w.add(tv);
             w
@@ -1228,7 +1228,7 @@ fn check_collapse_expand_via_methods() {
                 base: window!("Test,x:0,y:0,w:100%,h:9,flags: Sizeable"),
                 tv: Handle::None,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
             Course::populate_with_courses(&mut tv);
             w.tv = w.add(tv);
             w
@@ -1308,8 +1308,8 @@ fn check_expand_collapese_recursively() {
         CheckHash(0x98F8001FACD5814A) 
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
     Course::populate_with_icons(&mut tv);
     w.add(tv);
     a.add_window(w);
@@ -1325,10 +1325,10 @@ fn check_on_item_dynamic_colapse_expanded_recursively() {
     impl MyWin {
         fn new() -> Self {
             let mut w = MyWin {
-                base: window!("Test,d:c,w:100%,h:100%,flags: Sizeable"),
+                base: window!("Test,d:f,flags: Sizeable"),
                 count: 0,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::None);
             tv.add_item(treeview::Item::expandable(TestData::new("Root"), false));
             w.add(tv);
             w
@@ -1420,7 +1420,7 @@ fn check_collapse_expand_all() {
                 base: window!("Test,x:0,y:0,w:100%,h:14,flags: Sizeable"),
                 tv: Handle::None,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
             Course::populate_with_courses(&mut tv);
             Course::populate_with_icons(&mut tv);
             w.tv = w.add(tv);
@@ -1517,8 +1517,8 @@ fn check_empty_list() {
         CheckHash(0x19F65FEDF374B26D) 
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv: TreeView<Course> = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
     tv.expand_all();
     tv.collapse_all();
     w.add(tv);
@@ -1550,8 +1550,8 @@ fn check_one_frozen_column() {
         CheckHash(0x6BFECFDC37AE5CCD) 
     ";
     let mut a = App::debug(40, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
     Course::populate_with_courses_batch(&mut tv);
     tv.set_frozen_columns(1);
     w.add(tv);
@@ -1583,8 +1583,8 @@ fn check_two_frozen_column() {
         CheckHash(0xF6E6088E113B29B5) 
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
     Course::populate_with_courses_batch(&mut tv);
     tv.set_frozen_columns(2);
     w.add(tv);
@@ -1622,8 +1622,8 @@ fn check_select_simple() {
         CheckHash(0xD09A4C4043F4FDAC) 
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
     Course::populate_with_courses_batch(&mut tv);
     tv.set_frozen_columns(2);
     w.add(tv);
@@ -1663,8 +1663,8 @@ fn check_no_select_flags() {
         CheckHash(0xD09A4C4043F4FDAC) 
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
     Course::populate_with_courses_batch(&mut tv);
     tv.set_frozen_columns(2);
     w.add(tv);
@@ -1686,7 +1686,7 @@ fn check_select_and_count_method() {
                 tv: Handle::None,
                 idx: 0,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::None);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::None);
             Course::populate_with_icons(&mut tv);
             w.tv = w.add(tv);
             w
@@ -1783,8 +1783,8 @@ fn check_custom_filter() {
         CheckHash(0xFB0494D034757861) 
     ";
     let mut a = App::debug(60, 14, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = treeview!("TestData,d:c,flags: [ScrollBars,SearchBar,CustomFilter]");
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
     let h = tv.add(TestData::new("Alice"));
     tv.add_to_parent(TestData::new("Andra"), h);
     tv.add_to_parent(TestData::new("Boby"), h);
@@ -1814,7 +1814,7 @@ fn check_select_via_api() {
                 base: window!("Test,x:0,y:0,w:100%,h:9,flags: Sizeable"),
                 tv: Handle::None,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
             Course::populate_with_icons(&mut tv);
             w.tv = w.add(tv);
             w
@@ -1879,7 +1879,7 @@ fn check_current_item_via_api() {
                 base: window!("Test,x:0,y:0,w:100%,h:9,flags: Sizeable"),
                 tv: Handle::None,
             };
-            let mut tv = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+            let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
             assert!(tv.current_item().is_none());
             assert!(tv.current_item_mut().is_none());
             assert!(tv.current_item_handle().is_none());
@@ -1942,8 +1942,8 @@ fn check_root_access_via_api() {
         CheckHash(0xD10327941CB68014) 
     ";
     let mut a = App::debug(60, 14, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = treeview!("TestData,d:c,flags: [ScrollBars,SearchBar,CustomFilter]");
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
     assert!(tv.current_item().is_none());
     let h = tv.add(TestData::new("Alice"));
     tv.add_to_parent(TestData::new("Andra"), h);
@@ -1989,8 +1989,8 @@ fn check_mouse_select() {
         CheckHash(0xF2D9830739E10B0F)  
     ";
     let mut a = App::debug(60, 14, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv = treeview!("TestData,d:c,flags: [ScrollBars,SearchBar,CustomFilter]");
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
     let h = tv.add(TestData::new("Alice"));
     tv.add_to_parent(TestData::new("Andra"), h);
     tv.add_to_parent(TestData::new("Boby"), h);
@@ -2016,8 +2016,8 @@ fn check_move_cursor_to() {
         CheckHash(0x85BCA6685DCC2EDA) 
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:100%,h:100%,flags: Sizeable");
-    let mut tv: TreeView<Course> = TreeView::new(Layout::new("d:c"), treeview::Flags::ScrollBars);
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
     Course::populate_with_courses_batch(&mut tv);
     let len = tv.root_items().len();
     let h = tv.root_items()[len - 1];

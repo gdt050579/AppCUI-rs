@@ -411,7 +411,7 @@ pub(crate) struct Win {}
 impl Win {
     pub(crate) fn new() -> Self {
         let mut me = Self {
-            base: window!("Countries,d:c,w:70,h:10,flags: Sizeable"),
+            base: window!("Countries,a:c,w:70,h:10,flags: Sizeable"),
         };
         let mut lv = listview!("class: Country,x:0,y:0,w:100%,h:100%,flags: ScrollBars+SearchBar, columns:[{&Name,20,l},{&Capital,16,l}, {&Population,14,r}, {&Area,14,r}]");
         lv.add_items(data());

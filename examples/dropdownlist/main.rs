@@ -11,12 +11,12 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("d:c,w:50,h:10,caption:Win"),
+            base: window!("a:c,w:50,h:10,caption:Win"),
             h_txt: Handle::None,
             h_op: Handle::None,
         };
         w.add(label!("Operation,x:1,y:1,w:15"));
-        let mut db = DropDownList::<MathOp>::with_symbol(1, Layout::new("x:20,y:1,w:26"), dropdownlist::Flags::ShowDescription);
+        let mut db = DropDownList::<MathOp>::with_symbol(1, layout!("x:20,y:1,w:26"), dropdownlist::Flags::ShowDescription);
         db.add(MathOp::new("Sum", "(Add multiple numbers)", "∑", |x| x.iter().sum::<i32>()));
         db.add(MathOp::new("Product", "(Multiply multiple numbers)", "∏", |x| x.iter().product::<i32>()));
         db.add(MathOp::new("Average", "(Calculate the average of multiple numbers)", "∅", |x| x.iter().sum::<i32>() / x.len() as i32));
@@ -25,7 +25,7 @@ impl MyWin {
         w.h_op = w.add(db);
         w.add(label!("Numbers,x:1,y:3,w:15"));
         w.h_txt = w.add(textfield!("'1,2,3,4',x:20,y:3,w:26,flags:ProcessEnter"));
-        w.add(button!("&Calculate,x:50%,y:100%,a:b,w:20"));
+        w.add(button!("&Calculate,x:50%,y:100%,p:b,w:20"));
         w
     }
     fn compute(&self) {

@@ -7,8 +7,8 @@ Renders a vertical splitter that allows the user to resize the two panes it sepa
 To create a vertical splitter use `VSplitter::new` method or the `vsplitter!` macro.
 
 ```rust
-let vs_1 = VSplitter::new(0.5,Layout::new("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
-let vs_2 = VSplitter::new(20,Layout::new("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+let vs_1 = VSplitter::new(0.5,layout!("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+let vs_2 = VSplitter::new(20,layout!("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
 ```
 
 or
@@ -69,8 +69,8 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("'Vertical Splitter',d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = vsplitter!("50%,d:c,w:100%,h:100%,resize:PreserveRightPanelSize");
+    let mut w = window!("'Vertical Splitter',a:c,w:50,h:10,flags: Sizeable");
+    let mut vs = vsplitter!("50%,d:f,resize:PreserveRightPanelSize");
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);

@@ -409,7 +409,7 @@ fn check_add_window() {
                 mydesktop::Commands::AddWindow => {
                     let name = format!("Win-{}", self.index);
                     self.index += 1;
-                    self.add_window(Window::new(&name, Layout::new("d:c,w:20,h:10"), window::Flags::None));
+                    self.add_window(Window::new(&name, layout!("a:c,w:20,h:10"), window::Flags::None));
                     self.arrange_windows(desktop::ArrangeWindowsMethod::Grid);
                 }
             }
@@ -488,7 +488,7 @@ fn check_update_desktop_windows_count() {
                 mydesktop::Commands::AddWindow => {
                     let name = format!("Win-{}", self.index);
                     self.index += 1;
-                    self.add_window(Window::new(&name, Layout::new("d:c,w:20,h:10"), window::Flags::None));
+                    self.add_window(Window::new(&name, layout!("a:c,w:20,h:10"), window::Flags::None));
                 }
             }
         }
@@ -565,7 +565,7 @@ fn check_auto_hotkey_on_desktop() {
         }
 
         fn on_event(&mut self, _: mydesktop::Commands) {
-            self.add_window(window!("Test,d:c,w:20,h:10,hotkey:auto"));
+            self.add_window(window!("Test,a:c,w:20,h:10,hotkey:auto"));
         }
     }
     let script = "

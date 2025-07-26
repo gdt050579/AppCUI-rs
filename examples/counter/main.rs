@@ -8,10 +8,10 @@ struct CounterWindow {
 impl CounterWindow {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("'Counter window',d:c,w:30,h:5"),
+            base: window!("'Counter window',a:c,w:30,h:5"),
             counter: 1            
         };
-        w.add(button!("'1',d:b,w:20"));
+        w.add(button!("'1',a:b,w:20,h:100%"));
         w
     }
 }

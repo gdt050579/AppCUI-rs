@@ -16,7 +16,7 @@ impl Accordion {
     /// # Examples
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// let mut ac = Accordion::new(Layout::new("x:1,y:1,w:15,h:10"), accordion::Flags::None);
+    /// let mut ac = Accordion::new(layout!("x:1,y:1,w:15,h:10"), accordion::Flags::None);
     /// ac.add_panel("Panel 1");
     /// ac.add_panel("Panel 2");
     /// ac.add_panel("Panel 3");
@@ -210,7 +210,7 @@ impl OnPaint for Accordion {
         //     x: 1,
         //     y: 1,
         //     width: Some(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 }),
-        //     align: TextAlignament::Left,
+        //     align: TextAlignment::Left,
         //     text_wrap: TextWrap::Character,
         //     multi_line: false,
         //     ..Default::default()
@@ -218,7 +218,7 @@ impl OnPaint for Accordion {
         let mut format = TextFormatBuilder::new()
             .position(1, 1)
             .wrap_type(WrapType::SingleLineWrap(if sz.width > 2 { (sz.width as u16) - 2 } else { 1 }))
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .build();
 
         let cidx = self.base.focused_child_index.index();

@@ -10,8 +10,8 @@ fn check_create() {
         CheckHash(0xD1DEEDEB85046D1)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:51,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut w = window!("Test,a:c,w:51,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(0.5, layout!("d:f"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -27,8 +27,8 @@ fn check_create_procmacro() {
         CheckHash(0xD1DEEDEB85046D1)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:51,h:10,flags: Sizeable");
-    let mut vs = vsplitter!("50%,d:c,w:100%,h:100%");
+    let mut w = window!("Test,a:c,w:51,h:10,flags: Sizeable");
+    let mut vs = vsplitter!("50%,d:f");
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -62,8 +62,8 @@ fn check_keyboard_movement() {
         CheckHash(0x1E6CE665E12C30FE)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(24, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut w = window!("Test,a:c,w:50,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(24, layout!("d:f"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
@@ -99,8 +99,8 @@ fn check_keyboard_movement_with_procmacro() {
         CheckHash(0x1E6CE665E12C30FE)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = vsplitter!("pos:24,d:c,w:100%,h:100%,mlw:5,min-right-width:5");
+    let mut w = window!("Test,a:c,w:50,h:10,flags: Sizeable");
+    let mut vs = vsplitter!("pos:24,d:f,mlw:5,min-right-width:5");
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -125,8 +125,8 @@ fn check_mouse_buttons() {
         CheckHash(0xB617F953476DE6E2)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(24, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut w = window!("Test,a:c,w:50,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(24, layout!("d:f"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
@@ -168,8 +168,8 @@ fn check_mouse_movement() {
         CheckHash(0x550B43D780CCCBDD)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:50,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(24, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut w = window!("Test,a:c,w:50,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(24, layout!("d:f"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.set_min_width(vsplitter::Panel::Left, 5);
     vs.set_min_width(vsplitter::Panel::Right, 5);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
@@ -197,7 +197,7 @@ fn check_resize_preseve_aspect_ratio_with_percentage() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut vs = VSplitter::new(0.5, layout!("d:f"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -223,7 +223,7 @@ fn check_resize_preseve_aspect_ratio_with_absolute() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(14, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut vs = VSplitter::new(14, layout!("d:f"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -267,7 +267,7 @@ fn check_resize_preseve_left_width_with_absolute() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(10, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveLeftPanelSize);
+    let mut vs = VSplitter::new(10, layout!("d:f"), vsplitter::ResizeBehavior::PreserveLeftPanelSize);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -311,7 +311,7 @@ fn check_resize_preseve_left_width_with_percentage() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.39, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveLeftPanelSize);
+    let mut vs = VSplitter::new(0.39, layout!("d:f"), vsplitter::ResizeBehavior::PreserveLeftPanelSize);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -355,7 +355,7 @@ fn check_resize_preseve_right_width_with_absolute() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(14, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    let mut vs = VSplitter::new(14, layout!("d:f"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -399,7 +399,7 @@ fn check_resize_preseve_right_width_with_percentage() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:30,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.55, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    let mut vs = VSplitter::new(0.55, layout!("d:f"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
@@ -442,8 +442,8 @@ Multiple convolutional and pooling layers are stacked together, allowing the net
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:60,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
-    let mut c = canvas!("'80x300',d:c,w:100%,h:100%,flags=ScrollBars,lsm:3,tsm:1");
+    let mut vs = VSplitter::new(5, layout!("d:f"), vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    let mut c = canvas!("'80x300',d:f,flags=ScrollBars,lsm:3,tsm:1");
     let s = c.drawing_surface_mut();
     s.write_string(0, 0, CNN, CharAttribute::with_color(Color::White, Color::Black), true);
     vs.add(vsplitter::Panel::Right, c);
@@ -469,8 +469,8 @@ fn check_mouse_wheel_and_doubleclicked() {
         CheckHash(0x7DAA05CFF05C4721)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:c,w:51,h:10,flags: Sizeable");
-    let mut vs = VSplitter::new(0.5, Layout::new("d:c,w:100%,h:100%"), vsplitter::ResizeBehavior::PreserveAspectRatio);
+    let mut w = window!("Test,a:c,w:51,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(0.5, layout!("d:f"), vsplitter::ResizeBehavior::PreserveAspectRatio);
     vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);

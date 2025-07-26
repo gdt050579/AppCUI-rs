@@ -210,8 +210,8 @@ impl Window {
     ///     use appcui::prelude::*;
     ///
     ///     let mut a = App::new().build().unwrap();
-    ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
-    ///     w.add(Button::new("Press me",Layout::new("x:1,y:1,w:10"),button::Type::Normal));
+    ///     let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+    ///     w.add(Button::new("Press me",layout!("x:1,y:1,w:10"),button::Type::Normal));
     /// ```    
     ///
     /// You can not add a Window as a child to another Window nor can you add a Desktop
@@ -221,8 +221,8 @@ impl Window {
     ///     use appcui::prelude::*;
     ///
     ///     let mut a = App::new().build().unwrap();
-    ///     let mut w = Window::new("Title", Layout::new("d:c,w:20,h:10"), window::Flags::None);
-    ///     w.add(Window::new("aaa",Layout::new("d:c,w:20,h:10"),window::Flags::None));
+    ///     let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+    ///     w.add(Window::new("aaa",layout!("a:c,w:20,h:10"),window::Flags::None));
     /// ```    
     pub fn add<T>(&mut self, control: T) -> Handle<T>
     where
@@ -248,8 +248,8 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'My Window',d:c,w:40,h:10");
-    /// let label_handle = win.add(label!("'Hello World',d:c,w:12,h:1"));
+    /// let mut win = window!("'My Window',a:c,w:40,h:10");
+    /// let label_handle = win.add(label!("'Hello World',a:c,w:12,h:1"));
     /// 
     /// if let Some(label) = win.control(label_handle) {
     ///     // Use the label reference
@@ -280,8 +280,8 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'My Window',d:c,w:40,h:10");
-    /// let label_handle = win.add(label!("'Hello World',d:c,w:12,h:1"));
+    /// let mut win = window!("'My Window',a:c,w:40,h:10");
+    /// let label_handle = win.add(label!("'Hello World',a:c,w:12,h:1"));
     /// 
     /// if let Some(label) = win.control_mut(label_handle) {
     ///     // Use the mutable label reference
@@ -308,8 +308,8 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'My Window',d:c,w:40,h:10");
-    /// let button_handle = win.add(button!("'Click Me',d:c,w:10,h:1"));
+    /// let mut win = window!("'My Window',a:c,w:40,h:10");
+    /// let button_handle = win.add(button!("'Click Me',a:c,w:10,h:1"));
     /// 
     /// // Set focus to the button
     /// win.request_focus_for_control(button_handle);
@@ -335,7 +335,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'My Window',d:c,w:40,h:10");
+    /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// 
     /// // Create a toolbar group and add a button to it
     /// let group = win.toolbar().create_group(toolbar::GroupPosition::TopRight);
@@ -356,7 +356,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'My Window',d:c,w:40,h:10");
+    /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// win.set_title("New Window Title");
     /// ```
     pub fn set_title(&mut self, title: &str) {
@@ -374,7 +374,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'My Window',d:c,w:40,h:10");
+    /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// assert_eq!(win.title(), "My Window");
     /// ```
     pub fn title(&self) -> &str {
@@ -395,7 +395,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'Document Editor',d:c,w:60,h:20");
+    /// let mut win = window!("'Document Editor',a:c,w:60,h:20");
     /// win.set_tag("[Modified]");
     /// ```
     pub fn set_tag(&mut self, name: &str) {
@@ -416,7 +416,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'Document Editor',d:c,w:60,h:20");
+    /// let mut win = window!("'Document Editor',a:c,w:60,h:20");
     /// win.set_tag("[Modified]");
     /// assert_eq!(win.tag(), Some("[Modified]"));
     /// ```
@@ -435,7 +435,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'Document Editor',d:c,w:60,h:20");
+    /// let mut win = window!("'Document Editor',a:c,w:60,h:20");
     /// win.set_tag("[Modified]");
     /// // After saving the document
     /// win.clear_tag();
@@ -457,7 +457,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'My Window',d:c,w:40,h:10");
+    /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// win.set_auto_hotkey();
     /// ```
     pub fn set_auto_hotkey(&mut self) {
@@ -480,7 +480,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'My Window',d:c,w:40,h:10");
+    /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// win.set_hotkey(key!("Alt+W"));
     /// ```
     pub fn set_hotkey<T>(&mut self, key: T)
@@ -510,7 +510,7 @@ impl Window {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'Resizable Window',d:c,w:40,h:10,flags:Sizeable");
+    /// let mut win = window!("'Resizable Window',a:c,w:40,h:10,flags:Sizeable");
     /// win.enter_resize_mode();
     /// ```
     pub fn enter_resize_mode(&mut self) {
@@ -753,7 +753,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut win = window!("'My Window',d:c,w:40,h:10");
+    /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// // Later, when you need to close the window:
     /// win.close();
     /// ```    
@@ -855,7 +855,7 @@ impl Window {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let win = window!("'My Window',d:c,w:40,h:10");
+    /// let win = window!("'My Window',a:c,w:40,h:10");
     /// let handle = win.handle();
     /// ```
     #[inline(always)]
@@ -884,8 +884,8 @@ impl Window {
     /// ```rust,no_run
     ///    use appcui::prelude::*;
     ///    let mut app = App::new().build().unwrap();
-    ///    let mut w = window!("Title,d:c,w:20,h:10");
-    ///    let handle_b = w.add(button!("Button,d:C,w:10"));
+    ///    let mut w = window!("Title,a:c,w:20,h:10");
+    ///    let handle_b = w.add(button!("Button,a:C,w:10"));
     ///    Window::update_control(handle_b, |button| { button.set_caption("New text"); });
     /// ```
     pub fn update_control<T: Control + 'static>(handle: Handle<T>, run: fn(&mut T)) {

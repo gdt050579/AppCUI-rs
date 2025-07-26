@@ -15,7 +15,7 @@ impl Viewer {
     pub fn new(base_path: String, filename: &str) -> Self {
         let initial_path = format!(r"{base_path}\{filename}");
 
-        let window = Window::new(&initial_path, Layout::new("d:c, w:50, h: 15"), Flags::Sizeable);
+        let window = Window::new(&initial_path, layout!("a:c, w:50, h: 15"), Flags::Sizeable);
         let mut w: Viewer = Self {
             base: window,
             base_path,
@@ -27,7 +27,7 @@ impl Viewer {
 
         if let Some(text) = content {
             w.navigator.open(filename.to_string());
-            let m: Markdown = Markdown::new(&text, Layout::new("d: c"), markdown::Flags::ScrollBars);
+            let m: Markdown = Markdown::new(&text, layout!("d: f"), markdown::Flags::ScrollBars);
             w.h_md = w.add(m);
         }
         let group = w.toolbar().create_group(toolbar::GroupPosition::TopLeft);

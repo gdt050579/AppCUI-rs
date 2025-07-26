@@ -51,7 +51,7 @@ impl DatePicker {
     /// use appcui::prelude::*;
     /// use chrono::NaiveDate;
     ///
-    /// let datepicker = DatePicker::with_date(NaiveDate::from_ymd(2024, 6, 13), Layout::new("x:1,y:1,w:19"));
+    /// let datepicker = DatePicker::with_date(NaiveDate::from_ymd(2024, 6, 13), layout!("x:1,y:1,w:19"));
     /// ```
     pub fn with_date(date: NaiveDate, layout: Layout) -> Self {
         let mut dp = DatePicker {
@@ -84,7 +84,7 @@ impl DatePicker {
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let datepicker = DatePicker::new("2024-06-13", Layout::new("x:1,y:1,w:19"));
+    /// let datepicker = DatePicker::new("2024-06-13", layout!("x:1,y:1,w:19"));
     /// ```
     pub fn new(date_str: &str, layout: Layout) -> Self {
         let date = date_str.parse::<NaiveDate>().unwrap();
@@ -255,7 +255,7 @@ impl OnPaint for DatePicker {
         let mut format = TextFormatBuilder::new()
             .position(1, self.header_y_ofs)
             .attribute(col_text)
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .wrap_type(WrapType::SingleLineWrap((size.width - MIN_WIDTH_FOR_DATE_NAME) as u16))
             .build();
         surface.fill_horizontal_line(0, self.header_y_ofs, (size.width - MINSPACE_FOR_DATE_DRAWING) as i32, space_char);

@@ -17,11 +17,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut win = Window::new(
         "Surface Serialization Demo",
-        Layout::new("d:c,w:100%,h:100%"),
+        layout!("d:f"),
         window::Flags::NoCloseButton,
     );
 
-    let mut canvas = Canvas::new(loaded_surface.size(), Layout::new("l:0,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
+    let mut canvas = Canvas::new(loaded_surface.size(), layout!("l:0,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
     let drawing_surface = canvas.drawing_surface_mut();
     drawing_surface.draw_surface(0, 0, &loaded_surface);
 

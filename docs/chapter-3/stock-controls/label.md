@@ -6,7 +6,7 @@ Represent a label (a text):
 
 To create a label use `Label::new` method (with 2 parameters: a caption and a layout).
 ```rs
-let b = Label::new("My label", Layout::new("x:10,y:5,w:15"));
+let b = Label::new("My label", layout!("x:10,y:5,w:15"));
 ```
 or the macro `label!`
 ```rs
@@ -48,8 +48,8 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    let mut w = Window::new("Title", Layout::new("d:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("Hello world !", Layout::new("d:c,w:14,h:1")));
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(Label::new("Hello world !", layout!("a:c,w:14,h:1")));
     app.add_window(w);
     app.run();
     Ok(())

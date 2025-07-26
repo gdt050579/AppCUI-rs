@@ -31,8 +31,8 @@ impl EnumSelector for Animal { ... }
 then we can create a selector object based on this type as follows:
 
 ```rs
-let s1: Selector<Animal> = Selector::new(Some(Animal::Dog),Layout::new("..."),selector::Flags::None);
-let s2: Selector<Animal> = Selector::new(None,Layout::new("..."),selector::Flags::AllowNoneVariant);
+let s1: Selector<Animal> = Selector::new(Some(Animal::Dog),layout!("..."),selector::Flags::None);
+let s2: Selector<Animal> = Selector::new(None,layout!("..."),selector::Flags::AllowNoneVariant);
 let s3 = selector!("Animal,value:Dog,x:1,y:1,w:20");
 let s4 = selector!("enum: Animal,x:1,y:1,w:20, flags: AllowNoneVariant");
 ```

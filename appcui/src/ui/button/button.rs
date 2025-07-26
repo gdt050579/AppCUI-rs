@@ -12,7 +12,7 @@ impl Button {
     /// # Examples
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// let mut button = Button::new("Click me!", Layout::new("x:1,y:1,w:15"), button::Type::Normal);
+    /// let mut button = Button::new("Click me!", layout!("x:1,y:1,w:15"), button::Type::Normal);
     /// ```
     pub fn new(caption: &str, layout: Layout, button_type: Type) -> Self {
         let mut but = Button {
@@ -84,7 +84,7 @@ impl OnPaint for Button {
         let mut format = TextFormatBuilder::new()
             .position(x, 0)
             .attribute(col_text)
-            .align(TextAlignament::Center)
+            .align(TextAlignment::Center)
             .chars_count(self.caption.chars_count() as u16)
             .wrap_type(WrapType::SingleLineWrap(w as u16))
             .build();

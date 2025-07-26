@@ -789,7 +789,7 @@ fn check_create() {
         CheckHash(0x63C1CCFA05E9F034)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c,w:40,h:8");
+    let mut w = window!("Title,a:c,w:40,h:8");
     let img = Image::from_str(
         r#"
         |RR.........RR|
@@ -807,7 +807,7 @@ fn check_create() {
     .unwrap();
     w.add(ImageViewer::new(
         img,
-        Layout::new("d:c"),
+        layout!("d:f"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::Color16)
@@ -826,7 +826,7 @@ fn check_smallbloacks_scaling() {
         CheckHash(0x4332083E0CD9C530)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c");
+    let mut w = window!("Title,d:f");
     let s = r#"
         |RRRRGGGG|
         |RRRRGGGG|
@@ -839,7 +839,7 @@ fn check_smallbloacks_scaling() {
     "#;
     w.add(ImageViewer::new(
         Image::from_str(s).unwrap(),
-        Layout::new("x:0,y:0,w:8,h:4"),
+        layout!("x:0,y:0,w:8,h:4"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::Color16)
@@ -848,7 +848,7 @@ fn check_smallbloacks_scaling() {
     ));
     w.add(ImageViewer::new(
         Image::from_str(s).unwrap(),
-        Layout::new("x:10,y:0,w:16,h:8"),
+        layout!("x:10,y:0,w:16,h:8"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::GrayScale4)
@@ -867,8 +867,8 @@ fn check_macro_creation() {
         CheckHash(0x30560D8DDECA6294)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c");
-    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%,cs:Color16"));
+    let mut w = window!("Title,d:f");
+    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f,cs:Color16"));
     a.add_window(w);
     a.run();
 }
@@ -881,9 +881,9 @@ fn check_macro_creation_2() {
         CheckHash(0x7BFA1CEEF2BAD91)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c");
+    let mut w = window!("Title,d:f");
     w.add(imageviewer!(
-        "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
+        "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
     ));
     a.add_window(w);
     a.run();
@@ -897,8 +897,8 @@ fn check_ferris_ascii_art() {
         CheckHash(0x36815E6258204EF7)
     ";
     let mut a = App::debug(60, 30, script).build().unwrap();
-    let mut w = window!("Title,d:c");
-    let mut i = imageviewer!("d:c,w:100%,h:100%,scale:25%,charset:AsciiArt,flags:ScrollBars,cs:Color16");
+    let mut w = window!("Title,d:f");
+    let mut i = imageviewer!("d:f,scale:25%,charset:AsciiArt,flags:ScrollBars,cs:Color16");
     i.set_image(ferris_image());
     w.add(i);
     a.add_window(w);
@@ -958,8 +958,8 @@ fn check_keyboard() {
         CheckHash(0x52BF4FAAE6446859)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
-    let mut w = window!("Title,d:c");
-    let mut i = imageviewer!("d:c,w:100%,h:100%,scale:50%,flags:ScrollBars,cs:Color16");
+    let mut w = window!("Title,d:f");
+    let mut i = imageviewer!("d:f,scale:50%,flags:ScrollBars,cs:Color16");
     i.set_image(ferris_image());
     w.add(i);
     a.add_window(w);
@@ -1016,8 +1016,8 @@ fn check_keyboard_2() {
         CheckHash(0x60098108CD0E3264)
     ";
     let mut a = App::debug(40, 15, script).build().unwrap();
-    let mut w = window!("Title,d:c");
-    let mut i = imageviewer!("d:c,w:100%,h:100%,flags:ScrollBars,cs:color16");
+    let mut w = window!("Title,d:f");
+    let mut i = imageviewer!("d:f,flags:ScrollBars,cs:color16");
     i.set_image(ferris_image());
     w.add(i);
     a.add_window(w);
@@ -1032,8 +1032,8 @@ fn check_clear_background() {
         CheckHash(0x30560D8DDECA6294)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c");
-    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:c,w:100%,h:100%, back: {X,Red}, cs:Color16");
+    let mut w = window!("Title,d:f");
+    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, back: {X,Red}, cs:Color16");
     i.clear_background();
     w.add(i);
     a.add_window(w);
@@ -1070,10 +1070,10 @@ fn check_mouse_events() {
         CheckHash(0xF13E7EE85932A59C)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Title,d:c");
+    let mut w = window!("Title,d:f");
     let i = ImageViewer::new(
         ferris_image(),
-        Layout::new("d:c"),
+        layout!("d:f"),
         image::RenderOptionsBuilder::new()
             .character_set(image::CharacterSet::SmallBlocks)
             .color_schema(ColorSchema::Color16)
@@ -1099,7 +1099,7 @@ fn check_resize() {
             };
             let i = ImageViewer::new(
                 ferris_image(),
-                Layout::new("d:c"),
+                layout!("d:f"),
                 image::RenderOptionsBuilder::new()
                     .character_set(image::CharacterSet::SmallBlocks)
                     .color_schema(ColorSchema::Color16)

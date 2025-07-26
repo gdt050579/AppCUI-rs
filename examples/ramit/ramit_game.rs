@@ -35,7 +35,7 @@ pub struct RamItGame {
 impl RamItGame {
     pub fn new() -> Self {
         let mut o = Self {
-            base: ControlBase::new(Layout::new("d:c"), true),
+            base: ControlBase::new(layout!("d:f"), true),
             state: GameState::Menu,
             player_row: NUM_ROWS / 2,
             left_bars: [0; NUM_ROWS],
@@ -181,7 +181,7 @@ impl OnPaint for RamItGame {
                 let format = TextFormatBuilder::new()
                     .position(x as i32, y as i32)
                     .attribute(CharAttribute::with_color(Color::White, Color::Black))
-                    .align(TextAlignament::Center)
+                    .align(TextAlignment::Center)
                     .wrap_type(WrapType::SingleLine)
                     .build();
                 surface.write_text(&text, &format);

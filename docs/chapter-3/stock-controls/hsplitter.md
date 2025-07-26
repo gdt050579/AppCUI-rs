@@ -7,8 +7,8 @@ Renders a horizontal splitter that allows the user to resize the two panels it s
 To create a horizontal splitter use `HSplitter::new` method or the `hsplitter!` macro.
 
 ```rust
-let vs_1 = HSplitter::new(0.5,Layout::new("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
-let vs_2 = HSplitter::new(20,Layout::new("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
+let vs_1 = HSplitter::new(0.5,layout!("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
+let vs_2 = HSplitter::new(20,layout!("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
 ```
 
 or
@@ -69,8 +69,8 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
-    let mut w = window!("'Horizontal Splitter',d:c,w:50,h:11,flags: Sizeable");
-    let mut hs = hsplitter!("50%,d:c,w:100%,h:100%,resize:PreserveBottomPanelSize");
+    let mut w = window!("'Horizontal Splitter',a:c,w:50,h:11,flags: Sizeable");
+    let mut hs = hsplitter!("50%,d:f,resize:PreserveBottomPanelSize");
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
     hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
     w.add(hs);

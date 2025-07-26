@@ -3,7 +3,7 @@ use super::{
     Separator, SingleChoice, SubMenu,
 };
 use crate::{
-    graphics::{Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignament, TextFormatBuilder, WrapType},
+    graphics::{Character, ClipArea, LineType, Rect, Size, SpecialChar, Surface, TextAlignment, TextFormatBuilder, WrapType},
     input::{Key, KeyCode, MouseWheelDirection},
     prelude::KeyModifier,
     system::{Handle, HandleSupport, RuntimeManager, Theme},
@@ -37,7 +37,7 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 /// impl MyWindow {
 ///     fn new() -> Self {
 ///         let mut w = MyWindow {
-///             base: window!("Example,d:c,w:40,h:10"),
+///             base: window!("Example,a:c,w:40,h:10"),
 ///             file_menu: Handle::None,
 ///         };
 ///         
@@ -87,7 +87,7 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 /// impl MyWindow {
 ///     fn new() -> Self {
 ///         let mut w = MyWindow {
-///             base: window!("Example,d:c,w:40,h:10"),
+///             base: window!("Example,a:c,w:40,h:10"),
 ///             file_menu: Handle::None,
 ///         };
 ///         
@@ -399,14 +399,14 @@ impl Menu {
         // write items
         // let mut format = TextFormat {
         //     width: Some(self.text_width),
-        //     align: TextAlignament::Left,
+        //     align: TextAlignment::Left,
         //     text_wrap: TextWrap::Character,
         //     multi_line: false,
         //     ..Default::default()
         // };
         let mut format = TextFormatBuilder::new()
             .wrap_type(WrapType::SingleLineWrap(self.text_width))
-            .align(TextAlignament::Left)
+            .align(TextAlignment::Left)
             .build();
 
         let start = self.first_visible_item as usize;

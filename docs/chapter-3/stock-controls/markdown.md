@@ -6,7 +6,7 @@ Represent a control that can properly display .md (Markdown) text.
 To create a canvas use `Markdown::new` method (with 3 parameters: content, layout and initialization flags).
 
 ```rs
-let m = Markdown::new(&content,Layout::new("d: c"),markdown::Flags::ScrollBars);
+let m = Markdown::new(&content,layout!("d: c"),markdown::Flags::ScrollBars);
 ```
 or the macro `canvas!`
 ```rs
@@ -112,7 +112,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
 
-    let mut w = window!("Markdown,d:c,w:50,h:15,flags:sizeable");
+    let mut w = window!("Markdown,a:c,w:50,h:15,flags:sizeable");
     let m = markdown!(
         "'''
         \r\n\
