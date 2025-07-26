@@ -25,7 +25,10 @@ struct LayoutTesterWindow {
     align_selector: Handle<Selector<Alignment>>,
     dock_selector: Handle<Selector<Dock>>,
     pivot_selector: Handle<Selector<Pivot>>,
-
+    min_width: Handle<NumericSelector<u16>>,
+    max_width: Handle<NumericSelector<u16>>,
+    min_height: Handle<NumericSelector<u16>>,
+    max_height: Handle<NumericSelector<u16>>,
     // Display controls
     parent_control: Handle<ParentControl>,
     child_control: Handle<ChildControl>,
@@ -48,6 +51,10 @@ impl LayoutTesterWindow {
             pivot_selector: Handle::None,
             parent_control: Handle::None,
             child_control: Handle::None,
+            min_height: Handle::None,
+            max_height: Handle::None,
+            min_width: Handle::None,
+            max_width: Handle::None,
         };
 
         // Position parameters
@@ -86,6 +93,16 @@ impl LayoutTesterWindow {
         win.add(label!("'Pivot:',x:1,y:13,w:10,h:1"));
         win.pivot_selector = win.add(selector!("enum: Pivot,x:12,y:13,w:27,flags:AllowNoneVariant"));
 
+        win.add(hline!("x:0,y:14,w:40"));
+        win.add(label!("'Min width:',x:1,y:15,w:10"));
+        win.min_width = win.add(numericselector!("u16,x:12,y:15,w:27,value:1, min:1, max:65535"));
+        win.add(label!("'Max width:',x:1,y:17,w:10"));
+        win.max_width = win.add(numericselector!("u16,x:12,y:17,w:27,value:65535, min:1, max:65535"));
+        win.add(label!("'Min height:',x:1,y:19,w:11"));
+        win.min_height = win.add(numericselector!("u16,x:12,y:19,w:27,value:1, min:1, max:65535"));
+        win.add(label!("'Max height:',x:1,y:21,w:11"));
+        win.max_height = win.add(numericselector!("u16,x:12,y:21,w:27,value:65535, min:1, max:65535"));
+
         // Create right panel for display
         let mut p = ParentControl::new(layout!("l:40,t:1,r:1,b:1"));
         win.child_control = p.add(ChildControl::new(layout!("x:5,y:5,w:20,h:10")));
@@ -109,10 +126,15 @@ impl LayoutTesterWindow {
         if let Some(p) = self.control_mut(h) {
             p.clear_error();
         }
+        let min_w = self.control(self.min_width).unwrap().value();
+        let max_w = self.control(self.max_width).unwrap().value();
+        let min_h = self.control(self.min_height).unwrap().value();
+        let max_h = self.control(self.max_height).unwrap().value();
         let h = self.child_control;
         if let Some(c) = self.control_mut(h) {
             c.set_visible(true);
             c.update_layout(layout);
+            c.set_size_bounds(min_w,min_h, max_w, max_h);
         }
     }
 
