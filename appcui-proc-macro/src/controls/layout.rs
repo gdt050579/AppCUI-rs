@@ -1,6 +1,6 @@
 use crate::controls::control_builder;
 use crate::parameter_parser;
-use crate::parameter_parser::{alignment::Alignment, NamedParamsMap};
+use crate::parameter_parser::NamedParamsMap;
 use crate::token_stream_to_string::TokenStreamToString;
 use proc_macro::*;
 use std::fmt::Write;

@@ -44,7 +44,7 @@ impl PointAndSizeLayout {
             Dock::Right => {
                 should_not_use!(params.height, Error::HeightParameterUsedWithLeftOrRightDock);
                 Ok(PointAndSizeLayout {
-                    x: Coordinate16::Percentage(10000),
+                    x: Coordinate16::Absolute(0),
                     y: Coordinate16::Absolute(0),
                     width: params.width.unwrap_or(Dimension16::Absolute(0)),
                     height: Dimension16::Percentage(10000),
@@ -67,7 +67,7 @@ impl PointAndSizeLayout {
                 should_not_use!(params.width, Error::WidthParameterUsedWithTopOrBottomDock);
                 Ok(PointAndSizeLayout {
                     x: Coordinate16::Absolute(0),
-                    y: Coordinate16::Percentage(10000),
+                    y: Coordinate16::Absolute(0),
                     width: Dimension16::Percentage(10000),
                     height: params.height.unwrap_or(Dimension16::Absolute(0)),
                     align: Alignment::BottomLeft,
@@ -168,7 +168,7 @@ impl PointAndSizeLayout {
         let mut x = self.x.absolute(parent_width);
         let mut y = self.y.absolute(parent_height);
 
-        // compute (x,y) based on anchor
+        //compute (x,y) based on anchor
         match self.anchor {
             Alignment::TopLeft => {}
             Alignment::TopCenter => x = (parent_width / 2) as i32,

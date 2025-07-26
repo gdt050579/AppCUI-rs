@@ -178,7 +178,7 @@ fn layout_mode_dock_top_right() {
     validate_pos!("a:topright,w:50%,h:25%", 60, 40, 30, 0, 30, 10);
 }
 #[test]
-fn layout_mode_dock_left() {
+fn layout_mode_align_left() {
     //validate_pos!("a:l,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:left,w:20,h:10", 50, 30, 0, 10, 20, 10);
     validate_pos!("a:Left,w:20,h:100%", 50, 30, 00, 0, 20, 30);
@@ -187,7 +187,7 @@ fn layout_mode_dock_left() {
 }
 
 #[test]
-fn layout_mode_dock_top() {
+fn layout_mode_align_top() {
     //validate_pos!("a:t,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:top,w:20,h:10", 50, 30, 15, 0, 20, 10);
     validate_pos!("a:Top,w:20,h:100%", 50, 30, 15, 0, 20, 30);
@@ -196,7 +196,7 @@ fn layout_mode_dock_top() {
 }
 
 #[test]
-fn layout_mode_dock_right() {
+fn layout_mode_align_right() {
     //validate_pos!("a:r,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:Right,w:20,h:10", 50, 30, 30, 10, 20, 10);
     validate_pos!("a:right,w:20,h:100%", 50, 30, 30, 0, 20, 30);
@@ -204,7 +204,7 @@ fn layout_mode_dock_right() {
     validate_pos!("a:rIgHt,w:50%,h:25%", 60, 40, 30, 15, 30, 10);
 }
 #[test]
-fn layout_mode_dock_bottom() {
+fn layout_mode_align_bottom() {
     //validate_pos!("a:b,w:100%,h:100%", 50, 30, 0, 0, 50, 30);
     validate_pos!("a:bottom,w:20,h:10", 50, 30, 15, 20, 20, 10);
     validate_pos!("a:Bottom,w:20,h:100%", 50, 30, 15, 0, 20, 30);
@@ -304,7 +304,25 @@ fn dimension_from_basic_type() {
 }
 
 #[test]
-fn coordonate_from_basic_type() {
+fn dimension16_from_basic_type() {
+    assert_eq!(Dimension16::from(10u8), Dimension16::Absolute(10));
+    assert_eq!(Dimension16::from(10u16), Dimension16::Absolute(10));
+    assert_eq!(Dimension16::from(10u32), Dimension16::Absolute(10));
+    assert_eq!(Dimension16::from(10u64), Dimension16::Absolute(10));
+    assert_eq!(Dimension16::from(10i8), Dimension16::Absolute(10));
+    assert_eq!(Dimension16::from(10i16), Dimension16::Absolute(10));
+    assert_eq!(Dimension16::from(10i32), Dimension16::Absolute(10));
+    assert_eq!(Dimension16::from(10i64), Dimension16::Absolute(10));
+    assert_eq!(Dimension16::from(-10i8), Dimension16::Absolute(0));
+    assert_eq!(Dimension16::from(-10i16), Dimension16::Absolute(0));
+    assert_eq!(Dimension16::from(-10i32), Dimension16::Absolute(0));
+    assert_eq!(Dimension16::from(-10i64), Dimension16::Absolute(0));
+    assert_eq!(Dimension16::from(1.25f32), Dimension16::Percentage(12500));
+    assert_eq!(Dimension16::from(1.25f64), Dimension16::Percentage(12500));
+}
+
+#[test]
+fn coordinate_from_basic_type() {
     assert_eq!(Coordinate::from(10u8), Coordinate::Absolute(10));
     assert_eq!(Coordinate::from(-10i8), Coordinate::Absolute(-10));
     assert_eq!(Coordinate::from(10u16), Coordinate::Absolute(10));
@@ -313,6 +331,20 @@ fn coordonate_from_basic_type() {
     assert_eq!(Coordinate::from(-10i64), Coordinate::Absolute(-10));
     assert_eq!(Coordinate::from(1.25f32), Coordinate::Percentage(1.25));
     assert_eq!(Coordinate::from(-1.25f64), Coordinate::Percentage(-1.25));
+}
+
+#[test]
+fn coordinate16_from_basic_type() {
+    assert_eq!(Coordinate16::from(10u8), Coordinate16::Absolute(10));
+    assert_eq!(Coordinate16::from(-10i8), Coordinate16::Absolute(-10));
+    assert_eq!(Coordinate16::from(10u16), Coordinate16::Absolute(10));
+    assert_eq!(Coordinate16::from(-10i16), Coordinate16::Absolute(-10));
+    assert_eq!(Coordinate16::from(10u32), Coordinate16::Absolute(10));
+    assert_eq!(Coordinate16::from(-10i32), Coordinate16::Absolute(-10));
+    assert_eq!(Coordinate16::from(10u64), Coordinate16::Absolute(10));
+    assert_eq!(Coordinate16::from(-10i64), Coordinate16::Absolute(-10));
+    assert_eq!(Coordinate16::from(1.25f32), Coordinate16::Percentage(12500));
+    assert_eq!(Coordinate16::from(-1.25f64), Coordinate16::Percentage(-12500));
 }
 
 #[test]
@@ -378,6 +410,15 @@ fn check_layout_builder() {
     assert_eq!(lb.inner_layout.a_right, Some(Coordinate16::Percentage(2500)));
     assert_eq!(lb.inner_layout.a_top, Some(Coordinate16::Absolute(5)));
     assert_eq!(lb.inner_layout.a_bottom, Some(Coordinate16::Absolute(7)));
+}
+
+#[test]
+fn layout_mode_dock() {
+    validate_pos!("d:f", 50, 30, 0, 0, 50, 30);
+    validate_pos!("d:l,w:10", 50, 30, 0, 0, 10, 30);
+    validate_pos!("d:r,w:10", 50, 30, 40, 0, 10, 30);
+    validate_pos!("d:t,h:10", 50, 30, 0, 0, 50, 10);
+    validate_pos!("d:b,h:10", 50, 30, 0, 20, 50, 10);
 }
 
 #[test]
