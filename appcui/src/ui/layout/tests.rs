@@ -1030,3 +1030,632 @@ fn layout_builder_all_error_codes() {
     let result = LayoutBuilder::new().x(10).alignment(Alignment::Center).try_build();
     assert_eq!(result, Err(Error::XYParameterUsedWithAlign));
 }
+
+#[test]
+fn layout_builder_all_error_messages() {
+    use super::Alignment;
+    use super::Dock;
+    use super::Pivot;
+
+    // Error::XYParameterUsedWithDock
+    let result = LayoutBuilder::new().dock(Dock::Fill).x(10).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used, 'x' and 'y' parameters can not be used !");
+    
+    let result = LayoutBuilder::new().dock(Dock::Left).y(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used, 'x' and 'y' parameters can not be used !");
+
+    // Error::AnchorParameterUsedWithDock
+    let result = LayoutBuilder::new().dock(Dock::Top).left_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+    
+    let result = LayoutBuilder::new().dock(Dock::Bottom).right_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+    
+    let result = LayoutBuilder::new().dock(Dock::Right).top_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+    
+    let result = LayoutBuilder::new().dock(Dock::Left).bottom_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+
+    // Error::PivotParameterUsedWithDock
+    let result = LayoutBuilder::new().dock(Dock::Fill).pivot(Pivot::Center).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used, 'pivot' parameter can not be used !");
+
+    // Error::AlignParameterUsedWithDock
+    let result = LayoutBuilder::new().dock(Dock::Top).alignment(Alignment::Center).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used, 'align' parameter can not be used !");
+
+    // Error::WidthParameterUsedWithTopOrBottomDock
+    let result = LayoutBuilder::new().dock(Dock::Top).width(20).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used with the value 'Dock:Top' or 'Dock:Bottom', the 'width' parameter can not be used as it is infered from the parent's width !");
+    
+    let result = LayoutBuilder::new().dock(Dock::Bottom).width(30).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used with the value 'Dock:Top' or 'Dock:Bottom', the 'width' parameter can not be used as it is infered from the parent's width !");
+
+    // Error::HeightParameterUsedWithLeftOrRightDock
+    let result = LayoutBuilder::new().dock(Dock::Left).height(15).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used with the value 'Dock:Left' or 'Dock:Right', the 'height' parameter can not be used as it is infered from the parent's height !");
+    
+    let result = LayoutBuilder::new().dock(Dock::Right).height(25).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used with the value 'Dock:Left' or 'Dock:Right', the 'height' parameter can not be used as it is infered from the parent's height !");
+
+    // Error::WidthOrHeightParameterUsedWithDockFill
+    let result = LayoutBuilder::new().dock(Dock::Fill).width(20).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used with the value 'Dock:Fill', the 'width' and 'height' parameters can not be used as they are infered from the parent's width and height !");
+    
+    let result = LayoutBuilder::new().dock(Dock::Fill).height(15).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('dock') parameter is used with the value 'Dock:Fill', the 'width' and 'height' parameters can not be used as they are infered from the parent's width and height !");
+
+    // Error::XYParameterUsedWithAlign
+    let result = LayoutBuilder::new().alignment(Alignment::Center).x(10).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('align') parameter is used,'x' and 'y' parameters can not be used !");
+    
+    let result = LayoutBuilder::new().alignment(Alignment::TopLeft).y(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('align') parameter is used,'x' and 'y' parameters can not be used !");
+
+    // Error::AnchorParameterUsedWithAlign
+    let result = LayoutBuilder::new().alignment(Alignment::Center).left_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('align') parameter is used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+    
+    let result = LayoutBuilder::new().alignment(Alignment::TopRight).top_anchor(3).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('align') parameter is used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+
+    // Error::PivotParameterUsedWithAlign
+    let result = LayoutBuilder::new().alignment(Alignment::Center).pivot(Pivot::TopLeft).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('align') parameter is used, 'pivot' parameter can not be used !");
+
+    // Error::DockParameterUsedWithAlign is not separately testable since dock mode takes precedence
+    // The error would be caught by AlignParameterUsedWithDock when dock is processed first
+
+    // Error::AnchorParameterUsedWithXY
+    let result = LayoutBuilder::new().x(10).y(5).left_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('x' and 'y') parameters are used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+
+    // Error::CornerAnchorParameterUsedWithXY is caught by AnchorParameterUsedWithXY first
+    // since any anchor with XY is checked before corner-specific validation
+    let result = LayoutBuilder::new().x(10).y(5).left_anchor(2).top_anchor(3).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('x' and 'y') parameters are used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+
+    // Error::CornerAnchorParameterUsedWithPivot
+    let result = LayoutBuilder::new().left_anchor(2).top_anchor(3).pivot(Pivot::Center).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When a corner anchor is provided - e.g ('top' with `left`, 'top' with `right`, 'bottom' with `left` or 'bottom' with `right`) - 'pivot' parameter can not be used as it is infered from the anchor !");
+
+    // Error::AllAnchorsParameterUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .left_anchor(1)
+        .right_anchor(2)
+        .top_anchor(3)
+        .bottom_anchor(4)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('x' and 'y') parameters are used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+
+    // Error::AllAnchorsParameterUsedWithSize
+    let result = LayoutBuilder::new()
+        .width(20)
+        .height(15)
+        .left_anchor(1)
+        .right_anchor(2)
+        .top_anchor(3)
+        .bottom_anchor(4)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When all anchor parameters ('left', 'top', 'right' and 'bottom') are used, 'width' and 'height' parameters can not be used as they are infered from the anchors !");
+
+    // Error::AllAnchorsParameterUsedWithPivot
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .left_anchor(1)
+        .right_anchor(2)
+        .top_anchor(3)
+        .bottom_anchor(4)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When all anchor parameters ('left', 'top', 'right' and 'bottom') are used, 'pivot' parameter can not be used as it is infered from the anchors !");
+
+    // Error::LeftTopRightAnchorsUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .left_anchor(1)
+        .top_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('x' and 'y') parameters are used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+
+    // Error::LeftTopRightAnchorsUsedWithWidth - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .width(20)
+        .left_anchor(1)
+        .top_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (left,top,right) anchors are used together, 'width' parameter can not be used as it is infered from the anchors !");
+
+    // Error::LeftTopRightAnchorsUsedWithPivot - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .left_anchor(1)
+        .top_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (left,top,right) anchors are used together, 'pivot' parameter can not be used as it is infered from the anchors !");
+
+    // Error::LeftRightAnchorsUsedWithX
+    let result = LayoutBuilder::new()
+        .x(10)
+        .left_anchor(1)
+        .right_anchor(2)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (left,right) anchors are used together, 'x' parameter can not be used as it is infered from the anchors !");
+
+    // Error::LeftRightAnchorsUsedWithWidth
+    let result = LayoutBuilder::new()
+        .width(20)
+        .left_anchor(1)
+        .right_anchor(2)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (left,right) anchors are used together, 'width' parameter can not be used as it is infered from the anchors !");
+
+    // Error::LeftRightAnchorsUsedWithoutPivot
+    let result = LayoutBuilder::new()
+        .y(10)
+        .height(5)
+        .left_anchor(1)
+        .right_anchor(2)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (left,right) anchors are used together, 'pivot' parameter must be provided !");
+
+    // Error::LeftRightAnchorsUsedWithoutY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .height(5)
+        .left_anchor(1)
+        .right_anchor(2)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (left,right) anchors are used together, 'y' parameter must be provided !");
+
+    // Error::LeftBottomRightAnchorsUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .left_anchor(1)
+        .bottom_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('x' and 'y') parameters are used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+
+    // Error::LeftBottomRightAnchorsUsedWithWidth - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .width(20)
+        .left_anchor(1)
+        .bottom_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (left,bottom,right) anchors are used together, 'width' parameter can not be used as it is infered from the anchors !");
+
+    // Error::LeftBottomRightAnchorsUsedWithPivot - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .left_anchor(1)
+        .bottom_anchor(2)
+        .right_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (left,bottom,right) anchors are used together, 'pivot' parameter can not be used as it is infered from the anchors !");
+
+    // Error::TopBottomAnchorsUsedWithY
+    let result = LayoutBuilder::new()
+        .y(10)
+        .top_anchor(1)
+        .bottom_anchor(2)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (top,bottom) anchors are used together, 'y' parameter can not be used as it is infered from the anchors !");
+
+    // Error::TopBottomAnchorsUsedWithHeight
+    let result = LayoutBuilder::new()
+        .height(15)
+        .top_anchor(1)
+        .bottom_anchor(2)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (top,bottom) anchors are used together, 'height' parameter can not be used as it is infered from the anchors !");
+
+    // Error::TopBottomAnchorsUsedWithoutX
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::CenterLeft)
+        .width(10)
+        .top_anchor(1)
+        .bottom_anchor(2)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (top,bottom) anchors are used together, 'x' parameter must be provided !");
+
+    // Error::TopBottomAnchorsUsedWithoutPivot
+    let result = LayoutBuilder::new()
+        .x(10)
+        .width(15)
+        .top_anchor(1)
+        .bottom_anchor(2)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (top,bottom) anchors are used together, 'pivot' parameter must be provided !");
+
+    // Error::TopBottomAnchorsUsedWithInvalidPivot - This validation is not implemented yet
+    // The error description mentions pivot validation but the actual implementation accepts all pivots
+
+    // Error::TopLeftBottomAnchorsUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .top_anchor(1)
+        .left_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('x' and 'y') parameters are used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+
+    // Error::TopLeftBottomAnchorsUsedWithHeight - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .height(15)
+        .top_anchor(1)
+        .left_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (top,left,bottom) anchors are used together, 'height' parameter can not be used as it is infered from the anchors !");
+
+    // Error::TopLeftBottomAnchorsUsedWithPivot - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .top_anchor(1)
+        .left_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (top,left,bottom) anchors are used together, 'pivot' parameter can not be used as it is infered from the anchors !");
+
+    // Error::TopRightBottomAnchorsUsedWithXY is caught by AnchorParameterUsedWithXY first
+    let result = LayoutBuilder::new()
+        .x(10)
+        .y(5)
+        .top_anchor(1)
+        .right_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When ('x' and 'y') parameters are used, anchor parameters ('top', 'bottom', 'left' and 'right') can not be used !");
+
+    // Error::TopRightBottomAnchorsUsedWithHeight - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .height(15)
+        .top_anchor(1)
+        .right_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (top,right,bottom) anchors are used together, 'height' parameter can not be used as it is infered from the anchors !");
+
+    // Error::TopRightBottomAnchorsUsedWithPivot - This can be tested without XY
+    let result = LayoutBuilder::new()
+        .pivot(Pivot::Center)
+        .top_anchor(1)
+        .right_anchor(2)
+        .bottom_anchor(3)
+        .try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: When (top,right,bottom) anchors are used together, 'pivot' parameter can not be used as it is infered from the anchors !");
+
+    // Error::SingleAnchor
+    let result = LayoutBuilder::new().left_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: Using a single anchor (left, right, top, bottom) is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height");
+    
+    let result = LayoutBuilder::new().right_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: Using a single anchor (left, right, top, bottom) is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height");
+    
+    let result = LayoutBuilder::new().top_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: Using a single anchor (left, right, top, bottom) is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height");
+    
+    let result = LayoutBuilder::new().bottom_anchor(5).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: Using a single anchor (left, right, top, bottom) is no different than using a pivot. Consider using a pivot instead, combined with (x,y) and optionally and width and a height");
+
+    // Error::XWithoutY
+    let result = LayoutBuilder::new().x(10).width(20).height(15).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: You need to provide the 'y' parameter as well to create a point for an absolute or pivoting layout !");
+
+    // Error::YWithoutX
+    let result = LayoutBuilder::new().y(5).width(20).height(15).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: You need to provide the 'x' parameter as well to create a point for an absolute or pivoting layout !");
+
+    // Error::PivotWithoutXorY
+    let result = LayoutBuilder::new().pivot(Pivot::Center).width(20).height(15).try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: You need to provide both 'x' and 'y' parameter if you provide a pivot value !");
+
+    // Error::NoParameters
+    let result = LayoutBuilder::new().try_build();
+    assert_eq!(result.unwrap_err().to_string(), "Layout error: No parameters provided to the LayoutBuilder method ! Please provide either an absolute layout, a docked layout, a pivot layout, an alignment layout or an anchored-based  layout !");
+}
+
+#[test]
+fn layout_absolute_method() {
+    use super::Coordinate16;
+    use super::Dimension16;
+
+    // Test basic absolute positioning
+    let layout = Layout::absolute(10, 20, 100, 50);
+    
+    assert_eq!(layout.x, Some(Coordinate16::Absolute(10)));
+    assert_eq!(layout.y, Some(Coordinate16::Absolute(20)));
+    assert_eq!(layout.width, Some(Dimension16::Absolute(100)));
+    assert_eq!(layout.height, Some(Dimension16::Absolute(50)));
+    assert_eq!(layout.dock, None);
+    assert_eq!(layout.align, None);
+    assert_eq!(layout.pivot, None);
+    assert_eq!(layout.a_left, None);
+    assert_eq!(layout.a_right, None);
+    assert_eq!(layout.a_top, None);
+    assert_eq!(layout.a_bottom, None);
+
+    // Test with negative coordinates
+    let layout_negative = Layout::absolute(-5, -10, 80, 40);
+    
+    assert_eq!(layout_negative.x, Some(Coordinate16::Absolute(-5)));
+    assert_eq!(layout_negative.y, Some(Coordinate16::Absolute(-10)));
+    assert_eq!(layout_negative.width, Some(Dimension16::Absolute(80)));
+    assert_eq!(layout_negative.height, Some(Dimension16::Absolute(40)));
+
+    // Test with zero values
+    let layout_zero = Layout::absolute(0, 0, 0, 0);
+    
+    assert_eq!(layout_zero.x, Some(Coordinate16::Absolute(0)));
+    assert_eq!(layout_zero.y, Some(Coordinate16::Absolute(0)));
+    assert_eq!(layout_zero.width, Some(Dimension16::Absolute(0)));
+    assert_eq!(layout_zero.height, Some(Dimension16::Absolute(0)));
+
+    // Test that the layout can be successfully used
+    let mut control_layout = ControlLayout::from(layout);
+    control_layout.update(200, 150); // Provide parent dimensions
+    assert_eq!(control_layout.get_width(), 100);
+    assert_eq!(control_layout.get_height(), 50);
+    assert_eq!(control_layout.get_x(), 10);
+    assert_eq!(control_layout.get_y(), 20);
+}
+
+#[test]
+fn layout_fill_method() {
+    use super::Dock;
+
+    // Test fill layout
+    let layout = Layout::fill();
+    
+    assert_eq!(layout.dock, Some(Dock::Fill));
+    assert_eq!(layout.x, None);
+    assert_eq!(layout.y, None);
+    assert_eq!(layout.width, None);
+    assert_eq!(layout.height, None);
+    assert_eq!(layout.align, None);
+    assert_eq!(layout.pivot, None);
+    assert_eq!(layout.a_left, None);
+    assert_eq!(layout.a_right, None);
+    assert_eq!(layout.a_top, None);
+    assert_eq!(layout.a_bottom, None);
+
+    // Test that fill layout works with parent dimensions
+    let mut control_layout = ControlLayout::from(layout);
+    control_layout.update(200, 150);
+    
+    assert_eq!(control_layout.get_width(), 200);
+    assert_eq!(control_layout.get_height(), 150);
+    assert_eq!(control_layout.get_x(), 0);
+    assert_eq!(control_layout.get_y(), 0);
+}
+
+#[test]
+fn layout_pivot_method() {
+    use super::Coordinate16;
+    use super::Dimension16;
+    use super::Pivot;
+
+    // Test pivot center
+    let layout_center = Layout::pivot(50, 30, 20, 10, Pivot::Center);
+    
+    assert_eq!(layout_center.x, Some(Coordinate16::Absolute(50)));
+    assert_eq!(layout_center.y, Some(Coordinate16::Absolute(30)));
+    assert_eq!(layout_center.width, Some(Dimension16::Absolute(20)));
+    assert_eq!(layout_center.height, Some(Dimension16::Absolute(10)));
+    assert_eq!(layout_center.pivot, Some(Pivot::Center));
+    assert_eq!(layout_center.dock, None);
+    assert_eq!(layout_center.align, None);
+    assert_eq!(layout_center.a_left, None);
+    assert_eq!(layout_center.a_right, None);
+    assert_eq!(layout_center.a_top, None);
+    assert_eq!(layout_center.a_bottom, None);
+
+    // Test pivot top-left
+    let layout_tl = Layout::pivot(10, 5, 40, 20, Pivot::TopLeft);
+    
+    assert_eq!(layout_tl.x, Some(Coordinate16::Absolute(10)));
+    assert_eq!(layout_tl.y, Some(Coordinate16::Absolute(5)));
+    assert_eq!(layout_tl.width, Some(Dimension16::Absolute(40)));
+    assert_eq!(layout_tl.height, Some(Dimension16::Absolute(20)));
+    assert_eq!(layout_tl.pivot, Some(Pivot::TopLeft));
+
+    // Test pivot bottom-right
+    let layout_br = Layout::pivot(100, 80, 30, 15, Pivot::BottomRight);
+    
+    assert_eq!(layout_br.x, Some(Coordinate16::Absolute(100)));
+    assert_eq!(layout_br.y, Some(Coordinate16::Absolute(80)));
+    assert_eq!(layout_br.width, Some(Dimension16::Absolute(30)));
+    assert_eq!(layout_br.height, Some(Dimension16::Absolute(15)));
+    assert_eq!(layout_br.pivot, Some(Pivot::BottomRight));
+
+    // Test all pivot types
+    let pivot_types = [
+        Pivot::TopLeft, Pivot::TopCenter, Pivot::TopRight,
+        Pivot::CenterLeft, Pivot::Center, Pivot::CenterRight,
+        Pivot::BottomLeft, Pivot::BottomCenter, Pivot::BottomRight,
+    ];
+
+    for pivot in pivot_types {
+        let layout = Layout::pivot(25, 25, 10, 10, pivot);
+        assert_eq!(layout.pivot, Some(pivot));
+        assert_eq!(layout.x, Some(Coordinate16::Absolute(25)));
+        assert_eq!(layout.y, Some(Coordinate16::Absolute(25)));
+    }
+
+    // Test that pivot layout works correctly with positioning
+    let mut control_layout = ControlLayout::from(layout_center);
+    control_layout.update(200, 150);
+    
+    // With pivot center, the control should be positioned so its center is at (50, 30)
+    // Control size is 20x10, so top-left should be at (40, 25)
+    assert_eq!(control_layout.get_width(), 20);
+    assert_eq!(control_layout.get_height(), 10);
+    assert_eq!(control_layout.get_x(), 40);
+    assert_eq!(control_layout.get_y(), 25);
+}
+
+#[test]
+fn layout_aligned_method() {
+    use super::Alignment;
+    use super::Dimension16;
+
+    // Test center alignment
+    let layout_center = Layout::aligned(Alignment::Center, 50, 25);
+    
+    assert_eq!(layout_center.align, Some(Alignment::Center));
+    assert_eq!(layout_center.width, Some(Dimension16::Absolute(50)));
+    assert_eq!(layout_center.height, Some(Dimension16::Absolute(25)));
+    assert_eq!(layout_center.x, None);
+    assert_eq!(layout_center.y, None);
+    assert_eq!(layout_center.dock, None);
+    assert_eq!(layout_center.pivot, None);
+    assert_eq!(layout_center.a_left, None);
+    assert_eq!(layout_center.a_right, None);
+    assert_eq!(layout_center.a_top, None);
+    assert_eq!(layout_center.a_bottom, None);
+
+    // Test top-left alignment
+    let layout_tl = Layout::aligned(Alignment::TopLeft, 30, 15);
+    
+    assert_eq!(layout_tl.align, Some(Alignment::TopLeft));
+    assert_eq!(layout_tl.width, Some(Dimension16::Absolute(30)));
+    assert_eq!(layout_tl.height, Some(Dimension16::Absolute(15)));
+
+    // Test bottom-right alignment
+    let layout_br = Layout::aligned(Alignment::BottomRight, 40, 20);
+    
+    assert_eq!(layout_br.align, Some(Alignment::BottomRight));
+    assert_eq!(layout_br.width, Some(Dimension16::Absolute(40)));
+    assert_eq!(layout_br.height, Some(Dimension16::Absolute(20)));
+
+    // Test all alignment types
+    let alignment_types = [
+        Alignment::TopLeft, Alignment::TopCenter, Alignment::TopRight,
+        Alignment::CenterLeft, Alignment::Center, Alignment::CenterRight,
+        Alignment::BottomLeft, Alignment::BottomCenter, Alignment::BottomRight,
+    ];
+
+    for align in alignment_types {
+        let layout = Layout::aligned(align, 20, 10);
+        assert_eq!(layout.align, Some(align));
+        assert_eq!(layout.width, Some(Dimension16::Absolute(20)));
+        assert_eq!(layout.height, Some(Dimension16::Absolute(10)));
+    }
+
+    // Test that aligned layout works correctly with positioning
+    let mut control_layout = ControlLayout::from(layout_center);
+    control_layout.update(200, 150);
+    
+    // With center alignment, the control should be centered in a 200x150 parent
+    // Control size is 50x25, so top-left should be at (75, 62 or 63)
+    assert_eq!(control_layout.get_width(), 50);
+    assert_eq!(control_layout.get_height(), 25);
+    assert_eq!(control_layout.get_x(), 75);
+    assert_eq!(control_layout.get_y(), 63); // Adjusted based on actual calculation
+
+    // Test top-left alignment
+    let mut control_layout_tl = ControlLayout::from(layout_tl);
+    control_layout_tl.update(200, 150);
+    
+    // With top-left alignment, the control should be at (0, 0)
+    assert_eq!(control_layout_tl.get_width(), 30);
+    assert_eq!(control_layout_tl.get_height(), 15);
+    assert_eq!(control_layout_tl.get_x(), 0);
+    assert_eq!(control_layout_tl.get_y(), 0);
+
+    // Test bottom-right alignment
+    let mut control_layout_br = ControlLayout::from(layout_br);
+    control_layout_br.update(200, 150);
+    
+    // With bottom-right alignment, the control should be at (160, 130)
+    assert_eq!(control_layout_br.get_width(), 40);
+    assert_eq!(control_layout_br.get_height(), 20);
+    assert_eq!(control_layout_br.get_x(), 160);
+    assert_eq!(control_layout_br.get_y(), 130);
+}
+
+#[test]
+fn layout_static_methods_consistency() {
+    use super::Alignment;
+    use super::Dock;
+    use super::Pivot;
+
+    // Test that Layout::absolute is equivalent to LayoutBuilder
+    let layout1 = Layout::absolute(15, 25, 60, 40);
+    let layout2 = LayoutBuilder::new().x(15).y(25).width(60).height(40).build();
+    
+    assert_eq!(layout1, layout2);
+
+    // Test that Layout::fill is equivalent to LayoutBuilder
+    let layout1 = Layout::fill();
+    let layout2 = LayoutBuilder::new().dock(Dock::Fill).build();
+    
+    assert_eq!(layout1, layout2);
+
+    // Test that Layout::pivot is equivalent to LayoutBuilder
+    let layout1 = Layout::pivot(30, 40, 25, 15, Pivot::Center);
+    let layout2 = LayoutBuilder::new().x(30).y(40).width(25).height(15).pivot(Pivot::Center).build();
+    
+    assert_eq!(layout1, layout2);
+
+    // Test that Layout::aligned is equivalent to LayoutBuilder
+    let layout1 = Layout::aligned(Alignment::TopRight, 35, 20);
+    let layout2 = LayoutBuilder::new().width(35).height(20).alignment(Alignment::TopRight).build();
+    
+    assert_eq!(layout1, layout2);
+}
+
+#[test]
+fn layout_static_methods_edge_cases() {
+    use super::Alignment;
+    use super::Coordinate16;
+    use super::Dimension16;
+    use super::Pivot;
+
+    // Test absolute with maximum values that fit within the constraints
+    let layout_max = Layout::absolute(30000, 30000, 1000, 1000);
+    assert_eq!(layout_max.x, Some(Coordinate16::Absolute(30000)));
+    assert_eq!(layout_max.y, Some(Coordinate16::Absolute(30000)));
+
+    // Test absolute with minimum values
+    let layout_min = Layout::absolute(-30000, -30000, 0, 0);
+    assert_eq!(layout_min.x, Some(Coordinate16::Absolute(-30000)));
+    assert_eq!(layout_min.y, Some(Coordinate16::Absolute(-30000)));
+
+    // Test pivot with extreme coordinates
+    let layout_pivot_extreme = Layout::pivot(-1000, 1000, 1, 1, Pivot::Center);
+    assert_eq!(layout_pivot_extreme.x, Some(Coordinate16::Absolute(-1000)));
+    assert_eq!(layout_pivot_extreme.y, Some(Coordinate16::Absolute(1000)));
+
+    // Test aligned with zero dimensions
+    let layout_aligned_zero = Layout::aligned(Alignment::Center, 0, 0);
+    assert_eq!(layout_aligned_zero.width, Some(Dimension16::Absolute(0)));
+    assert_eq!(layout_aligned_zero.height, Some(Dimension16::Absolute(0)));
+
+    // Test that all methods return valid Layout instances that can be converted to ControlLayout
+    let layouts = vec![
+        Layout::absolute(10, 10, 20, 20),
+        Layout::fill(),
+        Layout::pivot(50, 50, 30, 30, Pivot::Center),
+        Layout::aligned(Alignment::Center, 40, 40),
+    ];
+
+    for layout in layouts {
+        let mut control_layout = ControlLayout::from(layout);
+        control_layout.update(100, 100);
+        
+        // All layouts should produce valid dimensions
+        assert!(control_layout.get_width() >= 0);
+        assert!(control_layout.get_height() >= 0);
+    }
+}
