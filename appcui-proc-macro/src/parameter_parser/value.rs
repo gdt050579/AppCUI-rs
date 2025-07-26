@@ -118,12 +118,12 @@ impl<'a> Value<'a> {
         }
         None
     }
-    pub(crate) fn to_align(&self) -> Alignment {
-        if let ValueType::Alignment(value) = &self.data_type {
-            return *value;
-        }
-        panic!("Invalid alignment value: {}", self.raw_data);
-    }
+    // pub(crate) fn to_align(&self) -> Alignment {
+    //     if let ValueType::Alignment(value) = &self.data_type {
+    //         return *value;
+    //     }
+    //     panic!("Invalid alignment value: {}", self.raw_data);
+    // }
     pub(crate) fn to_dock(&self) -> Dock {
         if let ValueType::Dock(value) = &self.data_type {
             return *value;

@@ -51,7 +51,7 @@ impl TopBottomAnchorsLayout {
 
             Pivot::TopRight => (x - new_w, t),
             Pivot::CenterRight => (x - new_w, (t + b - new_h) / 2),
-            Pivot::BottomRight => (x - new_w, t - new_h),
+            Pivot::BottomRight => (x - new_w, b - new_h),
 
             Pivot::TopCenter => (x- new_w / 2, t),
             Pivot::BottomCenter => (x- new_w / 2, b - new_h),
