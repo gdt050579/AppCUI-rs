@@ -21,6 +21,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 ## ✨ Features
 - [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, combo boxes, date/time pickers, color pickers, tabs, accordeons, etc.). A full list of controls can be found [here](docs/chapter-3/stock_controls.md) 
+- [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors or pivot positioning (see more [here](docs/chapter-3/layout.md)) 
 - [x] menus and toolbars
 - [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, MacOS via termios)
 - [x] multi-threading support to allow background tasks
