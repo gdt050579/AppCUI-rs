@@ -221,6 +221,8 @@ where
         } else {
             return;
         };
+        let ext_idx = self.control(self.mask).unwrap().index().unwrap() as usize;
+        let check_extension = self.extension_mask.len() > ext_idx;
         if let Some(result) = self.nav.join(&self.path, &entry) {
             if self.flags.contains(InnerFlags::ValidateOverwrite) {
                 match self.nav.exists(&result) {
@@ -240,6 +242,20 @@ where
                 }
             }
             self.update_last_path(&result); 
+            let fname = result.file_name();
+            if check_extension && fname.is_some() {
+                if let Some(fname) = fname.unwrap().to_os_string().to_str() {
+                    if !self.extension_mask[ext_idx].matches(fname) {
+                        // need to add the proper extension
+                        if self.extension_mask[ext_idx].extensions_count() == 1
+                        {
+                            // one extension - we need to add it
+                        } else {
+                            // multiple extensions - we need to select what we add
+                        }
+                    }
+                }
+            }
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
             crate::dialogs::error(

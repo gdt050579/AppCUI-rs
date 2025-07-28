@@ -244,6 +244,10 @@ impl FileMask {
         Ok(v)
     }
     #[inline(always)]
+    pub(super) fn extensions_count(&self) -> usize {
+        self.extensions_hash.len()
+    }
+    #[inline(always)]
     pub(super) fn name(&self) -> &str {
         &self.name
     }
