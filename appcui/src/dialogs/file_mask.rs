@@ -44,10 +44,18 @@ impl CharType {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Extension {
+    hash: u32,
+    start: u16,
+    end: u16,
+}
 #[derive(Debug)]
 pub(super) struct FileMask {
     name: String,
-    pub(super) extensions_hash: Vec<u32>,
+    extension_string: String,
+    extensions_hash: Vec<Extension>,
 }
 impl FileMask {
     fn compute_hash(buf: &[u8]) -> u32 {
@@ -204,6 +212,7 @@ impl FileMask {
             let end_word = FileMask::skip_word(bytes, start);
             let mut mask = FileMask {
                 name: text[start..end_word].to_string(),
+                extension_string: String::new(),
                 extensions_hash: Vec::new(),
             };
             start = FileMask::skip_spaces(bytes, end_word);
@@ -211,6 +220,8 @@ impl FileMask {
             start = FileMask::skip_spaces(bytes, start + 1);
             FileMask::expect_type(bytes, start, CharType::OpenSquareBracket)?;
             start = FileMask::skip_spaces(bytes, start + 1);
+            let start_extension_string = start;
+            let mut end_extension_string = start;
             let ct = FileMask::expect_type_or_type(bytes, start, CharType::Word, CharType::CloseSquareBracket)?;
             if ct == CharType::Word {
                 loop {
@@ -222,8 +233,13 @@ impl FileMask {
                     } else {
                         FileMask::compute_hash(ext_buf)
                     };
-                    mask.extensions_hash.push(hash);
+                    mask.extensions_hash.push(Extension {
+                        hash,
+                        start: start.saturating_sub(start_extension_string) as u16,
+                        end: end_word.saturating_sub(start_extension_string) as u16,
+                    });
                     // do something with extension
+                    end_extension_string = end_word;
                     start = FileMask::skip_spaces(bytes, end_word);
                     let ct = FileMask::expect_type_or_type(bytes, start, CharType::Comma, CharType::CloseSquareBracket)?;
                     if ct == CharType::CloseSquareBracket {
@@ -232,13 +248,14 @@ impl FileMask {
                     start = FileMask::skip_spaces(bytes, start + 1);
                 }
             }
+            mask.extension_string = text[start_extension_string..end_extension_string].to_string();
             start = FileMask::skip_spaces(bytes, start + 1);
             if start < len {
                 FileMask::expect_type(bytes, start, CharType::Comma)?;
                 start = FileMask::skip_spaces(bytes, start + 1);
             }
             // sort the extension hash to prepare for binary search
-            mask.extensions_hash.sort();
+            mask.extensions_hash.sort_by_key(|&ext| ext.hash);
             v.push(mask);
         }
         Ok(v)
@@ -251,6 +268,10 @@ impl FileMask {
     pub(super) fn name(&self) -> &str {
         &self.name
     }
+    #[inline(always)]
+    pub(super) fn extension(&self, index: usize) -> &str {
+        &self.extension_string[self.extensions_hash[index].start as usize..self.extensions_hash[index].end as usize]
+    }
     pub(super) fn matches(&self, file_name: &str) -> bool {
         if self.extensions_hash.is_empty() {
             return true;
@@ -261,6 +282,6 @@ impl FileMask {
         } else {
             0
         };
-        self.extensions_hash.binary_search(&hash).is_ok()
+        self.extensions_hash.binary_search_by_key(&hash, |&ext| ext.hash).is_ok()
     }
 }

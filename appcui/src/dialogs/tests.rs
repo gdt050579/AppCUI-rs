@@ -1123,7 +1123,7 @@ fn check_file_mask_empty() {
 
     let fm = FileMask::parse("key = []").unwrap();
     assert!(fm.len() == 1);
-    assert!(fm[0].extensions_hash.is_empty());
+    assert!(fm[0].extensions_count() == 0);
     assert!(fm[0].name() == "key");
     assert!(fm[0].matches("test.txt"));
     assert!(fm[0].matches("C:\\windows\\test.txt"));
@@ -1138,16 +1138,16 @@ fn check_file_mask_array() {
     let fm = FileMask::parse("  first key = [value1,  value2 , value3  ], key2 = [1,2,3,4,5]").unwrap();
     assert_eq!(fm.len(), 2);
     assert_eq!(fm[0].name(), "first key");
-    assert_eq!(fm[0].extensions_hash.len(), 3);
+    assert_eq!(fm[0].extensions_count(), 3);
     assert_eq!(fm[1].name(), "key2");
-    assert_eq!(fm[1].extensions_hash.len(), 5);
+    assert_eq!(fm[1].extensions_count(), 5);
 }
 
 #[test]
 fn check_file_mask_ignore_case() {
     let fm = FileMask::parse("images = [png,JPG]").unwrap();
     assert!(fm.len() == 1);
-    assert!(fm[0].extensions_hash.len() == 2);
+    assert!(fm[0].extensions_count() == 2);
     assert!(fm[0].name() == "images");
     assert!(fm[0].matches("test.png"));
     assert!(fm[0].matches("test.pNG"));
@@ -1155,6 +1155,22 @@ fn check_file_mask_ignore_case() {
     assert!(fm[0].matches("test.JPG"));
     assert!(!fm[0].matches("test.png123"));
     assert!(!fm[0].matches("test.JpG123"));
+}
+
+#[test]
+fn check_extension_list() {
+    let fm = FileMask::parse("images = [png,JPG, gif, bmp],video = [avi, mp3, hd_video]").unwrap();
+    assert_eq!(fm.len() , 2);
+    assert_eq!(fm[0].extensions_count() , 4);
+    assert_eq!(fm[0].name() , "images");
+    assert_eq!(fm[0].extension(0) , "gif");
+    assert_eq!(fm[0].extension(1) , "png");
+    assert_eq!(fm[0].extension(2) , "bmp");
+    assert_eq!(fm[0].extension(3) , "JPG");
+    assert_eq!(fm[1].name() , "video");
+    assert_eq!(fm[1].extension(0) , "avi");
+    assert_eq!(fm[1].extension(1) , "hd_video");
+    assert_eq!(fm[1].extension(2) , "mp3");
 }
 
 #[test]
