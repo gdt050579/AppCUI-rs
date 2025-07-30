@@ -55,6 +55,7 @@
 //! ```
 mod dialog_buttons;
 mod dialog_result;
+mod extension_selection_dialog;
 mod file_mask;
 mod folder_select_dialog;
 mod generic_alert_dialog;
@@ -72,6 +73,7 @@ use crate::{
 };
 use dialog_buttons::DialogButtons;
 use dialog_result::DialogResult;
+use extension_selection_dialog::ExtensionSelectionDialog;
 use file_mask::FileMask;
 use folder_select_dialog::{FolderExplorer, FolderSelectionDialogResult};
 use generic_alert_dialog::GenericAlertDialog;
