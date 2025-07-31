@@ -44,11 +44,11 @@ impl LayoutMode {
         }
         // Step 1 ==> if dock option is present
         if layout.dock.is_some() {
-            return PointAndSizeLayout::new_docked(&layout).map(|layout| LayoutMode::PointAndSize(layout));
+            return PointAndSizeLayout::new_docked(&layout).map(LayoutMode::PointAndSize);
         }
         // Step 2 ==> if align option is present
         if layout.align.is_some() {
-            return PointAndSizeLayout::new_aligned(&layout).map(|layout| LayoutMode::PointAndSize(layout));
+            return PointAndSizeLayout::new_aligned(&layout).map(LayoutMode::PointAndSize);
         }
         // Step 3 ==> check (X,Y) + (W,H) + (optional pivot)
         if layout.x.is_some() && layout.y.is_some() {
@@ -75,30 +75,30 @@ impl LayoutMode {
                     }
                 }
             }
-            return PointAndSizeLayout::new_xy(&layout).map(|layout| LayoutMode::PointAndSize(layout));
+            return PointAndSizeLayout::new_xy(&layout).map(LayoutMode::PointAndSize);
         }
 
         // step 4 ==> check anchors
         match anchors {
             Anchors::TopLeft => {
-                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopLeft).map(|layout| LayoutMode::PointAndSize(layout))
+                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopLeft).map(LayoutMode::PointAndSize)
             }
             Anchors::TopRight => {
-                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopRight).map(|layout| LayoutMode::PointAndSize(layout))
+                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::TopRight).map(LayoutMode::PointAndSize)
             }
             Anchors::BottomRight => {
-                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomRight).map(|layout| LayoutMode::PointAndSize(layout))
+                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomRight).map(LayoutMode::PointAndSize)
             }
             Anchors::BottomLeft => {
-                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomLeft).map(|layout| LayoutMode::PointAndSize(layout))
+                return PointAndSizeLayout::new_corner_anchor(&layout, Alignment::BottomLeft).map(LayoutMode::PointAndSize)
             }
-            Anchors::LeftRight => return LeftRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftRightAnchors(layout)),
-            Anchors::TopBottom => return TopBottomAnchorsLayout::new(&layout).map(|layout| LayoutMode::TopBottomAnchors(layout)),
-            Anchors::LeftTopRight => return LeftTopRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftTopRightAnchors(layout)),
-            Anchors::LeftBottomRight => return LeftBottomRightAnchorsLayout::new(&layout).map(|layout| LayoutMode::LeftBottomRightAnchors(layout)),
-            Anchors::TopLeftBottom => return TopLeftBottomAnchorsLayout::new(&layout).map(|layout| LayoutMode::TopLeftBottomAnchors(layout)),
-            Anchors::TopRightBottom => return TopRightBottomAnchorsLayout::new(&layout).map(|layout| LayoutMode::TopRightBottomAnchors(layout)),
-            Anchors::All => return AllAnchorsLayout::new(&layout).map(|layout| LayoutMode::AllAnchors(layout)),
+            Anchors::LeftRight => return LeftRightAnchorsLayout::new(&layout).map(LayoutMode::LeftRightAnchors),
+            Anchors::TopBottom => return TopBottomAnchorsLayout::new(&layout).map(LayoutMode::TopBottomAnchors),
+            Anchors::LeftTopRight => return LeftTopRightAnchorsLayout::new(&layout).map(LayoutMode::LeftTopRightAnchors),
+            Anchors::LeftBottomRight => return LeftBottomRightAnchorsLayout::new(&layout).map(LayoutMode::LeftBottomRightAnchors),
+            Anchors::TopLeftBottom => return TopLeftBottomAnchorsLayout::new(&layout).map(LayoutMode::TopLeftBottomAnchors),
+            Anchors::TopRightBottom => return TopRightBottomAnchorsLayout::new(&layout).map(LayoutMode::TopRightBottomAnchors),
+            Anchors::All => return AllAnchorsLayout::new(&layout).map(LayoutMode::AllAnchors),
             Anchors::Left | Anchors::Right | Anchors::Top | Anchors::Bottom => return Err(Error::SingleAnchor),
             Anchors::None => {}
         }
@@ -112,7 +112,7 @@ impl LayoutMode {
         if layout.pivot.is_some() {
             return Err(Error::PivotWithoutXorY)
         }
-        return Err(Error::InvalidLayoutRule);
+        Err(Error::InvalidLayoutRule)
     }
 }
 
