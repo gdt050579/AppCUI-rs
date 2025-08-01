@@ -48,7 +48,7 @@ impl From<u8> for Dimension16 {
 }
 impl From<u16> for Dimension16 {
     fn from(value: u16) -> Self {
-        Dimension16::Absolute(value.min(MAX_DIMENSION as u16) as u16)
+        Dimension16::Absolute(value.min(MAX_DIMENSION as u16))
     }
 }
 impl From<u32> for Dimension16 {

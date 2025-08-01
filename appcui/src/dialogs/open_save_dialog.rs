@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
+use dialogs::extension_selection_dialog::ExtensionSelectionDialog;
 use dialogs::file_mask::FileMask;
 use dialogs::root_select_dialog::RootSelectDialog;
 use fs::EntryType;
@@ -221,12 +222,13 @@ where
         } else {
             return;
         };
-        if let Some(result) = self.nav.join(&self.path, &entry) {
+        let ext_idx = self.control(self.mask).unwrap().index().unwrap() as usize;
+        let check_extension = self.extension_mask.len() > ext_idx;
+        if let Some(mut result) = self.nav.join(&self.path, &entry) {
             if self.flags.contains(InnerFlags::ValidateOverwrite) {
                 match self.nav.exists(&result) {
                     Some(true) => {
-                        if !crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str())
-                        {
+                        if !crate::dialogs::validate("Overwrite", format!("Do you want to overwrite the file: '{}'", result.display()).as_str()) {
                             return;
                         }
                     }
@@ -239,7 +241,24 @@ where
                     }
                 }
             }
-            self.update_last_path(&result); 
+            self.update_last_path(&result);
+            let fname = result.file_name();
+            if check_extension && fname.is_some() {
+                if let Some(fname) = fname.unwrap().to_os_string().to_str() {
+                    if !self.extension_mask[ext_idx].matches(fname) {
+                        // need to add the proper extension
+                        if self.extension_mask[ext_idx].extensions_count() == 1 {
+                            // one extension - we need to add it
+                            result.set_extension(self.extension_mask[ext_idx].extension(0));
+                        } else {
+                            // multiple extensions - we need to select what we add
+                            if let Some(selected_extension) = ExtensionSelectionDialog::new(&self.extension_mask[ext_idx]).show() {
+                                result.set_extension(&selected_extension);
+                            }
+                        }
+                    }
+                }
+            }
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
             crate::dialogs::error(
@@ -281,7 +300,7 @@ where
                     }
                 }
             }
-            self.update_last_path(&result); 
+            self.update_last_path(&result);
             self.exit_with(OpenSaveDialogResult::Path(result));
         } else {
             crate::dialogs::error(
@@ -294,7 +313,6 @@ where
                 .as_str(),
             );
         }
-
     }
     fn return_result(&mut self) {
         if self.flags.contains(InnerFlags::Save) {
@@ -420,7 +438,7 @@ where
 impl<T> PathFinderEvents for FileExplorer<T>
 where
     T: Navigator<Entry, Root, PathBuf> + 'static,
-{ 
+{
     fn on_path_updated(&mut self, handle: Handle<PathFinder>) -> EventProcessStatus {
         if handle == self.path_viewer {
             if let Some(pv) = self.control(self.path_viewer) {
@@ -430,4 +448,4 @@ where
         }
         EventProcessStatus::Processed
     }
-}   
+}

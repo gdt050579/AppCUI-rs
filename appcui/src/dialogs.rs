@@ -55,6 +55,7 @@
 //! ```
 mod dialog_buttons;
 mod dialog_result;
+mod extension_selection_dialog;
 mod file_mask;
 mod folder_select_dialog;
 mod generic_alert_dialog;
