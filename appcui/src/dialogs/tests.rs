@@ -54,7 +54,10 @@ static VFS: &str = "
     f,D:\\Windows\\melody.mp3,0,2019-03-12 12:31:55,
 ";
 
-static FILE_MASK: &str = "Images = [jpg,png,bmp], Documents = [txt,docx], Executable and scripts = [exe,dll,js,py,ps1,sh,bat,cmd]";
+static FILE_MASK: &str = "Images = [jpg,png,bmp], 
+                          Documents = [txt,docx], 
+                          Executable and scripts = [exe,dll,js,py,ps1,sh,bat,cmd], 
+                          Presentation = [ppt]";
 
 enum OpenSaveTestWindowFlags {
     Save(dialogs::SaveFileDialogFlags),
@@ -822,7 +825,7 @@ fn check_save_dialog_navigate() {
         CheckHash(0x787D5122AD4B01F4)
         Key.Pressed(Down,4)
         Paint('6. Select all files');
-        CheckHash(0x8F25B539CF9D5528)
+        CheckHash(0x16EAEE304AD5967A)
         Key.Pressed(Enter)
         Key.Pressed(Tab,4)
         Paint('7. File list has focus');
@@ -1357,5 +1360,244 @@ fn check_input_with_initial_value() {
 
     let mut a = App::debug(80, 12, script).build().unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
+#[test]
+fn check_save_select_extension() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x6D6E678D8633D6C1)   
+        Key.TypeText('myfile')
+        Paint('3. myfile without extension is typed');
+        CheckHash(0x276FB959EE1AE207)   
+        Key.Pressed(Enter)
+        Paint('4. Validate extension selection');
+        CheckHash(0xDD59640B190846EE)
+        Key.Pressed(Enter)
+        Paint('5. combobox opened');
+        CheckHash(0x2840F03ECF7FFA00)           
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('6. selected extension: png -> file is: C:\\Program Files\\myfile.png');
+        CheckHash(0x5AEDD66519EB7207)           
+    ";
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "myfile.exe",
+        dialogs::Location::Last,
+        SaveFileDialogFlags::Icons | SaveFileDialogFlags::ValidateOverwrite,
+    ));
+    a.run();
+}
+
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
+#[test]
+fn check_save_select_extension_but_quit() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x6D6E678D8633D6C1)   
+        Key.TypeText('myfile')
+        Paint('3. myfile without extension is typed');
+        CheckHash(0x276FB959EE1AE207)   
+        Key.Pressed(Enter)
+        Paint('4. Validate extension selection');
+        CheckHash(0xDD59640B190846EE)
+        Key.Pressed(Enter)
+        Paint('5. combobox opened');
+        CheckHash(0x2840F03ECF7FFA00)           
+        Key.Pressed(Tab)
+        Key.Pressed(Escape)
+        Paint('6. selected extension: None -> file is: C:\\Program Files\\myfile');
+        CheckHash(0x7F769C57E0A16CE4)           
+    ";
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "myfile.exe",
+        dialogs::Location::Last,
+        SaveFileDialogFlags::Icons | SaveFileDialogFlags::ValidateOverwrite,
+    ));
+    a.run();
+}
+
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
+#[test]
+fn check_save_select_extension_different() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x6D6E678D8633D6C1)   
+        Key.TypeText('myfile')
+        Paint('3. myfile without extension is typed');
+        CheckHash(0x276FB959EE1AE207)   
+        Key.Pressed(Enter)
+        Paint('4. Validate extension selection');
+        CheckHash(0xDD59640B190846EE)
+        Key.Pressed(Enter)
+        Key.Pressed(Down,2)
+        Paint('5. combobox opened + select jpg');
+        CheckHash(0xCCFB713ECDD5FFB8)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('6. selected extension: jpg -> file is: C:\\Program Files\\myfile.jpg');
+        CheckHash(0xA446E306398B35EF)           
+    ";
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "myfile.exe",
+        dialogs::Location::Last,
+        SaveFileDialogFlags::Icons | SaveFileDialogFlags::ValidateOverwrite,
+    ));
+    a.run();
+}
+
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
+#[test]
+fn check_save_select_extension_do_not_change() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x6D6E678D8633D6C1)   
+        Key.TypeText('myfile')
+        Paint('3. myfile without extension is typed');
+        CheckHash(0x276FB959EE1AE207)   
+        Key.Pressed(Enter)
+        Paint('4. Validate extension selection');
+        CheckHash(0xDD59640B190846EE)
+        Key.Pressed(Enter)
+        Key.Pressed(Down,3)
+        Paint('5. combobox opened + select do_not_change');
+        CheckHash(0x403BD91BBB561AEF)
+        Key.Pressed(Tab)
+        Key.Pressed(Enter)
+        Paint('6. selected extension: None -> file is: C:\\Program Files\\myfile');
+        CheckHash(0x7F769C57E0A16CE4)           
+    ";
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "myfile.exe",
+        dialogs::Location::Last,
+        SaveFileDialogFlags::Icons | SaveFileDialogFlags::ValidateOverwrite,
+    ));
+    a.run();
+}
+
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
+#[test]
+fn check_save_select_extension_not_called_due_to_correct_extension() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x6D6E678D8633D6C1)   
+        Key.TypeText('myfile.png')
+        Paint('3. myfile.png typed');
+        CheckHash(0x1AC52ACDDC935620)   
+        Key.Pressed(Enter)
+        Paint('4. selected extension: png -> file is: C:\\Program Files\\myfile.png');
+        CheckHash(0x5AEDD66519EB7207)           
+    ";
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "myfile.exe",
+        dialogs::Location::Last,
+        SaveFileDialogFlags::Icons | SaveFileDialogFlags::ValidateOverwrite,
+    ));
+    a.run();
+}
+
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
+#[test]
+fn check_save_select_extension_not_called_due_one_extension() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x6D6E678D8633D6C1)   
+        Key.TypeText('myfile')
+        Paint('3. myfile typed (no extension0');
+        CheckHash(0x276FB959EE1AE207)   
+        Key.Pressed(Tab, 2)
+        Key.Pressed(Down,3)
+        Paint('4. Selected Presentation type')
+        CheckHash(0x7992999EBAE045ED)           
+        Key.Pressed(Alt+O)
+        Key.Pressed(Tab)
+        // selection dialog should not be triggered because there is only one selection in the Presentation category
+        Paint('5. selected extension: ppt -> file is: C:\\Program Files\\myfile.ppt');
+        CheckHash(0x4C351F165DC22042)           
+    ";
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "myfile.exe",
+        dialogs::Location::Last,
+        SaveFileDialogFlags::Icons | SaveFileDialogFlags::ValidateOverwrite,
+    ));
+    a.run();
+}
+
+#[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]
+#[test]
+fn check_save_select_extension_not_called_due_all_files_mask() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')   
+        CheckHash(0x5ED47A4336110FC4)
+        Key.Pressed(Enter)
+        Paint('2. Show save dialog');
+        CheckHash(0x6D6E678D8633D6C1)   
+        Key.TypeText('myfile')
+        Paint('3. myfile typed (no extension0');
+        CheckHash(0x276FB959EE1AE207)   
+        Key.Pressed(Tab, 2)
+        // make sure that we select the 'All files' mask
+        Key.Pressed(Down,100)
+        Paint('4. Selected All Files type')
+        CheckHash(0xB9275C623A71C4E6)           
+        Key.Pressed(Alt+O)
+        Key.Pressed(Tab)
+        // selection dialog should not be trigered because we have used the All Files mask
+        Paint('5. selected extension: None -> file is: C:\\Program Files\\myfile');
+        CheckHash(0x7F769C57E0A16CE4)           
+    ";
+
+    let mut a = App::debug(80, 30, script).build().unwrap();
+    a.add_window(OpenSaveTestWindow::save(
+        "Save",
+        "myfile.exe",
+        dialogs::Location::Last,
+        SaveFileDialogFlags::Icons | SaveFileDialogFlags::ValidateOverwrite,
+    ));
     a.run();
 }

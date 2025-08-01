@@ -11,7 +11,7 @@ pub(super) struct ExtensionSelectionDialog {
 impl ExtensionSelectionDialog {
     pub(super) fn new(file_mask: &FileMask) -> Self {
         let mut me = Self {
-            base: ModalWindow::new("Select Extension", layout!("a:c,w:50,h:10"), window::Flags::NoCloseButton),
+            base: ModalWindow::new("Select Extension", layout!("a:c,w:50,h:9"), window::Flags::NoCloseButton),
             combo: Handle::None,
             btn_ok: Handle::None,
             btn_cancel: Handle::None,
@@ -28,8 +28,8 @@ impl ExtensionSelectionDialog {
         
         me.combo = me.add(combo);
         
-        me.btn_ok = me.add(Button::new("&OK", layout!("l:12,b:1,w:12"), button::Type::Normal));
-        me.btn_cancel = me.add(Button::new("&Cancel", layout!("l:26,b:1,w:12"), button::Type::Normal));
+        me.btn_ok = me.add(Button::new("&OK", layout!("l:12,b:0,w:13"), button::Type::Normal));
+        me.btn_cancel = me.add(Button::new("&Cancel", layout!("l:26,b:0,w:13"), button::Type::Normal));
         
         let combo_handle = me.combo;
         me.request_focus_for_control(combo_handle);
