@@ -6,6 +6,7 @@
 mod tab;
 mod tabpage;
 mod initialization_flags;
+pub mod events;
 #[cfg(test)]
 mod tests;
 
