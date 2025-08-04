@@ -143,7 +143,7 @@ impl Accordion {
     }
     /// Sets the current panel to the one with the given `index` parameter.
     /// The `index` parameter must be a valid index of the accordion panels.
-    pub fn set_current_panel__(&mut self, index: usize) {
+    pub fn set_current_panel(&mut self, index: usize) {
         self.internal_set_current_panel(index, false);
     }
 

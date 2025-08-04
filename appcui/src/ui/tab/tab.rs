@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use crate::ui::tab::{Flags, Type};
+use super::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed, internal=true)]
 pub struct Tab {
@@ -127,12 +128,18 @@ impl Tab {
     /// Sets the current tab to the specified index.
     /// The index must be valid and the control must be enabled and visible to receive input.
     pub fn set_current_tab(&mut self, index: usize) {
+        self.internal_set_current_tab(index, false);
+    }
+
+    pub fn internal_set_current_tab(&mut self, index: usize, emit_event: bool) {
         // Q: what is the tab is disabled ? can it still change a page
         // for the moment we will not allow this behavior
         // meaning that the tab must be able to receive focus (be visibale and enabled) in order to be able to change the page
         if !self.can_receive_input() {
             return;
         }
+        let mut idx = None;
+        let current_index = self.base.focused_child_index.index();
         if (index < self.base.children.len()) && (index != self.base.focused_child_index.index()) {
             // its a different page (valid)
             let cm = RuntimeManager::get().get_controls_mut();
@@ -141,11 +148,24 @@ impl Tab {
                     control.base_mut().set_visible(index == child_index);
                     if index == child_index {
                         control.base_mut().request_focus();
+                        idx = Some(index);
                     }
                 }
             }
         }
-    }
+        if let Some(index) = idx {
+            if emit_event {
+                self.raise_event(ControlEvent {
+                    emitter: self.handle,
+                    receiver: self.event_processor,
+                    data: ControlEventData::Tab(EventData {
+                        new_tab_index: index as u32,
+                        old_tab_index: current_index as u32,
+                    }),
+                });
+            }
+        }
+    }    
     
     /// Returns the width of the tabs.
     #[inline]
@@ -373,7 +393,7 @@ impl OnMouseEvent for Tab {
                 let idx = self.mouse_position_to_index(ev.x, ev.y);
                 if let Some(index) = idx {
                     if index != self.base.focused_child_index.index() {
-                        self.set_current_tab(index);
+                        self.internal_set_current_tab(index, true);
                         EventProcessStatus::Processed
                     } else {
                         EventProcessStatus::Ignored
@@ -395,13 +415,13 @@ impl OnKeyPressed for Tab {
             key!("Ctrl+Tab") => {
                 let mut idx = self.base.focused_child_index;
                 idx.add(1, self.base.children.len(), Strategy::RotateFromInvalidState);
-                self.set_current_tab(idx.index());
+                self.internal_set_current_tab(idx.index(), true);
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Shift+Tab") => {
                 let mut idx = self.base.focused_child_index;
                 idx.sub(1, self.base.children.len(), Strategy::RotateFromInvalidState);
-                self.set_current_tab(idx.index());
+                self.internal_set_current_tab(idx.index(), true);
                 return EventProcessStatus::Processed;
             }
             _ => {}
@@ -410,7 +430,7 @@ impl OnKeyPressed for Tab {
             // check if a new tab was selected
             for (index, elem) in self.pages.iter().enumerate() {
                 if elem.hotkey() == key {
-                    self.set_current_tab(index);
+                    self.internal_set_current_tab(index, true);
                     return EventProcessStatus::Processed;
                 }
             }
