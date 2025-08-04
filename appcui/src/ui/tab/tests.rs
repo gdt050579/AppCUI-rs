@@ -681,3 +681,72 @@ fn check_tab_mouse_events() {
     a.run();
 }
 
+#[test]
+fn check_events() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state with first tab selected')   
+        CheckHash(0x56513933A0D8A2C3)
+        Key.Pressed(Alt+3)
+        Paint('2. 3rd tab selected (New:2, Old:0)')   
+        CheckHash(0x980DFE27F56B0768)
+        Mouse.Click(20,3,left)
+        Paint('3. 2nd tab selected (New:1, Old:2)')   
+        CheckHash(0xB82C1E607518A880)
+        Key.Pressed(Alt+2)
+        Paint('4. Nothing changed')   
+        CheckHash(0xB82C1E607518A880)
+    ";
+
+    #[Window(events=TabEvents,internal:true)]
+    struct MyWin {
+        tab_handle: Handle<Tab>,
+        info_handle: Handle<Label>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,x:1,y:1,w:78,h:15"),
+                tab_handle: Handle::None,
+                info_handle: Handle::None,
+            };
+
+            let mut tb = Tab::new(layout!("x:1,y:1,w:70,h:10"), tab::Flags::None);
+            tb.add_tab("Tab &1");
+            tb.add_tab("Tab &2");
+            tb.add_tab("Tab &3");
+            tb.add_tab("Tab &4");
+
+            // Add some content to each panel
+            tb.add(0, Button::new("P1", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            tb.add(1, Button::new("P2", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            tb.add(2, Button::new("Pa", layout!("x:2,y:2,w:10"), button::Type::Flat));
+            tb.add(2, Button::new("Pb", layout!("x:14,y:2,w:10"), button::Type::Flat));
+            tb.add(3, Button::new("PX", layout!("x:2,y:2,w:20"), button::Type::Flat));
+
+            // Create a label to display panel information
+            let l = Label::new("", layout!("x:1,y:12,w:70,h:2"));
+
+            w.tab_handle = w.add(tb);
+            w.info_handle = w.add(l);
+
+            w
+        }
+    }
+
+    impl TabEvents for MyWin {
+        fn on_tab_changed(&mut self, _handle: Handle<Tab>, new_tab_index: u32, old_tab_index: u32) -> EventProcessStatus {
+            let s= format!("New: {new_tab_index}, Old: {old_tab_index}");
+            let h = self.info_handle;
+            if let Some(label) = self.control_mut(h) {
+                label.set_caption(&s);
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let mut a = App::debug(80, 20, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
