@@ -15,6 +15,7 @@ use crate::ui::{
     listview::events::GenericListViewEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents,
     radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
     markdown, markdown::events::MarkdownEvents, accordion, accordion::events::AccordionEvents,
+    tab, tab::events::TabEvents, 
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -46,6 +47,7 @@ pub(crate) enum ControlEventData {
     TreeView(treeview::events::EventData),
     Markdown(markdown::events::EventData),
     Accordion(accordion::events::EventData),
+    Tab(tab::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -148,6 +150,9 @@ impl ControlEvent {
             },
             ControlEventData::Accordion(data) => {
                 AccordionEvents::on_panel_changed(receiver, self.emitter.cast(), data.new_panel_index, data.old_panel_index)
+            }
+            ControlEventData::Tab(data) => {
+                TabEvents::on_tab_changed(receiver, self.emitter.cast(), data.new_tab_index, data.old_tab_index)
             }
         }
     }

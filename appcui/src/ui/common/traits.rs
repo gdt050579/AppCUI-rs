@@ -27,6 +27,7 @@ use crate::{
         togglebutton::events::ToggleButtonEvents,
         treeview::events::GenericTreeViewEvents,
         window::events::{ToolBarEvents, WindowEvents},
+        tab::events::TabEvents,
     },
 };
 
@@ -168,6 +169,7 @@ pub trait Control:
     + MarkdownEvents
     + GenericBackgroundTaskEvents
     + AccordionEvents
+    + TabEvents
 {
 }
 

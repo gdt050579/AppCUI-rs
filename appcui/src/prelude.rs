@@ -61,6 +61,7 @@ pub use super::ui::selector;
 pub use super::ui::selector::events::GenericSelectorEvents;
 pub use super::ui::selector::EnumSelector;
 pub use super::ui::tab;
+pub use super::ui::tab::events::TabEvents;
 pub use super::ui::textfield;
 pub use super::ui::textfield::events::TextFieldEvents;
 pub use super::ui::threestatebox;
