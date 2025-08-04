@@ -44,7 +44,21 @@ let t2 = tab!("type:OnLeft,tabs:[A,B,C],flags:TabsBar+TransparentBackground,d:f"
 ```
 
 ## Events
-This control does not emits any events.
+
+To intercept events from an tab, the following trait has to be implemented to the Window that processes the event loop:
+
+```rs
+pub trait AccordionEvents {
+    fn on_tab_changed(&mut self, handle: Handle<Tab>, 
+                                 new_tab_index: u32, 
+                                 old_tab_index: u32) -> EventProcessStatus 
+    {
+        // This method is called when the current tab is changed.
+        // The `handle` parameter is the handle of the tab control.
+        EventProcessStatus::Ignored
+    }
+}
+```
 
 ## Methods
 
