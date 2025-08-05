@@ -417,6 +417,10 @@ impl Surface {
         }
     }
 
+    pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y3: i32, line_type: LineType, attr: CharAttribute) {
+        
+    }
+
     /// Draws a rectangle with the specified character type, color and attributes. If the rectangle is outside the clip area, it will not be drawn.
     ///
     /// Example:
