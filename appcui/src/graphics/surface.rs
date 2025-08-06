@@ -1,3 +1,4 @@
+use std::env::current_exe;
 use std::path::Path;
 
 use super::CharAttribute;
@@ -420,16 +421,19 @@ impl Surface {
     fn draw_bresenham_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
         let line_chars = line_type.get_chars();
 
-        let mut last = Point::new(x1, y1);
-        let mut current = last;
+        let mut arr: [Point;3] = [Point::ORIGIN;3];
+        let mut pos = 1;
+        let mut current = Point::new(x1,y1);
         let end = Point::new(x2, y2);
         let mut ch = Character::with_attributes(' ', attr);
+        arr[0] = current;
 
         let dx = (x2 - x1).abs();
         let dy = (y2 - y1).abs();
         let sx = if x1 < x2 { 1 } else { -1 };
         let sy = if y1 < y2 { 1 } else { -1 };
         let mut err = dx - dy;
+
 
         loop {
             if current == end {
