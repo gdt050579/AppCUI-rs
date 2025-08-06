@@ -1212,3 +1212,15 @@ fn check_color_as_color_index() {
     assert_eq!(Color::White.as_color_index(), 15);
     assert_eq!(Color::Transparent.as_color_index(), 16);
 }
+
+
+#[test]
+fn check_draw_line() {
+    let mut s = SurfaceTester::new(60, 15);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    let attr = charattr!("w,black");
+    s.draw_line(1, 1, 30, 10, LineType::Single, attr);
+
+    s.print(false);
+    //assert_eq!(s.compute_hash(), 0xC8627A5B784CE327);
+}

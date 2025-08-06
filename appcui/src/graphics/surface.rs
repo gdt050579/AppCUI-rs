@@ -1,7 +1,5 @@
 use std::path::Path;
 
-use crate::prelude::CharFlags;
-use crate::prelude::RenderOptions;
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
@@ -14,6 +12,8 @@ use super::Rect;
 use super::Size;
 use super::TextAlignment;
 use super::TextFormat;
+use crate::prelude::CharFlags;
+use crate::prelude::RenderOptions;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -417,8 +417,53 @@ impl Surface {
         }
     }
 
-    pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y3: i32, line_type: LineType, attr: CharAttribute) {
-        
+    fn draw_bresenham_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
+        let line_chars = line_type.get_chars();
+
+        let mut last = Point::new(x1, y1);
+        let mut current = last;
+        let end = Point::new(x2, y2);
+        let mut ch = Character::with_attributes(' ', attr);
+
+        let dx = (x2 - x1).abs();
+        let dy = (y2 - y1).abs();
+        let sx = if x1 < x2 { 1 } else { -1 };
+        let sy = if y1 < y2 { 1 } else { -1 };
+        let mut err = dx - dy;
+
+        loop {
+            if current == end {
+                break;
+            }
+
+            let e2 = 2 * err;
+            if e2 > -dy {
+                err -= dy;
+                current.x += sx;
+            }
+            if e2 < dx {
+                err += dx;
+                current.y += sy;
+            }
+            // draw last based on current
+            let dir_x = (current.x - last.x).clamp(-1, 1);
+            let dir_y = (current.y - last.y).clamp(-1, 1);
+            match (dir_x, dir_y) {
+                (0, 1) | (0, -1) => ch.code = line_chars.vertical,
+                (1, 0) | (-1, 0) => ch.code = line_chars.horizontal,
+                (1, 1) => ch.code = line_chars.corner_top_right,
+                (-1, 1) => ch.code = line_chars.corner_bottom_right,
+                (-1, -1) => ch.code = line_chars.corner_top_right,
+                (1, -1) => ch.code = line_chars.corner_bottom_right,
+                _ => ch.code = 0 as char,
+            }
+            self.write_char(last.x, last.y, ch);
+            last = current;
+        }
+    }
+
+    pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
+        self.draw_bresenham_line(x1, y1, x2, y2, line_type, attr);
     }
 
     /// Draws a rectangle with the specified character type, color and attributes. If the rectangle is outside the clip area, it will not be drawn.
@@ -831,7 +876,7 @@ impl Surface {
     /// ```rust
     /// use appcui::prelude::*;
     /// use std::str::FromStr;
-    /// 
+    ///
     /// let mut surface = Surface::new(100, 50);
     /// let heart = r#"
     ///         |..rr.rr..|
