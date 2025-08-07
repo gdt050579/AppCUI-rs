@@ -430,6 +430,21 @@ impl Surface {
         let sy = if y1 < y2 { 1 } else { -1 };
         let mut err = dx - dy;
 
+        ch.code = if dx >= 3 * dy {
+            line_chars.horizontal
+        } else if dy >= 3 * dx {
+            line_chars.vertical
+        } else if x2 > x1 && y2 > y1 {
+            line_chars.corner_bottom_left 
+        } else if x2 < x1 && y2 > y1 {
+            line_chars.corner_bottom_right 
+        } else if x2 < x1 && y2 < y1 {
+            line_chars.corner_top_right 
+        } else {
+            line_chars.corner_top_left 
+        };
+        self.write_char(current.x, current.y, ch);
+
         loop {
             if current == end {
                 break;
@@ -456,19 +471,19 @@ impl Surface {
                     ch.code = line_chars.corner_bottom_left;
                 }
                 (-1, 1) => {
-                    ch.code = line_chars.corner_top_left; 
+                    ch.code = line_chars.corner_top_left;
                     self.write_char(last.x - 1, last.y, ch);
                     ch.code = line_chars.corner_bottom_right;
                 }
                 (-1, -1) => {
-                    ch.code = line_chars.corner_bottom_left; 
+                    ch.code = line_chars.corner_bottom_left;
                     self.write_char(last.x - 1, last.y, ch);
-                    ch.code = line_chars.corner_top_right; 
+                    ch.code = line_chars.corner_top_right;
                 }
                 (1, -1) => {
                     ch.code = line_chars.corner_bottom_right;
                     self.write_char(last.x + 1, last.y, ch);
-                    ch.code = line_chars.corner_top_left; 
+                    ch.code = line_chars.corner_top_left;
                 }
                 _ => ch.code = 0 as char,
             }

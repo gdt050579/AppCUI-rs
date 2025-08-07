@@ -1234,7 +1234,14 @@ fn check_draw_line() {
     s.write_char(42, 21, ch_start);
     s.write_char(22, 12, ch_end);
 
+    s.draw_line(21,1,21,22, LineType::Single, attr);
+    s.draw_line(41,11,1,11, LineType::Double, attr);
+    s.write_char(21, 1, ch_start);
+    s.write_char(21, 22, ch_end);
+    s.write_char(41, 11, ch_start);
+    s.write_char(1, 11, ch_end);
 
-    s.print(false);
-    //assert_eq!(s.compute_hash(), 0xC8627A5B784CE327);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x86EB4D9323C0CC89);
 }
