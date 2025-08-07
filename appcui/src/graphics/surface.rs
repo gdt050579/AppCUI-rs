@@ -1,4 +1,3 @@
-use std::env::current_exe;
 use std::path::Path;
 
 use super::CharAttribute;
@@ -369,7 +368,7 @@ impl Surface {
             x,
             top,
             bottom,
-            Character::new(line_type.get_chars().vertical, attr.foreground, attr.background, attr.flags),
+            Character::new(line_type.charset().vertical, attr.foreground, attr.background, attr.flags),
         );
     }
 
@@ -381,7 +380,7 @@ impl Surface {
                 x,
                 y,
                 y + ((height - 1) as i32),
-                Character::new(line_type.get_chars().vertical, attr.foreground, attr.background, attr.flags),
+                Character::new(line_type.charset().vertical, attr.foreground, attr.background, attr.flags),
             );
         }
     }
@@ -401,7 +400,7 @@ impl Surface {
             left,
             y,
             right,
-            Character::new(line_type.get_chars().horizontal, attr.foreground, attr.background, attr.flags),
+            Character::new(line_type.charset().horizontal, attr.foreground, attr.background, attr.flags),
         );
     }
 
@@ -413,27 +412,23 @@ impl Surface {
                 x,
                 y,
                 x + ((width - 1) as i32),
-                Character::new(line_type.get_chars().horizontal, attr.foreground, attr.background, attr.flags),
+                Character::new(line_type.charset().horizontal, attr.foreground, attr.background, attr.flags),
             );
         }
     }
 
     fn draw_bresenham_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
-        let line_chars = line_type.get_chars();
-
-        let mut arr: [Point;3] = [Point::ORIGIN;3];
-        let mut pos = 1;
-        let mut current = Point::new(x1,y1);
+        let line_chars = line_type.charset();
+        let mut last = Point::new(x1, y1);
+        let mut current = last;
         let end = Point::new(x2, y2);
         let mut ch = Character::with_attributes(' ', attr);
-        arr[0] = current;
 
         let dx = (x2 - x1).abs();
         let dy = (y2 - y1).abs();
         let sx = if x1 < x2 { 1 } else { -1 };
         let sy = if y1 < y2 { 1 } else { -1 };
         let mut err = dx - dy;
-
 
         loop {
             if current == end {
@@ -455,13 +450,29 @@ impl Surface {
             match (dir_x, dir_y) {
                 (0, 1) | (0, -1) => ch.code = line_chars.vertical,
                 (1, 0) | (-1, 0) => ch.code = line_chars.horizontal,
-                (1, 1) => ch.code = line_chars.corner_top_right,
-                (-1, 1) => ch.code = line_chars.corner_bottom_right,
-                (-1, -1) => ch.code = line_chars.corner_top_right,
-                (1, -1) => ch.code = line_chars.corner_bottom_right,
+                (1, 1) => {
+                    ch.code = line_chars.corner_top_right;
+                    self.write_char(last.x + 1, last.y, ch);
+                    ch.code = line_chars.corner_bottom_left;
+                }
+                (-1, 1) => {
+                    ch.code = line_chars.corner_top_left; 
+                    self.write_char(last.x - 1, last.y, ch);
+                    ch.code = line_chars.corner_bottom_right;
+                }
+                (-1, -1) => {
+                    ch.code = line_chars.corner_bottom_left; 
+                    self.write_char(last.x - 1, last.y, ch);
+                    ch.code = line_chars.corner_top_right; 
+                }
+                (1, -1) => {
+                    ch.code = line_chars.corner_bottom_right;
+                    self.write_char(last.x + 1, last.y, ch);
+                    ch.code = line_chars.corner_top_left; 
+                }
                 _ => ch.code = 0 as char,
             }
-            self.write_char(last.x, last.y, ch);
+            self.write_char(current.x, current.y, ch);
             last = current;
         }
     }
@@ -486,7 +497,7 @@ impl Surface {
         let top = rect.top();
         let bottom = rect.bottom();
 
-        let line_chars = line_type.get_chars();
+        let line_chars = line_type.charset();
         let mut ch = Character::new(' ', attr.foreground, attr.background, attr.flags);
         ch.code = line_chars.horizontal_on_top;
         self.fill_horizontal_line(left, top, right, ch);

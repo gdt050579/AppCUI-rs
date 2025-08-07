@@ -1216,10 +1216,24 @@ fn check_color_as_color_index() {
 
 #[test]
 fn check_draw_line() {
-    let mut s = SurfaceTester::new(60, 15);
+    let mut s = SurfaceTester::new(60, 25);
     s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     let attr = charattr!("w,black");
-    s.draw_line(1, 1, 30, 10, LineType::Single, attr);
+    s.draw_line(1, 1, 20, 10, LineType::Single, attr);
+    s.draw_line(22, 10, 42, 1, LineType::Double, attr);
+    s.draw_line(20, 12, 1, 21, LineType::SingleRound, attr);
+    s.draw_line(42, 21, 22, 12, LineType::SingleThick, attr);
+    let ch_start = Character::with_color(Color::Yellow, Color::Red);
+    let ch_end = Character::with_color(Color::Yellow, Color::Blue);
+    s.write_char(1, 1, ch_start);
+    s.write_char(20, 10, ch_end);
+    s.write_char(22, 10, ch_start);
+    s.write_char(42, 1, ch_end);
+    s.write_char(20, 12, ch_start);
+    s.write_char(1, 21, ch_end);
+    s.write_char(42, 21, ch_start);
+    s.write_char(22, 12, ch_end);
+
 
     s.print(false);
     //assert_eq!(s.compute_hash(), 0xC8627A5B784CE327);
