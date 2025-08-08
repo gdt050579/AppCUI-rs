@@ -435,13 +435,13 @@ impl Surface {
         } else if dy >= 3 * dx {
             line_chars.vertical
         } else if x2 > x1 && y2 > y1 {
-            line_chars.corner_bottom_left 
+            line_chars.corner_bottom_left
         } else if x2 < x1 && y2 > y1 {
-            line_chars.corner_bottom_right 
+            line_chars.corner_bottom_right
         } else if x2 < x1 && y2 < y1 {
-            line_chars.corner_top_right 
+            line_chars.corner_top_right
         } else {
-            line_chars.corner_top_left 
+            line_chars.corner_top_left
         };
         self.write_char(current.x, current.y, ch);
 
@@ -492,8 +492,102 @@ impl Surface {
         }
     }
 
+    #[inline]
+    fn braille_mask_single(sx: i32, sy: i32) -> u8 {
+        match (sx, sy) {
+            (0, 0) => 1 << 0, // dot 1
+            (0, 1) => 1 << 1, // dot 2
+            (0, 2) => 1 << 2, // dot 3
+            (0, 3) => 1 << 6, // dot 7
+            (1, 0) => 1 << 3, // dot 4
+            (1, 1) => 1 << 4, // dot 5
+            (1, 2) => 1 << 5, // dot 6
+            (1, 3) => 1 << 7, // dot 8
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn braille_mask_2(sx: i32, sy: i32) -> u8 {
+        match sy {
+            0 => (1 << 0) | (1 << 3), // dot 1
+            1 => (1 << 1) | (1 << 4), // dot 2
+            2 => (1 << 2) | (1 << 5), // dot 3
+            3 => (1 << 6) | (1 << 7), // dot 7
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn braille_mask(sx: i32, sy: i32) -> u8 {
+        match sy {
+            0 | 1 => (1 << 0) | (1 << 3) | (1 << 1) | (1 << 4), // dot 1
+            2 | 3 => (1 << 2) | (1 << 5) | (1 << 6) | (1 << 7), // dot 3
+            _ => 0,
+        }
+    }
+
+    #[inline]
+    fn braille_bits_from_char(c: char) -> u8 {
+        if (c as u32) >= 0x2800 && (c as u32) <= 0x28FF {
+            ((c as u32) - 0x2800) as u8
+        } else {
+            0
+        }
+    }
+
+    #[inline]
+    fn braille_char_from_bits(bits: u8) -> char {
+        char::from_u32(0x2800 + bits as u32).unwrap_or('\u{2800}')
+    }
+
+    pub fn draw_braille_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
+        // Anchor to the center of each Braille cell: (2x+1, 4y+2)
+        let mut px = x1 * 2 + 1;
+        let mut py = y1 * 4 + 2;
+        let tx = x2 * 2 + 1;
+        let ty = y2 * 4 + 2;
+        let mut ch = Character::with_attributes(' ', attr);
+
+        let dx = (tx - px).abs();
+        let dy = (ty - py).abs();
+        let sx = if px < tx { 1 } else { -1 };
+        let sy = if py < ty { 1 } else { -1 };
+        let mut err = dx - dy;
+
+        loop {
+            // Map pixel -> character cell + subcell (handles negatives correctly)
+            let cx = px.div_euclid(2);
+            let cy = py.div_euclid(4);
+            let sx_sub = px.rem_euclid(2);
+            let sy_sub = py.rem_euclid(4);
+
+            // Merge dot into existing braille cell
+            let existing = if let Some(c) = self.char(cx, cy) { c.code } else { ' ' };
+            let mut bits = Self::braille_bits_from_char(existing);
+            bits |= Self::braille_mask(sx_sub, sy_sub);
+            ch.code = Self::braille_char_from_bits(bits);
+            self.write_char(cx, cy, ch);
+
+            if px == tx && py == ty {
+                break;
+            }
+
+            let e2 = 2 * err;
+            if e2 > -dy {
+                err -= dy;
+                px += sx;
+            }
+            if e2 < dx {
+                err += dx;
+                py += sy;
+            }
+        }
+    }
+
     pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
-        self.draw_bresenham_line(x1, y1, x2, y2, line_type, attr);
+        //self.draw_bresenham_line(x1, y1, x2, y2, line_type, attr);
+        self.draw_braille_line(x1, y1, x2, y2, attr);
     }
 
     /// Draws a rectangle with the specified character type, color and attributes. If the rectangle is outside the clip area, it will not be drawn.
