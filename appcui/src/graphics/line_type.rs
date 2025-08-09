@@ -108,17 +108,17 @@ static LINE_TYPE_CHARS: [LineTypeChars; 8] = [
     },    
     /* Braille double line */
     LineTypeChars {
-        corner_top_left: '\u{28CF}',
-        corner_top_right: '\u{28F9}',
-        corner_bottom_right: '\u{28F9}',
-        corner_bottom_left: '\u{28CF}',
+        corner_top_left: '\u{28F6}',
+        corner_top_right: '\u{28F6}',
+        corner_bottom_right: '\u{283F}',
+        corner_bottom_left: '\u{283F}',
 
         vertical_on_right: '\u{28FF}',
         vertical_on_left: '\u{28FF}',
         vertical: '\u{28FF}',
-        horizontal_on_bottom: '\u{28C9}',
-        horizontal_on_top: '\u{28C9}',
-        horizontal: '\u{28C9}',
+        horizontal_on_bottom: '\u{2836}',
+        horizontal_on_top: '\u{2836}',
+        horizontal: '\u{2836}',
     },       
 ];
 
@@ -140,8 +140,8 @@ pub enum LineType {
     AsciiRound,
     #[VariantInfo(name = "Single Round", description = "Single lines with rounded corners")]
     SingleRound,
-    #[VariantInfo(name = "Braille Double Line", description = "Double line drawn with braille characters")]
-    BrailleDoubleLine,
+    #[VariantInfo(name = "Braille", description = "Double line drawn with braille characters")]
+    Braille,
 }
 
 impl LineType {

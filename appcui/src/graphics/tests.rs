@@ -95,6 +95,20 @@ fn check_draw_rect() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xD99DB2F59085FE71);
 }
+
+#[test]
+fn check_draw_rect_braille() {
+    let mut s = SurfaceTester::new(40, 10);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    s.draw_rect(
+        Rect::new(2, 2, 20, 8),
+        LineType::Braille,
+        CharAttribute::with_color(Color::Yellow, Color::Blue),
+    );
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x5672A3C9856D9381);
+}
+
 #[test]
 fn check_draw_rect_with_size() {
     let mut s = SurfaceTester::new(40, 10);
@@ -1283,10 +1297,10 @@ fn check_draw_line_braille() {
     let mut s = SurfaceTester::new(60, 25);
     s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     let attr = charattr!("w,black");
-    s.draw_line(1, 1, 20, 10, LineType::Single, attr);
-    s.draw_line(22, 10, 42, 1, LineType::Double, attr);
-    s.draw_line(20, 12, 1, 21, LineType::SingleRound, attr);
-    s.draw_line(42, 21, 22, 12, LineType::SingleThick, attr);
+    s.draw_line(1, 1, 20, 10, LineType::Braille, attr);
+    s.draw_line(22, 10, 42, 1, LineType::Braille, attr);
+    s.draw_line(20, 12, 1, 21, LineType::Braille, attr);
+    s.draw_line(42, 21, 22, 12, LineType::Braille, attr);
     let ch_start = Character::with_color(Color::Yellow, Color::Red);
     let ch_end = Character::with_color(Color::Yellow, Color::Blue);
     s.write_char(1, 1, ch_start);
@@ -1298,8 +1312,8 @@ fn check_draw_line_braille() {
     s.write_char(42, 21, ch_start);
     s.write_char(22, 12, ch_end);
 
-    s.draw_line(21,1,21,22, LineType::Single, attr);
-    s.draw_line(41,11,1,11, LineType::Double, attr);
+    s.draw_line(21,1,21,22, LineType::Braille, attr);
+    s.draw_line(41,11,1,11, LineType::Braille, attr);
     s.write_char(21, 1, ch_start);
     s.write_char(21, 22, ch_end);
     s.write_char(41, 11, ch_start);

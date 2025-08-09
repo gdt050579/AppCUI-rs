@@ -493,7 +493,7 @@ impl Surface {
     }
 
     #[inline]
-    fn braille_mask_single(sx: i32, sy: i32) -> u8 {
+    fn braille_mask(sx: i32, sy: i32) -> u8 {
         match (sx, sy) {
             (0, 0) => 1 << 0, // dot 1
             (0, 1) => 1 << 1, // dot 2
@@ -507,25 +507,25 @@ impl Surface {
         }
     }
 
-    #[inline]
-    fn braille_mask_2(sx: i32, sy: i32) -> u8 {
-        match sy {
-            0 => (1 << 0) | (1 << 3), // dot 1
-            1 => (1 << 1) | (1 << 4), // dot 2
-            2 => (1 << 2) | (1 << 5), // dot 3
-            3 => (1 << 6) | (1 << 7), // dot 7
-            _ => 0,
-        }
-    }
+    // #[inline]
+    // fn braille_mask_2(sx: i32, sy: i32) -> u8 {
+    //     match sy {
+    //         0 => (1 << 0) | (1 << 3), // dot 1
+    //         1 => (1 << 1) | (1 << 4), // dot 2
+    //         2 => (1 << 2) | (1 << 5), // dot 3
+    //         3 => (1 << 6) | (1 << 7), // dot 7
+    //         _ => 0,
+    //     }
+    // }
 
-    #[inline]
-    fn braille_mask(sx: i32, sy: i32) -> u8 {
-        match sy {
-            0 | 1 => (1 << 0) | (1 << 3) | (1 << 1) | (1 << 4), // dot 1
-            2 | 3 => (1 << 2) | (1 << 5) | (1 << 6) | (1 << 7), // dot 3
-            _ => 0,
-        }
-    }
+    // #[inline]
+    // fn braille_mask(sx: i32, sy: i32) -> u8 {
+    //     match sy {
+    //         0 | 1 => (1 << 0) | (1 << 3) | (1 << 1) | (1 << 4), // dot 1
+    //         2 | 3 => (1 << 2) | (1 << 5) | (1 << 6) | (1 << 7), // dot 3
+    //         _ => 0,
+    //     }
+    // }
 
     #[inline]
     fn braille_bits_from_char(c: char) -> u8 {
@@ -534,11 +534,6 @@ impl Surface {
         } else {
             0
         }
-    }
-
-    #[inline]
-    fn braille_char_from_bits(bits: u8) -> char {
-        char::from_u32(0x2800 + bits as u32).unwrap_or('\u{2800}')
     }
 
     pub fn draw_braille_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
@@ -566,7 +561,7 @@ impl Surface {
             let existing = if let Some(c) = self.char(cx, cy) { c.code } else { ' ' };
             let mut bits = Self::braille_bits_from_char(existing);
             bits |= Self::braille_mask(sx_sub, sy_sub);
-            ch.code = Self::braille_char_from_bits(bits);
+            ch.code = char::from_u32(0x2800 + bits as u32).unwrap_or('\u{2800}');
             self.write_char(cx, cy, ch);
 
             if px == tx && py == ty {
@@ -586,8 +581,14 @@ impl Surface {
     }
 
     pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
-        //self.draw_bresenham_line(x1, y1, x2, y2, line_type, attr);
-        self.draw_braille_line(x1, y1, x2, y2, attr);
+        match line_type {
+            LineType::Single | LineType::SingleThick | LineType::Double | LineType::SingleRound | LineType::Border => {
+                self.draw_bresenham_line(x1, y1, x2, y2, line_type, attr)
+            }
+            LineType::Ascii => todo!(),
+            LineType::AsciiRound => todo!(),
+            LineType::Braille => self.draw_braille_line(x1, y1, x2, y2, attr),
+        };
     }
 
     /// Draws a rectangle with the specified character type, color and attributes. If the rectangle is outside the clip area, it will not be drawn.
