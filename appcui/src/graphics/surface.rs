@@ -598,6 +598,29 @@ impl Surface {
         self.write_char(last_point.x, last_point.y, ch);
     }
 
+    /// Draws a straight line between two points `(x1, y1)` and `(x2, y2)`
+    /// using the specified line style (`LineType`) and character attributes.
+    ///
+    /// This method is similar to [`fill_line`](Self::fill_line), but instead of
+    /// filling the line with a single [`Character`], it automatically chooses
+    /// the appropriate glyphs for each segment based on the given [`LineType`]
+    /// (e.g., single, double, thick, ASCII, rounded) and applies the specified
+    /// [`CharAttribute`] (e.g., color, boldness, underline).
+    ///
+    /// # Parameters
+    /// - `x1`, `y1`: Starting point coordinates.
+    /// - `x2`, `y2`: Ending point coordinates.
+    /// - `line_type`: The [`LineType`] variant to use for rendering the line.
+    /// - `attr`: The [`CharAttribute`] to apply to each segment of the line.
+    ///
+    /// # Examples
+    /// ```rust
+    /// // Draw a horizontal single-line border in bold
+    /// surface.draw_line(0, 0, 10, 0, LineType::Single, charattr!("white,Black"));
+    ///
+    /// // Draw a vertical double-line in red
+    /// surface.draw_line(5, 2, 5, 8, LineType::Double, charattr!("red,Black");
+    /// ```
     pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
         match line_type {
             LineType::Single | LineType::SingleThick | LineType::Double | LineType::SingleRound | LineType::Border => {
@@ -608,6 +631,27 @@ impl Surface {
         };
     }
 
+    /// Draws a straight line between two points `(x1, y1)` and `(x2, y2)`
+    /// on the surface, filling each point along the path with the given character.
+    ///
+    /// This method implements an integer-based **Bresenham's line algorithm**,
+    /// which efficiently determines the set of coordinates that best approximate
+    /// a straight line between two points in a grid. It works for all line
+    /// orientations — horizontal, vertical, and diagonal
+    ///
+    /// # Parameters
+    /// - `x1`, `y1`: Starting point coordinates.
+    /// - `x2`, `y2`: Ending point coordinates.
+    /// - `ch`: The [`Character`] to draw along the line.
+    ///
+    /// # Examples
+    /// ```rust
+    /// // Draws a diagonal line from (0, 0) to (5, 3) using '*'
+    /// surface.fill_line(0, 0, 5, 3, Character::new('*', Color::White, Color::Bleck, CharFlags::None));
+    ///
+    /// // Draws a vertical line from (2, 1) to (2, 5)
+    /// surface.fill_line(2, 1, 2, 5, char!("'|',white,black"));
+    /// ```   
     pub fn fill_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, ch: Character) {
         let dx = (x2 - x1).abs();
         let dy = (y2 - y1).abs();
