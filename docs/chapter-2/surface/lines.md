@@ -15,6 +15,7 @@ The following methods can be used to draw lines on a surface using special chara
 | `draw_vertical_line(...)`             | Draws a vertical line on the surface. The line will be drawn from top to bottom.                                                                   |
 | `draw_horizontal_line_with_size(...)` | Draws a horizontal line on the surface with a specific length. The line will be drawn from left to right, starting from a given point and a width. |
 | `draw_vertical_line_with_size(...)`   | Draws a vertical line on the surface with a specific length. The line will be drawn from top to bottom, starting from a given point and a width.   |
+| `draw_line(...)`                      | Draw a line between two points using a specific line type and character attributes                                                                 |
 
 These methods take a parameter `line_type` that specifies the type of line that will be drawn. The line type can be one of the following values:
 
@@ -27,6 +28,7 @@ These methods take a parameter `line_type` that specifies the type of line that 
 | `Ascii`       | `\|`, `-`, `+`                                        |
 | `AsciiRound`  | `\|`, `-`, `+`, `\\` , `\/`                           |
 | `SingleRound` | `╭`, `╮`, `╯`, `╰`, `─`, `│`                          |
+| `Braille`     | Braille characters                                    |
 
 Example:
 
@@ -43,12 +45,14 @@ surface.draw_vertical_line(10, 10, 20,
 
 The following methods can be used to draw lines on a surface using a generic character:
 
-| Method                                | Description                                                                                                                                                |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Method                                | Description                                                                                                                                                   |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `fill_horizontal_line(...)`           | Fills a horizontal line on the surface. The line will be filled from left to right with a provided [Character](../screen.md#character)                        |
 | `fill_vertical_line(...)`             | Fills a vertical line on the surface. The line will be filled from top to bottom with a provided [Character](../screen.md#character)                          |
 | `fill_horizontal_line_with_size(...)` | Fills a horizontal line on the surface with a specific length. The line will be filled from left to right with a provided [Character](../screen.md#character) |
 | `fill_vertical_line_with_size(...)`   | Fills a vertical line on the surface with a specific length. The line will be filled from top to bottom with a provided [Character](../screen.md#character)   |
+| `fill_line(...)`                      | FIlls a line between two points with a given [Character](../screen.md#character)                                                                              |
+
 
 Example:
 
