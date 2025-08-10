@@ -534,8 +534,8 @@ impl Surface {
             match (dir_x, dir_y) {
                 (0, 1) | (0, -1) => ch.code = '|',
                 (1, 0) | (-1, 0) => ch.code = '-',
-                (1, 1) | (-1, -1)=> ch.code = '\\',             
-                (-1, 1) | (1, -1)=> ch.code = '/',      
+                (1, 1) | (-1, -1) => ch.code = '\\',
+                (-1, 1) | (1, -1) => ch.code = '/',
                 _ => ch.code = 0 as char,
             }
             self.write_char(current.x, current.y, ch);
@@ -606,6 +606,35 @@ impl Surface {
             LineType::Ascii | LineType::AsciiRound => self.draw_ascii_line(x1, y1, x2, y2, attr),
             LineType::Braille => self.draw_braille_line(x1, y1, x2, y2, attr),
         };
+    }
+
+    pub fn fill_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, ch: Character) {
+        let dx = (x2 - x1).abs();
+        let dy = (y2 - y1).abs();
+        let sx = if x1 < x2 { 1 } else { -1 };
+        let sy = if y1 < y2 { 1 } else { -1 };
+        let mut err = dx - dy;
+        let mut cx = x1;
+        let mut cy = y1;
+
+        self.write_char(cx, cy, ch);
+
+        loop {
+            if (cx == x2) && (cy == y2) {
+                break;
+            }
+
+            let e2 = 2 * err;
+            if e2 > -dy {
+                err -= dy;
+                cx += sx;
+            }
+            if e2 < dx {
+                err += dx;
+                cy += sy;
+            }
+            self.write_char(cx, cy, ch);
+        }
     }
 
     /// Draws a rectangle with the specified character type, color and attributes. If the rectangle is outside the clip area, it will not be drawn.
