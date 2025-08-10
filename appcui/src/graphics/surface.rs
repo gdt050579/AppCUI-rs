@@ -491,51 +491,57 @@ impl Surface {
             last = current;
         }
     }
+    fn draw_ascii_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
+        let mut last = Point::new(x1, y1);
+        let mut current = last;
+        let end = Point::new(x2, y2);
+        let mut ch = Character::with_attributes(' ', attr);
 
-    #[inline]
-    fn braille_mask(sx: i32, sy: i32) -> u8 {
-        match (sx, sy) {
-            (0, 0) => 1 << 0, // dot 1
-            (0, 1) => 1 << 1, // dot 2
-            (0, 2) => 1 << 2, // dot 3
-            (0, 3) => 1 << 6, // dot 7
-            (1, 0) => 1 << 3, // dot 4
-            (1, 1) => 1 << 4, // dot 5
-            (1, 2) => 1 << 5, // dot 6
-            (1, 3) => 1 << 7, // dot 8
-            _ => 0,
-        }
-    }
+        let dx = (x2 - x1).abs();
+        let dy = (y2 - y1).abs();
+        let sx = if x1 < x2 { 1 } else { -1 };
+        let sy = if y1 < y2 { 1 } else { -1 };
+        let mut err = dx - dy;
 
-    // #[inline]
-    // fn braille_mask_2(sx: i32, sy: i32) -> u8 {
-    //     match sy {
-    //         0 => (1 << 0) | (1 << 3), // dot 1
-    //         1 => (1 << 1) | (1 << 4), // dot 2
-    //         2 => (1 << 2) | (1 << 5), // dot 3
-    //         3 => (1 << 6) | (1 << 7), // dot 7
-    //         _ => 0,
-    //     }
-    // }
-
-    // #[inline]
-    // fn braille_mask(sx: i32, sy: i32) -> u8 {
-    //     match sy {
-    //         0 | 1 => (1 << 0) | (1 << 3) | (1 << 1) | (1 << 4), // dot 1
-    //         2 | 3 => (1 << 2) | (1 << 5) | (1 << 6) | (1 << 7), // dot 3
-    //         _ => 0,
-    //     }
-    // }
-
-    #[inline]
-    fn braille_bits_from_char(c: char) -> u8 {
-        if (c as u32) >= 0x2800 && (c as u32) <= 0x28FF {
-            ((c as u32) - 0x2800) as u8
+        ch.code = if dx >= 3 * dy {
+            '-'
+        } else if dy >= 3 * dx {
+            '|'
+        } else if x2 > x1 {
+            '\\'
         } else {
-            0
+            '/'
+        };
+        self.write_char(current.x, current.y, ch);
+
+        loop {
+            if current == end {
+                break;
+            }
+
+            let e2 = 2 * err;
+            if e2 > -dy {
+                err -= dy;
+                current.x += sx;
+            }
+            if e2 < dx {
+                err += dx;
+                current.y += sy;
+            }
+            // draw last based on current
+            let dir_x = (current.x - last.x).clamp(-1, 1);
+            let dir_y = (current.y - last.y).clamp(-1, 1);
+            match (dir_x, dir_y) {
+                (0, 1) | (0, -1) => ch.code = '|',
+                (1, 0) | (-1, 0) => ch.code = '-',
+                (1, 1) | (-1, -1)=> ch.code = '\\',             
+                (-1, 1) | (1, -1)=> ch.code = '/',      
+                _ => ch.code = 0 as char,
+            }
+            self.write_char(current.x, current.y, ch);
+            last = current;
         }
     }
-
     pub fn draw_braille_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
         // Anchor to the center of each Braille cell: (2x+1, 4y+2)
         let mut px = x1 * 2 + 1;
@@ -549,20 +555,30 @@ impl Surface {
         let sx = if px < tx { 1 } else { -1 };
         let sy = if py < ty { 1 } else { -1 };
         let mut err = dx - dy;
+        let mut last_point = Point::new(px.div_euclid(2), py.div_euclid(4));
+        let mut current_bit_set = 0;
 
         loop {
-            // Map pixel -> character cell + subcell (handles negatives correctly)
-            let cx = px.div_euclid(2);
-            let cy = py.div_euclid(4);
+            let new_point = Point::new(px.div_euclid(2), py.div_euclid(4));
             let sx_sub = px.rem_euclid(2);
             let sy_sub = py.rem_euclid(4);
-
-            // Merge dot into existing braille cell
-            let existing = if let Some(c) = self.char(cx, cy) { c.code } else { ' ' };
-            let mut bits = Self::braille_bits_from_char(existing);
-            bits |= Self::braille_mask(sx_sub, sy_sub);
-            ch.code = char::from_u32(0x2800 + bits as u32).unwrap_or('\u{2800}');
-            self.write_char(cx, cy, ch);
+            if last_point != new_point {
+                ch.code = char::from_u32(0x2800 + current_bit_set).unwrap_or('\u{2800}');
+                self.write_char(last_point.x, last_point.y, ch);
+                last_point = new_point;
+                current_bit_set = 0;
+            }
+            current_bit_set |= match (sx_sub, sy_sub) {
+                (0, 0) => 1 << 0,
+                (0, 1) => 1 << 1,
+                (0, 2) => 1 << 2,
+                (0, 3) => 1 << 6,
+                (1, 0) => 1 << 3,
+                (1, 1) => 1 << 4,
+                (1, 2) => 1 << 5,
+                (1, 3) => 1 << 7,
+                _ => 0,
+            };
 
             if px == tx && py == ty {
                 break;
@@ -578,6 +594,8 @@ impl Surface {
                 py += sy;
             }
         }
+        ch.code = char::from_u32(0x2800 + current_bit_set).unwrap_or('\u{2800}');
+        self.write_char(last_point.x, last_point.y, ch);
     }
 
     pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
@@ -585,8 +603,7 @@ impl Surface {
             LineType::Single | LineType::SingleThick | LineType::Double | LineType::SingleRound | LineType::Border => {
                 self.draw_bresenham_line(x1, y1, x2, y2, line_type, attr)
             }
-            LineType::Ascii => todo!(),
-            LineType::AsciiRound => todo!(),
+            LineType::Ascii | LineType::AsciiRound => self.draw_ascii_line(x1, y1, x2, y2, attr),
             LineType::Braille => self.draw_braille_line(x1, y1, x2, y2, attr),
         };
     }
