@@ -1,7 +1,5 @@
 use std::path::Path;
 
-use crate::prelude::CharFlags;
-use crate::prelude::RenderOptions;
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
@@ -14,6 +12,8 @@ use super::Rect;
 use super::Size;
 use super::TextAlignment;
 use super::TextFormat;
+use crate::prelude::CharFlags;
+use crate::prelude::RenderOptions;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -368,7 +368,7 @@ impl Surface {
             x,
             top,
             bottom,
-            Character::new(line_type.get_chars().vertical, attr.foreground, attr.background, attr.flags),
+            Character::new(line_type.charset().vertical, attr.foreground, attr.background, attr.flags),
         );
     }
 
@@ -380,7 +380,7 @@ impl Surface {
                 x,
                 y,
                 y + ((height - 1) as i32),
-                Character::new(line_type.get_chars().vertical, attr.foreground, attr.background, attr.flags),
+                Character::new(line_type.charset().vertical, attr.foreground, attr.background, attr.flags),
             );
         }
     }
@@ -400,7 +400,7 @@ impl Surface {
             left,
             y,
             right,
-            Character::new(line_type.get_chars().horizontal, attr.foreground, attr.background, attr.flags),
+            Character::new(line_type.charset().horizontal, attr.foreground, attr.background, attr.flags),
         );
     }
 
@@ -412,8 +412,280 @@ impl Surface {
                 x,
                 y,
                 x + ((width - 1) as i32),
-                Character::new(line_type.get_chars().horizontal, attr.foreground, attr.background, attr.flags),
+                Character::new(line_type.charset().horizontal, attr.foreground, attr.background, attr.flags),
             );
+        }
+    }
+
+    fn draw_bresenham_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
+        let line_chars = line_type.charset();
+        let mut last = Point::new(x1, y1);
+        let mut current = last;
+        let end = Point::new(x2, y2);
+        let mut ch = Character::with_attributes(' ', attr);
+
+        let dx = (x2 - x1).abs();
+        let dy = (y2 - y1).abs();
+        let sx = if x1 < x2 { 1 } else { -1 };
+        let sy = if y1 < y2 { 1 } else { -1 };
+        let mut err = dx - dy;
+
+        ch.code = if dx >= 3 * dy {
+            line_chars.horizontal
+        } else if dy >= 3 * dx {
+            line_chars.vertical
+        } else if x2 > x1 && y2 > y1 {
+            line_chars.corner_bottom_left
+        } else if x2 < x1 && y2 > y1 {
+            line_chars.corner_bottom_right
+        } else if x2 < x1 && y2 < y1 {
+            line_chars.corner_top_right
+        } else {
+            line_chars.corner_top_left
+        };
+        self.write_char(current.x, current.y, ch);
+
+        loop {
+            if current == end {
+                break;
+            }
+
+            let e2 = 2 * err;
+            if e2 > -dy {
+                err -= dy;
+                current.x += sx;
+            }
+            if e2 < dx {
+                err += dx;
+                current.y += sy;
+            }
+            // draw last based on current
+            let dir_x = (current.x - last.x).clamp(-1, 1);
+            let dir_y = (current.y - last.y).clamp(-1, 1);
+            match (dir_x, dir_y) {
+                (0, 1) | (0, -1) => ch.code = line_chars.vertical,
+                (1, 0) | (-1, 0) => ch.code = line_chars.horizontal,
+                (1, 1) => {
+                    ch.code = line_chars.corner_top_right;
+                    self.write_char(last.x + 1, last.y, ch);
+                    ch.code = line_chars.corner_bottom_left;
+                }
+                (-1, 1) => {
+                    ch.code = line_chars.corner_top_left;
+                    self.write_char(last.x - 1, last.y, ch);
+                    ch.code = line_chars.corner_bottom_right;
+                }
+                (-1, -1) => {
+                    ch.code = line_chars.corner_bottom_left;
+                    self.write_char(last.x - 1, last.y, ch);
+                    ch.code = line_chars.corner_top_right;
+                }
+                (1, -1) => {
+                    ch.code = line_chars.corner_bottom_right;
+                    self.write_char(last.x + 1, last.y, ch);
+                    ch.code = line_chars.corner_top_left;
+                }
+                _ => ch.code = 0 as char,
+            }
+            self.write_char(current.x, current.y, ch);
+            last = current;
+        }
+    }
+    fn draw_ascii_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
+        let mut last = Point::new(x1, y1);
+        let mut current = last;
+        let end = Point::new(x2, y2);
+        let mut ch = Character::with_attributes(' ', attr);
+
+        let dx = (x2 - x1).abs();
+        let dy = (y2 - y1).abs();
+        let sx = if x1 < x2 { 1 } else { -1 };
+        let sy = if y1 < y2 { 1 } else { -1 };
+        let mut err = dx - dy;
+
+        ch.code = if dx >= 3 * dy {
+            '-'
+        } else if dy >= 3 * dx {
+            '|'
+        } else if x2 > x1 {
+            '\\'
+        } else {
+            '/'
+        };
+        self.write_char(current.x, current.y, ch);
+
+        loop {
+            if current == end {
+                break;
+            }
+
+            let e2 = 2 * err;
+            if e2 > -dy {
+                err -= dy;
+                current.x += sx;
+            }
+            if e2 < dx {
+                err += dx;
+                current.y += sy;
+            }
+            // draw last based on current
+            let dir_x = (current.x - last.x).clamp(-1, 1);
+            let dir_y = (current.y - last.y).clamp(-1, 1);
+            match (dir_x, dir_y) {
+                (0, 1) | (0, -1) => ch.code = '|',
+                (1, 0) | (-1, 0) => ch.code = '-',
+                (1, 1) | (-1, -1) => ch.code = '\\',
+                (-1, 1) | (1, -1) => ch.code = '/',
+                _ => ch.code = 0 as char,
+            }
+            self.write_char(current.x, current.y, ch);
+            last = current;
+        }
+    }
+    pub fn draw_braille_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
+        // Anchor to the center of each Braille cell: (2x+1, 4y+2)
+        let mut px = x1 * 2 + 1;
+        let mut py = y1 * 4 + 2;
+        let tx = x2 * 2 + 1;
+        let ty = y2 * 4 + 2;
+        let mut ch = Character::with_attributes(' ', attr);
+
+        let dx = (tx - px).abs();
+        let dy = (ty - py).abs();
+        let sx = if px < tx { 1 } else { -1 };
+        let sy = if py < ty { 1 } else { -1 };
+        let mut err = dx - dy;
+        let mut last_point = Point::new(px.div_euclid(2), py.div_euclid(4));
+        let mut current_bit_set = 0;
+
+        loop {
+            let new_point = Point::new(px.div_euclid(2), py.div_euclid(4));
+            let sx_sub = px.rem_euclid(2);
+            let sy_sub = py.rem_euclid(4);
+            if last_point != new_point {
+                ch.code = char::from_u32(0x2800 + current_bit_set).unwrap_or('\u{2800}');
+                self.write_char(last_point.x, last_point.y, ch);
+                last_point = new_point;
+                current_bit_set = 0;
+            }
+            current_bit_set |= match (sx_sub, sy_sub) {
+                (0, 0) => 1 << 0,
+                (0, 1) => 1 << 1,
+                (0, 2) => 1 << 2,
+                (0, 3) => 1 << 6,
+                (1, 0) => 1 << 3,
+                (1, 1) => 1 << 4,
+                (1, 2) => 1 << 5,
+                (1, 3) => 1 << 7,
+                _ => 0,
+            };
+
+            if px == tx && py == ty {
+                break;
+            }
+
+            let e2 = 2 * err;
+            if e2 > -dy {
+                err -= dy;
+                px += sx;
+            }
+            if e2 < dx {
+                err += dx;
+                py += sy;
+            }
+        }
+        ch.code = char::from_u32(0x2800 + current_bit_set).unwrap_or('\u{2800}');
+        self.write_char(last_point.x, last_point.y, ch);
+    }
+
+    /// Draws a straight line between two points `(x1, y1)` and `(x2, y2)`
+    /// using the specified line style (`LineType`) and character attributes.
+    ///
+    /// This method is similar to [`fill_line`](Self::fill_line), but instead of
+    /// filling the line with a single [`Character`], it automatically chooses
+    /// the appropriate glyphs for each segment based on the given [`LineType`]
+    /// (e.g., single, double, thick, ASCII, rounded) and applies the specified
+    /// [`CharAttribute`] (e.g., color, boldness, underline).
+    ///
+    /// # Parameters
+    /// - `x1`, `y1`: Starting point coordinates.
+    /// - `x2`, `y2`: Ending point coordinates.
+    /// - `line_type`: The [`LineType`] variant to use for rendering the line.
+    /// - `attr`: The [`CharAttribute`] to apply to each segment of the line.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(100, 50);
+    /// 
+    /// // Draw a horizontal single-line border in bold
+    /// surface.draw_line(0, 0, 10, 0, LineType::Single, charattr!("white,black"));
+    ///
+    /// // Draw a vertical double-line in red
+    /// surface.draw_line(5, 2, 5, 8, LineType::Double, charattr!("red,black"));
+    /// ```
+    pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
+        match line_type {
+            LineType::Single | LineType::SingleThick | LineType::Double | LineType::SingleRound | LineType::Border => {
+                self.draw_bresenham_line(x1, y1, x2, y2, line_type, attr)
+            }
+            LineType::Ascii | LineType::AsciiRound => self.draw_ascii_line(x1, y1, x2, y2, attr),
+            LineType::Braille => self.draw_braille_line(x1, y1, x2, y2, attr),
+        };
+    }
+
+    /// Draws a straight line between two points `(x1, y1)` and `(x2, y2)`
+    /// on the surface, filling each point along the path with the given character.
+    ///
+    /// This method implements an integer-based **Bresenham's line algorithm**,
+    /// which efficiently determines the set of coordinates that best approximate
+    /// a straight line between two points in a grid. It works for all line
+    /// orientations — horizontal, vertical, and diagonal
+    ///
+    /// # Parameters
+    /// - `x1`, `y1`: Starting point coordinates.
+    /// - `x2`, `y2`: Ending point coordinates.
+    /// - `ch`: The [`Character`] to draw along the line.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(100, 50);
+    /// 
+    /// // Draws a diagonal line from (0, 0) to (5, 3) using '*'
+    /// surface.fill_line(0, 0, 5, 3, Character::new('*', Color::White, Color::Black, CharFlags::None));
+    ///
+    /// // Draws a vertical line from (2, 1) to (2, 5)
+    /// surface.fill_line(2, 1, 2, 5, char!("'|',white,black"));
+    /// ```   
+    pub fn fill_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, ch: Character) {
+        let dx = (x2 - x1).abs();
+        let dy = (y2 - y1).abs();
+        let sx = if x1 < x2 { 1 } else { -1 };
+        let sy = if y1 < y2 { 1 } else { -1 };
+        let mut err = dx - dy;
+        let mut cx = x1;
+        let mut cy = y1;
+
+        self.write_char(cx, cy, ch);
+
+        loop {
+            if (cx == x2) && (cy == y2) {
+                break;
+            }
+
+            let e2 = 2 * err;
+            if e2 > -dy {
+                err -= dy;
+                cx += sx;
+            }
+            if e2 < dx {
+                err += dx;
+                cy += sy;
+            }
+            self.write_char(cx, cy, ch);
         }
     }
 
@@ -433,7 +705,7 @@ impl Surface {
         let top = rect.top();
         let bottom = rect.bottom();
 
-        let line_chars = line_type.get_chars();
+        let line_chars = line_type.charset();
         let mut ch = Character::new(' ', attr.foreground, attr.background, attr.flags);
         ch.code = line_chars.horizontal_on_top;
         self.fill_horizontal_line(left, top, right, ch);
@@ -827,7 +1099,7 @@ impl Surface {
     /// ```rust
     /// use appcui::prelude::*;
     /// use std::str::FromStr;
-    /// 
+    ///
     /// let mut surface = Surface::new(100, 50);
     /// let heart = r#"
     ///         |..rr.rr..|

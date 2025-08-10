@@ -14,7 +14,7 @@ pub(super) struct LineTypeChars {
     pub(super) vertical: char,
 }
 
-static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
+static LINE_TYPE_CHARS: [LineTypeChars; 8] = [
     /* Single Lines */
     LineTypeChars {
         corner_top_left: '\u{250C}',
@@ -106,6 +106,20 @@ static LINE_TYPE_CHARS: [LineTypeChars; 7] = [
         horizontal: '\u{2500}',
         vertical: '\u{2502}',
     },    
+    /* Braille double line */
+    LineTypeChars {
+        corner_top_left: '\u{28F6}',
+        corner_top_right: '\u{28F6}',
+        corner_bottom_right: '\u{283F}',
+        corner_bottom_left: '\u{283F}',
+
+        vertical_on_right: '\u{28FF}',
+        vertical_on_left: '\u{28FF}',
+        vertical: '\u{28FF}',
+        horizontal_on_bottom: '\u{2836}',
+        horizontal_on_top: '\u{2836}',
+        horizontal: '\u{2836}',
+    },       
 ];
 
 /// LineType is an enum that represents the type of line to be drawn (single, double, thick, etc)
@@ -126,10 +140,12 @@ pub enum LineType {
     AsciiRound,
     #[VariantInfo(name = "Single Round", description = "Single lines with rounded corners")]
     SingleRound,
+    #[VariantInfo(name = "Braille", description = "Double line drawn with braille characters")]
+    Braille,
 }
 
 impl LineType {
-    pub(super) fn get_chars(&self) -> &'static LineTypeChars {
+    pub(super) fn charset(&self) -> &'static LineTypeChars {
         &LINE_TYPE_CHARS[(*self as u8) as usize]
     }
 }

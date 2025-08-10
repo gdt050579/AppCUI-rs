@@ -58,7 +58,7 @@ impl Dock {
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
-        return HASH_TO_VALUE[entry_index];
+        HASH_TO_VALUE[entry_index]
     }
     pub(crate) fn name(&self) -> &'static str {
         match self {

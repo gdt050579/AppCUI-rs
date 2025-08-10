@@ -95,6 +95,20 @@ fn check_draw_rect() {
     //s.print();
     assert_eq!(s.compute_hash(), 0xD99DB2F59085FE71);
 }
+
+#[test]
+fn check_draw_rect_braille() {
+    let mut s = SurfaceTester::new(40, 10);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    s.draw_rect(
+        Rect::new(2, 2, 20, 8),
+        LineType::Braille,
+        CharAttribute::with_color(Color::Yellow, Color::Blue),
+    );
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x5672A3C9856D9381);
+}
+
 #[test]
 fn check_draw_rect_with_size() {
     let mut s = SurfaceTester::new(40, 10);
@@ -1038,48 +1052,47 @@ fn check_deserialization_from_buffer() {
         0, 0, 1, 0, 10, 4, 111, 0, 0, 0, 1, 0, 10, 4, 114, 0, 0, 0, 1, 0, 10, 4, 108, 0, 0, 0, 1, 0, 10, 4, 100, 0, 0, 0, 1, 0, 10, 4,
     ];
     let s = Surface::from_buffer(&BUFFER).unwrap();
-    assert_eq!(*s.char(0, 0).unwrap(),char!("H,w,dr"));
-    assert_eq!(*s.char(1, 0).unwrap(),char!("e,w,dr"));
-    assert_eq!(*s.char(2, 0).unwrap(),char!("l,w,dr"));
-    assert_eq!(*s.char(3, 0).unwrap(),char!("l,w,dr"));
-    assert_eq!(*s.char(4, 0).unwrap(),char!("o,w,dr"));
-    assert_eq!(*s.char(0, 1).unwrap(),char!("W,green,dr,flags: Bold"));
-    assert_eq!(*s.char(1, 1).unwrap(),char!("o,green,dr,flags: Bold"));
-    assert_eq!(*s.char(2, 1).unwrap(),char!("r,green,dr,flags: Bold"));
-    assert_eq!(*s.char(3, 1).unwrap(),char!("l,green,dr,flags: Bold"));
-    assert_eq!(*s.char(4, 1).unwrap(),char!("d,green,dr,flags: Bold"));
+    assert_eq!(*s.char(0, 0).unwrap(), char!("H,w,dr"));
+    assert_eq!(*s.char(1, 0).unwrap(), char!("e,w,dr"));
+    assert_eq!(*s.char(2, 0).unwrap(), char!("l,w,dr"));
+    assert_eq!(*s.char(3, 0).unwrap(), char!("l,w,dr"));
+    assert_eq!(*s.char(4, 0).unwrap(), char!("o,w,dr"));
+    assert_eq!(*s.char(0, 1).unwrap(), char!("W,green,dr,flags: Bold"));
+    assert_eq!(*s.char(1, 1).unwrap(), char!("o,green,dr,flags: Bold"));
+    assert_eq!(*s.char(2, 1).unwrap(), char!("r,green,dr,flags: Bold"));
+    assert_eq!(*s.char(3, 1).unwrap(), char!("l,green,dr,flags: Bold"));
+    assert_eq!(*s.char(4, 1).unwrap(), char!("d,green,dr,flags: Bold"));
     assert_eq!(s.size(), Size::new(5, 2));
 }
 
 #[test]
 fn check_deserialize_color() {
-    assert_eq!(Surface::deserialize_color(&[0u8]), Some((Color::Black,1)));
-    assert_eq!(Surface::deserialize_color(&[1u8]), Some((Color::DarkBlue,1)));
-    assert_eq!(Surface::deserialize_color(&[2u8]), Some((Color::DarkGreen,1)));
-    assert_eq!(Surface::deserialize_color(&[3u8]), Some((Color::Teal,1)));
-    assert_eq!(Surface::deserialize_color(&[4u8]), Some((Color::DarkRed,1)));
-    assert_eq!(Surface::deserialize_color(&[5u8]), Some((Color::Magenta,1)));
-    assert_eq!(Surface::deserialize_color(&[6u8]), Some((Color::Olive,1)));
-    assert_eq!(Surface::deserialize_color(&[7u8]), Some((Color::Silver,1)));
-    assert_eq!(Surface::deserialize_color(&[8u8]), Some((Color::Gray,1)));
-    assert_eq!(Surface::deserialize_color(&[9u8]), Some((Color::Blue,1)));
-    assert_eq!(Surface::deserialize_color(&[10u8]), Some((Color::Green,1)));
-    assert_eq!(Surface::deserialize_color(&[11u8]), Some((Color::Aqua,1)));
-    assert_eq!(Surface::deserialize_color(&[12u8]), Some((Color::Red,1)));
-    assert_eq!(Surface::deserialize_color(&[13u8]), Some((Color::Pink,1)));
-    assert_eq!(Surface::deserialize_color(&[14u8]), Some((Color::Yellow,1)));
-    assert_eq!(Surface::deserialize_color(&[15u8]), Some((Color::White,1)));
-    assert_eq!(Surface::deserialize_color(&[16u8]), Some((Color::Transparent,1)));
+    assert_eq!(Surface::deserialize_color(&[0u8]), Some((Color::Black, 1)));
+    assert_eq!(Surface::deserialize_color(&[1u8]), Some((Color::DarkBlue, 1)));
+    assert_eq!(Surface::deserialize_color(&[2u8]), Some((Color::DarkGreen, 1)));
+    assert_eq!(Surface::deserialize_color(&[3u8]), Some((Color::Teal, 1)));
+    assert_eq!(Surface::deserialize_color(&[4u8]), Some((Color::DarkRed, 1)));
+    assert_eq!(Surface::deserialize_color(&[5u8]), Some((Color::Magenta, 1)));
+    assert_eq!(Surface::deserialize_color(&[6u8]), Some((Color::Olive, 1)));
+    assert_eq!(Surface::deserialize_color(&[7u8]), Some((Color::Silver, 1)));
+    assert_eq!(Surface::deserialize_color(&[8u8]), Some((Color::Gray, 1)));
+    assert_eq!(Surface::deserialize_color(&[9u8]), Some((Color::Blue, 1)));
+    assert_eq!(Surface::deserialize_color(&[10u8]), Some((Color::Green, 1)));
+    assert_eq!(Surface::deserialize_color(&[11u8]), Some((Color::Aqua, 1)));
+    assert_eq!(Surface::deserialize_color(&[12u8]), Some((Color::Red, 1)));
+    assert_eq!(Surface::deserialize_color(&[13u8]), Some((Color::Pink, 1)));
+    assert_eq!(Surface::deserialize_color(&[14u8]), Some((Color::Yellow, 1)));
+    assert_eq!(Surface::deserialize_color(&[15u8]), Some((Color::White, 1)));
+    assert_eq!(Surface::deserialize_color(&[16u8]), Some((Color::Transparent, 1)));
 
-    let res = Surface::deserialize_color(&[17u8,0,1,2]);
+    let res = Surface::deserialize_color(&[17u8, 0, 1, 2]);
     assert!(res.is_some());
     assert!(res.unwrap().1 == 4);
 
     // not 4 elements
     assert!(Surface::deserialize_color(&[17u8]).is_none());
 
-
-    let mut buf:[u8;1] = [0];
+    let mut buf: [u8; 1] = [0];
     for i in 18..=255u8 {
         buf[0] = i;
         assert!(Surface::deserialize_color(&buf).is_none());
@@ -1211,4 +1224,164 @@ fn check_color_as_color_index() {
     assert_eq!(Color::Yellow.as_color_index(), 14);
     assert_eq!(Color::White.as_color_index(), 15);
     assert_eq!(Color::Transparent.as_color_index(), 16);
+}
+
+#[test]
+fn check_draw_line_boxes() {
+    let mut s = SurfaceTester::new(60, 25);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    let attr = charattr!("w,black");
+    s.draw_line(1, 1, 20, 10, LineType::Single, attr);
+    s.draw_line(22, 10, 42, 1, LineType::Double, attr);
+    s.draw_line(20, 12, 1, 21, LineType::SingleRound, attr);
+    s.draw_line(42, 21, 22, 12, LineType::SingleThick, attr);
+    let ch_start = Character::with_color(Color::Yellow, Color::Red);
+    let ch_end = Character::with_color(Color::Yellow, Color::Blue);
+    s.write_char(1, 1, ch_start);
+    s.write_char(20, 10, ch_end);
+    s.write_char(22, 10, ch_start);
+    s.write_char(42, 1, ch_end);
+    s.write_char(20, 12, ch_start);
+    s.write_char(1, 21, ch_end);
+    s.write_char(42, 21, ch_start);
+    s.write_char(22, 12, ch_end);
+
+    s.draw_line(21, 1, 21, 22, LineType::Single, attr);
+    s.draw_line(41, 11, 1, 11, LineType::Double, attr);
+    s.write_char(21, 1, ch_start);
+    s.write_char(21, 22, ch_end);
+    s.write_char(41, 11, ch_start);
+    s.write_char(1, 11, ch_end);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x86EB4D9323C0CC89);
+}
+
+#[test]
+fn check_draw_line_blocks() {
+    let mut s = SurfaceTester::new(60, 25);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    let attr = charattr!("w,black");
+    s.draw_line(1, 1, 19, 9, LineType::Border, attr);
+    s.draw_line(23, 9, 42, 1, LineType::Border, attr);
+    s.draw_line(19, 13, 1, 21, LineType::Border, attr);
+    s.draw_line(42, 21, 23, 13, LineType::Border, attr);
+    let ch_start = Character::with_color(Color::Yellow, Color::Red);
+    let ch_end = Character::with_color(Color::Yellow, Color::Blue);
+    s.write_char(1, 1, ch_start);
+    s.write_char(19, 9, ch_end);
+    s.write_char(23, 9, ch_start);
+    s.write_char(42, 1, ch_end);
+    s.write_char(19, 13, ch_start);
+    s.write_char(1, 21, ch_end);
+    s.write_char(42, 21, ch_start);
+    s.write_char(23, 13, ch_end);
+
+    s.draw_line(21, 1, 21, 22, LineType::Border, attr);
+    s.draw_line(41, 11, 1, 11, LineType::Border, attr);
+    s.write_char(21, 1, ch_start);
+    s.write_char(21, 22, ch_end);
+    s.write_char(41, 11, ch_start);
+    s.write_char(1, 11, ch_end);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xAD6C3BC80EA6D1C5);
+}
+
+#[test]
+fn check_draw_line_braille() {
+    let mut s = SurfaceTester::new(60, 25);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    let attr = charattr!("w,black");
+    s.draw_line(1, 1, 20, 10, LineType::Braille, attr);
+    s.draw_line(22, 10, 42, 1, LineType::Braille, attr);
+    s.draw_line(20, 12, 1, 21, LineType::Braille, attr);
+    s.draw_line(42, 21, 22, 12, LineType::Braille, attr);
+    let ch_start = Character::with_color(Color::Yellow, Color::Red);
+    let ch_end = Character::with_color(Color::Yellow, Color::Blue);
+    s.write_char(1, 1, ch_start);
+    s.write_char(20, 10, ch_end);
+    s.write_char(22, 10, ch_start);
+    s.write_char(42, 1, ch_end);
+    s.write_char(20, 12, ch_start);
+    s.write_char(1, 21, ch_end);
+    s.write_char(42, 21, ch_start);
+    s.write_char(22, 12, ch_end);
+
+    s.draw_line(21, 1, 21, 22, LineType::Braille, attr);
+    s.draw_line(41, 11, 1, 11, LineType::Braille, attr);
+    s.write_char(21, 1, ch_start);
+    s.write_char(21, 22, ch_end);
+    s.write_char(41, 11, ch_start);
+    s.write_char(1, 11, ch_end);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x6204FB4E8E698A89);
+}
+
+#[test]
+fn check_draw_line_ascii() {
+    let mut s = SurfaceTester::new(60, 25);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    let attr = charattr!("w,black");
+    s.draw_line(1, 1, 20, 10, LineType::Ascii, attr);
+    s.draw_line(22, 10, 42, 1, LineType::Ascii, attr);
+    s.draw_line(20, 12, 1, 21, LineType::AsciiRound, attr);
+    s.draw_line(42, 21, 22, 12, LineType::AsciiRound, attr);
+    let ch_start = Character::with_color(Color::Yellow, Color::Red);
+    let ch_end = Character::with_color(Color::Yellow, Color::Blue);
+    s.write_char(1, 1, ch_start);
+    s.write_char(20, 10, ch_end);
+    s.write_char(22, 10, ch_start);
+    s.write_char(42, 1, ch_end);
+    s.write_char(20, 12, ch_start);
+    s.write_char(1, 21, ch_end);
+    s.write_char(42, 21, ch_start);
+    s.write_char(22, 12, ch_end);
+
+    s.draw_line(45, 1, 45 + 10, 1 + 10, LineType::Ascii, attr);
+    s.draw_line(45 + 10, 12, 45, 12 + 10, LineType::AsciiRound, attr);
+
+    s.draw_line(21, 1, 21, 22, LineType::Ascii, attr);
+    s.draw_line(41, 11, 1, 11, LineType::AsciiRound, attr);
+    s.write_char(21, 1, ch_start);
+    s.write_char(21, 22, ch_end);
+    s.write_char(41, 11, ch_start);
+    s.write_char(1, 11, ch_end);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xE598FF78A1290EE3);
+}
+
+#[test]
+fn check_fill_line() {
+    let mut s = SurfaceTester::new(60, 25);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    let ch = Character::new(SpecialChar::Block25, Color::White, Color::Black, CharFlags::None);
+    s.fill_line(1, 1, 20, 10, ch);
+    s.fill_line(22, 10, 42, 1, ch);
+    s.fill_line(20, 12, 1, 21, ch);
+    s.fill_line(42, 21, 22, 12, ch);
+    let ch_start = Character::with_color(Color::Yellow, Color::Red);
+    let ch_end = Character::with_color(Color::Yellow, Color::Blue);
+    s.write_char(1, 1, ch_start);
+    s.write_char(20, 10, ch_end);
+    s.write_char(22, 10, ch_start);
+    s.write_char(42, 1, ch_end);
+    s.write_char(20, 12, ch_start);
+    s.write_char(1, 21, ch_end);
+    s.write_char(42, 21, ch_start);
+    s.write_char(22, 12, ch_end);
+
+    let ch = Character::new(SpecialChar::BlockCentered, Color::White, Color::Black, CharFlags::None);
+
+    s.fill_line(21, 1, 21, 22, ch);
+    s.fill_line(41, 11, 1, 11, ch);
+    s.write_char(21, 1, ch_start);
+    s.write_char(21, 22, ch_end);
+    s.write_char(41, 11, ch_start);
+    s.write_char(1, 11, ch_end);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x953846DA8B6047F5);
 }

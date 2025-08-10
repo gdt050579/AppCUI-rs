@@ -1,5 +1,4 @@
 use super::Surface;
-//use crate::backend::utils::{AnsiFlags, AnsiFormatter};
 use std::ops::{Deref, DerefMut};
 
 pub(crate) struct SurfaceTester {
@@ -13,6 +12,7 @@ impl SurfaceTester {
     }
     // #[allow(dead_code)]
     // pub(crate) fn print(&mut self, show_just_hash: bool) {
+    //     use crate::backend::utils::{AnsiFlags, AnsiFormatter};
     //     if show_just_hash {
     //         println!("Hash = 0x{:X} - Dec: {}", self.compute_hash(), self.compute_hash());
     //     } else {
