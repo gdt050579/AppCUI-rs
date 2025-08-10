@@ -25,6 +25,7 @@ impl AnsiFormatter {
     pub(crate) fn clear(&mut self) {
         self.text.clear();
     }
+    #[allow(dead_code)]
     pub(crate) fn move_to_next_line(&mut self) {
         self.text.push('\n');
     }

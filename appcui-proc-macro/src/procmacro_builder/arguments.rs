@@ -348,7 +348,7 @@ impl Arguments {
                                     '<' => arr_state = ExpectNextInArry::TemplateItem(idx + 1),
                                     '>' => {
                                         arr_state = if idx == 1 {
-                                            if self.template_content.len() > 0 {
+                                            if !self.template_content.is_empty() {
                                                 self.template_content.remove(self.template_content.len() - 1);
                                             }
                                             self.validate_template();
