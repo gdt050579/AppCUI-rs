@@ -615,7 +615,7 @@ impl Surface {
     ///
     /// # Examples
     /// ```rust
-    /// use appcui::graphics::*;
+    /// use appcui::prelude::*;
     ///
     /// let mut surface = Surface::new(100, 50);
     /// 
@@ -623,7 +623,7 @@ impl Surface {
     /// surface.draw_line(0, 0, 10, 0, LineType::Single, charattr!("white,black"));
     ///
     /// // Draw a vertical double-line in red
-    /// surface.draw_line(5, 2, 5, 8, LineType::Double, charattr!("red,black");
+    /// surface.draw_line(5, 2, 5, 8, LineType::Double, charattr!("red,black"));
     /// ```
     pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
         match line_type {
@@ -650,12 +650,12 @@ impl Surface {
     ///
     /// # Examples
     /// ```rust
-    /// use appcui::graphics::*;
+    /// use appcui::prelude::*;
     ///
     /// let mut surface = Surface::new(100, 50);
     /// 
     /// // Draws a diagonal line from (0, 0) to (5, 3) using '*'
-    /// surface.fill_line(0, 0, 5, 3, Character::new('*', Color::White, Color::Bleck, CharFlags::None));
+    /// surface.fill_line(0, 0, 5, 3, Character::new('*', Color::White, Color::Black, CharFlags::None));
     ///
     /// // Draws a vertical line from (2, 1) to (2, 5)
     /// surface.fill_line(2, 1, 2, 5, char!("'|',white,black"));
