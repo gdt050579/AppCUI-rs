@@ -22,6 +22,8 @@ pub use super::ui::checkbox;
 pub use super::ui::checkbox::events::CheckBoxEvents;
 pub use super::ui::colorpicker;
 pub use super::ui::colorpicker::events::ColorPickerEvents;
+pub use super::ui::charpicker;
+pub use super::ui::charpicker::events::CharPickerEvents;
 pub use super::ui::combobox;
 pub use super::ui::combobox::events::ComboBoxEvents;
 pub use super::ui::command_bar::events::GenericCommandBarEvents;
