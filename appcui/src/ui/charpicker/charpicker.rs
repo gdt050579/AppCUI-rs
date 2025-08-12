@@ -88,6 +88,9 @@ impl OnPaint for CharPicker {
                     char::from_u32(code).unwrap_or('?')
                 };
                 surface.write_char(x * 3 + 1, y, Character::with_attributes(ch, col));
+                if code == self.code as u32 {
+                    surface.fill_horizontal_line_with_size(x*3, y, 3, Character::with_attributes(0 as char, theme.menu.text.pressed_or_selectd));
+                }
                 x += 1;
                 if x >= self.chars_per_width {
                     x = 0;
