@@ -52,7 +52,7 @@ The following methods can be used to draw lines on a surface using a generic cha
 | `fill_horizontal_line_with_size(...)` | Fills a horizontal line on the surface with a specific length. The line will be filled from left to right with a provided [Character](../screen.md#character) |
 | `fill_vertical_line_with_size(...)`   | Fills a vertical line on the surface with a specific length. The line will be filled from top to bottom with a provided [Character](../screen.md#character)   |
 | `fill_line(...)`                      | FIlls a line between two points with a given [Character](../screen.md#character)                                                                              |
-
+    
 
 Example:
 
