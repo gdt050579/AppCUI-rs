@@ -48,8 +48,13 @@ impl OnPaint for CharPicker {
             code = code >> 4;
         }
         // paint code
-
-        surface.write_ascii(3, self.header_y_ofs, arr.as_slice(), col_text, false);
+        if size.width>12 {
+            if size.width<17 {
+                surface.write_ascii(3, self.header_y_ofs, &arr[3..8], col_text, false);
+            } else {
+                surface.write_ascii(3, self.header_y_ofs, arr.as_slice(), col_text, false);
+            }
+        }
         // drop button
         let px = (size.width - 3) as i32;
         surface.fill_horizontal_line_with_size(px, self.header_y_ofs, 3, space_char);
