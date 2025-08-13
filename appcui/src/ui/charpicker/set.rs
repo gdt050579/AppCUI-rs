@@ -2,6 +2,7 @@ use flat_string::FlatString;
 
 pub enum UnicodeSymbols {
     Ascii,
+    Animals,
     Braille,
     Blocks,
     BoxDrawing,
@@ -9,9 +10,25 @@ pub enum UnicodeSymbols {
     Emoticons,
 }
 
+struct UnicodeInterval {
+    start: u32,
+    end: u32,
+}
+impl UnicodeInterval {
+    const fn new(start: u32, end: u32) -> Self {
+        Self { start, end }
+    }
+    #[inline(always)]
+    fn size(&self) -> u32 {
+        self.end + 1 - self.start
+    }
+}
+
+static ANIMALS: &'static [UnicodeInterval] = &[UnicodeInterval::new(0x1F400, 0x1F43C), UnicodeInterval::new(0x1F980, 0x1F9AE)];
 enum SetData {
     Interval(u32),
     List(Vec<char>),
+    MultiIntervals(&'static [UnicodeInterval]),
 }
 pub struct Set {
     name: FlatString<22>,
@@ -27,6 +44,18 @@ impl Set {
             UnicodeSymbols::BoxDrawing => Self::with_interval(name, 0x2500, 0x257F).unwrap(),
             UnicodeSymbols::Currency => Self::with_interval(name, 0x20A0, 0x20CF).unwrap(),
             UnicodeSymbols::Emoticons => Self::with_interval(name, 0x1F600, 0x1F64F).unwrap(),
+            UnicodeSymbols::Animals => Self::with_multi_intervale(name, ANIMALS),
+        }
+    }
+    fn with_multi_intervale(name: &str, mi: &'static [UnicodeInterval]) -> Self {
+        let mut count = 0;
+        for i in mi {
+            count += i.size();
+        }
+        Self {
+            name: FlatString::from_str(name),
+            count,
+            data: SetData::MultiIntervals(mi),
         }
     }
     pub fn with_interval(name: &str, start_code_point: u32, end_code_point: u32) -> Option<Self> {
@@ -67,6 +96,17 @@ impl Set {
         match &self.data {
             SetData::Interval(start) => char::from_u32(start + index),
             SetData::List(items) => Some(items[index as usize]),
+            SetData::MultiIntervals(multi_intervals) => {
+                let mut pos = 0;
+                for i in *multi_intervals {
+                    let next = pos + i.size();
+                    if (index >= pos) && (index < next) {
+                        return char::from_u32(index - pos + i.start);
+                    }
+                    pos = next;
+                }
+                None
+            }
         }
     }
 
@@ -92,6 +132,17 @@ impl Set {
                 }
             }
             SetData::List(items) => items.iter().position(|&c| c == ch).map(|idx| idx as u32),
+            SetData::MultiIntervals(multi_intervals) => {
+                let code_point = ch as u32;
+                let mut block_start = 0;
+                for i in *multi_intervals {
+                    if (code_point >= i.start) && (code_point <= i.end) {
+                        return Some(block_start + code_point - i.start);
+                    }
+                    block_start += i.size();
+                }
+                None
+            }
         }
     }
 }
