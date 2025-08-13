@@ -226,6 +226,19 @@ impl CharPicker {
             }
         }
     }
+    fn goto_set(&mut self, set_index: u32) {
+        if self.sets.is_empty() {
+            return;
+        }
+        let new_index = set_index.min((self.sets.len() - 1) as u32);
+        if new_index == self.nav.set_index {
+            return;
+        }
+        self.nav.set_index = new_index;
+        self.nav.current_index = 0;
+        self.nav.start_view_index = 0;
+        self.update_view(true, true);
+    }
 }
 impl OnPaint for CharPicker {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -388,10 +401,10 @@ impl OnMouseEvent for CharPicker {
                 if self.is_expanded() {
                     let mpos = self.compute_mouse_pos(data.x, data.y);
                     match mpos {
-                        MousePos::Char(_) => todo!(),
-                        MousePos::HoverLeftButton => todo!(),
-                        MousePos::HoverRightButton => todo!(),
-                        _ => ()
+                        MousePos::Char(index) => self.nav.current_index = index,
+                        MousePos::HoverLeftButton => self.goto_set(self.nav.set_index.saturating_sub(1)),
+                        MousePos::HoverRightButton => self.goto_set(self.nav.set_index + 1),
+                        _ => (),
                     }
                     self.nav.mouse_pos = mpos;
                     EventProcessStatus::Processed
