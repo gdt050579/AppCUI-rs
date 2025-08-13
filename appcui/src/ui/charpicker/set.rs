@@ -55,4 +55,21 @@ impl Set {
     pub(super) fn name(&self) -> &str {
         self.name.as_str()
     }
+
+    pub(super) fn index_of(&self, ch: char) -> Option<u32> {
+        match &self.data {
+            SetData::Interval(start) => {
+                let code_point = ch as u32;
+                let start = *start;
+                if (code_point>=start) && (code_point < (start+self.count)) {
+                    Some(code_point-start)
+                } else {
+                    None
+                }
+            }
+            SetData::List(items) => {
+                items.iter().position(|&c| c==ch).map(|idx| idx as u32)
+            },
+        }
+    }
 }

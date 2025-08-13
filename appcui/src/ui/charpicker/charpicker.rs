@@ -4,6 +4,7 @@ use crate::ui::charpicker::events::EventData;
 
 struct Navigation {
     chars_per_width: i32,
+    height: i32,
     set_index: u32,
     start_view_index: u32,
     current_index: u32,
@@ -25,23 +26,56 @@ impl CharPicker {
         Self::inner_new(initial_char, layout, vec![set])
     }
     fn inner_new(initial_char: Option<char>, layout: Layout, sets: Vec<Set>) -> Self {
-
         let mut cp = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             header_y_ofs: 0,
             expanded_panel_y: 1,
-            nav: Navigation { chars_per_width: 1, set_index: 0, start_view_index: 0, current_index: 0 },
-            code: Some(code),
-            sets: Vec::new(),
+            nav: Navigation {
+                chars_per_width: 1,
+                set_index: 0,
+                start_view_index: 0,
+                current_index: 0,
+                height: 1,
+            },
+            code: None,
+            sets: sets,
         };
+        if let Some(ch) = initial_char {
+            cp.goto(ch, false, false);
+        }
         cp.set_size_bounds(11, 1, u16::MAX, 1);
         cp
-    }    
+    }
     pub fn add_set(&mut self, set: Set) {
         self.sets.push(set);
     }
     pub fn clear_sets(&mut self) {
         self.sets.clear();
+    }
+    fn emit_change_char_event(&mut self) {}
+    fn update_view(&mut self) {
+        
+    }
+    fn goto(&mut self, ch: char, emit_event: bool, update_view: bool) {
+        let mut result = None;
+        for (set_idx, s) in self.sets.iter().enumerate() {
+            if let Some(idx) = s.index_of(ch) {
+                result = Some((set_idx as u32, idx));
+                break;
+            }
+        }
+        if let Some((set_idx, idx)) = result {
+            let last_set_idx = self.nav.set_index;
+            let last_idx = self.nav.current_index;
+            self.nav.set_index = set_idx;
+            self.nav.current_index = idx;
+            if (emit_event) && ((last_idx != idx) || (last_set_idx != set_idx)) {
+                self.emit_change_char_event();
+            }
+            if update_view {
+                self.update_view();
+            }
+        }
     }
 }
 impl OnPaint for CharPicker {
@@ -148,6 +182,8 @@ impl OnExpand for CharPicker {
             }
         }
         self.nav.chars_per_width = (self.expanded_size().width / 3) as i32;
+        self.nav.height = self.expanded_size().height.saturating_sub(5) as i32;
+        self.update_view();
     }
     fn on_pack(&mut self) {
         self.expanded_panel_y = 1;
