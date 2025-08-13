@@ -138,6 +138,18 @@ impl CharPicker {
         surface.write_text(set.name(), &format);
         surface.reset_clip();
         surface.draw_horizontal_line(1, self.expanded_panel_y + 2, size.width as i32 - 2, LineType::Single, col);
+        // left button
+        let but_color = match () {
+            _ if self.nav.set_index == 0 => theme.menu.symbol.inactive,
+            _ => theme.menu.symbol.normal,
+        };
+        surface.write_string(1, self.expanded_panel_y + 1, " < ", but_color, false);
+        // right button
+        let but_color = match () {
+            _ if (self.nav.set_index + 1) as usize == self.sets.len() => theme.menu.symbol.inactive,
+            _ => theme.menu.symbol.normal,
+        };
+        surface.write_string(size.width as i32 - 4, self.expanded_panel_y + 1, " > ", but_color, false);
         let mut y = 0;
         let mut x = 0;
         let mut idx = self.nav.start_view_index;
