@@ -7,3 +7,4 @@ mod tests;
 
 pub use self::charpicker::CharPicker;
 pub use self::set::Set;
+pub use self::set::UnicodeSymbols;

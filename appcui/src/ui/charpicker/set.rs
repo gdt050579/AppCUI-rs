@@ -1,5 +1,13 @@
 use flat_string::FlatString;
 
+pub enum UnicodeSymbols {
+    Ascii,
+    Braille,
+    Blocks,
+    BoxDrawing,
+    Currency,
+}
+
 enum SetData {
     Interval(u32),
     List(Vec<char>),
@@ -10,6 +18,15 @@ pub struct Set {
     data: SetData,
 }
 impl Set {
+    pub fn from_unicode_symbols(name: &str, symbols: UnicodeSymbols) -> Self {
+        match symbols {
+            UnicodeSymbols::Ascii => Self::with_interval(name, 32, 127).unwrap(),
+            UnicodeSymbols::Braille => Self::with_interval(name, 0x2800, 0x28FF).unwrap(),
+            UnicodeSymbols::Blocks => Self::with_interval(name, 0x2580, 0x259F).unwrap(),
+            UnicodeSymbols::BoxDrawing => Self::with_interval(name, 0x2500, 0x257F).unwrap(),
+            UnicodeSymbols::Currency => Self::with_interval(name, 0x20A0, 0x20CF).unwrap(),
+        }
+    }
     pub fn with_interval(name: &str, start_code_point: u32, end_code_point: u32) -> Option<Self> {
         let start = start_code_point.min(end_code_point);
         let end = start_code_point.max(end_code_point);
@@ -61,15 +78,13 @@ impl Set {
             SetData::Interval(start) => {
                 let code_point = ch as u32;
                 let start = *start;
-                if (code_point>=start) && (code_point < (start+self.count)) {
-                    Some(code_point-start)
+                if (code_point >= start) && (code_point < (start + self.count)) {
+                    Some(code_point - start)
                 } else {
                     None
                 }
             }
-            SetData::List(items) => {
-                items.iter().position(|&c| c==ch).map(|idx| idx as u32)
-            },
+            SetData::List(items) => items.iter().position(|&c| c == ch).map(|idx| idx as u32),
         }
     }
 }
