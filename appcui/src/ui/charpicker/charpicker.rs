@@ -12,7 +12,7 @@ struct Navigation {
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
 pub struct CharPicker {
-    code: Option<char>,
+    character: Option<char>,
     header_y_ofs: i32,
     expanded_panel_y: i32,
     nav: Navigation,
@@ -37,8 +37,8 @@ impl CharPicker {
                 current_index: 0,
                 height: 1,
             },
-            code: None,
-            sets: sets,
+            character: None,
+            sets,
         };
         if let Some(ch) = initial_char {
             cp.goto(ch, false, false);
@@ -84,11 +84,12 @@ impl CharPicker {
             }
         }
         if let Some((set_idx, idx)) = result {
-            let last_set_idx = self.nav.set_index;
-            let last_idx = self.nav.current_index;
             self.nav.set_index = set_idx;
             self.nav.current_index = idx;
-            if (emit_event) && ((last_idx != idx) || (last_set_idx != set_idx)) {
+            let old_char = self.character;
+            self.character = Some(ch);
+
+            if (emit_event) && (self.character != old_char) {
                 self.emit_change_char_event();
             }
             if update_view {
@@ -111,7 +112,7 @@ impl OnPaint for CharPicker {
         let space_char = Character::with_attributes(' ', col_text);
         // normal bar
         surface.fill_horizontal_line_with_size(0, self.header_y_ofs, size.width.saturating_sub(4), space_char);
-        if let Some(character) = self.code {
+        if let Some(character) = self.character {
             surface.write_char(1, self.header_y_ofs, Character::with_attributes(character, col_text));
             let mut arr: [u8; 9] = [b'(', b'U', b'+', b'0', b'0', b'0', b'0', b'0', b')'];
             let mut code = character as u32;
@@ -155,24 +156,26 @@ impl OnPaint for CharPicker {
                 col,
             );
             surface.draw_horizontal_line(1, self.expanded_panel_y + 2, size.width as i32 - 2, LineType::Single, col);
-            let mut y = 4;
+            let mut y = 0;
             let mut x = 0;
             let set = &self.sets[self.nav.set_index as usize];
             let mut idx = self.nav.start_view_index;
             let count = set.count();
-            while count < idx {
+            while (idx < count) && (y < self.nav.height) {
                 let ch = set.char(idx).unwrap_or('?');
-                surface.write_char(x * 3 + 1, y, Character::with_attributes(ch, col));
+                surface.write_char(x * 3 + 2, y + 4, Character::with_attributes(ch, col));
                 if idx == self.nav.current_index {
-                    surface.fill_horizontal_line_with_size(x * 3, y, 3, Character::with_attributes(0 as char, theme.menu.text.pressed_or_selectd));
+                    surface.fill_horizontal_line_with_size(
+                        x * 3 + 1,
+                        y + 4,
+                        3,
+                        Character::with_attributes(0 as char, theme.menu.text.pressed_or_selectd),
+                    );
                 }
                 x += 1;
                 if x >= self.nav.chars_per_width {
                     x = 0;
                     y += 1;
-                    if ((y as u32) + 1) >= size.height {
-                        break;
-                    }
                 }
                 idx += 1;
             }
@@ -200,7 +203,7 @@ impl OnExpand for CharPicker {
                 self.header_y_ofs = 0;
             }
         }
-        self.nav.chars_per_width = (self.expanded_size().width / 3) as i32;
+        self.nav.chars_per_width = ((self.expanded_size().width.saturating_sub(2) / 3) as i32).max(1);
         self.nav.height = self.expanded_size().height.saturating_sub(5) as i32;
         self.update_view();
     }
