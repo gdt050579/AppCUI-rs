@@ -6,6 +6,7 @@ pub enum UnicodeSymbols {
     Blocks,
     BoxDrawing,
     Currency,
+    Emoticons,
 }
 
 enum SetData {
@@ -25,6 +26,7 @@ impl Set {
             UnicodeSymbols::Blocks => Self::with_interval(name, 0x2580, 0x259F).unwrap(),
             UnicodeSymbols::BoxDrawing => Self::with_interval(name, 0x2500, 0x257F).unwrap(),
             UnicodeSymbols::Currency => Self::with_interval(name, 0x20A0, 0x20CF).unwrap(),
+            UnicodeSymbols::Emoticons => Self::with_interval(name, 0x1F600, 0x1F64F).unwrap(),
         }
     }
     pub fn with_interval(name: &str, start_code_point: u32, end_code_point: u32) -> Option<Self> {
