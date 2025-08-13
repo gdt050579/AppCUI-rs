@@ -178,16 +178,23 @@ impl CharPicker {
         let mut x = 0;
         let mut idx = self.nav.start_view_index;
         let count = set.count();
+        let ofs_y = 3 + self.expanded_panel_y;
+        let mouse_idx = match self.nav.mouse_pos {
+            MousePos::Char(idx) => idx,
+            _ => u32::MAX,
+        };
         while (idx < count) && (y < self.nav.height) {
             let ch = set.char(idx).unwrap_or('?');
-            surface.write_char(x * 3 + 2, y + 4, Character::with_attributes(ch, col));
+            surface.write_char(x * 3 + 2, y + ofs_y, Character::with_attributes(ch, col));
             if idx == self.nav.current_index {
                 surface.fill_horizontal_line_with_size(
                     x * 3 + 1,
-                    y + 4,
+                    y + ofs_y,
                     3,
                     Character::with_attributes(0 as char, theme.menu.text.pressed_or_selectd),
                 );
+            } else if idx == mouse_idx {
+                surface.fill_horizontal_line_with_size(x * 3 + 1, y + ofs_y, 3, Character::with_attributes(0 as char, theme.menu.text.hovered));
             }
             x += 1;
             if x >= self.nav.chars_per_width {
@@ -222,7 +229,22 @@ impl CharPicker {
                 }
             } else {
                 // check character
-                MousePos::None
+                let ofs_y = 3 + self.expanded_panel_y;
+                if y >= ofs_y && (x > 0) && (x < w - 1) {
+                    let px = (x - 1) / 3;
+                    if px >= self.nav.chars_per_width {
+                        MousePos::None
+                    } else {
+                        let idx = (px + (y - ofs_y) * self.nav.chars_per_width) as u32 + self.nav.start_view_index;
+                        if idx >= self.sets[self.nav.set_index as usize].count() {
+                            MousePos::None
+                        } else {
+                            MousePos::Char(idx)
+                        }
+                    }
+                } else {
+                    MousePos::None
+                }
             }
         }
     }
@@ -401,7 +423,10 @@ impl OnMouseEvent for CharPicker {
                 if self.is_expanded() {
                     let mpos = self.compute_mouse_pos(data.x, data.y);
                     match mpos {
-                        MousePos::Char(index) => self.nav.current_index = index,
+                        MousePos::Char(index) => {
+                            self.nav.current_index = index;
+                            self.update_view(true, true);
+                        }
                         MousePos::HoverLeftButton => self.goto_set(self.nav.set_index.saturating_sub(1)),
                         MousePos::HoverRightButton => self.goto_set(self.nav.set_index + 1),
                         _ => (),
