@@ -1,32 +1,42 @@
-use crate::prelude::*;
 use super::set::Set;
+use crate::prelude::*;
 use crate::ui::charpicker::events::EventData;
 
-
+struct Navigation {
+    chars_per_width: i32,
+    set_index: u32,
+    start_view_index: u32,
+    current_index: u32,
+}
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
 pub struct CharPicker {
-    code: char,
+    code: Option<char>,
     header_y_ofs: i32,
     expanded_panel_y: i32,
-    chars_per_width: i32,
-    start_code: u32,
+    nav: Navigation,
     sets: Vec<Set>,
 }
 impl CharPicker {
-    pub fn new(code: char, layout: Layout) -> Self {
+    pub fn new(layout: Layout) -> Self {
+        Self::inner_new(None, layout, Vec::new())
+    }
+    pub fn with_set(initial_char: Option<char>, layout: Layout, set: Set) -> Self {
+        Self::inner_new(initial_char, layout, vec![set])
+    }
+    fn inner_new(initial_char: Option<char>, layout: Layout, sets: Vec<Set>) -> Self {
+
         let mut cp = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             header_y_ofs: 0,
             expanded_panel_y: 1,
-            chars_per_width: 1,
-            code,
-            start_code: 32,
-            sets: Vec::new()
+            nav: Navigation { chars_per_width: 1, set_index: 0, start_view_index: 0, current_index: 0 },
+            code: Some(code),
+            sets: Vec::new(),
         };
         cp.set_size_bounds(11, 1, u16::MAX, 1);
         cp
-    }
+    }    
     pub fn add_set(&mut self, set: Set) {
         self.sets.push(set);
     }
@@ -47,28 +57,32 @@ impl OnPaint for CharPicker {
 
         let space_char = Character::with_attributes(' ', col_text);
         // normal bar
-        surface.fill_horizontal_line_with_size(0, self.header_y_ofs, size.width.saturating_sub(4), space_char);
-        surface.write_char(1, self.header_y_ofs, Character::with_attributes(self.code, col_text));
-        let mut arr: [u8; 9] = [b'(', b'U', b'+', b'0', b'0', b'0', b'0', b'0', b')'];
-        let mut code = self.code as u32;
-        let mut pos = 7;
-        while (code > 0) && (pos > 2) {
-            let r = (code % 16) as u8;
-            if r < 10 {
-                arr[pos] = 48 + r;
-            } else {
-                arr[pos] = 55 + r;
+        if let Some(character) = self.code {
+            surface.fill_horizontal_line_with_size(0, self.header_y_ofs, size.width.saturating_sub(4), space_char);
+            surface.write_char(1, self.header_y_ofs, Character::with_attributes(character, col_text));
+            let mut arr: [u8; 9] = [b'(', b'U', b'+', b'0', b'0', b'0', b'0', b'0', b')'];
+            let mut code = character as u32;
+            let mut pos = 7;
+            while (code > 0) && (pos > 2) {
+                let r = (code % 16) as u8;
+                if r < 10 {
+                    arr[pos] = 48 + r;
+                } else {
+                    arr[pos] = 55 + r;
+                }
+                pos = pos - 1;
+                code = code >> 4;
             }
-            pos = pos - 1;
-            code = code >> 4;
-        }
-        // paint code
-        if size.width > 12 {
-            if size.width < 17 {
-                surface.write_ascii(3, self.header_y_ofs, &arr[3..8], col_text, false);
-            } else {
-                surface.write_ascii(3, self.header_y_ofs, arr.as_slice(), col_text, false);
+            // paint code
+            if size.width > 12 {
+                if size.width < 17 {
+                    surface.write_ascii(3, self.header_y_ofs, &arr[3..8], col_text, false);
+                } else {
+                    surface.write_ascii(3, self.header_y_ofs, arr.as_slice(), col_text, false);
+                }
             }
+        } else {
+            surface.write_ascii(1, self.header_y_ofs, "None".as_bytes(), col_text, false);
         }
         // drop button
         let px = (size.width - 3) as i32;
@@ -90,30 +104,24 @@ impl OnPaint for CharPicker {
             surface.draw_horizontal_line(1, self.expanded_panel_y + 2, size.width as i32 - 2, LineType::Single, col);
             let mut y = 4;
             let mut x = 0;
-            let mut code = self.start_code;
-            let end_code = code + 1000;
-            loop {
-                let ch = if (code == 128) || (code == 0) {
-                    ' '
-                } else {
-                    char::from_u32(code).unwrap_or('?')
-                };
+            let set = &self.sets[self.nav.set_index as usize];
+            let mut idx = self.nav.start_view_index;
+            let count = set.count();
+            while count < idx {
+                let ch = set.char(idx).unwrap_or('?');
                 surface.write_char(x * 3 + 1, y, Character::with_attributes(ch, col));
-                if code == self.code as u32 {
-                    surface.fill_horizontal_line_with_size(x*3, y, 3, Character::with_attributes(0 as char, theme.menu.text.pressed_or_selectd));
+                if idx == self.nav.current_index {
+                    surface.fill_horizontal_line_with_size(x * 3, y, 3, Character::with_attributes(0 as char, theme.menu.text.pressed_or_selectd));
                 }
                 x += 1;
-                if x >= self.chars_per_width {
+                if x >= self.nav.chars_per_width {
                     x = 0;
                     y += 1;
                     if ((y as u32) + 1) >= size.height {
                         break;
                     }
                 }
-                code += 1;
-                if code >= end_code {
-                    break;
-                }
+                idx += 1;
             }
         }
     }
@@ -139,7 +147,7 @@ impl OnExpand for CharPicker {
                 self.header_y_ofs = 0;
             }
         }
-        self.chars_per_width = (self.expanded_size().width / 3) as i32;
+        self.nav.chars_per_width = (self.expanded_size().width / 3) as i32;
     }
     fn on_pack(&mut self) {
         self.expanded_panel_y = 1;
