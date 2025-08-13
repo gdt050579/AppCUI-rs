@@ -491,6 +491,15 @@ impl OnMouseEvent for CharPicker {
                     EventProcessStatus::Ignored
                 }
             }
+            MouseEvent::Wheel(dir) => {
+                match dir {
+                    MouseWheelDirection::Left => self.goto_set(self.nav.set_index.saturating_sub(1)),
+                    MouseWheelDirection::Right => self.goto_set(self.nav.set_index + 1),
+                    MouseWheelDirection::Up => self.move_scroll_view_by(-1),
+                    MouseWheelDirection::Down => self.move_scroll_view_by(1),
+                }
+                EventProcessStatus::Processed
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
