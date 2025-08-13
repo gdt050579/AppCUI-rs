@@ -75,6 +75,11 @@ impl Set {
         self.name.as_str()
     }
 
+    #[inline(always)]
+    pub(super) fn name_chars_count(&self) -> usize {
+        self.name.chars_count()
+    }
+
     pub(super) fn index_of(&self, ch: char) -> Option<u32> {
         match &self.data {
             SetData::Interval(start) => {

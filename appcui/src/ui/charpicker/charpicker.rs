@@ -112,6 +112,55 @@ impl CharPicker {
             }
         }
     }
+    fn paint_extanded(&self, surface: &mut Surface, theme: &Theme) {
+        // if you end up at this point , it is assume thet self.sets are not empty !!!
+        let size = self.expanded_size();
+        let space_char = Character::with_attributes(' ', theme.menu.text.normal);
+        let col = theme.menu.text.normal;
+        let set = &self.sets[self.nav.set_index as usize];
+        surface.fill_rect(
+            Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+            space_char,
+        );
+        surface.draw_rect(
+            Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
+            LineType::Single,
+            col,
+        );
+        // draw Set Name
+        let format = TextFormatBuilder::new()
+            .align(TextAlignment::Center)
+            .position(size.width as i32 / 2, self.expanded_panel_y + 1)
+            .attribute(theme.menu.hotkey.normal)
+            .chars_count(set.name_chars_count() as u16)
+            .build();
+        surface.set_relative_clip(4, self.expanded_panel_y + 1, (size.width as i32) - 5, self.expanded_panel_y + 1);
+        surface.write_text(set.name(), &format);
+        surface.reset_clip();
+        surface.draw_horizontal_line(1, self.expanded_panel_y + 2, size.width as i32 - 2, LineType::Single, col);
+        let mut y = 0;
+        let mut x = 0;
+        let mut idx = self.nav.start_view_index;
+        let count = set.count();
+        while (idx < count) && (y < self.nav.height) {
+            let ch = set.char(idx).unwrap_or('?');
+            surface.write_char(x * 3 + 2, y + 4, Character::with_attributes(ch, col));
+            if idx == self.nav.current_index {
+                surface.fill_horizontal_line_with_size(
+                    x * 3 + 1,
+                    y + 4,
+                    3,
+                    Character::with_attributes(0 as char, theme.menu.text.pressed_or_selectd),
+                );
+            }
+            x += 1;
+            if x >= self.nav.chars_per_width {
+                x = 0;
+                y += 1;
+            }
+            idx += 1;
+        }
+    }
 }
 impl OnPaint for CharPicker {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -158,42 +207,8 @@ impl OnPaint for CharPicker {
         surface.fill_horizontal_line_with_size(px, self.header_y_ofs, 3, space_char);
         surface.write_char(px + 1, self.header_y_ofs, Character::with_attributes(SpecialChar::TriangleDown, col_text));
         // assuming the control is expanded
-        if self.is_expanded() {
-            let size = self.expanded_size();
-            let col = theme.menu.text.normal;
-            surface.fill_rect(
-                Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
-                space_char,
-            );
-            surface.draw_rect(
-                Rect::with_size(0, self.expanded_panel_y, size.width as u16, (size.height - 1) as u16),
-                LineType::Single,
-                col,
-            );
-            surface.draw_horizontal_line(1, self.expanded_panel_y + 2, size.width as i32 - 2, LineType::Single, col);
-            let mut y = 0;
-            let mut x = 0;
-            let set = &self.sets[self.nav.set_index as usize];
-            let mut idx = self.nav.start_view_index;
-            let count = set.count();
-            while (idx < count) && (y < self.nav.height) {
-                let ch = set.char(idx).unwrap_or('?');
-                surface.write_char(x * 3 + 2, y + 4, Character::with_attributes(ch, col));
-                if idx == self.nav.current_index {
-                    surface.fill_horizontal_line_with_size(
-                        x * 3 + 1,
-                        y + 4,
-                        3,
-                        Character::with_attributes(0 as char, theme.menu.text.pressed_or_selectd),
-                    );
-                }
-                x += 1;
-                if x >= self.nav.chars_per_width {
-                    x = 0;
-                    y += 1;
-                }
-                idx += 1;
-            }
+        if self.is_expanded() && !self.sets.is_empty() {
+            self.paint_extanded(surface, theme);
         }
     }
 }
