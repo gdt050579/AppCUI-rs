@@ -104,6 +104,22 @@ impl CharPicker {
             }
         }
     }
+
+    fn move_scroll_view_by(&mut self, dir: i32) {
+        if self.sets.is_empty() {
+            return;
+        }
+        let ofs = (self.nav.chars_per_width * dir.abs()) as u32;
+        self.nav.start_view_index = if dir<0 {
+            self.nav.start_view_index.saturating_sub(ofs)
+        } else {
+            self.nav.start_view_index + ofs
+        };
+        let page_size = self.nav.chars_per_width as u32 * (self.expanded_size().height.saturating_sub(5));
+        let count = self.sets[self.nav.set_index as usize].count();
+        self.nav.start_view_index = self.nav.start_view_index.min(count.saturating_sub(page_size));
+    }
+
     fn goto(&mut self, ch: char, emit_event: bool, update_view: bool) {
         let mut result = None;
         for (set_idx, s) in self.sets.iter().enumerate() {
@@ -382,6 +398,44 @@ impl OnKeyPressed for CharPicker {
             key!("Right") => {
                 self.nav.current_index += 1;
                 self.update_view(true, true);
+                return EventProcessStatus::Processed;
+            }
+            key!("Home") => {
+                self.nav.current_index = 0;
+                self.update_view(true, true);
+                return EventProcessStatus::Processed;
+            }
+            key!("End") => {
+                self.nav.current_index = u32::MAX;
+                self.update_view(true, true);
+                return EventProcessStatus::Processed;
+            }
+            key!("PageUp") => {
+                let dif = (self.nav.chars_per_width * (self.expanded_size().height.saturating_sub(5) as i32)) as u32;
+                self.nav.current_index = self.nav.current_index.saturating_sub(dif);
+                self.update_view(true, true);
+                return EventProcessStatus::Processed;
+            }
+            key!("PageDown") => {
+                let dif = (self.nav.chars_per_width * (self.expanded_size().height.saturating_sub(5) as i32)) as u32;
+                self.nav.current_index = self.nav.current_index + dif;
+                self.update_view(true, true);
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Left") | key!("Alt+Left") => {
+                self.goto_set(self.nav.set_index.saturating_sub(1));
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Right") | key!("Alt+Right") => {
+                self.goto_set(self.nav.set_index + 1);
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Up") | key!("Alt+Up") => {
+                self.move_scroll_view_by(-1);
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Down") | key!("Alt+Down") => {
+                self.move_scroll_view_by(1);
                 return EventProcessStatus::Processed;
             }
             _ => {}
