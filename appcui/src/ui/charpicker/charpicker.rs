@@ -54,7 +54,26 @@ impl CharPicker {
     }
     fn emit_change_char_event(&mut self) {}
     fn update_view(&mut self) {
-        
+        if self.sets.is_empty() {
+            return;
+        }
+        if self.nav.set_index as usize >= self.sets.len() {
+            // reset to first
+            self.nav.set_index = 0;
+            self.nav.current_index = 0;
+        }
+        let count = self.sets[self.nav.set_index as usize].count();
+        // I know a set has at least one character
+        // make sure tha current index is valid
+        self.nav.current_index = self.nav.current_index.min(count.saturating_sub(1));
+        if self.nav.current_index < self.nav.start_view_index {
+            self.nav.start_view_index = self.nav.current_index;
+        } else {
+            let displayed_chars = (self.nav.chars_per_width * self.nav.height) as u32;
+            if self.nav.current_index >= self.nav.start_view_index + displayed_chars {
+                self.nav.start_view_index = self.nav.current_index.saturating_sub(displayed_chars + 1);
+            }
+        }
     }
     fn goto(&mut self, ch: char, emit_event: bool, update_view: bool) {
         let mut result = None;
@@ -207,22 +226,26 @@ impl OnKeyPressed for CharPicker {
                 self.on_default_action();
                 return EventProcessStatus::Processed;
             }
-            // key!("Up") => {
-            //     self.next_color(expanded, if expanded { -COLOR_MATRIX_WIDTH } else { -1 });
-            //     return EventProcessStatus::Processed;
-            // }
-            // key!("Down") => {
-            //     self.next_color(expanded, if expanded { COLOR_MATRIX_WIDTH } else { 1 });
-            //     return EventProcessStatus::Processed;
-            // }
-            // key!("Left") => {
-            //     self.next_color(expanded, -1);
-            //     return EventProcessStatus::Processed;
-            // }
-            // key!("Right") => {
-            //     self.next_color(expanded, 1);
-            //     return EventProcessStatus::Processed;
-            // }
+            key!("Up") => {
+                self.nav.current_index = self.nav.current_index.saturating_sub(self.nav.chars_per_width as u32);
+                self.update_view();
+                return EventProcessStatus::Processed;
+            }
+            key!("Down") => {
+                self.nav.current_index += self.nav.chars_per_width as u32;
+                self.update_view();
+                return EventProcessStatus::Processed;
+            }
+            key!("Left") => {
+                self.nav.current_index = self.nav.current_index.saturating_sub(1);
+                self.update_view();
+                return EventProcessStatus::Processed;
+            }
+            key!("Right") => {
+                self.nav.current_index += 1;
+                self.update_view();
+                return EventProcessStatus::Processed;
+            }
             _ => {}
         }
         EventProcessStatus::Ignored
