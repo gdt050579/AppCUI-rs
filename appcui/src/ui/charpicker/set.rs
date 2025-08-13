@@ -2,6 +2,7 @@ use flat_string::FlatString;
 
 pub enum UnicodeSymbols {
     Ascii,
+    Arrows,
     Animals,
     Braille,
     Blocks,
@@ -25,6 +26,14 @@ impl UnicodeInterval {
 }
 
 static ANIMALS: &'static [UnicodeInterval] = &[UnicodeInterval::new(0x1F400, 0x1F43C), UnicodeInterval::new(0x1F980, 0x1F9AE)];
+static ARROWS: &'static [UnicodeInterval] = &[
+    UnicodeInterval::new(0x2190, 0x21FF),
+    UnicodeInterval::new(0x27F0, 0x27FF),
+    UnicodeInterval::new(0x2B00, 0x2B11),
+    UnicodeInterval::new(0x2B60, 0x2BB8),
+    UnicodeInterval::new(0x1F800, 0x1F8B1),
+];
+
 enum SetData {
     Interval(u32),
     List(Vec<char>),
@@ -45,6 +54,7 @@ impl Set {
             UnicodeSymbols::Currency => Self::with_interval(name, 0x20A0, 0x20CF).unwrap(),
             UnicodeSymbols::Emoticons => Self::with_interval(name, 0x1F600, 0x1F64F).unwrap(),
             UnicodeSymbols::Animals => Self::with_multi_intervale(name, ANIMALS),
+            UnicodeSymbols::Arrows => Self::with_multi_intervale(name, ARROWS),
         }
     }
     fn with_multi_intervale(name: &str, mi: &'static [UnicodeInterval]) -> Self {
