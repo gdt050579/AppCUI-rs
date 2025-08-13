@@ -110,8 +110,8 @@ impl OnPaint for CharPicker {
 
         let space_char = Character::with_attributes(' ', col_text);
         // normal bar
+        surface.fill_horizontal_line_with_size(0, self.header_y_ofs, size.width.saturating_sub(4), space_char);
         if let Some(character) = self.code {
-            surface.fill_horizontal_line_with_size(0, self.header_y_ofs, size.width.saturating_sub(4), space_char);
             surface.write_char(1, self.header_y_ofs, Character::with_attributes(character, col_text));
             let mut arr: [u8; 9] = [b'(', b'U', b'+', b'0', b'0', b'0', b'0', b'0', b')'];
             let mut code = character as u32;
