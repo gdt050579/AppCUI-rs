@@ -8,6 +8,7 @@ struct Navigation {
     set_index: u32,
     start_view_index: u32,
     current_index: u32,
+    computed_column_index: u32,
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
@@ -36,6 +37,7 @@ impl CharPicker {
                 start_view_index: 0,
                 current_index: 0,
                 height: 1,
+                computed_column_index: 0,
             },
             character: None,
             sets,
@@ -66,15 +68,18 @@ impl CharPicker {
             // make sure tha current index is valid
             self.nav.current_index = self.nav.current_index.min(count.saturating_sub(1));
             if self.nav.current_index < self.nav.start_view_index {
-                self.nav.start_view_index = self.nav.current_index;
+                self.nav.start_view_index = self.nav.current_index.saturating_sub(self.nav.computed_column_index);
             } else {
                 let displayed_chars = (self.nav.chars_per_width * self.nav.height) as u32;
                 if self.nav.current_index >= self.nav.start_view_index + displayed_chars {
-                    self.nav.start_view_index = self.nav.current_index.saturating_sub(displayed_chars - 1);
+                    self.nav.start_view_index = self.nav.current_index.saturating_sub(displayed_chars - 1)
+                        + (self.nav.chars_per_width as u32).saturating_sub(self.nav.computed_column_index + 1);
+                    self.nav.start_view_index = self.nav.start_view_index.min(count.saturating_sub(displayed_chars));
                 }
             }
+            self.nav.computed_column_index = (self.nav.current_index.saturating_sub(self.nav.start_view_index)) % (self.nav.chars_per_width as u32);
         }
-                let new_char = if self.sets.is_empty() {
+        let new_char = if self.sets.is_empty() {
             None
         } else {
             self.sets[self.nav.set_index as usize].char(self.nav.current_index)
