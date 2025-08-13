@@ -1,5 +1,8 @@
 use crate::prelude::*;
+use super::set::Set;
 use crate::ui::charpicker::events::EventData;
+
+
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
 pub struct CharPicker {
@@ -8,6 +11,7 @@ pub struct CharPicker {
     expanded_panel_y: i32,
     chars_per_width: i32,
     start_code: u32,
+    sets: Vec<Set>,
 }
 impl CharPicker {
     pub fn new(code: char, layout: Layout) -> Self {
@@ -18,9 +22,16 @@ impl CharPicker {
             chars_per_width: 1,
             code,
             start_code: 32,
+            sets: Vec::new()
         };
         cp.set_size_bounds(11, 1, u16::MAX, 1);
         cp
+    }
+    pub fn add_set(&mut self, set: Set) {
+        self.sets.push(set);
+    }
+    pub fn clear_sets(&mut self) {
+        self.sets.clear();
     }
 }
 impl OnPaint for CharPicker {
