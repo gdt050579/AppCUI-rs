@@ -2,6 +2,16 @@ use super::set::Set;
 use crate::prelude::*;
 use crate::ui::charpicker::events::EventData;
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum MousePos {
+    None,
+    Char(u32),
+    HoverLeftButton,
+    PressLeftButton,
+    HoverRightButton,
+    PressRightButton,
+}
+
 struct Navigation {
     chars_per_width: i32,
     height: i32,
@@ -9,6 +19,7 @@ struct Navigation {
     start_view_index: u32,
     current_index: u32,
     computed_column_index: u32,
+    mouse_pos: MousePos,
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
@@ -38,6 +49,7 @@ impl CharPicker {
                 current_index: 0,
                 height: 1,
                 computed_column_index: 0,
+                mouse_pos: MousePos::None,
             },
             character: None,
             sets,
@@ -79,15 +91,17 @@ impl CharPicker {
             }
             self.nav.computed_column_index = (self.nav.current_index.saturating_sub(self.nav.start_view_index)) % (self.nav.chars_per_width as u32);
         }
-        let new_char = if self.sets.is_empty() {
-            None
-        } else {
-            self.sets[self.nav.set_index as usize].char(self.nav.current_index)
-        };
-        let old_char = self.character;
-        self.character = new_char;
-        if (emit_event) && (old_char != self.character) {
-            self.emit_change_char_event();
+        if update_char {
+            let new_char = if self.sets.is_empty() {
+                None
+            } else {
+                self.sets[self.nav.set_index as usize].char(self.nav.current_index)
+            };
+            let old_char = self.character;
+            self.character = new_char;
+            if (emit_event) && (old_char != self.character) {
+                self.emit_change_char_event();
+            }
         }
     }
     fn goto(&mut self, ch: char, emit_event: bool, update_view: bool) {
@@ -139,15 +153,25 @@ impl CharPicker {
         surface.reset_clip();
         surface.draw_horizontal_line(1, self.expanded_panel_y + 2, size.width as i32 - 2, LineType::Single, col);
         // left button
-        let but_color = match () {
-            _ if self.nav.set_index == 0 => theme.menu.symbol.inactive,
-            _ => theme.menu.symbol.normal,
+        let but_color = if self.nav.set_index == 0 {
+            theme.menu.symbol.inactive
+        } else {
+            match self.nav.mouse_pos {
+                MousePos::HoverLeftButton => theme.menu.symbol.hovered,
+                MousePos::PressLeftButton => theme.menu.symbol.pressed_or_selectd,
+                _ => theme.menu.symbol.normal,
+            }
         };
         surface.write_string(1, self.expanded_panel_y + 1, " < ", but_color, false);
         // right button
-        let but_color = match () {
-            _ if (self.nav.set_index + 1) as usize == self.sets.len() => theme.menu.symbol.inactive,
-            _ => theme.menu.symbol.normal,
+        let but_color = if (self.nav.set_index + 1) as usize == self.sets.len() {
+            theme.menu.symbol.inactive
+        } else {
+            match self.nav.mouse_pos {
+                MousePos::HoverRightButton => theme.menu.symbol.hovered,
+                MousePos::PressRightButton => theme.menu.symbol.pressed_or_selectd,
+                _ => theme.menu.symbol.normal,
+            }
         };
         surface.write_string(size.width as i32 - 4, self.expanded_panel_y + 1, " > ", but_color, false);
         let mut y = 0;
@@ -171,6 +195,35 @@ impl CharPicker {
                 y += 1;
             }
             idx += 1;
+        }
+    }
+    fn compute_mouse_pos(&self, x: i32, y: i32) -> MousePos {
+        if !self.is_expanded() || self.sets.is_empty() {
+            MousePos::None
+        } else {
+            let size = self.expanded_size();
+            let w = size.width as i32;
+            // check buttons
+            if y == (self.expanded_panel_y + 1) {
+                if (x >= 1) && (x <= 3) {
+                    if self.nav.set_index == 0 {
+                        MousePos::None
+                    } else {
+                        MousePos::HoverLeftButton
+                    }
+                } else if (x >= w - 4) && (x <= w - 1) {
+                    if (self.nav.set_index + 1) as usize == self.sets.len() {
+                        MousePos::None
+                    } else {
+                        MousePos::HoverRightButton
+                    }
+                } else {
+                    MousePos::None
+                }
+            } else {
+                // check character
+                MousePos::None
+            }
         }
     }
 }
@@ -247,6 +300,7 @@ impl OnExpand for CharPicker {
         }
         self.nav.chars_per_width = ((self.expanded_size().width.saturating_sub(2) / 3) as i32).max(1);
         self.nav.height = self.expanded_size().height.saturating_sub(5) as i32;
+        self.nav.mouse_pos = MousePos::None;
         self.update_view(false, false);
     }
     fn on_pack(&mut self) {
@@ -254,6 +308,7 @@ impl OnExpand for CharPicker {
         self.header_y_ofs = 0;
         self.nav.chars_per_width = 1; // Up/Down will go one char
         self.nav.height = 1;
+        self.nav.mouse_pos = MousePos::None;
         self.update_view(false, false);
     }
 }
@@ -302,40 +357,48 @@ impl OnKeyPressed for CharPicker {
 impl OnMouseEvent for CharPicker {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
-            // MouseEvent::Enter => {
-            //     if !self.is_expanded() && self.color.name().len() as i32 > ((self.size().width as i32) - 8) {
-            //         self.show_tooltip(self.color.name())
-            //     }
-            //     EventProcessStatus::Processed
-            // }
+            MouseEvent::Enter => EventProcessStatus::Processed,
 
-            // MouseEvent::Leave => {
-            //     self.hide_tooltip();
-            //     EventProcessStatus::Processed
-            // }
-            // MouseEvent::Over(p) => {
-            //     let idx = self.mouse_to_color_index(p.x, p.y);
-            //     if idx != self.mouse_on_color_index {
-            //         self.mouse_on_color_index = idx;
-            //         return EventProcessStatus::Processed;
-            //     }
-            //     EventProcessStatus::Ignored
-            // }
-            // MouseEvent::Pressed(data) => {
-            //     let idx = self.mouse_to_color_index(data.x, data.y);
-            //     if let Some(col) = Color::from_value(idx) {
-            //         if col != self.color {
-            //             self.color = col;
-            //             self.raise_event(ControlEvent {
-            //                 emitter: self.handle,
-            //                 receiver: self.event_processor,
-            //                 data: ControlEventData::CharPicker(EventData { color: col }),
-            //             });
-            //         }
-            //     }
-            //     self.on_default_action();
-            //     EventProcessStatus::Processed
-            // }
+            MouseEvent::Leave => {
+                self.hide_tooltip();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(p) => {
+                let mpos = self.compute_mouse_pos(p.x, p.y);
+                if mpos != self.nav.mouse_pos {
+                    self.nav.mouse_pos = mpos;
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            MouseEvent::Pressed(data) => {
+                if data.y == self.header_y_ofs {
+                    self.on_default_action();
+                } else {
+                    let mpos = self.compute_mouse_pos(data.x, data.y);
+                    match mpos {
+                        MousePos::HoverLeftButton => self.nav.mouse_pos = MousePos::PressLeftButton,
+                        MousePos::HoverRightButton => self.nav.mouse_pos = MousePos::PressRightButton,
+                        _ => self.nav.mouse_pos = mpos,
+                    }
+                }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Released(data) => {
+                if self.is_expanded() {
+                    let mpos = self.compute_mouse_pos(data.x, data.y);
+                    match mpos {
+                        MousePos::Char(_) => todo!(),
+                        MousePos::HoverLeftButton => todo!(),
+                        MousePos::HoverRightButton => todo!(),
+                        _ => ()
+                    }
+                    self.nav.mouse_pos = mpos;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
