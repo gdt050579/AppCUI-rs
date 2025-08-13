@@ -53,26 +53,36 @@ impl CharPicker {
         self.sets.clear();
     }
     fn emit_change_char_event(&mut self) {}
-    fn update_view(&mut self) {
-        if self.sets.is_empty() {
-            return;
-        }
-        if self.nav.set_index as usize >= self.sets.len() {
-            // reset to first
-            self.nav.set_index = 0;
-            self.nav.current_index = 0;
-        }
-        let count = self.sets[self.nav.set_index as usize].count();
-        // I know a set has at least one character
-        // make sure tha current index is valid
-        self.nav.current_index = self.nav.current_index.min(count.saturating_sub(1));
-        if self.nav.current_index < self.nav.start_view_index {
-            self.nav.start_view_index = self.nav.current_index;
-        } else {
-            let displayed_chars = (self.nav.chars_per_width * self.nav.height) as u32;
-            if self.nav.current_index >= self.nav.start_view_index + displayed_chars {
-                self.nav.start_view_index = self.nav.current_index.saturating_sub(displayed_chars + 1);
+
+    fn update_view(&mut self, update_char: bool, emit_event: bool) {
+        if !self.sets.is_empty() {
+            if self.nav.set_index as usize >= self.sets.len() {
+                // reset to first
+                self.nav.set_index = 0;
+                self.nav.current_index = 0;
             }
+            let count = self.sets[self.nav.set_index as usize].count();
+            // I know a set has at least one character
+            // make sure tha current index is valid
+            self.nav.current_index = self.nav.current_index.min(count.saturating_sub(1));
+            if self.nav.current_index < self.nav.start_view_index {
+                self.nav.start_view_index = self.nav.current_index;
+            } else {
+                let displayed_chars = (self.nav.chars_per_width * self.nav.height) as u32;
+                if self.nav.current_index >= self.nav.start_view_index + displayed_chars {
+                    self.nav.start_view_index = self.nav.current_index.saturating_sub(displayed_chars - 1);
+                }
+            }
+        }
+                let new_char = if self.sets.is_empty() {
+            None
+        } else {
+            self.sets[self.nav.set_index as usize].char(self.nav.current_index)
+        };
+        let old_char = self.character;
+        self.character = new_char;
+        if (emit_event) && (old_char != self.character) {
+            self.emit_change_char_event();
         }
     }
     fn goto(&mut self, ch: char, emit_event: bool, update_view: bool) {
@@ -93,7 +103,7 @@ impl CharPicker {
                 self.emit_change_char_event();
             }
             if update_view {
-                self.update_view();
+                self.update_view(true, false);
             }
         }
     }
@@ -205,11 +215,14 @@ impl OnExpand for CharPicker {
         }
         self.nav.chars_per_width = ((self.expanded_size().width.saturating_sub(2) / 3) as i32).max(1);
         self.nav.height = self.expanded_size().height.saturating_sub(5) as i32;
-        self.update_view();
+        self.update_view(false, false);
     }
     fn on_pack(&mut self) {
         self.expanded_panel_y = 1;
         self.header_y_ofs = 0;
+        self.nav.chars_per_width = 1; // Up/Down will go one char
+        self.nav.height = 1;
+        self.update_view(false, false);
     }
 }
 impl OnKeyPressed for CharPicker {
@@ -231,22 +244,22 @@ impl OnKeyPressed for CharPicker {
             }
             key!("Up") => {
                 self.nav.current_index = self.nav.current_index.saturating_sub(self.nav.chars_per_width as u32);
-                self.update_view();
+                self.update_view(true, true);
                 return EventProcessStatus::Processed;
             }
             key!("Down") => {
                 self.nav.current_index += self.nav.chars_per_width as u32;
-                self.update_view();
+                self.update_view(true, true);
                 return EventProcessStatus::Processed;
             }
             key!("Left") => {
                 self.nav.current_index = self.nav.current_index.saturating_sub(1);
-                self.update_view();
+                self.update_view(true, true);
                 return EventProcessStatus::Processed;
             }
             key!("Right") => {
                 self.nav.current_index += 1;
-                self.update_view();
+                self.update_view(true, true);
                 return EventProcessStatus::Processed;
             }
             _ => {}
