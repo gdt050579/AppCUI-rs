@@ -181,23 +181,23 @@ impl CharPicker {
             theme.menu.text.inactive
         } else {
             match self.nav.mouse_pos {
-                MousePos::HoverLeftButton => theme.menu.symbol.hovered,
-                MousePos::PressLeftButton => theme.menu.symbol.pressed_or_selectd,
-                _ => theme.menu.symbol.normal,
+                MousePos::HoverLeftButton => theme.menu.text.hovered,
+                MousePos::PressLeftButton => theme.menu.text.pressed_or_selectd,
+                _ => theme.menu.text.normal,
             }
         };
-        surface.write_string(1, self.expanded_panel_y + 1, " < ", but_color, false);
+        surface.write_string(1, self.expanded_panel_y + 1, " \u{25C4} ", but_color, false);
         // right button
         let but_color = if (self.nav.set_index + 1) as usize == self.sets.len() {
             theme.menu.text.inactive
         } else {
             match self.nav.mouse_pos {
-                MousePos::HoverRightButton => theme.menu.symbol.hovered,
-                MousePos::PressRightButton => theme.menu.symbol.pressed_or_selectd,
-                _ => theme.menu.symbol.normal,
+                MousePos::HoverRightButton => theme.menu.text.hovered,
+                MousePos::PressRightButton => theme.menu.text.pressed_or_selectd,
+                _ => theme.menu.text.normal,
             }
         };
-        surface.write_string(size.width as i32 - 4, self.expanded_panel_y + 1, " > ", but_color, false);
+        surface.write_string(size.width as i32 - 4, self.expanded_panel_y + 1, " \u{25BA} ", but_color, false);
         let mut y = 0;
         let mut x = 0;
         let mut idx = self.nav.start_view_index;
