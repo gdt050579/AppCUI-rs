@@ -30,6 +30,8 @@ impl UnicodeInterval {
 static ANIMALS: &'static [UnicodeInterval] = &[UnicodeInterval::new(0x1F400, 0x1F43C), UnicodeInterval::new(0x1F980, 0x1F9AE)];
 static ARROWS: &'static [UnicodeInterval] = &[
     UnicodeInterval::new(0x2190, 0x21FF),
+    UnicodeInterval::new(0x2798, 0x27AF),
+    UnicodeInterval::new(0x27B1, 0x27BE),
     UnicodeInterval::new(0x27F0, 0x27FF),
     UnicodeInterval::new(0x2B00, 0x2B11),
     UnicodeInterval::new(0x2B60, 0x2BB8),
