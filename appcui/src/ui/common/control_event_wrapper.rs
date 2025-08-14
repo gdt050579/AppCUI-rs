@@ -10,12 +10,11 @@ use crate::prelude::{
 use crate::system::Handle;
 
 use crate::ui::{
-    button, button::events::ButtonEvents, checkbox, checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents,
-    datepicker::events::DatePickerEvents, dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents,
-    listview::events::GenericListViewEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents,
-    radiobox, radiobox::events::RadioBoxEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
-    markdown, markdown::events::MarkdownEvents, accordion, accordion::events::AccordionEvents,
-    tab, tab::events::TabEvents, 
+    accordion, accordion::events::AccordionEvents, button, button::events::ButtonEvents, charpicker, charpicker::events::CharPickerEvents, checkbox,
+    checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents, datepicker::events::DatePickerEvents,
+    dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents, listview::events::GenericListViewEvents, markdown,
+    markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents, radiobox,
+    radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -33,6 +32,7 @@ pub(crate) enum ControlEventData {
     ToggleButton(togglebutton::events::EventData),
     ThreeStateBox(threestatebox::events::EventData),
     ColorPicker(colorpicker::events::EventData),
+    CharPicker(charpicker::events::EventData),
     Password(password::events::EventData),
     KeySelector(keyselector::events::EventData),
     TextField(textfield::events::EventData),
@@ -84,10 +84,8 @@ impl ControlEvent {
                         } else {
                             EventProcessStatus::Ignored
                         }
-                    } 
-                    textfield::events::TextFieldEventsType::OnTextChanged => {
-                        TextFieldEvents::on_text_changed(receiver, self.emitter.cast())
                     }
+                    textfield::events::TextFieldEventsType::OnTextChanged => TextFieldEvents::on_text_changed(receiver, self.emitter.cast()),
                 }
             }
             ControlEventData::Custom(data) => CustomEvents::on_event(receiver, self.emitter.cast(), data.class_hash, data.event_id),
@@ -129,10 +127,10 @@ impl ControlEvent {
                 }
                 treeview::events::TreeViewEventTypes::ItemCollapsed(item_handle, recursive) => {
                     GenericTreeViewEvents::on_item_collapsed(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
-                },
+                }
                 treeview::events::TreeViewEventTypes::ItemExpanded(item_handle, recursive) => {
                     GenericTreeViewEvents::on_item_expanded(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
-                },
+                }
                 treeview::events::TreeViewEventTypes::ItemAction(item_handle) => {
                     GenericTreeViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, item_handle)
                 }
@@ -141,19 +139,14 @@ impl ControlEvent {
                 }
             },
             ControlEventData::Markdown(data) => match &data.event_type {
-                markdown::events::Data::BackEvent => {
-                    MarkdownEvents::on_backspace_navigation(receiver, self.emitter.cast())
-                },
-                markdown::events::Data::LinkClickEvent(link) => {
-                    MarkdownEvents::on_external_link(receiver, self.emitter.cast(), link)
-                },
+                markdown::events::Data::BackEvent => MarkdownEvents::on_backspace_navigation(receiver, self.emitter.cast()),
+                markdown::events::Data::LinkClickEvent(link) => MarkdownEvents::on_external_link(receiver, self.emitter.cast(), link),
             },
             ControlEventData::Accordion(data) => {
                 AccordionEvents::on_panel_changed(receiver, self.emitter.cast(), data.new_panel_index, data.old_panel_index)
             }
-            ControlEventData::Tab(data) => {
-                TabEvents::on_tab_changed(receiver, self.emitter.cast(), data.new_tab_index, data.old_tab_index)
-            }
+            ControlEventData::Tab(data) => TabEvents::on_tab_changed(receiver, self.emitter.cast(), data.new_tab_index, data.old_tab_index),
+            ControlEventData::CharPicker(data) => CharPickerEvents::on_char_changed(receiver, self.emitter.cast(), data.code),
         }
     }
 }

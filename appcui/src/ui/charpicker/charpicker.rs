@@ -66,7 +66,15 @@ impl CharPicker {
     pub fn clear_sets(&mut self) {
         self.sets.clear();
     }
-    fn emit_change_char_event(&mut self) {}
+    fn emit_change_char_event(&mut self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::CharPicker(EventData {
+                code: self.character.unwrap_or(0 as char),
+            }),
+        });
+    }
 
     fn update_view(&mut self, update_char: bool, emit_event: bool) {
         if !self.sets.is_empty() {
@@ -110,7 +118,7 @@ impl CharPicker {
             return;
         }
         let ofs = (self.nav.chars_per_width * dir.abs()) as u32;
-        self.nav.start_view_index = if dir<0 {
+        self.nav.start_view_index = if dir < 0 {
             self.nav.start_view_index.saturating_sub(ofs)
         } else {
             self.nav.start_view_index + ofs

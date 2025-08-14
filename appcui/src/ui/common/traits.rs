@@ -7,6 +7,7 @@ use crate::{
         button::events::ButtonEvents,
         checkbox::events::CheckBoxEvents,
         colorpicker::events::ColorPickerEvents,
+        charpicker::events::CharPickerEvents,
         combobox::events::ComboBoxEvents,
         command_bar::events::GenericCommandBarEvents,
         datepicker::events::DatePickerEvents,
@@ -170,6 +171,7 @@ pub trait Control:
     + GenericBackgroundTaskEvents
     + AccordionEvents
     + TabEvents
+    + CharPickerEvents
 {
 }
 
