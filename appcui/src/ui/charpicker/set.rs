@@ -10,6 +10,7 @@ pub enum UnicodeSymbols {
     Currency,
     Emoticons,
     Shapes,
+    Punctuation
 }
 
 struct UnicodeInterval {
@@ -35,7 +36,12 @@ static ARROWS: &'static [UnicodeInterval] = &[
     UnicodeInterval::new(0x1F800, 0x1F8B1),
 ];
 static SHAPES: &'static [UnicodeInterval] = &[UnicodeInterval::new(0x25A0, 0x25FF), UnicodeInterval::new(0x1F780, 0x1F7FF)];
-
+static PUNCTUATION: &'static [UnicodeInterval] = &[
+    UnicodeInterval::new(0x2010, 0x2027),
+    UnicodeInterval::new(0x2030, 0x205E),
+    UnicodeInterval::new(0x2E00, 0x2E52),
+    UnicodeInterval::new(0x3001, 0x3020),
+];
 enum SetData {
     Interval(u32),
     List(Vec<char>),
@@ -49,7 +55,7 @@ pub struct Set {
 impl Set {
     pub fn from_unicode_symbols(name: &str, symbols: UnicodeSymbols) -> Self {
         match symbols {
-            UnicodeSymbols::Ascii => Self::with_interval(name, 32, 127).unwrap(),
+            UnicodeSymbols::Ascii => Self::with_interval(name, 32, 126).unwrap(),
             UnicodeSymbols::Braille => Self::with_interval(name, 0x2800, 0x28FF).unwrap(),
             UnicodeSymbols::Blocks => Self::with_interval(name, 0x2580, 0x259F).unwrap(),
             UnicodeSymbols::BoxDrawing => Self::with_interval(name, 0x2500, 0x257F).unwrap(),
@@ -58,6 +64,7 @@ impl Set {
             UnicodeSymbols::Animals => Self::with_multi_intervale(name, ANIMALS),
             UnicodeSymbols::Arrows => Self::with_multi_intervale(name, ARROWS),
             UnicodeSymbols::Shapes => Self::with_multi_intervale(name, SHAPES),
+            UnicodeSymbols::Punctuation => Self::with_multi_intervale(name, PUNCTUATION),
         }
     }
     fn with_multi_intervale(name: &str, mi: &'static [UnicodeInterval]) -> Self {
