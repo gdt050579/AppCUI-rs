@@ -2308,3 +2308,10 @@ pub fn textarea(input: TokenStream) -> TokenStream {
 pub fn layout(input: TokenStream) -> TokenStream {
     crate::controls::layout::create(input)
 }
+
+
+
+#[proc_macro]
+pub fn charpicker(input: TokenStream) -> TokenStream {
+    crate::controls::charpicker::create(input)
+}

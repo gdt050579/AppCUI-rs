@@ -68,6 +68,12 @@ impl CharPicker {
     pub fn clear_sets(&mut self) {
         self.sets.clear();
     }
+    pub fn select_char(&mut self, character: char) {
+        self.goto(character, false, true);
+    }
+    pub fn clean_char(&mut self) {
+        self.character = None;
+    }
     fn emit_change_char_event(&mut self) {
         self.raise_event(ControlEvent {
             emitter: self.handle,
