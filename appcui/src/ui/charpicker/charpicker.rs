@@ -382,7 +382,7 @@ impl OnExpand for CharPicker {
     }
 }
 impl OnKeyPressed for CharPicker {
-    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         let expanded = self.is_expanded();
 
         match key.value() {
@@ -456,7 +456,22 @@ impl OnKeyPressed for CharPicker {
                 self.move_scroll_view_by(1);
                 return EventProcessStatus::Processed;
             }
+            key!("Ctrl+V") | key!("Shift+Insert") => {
+                if let Some(txt) = RuntimeManager::get().backend().clipboard_text() {
+                    if txt.len() > 0 {
+                        let ch = txt.chars().next();
+                        if let Some(ch) = ch {
+                            self.goto(ch, true, true);
+                        }
+                    }
+                }
+                return EventProcessStatus::Processed;
+            }
             _ => {}
+        }
+        if character >= 0 as char {
+            self.goto(character, true, true);
+            return EventProcessStatus::Processed;
         }
         EventProcessStatus::Ignored
     }
