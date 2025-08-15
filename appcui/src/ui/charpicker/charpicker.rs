@@ -10,6 +10,8 @@ enum MousePos {
     PressLeftButton,
     HoverRightButton,
     PressRightButton,
+    HoverNone,
+    PressNone,
 }
 
 struct Navigation {
@@ -165,6 +167,12 @@ impl CharPicker {
             LineType::Single,
             col,
         );
+        let none_attr = match self.nav.mouse_pos {
+            MousePos::HoverNone => theme.menu.text.hovered,
+            MousePos::PressNone => theme.menu.text.pressed_or_selectd,
+            _ => theme.menu.text.normal,
+        };
+        surface.write_string(2, size.height as i32 - 1, "[None]", none_attr, false);
         // draw Set Name
         let format = TextFormatBuilder::new()
             .align(TextAlignment::Center)
@@ -251,6 +259,8 @@ impl CharPicker {
                 } else {
                     MousePos::None
                 }
+            } else if (y == size.height as i32 - 1) && (x >= 2) && (x <= 7) {
+                MousePos::HoverNone
             } else {
                 // check character
                 let ofs_y = 3 + self.expanded_panel_y;
@@ -476,6 +486,7 @@ impl OnMouseEvent for CharPicker {
                     match mpos {
                         MousePos::HoverLeftButton => self.nav.mouse_pos = MousePos::PressLeftButton,
                         MousePos::HoverRightButton => self.nav.mouse_pos = MousePos::PressRightButton,
+                        MousePos::HoverNone => self.nav.mouse_pos = MousePos::PressNone,
                         _ => self.nav.mouse_pos = mpos,
                     }
                 }
@@ -491,6 +502,12 @@ impl OnMouseEvent for CharPicker {
                         }
                         MousePos::HoverLeftButton => self.goto_set(self.nav.set_index.saturating_sub(1)),
                         MousePos::HoverRightButton => self.goto_set(self.nav.set_index + 1),
+                        MousePos::HoverNone => {
+                            if self.character.is_some() {
+                                self.character = None;
+                                self.emit_change_char_event();
+                            }
+                        }
                         _ => (),
                     }
                     self.nav.mouse_pos = mpos;
