@@ -56,6 +56,38 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     if !s.is_empty() {
         cb.add(&s);
     }
+    // code part
+    let s = if cb.has_parameter("code") {
+        if let Some(code_id) = cb.get_i32("code") {
+            if code_id > 0 {
+                format!("if let Some(ch) = char::from_u32({}) {{ control.select_char(ch); }}", code_id)
+            } else {
+                panic!("Character code should be a positive, non-null number (used value was : '{}')", code_id);
+            }
+        } else {
+            panic!("You need to provide a numerical (positive, non-null) value for the `code` parameter !");
+        }
+    } else {
+        String::new()
+    };
+    if !s.is_empty() {
+        cb.add(&s);
+    }
+    // char
+    // code part
+    let s = if let Some(val) = cb.get_value("char") {
+        if !val.is_empty() {
+            let ch = val.chars().next().unwrap() as u32;
+            format!("control.select_char(char::from_u32({ch}).unwrap());")
+        } else {
+            panic!("You need to provide a character for the `char` parameter !")
+        }
+    } else {
+        String::new()
+    };
+    if !s.is_empty() {
+        cb.add(&s);
+    }    
     cb.add_basecontrol_operations();
     cb.into()
 }
