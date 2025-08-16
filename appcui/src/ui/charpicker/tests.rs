@@ -506,3 +506,73 @@ fn check_change_sets_via_mouse_expand_from_bottom() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_change_schar_via_mouse_expand_from_top() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x6EB73C011EEF023B)  
+        Mouse.Click(20,2,left)
+        Paint('2. charpicker expanded')   
+        CheckHash(0x307446D3D5EE2D90)  
+        Mouse.Move(19,6)
+        Paint('3. Hover over <0> character')   
+        CheckHash(0xE453CDBC3532E1D8)  
+        Mouse.Move(34,9)
+        Paint('4. Hover over <K> character')   
+        CheckHash(0x7383BB5C2BD82298)  
+        Mouse.Click(22,9, left)
+        Paint('5. Selected character is <G>')   
+        CheckHash(0xFB343E815CAEB445)  
+        Mouse.Move(37,7)
+        Paint('6. Outside hover aria (nothing happens)')   
+        CheckHash(0xFB343E815CAEB445)  
+        Mouse.Click(37,7, left)
+        Paint('7. Outside clickable aria (nothing happens)')   
+        CheckHash(0xFB343E815CAEB445)  
+        Mouse.Click(20,13, left)
+        Paint('8. Control is packed')   
+        CheckHash(0xFED46F2CC0D70D8E)  
+    ";
+    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut w = window!("Title,d:f");
+    w.add(charpicker!("l:1,t:1,r:1,sets: [Ascii, Braille, Animals]"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_change_schar_via_mouse_expand_from_bottom() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xC5A937A08B015E6B)  
+        Mouse.Click(20,12,left)
+        Paint('2. charpicker expanded')   
+        CheckHash(0xB3EC99E73DE7F1E8)  
+        Mouse.Move(19,8)
+        Paint('3. Hover over <0> character')   
+        CheckHash(0x355DBDFFE2CEC90)  
+        Mouse.Move(34,10)
+        Paint('4. Hover over <K> character')   
+        CheckHash(0xD477F9A6494E6270)  
+        Mouse.Click(22,10, left)
+        Paint('5. Selected character is <G>')   
+        CheckHash(0x7EB8EFDCB5779799)  
+        Mouse.Move(37,7)
+        Paint('6. Outside hover aria (nothing happens)')   
+        CheckHash(0x7EB8EFDCB5779799)  
+        Mouse.Click(37,7, left)
+        Paint('7. Outside clickable aria (nothing happens)')   
+        CheckHash(0x7EB8EFDCB5779799)  
+        Mouse.Click(20,13, left)
+        Paint('8. Control is packed')   
+        CheckHash(0x821FF576DEC8014E)  
+    ";
+    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut w = window!("Title,d:f");
+    w.add(charpicker!("l:1,b:1,r:1,sets: [Ascii, Braille, Animals]"));
+    a.add_window(w);
+    a.run();
+}
