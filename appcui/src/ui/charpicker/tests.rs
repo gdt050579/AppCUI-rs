@@ -620,3 +620,53 @@ fn check_mouse_wheel() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_events() {
+    #[Window(events = CharPicker, internal: true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: window!("Test,a:c,w:40,h:8")
+            };
+            let mut cp = charpicker!("A,l:1,t:2,r:1,sets:[Ascii]");
+            cp.unselect_char();
+            me.add(cp);
+            me
+        }
+    }
+    impl CharPickerEvents for MyWin {
+        fn on_char_changed(&mut self, _handle: Handle<CharPicker>, code: Option<char>) -> EventProcessStatus {
+            if let Some(c) = code {
+                self.set_title(format!("C:{c}").as_str());
+            } else {
+                self.set_title("None");
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (None)')   
+        CheckHash(0xD12EA7ABD24E212E)
+        Key.TypeText('A')
+        Paint('2. Selected: A')   
+        CheckHash(0x8AE217BDA720929A)
+        Key.TypeText('Z')
+        Paint('3. Selected: Z')   
+        CheckHash(0xEE6386FD8EC8744B)
+        Key.Pressed(Up)
+        Paint('4. Selected: Y')   
+        CheckHash(0xC99CF510730FE40F)
+        Key.Pressed(Space)
+        Paint('5. Expanded')   
+        CheckHash(0xDFF8616E796F01CB)
+        Mouse.Click(5,12,left)
+        Paint('6. None selected')   
+        CheckHash(0x9D8C57ECE48160A)
+    ";
+    let mut a = App::debug(40, 15, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();    
+}

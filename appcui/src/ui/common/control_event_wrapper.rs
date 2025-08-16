@@ -146,7 +146,9 @@ impl ControlEvent {
                 AccordionEvents::on_panel_changed(receiver, self.emitter.cast(), data.new_panel_index, data.old_panel_index)
             }
             ControlEventData::Tab(data) => TabEvents::on_tab_changed(receiver, self.emitter.cast(), data.new_tab_index, data.old_tab_index),
-            ControlEventData::CharPicker(data) => CharPickerEvents::on_char_changed(receiver, self.emitter.cast(), data.code),
+            ControlEventData::CharPicker(data) => {
+                CharPickerEvents::on_char_changed(receiver, self.emitter.cast(), if data.code as u32 > 0 { Some(data.code) } else { None })
+            }
         }
     }
 }
