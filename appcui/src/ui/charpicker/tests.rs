@@ -508,7 +508,7 @@ fn check_change_sets_via_mouse_expand_from_bottom() {
 }
 
 #[test]
-fn check_change_schar_via_mouse_expand_from_top() {
+fn check_change_char_via_mouse_expand_from_top() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')   
@@ -543,7 +543,7 @@ fn check_change_schar_via_mouse_expand_from_top() {
 }
 
 #[test]
-fn check_change_schar_via_mouse_expand_from_bottom() {
+fn check_change_char_via_mouse_expand_from_bottom() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')   
@@ -573,6 +573,50 @@ fn check_change_schar_via_mouse_expand_from_bottom() {
     let mut a = App::debug(40, 15, script).build().unwrap();
     let mut w = window!("Title,d:f");
     w.add(charpicker!("l:1,b:1,r:1,sets: [Ascii, Braille, Animals]"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_wheel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x6EB73C011EEF023B)  
+        Mouse.Click(20,2,left)
+        Paint('2. charpicker expanded')   
+        CheckHash(0x307446D3D5EE2D90)  
+        Mouse.Wheel(20,4,down,1)
+        Paint('3. Move scroll down (1 pos)')   
+        CheckHash(0x5A96E990FE8FB9B8)  
+        Mouse.Wheel(20,4,down,1)
+        Paint('4. Move scroll down (1 pos)')   
+        CheckHash(0xEDA8EC9863AF449C)  
+        Mouse.Wheel(20,4,up,2)
+        Paint('5. Move scroll up (2 pos)')   
+        CheckHash(0x307446D3D5EE2D90)   
+        Mouse.Wheel(20,4,right,1)
+        Paint('6. New set: Braille')   
+        CheckHash(0xFA1089E0C91CE8D3)         
+        Mouse.Wheel(20,4,right,1)
+        Paint('7. New set: Animals')   
+        CheckHash(0x3A6BCF382C82CF17)         
+        Mouse.Wheel(20,4,right,1)
+        Paint('8. Nothing changes (same set - Animals)')   
+        CheckHash(0x3A6BCF382C82CF17)         
+        Mouse.Wheel(20,4,left,1)
+        Paint('9. New set: Braille')   
+        CheckHash(0xFA1089E0C91CE8D3)         
+        Mouse.Wheel(20,4,left,1)
+        Paint('10. New set: Ascii')   
+        CheckHash(0x102BF166271EC867)         
+        Mouse.Wheel(20,4,left,1)
+        Paint('11. Nothing changes - set remains Ascii')   
+        CheckHash(0x102BF166271EC867)         
+    ";
+    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut w = window!("Title,d:f");
+    w.add(charpicker!("l:1,t:1,r:1,sets: [Ascii, Braille, Animals]"));
     a.add_window(w);
     a.run();
 }
