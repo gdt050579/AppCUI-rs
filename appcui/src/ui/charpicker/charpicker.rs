@@ -47,7 +47,7 @@ impl CharPicker {
     /// ```rust, no_run 
     /// use appcui::prelude::*;
     /// let mut cp = CharPicker::new(None, layout!("x:1,y:1,w:30"));
-    /// cp.add_set(Set::with_interval("Unicode", 1, 0xE01EF).unwrap());
+    /// cp.add_set(charpicker::Set::with_interval("Unicode", 1, 0xE01EF).unwrap());
     /// ```
     pub fn new(initial_char: Option<char>, layout: Layout) -> Self {
         Self::inner_new(initial_char, layout, vec![Set::with_interval("Unicode", 1, 0xE01EF).unwrap()])
@@ -68,8 +68,8 @@ impl CharPicker {
     /// use appcui::prelude::*;
     /// let mut cp = CharPicker::with_set(
     ///     Some('A'), 
-    ///     LayoutBuilder::new().x(1).y(1).w(30).build(), 
-    ///     Set::with_interval("ASCII", 0, 0x7F).unwrap()
+    ///     LayoutBuilder::new().x(1).y(1).width(30).build(), 
+    ///     charpicker::Set::with_interval("ASCII", 0, 0x7F).unwrap()
     /// );
     /// ```
     pub fn with_set(initial_char: Option<char>, layout: Layout, set: Set) -> Self {
