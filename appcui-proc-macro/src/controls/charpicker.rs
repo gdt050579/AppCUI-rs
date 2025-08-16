@@ -27,6 +27,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("charpicker", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
     cb.init_control("CharPicker::new");
+    cb.add("None");
     cb.add_layout();
     cb.finish_control_initialization();
     let s = if cb.has_parameter("sets") {
@@ -54,6 +55,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         String::new()
     };
     if !s.is_empty() {
+        cb.add("control.clear_sets();");
         cb.add(&s);
     }
     // code part

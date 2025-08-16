@@ -33,8 +33,8 @@ pub struct CharPicker {
     sets: Vec<Set>,
 }
 impl CharPicker {
-    pub fn new(layout: Layout) -> Self {
-        Self::inner_new(None, layout, Vec::new())
+    pub fn new(initial_char: Option<char>, layout: Layout) -> Self {
+        Self::inner_new(initial_char, layout, vec![Set::with_interval("Unicode", 1, 0xE01EF).unwrap()])
     }
     pub fn with_set(initial_char: Option<char>, layout: Layout, set: Set) -> Self {
         Self::inner_new(initial_char, layout, vec![set])
@@ -71,7 +71,7 @@ impl CharPicker {
     pub fn select_char(&mut self, character: char) {
         self.goto(character, false, true);
     }
-    pub fn clean_char(&mut self) {
+    pub fn unselect_char(&mut self) {
         self.character = None;
     }
     fn emit_change_char_event(&mut self) {
