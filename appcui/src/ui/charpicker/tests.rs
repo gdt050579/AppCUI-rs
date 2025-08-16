@@ -1,3 +1,5 @@
+use std::u32;
+
 use crate::prelude::*;
 
 #[test]
@@ -669,4 +671,39 @@ fn check_events() {
     let mut a = App::debug(40, 15, script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();    
+}
+
+#[test]
+fn check_no_set() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (char should be None)')   
+        CheckHash(0x6EB73C011EEF023B)  
+        Key.Pressed(Space)        
+        Paint('2. No painting')   
+        CheckHash(0x6EB73C011EEF023B) 
+        Key.TypeText('abcdefg0123456')
+        Key.Pressed(Up)
+        Key.Pressed(Down)
+        Key.Pressed(Alt+Up)
+        Key.Pressed(Ctrl+Down,10)
+        Key.Pressed(Alt+Left,2)
+        Key.Pressed(Alt+Right,10)
+        Paint('3. Nothing changes')   
+        CheckHash(0x6EB73C011EEF023B) 
+    ";
+    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut w = window!("Title,d:f");
+    let mut c = CharPicker::new(Some('A'), layout!("l:1,t:1,r:1"));
+    c.clear_sets();
+    w.add(c);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_set_ctor() {
+    assert!(charpicker::Set::new("Test", "").is_none());
+    assert!(charpicker::Set::with_interval("Test", u32::MAX, u32::MAX).is_none());
+
 }

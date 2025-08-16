@@ -33,9 +33,45 @@ pub struct CharPicker {
     sets: Vec<Set>,
 }
 impl CharPicker {
+    /// Create a new CharPicker with all of the unicode characters
+    ///
+    /// # Arguments
+    ///
+    /// * `initial_char` - The initial character to select
+    /// * `layout` - The layout of the control
+    ///
+    /// # Returns
+    /// * `CharPicker` - A new CharPicker control
+    /// 
+    /// # Example
+    /// ```rust, no_run 
+    /// use appcui::prelude::*;
+    /// let mut cp = CharPicker::new(None, layout!("x:1,y:1,w:30"));
+    /// cp.add_set(Set::with_interval("Unicode", 1, 0xE01EF).unwrap());
+    /// ```
     pub fn new(initial_char: Option<char>, layout: Layout) -> Self {
         Self::inner_new(initial_char, layout, vec![Set::with_interval("Unicode", 1, 0xE01EF).unwrap()])
     }
+    /// Create a new CharPicker with a single set of characters
+    ///
+    /// # Arguments
+    ///
+    /// * `initial_char` - The initial character to select
+    /// * `layout` - The layout of the control
+    /// * `set` - The set of characters to display
+    ///
+    /// # Returns
+    /// * `CharPicker` - A new CharPicker control
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// let mut cp = CharPicker::with_set(
+    ///     Some('A'), 
+    ///     LayoutBuilder::new().x(1).y(1).w(30).build(), 
+    ///     Set::with_interval("ASCII", 0, 0x7F).unwrap()
+    /// );
+    /// ```
     pub fn with_set(initial_char: Option<char>, layout: Layout, set: Set) -> Self {
         Self::inner_new(initial_char, layout, vec![set])
     }
@@ -62,15 +98,27 @@ impl CharPicker {
         cp.set_size_bounds(11, 1, u16::MAX, 1);
         cp
     }
+    /// Add a new set of characters to the CharPicker
     pub fn add_set(&mut self, set: Set) {
         self.sets.push(set);
     }
+
+    /// Clear all sets from the CharPicker
     pub fn clear_sets(&mut self) {
         self.sets.clear();
+        self.character = None;
     }
+    /// Select a character in the CharPicker
+    ///
+    /// # Arguments
+    ///
+    /// * `character` - The character to select
+    /// The character has to be present in one of the sets that were added to the CharPicker
     pub fn select_char(&mut self, character: char) {
         self.goto(character, false, true);
     }
+
+    /// Unselects the current character (sets it to None)
     pub fn unselect_char(&mut self) {
         self.character = None;
     }
