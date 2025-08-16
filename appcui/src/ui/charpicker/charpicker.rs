@@ -473,6 +473,13 @@ impl OnKeyPressed for CharPicker {
                 }
                 return EventProcessStatus::Processed;
             }
+            key!("Ctrl+C") | key!("Ctrl+Insert") => {
+                if let Some(ch) = self.character {
+                    let mut buf: [u8;16] = [0;16];                    
+                    RuntimeManager::get().backend_mut().set_clipboard_text(ch.encode_utf8(&mut buf));
+                }
+                return EventProcessStatus::Processed;
+            }            
             _ => {}
         }
         if character >= 31 as char {

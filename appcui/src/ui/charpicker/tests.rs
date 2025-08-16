@@ -291,3 +291,51 @@ fn check_navigation_change_sets() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_navigation_paste() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xECFFDFB22EF3A9AF)  
+        Key.Pressed(Space)
+        Paint('2. Expanded down (current set: Ascii)')   
+        CheckHash(0xD721C8C4FDA0F9F5)  
+        Key.Pressed(Ctrl+V)
+        Paint('3. Rmains the same (nothing to paste)')   
+        CheckHash(0xD721C8C4FDA0F9F5)  
+        Clipboard.SetText('z')
+        Key.Pressed(Ctrl+V)
+        Paint('4. Seleced character is <z>')   
+        CheckHash(0x2696253A2ED859F5)  
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Title,a:c,w:40,h:8");
+    w.add(charpicker!("x:1,y:1,w:15,sets:[Ascii,Braille,Animals],char:A"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_navigation_copy() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xECFFDFB22EF3A9AF)  
+        Key.Pressed(Space)
+        Paint('2. Expanded down (current set: Ascii)')   
+        CheckHash(0xD721C8C4FDA0F9F5)  
+        Key.Pressed(Right,6)
+        Paint('3. Current char is <G>')   
+        CheckHash(0xB319CD11C2DD3B65)  
+        Key.Pressed(Ctrl+C)
+        Paint('4. Character copied')   
+        CheckHash(0xB319CD11C2DD3B65) 
+        CheckClipboardText('G') 
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Title,a:c,w:40,h:8");
+    w.add(charpicker!("x:1,y:1,w:15,sets:[Ascii,Braille,Animals],char:A"));
+    a.add_window(w);
+    a.run();
+}
