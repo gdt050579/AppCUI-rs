@@ -270,7 +270,7 @@ impl CharPicker {
             } else {
                 // check character
                 let ofs_y = 3 + self.expanded_panel_y;
-                if y >= ofs_y && (x > 0) && (x < w - 1) {
+                if (y >= ofs_y) && (y < size.height as i32 - 2 + self.expanded_panel_y) && (x > 0) && (x < w - 1) {
                     let px = (x - 1) / 3;
                     if px >= self.nav.chars_per_width {
                         MousePos::None

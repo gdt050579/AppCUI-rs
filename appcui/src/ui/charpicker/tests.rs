@@ -339,3 +339,170 @@ fn check_navigation_copy() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_expand_up_and_down_via_mouse() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (focus on second control)')   
+        CheckHash(0x79B93797825FB3D4)  
+        Mouse.Move(20,2)
+        Paint('2. Mouse over first charpicker')   
+        CheckHash(0x963675ABFFBF05E2)  
+        Mouse.Click(20,2,left)
+        Paint('3. first charpicker expanded')   
+        CheckHash(0xD9C071575AE05055)  
+        Mouse.Click(20,2,left)
+        Paint('4. first charpicker packed')   
+        CheckHash(0x1D6ABC5029E07D2C)  
+        Mouse.Click(20,12,left)
+        Paint('5. second charpicker expanded')   
+        CheckHash(0x198BBD28407011)  
+        Mouse.Click(20,12,left)
+        Paint('6. second charpicker packed')   
+        CheckHash(0x79B93797825FB3D4)  
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Title,d:f");
+    w.add(charpicker!("l:1,t:1,r:1,char: 0"));
+    w.add(charpicker!("l:1,b:1,r:1,code: 41"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_set_none_via_mouse() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (focus on second control)')   
+        CheckHash(0x79B93797825FB3D4)  
+        Mouse.Move(20,2)
+        Paint('2. Mouse over first charpicker')   
+        CheckHash(0x963675ABFFBF05E2)  
+        Mouse.Click(20,2,left)
+        Paint('3. first charpicker expanded')   
+        CheckHash(0xD9C071575AE05055)  
+        Mouse.Move(9,10)
+        Paint('4. Hover over None button')   
+        CheckHash(0xD91B40CA0DA7BE45)  
+        Mouse.Hold(9,10,left)
+        Paint('5. Hold None button')   
+        CheckHash(0x29FAE6267EDC3EB5)  
+        Mouse.Release(9,10,left)
+        Paint('6. Release None button (value is now None)')   
+        CheckHash(0x6150CBB6A8E0502B)  
+        Mouse.Click(20,12,left)
+        Paint('7. second charpicker expanded')   
+        CheckHash(0xAF1B7D96348EA8F)  
+        Mouse.Move(7,11)
+        Paint('8. Hover over None button')   
+        CheckHash(0x9EAD7A9A239468FF)  
+        Mouse.Hold(7,11,left)
+        Paint('9. Hold None button')   
+        CheckHash(0x7EE17BFAC03F3997)  
+        Mouse.Release(7,11,left)
+        Paint('10. Release None button (value is now None)')   
+        CheckHash(0xA50962AF232EA30C)  
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Title,d:f");
+    w.add(charpicker!("l:1,t:1,r:1,char: 0"));
+    w.add(charpicker!("l:1,b:1,r:1,code: 41"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_change_sets_via_mouse_expand_from_top() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x6EB73C011EEF023B)  
+        Mouse.Click(20,2,left)
+        Paint('2. charpicker expanded')   
+        CheckHash(0x307446D3D5EE2D90)  
+        Mouse.Move(35,4)
+        Paint('3. Hover over > button')   
+        CheckHash(0x469C0437F562EAF8)  
+        Mouse.Hold(35,4,left)
+        Paint('4. Hold > button')   
+        CheckHash(0x1D5C8180237593B4)  
+        Mouse.Release(35,4,left)
+        Paint('5. Release > button (set is now Braille)')   
+        CheckHash(0x971965F815ED1D8B)  
+        Mouse.Click(35,4,left)
+        Paint('6. Set is now Animals')   
+        CheckHash(0x3A6BCF382C82CF17)  
+        Mouse.Click(35,4,left)
+        Paint('7. Nothing changes ( > button is inactive)')   
+        CheckHash(0x3A6BCF382C82CF17)  
+        Mouse.Move(4,4)
+        Paint('8. Hover over < button')   
+        CheckHash(0xD9346209BB83504F)  
+        Mouse.Hold(4,4,left)
+        Paint('9. Hold < button')   
+        CheckHash(0xE4D71946AF7731F3)  
+        Mouse.Release(4,4,left)
+        Paint('10. Release < button (set is now Braille)')   
+        CheckHash(0x271C2CA2EE660F4B)  
+        Mouse.Click(4,4,left)
+        Paint('11. Set is now Ascii')   
+        CheckHash(0x102BF166271EC867)  
+        Mouse.Click(4,4,left)
+        Paint('12. Nothing changes ( < button is inactive)')   
+        CheckHash(0x102BF166271EC867)  
+    ";
+    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut w = window!("Title,d:f");
+    w.add(charpicker!("l:1,t:1,r:1,sets: [Ascii, Braille, Animals]"));
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_change_sets_via_mouse_expand_from_bottom() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xC5A937A08B015E6B)  
+        Mouse.Click(20,12,left)
+        Paint('2. charpicker expanded')   
+        CheckHash(0xB3EC99E73DE7F1E8)  
+        Mouse.Move(35,5)
+        Paint('3. Hover over > button')   
+        CheckHash(0x6045B0AF7A710530)  
+        Mouse.Hold(35,5,left)
+        Paint('4. Hold > button')   
+        CheckHash(0x8E773710AC00CB98)  
+        Mouse.Release(35,5,left)
+        Paint('5. Release > button (set is now Braille)')   
+        CheckHash(0xE095C96310B964FF)  
+        Mouse.Click(35,5,left)
+        Paint('6. Set is now Animals')   
+        CheckHash(0x85E3C7186812D7E3)  
+        Mouse.Click(35,5,left)
+        Paint('7. Nothing changes ( > button is inactive)')   
+        CheckHash(0x85E3C7186812D7E3)  
+        Mouse.Move(4,5)
+        Paint('8. Hover over < button')   
+        CheckHash(0x77B705DDE9FDD07B)  
+        Mouse.Hold(4,5,left)
+        Paint('9. Hold < button')   
+        CheckHash(0x511E92286B205C27)  
+        Mouse.Release(4,5,left)
+        Paint('10. Release < button (set is now Braille)')   
+        CheckHash(0xE4686A1E30ABCC6F)  
+        Mouse.Click(4,5,left)
+        Paint('11. Set is now Ascii')   
+        CheckHash(0x2D206D16A0C0EF13)  
+        Mouse.Click(4,5,left)
+        Paint('12. Nothing changes ( < button is inactive)')   
+        CheckHash(0x2D206D16A0C0EF13)  
+    ";
+    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut w = window!("Title,d:f");
+    w.add(charpicker!("l:1,b:1,r:1,sets: [Ascii, Braille, Animals]"));
+    a.add_window(w);
+    a.run();
+}
