@@ -113,6 +113,7 @@ impl CharPicker {
     /// # Arguments
     ///
     /// * `character` - The character to select
+    /// 
     /// The character has to be present in one of the sets that were added to the CharPicker
     pub fn select_char(&mut self, character: char) {
         self.goto(character, false, true);
@@ -298,13 +299,13 @@ impl CharPicker {
             let w = size.width as i32;
             // check buttons
             if y == (self.expanded_panel_y + 1) {
-                if (x >= 1) && (x <= 3) {
+                if (1..=3).contains(&x) {
                     if self.nav.set_index == 0 {
                         MousePos::None
                     } else {
                         MousePos::HoverLeftButton
                     }
-                } else if (x >= w - 4) && (x <= w - 1) {
+                } else if (x >= w - 4) && (x < w) {
                     if (self.nav.set_index + 1) as usize == self.sets.len() {
                         MousePos::None
                     } else {
@@ -313,7 +314,7 @@ impl CharPicker {
                 } else {
                     MousePos::None
                 }
-            } else if (y == size.height as i32 - 2 + self.expanded_panel_y) && (x >= 2) && (x <= 7) {
+            } else if (y == size.height as i32 - 2 + self.expanded_panel_y) && (2..=7).contains(&x) {
                 MousePos::HoverNone
             } else {
                 // check character
@@ -376,8 +377,8 @@ impl OnPaint for CharPicker {
                 } else {
                     arr[pos] = 55 + r;
                 }
-                pos = pos - 1;
-                code = code >> 4;
+                pos -= 1;
+                code >>= 4;
             }
             // paint code
             if size.width > 12 {
@@ -490,7 +491,7 @@ impl OnKeyPressed for CharPicker {
             }
             key!("PageDown") => {
                 let dif = (self.nav.chars_per_width * (self.expanded_size().height.saturating_sub(5) as i32)) as u32;
-                self.nav.current_index = self.nav.current_index + dif;
+                self.nav.current_index += dif;
                 self.update_view(true, true);
                 return EventProcessStatus::Processed;
             }
@@ -512,7 +513,7 @@ impl OnKeyPressed for CharPicker {
             }
             key!("Ctrl+V") | key!("Shift+Insert") => {
                 if let Some(txt) = RuntimeManager::get().backend().clipboard_text() {
-                    if txt.len() > 0 {
+                    if !txt.is_empty() {
                         let ch = txt.chars().next();
                         if let Some(ch) = ch {
                             self.goto(ch, true, true);

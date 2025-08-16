@@ -62,9 +62,9 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     let s = if cb.has_parameter("code") {
         if let Some(code_id) = cb.get_i32("code") {
             if code_id > 0 {
-                format!("if let Some(ch) = char::from_u32({}) {{ control.select_char(ch); }}", code_id)
+                format!("if let Some(ch) = char::from_u32({code_id}) {{ control.select_char(ch); }}")
             } else {
-                panic!("Character code should be a positive, non-null number (used value was : '{}')", code_id);
+                panic!("Character code should be a positive, non-null number (used value was : '{code_id}')");
             }
         } else {
             panic!("You need to provide a numerical (positive, non-null) value for the `code` parameter !");

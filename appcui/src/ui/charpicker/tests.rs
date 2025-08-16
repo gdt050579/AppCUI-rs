@@ -1,5 +1,3 @@
-use std::u32;
-
 use crate::prelude::*;
 
 #[test]
@@ -703,7 +701,7 @@ fn check_no_set() {
 
 #[test]
 fn check_set_ctor() {
-    assert!(charpicker::Set::new("Test", "").is_none());
+    assert!(charpicker::Set::new("Test", "").is_none()); 
     assert!(charpicker::Set::with_interval("Test", u32::MAX, u32::MAX).is_none());
 
 }

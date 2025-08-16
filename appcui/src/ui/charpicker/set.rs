@@ -28,8 +28,8 @@ impl UnicodeInterval {
     }
 }
 
-static ANIMALS: &'static [UnicodeInterval] = &[UnicodeInterval::new(0x1F400, 0x1F43C), UnicodeInterval::new(0x1F980, 0x1F9AE)];
-static ARROWS: &'static [UnicodeInterval] = &[
+static ANIMALS: &[UnicodeInterval] = &[UnicodeInterval::new(0x1F400, 0x1F43C), UnicodeInterval::new(0x1F980, 0x1F9AE)];
+static ARROWS: &[UnicodeInterval] = &[
     UnicodeInterval::new(0x2190, 0x21FF),
     UnicodeInterval::new(0x2798, 0x27AF),
     UnicodeInterval::new(0x27B1, 0x27BE),
@@ -38,14 +38,14 @@ static ARROWS: &'static [UnicodeInterval] = &[
     UnicodeInterval::new(0x2B60, 0x2BB8),
     UnicodeInterval::new(0x1F800, 0x1F8B1),
 ];
-static SHAPES: &'static [UnicodeInterval] = &[UnicodeInterval::new(0x25A0, 0x25FF), UnicodeInterval::new(0x1F780, 0x1F7FF)];
-static PUNCTUATION: &'static [UnicodeInterval] = &[
+static SHAPES: &[UnicodeInterval] = &[UnicodeInterval::new(0x25A0, 0x25FF), UnicodeInterval::new(0x1F780, 0x1F7FF)];
+static PUNCTUATION: &[UnicodeInterval] = &[
     UnicodeInterval::new(0x2010, 0x2027),
     UnicodeInterval::new(0x2030, 0x205E),
     UnicodeInterval::new(0x2E00, 0x2E52),
     UnicodeInterval::new(0x3001, 0x3020),
 ];
-static LATIN: &'static [UnicodeInterval] = &[
+static LATIN: &[UnicodeInterval] = &[
     UnicodeInterval::new(0x20, 0x7E),
     UnicodeInterval::new(0x100, 0x17F),
     UnicodeInterval::new(0xC0, 0xFF),
