@@ -178,7 +178,7 @@ impl CharPicker {
             MousePos::PressNone => theme.menu.text.pressed_or_selectd,
             _ => theme.menu.text.normal,
         };
-        surface.write_string(2, size.height as i32 - 1, "[None]", none_attr, false);
+        surface.write_string(2, size.height as i32 - 2 + self.expanded_panel_y, "[None]", none_attr, false);
         // draw Set Name
         let format = TextFormatBuilder::new()
             .align(TextAlignment::Center)
@@ -265,7 +265,7 @@ impl CharPicker {
                 } else {
                     MousePos::None
                 }
-            } else if (y == size.height as i32 - 1) && (x >= 2) && (x <= 7) {
+            } else if (y == size.height as i32 - 2 + self.expanded_panel_y) && (x >= 2) && (x <= 7) {
                 MousePos::HoverNone
             } else {
                 // check character
@@ -475,7 +475,7 @@ impl OnKeyPressed for CharPicker {
             }
             _ => {}
         }
-        if character >= 0 as char {
+        if character >= 31 as char {
             self.goto(character, true, true);
             return EventProcessStatus::Processed;
         }
