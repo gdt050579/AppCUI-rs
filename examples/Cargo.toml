@@ -68,6 +68,10 @@ name = "char_format"
 path = "char_format/main.rs"
 
 [[example]]
+name = "charpicker"
+path = "charpicker/main.rs"
+
+[[example]]
 name = "checkboxes"
 path = "checkboxes/main.rs"
 
