@@ -53,6 +53,7 @@ pub(crate) enum AppCUITrait {
     GenericBackgroundTaskEvents = 44,
     AccordionEvents = 45,
     TabEvents = 46,
+    CharPickerEvents = 47,
 }
 
 #[repr(u8)]
@@ -116,6 +117,8 @@ impl AppCUITrait {
             AppCUITrait::GenericBackgroundTaskEvents => "BackgroundTaskEvents", // important to be without Generic
             AppCUITrait::AccordionEvents => "AccordionEvents",
             AppCUITrait::TabEvents => "TabEvents",
+            AppCUITrait::CharPickerEvents => "CharPickerEvents",
+
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -170,6 +173,7 @@ impl AppCUITrait {
             AppCUITrait::GenericBackgroundTaskEvents => TraitType::ControlEvent,
             AppCUITrait::AccordionEvents => TraitType::ControlEvent,
             AppCUITrait::TabEvents => TraitType::ControlEvent,
+            AppCUITrait::CharPickerEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -224,6 +228,7 @@ impl AppCUITrait {
             AppCUITrait::GenericBackgroundTaskEvents => "",
             AppCUITrait::AccordionEvents => "",
             AppCUITrait::TabEvents => "",
+            AppCUITrait::CharPickerEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -278,6 +283,7 @@ impl AppCUITrait {
             AppCUITrait::GenericBackgroundTaskEvents => "impl$(TEMPLATE_TYPE) GenericBackgroundTaskEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::AccordionEvents => "impl$(TEMPLATE_TYPE) AccordionEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::TabEvents => "impl$(TEMPLATE_TYPE) TabEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::CharPickerEvents => "impl$(TEMPLATE_TYPE) CharPickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -333,6 +339,7 @@ impl AppCUITrait {
             "BackgroundTaskEvents" | "BackgroundTask" => Some(AppCUITrait::GenericBackgroundTaskEvents),
             "AccordionEvents" | "Accordion" => Some(AppCUITrait::AccordionEvents),
             "TabEvents" | "Tab" => Some(AppCUITrait::TabEvents),
+            "CharPickerEvents" | "CharPicker" => Some(AppCUITrait::CharPickerEvents),
             _ => None,
         }
     }
@@ -388,6 +395,7 @@ impl AppCUITrait {
             44 => Some(AppCUITrait::GenericBackgroundTaskEvents),
             45 => Some(AppCUITrait::AccordionEvents),
             46 => Some(AppCUITrait::TabEvents),
+            47 => Some(AppCUITrait::CharPickerEvents),
             _ => None,
         };
         result?;

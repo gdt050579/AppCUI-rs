@@ -58,6 +58,7 @@
         - [Canvas](chapter-3/stock-controls/canvas.md)
         - [CheckBox](chapter-3/stock-controls/checkbox.md)
         - [ColorPicker](chapter-3/stock-controls/colorpicker.md)
+        - [CharPicker](chapter-3/stock-controls/charpicker.md)
         - [ComboBox](chapter-3/stock-controls/combobox.md)
         - [DatePicker](chapter-3/stock-controls/datepicker.md)
         - [DropDownList](chapter-3/stock-controls/dropdownlist.md)

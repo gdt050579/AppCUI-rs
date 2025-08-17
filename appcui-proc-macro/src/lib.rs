@@ -103,6 +103,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -166,6 +167,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -255,6 +257,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::Default);
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TabEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
 
 
     // custom events
@@ -317,6 +320,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::Default);
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TabEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
 
 
 
@@ -405,6 +409,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericBackgroundTaskEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // custom events
@@ -2302,4 +2307,11 @@ pub fn textarea(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn layout(input: TokenStream) -> TokenStream {
     crate::controls::layout::create(input)
+}
+
+
+
+#[proc_macro]
+pub fn charpicker(input: TokenStream) -> TokenStream {
+    crate::controls::charpicker::create(input)
 }
