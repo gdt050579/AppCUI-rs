@@ -123,6 +123,12 @@ impl CharPicker {
     pub fn unselect_char(&mut self) {
         self.character = None;
     }
+
+    /// Returns the current character selected in the CharPicker
+    pub fn char(&self) -> Option<char> {
+        self.character
+    }
+
     fn emit_change_char_event(&mut self) {
         self.raise_event(ControlEvent {
             emitter: self.handle,
