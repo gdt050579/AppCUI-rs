@@ -42,9 +42,9 @@ impl CharPicker {
     ///
     /// # Returns
     /// * `CharPicker` - A new CharPicker control
-    /// 
+    ///
     /// # Example
-    /// ```rust, no_run 
+    /// ```rust, no_run
     /// use appcui::prelude::*;
     /// let mut cp = CharPicker::new(None, layout!("x:1,y:1,w:30"));
     /// cp.add_set(charpicker::Set::with_interval("Unicode", 0x20, 0x10FFFF).unwrap());
@@ -62,13 +62,13 @@ impl CharPicker {
     ///
     /// # Returns
     /// * `CharPicker` - A new CharPicker control
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// let mut cp = CharPicker::with_set(
-    ///     Some('A'), 
-    ///     LayoutBuilder::new().x(1).y(1).width(30).build(), 
+    ///     Some('A'),
+    ///     LayoutBuilder::new().x(1).y(1).width(30).build(),
     ///     charpicker::Set::with_interval("ASCII", 0, 0x7F).unwrap()
     /// );
     /// ```
@@ -113,7 +113,7 @@ impl CharPicker {
     /// # Arguments
     ///
     /// * `character` - The character to select
-    /// 
+    ///
     /// The character has to be present in one of the sets that were added to the CharPicker
     pub fn select_char(&mut self, character: char) {
         self.goto(character, false, true);
@@ -530,11 +530,11 @@ impl OnKeyPressed for CharPicker {
             }
             key!("Ctrl+C") | key!("Ctrl+Insert") => {
                 if let Some(ch) = self.character {
-                    let mut buf: [u8;16] = [0;16];                    
+                    let mut buf: [u8; 16] = [0; 16];
                     RuntimeManager::get().backend_mut().set_clipboard_text(ch.encode_utf8(&mut buf));
                 }
                 return EventProcessStatus::Processed;
-            }            
+            }
             _ => {}
         }
         if character >= 31 as char {
@@ -582,6 +582,9 @@ impl OnMouseEvent for CharPicker {
                         MousePos::Char(index) => {
                             self.nav.current_index = index;
                             self.update_view(true, true);
+                            if self.is_expanded() {
+                                self.pack();
+                            }
                         }
                         MousePos::HoverLeftButton => self.goto_set(self.nav.set_index.saturating_sub(1)),
                         MousePos::HoverRightButton => self.goto_set(self.nav.set_index + 1),
@@ -589,6 +592,9 @@ impl OnMouseEvent for CharPicker {
                             if self.character.is_some() {
                                 self.character = None;
                                 self.emit_change_char_event();
+                                if self.is_expanded() {
+                                    self.pack();
+                                }
                             }
                         }
                         _ => (),
