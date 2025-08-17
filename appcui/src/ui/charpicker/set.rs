@@ -22,6 +22,8 @@ pub enum UnicodeSymbols {
     Numbers,
     Pictographs,
     Transport,
+    Unicode,
+    Games,
 }
 
 struct UnicodeInterval {
@@ -103,6 +105,12 @@ static PICTOGRAPHS: &[UnicodeInterval] = &[
     UnicodeInterval::new(0x1F900, 0x1F9FF),
     UnicodeInterval::new(0x1FA70, 0x1FAFF),
 ];
+static GAMES: &[UnicodeInterval] = &[
+    UnicodeInterval::new(0x1F000, 0x1F0FF),
+    UnicodeInterval::new(0x2654, 0x2667),
+    UnicodeInterval::new(0x2680, 0x2685),
+    UnicodeInterval::new(0x26C0, 0x26C3),
+];
 
 enum SetData {
     Interval(u32),
@@ -138,6 +146,8 @@ impl Set {
             UnicodeSymbols::Numbers => Self::with_multiple_intervals(name, NUMBERS),
             UnicodeSymbols::Pictographs => Self::with_multiple_intervals(name, PICTOGRAPHS),
             UnicodeSymbols::Transport => Self::with_interval(name, 0x1F680, 0x1F6FF).unwrap(),
+            UnicodeSymbols::Unicode => Self::with_interval(name, 0x0020, 0x10FFFF).unwrap(),
+            UnicodeSymbols::Games => Self::with_multiple_intervals(name, GAMES),
         }
     }
     fn with_multiple_intervals(name: &str, mi: &'static [UnicodeInterval]) -> Self {
