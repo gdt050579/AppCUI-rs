@@ -11,7 +11,13 @@ pub enum UnicodeSymbols {
     Emoticons,
     Shapes,
     Latin,
-    Punctuation
+    Punctuation,
+    Cyrillic,
+    Greek,
+    //Math,
+    //Arabic,
+    //subscripts,
+    //superscripts,
 }
 
 struct UnicodeInterval {
@@ -51,6 +57,14 @@ static LATIN: &[UnicodeInterval] = &[
     UnicodeInterval::new(0xC0, 0xFF),
     UnicodeInterval::new(0x1E00, 0x1EFF),
 ];
+static CYRILLIC: &[UnicodeInterval] = &[
+    UnicodeInterval::new(0x400, 0x4FF),
+    UnicodeInterval::new(0x500, 0x52F),
+    UnicodeInterval::new(0x2DE0, 0x2DFF),
+    UnicodeInterval::new(0xA640, 0xA69F),
+];
+static GREEK: &[UnicodeInterval] = &[UnicodeInterval::new(0x370, 0x3FF), UnicodeInterval::new(0x1F00, 0x1FFF)];
+
 enum SetData {
     Interval(u32),
     List(Vec<char>),
@@ -70,14 +84,16 @@ impl Set {
             UnicodeSymbols::BoxDrawing => Self::with_interval(name, 0x2500, 0x257F).unwrap(),
             UnicodeSymbols::Currency => Self::with_interval(name, 0x20A0, 0x20CF).unwrap(),
             UnicodeSymbols::Emoticons => Self::with_interval(name, 0x1F600, 0x1F64F).unwrap(),
-            UnicodeSymbols::Animals => Self::with_multi_intervale(name, ANIMALS),
-            UnicodeSymbols::Arrows => Self::with_multi_intervale(name, ARROWS),
-            UnicodeSymbols::Shapes => Self::with_multi_intervale(name, SHAPES),
-            UnicodeSymbols::Punctuation => Self::with_multi_intervale(name, PUNCTUATION),
-            UnicodeSymbols::Latin => Self::with_multi_intervale(name, LATIN),
+            UnicodeSymbols::Animals => Self::with_multiple_intervals(name, ANIMALS),
+            UnicodeSymbols::Arrows => Self::with_multiple_intervals(name, ARROWS),
+            UnicodeSymbols::Shapes => Self::with_multiple_intervals(name, SHAPES),
+            UnicodeSymbols::Punctuation => Self::with_multiple_intervals(name, PUNCTUATION),
+            UnicodeSymbols::Latin => Self::with_multiple_intervals(name, LATIN),
+            UnicodeSymbols::Cyrillic => Self::with_multiple_intervals(name, CYRILLIC),
+            UnicodeSymbols::Greek => Self::with_multiple_intervals(name, GREEK),
         }
     }
-    fn with_multi_intervale(name: &str, mi: &'static [UnicodeInterval]) -> Self {
+    fn with_multiple_intervals(name: &str, mi: &'static [UnicodeInterval]) -> Self {
         let mut count = 0;
         for i in mi {
             count += i.size();
