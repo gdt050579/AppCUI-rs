@@ -21,18 +21,38 @@ A CharPicker supports all common parameters (as they are described in [Instantia
 | `code`         | Numeric | **No**                               | The Unicode code point of the initial character to select                                     |
 | `sets`         | List    | **No**                               | A list of character sets to populate the CharPicker with (e.g., `[Ascii, Arrows, Emoticons]`) |
 
-A CharPicker supports the following character sets for the `sets` parameter:
-* `Ascii` - ASCII characters (0x20-0x7E)
-* `Arrows` - Various arrow symbols
-* `Animals` - Animal emoji and symbols
-* `Braille` - Braille patterns (0x2800-0x28FF)
-* `Blocks` - Block drawing characters (0x2580-0x259F)
-* `BoxDrawing` - Box drawing characters (0x2500-0x257F)
-* `Currency` - Currency symbols (0x20A0-0x20CF)
-* `Emoticons` - Emoticons and emoji (0x1F600-0x1F64F)
-* `Shapes` - Geometric shapes
-* `Latin` - Extended Latin characters
-* `Punctuation` - Various punctuation marks
+The following sets are available:
+
+| Name           | Description                              | Example                          |
+| -------------- | ---------------------------------------- | -------------------------------- |
+| `Animals`      | Animal emoji and symbols                 | &#128000;, &#128060;, &#129408;  |
+| `Arabic`       | Arabic script characters                 | &#1575;, &#1576;, &#1578;        |
+| `Arrows`       | Various arrow symbols                    | &#8593;, &#8594;, &#8596;        |
+| `Ascii`        | ASCII characters (0x20-0x7E)             | A, B, C, !, @, #                 |
+| `Blocks`       | Block drawing characters (0x2580-0x259F) | &#9600;, &#9604;, &#9608;        |
+| `BoxDrawing`   | Box drawing characters (0x2500-0x257F)   | &#9556;, &#9559;, &#9562;        |
+| `Braille`      | Braille patterns (0x2800-0x28FF)         | &#10241;, &#10243;, &#10249;     |
+| `Chinese`      | Chinese (CJK) characters (0x4E00-0x9FFF) | &#20013;, &#25991;, &#23383;     |
+| `Currency`     | Currency symbols (0x20A0-0x20CF)         | &#8364;, &#163;, &#8377;         |
+| `Cyrillic`     | Cyrillic script characters               | &#1040;, &#1041;, &#1042;        |
+| `Emoticons`    | Emoticons and emoji (0x1F600-0x1F64F)    | &#128512;, &#128513;, &#128514;  |
+| `Games`        | Gaming symbols (cards, dice, chess)      | &#9812;, &#9823;, &#9856;        |
+| `Greek`        | Greek script characters                  | &#913;, &#914;, &#915;           |
+| `Latin`        | Extended Latin characters                | &#192;, &#193;, &#194;           |
+| `Math`         | Mathematical symbols                     | &#8704;, &#8706;, &#8707;        |
+| `Numbers`      | Number-related symbols                   | &#8532;, &#8533;, &#9312;        |
+| `Pictographs`  | Miscellaneous symbols and pictographs    | &#9728;, &#9729;, &#127744;      |
+| `Punctuation`  | Various punctuation marks                | &#8211;, &#8212;, &#8230;        |
+| `Shapes`       | Geometric shapes                         | &#9632;, &#9633;, &#9650;        |
+| `Subscripts`   | Subscript characters (0x2080-0x209C)     | &#8320;, &#8321;, &#8322;        |
+| `Superscripts` | Superscript characters                   | &#8304;, &#185;, &#178;          |
+| `Transport`    | Transportation symbols (0x1F680-0x1F6FF) | &#128640;, &#128641;, &#128642;  |
+| `Unicode`      | Full Unicode range (0x0020-0x10FFFF)     | All available Unicode characters |
+
+**Remark:** The `sets` parameter can also be set to `[*]` to select all available sets.
+```rs
+let cp = charpicker!("x:1,y:1,w:30,sets:[*]");
+```
 
 ## Events
 
