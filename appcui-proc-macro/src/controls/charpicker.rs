@@ -3,17 +3,29 @@ use crate::parameter_parser::*;
 use proc_macro::*;
 
 static SETS: FlagsSignature = FlagsSignature::new(&[
-    "Ascii",
-    "Arrows",
     "Animals",
-    "Braille",
+    "Arabic",
+    "Arrows",
+    "Ascii",
     "Blocks",
     "BoxDrawing",
+    "Braille",
+    "Chinese",
     "Currency",
+    "Cyrillic",
     "Emoticons",
-    "Shapes",
+    "Games",
+    "Greek",
     "Latin",
+    "Math",
+    "Numbers",
+    "Pictographs",
     "Punctuation",
+    "Shapes",
+    "Subscripts",
+    "Superscripts",
+    "Transport",
+    "Unicode",
 ]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("char", ParamType::String)];

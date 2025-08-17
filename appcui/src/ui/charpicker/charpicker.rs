@@ -47,10 +47,10 @@ impl CharPicker {
     /// ```rust, no_run 
     /// use appcui::prelude::*;
     /// let mut cp = CharPicker::new(None, layout!("x:1,y:1,w:30"));
-    /// cp.add_set(charpicker::Set::with_interval("Unicode", 1, 0xE01EF).unwrap());
+    /// cp.add_set(charpicker::Set::with_interval("Unicode", 0x20, 0x10FFFF).unwrap());
     /// ```
     pub fn new(initial_char: Option<char>, layout: Layout) -> Self {
-        Self::inner_new(initial_char, layout, vec![Set::with_interval("Unicode", 1, 0xE01EF).unwrap()])
+        Self::inner_new(initial_char, layout, vec![Set::with_interval("Unicode", 0x20, 0x10FFFF).unwrap()])
     }
     /// Create a new CharPicker with a single set of characters
     ///
