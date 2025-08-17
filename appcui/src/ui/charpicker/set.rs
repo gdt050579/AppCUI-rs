@@ -14,8 +14,9 @@ pub enum UnicodeSymbols {
     Punctuation,
     Cyrillic,
     Greek,
-    //Math,
-    //Arabic,
+    Arabic,
+    Chinese,
+    Math,
     //subscripts,
     //superscripts,
 }
@@ -64,6 +65,19 @@ static CYRILLIC: &[UnicodeInterval] = &[
     UnicodeInterval::new(0xA640, 0xA69F),
 ];
 static GREEK: &[UnicodeInterval] = &[UnicodeInterval::new(0x370, 0x3FF), UnicodeInterval::new(0x1F00, 0x1FFF)];
+static ARABIC: &[UnicodeInterval] = &[
+    UnicodeInterval::new(0x600, 0x6FF),
+    UnicodeInterval::new(0x750, 0x77F),
+    UnicodeInterval::new(0x8A0, 0x8FF),
+    UnicodeInterval::new(0xFB50, 0xFDFF),
+    UnicodeInterval::new(0xFE70, 0xFEFF),
+];
+static MATH: &[UnicodeInterval] = &[
+    UnicodeInterval::new(0x2200, 0x22FF),
+    UnicodeInterval::new(0x27C0, 0x27EF),
+    UnicodeInterval::new(0x2980, 0x29FF),
+    UnicodeInterval::new(0x2A00, 0x2AFF),
+];
 
 enum SetData {
     Interval(u32),
@@ -91,6 +105,9 @@ impl Set {
             UnicodeSymbols::Latin => Self::with_multiple_intervals(name, LATIN),
             UnicodeSymbols::Cyrillic => Self::with_multiple_intervals(name, CYRILLIC),
             UnicodeSymbols::Greek => Self::with_multiple_intervals(name, GREEK),
+            UnicodeSymbols::Arabic => Self::with_multiple_intervals(name, ARABIC),
+            UnicodeSymbols::Chinese => Self::with_interval(name, 0x4E00, 0x9FFF).unwrap(),
+            UnicodeSymbols::Math => Self::with_multiple_intervals(name, MATH),
         }
     }
     fn with_multiple_intervals(name: &str, mi: &'static [UnicodeInterval]) -> Self {
