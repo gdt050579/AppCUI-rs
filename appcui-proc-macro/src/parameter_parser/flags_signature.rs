@@ -7,6 +7,16 @@ pub(crate) struct FlagsSignature {
     map: OnceLock<HashMap<u64, &'static str>>,
 }
 impl FlagsSignature {
+    pub(crate) fn len(&self) -> usize {
+        self.flags.len()
+    }
+    pub(crate) fn flag_name(&self, index: usize) -> &'static str {
+        if index < self.flags.len() {
+            self.flags[index]
+        } else {
+            panic!("Index out of bounds: the length is {} but the index is {}", self.flags.len(), index);
+        }
+    }
     pub(crate) const fn new(flags: &'static [&'static str]) -> Self {
         Self { flags, map: OnceLock::new() }
     }

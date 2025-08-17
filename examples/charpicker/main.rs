@@ -49,7 +49,7 @@ impl MyWin {
 
         // all available sets
         win.add(Label::new("All Sets:", layout!("x:2,y:10,w:20")));
-        win.cp_all = win.add(charpicker!("x:12,y:10,w:42,sets:[Ascii,Arrows,Braille,Emoticons,Animals,Shapes,Math,Numbers]"));
+        win.cp_all = win.add(charpicker!("x:12,y:10,w:42,sets:[*]"));
         win.lb_all = win.add(Label::new("No character selected", layout!("x:12,y:11,w:56")));
 
         win

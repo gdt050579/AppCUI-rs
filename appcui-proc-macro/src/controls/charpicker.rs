@@ -45,15 +45,28 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     let s = if cb.has_parameter("sets") {
         let mut cmd = String::with_capacity(1024);
         if let Some(list) = cb.get_list("sets") {
-            for item in list {
-                if let Some(name) = SETS.get(item.get_string()) {
+            if list.is_empty() {
+                panic!("Parameter 'sets' should be a list of available character sets and can not be empty(e.g. sets = [Arrows, Ascii]. Available sets are: {}). Alternatively, you can specify sets = [*] to select all available sets.", SETS.list());
+            }
+            if list.len() == 1 && list[0].get_string() == "*" {
+                for i in 0..SETS.len() {    
                     cmd.push_str("control.add_set(charpicker::Set::from_unicode_symbols(\"");
-                    cmd.push_str(name);
+                    cmd.push_str(SETS.flag_name(i));
                     cmd.push_str("\", charpicker::UnicodeSymbols::");
-                    cmd.push_str(name);
+                    cmd.push_str(SETS.flag_name(i));
                     cmd.push_str("));\n");
-                } else {
-                    panic!("Unknwon set `{}`. Available sets are: {}", item.get_string(), SETS.list())
+                }
+            } else {
+                for item in list {
+                    if let Some(name) = SETS.get(item.get_string()) {
+                        cmd.push_str("control.add_set(charpicker::Set::from_unicode_symbols(\"");
+                        cmd.push_str(name);
+                        cmd.push_str("\", charpicker::UnicodeSymbols::");
+                        cmd.push_str(name);
+                        cmd.push_str("));\n");
+                    } else {
+                        panic!("Unknwon set `{}`. Available sets are: {}", item.get_string(), SETS.list())
+                    }
                 }
             }
             cmd
@@ -101,7 +114,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     };
     if !s.is_empty() {
         cb.add(&s);
-    }    
+    }
     cb.add_basecontrol_operations();
     cb.into()
 }
