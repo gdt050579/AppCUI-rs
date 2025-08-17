@@ -17,8 +17,8 @@ pub enum UnicodeSymbols {
     Arabic,
     Chinese,
     Math,
-    //subscripts,
-    //superscripts,
+    Subscripts,
+    Superscripts,
 }
 
 struct UnicodeInterval {
@@ -78,6 +78,13 @@ static MATH: &[UnicodeInterval] = &[
     UnicodeInterval::new(0x2980, 0x29FF),
     UnicodeInterval::new(0x2A00, 0x2AFF),
 ];
+static SUPERSCRIPTS: &[UnicodeInterval] = &[
+    UnicodeInterval::new(0x2070, 0x2070),
+    UnicodeInterval::new(0x00B9, 0x00B9),
+    UnicodeInterval::new(0x00B2, 0x00B3),
+    UnicodeInterval::new(0x2074, 0x207F),
+    UnicodeInterval::new(0x2071, 0x2071),
+];
 
 enum SetData {
     Interval(u32),
@@ -108,6 +115,8 @@ impl Set {
             UnicodeSymbols::Arabic => Self::with_multiple_intervals(name, ARABIC),
             UnicodeSymbols::Chinese => Self::with_interval(name, 0x4E00, 0x9FFF).unwrap(),
             UnicodeSymbols::Math => Self::with_multiple_intervals(name, MATH),
+            UnicodeSymbols::Subscripts => Self::with_interval(name, 0x2080, 0x209C).unwrap(),
+            UnicodeSymbols::Superscripts => Self::with_multiple_intervals(name, SUPERSCRIPTS),
         }
     }
     fn with_multiple_intervals(name: &str, mi: &'static [UnicodeInterval]) -> Self {
