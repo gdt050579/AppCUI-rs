@@ -19,6 +19,9 @@ pub enum UnicodeSymbols {
     Math,
     Subscripts,
     Superscripts,
+    Numbers,
+    Pictographs,
+    Transport,
 }
 
 struct UnicodeInterval {
@@ -45,7 +48,11 @@ static ARROWS: &[UnicodeInterval] = &[
     UnicodeInterval::new(0x2B60, 0x2BB8),
     UnicodeInterval::new(0x1F800, 0x1F8B1),
 ];
-static SHAPES: &[UnicodeInterval] = &[UnicodeInterval::new(0x25A0, 0x25FF), UnicodeInterval::new(0x1F780, 0x1F7FF)];
+static SHAPES: &[UnicodeInterval] = &[
+    UnicodeInterval::new(0x25A0, 0x25FF),
+    UnicodeInterval::new(0x2BB9, 0x2BCF),
+    UnicodeInterval::new(0x1F780, 0x1F7FF),
+];
 static PUNCTUATION: &[UnicodeInterval] = &[
     UnicodeInterval::new(0x2010, 0x2027),
     UnicodeInterval::new(0x2030, 0x205E),
@@ -85,6 +92,17 @@ static SUPERSCRIPTS: &[UnicodeInterval] = &[
     UnicodeInterval::new(0x2074, 0x207F),
     UnicodeInterval::new(0x2071, 0x2071),
 ];
+static NUMBERS: &[UnicodeInterval] = &[
+    UnicodeInterval::new(0x30, 0x39),
+    UnicodeInterval::new(0x2150, 0x218F),
+    UnicodeInterval::new(0x2460, 0x24FF),
+];
+static PICTOGRAPHS: &[UnicodeInterval] = &[
+    UnicodeInterval::new(0x2600, 0x27BF),
+    UnicodeInterval::new(0x1F300, 0x1F5FF),
+    UnicodeInterval::new(0x1F900, 0x1F9FF),
+    UnicodeInterval::new(0x1FA70, 0x1FAFF),
+];
 
 enum SetData {
     Interval(u32),
@@ -117,6 +135,9 @@ impl Set {
             UnicodeSymbols::Math => Self::with_multiple_intervals(name, MATH),
             UnicodeSymbols::Subscripts => Self::with_interval(name, 0x2080, 0x209C).unwrap(),
             UnicodeSymbols::Superscripts => Self::with_multiple_intervals(name, SUPERSCRIPTS),
+            UnicodeSymbols::Numbers => Self::with_multiple_intervals(name, NUMBERS),
+            UnicodeSymbols::Pictographs => Self::with_multiple_intervals(name, PICTOGRAPHS),
+            UnicodeSymbols::Transport => Self::with_interval(name, 0x1F680, 0x1F6FF).unwrap(),
         }
     }
     fn with_multiple_intervals(name: &str, mi: &'static [UnicodeInterval]) -> Self {
