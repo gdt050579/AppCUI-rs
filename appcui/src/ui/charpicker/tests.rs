@@ -21,6 +21,26 @@ fn check_create() {
 }
 
 #[test]
+fn check_create_with_all() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x89DCEE13ABCD4574)  
+        Key.Pressed(Space)
+        Paint('2. Expanded (3 rows)')   
+        CheckHash(0xDE871A7CD2881D34)  
+        Key.Pressed(Space)
+        Paint('3. Back to initial state')   
+        CheckHash(0x89DCEE13ABCD4574)  
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Title,a:c,w:40,h:9");
+    w.add(charpicker!("a,x:1,y:1,w:20,sets:[*]"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_create_macro() {
     let script = "
         Paint.Enable(false)
