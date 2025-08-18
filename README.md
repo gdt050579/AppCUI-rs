@@ -20,8 +20,8 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 
 ## ✨ Features
-- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, combo boxes, date/time pickers, color pickers, tabs, accordeons, etc.). A full list of controls can be found [here](docs/chapter-3/stock_controls.md) 
-- [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors or pivot positioning (see more [here](docs/chapter-3/layout.md)) 
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, combo boxes, date/time pickers, color pickers, tabs, accordeons, etc.). A full list of controls can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock_controls.html) 
+- [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
 - [x] menus and toolbars
 - [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, MacOS via termios)
 - [x] multi-threading support to allow background tasks
@@ -48,7 +48,7 @@ AppCUI supports various backends based on the operating system it is being used 
 * **Web Terminal** - designed for Web implementation (based on webgl)
 * **CrossTerm** - based on the `crossterm` crate, but enabled via a feature flag
 
-More on the supported backends can be found [here](docs/chapter-2/backends.md)
+More on the supported backends can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-2/backends.html)
 
 
 ## 🚀 Quick Start
