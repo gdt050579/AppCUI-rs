@@ -2,6 +2,10 @@
 
 A visual tour of AppCUI-rs. Each category shows one quick preview; expand for more.
 
+```
+Currently this is a work in progress - expect first version to be ready by 1st of September.
+```
+
 - [AppCUI-rs Gallery](#appcui-rs-gallery)
   - [Animations](#animations)
 
