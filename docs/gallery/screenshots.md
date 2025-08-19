@@ -16,7 +16,7 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 
 ![Animations — preview](img/animations/matrix.gif)
 
-* **Code:** [examples/matrix](../../examples/matrix/)
+* **Code:** [examples/matrix](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/matrix)
 * **Elements:** [Custom Desktop](https://gdt050579.github.io/AppCUI-rs/chapter-4/custom_desktop.html), [Menus](https://gdt050579.github.io/AppCUI-rs/chapter-4/menu.html), [Timers](https://gdt050579.github.io/AppCUI-rs/chapter-7/timers.html)
 
 <details>
