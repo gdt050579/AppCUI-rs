@@ -123,3 +123,4 @@
 - [Multi-Threading](chapter-7/multi-threading.md)
     - [Timers](chapter-7/timers.md)
     - [Background tasks](chapter-7/background_tasks.md)
+- [Gallery](gallery/screenshots.md)
