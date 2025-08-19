@@ -13,6 +13,7 @@
 ![License](https://img.shields.io/github/license/gdt050579/AppCUI-rs)
 [![Crates.io](https://img.shields.io/crates/v/appcui.svg)](https://crates.io/crates/appcui)
 [![Docs.rs](https://docs.rs/appcui/badge.svg)](https://docs.rs/appcui)
+[![Gallery](https://img.shields.io/badge/See-Gallery-blue?style=for-the-badge)](./Gallery.md)
 
 AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based user interfaces (TUIs) with rich widgets, themes, and full Unicode support—an alternative to ncurses and other terminal UI frameworks.
 * [Book](https://gdt050579.github.io/AppCUI-rs/)
@@ -36,6 +37,8 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 ## 📸 Screenshots 
 
 <img src="https://github.com/gdt050579/AppCUI-rs/raw/main/docs/chapter-1/img/appcui-rs-demo.gif" align="center" />
+
+👉 **Check out the [Gallery](./Gallery.md) for full demos of all controls!**
 
 ## 🖥️ Backends
 
