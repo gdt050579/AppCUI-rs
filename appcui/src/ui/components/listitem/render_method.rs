@@ -117,6 +117,10 @@ impl<'a> RenderMethod<'a> {
                         surface.fill_horizontal_line_with_size(1, 0, sz, Character::with_attributes('=', attr));
                         surface.write_char(1 + (sz.saturating_sub(1) as i32), 0, Character::with_attributes('>', attr));
                     }
+                    StatusFormat::Block => {
+                        surface.fill_horizontal_line_with_size(1, 0, draw_sz, Character::with_attributes(' ', attr));
+                        surface.fill_horizontal_line_with_size(1, 0, sz, Character::with_attributes(SpecialChar::BlockCentered, attr));
+                    }                    
                 }
             } else {
                 RenderMethod::paint_ascii(txt, surface, rd);

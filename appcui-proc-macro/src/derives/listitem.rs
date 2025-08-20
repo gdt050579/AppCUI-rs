@@ -98,7 +98,7 @@ impl RenderMethod {
     const TEMPERATURE_FORMATS: [&'static str; 3] = ["Celsius","Fahrenheit","Kelvin"];
     const CURRENCY_FORMATS: [&'static str; 11] = ["USD","USDSymbol","EUR","EURSymbol","GBP","GBPSymbol","YEN","YENSymbol","Bitcoin","BitcoinSymbol","RON"];
     const RATNG_FORMATS: [&'static str; 4] = ["Numerical","Stars","Circles","Asterix"];
-    const STATUS_FORMATS: [&'static str; 3] = ["Hashtag","Graphical","Arrow"];
+    const STATUS_FORMATS: [&'static str; 4] = ["Hashtag","Graphical","Arrow","Block"];
     const DATETIME_FORMATS: [&'static str; 3] = ["Full","Normal","Short"];
     const TIME_FORMATS: [&'static str; 3] = ["Short","AMPM","Normal"];
     const DATE_FORMATS: [&'static str; 3] = ["Full","YearMonthDay","DayMonthYear"];
