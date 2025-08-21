@@ -3939,6 +3939,7 @@ fn check_status_formater_renderer() {
                 1 => Some(listview::RenderMethod::Status(self.status, listview::StatusFormat::Hashtag)),
                 2 => Some(listview::RenderMethod::Status(self.status, listview::StatusFormat::Graphical)),
                 3 => Some(listview::RenderMethod::Status(self.status, listview::StatusFormat::Arrow)),
+                4 => Some(listview::RenderMethod::Status(self.status, listview::StatusFormat::Block)),
                 _ => None,
             }
         }
@@ -3953,11 +3954,11 @@ fn check_status_formater_renderer() {
     let script = "
         Paint.Enable(false) 
         Paint('1. Initial state')
-        CheckHash(0x3C5D207D90FE87F8)
+        CheckHash(0xB6585EA6534B7778)
     ";
-    let mut a = App::debug(80, 12, script).build().unwrap();
+    let mut a = App::debug(100, 12, script).build().unwrap();
     let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Normal,20,Right},{Two,20,Right},{Three,20,Right}]");
+    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Normal,20,Right},{Two,20,Right},{Three,20,Right},{Four,20,Right}]");
 
     let files = vec![
         FileInfo {

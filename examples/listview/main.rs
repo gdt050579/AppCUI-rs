@@ -9,6 +9,7 @@ mod greek_letters;
 mod custom_filter;
 mod custom_paint;
 mod files;
+mod tasks;
 
 const LOGO: [&str; 6] = [
     "██╗     ██╗███████╗████████╗██╗   ██╗██╗███████╗██╗    ██╗",
@@ -22,7 +23,7 @@ const LOGO: [&str; 6] = [
 #[Desktop(events    = [MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
           commands  = [ShowCountries, ShowMusic, ShowWords, ShowSalaries, ShowPlanets, ShowAnimals, 
-                       ShowGreekLetters, ShowCustomFilter, ShowCustomPaint, ShowFiles,
+                       ShowGreekLetters, ShowCustomFilter, ShowCustomPaint, ShowFiles, ShowTasks,
                        Exit, About, 
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -91,6 +92,7 @@ impl DesktopEvents for MyDesktop {
                 {&Animals,cmd: ShowAnimals},
                 {'&Greek Letters',cmd: ShowGreekLetters},
                 {'&Files',cmd: ShowFiles},
+                {&Tasks, cmd: ShowTasks},
                 {---},
                 {'Custom Filter', cmd: ShowCustomFilter},
                 {'Custom Paint', cmd: ShowCustomPaint},
@@ -147,6 +149,9 @@ impl MenuEvents for MyDesktop {
             mydesktop::Commands::ShowFiles => { 
                 self.add_window(files::Win::new());
             },
+            mydesktop::Commands::ShowTasks => { 
+                self.add_window(tasks::Win::new());
+            },            
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
                 dialogs::message("List View Example", "This is an example of a list view control in AppCUI");

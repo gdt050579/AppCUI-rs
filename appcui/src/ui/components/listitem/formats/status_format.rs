@@ -92,6 +92,7 @@ pub enum StatusFormat {
     Hashtag,
     Graphical,
     Arrow,
+    Block,
 }
 
 const PERCENTAGE_RUNNING: FormatNumber = FormatNumber::new(10).suffix("%").fill(4, b' ');
