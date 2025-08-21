@@ -9,6 +9,7 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 - [AppCUI-rs Gallery](#appcui-rs-gallery)
   - [Animations](#animations)
     - [Spiral](#spiral)
+  - [Lists \& Trees](#lists--trees)
 
 
 ---
@@ -49,3 +50,9 @@ Some description
 
 ---
 
+## Lists & Trees
+
+![Lists & Trees — preview](img/lists/listview.gif)
+
+* **Code:** [examples/listview](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/listview)
+* **Elements:** [List View](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/listview.html), [List item](https://gdt050579.github.io/AppCUI-rs/chapter-3/object-traits/listitem.html), [Menus](https://gdt050579.github.io/AppCUI-rs/chapter-4/menu.html)
