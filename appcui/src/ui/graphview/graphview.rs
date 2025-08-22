@@ -1,6 +1,7 @@
 use super::initialization_flags::Flags;
 use super::node::Node;
 use super::edge::Edge;
+use super::graph::Graph;
 use crate::{prelude::*, ui::graphview::GraphNode};
 
 use self::components::ScrollBars;
@@ -10,7 +11,7 @@ pub struct GraphView<T>
 where
     T: GraphNode,
 {
-    nodes: Vec<Node<T>>,
+    graph: Graph<T>,
     origin_point: Point,
     surface: Surface,
     background: Option<Character>,
@@ -37,7 +38,7 @@ where
             origin_point: Point::ORIGIN,
             background: None,
             drag_point: None,
-            nodes: Vec::new(),
+            graph: Graph::default(),
             surface: Surface::new(200, 200),
             scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
         }
@@ -60,7 +61,9 @@ where
     }
 
     pub fn set_graph(&mut self, nodes: Vec<Node<T>>, edges: Vec<Edge>) {
-
+        self.graph = Graph::new(nodes, edges);
+        self.graph.update_surface_size();
+        self.surface.resize(self.graph.size());
     }
     fn move_scroll_to(&mut self, x: i32, y: i32) {
         let sz = self.size();

@@ -228,4 +228,12 @@ impl Rect {
         self.right = self.left.max(self.right + right);
         self.bottom = self.top.max(self.bottom + bottom);
     }
+    /// Translate a rectangle with specific offsets on the X and Y axxes.
+    #[inline(always)]
+    pub fn translate_with(&mut self, ofs_x: i32, ofs_y: i32) {
+        self.left += ofs_x;
+        self.top += ofs_y;
+        self.right += ofs_x;
+        self.bottom += ofs_y;
+    }
 }
