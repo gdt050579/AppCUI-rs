@@ -2,7 +2,7 @@ use super::edge::Edge;
 use super::node::Node;
 use super::GraphNode;
 use crate::graphics::*;
-
+use crate::prelude::*;
 pub struct Graph<T>
 where
     T: GraphNode,
@@ -50,17 +50,18 @@ where
             br.x = br.x.max(n.rect.right());
             br.y = br.y.max(n.rect.bottom());
         }
+
         // translate all nodes
-        let ofs_x = 2 - tl.x; // one character on X-axes
-        let ofs_y = 1 - tl.y; // two character on Y-axes
+        let dx = 2 - tl.x; // one character on X-axes
+        let dy = 1 - tl.y; // two character on Y-axes
 
         // adjust all nodes
         for n in &mut self.nodes {
-            n.rect += (ofs_x, ofs_y);
+            n.rect += (dx, dy);
         }
         // 4 extra ccharacters on left / right (two on left, tow on right)
         // 2 extra on top-bottom (1 on top, 1 on bottom)
-        self.surface_size = Size::new(((br.x - tl.x + 1 + 4) as u32).min(1), ((br.y - tl.y + 1 + 2) as u32).min(1));
+        self.surface_size = Size::new(((br.x - tl.x + 1 + 4) as u32).max(1), ((br.y - tl.y + 1 + 2) as u32).max(1));
     }
     #[inline(always)]
     pub(super) fn size(&self) -> Size {
