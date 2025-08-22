@@ -1,8 +1,10 @@
 mod graphview;
 mod graphnode;
 mod initialization_flags;
+mod layout;
 mod node;
 mod edge;
+mod graph;
 #[cfg(test)]
 mod tests;
 

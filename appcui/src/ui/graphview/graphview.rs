@@ -1,5 +1,6 @@
 use super::initialization_flags::Flags;
 use super::node::Node;
+use super::edge::Edge;
 use crate::{prelude::*, ui::graphview::GraphNode};
 
 use self::components::ScrollBars;
@@ -58,9 +59,8 @@ where
         self.background = None;
     }
 
-    pub fn add(&mut self, node: T) {
-        let n = Node::new(0, 0, 10, 1, node);
-        self.nodes.push(n);
+    pub fn set_graph(&mut self, nodes: Vec<Node<T>>, edges: Vec<Edge>) {
+
     }
     fn move_scroll_to(&mut self, x: i32, y: i32) {
         let sz = self.size();
