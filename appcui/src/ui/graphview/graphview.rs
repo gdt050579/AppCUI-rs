@@ -62,6 +62,7 @@ where
 
     pub fn set_graph(&mut self, nodes: Vec<Node<T>>, edges: Vec<Edge>) {
         self.graph = Graph::new(nodes, edges);
+        super::layout::hierarchical_bfs::rearange(&mut self.graph);
         self.graph.update_surface_size();
         self.surface.resize(self.graph.size());
     }

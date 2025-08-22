@@ -42,7 +42,7 @@ where
 
         // adjust all nodes
         for n in &mut self.nodes {
-            n.rect.translate_with(ofs_x, ofs_y);
+            n.rect += (ofs_x, ofs_y);
         }
         // 4 extra ccharacters on left / right (two on left, tow on right)
         // 2 extra on top-bottom (1 on top, 1 on bottom)

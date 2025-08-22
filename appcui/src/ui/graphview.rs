@@ -11,3 +11,6 @@ mod tests;
 pub use self::graphview::GraphView;
 pub use self::initialization_flags::Flags;
 pub use self::graphnode::GraphNode;
+use self::graph::Graph;
+use self::node::Node;
+use self::edge::Edge;
