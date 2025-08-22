@@ -1,3 +1,5 @@
+use std::ops::AddAssign;
+
 use super::{Point, Size};
 
 /// RectAlignment enum represents the alignment of a rectangle in a 2D space.
@@ -228,12 +230,69 @@ impl Rect {
         self.right = self.left.max(self.right + right);
         self.bottom = self.top.max(self.bottom + bottom);
     }
-    /// Translate a rectangle with specific offsets on the X and Y axxes.
+    /// Translates this rectangle **in place** by the given offsets.
+    ///
+    /// The rectangle’s size (width/height) is unchanged; only its position moves.
+    /// Positive `dx` moves it right; positive `dy` moves it down.
     #[inline(always)]
-    pub fn translate_with(&mut self, ofs_x: i32, ofs_y: i32) {
-        self.left += ofs_x;
-        self.top += ofs_y;
-        self.right += ofs_x;
-        self.bottom += ofs_y;
+    pub fn translate(&mut self, dx: i32, dy: i32) {
+        self.left += dx;
+        self.top += dy;
+        self.right += dx;
+        self.bottom += dy;
+    }
+    /// Sets the **left edge** of the rectangle to `x`, preserving its width.
+    ///
+    /// The rectangle is shifted horizontally so that `left == x`.  
+    /// The `right` edge is updated accordingly, leaving the width unchanged.  
+    /// The vertical position (`top`, `bottom`) is unaffected.    
+    #[inline]
+    pub fn set_left(&mut self, x: i32) {
+        let w = self.right - self.left;
+        self.left = x;
+        self.right = x + w;
+    }
+
+    /// Sets the **right edge** of the rectangle to `x`, preserving its width.
+    ///
+    /// The rectangle is shifted horizontally so that `right == x`.  
+    /// The `left` edge is updated accordingly, leaving the width unchanged.  
+    /// The vertical position (`top`, `bottom`) is unaffected.
+    #[inline]
+    pub fn set_right(&mut self, x: i32) {
+        let w = self.right - self.left;
+        self.right = x;
+        self.left = x - w;
+    }
+
+    /// Sets the **top edge** of the rectangle to `y`, preserving its height.
+    ///
+    /// The rectangle is shifted vertically so that `top == y`.  
+    /// The `bottom` edge is updated accordingly, leaving the height unchanged.  
+    /// The horizontal position (`left`, `right`) is unaffected.
+    #[inline]
+    pub fn set_top(&mut self, y: i32) {
+        let h = self.bottom - self.top;
+        self.top = y;
+        self.bottom = y + h;
+    }    
+
+    /// Sets the **bottom edge** of the rectangle to `y`, preserving its height.
+    ///
+    /// The rectangle is shifted vertically so that `bottom == y`.  
+    /// The `top` edge is updated accordingly, leaving the height unchanged.  
+    /// The horizontal position (`left`, `right`) is unaffected.
+    #[inline]
+    pub fn set_bottom(&mut self, y: i32) {
+        let h = self.bottom - self.top;
+        self.bottom = y;
+        self.top = y - h;
+    }        
+}
+
+/// Adds a `(dx, dy)` offset to this rectangle in place.
+impl AddAssign<(i32, i32)> for Rect {
+    fn add_assign(&mut self, (dx, dy): (i32, i32)) {
+        self.translate(dx, dy);
     }
 }
