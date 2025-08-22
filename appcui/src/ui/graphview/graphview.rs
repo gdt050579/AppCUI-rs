@@ -60,8 +60,8 @@ where
         self.background = None;
     }
 
-    pub fn set_graph(&mut self, nodes: Vec<Node<T>>, edges: Vec<Edge>) {
-        self.graph = Graph::new(nodes, edges);
+    pub fn set_graph(&mut self, graph: Graph<T>) {
+        self.graph = graph;
         super::layout::hierarchical_bfs::rearange(&mut self.graph);
         self.graph.update_surface_size();
         self.surface.resize(self.graph.size());

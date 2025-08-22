@@ -3,7 +3,7 @@ use super::node::Node;
 use super::GraphNode;
 use crate::graphics::*;
 
-pub(super) struct Graph<T>
+pub struct Graph<T>
 where
     T: GraphNode,
 {
@@ -15,12 +15,26 @@ impl<T> Graph<T>
 where
     T: GraphNode,
 {
-    pub(super) fn new(nodes: Vec<Node<T>>, edges: Vec<Edge>) -> Self {
+    pub fn new(nodes: Vec<Node<T>>, edges: Vec<Edge>) -> Self {
         Self {
             nodes,
             edges,
             surface_size: Size::new(1, 1),
         }
+    }
+    pub fn with_slices(nodes: &[T], edges: &[(u32, u32)]) -> Self
+    where
+        T: GraphNode + Clone,
+    {
+        let v: Vec<Node<T>> = nodes.iter().map(|n| Node::new(n.clone())).collect();
+        let e: Vec<Edge> = edges
+            .iter()
+            .map(|link| Edge {
+                from_node_id: link.0,
+                to_node_id: link.1,
+            })
+            .collect();
+        Self::new(v, e)
     }
     pub(super) fn update_surface_size(&mut self) {
         if self.nodes.is_empty() {
