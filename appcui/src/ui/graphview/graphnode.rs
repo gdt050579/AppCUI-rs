@@ -5,21 +5,16 @@ use crate::system::Theme;
 
 pub trait GraphNode {
     fn paint(&self, _surface: &mut Surface, _theme: &Theme, attr: CharAttribute) {}
-    fn format_short(&self, out: &mut dyn std::io::Write);
-    fn format(&self, out: &mut dyn std::io::Write);
+    fn write(&self, out: &mut String, size: Size);
     fn prefered_size(&self) -> Size;
 }
 
 impl GraphNode for &str {
-    fn format_short(&self, out: &mut dyn std::io::Write) {
-        let _ = write!(out, "{}", self);
-    }
-
-    fn format(&self, out: &mut dyn std::io::Write) {
-       let _ = write!(out, "{}", self);
+    fn write(&self, out: &mut String, size: Size) {
+       out.push_str(self)
     }
 
     fn prefered_size(&self) -> Size {
-        Size::new((self.chars().count() as u32).min(1), 1)
+        Size::new(self.chars().count() as u32, 1)
     }
 }

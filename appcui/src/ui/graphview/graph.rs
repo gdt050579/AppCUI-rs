@@ -49,19 +49,19 @@ where
             tl.y = tl.y.min(n.rect.top());
             br.x = br.x.max(n.rect.right());
             br.y = br.y.max(n.rect.bottom());
+            log!("G","  R = {:?}",n.rect);
         }
-
-        // translate all nodes
         let dx = 2 - tl.x; // one character on X-axes
         let dy = 1 - tl.y; // two character on Y-axes
-
-        // adjust all nodes
+        log!("G","dx={}, dy={}, TL = {:?}, BR = {:?}",dx,dy, tl, br);
         for n in &mut self.nodes {
             n.rect += (dx, dy);
+            log!("G","  R = {:?}",n.rect);
         }
         // 4 extra ccharacters on left / right (two on left, tow on right)
         // 2 extra on top-bottom (1 on top, 1 on bottom)
         self.surface_size = Size::new(((br.x - tl.x + 1 + 4) as u32).max(1), ((br.y - tl.y + 1 + 2) as u32).max(1));
+        log!("G","New size = {:?}",self.surface_size);
     }
     #[inline(always)]
     pub(super) fn size(&self) -> Size {

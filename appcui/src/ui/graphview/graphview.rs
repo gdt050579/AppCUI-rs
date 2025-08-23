@@ -1,7 +1,7 @@
-use super::initialization_flags::Flags;
-use super::node::Node;
 use super::edge::Edge;
 use super::graph::Graph;
+use super::initialization_flags::Flags;
+use super::node::Node;
 use crate::{prelude::*, ui::graphview::GraphNode};
 
 use self::components::ScrollBars;
@@ -65,6 +65,20 @@ where
         super::layout::hierarchical_bfs::rearange(&mut self.graph);
         self.graph.update_surface_size();
         self.surface.resize(self.graph.size());
+        self.repaint_graph();   
+    }
+    fn repaint_graph(&mut self) {
+        let ch = self
+            .background
+            .unwrap_or(Character::new(' ', Color::Transparent, Color::Transparent, CharFlags::None));
+
+        self.surface.clear(ch);
+        let mut out = String::with_capacity(128);
+        for node in &self.graph.nodes {
+            self.surface.fill_rect(node.rect, char!("' ',red,red"));
+            out.clear();
+            node.paint(&mut self.surface, charattr!("w,r"), &mut out);
+        }
     }
     fn move_scroll_to(&mut self, x: i32, y: i32) {
         let sz = self.size();
