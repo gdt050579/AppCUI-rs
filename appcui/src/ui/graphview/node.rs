@@ -37,8 +37,14 @@ where
     pub(super) fn contains(&self, x: i32, y: i32) -> bool {
         self.rect.contains(Point::new(x, y))
     }
-    pub(super) fn paint(&self, surface: &mut Surface, attr: CharAttribute, out: &mut String) {
-        surface.fill_rect(self.rect, Character::with_attributes(' ', attr));
+    pub(super) fn paint(&self, surface: &mut Surface, text_attr: CharAttribute, border_attr: CharAttribute, out: &mut String) {
+        surface.fill_rect(self.rect, Character::with_attributes(' ', text_attr));
+        if let Some(line_type) = self.border {
+            surface.draw_rect(self.rect, line_type, border_attr);
+            surface.set_relative_clip(self.rect.left() + 1, self.rect.top() + 1, self.rect.right() - 1, self.rect.bottom() - 1);
+        } else {
+            surface.set_relative_clip(self.rect.left(), self.rect.top(), self.rect.right(), self.rect.bottom());
+        }
         let mut cx = self.rect.center_x();
         let cy = if self.border.is_some() { 1 } else { 0 } + self.rect.top();
         let w = self.rect.width().saturating_sub(2) as u16;
@@ -47,7 +53,7 @@ where
         }
         let format = TextFormatBuilder::new()
             .align(self.text_align)
-            .attribute(attr)
+            .attribute(text_attr)
             .wrap_type(WrapType::WordWrap(w))
             .position(cx, cy)
             .build();
@@ -57,6 +63,7 @@ where
         }
         self.obj.write(out, sz);
         surface.write_text(&out, &format);
+        surface.reset_clip();
     }
 }
 
@@ -81,7 +88,7 @@ where
                 border_attr: None,
                 text_attr: None,
             },
-            size: None
+            size: None,
         }
     }
     pub fn border(mut self, line_type: LineType) -> Self {

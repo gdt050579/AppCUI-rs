@@ -76,7 +76,7 @@ where
         let mut out = String::with_capacity(128);
         for node in &self.graph.nodes {
             out.clear();
-            node.paint(&mut self.surface, charattr!("w,dr"), &mut out);
+            node.paint(&mut self.surface, charattr!("w,dr"), charattr!("y,dr"), &mut out);
         }
     }
     fn move_scroll_to(&mut self, x: i32, y: i32) {
