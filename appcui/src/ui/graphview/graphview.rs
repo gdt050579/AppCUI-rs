@@ -6,6 +6,12 @@ use crate::{prelude::*, ui::graphview::GraphNode};
 
 use self::components::ScrollBars;
 
+struct StateAttr {
+    text: CharAttribute,
+    border: CharAttribute,
+    use_custom: bool,
+}
+
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct GraphView<T>
 where
@@ -65,18 +71,87 @@ where
         super::layout::hierarchical_bfs::rearange(&mut self.graph);
         self.graph.update_surface_size();
         self.surface.resize(self.graph.size());
-        self.repaint_graph();   
+        self.repaint_graph();
     }
+
+    // fn compute_state_attr(&self) -> StateAttr {
+    //     let theme = self.theme();
+    //     if !self.is_enabled() {
+    //         StateAttr {
+    //             text: theme.text.inactive,
+    //             border: theme.border.inactive,
+    //             use_custom: false,
+    //         }
+    //     } else if self.has_focus() {
+    //         StateAttr {
+    //             text: theme.text.focused,
+    //             border: theme.border.focused,
+    //             use_custom: true,
+    //         }
+    //     } else {
+    //         StateAttr {
+    //             text: theme.text.normal,
+    //             border: theme.border.normal,
+    //             use_custom: false,
+    //         }
+    //     }
+    // }
+
+    fn compute_state_attr(&self) -> StateAttr {
+        let theme = self.theme();
+        if !self.is_enabled() {
+            StateAttr {
+                text: theme.button.text.inactive,
+                border: theme.button.hotkey.inactive,
+                use_custom: false,
+            }
+        } else if self.has_focus() {
+            StateAttr {
+                text: theme.button.text.focused,
+                border: theme.button.hotkey.focused,
+                use_custom: true,
+            }
+        } else {
+            StateAttr {
+                text: theme.button.text.normal,
+                border: theme.button.hotkey.normal,
+                use_custom: false,
+            }
+        }
+    }
+
     fn repaint_graph(&mut self) {
         let ch = self
             .background
             .unwrap_or(Character::new(' ', Color::Transparent, Color::Transparent, CharFlags::None));
-
-        self.surface.clear(ch);
+        let state = self.compute_state_attr();
+        self.surface.reset();
+        for c in &mut self.surface.chars {
+            *c = ch;
+        }
+        // first draw the lines
+        for e in &self.graph.edges {
+            let p1 = self.graph.nodes[e.from_node_id as usize].rect.center();
+            let p2 = self.graph.nodes[e.to_node_id as usize].rect.center();
+            self.surface.draw_orthogonal_line(
+                p1.x,
+                p1.y,
+                p2.x,
+                p2.y,
+                LineType::Single,
+                OrthogonalDirection::Auto,
+                charattr!("white"),
+            );
+        }
         let mut out = String::with_capacity(128);
         for node in &self.graph.nodes {
             out.clear();
-            node.paint(&mut self.surface, charattr!("w,dr"), charattr!("y,dr"), &mut out);
+            let (t, b) = if state.use_custom {
+                (node.text_attr.unwrap_or(state.text), node.border_attr.unwrap_or(state.border))
+            } else {
+                (state.text, state.border)
+            };
+            node.paint(&mut self.surface, t, b, &mut out);
         }
     }
     fn move_scroll_to(&mut self, x: i32, y: i32) {

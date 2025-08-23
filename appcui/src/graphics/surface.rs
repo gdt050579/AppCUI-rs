@@ -7,6 +7,7 @@ use super::Color;
 use super::Cursor;
 use super::Image;
 use super::LineType;
+use super::OrthogonalDirection;
 use super::Point;
 use super::Rect;
 use super::Size;
@@ -14,7 +15,6 @@ use super::TextAlignment;
 use super::TextFormat;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
-use super::OrthogonalDirection;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -640,36 +640,70 @@ impl Surface {
         };
     }
 
-    pub fn draw_orthogonal_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, dir: OrthogonalDirection, attr: CharAttribute) {
-        if (x1==x2) && (y1==y2) {
+    pub fn draw_orthogonal_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, mut dir: OrthogonalDirection, attr: CharAttribute) {
+        if (x1 == x2) && (y1 == y2) {
             // to see what character I should draw
             return;
         }
-        if x1==x2 {
+        if x1 == x2 {
             // vertical line
             self.draw_vertical_line(x1, y1, y2, line_type, attr);
             return;
         }
-        if y1==y2 {
+        if y1 == y2 {
             // horizontal line
             self.draw_horizontal_line(x1, y1, x2, line_type, attr);
             return;
         }
         // simple elbow
+        let cs = line_type.charset();
+        if dir == OrthogonalDirection::Auto {
+            if (x2-x1).abs() > (y2-y1).abs() {
+                dir = OrthogonalDirection::HorizontalFirst;
+            } else {
+                dir = OrthogonalDirection::VerticalFirst;
+            }
+        }
         match dir {
             OrthogonalDirection::HorizontalFirst => {
                 self.draw_horizontal_line(x1, y1, x2, line_type, attr);
                 self.draw_vertical_line(x2, y1, y2, line_type, attr);
-            },
+                let ch = if x1 < x2 {
+                    if y1 < y2 {
+                        cs.corner_top_right
+                    } else {
+                        cs.corner_bottom_right
+                    }
+                } else {
+                    if y1 < y2 {
+                        cs.corner_top_left
+                    } else {
+                        cs.corner_bottom_left
+                    }
+                };
+                self.write_char(x2, y1, Character::with_char(ch));
+            }
             OrthogonalDirection::VerticalFirst => {
-                self.draw_vertical_line(x1, y1, y2, line_type, attr);              
+                self.draw_vertical_line(x1, y1, y2, line_type, attr);
                 self.draw_horizontal_line(x1, y2, x2, line_type, attr);
-            },
-            OrthogonalDirection::Auto => todo!(),
+                let ch = if y1 < y2 {
+                    if x1 < x2 {
+                        cs.corner_bottom_left
+                    } else {
+                        cs.corner_bottom_right
+                    }
+                } else {
+                    if x1 < x2 {
+                        cs.corner_top_left
+                    } else {
+                        cs.corner_top_right
+                    }
+                };
+                self.write_char(x1, y2, Character::with_char(ch));
+            }
+            OrthogonalDirection::Auto => unreachable!(),
         }
-
     }
-
 
     /// Draws a straight line between two points `(x1, y1)` and `(x2, y2)`
     /// on the surface, filling each point along the path with the given character.
