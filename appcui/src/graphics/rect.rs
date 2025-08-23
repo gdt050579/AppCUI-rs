@@ -164,6 +164,12 @@ impl Rect {
         ((self.bottom - self.top) as u32) + 1u32
     }
 
+    /// Returns the size of the Rect
+    #[inline(always)]
+    pub fn size(&self) -> Size {
+        Size::new(((self.right - self.left) as u32) + 1u32, ((self.bottom - self.top) as u32) + 1u32)
+    }
+
     /// Returns the rectangle X-axis center.
     #[inline(always)]
     pub fn center_x(&self) -> i32 {
@@ -275,7 +281,7 @@ impl Rect {
         let h = self.bottom - self.top;
         self.top = y;
         self.bottom = y + h;
-    }    
+    }
 
     /// Sets the **bottom edge** of the rectangle to `y`, preserving its height.
     ///
@@ -287,7 +293,7 @@ impl Rect {
         let h = self.bottom - self.top;
         self.bottom = y;
         self.top = y - h;
-    }        
+    }
 }
 
 /// Adds a `(dx, dy)` offset to this rectangle in place.
