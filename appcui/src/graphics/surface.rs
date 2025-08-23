@@ -310,8 +310,10 @@ impl Surface {
     /// surface.fill_horizontal_line(10, 10, 20, Character::new('-', Color::White, Color::Black, CharFlags::None));
     /// ```
     pub fn fill_horizontal_line(&mut self, left: i32, y: i32, right: i32, ch: Character) {
-        let mut x = left;
-        while x <= right {
+        let l = left.min(right);
+        let r = right.max(left);
+        let mut x = l;
+        while x <= r {
             if let Some(pos) = self.coords_to_position(x, y) {
                 self.chars[pos].set(ch);
             }
@@ -336,8 +338,10 @@ impl Surface {
     /// surface.fill_vertical_line(10, 10, 20, Character::new('|', Color::White, Color::Black, CharFlags::None));
     /// ```
     pub fn fill_vertical_line(&mut self, x: i32, top: i32, bottom: i32, ch: Character) {
-        let mut y = top;
-        while y <= bottom {
+        let t = top.min(bottom);
+        let b = bottom.max(top);
+        let mut y = t;
+        while y <= b {
             if let Some(pos) = self.coords_to_position(x, y) {
                 self.chars[pos].set(ch);
             }
@@ -618,7 +622,7 @@ impl Surface {
     /// use appcui::prelude::*;
     ///
     /// let mut surface = Surface::new(100, 50);
-    /// 
+    ///
     /// // Draw a horizontal single-line border in bold
     /// surface.draw_line(0, 0, 10, 0, LineType::Single, charattr!("white,black"));
     ///
@@ -634,6 +638,27 @@ impl Surface {
             LineType::Braille => self.draw_braille_line(x1, y1, x2, y2, attr),
         };
     }
+
+    pub fn draw_orthogonal_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
+        if (x1==x2) && (y1==y2) {
+            // to see what character I should draw
+            return;
+        }
+        if x1==x2 {
+            // vertical line
+            self.draw_vertical_line(x1, y1, y2, line_type, attr);
+            return;
+        }
+        if y1==y2 {
+            // horizontal line
+            self.draw_horizontal_line(x1, y1, x2, line_type, attr);
+            return;
+        }
+        // simple elbow
+        self.draw_horizontal_line(x1, y1, x2, line_type, attr);
+        self.draw_vertical_line(x2, y1, y2, line_type, attr);
+    }
+
 
     /// Draws a straight line between two points `(x1, y1)` and `(x2, y2)`
     /// on the surface, filling each point along the path with the given character.
@@ -653,7 +678,7 @@ impl Surface {
     /// use appcui::prelude::*;
     ///
     /// let mut surface = Surface::new(100, 50);
-    /// 
+    ///
     /// // Draws a diagonal line from (0, 0) to (5, 3) using '*'
     /// surface.fill_line(0, 0, 5, 3, Character::new('*', Color::White, Color::Black, CharFlags::None));
     ///
