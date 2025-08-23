@@ -14,6 +14,7 @@ use super::TextAlignment;
 use super::TextFormat;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
+use super::OrthogonalDirection;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -639,7 +640,7 @@ impl Surface {
         };
     }
 
-    pub fn draw_orthogonal_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
+    pub fn draw_orthogonal_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, dir: OrthogonalDirection, attr: CharAttribute) {
         if (x1==x2) && (y1==y2) {
             // to see what character I should draw
             return;
@@ -655,8 +656,18 @@ impl Surface {
             return;
         }
         // simple elbow
-        self.draw_horizontal_line(x1, y1, x2, line_type, attr);
-        self.draw_vertical_line(x2, y1, y2, line_type, attr);
+        match dir {
+            OrthogonalDirection::HorizontalFirst => {
+                self.draw_horizontal_line(x1, y1, x2, line_type, attr);
+                self.draw_vertical_line(x2, y1, y2, line_type, attr);
+            },
+            OrthogonalDirection::VerticalFirst => {
+                self.draw_vertical_line(x1, y1, y2, line_type, attr);              
+                self.draw_horizontal_line(x1, y2, x2, line_type, attr);
+            },
+            OrthogonalDirection::Auto => todo!(),
+        }
+
     }
 
 
