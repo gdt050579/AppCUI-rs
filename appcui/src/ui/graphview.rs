@@ -13,4 +13,5 @@ pub use self::initialization_flags::Flags;
 pub use self::graphnode::GraphNode;
 pub use self::graph::Graph;
 pub use self::node::Node;
+pub use self::node::NodeBuilder;
 pub use self::edge::Edge;

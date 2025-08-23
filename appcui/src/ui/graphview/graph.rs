@@ -1,7 +1,7 @@
-use super::edge::Edge;
-use super::node::Node;
+use super::Edge;
+use super::Node;
+use super::NodeBuilder;
 use super::GraphNode;
-use crate::graphics::*;
 use crate::prelude::*;
 pub struct Graph<T>
 where
@@ -26,7 +26,7 @@ where
     where
         T: GraphNode + Clone,
     {
-        let v: Vec<Node<T>> = nodes.iter().map(|n| Node::new(n.clone())).collect();
+        let v: Vec<Node<T>> = nodes.iter().map(|n| NodeBuilder::new(n.clone()).build()).collect();
         let e: Vec<Edge> = edges
             .iter()
             .map(|link| Edge {
@@ -36,6 +36,20 @@ where
             .collect();
         Self::new(v, e)
     }
+    pub fn with_slices_and_border(nodes: &[T], edges: &[(u32, u32)], border: LineType) -> Self
+    where
+        T: GraphNode + Clone,
+    {
+        let v: Vec<Node<T>> = nodes.iter().map(|n| NodeBuilder::new(n.clone()).border(border).build()).collect();
+        let e: Vec<Edge> = edges
+            .iter()
+            .map(|link| Edge {
+                from_node_id: link.0,
+                to_node_id: link.1,
+            })
+            .collect();
+        Self::new(v, e)
+    }    
     pub(super) fn update_surface_size(&mut self) {
         if self.nodes.is_empty() {
             self.surface_size = Size::new(1, 1);

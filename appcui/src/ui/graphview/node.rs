@@ -20,7 +20,17 @@ where
     T: GraphNode,
 {
     fn resize(&mut self, mut size: Size) {
-        
+        let p = self.rect.top_left();
+        if self.border.is_some() {
+            // 2 characters (left/right for the border)
+            // 2 characters (top/bottom for the border)
+            size.width += 2;
+            size.height += 2;
+        } else {
+            // one extra space on left and right
+            size.width += 2;
+        }
+        self.rect = Rect::with_point_and_size(p, size);
     }
 
     #[inline]
