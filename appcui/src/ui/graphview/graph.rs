@@ -267,8 +267,12 @@ where
     }
 
     pub(super) fn set_current_node(&mut self, index: usize, control: &ControlBase) {
-        self.current_node = index;
-        self.paint_node(control, index);
+        if index != self.current_node {
+            let old_index = self.current_node;
+            self.current_node = index;
+            self.paint_node(control, old_index);
+            self.paint_node(control, index);
+        }
     }
 }
 
