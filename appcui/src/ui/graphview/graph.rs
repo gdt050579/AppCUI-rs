@@ -37,7 +37,7 @@ impl ControlState {
     }
     #[inline(always)]
     fn current_node_attr(&self, theme: &Theme) -> (CharAttribute, CharAttribute) {
-        (theme.button.text.pressed_or_selectd, theme.button.hotkey.pressed_or_selectd)
+        (theme.button.text.focused, theme.button.hotkey.focused)
     }
 }
 
@@ -170,11 +170,13 @@ where
         if (state != ControlState::Disabled) && (hover_node_id < len) {
             let node = &self.nodes[hover_node_id];
             let (t, b) = state.hovered_node_attr(theme);
+            self.repr_buffer.clear();
             node.paint(&mut self.surface, t, b, &mut self.repr_buffer);
         }
         if (state == ControlState::Focused) && (self.current_node < len) {
             let node = &self.nodes[self.current_node];
             let (t, b) = state.current_node_attr(theme);
+            self.repr_buffer.clear();
             node.paint(&mut self.surface, t, b, &mut self.repr_buffer);
         }
     }
@@ -209,6 +211,7 @@ where
             }
         };
         let node = &self.nodes[index];
+        self.repr_buffer.clear();
         node.paint(&mut self.surface, t, b, &mut self.repr_buffer);
     }
     pub(super) fn reset_hover(&mut self, control: &ControlBase) {
