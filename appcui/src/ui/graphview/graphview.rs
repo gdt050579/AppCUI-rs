@@ -60,7 +60,7 @@ where
 
     pub fn set_graph(&mut self, graph: Graph<T>) {
         self.graph = graph;
-        super::layout::hierarchical_bfs::rearange(&mut self.graph);
+        super::layout::grid::rearange(&mut self.graph);
         self.graph.resize_to_fit();
         self.graph.repaint(&self.base);
     }
