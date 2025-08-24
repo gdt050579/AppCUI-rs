@@ -25,19 +25,27 @@ impl ControlState {
         }
     }
     #[inline(always)]
-    fn node_attr(&self, theme: &Theme) -> (CharAttribute, CharAttribute) {
+    fn node_attr(&self, theme: &Theme) -> CharAttribute {
         match self {
-            ControlState::Disabled => (theme.button.text.inactive, theme.button.hotkey.inactive),
-            ControlState::Normal | ControlState::Focused => (theme.button.text.normal, theme.button.hotkey.normal),
+            ControlState::Disabled => theme.button.text.inactive,
+            ControlState::Normal | ControlState::Focused => theme.button.text.normal,
         }
     }
     #[inline(always)]
-    fn hovered_node_attr(&self, theme: &Theme) -> (CharAttribute, CharAttribute) {
-        (theme.button.text.hovered, theme.button.hotkey.hovered)
+    fn edge_attr(&self, theme: &Theme) -> CharAttribute {
+        match self {
+            ControlState::Disabled => theme.lines.inactive,
+            ControlState::Normal => theme.lines.normal,
+            ControlState::Focused => theme.lines.focused,
+        }
     }
     #[inline(always)]
-    fn current_node_attr(&self, theme: &Theme) -> (CharAttribute, CharAttribute) {
-        (theme.button.text.focused, theme.button.hotkey.focused)
+    fn hovered_node_attr(&self, theme: &Theme) -> CharAttribute {
+        theme.button.text.hovered
+    }
+    #[inline(always)]
+    fn current_node_attr(&self, theme: &Theme) -> CharAttribute {
+        theme.button.text.focused
     }
 }
 
@@ -149,19 +157,22 @@ where
         }
         let state = ControlState::new(control);
         let theme = control.theme();
-        let (text_attr, border_attr) = state.node_attr(theme);
+        let text_attr = state.node_attr(theme);
+        let edge_attr = state.edge_attr(theme);
+        // draw edges
+        for e in &self.edges {
+            let p1 = self.nodes[e.from_node_id as usize].rect.center();
+            let p2 = self.nodes[e.to_node_id as usize].rect.center();
+            self.surface
+                .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, LineType::Single, OrthogonalDirection::Auto, edge_attr);
+        }
         // draw nodes
         for node in &self.nodes {
             self.repr_buffer.clear();
             if state == ControlState::Focused {
-                node.paint(
-                    &mut self.surface,
-                    node.text_attr.unwrap_or(text_attr),
-                    node.border_attr.unwrap_or(border_attr),
-                    &mut self.repr_buffer,
-                );
+                node.paint(&mut self.surface, node.text_attr.unwrap_or(text_attr), &mut self.repr_buffer);
             } else {
-                node.paint(&mut self.surface, text_attr, border_attr, &mut self.repr_buffer);
+                node.paint(&mut self.surface, text_attr, &mut self.repr_buffer);
             };
         }
         // draw hover node (if case)
@@ -169,15 +180,15 @@ where
         let hover_node_id = self.hovered_node.unwrap_or(usize::MAX);
         if (state != ControlState::Disabled) && (hover_node_id < len) {
             let node = &self.nodes[hover_node_id];
-            let (t, b) = state.hovered_node_attr(theme);
+            let attr = state.hovered_node_attr(theme);
             self.repr_buffer.clear();
-            node.paint(&mut self.surface, t, b, &mut self.repr_buffer);
+            node.paint(&mut self.surface, attr, &mut self.repr_buffer);
         }
         if (state == ControlState::Focused) && (self.current_node < len) {
             let node = &self.nodes[self.current_node];
-            let (t, b) = state.current_node_attr(theme);
+            let attr = state.current_node_attr(theme);
             self.repr_buffer.clear();
-            node.paint(&mut self.surface, t, b, &mut self.repr_buffer);
+            node.paint(&mut self.surface, attr, &mut self.repr_buffer);
         }
     }
     pub(super) fn paint_node(&mut self, control: &ControlBase, index: usize) {
@@ -187,7 +198,7 @@ where
         }
         let state = ControlState::new(control);
         let theme = control.theme();
-        let (t, b) = match state {
+        let attr = match state {
             ControlState::Disabled => state.node_attr(theme),
             ControlState::Normal => {
                 let hover_node_id = self.hovered_node.unwrap_or(usize::MAX);
@@ -212,7 +223,7 @@ where
         };
         let node = &self.nodes[index];
         self.repr_buffer.clear();
-        node.paint(&mut self.surface, t, b, &mut self.repr_buffer);
+        node.paint(&mut self.surface, attr, &mut self.repr_buffer);
     }
     pub(super) fn reset_hover(&mut self, control: &ControlBase) {
         let index = self.hovered_node.unwrap_or(usize::MAX);
@@ -236,6 +247,28 @@ where
     }
     pub(super) fn surface(&self) -> &Surface {
         &self.surface
+    }
+    pub(super) fn move_node_to(&mut self, id: usize, x: i32, y: i32, control: &ControlBase) -> bool {
+        let node = &mut self.nodes[id];
+        let tl = node.rect.top_left();
+        if (tl.x == x) && (tl.y == y) {
+            return false;
+        }
+        node.rect.set_left(x);
+        node.rect.set_top(y);
+        let mut resized = false;
+        if node.rect.right() >= (self.surface_size.width as i32) || node.rect.bottom() >= (self.surface_size.height as i32) || x < 0 || y < 0 {
+            // need to resize the surface
+            self.resize_to_fit();
+            resized = true;
+        }
+        self.repaint(control);
+        resized
+    }
+
+    pub(super) fn set_current_node(&mut self, index: usize, control: &ControlBase) {
+        self.current_node = index;
+        self.paint_node(control, index);
     }
 }
 

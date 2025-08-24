@@ -1,6 +1,6 @@
-#[repr(u8)]
-#[derive(Eq,PartialEq, Copy, Clone)]
+use EnumBitFlags::EnumBitFlags;
+
+#[EnumBitFlags(bits: 8)]
 pub enum Flags {
-    None,
-    ScrollBars,
+    ScrollBars = 1,
 }

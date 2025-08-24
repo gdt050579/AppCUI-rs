@@ -6,6 +6,17 @@ use crate::{prelude::*, ui::graphview::GraphNode};
 
 use self::components::ScrollBars;
 
+struct NodeInfo {
+    id: usize,
+    top_left: Point,
+    origin: Point,
+}
+enum Drag {
+    None,
+    View(Point),
+    Node(NodeInfo),
+}
+
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct GraphView<T>
 where
@@ -15,7 +26,7 @@ where
     origin_point: Point,
     background: Option<Character>,
     flags: Flags,
-    drag_point: Option<Point>,
+    drag: Drag,
     scrollbars: ScrollBars,
 }
 impl<T> GraphView<T>
@@ -36,7 +47,7 @@ where
             flags,
             origin_point: Point::ORIGIN,
             background: None,
-            drag_point: None,
+            drag: Drag::None,
             graph: Graph::default(),
             scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
         }
@@ -65,56 +76,6 @@ where
         self.graph.repaint(&self.base);
     }
 
-    // fn compute_state_attr(&self) -> StateAttr {
-    //     let theme = self.theme();
-    //     if !self.is_enabled() {
-    //         StateAttr {
-    //             text: theme.text.inactive,
-    //             border: theme.border.inactive,
-    //             use_custom: false,
-    //         }
-    //     } else if self.has_focus() {
-    //         StateAttr {
-    //             text: theme.text.focused,
-    //             border: theme.border.focused,
-    //             use_custom: true,
-    //         }
-    //     } else {
-    //         StateAttr {
-    //             text: theme.text.normal,
-    //             border: theme.border.normal,
-    //             use_custom: false,
-    //         }
-    //     }
-    // }
-
-    // fn repaint_graph(&mut self) {
-
-    //     // first draw the lines
-    //     for e in &self.graph.edges {
-    //         let p1 = self.graph.nodes[e.from_node_id as usize].rect.center();
-    //         let p2 = self.graph.nodes[e.to_node_id as usize].rect.center();
-    //         self.surface.draw_orthogonal_line(
-    //             p1.x,
-    //             p1.y,
-    //             p2.x,
-    //             p2.y,
-    //             LineType::Single,
-    //             OrthogonalDirection::Auto,
-    //             charattr!("white"),
-    //         );
-    //     }
-    //     let mut out = String::with_capacity(128);
-    //     for node in &self.graph.nodes {
-    //         out.clear();
-    //         let (t, b) = if state.use_custom {
-    //             (node.text_attr.unwrap_or(state.text), node.border_attr.unwrap_or(state.border))
-    //         } else {
-    //             (state.text, state.border)
-    //         };
-    //         node.paint(&mut self.surface, t, b, &mut out);
-    //     }
-    // }
     fn move_scroll_to(&mut self, x: i32, y: i32) {
         let sz = self.size();
         let surface_size = self.graph.size();
@@ -137,15 +98,18 @@ where
         let v = -(self.scrollbars.vertical_index() as i32);
         self.move_scroll_to(h, v);
     }
+    fn update_scroll_bars(&mut self) {
+        let paint_sz = self.graph.size();
+        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
+        self.move_scroll_to(self.origin_point.x, self.origin_point.y);        
+    }
 }
 impl<T> OnResize for GraphView<T>
 where
     T: GraphNode,
 {
-    fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
-        let paint_sz = self.graph.size();
-        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
-        self.move_scroll_to(self.origin_point.x, self.origin_point.y);
+    fn on_resize(&mut self, _: Size, _: Size) {
+        self.update_scroll_bars();
     }
 }
 impl<T> OnPaint for GraphView<T>
@@ -153,7 +117,7 @@ where
     T: GraphNode,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        if (self.has_focus()) && (self.flags == Flags::ScrollBars) {
+        if (self.has_focus()) && (self.flags.contains_one(Flags::ScrollBars)) {
             self.scrollbars.paint(surface, theme, self);
             surface.reduce_clip_by(0, 0, 1, 1);
         }
@@ -201,12 +165,81 @@ where
             }
             MouseEvent::Over(point) => {
                 return self.graph.process_mouse_over(&self.base, *point);
+            }
+            MouseEvent::Pressed(data) => {
+                if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
+                    // click on a node
+                    self.graph.set_current_node(id, &self.base);
+                    let tl = self.graph.nodes[id].rect.top_left();
+                    self.drag = Drag::Node(NodeInfo {
+                        id,
+                        top_left: tl,
+                        origin: Point::new(data.x, data.y),
+                    });
+                    return EventProcessStatus::Processed;
+                }
+                if self.flags.contains_one(Flags::ScrollBars) && (self.has_focus()) {
+                    let sz = self.size();
+                    if (data.x == sz.width as i32) || (data.y == sz.height as i32) {
+                        return EventProcessStatus::Ignored;
+                    }
+                }
+                self.drag = Drag::View(Point::new(data.x, data.y));
+                return EventProcessStatus::Processed;
+            }
+            MouseEvent::Released(data) => match &self.drag {
+                Drag::None => {
+                    return EventProcessStatus::Ignored;
+                }
+                Drag::View(p) => {
+                    self.move_scroll_to(self.origin_point.x + data.x - p.x, self.origin_point.y + data.y - p.y);
+                    self.drag = Drag::None;
+                    return EventProcessStatus::Processed;
+                }
+                Drag::Node(node_info) => {
+                    if self.graph.move_node_to(
+                        node_info.id,
+                        node_info.top_left.x + data.x - node_info.origin.x,
+                        node_info.top_left.y + data.y - node_info.origin.y,
+                        &self.base,
+                    ) {
+                        self.update_scroll_bars();
+                    }
+                    self.drag = Drag::None;
+                    return EventProcessStatus::Processed;
+                }
             },
-            MouseEvent::Pressed(mouse_event_data) => todo!(),
-            MouseEvent::Released(mouse_event_data) => todo!(),
             MouseEvent::DoubleClick(mouse_event_data) => todo!(),
-            MouseEvent::Drag(mouse_event_data) => todo!(),
-            MouseEvent::Wheel(mouse_wheel_direction) => todo!(),
+            MouseEvent::Drag(data) => match &self.drag {
+                Drag::None => {
+                    return EventProcessStatus::Ignored;
+                }
+                Drag::View(p) => {
+                    self.move_scroll_to(self.origin_point.x + data.x - p.x, self.origin_point.y + data.y - p.y);
+                    self.drag = Drag::View(Point::new(data.x, data.y));
+                    return EventProcessStatus::Processed;
+                }
+                Drag::Node(node_info) => {
+                    if self.graph.move_node_to(
+                        node_info.id,
+                        node_info.top_left.x + data.x - node_info.origin.x,
+                        node_info.top_left.y + data.y - node_info.origin.y,
+                        &self.base,
+                    ) {
+                        self.update_scroll_bars();
+                    }
+                    return EventProcessStatus::Processed;
+                }
+            },
+            MouseEvent::Wheel(dir) => {
+                match dir {
+                    MouseWheelDirection::Left => self.move_scroll_to(self.origin_point.x + 1, self.origin_point.y),
+                    MouseWheelDirection::Right => self.move_scroll_to(self.origin_point.x - 1, self.origin_point.y),
+                    MouseWheelDirection::Up => self.move_scroll_to(self.origin_point.x, self.origin_point.y + 1),
+                    MouseWheelDirection::Down => self.move_scroll_to(self.origin_point.x, self.origin_point.y - 1),
+                };
+                return EventProcessStatus::Processed;
+            }
         }
         EventProcessStatus::Ignored
     }

@@ -12,7 +12,6 @@ pub struct Node<T: GraphNode> {
     pub(super) rect: Rect,
     pub(super) border: Option<LineType>,
     pub(super) text_align: TextAlignment,
-    pub(super) border_attr: Option<CharAttribute>,
     pub(super) text_attr: Option<CharAttribute>,
 }
 impl<T> Node<T>
@@ -37,10 +36,10 @@ where
     pub(super) fn contains(&self, x: i32, y: i32) -> bool {
         self.rect.contains(Point::new(x, y))
     }
-    pub(super) fn paint(&self, surface: &mut Surface, text_attr: CharAttribute, border_attr: CharAttribute, out: &mut String) {
-        surface.fill_rect(self.rect, Character::with_attributes(' ', text_attr));
+    pub(super) fn paint(&self, surface: &mut Surface, attr: CharAttribute, out: &mut String) {
+        surface.fill_rect(self.rect, Character::with_attributes(' ', attr));
         if let Some(line_type) = self.border {
-            surface.draw_rect(self.rect, line_type, border_attr);
+            surface.draw_rect(self.rect, line_type, attr);
             surface.set_relative_clip(self.rect.left() + 1, self.rect.top() + 1, self.rect.right() - 1, self.rect.bottom() - 1);
         } else {
             surface.set_relative_clip(self.rect.left(), self.rect.top(), self.rect.right(), self.rect.bottom());
@@ -53,7 +52,7 @@ where
         }
         let format = TextFormatBuilder::new()
             .align(self.text_align)
-            .attribute(text_attr)
+            .attribute(attr)
             .wrap_type(WrapType::WordWrap(w))
             .position(cx, cy)
             .build();
@@ -85,7 +84,6 @@ where
                 rect: Rect::new(0, 0, 0, 0),
                 border: None,
                 text_align: TextAlignment::Center,
-                border_attr: None,
                 text_attr: None,
             },
             size: None,
@@ -97,10 +95,6 @@ where
     }
     pub fn text_attribute(mut self, attr: CharAttribute) -> Self {
         self.node.text_attr = Some(attr);
-        self
-    }
-    pub fn border_attribute(mut self, attr: CharAttribute) -> Self {
-        self.node.border_attr = Some(attr);
         self
     }
     pub fn text_alignment(mut self, align: TextAlignment) -> Self {
