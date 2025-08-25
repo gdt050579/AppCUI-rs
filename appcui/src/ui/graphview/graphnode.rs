@@ -4,13 +4,13 @@ use crate::prelude::CharAttribute;
 use crate::system::Theme;
 
 pub trait GraphNode {
-    fn paint(&self, _surface: &mut Surface, _theme: &Theme, attr: CharAttribute) {}
+    fn paint(&self, _surface: &mut Surface, _theme: &Theme, _attr: CharAttribute) {}
     fn write(&self, out: &mut String, size: Size);
     fn prefered_size(&self) -> Size;
 }
 
 impl GraphNode for &str {
-    fn write(&self, out: &mut String, size: Size) {
+    fn write(&self, out: &mut String, _: Size) {
        out.push_str(self)
     }
 

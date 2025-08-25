@@ -374,6 +374,18 @@ where
             key!("Ctrl+Right") => self.move_node_with(self.current_node, 1, 0, control),
             key!("Ctrl+Up") => self.move_node_with(self.current_node, 0, -1, control),
             key!("Ctrl+Down") => self.move_node_with(self.current_node, 0, 1, control),
+            key!("Ctrl+Tab") => {
+                if self.nodes.len() > 0 {
+                    self.set_current_node((self.current_node + 1) % self.nodes.len(), control);
+                }
+                true
+            }
+            key!("Ctrl+Shift+Tab") => {
+                if self.nodes.len() > 0 {
+                    self.set_current_node((self.current_node + self.nodes.len() - 1) % self.nodes.len(), control);
+                }
+                true
+            }
             _ => false,
         }
     }

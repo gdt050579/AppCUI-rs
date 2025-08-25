@@ -246,7 +246,7 @@ where
                     return EventProcessStatus::Processed;
                 }
             },
-            MouseEvent::DoubleClick(mouse_event_data) => todo!(),
+            MouseEvent::DoubleClick(_) => return EventProcessStatus::Ignored,
             MouseEvent::Drag(data) => match &self.drag {
                 Drag::None => {
                     return EventProcessStatus::Ignored;
@@ -277,7 +277,6 @@ where
                 };
                 return EventProcessStatus::Processed;
             }
-        }
-        EventProcessStatus::Ignored
+        }        
     }
 }
