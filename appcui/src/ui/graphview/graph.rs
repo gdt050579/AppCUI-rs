@@ -267,6 +267,9 @@ where
         &self.surface
     }
     pub(super) fn move_node_to(&mut self, id: usize, x: i32, y: i32, control: &ControlBase) -> bool {
+        if id >= self.nodes.len() {
+            return false;
+        }
         let node = &mut self.nodes[id];
         let tl = node.rect.top_left();
         if (tl.x == x) && (tl.y == y) {
@@ -282,6 +285,13 @@ where
         }
         self.repaint(control);
         resized
+    }
+    fn move_node_with(&mut self, id: usize, dx: i32, dy: i32, control: &ControlBase) -> bool {
+        if id >= self.nodes.len() {
+            return false;
+        }
+        let tl = self.nodes[id].rect.top_left();
+        self.move_node_to(id, tl.x + dx, tl.y + dy, control)
     }
 
     pub(super) fn set_current_node(&mut self, index: usize, control: &ControlBase) {
@@ -360,6 +370,10 @@ where
             key!("Right") => self.move_to_node_with_direction(Direction::OnRight, control),
             key!("Up") => self.move_to_node_with_direction(Direction::OnTop, control),
             key!("Down") => self.move_to_node_with_direction(Direction::OnBottom, control),
+            key!("Ctrl+Left") => self.move_node_with(self.current_node, -1, 0, control),
+            key!("Ctrl+Right") => self.move_node_with(self.current_node, 1, 0, control),
+            key!("Ctrl+Up") => self.move_node_with(self.current_node, 0, -1, control),
+            key!("Ctrl+Down") => self.move_node_with(self.current_node, 0, 1, control),
             _ => false,
         }
     }
