@@ -1,4 +1,5 @@
 use std::u32;
+use std::u64;
 use std::usize;
 
 use super::Edge;
@@ -12,6 +13,23 @@ enum ControlState {
     Disabled,
     Normal,
     Focused,
+}
+
+enum Direction {
+    OnLeft,
+    OnRight,
+    OnTop,
+    OnBottom,
+}
+impl Direction {
+    fn compare_point(&self, rect: &Rect) -> Point {
+        match self {
+            Direction::OnLeft => Point::new(rect.left(), rect.center_y()),
+            Direction::OnRight => Point::new(rect.right(), rect.center_y()),
+            Direction::OnTop => Point::new(rect.center_x(), rect.top()),
+            Direction::OnBottom => Point::new(rect.center_x(), rect.bottom()),
+        }
+    }
 }
 
 impl ControlState {
@@ -272,6 +290,77 @@ where
             self.current_node = index;
             self.paint_node(control, old_index);
             self.paint_node(control, index);
+        }
+    }
+
+    fn next_node(&self, dir: Direction) -> Option<usize> {
+        if self.nodes.is_empty() {
+            return None;
+        }
+        let r = self.nodes[self.current_node].rect;
+        let c = dir.compare_point(&r);
+        let mut best = None;
+        let mut best_dist = u64::MAX;
+        for (index, n) in self.nodes.iter().enumerate() {
+            if index == self.current_node {
+                continue;
+            }
+            let dp = match dir {
+                Direction::OnLeft => {
+                    if r.right() > n.rect.right() {
+                        Some(Direction::OnRight.compare_point(&n.rect))
+                    } else {
+                        None
+                    }
+                }
+                Direction::OnRight => {
+                    if r.left() < n.rect.left() {
+                        Some(Direction::OnLeft.compare_point(&n.rect))
+                    } else {
+                        None
+                    }
+                }
+                Direction::OnTop => {
+                    if r.bottom() > n.rect.bottom() {
+                        Some(Direction::OnBottom.compare_point(&n.rect))
+                    } else {
+                        None
+                    }
+                }
+                Direction::OnBottom => {
+                    if r.top() < n.rect.top() {
+                        Some(Direction::OnTop.compare_point(&n.rect))
+                    } else {
+                        None
+                    }
+                }
+            };
+            if let Some(nc) = dp {
+                let dist = ((nc.x - c.x) * (nc.x - c.x)) as u64 + ((nc.y - c.y) * (nc.y - c.y)) as u64;
+                if dist < best_dist {
+                    best = Some(index);
+                    best_dist = dist;
+                }
+            }
+        }
+        best
+    }
+    fn move_to_node_with_direction(&mut self, dir: Direction, control: &ControlBase) -> bool {
+        if let Some(next_index) = self.next_node(dir) {
+            self.set_current_node(next_index, control);
+            true
+        } else {
+            false
+        }
+    }
+
+    pub(super) fn process_key_events(&mut self, key: Key, control: &ControlBase) -> bool {
+        match key.value() {
+            key!("Left") => self.move_to_node_with_direction(Direction::OnLeft, control),
+            key!("Right") => self.move_to_node_with_direction(Direction::OnRight, control),
+            key!("Up") => self.move_to_node_with_direction(Direction::OnTop, control),
+            key!("Down") => self.move_to_node_with_direction(Direction::OnBottom, control),
+            _ => false,
         }
     }
 }

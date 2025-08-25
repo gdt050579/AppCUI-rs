@@ -101,7 +101,7 @@ where
     fn update_scroll_bars(&mut self) {
         let paint_sz = self.graph.size();
         self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
-        self.move_scroll_to(self.origin_point.x, self.origin_point.y);        
+        self.move_scroll_to(self.origin_point.x, self.origin_point.y);
     }
 }
 impl<T> OnResize for GraphView<T>
@@ -131,8 +131,45 @@ impl<T> OnKeyPressed for GraphView<T>
 where
     T: GraphNode,
 {
-    fn on_key_pressed(&mut self, _key: Key, _character: char) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        if self.graph.process_key_events(key, &self.base) {
+            return EventProcessStatus::Processed;
+        }
+        match key.value() {
+            key!("Alt+Left") => {
+                self.move_scroll_to(self.origin_point.x + 1, self.origin_point.y);
+                EventProcessStatus::Processed
+            }
+            key!("Alt+Right") => {
+                self.move_scroll_to(self.origin_point.x - 1, self.origin_point.y);
+                EventProcessStatus::Processed
+            }
+            key!("Alt+Up") => {
+                self.move_scroll_to(self.origin_point.x, self.origin_point.y + 1);
+                EventProcessStatus::Processed
+            }
+            key!("Alt+Down") => {
+                self.move_scroll_to(self.origin_point.x, self.origin_point.y - 1);
+                EventProcessStatus::Processed
+            }
+            key!("PageUp") => {
+                self.move_scroll_to(self.origin_point.x, self.origin_point.y + self.size().height as i32);
+                EventProcessStatus::Processed
+            }
+            key!("PageDown") => {
+                self.move_scroll_to(self.origin_point.x, self.origin_point.y - self.size().height as i32);
+                EventProcessStatus::Processed
+            }
+            key!("Home") => {
+                self.move_scroll_to(0, 0);
+                EventProcessStatus::Processed
+            }
+            key!("End") => {
+                self.move_scroll_to(i32::MIN, i32::MIN);
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
 
