@@ -13,6 +13,8 @@ pub struct Node<T: GraphNode> {
     pub(super) border: Option<LineType>,
     pub(super) text_align: TextAlignment,
     pub(super) text_attr: Option<CharAttribute>,
+    pub(super) edges_in: Vec<u32>,
+    pub(super) edges_out: Vec<u32>,
 }
 impl<T> Node<T>
 where
@@ -85,6 +87,8 @@ where
                 border: None,
                 text_align: TextAlignment::Center,
                 text_attr: None,
+                edges_in: Vec::new(),
+                edges_out: Vec::new(),
             },
             size: None,
         }

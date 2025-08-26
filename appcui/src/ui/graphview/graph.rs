@@ -84,7 +84,7 @@ where
     T: GraphNode,
 {
     pub fn new(nodes: Vec<Node<T>>, edges: Vec<Edge>) -> Self {
-        Self {
+        let mut g = Self {
             nodes,
             edges,
             surface_size: Size::new(1, 1),
@@ -92,7 +92,16 @@ where
             current_node: 0,
             hovered_node: None,
             repr_buffer: String::with_capacity(128),
+        };
+        // remove edges that have invalid node index value
+        let nodes_count = g.nodes.len() as u32;
+        g.edges.retain(|e| (e.from_node_id < nodes_count) && (e.to_node_id < nodes_count));
+        // build edges_in / edges_out for each node
+        for (idx,e) in g.edges.iter().enumerate() {
+            g.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
+            g.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
         }
+        g
     }
     pub fn with_slices(nodes: &[T], edges: &[(u32, u32)]) -> Self
     where
@@ -181,8 +190,9 @@ where
         for e in &self.edges {
             let p1 = self.nodes[e.from_node_id as usize].rect.center();
             let p2 = self.nodes[e.to_node_id as usize].rect.center();
-            self.surface
-                .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, LineType::Single, OrthogonalDirection::Auto, edge_attr);
+            // self.surface
+            //     .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, LineType::Single, OrthogonalDirection::Auto, edge_attr);
+            self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, LineType::Single, edge_attr);
         }
         // draw nodes
         for node in &self.nodes {
