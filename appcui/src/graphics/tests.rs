@@ -1254,7 +1254,7 @@ fn check_draw_line_boxes() {
     s.write_char(1, 11, ch_end);
 
     //s.print(false);
-    assert_eq!(s.compute_hash(), 0x86EB4D9323C0CC89);
+    assert_eq!(s.compute_hash(), 0x2188169A7786E648);
 }
 
 #[test]
@@ -1285,7 +1285,7 @@ fn check_draw_line_blocks() {
     s.write_char(1, 11, ch_end);
 
     //s.print(false);
-    assert_eq!(s.compute_hash(), 0xAD6C3BC80EA6D1C5);
+    assert_eq!(s.compute_hash(), 0x7C79142A4ED38F51);
 }
 
 #[test]
@@ -1395,8 +1395,8 @@ fn check_draw_line_small_angle_horizontal() {
     s.draw_line(40, 3, 1, 4,  LineType::Single, CharAttribute::default());
     s.draw_line(1, 10, 40, 9,  LineType::Single, CharAttribute::default());
     s.draw_line(40, 11, 1, 12,  LineType::Single, CharAttribute::default());
-    s.print(false);
-    assert_eq!(s.compute_hash(), 0x0);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xAB7ED1ACC5674F55);
 }
 
 
@@ -1410,7 +1410,7 @@ fn check_draw_line_small_angle_vertical() {
     s.draw_line(10, 15, 9, 1,  LineType::Single, CharAttribute::default());
     s.draw_line(20, 1, 19, 15,  LineType::Single, CharAttribute::default());
     //s.print(false);
-    assert_eq!(s.compute_hash(), 0x903A73D463DA86C5);
+    assert_eq!(s.compute_hash(), 0x574FC9BE130E402D);
 }
 
 #[test]
@@ -1422,8 +1422,8 @@ fn check_draw_line_diagonal() {
     s.draw_line(20, 15, 6, 1,  LineType::Single, CharAttribute::default());
     s.draw_line(22, 15, 36, 1,  LineType::Single, CharAttribute::default());
     s.draw_line(40, 1, 26, 15,  LineType::Single, CharAttribute::default());
-    s.print(false);
-    //assert_eq!(s.compute_hash(), 0x903A73D463DA86C5);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x6684ABF675F12691);
 }
 
 
@@ -1440,6 +1440,6 @@ fn check_draw_line_small_angle() {
     // diagonal (small - 2 chars)
     s.draw_line(8, 7, 9, 8,  LineType::Single, CharAttribute::default());
     s.draw_line(8, 12, 9, 11,  LineType::Single, CharAttribute::default());
-    s.print(false);
-    //assert_eq!(s.compute_hash(), 0xBA48710BD060DFAB);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xF13389F6E5923425);
 }
