@@ -1385,3 +1385,61 @@ fn check_fill_line() {
     //s.print(false);
     assert_eq!(s.compute_hash(), 0x953846DA8B6047F5);
 }
+
+#[test]
+fn check_draw_line_small_angle_horizontal() {
+    let mut s = SurfaceTester::new(42, 15);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    // horizontal
+    s.draw_line(1, 1, 40, 2,  LineType::Single, CharAttribute::default());
+    s.draw_line(40, 3, 1, 4,  LineType::Single, CharAttribute::default());
+    s.draw_line(1, 10, 40, 9,  LineType::Single, CharAttribute::default());
+    s.draw_line(40, 11, 1, 12,  LineType::Single, CharAttribute::default());
+    s.print(false);
+    assert_eq!(s.compute_hash(), 0x0);
+}
+
+
+#[test]
+fn check_draw_line_small_angle_vertical() {
+    let mut s = SurfaceTester::new(42, 15);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    // vertical
+    s.draw_line(1, 1, 2, 15,  LineType::Single, CharAttribute::default());
+    s.draw_line(3, 15, 4, 1,  LineType::Single, CharAttribute::default());
+    s.draw_line(10, 15, 9, 1,  LineType::Single, CharAttribute::default());
+    s.draw_line(20, 1, 19, 15,  LineType::Single, CharAttribute::default());
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x903A73D463DA86C5);
+}
+
+#[test]
+fn check_draw_line_diagonal() {
+    let mut s = SurfaceTester::new(42, 15);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    // vertical
+    s.draw_line(1, 1, 15, 15,  LineType::Single, CharAttribute::default());
+    s.draw_line(20, 15, 6, 1,  LineType::Single, CharAttribute::default());
+    s.draw_line(22, 15, 36, 1,  LineType::Single, CharAttribute::default());
+    s.draw_line(40, 1, 26, 15,  LineType::Single, CharAttribute::default());
+    s.print(false);
+    //assert_eq!(s.compute_hash(), 0x903A73D463DA86C5);
+}
+
+
+#[test]
+fn check_draw_line_small_angle() {
+    let mut s = SurfaceTester::new(42, 15);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    // horizontal
+    s.draw_line(1, 1, 40, 2,  LineType::Single, CharAttribute::default());
+    s.draw_line(40, 3, 1, 4,  LineType::Single, CharAttribute::default());
+    // vertical
+    s.draw_line(1, 5, 2, 15,  LineType::Single, CharAttribute::default());
+    s.draw_line(5, 5, 4, 15,  LineType::Single, CharAttribute::default());
+    // diagonal (small - 2 chars)
+    s.draw_line(8, 7, 9, 8,  LineType::Single, CharAttribute::default());
+    s.draw_line(8, 12, 9, 11,  LineType::Single, CharAttribute::default());
+    s.print(false);
+    //assert_eq!(s.compute_hash(), 0xBA48710BD060DFAB);
+}
