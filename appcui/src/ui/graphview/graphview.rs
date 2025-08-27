@@ -1,5 +1,5 @@
 use super::graph::Graph;
-use super::initialization_flags::Flags;
+use super::initialization_flags::*;
 use crate::{prelude::*, ui::graphview::GraphNode};
 
 use self::components::ScrollBars;
@@ -72,6 +72,18 @@ where
         super::layout::grid::rearange(&mut self.graph);
         self.graph.resize_graph(true);
         self.graph.repaint(&self.base);
+    }
+
+    pub fn set_edge_routing(&mut self, routing: EdgeRouting) {
+        self.graph.set_edge_routing(routing, &self.base);
+    }
+
+    pub fn set_edge_line_type(&mut self, line_type: LineType) {
+        self.graph.set_edge_line_type(line_type, &self.base);
+    }
+
+    pub fn enable_edge_highlighting(&mut self, incoming: bool, outgoing: bool) {
+        self.graph.set_highlight_edges(incoming, outgoing, &self.base);
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {

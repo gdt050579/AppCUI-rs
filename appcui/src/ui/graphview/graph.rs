@@ -1,8 +1,5 @@
-use std::u32;
-use std::u64;
-use std::usize;
-
 use super::Edge;
+use super::EdgeRouting;
 use super::GraphNode;
 use super::Node;
 use super::NodeBuilder;
@@ -80,6 +77,8 @@ where
     repr_buffer: String,
     highlight_edges_in: bool,
     highlight_edges_out: bool,
+    edge_routing: EdgeRouting,
+    line_type: LineType,
 }
 impl<T> Graph<T>
 where
@@ -96,6 +95,8 @@ where
             repr_buffer: String::with_capacity(128),
             highlight_edges_in: false,
             highlight_edges_out: false,
+            edge_routing: EdgeRouting::Direct,
+            line_type: LineType::Single,
         };
         // remove edges that have invalid node index value
         let nodes_count = g.nodes.len() as u32;
@@ -188,6 +189,18 @@ where
             self.repaint(control);
         }
     }
+    pub(super) fn set_edge_routing(&mut self, routing: EdgeRouting, control: &ControlBase) {
+        if routing != self.edge_routing {
+            self.edge_routing = routing;
+            self.repaint(control);
+        }
+    }
+    pub(super) fn set_edge_line_type(&mut self, line_type: LineType, control: &ControlBase) {
+        if line_type != self.line_type {
+            self.line_type = line_type;
+            self.repaint(control);
+        }
+    }
     pub(super) fn mouse_pos_to_index(&self, x: i32, y: i32) -> Option<usize> {
         for (idx, n) in self.nodes.iter().enumerate() {
             if n.contains(x, y) {
@@ -200,7 +213,12 @@ where
         let e = &self.edges[index as usize];
         let p1 = self.nodes[e.from_node_id as usize].rect.center();
         let p2 = self.nodes[e.to_node_id as usize].rect.center();
-        self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, LineType::Single, attr);
+        match self.edge_routing {
+            EdgeRouting::Direct => self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, self.line_type, attr),
+            EdgeRouting::Orthogonal => self
+                .surface
+                .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, self.line_type, OrthogonalDirection::Auto, attr),
+        }
     }
     fn draw_edges_from_current(&mut self, attr: CharAttribute) {
         if self.current_node >= self.nodes.len() {
@@ -474,6 +492,8 @@ where
             repr_buffer: String::new(),
             highlight_edges_in: false,
             highlight_edges_out: false,
+            edge_routing: EdgeRouting::Direct,
+            line_type: LineType::Single,
         }
     }
 }
