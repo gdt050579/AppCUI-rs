@@ -1,4 +1,3 @@
-use std::ops::Index;
 use std::u32;
 use std::u64;
 use std::usize;

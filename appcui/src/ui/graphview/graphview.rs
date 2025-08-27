@@ -1,7 +1,5 @@
-use super::edge::Edge;
 use super::graph::Graph;
 use super::initialization_flags::Flags;
-use super::node::Node;
 use crate::{prelude::*, ui::graphview::GraphNode};
 
 use self::components::ScrollBars;
@@ -201,9 +199,11 @@ where
                 return EventProcessStatus::Processed;
             }
             MouseEvent::Over(point) => {
-                return self.graph.process_mouse_over(&self.base, *point);
+                let p = Point::new(point.x - self.origin_point.x, point.y - self.origin_point.y);
+                return self.graph.process_mouse_over(&self.base, p);
             }
-            MouseEvent::Pressed(data) => {
+            MouseEvent::Pressed(mouse_data) => {
+                let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                 if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
                     // click on a node
                     self.graph.set_current_node(id, &self.base);
@@ -224,16 +224,17 @@ where
                 self.drag = Drag::View(Point::new(data.x, data.y));
                 return EventProcessStatus::Processed;
             }
-            MouseEvent::Released(data) => match &self.drag {
+            MouseEvent::Released(mouse_data) => match &self.drag {
                 Drag::None => {
                     return EventProcessStatus::Ignored;
                 }
                 Drag::View(p) => {
-                    self.move_scroll_to(self.origin_point.x + data.x - p.x, self.origin_point.y + data.y - p.y);
+                    self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
                     self.drag = Drag::None;
                     return EventProcessStatus::Processed;
                 }
                 Drag::Node(node_info) => {
+                    let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                     if self.graph.move_node_to(
                         node_info.id,
                         node_info.top_left.x + data.x - node_info.origin.x,
@@ -247,16 +248,17 @@ where
                 }
             },
             MouseEvent::DoubleClick(_) => return EventProcessStatus::Ignored,
-            MouseEvent::Drag(data) => match &self.drag {
+            MouseEvent::Drag(mouse_data) => match &self.drag {
                 Drag::None => {
                     return EventProcessStatus::Ignored;
                 }
                 Drag::View(p) => {
-                    self.move_scroll_to(self.origin_point.x + data.x - p.x, self.origin_point.y + data.y - p.y);
-                    self.drag = Drag::View(Point::new(data.x, data.y));
+                    self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
+                    self.drag = Drag::View(Point::new(mouse_data.x, mouse_data.y));
                     return EventProcessStatus::Processed;
                 }
                 Drag::Node(node_info) => {
+                    let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                     if self.graph.move_node_to(
                         node_info.id,
                         node_info.top_left.x + data.x - node_info.origin.x,
