@@ -72,7 +72,7 @@ where
     pub fn set_graph(&mut self, graph: Graph<T>) {
         self.graph = graph;
         super::layout::grid::rearange(&mut self.graph);
-        self.graph.resize_to_fit();
+        self.graph.resize_graph(true);
         self.graph.repaint(&self.base);
     }
 

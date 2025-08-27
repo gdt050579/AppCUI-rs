@@ -1,3 +1,4 @@
+use std::ops::Index;
 use std::u32;
 use std::u64;
 use std::usize;
@@ -78,6 +79,8 @@ where
     current_node: usize,
     hovered_node: Option<usize>,
     repr_buffer: String,
+    highlight_edges_in: bool,
+    highlight_edges_out: bool,
 }
 impl<T> Graph<T>
 where
@@ -92,12 +95,14 @@ where
             current_node: 0,
             hovered_node: None,
             repr_buffer: String::with_capacity(128),
+            highlight_edges_in: false,
+            highlight_edges_out: false,
         };
         // remove edges that have invalid node index value
         let nodes_count = g.nodes.len() as u32;
         g.edges.retain(|e| (e.from_node_id < nodes_count) && (e.to_node_id < nodes_count));
         // build edges_in / edges_out for each node
-        for (idx,e) in g.edges.iter().enumerate() {
+        for (idx, e) in g.edges.iter().enumerate() {
             g.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
             g.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
         }
@@ -131,7 +136,7 @@ where
             .collect();
         Self::new(v, e)
     }
-    fn update_surface_size(&mut self) {
+    fn update_surface_size(&mut self, pack: bool) {
         if self.nodes.is_empty() {
             self.surface_size = Size::new(1, 1);
             return;
@@ -148,25 +153,41 @@ where
         }
         let dx = 2 - tl.x; // one character on X-axes
         let dy = 1 - tl.y; // two character on Y-axes
-                           //log!("G","dx={}, dy={}, TL = {:?}, BR = {:?}",dx,dy, tl, br);
-        for n in &mut self.nodes {
-            n.rect += (dx, dy);
-            //log!("G","  R = {:?}",n.rect);
+        if pack {
+            for n in &mut self.nodes {
+                n.rect += (dx, dy);
+            }
+            // 4 extra ccharacters on left / right (two on left, tow on right)
+            // 2 extra on top-bottom (1 on top, 1 on bottom)
+            self.surface_size = Size::new(((br.x - tl.x + 1 + 4) as u32).max(1), ((br.y - tl.y + 1 + 2) as u32).max(1));
+        } else {
+            let dx = dx.max(0);
+            let dy = dy.max(0);
+            if dx > 0 || dy > 0 {
+                for n in &mut self.nodes {
+                    n.rect += (dx, dy);
+                }
+            }
+            self.surface_size = Size::new(((br.x + (dx - 2) + 1 + 4) as u32).max(1), ((br.y + (dy - 1) + 1 + 2) as u32).max(1));
         }
-        // 4 extra ccharacters on left / right (two on left, tow on right)
-        // 2 extra on top-bottom (1 on top, 1 on bottom)
-        self.surface_size = Size::new(((br.x - tl.x + 1 + 4) as u32).max(1), ((br.y - tl.y + 1 + 2) as u32).max(1));
         //log!("G","New size = {:?}",self.surface_size);
     }
 
-    pub(super) fn resize_to_fit(&mut self) {
-        self.update_surface_size();
+    pub(super) fn resize_graph(&mut self, pack: bool) {
+        self.update_surface_size(pack);
         self.surface.resize(self.surface_size);
     }
 
     #[inline(always)]
     pub(super) fn size(&self) -> Size {
         self.surface_size
+    }
+    pub(super) fn set_highlight_edges(&mut self, endges_is: bool, edges_out: bool, control: &ControlBase) {
+        if (edges_out != self.highlight_edges_out) || (endges_is != self.highlight_edges_in) {
+            self.highlight_edges_in = endges_is;
+            self.highlight_edges_out = edges_out;
+            self.repaint(control);
+        }
     }
     pub(super) fn mouse_pos_to_index(&self, x: i32, y: i32) -> Option<usize> {
         for (idx, n) in self.nodes.iter().enumerate() {
@@ -175,6 +196,32 @@ where
             }
         }
         None
+    }
+    fn draw_edge(&mut self, index: u32, attr: CharAttribute) {
+        let e = &self.edges[index as usize];
+        let p1 = self.nodes[e.from_node_id as usize].rect.center();
+        let p2 = self.nodes[e.to_node_id as usize].rect.center();
+        self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, LineType::Single, attr);
+    }
+    fn draw_edges_from_current(&mut self, attr: CharAttribute) {
+        if self.current_node >= self.nodes.len() {
+            return;
+        }
+        let len = self.nodes[self.current_node].edges_out.len();
+        for i in 0..len {
+            let index = self.nodes[self.current_node].edges_out[i];
+            self.draw_edge(index, attr);
+        }
+    }
+    fn draw_edges_to_current(&mut self, attr: CharAttribute) {
+        if self.current_node >= self.nodes.len() {
+            return;
+        }
+        let len = self.nodes[self.current_node].edges_in.len();
+        for i in 0..len {
+            let index = self.nodes[self.current_node].edges_in[i];
+            self.draw_edge(index, attr);
+        }
     }
     pub(super) fn repaint(&mut self, control: &ControlBase) {
         // clear the entire surface
@@ -186,13 +233,19 @@ where
         let theme = control.theme();
         let text_attr = state.node_attr(theme);
         let edge_attr = state.edge_attr(theme);
-        // draw edges
-        for e in &self.edges {
-            let p1 = self.nodes[e.from_node_id as usize].rect.center();
-            let p2 = self.nodes[e.to_node_id as usize].rect.center();
-            // self.surface
-            //     .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, LineType::Single, OrthogonalDirection::Auto, edge_attr);
-            self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, LineType::Single, edge_attr);
+        // draw all edges
+        let len = self.edges.len() as u32;
+        for index in 0..len {
+            self.draw_edge(index, edge_attr);
+        }
+        if (state == ControlState::Focused) && (self.current_node < self.nodes.len()) {
+            let attr = theme.lines.hovered;
+            if self.highlight_edges_out {
+                self.draw_edges_from_current(attr);
+            }
+            if self.highlight_edges_in {
+                self.draw_edges_to_current(attr);
+            }
         }
         // draw nodes
         for node in &self.nodes {
@@ -203,6 +256,7 @@ where
                 node.paint(&mut self.surface, text_attr, &mut self.repr_buffer);
             };
         }
+        // draw nodes related to current_node
         // draw hover node (if case)
         let len = self.nodes.len();
         let hover_node_id = self.hovered_node.unwrap_or(usize::MAX);
@@ -290,7 +344,7 @@ where
         let mut resized = false;
         if node.rect.right() >= (self.surface_size.width as i32) || node.rect.bottom() >= (self.surface_size.height as i32) || x < 0 || y < 0 {
             // need to resize the surface
-            self.resize_to_fit();
+            self.resize_graph(false);
             resized = true;
         }
         self.repaint(control);
@@ -306,10 +360,15 @@ where
 
     pub(super) fn set_current_node(&mut self, index: usize, control: &ControlBase) {
         if index != self.current_node {
-            let old_index = self.current_node;
-            self.current_node = index;
-            self.paint_node(control, old_index);
-            self.paint_node(control, index);
+            if self.highlight_edges_in || self.highlight_edges_out {
+                self.current_node = index;
+                self.repaint(control);
+            } else {
+                let old_index = self.current_node;
+                self.current_node = index;
+                self.paint_node(control, old_index);
+                self.paint_node(control, index);
+            }
         }
     }
 
@@ -414,6 +473,8 @@ where
             current_node: 0,
             hovered_node: None,
             repr_buffer: String::new(),
+            highlight_edges_in: false,
+            highlight_edges_out: false,
         }
     }
 }
