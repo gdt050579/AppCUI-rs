@@ -1156,6 +1156,63 @@ fn check_rect_center() {
 }
 
 #[test]
+fn check_rect_set_bottom() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.set_bottom(10);
+    assert_eq!(r, Rect::new(1, 8, 3, 10));
+}   
+
+#[test]
+fn check_rect_set_right() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.set_right(10);
+    assert_eq!(r, Rect::new(8, 2, 10, 4));
+}
+
+#[test]
+fn check_rect_set_top() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.set_top(0);
+    assert_eq!(r, Rect::new(1, 0, 3, 2));
+}
+
+#[test]
+fn check_rect_set_left() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.set_left(0);
+    assert_eq!(r, Rect::new(0, 2, 2, 4));
+}
+
+#[test]
+fn check_rect_add_asign() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r += (10, 20);
+    assert_eq!(r, Rect::new(11, 22, 13, 24));
+}
+
+#[test]
+fn check_rect_translate() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.translate(10, 20);
+    assert_eq!(r, Rect::new(11, 22, 13, 24));
+}   
+
+#[test]
+fn check_rect_size() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.size(), Size::new(3, 3));
+}
+
+#[test]
+fn check_rect_contains_rect() {
+    let r1 = Rect::new(1, 2, 5, 6);
+    let r2 = Rect::new(2, 3, 4, 5);
+    let r3 = Rect::new(0, 0, 4, 5);
+    assert!(r1.contains_rect(r2));
+    assert!(!r1.contains_rect(r3));
+}
+
+#[test]
 fn check_color_contrast() {
     assert_eq!(Color::Black.contrast_color(), Color::White);
     assert_eq!(Color::White.contrast_color(), Color::Black);
