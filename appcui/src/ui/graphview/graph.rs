@@ -209,6 +209,13 @@ where
         }
         None
     }
+    pub(super) fn current_node_id(&self) -> Option<usize> {
+        if self.current_node < self.nodes.len() {
+            Some(self.current_node)
+        } else {
+            None
+        }
+    }
     fn draw_edge(&mut self, index: u32, attr: CharAttribute) {
         let e = &self.edges[index as usize];
         let p1 = self.nodes[e.from_node_id as usize].rect.center();

@@ -113,6 +113,37 @@ where
         self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
         self.move_scroll_to(self.origin_point.x, self.origin_point.y);
     }
+    fn ensure_node_is_visible(&mut self, node_id: usize) {
+        if let Some(node) = self.graph.nodes.get(node_id) {
+            let node_rect = node.rect;
+            let mut sz = self.size();
+            if self.flags.contains_one(Flags::ScrollBars) && (self.has_focus()) {
+                sz.width = sz.width.saturating_sub(1);
+                sz.height = sz.height.saturating_sub(1);
+            }
+            let view_rect = Rect::with_point_and_size(Point::new(-self.origin_point.x, -self.origin_point.y), sz);
+            if !view_rect.contains_rect(node_rect) {
+                let mut new_x = self.origin_point.x;
+                let mut new_y = self.origin_point.y;
+                if node_rect.left() < view_rect.left() {
+                    new_x = -node_rect.left();
+                } else if node_rect.right() > view_rect.right() {
+                    new_x = -(node_rect.right() - sz.width as i32);
+                }
+                if node_rect.top() < view_rect.top() {
+                    new_y = -node_rect.top();
+                } else if node_rect.bottom() > view_rect.bottom() {
+                    new_y = -(node_rect.bottom() - sz.height as i32);
+                }
+                self.move_scroll_to(new_x, new_y);
+            }
+        }
+    }
+    fn ensure_current_node_is_visible(&mut self) {
+        if let Some(id) = self.graph.current_node_id() {
+            self.ensure_node_is_visible(id);
+        }
+    }
 }
 impl<T> OnResize for GraphView<T>
 where
@@ -143,6 +174,7 @@ where
 {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         if self.graph.process_key_events(key, &self.base) {
+            self.ensure_current_node_is_visible();
             return EventProcessStatus::Processed;
         }
         match key.value() {
@@ -256,6 +288,7 @@ where
                         self.update_scroll_bars();
                     }
                     self.drag = Drag::None;
+                    self.ensure_current_node_is_visible();
                     return EventProcessStatus::Processed;
                 }
             },
@@ -279,6 +312,7 @@ where
                     ) {
                         self.update_scroll_bars();
                     }
+                    self.ensure_current_node_is_visible();
                     return EventProcessStatus::Processed;
                 }
             },
@@ -291,6 +325,6 @@ where
                 };
                 return EventProcessStatus::Processed;
             }
-        }        
+        }
     }
 }

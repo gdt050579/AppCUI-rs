@@ -188,6 +188,13 @@ impl Rect {
         (point.x >= self.left) && (point.x <= self.right) && (point.y >= self.top) && (point.y <= self.bottom)
     }
 
+    /// Returns true if the rectangle fully contains the given rectangle.
+     /// If only a part of the rectangle is inside this rectangle, false is returned.
+    #[inline(always)]
+    pub fn contains_rect(&self, rect: Rect) -> bool {
+        (rect.left >= self.left) && (rect.right <= self.right) && (rect.top >= self.top) && (rect.bottom <= self.bottom)
+    }    
+
     /// Returns the center point of the rectangle.
     #[inline(always)]
     pub fn center(&self) -> Point {
