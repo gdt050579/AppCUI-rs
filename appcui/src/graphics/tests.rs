@@ -1158,29 +1158,45 @@ fn check_rect_center() {
 #[test]
 fn check_rect_set_bottom() {
     let mut r = Rect::new(1, 2, 3, 4);
-    r.set_bottom(10);
+    r.set_bottom(10, true);
     assert_eq!(r, Rect::new(1, 8, 3, 10));
+    r.set_bottom(20, false);
+    assert_eq!(r, Rect::new(1, 8, 3, 20));
+    r.set_bottom(0, false);
+    assert_eq!(r, Rect::new(1, 8, 3, 20)); // notthing happens
 }   
 
 #[test]
 fn check_rect_set_right() {
     let mut r = Rect::new(1, 2, 3, 4);
-    r.set_right(10);
+    r.set_right(10, true);
     assert_eq!(r, Rect::new(8, 2, 10, 4));
+    r.set_right(20, false);
+    assert_eq!(r, Rect::new(8, 2, 20, 4));
+    r.set_right(0, false);  
+    assert_eq!(r, Rect::new(8, 2, 20, 4)); // notthing happens
 }
 
 #[test]
 fn check_rect_set_top() {
     let mut r = Rect::new(1, 2, 3, 4);
-    r.set_top(0);
+    r.set_top(0, true);
     assert_eq!(r, Rect::new(1, 0, 3, 2));
+    r.set_top(-5, false);
+    assert_eq!(r, Rect::new(1, -5, 3, 2));
+    r.set_top(10, false);
+    assert_eq!(r, Rect::new(1, -5, 3, 2)); // notthing happens
 }
 
 #[test]
 fn check_rect_set_left() {
     let mut r = Rect::new(1, 2, 3, 4);
-    r.set_left(0);
+    r.set_left(0, true);
     assert_eq!(r, Rect::new(0, 2, 2, 4));
+    r.set_left(-5, false);
+    assert_eq!(r, Rect::new(-5, 2, 2, 4));
+    r.set_left(10, false);
+    assert_eq!(r, Rect::new(-5, 2, 2, 4)); // notthing happens
 }
 
 #[test]

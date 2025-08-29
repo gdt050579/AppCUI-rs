@@ -363,8 +363,8 @@ where
         if (tl.x == x) && (tl.y == y) {
             return false;
         }
-        node.rect.set_left(x);
-        node.rect.set_top(y);
+        node.rect.set_left(x, true);
+        node.rect.set_top(y, true);
         let mut resized = false;
         if node.rect.right() >= (self.surface_size.width as i32) || node.rect.bottom() >= (self.surface_size.height as i32) || x < 0 || y < 0 {
             // need to resize the surface

@@ -20,8 +20,8 @@ pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>) {
     let mut x = 0;
     let mut y = 0;
     for node in &mut graph.nodes {
-        node.rect.set_left(x);
-        node.rect.set_top(y);
+        node.rect.set_left(x, true);
+        node.rect.set_top(y, true);
         x += (cell_size.width as i32) + 2;
         column += 1;
         if column == columns {

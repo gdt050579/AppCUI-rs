@@ -254,52 +254,72 @@ impl Rect {
         self.right += dx;
         self.bottom += dy;
     }
-    /// Sets the **left edge** of the rectangle to `x`, preserving its width.
-    ///
-    /// The rectangle is shifted horizontally so that `left == x`.  
-    /// The `right` edge is updated accordingly, leaving the width unchanged.  
-    /// The vertical position (`top`, `bottom`) is unaffected.    
-    #[inline]
-    pub fn set_left(&mut self, x: i32) {
-        let w = self.right - self.left;
-        self.left = x;
-        self.right = x + w;
-    }
-
-    /// Sets the **right edge** of the rectangle to `x`, preserving its width.
-    ///
-    /// The rectangle is shifted horizontally so that `right == x`.  
-    /// The `left` edge is updated accordingly, leaving the width unchanged.  
+    /// Sets the **left edge** of the rectangle to `x` value. The parameter `preserve_weight` indicates if the width of the rectangle should be preserved or not.
+    /// If `preserve_weight` is true, the rectangle is shifted horizontally so that `left == x` and the `right` edge is updated accordingly, leaving the width unchanged.
+    /// If `preserve_weight` is false, the `left` edge is updated to `x` only if `x` is less than or equal to the current `right` edge.  
     /// The vertical position (`top`, `bottom`) is unaffected.
     #[inline]
-    pub fn set_right(&mut self, x: i32) {
-        let w = self.right - self.left;
-        self.right = x;
-        self.left = x - w;
+    pub fn set_left(&mut self, x: i32, preserve_weight: bool) {
+        if preserve_weight {
+            let w = self.right - self.left;
+            self.left = x;
+            self.right = x + w;            
+        } else {
+            if x<= self.right {
+                self.left = x;
+            }
+        }
     }
 
-    /// Sets the **top edge** of the rectangle to `y`, preserving its height.
-    ///
-    /// The rectangle is shifted vertically so that `top == y`.  
-    /// The `bottom` edge is updated accordingly, leaving the height unchanged.  
-    /// The horizontal position (`left`, `right`) is unaffected.
+    /// Sets the **right edge** of the rectangle to `x` value. The parameter `preserve_weight` indicates if the width of the rectangle should be preserved or not.
+    /// If `preserve_weight` is true, the rectangle is shifted horizontally so that `right == x` and the `left` edge is updated accordingly, leaving the width unchanged.
+    /// If `preserve_weight` is false, the `right` edge is updated to `x` only if `x` is greater than or equal to the current `left` edge.  
+    /// The vertical position (`top`, `bottom`) is unaffected.
     #[inline]
-    pub fn set_top(&mut self, y: i32) {
-        let h = self.bottom - self.top;
-        self.top = y;
-        self.bottom = y + h;
+    pub fn set_right(&mut self, x: i32, preserve_weight: bool) {
+        if preserve_weight {
+            let w = self.right - self.left;
+            self.right = x;
+            self.left = x - w;            
+        } else {
+            if x >= self.left {
+                self.right = x;
+            }
+        }
     }
 
-    /// Sets the **bottom edge** of the rectangle to `y`, preserving its height.
-    ///
-    /// The rectangle is shifted vertically so that `bottom == y`.  
-    /// The `top` edge is updated accordingly, leaving the height unchanged.  
+    /// Sets the **top edge** of the rectangle to `y` value. The parameter `preserve_height` indicates if the height of the rectangle should be preserved or not.
+    /// If `preserve_height` is true, the rectangle is shifted vertically so that `top == y` and the `bottom` edge is updated accordingly, leaving the height unchanged.
+    /// If `preserve_height` is false, the `top` edge is updated to `y` only if `y` is less than or equal to the current `bottom` edge.  
     /// The horizontal position (`left`, `right`) is unaffected.
     #[inline]
-    pub fn set_bottom(&mut self, y: i32) {
-        let h = self.bottom - self.top;
-        self.bottom = y;
-        self.top = y - h;
+    pub fn set_top(&mut self, y: i32, preserve_height: bool) {
+        if preserve_height {
+            let h = self.bottom - self.top;
+            self.top = y;
+            self.bottom = y + h;            
+        } else {
+            if y <= self.bottom {
+                self.top = y;
+            }
+        }
+    }
+
+    /// Sets the **bottom edge** of the rectangle to `y` value. The parameter `preserve_height` indicates if the height of the rectangle should be preserved or not.
+    /// If `preserve_height` is true, the rectangle is shifted vertically so that `bottom == y` and the `top` edge is updated accordingly, leaving the height unchanged.
+    /// If `preserve_height` is false, the `bottom` edge is updated to `y` only if `y` is greater than or equal to the current `top` edge.  
+    /// The horizontal position (`left`, `right`) is unaffected.
+    #[inline]
+    pub fn set_bottom(&mut self, y: i32, preserve_height: bool) {
+        if preserve_height {
+            let h = self.bottom - self.top;
+            self.bottom = y;
+            self.top = y - h;            
+        } else {
+            if y >= self.top {
+                self.bottom = y;
+            }
+        }
     }
 }
 
