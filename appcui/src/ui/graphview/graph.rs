@@ -1,4 +1,5 @@
 use super::Edge;
+use super::EdgeBuilder;
 use super::EdgeRouting;
 use super::GraphNode;
 use super::Node;
@@ -78,7 +79,7 @@ where
     highlight_edges_in: bool,
     highlight_edges_out: bool,
     edge_routing: EdgeRouting,
-    line_type: LineType,
+    edge_line_type: LineType,
 }
 impl<T> Graph<T>
 where
@@ -96,15 +97,22 @@ where
             highlight_edges_in: false,
             highlight_edges_out: false,
             edge_routing: EdgeRouting::Direct,
-            line_type: LineType::Single,
+            edge_line_type: LineType::Single,
         };
         // remove edges that have invalid node index value
         let nodes_count = g.nodes.len() as u32;
         g.edges.retain(|e| (e.from_node_id < nodes_count) && (e.to_node_id < nodes_count));
         // build edges_in / edges_out for each node
         for (idx, e) in g.edges.iter().enumerate() {
-            g.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
-            g.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
+            if e.directed {
+                g.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
+                g.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
+            } else {
+                g.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
+                g.nodes[e.from_node_id as usize].edges_in.push(idx as u32);
+                g.nodes[e.to_node_id as usize].edges_out.push(idx as u32);
+                g.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
+            }
         }
         g
     }
@@ -113,13 +121,7 @@ where
         T: GraphNode + Clone,
     {
         let v: Vec<Node<T>> = nodes.iter().map(|n| NodeBuilder::new(n.clone()).build()).collect();
-        let e: Vec<Edge> = edges
-            .iter()
-            .map(|link| Edge {
-                from_node_id: link.0,
-                to_node_id: link.1,
-            })
-            .collect();
+        let e: Vec<Edge> = edges.iter().map(|link| EdgeBuilder::new(link.0, link.1).build()).collect();
         Self::new(v, e)
     }
     pub fn with_slices_and_border(nodes: &[T], edges: &[(u32, u32)], border: LineType) -> Self
@@ -127,13 +129,7 @@ where
         T: GraphNode + Clone,
     {
         let v: Vec<Node<T>> = nodes.iter().map(|n| NodeBuilder::new(n.clone()).border(border).build()).collect();
-        let e: Vec<Edge> = edges
-            .iter()
-            .map(|link| Edge {
-                from_node_id: link.0,
-                to_node_id: link.1,
-            })
-            .collect();
+        let e: Vec<Edge> = edges.iter().map(|link| EdgeBuilder::new(link.0, link.1).build()).collect();
         Self::new(v, e)
     }
     fn update_surface_size(&mut self, pack: bool) {
@@ -196,8 +192,8 @@ where
         }
     }
     pub(super) fn set_edge_line_type(&mut self, line_type: LineType, control: &ControlBase) {
-        if line_type != self.line_type {
-            self.line_type = line_type;
+        if line_type != self.edge_line_type {
+            self.edge_line_type = line_type;
             self.repaint(control);
         }
     }
@@ -221,10 +217,11 @@ where
         let p1 = self.nodes[e.from_node_id as usize].rect.center();
         let p2 = self.nodes[e.to_node_id as usize].rect.center();
         match self.edge_routing {
-            EdgeRouting::Direct => self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, self.line_type, attr),
-            EdgeRouting::Orthogonal => self
-                .surface
-                .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, self.line_type, OrthogonalDirection::Auto, attr),
+            EdgeRouting::Direct => self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, self.edge_line_type, attr),
+            EdgeRouting::Orthogonal => {
+                self.surface
+                    .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, self.edge_line_type, OrthogonalDirection::Auto, attr)
+            }
         }
     }
     fn draw_edges_from_current(&mut self, attr: CharAttribute) {
@@ -259,8 +256,15 @@ where
         let edge_attr = state.edge_attr(theme);
         // draw all edges
         let len = self.edges.len() as u32;
-        for index in 0..len {
-            self.draw_edge(index, edge_attr);
+        if state == ControlState::Focused {
+            for index in 0..len {
+                let attr = self.edges[index as usize].attribute.unwrap_or(edge_attr);
+                self.draw_edge(index, attr);
+            }
+        } else {
+            for index in 0..len {
+                self.draw_edge(index, edge_attr);
+            }
         }
         if (state == ControlState::Focused) && (self.current_node < self.nodes.len()) {
             let attr = theme.lines.hovered;
@@ -500,7 +504,7 @@ where
             highlight_edges_in: false,
             highlight_edges_out: false,
             edge_routing: EdgeRouting::Direct,
-            line_type: LineType::Single,
+            edge_line_type: LineType::Single,
         }
     }
 }

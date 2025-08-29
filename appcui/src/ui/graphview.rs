@@ -16,3 +16,4 @@ pub use self::graph::Graph;
 pub use self::node::Node;
 pub use self::node::NodeBuilder;
 pub use self::edge::Edge;
+pub use self::edge::EdgeBuilder;
