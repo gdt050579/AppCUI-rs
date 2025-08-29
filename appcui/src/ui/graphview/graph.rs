@@ -216,11 +216,12 @@ where
         let e = &self.edges[index as usize];
         let p1 = self.nodes[e.from_node_id as usize].rect.center();
         let p2 = self.nodes[e.to_node_id as usize].rect.center();
+        let line_type = e.line_type.unwrap_or(self.edge_line_type);
         match self.edge_routing {
-            EdgeRouting::Direct => self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, self.edge_line_type, attr),
+            EdgeRouting::Direct => self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, line_type, attr),
             EdgeRouting::Orthogonal => {
                 self.surface
-                    .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, self.edge_line_type, OrthogonalDirection::Auto, attr)
+                    .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, line_type, OrthogonalDirection::Auto, attr)
             }
         }
     }
