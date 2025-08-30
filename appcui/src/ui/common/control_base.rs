@@ -592,6 +592,19 @@ impl ControlBase {
             RuntimeManager::get().hide_tooltip();
         }
     }
+    pub(crate) fn show_tooltip_on_rect(&self, txt: &str, r: &Rect) {
+        if self.is_visible() && self.screen_clip.is_visible() {
+            let r = Rect::new(
+                r.left() + self.screen_clip.left,
+                r.top() + self.screen_clip.top,
+                r.right() + self.screen_clip.left,
+                r.bottom() + self.screen_clip.top,
+            );
+            RuntimeManager::get().show_tooltip(txt, &r);
+        } else {
+            RuntimeManager::get().hide_tooltip();
+        }
+    }    
     pub(crate) fn show_tooltip(&self, txt: &str) {
         if self.is_visible() && self.screen_clip.is_visible() {
             let r = Rect::new(
