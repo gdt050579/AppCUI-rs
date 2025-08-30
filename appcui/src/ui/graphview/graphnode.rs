@@ -1,3 +1,5 @@
+use std::fmt::Pointer;
+
 use crate::graphics::Size;
 use crate::graphics::Surface;
 use crate::prelude::CharAttribute;
@@ -89,3 +91,60 @@ impl GraphNode for String {
         f.write_str(self.as_str())
     }
 }
+
+macro_rules! IMPL_GRAPHMODE_FOR_UNSIGNED_INTEGERS {
+    ($($t:ty),*) => {
+        $(
+            impl GraphNode for $t {
+                fn prefered_size(&self) -> Size {
+                    let mut v = *self;
+                    let mut count = 0;
+                    loop {
+                        v /= 10;
+                        count += 1;
+                        if v==0 {
+                            break;
+                        }
+                    }
+                    Size::new(count, 1)
+                }
+                fn write_label(&self, f: &mut dyn std::fmt::Write, _: Size) -> std::fmt::Result {
+                    write!(f, "{}", self)
+                }
+                fn write_description(&self, f: &mut dyn std::fmt::Write) -> std::fmt::Result {
+                    write!(f, "Dec: {}\nHex: 0x{:X}", self, self)
+                }
+            }
+        )*
+    };
+}
+
+macro_rules! IMPL_GRAPHMODE_FOR_SIGNED_INTEGERS {
+    ($($t:ty),*) => {
+        $(
+            impl GraphNode for $t {
+                fn prefered_size(&self) -> Size {
+                    let mut v = *self;
+                    let mut count = if v <= 0 { 1 } else { 0 };
+                    loop {
+                        v /= 10;
+                        count += 1;
+                        if v==0 {
+                            break;
+                        }
+                    }
+                    Size::new(count, 1)
+                }
+                fn write_label(&self, f: &mut dyn std::fmt::Write, _: Size) -> std::fmt::Result {
+                    write!(f, "{}", self)
+                }
+                fn write_description(&self, f: &mut dyn std::fmt::Write) -> std::fmt::Result {
+                    write!(f, "Dec: {}\nHex: 0x{:X}", self, self)
+                }
+            }
+        )*
+    };
+}
+
+IMPL_GRAPHMODE_FOR_UNSIGNED_INTEGERS!(u8, u16, u32, u64, usize);
+IMPL_GRAPHMODE_FOR_SIGNED_INTEGERS!(i8, i16, i32, i64, isize);
