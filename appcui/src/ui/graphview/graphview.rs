@@ -250,7 +250,11 @@ where
                 }
                 if let Some(id) = self.graph.hovered_node_id() {
                     let r = self.graph.nodes[id].rect + (self.origin_point.x, self.origin_point.y);
-                    self.show_tooltip_on_rect(self.graph.nodes[id].obj.description(), &r);
+                    if let Some(desc) = self.graph.node_description(id) {
+                        self.base.show_tooltip_on_rect(desc, &r);
+                    } else {
+                        self.hide_tooltip();
+                    }
                 } else {
                     self.hide_tooltip();
                 }

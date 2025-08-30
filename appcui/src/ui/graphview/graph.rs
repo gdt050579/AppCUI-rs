@@ -490,6 +490,20 @@ where
             _ => false,
         }
     }
+    pub(super) fn node_description(&mut self, id: usize) -> Option<&str> {
+        if id >= self.nodes.len() {
+            return None;
+        }
+        self.repr_buffer.clear();
+        if self.nodes[id].obj.write_description(&mut self.repr_buffer).is_err() {
+            return None;
+        }
+        if self.repr_buffer.is_empty() {
+            None
+        } else {
+            Some(&self.repr_buffer)
+        }
+    }
 }
 
 impl<T> Default for Graph<T>
