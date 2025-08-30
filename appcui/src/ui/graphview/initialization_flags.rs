@@ -1,5 +1,5 @@
-use EnumBitFlags::EnumBitFlags;
 use crate::prelude::*;
+use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits: 8)]
 pub enum Flags {
@@ -12,4 +12,9 @@ pub enum EdgeRouting {
     Direct,
     #[VariantInfo(name = "Orthogonal", description = "Draw edges as orthogonal lines between nodes")]
     Orthogonal,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub enum ArrangeMethod {
+    Grid,
 }

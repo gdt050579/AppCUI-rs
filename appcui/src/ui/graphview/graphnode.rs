@@ -1,5 +1,3 @@
-use std::fmt::Pointer;
-
 use crate::graphics::Size;
 use crate::graphics::Surface;
 use crate::prelude::CharAttribute;

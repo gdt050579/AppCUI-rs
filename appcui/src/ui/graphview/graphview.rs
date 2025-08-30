@@ -26,6 +26,7 @@ where
     flags: Flags,
     drag: Drag,
     scrollbars: ScrollBars,
+    arrange_method: ArrangeMethod,
 }
 impl<T> GraphView<T>
 where
@@ -47,6 +48,7 @@ where
             background: None,
             drag: Drag::None,
             graph: Graph::default(),
+            arrange_method: ArrangeMethod::Grid,
             scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
         }
     }
@@ -69,9 +71,7 @@ where
 
     pub fn set_graph(&mut self, graph: Graph<T>) {
         self.graph = graph;
-        super::layout::grid::rearange(&mut self.graph);
-        self.graph.resize_graph(true);
-        self.graph.repaint(&self.base);
+        self.arrange_nodes(self.arrange_method);
     }
 
     pub fn set_edge_routing(&mut self, routing: EdgeRouting) {
@@ -84,6 +84,14 @@ where
 
     pub fn enable_edge_highlighting(&mut self, incoming: bool, outgoing: bool) {
         self.graph.set_highlight_edges(incoming, outgoing, &self.base);
+    }
+
+    pub fn arrange_nodes(&mut self, method: ArrangeMethod) {
+        match method {
+            ArrangeMethod::Grid => super::node_layout::grid::rearange(&mut self.graph),
+        }
+        self.graph.resize_graph(true);
+        self.graph.repaint(&self.base);
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {

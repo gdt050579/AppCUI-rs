@@ -1,7 +1,5 @@
-use super::super::Edge;
 use super::super::Graph;
 use super::super::GraphNode;
-use super::super::Node;
 use crate::graphics::*;
 
 pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>) {
