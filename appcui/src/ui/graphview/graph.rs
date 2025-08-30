@@ -212,6 +212,9 @@ where
             None
         }
     }
+    pub(super) fn hovered_node_id(&self) -> Option<usize> {
+        self.hovered_node
+    }
     fn draw_edge(&mut self, index: u32, attr: CharAttribute) {
         let e = &self.edges[index as usize];
         let p1 = self.nodes[e.from_node_id as usize].rect.center();
@@ -343,10 +346,10 @@ where
             self.paint_node(control, index);
         }
     }
-    pub(super) fn process_mouse_over(&mut self, control: &ControlBase, point: Point) -> EventProcessStatus {
+    pub(super) fn process_mouse_over(&mut self, control: &ControlBase, point: Point) -> bool {
         let new_idx = self.mouse_pos_to_index(point.x, point.y);
         if new_idx == self.hovered_node {
-            return EventProcessStatus::Ignored;
+            return false
         }
         // first clear the existing one
         self.reset_hover(control);
@@ -354,7 +357,7 @@ where
         if let Some(idx) = new_idx {
             self.paint_node(control, idx);
         }
-        EventProcessStatus::Processed
+        true
     }
     pub(super) fn surface(&self) -> &Surface {
         &self.surface

@@ -62,7 +62,7 @@ where
         if self.border.is_some() {
             sz = sz.reduce_by(2);
         }
-        self.obj.write(out, sz);
+        self.obj.label(out, sz);
         surface.write_text(&out, &format);
         surface.reset_clip();
     }

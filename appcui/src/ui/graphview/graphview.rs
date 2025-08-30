@@ -240,11 +240,21 @@ where
         match event {
             MouseEvent::Enter | MouseEvent::Leave => {
                 self.graph.reset_hover(&self.base);
+                self.hide_tooltip();
                 return EventProcessStatus::Processed;
             }
             MouseEvent::Over(point) => {
                 let p = Point::new(point.x - self.origin_point.x, point.y - self.origin_point.y);
-                return self.graph.process_mouse_over(&self.base, p);
+                if !self.graph.process_mouse_over(&self.base, p) {
+                    return EventProcessStatus::Ignored;
+                }
+                if let Some(id) = self.graph.hovered_node_id() {
+                    let r = self.graph.nodes[id].rect + (self.origin_point.x, self.origin_point.y);
+                    self.show_tooltip_on_rect(self.graph.nodes[id].obj.description(), &r);
+                } else {
+                    self.hide_tooltip();
+                }
+                return EventProcessStatus::Processed;
             }
             MouseEvent::Pressed(mouse_data) => {
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
