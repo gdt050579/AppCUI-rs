@@ -1207,6 +1207,13 @@ fn check_rect_add_asign() {
 }
 
 #[test]
+fn check_rect_add() {
+    let r = Rect::new(1, 2, 3, 4);
+    let r2 = r + (10, 20);
+    assert_eq!(r2, Rect::new(11, 22, 13, 24));
+}
+
+#[test]
 fn check_rect_translate() {
     let mut r = Rect::new(1, 2, 3, 4);
     r.translate(10, 20);

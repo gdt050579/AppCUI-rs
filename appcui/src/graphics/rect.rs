@@ -1,4 +1,4 @@
-use std::ops::AddAssign;
+use std::ops::{Add, AddAssign};
 
 use super::{Point, Size};
 
@@ -327,5 +327,20 @@ impl Rect {
 impl AddAssign<(i32, i32)> for Rect {
     fn add_assign(&mut self, (dx, dy): (i32, i32)) {
         self.translate(dx, dy);
+    }
+}
+
+
+/// Adds a `(dx, dy)` offset to this rectangle and returns a new rectangle.
+impl Add<(i32, i32)> for Rect {
+    type Output = Rect;
+
+    fn add(self, rhs: (i32, i32)) -> Self::Output {
+        Rect {
+            left: self.left + rhs.0,
+            top: self.top + rhs.1,
+            right: self.right + rhs.0,
+            bottom: self.bottom + rhs.1,
+        }
     }
 }
