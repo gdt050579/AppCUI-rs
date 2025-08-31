@@ -2,8 +2,6 @@ use super::graph::Graph;
 use super::initialization_flags::*;
 use crate::{prelude::*, ui::graphview::GraphNode};
 
-use self::components::ScrollBars;
-
 struct NodeInfo {
     id: usize,
     top_left: Point,
@@ -25,7 +23,7 @@ where
     background: Option<Character>,
     flags: Flags,
     drag: Drag,
-    scrollbars: ScrollBars,
+    comp: ListScrollBars,
     arrange_method: ArrangeMethod,
 }
 impl<T> GraphView<T>
@@ -37,7 +35,7 @@ where
             base: ControlBase::with_status_flags(
                 layout,
                 (StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput)
-                    | if flags == Flags::ScrollBars {
+                    | if flags.contains_one(Flags::ScrollBars | Flags::SearchBar) {
                         StatusFlags::IncreaseBottomMarginOnFocus | StatusFlags::IncreaseRightMarginOnFocus
                     } else {
                         StatusFlags::None
@@ -49,7 +47,7 @@ where
             drag: Drag::None,
             graph: Graph::default(),
             arrange_method: ArrangeMethod::Grid,
-            scrollbars: ScrollBars::new(flags == Flags::ScrollBars),
+            comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
         }
     }
 
@@ -109,23 +107,28 @@ where
         };
         self.origin_point.x = self.origin_point.x.min(0);
         self.origin_point.y = self.origin_point.y.min(0);
-        self.scrollbars.set_indexes((-self.origin_point.x) as u64, (-self.origin_point.y) as u64);
+        self.comp.set_indexes((-self.origin_point.x) as u64, (-self.origin_point.y) as u64);
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
-        let h = -(self.scrollbars.horizontal_index() as i32);
-        let v = -(self.scrollbars.vertical_index() as i32);
+        let h = -(self.comp.horizontal_index() as i32);
+        let v = -(self.comp.vertical_index() as i32);
         self.move_scroll_to(h, v);
     }
     fn update_scroll_bars(&mut self) {
         let paint_sz = self.graph.size();
-        self.scrollbars.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base);
+        let mut sz = self.size();
+        if self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar) && (self.has_focus()) {
+            sz.width = sz.width.saturating_sub(1);
+            sz.height = sz.height.saturating_sub(1);
+        }
+        self.comp.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base, sz);
         self.move_scroll_to(self.origin_point.x, self.origin_point.y);
     }
     fn ensure_node_is_visible(&mut self, node_id: usize) {
         if let Some(node) = self.graph.nodes.get(node_id) {
             let node_rect = node.rect;
             let mut sz = self.size();
-            if self.flags.contains_one(Flags::ScrollBars) && (self.has_focus()) {
+            if self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar) && (self.has_focus()) {
                 sz.width = sz.width.saturating_sub(1);
                 sz.height = sz.height.saturating_sub(1);
             }
@@ -152,6 +155,24 @@ where
             self.ensure_node_is_visible(id);
         }
     }
+    fn search_text(&mut self) {
+        let txt = self.comp.search_text();
+        let count = self.graph.filter(txt, &self.base);
+        self.ensure_current_node_is_visible();
+        if count == self.graph.nodes.len() {
+            self.comp.clear_match_count();
+        } else {
+            self.comp.set_match_count(count);
+        }
+    }
+    fn goto_next_match(&mut self) {
+        self.graph.goto_next_match(&self.base);
+        self.ensure_current_node_is_visible();
+    }
+    fn goto_previous_match(&mut self) {
+        self.graph.goto_previous_match(&self.base);
+        self.ensure_current_node_is_visible();
+    }
 }
 impl<T> OnResize for GraphView<T>
 where
@@ -166,8 +187,8 @@ where
     T: GraphNode,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        if (self.has_focus()) && (self.flags.contains_one(Flags::ScrollBars)) {
-            self.scrollbars.paint(surface, theme, self);
+        if (self.has_focus()) && (self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar)) {
+            self.comp.paint(surface, theme, self);
             surface.reduce_clip_by(0, 0, 1, 1);
         }
         if let Some(back) = self.background {
@@ -180,12 +201,17 @@ impl<T> OnKeyPressed for GraphView<T>
 where
     T: GraphNode,
 {
-    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        if self.graph.process_key_events(key, &self.base) {
-            self.ensure_current_node_is_visible();
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        if self.comp.process_key_pressed(key, character) {
+            self.search_text();
             return EventProcessStatus::Processed;
         }
-        match key.value() {
+        if self.graph.process_key_events(key, &self.base) {
+            self.ensure_current_node_is_visible();
+            self.comp.exit_edit_mode();
+            return EventProcessStatus::Processed;
+        }
+        let result = match key.value() {
             key!("Alt+Left") => {
                 self.move_scroll_to(self.origin_point.x + 1, self.origin_point.y);
                 EventProcessStatus::Processed
@@ -218,7 +244,33 @@ where
                 self.move_scroll_to(i32::MIN, i32::MIN);
                 EventProcessStatus::Processed
             }
+            key!("Enter") => {
+                if self.comp.is_in_edit_mode() {
+                    self.goto_next_match();
+                    // exist directly so that we don't exit the edit mode
+                    return EventProcessStatus::Processed;
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            key!("Ctrl+Enter") => {
+                if self.comp.is_in_edit_mode() {
+                    self.goto_previous_match();
+                    // exist directly so that we don't exit the edit mode
+                    return EventProcessStatus::Processed;
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }            
             _ => EventProcessStatus::Ignored,
+        };
+        if result == EventProcessStatus::Processed {
+            self.comp.exit_edit_mode();
+        }
+        if self.comp.should_repaint() {
+            EventProcessStatus::Processed
+        } else {
+            result
         }
     }
 }
@@ -241,7 +293,7 @@ where
     T: GraphNode,
 {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        if self.scrollbars.process_mouse_event(event) {
+        if self.comp.process_mouse_event(event) {
             self.update_scroll_pos_from_scrollbars();
             return EventProcessStatus::Processed;
         }

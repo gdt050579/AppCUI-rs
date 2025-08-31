@@ -5,6 +5,7 @@ use super::GraphNode;
 use super::Node;
 use super::NodeBuilder;
 use crate::prelude::*;
+use crate::utils::GlyphParser;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 enum ControlState {
@@ -174,6 +175,93 @@ where
         self.surface.resize(self.surface_size);
     }
 
+    pub(super) fn clear_filter(&mut self, control: &ControlBase) {
+        let mut need_repaint = false;
+        for n in &mut self.nodes {
+            if n.filtered {
+                n.filtered = false;
+                need_repaint = true;
+            }
+        }
+        if need_repaint {
+            self.repaint(control);
+        }
+    }
+    pub(super) fn filter(&mut self, text: &str, control: &ControlBase) -> usize {
+        if text.is_empty() {
+            self.clear_filter(control);
+            return self.nodes.len();
+        }
+        let mut need_repaint = false;
+        let mut count = 0;
+        for n in &mut self.nodes {
+            self.repr_buffer.clear();
+            if n.obj.write_label(&mut self.repr_buffer, Size::new(u32::MAX, u32::MAX)).is_ok() {
+                if self.repr_buffer.index_ignoring_case(text).is_some() {
+                    if n.filtered {
+                        n.filtered = false;
+                        need_repaint = true;
+                    }
+                    count += 1;
+                } else {
+                    if !n.filtered {
+                        n.filtered = true;
+                        need_repaint = true;
+                    }
+                }
+            } else {
+                if !n.filtered {
+                    n.filtered = true;
+                    need_repaint = true;
+                }
+            }
+        }
+        // check to see if the current node is filtered
+        if (count>0) && (self.current_node < self.nodes.len()) && self.nodes[self.current_node].filtered
+        {
+            let len = self.nodes.len();
+            for i in 0..self.nodes.len() {
+                let idx = (self.current_node + i) % len;
+                if !self.nodes[idx].filtered {
+                    self.current_node = idx;
+                    break;
+                    // no need to repaint here as we wil do it later
+                }
+            }
+            need_repaint = true;
+        } 
+        if need_repaint {
+            self.repaint(control);
+        }
+        count
+    }
+    pub(super) fn goto_next_match(&mut self, control: &ControlBase) {
+        if self.nodes.is_empty() {
+            return;
+        }
+        let len = self.nodes.len();
+        for i in 1..=len {
+            let idx = (self.current_node + i) % len;
+            if !self.nodes[idx].filtered {
+                self.set_current_node(idx, control);
+                break;
+            }
+        }
+    }
+    pub(super) fn goto_previous_match(&mut self, control: &ControlBase) {
+        if self.nodes.is_empty() {
+            return;
+        }
+        let len = self.nodes.len();
+        for i in 1..=len {
+            let idx = (self.current_node + len - i) % len;
+            if !self.nodes[idx].filtered {
+                self.set_current_node(idx, control);
+                break;
+            }
+        }
+    }
+
     #[inline(always)]
     pub(super) fn size(&self) -> Size {
         self.surface_size
@@ -222,10 +310,9 @@ where
         let line_type = e.line_type.unwrap_or(self.edge_line_type);
         match self.edge_routing {
             EdgeRouting::Direct => self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, line_type, attr),
-            EdgeRouting::Orthogonal => {
-                self.surface
-                    .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, line_type, OrthogonalDirection::Auto, attr)
-            }
+            EdgeRouting::Orthogonal => self
+                .surface
+                .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, line_type, OrthogonalDirection::Auto, attr),
         }
     }
     fn draw_edges_from_current(&mut self, attr: CharAttribute) {
@@ -283,7 +370,12 @@ where
         for node in &self.nodes {
             self.repr_buffer.clear();
             if state == ControlState::Focused {
-                node.paint(&mut self.surface, node.text_attr.unwrap_or(text_attr), &mut self.repr_buffer);
+                let attr = if node.filtered {
+                    ControlState::Disabled.node_attr(theme)
+                } else {
+                    node.text_attr.unwrap_or(text_attr)
+                };
+                node.paint(&mut self.surface, attr, &mut self.repr_buffer);
             } else {
                 node.paint(&mut self.surface, text_attr, &mut self.repr_buffer);
             };
@@ -312,6 +404,7 @@ where
         }
         let state = ControlState::new(control);
         let theme = control.theme();
+        let node = &self.nodes[index];
         let attr = match state {
             ControlState::Disabled => state.node_attr(theme),
             ControlState::Normal => {
@@ -330,12 +423,15 @@ where
                     if hover_node_id == index {
                         state.hovered_node_attr(theme)
                     } else {
-                        state.node_attr(theme)
+                        if node.filtered {
+                            ControlState::Disabled.node_attr(theme)
+                        } else {
+                            node.text_attr.unwrap_or(state.node_attr(theme))
+                        }
                     }
                 }
             }
         };
-        let node = &self.nodes[index];
         self.repr_buffer.clear();
         node.paint(&mut self.surface, attr, &mut self.repr_buffer);
     }
@@ -349,7 +445,7 @@ where
     pub(super) fn process_mouse_over(&mut self, control: &ControlBase, point: Point) -> bool {
         let new_idx = self.mouse_pos_to_index(point.x, point.y);
         if new_idx == self.hovered_node {
-            return false
+            return false;
         }
         // first clear the existing one
         self.reset_hover(control);

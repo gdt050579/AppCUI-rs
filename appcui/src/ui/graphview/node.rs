@@ -15,6 +15,7 @@ pub struct Node<T: GraphNode> {
     pub(super) text_attr: Option<CharAttribute>,
     pub(super) edges_in: Vec<u32>,
     pub(super) edges_out: Vec<u32>,
+    pub(super) filtered: bool,
 }
 impl<T> Node<T>
 where
@@ -92,6 +93,7 @@ where
                 text_attr: None,
                 edges_in: Vec::new(),
                 edges_out: Vec::new(),
+                filtered: false,
             },
             size: None,
         }
@@ -110,6 +112,11 @@ where
     }
     pub fn size(mut self, size: Size) -> Self {
         self.size = Some(size);
+        self
+    }
+    pub fn position(mut self, p: Point) -> Self {
+        self.node.rect.set_left(p.x, true);
+        self.node.rect.set_top(p.y, true);
         self
     }
     #[inline(always)]

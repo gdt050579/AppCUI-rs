@@ -4,6 +4,7 @@ use EnumBitFlags::EnumBitFlags;
 #[EnumBitFlags(bits: 8)]
 pub enum Flags {
     ScrollBars = 1,
+    SearchBar = 0x02,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, EnumSelector)]
