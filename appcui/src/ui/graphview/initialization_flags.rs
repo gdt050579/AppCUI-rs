@@ -18,4 +18,6 @@ pub enum EdgeRouting {
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub enum ArrangeMethod {
     Grid,
+    Circular,
+    Hierarchical,
 }

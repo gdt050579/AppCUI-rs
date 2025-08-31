@@ -1,2 +1,3 @@
-pub(super) mod hierarchical_bfs;
+pub(super) mod hierarchical;
 pub(super) mod grid;
+pub(super) mod circular;

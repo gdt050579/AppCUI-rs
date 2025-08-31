@@ -87,6 +87,8 @@ where
     pub fn arrange_nodes(&mut self, method: ArrangeMethod) {
         match method {
             ArrangeMethod::Grid => super::node_layout::grid::rearange(&mut self.graph),
+            ArrangeMethod::Circular => super::node_layout::circular::rearange(&mut self.graph),
+            ArrangeMethod::Hierarchical => super::node_layout::hierarchical::rearange(&mut self.graph),
         }
         self.graph.resize_graph(true);
         self.graph.repaint(&self.base);
