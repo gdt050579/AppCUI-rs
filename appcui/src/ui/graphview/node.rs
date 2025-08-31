@@ -83,6 +83,7 @@ impl<T> NodeBuilder<T>
 where
     T: GraphNode,
 {
+    /// Create a new NodeBuilder
     pub fn new(obj: T) -> Self {
         Self {
             node: Node {
@@ -98,27 +99,39 @@ where
             size: None,
         }
     }
+    /// Set a border for the node
     pub fn border(mut self, line_type: LineType) -> Self {
         self.node.border = Some(line_type);
         self
     }
+    /// Set the text attribute for the node label and border
+    /// If not set, the default attribute will be used
+    /// These attributes will only be used if the graphview control is focused and the node is not filtered
     pub fn text_attribute(mut self, attr: CharAttribute) -> Self {
         self.node.text_attr = Some(attr);
         self
     }
+
+    /// Set the text alignment for the node label (default is center)
     pub fn text_alignment(mut self, align: TextAlignment) -> Self {
         self.node.text_align = align;
         self
     }
+
+    /// Set the size of the node (if not set, the prefered size as it is returned by the GraphNode implementation will be used)
     pub fn size(mut self, size: Size) -> Self {
         self.size = Some(size);
         self
     }
+
+    /// Set the position of the node (top-left corner)
     pub fn position(mut self, p: Point) -> Self {
         self.node.rect.set_left(p.x, true);
         self.node.rect.set_top(p.y, true);
         self
     }
+
+    /// Builds the actual node
     #[inline(always)]
     pub fn build(mut self) -> Node<T> {
         if let Some(size) = self.size {
