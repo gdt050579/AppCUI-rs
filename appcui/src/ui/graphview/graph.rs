@@ -66,6 +66,96 @@ impl ControlState {
     }
 }
 
+fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection) {
+    let h = if r1.right() + 2 <= r2.left() {
+        2
+    } else if r1.left() >= r2.right() + 2 {
+        1
+    } else {
+        0
+    };
+    let v = if r1.bottom() + 2 <= r2.top() {
+        2
+    } else if r1.top() >= r2.bottom() + 2 {
+        1
+    } else {
+        0
+    };
+    let value: u8 = (h << 2) | v;
+    // format : 0b_hh_vv
+    // h = 0 => center_x
+    // h = 1 => on left of r1 (r1_left to r2_right)
+    // h = 2 => on right of r1 (r1_right to r2_left)
+    // v = 0 => center_y
+    // v = 1 => on top of r1 (r1_top to r2_bottom)
+    // v = 2 => on bottom of r1 (r1_bottom to r2_top)
+    match value {
+        0 => {
+            // intersect
+            (r1.center(), r2.center(), OrthogonalDirection::Auto)
+        }
+        0b_00_01 => {
+            // h = 0, v = 1
+            (Point::new(r1.center_x(), r1.top()), Point::new(r2.center_x(), r2.bottom()), OrthogonalDirection::VerticalUntilMiddle)
+        }
+        0b_00_10 => {
+            // h = 0, v = 2
+            (Point::new(r1.center_x(), r1.bottom()), Point::new(r2.center_x(), r2.top()), OrthogonalDirection::VerticalUntilMiddle)
+        }
+        0b_01_00 => {
+            // h = 1, v = 0
+            (Point::new(r1.left(), r1.center_y()), Point::new(r2.right(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+        }
+        0b_01_01 => {
+            // h = 1, v = 1
+            if (r1.left() - r2.right()).abs() < (r1.top() - r2.bottom()).abs() {
+                // more to the left
+                (Point::new(r1.left(), r1.center_y()), Point::new(r2.right(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+            } else {
+                // more to the top
+                (Point::new(r1.center_x(), r1.top()), Point::new(r2.center_x(), r2.bottom()), OrthogonalDirection::VerticalUntilMiddle)
+            }
+        }
+        0b_01_10 => {
+            // h = 1, v = 2
+            if (r1.left() - r2.right()).abs() < (r1.bottom() - r2.top()).abs() {
+                // more to the left
+                (Point::new(r1.left(), r1.center_y()), Point::new(r2.right(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+            } else {
+                // more to the bottom
+                (Point::new(r1.center_x(), r1.bottom()), Point::new(r2.center_x(), r2.top()), OrthogonalDirection::VerticalUntilMiddle)
+            }
+        }
+        0b_10_00 => {
+            // h = 2, v = 0
+            (Point::new(r1.right(), r1.center_y()), Point::new(r2.left(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+        }
+        0b_10_01 => {
+            // h = 2, v = 1
+            if (r1.right() - r2.left()).abs() < (r1.top() - r2.bottom()).abs() {
+                // more to the right
+                (Point::new(r1.right(), r1.center_y()), Point::new(r2.left(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+            } else {
+                // more to the top
+                (Point::new(r1.center_x(), r1.top()), Point::new(r2.center_x(), r2.bottom()), OrthogonalDirection::VerticalUntilMiddle)
+            }
+        }
+        0b_10_10 => {
+            // h = 2, v = 2
+            if (r1.right() - r2.left()).abs() < (r1.bottom() - r2.top()).abs() {
+                // more to the right
+                (Point::new(r1.right(), r1.center_y()), Point::new(r2.left(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+            } else {
+                // more to the bottom
+                (Point::new(r1.center_x(), r1.bottom()), Point::new(r2.center_x(), r2.top()), OrthogonalDirection::VerticalUntilMiddle)
+            }
+        }
+        _ => {
+            unreachable!("The combination {value} [h={h}, v={v}] is not possible !");
+        }
+    }
+}
+
 pub struct Graph<T>
 where
     T: GraphNode,
@@ -217,8 +307,7 @@ where
             }
         }
         // check to see if the current node is filtered
-        if (count>0) && (self.current_node < self.nodes.len()) && self.nodes[self.current_node].filtered
-        {
+        if (count > 0) && (self.current_node < self.nodes.len()) && self.nodes[self.current_node].filtered {
             let len = self.nodes.len();
             for i in 0..self.nodes.len() {
                 let idx = (self.current_node + i) % len;
@@ -229,7 +318,7 @@ where
                 }
             }
             need_repaint = true;
-        } 
+        }
         if need_repaint {
             self.repaint(control);
         }
@@ -305,14 +394,16 @@ where
     }
     fn draw_edge(&mut self, index: u32, attr: CharAttribute) {
         let e = &self.edges[index as usize];
-        let p1 = self.nodes[e.from_node_id as usize].rect.center();
-        let p2 = self.nodes[e.to_node_id as usize].rect.center();
+
+        // let p1 = self.nodes[e.from_node_id as usize].rect.center();
+        // let p2 = self.nodes[e.to_node_id as usize].rect.center();
+        let (p1, p2, dir) = closest_points(&self.nodes[e.from_node_id as usize].rect, &self.nodes[e.to_node_id as usize].rect);
         let line_type = e.line_type.unwrap_or(self.edge_line_type);
         match self.edge_routing {
             EdgeRouting::Direct => self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, line_type, attr),
             EdgeRouting::Orthogonal => self
                 .surface
-                .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, line_type, OrthogonalDirection::Auto, attr),
+                .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, line_type, dir, attr),
         }
     }
     fn draw_edges_from_current(&mut self, attr: CharAttribute) {
