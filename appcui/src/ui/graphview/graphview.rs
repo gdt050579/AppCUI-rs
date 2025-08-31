@@ -89,6 +89,7 @@ where
             ArrangeMethod::Grid => super::node_layout::grid::rearange(&mut self.graph),
             ArrangeMethod::Circular => super::node_layout::circular::rearange(&mut self.graph),
             ArrangeMethod::Hierarchical => super::node_layout::hierarchical::rearange(&mut self.graph),
+            ArrangeMethod::ForceDirected => super::node_layout::force_directed::rearange(&mut self.graph),
         }
         self.graph.resize_graph(true);
         self.graph.repaint(&self.base);

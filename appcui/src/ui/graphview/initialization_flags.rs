@@ -20,4 +20,5 @@ pub enum ArrangeMethod {
     Grid,
     Circular,
     Hierarchical,
+    ForceDirected,
 }
