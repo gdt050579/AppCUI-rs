@@ -2,6 +2,8 @@
 pub enum OrthogonalDirection {
     HorizontalFirst,
     VerticalFirst,
+    HorizontalUntilMiddle,
+    VerticalUntilMiddle,
     #[default]
     Auto,
 }

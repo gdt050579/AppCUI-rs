@@ -757,6 +757,27 @@ impl Surface {
                 };
                 self.write_char(x2, y1, Character::with_char(ch));
             }
+            OrthogonalDirection::HorizontalUntilMiddle => {
+                let middle_x = (x1 + x2) / 2;
+                self.draw_horizontal_line(x1, y1, middle_x, line_type, attr);
+                self.draw_vertical_line(middle_x, y1, y2, line_type, attr);
+                self.draw_horizontal_line(middle_x, y2, x2, line_type, attr);
+                let (ch1,ch2) = if x1 < x2 {
+                    if y1 < y2 {
+                        (cs.corner_top_right, cs.corner_bottom_left)
+                    } else {
+                        (cs.corner_bottom_right, cs.corner_top_left)
+                    }
+                } else {
+                    if y1 < y2 {
+                        (cs.corner_top_left, cs.corner_bottom_right)
+                    } else {
+                        (cs.corner_bottom_left, cs.corner_top_right)
+                    }
+                };
+                self.write_char(middle_x, y1, Character::with_char(ch1));
+                self.write_char(middle_x, y2, Character::with_char(ch2));
+            }            
             OrthogonalDirection::VerticalFirst => {
                 self.draw_vertical_line(x1, y1, y2, line_type, attr);
                 self.draw_horizontal_line(x1, y2, x2, line_type, attr);
@@ -774,6 +795,27 @@ impl Surface {
                     }
                 };
                 self.write_char(x1, y2, Character::with_char(ch));
+            }
+            OrthogonalDirection::VerticalUntilMiddle => {
+                let middle_y = (y1 + y2) / 2;
+                self.draw_vertical_line(x1, y1, middle_y, line_type, attr);
+                self.draw_horizontal_line(x1, middle_y, x2, line_type, attr);
+                self.draw_vertical_line(x2, middle_y, y2, line_type, attr);
+                let (ch1,ch2) = if y1 < y2 {
+                    if x1 < x2 {
+                        (cs.corner_bottom_left, cs.corner_top_right)
+                    } else {
+                        (cs.corner_bottom_right, cs.corner_top_left)
+                    }
+                } else {
+                    if x1 < x2 {
+                        (cs.corner_top_left, cs.corner_bottom_right)
+                    } else {
+                        (cs.corner_top_right, cs.corner_bottom_left)
+                    }
+                };
+                self.write_char(x1, middle_y, Character::with_char(ch1));
+                self.write_char(x2, middle_y, Character::with_char(ch2));
             }
             OrthogonalDirection::Auto => unreachable!(),
         }
