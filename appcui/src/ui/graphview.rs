@@ -5,8 +5,11 @@ mod node_layout;
 mod node;
 mod edge;
 mod graph;
+mod graph_rendering_options;
 #[cfg(test)]
 mod tests;
+
+use self::graph_rendering_options::RenderingOptions;
 
 pub use self::graphview::GraphView;
 pub use self::initialization_flags::Flags;
@@ -18,3 +21,4 @@ pub use self::node::Node;
 pub use self::node::NodeBuilder;
 pub use self::edge::Edge;
 pub use self::edge::EdgeBuilder;
+

@@ -4,6 +4,7 @@ use super::EdgeRouting;
 use super::GraphNode;
 use super::Node;
 use super::NodeBuilder;
+use super::RenderingOptions;
 use crate::prelude::*;
 use crate::utils::GlyphParser;
 
@@ -216,6 +217,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
     }
 }
 
+
 pub struct Graph<T>
 where
     T: GraphNode,
@@ -227,11 +229,7 @@ where
     current_node: usize,
     hovered_node: Option<usize>,
     repr_buffer: String,
-    highlight_edges_in: bool,
-    highlight_edges_out: bool,
-    show_arrow_heads: bool,
-    edge_routing: EdgeRouting,
-    edge_line_type: LineType,
+    rendering_options: RenderingOptions,
 }
 impl<T> Graph<T>
 where
@@ -246,11 +244,7 @@ where
             current_node: 0,
             hovered_node: None,
             repr_buffer: String::with_capacity(128),
-            highlight_edges_in: false,
-            highlight_edges_out: false,
-            show_arrow_heads: true,
-            edge_routing: EdgeRouting::Direct,
-            edge_line_type: LineType::Single,
+            rendering_options: RenderingOptions::new(),
         };
         // remove edges that have invalid node index value
         let nodes_count = g.nodes.len() as u32;
@@ -417,22 +411,9 @@ where
     pub(super) fn size(&self) -> Size {
         self.surface_size
     }
-    pub(super) fn set_highlight_edges(&mut self, endges_is: bool, edges_out: bool, control: &ControlBase) {
-        if (edges_out != self.highlight_edges_out) || (endges_is != self.highlight_edges_in) {
-            self.highlight_edges_in = endges_is;
-            self.highlight_edges_out = edges_out;
-            self.repaint(control);
-        }
-    }
-    pub(super) fn set_edge_routing(&mut self, routing: EdgeRouting, control: &ControlBase) {
-        if routing != self.edge_routing {
-            self.edge_routing = routing;
-            self.repaint(control);
-        }
-    }
-    pub(super) fn set_edge_line_type(&mut self, line_type: LineType, control: &ControlBase) {
-        if line_type != self.edge_line_type {
-            self.edge_line_type = line_type;
+    pub(super) fn update_rendering_options(&mut self, new_options: &RenderingOptions, control: &ControlBase) {
+        if self.rendering_options != *new_options {
+            self.rendering_options = *new_options;
             self.repaint(control);
         }
     }
@@ -460,12 +441,12 @@ where
         // let p1 = self.nodes[e.from_node_id as usize].rect.center();
         // let p2 = self.nodes[e.to_node_id as usize].rect.center();
         let (p1, p2, orto_dir, entry_dir) = closest_points(&self.nodes[e.from_node_id as usize].rect, &self.nodes[e.to_node_id as usize].rect);
-        let line_type = e.line_type.unwrap_or(self.edge_line_type);
-        match self.edge_routing {
+        let line_type = e.line_type.unwrap_or(self.rendering_options.edge_line_type);
+        match self.rendering_options.edge_routing {
             EdgeRouting::Direct => self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, line_type, attr),
             EdgeRouting::Orthogonal => self.surface.draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, line_type, orto_dir, attr),
         }
-        if e.directed && self.show_arrow_heads {
+        if e.directed && self.rendering_options.show_arrow_heads {
             match entry_dir {
                 Some(Direction::OnLeft) => self.surface.write_char(p2.x - 1, p2.y, Character::with_char(SpecialChar::TriangleRight)),
                 Some(Direction::OnRight) => self.surface.write_char(p2.x + 1, p2.y, Character::with_char(SpecialChar::TriangleLeft)),
@@ -519,10 +500,10 @@ where
         }
         if (state == ControlState::Focused) && (self.current_node < self.nodes.len()) {
             let attr = theme.lines.hovered;
-            if self.highlight_edges_out {
+            if self.rendering_options.highlight_edges_out {
                 self.draw_edges_from_current(attr);
             }
-            if self.highlight_edges_in {
+            if self.rendering_options.highlight_edges_in {
                 self.draw_edges_to_current(attr);
             }
         }
@@ -648,7 +629,7 @@ where
 
     pub(super) fn set_current_node(&mut self, index: usize, control: &ControlBase) {
         if index != self.current_node {
-            if self.highlight_edges_in || self.highlight_edges_out {
+            if self.rendering_options.highlight_edges_in || self.rendering_options.highlight_edges_out {
                 self.current_node = index;
                 self.repaint(control);
             } else {
@@ -775,11 +756,7 @@ where
             current_node: 0,
             hovered_node: None,
             repr_buffer: String::new(),
-            highlight_edges_in: false,
-            highlight_edges_out: false,
-            show_arrow_heads: true,
-            edge_routing: EdgeRouting::Direct,
-            edge_line_type: LineType::Single,
+            rendering_options: RenderingOptions::new(),
         }
     }
 }

@@ -1,6 +1,7 @@
 use super::graph::Graph;
 use super::initialization_flags::*;
 use crate::{prelude::*, ui::graphview::GraphNode};
+use super::RenderingOptions;
 
 struct NodeInfo {
     id: usize,
@@ -25,6 +26,7 @@ where
     drag: Drag,
     comp: ListScrollBars,
     arrange_method: ArrangeMethod,
+    rendering_options: RenderingOptions,
 }
 impl<T> GraphView<T>
 where
@@ -47,6 +49,7 @@ where
             drag: Drag::None,
             graph: Graph::default(),
             arrange_method: ArrangeMethod::Grid,
+            rendering_options: RenderingOptions::new(),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
         }
     }
@@ -69,19 +72,29 @@ where
 
     pub fn set_graph(&mut self, graph: Graph<T>) {
         self.graph = graph;
+        self.graph.update_rendering_options(&self.rendering_options, &self.base);
         self.arrange_nodes(self.arrange_method);
     }
 
     pub fn set_edge_routing(&mut self, routing: EdgeRouting) {
-        self.graph.set_edge_routing(routing, &self.base);
+        self.rendering_options.edge_routing = routing;
+        self.graph.update_rendering_options(&self.rendering_options, &self.base);
     }
 
     pub fn set_edge_line_type(&mut self, line_type: LineType) {
-        self.graph.set_edge_line_type(line_type, &self.base);
+        self.rendering_options.edge_line_type = line_type;
+        self.graph.update_rendering_options(&self.rendering_options, &self.base);
     }
 
     pub fn enable_edge_highlighting(&mut self, incoming: bool, outgoing: bool) {
-        self.graph.set_highlight_edges(incoming, outgoing, &self.base);
+        self.rendering_options.highlight_edges_in = incoming;
+        self.rendering_options.highlight_edges_out = outgoing;
+        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+    }
+
+    pub fn enable_arrow_heads(&mut self, enabled: bool) {
+        self.rendering_options.show_arrow_heads = enabled;
+        self.graph.update_rendering_options(&self.rendering_options, &self.base);
     }
 
     pub fn arrange_nodes(&mut self, method: ArrangeMethod) {
