@@ -1,7 +1,7 @@
 use super::super::Graph;
 use super::super::GraphNode;
 use crate::graphics::*;
-use std::collections::HashMap;
+
 
 #[derive(Clone, Copy, Debug)]
 struct Vector2D {
@@ -92,7 +92,7 @@ pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>) {
     }
 
     // Run force-directed simulation
-    run_force_simulation(graph, &mut positions, &mut velocities, area_size, &max_node_size);
+    run_force_simulation(graph, &mut positions, &mut velocities, area_size);
 
     // Apply final positions to nodes with aspect ratio correction
     apply_positions_to_nodes(graph, &positions, &max_node_size);
@@ -103,7 +103,6 @@ fn run_force_simulation<T: GraphNode>(
     positions: &mut Vec<Vector2D>,
     velocities: &mut Vec<Vector2D>,
     area_size: i32,
-    max_node_size: &Size,
 ) {
     let node_count = positions.len();
     if node_count <= 1 {
@@ -216,8 +215,6 @@ fn apply_positions_to_nodes<T: GraphNode>(
     }
     
     // Calculate offset to center the layout and ensure positive coordinates
-    let width = max_x - min_x;
-    let height = max_y - min_y;
     let padding = (max_node_size.width.max(max_node_size.height) as f64) * 2.0;
     
     let offset_x = -min_x + padding;

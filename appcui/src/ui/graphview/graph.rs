@@ -66,7 +66,7 @@ impl ControlState {
     }
 }
 
-fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection) {
+fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, Option<Direction>) {
     let h = if r1.right() + 2 <= r2.left() {
         2
     } else if r1.left() >= r2.right() + 2 {
@@ -92,62 +92,122 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection) {
     match value {
         0 => {
             // intersect
-            (r1.center(), r2.center(), OrthogonalDirection::Auto)
+            (r1.center(), r2.center(), OrthogonalDirection::Auto, None)
         }
         0b_00_01 => {
             // h = 0, v = 1
-            (Point::new(r1.center_x(), r1.top()), Point::new(r2.center_x(), r2.bottom()), OrthogonalDirection::VerticalUntilMiddle)
+            (
+                Point::new(r1.center_x(), r1.top()),
+                Point::new(r2.center_x(), r2.bottom()),
+                OrthogonalDirection::VerticalUntilMiddle,
+                Some(Direction::OnBottom),
+            )
         }
         0b_00_10 => {
             // h = 0, v = 2
-            (Point::new(r1.center_x(), r1.bottom()), Point::new(r2.center_x(), r2.top()), OrthogonalDirection::VerticalUntilMiddle)
+            (
+                Point::new(r1.center_x(), r1.bottom()),
+                Point::new(r2.center_x(), r2.top()),
+                OrthogonalDirection::VerticalUntilMiddle,
+                Some(Direction::OnTop),
+            )
         }
         0b_01_00 => {
             // h = 1, v = 0
-            (Point::new(r1.left(), r1.center_y()), Point::new(r2.right(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+            (
+                Point::new(r1.left(), r1.center_y()),
+                Point::new(r2.right(), r2.center_y()),
+                OrthogonalDirection::HorizontalUntilMiddle,
+                Some(Direction::OnRight),
+            )
         }
         0b_01_01 => {
             // h = 1, v = 1
             if (r1.left() - r2.right()).abs() < (r1.top() - r2.bottom()).abs() {
                 // more to the left
-                (Point::new(r1.left(), r1.center_y()), Point::new(r2.right(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+                (
+                    Point::new(r1.left(), r1.center_y()),
+                    Point::new(r2.right(), r2.center_y()),
+                    OrthogonalDirection::HorizontalUntilMiddle,
+                    Some(Direction::OnRight),
+                )
             } else {
                 // more to the top
-                (Point::new(r1.center_x(), r1.top()), Point::new(r2.center_x(), r2.bottom()), OrthogonalDirection::VerticalUntilMiddle)
+                (
+                    Point::new(r1.center_x(), r1.top()),
+                    Point::new(r2.center_x(), r2.bottom()),
+                    OrthogonalDirection::VerticalUntilMiddle,
+                    Some(Direction::OnBottom),
+                )
             }
         }
         0b_01_10 => {
             // h = 1, v = 2
             if (r1.left() - r2.right()).abs() < (r1.bottom() - r2.top()).abs() {
                 // more to the left
-                (Point::new(r1.left(), r1.center_y()), Point::new(r2.right(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+                (
+                    Point::new(r1.left(), r1.center_y()),
+                    Point::new(r2.right(), r2.center_y()),
+                    OrthogonalDirection::HorizontalUntilMiddle,
+                    Some(Direction::OnRight),
+                )
             } else {
                 // more to the bottom
-                (Point::new(r1.center_x(), r1.bottom()), Point::new(r2.center_x(), r2.top()), OrthogonalDirection::VerticalUntilMiddle)
+                (
+                    Point::new(r1.center_x(), r1.bottom()),
+                    Point::new(r2.center_x(), r2.top()),
+                    OrthogonalDirection::VerticalUntilMiddle,
+                    Some(Direction::OnTop),
+                )
             }
         }
         0b_10_00 => {
             // h = 2, v = 0
-            (Point::new(r1.right(), r1.center_y()), Point::new(r2.left(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+            (
+                Point::new(r1.right(), r1.center_y()),
+                Point::new(r2.left(), r2.center_y()),
+                OrthogonalDirection::HorizontalUntilMiddle,
+                Some(Direction::OnLeft),
+            )
         }
         0b_10_01 => {
             // h = 2, v = 1
             if (r1.right() - r2.left()).abs() < (r1.top() - r2.bottom()).abs() {
                 // more to the right
-                (Point::new(r1.right(), r1.center_y()), Point::new(r2.left(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+                (
+                    Point::new(r1.right(), r1.center_y()),
+                    Point::new(r2.left(), r2.center_y()),
+                    OrthogonalDirection::HorizontalUntilMiddle,
+                    Some(Direction::OnLeft),
+                )
             } else {
                 // more to the top
-                (Point::new(r1.center_x(), r1.top()), Point::new(r2.center_x(), r2.bottom()), OrthogonalDirection::VerticalUntilMiddle)
+                (
+                    Point::new(r1.center_x(), r1.top()),
+                    Point::new(r2.center_x(), r2.bottom()),
+                    OrthogonalDirection::VerticalUntilMiddle,
+                    Some(Direction::OnBottom),
+                )
             }
         }
         0b_10_10 => {
             // h = 2, v = 2
             if (r1.right() - r2.left()).abs() < (r1.bottom() - r2.top()).abs() {
                 // more to the right
-                (Point::new(r1.right(), r1.center_y()), Point::new(r2.left(), r2.center_y()), OrthogonalDirection::HorizontalUntilMiddle)
+                (
+                    Point::new(r1.right(), r1.center_y()),
+                    Point::new(r2.left(), r2.center_y()),
+                    OrthogonalDirection::HorizontalUntilMiddle,
+                    Some(Direction::OnLeft),
+                )
             } else {
                 // more to the bottom
-                (Point::new(r1.center_x(), r1.bottom()), Point::new(r2.center_x(), r2.top()), OrthogonalDirection::VerticalUntilMiddle)
+                (
+                    Point::new(r1.center_x(), r1.bottom()),
+                    Point::new(r2.center_x(), r2.top()),
+                    OrthogonalDirection::VerticalUntilMiddle,
+                    Some(Direction::OnTop),
+                )
             }
         }
         _ => {
@@ -169,6 +229,7 @@ where
     repr_buffer: String,
     highlight_edges_in: bool,
     highlight_edges_out: bool,
+    show_arrow_heads: bool,
     edge_routing: EdgeRouting,
     edge_line_type: LineType,
 }
@@ -187,6 +248,7 @@ where
             repr_buffer: String::with_capacity(128),
             highlight_edges_in: false,
             highlight_edges_out: false,
+            show_arrow_heads: true,
             edge_routing: EdgeRouting::Direct,
             edge_line_type: LineType::Single,
         };
@@ -207,20 +269,20 @@ where
         }
         g
     }
-    pub fn with_slices(nodes: &[T], edges: &[(u32, u32)]) -> Self
+    pub fn with_slices(nodes: &[T], edges: &[(u32, u32)], directed: bool) -> Self
     where
         T: GraphNode + Clone,
     {
         let v: Vec<Node<T>> = nodes.iter().map(|n| NodeBuilder::new(n.clone()).build()).collect();
-        let e: Vec<Edge> = edges.iter().map(|link| EdgeBuilder::new(link.0, link.1).build()).collect();
+        let e: Vec<Edge> = edges.iter().map(|link| EdgeBuilder::new(link.0, link.1).directed(directed).build()).collect();
         Self::new(v, e)
     }
-    pub fn with_slices_and_border(nodes: &[T], edges: &[(u32, u32)], border: LineType) -> Self
+    pub fn with_slices_and_border(nodes: &[T], edges: &[(u32, u32)], border: LineType, directed: bool) -> Self
     where
         T: GraphNode + Clone,
     {
         let v: Vec<Node<T>> = nodes.iter().map(|n| NodeBuilder::new(n.clone()).border(border).build()).collect();
-        let e: Vec<Edge> = edges.iter().map(|link| EdgeBuilder::new(link.0, link.1).build()).collect();
+        let e: Vec<Edge> = edges.iter().map(|link| EdgeBuilder::new(link.0, link.1).directed(directed).build()).collect();
         Self::new(v, e)
     }
     fn update_surface_size(&mut self, pack: bool) {
@@ -397,13 +459,20 @@ where
 
         // let p1 = self.nodes[e.from_node_id as usize].rect.center();
         // let p2 = self.nodes[e.to_node_id as usize].rect.center();
-        let (p1, p2, dir) = closest_points(&self.nodes[e.from_node_id as usize].rect, &self.nodes[e.to_node_id as usize].rect);
+        let (p1, p2, orto_dir, entry_dir) = closest_points(&self.nodes[e.from_node_id as usize].rect, &self.nodes[e.to_node_id as usize].rect);
         let line_type = e.line_type.unwrap_or(self.edge_line_type);
         match self.edge_routing {
             EdgeRouting::Direct => self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, line_type, attr),
-            EdgeRouting::Orthogonal => self
-                .surface
-                .draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, line_type, dir, attr),
+            EdgeRouting::Orthogonal => self.surface.draw_orthogonal_line(p1.x, p1.y, p2.x, p2.y, line_type, orto_dir, attr),
+        }
+        if e.directed && self.show_arrow_heads {
+            match entry_dir {
+                Some(Direction::OnLeft) => self.surface.write_char(p2.x - 1, p2.y, Character::with_char(SpecialChar::TriangleRight)),
+                Some(Direction::OnRight) => self.surface.write_char(p2.x + 1, p2.y, Character::with_char(SpecialChar::TriangleLeft)),
+                Some(Direction::OnTop) => self.surface.write_char(p2.x, p2.y - 1, Character::with_char(SpecialChar::TriangleDown)),
+                Some(Direction::OnBottom) => self.surface.write_char(p2.x, p2.y + 1, Character::with_char(SpecialChar::TriangleUp)),
+                None => (),
+            }
         }
     }
     fn draw_edges_from_current(&mut self, attr: CharAttribute) {
@@ -708,6 +777,7 @@ where
             repr_buffer: String::new(),
             highlight_edges_in: false,
             highlight_edges_out: false,
+            show_arrow_heads: true,
             edge_routing: EdgeRouting::Direct,
             edge_line_type: LineType::Single,
         }
