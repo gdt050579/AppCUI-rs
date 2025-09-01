@@ -101,7 +101,8 @@ where
         match method {
             ArrangeMethod::Grid => super::node_layout::grid::rearange(&mut self.graph),
             ArrangeMethod::Circular => super::node_layout::circular::rearange(&mut self.graph),
-            ArrangeMethod::Hierarchical => super::node_layout::hierarchical::rearange(&mut self.graph),
+            ArrangeMethod::Hierarchical => super::node_layout::hierarchical::rearange(&mut self.graph, 2),
+            ArrangeMethod::HierarchicalPacked => super::node_layout::hierarchical::rearange(&mut self.graph, 1),
             ArrangeMethod::ForceDirected => super::node_layout::force_directed::rearange(&mut self.graph),
         }
         self.graph.resize_graph(true);

@@ -1,9 +1,9 @@
 use super::super::Graph;
 use super::super::GraphNode;
 use crate::graphics::*;
-use std::collections::{VecDeque, HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 
-pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>) {
+pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>, spacing: u32) {
     if graph.nodes.is_empty() {
         return;
     }
@@ -18,27 +18,27 @@ pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>) {
 
     // Find connected components and their roots
     let components = find_connected_components_with_roots(graph);
-    
+
     if components.is_empty() {
         return;
     }
 
     // Calculate spacing
     // Ensure at least 2 characters between children horizontally and 1 character between parent-child vertically
-    let horizontal_spacing = max_node_size.width + 2;  // At least 2 characters between children
-    let vertical_spacing = (max_node_size.height + 1) * 2;   // At least 1 character between parent and children (doubled for aspect ratio correction)
+    let horizontal_spacing = max_node_size.width + spacing * 2; // At least 2 characters between children
+    let vertical_spacing = (max_node_size.height + spacing) * 2; // At least 1 character between parent and children (doubled for aspect ratio correction)
 
     // Position each component's tree
     let mut current_x_offset = 0;
     for (root, nodes) in components {
         let tree_width = arrange_tree_component(
-            graph, 
-            root, 
-            &nodes, 
-            current_x_offset, 
-            horizontal_spacing, 
+            graph,
+            root,
+            &nodes,
+            current_x_offset,
+            horizontal_spacing,
             vertical_spacing,
-            &max_node_size
+            &max_node_size,
         );
         current_x_offset += tree_width + (horizontal_spacing * 2) as i32;
     }
@@ -52,7 +52,7 @@ fn find_connected_components_with_roots<T: GraphNode>(graph: &Graph<T>) -> Vec<(
         if !visited[start_node] {
             let mut component = HashSet::new();
             let mut queue = VecDeque::new();
-            
+
             queue.push_back(start_node);
             visited[start_node] = true;
 
@@ -103,9 +103,10 @@ fn find_connected_components_with_roots<T: GraphNode>(graph: &Graph<T>) -> Vec<(
 fn find_best_root<T: GraphNode>(graph: &Graph<T>, component: &HashSet<usize>) -> usize {
     // First, check if this is a directed graph by looking for directed edges
     let has_directed_edges = component.iter().any(|&node_idx| {
-        graph.nodes[node_idx].edges_out.iter().any(|&edge_idx| {
-            graph.edges[edge_idx as usize].directed
-        })
+        graph.nodes[node_idx]
+            .edges_out
+            .iter()
+            .any(|&edge_idx| graph.edges[edge_idx as usize].directed)
     });
 
     if has_directed_edges {
@@ -162,7 +163,7 @@ fn find_most_central_node<T: GraphNode>(graph: &Graph<T>, component: &HashSet<us
     for &candidate in component {
         let distances = bfs_distances(graph, candidate, component);
         let max_distance = distances.values().max().copied().unwrap_or(0);
-        
+
         if max_distance < min_max_distance {
             min_max_distance = max_distance;
             best_node = Some(candidate);
@@ -175,7 +176,7 @@ fn find_most_central_node<T: GraphNode>(graph: &Graph<T>, component: &HashSet<us
 fn bfs_distances<T: GraphNode>(graph: &Graph<T>, start: usize, component: &HashSet<usize>) -> HashMap<usize, usize> {
     let mut distances = HashMap::new();
     let mut queue = VecDeque::new();
-    
+
     distances.insert(start, 0);
     queue.push_back(start);
 
@@ -226,26 +227,26 @@ fn arrange_tree_component<T: GraphNode>(
 ) -> i32 {
     // Build the tree structure from the root
     let tree = build_tree_from_root(graph, root, component);
-    
+
     // Calculate positions for each level
     let level_positions = calculate_tree_positions(&tree, horizontal_spacing, vertical_spacing);
-    
+
     // Apply positions to nodes with aspect ratio correction
     let mut min_x = i32::MAX;
     let mut max_x = i32::MIN;
-    
+
     for (node_idx, (x, y)) in level_positions {
         let adjusted_x = x_offset + x;
-        let adjusted_y = y / 2;  // Apply 2:1 aspect ratio correction
-        
+        let adjusted_y = y / 2; // Apply 2:1 aspect ratio correction
+
         let node = &mut graph.nodes[node_idx];
         node.rect.set_left(adjusted_x - (node.rect.width() as i32 / 2), true);
         node.rect.set_top(adjusted_y - (node.rect.height() as i32 / 2), true);
-        
+
         min_x = min_x.min(adjusted_x - (node.rect.width() as i32 / 2));
         max_x = max_x.max(adjusted_x + (node.rect.width() as i32 / 2));
     }
-    
+
     // Return the width of this tree component
     if min_x == i32::MAX {
         horizontal_spacing as i32
@@ -254,15 +255,11 @@ fn arrange_tree_component<T: GraphNode>(
     }
 }
 
-fn build_tree_from_root<T: GraphNode>(
-    graph: &Graph<T>, 
-    root: usize, 
-    component: &HashSet<usize>
-) -> HashMap<usize, Vec<usize>> {
+fn build_tree_from_root<T: GraphNode>(graph: &Graph<T>, root: usize, component: &HashSet<usize>) -> HashMap<usize, Vec<usize>> {
     let mut tree = HashMap::new();
     let mut visited = HashSet::new();
     let mut queue = VecDeque::new();
-    
+
     queue.push_back(root);
     visited.insert(root);
     tree.insert(root, Vec::new());
@@ -294,10 +291,10 @@ fn build_tree_from_root<T: GraphNode>(
             if edge.directed {
                 continue; // Skip directed edges in the wrong direction
             }
-            
+
             let connected_node = if edge.to_node_id as usize == node_idx {
                 edge.from_node_id as usize
-        } else {
+            } else {
                 edge.to_node_id as usize
             };
 
@@ -314,36 +311,27 @@ fn build_tree_from_root<T: GraphNode>(
     tree
 }
 
-fn calculate_tree_positions(
-    tree: &HashMap<usize, Vec<usize>>, 
-    horizontal_spacing: u32, 
-    vertical_spacing: u32
-) -> HashMap<usize, (i32, i32)> {
+fn calculate_tree_positions(tree: &HashMap<usize, Vec<usize>>, horizontal_spacing: u32, vertical_spacing: u32) -> HashMap<usize, (i32, i32)> {
     let mut positions = HashMap::new();
     let mut node_widths = HashMap::new();
-    
+
     // Find the root (node that appears as key but not as child)
     let all_children: HashSet<usize> = tree.values().flatten().copied().collect();
     let root = tree.keys().find(|&&node| !all_children.contains(&node)).copied().unwrap_or(0);
-    
+
     // Calculate subtree widths bottom-up
     calculate_subtree_widths(tree, root, &mut node_widths, horizontal_spacing);
-    
+
     // Position nodes top-down
     position_tree_nodes(tree, root, 0, 0, &node_widths, &mut positions, horizontal_spacing, vertical_spacing);
-    
+
     positions
 }
 
-fn calculate_subtree_widths(
-    tree: &HashMap<usize, Vec<usize>>, 
-    node: usize, 
-    widths: &mut HashMap<usize, i32>,
-    horizontal_spacing: u32
-) -> i32 {
+fn calculate_subtree_widths(tree: &HashMap<usize, Vec<usize>>, node: usize, widths: &mut HashMap<usize, i32>, horizontal_spacing: u32) -> i32 {
     let empty_vec = Vec::new();
     let children = tree.get(&node).unwrap_or(&empty_vec);
-    
+
     if children.is_empty() {
         // Leaf node
         let width = horizontal_spacing as i32;
@@ -351,7 +339,8 @@ fn calculate_subtree_widths(
         width
     } else {
         // Internal node - width is sum of children widths
-        let total_width: i32 = children.iter()
+        let total_width: i32 = children
+            .iter()
             .map(|&child| calculate_subtree_widths(tree, child, widths, horizontal_spacing))
             .sum();
         widths.insert(node, total_width);
@@ -370,25 +359,34 @@ fn position_tree_nodes(
     vertical_spacing: u32,
 ) {
     positions.insert(node, (x, y));
-    
+
     let empty_vec = Vec::new();
     let children = tree.get(&node).unwrap_or(&empty_vec);
     if children.is_empty() {
         return;
     }
-    
+
     // Calculate starting position for children
     let total_width = widths.get(&node).unwrap_or(&0);
     let mut current_x = x - total_width / 2;
     let child_y = y + vertical_spacing as i32;
-    
+
     for &child in children {
         let default_width = horizontal_spacing as i32;
         let child_width = widths.get(&child).unwrap_or(&default_width);
         let child_center_x = current_x + child_width / 2;
-        
-        position_tree_nodes(tree, child, child_center_x, child_y, widths, positions, horizontal_spacing, vertical_spacing);
-        
+
+        position_tree_nodes(
+            tree,
+            child,
+            child_center_x,
+            child_y,
+            widths,
+            positions,
+            horizontal_spacing,
+            vertical_spacing,
+        );
+
         current_x += child_width;
     }
 }
