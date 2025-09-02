@@ -499,7 +499,7 @@ where
     }
     pub(super) fn repaint(&mut self, control: &ControlBase) {
         // clear the entire surface
-        let ch = Character::new(' ', Color::Transparent, Color::Transparent, CharFlags::None);
+        let ch = Character::new(0 as char, Color::Transparent, Color::Transparent, CharFlags::None);
         for c in &mut self.surface.chars {
             *c = ch;
         }
