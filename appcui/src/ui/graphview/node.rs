@@ -131,7 +131,7 @@ where
         self
     }
 
-    /// Builds the actual node
+    /// Builds the actual node. If the size was not set, the prefered size as it is returned by the GraphNode implementation will be used
     #[inline(always)]
     pub fn build(mut self) -> Node<T> {
         if let Some(size) = self.size {
