@@ -279,6 +279,27 @@ where
         let e: Vec<Edge> = edges.iter().map(|link| EdgeBuilder::new(link.0, link.1).directed(directed).build()).collect();
         Self::new(v, e)
     }
+    
+    /// Returns the object (of type T) associated with the current node 
+    /// This method returns None only if th graph is empty (no nodes) otherwise it always returns Some(&T)
+    pub fn current_node(&self) -> Option<&Node<T>> {
+        if self.current_node < self.nodes.len() {
+            Some(&self.nodes[self.current_node])
+        } else {
+            None
+        }
+    }
+
+    /// Returns the number of nodes in the graph
+    pub fn nodes_count(&self) -> usize {
+        self.nodes.len()
+    }
+
+    /// Returns a object associated with a node in the graph by its index (if the index is valid)
+    pub fn node(&self, index: usize) -> Option<&Node<T>> {
+        self.nodes.get(index)
+    }
+    
     fn update_surface_size(&mut self, pack: bool) {
         if self.nodes.is_empty() {
             self.surface_size = Size::new(1, 1);

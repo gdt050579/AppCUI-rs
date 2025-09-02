@@ -109,6 +109,10 @@ where
         self.graph.repaint(&self.base);
     }
 
+    pub fn graph(&self) -> &Graph<T> {
+        &self.graph
+    }
+
     fn move_scroll_to(&mut self, x: i32, y: i32) {
         let sz = self.size();
         let surface_size = self.graph.size();
