@@ -35,3 +35,4 @@ pub (crate) mod treeview;
 pub (crate) mod markdown;
 pub (crate) mod progressbar;
 pub (crate) mod textarea;
+pub (crate) mod graphview;

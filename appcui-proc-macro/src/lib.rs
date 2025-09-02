@@ -2315,3 +2315,8 @@ pub fn layout(input: TokenStream) -> TokenStream {
 pub fn charpicker(input: TokenStream) -> TokenStream {
     crate::controls::charpicker::create(input)
 }
+
+#[proc_macro]
+pub fn graphview(input: TokenStream) -> TokenStream {
+    crate::controls::graphview::create(input)
+}
