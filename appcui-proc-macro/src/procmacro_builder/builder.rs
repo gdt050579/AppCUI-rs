@@ -207,7 +207,7 @@ fn generate_graphview_events(a: &mut Arguments) -> String {
     }
     let mut on_current_node_changed_code = String::new();
     let mut on_node_action_code = String::new();
-    for trait_name in a.template_events[&AppCUITrait::GenericListViewEvents].iter() {
+    for trait_name in a.template_events[&AppCUITrait::GenericGraphViewEvents].iter() {
         on_current_node_changed_code.push_str(templates::GRAPHVIEW_ON_CURRENT_NODE_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
         on_node_action_code.push_str(templates::GRAPHVIEW_ON_NODE_ACTION_DEF.replace("$(TYPE)", trait_name).as_str());
     }

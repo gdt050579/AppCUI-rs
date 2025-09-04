@@ -403,12 +403,12 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 pub(crate) static GRAPHVIEW_ON_NODE_ACTION_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<GraphView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
-    return GraphViewEvents::<$(TYPE)>::on_item_action(self, h, index);
+    return GraphViewEvents::<$(TYPE)>::on_node_action(self, h, index);
 }
 ";
 
 pub(crate) static GRAPHVIEW_TRAIT_DEF: &str = "
-trait GraphViewEvents<T: graphview::GraphNode+'static> {
+trait GraphViewEvents<T: graphview: :GraphNode+'static> {
     fn on_current_node_changed(&mut self, handle: Handle<GraphView<T>>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
@@ -416,7 +416,7 @@ trait GraphViewEvents<T: graphview::GraphNode+'static> {
         EventProcessStatus::Ignored
     }
 }
-impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+impl$(TEMPLATE_TYPE) GenericGraphViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 
     fn on_current_node_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
         $(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_CURRENT_NODE_CHANGED)
