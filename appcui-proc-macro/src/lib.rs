@@ -104,6 +104,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -168,6 +169,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -258,6 +260,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TabEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
 
 
     // custom events
@@ -321,6 +324,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TabEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
 
 
 
@@ -410,6 +414,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // custom events

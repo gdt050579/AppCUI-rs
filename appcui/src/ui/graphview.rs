@@ -6,6 +6,7 @@ mod node;
 mod edge;
 mod graph;
 mod graph_rendering_options;
+pub mod events;
 #[cfg(test)]
 mod tests;
 
