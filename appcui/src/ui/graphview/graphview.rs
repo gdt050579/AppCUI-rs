@@ -380,6 +380,7 @@ where
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                 if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
                     // click on a node
+                    let nid = self.graph.current_node_id();
                     self.graph.set_current_node(id, &self.base);
                     let tl = self.graph.nodes[id].rect.top_left();
                     self.drag = Drag::Node(NodeInfo {
@@ -387,6 +388,7 @@ where
                         top_left: tl,
                         origin: Point::new(data.x, data.y),
                     });
+                    self.raise_current_node_changed(nid);
                     return EventProcessStatus::Processed;
                 }
                 if self.flags.contains_one(Flags::ScrollBars) && (self.has_focus()) {
@@ -422,7 +424,15 @@ where
                     return EventProcessStatus::Processed;
                 }
             },
-            MouseEvent::DoubleClick(_) => return EventProcessStatus::Ignored,
+            MouseEvent::DoubleClick(mouse_data) => {
+                let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
+                if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
+                    self.raise_action_on_node(id);
+                    return EventProcessStatus::Processed;
+                } else {
+                    return EventProcessStatus::Ignored;
+                }
+            }
             MouseEvent::Drag(mouse_data) => match &self.drag {
                 Drag::None => {
                     return EventProcessStatus::Ignored;
