@@ -459,6 +459,18 @@ fn check_scroll_view_via_keyboard() {
         Key.Pressed(Alt+Up,4)
         Paint('5. Scroll left 4 times')   
         CheckHash(0xA8F8EDAEAFB28238)
+        Key.Pressed(PageDown)
+        Paint('6. Scroll Down One Page')   
+        CheckHash(0x1082AF67FBBE796A)
+        Key.Pressed(PageUp)
+        Paint('7. Scroll Up One Page')   
+        CheckHash(0x4617C19A7708D5B3)
+        Key.Pressed(Home)
+        Paint('8. Goto top-left of the graph')   
+        CheckHash(0x2A306A3D0F8190EA)
+        Key.Pressed(End)
+        Paint('9. Goto bottom-right of graph')   
+        CheckHash(0xB37A0A8CC46F7CCB)
     ";
     let mut a = App::debug(40, 20, script).build().unwrap();
     let mut w = window!("Test,d:f");
