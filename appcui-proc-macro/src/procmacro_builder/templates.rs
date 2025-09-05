@@ -408,7 +408,7 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 ";
 
 pub(crate) static GRAPHVIEW_TRAIT_DEF: &str = "
-trait GraphViewEvents<T: graphview: :GraphNode+'static> {
+trait GraphViewEvents<T: graphview::GraphNode+'static> {
     fn on_current_node_changed(&mut self, handle: Handle<GraphView<T>>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }

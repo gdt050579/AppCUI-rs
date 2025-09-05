@@ -1,7 +1,10 @@
+use std::any::TypeId;
+
+use super::events::*;
 use super::graph::Graph;
 use super::initialization_flags::*;
-use crate::{prelude::*, ui::graphview::GraphNode};
 use super::RenderingOptions;
+use crate::{prelude::*, ui::graphview::GraphNode};
 
 struct NodeInfo {
     id: usize,
@@ -17,7 +20,7 @@ enum Drag {
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct GraphView<T>
 where
-    T: GraphNode,
+    T: GraphNode + 'static,
 {
     graph: Graph<T>,
     origin_point: Point,
@@ -194,6 +197,29 @@ where
         self.graph.goto_previous_match(&self.base);
         self.ensure_current_node_is_visible();
     }
+    fn raise_current_node_changed(&mut self, old_id: Option<usize>) {
+        let new_id = self.graph.current_node_id();
+        if (old_id != new_id) && new_id.is_some() {
+            self.raise_event(ControlEvent {
+                emitter: self.handle,
+                receiver: self.event_processor,
+                data: ControlEventData::GraphView(EventData {
+                    event_type: GraphViewEventTypes::CurrentNodeChanged,
+                    type_id: TypeId::of::<T>(),
+                }),
+            });
+        }
+    }
+    fn raise_action_on_node(&mut self, id: usize) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::GraphView(EventData {
+                event_type: GraphViewEventTypes::NodeAction(id),
+                type_id: TypeId::of::<T>(),
+            }),
+        });
+    }
 }
 impl<T> OnResize for GraphView<T>
 where
@@ -223,13 +249,16 @@ where
     T: GraphNode,
 {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        let nid = self.graph.current_node_id();
         if self.comp.process_key_pressed(key, character) {
             self.search_text();
+            self.raise_current_node_changed(nid);
             return EventProcessStatus::Processed;
         }
         if self.graph.process_key_events(key, &self.base) {
             self.ensure_current_node_is_visible();
             self.comp.exit_edit_mode();
+            self.raise_current_node_changed(nid);
             return EventProcessStatus::Processed;
         }
         let result = match key.value() {
@@ -268,21 +297,27 @@ where
             key!("Enter") => {
                 if self.comp.is_in_edit_mode() {
                     self.goto_next_match();
+                    self.raise_current_node_changed(nid);
                     // exist directly so that we don't exit the edit mode
                     return EventProcessStatus::Processed;
                 } else {
+                    if let Some(id) = self.graph.current_node_id() {
+                        self.raise_action_on_node(id);
+                        return EventProcessStatus::Processed;
+                    }
                     EventProcessStatus::Ignored
                 }
             }
             key!("Ctrl+Enter") => {
                 if self.comp.is_in_edit_mode() {
                     self.goto_previous_match();
+                    self.raise_current_node_changed(nid);
                     // exist directly so that we don't exit the edit mode
                     return EventProcessStatus::Processed;
                 } else {
                     EventProcessStatus::Ignored
                 }
-            }            
+            }
             _ => EventProcessStatus::Ignored,
         };
         if result == EventProcessStatus::Processed {

@@ -46,7 +46,7 @@ impl ControlState {
     fn node_attr(&self, theme: &Theme) -> CharAttribute {
         match self {
             ControlState::Disabled => theme.button.text.inactive,
-            ControlState::Normal | ControlState::Focused => theme.button.text.normal,
+            ControlState::Normal | ControlState::Focused => theme.button.text.normal,   
         }
     }
     #[inline(always)]

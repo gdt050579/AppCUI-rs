@@ -10,7 +10,7 @@ fn sinple_display() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = GraphView::new(Layout::fill(), graphview::Flags::ScrollBars | graphview::Flags::SearchBar);
-    let g = graphview::Graph::with_slices(&["A","B","C","D"], &[(0,1),(0,2),(1,3)], true);
+    let g = graphview::Graph::with_slices(&["A", "B", "C", "D"], &[(0, 1), (0, 2), (1, 3)], true);
     gv.arrange_nodes(graphview::ArrangeMethod::Hierarchical);
     gv.set_edge_routing(graphview::EdgeRouting::Orthogonal);
     gv.set_edge_line_type(LineType::SingleThick);
@@ -34,7 +34,7 @@ fn sinple_display_proc_macro() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Hierarchical, back:{.,gray,black}, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
-    let g = graphview::Graph::with_slices(&["A","B","C","D"], &[(0,1),(0,2),(1,3)], true);
+    let g = graphview::Graph::with_slices(&["A", "B", "C", "D"], &[(0, 1), (0, 2), (1, 3)], true);
     gv.set_graph(g);
     w.add(gv);
     a.add_window(w);
@@ -47,9 +47,7 @@ fn check_events() {
     struct MyWin {}
     impl MyWin {
         fn new(g: graphview::Graph<u32>) -> Self {
-            let mut w = Self {
-                base: window!("Test,d:f"),
-            };
+            let mut w = Self { base: window!("Test,d:f") };
             let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
             gv.set_graph(g);
             w.add(gv);
@@ -57,23 +55,43 @@ fn check_events() {
         }
     }
     impl GraphViewEvents<u32> for MyWin {
-        fn on_current_node_changed(&mut self,handle:Handle<GraphView<u32>>) -> EventProcessStatus {
+        fn on_current_node_changed(&mut self, handle: Handle<GraphView<u32>>) -> EventProcessStatus {
+            let nid = self.control(handle).unwrap().graph().current_node_id().unwrap();
+            let f = format!("Node IDX: {}", nid);
+            self.set_title(&f);
             EventProcessStatus::Ignored
         }
-    
-        fn on_node_action(&mut self,handle:Handle<GraphView<u32>>,item_index:usize) -> EventProcessStatus {
+
+        fn on_node_action(&mut self, _: Handle<GraphView<u32>>, item_index: usize) -> EventProcessStatus {
+            let f = format!("Action IDX: {}", item_index);
+            self.set_title(&f);
             EventProcessStatus::Ignored
         }
     }
 
-
     let script = "
         Paint.Enable(false)
-        Paint('Initial state')   
-        CheckHash(0xC976C47E78769FFC) 
+        //Error.Disable(true)
+        Paint('1. Initial state')   
+        CheckHash(0x369776D345DF3EB4) 
+        Key.Pressed('Right')
+        Paint('2. New node - title is: New IDX: 1')   
+        CheckHash(0xCFF990B23499F06B) 
+        Key.Pressed('Down')
+        Paint('3. New node - title is: New IDX: 3')   
+        CheckHash(0xA9F5CB1A947005) 
+        Key.Pressed('Enter')
+        Paint('4. Action - title is: Action IDX: 3')   
+        CheckHash(0xDAB162CDCCC002FF) 
+        Key.Pressed('Left')
+        Paint('5. New node - title is: New IDX: 2')   
+        CheckHash(0xFA69C3E174F6553C)         
+        Key.Pressed('Up')
+        Paint('6. New node - title is: New IDX: 0')   
+        CheckHash(0xDD4D4629B0731CA6)         
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
-    let g = graphview::Graph::with_slices(&[0,1,2,3], &[(0,1),(0,2),(1,3)], true);
+    let g = graphview::Graph::with_slices(&[0, 1, 2, 3], &[(0, 1), (0, 2), (1, 3)], true);
     a.add_window(MyWin::new(g));
     a.run();
 }

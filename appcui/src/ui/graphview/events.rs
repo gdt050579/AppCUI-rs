@@ -11,7 +11,7 @@ pub trait GenericGraphViewEvents {
 }
 #[derive(Copy,Clone)]
 pub(crate) enum GraphViewEventTypes {
-    CurrentItemChanged,
+    CurrentNodeChanged,
     NodeAction(usize),
 }
 
