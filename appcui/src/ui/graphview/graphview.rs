@@ -108,6 +108,7 @@ where
             ArrangeMethod::HierarchicalPacked => super::node_layout::hierarchical::rearange(&mut self.graph, 1),
             ArrangeMethod::ForceDirected => super::node_layout::force_directed::rearange(&mut self.graph),
         }
+        self.arrange_method = method;
         self.graph.resize_graph(true);
         self.graph.repaint(&self.base);
     }

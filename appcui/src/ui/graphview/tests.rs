@@ -1,5 +1,72 @@
 use crate::prelude::*;
 
+fn build_custom_graph_1() -> graphview::Graph<String> {
+    let mut nodes = Vec::new();
+    let mut edges = Vec::new();
+    nodes.push(
+        graphview::NodeBuilder::new("School".to_string())
+            .border(LineType::Double)
+            .size(Size::new(20, 1))
+            .build(),
+    );
+    nodes.push(
+        graphview::NodeBuilder::new("Math".to_string())
+            .border(LineType::Single)
+            .size(Size::new(10, 1))
+            .text_alignment(TextAlignment::Left)
+            .build(),
+    );
+    nodes.push(
+        graphview::NodeBuilder::new("English".to_string())
+            .border(LineType::Ascii)
+            .size(Size::new(15, 1))
+            .text_alignment(TextAlignment::Right)
+            .build(),
+    );
+    nodes.push(graphview::NodeBuilder::new("Science".to_string()).size(Size::new(12, 1)).build());
+    nodes.push(graphview::NodeBuilder::new("Glonal\nLiterature".to_string()).size(Size::new(12, 2)).build());    
+    edges.push(graphview::EdgeBuilder::new(0, 1).build());
+    edges.push(graphview::EdgeBuilder::new(0, 2).build());
+    edges.push(graphview::EdgeBuilder::new(1, 3).build());
+    edges.push(graphview::EdgeBuilder::new(2, 4).build());
+    graphview::Graph::new(nodes, edges)
+}
+
+fn build_custom_graph_2() -> graphview::Graph<&'static str> {
+    let nodes = &[
+        "N1","N2","N3","N4","N5",
+        "N6","N7","N8","N9","N10",
+        "N11","N12","N13","N14","N15",
+        "N16","N17","N18","N19","N20",
+    ];
+
+    let edges: &[(u32, u32)] = &[
+        (0,1), (0,2), (0,3),
+        (1,4), (1,5), (1,6),
+        (2,6), (2,7), (2,8),
+        (3,8), (3,9), (3,10),
+        (4,10), (4,11), (4,12),
+        (5,12), (5,13), (5,14),
+        (6,14), (6,15), (6,16),
+        (7,16), (7,17), (7,18),
+        (8,18), (8,19), (8,0),
+        (9,1), (9,5), (9,13),
+        (10,2), (10,6), (10,14),
+        (11,3), (11,7), (11,15),
+        (12,4), (12,8), (12,16),
+        (13,5), (13,9), (13,17),
+        (14,6), (14,10), (14,18),
+        (15,7), (15,11), (15,19),
+        (16,8), (16,12), (16,0),
+        (17,9), (17,13), (17,1),
+        (18,10), (18,14), (18,2),
+        (19,11), (19,15), (19,3),
+    ];
+
+    graphview::Graph::with_slices(nodes, edges, false)
+}
+
+
 #[test]
 fn sinple_display() {
     let script = "
@@ -11,7 +78,7 @@ fn sinple_display() {
     let mut w = window!("Test,d:f");
     let mut gv = GraphView::new(Layout::fill(), graphview::Flags::ScrollBars | graphview::Flags::SearchBar);
     let g = graphview::Graph::with_slices(&["A", "B", "C", "D"], &[(0, 1), (0, 2), (1, 3)], true);
-    gv.arrange_nodes(graphview::ArrangeMethod::Hierarchical);
+    gv.arrange_nodes(graphview::ArrangeMethod::Grid);
     gv.set_edge_routing(graphview::EdgeRouting::Orthogonal);
     gv.set_edge_line_type(LineType::SingleThick);
     gv.enable_arrow_heads(false);
@@ -33,7 +100,7 @@ fn sinple_display_proc_macro() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:f");
-    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Hierarchical, back:{.,gray,black}, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Grid, back:{.,gray,black}, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices(&["A", "B", "C", "D"], &[(0, 1), (0, 2), (1, 3)], true);
     gv.set_graph(g);
     w.add(gv);
@@ -48,7 +115,7 @@ fn check_events() {
     impl MyWin {
         fn new(g: graphview::Graph<u32>) -> Self {
             let mut w = Self { base: window!("Test,d:f") };
-            let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+            let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
             gv.set_graph(g);
             w.add(gv);
             w
@@ -102,7 +169,7 @@ fn check_events_with_mouse() {
     impl MyWin {
         fn new(g: graphview::Graph<u32>) -> Self {
             let mut w = Self { base: window!("Test,d:f") };
-            let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+            let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
             gv.set_graph(g);
             w.add(gv);
             w
@@ -146,5 +213,258 @@ fn check_events_with_mouse() {
     let mut a = App::debug(60, 10, script).build().unwrap();
     let g = graphview::Graph::with_slices(&[0, 1, 2, 3], &[(0, 1), (0, 2), (1, 3)], true);
     a.add_window(MyWin::new(g));
+    a.run();
+}
+
+#[test]
+fn check_graph_with_margins_for_node_single() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x7CDDF286305BF42D) 
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    let g = graphview::Graph::with_slices_and_border(
+        &["Node-A", "Node-B", "Node-C", "Node-D"],
+        &[(0, 1), (0, 2), (1, 3)],
+        LineType::Single,
+        true,
+    );
+    gv.set_graph(g);
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_graph_with_margins_for_node_double() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0x91DEDEB78C848365) 
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    let g = graphview::Graph::with_slices_and_border(
+        &["Node-A", "Node-B", "Node-C", "Node-D"],
+        &[(0, 1), (0, 2), (1, 3)],
+        LineType::Double,
+        true,
+    );
+    gv.set_graph(g);
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_hover_node() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xA52D4BE5FE3169FD) 
+        Mouse.Move(15,4)
+        Paint('2. Hovered over Node-B')   
+        CheckHash(0xD82A932648700D17) 
+        Mouse.Move(15,7)
+        Paint('3. Hovered over Node-D')   
+        CheckHash(0x2C607075309AE9F3)      
+        Mouse.Move(40,7)
+        Paint('4. hovered outside any node')   
+        CheckHash(0xA52D4BE5FE3169FD)             
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    let g = graphview::Graph::with_slices_and_border(
+        &["Node-A", "Node-B", "Node-C", "Node-D"],
+        &[(0, 1), (0, 2), (1, 3)],
+        LineType::SingleRound,
+        true,
+    );
+    gv.set_graph(g);
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_tree_view() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xBE6D432823B0BC2B)           
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: true, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    let g = graphview::Graph::with_slices(
+        &["1", "1-1", "1-2", "1-1-1", "1-1-2", "1-2-1", "1-2-2"],
+        &[(0, 1), (0, 2), (1, 3), (1, 4), (2, 5), (2, 6)],
+        true,
+    );
+    gv.set_graph(g);
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+#[test]
+fn check_tree_view_packed() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x29694D45CF699BF)           
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: HierarchicalPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    let g = graphview::Graph::with_slices(
+        &["1", "1-1", "1-2", "1-1-1", "1-1-2", "1-2-1", "1-2-2"],
+        &[(0, 1), (0, 2), (1, 3), (1, 4), (2, 5), (2, 6)],
+        true,
+    );
+    gv.set_graph(g);
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_custom_graph() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xD896F64DAEC2F4B0)           
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_1());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_arrange_hierarchical() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xC6B8B2D87813BCED)           
+    ";
+    let mut a = App::debug(130, 15, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_arrange_grid() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x1F4C38ABDB6BB845)           
+    ";
+    let mut a = App::debug(130, 15, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_arrange_circular() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x710407C8369BB527)           
+    ";
+    let mut a = App::debug(60, 30, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_arrange_force_directed() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0xCF8E04F6F85CD000)           
+    ";
+    let mut a = App::debug(120, 30, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: ForceDirected, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_mouse_wheel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x2A306A3D0F8190EA)
+        Mouse.Wheel(20,10,right,3)
+        Paint('2. Scroll right 3 times')   
+        CheckHash(0x7E3EDB940E168E0F)
+        Mouse.Wheel(20,10,down,10)
+        Paint('3. Scroll down 10 times')   
+        CheckHash(0x29BD7AAF1237E703)
+        Mouse.Wheel(20,10,left,2)
+        Paint('4. Scroll left 2 times')   
+        CheckHash(0x90627173D19DEAC0)
+        Mouse.Wheel(20,10,up,4)
+        Paint('5. Scroll left 4 times')   
+        CheckHash(0xA8F8EDAEAFB28238)
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: ForceDirected, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_scroll_view_via_keyboard() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x2A306A3D0F8190EA)
+        Key.Pressed(Alt+Right,3)
+        Paint('2. Scroll right 3 times')   
+        CheckHash(0x7E3EDB940E168E0F)
+        Key.Pressed(Alt+Down,10)
+        Paint('3. Scroll down 10 times')   
+        CheckHash(0x29BD7AAF1237E703)
+        Key.Pressed(Alt+Left,2)
+        Paint('4. Scroll left 2 times')   
+        CheckHash(0x90627173D19DEAC0)
+        Key.Pressed(Alt+Up,4)
+        Paint('5. Scroll left 4 times')   
+        CheckHash(0xA8F8EDAEAFB28238)
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: ForceDirected, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
     a.run();
 }
