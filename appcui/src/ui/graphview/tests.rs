@@ -745,3 +745,31 @@ fn check_graph_with_u32() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_scroll_with_mouse_drag() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (current is N1)')   
+        CheckHash(0x522B607E2901558) 
+        Mouse.Drag(30,9,17,9)
+        Paint('2. Drag horizontally')   
+        CheckHash(0x1026F782FAFDAB79) 
+        Mouse.Drag(17,9,12,9)
+        Paint('3. Drag vertically')   
+        CheckHash(0x58F9C35AFE5A0EE6) 
+        Mouse.Drag(17,9,-100,-100)
+        Paint('4. Drag until bottom-right')   
+        CheckHash(0x4A55F2C886D16CA2) 
+        Mouse.Drag(17,9,100,100)
+        Paint('5. Drag until top-left')   
+        CheckHash(0x522B607E2901558)         
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
