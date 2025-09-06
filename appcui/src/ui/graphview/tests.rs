@@ -574,3 +574,48 @@ fn check_moving_nodes_with_keyboard() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_scroll_from_scrollbars() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x522B607E2901558)
+        Mouse.Click(37,19,left)
+        Paint('2. Scroll left by 1')   
+        CheckHash(0x631EB708E571E526)
+        Mouse.Click(37,19,left)
+        Mouse.Click(37,19,left)
+        Paint('3. Scroll left by 2')   
+        CheckHash(0x3A949F7C6F289B17)
+        Mouse.Click(39,18,left)
+        Paint('4. Scroll down by 1')   
+        CheckHash(0x8073C14693BB8C9E)        
+        Mouse.Click(36,19,left)
+        Paint('5. Move scroll to right most')   
+        CheckHash(0x68BC29B5BA766271)        
+        Mouse.Click(39,17,left)
+        Paint('6. Move scroll to Bottom most')   
+        CheckHash(0x9AACA4A28AB010C)        
+        Mouse.Click(39,2,left)
+        Paint('7. Move scroll up by 1')   
+        CheckHash(0x253AD9719554AD11)        
+        Mouse.Click(39,3,left)
+        Paint('8. Move scroll to top most')   
+        CheckHash(0xD3A23E8D8D66211C)        
+        Mouse.Click(18,19,left)
+        Paint('9. Move scroll left by 1')   
+        CheckHash(0x2A8F52BF81AD8F86)        
+        Mouse.Click(19,19,left)
+        Paint('10. Move scroll to left most')   
+        CheckHash(0x469A23C3E150C371)        
+
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
