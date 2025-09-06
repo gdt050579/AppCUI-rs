@@ -619,3 +619,64 @@ fn check_scroll_from_scrollbars() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_navigate_between_nodes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (current is N1)')   
+        CheckHash(0x522B607E2901558)
+        Key.Pressed(Ctrl+Tab)
+        Paint('2. Focus on N2 (with ensure visible)')   
+        CheckHash(0x9AB273BF25427B77)   
+        Key.Pressed(Ctrl+Tab,2)
+        Paint('3. Focus on N4 (with ensure visible)')   
+        CheckHash(0xE6FBB28B074C74B6)   
+        Key.Pressed(Ctrl+Shift+Tab)
+        Paint('4. Focus on N3 (with ensure visible)')   
+        CheckHash(0x6888EA4B81E93586)   
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_graph_disabled() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (current is N1)')   
+        CheckHash(0xD7A096B508B654AB) 
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1, enable: false");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_graph_without_focus() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (focus on button)')   
+        CheckHash(0x9F6629F0F641D509) 
+        Key.Pressed(Tab)
+        Paint('2. Now with focus')   
+        CheckHash(0xC4ACEFC3627EC4E9) 
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1,back:{*,white,black}");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    w.add(button!("Press,a:c,w:10"));
+    a.add_window(w);
+    a.run();
+}
