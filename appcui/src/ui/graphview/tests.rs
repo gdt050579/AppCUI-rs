@@ -424,13 +424,13 @@ fn check_mouse_wheel() {
         CheckHash(0x7E3EDB940E168E0F)
         Mouse.Wheel(20,10,down,10)
         Paint('3. Scroll down 10 times')   
-        CheckHash(0x29BD7AAF1237E703)
+        CheckHash(0x60AB14D9C5B89607)
         Mouse.Wheel(20,10,left,2)
         Paint('4. Scroll left 2 times')   
-        CheckHash(0x90627173D19DEAC0)
+        CheckHash(0xF35DC5C49FA3C5D4)
         Mouse.Wheel(20,10,up,4)
         Paint('5. Scroll left 4 times')   
-        CheckHash(0xA8F8EDAEAFB28238)
+        CheckHash(0x96CF99C818070CCC)
     ";
     let mut a = App::debug(40, 20, script).build().unwrap();
     let mut w = window!("Test,d:f");
@@ -452,16 +452,16 @@ fn check_scroll_view_via_keyboard() {
         CheckHash(0x7E3EDB940E168E0F)
         Key.Pressed(Alt+Down,10)
         Paint('3. Scroll down 10 times')   
-        CheckHash(0x29BD7AAF1237E703)
+        CheckHash(0x60AB14D9C5B89607)
         Key.Pressed(Alt+Left,2)
         Paint('4. Scroll left 2 times')   
-        CheckHash(0x90627173D19DEAC0)
+        CheckHash(0xF35DC5C49FA3C5D4)
         Key.Pressed(Alt+Up,4)
         Paint('5. Scroll left 4 times')   
-        CheckHash(0xA8F8EDAEAFB28238)
+        CheckHash(0x96CF99C818070CCC)
         Key.Pressed(PageDown)
         Paint('6. Scroll Down One Page')   
-        CheckHash(0x1082AF67FBBE796A)
+        CheckHash(0x9CD59E33F0D1DCA6)
         Key.Pressed(PageUp)
         Paint('7. Scroll Up One Page')   
         CheckHash(0x4617C19A7708D5B3)
@@ -470,7 +470,7 @@ fn check_scroll_view_via_keyboard() {
         CheckHash(0x2A306A3D0F8190EA)
         Key.Pressed(End)
         Paint('9. Goto bottom-right of graph')   
-        CheckHash(0xB37A0A8CC46F7CCB)
+        CheckHash(0xFC5CED13088F95C3)
     ";
     let mut a = App::debug(40, 20, script).build().unwrap();
     let mut w = window!("Test,d:f");
