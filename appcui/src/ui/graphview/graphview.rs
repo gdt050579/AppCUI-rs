@@ -142,10 +142,6 @@ where
     fn update_scroll_bars(&mut self) {
         let paint_sz = self.graph.size();
         let sz = self.size();
-        // if self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar) && (self.has_focus()) {
-        //     sz.width = sz.width.saturating_sub(1);
-        //     sz.height = sz.height.saturating_sub(1);
-        // }
         self.comp.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base, sz);
         self.move_scroll_to(self.origin_point.x, self.origin_point.y);
     }
@@ -153,16 +149,7 @@ where
         if let Some(node) = self.graph.nodes.get(node_id) {
             let node_rect = node.rect;
             let sz = self.size();
-            // if self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar) && (self.has_focus()) {
-            //     sz.width = sz.width.saturating_sub(1);
-            //     sz.height = sz.height.saturating_sub(1);
-            // }
             let view_rect = Rect::with_point_and_size(Point::new(-self.origin_point.x, -self.origin_point.y), sz);
-            log!("G","--- Ensure node: {} is visible ---", node_id);
-            log!("G","    sz = {:?}", sz);
-            log!("G","    node rect = {:?}", node_rect);
-            log!("G","    view rect = {:?}", view_rect);
-            log!("G","    node rect visible = {}", view_rect.contains_rect(node_rect));
 
             if !view_rect.contains_rect(node_rect) {
                 let mut adx = 0;
@@ -185,7 +172,6 @@ where
         }
     }
     fn ensure_current_node_is_visible(&mut self) {
-        log!("G","==> Req ensure current nod s visible: {:?}", self.graph.current_node_id());
         if let Some(id) = self.graph.current_node_id() {
             self.ensure_node_is_visible(id);
         }
