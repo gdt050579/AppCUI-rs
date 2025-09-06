@@ -141,41 +141,51 @@ where
     }
     fn update_scroll_bars(&mut self) {
         let paint_sz = self.graph.size();
-        let mut sz = self.size();
-        if self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar) && (self.has_focus()) {
-            sz.width = sz.width.saturating_sub(1);
-            sz.height = sz.height.saturating_sub(1);
-        }
+        let sz = self.size();
+        // if self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar) && (self.has_focus()) {
+        //     sz.width = sz.width.saturating_sub(1);
+        //     sz.height = sz.height.saturating_sub(1);
+        // }
         self.comp.resize(paint_sz.width as u64, paint_sz.height as u64, &self.base, sz);
         self.move_scroll_to(self.origin_point.x, self.origin_point.y);
     }
     fn ensure_node_is_visible(&mut self, node_id: usize) {
         if let Some(node) = self.graph.nodes.get(node_id) {
             let node_rect = node.rect;
-            let mut sz = self.size();
-            if self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar) && (self.has_focus()) {
-                sz.width = sz.width.saturating_sub(1);
-                sz.height = sz.height.saturating_sub(1);
-            }
+            let sz = self.size();
+            // if self.flags.contains_one(Flags::ScrollBars | Flags::SearchBar) && (self.has_focus()) {
+            //     sz.width = sz.width.saturating_sub(1);
+            //     sz.height = sz.height.saturating_sub(1);
+            // }
             let view_rect = Rect::with_point_and_size(Point::new(-self.origin_point.x, -self.origin_point.y), sz);
+            log!("G","--- Ensure node: {} is visible ---", node_id);
+            log!("G","    sz = {:?}", sz);
+            log!("G","    node rect = {:?}", node_rect);
+            log!("G","    view rect = {:?}", view_rect);
+            log!("G","    node rect visible = {}", view_rect.contains_rect(node_rect));
+
             if !view_rect.contains_rect(node_rect) {
-                let mut new_x = self.origin_point.x;
-                let mut new_y = self.origin_point.y;
+                let mut adx = 0;
+                let mut ady = 0;
+
+                if node_rect.right() > view_rect.right() {
+                    adx = node_rect.right() - view_rect.right();
+                }
                 if node_rect.left() < view_rect.left() {
-                    new_x = -node_rect.left();
-                } else if node_rect.right() > view_rect.right() {
-                    new_x = -(node_rect.right() - sz.width as i32);
+                    adx = node_rect.left() - view_rect.left();
+                }
+                if node_rect.bottom() > view_rect.bottom() {
+                    ady = node_rect.bottom() - view_rect.bottom();
                 }
                 if node_rect.top() < view_rect.top() {
-                    new_y = -node_rect.top();
-                } else if node_rect.bottom() > view_rect.bottom() {
-                    new_y = -(node_rect.bottom() - sz.height as i32);
+                    ady = node_rect.top() - view_rect.top();
                 }
-                self.move_scroll_to(new_x, new_y);
+                self.move_scroll_to(self.origin_point.x - adx, self.origin_point.y - ady);
             }
         }
     }
     fn ensure_current_node_is_visible(&mut self) {
+        log!("G","==> Req ensure current nod s visible: {:?}", self.graph.current_node_id());
         if let Some(id) = self.graph.current_node_id() {
             self.ensure_node_is_visible(id);
         }
@@ -243,6 +253,8 @@ where
             surface.clear(back);
         }
         surface.draw_surface(self.origin_point.x, self.origin_point.y, self.graph.surface());
+        // let sz = format!("Size {:?}", self.size());
+        // surface.write_string(0, 0, &sz, charattr!("w,black"), false);
     }
 }
 impl<T> OnKeyPressed for GraphView<T>

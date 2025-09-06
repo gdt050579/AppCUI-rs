@@ -123,8 +123,8 @@ impl Rect {
         Rect {
             left: point.x,
             top: point.y,
-            right: point.x + (size.width as i32).max(1) - 1,
-            bottom: point.y + (size.height as i32).max(1) - 1,
+            right: point.x + (size.width.saturating_sub(1) as i32),
+            bottom: point.y + (size.height.saturating_sub(1) as i32),
         }
     }
 
@@ -189,11 +189,11 @@ impl Rect {
     }
 
     /// Returns true if the rectangle fully contains the given rectangle.
-     /// If only a part of the rectangle is inside this rectangle, false is returned.
+    /// If only a part of the rectangle is inside this rectangle, false is returned.
     #[inline(always)]
     pub fn contains_rect(&self, rect: Rect) -> bool {
         (rect.left >= self.left) && (rect.right <= self.right) && (rect.top >= self.top) && (rect.bottom <= self.bottom)
-    }    
+    }
 
     /// Returns the center point of the rectangle.
     #[inline(always)]
@@ -263,9 +263,9 @@ impl Rect {
         if preserve_weight {
             let w = self.right - self.left;
             self.left = x;
-            self.right = x + w;            
+            self.right = x + w;
         } else {
-            if x<= self.right {
+            if x <= self.right {
                 self.left = x;
             }
         }
@@ -280,7 +280,7 @@ impl Rect {
         if preserve_weight {
             let w = self.right - self.left;
             self.right = x;
-            self.left = x - w;            
+            self.left = x - w;
         } else {
             if x >= self.left {
                 self.right = x;
@@ -297,7 +297,7 @@ impl Rect {
         if preserve_height {
             let h = self.bottom - self.top;
             self.top = y;
-            self.bottom = y + h;            
+            self.bottom = y + h;
         } else {
             if y <= self.bottom {
                 self.top = y;
@@ -314,7 +314,7 @@ impl Rect {
         if preserve_height {
             let h = self.bottom - self.top;
             self.bottom = y;
-            self.top = y - h;            
+            self.top = y - h;
         } else {
             if y >= self.top {
                 self.bottom = y;
@@ -329,7 +329,6 @@ impl AddAssign<(i32, i32)> for Rect {
         self.translate(dx, dy);
     }
 }
-
 
 /// Adds a `(dx, dy)` offset to this rectangle and returns a new rectangle.
 impl Add<(i32, i32)> for Rect {

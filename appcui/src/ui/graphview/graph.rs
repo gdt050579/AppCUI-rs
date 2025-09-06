@@ -45,8 +45,8 @@ impl ControlState {
     #[inline(always)]
     fn node_attr(&self, theme: &Theme) -> CharAttribute {
         match self {
-            ControlState::Disabled => theme.button.text.inactive,
-            ControlState::Normal | ControlState::Focused => theme.button.text.normal,   
+            ControlState::Disabled => theme.text.inactive,
+            ControlState::Normal | ControlState::Focused => theme.button.text.normal,
         }
     }
     #[inline(always)]
@@ -217,7 +217,6 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
     }
 }
 
-
 pub struct Graph<T>
 where
     T: GraphNode,
@@ -268,7 +267,10 @@ where
         T: GraphNode + Clone,
     {
         let v: Vec<Node<T>> = nodes.iter().map(|n| NodeBuilder::new(n.clone()).build()).collect();
-        let e: Vec<Edge> = edges.iter().map(|link| EdgeBuilder::new(link.0, link.1).directed(directed).build()).collect();
+        let e: Vec<Edge> = edges
+            .iter()
+            .map(|link| EdgeBuilder::new(link.0, link.1).directed(directed).build())
+            .collect();
         Self::new(v, e)
     }
     pub fn with_slices_and_border(nodes: &[T], edges: &[(u32, u32)], border: LineType, directed: bool) -> Self
@@ -276,11 +278,14 @@ where
         T: GraphNode + Clone,
     {
         let v: Vec<Node<T>> = nodes.iter().map(|n| NodeBuilder::new(n.clone()).border(border).build()).collect();
-        let e: Vec<Edge> = edges.iter().map(|link| EdgeBuilder::new(link.0, link.1).directed(directed).build()).collect();
+        let e: Vec<Edge> = edges
+            .iter()
+            .map(|link| EdgeBuilder::new(link.0, link.1).directed(directed).build())
+            .collect();
         Self::new(v, e)
     }
-    
-    /// Returns the object (of type T) associated with the current node 
+
+    /// Returns the object (of type T) associated with the current node
     /// This method returns None only if th graph is empty (no nodes) otherwise it always returns Some(&T)
     pub fn current_node(&self) -> Option<&Node<T>> {
         if self.current_node < self.nodes.len() {
@@ -299,7 +304,7 @@ where
     pub fn node(&self, index: usize) -> Option<&Node<T>> {
         self.nodes.get(index)
     }
-    
+
     fn update_surface_size(&mut self, pack: bool) {
         if self.nodes.is_empty() {
             self.surface_size = Size::new(1, 1);
@@ -620,6 +625,8 @@ where
     pub(super) fn surface(&self) -> &Surface {
         &self.surface
     }
+    
+    // returns TRUE if the size was resized to adjust the scrolling bars
     pub(super) fn move_node_to(&mut self, id: usize, x: i32, y: i32, control: &ControlBase) -> bool {
         if id >= self.nodes.len() {
             return false;
@@ -640,12 +647,12 @@ where
         self.repaint(control);
         resized
     }
-    fn move_node_with(&mut self, id: usize, dx: i32, dy: i32, control: &ControlBase) -> bool {
+    fn move_node_with(&mut self, id: usize, dx: i32, dy: i32, control: &ControlBase) {
         if id >= self.nodes.len() {
-            return false;
+            return ;
         }
         let tl = self.nodes[id].rect.top_left();
-        self.move_node_to(id, tl.x + dx, tl.y + dy, control)
+        self.move_node_to(id, tl.x + dx, tl.y + dy, control);
     }
 
     pub(super) fn set_current_node(&mut self, index: usize, control: &ControlBase) {
@@ -714,13 +721,10 @@ where
         }
         best
     }
-    fn move_to_node_with_direction(&mut self, dir: Direction, control: &ControlBase) -> bool {
+    fn move_to_node_with_direction(&mut self, dir: Direction, control: &ControlBase) {
         if let Some(next_index) = self.next_node(dir) {
             self.set_current_node(next_index, control);
-            true
-        } else {
-            false
-        }
+        } 
     }
 
     pub(super) fn process_key_events(&mut self, key: Key, control: &ControlBase) -> bool {
@@ -737,16 +741,15 @@ where
                 if self.nodes.len() > 0 {
                     self.set_current_node((self.current_node + 1) % self.nodes.len(), control);
                 }
-                true
             }
             key!("Ctrl+Shift+Tab") => {
                 if self.nodes.len() > 0 {
                     self.set_current_node((self.current_node + self.nodes.len() - 1) % self.nodes.len(), control);
                 }
-                true
             }
-            _ => false,
+            _ => return false,
         }
+        return true; // key was processed
     }
     pub(super) fn node_description(&mut self, id: usize) -> Option<&str> {
         if id >= self.nodes.len() {

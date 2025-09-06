@@ -480,3 +480,97 @@ fn check_scroll_view_via_keyboard() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_search_bar() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x710407C8369BB527)   
+        Key.TypeText('N1')        
+        Paint('2. Nodes that conrain N1 are selected')   
+        CheckHash(0xF95D8B2BE34ED00B)   
+        Key.Pressed(Enter)
+        Paint('3. Move to Next node found (-> N10)')   
+        CheckHash(0xF4A63DCADBB69072)   
+        Key.Pressed(Ctrl+Enter,2)
+        Paint('4. Move backwards twice to Previous node found (-> N19)')   
+        CheckHash(0x64E4BBBE905D4056)   
+        Key.TypeText('7')        
+        Paint('5. Now only N17 is selected')   
+        CheckHash(0xCD55F86BFF9BC314)   
+        Key.Pressed(Escape)       
+        Paint('6. Clear search text (N17 is still current node'))   
+        CheckHash(0x836840446A2F8D16)   
+        Key.Pressed(Escape)       
+        Paint('7. Exit window (Escape is no longer processed)')   
+        CheckHash(0x9EE74A86D600A6F5)   
+    ";
+    let mut a = App::debug(60, 30, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_moving_nodes_with_keyboard() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (on node <1>)')   
+        CheckHash(0x11284079999C4D55)
+        Key.Pressed(Right)           
+        Paint('2. Move to node: <1-2-1>')   
+        CheckHash(0x94ECE0C4BEEF149)
+        Key.Pressed(Right)           
+        Paint('3. Move to node: <1-2>')   
+        CheckHash(0x315E4E42E45F35AD)
+        Key.Pressed(Right)              
+        Paint('4. Move to node: <1-2-2>')   
+        CheckHash(0x46209BF2096F9E75)
+        Key.Pressed(Left, 2)           
+        Paint('5. Move to node: <1-2-2>')   
+        CheckHash(0x94ECE0C4BEEF149)
+        Key.Pressed(Up)           
+        Paint('6. Move to node: <1-2>')   
+        CheckHash(0x315E4E42E45F35AD)
+        Key.Pressed(Ctrl+Right,10)           
+        Paint('7. Move node: <1-2> to a right most position')   
+        CheckHash(0x1BDE5E242E760D11)
+        Key.Pressed(Ctrl+Up,3)           
+        Paint('8. Move node: <1-2> to a top position (by 3)')   
+        CheckHash(0x14E7FC3ACDE047D1)        
+        Key.Pressed(Ctrl+Left,12)           
+        Paint('9. Move node: <1-2> to a left most poition')   
+        CheckHash(0x6FFBC2338F6C3597)        
+        Key.Pressed(Down)           
+        Paint('10. Move to node: <1-2-1>')   
+        CheckHash(0xFABC5CEE2E3A23A3)
+        Key.Pressed(Ctrl+Down,5)           
+        Paint('11. Move node: <1-2-1> down, also so scroll moves to ensure <1-2-1> is visible')   
+        CheckHash(0x60E8B63004E31F9C)        
+        Key.Pressed(Ctrl+Left,40)           
+        Paint('12. Move node: <1-2-1> left, also so scroll moves to ensure <1-2-1> is visible')   
+        CheckHash(0x1B960839B2B9F81E)        
+        Key.Pressed(Ctrl+Up,10)           
+        Paint('13. Move node: <1-2-1> up, also so scroll moves to ensure <1-2-1> is visible')   
+        CheckHash(0xDDD275848378D703)        
+        Key.Pressed(Ctrl+Right,60)           
+        Paint('14. Move node: <1-2-1> right, also so scroll moves to ensure <1-2-1> is visible')   
+        CheckHash(0x97B0C6BD53B493DB)        
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: true, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    let g = graphview::Graph::with_slices(
+        &["1", "1-1", "1-2", "1-1-1", "1-1-2", "1-2-1", "1-2-2"],
+        &[(0, 1), (0, 2), (1, 3), (1, 4), (2, 5), (2, 6)],
+        true,
+    );
+    gv.set_graph(g);
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
