@@ -24,7 +24,11 @@ fn build_custom_graph_1() -> graphview::Graph<String> {
             .build(),
     );
     nodes.push(graphview::NodeBuilder::new("Science".to_string()).size(Size::new(12, 1)).build());
-    nodes.push(graphview::NodeBuilder::new("Glonal\nLiterature".to_string()).size(Size::new(12, 2)).build());    
+    nodes.push(
+        graphview::NodeBuilder::new("Glonal\nLiterature".to_string())
+            .size(Size::new(12, 2))
+            .build(),
+    );
     edges.push(graphview::EdgeBuilder::new(0, 1).build());
     edges.push(graphview::EdgeBuilder::new(0, 2).build());
     edges.push(graphview::EdgeBuilder::new(1, 3).build());
@@ -34,38 +38,74 @@ fn build_custom_graph_1() -> graphview::Graph<String> {
 
 fn build_custom_graph_2() -> graphview::Graph<&'static str> {
     let nodes = &[
-        "N1","N2","N3","N4","N5",
-        "N6","N7","N8","N9","N10",
-        "N11","N12","N13","N14","N15",
-        "N16","N17","N18","N19","N20",
+        "N1", "N2", "N3", "N4", "N5", "N6", "N7", "N8", "N9", "N10", "N11", "N12", "N13", "N14", "N15", "N16", "N17", "N18", "N19", "N20",
     ];
 
     let edges: &[(u32, u32)] = &[
-        (0,1), (0,2), (0,3),
-        (1,4), (1,5), (1,6),
-        (2,6), (2,7), (2,8),
-        (3,8), (3,9), (3,10),
-        (4,10), (4,11), (4,12),
-        (5,12), (5,13), (5,14),
-        (6,14), (6,15), (6,16),
-        (7,16), (7,17), (7,18),
-        (8,18), (8,19), (8,0),
-        (9,1), (9,5), (9,13),
-        (10,2), (10,6), (10,14),
-        (11,3), (11,7), (11,15),
-        (12,4), (12,8), (12,16),
-        (13,5), (13,9), (13,17),
-        (14,6), (14,10), (14,18),
-        (15,7), (15,11), (15,19),
-        (16,8), (16,12), (16,0),
-        (17,9), (17,13), (17,1),
-        (18,10), (18,14), (18,2),
-        (19,11), (19,15), (19,3),
+        (0, 1),
+        (0, 2),
+        (0, 3),
+        (1, 4),
+        (1, 5),
+        (1, 6),
+        (2, 6),
+        (2, 7),
+        (2, 8),
+        (3, 8),
+        (3, 9),
+        (3, 10),
+        (4, 10),
+        (4, 11),
+        (4, 12),
+        (5, 12),
+        (5, 13),
+        (5, 14),
+        (6, 14),
+        (6, 15),
+        (6, 16),
+        (7, 16),
+        (7, 17),
+        (7, 18),
+        (8, 18),
+        (8, 19),
+        (8, 0),
+        (9, 1),
+        (9, 5),
+        (9, 13),
+        (10, 2),
+        (10, 6),
+        (10, 14),
+        (11, 3),
+        (11, 7),
+        (11, 15),
+        (12, 4),
+        (12, 8),
+        (12, 16),
+        (13, 5),
+        (13, 9),
+        (13, 17),
+        (14, 6),
+        (14, 10),
+        (14, 18),
+        (15, 7),
+        (15, 11),
+        (15, 19),
+        (16, 8),
+        (16, 12),
+        (16, 0),
+        (17, 9),
+        (17, 13),
+        (17, 1),
+        (18, 10),
+        (18, 14),
+        (18, 2),
+        (19, 11),
+        (19, 15),
+        (19, 3),
     ];
 
     graphview::Graph::with_slices(nodes, edges, false)
 }
-
 
 #[test]
 fn sinple_display() {
@@ -373,7 +413,9 @@ fn check_arrange_grid() {
     ";
     let mut a = App::debug(130, 15, script).build().unwrap();
     let mut w = window!("Test,d:f");
-    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    let mut gv = graphview!(
+        "line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
+    );
     gv.set_graph(build_custom_graph_2());
     w.add(gv);
     a.add_window(w);
@@ -411,7 +453,6 @@ fn check_arrange_force_directed() {
     a.add_window(w);
     a.run();
 }
-
 
 #[test]
 fn check_mouse_wheel() {
@@ -677,6 +718,30 @@ fn check_graph_without_focus() {
     gv.set_graph(build_custom_graph_2());
     w.add(gv);
     w.add(button!("Press,a:c,w:10"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_graph_with_u32() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xCF5921784B552D98) 
+        Mouse.Move(23,6)
+        Paint('Hovered over node')
+        CheckHash(0x4F280346E0D0B000) 
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    let g = graphview::Graph::with_slices(
+        &[1u32, 100, 1000, 255, 65535, 0xFFFFFFFF, 99],
+        &[(0, 1), (0, 2), (1, 2), (2, 3), (0, 4), (1, 5), (2, 6), (2, 5), (3, 4)],
+        false,
+    );
+    gv.set_graph(g);
+    w.add(gv);
     a.add_window(w);
     a.run();
 }
