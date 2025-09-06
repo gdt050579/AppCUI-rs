@@ -1,11 +1,6 @@
 use crate::graphics::Size;
-use crate::graphics::Surface;
-use crate::prelude::CharAttribute;
-use crate::system::Theme;
 
 pub trait GraphNode {
-    fn paint(&self, _surface: &mut Surface, _theme: &Theme, _attr: CharAttribute) {}
-
     /// Write the label of the node into the provided formatter
     fn write_label(&self, f: &mut dyn std::fmt::Write, size: Size) -> std::fmt::Result;
 
@@ -13,6 +8,9 @@ pub trait GraphNode {
     fn write_description(&self, _f: &mut dyn std::fmt::Write) -> std::fmt::Result {
         Ok(())
     }
+
+    /// Returns the prefered size (width and height) for the current Node
+    /// This value is being used if the size is not provided via NodeBuilder method .size(...)
     fn prefered_size(&self) -> Size;
 }
 

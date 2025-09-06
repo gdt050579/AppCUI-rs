@@ -51,7 +51,7 @@ where
             background: None,
             drag: Drag::None,
             graph: Graph::default(),
-            arrange_method: ArrangeMethod::Grid,
+            arrange_method: ArrangeMethod::GridPacked,
             rendering_options: RenderingOptions::new(),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
         }
@@ -102,7 +102,9 @@ where
 
     pub fn arrange_nodes(&mut self, method: ArrangeMethod) {
         match method {
-            ArrangeMethod::Grid => super::node_layout::grid::rearange(&mut self.graph),
+            ArrangeMethod::None => { /* do nothing */ }
+            ArrangeMethod::Grid => super::node_layout::grid::rearange(&mut self.graph, 2),
+            ArrangeMethod::GridPacked => super::node_layout::grid::rearange(&mut self.graph, 1),
             ArrangeMethod::Circular => super::node_layout::circular::rearange(&mut self.graph),
             ArrangeMethod::Hierarchical => super::node_layout::hierarchical::rearange(&mut self.graph, 2),
             ArrangeMethod::HierarchicalPacked => super::node_layout::hierarchical::rearange(&mut self.graph, 1),

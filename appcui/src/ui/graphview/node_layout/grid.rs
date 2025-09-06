@@ -2,7 +2,7 @@ use super::super::Graph;
 use super::super::GraphNode;
 use crate::graphics::*;
 
-pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>) {
+pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>, space: i32) {
     if graph.nodes.is_empty() {
         return;
     }
@@ -20,12 +20,12 @@ pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>) {
     for node in &mut graph.nodes {
         node.rect.set_left(x, true);
         node.rect.set_top(y, true);
-        x += (cell_size.width as i32) + 2;
+        x += (cell_size.width as i32) + space * 2;
         column += 1;
         if column == columns {
             x = 0;
             column = 0;
-            y += (cell_size.height as i32) + 1;
+            y += (cell_size.height as i32) + space;
         }
     }
 }

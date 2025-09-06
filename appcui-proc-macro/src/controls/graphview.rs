@@ -50,7 +50,9 @@ static ROUTING: FlagsSignature = FlagsSignature::new(&[
 ]);
 
 static ARRANGE: FlagsSignature = FlagsSignature::new(&[
+    "None",
     "Grid",
+    "GridPacked",
     "Circular",
     "Hierarchical",
     "HierarchicalPacked",
