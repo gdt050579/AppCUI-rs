@@ -21,6 +21,10 @@ impl<T> Node<T>
 where
     T: GraphNode,
 {
+    // Returns a reference to the object of type T associated with the Node
+    pub fn value(&self) -> &T {
+        &self.obj
+    }
     fn resize(&mut self, mut size: Size) {
         let p = self.rect.top_left();
         if self.border.is_some() {

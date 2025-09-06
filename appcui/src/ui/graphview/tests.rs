@@ -108,7 +108,7 @@ fn build_custom_graph_2() -> graphview::Graph<&'static str> {
 }
 
 #[test]
-fn sinple_display() {
+fn check_sinple_display() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
@@ -132,7 +132,7 @@ fn sinple_display() {
 }
 
 #[test]
-fn sinple_display_proc_macro() {
+fn check_sinple_display_proc_macro() {
     let script = "
         Paint.Enable(false)
         Paint('Initial state')   
@@ -413,9 +413,7 @@ fn check_arrange_grid() {
     ";
     let mut a = App::debug(130, 15, script).build().unwrap();
     let mut w = window!("Test,d:f");
-    let mut gv = graphview!(
-        "line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
-    );
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
     w.add(gv);
     a.add_window(w);
@@ -768,6 +766,126 @@ fn check_scroll_with_mouse_drag() {
     let mut a = App::debug(40, 20, script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_drag_nodes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (current is N1)')   
+        CheckHash(0x522B607E2901558) 
+        Mouse.Drag(9,7,30,17)
+        Paint('2. Drag N11')   
+        CheckHash(0xFF03D585A1AE8C20)        
+        Mouse.Drag(30,17,-3,17)
+        Paint('3. Drag N11 - and extend on Left')   
+        CheckHash(0xC0A6E5F151220CAF)        
+        Mouse.Drag(5,17,5,-2)
+        Paint('4. Drag N11 - and extend on top')   
+        CheckHash(0x672EFC99CCBB85AC)        
+        Mouse.Drag(5,2,45,2)
+        Paint('5. Drag N11 - and extend on riht')   
+        CheckHash(0xD4437D12488EB421)        
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
+    gv.set_graph(build_custom_graph_2());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+
+#[test]
+fn check_api() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (current is N1)')   
+        CheckHash(0x522B607E2901558) 
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1,back:{x}");
+    gv.set_graph(build_custom_graph_2());
+    assert_eq!(gv.graph().current_node_id(),Some(0));
+    assert_eq!(*gv.graph().current_node().unwrap().value(),"N1");
+    assert_eq!(*gv.graph().node(1).unwrap().value(),"N2");
+    assert_eq!(gv.graph().nodes_count(),20);
+    gv.clear_background();
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_click_double_click() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (current is N1)')   
+        CheckHash(0x522B607E2901558) 
+        Mouse.Click(9,7,left)
+        Paint('2. Clink on N11 (new node selected)')   
+        CheckHash(0x2F11FF95B7641249) 
+        Mouse.DoubleClick(9,7,left)
+        Paint('3. DoubleClick on N11 (nothing changes)')   
+        CheckHash(0x2F11FF95B7641249)         
+    ";
+    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1,back:{x}");
+    gv.set_graph(build_custom_graph_2());
+    gv.clear_background();
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_event_enter_leave() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (button has the focus)')   
+        CheckHash(0xED41A043919CE36B)    
+        Key.Pressed(Tab)   
+        Paint('2. Graphview has the focus')   
+        CheckHash(0x90BD62B2DB6108A4)    
+        Key.Pressed(Tab)   
+        Paint('3. Button has the focus')   
+        CheckHash(0xED41A043919CE36B)  
+        Mouse.Move(14,4)  
+        Paint('4. Mouse.Hover over N19')   
+        CheckHash(0x866707DCCD848BAC)  
+        Mouse.Move(35,1)  
+        Paint('5. Mouse.Hover over Button')   
+        CheckHash(0xED41A043919CE36B)  
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, x:0,y:0,w:30,h:100%, flags:[ScrollBars,SearchBar],lsm:2,tsm:1,back:{x}");
+    gv.set_graph(build_custom_graph_2());
+    gv.clear_background();
+    w.add(gv);
+    w.add(vline!("x:30,y:0,h:100%"));
+    w.add(button!("Test,x:32,y:0,w:8"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_custom_nodes() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (button has the focus)')   
+        CheckHash(0xED41A043919CE36B)    
+    ";
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
     w.add(gv);
     a.add_window(w);
