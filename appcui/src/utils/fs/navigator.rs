@@ -117,6 +117,7 @@ impl Navigator {
             let metadata = entry.metadata()?;
             if let Some(utf8path) = entry.file_name().to_str() {
                 let entry = Self::get_entry_from_metadata(utf8path, &metadata)?;
+                //log!("FS", " - Entry: {:?}", entry);
                 result.push(entry);
             }
         }

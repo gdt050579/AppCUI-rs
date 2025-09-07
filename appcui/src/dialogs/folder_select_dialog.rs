@@ -137,6 +137,15 @@ where
     fn populate_root(&mut self, search: &str) -> Option<Handle<treeview::Item<FolderName>>> {
         //log!("SELECT-FOLDER", "Populate root with search: '{}'", search);
         let h = self.tv;
+        #[cfg(target_family = "unix")]
+        let roots = vec![Root {
+            path: "/".to_string(),
+            name: "Root".to_string(),
+            size: 0,
+            free_space: 0,
+            root_type: fs::RootType::Fixed,
+        }];
+        #[cfg(not(target_family = "unix"))]
         let roots = self.nav.roots();
         let set_icon = self.flags.contains(SelectFolderDialogFlags::Icons);
         if let Some(tv) = self.control_mut(h) {
@@ -261,7 +270,7 @@ where
     T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_activate(&mut self) {
-        log!("SELECT-FOLDER","Initialing the TreeView");
+        log!("SELECT-FOLDER", "Initialing the TreeView");
         self.populate_from_path();
     }
     fn on_accept(&mut self) {
