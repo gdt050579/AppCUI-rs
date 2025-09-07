@@ -63,7 +63,7 @@ pub fn create() -> (graphview::Graph<String>, Settings) {
     ];
 
     // Create the graph with undirected edges (enrollment is bidirectional)
-    let graph = graphview::Graph::with_slices_and_border(&nodes, &edges, LineType::Double, false);
+    let graph = graphview::Graph::with_slices(&nodes, &edges, false);
     
     // Configure settings for bipartite visualization
     let settings = Settings::new("Bipartite Graph - Students & Courses")

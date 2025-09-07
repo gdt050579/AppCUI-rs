@@ -4,6 +4,7 @@ mod graph_window;
 mod tree;
 mod circular;
 mod bipartite;
+mod showcase;
 
 use graph_window::GraphWindow;
 
@@ -18,7 +19,7 @@ const LOGO: [&str; 6] = [
 
 #[Desktop(events    = [MenuEvents,DesktopEvents], 
           overwrite = OnPaint, 
-          commands  = [ShowTree, ShowCircular, ShowBipartite,
+          commands  = [ShowTree, ShowCircular, ShowBipartite, ShowShowcase,
                        Exit, About, 
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -87,6 +88,7 @@ impl DesktopEvents for MyDesktop {
                 {'&Tree Graph',cmd: ShowTree},
                 {'&Circular Graph',cmd: ShowCircular},
                 {'&Bipartite Graph',cmd: ShowBipartite},
+                {'&Showcase Graph',cmd: ShowShowcase},
             ]
         "));
         
@@ -125,9 +127,13 @@ impl MenuEvents for MyDesktop {
                 let (graph, settings) = bipartite::create();
                 self.add_window(GraphWindow::new(graph, settings));
             },
+            mydesktop::Commands::ShowShowcase => { 
+                let (graph, settings) = showcase::create();
+                self.add_window(GraphWindow::new(graph, settings));
+            },
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
-                dialogs::message("GraphView Example", "This is an example demonstrating the GraphView control in AppCUI.\n\nFeatures:\n• Tree graphs with hierarchical layout\n• Circular graphs with radial arrangement\n• Bipartite graphs with two-layer structure\n• Interactive graph configuration options\n\nEach graph window includes a Graph menu with options to:\n• Change node arrangement algorithms\n• Toggle arrow heads and edge highlighting\n• Modify edge line types and routing");
+                dialogs::message("GraphView Example", "This is an example demonstrating the GraphView control in AppCUI.\n\nFeatures:\n• Tree graphs with hierarchical layout\n• Circular graphs with radial arrangement\n• Bipartite graphs with two-layer structure\n• Showcase graph with colored nodes, Unicode characters, and styled edges\n• Interactive graph configuration options\n\nEach graph window includes a Graph menu with options to:\n• Change node arrangement algorithms\n• Toggle arrow heads and edge highlighting\n• Modify edge line types and routing\n• Choose from various line styles (Single, Double, Thick, ASCII, Border, etc.)");
             },     
             _ => { }      
         }
