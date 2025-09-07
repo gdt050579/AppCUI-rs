@@ -1149,24 +1149,23 @@ fn check_graph_with_cusom_node_positions() {
     a.run();
 }
 
-// #[test]
-// fn check_multi_graph_hierarchical() {
-//     let script = "
-//         //Paint.Enable(false)
-//         Paint('1. Initial state (button has the focus)')
-//         CheckHash(0xA52DBDE1D3804F96)
-//     ";
-//     let mut a = App::debug(130, 30, script).build().unwrap();
-//     let mut w = window!("Test,d:f");
-//     let mut gv = graphview!(
-//         "line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
-//     );
-//     // there is a random value (maybe due to a vecdeque?) so we disable the test for now as it is not deterministicz
-//     gv.set_graph(build_custom_graph_5());
-//     w.add(gv);
-//     a.add_window(w);
-//     a.run();
-// }
+#[test]
+fn check_multi_graph_hierarchical() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (button has the focus)')
+        CheckHash(0xE3FB6F2B982BED13)
+    ";
+    let mut a = App::debug(130, 30, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!(
+        "line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
+    );
+    gv.set_graph(build_custom_graph_5());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
 
 #[test]
 fn check_multi_graph_circular() {

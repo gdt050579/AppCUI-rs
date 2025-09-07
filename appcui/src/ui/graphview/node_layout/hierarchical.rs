@@ -1,7 +1,7 @@
 use super::super::Graph;
 use super::super::GraphNode;
 use crate::graphics::*;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 
 pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>, spacing: u32) {
     if graph.nodes.is_empty() {
@@ -44,13 +44,13 @@ pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>, spacing: u3
     }
 }
 
-fn find_connected_components_with_roots<T: GraphNode>(graph: &Graph<T>) -> Vec<(usize, HashSet<usize>)> {
+fn find_connected_components_with_roots<T: GraphNode>(graph: &Graph<T>) -> Vec<(usize, BTreeSet<usize>)> {
     let mut visited = vec![false; graph.nodes.len()];
     let mut components = Vec::new();
 
     for start_node in 0..graph.nodes.len() {
         if !visited[start_node] {
-            let mut component = HashSet::new();
+            let mut component = BTreeSet::new();
             let mut queue = VecDeque::new();
 
             queue.push_back(start_node);
@@ -100,7 +100,7 @@ fn find_connected_components_with_roots<T: GraphNode>(graph: &Graph<T>) -> Vec<(
     components
 }
 
-fn find_best_root<T: GraphNode>(graph: &Graph<T>, component: &HashSet<usize>) -> usize {
+fn find_best_root<T: GraphNode>(graph: &Graph<T>, component: &BTreeSet<usize>) -> usize {
     // First, check if this is a directed graph by looking for directed edges
     let has_directed_edges = component.iter().any(|&node_idx| {
         graph.nodes[node_idx]
@@ -151,7 +151,7 @@ fn find_best_root<T: GraphNode>(graph: &Graph<T>, component: &HashSet<usize>) ->
     find_most_central_node(graph, component).unwrap_or(best_node)
 }
 
-fn find_most_central_node<T: GraphNode>(graph: &Graph<T>, component: &HashSet<usize>) -> Option<usize> {
+fn find_most_central_node<T: GraphNode>(graph: &Graph<T>, component: &BTreeSet<usize>) -> Option<usize> {
     if component.len() <= 2 {
         return component.iter().next().copied();
     }
@@ -173,7 +173,7 @@ fn find_most_central_node<T: GraphNode>(graph: &Graph<T>, component: &HashSet<us
     best_node
 }
 
-fn bfs_distances<T: GraphNode>(graph: &Graph<T>, start: usize, component: &HashSet<usize>) -> HashMap<usize, usize> {
+fn bfs_distances<T: GraphNode>(graph: &Graph<T>, start: usize, component: &BTreeSet<usize>) -> HashMap<usize, usize> {
     let mut distances = HashMap::new();
     let mut queue = VecDeque::new();
 
@@ -219,7 +219,7 @@ fn bfs_distances<T: GraphNode>(graph: &Graph<T>, start: usize, component: &HashS
 fn arrange_tree_component<T: GraphNode>(
     graph: &mut Graph<T>,
     root: usize,
-    component: &HashSet<usize>,
+    component: &BTreeSet<usize>,
     x_offset: i32,
     horizontal_spacing: u32,
     vertical_spacing: u32,
@@ -255,9 +255,9 @@ fn arrange_tree_component<T: GraphNode>(
     }
 }
 
-fn build_tree_from_root<T: GraphNode>(graph: &Graph<T>, root: usize, component: &HashSet<usize>) -> HashMap<usize, Vec<usize>> {
+fn build_tree_from_root<T: GraphNode>(graph: &Graph<T>, root: usize, component: &BTreeSet<usize>) -> HashMap<usize, Vec<usize>> {
     let mut tree = HashMap::new();
-    let mut visited = HashSet::new();
+    let mut visited = BTreeSet::new();
     let mut queue = VecDeque::new();
 
     queue.push_back(root);
