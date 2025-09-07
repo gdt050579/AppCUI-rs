@@ -104,6 +104,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -168,6 +169,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -258,6 +260,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TabEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
 
 
     // custom events
@@ -321,6 +324,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TabEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
 
 
 
@@ -410,6 +414,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::AccordionEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
 
 
     // custom events
@@ -2311,7 +2316,180 @@ pub fn layout(input: TokenStream) -> TokenStream {
 
 
 
+/// Creates a new character picker control for selecting Unicode characters from various character sets.
+/// The format is `charpicker!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `char` or `ch` (optional, first positional parameter) - Initial character to select
+/// * `code` - Unicode code point to select as initial character (optional, must be positive)
+/// * `sets` - List of character sets to display (optional). Available sets:
+///   - **Animals** - Animal symbols and emojis
+///   - **Arabic** - Arabic script characters
+///   - **Arrows** - Arrow symbols and directional indicators
+///   - **Ascii** - Basic ASCII characters
+///   - **Blocks** - Block drawing characters
+///   - **BoxDrawing** - Box drawing and line characters
+///   - **Braille** - Braille pattern characters
+///   - **Chinese** - Chinese characters and symbols
+///   - **Currency** - Currency symbols ($, €, ¥, etc.)
+///   - **Cyrillic** - Cyrillic script characters
+///   - **Emoticons** - Emoticon and emoji characters
+///   - **Games** - Gaming-related symbols
+///   - **Greek** - Greek alphabet characters
+///   - **Latin** - Latin alphabet and extended characters
+///   - **Math** - Mathematical symbols and operators
+///   - **Numbers** - Numeric characters and related symbols
+///   - **Pictographs** - Pictographic symbols
+///   - **Punctuation** - Punctuation marks and symbols
+///   - **Shapes** - Geometric shapes and symbols
+///   - **Subscripts** - Subscript characters
+///   - **Superscripts** - Superscript characters
+///   - **Transport** - Transportation symbols
+///   - **Unicode** - General Unicode symbols
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic character picker with all sets
+/// let cp = charpicker!("sets: [*], x=1, y=1, width=40, height=20");
+/// 
+/// // Character picker with specific sets
+/// let cp = charpicker!(
+///     "sets: [Arrows, Math, Shapes],
+///     x=2, y=2, width=50, height=25"
+/// );
+/// 
+/// // Character picker with initial character selection
+/// let cp = charpicker!(
+///     "'→',
+///     sets: [Arrows, Punctuation],
+///     x=3, y=3, width=30, height=15"
+/// );
+/// 
+/// // Character picker with Unicode code point
+/// let cp = charpicker!(
+///     "code: 8594,
+///     sets: [Arrows, Math],
+///     dock: center,
+///     width: 35,
+///     height: 20"
+/// );
+/// 
+/// // Specialized picker for mathematical symbols
+/// let cp = charpicker!(
+///     "sets: [Math, Greek, Superscripts, Subscripts],
+///     char: '∑',
+///     x=0, y=0, width=45, height=30"
+/// );
+/// 
+/// // Emoji and symbol picker
+/// let cp = charpicker!(
+///     "sets: [Emoticons, Animals, Pictographs],
+///     x=5, y=5, width=40, height=25"
+/// );
+/// ```
 #[proc_macro]
 pub fn charpicker(input: TokenStream) -> TokenStream {
     crate::controls::charpicker::create(input)
+}
+
+/// Creates a new graph view control for displaying and interacting with node-edge graphs.
+/// The format is `graphview!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `flags` - Control flags (optional). Can be:
+///   - **ScrollBars** - Shows scroll bars when content exceeds the control size
+///   - **SearchBar** - Enables search functionality for finding nodes and edges
+/// * `background` or `back` - Background character and attributes (optional). Format: `{char,color,background_color}`
+/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
+/// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
+/// * `line-type`, `edge-line-type`, or `elt` - Edge line rendering style (optional). Can be:
+///   - **Single** - Single line characters (default)
+///   - **Double** - Double line characters
+///   - **SingleThick** - Single thick line characters
+///   - **Border** - Border-style line characters
+///   - **Ascii** - ASCII line characters (-, |, +)
+///   - **AsciiRound** - ASCII rounded line characters
+///   - **SingleRound** - Single rounded line characters
+///   - **Braille** - Braille dot characters for smooth lines
+/// * `routing` or `edge-routing` - Edge routing algorithm (optional). Can be:
+///   - **Direct** - Direct straight lines between nodes (default)
+///   - **Orthogonal** - Orthogonal (right-angle) routing
+/// * `arrange` or `arrange-nodes` - Node arrangement algorithm (optional). Can be:
+///   - **None** - No automatic arrangement (default)
+///   - **Grid** - Simple grid layout
+///   - **GridPacked** - Packed grid layout with minimal spacing
+///   - **Circular** - Circular arrangement
+///   - **Hierarchical** - Hierarchical tree-like arrangement
+///   - **HierarchicalPacked** - Packed hierarchical arrangement
+///   - **ForceDirected** - Force-directed physics-based layout
+/// * `arrow-heads` or `arrows` - Whether to display arrow heads on directed edges (optional, defaults to false)
+/// * `highlight-incoming-edges` or `hie` - Whether to highlight incoming edges when a node is selected (optional, defaults to false)
+/// * `highlight-outgoing-edges` or `hoe` - Whether to highlight outgoing edges when a node is selected (optional, defaults to false)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+/// 
+/// // Basic graph view
+/// let gv = graphview!("x=1, y=1, width=40, height=20");
+/// 
+/// // Graph view with scrollbars and search
+/// let gv = graphview!(
+///     "flags: ScrollBars+SearchBar,
+///     x=2, y=2, width=50, height=25"
+/// );
+/// 
+/// // Graph with custom styling and layout
+/// let gv = graphview!(
+///     "flags: ScrollBars,
+///     line-type: Double,
+///     routing: Orthogonal,
+///     arrange: ForceDirected,
+///     arrows: true,
+///     highlight-incoming-edges: true,
+///     highlight-outgoing-edges: true,
+///     back: {' ', White, DarkBlue},
+///     x=3, y=3, width=60, height=30"
+/// );
+/// 
+/// // Minimalist graph with ASCII rendering
+/// let gv = graphview!(
+///     "elt: Ascii,
+///     routing: Direct,
+///     arrange: Grid,
+///     lsm: 2,
+///     tsm: 1,
+///     dock: fill"
+/// );
+/// 
+/// // Hierarchical graph with braille lines
+/// let gv = graphview!(
+///     "line-type: Braille,
+///     arrange: Hierarchical,
+///     arrows: true,
+///     flags: ScrollBars,
+///     x=0, y=0, width=80, height=40"
+/// );
+/// ```
+#[proc_macro]
+pub fn graphview(input: TokenStream) -> TokenStream {
+    crate::controls::graphview::create(input)
 }

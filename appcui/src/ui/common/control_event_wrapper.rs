@@ -12,9 +12,10 @@ use crate::system::Handle;
 use crate::ui::{
     accordion, accordion::events::AccordionEvents, button, button::events::ButtonEvents, charpicker, charpicker::events::CharPickerEvents, checkbox,
     checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents, datepicker::events::DatePickerEvents,
-    dropdownlist::events::GenericDropDownListEvents, listbox::events::ListBoxEvents, listview::events::GenericListViewEvents, markdown,
-    markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents, radiobox,
-    radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
+    dropdownlist::events::GenericDropDownListEvents, graphview, graphview::events::GenericGraphViewEvents, listbox::events::ListBoxEvents,
+    listview::events::GenericListViewEvents, markdown, markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents,
+    password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
+    textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -48,6 +49,7 @@ pub(crate) enum ControlEventData {
     Markdown(markdown::events::EventData),
     Accordion(accordion::events::EventData),
     Tab(tab::events::EventData),
+    GraphView(graphview::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -149,6 +151,14 @@ impl ControlEvent {
             ControlEventData::CharPicker(data) => {
                 CharPickerEvents::on_char_changed(receiver, self.emitter.cast(), if data.code as u32 > 0 { Some(data.code) } else { None })
             }
+            ControlEventData::GraphView(data) => match data.event_type {
+                graphview::events::GraphViewEventTypes::CurrentNodeChanged => {
+                    GenericGraphViewEvents::on_current_node_changed(receiver, self.emitter.cast(), data.type_id)
+                }
+                graphview::events::GraphViewEventTypes::NodeAction(index) => {
+                    GenericGraphViewEvents::on_node_action(receiver, self.emitter.cast(), data.type_id, index)
+                }
+            },
         }
     }
 }

@@ -119,6 +119,7 @@ pub mod pathfinder;
 pub mod treeview;
 pub mod progressbar;
 pub mod textarea;
+pub mod graphview;
 
 // re-export
 pub use common::ControlBase;
@@ -165,3 +166,4 @@ pub use treeview::TreeView;
 pub use progressbar::ProgressBar;
 pub use textarea::TextArea;
 pub use menu::Menu;
+pub use graphview::GraphView;

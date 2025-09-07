@@ -13,6 +13,7 @@ use crate::{
         datepicker::events::DatePickerEvents,
         desktop::events::DesktopEvents,
         dropdownlist::events::GenericDropDownListEvents,
+        graphview::events::GenericGraphViewEvents,
         keyselector::events::KeySelectorEvents,
         listbox::events::ListBoxEvents,
         listview::events::GenericListViewEvents,
@@ -172,6 +173,7 @@ pub trait Control:
     + AccordionEvents
     + TabEvents
     + CharPickerEvents
+    + GenericGraphViewEvents
 {
 }
 
