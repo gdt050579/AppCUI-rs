@@ -24,13 +24,12 @@ impl CommandBarEvents for MyDesktop {
                 }
             }
             mydesktop::Commands::Exit => self.close(),
-            _ => {}
         }
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    //App::new().desktop(MyDesktop::new()).command_bar().build()?.run();
-    App::new().desktop(MyDesktop::new()).log_file("log.txt",true).command_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).command_bar().build()?.run();
+    //App::new().desktop(MyDesktop::new()).log_file("log.txt",true).command_bar().build()?.run();
     Ok(())
 }

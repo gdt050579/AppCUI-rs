@@ -109,7 +109,7 @@ impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
 
 impl Navigator {
     fn get_folder_listing(path: &Path) -> std::io::Result<Vec<Entry>> {
-        log!("FS", "get_folder_listing({})", path.display());
+        //log!("FS", "get_folder_listing (\"{}\")", path.display());
         let mut result: Vec<Entry> = vec![];
         // Read the directory entries
         for dir_entry in fs::read_dir(path)? {
@@ -125,7 +125,9 @@ impl Navigator {
     }
 
     fn get_entry_from_metadata(path: &str, metadata: &std::fs::Metadata) -> std::io::Result<Entry> {
-        let creation = metadata.created()?;
+        let mut time = metadata.created();
+        if time.is_err() { time = metadata.modified(); }
+        let creation = time?;
         let datetime = Self::system_time_to_naive_datetime(creation)?;
         let size = match metadata.is_dir() {
             false => metadata.len(),
