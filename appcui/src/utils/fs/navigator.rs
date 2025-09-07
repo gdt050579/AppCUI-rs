@@ -14,7 +14,7 @@ pub(crate) struct Navigator {
 impl crate::utils::Navigator<Entry, Root, PathBuf> for Navigator {
     #[cfg(target_os = "windows")]
     fn entries(&self, path: &PathBuf) -> Vec<Entry> {
-        log!("FS", "entries({})", path.display());
+        //log!("FS", "entries({})", path.display());
         if path.as_os_str().is_empty() {
             return vec![];
         }
