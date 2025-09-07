@@ -193,21 +193,23 @@ fn build_custom_graph_5() -> graphview::Graph<&'static str> {
         (1, 2),
         (2, 3),
         (3, 4),
-
         (5, 6),
         (6, 7),
         (7, 8),
         (8, 9),
-
-        (10, 11), (11,12), (10,12),
-
-        (13,14), (14,15), (13,16), (15,17), (15,18), (16,19)
+        (10, 11),
+        (11, 12),
+        (10, 12),
+        (13, 14),
+        (14, 15),
+        (13, 16),
+        (15, 17),
+        (15, 18),
+        (16, 19),
     ];
 
     graphview::Graph::with_slices(nodes, edges, false)
 }
-
-
 
 #[test]
 fn check_sinple_display() {
@@ -1151,8 +1153,8 @@ fn check_graph_with_cusom_node_positions() {
 // fn check_multi_graph_hierarchical() {
 //     let script = "
 //         //Paint.Enable(false)
-//         Paint('1. Initial state (button has the focus)')   
-//         CheckHash(0xA52DBDE1D3804F96)    
+//         Paint('1. Initial state (button has the focus)')
+//         CheckHash(0xA52DBDE1D3804F96)
 //     ";
 //     let mut a = App::debug(130, 30, script).build().unwrap();
 //     let mut w = window!("Test,d:f");
@@ -1199,5 +1201,68 @@ fn check_multi_graph_force_directed() {
     gv.set_graph(build_custom_graph_5());
     w.add(gv);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_doc_example() {
+    type NodeValue = &'static str;
+
+    #[Window(events = GraphViewEvents<NodeValue>, internal: true)]
+    struct MyWin {
+        graph_view: Handle<GraphView<NodeValue>>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = MyWin {
+                base: Window::new("Graph Demo", layout!("d:f"), window::Flags::None),
+                graph_view: Handle::None,
+            };
+
+            // Create a simple graph
+            let nodes = &["Root", "Child 1", "Child 2", "Grandchild"];
+            let edges = &[(0, 1), (0, 2), (1, 3)];
+            let graph = graphview::Graph::with_slices(nodes, edges, true);
+
+            // Create and configure the GraphView
+            let mut gv = graphview!("d:f,arrange:Grid,routing:Orthogonal,arrows:true,flags:[ScrollBars,SearchBar],hie:true");
+            gv.set_graph(graph);
+
+            win.graph_view = win.add(gv);
+            win
+        }
+    }
+    impl GraphViewEvents<NodeValue> for MyWin {
+        fn on_current_node_changed(&mut self, handle: Handle<GraphView<&'static str>>) -> EventProcessStatus {
+            if let Some(gv) = self.control(handle) {
+                if let Some(node) = gv.graph().current_node() {
+                    let title = format!("Graph Demo - Selected: {}", node.value());
+                    self.set_title(&title);
+                }
+            }
+            EventProcessStatus::Processed
+        }
+
+        fn on_node_action(&mut self, handle: Handle<GraphView<&'static str>>, node_index: usize) -> EventProcessStatus {
+            if let Some(gv) = self.control(handle) {
+                if let Some(node) = gv.graph().node(node_index) {
+                    let title = format!("Graph Demo - Action on: {}", node.value());
+                    self.set_title(&title);
+                }
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state (button has the focus)')   
+        CheckHash(0xCC478EC25AC80686)  
+        Mouse.Click(24,2,left)  
+        Paint('2. Click on Child 1')   
+        CheckHash(0x196ECBEC764AED6A)  
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
