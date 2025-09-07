@@ -142,6 +142,6 @@ impl MenuEvents for GraphWindow {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_graph, u8::MAX);
+        menubar.add(self.menu_graph, 1);
     }
 }
