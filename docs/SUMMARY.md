@@ -62,6 +62,7 @@
         - [ComboBox](chapter-3/stock-controls/combobox.md)
         - [DatePicker](chapter-3/stock-controls/datepicker.md)
         - [DropDownList](chapter-3/stock-controls/dropdownlist.md)
+        - [GraphView](chapter-3/stock-controls/graphview.md)
         - [Label](chapter-3/stock-controls/label.md)
         - [ListBox](chapter-3/stock-controls/listbox.md)
         - [ListView](chapter-3/stock-controls/listview.md)

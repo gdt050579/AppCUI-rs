@@ -1,3 +1,5 @@
+use std::ops::{Add, AddAssign};
+
 use super::{Point, Size};
 
 /// RectAlignment enum represents the alignment of a rectangle in a 2D space.
@@ -121,8 +123,8 @@ impl Rect {
         Rect {
             left: point.x,
             top: point.y,
-            right: point.x + (size.width as i32).max(1) - 1,
-            bottom: point.y + (size.height as i32).max(1) - 1,
+            right: point.x + (size.width.saturating_sub(1) as i32),
+            bottom: point.y + (size.height.saturating_sub(1) as i32),
         }
     }
 
@@ -162,6 +164,12 @@ impl Rect {
         ((self.bottom - self.top) as u32) + 1u32
     }
 
+    /// Returns the size of the Rect
+    #[inline(always)]
+    pub fn size(&self) -> Size {
+        Size::new(((self.right - self.left) as u32) + 1u32, ((self.bottom - self.top) as u32) + 1u32)
+    }
+
     /// Returns the rectangle X-axis center.
     #[inline(always)]
     pub fn center_x(&self) -> i32 {
@@ -178,6 +186,13 @@ impl Rect {
     #[inline(always)]
     pub fn contains(&self, point: Point) -> bool {
         (point.x >= self.left) && (point.x <= self.right) && (point.y >= self.top) && (point.y <= self.bottom)
+    }
+
+    /// Returns true if the rectangle fully contains the given rectangle.
+    /// If only a part of the rectangle is inside this rectangle, false is returned.
+    #[inline(always)]
+    pub fn contains_rect(&self, rect: Rect) -> bool {
+        (rect.left >= self.left) && (rect.right <= self.right) && (rect.top >= self.top) && (rect.bottom <= self.bottom)
     }
 
     /// Returns the center point of the rectangle.
@@ -227,5 +242,96 @@ impl Rect {
         self.top = self.bottom.min(self.top - top);
         self.right = self.left.max(self.right + right);
         self.bottom = self.top.max(self.bottom + bottom);
+    }
+    /// Translates this rectangle **in place** by the given offsets.
+    ///
+    /// The rectangle’s size (width/height) is unchanged; only its position moves.
+    /// Positive `dx` moves it right; positive `dy` moves it down.
+    #[inline(always)]
+    pub fn translate(&mut self, dx: i32, dy: i32) {
+        self.left += dx;
+        self.top += dy;
+        self.right += dx;
+        self.bottom += dy;
+    }
+    /// Sets the **left edge** of the rectangle to `x` value. The parameter `preserve_weight` indicates if the width of the rectangle should be preserved or not.
+    /// If `preserve_weight` is true, the rectangle is shifted horizontally so that `left == x` and the `right` edge is updated accordingly, leaving the width unchanged.
+    /// If `preserve_weight` is false, the `left` edge is updated to `x` only if `x` is less than or equal to the current `right` edge.  
+    /// The vertical position (`top`, `bottom`) is unaffected.
+    #[inline]
+    pub fn set_left(&mut self, x: i32, preserve_weight: bool) {
+        if preserve_weight {
+            let w = self.right - self.left;
+            self.left = x;
+            self.right = x + w;
+        } else if x <= self.right {
+            self.left = x;
+        }
+    }
+
+    /// Sets the **right edge** of the rectangle to `x` value. The parameter `preserve_weight` indicates if the width of the rectangle should be preserved or not.
+    /// If `preserve_weight` is true, the rectangle is shifted horizontally so that `right == x` and the `left` edge is updated accordingly, leaving the width unchanged.
+    /// If `preserve_weight` is false, the `right` edge is updated to `x` only if `x` is greater than or equal to the current `left` edge.  
+    /// The vertical position (`top`, `bottom`) is unaffected.
+    #[inline]
+    pub fn set_right(&mut self, x: i32, preserve_weight: bool) {
+        if preserve_weight {
+            let w = self.right - self.left;
+            self.right = x;
+            self.left = x - w;
+        } else if x >= self.left {
+            self.right = x;
+        }
+    }
+
+    /// Sets the **top edge** of the rectangle to `y` value. The parameter `preserve_height` indicates if the height of the rectangle should be preserved or not.
+    /// If `preserve_height` is true, the rectangle is shifted vertically so that `top == y` and the `bottom` edge is updated accordingly, leaving the height unchanged.
+    /// If `preserve_height` is false, the `top` edge is updated to `y` only if `y` is less than or equal to the current `bottom` edge.  
+    /// The horizontal position (`left`, `right`) is unaffected.
+    #[inline]
+    pub fn set_top(&mut self, y: i32, preserve_height: bool) {
+        if preserve_height {
+            let h = self.bottom - self.top;
+            self.top = y;
+            self.bottom = y + h;
+        } else if y <= self.bottom {
+            self.top = y;
+        }
+    }
+
+    /// Sets the **bottom edge** of the rectangle to `y` value. The parameter `preserve_height` indicates if the height of the rectangle should be preserved or not.
+    /// If `preserve_height` is true, the rectangle is shifted vertically so that `bottom == y` and the `top` edge is updated accordingly, leaving the height unchanged.
+    /// If `preserve_height` is false, the `bottom` edge is updated to `y` only if `y` is greater than or equal to the current `top` edge.  
+    /// The horizontal position (`left`, `right`) is unaffected.
+    #[inline]
+    pub fn set_bottom(&mut self, y: i32, preserve_height: bool) {
+        if preserve_height {
+            let h = self.bottom - self.top;
+            self.bottom = y;
+            self.top = y - h;
+        } else if y >= self.top {
+            self.bottom = y;
+        }
+    }
+}
+
+/// Adds a `(dx, dy)` offset to this rectangle in place.
+impl AddAssign<(i32, i32)> for Rect {
+    fn add_assign(&mut self, (dx, dy): (i32, i32)) {
+        self.translate(dx, dy);
+    }
+}
+
+/// Adds a `(dx, dy)` offset to this rectangle and returns a new rectangle.
+impl Add<(i32, i32)> for Rect {
+    type Output = Rect;
+
+    fn add(self, rhs: (i32, i32)) -> Self::Output {
+        Rect {
+            left: self.left + rhs.0,
+            top: self.top + rhs.1,
+            right: self.right + rhs.0,
+            bottom: self.bottom + rhs.1,
+        }
     }
 }

@@ -38,7 +38,7 @@ pub enum RectAlignment {
 }
 ```
 
-| Alignment    | Decription                                                | Preview                                   |
+| Alignment     | Decription                                                | Preview                                   |
 | ------------- | --------------------------------------------------------- | ----------------------------------------- |
 | `TopLeft`     | (X,Y) represents the top-left corner of the rectangle     | ![TopLeft](img/rect_top_left.png)         |
 | `Top`         | (X,Y) represents the top-center of the rectangle          | ![Top](img/rect_top.png)                  |
@@ -49,7 +49,6 @@ pub enum RectAlignment {
 | `BottomLeft`  | (X,Y) represents the bottom-left corner of the rectangle  | ![BottomLeft](img/rect_bottom_left.png)   |
 | `Left`        | (X,Y) represents the left-center of the rectangle         | ![Left](img/rect_left.png)                |
 | `Center`      | (X,Y) represents the center of the rectangle              | ![Center](img/rect_center.png)            |
-
 
 To draw a rectangle on a surface, you can use the following methods:
 
@@ -70,3 +69,32 @@ surface.fill_rect(r, Character::new(' ', Color::White, Color::DarkBlue, CharFlag
 // draw a border around the rectangle (white on black)
 surface.draw_rect(r, LineType::Single, CharAttribute::with_color(Color::White, Color::Black));
 ```
+
+## Methods
+
+A rectangle has the following methods:
+| Method               | Description                                                                    |
+| -------------------- | ------------------------------------------------------------------------------ |
+| `left()`             | Returns the left coordinate of the rectangle.                                  |
+| `top()`              | Returns the top coordinate of the rectangle.                                   |
+| `right()`            | Returns the right coordinate of the rectangle.                                 |
+| `bottom()`           | Returns the bottom coordinate of the rectangle.                                |
+| `width()`            | Returns the width of the rectangle.                                            |
+| `height()`           | Returns the height of the rectangle.                                           |
+| `size()`             | Returns the size of the rectangle as a `Size` object.                          |
+| `center_x()`         | Returns the x coordinate of the center of the rectangle.                       |
+| `center_y()`         | Returns the y coordinate of the center of the rectangle.                       |
+| `center()`           | Returns the center of the rectangle as a `Point` object.                       |
+| `top_left()`         | Returns the top-left corner of the rectangle as a `Point` object.              |
+| `top_right()`        | Returns the top-right corner of the rectangle as a `Point` object.             |
+| `bottom_left()`      | Returns the bottom-left corner of the rectangle as a `Point` object.           |
+| `bottom_right()`     | Returns the bottom-right corner of the rectangle as a `Point` object.          |
+| `contains(...)`      | Checks if a point is inside the rectangle.                                     |
+| `contains_rect(...)` | Checks if a rectangle is fully inside (no intersections) the rectangle.        |
+| `inflate_with(...)`  | Inflates the rectangle by the given amount in left, top, right, bottom.        |
+| `translate(...)`     | Translates the rectangle by the given amount in x and y.                       |
+| `set_left(...)`      | Sets the left coordinate of the rectangle, optionally preserving the width.    |
+| `set_top(...)`       | Sets the top coordinate of the rectangle, optionally preserving the height.    |
+| `set_right(...)`     | Sets the right coordinate of the rectangle, optionally preserving the width.   |
+| `set_bottom(...)`    | Sets the bottom coordinate of the rectangle, optionally preserving the height. |
+

@@ -54,6 +54,7 @@ pub(crate) enum AppCUITrait {
     AccordionEvents = 45,
     TabEvents = 46,
     CharPickerEvents = 47,
+    GenericGraphViewEvents = 48,
 }
 
 #[repr(u8)]
@@ -118,6 +119,7 @@ impl AppCUITrait {
             AppCUITrait::AccordionEvents => "AccordionEvents",
             AppCUITrait::TabEvents => "TabEvents",
             AppCUITrait::CharPickerEvents => "CharPickerEvents",
+            AppCUITrait::GenericGraphViewEvents => "GraphViewEvents", // important to be without Generic
 
         }
     }
@@ -174,6 +176,7 @@ impl AppCUITrait {
             AppCUITrait::AccordionEvents => TraitType::ControlEvent,
             AppCUITrait::TabEvents => TraitType::ControlEvent,
             AppCUITrait::CharPickerEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericGraphViewEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -229,6 +232,7 @@ impl AppCUITrait {
             AppCUITrait::AccordionEvents => "",
             AppCUITrait::TabEvents => "",
             AppCUITrait::CharPickerEvents => "",
+            AppCUITrait::GenericGraphViewEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -284,6 +288,7 @@ impl AppCUITrait {
             AppCUITrait::AccordionEvents => "impl$(TEMPLATE_TYPE) AccordionEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::TabEvents => "impl$(TEMPLATE_TYPE) TabEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::CharPickerEvents => "impl$(TEMPLATE_TYPE) CharPickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericGraphViewEvents => "impl$(TEMPLATE_TYPE) GenericGraphViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -295,6 +300,7 @@ impl AppCUITrait {
                 | AppCUITrait::GenericListViewEvents
                 | AppCUITrait::GenericTreeViewEvents
                 | AppCUITrait::GenericBackgroundTaskEvents
+                | AppCUITrait::GenericGraphViewEvents
         )
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -340,6 +346,7 @@ impl AppCUITrait {
             "AccordionEvents" | "Accordion" => Some(AppCUITrait::AccordionEvents),
             "TabEvents" | "Tab" => Some(AppCUITrait::TabEvents),
             "CharPickerEvents" | "CharPicker" => Some(AppCUITrait::CharPickerEvents),
+            "GraphViewEvents" | "GraphView" => Some(AppCUITrait::GenericGraphViewEvents),
             _ => None,
         }
     }
@@ -396,6 +403,7 @@ impl AppCUITrait {
             45 => Some(AppCUITrait::AccordionEvents),
             46 => Some(AppCUITrait::TabEvents),
             47 => Some(AppCUITrait::CharPickerEvents),
+            48 => Some(AppCUITrait::GenericGraphViewEvents),
             _ => None,
         };
         result?;

@@ -7,6 +7,7 @@ use super::Color;
 use super::Cursor;
 use super::Image;
 use super::LineType;
+use super::OrthogonalDirection;
 use super::Point;
 use super::Rect;
 use super::Size;
@@ -310,8 +311,10 @@ impl Surface {
     /// surface.fill_horizontal_line(10, 10, 20, Character::new('-', Color::White, Color::Black, CharFlags::None));
     /// ```
     pub fn fill_horizontal_line(&mut self, left: i32, y: i32, right: i32, ch: Character) {
-        let mut x = left;
-        while x <= right {
+        let l = left.min(right);
+        let r = right.max(left);
+        let mut x = l;
+        while x <= r {
             if let Some(pos) = self.coords_to_position(x, y) {
                 self.chars[pos].set(ch);
             }
@@ -336,8 +339,10 @@ impl Surface {
     /// surface.fill_vertical_line(10, 10, 20, Character::new('|', Color::White, Color::Black, CharFlags::None));
     /// ```
     pub fn fill_vertical_line(&mut self, x: i32, top: i32, bottom: i32, ch: Character) {
-        let mut y = top;
-        while y <= bottom {
+        let t = top.min(bottom);
+        let b = bottom.max(top);
+        let mut y = t;
+        while y <= b {
             if let Some(pos) = self.coords_to_position(x, y) {
                 self.chars[pos].set(ch);
             }
@@ -416,13 +421,35 @@ impl Surface {
             );
         }
     }
-
     fn draw_bresenham_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
-        let line_chars = line_type.charset();
-        let mut last = Point::new(x1, y1);
-        let mut current = last;
+        #[derive(Copy, Clone)]
+        enum Direction {
+            Up,
+            Down,
+            Left,
+            Right,
+            None,
+        }
+
+        if (x1 == x2) && (y1 == y2) {
+            // single point
+            self.write_char(x1, y1, Character::with_attributes(' ', attr));
+            return;
+        }
+        // some optimizations
+        if x1 == x2 {
+            // vertical line
+            self.draw_vertical_line(x1, y1.min(y2), y1.max(y2), line_type, attr);
+            return;
+        }
+        if y1 == y2 {
+            // horizontal line
+            self.draw_horizontal_line(x1.min(x2), y1, x1.max(x2), line_type, attr);
+            return;
+        }
+
+        let mut current = Point::new(x1, y1);
         let end = Point::new(x2, y2);
-        let mut ch = Character::with_attributes(' ', attr);
 
         let dx = (x2 - x1).abs();
         let dy = (y2 - y1).abs();
@@ -430,67 +457,110 @@ impl Surface {
         let sy = if y1 < y2 { 1 } else { -1 };
         let mut err = dx - dy;
 
-        ch.code = if dx >= 3 * dy {
-            line_chars.horizontal
-        } else if dy >= 3 * dx {
-            line_chars.vertical
-        } else if x2 > x1 && y2 > y1 {
-            line_chars.corner_bottom_left
-        } else if x2 < x1 && y2 > y1 {
-            line_chars.corner_bottom_right
-        } else if x2 < x1 && y2 < y1 {
-            line_chars.corner_top_right
-        } else {
-            line_chars.corner_top_left
-        };
-        self.write_char(current.x, current.y, ch);
+        let mut ch = Character::with_attributes(' ', attr);
+        let line_chars = line_type.charset();
 
-        loop {
-            if current == end {
-                break;
+        // go one position backwords
+        let e2 = 2 * err;
+        if dx < dy {
+            // favor horizontal first
+            if e2 > -dy {
+                err += dy;
+                current.x -= sx;
+            } else if e2 < dx {
+                err -= dx;
+                current.y -= sy;
             }
+        } else {
+            // favor vertical first
+            if e2 < dx {
+                err -= dx;
+                current.y -= sy;
+            } else if e2 > -dy {
+                err += dy;
+                current.x -= sx;
+            }
+        }
+
+        while current != end {
+            // Step Bresenham – only one axis per step
+            let e2 = 2 * err;
+            let prev = current;
+
+            if dx < dy {
+                // favor horizontal first
+                if e2 > -dy {
+                    err -= dy;
+                    current.x += sx;
+                } else if e2 < dx {
+                    err += dx;
+                    current.y += sy;
+                }
+            } else {
+                // favor vertical first
+                if e2 < dx {
+                    err += dx;
+                    current.y += sy;
+                } else if e2 > -dy {
+                    err -= dy;
+                    current.x += sx;
+                }
+            }
+
+            // direction from prev → current
+            let dir_in = match (current.x - prev.x, current.y - prev.y) {
+                (1, 0) => Direction::Right,
+                (-1, 0) => Direction::Left,
+                (0, 1) => Direction::Down,
+                (0, -1) => Direction::Up,
+                _ => Direction::None,
+            };
+
+            // lookahead (dir_out)
 
             let e2 = 2 * err;
-            if e2 > -dy {
-                err -= dy;
-                current.x += sx;
+            let mut next = current;
+            if dx < dy {
+                // favor horizontal first
+                if e2 > -dy {
+                    next.x += sx;
+                } else if e2 < dx {
+                    next.y += sy;
+                }
+            } else {
+                // favor vertical first
+                if e2 < dx {
+                    next.y += sy;
+                } else if e2 > -dy {
+                    next.x += sx;
+                }
             }
-            if e2 < dx {
-                err += dx;
-                current.y += sy;
-            }
-            // draw last based on current
-            let dir_x = (current.x - last.x).clamp(-1, 1);
-            let dir_y = (current.y - last.y).clamp(-1, 1);
-            match (dir_x, dir_y) {
-                (0, 1) | (0, -1) => ch.code = line_chars.vertical,
-                (1, 0) | (-1, 0) => ch.code = line_chars.horizontal,
-                (1, 1) => {
-                    ch.code = line_chars.corner_top_right;
-                    self.write_char(last.x + 1, last.y, ch);
-                    ch.code = line_chars.corner_bottom_left;
-                }
-                (-1, 1) => {
-                    ch.code = line_chars.corner_top_left;
-                    self.write_char(last.x - 1, last.y, ch);
-                    ch.code = line_chars.corner_bottom_right;
-                }
-                (-1, -1) => {
-                    ch.code = line_chars.corner_bottom_left;
-                    self.write_char(last.x - 1, last.y, ch);
-                    ch.code = line_chars.corner_top_right;
-                }
-                (1, -1) => {
-                    ch.code = line_chars.corner_bottom_right;
-                    self.write_char(last.x + 1, last.y, ch);
-                    ch.code = line_chars.corner_top_left;
-                }
-                _ => ch.code = 0 as char,
-            }
+            let dir_out = match (next.x - current.x, next.y - current.y) {
+                (1, 0) => Direction::Right,
+                (-1, 0) => Direction::Left,
+                (0, 1) => Direction::Down,
+                (0, -1) => Direction::Up,
+                _ => Direction::None,
+            };
+
+            // decide character
+            ch.code = match (dir_in, dir_out) {
+                (Direction::Left, Direction::Left) | (Direction::Right, Direction::Right) => line_chars.horizontal,
+                (Direction::Up, Direction::Up) | (Direction::Down, Direction::Down) => line_chars.vertical,
+                (Direction::Left, Direction::Up) => line_chars.corner_bottom_left,
+                (Direction::Up, Direction::Left) => line_chars.corner_top_right,
+                (Direction::Right, Direction::Up) => line_chars.corner_bottom_right,
+                (Direction::Up, Direction::Right) => line_chars.corner_top_left,
+                (Direction::Left, Direction::Down) => line_chars.corner_top_left,
+                (Direction::Down, Direction::Left) => line_chars.corner_bottom_right,
+                (Direction::Right, Direction::Down) => line_chars.corner_top_right,
+                (Direction::Down, Direction::Right) => line_chars.corner_bottom_left,
+                _ => 'X',
+            };
             self.write_char(current.x, current.y, ch);
-            last = current;
         }
     }
+
     fn draw_ascii_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
         let mut last = Point::new(x1, y1);
         let mut current = last;
@@ -618,7 +688,7 @@ impl Surface {
     /// use appcui::prelude::*;
     ///
     /// let mut surface = Surface::new(100, 50);
-    /// 
+    ///
     /// // Draw a horizontal single-line border in bold
     /// surface.draw_line(0, 0, 10, 0, LineType::Single, charattr!("white,black"));
     ///
@@ -633,6 +703,114 @@ impl Surface {
             LineType::Ascii | LineType::AsciiRound => self.draw_ascii_line(x1, y1, x2, y2, attr),
             LineType::Braille => self.draw_braille_line(x1, y1, x2, y2, attr),
         };
+    }
+
+    pub fn draw_orthogonal_line(
+        &mut self,
+        x1: i32,
+        y1: i32,
+        x2: i32,
+        y2: i32,
+        line_type: LineType,
+        mut dir: OrthogonalDirection,
+        attr: CharAttribute,
+    ) {
+        if (x1 == x2) && (y1 == y2) {
+            // to see what character I should draw
+            return;
+        }
+        if x1 == x2 {
+            // vertical line
+            self.draw_vertical_line(x1, y1, y2, line_type, attr);
+            return;
+        }
+        if y1 == y2 {
+            // horizontal line
+            self.draw_horizontal_line(x1, y1, x2, line_type, attr);
+            return;
+        }
+        // simple elbow
+        let cs = line_type.charset();
+        if dir == OrthogonalDirection::Auto {
+            if (x2 - x1).abs() > (y2 - y1).abs() {
+                dir = OrthogonalDirection::HorizontalFirst;
+            } else {
+                dir = OrthogonalDirection::VerticalFirst;
+            }
+        }
+        match dir {
+            OrthogonalDirection::HorizontalFirst => {
+                self.draw_horizontal_line(x1, y1, x2, line_type, attr);
+                self.draw_vertical_line(x2, y1, y2, line_type, attr);
+                let ch = if x1 < x2 {
+                    if y1 < y2 {
+                        cs.corner_top_right
+                    } else {
+                        cs.corner_bottom_right
+                    }
+                } else if y1 < y2 {
+                    cs.corner_top_left
+                } else {
+                    cs.corner_bottom_left
+                };
+                self.write_char(x2, y1, Character::with_char(ch));
+            }
+            OrthogonalDirection::HorizontalUntilMiddle => {
+                let middle_x = (x1 + x2) / 2;
+                self.draw_horizontal_line(x1, y1, middle_x, line_type, attr);
+                self.draw_vertical_line(middle_x, y1, y2, line_type, attr);
+                self.draw_horizontal_line(middle_x, y2, x2, line_type, attr);
+                let (ch1,ch2) = if x1 < x2 {
+                    if y1 < y2 {
+                        (cs.corner_top_right, cs.corner_bottom_left)
+                    } else {
+                        (cs.corner_bottom_right, cs.corner_top_left)
+                    }
+                } else if y1 < y2 {
+                    (cs.corner_top_left, cs.corner_bottom_right)
+                } else {
+                    (cs.corner_bottom_left, cs.corner_top_right)
+                };
+                self.write_char(middle_x, y1, Character::with_char(ch1));
+                self.write_char(middle_x, y2, Character::with_char(ch2));
+            }            
+            OrthogonalDirection::VerticalFirst => {
+                self.draw_vertical_line(x1, y1, y2, line_type, attr);
+                self.draw_horizontal_line(x1, y2, x2, line_type, attr);
+                let ch = if y1 < y2 {
+                    if x1 < x2 {
+                        cs.corner_bottom_left
+                    } else {
+                        cs.corner_bottom_right
+                    }
+                } else if x1 < x2 {
+                    cs.corner_top_left
+                } else {
+                    cs.corner_top_right
+                };
+                self.write_char(x1, y2, Character::with_char(ch));
+            }
+            OrthogonalDirection::VerticalUntilMiddle => {
+                let middle_y = (y1 + y2) / 2;
+                self.draw_vertical_line(x1, y1, middle_y, line_type, attr);
+                self.draw_horizontal_line(x1, middle_y, x2, line_type, attr);
+                self.draw_vertical_line(x2, middle_y, y2, line_type, attr);
+                let (ch1,ch2) = if y1 < y2 {
+                    if x1 < x2 {
+                        (cs.corner_bottom_left, cs.corner_top_right)
+                    } else {
+                        (cs.corner_bottom_right, cs.corner_top_left)
+                    }
+                } else if x1 < x2 {
+                    (cs.corner_top_left, cs.corner_bottom_right)
+                } else {
+                    (cs.corner_top_right, cs.corner_bottom_left)
+                };
+                self.write_char(x1, middle_y, Character::with_char(ch1));
+                self.write_char(x2, middle_y, Character::with_char(ch2));
+            }
+            OrthogonalDirection::Auto => unreachable!(),
+        }
     }
 
     /// Draws a straight line between two points `(x1, y1)` and `(x2, y2)`
@@ -653,7 +831,7 @@ impl Surface {
     /// use appcui::prelude::*;
     ///
     /// let mut surface = Surface::new(100, 50);
-    /// 
+    ///
     /// // Draws a diagonal line from (0, 0) to (5, 3) using '*'
     /// surface.fill_line(0, 0, 5, 3, Character::new('*', Color::White, Color::Black, CharFlags::None));
     ///

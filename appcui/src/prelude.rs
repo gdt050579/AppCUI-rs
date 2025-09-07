@@ -35,6 +35,8 @@ pub use super::ui::desktop::events::DesktopEvents;
 pub use super::ui::dropdownlist;
 pub use super::ui::dropdownlist::events::GenericDropDownListEvents;
 pub use super::ui::dropdownlist::DropDownListType;
+pub use super::ui::graphview;
+pub use super::ui::graphview::events::GenericGraphViewEvents;
 pub use super::ui::hsplitter;
 pub use super::ui::imageviewer;
 pub use super::ui::keyselector;

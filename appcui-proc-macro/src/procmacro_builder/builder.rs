@@ -201,6 +201,24 @@ fn generate_treeview_events(a: &mut Arguments) -> String {
         .replace("$(TYPE_ID_TRANSLATION_FOR_TREEVIEW_ON_ITEM_ACTION)", &on_item_action_code)
 }
 
+fn generate_graphview_events(a: &mut Arguments) -> String {
+    if !a.template_events.contains_key(&AppCUITrait::GenericGraphViewEvents) {
+        panic!("Missing generic type for GraphView event (Have you used events=GraphVewEvents<Type> ?)");
+    }
+    let mut on_current_node_changed_code = String::new();
+    let mut on_node_action_code = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericGraphViewEvents].iter() {
+        on_current_node_changed_code.push_str(templates::GRAPHVIEW_ON_CURRENT_NODE_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_node_action_code.push_str(templates::GRAPHVIEW_ON_NODE_ACTION_DEF.replace("$(TYPE)", trait_name).as_str());
+    }
+    templates::GRAPHVIEW_TRAIT_DEF
+        .replace(
+            "$(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_CURRENT_NODE_CHANGED)",
+            &on_current_node_changed_code,
+        )
+        .replace("$(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_NODE_ACTION)", &on_node_action_code)
+}
+
 fn generate_backgroundtask_events(a: &mut Arguments) -> String {
     if !a.template_events.contains_key(&AppCUITrait::GenericBackgroundTaskEvents) {
         panic!("Missing generic type for BackgroundTask event (Have you used events=BackgroundTask<Type-1,Type-2> ?)");
@@ -273,6 +291,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericListViewEvents => code.push_str(generate_listview_events(&mut a).as_str()),
                         AppCUITrait::GenericTreeViewEvents => code.push_str(generate_treeview_events(&mut a).as_str()),
                         AppCUITrait::GenericBackgroundTaskEvents=> code.push_str(generate_backgroundtask_events(&mut a).as_str()),
+                        AppCUITrait::GenericGraphViewEvents => code.push_str(generate_graphview_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

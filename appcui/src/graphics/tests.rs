@@ -1156,6 +1156,86 @@ fn check_rect_center() {
 }
 
 #[test]
+fn check_rect_set_bottom() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.set_bottom(10, true);
+    assert_eq!(r, Rect::new(1, 8, 3, 10));
+    r.set_bottom(20, false);
+    assert_eq!(r, Rect::new(1, 8, 3, 20));
+    r.set_bottom(0, false);
+    assert_eq!(r, Rect::new(1, 8, 3, 20)); // notthing happens
+}   
+
+#[test]
+fn check_rect_set_right() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.set_right(10, true);
+    assert_eq!(r, Rect::new(8, 2, 10, 4));
+    r.set_right(20, false);
+    assert_eq!(r, Rect::new(8, 2, 20, 4));
+    r.set_right(0, false);  
+    assert_eq!(r, Rect::new(8, 2, 20, 4)); // notthing happens
+}
+
+#[test]
+fn check_rect_set_top() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.set_top(0, true);
+    assert_eq!(r, Rect::new(1, 0, 3, 2));
+    r.set_top(-5, false);
+    assert_eq!(r, Rect::new(1, -5, 3, 2));
+    r.set_top(10, false);
+    assert_eq!(r, Rect::new(1, -5, 3, 2)); // notthing happens
+}
+
+#[test]
+fn check_rect_set_left() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.set_left(0, true);
+    assert_eq!(r, Rect::new(0, 2, 2, 4));
+    r.set_left(-5, false);
+    assert_eq!(r, Rect::new(-5, 2, 2, 4));
+    r.set_left(10, false);
+    assert_eq!(r, Rect::new(-5, 2, 2, 4)); // notthing happens
+}
+
+#[test]
+fn check_rect_add_asign() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r += (10, 20);
+    assert_eq!(r, Rect::new(11, 22, 13, 24));
+}
+
+#[test]
+fn check_rect_add() {
+    let r = Rect::new(1, 2, 3, 4);
+    let r2 = r + (10, 20);
+    assert_eq!(r2, Rect::new(11, 22, 13, 24));
+}
+
+#[test]
+fn check_rect_translate() {
+    let mut r = Rect::new(1, 2, 3, 4);
+    r.translate(10, 20);
+    assert_eq!(r, Rect::new(11, 22, 13, 24));
+}   
+
+#[test]
+fn check_rect_size() {
+    let r = Rect::new(1, 2, 3, 4);
+    assert_eq!(r.size(), Size::new(3, 3));
+}
+
+#[test]
+fn check_rect_contains_rect() {
+    let r1 = Rect::new(1, 2, 5, 6);
+    let r2 = Rect::new(2, 3, 4, 5);
+    let r3 = Rect::new(0, 0, 4, 5);
+    assert!(r1.contains_rect(r2));
+    assert!(!r1.contains_rect(r3));
+}
+
+#[test]
 fn check_color_contrast() {
     assert_eq!(Color::Black.contrast_color(), Color::White);
     assert_eq!(Color::White.contrast_color(), Color::Black);
@@ -1254,7 +1334,7 @@ fn check_draw_line_boxes() {
     s.write_char(1, 11, ch_end);
 
     //s.print(false);
-    assert_eq!(s.compute_hash(), 0x86EB4D9323C0CC89);
+    assert_eq!(s.compute_hash(), 0x2188169A7786E648);
 }
 
 #[test]
@@ -1285,7 +1365,7 @@ fn check_draw_line_blocks() {
     s.write_char(1, 11, ch_end);
 
     //s.print(false);
-    assert_eq!(s.compute_hash(), 0xAD6C3BC80EA6D1C5);
+    assert_eq!(s.compute_hash(), 0x7C79142A4ED38F51);
 }
 
 #[test]
@@ -1384,4 +1464,62 @@ fn check_fill_line() {
 
     //s.print(false);
     assert_eq!(s.compute_hash(), 0x953846DA8B6047F5);
+}
+
+#[test]
+fn check_draw_line_small_angle_horizontal() {
+    let mut s = SurfaceTester::new(42, 15);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    // horizontal
+    s.draw_line(1, 1, 40, 2,  LineType::Single, CharAttribute::default());
+    s.draw_line(40, 3, 1, 4,  LineType::Single, CharAttribute::default());
+    s.draw_line(1, 10, 40, 9,  LineType::Single, CharAttribute::default());
+    s.draw_line(40, 11, 1, 12,  LineType::Single, CharAttribute::default());
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xAB7ED1ACC5674F55);
+}
+
+
+#[test]
+fn check_draw_line_small_angle_vertical() {
+    let mut s = SurfaceTester::new(42, 15);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    // vertical
+    s.draw_line(1, 1, 2, 15,  LineType::Single, CharAttribute::default());
+    s.draw_line(3, 15, 4, 1,  LineType::Single, CharAttribute::default());
+    s.draw_line(10, 15, 9, 1,  LineType::Single, CharAttribute::default());
+    s.draw_line(20, 1, 19, 15,  LineType::Single, CharAttribute::default());
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x574FC9BE130E402D);
+}
+
+#[test]
+fn check_draw_line_diagonal() {
+    let mut s = SurfaceTester::new(42, 15);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    // vertical
+    s.draw_line(1, 1, 15, 15,  LineType::Single, CharAttribute::default());
+    s.draw_line(20, 15, 6, 1,  LineType::Single, CharAttribute::default());
+    s.draw_line(22, 15, 36, 1,  LineType::Single, CharAttribute::default());
+    s.draw_line(40, 1, 26, 15,  LineType::Single, CharAttribute::default());
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x6684ABF675F12691);
+}
+
+
+#[test]
+fn check_draw_line_small_angle() {
+    let mut s = SurfaceTester::new(42, 15);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    // horizontal
+    s.draw_line(1, 1, 40, 2,  LineType::Single, CharAttribute::default());
+    s.draw_line(40, 3, 1, 4,  LineType::Single, CharAttribute::default());
+    // vertical
+    s.draw_line(1, 5, 2, 15,  LineType::Single, CharAttribute::default());
+    s.draw_line(5, 5, 4, 15,  LineType::Single, CharAttribute::default());
+    // diagonal (small - 2 chars)
+    s.draw_line(8, 7, 9, 8,  LineType::Single, CharAttribute::default());
+    s.draw_line(8, 12, 9, 11,  LineType::Single, CharAttribute::default());
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xF13389F6E5923425);
 }
