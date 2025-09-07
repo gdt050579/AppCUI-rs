@@ -516,8 +516,7 @@ where
         let len = self.edges.len() as u32;
         if state == ControlState::Focused {
             for index in 0..len {
-                let attr = self.edges[index as usize].attribute.unwrap_or(edge_attr);
-                self.draw_edge(index, attr);
+                self.draw_edge(index, self.edges[index as usize].attribute.unwrap_or(edge_attr));
             }
         } else {
             for index in 0..len {
