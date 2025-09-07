@@ -323,7 +323,7 @@ fn calculate_tree_positions(tree: &HashMap<usize, Vec<usize>>, horizontal_spacin
     calculate_subtree_widths(tree, root, &mut node_widths, horizontal_spacing);
 
     // Position nodes top-down
-    position_tree_nodes(tree, root, 0, 0, &node_widths, &mut positions, horizontal_spacing, vertical_spacing);
+    position_tree_nodes(tree, root, Point::new(0, 0), &node_widths, &mut positions, horizontal_spacing, vertical_spacing);
 
     positions
 }
@@ -351,14 +351,13 @@ fn calculate_subtree_widths(tree: &HashMap<usize, Vec<usize>>, node: usize, widt
 fn position_tree_nodes(
     tree: &HashMap<usize, Vec<usize>>,
     node: usize,
-    x: i32,
-    y: i32,
+    position: Point,
     widths: &HashMap<usize, i32>,
     positions: &mut HashMap<usize, (i32, i32)>,
     horizontal_spacing: u32,
     vertical_spacing: u32,
 ) {
-    positions.insert(node, (x, y));
+    positions.insert(node, (position.x, position.y));
 
     let empty_vec = Vec::new();
     let children = tree.get(&node).unwrap_or(&empty_vec);
@@ -368,8 +367,8 @@ fn position_tree_nodes(
 
     // Calculate starting position for children
     let total_width = widths.get(&node).unwrap_or(&0);
-    let mut current_x = x - total_width / 2;
-    let child_y = y + vertical_spacing as i32;
+    let mut current_x = position.x - total_width / 2;
+    let child_y = position.y + vertical_spacing as i32;
 
     for &child in children {
         let default_width = horizontal_spacing as i32;
@@ -379,8 +378,7 @@ fn position_tree_nodes(
         position_tree_nodes(
             tree,
             child,
-            child_center_x,
-            child_y,
+            Point::new(child_center_x, child_y),
             widths,
             positions,
             horizontal_spacing,

@@ -71,7 +71,7 @@ where
             out.clear();
             out.push_str("???");
         }
-        surface.write_text(&out, &format);
+        surface.write_text(out, &format);
         surface.reset_clip();
     }
 }

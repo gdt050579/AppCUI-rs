@@ -584,7 +584,7 @@ where
             MouseEvent::Enter | MouseEvent::Leave => {
                 self.graph.reset_hover(&self.base);
                 self.hide_tooltip();
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             MouseEvent::Over(point) => {
                 let p = Point::new(point.x - self.origin_point.x, point.y - self.origin_point.y);
@@ -601,7 +601,7 @@ where
                 } else {
                     self.hide_tooltip();
                 }
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             MouseEvent::Pressed(mouse_data) => {
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
@@ -625,16 +625,16 @@ where
                     }
                 }
                 self.drag = Drag::View(Point::new(data.x, data.y));
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
             MouseEvent::Released(mouse_data) => match &self.drag {
                 Drag::None => {
-                    return EventProcessStatus::Ignored;
+                    EventProcessStatus::Ignored
                 }
                 Drag::View(p) => {
                     self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
                     self.drag = Drag::None;
-                    return EventProcessStatus::Processed;
+                    EventProcessStatus::Processed
                 }
                 Drag::Node(node_info) => {
                     let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
@@ -648,26 +648,26 @@ where
                     }
                     self.drag = Drag::None;
                     self.ensure_current_node_is_visible();
-                    return EventProcessStatus::Processed;
+                    EventProcessStatus::Processed
                 }
             },
             MouseEvent::DoubleClick(mouse_data) => {
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                 if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
                     self.raise_action_on_node(id);
-                    return EventProcessStatus::Processed;
+                    EventProcessStatus::Processed
                 } else {
-                    return EventProcessStatus::Ignored;
+                    EventProcessStatus::Ignored
                 }
             }
             MouseEvent::Drag(mouse_data) => match &self.drag {
                 Drag::None => {
-                    return EventProcessStatus::Ignored;
+                    EventProcessStatus::Ignored
                 }
                 Drag::View(p) => {
                     self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
                     self.drag = Drag::View(Point::new(mouse_data.x, mouse_data.y));
-                    return EventProcessStatus::Processed;
+                    EventProcessStatus::Processed
                 }
                 Drag::Node(node_info) => {
                     let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
@@ -680,7 +680,7 @@ where
                         self.update_scroll_bars();
                     }
                     self.ensure_current_node_is_visible();
-                    return EventProcessStatus::Processed;
+                    EventProcessStatus::Processed
                 }
             },
             MouseEvent::Wheel(dir) => {
@@ -690,7 +690,7 @@ where
                     MouseWheelDirection::Up => self.move_scroll_to(self.origin_point.x, self.origin_point.y + 1),
                     MouseWheelDirection::Down => self.move_scroll_to(self.origin_point.x, self.origin_point.y - 1),
                 };
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
         }
     }

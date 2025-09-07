@@ -100,8 +100,8 @@ pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>) {
 
 fn run_force_simulation<T: GraphNode>(
     graph: &Graph<T>,
-    positions: &mut Vec<Vector2D>,
-    velocities: &mut Vec<Vector2D>,
+    positions: &mut [Vector2D], //&mut Vec<Vector2D>,
+    velocities: &mut [Vector2D], //&mut Vec<Vector2D>,
     area_size: i32,
 ) {
     let node_count = positions.len();

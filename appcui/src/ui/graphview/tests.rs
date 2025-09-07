@@ -268,13 +268,13 @@ fn check_events() {
     impl GraphViewEvents<u32> for MyWin {
         fn on_current_node_changed(&mut self, handle: Handle<GraphView<u32>>) -> EventProcessStatus {
             let nid = self.control(handle).unwrap().graph().current_node_id().unwrap();
-            let f = format!("Node IDX: {}", nid);
+            let f = format!("Node IDX: {nid}");
             self.set_title(&f);
             EventProcessStatus::Ignored
         }
 
         fn on_node_action(&mut self, _: Handle<GraphView<u32>>, item_index: usize) -> EventProcessStatus {
-            let f = format!("Action IDX: {}", item_index);
+            let f = format!("Action IDX: {item_index}");
             self.set_title(&f);
             EventProcessStatus::Ignored
         }
@@ -322,13 +322,13 @@ fn check_events_with_mouse() {
     impl GraphViewEvents<u32> for MyWin {
         fn on_current_node_changed(&mut self, handle: Handle<GraphView<u32>>) -> EventProcessStatus {
             let nid = self.control(handle).unwrap().graph().current_node_id().unwrap();
-            let f = format!("Node IDX: {}", nid);
+            let f = format!("Node IDX: {nid}");
             self.set_title(&f);
             EventProcessStatus::Ignored
         }
 
         fn on_node_action(&mut self, _: Handle<GraphView<u32>>, item_index: usize) -> EventProcessStatus {
-            let f = format!("Action IDX: {}", item_index);
+            let f = format!("Action IDX: {item_index}");
             self.set_title(&f);
             EventProcessStatus::Ignored
         }

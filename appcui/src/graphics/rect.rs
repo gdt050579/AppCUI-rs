@@ -264,10 +264,8 @@ impl Rect {
             let w = self.right - self.left;
             self.left = x;
             self.right = x + w;
-        } else {
-            if x <= self.right {
-                self.left = x;
-            }
+        } else if x <= self.right {
+            self.left = x;
         }
     }
 
@@ -281,10 +279,8 @@ impl Rect {
             let w = self.right - self.left;
             self.right = x;
             self.left = x - w;
-        } else {
-            if x >= self.left {
-                self.right = x;
-            }
+        } else if x >= self.left {
+            self.right = x;
         }
     }
 
@@ -298,10 +294,8 @@ impl Rect {
             let h = self.bottom - self.top;
             self.top = y;
             self.bottom = y + h;
-        } else {
-            if y <= self.bottom {
-                self.top = y;
-            }
+        } else if y <= self.bottom {
+            self.top = y;
         }
     }
 
@@ -315,10 +309,8 @@ impl Rect {
             let h = self.bottom - self.top;
             self.bottom = y;
             self.top = y - h;
-        } else {
-            if y >= self.top {
-                self.bottom = y;
-            }
+        } else if y >= self.top {
+            self.bottom = y;
         }
     }
 }

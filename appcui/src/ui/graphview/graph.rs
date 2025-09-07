@@ -16,18 +16,18 @@ enum ControlState {
 }
 
 enum Direction {
-    OnLeft,
-    OnRight,
-    OnTop,
-    OnBottom,
+    Left,
+    Right,
+    Top,
+    Bottom,
 }
 impl Direction {
     fn compare_point(&self, rect: &Rect) -> Point {
         match self {
-            Direction::OnLeft => Point::new(rect.left(), rect.center_y()),
-            Direction::OnRight => Point::new(rect.right(), rect.center_y()),
-            Direction::OnTop => Point::new(rect.center_x(), rect.top()),
-            Direction::OnBottom => Point::new(rect.center_x(), rect.bottom()),
+            Direction::Left => Point::new(rect.left(), rect.center_y()),
+            Direction::Right => Point::new(rect.right(), rect.center_y()),
+            Direction::Top => Point::new(rect.center_x(), rect.top()),
+            Direction::Bottom => Point::new(rect.center_x(), rect.bottom()),
         }
     }
 }
@@ -101,7 +101,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                 Point::new(r1.center_x(), r1.top()),
                 Point::new(r2.center_x(), r2.bottom()),
                 OrthogonalDirection::VerticalUntilMiddle,
-                Some(Direction::OnBottom),
+                Some(Direction::Bottom),
             )
         }
         0b_00_10 => {
@@ -110,7 +110,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                 Point::new(r1.center_x(), r1.bottom()),
                 Point::new(r2.center_x(), r2.top()),
                 OrthogonalDirection::VerticalUntilMiddle,
-                Some(Direction::OnTop),
+                Some(Direction::Top),
             )
         }
         0b_01_00 => {
@@ -119,7 +119,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                 Point::new(r1.left(), r1.center_y()),
                 Point::new(r2.right(), r2.center_y()),
                 OrthogonalDirection::HorizontalUntilMiddle,
-                Some(Direction::OnRight),
+                Some(Direction::Right),
             )
         }
         0b_01_01 => {
@@ -130,7 +130,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                     Point::new(r1.left(), r1.center_y()),
                     Point::new(r2.right(), r2.center_y()),
                     OrthogonalDirection::HorizontalUntilMiddle,
-                    Some(Direction::OnRight),
+                    Some(Direction::Right),
                 )
             } else {
                 // more to the top
@@ -138,7 +138,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                     Point::new(r1.center_x(), r1.top()),
                     Point::new(r2.center_x(), r2.bottom()),
                     OrthogonalDirection::VerticalUntilMiddle,
-                    Some(Direction::OnBottom),
+                    Some(Direction::Bottom),
                 )
             }
         }
@@ -150,7 +150,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                     Point::new(r1.left(), r1.center_y()),
                     Point::new(r2.right(), r2.center_y()),
                     OrthogonalDirection::HorizontalUntilMiddle,
-                    Some(Direction::OnRight),
+                    Some(Direction::Right),
                 )
             } else {
                 // more to the bottom
@@ -158,7 +158,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                     Point::new(r1.center_x(), r1.bottom()),
                     Point::new(r2.center_x(), r2.top()),
                     OrthogonalDirection::VerticalUntilMiddle,
-                    Some(Direction::OnTop),
+                    Some(Direction::Top),
                 )
             }
         }
@@ -168,7 +168,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                 Point::new(r1.right(), r1.center_y()),
                 Point::new(r2.left(), r2.center_y()),
                 OrthogonalDirection::HorizontalUntilMiddle,
-                Some(Direction::OnLeft),
+                Some(Direction::Left),
             )
         }
         0b_10_01 => {
@@ -179,7 +179,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                     Point::new(r1.right(), r1.center_y()),
                     Point::new(r2.left(), r2.center_y()),
                     OrthogonalDirection::HorizontalUntilMiddle,
-                    Some(Direction::OnLeft),
+                    Some(Direction::Left),
                 )
             } else {
                 // more to the top
@@ -187,7 +187,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                     Point::new(r1.center_x(), r1.top()),
                     Point::new(r2.center_x(), r2.bottom()),
                     OrthogonalDirection::VerticalUntilMiddle,
-                    Some(Direction::OnBottom),
+                    Some(Direction::Bottom),
                 )
             }
         }
@@ -199,7 +199,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                     Point::new(r1.right(), r1.center_y()),
                     Point::new(r2.left(), r2.center_y()),
                     OrthogonalDirection::HorizontalUntilMiddle,
-                    Some(Direction::OnLeft),
+                    Some(Direction::Left),
                 )
             } else {
                 // more to the bottom
@@ -207,7 +207,7 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
                     Point::new(r1.center_x(), r1.bottom()),
                     Point::new(r2.center_x(), r2.top()),
                     OrthogonalDirection::VerticalUntilMiddle,
-                    Some(Direction::OnTop),
+                    Some(Direction::Top),
                 )
             }
         }
@@ -375,17 +375,13 @@ where
                         need_repaint = true;
                     }
                     count += 1;
-                } else {
-                    if !n.filtered {
-                        n.filtered = true;
-                        need_repaint = true;
-                    }
-                }
-            } else {
-                if !n.filtered {
+                } else if !n.filtered {
                     n.filtered = true;
                     need_repaint = true;
                 }
+            } else if !n.filtered {
+                n.filtered = true;
+                need_repaint = true;
             }
         }
         // check to see if the current node is filtered
@@ -474,10 +470,10 @@ where
         }
         if e.directed && self.rendering_options.show_arrow_heads {
             match entry_dir {
-                Some(Direction::OnLeft) => self.surface.write_char(p2.x - 1, p2.y, Character::with_char(SpecialChar::TriangleRight)),
-                Some(Direction::OnRight) => self.surface.write_char(p2.x + 1, p2.y, Character::with_char(SpecialChar::TriangleLeft)),
-                Some(Direction::OnTop) => self.surface.write_char(p2.x, p2.y - 1, Character::with_char(SpecialChar::TriangleDown)),
-                Some(Direction::OnBottom) => self.surface.write_char(p2.x, p2.y + 1, Character::with_char(SpecialChar::TriangleUp)),
+                Some(Direction::Left) => self.surface.write_char(p2.x - 1, p2.y, Character::with_char(SpecialChar::TriangleRight)),
+                Some(Direction::Right) => self.surface.write_char(p2.x + 1, p2.y, Character::with_char(SpecialChar::TriangleLeft)),
+                Some(Direction::Top) => self.surface.write_char(p2.x, p2.y - 1, Character::with_char(SpecialChar::TriangleDown)),
+                Some(Direction::Bottom) => self.surface.write_char(p2.x, p2.y + 1, Character::with_char(SpecialChar::TriangleUp)),
                 None => (),
             }
         }
@@ -588,12 +584,10 @@ where
                     let hover_node_id = self.hovered_node.unwrap_or(usize::MAX);
                     if hover_node_id == index {
                         state.hovered_node_attr(theme)
+                    } else if node.filtered {
+                        ControlState::Disabled.node_attr(theme)
                     } else {
-                        if node.filtered {
-                            ControlState::Disabled.node_attr(theme)
-                        } else {
-                            node.text_attr.unwrap_or(state.node_attr(theme))
-                        }
+                        node.text_attr.unwrap_or(state.node_attr(theme))
                     }
                 }
             }
@@ -681,30 +675,30 @@ where
                 continue;
             }
             let dp = match dir {
-                Direction::OnLeft => {
+                Direction::Left => {
                     if r.right() > n.rect.right() {
-                        Some(Direction::OnRight.compare_point(&n.rect))
+                        Some(Direction::Right.compare_point(&n.rect))
                     } else {
                         None
                     }
                 }
-                Direction::OnRight => {
+                Direction::Right => {
                     if r.left() < n.rect.left() {
-                        Some(Direction::OnLeft.compare_point(&n.rect))
+                        Some(Direction::Left.compare_point(&n.rect))
                     } else {
                         None
                     }
                 }
-                Direction::OnTop => {
+                Direction::Top => {
                     if r.bottom() > n.rect.bottom() {
-                        Some(Direction::OnBottom.compare_point(&n.rect))
+                        Some(Direction::Bottom.compare_point(&n.rect))
                     } else {
                         None
                     }
                 }
-                Direction::OnBottom => {
+                Direction::Bottom => {
                     if r.top() < n.rect.top() {
-                        Some(Direction::OnTop.compare_point(&n.rect))
+                        Some(Direction::Top.compare_point(&n.rect))
                     } else {
                         None
                     }
@@ -728,27 +722,27 @@ where
 
     pub(super) fn process_key_events(&mut self, key: Key, control: &ControlBase) -> bool {
         match key.value() {
-            key!("Left") => self.move_to_node_with_direction(Direction::OnLeft, control),
-            key!("Right") => self.move_to_node_with_direction(Direction::OnRight, control),
-            key!("Up") => self.move_to_node_with_direction(Direction::OnTop, control),
-            key!("Down") => self.move_to_node_with_direction(Direction::OnBottom, control),
+            key!("Left") => self.move_to_node_with_direction(Direction::Left, control),
+            key!("Right") => self.move_to_node_with_direction(Direction::Right, control),
+            key!("Up") => self.move_to_node_with_direction(Direction::Top, control),
+            key!("Down") => self.move_to_node_with_direction(Direction::Bottom, control),
             key!("Ctrl+Left") => self.move_node_with(self.current_node, -1, 0, control),
             key!("Ctrl+Right") => self.move_node_with(self.current_node, 1, 0, control),
             key!("Ctrl+Up") => self.move_node_with(self.current_node, 0, -1, control),
             key!("Ctrl+Down") => self.move_node_with(self.current_node, 0, 1, control),
             key!("Ctrl+Tab") => {
-                if self.nodes.len() > 0 {
+                if !self.nodes.is_empty() {
                     self.set_current_node((self.current_node + 1) % self.nodes.len(), control);
                 }
             }
             key!("Ctrl+Shift+Tab") => {
-                if self.nodes.len() > 0 {
+                if !self.nodes.is_empty() {
                     self.set_current_node((self.current_node + self.nodes.len() - 1) % self.nodes.len(), control);
                 }
             }
             _ => return false,
         }
-        return true; // key was processed
+        true// key was processed
     }
     pub(super) fn node_description(&mut self, id: usize) -> Option<&str> {
         if id >= self.nodes.len() {

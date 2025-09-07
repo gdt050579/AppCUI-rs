@@ -748,12 +748,10 @@ impl Surface {
                     } else {
                         cs.corner_bottom_right
                     }
+                } else if y1 < y2 {
+                    cs.corner_top_left
                 } else {
-                    if y1 < y2 {
-                        cs.corner_top_left
-                    } else {
-                        cs.corner_bottom_left
-                    }
+                    cs.corner_bottom_left
                 };
                 self.write_char(x2, y1, Character::with_char(ch));
             }
@@ -768,12 +766,10 @@ impl Surface {
                     } else {
                         (cs.corner_bottom_right, cs.corner_top_left)
                     }
+                } else if y1 < y2 {
+                    (cs.corner_top_left, cs.corner_bottom_right)
                 } else {
-                    if y1 < y2 {
-                        (cs.corner_top_left, cs.corner_bottom_right)
-                    } else {
-                        (cs.corner_bottom_left, cs.corner_top_right)
-                    }
+                    (cs.corner_bottom_left, cs.corner_top_right)
                 };
                 self.write_char(middle_x, y1, Character::with_char(ch1));
                 self.write_char(middle_x, y2, Character::with_char(ch2));
@@ -787,12 +783,10 @@ impl Surface {
                     } else {
                         cs.corner_bottom_right
                     }
+                } else if x1 < x2 {
+                    cs.corner_top_left
                 } else {
-                    if x1 < x2 {
-                        cs.corner_top_left
-                    } else {
-                        cs.corner_top_right
-                    }
+                    cs.corner_top_right
                 };
                 self.write_char(x1, y2, Character::with_char(ch));
             }
@@ -807,12 +801,10 @@ impl Surface {
                     } else {
                         (cs.corner_bottom_right, cs.corner_top_left)
                     }
+                } else if x1 < x2 {
+                    (cs.corner_top_left, cs.corner_bottom_right)
                 } else {
-                    if x1 < x2 {
-                        (cs.corner_top_left, cs.corner_bottom_right)
-                    } else {
-                        (cs.corner_top_right, cs.corner_bottom_left)
-                    }
+                    (cs.corner_top_right, cs.corner_bottom_left)
                 };
                 self.write_char(x1, middle_y, Character::with_char(ch1));
                 self.write_char(x2, middle_y, Character::with_char(ch2));

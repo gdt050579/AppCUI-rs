@@ -55,7 +55,7 @@ pub(in super::super) fn rearange<T: GraphNode>(graph: &mut Graph<T>) {
             node.rect.set_top(y - (node.rect.height() as i32 / 2), true);
         } else {
             // Multiple nodes - arrange them in a smaller circle or line
-            arrange_component_nodes(graph, component, i, num_components, center_x, center_y, main_radius, &max_node_size);
+            arrange_component_nodes(graph, component, i, num_components, Point::new(center_x, center_y), main_radius, &max_node_size);
         }
     }
 }
@@ -120,8 +120,7 @@ fn arrange_component_nodes<T: GraphNode>(
     component: &[usize],
     component_idx: usize,
     total_components: usize,
-    center_x: i32,
-    center_y: i32,
+    center: Point,
     main_radius: f64,
     max_node_size: &Size,
 ) {
@@ -134,8 +133,8 @@ fn arrange_component_nodes<T: GraphNode>(
         2.0 * std::f64::consts::PI * component_idx as f64 / total_components as f64
     };
     
-    let component_center_x = center_x + (main_radius * main_angle.cos()) as i32;
-    let component_center_y = center_y + (main_radius * main_angle.sin() / 2.0) as i32;  // Aspect ratio correction
+    let component_center_x = center.x + (main_radius * main_angle.cos()) as i32;
+    let component_center_y = center.y + (main_radius * main_angle.sin() / 2.0) as i32;  // Aspect ratio correction
 
     if component_size <= 3 {
         // For small components, arrange in a line perpendicular to the radius

@@ -34,7 +34,7 @@ pub struct GraphWindow {
     h_highlight_outgoing_edges: Handle<menu::CheckBox>,
 }
 
-impl GraphWindow {
+impl GraphWindow { 
     pub fn new(graph: graphview::Graph<String>, settings: Settings) -> Self {
         let mut win = Self {
             base: Window::new(&settings.title, layout!("a:c,w:75%,h:75%"), window::Flags::Sizeable),
