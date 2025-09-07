@@ -327,3 +327,7 @@ path = "graphs/main.rs"
 [[example]]
 name = "layout_tester"
 path = "layout_tester/main.rs"
+
+[[example]]
+name = "select_folder"
+path = "select_folder/main.rs"
