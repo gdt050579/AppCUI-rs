@@ -1,5 +1,4 @@
 use super::{Entry, EntryType, Root};
-use crate::prelude::*;
 use crate::utils::NavigatorEntry;
 use chrono::DateTime;
 use chrono::NaiveDateTime;
