@@ -6,11 +6,32 @@ use crate::settings::Settings;
                   ArrangeHierarchical, ArrangeHierarchicalPacked, ArrangeForceDirected,
                   ToggleArrowHeads, ToggleEdgeHighlightingIn, ToggleEdgeHighlightingOut,
                   SetEdgeLineSingle, SetEdgeLineDouble, SetEdgeLineThick, SetEdgeLineAscii,
-                  SetEdgeRoutingDirect, SetEdgeRoutingOrthogonal])]
+                  SetEdgeRoutingDirect, SetEdgeRoutingOrthogonal, SetEdgeLineBorder,
+                  SetEdgeLineAsciiRound, SetEdgeLineSingleRound, SetEdgeLineBraille])]
 pub struct GraphWindow {
     graph_view: Handle<GraphView<String>>,
     menu_graph: Handle<Menu>,
     settings: Settings,
+    h_arrange_none: Handle<menu::SingleChoice>, 
+    h_arrange_grid: Handle<menu::SingleChoice>,
+    h_arrange_grid_packed: Handle<menu::SingleChoice>,
+    h_arrange_circular: Handle<menu::SingleChoice>,
+    m_hierarchical: Handle<menu::SingleChoice>,
+    m_hierarchical_packed: Handle<menu::SingleChoice>,
+    m_force_directed: Handle<menu::SingleChoice>,
+    h_edge_routing_direct: Handle<menu::SingleChoice>,
+    h_edge_routing_orthogonal: Handle<menu::SingleChoice>,
+    h_edge_line_single: Handle<menu::SingleChoice>,
+    h_edge_line_double: Handle<menu::SingleChoice>,
+    h_edge_line_thick: Handle<menu::SingleChoice>,
+    h_edge_line_ascii: Handle<menu::SingleChoice>,
+    h_edge_line_border: Handle<menu::SingleChoice>,
+    h_edge_line_ascii_round: Handle<menu::SingleChoice>,
+    h_edge_line_single_round: Handle<menu::SingleChoice>,
+    h_edge_line_braille: Handle<menu::SingleChoice>,
+    h_arrow_heads: Handle<menu::CheckBox>,
+    h_highlight_incoming_edges: Handle<menu::CheckBox>,
+    h_highlight_outgoing_edges: Handle<menu::CheckBox>,
 }
 
 impl GraphWindow {
@@ -20,6 +41,26 @@ impl GraphWindow {
             graph_view: Handle::None,
             menu_graph: Handle::None,
             settings: settings.clone(),
+            h_arrange_none: Handle::None,
+            h_arrange_grid: Handle::None,
+            h_arrange_grid_packed: Handle::None,
+            h_arrange_circular: Handle::None,
+            m_hierarchical: Handle::None,
+            m_hierarchical_packed: Handle::None,
+            m_force_directed: Handle::None,
+            h_edge_routing_direct: Handle::None,
+            h_edge_routing_orthogonal: Handle::None,
+            h_edge_line_single: Handle::None,
+            h_edge_line_double: Handle::None,
+            h_edge_line_thick: Handle::None,
+            h_edge_line_ascii: Handle::None,
+            h_edge_line_border: Handle::None,
+            h_edge_line_ascii_round: Handle::None,
+            h_edge_line_single_round: Handle::None,
+            h_edge_line_braille: Handle::None,
+            h_arrow_heads: Handle::None,
+            h_highlight_incoming_edges: Handle::None,
+            h_highlight_outgoing_edges: Handle::None,
         };
         
         let mut gv = graphview!("d:f,flags:[ScrollBars,SearchBar]");
@@ -32,29 +73,39 @@ impl GraphWindow {
         win.graph_view = win.add(gv);
 
         // create a menu and register it
-        let m = menu!("&Graph,class:GraphWindow,items:[
-            {'&Arrangement',items:[
-                {'&None',cmd: ArrangeNone, select: false},
-                {'&Grid',cmd: ArrangeGrid, select: false},
-                {'Grid &Packed',cmd: ArrangeGridPacked, select: false},
-                {'&Circular',cmd: ArrangeCircular, select: false},
-            ]},
-            {---},
-            {'&Edge Line Type',items:[
-                {'&Single',cmd: SetEdgeLineSingle, select: false},
-                {'&Double',cmd: SetEdgeLineDouble, select: false},
-                {'&Thick',cmd: SetEdgeLineThick, select: false},
-                {'&ASCII',cmd: SetEdgeLineAscii, select: false},
-            ]},
-            {'&Edge Routing',items:[
-                {'&Direct',cmd: SetEdgeRoutingDirect, select: false},
-                {'&Orthogonal',cmd: SetEdgeRoutingOrthogonal, select: false},
-            ]},
-            {---},
-            {'Show &Arrow Heads',cmd: ToggleArrowHeads, check: false},
-            {'Highlight &Incoming Edges',cmd: ToggleEdgeHighlightingIn, check: false},
-            {'Highlight &Outgoing Edges',cmd: ToggleEdgeHighlightingOut, check: false},
-        ]");
+        let mut m = Menu::new("&Graph");
+        let mut a = Menu::new("&Arrangement");
+        win.h_arrange_none = a.add(menu::SingleChoice::new("&None", Key::None, graphwindow::Commands::ArrangeNone, false));
+        win.h_arrange_grid = a.add(menu::SingleChoice::new("&Grid", Key::None, graphwindow::Commands::ArrangeGrid, false));
+        win.h_arrange_grid_packed = a.add(menu::SingleChoice::new("Grid &Packed", Key::None, graphwindow::Commands::ArrangeGridPacked, false));
+        win.h_arrange_circular = a.add(menu::SingleChoice::new("&Circular", Key::None, graphwindow::Commands::ArrangeCircular, false));
+        win.m_hierarchical = a.add(menu::SingleChoice::new("&Hierarchical", Key::None, graphwindow::Commands::ArrangeHierarchical, false));
+        win.m_hierarchical_packed = a.add(menu::SingleChoice::new("Hierarchical P&acked", Key::None, graphwindow::Commands::ArrangeHierarchicalPacked, false));
+        win.m_force_directed = a.add(menu::SingleChoice::new("&Force Directed", Key::None, graphwindow::Commands::ArrangeForceDirected, false));
+        m.add(menu::SubMenu::new(a));
+
+        let mut er = Menu::new("&Edge routing");
+        win.h_edge_routing_direct = er.add(menu::SingleChoice::new("&Direct", Key::None, graphwindow::Commands::SetEdgeRoutingDirect, false));
+        win.h_edge_routing_orthogonal = er.add(menu::SingleChoice::new("&Orthogonal", Key::None, graphwindow::Commands::SetEdgeRoutingOrthogonal, false));
+        m.add(menu::SubMenu::new(er));
+        
+        let mut et = Menu::new("Edge &line type");
+        win.h_edge_line_single = et.add(menu::SingleChoice::new("&Single", Key::None, graphwindow::Commands::SetEdgeLineSingle, false));
+        win.h_edge_line_double = et.add(menu::SingleChoice::new("&Double", Key::None, graphwindow::Commands::SetEdgeLineDouble, false));
+        win.h_edge_line_thick = et.add(menu::SingleChoice::new("&Thick", Key::None, graphwindow::Commands::SetEdgeLineThick, false));
+        win.h_edge_line_ascii = et.add(menu::SingleChoice::new("&ASCII", Key::None, graphwindow::Commands::SetEdgeLineAscii, false));
+        win.h_edge_line_border = et.add(menu::SingleChoice::new("&Border", Key::None, graphwindow::Commands::SetEdgeLineBorder, false));
+        win.h_edge_line_ascii_round = et.add(menu::SingleChoice::new("&ASCII Round", Key::None, graphwindow::Commands::SetEdgeLineAsciiRound, false));
+        win.h_edge_line_single_round = et.add(menu::SingleChoice::new("&Single Round", Key::None, graphwindow::Commands::SetEdgeLineSingleRound, false));
+        win.h_edge_line_braille = et.add(menu::SingleChoice::new("&Braille", Key::None, graphwindow::Commands::SetEdgeLineBraille, false));
+        m.add(menu::SubMenu::new(et));
+
+        m.add(menu::Separator::new());
+
+        win.h_arrow_heads = m.add(menu::CheckBox::new("Show &Arrow Heads", Key::None, graphwindow::Commands::ToggleArrowHeads, false));
+        win.h_highlight_incoming_edges = m.add(menu::CheckBox::new("Highlight &Incoming Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingIn, false));
+        win.h_highlight_outgoing_edges = m.add(menu::CheckBox::new("Highlight &Outgoing Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingOut, false));
+
         win.menu_graph = win.register_menu(m);
         
         win
@@ -120,6 +171,18 @@ impl MenuEvents for GraphWindow {
             graphwindow::Commands::SetEdgeRoutingOrthogonal => {
                 self.settings.edge_routing = graphview::EdgeRouting::Orthogonal;
             },
+            graphwindow::Commands::SetEdgeLineBorder => {
+                self.settings.edge_line_type = LineType::Border;
+            },
+            graphwindow::Commands::SetEdgeLineAsciiRound => {
+                self.settings.edge_line_type = LineType::AsciiRound;
+            },
+            graphwindow::Commands::SetEdgeLineSingleRound => {
+                self.settings.edge_line_type = LineType::SingleRound;
+            },
+            graphwindow::Commands::SetEdgeLineBraille => {
+                self.settings.edge_line_type = LineType::Braille;
+            },
             _ => {}
         }
         self.update_graph_view();
@@ -143,5 +206,55 @@ impl MenuEvents for GraphWindow {
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
         menubar.add(self.menu_graph, 1);
+    }
+
+    fn on_menu_open(&self,menu: &mut Menu) {
+        // update the status of menu items based on the settings.
+        let h = match self.settings.arrange_method {
+            graphview::ArrangeMethod::None => self.h_arrange_none,
+            graphview::ArrangeMethod::Grid => self.h_arrange_grid,
+            graphview::ArrangeMethod::GridPacked => self.h_arrange_grid_packed,
+            graphview::ArrangeMethod::Circular => self.h_arrange_circular,
+            graphview::ArrangeMethod::Hierarchical => self.m_hierarchical,
+            graphview::ArrangeMethod::HierarchicalPacked => self.m_hierarchical_packed,
+            graphview::ArrangeMethod::ForceDirected => self.m_force_directed,
+        };
+        if let Some(item) = menu.get_mut(h) {
+            item.set_selected();
+        }
+        // update the status of edge routing menu items based on the settings.
+        let h = match self.settings.edge_routing {
+            graphview::EdgeRouting::Direct => self.h_edge_routing_direct,
+            graphview::EdgeRouting::Orthogonal => self.h_edge_routing_orthogonal,
+        };
+        if let Some(item) = menu.get_mut(h) {
+            item.set_selected();
+        }
+        // update the status of edge line type menu items based on the settings.
+        let h = match self.settings.edge_line_type {
+            LineType::Single => self.h_edge_line_single,
+            LineType::Double => self.h_edge_line_double,
+            LineType::SingleThick => self.h_edge_line_thick,
+            LineType::Ascii => self.h_edge_line_ascii,
+            LineType::Border => self.h_edge_line_border,
+            LineType::AsciiRound => self.h_edge_line_ascii_round,
+            LineType::SingleRound => self.h_edge_line_single_round,
+            LineType::Braille => self.h_edge_line_braille,            
+        };
+        if let Some(item) = menu.get_mut(h) {
+            item.set_selected();
+        }
+        // update the status of arrow heads menu item based on the settings.
+        if let Some(item) = menu.get_mut(self.h_arrow_heads) {
+            item.set_checked(self.settings.show_arrow_heads);
+        }
+        // update the status of incoming edges menu item based on the settings.
+        if let Some(item) = menu.get_mut(self.h_highlight_incoming_edges) {
+            item.set_checked(self.settings.highlight_incoming_edges);
+        }
+        // update the status of outgoing edges menu item based on the settings.
+        if let Some(item) = menu.get_mut(self.h_highlight_outgoing_edges) {
+            item.set_checked(self.settings.highlight_outgoing_edges);
+        }
     }
 }
