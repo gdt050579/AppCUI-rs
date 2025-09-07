@@ -37,7 +37,7 @@ pub struct GraphWindow {
 impl GraphWindow {
     pub fn new(graph: graphview::Graph<String>, settings: Settings) -> Self {
         let mut win = Self {
-            base: Window::new(&settings.title, layout!("x:5,y:5,w:80,h:30"), window::Flags::Sizeable),
+            base: Window::new(&settings.title, layout!("a:c,w:75%,h:75%"), window::Flags::Sizeable),
             graph_view: Handle::None,
             menu_graph: Handle::None,
             settings: settings.clone(),
@@ -110,7 +110,7 @@ impl GraphWindow {
         
         win
     }
-    fn update_graph_view(&mut self) {
+    fn update_graph_view(&mut self, rearange: bool) {
         let h = self.graph_view;
         let arrange_method = self.settings.arrange_method;
         let show_arrow_heads = self.settings.show_arrow_heads;
@@ -119,7 +119,9 @@ impl GraphWindow {
         let edge_line_type = self.settings.edge_line_type;
         let edge_routing = self.settings.edge_routing;
         if let Some(gv) = self.control_mut(h) {
-            gv.arrange_nodes(arrange_method);
+            if rearange {
+                gv.arrange_nodes(arrange_method);
+            }
             gv.enable_arrow_heads(show_arrow_heads);
             gv.enable_edge_highlighting(highlight_incoming_edges, highlight_outgoing_edges);
             gv.set_edge_line_type(edge_line_type);
@@ -131,27 +133,35 @@ impl GraphWindow {
 
 impl MenuEvents for GraphWindow {
     fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<menu::SingleChoice>, command: graphwindow::Commands) {
+        let mut rearange = false;
         match command {
             graphwindow::Commands::ArrangeNone => {
                 self.settings.arrange_method = graphview::ArrangeMethod::None;
+                rearange = true;
             },
             graphwindow::Commands::ArrangeGrid => {
                 self.settings.arrange_method = graphview::ArrangeMethod::Grid;
+                rearange = true;
             },
             graphwindow::Commands::ArrangeGridPacked => {
                 self.settings.arrange_method = graphview::ArrangeMethod::GridPacked;
+                rearange = true;
             },
             graphwindow::Commands::ArrangeCircular => {
                 self.settings.arrange_method = graphview::ArrangeMethod::Circular;
+                rearange = true;
             },
             graphwindow::Commands::ArrangeHierarchical => {
                 self.settings.arrange_method = graphview::ArrangeMethod::Hierarchical;
+                rearange = true;
             },
             graphwindow::Commands::ArrangeHierarchicalPacked => {
                 self.settings.arrange_method = graphview::ArrangeMethod::HierarchicalPacked;
+                rearange = true;
             },
             graphwindow::Commands::ArrangeForceDirected => {
                 self.settings.arrange_method = graphview::ArrangeMethod::ForceDirected;
+                rearange = true;
             },
             graphwindow::Commands::SetEdgeLineSingle => {
                 self.settings.edge_line_type = LineType::Single;
@@ -185,7 +195,7 @@ impl MenuEvents for GraphWindow {
             },
             _ => {}
         }
-        self.update_graph_view();
+        self.update_graph_view(rearange);
         
     }
     fn on_check(&mut self, _menu: Handle<Menu>, _: Handle<menu::CheckBox>, command: graphwindow::Commands, checked: bool) {
@@ -201,7 +211,7 @@ impl MenuEvents for GraphWindow {
             },
             _ => {}
         }
-        self.update_graph_view();
+        self.update_graph_view(false);
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
