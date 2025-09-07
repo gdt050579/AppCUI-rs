@@ -112,7 +112,7 @@ where
         let entries = self.nav.entries(path);
         let mut result = None;
         let flags = self.flags;
-        //log!("INFO", "Populate Node: Path={:?}, search='{}', entries='{:?}'", path, search, entries);
+        log!("SELECT-FOLDER", "Populate Node: Path={:?}, search='{}', entries='{:?}'", path, search, entries);
 
         if let Some(tv) = self.control_mut(h) {
             tv.add_batch(|tv| {
@@ -135,7 +135,7 @@ where
         result
     }
     fn populate_root(&mut self, search: &str) -> Option<Handle<treeview::Item<FolderName>>> {
-        //log!("INFO", "Populate root with search: '{}'", search);
+        log!("SELECT-FOLDER", "Populate root with search: '{}'", search);
         let h = self.tv;
         let roots = self.nav.roots();
         let set_icon = self.flags.contains(SelectFolderDialogFlags::Icons);
@@ -172,7 +172,7 @@ where
         if let Some(tv) = self.control_mut(h) {
             tv.clear()
         }
-        //log!("INFO", "Populate from path: {:?}", current_path);
+        log!("SELECT-FOLDER", "Populate from path: {:?}", current_path);
 
         let total_components = current_path.components().count();
         for (index, component) in current_path.components().enumerate() {
@@ -261,6 +261,7 @@ where
     T: Navigator<Entry, Root, PathBuf> + 'static,
 {
     fn on_activate(&mut self) {
+        log!("SELECT-FOLDER","Initialing the TreeView");
         self.populate_from_path();
     }
     fn on_accept(&mut self) {
