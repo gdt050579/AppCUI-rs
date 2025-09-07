@@ -1,3 +1,14 @@
+//! A graph view control for displaying and interacting with node-edge graphs.
+//!
+//! The GraphView control provides a way to display and interact with graphs, which are collections of nodes and edges.
+//! It supports various layout algorithms, edge routing, and interactive features.
+//! 
+//! The GraphView control is designed to be used with the GraphNode trait, which provides the necessary methods
+//! for displaying and interacting with nodes and edges.
+//! 
+//! The GraphView control is also designed to be used with the GraphBuilder trait, which provides the necessary methods
+//! for building graphs.
+
 mod graphview;
 mod graphnode;
 mod initialization_flags;

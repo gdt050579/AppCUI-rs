@@ -35,6 +35,25 @@ impl<T> GraphView<T>
 where
     T: GraphNode,
 {
+    /// Creates a new GraphView control with the specified layout and flags.
+    /// 
+    /// # Parameters
+    /// - `layout`: The layout configuration for positioning and sizing the GraphView
+    /// - `flags`: Combination of initialization flags that control the GraphView behavior:
+    ///   - `Flags::ScrollBars`: Enables scroll bars for navigating large graphs
+    ///   - `Flags::SearchBar`: Enables a search bar for finding nodes
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"),
+    ///     graphview::Flags::ScrollBars | graphview::Flags::SearchBar
+    /// );
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self {
             base: ControlBase::with_status_flags(
@@ -58,48 +77,231 @@ where
     }
 
     /// Sets the background of the GraphView to the specified character.
+    /// 
+    /// This method allows you to customize the background appearance of the GraphView.
+    /// The background character will be used to fill the entire control area before
+    /// drawing the graph nodes and edges.
+    /// 
+    /// # Parameters
+    /// - `backgroud_char`: The character to use as background, including its color and formatting
+    /// 
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// let mut GraphView = GraphView::new(Size::new(100, 100), layout!("x:1,y:1,w:30,h:10"), GraphView::Flags::ScrollBars);
-    /// GraphView.set_background(Character::new('*', Color::White, Color::Black, CharFlags::None));
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:30,h:10"), 
+    ///     graphview::Flags::ScrollBars
+    /// );
+    /// graph_view.set_background(Character::new('·', Color::Gray, Color::Black, CharFlags::None));
     /// ```
     pub fn set_background(&mut self, backgroud_char: Character) {
         self.background = Some(backgroud_char);
     }
 
-    /// Clears the background character of the GraphView. It esentially resets it to transparent foreground and backgroud colors
+    /// Clears the background character of the GraphView.
+    /// 
+    /// This method removes any previously set background character and resets the GraphView
+    /// to use transparent foreground and background colors, allowing the default theme
+    /// background to show through.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:30,h:10"), 
+    ///     graphview::Flags::None
+    /// );
+    /// graph_view.set_background(Character::new('*', Color::White, Color::Black, CharFlags::None));
+    /// graph_view.clear_background(); // Removes the background character
+    /// ```
     pub fn clear_background(&mut self) {
         self.background = None;
     }
 
+    /// Sets the graph data to be displayed in the GraphView.
+    /// 
+    /// This method replaces the current graph with a new one, updates the rendering options,
+    /// and automatically arranges the nodes using the current arrangement method.
+    /// 
+    /// # Parameters
+    /// - `graph`: The graph containing nodes and edges to be displayed
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     graphview::Flags::ScrollBars
+    /// );
+    /// 
+    /// let nodes = &["A", "B", "C", "D", "E"];
+    /// let edges = &[(0, 1), (0, 2), (1, 3), (2, 4)];
+    /// let graph = graphview::Graph::with_slices(nodes, edges, true);
+    /// graph_view.set_graph(graph);
+    /// ```
     pub fn set_graph(&mut self, graph: Graph<T>) {
         self.graph = graph;
         self.graph.update_rendering_options(&self.rendering_options, &self.base);
         self.arrange_nodes(self.arrange_method);
     }
 
+    /// Sets the edge routing method for drawing connections between nodes.
+    /// 
+    /// This method determines how edges are drawn between nodes in the graph.
+    /// 
+    /// # Parameters
+    /// - `routing`: The routing method to use:
+    ///   - `EdgeRouting::Direct`: Draw edges as straight lines between nodes
+    ///   - `EdgeRouting::Orthogonal`: Draw edges as orthogonal (right-angled) lines
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     graphview::Flags::ScrollBars
+    /// );
+    /// graph_view.set_edge_routing(graphview::EdgeRouting::Orthogonal);
+    /// ```
     pub fn set_edge_routing(&mut self, routing: EdgeRouting) {
         self.rendering_options.edge_routing = routing;
         self.graph.update_rendering_options(&self.rendering_options, &self.base);
     }
 
+    /// Sets the line type used for drawing edges between nodes.
+    /// 
+    /// This method controls the visual style of the lines used to draw edges.
+    /// Different line types provide different visual appearances.
+    /// 
+    /// # Parameters
+    /// - `line_type`: The line style to use:
+    ///   - `LineType::Single`: Single lines with Unicode box-drawing characters
+    ///   - `LineType::Double`: Double lines with Unicode box-drawing characters
+    ///   - `LineType::SingleThick`: Thick single lines
+    ///   - `LineType::Border`: Border-style thick lines
+    ///   - `LineType::Ascii`: ASCII characters ('+', '-', '|')
+    ///   - `LineType::AsciiRound`: ASCII with rounded corners
+    ///   - `LineType::SingleRound`: Unicode single lines with rounded corners
+    ///   - `LineType::Braille`: Double lines using Braille characters
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     graphview::Flags::ScrollBars
+    /// );
+    /// graph_view.set_edge_line_type(LineType::Double);
+    /// ```
     pub fn set_edge_line_type(&mut self, line_type: LineType) {
         self.rendering_options.edge_line_type = line_type;
         self.graph.update_rendering_options(&self.rendering_options, &self.base);
     }
 
+    /// Enables or disables edge highlighting for the currently selected node.
+    /// 
+    /// When edge highlighting is enabled, edges connected to the currently selected
+    /// node will be visually highlighted to make the connections more apparent.
+    /// 
+    /// # Parameters
+    /// - `incoming`: Whether to highlight edges pointing to the current node
+    /// - `outgoing`: Whether to highlight edges originating from the current node
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     graphview::Flags::ScrollBars
+    /// );
+    /// // Highlight both incoming and outgoing edges
+    /// graph_view.enable_edge_highlighting(true, true);
+    /// 
+    /// // Only highlight outgoing edges
+    /// graph_view.enable_edge_highlighting(false, true);
+    /// ```
     pub fn enable_edge_highlighting(&mut self, incoming: bool, outgoing: bool) {
         self.rendering_options.highlight_edges_in = incoming;
         self.rendering_options.highlight_edges_out = outgoing;
         self.graph.update_rendering_options(&self.rendering_options, &self.base);
     }
 
+    /// Enables or disables arrow heads on directed edges.
+    /// 
+    /// When enabled, directed edges will display arrow heads to indicate
+    /// the direction of the connection between nodes.
+    /// 
+    /// # Parameters
+    /// - `enabled`: Whether to show arrow heads on directed edges
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     graphview::Flags::ScrollBars
+    /// );
+    /// graph_view.enable_arrow_heads(true);
+    /// ```
     pub fn enable_arrow_heads(&mut self, enabled: bool) {
         self.rendering_options.show_arrow_heads = enabled;
         self.graph.update_rendering_options(&self.rendering_options, &self.base);
     }
 
+    /// Arranges the nodes in the graph using the specified layout algorithm.
+    /// 
+    /// This method automatically positions all nodes in the graph according to
+    /// the chosen arrangement algorithm. The graph will be resized and repainted
+    /// after the arrangement is complete.
+    /// 
+    /// # Parameters
+    /// - `method`: The arrangement algorithm to use:
+    ///   - `ArrangeMethod::None`: No automatic arrangement (manual positioning)
+    ///   - `ArrangeMethod::Grid`: Arrange nodes in a regular grid with spacing
+    ///   - `ArrangeMethod::GridPacked`: Arrange nodes in a compact grid
+    ///   - `ArrangeMethod::Circular`: Arrange nodes in a circular pattern
+    ///   - `ArrangeMethod::Hierarchical`: Arrange nodes in hierarchical layers with spacing
+    ///   - `ArrangeMethod::HierarchicalPacked`: Arrange nodes in compact hierarchical layers
+    ///   - `ArrangeMethod::ForceDirected`: Use force-directed algorithm for natural positioning
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     graphview::Flags::ScrollBars
+    /// );
+    /// 
+    /// // Arrange nodes in a hierarchical layout
+    /// graph_view.arrange_nodes(graphview::ArrangeMethod::Hierarchical);
+    /// 
+    /// // Use force-directed layout for organic appearance
+    /// graph_view.arrange_nodes(graphview::ArrangeMethod::ForceDirected);
+    /// ```
     pub fn arrange_nodes(&mut self, method: ArrangeMethod) {
         match method {
             ArrangeMethod::None => { /* do nothing */ }
@@ -115,6 +317,30 @@ where
         self.graph.repaint(&self.base);
     }
 
+    /// Returns an immutable reference to the underlying graph data.
+    /// 
+    /// This method provides read-only access to the graph structure,
+    /// allowing you to query nodes, edges, and other graph properties.
+    /// 
+    /// # Returns
+    /// A reference to the `Graph<T>` containing all nodes and edges
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    /// 
+    /// let graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     graphview::Flags::ScrollBars
+    /// );
+    /// 
+    /// let graph = graph_view.graph();
+    /// if let Some(node) = graph.current_node() {
+    ///     // do something with the current node
+    /// }
+    /// ```
     pub fn graph(&self) -> &Graph<T> {
         &self.graph
     }
