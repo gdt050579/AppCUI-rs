@@ -40,7 +40,7 @@
 //! platform-specific features when available.
 
 mod debug;
-#[cfg(target_os = "linux")]
+#[cfg(target_family = "unix")]
 mod ncurses;
 mod system_event_thread;
 #[cfg(target_family = "unix")]
@@ -73,7 +73,7 @@ pub(super) use self::system_event_thread::SystemEventReader;
 
 use self::debug::DebugTerminal;
 
-#[cfg(target_os = "linux")]
+#[cfg(target_family = "unix")]
 use self::ncurses::NcursesTerminal;
 #[cfg(target_family = "unix")]
 use self::termios::TermiosTerminal;
@@ -109,7 +109,7 @@ pub enum Type {
     WindowsVT,
     #[cfg(target_family = "unix")]
     Termios,
-    #[cfg(target_os = "linux")]
+    #[cfg(target_family = "unix")]
     NcursesTerminal,
     #[cfg(target_arch = "wasm32")]
     WebTerminal,
@@ -157,7 +157,7 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
         #[cfg(target_family = "unix")]
         Type::Termios => TermiosTerminal::new(builder, sender),
 
-        #[cfg(target_os = "linux")]
+        #[cfg(target_family = "unix")]
         Type::NcursesTerminal => {
             let term = NcursesTerminal::new(builder, sender)?;
             Ok(Box::new(term))
