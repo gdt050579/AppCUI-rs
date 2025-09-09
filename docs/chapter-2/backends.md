@@ -48,7 +48,7 @@ pub enum Type {
 | ------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
 | Windows | Yes             | Yes        | -       | -       | -            | Yes       |
 | Linux   | -               | -          | Yes     | Yes     | -            | Yes       |
-| Mac/OSX | -               | -          | -       | Yes     | -            | Yes       |
+| Mac/OSX | -               | -          | Yes     | Yes     | -            | Yes       |
 | Web     | -               | -          | -       | -       | Yes          | -         |
 
 
@@ -63,15 +63,15 @@ Each backend comes with different support related to what can be displayed on th
 * **Cursor** - support for cursor
 * **Cursor Blinking** - support for cursor blinking
 
-| Display          | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
-| ---------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
-| 16 colors        | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
-| True colors      | -               | Yes        | -       | Yes     | Yes          | Yes       |
-| ASCII            | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
-| WTF-16           | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
-| UTF-8            | -               | Yes        | -       | Yes     | Yes          | Yes       |
-| Cursor           | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
-| Cursor Blinking  | Yes             | Yes        | -       | -       | -            | Yes       |
+| Display         | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
+| --------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
+| 16 colors       | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| True colors     | -               | Yes        | -       | Yes     | Yes          | Yes       |
+| ASCII           | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| WTF-16          | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| UTF-8           | -               | Yes        | -       | Yes     | Yes          | Yes       |
+| Cursor          | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
+| Cursor Blinking | Yes             | Yes        | -       | -       | -            | Yes       |
 
 **Remarks**:
 1. **True colors** support requires the feature `TRUE_COLORS` to be enabled (keep in mind that by doing this you also increase the size of your Color and Character structures - if you don't need this or your terminal does not support true colors, you will only allocate aditional space that will not be used).
@@ -182,8 +182,8 @@ AppCUI provides clipboard support for copying and pasting text. The clipboard fu
 
 By default, when using initializing an `App` objct via `App::new()`, the folowing backend will be used :
 
-| OS      | Default backend |
-| ------- | --------------- |
-| Windows | Windows Console |
-| Linux   | NCurses         |
-| Mac/OSX | Termios         |
+| OS      | Default backend | Other available backends |
+| ------- | --------------- | ------------------------ |
+| Windows | Windows Console | Windows VT, CrossTerm    |
+| Linux   | NCurses         | CrissTerm                |
+| Mac/OSX | Termios         | NCurses, CrossTerm       |
