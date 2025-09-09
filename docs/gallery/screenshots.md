@@ -39,3 +39,12 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 
 * **Code:** [examples/listview](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/listview)
 * **Elements:** [List View](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/listview.html), [List item](https://gdt050579.github.io/AppCUI-rs/chapter-3/object-traits/listitem.html), [Menus](https://gdt050579.github.io/AppCUI-rs/chapter-4/menu.html)
+
+<details>
+  <summary>More Anmations</summary>
+
+| Image        | Descrption |
+| ------------ | ---------- |
+| <img src="img/lists/graphview.gif" >   | **Spiral Animation** <br> * **Code:** [examples/graphs](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/graphs) <br> * **Description:** Various animation with graphs/trees where you can move nodes, display orthogonal lines, search and filter data, etc            |
+
+</details>
