@@ -43,8 +43,10 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 <details>
   <summary>More Anmations</summary>
 
-| Image        | Descrption |
-| ------------ | ---------- |
-| <img src="img/lists/graphview.gif" >   | **Spiral Animation** <br> * **Code:** [examples/graphs](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/graphs) <br> * **Description:** Various animation with graphs/trees where you can move nodes, display orthogonal lines, search and filter data, etc            |
+| Image                                | Descrption                                                                                                                                                                                                                                                        |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="img/lists/graphview.gif" > | **Graph Viewer** <br> * **Code:** [examples/graphs](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/graphs) <br> * **Description:** Various animation with graphs/trees where you can move nodes, display orthogonal lines, search and filter data, etc |
+| <img src="img/lists/treeview.gif" >  | **Tree Viewer** <br> * **Code:** [examples/treeview](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/treeview) <br> * **Description:** A simple tree view wth 3 columns where you can navigate, select, sort, filter, fold and unfold items.            |
+
 
 </details>
