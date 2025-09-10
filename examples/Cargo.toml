@@ -331,3 +331,7 @@ path = "layout_tester/main.rs"
 [[example]]
 name = "select_folder"
 path = "select_folder/main.rs"
+
+[[example]]
+name = "basic_controls"
+path = "basic_controls/main.rs"
