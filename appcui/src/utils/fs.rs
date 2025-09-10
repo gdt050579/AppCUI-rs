@@ -1,4 +1,5 @@
 mod entry;
+#[cfg(test)]
 mod nav_simulator;
 mod navigator;
 mod root;

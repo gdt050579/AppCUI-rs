@@ -5,7 +5,7 @@ struct Student {
     grade: u32
 }
 impl listview::ListItem for Student {
-    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+    fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
         match column_index {
             0 => Some(listview::RenderMethod::Text(self.name)),
             1 => Some(listview::RenderMethod::UInt64(self.grade as u64, listview::NumericFormat::Normal)),

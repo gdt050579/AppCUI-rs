@@ -78,7 +78,7 @@ impl TraitsConfig {
         }
         self.list[idx]
     }
-    pub(crate) fn iter(&self) -> TraitConfigIterator {
+    pub(crate) fn iter(&'_ self) -> TraitConfigIterator<'_> {
         TraitConfigIterator { config: self, index: 0 }
     }
     #[inline(always)]

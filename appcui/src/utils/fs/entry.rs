@@ -26,6 +26,7 @@ impl Entry {
             entry_type,
         }
     }
+    #[cfg(test)]
     pub(super) fn from_csv_line(line: &str, path: &str) -> Option<Self> {
         // format is type,name,size,created
         let mut parts = line.split(',');
@@ -76,7 +77,7 @@ impl NavigatorEntry for Entry {
 
 impl listview::ListItem for Entry {
     
-    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+    fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
         match column_index {
             0 => Some(listview::RenderMethod::Text(&self.name)),
             1 => {

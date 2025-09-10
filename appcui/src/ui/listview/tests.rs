@@ -4,7 +4,7 @@ use listview::Group;
 
 struct TestItem {}
 impl listview::ListItem for TestItem {
-    fn render_method(&self, _column_index: u16) -> Option<listview::RenderMethod> {
+    fn render_method(&'_ self, _column_index: u16) -> Option<listview::RenderMethod<'_>> {
         Some(listview::RenderMethod::Text("abc"))
     }
     fn compare(&self, _other: &Self, _column_index: u16) -> std::cmp::Ordering {
@@ -134,7 +134,7 @@ impl Person {
     }
 }
 impl listview::ListItem for Person {
-    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+    fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
         match column_index {
             0 => Some(listview::RenderMethod::Text(self.name)),
             1 => Some(listview::RenderMethod::Text(self.age)),
@@ -294,7 +294,7 @@ impl ColorInfo {
     }
 }
 impl listview::ListItem for ColorInfo {
-    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+    fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
         match column_index {
             0 => Some(listview::RenderMethod::Ascii(self.name)),
             1 => Some(listview::RenderMethod::UInt64(self.value as u64, listview::NumericFormat::Hex32)),
@@ -2348,7 +2348,7 @@ fn check_datetime_normal() {
         born: NaiveDateTime,
     }
     impl listview::ListItem for Student {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Text(self.name)),
                 1 => Some(listview::RenderMethod::DateTime(self.born, listview::DateTimeFormat::Normal)),
@@ -2416,7 +2416,7 @@ fn check_datetime_short() {
         born: NaiveDateTime,
     }
     impl listview::ListItem for Student {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Text(self.name)),
                 1 => Some(listview::RenderMethod::DateTime(self.born, listview::DateTimeFormat::Short)),
@@ -2484,7 +2484,7 @@ fn check_datetime_full() {
         born: NaiveDateTime,
     }
     impl listview::ListItem for Student {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Text(self.name)),
                 1 => Some(listview::RenderMethod::DateTime(self.born, listview::DateTimeFormat::Full)),
@@ -3067,7 +3067,7 @@ fn check_custom_filter() {
         grade: i32,
     }
     impl listview::ListItem for Student {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Text(self.name)),
                 1 => Some(listview::RenderMethod::Int64(self.grade as i64, listview::NumericFormat::Normal)),
@@ -3129,7 +3129,7 @@ fn check_numeric_formater_renderer() {
         debt: i64,
     }
     impl listview::ListItem for Employee {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::UInt64(self.salary, listview::NumericFormat::Separator)),
@@ -3294,7 +3294,7 @@ fn check_bool_formater_renderer() {
         v4: bool,
     }
     impl listview::ListItem for Employee {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Bool(self.v1, listview::BoolFormat::YesNo)),
@@ -3471,7 +3471,7 @@ fn check_size_formater_renderer_simple() {
         size: u64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::Bytes)),
@@ -3525,7 +3525,7 @@ fn check_size_formater_renderer_with_decimals() {
         size: u64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::Bytes)),
@@ -3582,7 +3582,7 @@ fn check_size_formater_renderer_with_auto() {
         size: u64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Size(self.size, listview::SizeFormat::Bytes)),
@@ -3638,7 +3638,7 @@ fn check_time_formater_renderer() {
         tm: NaiveTime,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Time(self.tm, listview::TimeFormat::Short)),
@@ -3704,7 +3704,7 @@ fn check_date_formater_renderer() {
         dt: NaiveDate,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Date(self.dt, listview::DateFormat::Full)),
@@ -3770,7 +3770,7 @@ fn check_percentage_formater_renderer() {
         proc: f64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Percentage(self.proc, listview::PercentageFormat::Normal)),
@@ -3816,7 +3816,7 @@ fn check_float_formater_renderer() {
         value: f64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Float(self.value, listview::FloatFormat::Normal)),
@@ -3933,7 +3933,7 @@ fn check_status_formater_renderer() {
         status: listview::Status,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Status(self.status, listview::StatusFormat::Hashtag)),
@@ -4015,7 +4015,7 @@ fn check_temperature_formater_renderer() {
         temperature: f64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Temperature(
@@ -4206,7 +4206,7 @@ fn check_area_formater_renderer_simple() {
         size: u64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Area(self.size, listview::AreaFormat::SquaredKilometers)),
@@ -4261,7 +4261,7 @@ fn check_distance_formater_renderer_simple() {
         dist: u64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Distance(self.dist, listview::DistanceFormat::Centimeters)),
@@ -4315,7 +4315,7 @@ fn check_volume_formater_renderer_simple() {
         vol: u64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Volume(self.vol, listview::VolumeFormat::CubicCentimeters)),
@@ -4368,7 +4368,7 @@ fn check_weight_formater_renderer_simple() {
         w: u64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Weight(self.w, listview::WeightFormat::Kilograms)),
@@ -4418,7 +4418,7 @@ fn check_speed_formater_renderer_simple() {
         speed: u64,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Speed(self.speed, listview::SpeedFormat::KilometersPerHour)),
@@ -4471,7 +4471,7 @@ fn check_rating_formater_renderer_simple() {
         scor: u32,
     }
     impl listview::ListItem for FileInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Rating(self.r, listview::RatingFormat::Stars(5))),
@@ -4528,7 +4528,7 @@ fn check_duration_formater_renderer() {
         d: Duration,
     }
     impl listview::ListItem for ItemInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Duration(self.d, listview::DurationFormat::Auto)),
@@ -4638,7 +4638,7 @@ fn check_currency_formater_renderer() {
         sum: f64,
     }
     impl listview::ListItem for ItemInfo {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Ascii(self.name)),
                 1 => Some(listview::RenderMethod::Currency(self.sum, listview::CurrencyFormat::USDSymbol)),
@@ -4891,7 +4891,7 @@ fn check_dynamically_change_view() {
         description: &'static str,
     }
     impl listview::ListItem for GreekLetter {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Text(self.name)),
                 1 => Some(listview::RenderMethod::Text(self.description)),
@@ -5232,7 +5232,7 @@ fn check_item_custom_paint() {
         city: &'static str,
     }
     impl listview::ListItem for MyItem {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Text(self.name)),
                 1 => Some(listview::RenderMethod::Custom),
@@ -5303,7 +5303,7 @@ fn check_item_custom_paint_first_column_details() {
         city: &'static str,
     }
     impl listview::ListItem for MyItem {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Custom),
                 1 => Some(listview::RenderMethod::Text(self.name)),
@@ -5375,7 +5375,7 @@ fn check_item_custom_paint_first_column_columns_3() {
         city: &'static str,
     }
     impl listview::ListItem for MyItem {
-        fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+        fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
             match column_index {
                 0 => Some(listview::RenderMethod::Custom),
                 1 => Some(listview::RenderMethod::Text(self.name)),

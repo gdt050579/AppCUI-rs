@@ -11,6 +11,7 @@ pub(crate) enum RootType {
     Unknown,
 }
 impl RootType {
+    #[cfg(test)]
     pub(crate) fn new(value: &str) -> Option<Self> {
         match value {
             "fixed" | "disk" | "d" | "D" | "f" | "F" => Some(Self::Fixed),
@@ -56,6 +57,7 @@ impl Root {
     //         root_type
     //     }
     // }
+    #[cfg(test)]
     pub(super) fn from_csv_line(line: &str) -> Option<Self> {
         let mut parts = line.split(',');
         let entry_type = parts.next()?;

@@ -19,7 +19,7 @@ impl TestData {
     }
 }
 impl ListItem for TestData {
-    fn render_method(&self, column_index: u16) -> Option<super::RenderMethod> {
+    fn render_method(&'_ self, column_index: u16) -> Option<super::RenderMethod<'_>> {
         match column_index {
             0 => Some(super::RenderMethod::Text(self.text.as_str())),
             _ => None,

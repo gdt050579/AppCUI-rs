@@ -11,7 +11,7 @@ pub struct CSVEntry {
 }
 
 impl ListItem for CSVEntry {
-    fn render_method(&self, column_index: u16) -> Option<listview::RenderMethod> {
+    fn render_method(&'_ self, column_index: u16) -> Option<listview::RenderMethod<'_>> {
         if column_index < self.data.len() as u16 {
             Some(listview::RenderMethod::Text(&self.data[column_index as usize]))
         } else {
