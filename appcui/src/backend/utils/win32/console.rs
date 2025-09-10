@@ -183,9 +183,8 @@ impl Console {
         let mut key_modifier = KeyModifier::None;
         let mut character = '\0';
         if (evnt.unicode_char >= 32) && (evnt.key_down == constants::TRUE) {
-            let res = char::from_u32(evnt.unicode_char as u32);
-            if res.is_some() {
-                character = res.unwrap();
+            if let Some(ch) = char::from_u32(evnt.unicode_char as u32) {
+                character = ch;
             }
         }
         if evnt.virtual_key_code < 256 {

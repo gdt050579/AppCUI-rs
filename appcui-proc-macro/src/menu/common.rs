@@ -206,10 +206,8 @@ fn get_class(dict: &mut NamedParamsMap, inherit: Option<&str>) -> Option<String>
             panic!("Invalid class name '{c}' => {desc}");
         }
         Some(String::from(c))
-    } else if let Some(name) = inherit {
-        return Some(String::from(name));
     } else {
-        return None;
+        inherit.map(String::from)
     }
 }
 pub(super) fn build_menu(param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {

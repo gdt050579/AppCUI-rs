@@ -480,9 +480,9 @@ impl Menu {
                 MouseMoveMenuResult::RepaintAndPass
             }
         } else if mpi.is_on_menu {
-            return MouseMoveMenuResult::ProcessWithoutRepaint;
+            MouseMoveMenuResult::ProcessWithoutRepaint
         } else {
-            return MouseMoveMenuResult::Ignored;
+            MouseMoveMenuResult::Ignored
         }
     }
     pub(crate) fn on_mouse_wheel(&mut self, direction: MouseWheelDirection) -> EventProcessStatus {
