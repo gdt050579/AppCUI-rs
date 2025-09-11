@@ -8,7 +8,8 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 
 - [AppCUI-rs Gallery](#appcui-rs-gallery)
   - [Animations](#animations)
-  - [Lists \& Trees](#lists--trees)
+  - [Basic Controls](#basic-controls)
+  - [Lists, Trees and Graphs](#lists-trees-and-graphs)
 
 
 ---
@@ -33,7 +34,26 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 
 ---
 
-## Lists & Trees
+## Basic Controls
+
+![Animations — preview](img/basic_controls/basic_controls.gif)
+
+* **Code:** [examples/basic_controls](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/basic_controls)
+* **Elements:** [Accordion](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/accordion.html),[Button](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/button.html), [CheckBox](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/checkbox.html), [ComboBox](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/combobox.html), [CharPicker](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/charpicker.html), [ColorPicker](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/colorpicker.html),[DatePicker](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/datepicker.html),[DropDownList](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/dropdownlist.html),[HSplitter](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/hsplitter.html),[Panel](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/panel.html),[Password](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/password.html),[RadioBox](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/radiobox.html),[Selector](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/selector.html),[Tab](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/tab.html),[TextArea](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/textarea.html),[TextField](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/textfield.html),[TreeStateBox](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/treestatebox.html),[VSplitter](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/vsplitter.html),
+
+<details>
+  <summary>More Anmations</summary>
+
+| Image                                           | Descrption                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <img src="img/basic_controls/char_picker.gif" > | **Char Picker** <br> * **Code:** [examples/charpicker](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/charpicker) <br> * **Description:** A **CharPicker** is a UI control in AppCUI-rs that allows users to select a single character from a wide range of Unicode sets, such as ASCII, box-drawing and line-drawing symbols, arrows, geometric shapes, emoji, and other predefined or custom character groups, presented in an expandable panel for easy browsing and selection.
+ |
+
+</details>
+
+---
+
+## Lists, Trees and Graphs
 
 ![Lists & Trees — preview](img/lists/listview.gif)
 
