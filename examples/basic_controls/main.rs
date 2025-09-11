@@ -87,7 +87,7 @@ fn add_checkboxes(tab: &mut Tab, index: u32) {
     add!(1,1, checkbox::Type::Standard, "Standard");
     add!(22,1, checkbox::Type::CheckBox, "CheckBoxes");
     add!(43,1, checkbox::Type::CheckMark, "CheckMark");
-    add!(1,11, checkbox::Type::PlusMinus, "Plus/Minus");
+    add!(1,11, checkbox::Type::FilledBox, "Filled Box");
     let mut p = panel!("'Tri-State checkboxes',x:22,y:11,w:42,h:9, type: Window");
     p.add(threestatebox!("'Checked',x:1,y:1,w:18,state: checked"));
     p.add(threestatebox!("'Not-Checked',x:1,y:2,w:18,state: unchecked"));
