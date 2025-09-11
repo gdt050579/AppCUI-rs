@@ -235,7 +235,7 @@ fn check_checkbox_checkbox_mode() {
     let script = "
         Paint.Enable(false)
         Paint('Ascii mode CheckBox')   
-        CheckHash(0x9F65CE8526917920)  
+        CheckHash(0x408A0B79E00F07F0)  
         CheckCursor(7,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
@@ -253,7 +253,7 @@ fn check_checkbox_fillbox_mode() {
     let script = "
         Paint.Enable(false)
         Paint('Ascii mode FilledBox')   
-        CheckHash(0x9E9BB3D3D61B96C2)  
+        CheckHash(0xA693D954DF65A44C)  
         CheckCursor(7,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();

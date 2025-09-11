@@ -254,7 +254,7 @@ fn check_radiobox_circle_mode() {
     let script = "
         Paint.Enable(false)
         Paint('Circle mode')   
-        CheckHash(0xF471A26E9DA373E8)  
+        CheckHash(0x176C684A28254301)  
         CheckCursor(7,4)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();

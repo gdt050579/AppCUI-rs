@@ -8,15 +8,15 @@ pub enum Type {
     YesNo,
     PlusMinus,
 }
-
+// ✅ 🔲 🗹 🞎 🞏 🞕
 impl Type {
     pub(super) fn check_symbol(&self) -> &str {
         match self {
             Type::Standard => "[\u{221A}]",
             Type::Ascii => "[X]",
-            Type::CheckBox => "☑ ",
+            Type::CheckBox => "🗹 ",
             Type::CheckMark => "\u{221A}",
-            Type::FilledBox => "▣",
+            Type::FilledBox => "🞕 ",
             Type::YesNo => "[Y]",
             Type::PlusMinus => "➕ ",
         }
@@ -25,9 +25,9 @@ impl Type {
         match self {
             Type::Standard => "[ ]",
             Type::Ascii => "[ ]",
-            Type::CheckBox => "☐ ",
+            Type::CheckBox => "🞎 ",
             Type::CheckMark => "x",
-            Type::FilledBox => "▢",
+            Type::FilledBox => "🞏 ",
             Type::YesNo => "[N]",
             Type::PlusMinus => "➖ ",
         }
