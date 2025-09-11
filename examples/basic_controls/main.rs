@@ -43,6 +43,21 @@ enum Shape {
     Circle,
 }
 
+#[CustomControl(overwrite = OnPaint)]
+struct WindowBackground {}
+impl WindowBackground {
+    fn new(x:i32, y:i32, w: u32, h: u32) -> Self {
+        Self {
+            base: ControlBase::new(LayoutBuilder::new().x(x).y(y).width(w).height(h).build(), false)
+        }
+    }
+}
+impl OnPaint for WindowBackground {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        surface.clear(Character::with_attributes(' ', theme.window.normal));
+    }
+}
+
 fn add_description(tab: &mut Tab, index: u32, desc: &str) {
     tab.add(index, vline!("r:30,t:0,b:0"));
     tab.add(index, Label::new(desc, layout!("x:99%,y:1,w:27,h:100%,p:tr")));
@@ -133,16 +148,62 @@ fn add_selectors(tab: &mut Tab, index: u32) {
 
 }
 
+fn add_text(tab: &mut Tab, index: u32) {
+    add_description(tab, index, "These controls allow you to insert text in different formats (regular, passwords, numbers, etc)");
+    tab.add(index, label!("'Text field',x:1,y:1, w: 20"));
+    tab.add(index, textfield!("'This is a text',x:25,y:1,w:30"));
+    tab.add(index, label!("'Password field',x:1,y:3, w: 20"));
+    tab.add(index, password!("pass:'1234',x:25,y:3,w:30"));
+    tab.add(index, label!("'Key selector',x:1,y:5, w: 20"));
+    tab.add(index, keyselector!("Ctrl+Alt+Shift+F1,x:25,y:5,w:30"));
+    tab.add(index, label!("'Text Area\nEditor',x:1,y:7, w: 20, h:2"));
+    let mut ta = textarea!("x:25,y:7,w:30,h:7,flags: ShowLineNumber");
+    ta.set_text(r#"Multi line support:
+
+[Different features]
+- line numbers
+- scrollbars
+- cursor highlighting
+    "#);
+    tab.add(index, ta);
+
+}
+
+fn add_containers(tab: &mut Tab, index: u32) {
+    add_description(tab, index, "Containers are a set of special controls that contains other controls (allowing one to select how the other controls are aligned)");
+    tab.add(index, label!("'Panels',x:1,y:1, w: 10"));
+    tab.add(index, panel!("'Panel',x:15,y:1,w:20,h:3, type: Border"));
+    tab.add(index, panel!("'Panel',x:40,y:1,w:20,h:3, type: Window"));
+    
+    tab.add(index, label!("'Tabs',x:1,y:5, w: 10"));
+    tab.add(index, WindowBackground::new(15,5,22,7));
+    tab.add(index, tab!("x:16,y:6,w:20,h:5,tabs:[A,B,C], tw:3"));
+
+    tab.add(index, label!("'Accordeon',x:1,y:14, w: 10"));
+    tab.add(index, WindowBackground::new(15,14,22,9));
+    tab.add(index, accordion!("x:16,y:15,w:20,h:7, panels:[Panel-1,Panel-2,Panel-3]"));
+
+    tab.add(index, label!("'Splitters (Vertical/Horizontal)',x:40,y:5, w: 30"));
+    let mut p = panel!("x:40,y:6,w:30,h:17");
+    let mut sh = hsplitter!("d:f,pos:75%");
+    sh.add(hsplitter::Panel::Top,vsplitter!("d:f,pos:50%"));
+    p.add(sh);
+    tab.add(index,p);
+
+}
+
 
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().size(Size::new(120, 30)).single_window().build()?;
     let mut w = window!("'Basic Controls',dock:fill");
-    let mut t = tab!("d:f, tabs:[Buttons,CheckBoxes,RadioBoxes,Selectors], type: OnLeft");
+    let mut t = tab!("d:f, tabs:[Buttons,CheckBoxes,RadioBoxes,Selectors,Text,Containers], type: OnLeft");
     add_buttons(&mut t, 0);
     add_checkboxes(&mut t, 1);
     add_radioboxes(&mut t, 2);
     add_selectors(&mut t, 3);
+    add_text(&mut t, 4);
+    add_containers(&mut t, 5);
     w.add(t);
     a.add_window(w);
     a.run();
