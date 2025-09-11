@@ -3,7 +3,7 @@ use appcui::prelude::*;
 
 fn add_description(tab: &mut Tab, index: u32, desc: &str) {
     tab.add(index, vline!("r:30,t:0,b:0"));
-    tab.add(index, Label::new(desc, layout!("x:100%,y:0,w:29,h:100%,p:tr")));
+    tab.add(index, Label::new(desc, layout!("x:99%,y:1,w:27,h:100%,p:tr")));
 }
 
 fn add_buttons(tab: &mut Tab, index: u32) {
@@ -38,12 +38,39 @@ fn add_checkboxes(tab: &mut Tab, index: u32) {
     tab.add(index, p);
 }
 
+fn add_radioboxes(tab: &mut Tab, index: u32) {
+    macro_rules! add {
+        ($x: expr, $y: expr, $type: expr, $name: expr) => {
+            let mut p = Panel::new($name, LayoutBuilder::new().x($x).y($y).width(20).height(9).build(), panel::Type::Window);
+            p.add(RadioBox::with_type("Checked", LayoutBuilder::new().x(1).y(1).width(18).build(), true, $type));
+            p.add(RadioBox::with_type("Un-Checked", LayoutBuilder::new().x(1).y(2).width(18).build(), false, $type));
+            let mut c = RadioBox::with_type("Inactive", LayoutBuilder::new().x(1).y(3).width(18).build(), false, $type);
+            c.set_enabled(false);
+            p.add(c);
+            p.add(RadioBox::with_type("Multi-Line\nText", LayoutBuilder::new().x(1).y(4).width(18).height(2).build(), false, $type));
+            tab.add(index, p);
+        };
+    }
+    add_description(tab, index, "Radioboxes are controls that have two states (checked or unchecked) but unlike a checkbox they are used in groups where only one can be checked at a time.");
+    add!(1,1, radiobox::Type::Standard, "Standard");
+    add!(22,1, radiobox::Type::Circle, "Circular");
+    add!(43,1, radiobox::Type::Diamond, "Diamond");
+}
+
+fn add_selectors(tab: &mut Tab, index: u32) {
+    add_description(tab, index, "Selctors are component that allows you to chose from multiple variants (such as colors, characters, list of options or numbers).");
+    tab.add(index, label!("'Combobox (drop-down)',x:1,y:1, w: 20"));
+}
+
+
+
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().size(Size::new(120, 30)).single_window().build()?;
     let mut w = window!("'Basic Controls',dock:fill");
-    let mut t = tab!("d:f, tabs:[Buttons,CheckBoxes], type: OnLeft");
+    let mut t = tab!("d:f, tabs:[Buttons,CheckBoxes,RadioBoxes,Selectors], type: OnLeft");
     add_buttons(&mut t, 0);
     add_checkboxes(&mut t, 1);
+    add_radioboxes(&mut t, 2);
     w.add(t);
     a.add_window(w);
     a.run();
