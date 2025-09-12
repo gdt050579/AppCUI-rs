@@ -44,10 +44,10 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 <details>
   <summary>More Anmations</summary>
 
-| Image                                           | Descrption                                                                                                                                                                                                                                                                                                                                                   |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <img src="img/basic_controls/char_picker.gif" > | **Char Picker** <br> * **Code:** [examples/charpicker](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/charpicker) <br> * **Description:** A **CharPicker** is a UI control in AppCUI-rs that allows users to select a single character from a wide range of Unicode sets, such as ASCII, box-drawing and line-drawing symbols, arrows, geometric shapes, emoji, and other predefined or custom character groups, presented in an expandable panel for easy browsing and selection.
- |
+| Image                                           | Descrption                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="img/basic_controls/char_picker.gif" > | **Char Picker** <br> * **Code:** [examples/charpicker](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/charpicker) <br> * **Description:** A **CharPicker** is a UI control in AppCUI-rs that allows users to select a single character from a wide range of Unicode sets, such as ASCII, box-drawing and line-drawing symbols, arrows, geometric shapes, emoji, and other predefined or custom character groups, presented in an expandable panel for easy browsing and selection. |
+|                                                 |
 
 </details>
 
@@ -67,6 +67,7 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | <img src="img/lists/graphview.gif" > | **Graph Viewer** <br> * **Code:** [examples/graphs](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/graphs) <br> * **Description:** Various animation with graphs/trees where you can move nodes, display orthogonal lines, search and filter data, etc |
 | <img src="img/lists/treeview.gif" >  | **Tree Viewer** <br> * **Code:** [examples/treeview](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/treeview) <br> * **Description:** A simple tree view wth 3 columns where you can navigate, select, sort, filter, fold and unfold items.            |
+| <img src="img/lists/listbox.gif" >   | **ListBoxr** <br> * **Code:** [examples/listbox](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/listbox) <br> * **Description:** A listbox is a simple list that has multiple items (without any columns - all strings) that you can select from.      |
 
 
 </details>
