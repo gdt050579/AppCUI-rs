@@ -2,7 +2,7 @@ use super::Size;
 
 pub struct Glyph {
     size: Size,
-    chars: Vec<char>,
+    pub(super) chars: Vec<char>,
 }
 
 impl Glyph {
@@ -58,13 +58,14 @@ impl Glyph {
     }
     #[inline(always)]
     pub fn resize(&mut self, width: u32, height: u32) {
-        self.resize_woth(width, height, Glyph::TRANSPARENT_CHAR);
+        self.resize_with(width, height, Glyph::TRANSPARENT_CHAR);
     }
-    pub fn resize_woth(&mut self, width: u32, height: u32, ch: char) {
+    pub fn resize_with(&mut self, width: u32, height: u32, ch: char) {
         let sz = Glyph::compute_size(width, height);
         let new_len = (sz.width * sz.height) as usize;
         self.chars.resize(new_len, ch);
         self.clear_with(ch);
+        self.size = sz;
     }
     pub fn write_str(&mut self, x: u32, y: u32, text: &str) {
         if (x >= self.size.width) || (y >= self.size.height) {
@@ -92,10 +93,6 @@ impl Glyph {
             }
         }
     }
-    // ..xx..
-    // .xxxx.
-    //
-
     #[inline(always)]
     fn compute_size(width: u32, height: u32) -> Size {
         if width * height == 0 {

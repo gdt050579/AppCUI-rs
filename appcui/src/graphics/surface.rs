@@ -941,8 +941,22 @@ impl Surface {
         }
     }
 
-    pub fn draw_glyph(&mut self, x: i32, y: i32, glyph: &Glyph, attribute: CharAttribute) {
-
+    pub fn draw_glyph(&mut self, x: i32, y: i32, glyph: &Glyph, attr: CharAttribute) {
+        if !self.clip.is_visible() {
+            return;
+        }
+        let mut index = 0usize;
+        let mut c = Character::with_attributes(' ', attr);
+        let h = glyph.size().height as i32;
+        let w = glyph.size().width as i32;
+        
+        for s_y in 0..h {
+            for s_x in 0..w {
+                c.code = glyph.chars[index];
+                self.write_char(x + s_x, y + s_y, c);
+                index += 1;
+            }
+        }
     } 
 
     /// Writes a string at the specified position, from left to right using a specific character attribute. If the text is outside the clip area, it will not be drawn.
