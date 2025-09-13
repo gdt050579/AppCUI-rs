@@ -127,7 +127,7 @@ impl Backend for CrossTerm {
         use crossterm::queue;
         use std::io::Write;
 
-        queue!(stdout, Clear(ClearType::All), MoveTo(0, 0)).unwrap();
+        queue!(stdout, MoveTo(0, 0)).unwrap();
 
         let mut x = 0;
         let mut y = 0;
