@@ -13,6 +13,7 @@ use super::Rect;
 use super::Size;
 use super::TextAlignment;
 use super::TextFormat;
+use super::Glyph;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
 
@@ -939,6 +940,10 @@ impl Surface {
             }
         }
     }
+
+    pub fn draw_glyph(&mut self, x: i32, y: i32, glyph: &Glyph, attribute: CharAttribute) {
+
+    } 
 
     /// Writes a string at the specified position, from left to right using a specific character attribute. If the text is outside the clip area, it will not be drawn.
     /// The `multi-line` parameter specifices if the text should interpret new line characters as a new line or not. if set to `false` the code of this method is optimized to write the text faster.
