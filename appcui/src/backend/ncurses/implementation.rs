@@ -42,7 +42,7 @@ impl NcursesTerminal {
             (ncursesapi::constants::ALL_MOUSE_EVENTS as mmask_t | ncursesapi::constants::REPORT_MOUSE_POSITION as mmask_t) as mmask_t,
             None,
         );
-        println!("\x1B[?1003h");
+        println!("\x1b[?1000h\x1b[?1002h\x1b[?1003h\x1b[?1006h");
         ncursesapi::lib::ncurses_mouseinterval(0);
         ncursesapi::lib::ncurses_set_escdelay(0);
 
@@ -165,6 +165,10 @@ impl Backend for NcursesTerminal {
         ncursesapi::lib::ncurses_wrefresh(self.win);
     }
 
+    fn on_resize(&mut self, new_size: Size) {
+        self.size = new_size;
+    }
+
     fn size(&self) -> Size {
         self.size
     }
@@ -184,11 +188,11 @@ impl Backend for NcursesTerminal {
         ctx.get_contents().is_ok()
     }
 
-    fn on_resize(&mut self, new_size: Size) {
-        self.size = new_size;
-    }
-
     fn is_single_threaded(&self) -> bool {
         false
+    }
+
+    fn on_close(&mut self) {
+        println!("\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l")
     }
 }
