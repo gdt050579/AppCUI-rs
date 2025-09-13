@@ -24,6 +24,7 @@ use copypasta::ClipboardProvider;
 
 pub(crate) struct CrossTerm {
     size: Size,
+    use_color_schema: bool,
 }
 
 impl CrossTerm {
@@ -52,6 +53,7 @@ impl CrossTerm {
 
         let mut term = CrossTerm {
             size: Size::new(width as u32, height as u32),
+            use_color_schema: builder.use_color_schema,
         };
 
         if let Some(sz) = builder.size {
@@ -71,26 +73,50 @@ impl CrossTerm {
     }
 
     fn convert_color(&self, color: Color) -> CrosstermColor {
-        match color {
-            Color::Black => CrosstermColor::Black,
-            Color::DarkRed => CrosstermColor::DarkRed,
-            Color::DarkGreen => CrosstermColor::DarkGreen,
-            Color::Olive => CrosstermColor::DarkYellow,
-            Color::DarkBlue => CrosstermColor::DarkBlue,
-            Color::Magenta => CrosstermColor::DarkMagenta,
-            Color::Teal => CrosstermColor::DarkCyan,
-            Color::Silver => CrosstermColor::White,
-            Color::Gray => CrosstermColor::Grey,
-            Color::Red => CrosstermColor::Red,
-            Color::Green => CrosstermColor::Green,
-            Color::Yellow => CrosstermColor::Yellow,
-            Color::Blue => CrosstermColor::Blue,
-            Color::Pink => CrosstermColor::Magenta,
-            Color::Aqua => CrosstermColor::Cyan,
-            Color::White => CrosstermColor::White,
-            Color::Transparent => CrosstermColor::Reset,
-            #[cfg(feature = "TRUE_COLORS")]
-            Color::RGB(r, g, b) => CrosstermColor::Rgb { r, g, b },
+        if self.use_color_schema {
+            match color {
+                Color::Black => CrosstermColor::Black,
+                Color::DarkRed => CrosstermColor::DarkRed,
+                Color::DarkGreen => CrosstermColor::DarkGreen,
+                Color::Olive => CrosstermColor::DarkYellow,
+                Color::DarkBlue => CrosstermColor::DarkBlue,
+                Color::Magenta => CrosstermColor::DarkMagenta,
+                Color::Teal => CrosstermColor::DarkCyan,
+                Color::Silver => CrosstermColor::White,
+                Color::Gray => CrosstermColor::Grey,
+                Color::Red => CrosstermColor::Red,
+                Color::Green => CrosstermColor::Green,
+                Color::Yellow => CrosstermColor::Yellow,
+                Color::Blue => CrosstermColor::Blue,
+                Color::Pink => CrosstermColor::Magenta,
+                Color::Aqua => CrosstermColor::Cyan,
+                Color::White => CrosstermColor::White,
+                Color::Transparent => CrosstermColor::Reset,
+                #[cfg(feature = "TRUE_COLORS")]
+                Color::RGB(r, g, b) => CrosstermColor::Rgb { r, g, b },
+            }
+        } else {
+            match color {
+                Color::Black => CrosstermColor::Rgb { r: 0, g: 0, b: 0 },
+                Color::DarkRed => CrosstermColor::Rgb { r: 128, g: 0, b: 0 },
+                Color::DarkGreen => CrosstermColor::Rgb { r: 0, g: 128, b: 0 },
+                Color::Olive => CrosstermColor::Rgb { r: 128, g: 128, b: 0 },
+                Color::DarkBlue => CrosstermColor::Rgb { r: 0, g: 0, b: 128 },
+                Color::Magenta => CrosstermColor::Rgb { r: 128, g: 0, b: 128 },
+                Color::Teal => CrosstermColor::Rgb { r: 0, g: 128, b: 128 },
+                Color::Silver => CrosstermColor::Rgb { r: 196, g: 196, b: 196 },
+                Color::Gray => CrosstermColor::Rgb { r: 128, g: 128, b: 128 },
+                Color::Red => CrosstermColor::Rgb { r: 255, g: 0, b: 0 },
+                Color::Green => CrosstermColor::Rgb { r: 0, g: 255, b: 0 },
+                Color::Yellow => CrosstermColor::Rgb { r: 255, g: 255, b: 0 },
+                Color::Blue => CrosstermColor::Rgb { r: 0, g: 0, b: 255 },
+                Color::Pink => CrosstermColor::Rgb { r: 255, g: 0, b: 255 },
+                Color::Aqua => CrosstermColor::Rgb { r: 0, g: 255, b: 255 },
+                Color::White => CrosstermColor::Rgb { r: 255, g: 255, b: 255 },
+                Color::Transparent => CrosstermColor::Reset,
+                #[cfg(feature = "TRUE_COLORS")]
+                Color::RGB(r, g, b) => CrosstermColor::Rgb { r, g, b },
+            }
         }
     }
 }
@@ -143,7 +169,7 @@ impl Backend for CrossTerm {
                 if ch.flags.contains(CharFlags::StrikeThrough) {
                     queue!(stdout, crossterm::style::SetAttribute(crossterm::style::Attribute::CrossedOut)).unwrap();
                 }
-            
+
                 flags = ch.flags;
             }
             queue!(stdout, Print(ch.code)).unwrap();

@@ -2,8 +2,8 @@ use crate::backend::SystemEventReader;
 use crate::input::{Key, KeyCode, KeyModifier, MouseButton, MouseWheelDirection};
 use crate::system::SystemEvent;
 use crate::system::{KeyModifierChangedEvent, KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent, MouseWheelEvent};
-use crossterm::event::{self, Event, KeyEvent, KeyEventKind, MouseButton as CrosstermMouseButton, MouseEvent, MouseEventKind};
 use crossterm::event::KeyCode as CrosstermKeyCode;
+use crossterm::event::{self, Event, KeyEvent, KeyEventKind, MouseButton as CrosstermMouseButton, MouseEvent, MouseEventKind};
 
 pub(crate) struct Input {
     last_modifiers: KeyModifier,
@@ -78,6 +78,10 @@ impl Input {
                 y,
                 button: MouseButton::None,
             })),
+            MouseEventKind::Drag(button) => {
+                let button = self.convert_mouse_button(button);
+                Some(SystemEvent::MouseMove(MouseMoveEvent { x, y, button }))
+            }
             MouseEventKind::ScrollUp => Some(SystemEvent::MouseWheel(MouseWheelEvent {
                 x,
                 y,
@@ -88,7 +92,16 @@ impl Input {
                 y,
                 direction: MouseWheelDirection::Down,
             })),
-            _ => None,
+            MouseEventKind::ScrollLeft => Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                x,
+                y,
+                direction: MouseWheelDirection::Left,
+            })),
+            MouseEventKind::ScrollRight => Some(SystemEvent::MouseWheel(MouseWheelEvent {
+                x,
+                y,
+                direction: MouseWheelDirection::Right,
+            })),
         }
     }
 
