@@ -1,7 +1,10 @@
-use crate::{system::{Handle, HandleSupport, Theme}, ui::menubar::ItemStatus};
 use super::ItemBase;
-use crate::graphics::Surface;
 use super::MenuEntry;
+use crate::graphics::Surface;
+use crate::{
+    system::{Handle, HandleSupport, Theme},
+    ui::menubar::ItemStatus,
+};
 
 // un menu bar itm are:
 // flag-urile: enabld / visible / to left / capture input
@@ -34,7 +37,16 @@ impl MenuBarItemWrapper {
             MenuBarItemWrapper::Label(_) => todo!(),
             MenuBarItemWrapper::Button(_) => todo!(),
             MenuBarItemWrapper::CheckBox(_) => todo!(),
-        }        
+        }
+    }
+    pub(super) fn activate(&mut self) {
+        match self {
+            MenuBarItemWrapper::Separator(_) => todo!(),
+            MenuBarItemWrapper::MenuEntry(obj) => obj.on_activate(),
+            MenuBarItemWrapper::Label(_) => todo!(),
+            MenuBarItemWrapper::Button(_) => todo!(),
+            MenuBarItemWrapper::CheckBox(_) => todo!(),
+        }
     }
     #[inline(always)]
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: ItemStatus) {
@@ -45,7 +57,6 @@ impl MenuBarItemWrapper {
             MenuBarItemWrapper::Button(_) => todo!(),
             MenuBarItemWrapper::CheckBox(_) => todo!(),
         }
-
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         match self {
@@ -54,7 +65,7 @@ impl MenuBarItemWrapper {
             MenuBarItemWrapper::Label(_) => todo!(),
             MenuBarItemWrapper::Button(_) => todo!(),
             MenuBarItemWrapper::CheckBox(_) => todo!(),
-        }    
+        }
     }
 }
 

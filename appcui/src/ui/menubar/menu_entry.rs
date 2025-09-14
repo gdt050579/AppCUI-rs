@@ -30,7 +30,7 @@ impl MenuEntry {
             surface.fill_horizontal_line_with_size(
                 self.base.x(),
                 0,
-                (self.base.width() as u32) + 2,
+                (self.base.width() as u32),
                 Character::with_attributes(' ', status.text_attribute(theme)),
             );
         }
@@ -45,6 +45,9 @@ impl MenuEntry {
             format.set_hotkey_from_caption(status.hotkey_attribute(theme), &c);
             surface.write_text(c.text(), &format);
         }
+    }
+    pub(super) fn on_activate(&mut self) {
+        RuntimeManager::get().show_menu(self.handle, self.receiver_control_handle, self.base.x(), 0, None)
     }
 }
 

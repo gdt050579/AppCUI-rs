@@ -1,3 +1,5 @@
+use std::usize;
+
 use super::{MenuBarItem, MenuBarItemWrapper};
 use crate::graphics::*;
 use crate::input::Key;
@@ -19,6 +21,8 @@ pub struct MenuBar {
     shown_items: Vec<MenuBarItemPos>,
     receiver_control_handle: Handle<()>,
     width: u32,
+    hovered_item_index: Option<usize>,
+    current_item_index: Option<usize>,
 }
 impl MenuBar {
     pub(crate) fn new(width: u32) -> Self {
@@ -27,6 +31,8 @@ impl MenuBar {
             shown_items: Vec::with_capacity(64),
             receiver_control_handle: Handle::None,
             width,
+            hovered_item_index: None,
+            current_item_index: None,
         }
     }
     pub fn add<T>(&mut self, item: T) -> Handle<T>
@@ -72,6 +78,19 @@ impl MenuBar {
     pub(crate) fn close(&mut self) {
         todo!()
     }
+    fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {
+        if y != 0 {
+            return None;
+        }
+        for (index, item) in self.shown_items.iter().enumerate() {
+            let start = item.x as i32;
+            let end = start + item.width as i32;
+            if (x >= start) && (x < end) {
+                return Some(index);
+            }
+        }
+        None
+    }
     pub(crate) fn update_positions(&mut self) {
         // sort the data first
         self.shown_items.sort_by_key(|i| i.order);
@@ -83,20 +102,36 @@ impl MenuBar {
                 let w = obj.base().width();
                 item.x = x as i16;
                 item.width = w;
-                x += 2 + obj.base().width() as i32;
+                x += w as i32;
             }
         }
     }
     #[inline(always)]
     pub(crate) fn is_opened(&self) -> bool {
-        todo!()
+        self.current_item_index.is_some()
+    }
+    fn open(&mut self, index: usize) {
+        if index < self.shown_items.len() {
+            self.current_item_index = Some(index);
+            let idx = self.shown_items[index].idx as usize;
+            if let Some(elem) = self.manager.element_mut(idx) {
+                elem.activate();
+            }
+        }
     }
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.fill_horizontal_line_with_size(0, 0, self.width, Character::with_attributes(' ', theme.menu.text.normal));
-
-        for item in &self.shown_items {
+        let hover_index = self.hovered_item_index.unwrap_or(usize::MAX);
+        let current_index = self.current_item_index.unwrap_or(usize::MAX);
+        for (index, item) in self.shown_items.iter().enumerate() {
             if let Some(elem) = self.manager.element(item.idx as usize) {
-                let status = ItemStatus::Normal;
+                let status = if index == current_index {
+                    ItemStatus::Current
+                } else if index == hover_index {
+                    ItemStatus::Hovered
+                } else {
+                    ItemStatus::Normal
+                };
                 elem.paint(surface, theme, status);
             }
         }
@@ -105,8 +140,17 @@ impl MenuBar {
         todo!()
     }
     pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        EventProcessStatus::Ignored
-        //fstodo!()
+        let new_hover_pos = self.mouse_position_to_index(x, y);
+        if new_hover_pos == self.hovered_item_index {
+            return EventProcessStatus::Ignored;
+        }
+        self.hovered_item_index = new_hover_pos;
+        if let Some(idx) = new_hover_pos {
+            if self.current_item_index.is_some() {
+                self.open(idx);
+            }
+        }
+        EventProcessStatus::Processed
     }
     pub(crate) fn on_key_event(&mut self, key: Key, menu_is_opened: bool) -> EventProcessStatus {
         todo!()

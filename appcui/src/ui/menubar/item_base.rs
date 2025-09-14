@@ -28,7 +28,7 @@ impl ItemBase {
         Self {
             flags: f,
             x: 0,
-            width: width.min(1),
+            width: width.max(1),
             order,
             handle: Handle::None,
         }
