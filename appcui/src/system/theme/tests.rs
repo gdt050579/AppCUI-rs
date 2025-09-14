@@ -89,15 +89,19 @@ impl WindowWithTheme {
             h_file: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.menubar_mut().add(menubar::MenuEntry::new(menu!(
-            "&File,class: WindowWithTheme, items=[
-            {New,F1,cmd:New},
-            {&Save,F2,cmd:Save},
-            {&Open,F3,cmd:Open},
-            {-},
-            {E&xit,Alt+F4,cmd:Exit}
-        ]"
-        )));
+        w.h_file = w.menubar_mut().add(menubar::MenuEntry::new(
+            menu!(
+                "&File,class: WindowWithTheme, items=[
+                    {New,F1,cmd:New},
+                    {&Save,F2,cmd:Save},
+                    {&Open,F3,cmd:Open},
+                    {-},
+                    {E&xit,Alt+F4,cmd:Exit}
+                ]"
+            ),
+            0,
+            menubar::MenuBarPosition::Left,
+        ));
 
         let mut splitter = vsplitter!("d:f,pos:55");
         let mut p_basic = panel!("'Basic controls',l:1,t:1,r:1,h:8");

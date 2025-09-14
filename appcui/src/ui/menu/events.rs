@@ -1,4 +1,5 @@
-use super::{MenuBar, Menu, CheckBox, Command, SingleChoice};
+use super::{Menu, CheckBox, Command, SingleChoice};
+use crate::ui::MenuBar;
 
 /// A trait that defines the event handlers for menu-related interactions.
 ///

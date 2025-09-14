@@ -7,7 +7,8 @@ use crate::{
     utils::{Strategy, VectorIndex},
 };
 
-use super::{Menu, MenuBarItem_old};
+use super::Menu;
+use super::menu_bar_item::MenuBarItem_old;
 
 /// A menu bar that displays a horizontal list of menus at the top of a window or desktop.
 ///

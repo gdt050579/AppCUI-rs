@@ -1,12 +1,15 @@
-use crate::prelude::*;
+use crate::{
+    prelude::*,
+    ui::menubar::{MenuBarPosition, MenuEntry},
+};
 
 #[test]
 fn check_view() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
     struct MyWin {
-        m_file: Handle<Menu>,
-        m_edit: Handle<Menu>,
-        m_help: Handle<Menu>,
+        m_file: Handle<MenuEntry>,
+        m_edit: Handle<MenuEntry>,
+        m_help: Handle<MenuEntry>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -22,7 +25,7 @@ fn check_view() {
             m.add(menu::Command::new("&Open", key!("F3"), mywin::Commands::A));
             m.add(menu::Separator::new());
             m.add(menu::Command::new("E&xit", key!("Alt+F4"), mywin::Commands::A));
-            w.m_file = w.register_menu(m);
+            w.m_file = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
 
             let mut m = Menu::new("&Edit");
             m.add(menu::Command::new("&Copy", Key::None, mywin::Commands::B));
@@ -32,19 +35,19 @@ fn check_view() {
             m.add(menu::SingleChoice::new("Paste only text", Key::None, mywin::Commands::B, true));
             m.add(menu::SingleChoice::new("Paste only images", Key::None, mywin::Commands::B, false));
             m.add(menu::SingleChoice::new("Paste everything", Key::None, mywin::Commands::B, false));
-            w.m_edit = w.register_menu(m);
+            w.m_edit = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
 
             let mut m = Menu::new("&Help");
             m.add(menu::Command::new("About", Key::None, mywin::Commands::C));
-            w.m_help = w.register_menu(m);
+            w.m_help = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
             w
         }
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_file, 0);
-            menubar.add(self.m_edit, 0);
-            menubar.add(self.m_help, 0);
+            menubar.show(self.m_file);
+            menubar.show(self.m_edit);
+            menubar.show(self.m_help);
         }
     }
     let script = "
@@ -86,7 +89,7 @@ fn check_view() {
 fn check_scroll_button_activation() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
     struct MyWin {
-        m_file: Handle<Menu>,
+        m_file: Handle<MenuEntry>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -110,13 +113,13 @@ fn check_scroll_button_activation() {
                     {12,cmd:A},
                 ]"
             );
-            w.m_file = w.register_menu(m);
+            w.m_file = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
             w
         }
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_file, 0);
+            menubar.show(self.m_file);
         }
     }
     let script = "
@@ -160,7 +163,7 @@ fn check_scroll_button_activation() {
 fn check_submenus_open() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
     struct MyWin {
-        m_file: Handle<Menu>,
+        m_file: Handle<MenuEntry>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -223,13 +226,13 @@ fn check_submenus_open() {
                 {12,cmd:A},
             ]"
             );
-            w.m_file = w.register_menu(m);
+            w.m_file = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
             w
         }
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_file, 0);
+            menubar.show(self.m_file);
         }
     }
     let script = "
@@ -309,7 +312,7 @@ fn check_dynamic_change_menu() {
     #[Window(events = MenuEvents, commands=Increment, internal: true)]
     struct MyWin {
         m_counter: Handle<menu::Command>,
-        some_menu: Handle<Menu>,
+        some_menu: Handle<MenuEntry>,
         counter: u32,
     }
     impl MyWin {
@@ -322,14 +325,14 @@ fn check_dynamic_change_menu() {
             };
             let mut m = Menu::new("Some menu");
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.register_menu(m);
+            w.some_menu = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
 
             w
         }
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.some_menu, 0);
+            menubar.show(self.some_menu);
         }
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
             if item == self.m_counter {
@@ -377,7 +380,7 @@ fn check_dynamic_change_menu_2() {
     #[Window(events = MenuEvents, commands=Increment, internal: true)]
     struct MyWin {
         m_counter: Handle<menu::Command>,
-        some_menu: Handle<Menu>,
+        some_menu: Handle<MenuEntry>,
         counter: u32,
     }
     impl MyWin {
@@ -390,14 +393,14 @@ fn check_dynamic_change_menu_2() {
             };
             let mut m = Menu::new("Some menu");
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.register_menu(m);
+            w.some_menu = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
 
             w
         }
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.some_menu, 0);
+            menubar.show(self.some_menu);
         }
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
             if item == self.m_counter {
@@ -495,9 +498,10 @@ fn check_dynamic_change_menu_2() {
 fn check_menubar_update_multiple_menus() {
     mod mywin {
         use crate::prelude::*;
+        use crate::ui::menubar::*;
         #[Window(events = MenuEvents, commands=New+Save+Open, internal: true)]
         pub struct MyWindow {
-            h_menu: Handle<Menu>,
+            h_menu: Handle<MenuEntry>,
         }
         impl MyWindow {
             pub fn new(title: &str, layout: Layout) -> Self {
@@ -512,24 +516,25 @@ fn check_menubar_update_multiple_menus() {
                         {Open,cmd:Open},
                     ]"
                 );
-                w.h_menu = w.register_menu(m);
+                w.h_menu = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
 
                 w
             }
         }
         impl MenuEvents for MyWindow {
             fn on_update_menubar(&self, menubar: &mut MenuBar) {
-                menubar.add(self.h_menu, 0);
+                menubar.show(self.h_menu);
             }
         }
     }
     mod colorcustomcontrol {
         use crate::prelude::*;
+        use crate::ui::menubar::*;
 
         #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
         pub struct ColorCustomControl {
             col: Color,
-            h_menu: Handle<Menu>,
+            h_menu: Handle<MenuEntry>,
         }
         impl ColorCustomControl {
             pub fn new(layout: Layout) -> Self {
@@ -545,7 +550,7 @@ fn check_menubar_update_multiple_menus() {
                         {Blue,F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.register_menu(m);
+                obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
                 obj
             }
         }
@@ -567,17 +572,18 @@ fn check_menubar_update_multiple_menus() {
             }
 
             fn on_update_menubar(&self, menubar: &mut MenuBar) {
-                menubar.add(self.h_menu, 0);
+                menubar.show(self.h_menu);
             }
         }
     }
     mod textcustomcontrol {
         use crate::prelude::*;
+        use crate::ui::menubar::*;
 
         #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
         pub struct TextCustomControl {
             text: &'static str,
-            h_menu: Handle<Menu>,
+            h_menu: Handle<MenuEntry>,
         }
         impl TextCustomControl {
             pub fn new(layout: Layout) -> Self {
@@ -593,7 +599,7 @@ fn check_menubar_update_multiple_menus() {
                         {'Text->Blue',F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.register_menu(m);
+                obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
                 obj
             }
         }
@@ -618,7 +624,7 @@ fn check_menubar_update_multiple_menus() {
             }
 
             fn on_update_menubar(&self, menubar: &mut MenuBar) {
-                menubar.add(self.h_menu, 0);
+                menubar.show(self.h_menu);
             }
         }
     }
@@ -683,6 +689,7 @@ fn check_menubar_update_multiple_menus() {
 fn check_popup_menu() {
     pub(crate) mod mycustomcontrol {
         use crate::prelude::*;
+        use crate::ui::menubar::*;
 
         #[CustomControl(events = MenuEvents, overwrite = OnPaint+OnMouseEvent, commands = Red+Green+Black+Aqua+Magenta+Yellow+Blue+Gray+White+LightRed+LightGreen, internal: true)]
         pub struct MyCustomControl {
@@ -878,6 +885,7 @@ fn check_popup_menu() {
 fn check_popup_menu_with_keys() {
     pub(crate) mod mycustomcontrol {
         use crate::prelude::*;
+        use crate::ui::menubar::*;
 
         #[CustomControl(events = MenuEvents, overwrite = OnPaint+OnMouseEvent, commands = Red+Green+Black+Aqua+Magenta+Yellow+Blue+Gray+White+LightRed+LightGreen, internal: true)]
         pub struct MyCustomControl {
@@ -1027,9 +1035,9 @@ fn check_popup_menu_with_keys() {
 fn check_menubar_with_keys() {
     #[Window(events : MenuEvents, commands  : A, internal: true)]
     struct MyWindow {
-        h_file: Handle<Menu>,
-        h_edit: Handle<Menu>,
-        h_help: Handle<Menu>,
+        h_file: Handle<MenuEntry>,
+        h_edit: Handle<MenuEntry>,
+        h_help: Handle<MenuEntry>,
         lb: Handle<Label>,
     }
     impl MyWindow {
@@ -1043,8 +1051,9 @@ fn check_menubar_with_keys() {
             };
             w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
-            w.h_file = w.register_menu(menu!(
-                "&File,class: MyWindow, items=[
+            w.h_file = w.menubar_mut().add(MenuEntry::new(
+                menu!(
+                    "&File,class: MyWindow, items=[
                 {New,cmd:A},
                 {&Save,cmd:A},
                 {'&Save As ...',cmd:A},
@@ -1052,9 +1061,13 @@ fn check_menubar_with_keys() {
                 {-},
                 {E&xit,Alt+F4,cmd:A}
             ]"
+                ),
+                0,
+                MenuBarPosition::Left,
             ));
-            w.h_edit = w.register_menu(menu!(
-                "&Edit,class: MyWindow, items=[
+            w.h_edit = w.menubar_mut().add(MenuEntry::new(
+                menu!(
+                    "&Edit,class: MyWindow, items=[
                 {&Copy,cmd:A},
                 {&Paste,cmd:A},
                 {&Cut,cmd:A},
@@ -1067,9 +1080,13 @@ fn check_menubar_with_keys() {
                     {'Slot &5',cmd:A},
                 ]}            
             ]"
+                ),
+                0,
+                MenuBarPosition::Left,
             ));
-            w.h_help = w.register_menu(menu!(
-                "&Help,class: MyWindow, items=[
+            w.h_help = w.menubar_mut().add(MenuEntry::new(
+                menu!(
+                    "&Help,class: MyWindow, items=[
                 {&About,cmd:A},
                 {&Update,cmd:A},
                 {-},
@@ -1083,6 +1100,9 @@ fn check_menubar_with_keys() {
                     ]}            
                 ]}            
             ]"
+                ),
+                0,
+                MenuBarPosition::Left,
             ));
             w
         }
@@ -1099,9 +1119,9 @@ fn check_menubar_with_keys() {
         }
 
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.h_file, 0);
-            menubar.add(self.h_edit, 0);
-            menubar.add(self.h_help, 0);
+            menubar.show(self.h_file);
+            menubar.show(self.h_edit);
+            menubar.show(self.h_help);
         }
     }
 
@@ -1286,9 +1306,9 @@ fn check_menubar_with_keys() {
 fn check_menubar_recursive_shortcuts() {
     #[Window(events : MenuEvents, commands  : A, internal: true)]
     struct MyWindow {
-        h_file: Handle<Menu>,
-        h_edit: Handle<Menu>,
-        h_help: Handle<Menu>,
+        h_file: Handle<MenuEntry>,
+        h_edit: Handle<MenuEntry>,
+        h_help: Handle<MenuEntry>,
         lb: Handle<Label>,
     }
     impl MyWindow {
@@ -1302,8 +1322,9 @@ fn check_menubar_recursive_shortcuts() {
             };
             w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
-            w.h_file = w.register_menu(menu!(
-                "&File,class: MyWindow, items=[
+            w.h_file = w.menubar_mut().add(MenuEntry::new(
+                menu!(
+                    "&File,class: MyWindow, items=[
                     {New,F1,cmd:A},
                     {&Save,F2,cmd:A},
                     {'&Save As ...',Alt+F2,cmd:A},
@@ -1311,9 +1332,13 @@ fn check_menubar_recursive_shortcuts() {
                     {-},
                     {E&xit,Alt+F4,cmd:A}
                 ]"
+                ),
+                0,
+                MenuBarPosition::Left,
             ));
-            w.h_edit = w.register_menu(menu!(
-                "&Edit,class: MyWindow, items=[
+            w.h_edit = w.menubar_mut().add(MenuEntry::new(
+                menu!(
+                    "&Edit,class: MyWindow, items=[
                     {&Copy,Ctrl+Ins,cmd:A},
                     {&Paste,Shift+Ins,cmd:A},
                     {&Cut,Ctrl+X,cmd:A},
@@ -1326,9 +1351,13 @@ fn check_menubar_recursive_shortcuts() {
                         {'Slot &5',Alt+5,cmd:A},
                     ]}            
                 ]"
+                ),
+                0,
+                MenuBarPosition::Left,
             ));
-            w.h_help = w.register_menu(menu!(
-                "&Help,class: MyWindow, items=[
+            w.h_help = w.menubar_mut().add(MenuEntry::new(
+                menu!(
+                    "&Help,class: MyWindow, items=[
                     {&About,Ctrl+Shift+A,cmd:A},
                     {&Update,F10,cmd:A},
                     {-},
@@ -1342,6 +1371,9 @@ fn check_menubar_recursive_shortcuts() {
                         ]}            
                     ]}            
                 ]"
+                ),
+                0,
+                MenuBarPosition::Left,
             ));
             w
         }
@@ -1358,9 +1390,9 @@ fn check_menubar_recursive_shortcuts() {
         }
 
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.h_file, 0);
-            menubar.add(self.h_edit, 0);
-            menubar.add(self.h_help, 0);
+            menubar.show(self.h_file);
+            menubar.show(self.h_edit);
+            menubar.show(self.h_help);
         }
     }
 
@@ -1449,7 +1481,7 @@ fn check_menubar_recursive_shortcuts() {
 fn check_menu_checkbox_methods() {
     #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        m_desktop: Handle<Menu>,
+        m_desktop: Handle<MenuEntry>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -1469,12 +1501,12 @@ fn check_menu_checkbox_methods() {
                     {&C,cmd:C, checked: true}
                 ]"
             );
-            self.m_desktop = self.register_menu(m);
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_desktop, 0);
+            menubar.show(self.m_desktop);
         }
 
         fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, _: mydesktop::Commands, _: bool) {
@@ -1513,7 +1545,7 @@ fn check_menu_checkbox_methods() {
 fn check_menu_singlechoice_methods() {
     #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        m_desktop: Handle<Menu>,
+        m_desktop: Handle<MenuEntry>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -1533,12 +1565,12 @@ fn check_menu_singlechoice_methods() {
                     {&C,cmd:C, selected: false}
                 ]"
             );
-            self.m_desktop = self.register_menu(m);
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_desktop, 0);
+            menubar.show(self.m_desktop);
         }
 
         fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, _: mydesktop::Commands) {
@@ -1577,7 +1609,7 @@ fn check_menu_singlechoice_methods() {
 fn check_menu_set_status_checkbox_and_singlechoice() {
     #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        m_desktop: Handle<Menu>,
+        m_desktop: Handle<MenuEntry>,
         m_cb: Handle<menu::CheckBox>,
         m_sc: Handle<menu::SingleChoice>,
     }
@@ -1599,12 +1631,12 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
             m.add(menu::Separator::new());
             self.m_sc = m.add(menu::SingleChoice::new("Choice One", Key::None, mydesktop::Commands::B, false));
             m.add(menu::SingleChoice::new("Choice Two", Key::None, mydesktop::Commands::C, false));
-            self.m_desktop = self.register_menu(m);
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_desktop, 0);
+            menubar.show(self.m_desktop);
         }
 
         fn on_menu_open(&self, menu: &mut Menu) {
@@ -1634,7 +1666,7 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
 fn check_menu_command_methods() {
     #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        m_desktop: Handle<Menu>,
+        m_desktop: Handle<MenuEntry>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -1654,12 +1686,12 @@ fn check_menu_command_methods() {
                     {&C,cmd:C}
                 ]"
             );
-            self.m_desktop = self.register_menu(m);
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_desktop, 0);
+            menubar.show(self.m_desktop);
         }
 
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mydesktop::Commands) {
@@ -1697,9 +1729,9 @@ fn check_menu_command_methods() {
 fn check_menubar_order_parameter() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
     struct MyWin {
-        m_file: Handle<Menu>,
-        m_edit: Handle<Menu>,
-        m_help: Handle<Menu>,
+        m_file: Handle<MenuEntry>,
+        m_edit: Handle<MenuEntry>,
+        m_help: Handle<MenuEntry>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -1709,17 +1741,17 @@ fn check_menubar_order_parameter() {
                 m_help: Handle::None,
                 m_edit: Handle::None,
             };
-            w.m_file = w.register_menu(Menu::new("&File"));
-            w.m_edit = w.register_menu(Menu::new("&Edit"));
-            w.m_help = w.register_menu(Menu::new("&Help"));
+            w.m_file = w.menubar_mut().add(MenuEntry::new(Menu::new("&File"), 2, MenuBarPosition::Left));
+            w.m_edit = w.menubar_mut().add(MenuEntry::new(Menu::new("&Edit"), 0, MenuBarPosition::Left));
+            w.m_help = w.menubar_mut().add(MenuEntry::new(Menu::new("&Help"), 1, MenuBarPosition::Left));
             w
         }
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.m_file, 2);
-            menubar.add(self.m_help, 0);
-            menubar.add(self.m_edit, 1);
+            menubar.show(self.m_file);
+            menubar.show(self.m_help);
+            menubar.show(self.m_edit);
         }
     }
     let script = "
@@ -1737,15 +1769,17 @@ fn check_menubar_order_parameter_multi_controls() {
     // Window with menu
     pub mod mywindow {
         use crate::prelude::*;
+        use crate::ui::menubar::*;
 
         // Custom control with menu
         pub mod mycustomcontrol {
             use crate::prelude::*;
+            use crate::ui::menubar::*;
 
             #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
             pub struct MyCustomControl {
                 col: Color,
-                h_menu: Handle<Menu>,
+                h_menu: Handle<MenuEntry>,
             }
             impl MyCustomControl {
                 pub fn new(layout: Layout) -> Self {
@@ -1761,7 +1795,7 @@ fn check_menubar_order_parameter_multi_controls() {
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.register_menu(m);
+                    obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m, 2, MenuBarPosition::Left));
                     obj
                 }
             }
@@ -1786,14 +1820,14 @@ fn check_menubar_order_parameter_multi_controls() {
 
                 fn on_update_menubar(&self, menubar: &mut MenuBar) {
                     // Custom control menu with order 2 (should appear third)
-                    menubar.add(self.h_menu, 2);
+                    menubar.show(self.h_menu);
                 }
             }
         }
 
         #[Window(events = MenuEvents, commands = Copy+Paste+Cut, internal: true)]
         pub struct MyWindow {
-            h_menu: Handle<Menu>,
+            h_menu: Handle<MenuEntry>,
             hc: Handle<mycustomcontrol::MyCustomControl>,
         }
         impl MyWindow {
@@ -1810,7 +1844,7 @@ fn check_menubar_order_parameter_multi_controls() {
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.register_menu(m);
+                w.h_menu = w.menubar_mut().add(MenuEntry::new(m, 1, MenuBarPosition::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -1818,7 +1852,7 @@ fn check_menubar_order_parameter_multi_controls() {
         impl MenuEvents for MyWindow {
             fn on_update_menubar(&self, menubar: &mut MenuBar) {
                 // Window menu with order 1 (should appear second)
-                menubar.add(self.h_menu, 1);
+                menubar.show(self.h_menu);
             }
         }
     }
@@ -1826,7 +1860,7 @@ fn check_menubar_order_parameter_multi_controls() {
     // Desktop with menu
     #[Desktop(events = MenuEvents+DesktopEvents, commands = Settings+About, internal: true)]
     struct MyDesktop {
-        m_desktop: Handle<Menu>,
+        m_desktop: Handle<MenuEntry>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -1845,13 +1879,13 @@ fn check_menubar_order_parameter_multi_controls() {
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.register_menu(m);
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
             // Desktop menu with order 0 (should appear first)
-            menubar.add(self.m_desktop, 0);
+            menubar.show(self.m_desktop);
         }
     }
 
@@ -1870,15 +1904,17 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
     // Window with menu
     pub mod mywindow {
         use crate::prelude::*;
+        use crate::ui::menubar::*;
 
         // Custom control with menu
         pub mod mycustomcontrol {
             use crate::prelude::*;
+            use crate::ui::menubar::*;
 
             #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
             pub struct MyCustomControl {
                 col: Color,
-                h_menu: Handle<Menu>,
+                h_menu: Handle<MenuEntry>,
             }
             impl MyCustomControl {
                 pub fn new(layout: Layout) -> Self {
@@ -1894,7 +1930,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.register_menu(m);
+                    obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
                     obj
                 }
             }
@@ -1919,14 +1955,14 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
 
                 fn on_update_menubar(&self, menubar: &mut MenuBar) {
                     // Custom control menu with order 2 (should appear first)
-                    menubar.add(self.h_menu, 0);
+                    menubar.show(self.h_menu);
                 }
             }
         }
 
         #[Window(events = MenuEvents, commands = Copy+Paste+Cut, internal: true)]
         pub struct MyWindow {
-            h_menu: Handle<Menu>,
+            h_menu: Handle<MenuEntry>,
             hc: Handle<mycustomcontrol::MyCustomControl>,
         }
         impl MyWindow {
@@ -1943,7 +1979,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.register_menu(m);
+                w.h_menu = w.menubar_mut().add(MenuEntry::new(m, 1, MenuBarPosition::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -1951,7 +1987,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
         impl MenuEvents for MyWindow {
             fn on_update_menubar(&self, menubar: &mut MenuBar) {
                 // Window menu with order 1 (should appear second)
-                menubar.add(self.h_menu, 1);
+                menubar.show(self.h_menu);
             }
         }
     }
@@ -1959,7 +1995,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
     // Desktop with menu
     #[Desktop(events = MenuEvents+DesktopEvents, commands = Settings+About, internal: true)]
     struct MyDesktop {
-        m_desktop: Handle<Menu>,
+        m_desktop: Handle<MenuEntry>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -1978,13 +2014,13 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.register_menu(m);
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 2, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            // Desktop menu with order 0 (should appear last)
-            menubar.add(self.m_desktop, 2);
+            // Desktop menu with order 2 (should appear last)
+            menubar.show(self.m_desktop);
         }
     }
 
@@ -1997,4 +2033,3 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
     a.add_window(mywindow::MyWindow::new());
     a.run();
 }
-

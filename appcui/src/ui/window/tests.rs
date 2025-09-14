@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, ui};
 
 use super::{
     toolbar::{self, GroupPosition},
@@ -67,11 +67,7 @@ fn check_window_just_oversized_title() {
         CheckHash(0x8AD5C306676ACF04)
     ";
     let mut a = App::debug(20, 10, script).build().unwrap();
-    a.add_window(Window::new(
-        "0123456789ABCDEFGH",
-        layout!("a:c,w:20,h:10"),
-        window::Flags::NoCloseButton,
-    ));
+    a.add_window(Window::new("0123456789ABCDEFGH", layout!("a:c,w:20,h:10"), window::Flags::NoCloseButton));
     a.run();
 }
 #[test]
@@ -1348,11 +1344,7 @@ fn check_window_fixed_pos() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(Window::new("Moveable", layout!("x:5,y:1,w:20,h:6"), window::Flags::None));
-    a.add_window(Window::new(
-        "Non-Moveable",
-        layout!("x:30,y:1,w:25,h:6"),
-        window::Flags::FixedPosition,
-    ));
+    a.add_window(Window::new("Non-Moveable", layout!("x:30,y:1,w:25,h:6"), window::Flags::FixedPosition));
     a.run();
 }
 
@@ -1751,7 +1743,7 @@ fn check_modal_window_close() {
 fn check_window_close_with_commandbar_and_menu() {
     #[Window(events = CommandBarEvents+MenuEvents, commands: A, internal = true)]
     struct MyWin {
-        h_menu: Handle<Menu>,
+        h_menu: Handle<ui::menubar::MenuEntry>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -1759,7 +1751,11 @@ fn check_window_close_with_commandbar_and_menu() {
                 base: window!("Test,a:c,w:30,h:8"),
                 h_menu: Handle::None,
             };
-            w.h_menu = w.register_menu(menu!("File,class:MyWin,items=[{New,cmd:A}]"));
+            w.h_menu = w.menubar_mut().add(ui::menubar::MenuEntry::new(
+                menu!("File,class:MyWin,items=[{New,cmd:A}]"),
+                0,
+                ui::menubar::MenuBarPosition::Left,
+            ));
             w
         }
     }
@@ -1773,7 +1769,7 @@ fn check_window_close_with_commandbar_and_menu() {
     }
     impl MenuEvents for MyWin {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.h_menu, 0);
+            menubar.show(self.h_menu);
         }
     }
     let script = "

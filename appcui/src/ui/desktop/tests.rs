@@ -131,8 +131,9 @@ fn check_menus() {
     }
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
-            self.file_menu = self.register_menu(menu!(
-                "&File,class: MyDesktop, items=[
+            self.file_menu = self.menubar_mut().add(menubar::MenuEntry::new(
+                menu!(
+                    "&File,class: MyDesktop, items=[
                     {New,F1,cmd:A},
                     {&Save,F2,cmd:B},
                     {'&Save As ...',Alt+F2,cmd:C},
@@ -140,12 +141,15 @@ fn check_menus() {
                     {-},
                     {E&xit,Alt+F4,cmd:C}
                 ]"
+                ),
+                0,
+                menubar::MenuBarPosition::Left,
             ));
         }
     }
     impl MenuEvents for MyDesktop {
         fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.file_menu, 0);
+            menubar.show(self.file_menu);
         }
     }
     let script = "
@@ -717,9 +721,9 @@ fn check_commands_ignored() {
         }
     }
     impl DesktopEvents for MyDesktop {
-        fn on_start(&mut self) { 
+        fn on_start(&mut self) {
             // nothing should happen - set_size is ignored for desktop
-            self.set_size(1,1);
+            self.set_size(1, 1);
             self.set_enabled(false);
             self.set_visible(false);
         }

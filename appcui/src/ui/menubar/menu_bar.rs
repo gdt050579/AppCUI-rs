@@ -51,11 +51,11 @@ impl MenuBar {
     }
     #[inline(always)]
     pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
-        self.receiver_control_handle = handle;
+        //self.receiver_control_handle = handle;
     }
     pub(crate) fn clear(&mut self) {
         self.visibl_indexes.clear();
-        self.receiver_control_handle = Handle::None;
+        //self.receiver_control_handle = Handle::None;
         todo!()
     }
     pub(crate) fn close(&mut self) {
