@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 use std::time::Duration;
 
 mod fractal;
@@ -10,7 +11,7 @@ use fractal::Fractal;
 struct FractalDesktop {
     fractal: Fractal,
     window_count: u32,
-    main_menu: Handle<Menu>,
+    main_menu: Handle<MenuEntry>,
 }
 
 impl FractalDesktop {
@@ -91,13 +92,13 @@ impl DesktopEvents for FractalDesktop {
             timer.start(Duration::from_millis(50));
         }
         
-        self.main_menu = self.register_menu(menu!("
+        self.main_menu = self.menubar_mut().add(MenuEntry::new(menu!("
             &File,class: FractalDesktop, items:[
                 {&New,cmd: New, key: Ctrl+N},
                 {-},
                 {&Exit,cmd: Exit, key: Escape}
             ]
-        "));
+        "),0,MenuBarPosition::Left));
     }
 }
 
@@ -109,7 +110,7 @@ impl MenuEvents for FractalDesktop {
         }
     }
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.main_menu, 0);
+        menubar.show(self.main_menu);
     }
 }
 

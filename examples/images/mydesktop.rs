@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 
 use crate::dizzy::DIZZY_PIXELS;
 use crate::ferris::FERRIS_PIXELS;
@@ -10,8 +11,8 @@ use crate::shapes::SHAPES_PIXELS;
           commands  = Dizzy+Hello+Shapes+Ferris+Exit+Grid+Vertical+Horizontal+Cascade)]
 pub struct MyDesktop {
     index: u32,
-    menu_windows: Handle<Menu>,
-    menu_arrange: Handle<Menu>,
+    menu_windows: Handle<MenuEntry>,
+    menu_arrange: Handle<MenuEntry>,
 }
 impl MyDesktop {
     pub fn new() -> Self {
@@ -30,7 +31,7 @@ impl MyDesktop {
 impl DesktopEvents for MyDesktop {
     fn on_start(&mut self) {
         // define and register a menu
-        self.menu_windows = self.register_menu(menu!(
+        self.menu_windows = self.menubar_mut().add(MenuEntry::new(menu!(
             "&Windows,class: MyDesktop, items:[
                 {'&Dizzy',Alt+1, cmd: Dizzy},
                 {'&Hello Rust',Alt+2, cmd: Hello},
@@ -39,22 +40,22 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {'E&xit',cmd: Exit},
             ]"
-        ));
-        self.menu_arrange = self.register_menu(menu!(
+        ),0,MenuBarPosition::Left));
+        self.menu_arrange = self.menubar_mut().add(MenuEntry::new(menu!(
             "&Arrange,class: MyDesktop, items:[
               {'&Grid',cmd: Grid},
               {'&Vertical',cmd: Vertical},
               {'&Horizontal',cmd: Horizontal},
               {'&Cascade',cmd: Cascade},
           ]"
-        ));
+        ),0,MenuBarPosition::Left));
     }
 }
 
 impl MenuEvents for MyDesktop {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_windows, 0);
-        menubar.add(self.menu_arrange, 0);
+        menubar.show(self.menu_windows);
+        menubar.show(self.menu_arrange);
     }
 
     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mydesktop::Commands) {

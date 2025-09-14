@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 
 const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
@@ -24,7 +25,7 @@ const LOGO: [&str; 15] = [
 struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<Menu>,
+    menu_arrange: Handle<MenuEntry>,
 }
 impl MyDesktop {
     fn new() -> Self {
@@ -58,7 +59,7 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_arrange = self.register_menu(menu!("
+        self.menu_arrange = self.menubar_mut().add(MenuEntry::new(menu!("
             &Windows,class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
@@ -66,7 +67,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "));
+        "),0,MenuBarPosition::Left));
     }
         
 }
@@ -106,7 +107,7 @@ impl MenuEvents for MyDesktop {
     }
 
     fn on_update_menubar(&self,menubar: &mut MenuBar){
-        menubar.add(self.menu_arrange, 0);
+        menubar.show(self.menu_arrange);
     }
 }
 

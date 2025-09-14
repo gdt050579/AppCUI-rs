@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 use crate::Viewer;
 
 use std::fs;
@@ -18,8 +19,8 @@ const LOGO: [&str; 6] = [
 pub struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<Menu>,
-    menu_file: Handle<Menu>,
+    menu_arrange: Handle<MenuEntry>,
+    menu_file: Handle<MenuEntry>,
 }
 impl MyDesktop {
     pub fn new() -> Self {
@@ -54,14 +55,14 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_file = self.register_menu(menu!("
+        self.menu_file = self.menubar_mut().add(MenuEntry::new(menu!("
             &File, class: MyDesktop, items:[
                 {'&Open',cmd: Open, key: F3},
                 {---},
                 {'E&xit',cmd: Exit, key: Escape},
             ]
-        "));
-        self.menu_arrange = self.register_menu(menu!("
+        "),0,MenuBarPosition::Left));
+        self.menu_arrange = self.menubar_mut().add(MenuEntry::new(menu!("
             &Windows, class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
@@ -69,7 +70,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "));
+        "),0,MenuBarPosition::Left));
     }
         
 }
@@ -113,7 +114,7 @@ impl MenuEvents for MyDesktop {
 
     fn on_update_menubar(&self,menubar: &mut MenuBar)
     {
-        menubar.add(self.menu_file, 0);
-        menubar.add(self.menu_arrange, 0);
+        menubar.show(self.menu_file);
+        menubar.show(self.menu_arrange);
     }
 }
