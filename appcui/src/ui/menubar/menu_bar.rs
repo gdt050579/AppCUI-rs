@@ -76,7 +76,8 @@ impl MenuBar {
         self.receiver_control_handle = Handle::None;
     }
     pub(crate) fn close(&mut self) {
-        todo!()
+        self.current_item_index = None;
+        self.hovered_item_index = None;
     }
     fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {
         if y != 0 {
@@ -137,7 +138,12 @@ impl MenuBar {
         }
     }
     pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        todo!()
+        if let Some(idx) = self.mouse_position_to_index(x, y) {
+            self.open(idx);
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
     }
     pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
         let new_hover_pos = self.mouse_position_to_index(x, y);

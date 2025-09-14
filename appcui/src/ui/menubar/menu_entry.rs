@@ -47,7 +47,7 @@ impl MenuEntry {
         }
     }
     pub(super) fn on_activate(&mut self) {
-        RuntimeManager::get().show_menu(self.handle, self.receiver_control_handle, self.base.x(), 0, None)
+        RuntimeManager::get().show_menu(self.handle, self.receiver_control_handle, self.base.x(), 1, None)
     }
 }
 
