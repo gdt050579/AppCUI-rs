@@ -1742,8 +1742,8 @@ fn check_menubar_order_parameter() {
                 m_edit: Handle::None,
             };
             w.m_file = w.menubar_mut().add(MenuEntry::new(Menu::new("&File"), 2, MenuBarPosition::Left));
-            w.m_edit = w.menubar_mut().add(MenuEntry::new(Menu::new("&Edit"), 0, MenuBarPosition::Left));
-            w.m_help = w.menubar_mut().add(MenuEntry::new(Menu::new("&Help"), 1, MenuBarPosition::Left));
+            w.m_edit = w.menubar_mut().add(MenuEntry::new(Menu::new("&Edit"), 1, MenuBarPosition::Left));
+            w.m_help = w.menubar_mut().add(MenuEntry::new(Menu::new("&Help"), 0, MenuBarPosition::Left));
             w
         }
     }
