@@ -14,7 +14,7 @@ use super::{Menu, MenuBarItem_old};
 /// The menu bar is responsible for displaying and managing the top-level menus 
 /// in an application. It handles user interactions, keyboard shortcuts, and visual 
 /// presentation of menus.
-pub struct MenuBar {
+pub struct MenuBarV1 {
     items: Vec<MenuBarItem_old>,
     x: i32,
     y: i32,
@@ -25,7 +25,7 @@ pub struct MenuBar {
     receiver_control_handle: Handle<()>,
 }
 
-impl MenuBar {
+impl MenuBarV1 {
     pub(crate) fn new(width: u32) -> Self {
         Self {
             items: Vec::with_capacity(8),
@@ -108,7 +108,7 @@ impl MenuBar {
         if let Some(idx) = self.mouse_position_to_index(x, y) {
             if self.hovered_item.index() != idx {
                 self.hovered_item = VectorIndex::from(idx);
-                // if MenuBar is already opened, moving a mouse over another menu will implicetely open that menu
+                // if MenuBarV1 is already opened, moving a mouse over another menu will implicetely open that menu
                 if self.opened_item.is_valid() {
                     self.open(self.hovered_item);
                 }

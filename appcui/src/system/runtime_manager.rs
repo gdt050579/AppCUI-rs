@@ -19,7 +19,7 @@ use crate::ui::common::ControlManager;
 use crate::ui::common::ControlEvent;
 use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
-use crate::ui::menu::{Menu, MenuBar};
+use crate::ui::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
 
@@ -451,6 +451,9 @@ impl RuntimeManager {
     pub(crate) fn get_menu(&mut self, handle: Handle<Menu>) -> Option<&mut Menu> {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
+    }
+    pub(crate) fn get_menubar(&mut self)->&mut MenuBar {
+        self.menubar.as_mut().unwrap()
     }
     pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {
         let menus = unsafe { &mut *self.menus };

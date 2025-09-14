@@ -80,7 +80,7 @@ struct FileInformation {
 
 #[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme, internal: true)]
 struct WindowWithTheme {
-    h_file: Handle<Menu>,
+    h_file: Handle<menubar::MenuEntry>,
 }
 impl WindowWithTheme {
     fn new() -> Self {
@@ -89,7 +89,7 @@ impl WindowWithTheme {
             h_file: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.register_menu(menu!(
+        w.h_file = w.menubar_mut().add(menubar::MenuEntry::new(menu!(
             "&File,class: WindowWithTheme, items=[
             {New,F1,cmd:New},
             {&Save,F2,cmd:Save},
@@ -97,7 +97,7 @@ impl WindowWithTheme {
             {-},
             {E&xit,Alt+F4,cmd:Exit}
         ]"
-        ));
+        )));
 
         let mut splitter = vsplitter!("d:f,pos:55");
         let mut p_basic = panel!("'Basic controls',l:1,t:1,r:1,h:8");
@@ -174,7 +174,7 @@ impl WindowWithTheme {
 }
 impl MenuEvents for WindowWithTheme {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_file, 0);
+        menubar.show(self.h_file);
     }
 }
 
@@ -196,7 +196,6 @@ fn check_default_theme() {
     a.add_window(WindowWithTheme::new());
     a.run();
 }
-
 
 #[test]
 fn check_darkgray_theme() {

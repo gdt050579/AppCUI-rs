@@ -8,6 +8,7 @@ use crate::system::ThemeMethods;
 use crate::system::Timer;
 use crate::system::TimerMethods;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
+use crate::ui::MenuBar;
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
     desktop::events::DesktopEvents, layout::*, menu::events::GenericMenuEvents, menu::Menu, menu::MenuItem, window::events::ToolBarEvents,
@@ -659,6 +660,10 @@ impl ControlBase {
             return menu.get_mut(menuitem_handle);
         }
         None
+    }
+
+    pub fn menubar_mut(&mut self)->&mut MenuBar {
+        RuntimeManager::get().get_menubar()
     }
 
     #[inline(always)]

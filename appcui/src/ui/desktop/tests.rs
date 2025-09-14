@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, ui};
 
 use super::EmptyDesktop;
 
@@ -119,7 +119,7 @@ fn check_on_resize_for_desktop() {
 fn check_menus() {
     #[Desktop(events = DesktopEvents + MenuEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        file_menu: Handle<Menu>,
+        file_menu: Handle<ui::menubar::MenuEntry>,
     }
     impl MyDesktop {
         fn new() -> Self {
