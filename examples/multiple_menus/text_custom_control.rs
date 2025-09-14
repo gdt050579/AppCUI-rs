@@ -1,9 +1,10 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 
 #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue)]
 pub struct TextCustomControl {
     text: &'static str,
-    h_menu: Handle<Menu>,
+    h_menu: Handle<MenuEntry>,
 }
 impl TextCustomControl {
     pub fn new(layout: Layout) -> Self {
@@ -19,7 +20,7 @@ impl TextCustomControl {
             {'Text->Blue',F3,selected:false,cmd:Blue}
         ]"
         );
-        obj.h_menu = obj.register_menu(m);
+        obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m,0,MenuBarPosition::Left));
         obj
     }
 }
@@ -44,6 +45,6 @@ impl MenuEvents for TextCustomControl {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_menu, 0);
+        menubar.show(self.h_menu);
     }
 }

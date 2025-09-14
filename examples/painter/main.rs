@@ -1,4 +1,5 @@
 use appcui::{dialogs::{OpenFileDialogFlags, SaveFileDialogFlags}, prelude::*};
+use appcui::ui::menubar::*;
 mod painter_window;
 use painter_window::PainterWindow;
 mod painter_control;
@@ -8,7 +9,7 @@ mod painter_control;
           commands = [New, Exit, Open, Save])]
 struct PainterDesktop {
     index: u32,
-    menu_file: Handle<Menu>,
+    menu_file: Handle<MenuEntry>,
 }
 
 impl PainterDesktop {
@@ -29,7 +30,7 @@ impl OnPaint for PainterDesktop {
 
 impl DesktopEvents for PainterDesktop {
     fn on_start(&mut self) { 
-        self.menu_file = self.register_menu(menu!("
+        self.menu_file = self.menubar_mut().add(MenuEntry::new(menu!("
             &File,class: PainterDesktop, items:[
                 {'&New',cmd: New},
                 {'&Open',cmd: Open},
@@ -37,7 +38,7 @@ impl DesktopEvents for PainterDesktop {
                 {-},
                 {'E&xit',cmd: Exit}
             ]
-        "));
+        "),0,MenuBarPosition::Left));
     }
 }
 
@@ -75,7 +76,7 @@ impl MenuEvents for PainterDesktop {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_file, 0);
+        menubar.show(self.menu_file);
     }
 }
 

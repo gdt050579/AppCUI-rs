@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 mod minesweeper_game;
 mod mywin;
 use mywin::MyWin;
@@ -7,7 +8,7 @@ use mywin::MyWin;
           overwrite = OnPaint, 
           commands = [Easy, Medium, Hard, Extreme, Exit])]
 struct MyDesktop {
-    menu_game: Handle<Menu>,
+    menu_game: Handle<MenuEntry>,
 }
 
 impl MyDesktop {
@@ -37,7 +38,7 @@ impl CommandBarEvents for MyDesktop {
 
 impl MenuEvents for MyDesktop {
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_game, 0);
+        menubar.show(self.menu_game);
     }
     
     fn on_command(&mut self, _: Handle<Menu>, _: Handle<menu::Command>, command: mydesktop::Commands) {
@@ -61,7 +62,7 @@ impl MenuEvents for MyDesktop {
 
 impl DesktopEvents for MyDesktop {
     fn on_start(&mut self) {
-        self.menu_game = self.register_menu(menu!("
+        self.menu_game = self.menubar_mut().add(MenuEntry::new(menu!("
             &Game, class: MyDesktop, items:[
                 {&Easy, cmd: Easy},
                 {&Medium, cmd: Medium},
@@ -70,7 +71,7 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {&Exit, cmd: Exit}
             ]
-        "));
+        "),0,MenuBarPosition::Left));
     }
 }
 

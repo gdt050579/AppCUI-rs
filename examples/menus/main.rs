@@ -1,10 +1,11 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 
 #[Window(events : MenuEvents, commands  : A)]
 struct MyWindow {
-    h_file: Handle<Menu>,
-    h_edit: Handle<Menu>,
-    h_help: Handle<Menu>,
+    h_file: Handle<MenuEntry>,
+    h_edit: Handle<MenuEntry>,
+    h_help: Handle<MenuEntry>,
     lb: Handle<Label>,
 }
 impl MyWindow {
@@ -18,7 +19,7 @@ impl MyWindow {
         };
         w.lb = w.add(label!("None,a:c,w:30,h:1"));
         // construct a popup menu
-        w.h_file = w.register_menu(menu!(
+        w.h_file = w.menubar_mut().add(MenuEntry::new(menu!(
             "&File,class: MyWindow, items=[
             {New,F1,cmd:A},
             {&Save,F2,cmd:A},
@@ -27,8 +28,8 @@ impl MyWindow {
             {-},
             {E&xit,Alt+F4,cmd:A}
         ]"
-        ));
-        w.h_edit = w.register_menu(menu!(
+        ),0,MenuBarPosition::Left));
+        w.h_edit = w.menubar_mut().add(MenuEntry::new(menu!(
             "&Edit,class: MyWindow, items=[
             {&Copy,Ctrl+Ins,cmd:A},
             {&Paste,Shift+Ins,cmd:A},
@@ -42,8 +43,8 @@ impl MyWindow {
                 {'Slot &5',Alt+5,cmd:A},
             ]}            
         ]"
-        ));
-        w.h_help = w.register_menu(menu!(
+        ),0,MenuBarPosition::Left));
+        w.h_help = w.menubar_mut().add(MenuEntry::new(menu!(
             "&Help,class: MyWindow, items=[
             {&About,Ctrl+Shift+A,cmd:A},
             {&Update,F10,cmd:A},
@@ -58,7 +59,7 @@ impl MyWindow {
                 ]}            
             ]}            
         ]"
-        ));
+        ),0,MenuBarPosition::Left));
         w
     }
 }
@@ -74,9 +75,9 @@ impl MenuEvents for MyWindow {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_file, 0);
-        menubar.add(self.h_edit, 0);
-        menubar.add(self.h_help, 0);
+        menubar.show(self.h_file);
+        menubar.show(self.h_edit);
+        menubar.show(self.h_help);
     }
 }
 

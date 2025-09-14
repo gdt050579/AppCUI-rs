@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 mod file_navigator;
 mod base_controls;
 mod image_win;
@@ -32,9 +33,9 @@ const LOGO: [&str; 15] = [
           commands  = [Lists, BaseControls, Images, Animation, TreeExample, ColorPalette, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme, LightTheme])]
 struct MyDesktop {
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<Menu>,
-    menu_examples: Handle<Menu>,
-    menu_theme: Handle<Menu>,
+    menu_arrange: Handle<MenuEntry>,
+    menu_examples: Handle<MenuEntry>,
+    menu_theme: Handle<MenuEntry>,
 }
 impl MyDesktop {
     fn new() -> Self {
@@ -69,7 +70,7 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_examples = self.register_menu(menu!("
+        self.menu_examples = self.menubar_mut().add(MenuEntry::new(menu!("
             &Examples, class: MyDesktop, items:[
                 { Lists, cmd: Lists}, 
                 { 'Base Controls', cmd: BaseControls},
@@ -78,8 +79,8 @@ impl DesktopEvents for MyDesktop {
                 { 'Tree Example', cmd: TreeExample},
                 { 'Color Palette', cmd: ColorPalette}
             ]
-        "));
-        self.menu_arrange = self.register_menu(menu!("
+        "),0,MenuBarPosition::Left));
+        self.menu_arrange = self.menubar_mut().add(MenuEntry::new(menu!("
             &Windows,class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
@@ -87,14 +88,14 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "));
-        self.menu_theme = self.register_menu(menu!("
+        "),0,MenuBarPosition::Left));
+        self.menu_theme = self.menubar_mut().add(MenuEntry::new(menu!("
             &Theme,class: MyDesktop, items:[
                 {&Default,cmd: DefaultTheme, select: true},
                 {'Dark &Gray',cmd: DarkGrayTheme, select: false},
                 {'&Light',cmd: LightTheme, select: false}
             ]
-        "));
+        "),0,MenuBarPosition::Left));
     }
         
 }
@@ -127,9 +128,9 @@ impl MenuEvents for MyDesktop {
     }
 
     fn on_update_menubar(&self,menubar: &mut MenuBar) {
-        menubar.add(self.menu_examples, 0);
-        menubar.add(self.menu_arrange, 0);
-        menubar.add(self.menu_theme, 0);
+        menubar.show(self.menu_examples);
+        menubar.show(self.menu_arrange);
+        menubar.show(self.menu_theme);
     }
     
     fn on_command(&mut self,_:Handle<Menu>,_:Handle<menu::Command>,command:mydesktop::Commands){

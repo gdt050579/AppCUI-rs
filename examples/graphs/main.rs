@@ -1,4 +1,6 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
+
 mod settings;
 mod graph_window;
 mod tree;
@@ -25,9 +27,9 @@ const LOGO: [&str; 6] = [
 struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<Menu>,
-    menu_examples: Handle<Menu>,
-    menu_help: Handle<Menu>,
+    menu_arrange: Handle<MenuEntry>,
+    menu_examples: Handle<MenuEntry>,
+    menu_help: Handle<MenuEntry>,
 }
 
 impl MyDesktop {
@@ -73,7 +75,7 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register menus
-        self.menu_arrange = self.register_menu(menu!("
+        self.menu_arrange = self.menubar_mut().add(MenuEntry::new(menu!("
             &Windows,class: MyDesktop, items:[
                 {'&No arrangement',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
@@ -81,23 +83,23 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "));
+        "),2,MenuBarPosition::Left));
         
-        self.menu_examples = self.register_menu(menu!("
+        self.menu_examples = self.menubar_mut().add(MenuEntry::new(menu!("
             &Examples,class: MyDesktop, items:[
                 {'&Tree Graph',cmd: ShowTree},
                 {'&Circular Graph',cmd: ShowCircular},
                 {'&Bipartite Graph',cmd: ShowBipartite},
                 {'&Showcase Graph',cmd: ShowShowcase},
             ]
-        "));
+        "),0,MenuBarPosition::Left));
         
-        self.menu_help = self.register_menu(menu!("
+        self.menu_help = self.menubar_mut().add(MenuEntry::new(menu!("
             &Help,class: MyDesktop, items:[
                 {&About,cmd: About},
                 {E&xit,cmd: Exit},
             ]
-        "));
+        "),2,MenuBarPosition::Left));
     }  
 }
 
@@ -140,9 +142,9 @@ impl MenuEvents for MyDesktop {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_examples, 0);
-        menubar.add(self.menu_arrange, 2);
-        menubar.add(self.menu_help, 2);
+        menubar.show(self.menu_examples);
+        menubar.show(self.menu_arrange);
+        menubar.show(self.menu_help);
     }
 }
 

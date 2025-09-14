@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 use crate::settings::Settings;
 
 #[Window(events=[MenuEvents], 
@@ -10,7 +11,7 @@ use crate::settings::Settings;
                   SetEdgeLineAsciiRound, SetEdgeLineSingleRound, SetEdgeLineBraille])]
 pub struct GraphWindow {
     graph_view: Handle<GraphView<String>>,
-    menu_graph: Handle<Menu>,
+    menu_graph: Handle<MenuEntry>,
     settings: Settings,
     h_arrange_none: Handle<menu::SingleChoice>, 
     h_arrange_grid: Handle<menu::SingleChoice>,
@@ -106,7 +107,7 @@ impl GraphWindow {
         win.h_highlight_incoming_edges = m.add(menu::CheckBox::new("Highlight &Incoming Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingIn, false));
         win.h_highlight_outgoing_edges = m.add(menu::CheckBox::new("Highlight &Outgoing Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingOut, false));
 
-        win.menu_graph = win.register_menu(m);
+        win.menu_graph = win.menubar_mut().add(MenuEntry::new(m,1,MenuBarPosition::Left));
         
         win
     }
@@ -215,7 +216,7 @@ impl MenuEvents for GraphWindow {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_graph, 1);
+        menubar.show(self.menu_graph);
     }
 
     fn on_menu_open(&self,menu: &mut Menu) {

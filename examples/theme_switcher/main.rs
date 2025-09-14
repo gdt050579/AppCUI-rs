@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 use chrono::NaiveDate;
 
 #[derive(ListItem)]
@@ -13,8 +14,8 @@ struct FileInformation {
 
 #[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme)]
 struct MyWindow {
-    h_file: Handle<Menu>,
-    h_theme: Handle<Menu>,
+    h_file: Handle<MenuEntry>,
+    h_theme: Handle<MenuEntry>,
 }
 impl MyWindow {
     fn new() -> Self {
@@ -24,7 +25,7 @@ impl MyWindow {
             h_theme: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.register_menu(menu!(
+        w.h_file = w.menubar_mut().add(MenuEntry::new(menu!(
             "&File,class: MyWindow, items=[
             {New,F1,cmd:New},
             {&Save,F2,cmd:Save},
@@ -32,14 +33,14 @@ impl MyWindow {
             {-},
             {E&xit,Alt+F4,cmd:Exit}
         ]"
-        ));
-        w.h_theme = w.register_menu(menu!(
+        ),0,MenuBarPosition::Left));
+        w.h_theme = w.menubar_mut().add(MenuEntry::new(menu!(
             "&Theme,class: MyWindow, items=[
             {&Default,cmd:DefaultTheme,selected: true},
             {'Dark Gray',cmd:DarkGrayTheme, selected: false},
             {'&Light',cmd:LightTheme, selected: false}
         ]"
-        ));
+        ),0,MenuBarPosition::Left));
 
         let mut splitter = vsplitter!("d:f,pos:55");
         let mut p_basic = panel!("'Basic controls',l:1,t:1,r:1,h:8");
@@ -133,8 +134,8 @@ impl MenuEvents for MyWindow {
     }
 
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_file, 0);
-        menubar.add(self.h_theme, 0);
+        menubar.show(self.h_file);
+        menubar.show(self.h_theme);
     }
 }
 

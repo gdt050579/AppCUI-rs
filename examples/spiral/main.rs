@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::menubar::*;
 use std::time::Duration;
 
 mod spiral;
@@ -10,7 +11,7 @@ use spiral::Spiral;
 struct SpiralDesktop {
     spiral: Spiral,
     window_count: u32,
-    main_menu: Handle<Menu>,
+    main_menu: Handle<MenuEntry>,
 }
 
 impl SpiralDesktop {
@@ -98,13 +99,13 @@ impl DesktopEvents for SpiralDesktop {
             timer.start(Duration::from_millis(50));
         }
         
-        self.main_menu = self.register_menu(menu!("
+        self.main_menu = self.menubar_mut().add(MenuEntry::new(menu!("
             &File,class: SpiralDesktop, items:[
                 {&New,cmd: New, key: Ctrl+N},
                 {-},
                 {&Exit,cmd: Exit, key: Escape}
             ]
-        "));
+        "),0,MenuBarPosition::Left));
     }
 }
 
@@ -116,7 +117,7 @@ impl MenuEvents for SpiralDesktop {
         }
     }
     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.main_menu, 0);
+        menubar.show(self.main_menu);
     }
 }
 
