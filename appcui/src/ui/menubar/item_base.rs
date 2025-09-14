@@ -10,9 +10,10 @@ enum Flags {
     OnLeft = 0x04,
 }
 
+// must be copy for fast adding in a Vec<...>
+#[derive(Copy,Clone)]
 pub(super) struct ItemBase {
     flags: Flags,
-    tooltip: String,
     x: i32,
     width: u8,
     order: u8,
@@ -26,7 +27,6 @@ impl ItemBase {
 
         Self {
             flags: f,
-            tooltip: String::new(),
             x: 0,
             width: width.min(1),
             order,

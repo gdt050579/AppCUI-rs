@@ -7,9 +7,16 @@ use crate::ui::common::traits::EventProcessStatus;
 use crate::ui::menubar::ItemStatus;
 use crate::utils::HandleManager;
 
+#[derive(Copy, Clone)]
+struct MenuBarItemPos {
+    idx: u32,
+    x: i16,
+    width: u8,
+    order: u8,
+}
 pub struct MenuBar {
     manager: HandleManager<MenuBarItemWrapper>,
-    visible_indexes: Vec<(u32,u8)>,
+    shown_items: Vec<MenuBarItemPos>,
     receiver_control_handle: Handle<()>,
     width: u32,
 }
@@ -17,7 +24,7 @@ impl MenuBar {
     pub(crate) fn new(width: u32) -> Self {
         Self {
             manager: HandleManager::with_capacity(16),
-            visible_indexes: Vec::with_capacity(64),
+            shown_items: Vec::with_capacity(64),
             receiver_control_handle: Handle::None,
             width,
         }
@@ -59,7 +66,7 @@ impl MenuBar {
         self.receiver_control_handle = handle;
     }
     pub(crate) fn clear(&mut self) {
-        self.visible_indexes.clear();
+        self.shown_items.clear();
         self.receiver_control_handle = Handle::None;
     }
     pub(crate) fn close(&mut self) {
@@ -67,12 +74,15 @@ impl MenuBar {
     }
     pub(crate) fn update_positions(&mut self) {
         // sort the data first
-        self.visible_indexes.sort_by_key(|i| i.1);
+        self.shown_items.sort_by_key(|i| i.order);
         let mut x = 0;
-        for vis in &self.visible_indexes {
-            let idx = vis.0 as usize;
+        for item in &mut self.shown_items {
+            let idx = item.idx as usize;
             if let Some(obj) = self.manager.element_mut(idx) {
                 obj.base_mut().set_x(x);
+                let w = obj.base().width();
+                item.x = x as i16;
+                item.width = w;
                 x += 2 + obj.base().width() as i32;
             }
         }
@@ -84,8 +94,8 @@ impl MenuBar {
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.fill_horizontal_line_with_size(0, 0, self.width, Character::with_attributes(' ', theme.menu.text.normal));
 
-        for vis in &self.visible_indexes {
-            if let Some(elem) = self.manager.element(vis.0 as usize) {
+        for item in &self.shown_items {
+            if let Some(elem) = self.manager.element(item.idx as usize) {
                 let status = ItemStatus::Normal;
                 elem.paint(surface, theme, status);
             }
@@ -113,9 +123,13 @@ impl MenuBar {
         }
         if let Some(item) = self.manager.get_mut(handle.cast()) {
             item.set_receiver_control_handle(self.receiver_control_handle);
-            let o = item.base().order();
-            self.visible_indexes.push((handle.index() as u32,o));
+            let base = item.base();
+            self.shown_items.push(MenuBarItemPos {
+                idx: handle.index() as u32,
+                x: base.x() as i16,
+                width: base.width(),
+                order: base.order(),
+            });
         }
-
     }
 }
