@@ -167,4 +167,5 @@ pub use treeview::TreeView;
 pub use progressbar::ProgressBar;
 pub use textarea::TextArea;
 pub use menu::Menu;
+pub use menu_bar::MenuBar;
 pub use graphview::GraphView;

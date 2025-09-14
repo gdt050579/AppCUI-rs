@@ -44,8 +44,13 @@ impl MenuBar {
             MenuBarItemWrapper::Button(_) => todo!(),
             MenuBarItemWrapper::CheckBox(_) => todo!(),
         }
-    }    
+    }
     pub(crate) fn update_positions(&mut self) {
         todo!()
+    }
+    pub fn show<T>(&mut self, handle: Handle<T>)
+    where
+        T: MenuBarItem,
+    {
     }
 }

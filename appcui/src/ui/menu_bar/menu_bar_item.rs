@@ -1,6 +1,7 @@
 use crate::system::{Handle, HandleSupport};
 use super::ItemBase;
 use crate::graphics::Surface;
+use super::MenuEntry;
 
 // un menu bar itm are:
 // flag-urile: enabld / visible / to left / capture input
@@ -10,7 +11,7 @@ pub(crate) trait MenuBarItem {
 }
 pub(crate) enum MenuBarItemWrapper {
     Separator(bool),
-    MenuEntry(bool),
+    MenuEntry(MenuEntry),
     Label(bool),
     Button(bool),
     CheckBox(bool),
