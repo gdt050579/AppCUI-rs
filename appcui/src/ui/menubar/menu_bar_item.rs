@@ -1,4 +1,4 @@
-use crate::system::{Handle, HandleSupport};
+use crate::{system::{Handle, HandleSupport, Theme}, ui::menubar::ItemStatus};
 use super::ItemBase;
 use crate::graphics::Surface;
 use super::MenuEntry;
@@ -36,7 +36,15 @@ impl MenuBarItemWrapper {
             MenuBarItemWrapper::CheckBox(_) => todo!(),
         }        
     }
-    pub(super) fn paint(&self, surface: &mut Surface) {
+    #[inline(always)]
+    pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: ItemStatus) {
+        match self {
+            MenuBarItemWrapper::Separator(_) => todo!(),
+            MenuBarItemWrapper::MenuEntry(obj) => obj.paint(surface, theme, status),
+            MenuBarItemWrapper::Label(_) => todo!(),
+            MenuBarItemWrapper::Button(_) => todo!(),
+            MenuBarItemWrapper::CheckBox(_) => todo!(),
+        }
 
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {

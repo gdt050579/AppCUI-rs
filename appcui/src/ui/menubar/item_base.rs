@@ -53,4 +53,8 @@ impl ItemBase {
     pub(super) fn set_x(&mut self, x: i32) {
         self.x = x;
     }
+    #[inline(always)]
+    pub(super) fn x(&self) -> i32 {
+        self.x
+    }      
 }

@@ -1,15 +1,17 @@
 use super::{MenuBarItem, MenuBarItemWrapper};
-use crate::graphics::Surface;
+use crate::graphics::*;
 use crate::input::Key;
 use crate::system::Handle;
 use crate::system::Theme;
 use crate::ui::common::traits::EventProcessStatus;
+use crate::ui::menubar::ItemStatus;
 use crate::utils::HandleManager;
 
 pub struct MenuBar {
     manager: HandleManager<MenuBarItemWrapper>,
     visible_indexes: Vec<(u32,u8)>,
     receiver_control_handle: Handle<()>,
+    width: u32,
 }
 impl MenuBar {
     pub(crate) fn new(width: u32) -> Self {
@@ -17,6 +19,7 @@ impl MenuBar {
             manager: HandleManager::with_capacity(16),
             visible_indexes: Vec::with_capacity(64),
             receiver_control_handle: Handle::None,
+            width,
         }
     }
     pub fn add<T>(&mut self, item: T) -> Handle<T>
@@ -79,13 +82,21 @@ impl MenuBar {
         todo!()
     }
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
-        todo!()
+        surface.fill_horizontal_line_with_size(0, 0, self.width, Character::with_attributes(' ', theme.menu.text.normal));
+
+        for vis in &self.visible_indexes {
+            if let Some(elem) = self.manager.element(vis.0 as usize) {
+                let status = ItemStatus::Normal;
+                elem.paint(surface, theme, status);
+            }
+        }
     }
     pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
         todo!()
     }
     pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        todo!()
+        EventProcessStatus::Ignored
+        //fstodo!()
     }
     pub(crate) fn on_key_event(&mut self, key: Key, menu_is_opened: bool) -> EventProcessStatus {
         todo!()
