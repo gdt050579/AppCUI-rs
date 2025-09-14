@@ -21,7 +21,7 @@ impl MenuBarItemWrapper {
     pub(super) fn base(&self) -> &ItemBase {
         match self {
             MenuBarItemWrapper::Separator(_) => todo!(),
-            MenuBarItemWrapper::MenuEntry(_) => todo!(),
+            MenuBarItemWrapper::MenuEntry(obj) => &obj.base,
             MenuBarItemWrapper::Label(_) => todo!(),
             MenuBarItemWrapper::Button(_) => todo!(),
             MenuBarItemWrapper::CheckBox(_) => todo!(),
@@ -30,7 +30,7 @@ impl MenuBarItemWrapper {
     pub(super) fn base_mut(&mut self) -> &mut ItemBase {
         match self {
             MenuBarItemWrapper::Separator(_) => todo!(),
-            MenuBarItemWrapper::MenuEntry(_) => todo!(),
+            MenuBarItemWrapper::MenuEntry(obj) => &mut obj.base,
             MenuBarItemWrapper::Label(_) => todo!(),
             MenuBarItemWrapper::Button(_) => todo!(),
             MenuBarItemWrapper::CheckBox(_) => todo!(),
@@ -39,14 +39,23 @@ impl MenuBarItemWrapper {
     pub(super) fn paint(&self, surface: &mut Surface) {
 
     }
+    pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
+        match self {
+            MenuBarItemWrapper::Separator(_) => todo!(),
+            MenuBarItemWrapper::MenuEntry(obj) => obj.set_receiver_control_handle(handle),
+            MenuBarItemWrapper::Label(_) => todo!(),
+            MenuBarItemWrapper::Button(_) => todo!(),
+            MenuBarItemWrapper::CheckBox(_) => todo!(),
+        }    
+    }
 }
 
 impl HandleSupport<MenuBarItemWrapper> for MenuBarItemWrapper {
     fn handle(&self) -> Handle<MenuBarItemWrapper> {
-        todo!()
+        self.base().handle()
     }
 
     fn set_handle(&mut self, handle: Handle<MenuBarItemWrapper>) {
-        todo!()
+        self.base_mut().update_handle(handle);
     }
 }

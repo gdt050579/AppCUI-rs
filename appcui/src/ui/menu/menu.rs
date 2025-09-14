@@ -775,6 +775,10 @@ impl Menu {
     pub(crate) fn get_parent_handle(&self) -> Handle<Menu> {
         self.parent_handle
     }
+
+    pub(crate) fn caption(&self) -> &Caption {
+        &self.caption
+    }
 }
 
 impl HandleSupport<Menu> for Menu {

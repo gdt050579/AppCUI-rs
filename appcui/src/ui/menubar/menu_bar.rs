@@ -1,20 +1,22 @@
 use super::{MenuBarItem, MenuBarItemWrapper};
-use crate::system::Handle;
-use crate::utils::HandleManager;
 use crate::graphics::Surface;
-use crate::system::Theme;
 use crate::input::Key;
+use crate::system::Handle;
+use crate::system::Theme;
 use crate::ui::common::traits::EventProcessStatus;
+use crate::utils::HandleManager;
 
 pub struct MenuBar {
     manager: HandleManager<MenuBarItemWrapper>,
-    visibl_indexes: Vec<u32>,
+    visible_indexes: Vec<(u32,u8)>,
+    receiver_control_handle: Handle<()>,
 }
 impl MenuBar {
     pub(crate) fn new(width: u32) -> Self {
         Self {
             manager: HandleManager::with_capacity(16),
-            visibl_indexes: Vec::with_capacity(64),
+            visible_indexes: Vec::with_capacity(64),
+            receiver_control_handle: Handle::None,
         }
     }
     pub fn add<T>(&mut self, item: T) -> Handle<T>
@@ -51,20 +53,28 @@ impl MenuBar {
     }
     #[inline(always)]
     pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
-        //self.receiver_control_handle = handle;
+        self.receiver_control_handle = handle;
     }
     pub(crate) fn clear(&mut self) {
-        self.visibl_indexes.clear();
-        //self.receiver_control_handle = Handle::None;
-        todo!()
+        self.visible_indexes.clear();
+        self.receiver_control_handle = Handle::None;
     }
     pub(crate) fn close(&mut self) {
         todo!()
     }
     pub(crate) fn update_positions(&mut self) {
-        todo!()
+        // sort the data first
+        self.visible_indexes.sort_by_key(|i| i.1);
+        let mut x = 0;
+        for vis in &self.visible_indexes {
+            let idx = vis.0 as usize;
+            if let Some(obj) = self.manager.element_mut(idx) {
+                obj.base_mut().set_x(x);
+                x += 2 + obj.base().width() as i32;
+            }
+        }
     }
-        #[inline(always)]
+    #[inline(always)]
     pub(crate) fn is_opened(&self) -> bool {
         todo!()
     }
@@ -87,5 +97,14 @@ impl MenuBar {
     where
         T: MenuBarItem,
     {
+        if self.receiver_control_handle.is_none() {
+            return;
+        }
+        if let Some(item) = self.manager.get_mut(handle.cast()) {
+            item.set_receiver_control_handle(self.receiver_control_handle);
+            let o = item.base().order();
+            self.visible_indexes.push((handle.index() as u32,o));
+        }
+
     }
 }
