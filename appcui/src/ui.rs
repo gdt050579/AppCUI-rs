@@ -91,6 +91,7 @@ pub mod panel;
 pub mod password;
 pub mod textfield;
 pub mod menu;
+pub mod menu_bar;
 pub mod command_bar;
 pub mod window;
 pub mod button;

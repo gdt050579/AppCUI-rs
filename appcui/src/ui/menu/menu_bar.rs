@@ -7,7 +7,7 @@ use crate::{
     utils::{Strategy, VectorIndex},
 };
 
-use super::{Menu, MenuBarItem};
+use super::{Menu, MenuBarItem_old};
 
 /// A menu bar that displays a horizontal list of menus at the top of a window or desktop.
 ///
@@ -15,7 +15,7 @@ use super::{Menu, MenuBarItem};
 /// in an application. It handles user interactions, keyboard shortcuts, and visual 
 /// presentation of menus.
 pub struct MenuBar {
-    items: Vec<MenuBarItem>,
+    items: Vec<MenuBarItem_old>,
     x: i32,
     y: i32,
     width: u32,
@@ -91,7 +91,7 @@ impl MenuBar {
                 self.items[self.count].set(handle, self.receiver_control_handle, &menu.caption);
                 self.items[self.count].set_order(order);
             } else {
-                self.items.push(MenuBarItem::new(handle, self.receiver_control_handle, &menu.caption, order));
+                self.items.push(MenuBarItem_old::new(handle, self.receiver_control_handle, &menu.caption, order));
             }
             self.count += 1;
         }

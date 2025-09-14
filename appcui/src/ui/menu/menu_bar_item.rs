@@ -2,14 +2,35 @@ use crate::{system::Handle, utils::Caption, utils::ExtractHotKeyMethod};
 
 use super::Menu;
 
-pub(super) struct MenuBarItem {
+
+/*
+* Menu(Menu)
+* Separator(|)
+* Label(text)
+* Button
+// x, enabled, hidden
+// fac un manager cu toate (problema e ca daca inchide o fereastra ar trebui sa le sterg !!! (de vazut cum))
+// cand se schimba focusul le adaug pe toate in vector
+
+menubar().add(Menu, order, direction::Left|Right)
+menubar().add(menubar::Label::new(...), order, drection::Left|Right)
+menubar().add(menubar::Separator::new(), order, direction::Left|Right)
+menubar().add(menubar::Menu(menu::Menu), order, direction::Left|Right)
+
+enum MenuBarItem {
+    Menu()
+}
+
+*/
+
+pub(super) struct MenuBarItem_old {
     pub(super) caption: Caption,
     pub(super) x: i32,
     pub(super) handle: Handle<Menu>,
     pub(super) receiver_control_handle: Handle<()>,
     pub(super) order: u8,
 }
-impl MenuBarItem {
+impl MenuBarItem_old {
     pub(super) fn new(handle: Handle<Menu>, control_handle: Handle<()>, caption: &Caption, order: u8) -> Self {
         Self {
             x: 0,
