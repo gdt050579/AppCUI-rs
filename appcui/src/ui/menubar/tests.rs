@@ -202,13 +202,13 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                         h_menu: Handle::None,
                     };
                     let m = menu!(
-                        "ControlMenu,class:MyCustomControl,items=[
+                        "class:MyCustomControl,items=[
                         {Red,selected:true,cmd:Red},
                         {Green,selected:false,cmd:Green},
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+                    obj.h_menu = obj.menubar_mut().add(MenuEntry::new("ColorMenu", m, 0, MenuBarPosition::Left));
                     obj
                 }
             }
@@ -251,13 +251,13 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                     hc: Handle::None,
                 };
                 let m = menu!(
-                    "WindowMenu,class:MyWindow,items=[
+                    "class:MyWindow,items=[
                         {Copy,cmd:Copy},
                         {Paste,cmd:Paste},
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.menubar_mut().add(MenuEntry::new(m, 1, MenuBarPosition::Left));
+                w.h_menu = w.menubar_mut().add(MenuEntry::new("WindowMenu", m, 1, MenuBarPosition::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -287,12 +287,12 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
             let m = menu!(
-                "DesktopMenu,class:MyDesktop,items=[
+                "class:MyDesktop,items=[
                     {Settings,cmd:Settings},
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 2, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("DesktopMenu", m, 2, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
