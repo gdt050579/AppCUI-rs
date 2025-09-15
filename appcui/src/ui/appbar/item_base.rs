@@ -1,6 +1,6 @@
 use crate::ui::appbar::Side;
 use crate::system::Handle;
-use super::MenuBarItemWrapper;
+use super::AppBarItemWrapper;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits: 8)]
@@ -17,7 +17,7 @@ pub(super) struct ItemBase {
     x: i32,
     width: u8,
     order: u8,
-    handle: Handle<MenuBarItemWrapper>
+    handle: Handle<AppBarItemWrapper>
 }
 impl ItemBase {
     pub(super) fn new(width: u8, order: u8, position: Side, accept_input: bool) -> Self {
@@ -34,11 +34,11 @@ impl ItemBase {
         }
     }
     #[inline(always)]
-    pub(super) fn update_handle(&mut self, handle: Handle<MenuBarItemWrapper>) {
+    pub(super) fn update_handle(&mut self, handle: Handle<AppBarItemWrapper>) {
         self.handle = handle;
     }
     #[inline(always)]
-    pub(super) fn handle(&self) -> Handle<MenuBarItemWrapper> {
+    pub(super) fn handle(&self) -> Handle<AppBarItemWrapper> {
         self.handle
     }
     #[inline(always)]

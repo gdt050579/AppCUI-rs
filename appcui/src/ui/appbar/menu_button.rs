@@ -1,4 +1,4 @@
-use super::{ItemBase, ItemStatus, MenuBarItem, MenuBarItemWrapper, Side};
+use super::{ItemBase, ItemStatus, AppBarItem, AppBarItemWrapper, Side};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, MenuHandleManager, RuntimeManager, Theme};
@@ -67,8 +67,8 @@ impl MenuButton {
     }
 }
 
-impl MenuBarItem for MenuButton {
-    fn into_menuibartem(self) -> MenuBarItemWrapper {
-        MenuBarItemWrapper::MenuEntry(self)
+impl AppBarItem for MenuButton {
+    fn into_appbaribartem(self) -> AppBarItemWrapper {
+        AppBarItemWrapper::MenuEntry(self)
     }
 }
