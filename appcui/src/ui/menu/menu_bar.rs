@@ -186,6 +186,7 @@ impl MenuBarV1 {
             _ => EventProcessStatus::Ignored,
         }
     }
+    
     pub(crate) fn on_key_event(&mut self, key: Key, menu_is_opened: bool) -> EventProcessStatus {
         if menu_is_opened {
             if key.modifier.is_empty() {

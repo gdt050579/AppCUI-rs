@@ -7,17 +7,20 @@ use crate::ui::menu::Menu;
 pub struct MenuEntry {
     handle: Handle<Menu>,
     receiver_control_handle: Handle<()>,
+    hotkey: Key,
     pub(super) base: ItemBase,
 }
 
 impl MenuEntry {
     pub fn new(menu: Menu, order: u8, pos: MenuBarPosition) -> Self {
         let w = (menu.caption().chars_count().max(1) + 2).min(u8::MAX as usize) as u8;
+        let hotkey = menu.caption().hotkey();
         let h = RuntimeManager::get().add_menu(menu);
         Self {
             handle: h,
             receiver_control_handle: Handle::None,
             base: ItemBase::new(w, order, pos, true),
+            hotkey,
         }
     }
     pub fn with_handle(handle: Handle<Menu>, order: u8, pos: MenuBarPosition) -> Self {
@@ -60,6 +63,10 @@ impl MenuEntry {
             false
         }
     }
+    #[inline(always)]
+    pub(super) fn hotkey(&self) -> Key {
+        self.hotkey
+    }    
 }
 
 impl MenuBarItem for MenuEntry {

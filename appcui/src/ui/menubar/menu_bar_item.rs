@@ -47,7 +47,13 @@ impl MenuBarItemWrapper {
     }
     #[inline(always)]
     pub(super) fn hotkey(&self) -> Key {
-        Key::None
+        match self {
+            MenuBarItemWrapper::Separator(_) => todo!(),
+            MenuBarItemWrapper::MenuEntry(menu_entry) => menu_entry.hotkey(),
+            MenuBarItemWrapper::Label(_) => todo!(),
+            MenuBarItemWrapper::Button(_) => todo!(),
+            MenuBarItemWrapper::CheckBox(_) => todo!(),
+        }
     }
     #[inline(always)]
     pub(super) fn process_shortcut(&self, key: Key, menus: &mut MenuHandleManager) -> bool {
