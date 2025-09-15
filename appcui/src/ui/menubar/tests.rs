@@ -3,7 +3,6 @@ use crate::{
     ui::menubar::{MenuBarPosition, MenuEntry},
 };
 
-
 #[test]
 fn check_menubar_order_parameter() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
@@ -20,9 +19,9 @@ fn check_menubar_order_parameter() {
                 m_help: Handle::None,
                 m_edit: Handle::None,
             };
-            w.m_file = w.menubar_mut().add(MenuEntry::new(Menu::new("&File"), 2, MenuBarPosition::Left));
-            w.m_edit = w.menubar_mut().add(MenuEntry::new(Menu::new("&Edit"), 1, MenuBarPosition::Left));
-            w.m_help = w.menubar_mut().add(MenuEntry::new(Menu::new("&Help"), 0, MenuBarPosition::Left));
+            w.m_file = w.menubar_mut().add(MenuEntry::new("&File", Menu::new(), 2, MenuBarPosition::Left));
+            w.m_edit = w.menubar_mut().add(MenuEntry::new("&Edit", Menu::new(), 1, MenuBarPosition::Left));
+            w.m_help = w.menubar_mut().add(MenuEntry::new("&Help", Menu::new(), 0, MenuBarPosition::Left));
             w
         }
     }
@@ -68,13 +67,13 @@ fn check_menubar_order_parameter_multi_controls() {
                         h_menu: Handle::None,
                     };
                     let m = menu!(
-                        "ControlMenu,class:MyCustomControl,items=[
+                        "class:MyCustomControl,items=[
                         {Red,selected:true,cmd:Red},
                         {Green,selected:false,cmd:Green},
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m, 2, MenuBarPosition::Left));
+                    obj.h_menu = obj.menubar_mut().add(MenuEntry::new("ControlMenu", m, 2, MenuBarPosition::Left));
                     obj
                 }
             }
@@ -117,13 +116,13 @@ fn check_menubar_order_parameter_multi_controls() {
                     hc: Handle::None,
                 };
                 let m = menu!(
-                    "WindowMenu,class:MyWindow,items=[
+                    "class:MyWindow,items=[
                         {Copy,cmd:Copy},
                         {Paste,cmd:Paste},
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.menubar_mut().add(MenuEntry::new(m, 1, MenuBarPosition::Left));
+                w.h_menu = w.menubar_mut().add(MenuEntry::new("WindowMenu", m, 1, MenuBarPosition::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -153,12 +152,12 @@ fn check_menubar_order_parameter_multi_controls() {
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
             let m = menu!(
-                "DesktopMenu,class:MyDesktop,items=[
+                "class:MyDesktop,items=[
                     {Settings,cmd:Settings},
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("DesktopMenu", m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -313,7 +312,6 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
     a.run();
 }
 
-
 #[test]
 fn check_menubar_update_multiple_menus() {
     mod mywin {
@@ -330,13 +328,13 @@ fn check_menubar_update_multiple_menus() {
                     h_menu: Handle::None,
                 };
                 let m = menu!(
-                    "File,class:MyWindow,items=[
+                    "class:MyWindow,items=[
                         {New,cmd:New},
                         {Save,cmd:Save},
                         {Open,cmd:Open},
                     ]"
                 );
-                w.h_menu = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+                w.h_menu = w.menubar_mut().add(MenuEntry::new("File", m, 0, MenuBarPosition::Left));
 
                 w
             }
@@ -364,13 +362,13 @@ fn check_menubar_update_multiple_menus() {
                     h_menu: Handle::None,
                 };
                 let m = menu!(
-                    "ColorControl,class:ColorCustomControl,items=[
+                    "class:ColorCustomControl,items=[
                         {Red,F1,selected:true,cmd:Red},
                         {Green,F2,selected:false,cmd:Green},
                         {Blue,F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+                obj.h_menu = obj.menubar_mut().add(MenuEntry::new("ColorControl", m, 0, MenuBarPosition::Left));
                 obj
             }
         }
@@ -413,13 +411,13 @@ fn check_menubar_update_multiple_menus() {
                     h_menu: Handle::None,
                 };
                 let m = menu!(
-                    "Text,class:TextCustomControl,items=[
+                    "class:TextCustomControl,items=[
                         {'Text->Red',F1,selected:true,cmd:Red},
                         {'Text->Green',F2,selected:false,cmd:Green},
                         {'Text->Blue',F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+                obj.h_menu = obj.menubar_mut().add(MenuEntry::new("Text", m, 0, MenuBarPosition::Left));
                 obj
             }
         }
@@ -505,7 +503,6 @@ fn check_menubar_update_multiple_menus() {
     a.run();
 }
 
-
 #[test]
 fn check_menubar_with_keys() {
     #[Window(events : MenuEvents, commands  : A, internal: true)]
@@ -527,54 +524,57 @@ fn check_menubar_with_keys() {
             w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
             w.h_file = w.menubar_mut().add(MenuEntry::new(
+                "&File",
                 menu!(
-                    "&File,class: MyWindow, items=[
-                {New,cmd:A},
-                {&Save,cmd:A},
-                {'&Save As ...',cmd:A},
-                {&Open,cmd:A},
-                {-},
-                {E&xit,Alt+F4,cmd:A}
-            ]"
+                    "class: MyWindow, items=[
+                    {New,cmd:A},
+                    {&Save,cmd:A},
+                    {'&Save As ...',cmd:A},
+                    {&Open,cmd:A},
+                    {-},
+                    {E&xit,Alt+F4,cmd:A}
+                ]"
                 ),
                 0,
                 MenuBarPosition::Left,
             ));
             w.h_edit = w.menubar_mut().add(MenuEntry::new(
+                "&Edit",
                 menu!(
-                    "&Edit,class: MyWindow, items=[
-                {&Copy,cmd:A},
-                {&Paste,cmd:A},
-                {&Cut,cmd:A},
-                {-},
-                {&Special,items=[
-                    {'Slot &1',cmd:A},
-                    {'Slot &2',cmd:A},
-                    {'Slot &3',cmd:A},
-                    {'Slot &4',cmd:A},
-                    {'Slot &5',cmd:A},
-                ]}            
-            ]"
+                    "class: MyWindow, items=[
+                    {&Copy,cmd:A},
+                    {&Paste,cmd:A},
+                    {&Cut,cmd:A},
+                    {-},
+                    {&Special,items=[
+                        {'Slot &1',cmd:A},
+                        {'Slot &2',cmd:A},
+                        {'Slot &3',cmd:A},
+                        {'Slot &4',cmd:A},
+                        {'Slot &5',cmd:A},
+                    ]}            
+                ]"
                 ),
                 0,
                 MenuBarPosition::Left,
             ));
             w.h_help = w.menubar_mut().add(MenuEntry::new(
+                "&Help",
                 menu!(
-                    "&Help,class: MyWindow, items=[
-                {&About,cmd:A},
-                {&Update,cmd:A},
-                {-},
-                {&Tutorials,items=[
-                    {'&Usage',cmd:A},
-                    {'&Download',cmd:A},
-                    {&Time,items=[
-                        {'Day &1',cmd:A},
-                        {'Day &2',cmd:A},
-                        {'Day &3',cmd:A},
+                    "class: MyWindow, items=[
+                    {&About,cmd:A},
+                    {&Update,cmd:A},
+                    {-},
+                    {&Tutorials,items=[
+                        {'&Usage',cmd:A},
+                        {'&Download',cmd:A},
+                        {&Time,items=[
+                            {'Day &1',cmd:A},
+                            {'Day &2',cmd:A},
+                            {'Day &3',cmd:A},
+                        ]}            
                     ]}            
-                ]}            
-            ]"
+                ]"
                 ),
                 0,
                 MenuBarPosition::Left,
@@ -798,8 +798,9 @@ fn check_menubar_recursive_shortcuts() {
             w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
             w.h_file = w.menubar_mut().add(MenuEntry::new(
+                "&File",
                 menu!(
-                    "&File,class: MyWindow, items=[
+                    "class: MyWindow, items=[
                     {New,F1,cmd:A},
                     {&Save,F2,cmd:A},
                     {'&Save As ...',Alt+F2,cmd:A},
@@ -812,8 +813,9 @@ fn check_menubar_recursive_shortcuts() {
                 MenuBarPosition::Left,
             ));
             w.h_edit = w.menubar_mut().add(MenuEntry::new(
+                "&Edit",
                 menu!(
-                    "&Edit,class: MyWindow, items=[
+                    "class: MyWindow, items=[
                     {&Copy,Ctrl+Ins,cmd:A},
                     {&Paste,Shift+Ins,cmd:A},
                     {&Cut,Ctrl+X,cmd:A},
@@ -831,8 +833,9 @@ fn check_menubar_recursive_shortcuts() {
                 MenuBarPosition::Left,
             ));
             w.h_help = w.menubar_mut().add(MenuEntry::new(
+                "&Help",
                 menu!(
-                    "&Help,class: MyWindow, items=[
+                    "class: MyWindow, items=[
                     {&About,Ctrl+Shift+A,cmd:A},
                     {&Update,F10,cmd:A},
                     {-},

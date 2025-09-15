@@ -90,8 +90,9 @@ impl WindowWithTheme {
         };
         // construct a popup menu
         w.h_file = w.menubar_mut().add(menubar::MenuEntry::new(
+            "&File",
             menu!(
-                "&File,class: WindowWithTheme, items=[
+                "class: WindowWithTheme, items=[
                     {New,F1,cmd:New},
                     {&Save,F2,cmd:Save},
                     {&Open,F3,cmd:Open},

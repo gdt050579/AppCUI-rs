@@ -19,15 +19,15 @@ fn check_view() {
                 m_help: Handle::None,
                 m_edit: Handle::None,
             };
-            let mut m = Menu::new("&File");
+            let mut m = Menu::new();
             m.add(menu::Command::new("&New", key!("F1"), mywin::Commands::A));
             m.add(menu::Command::new("&Save", key!("F2"), mywin::Commands::A));
             m.add(menu::Command::new("&Open", key!("F3"), mywin::Commands::A));
             m.add(menu::Separator::new());
             m.add(menu::Command::new("E&xit", key!("Alt+F4"), mywin::Commands::A));
-            w.m_file = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            w.m_file = w.menubar_mut().add(MenuEntry::new("&File", m, 0, MenuBarPosition::Left));
 
-            let mut m = Menu::new("&Edit");
+            let mut m = Menu::new();
             m.add(menu::Command::new("&Copy", Key::None, mywin::Commands::B));
             m.add(menu::Command::new("C&ut", Key::None, mywin::Commands::B));
             m.add(menu::Command::new("&Paste", Key::None, mywin::Commands::B));
@@ -35,11 +35,11 @@ fn check_view() {
             m.add(menu::SingleChoice::new("Paste only text", Key::None, mywin::Commands::B, true));
             m.add(menu::SingleChoice::new("Paste only images", Key::None, mywin::Commands::B, false));
             m.add(menu::SingleChoice::new("Paste everything", Key::None, mywin::Commands::B, false));
-            w.m_edit = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            w.m_edit = w.menubar_mut().add(MenuEntry::new("&Edit", m, 0, MenuBarPosition::Left));
 
-            let mut m = Menu::new("&Help");
+            let mut m = Menu::new();
             m.add(menu::Command::new("About", Key::None, mywin::Commands::C));
-            w.m_help = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            w.m_help = w.menubar_mut().add(MenuEntry::new("&Help", m, 0, MenuBarPosition::Left));
             w
         }
     }
@@ -98,7 +98,7 @@ fn check_scroll_button_activation() {
                 m_file: Handle::None,
             };
             let m = menu!(
-                "&Keywords, class:MyWin, items=[
+                "class:MyWin, items=[
                     {1,cmd:A},
                     {2,cmd:A},
                     {3,cmd:A},
@@ -113,7 +113,7 @@ fn check_scroll_button_activation() {
                     {12,cmd:A},
                 ]"
             );
-            w.m_file = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            w.m_file = w.menubar_mut().add(MenuEntry::new("&Keywords", m, 0, MenuBarPosition::Left));
             w
         }
     }
@@ -172,7 +172,7 @@ fn check_submenus_open() {
                 m_file: Handle::None,
             };
             let m = menu!(
-                "&Menu, class:MyWin, items=[
+                "class:MyWin, items=[
                 {1,items=[
                     {1,cmd:A},
                     {2,cmd:A},
@@ -226,7 +226,7 @@ fn check_submenus_open() {
                 {12,cmd:A},
             ]"
             );
-            w.m_file = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            w.m_file = w.menubar_mut().add(MenuEntry::new("&Menu", m, 0, MenuBarPosition::Left));
             w
         }
     }
@@ -323,9 +323,9 @@ fn check_dynamic_change_menu() {
                 some_menu: Handle::None,
                 counter: 0,
             };
-            let mut m = Menu::new("Some menu");
+            let mut m = Menu::new();
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            w.some_menu = w.menubar_mut().add(MenuEntry::new("Some menu", m, 0, MenuBarPosition::Left));
 
             w
         }
@@ -391,9 +391,9 @@ fn check_dynamic_change_menu_2() {
                 some_menu: Handle::None,
                 counter: 0,
             };
-            let mut m = Menu::new("Some menu");
+            let mut m = Menu::new();
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            w.some_menu = w.menubar_mut().add(MenuEntry::new("Some menu", m, 0, MenuBarPosition::Left));
 
             w
         }
@@ -514,7 +514,7 @@ fn check_popup_menu() {
                     small_menu: false,
                 };
                 let m = menu!(
-                    "ColorControl,class:MyCustomControl,items=[
+                    "class:MyCustomControl,items=[
                         {&Red,selected:true,cmd:Red},
                         {&Green,selected:false,cmd:Green},
                         {Black,selected:false,cmd:Black},
@@ -709,7 +709,7 @@ fn check_popup_menu_with_keys() {
                     small_menu: false,
                 };
                 let m = menu!(
-                    "ColorControl,class:MyCustomControl,items=[
+                    "class:MyCustomControl,items=[
                         {&Red,selected:true,cmd:Red},
                         {&Green,selected:false,cmd:Green},
                         {Black,selected:false,cmd:Black},
@@ -856,13 +856,13 @@ fn check_menu_checkbox_methods() {
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
             let m = menu!(
-                "Desktop,class:MyDesktop,items=[
+                "class:MyDesktop,items=[
                     {&A,cmd:A, checked: true},
                     {&B,cmd:B, checked: false},
                     {&C,cmd:C, checked: true}
                 ]"
             );
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop", m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -920,13 +920,13 @@ fn check_menu_singlechoice_methods() {
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
             let m = menu!(
-                "Desktop,class:MyDesktop,items=[
+                "class:MyDesktop,items=[
                     {&A,cmd:A, selected: true},
                     {&B,cmd:B, selected: false},
                     {&C,cmd:C, selected: false}
                 ]"
             );
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop", m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -987,12 +987,12 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
 
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
-            let mut m = Menu::new("Desktop");
+            let mut m = Menu::new();
             self.m_cb = m.add(menu::CheckBox::new("Check Item", Key::None, mydesktop::Commands::A, false));
             m.add(menu::Separator::new());
             self.m_sc = m.add(menu::SingleChoice::new("Choice One", Key::None, mydesktop::Commands::B, false));
             m.add(menu::SingleChoice::new("Choice Two", Key::None, mydesktop::Commands::C, false));
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop", m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -1041,13 +1041,13 @@ fn check_menu_command_methods() {
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
             let m = menu!(
-                "Desktop,class:MyDesktop,items=[
+                "class:MyDesktop,items=[
                     {&A,cmd:A},
                     {&B,cmd:B},
                     {&C,cmd:C}
                 ]"
             );
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop",m, 0, MenuBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
