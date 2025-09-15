@@ -208,7 +208,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.menubar_mut().add(MenuEntry::new("ColorMenu", m, 0, MenuBarPosition::Left));
+                    obj.h_menu = obj.menubar_mut().add(MenuEntry::new("ControlMenu", m, 0, MenuBarPosition::Left));
                     obj
                 }
             }
