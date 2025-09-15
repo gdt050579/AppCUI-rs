@@ -3,7 +3,7 @@ use appcui::ui::appbar::*;
 
 #[Window(events = MenuEvents, commands=New+Save+Open)]
 pub struct MyWindow {
-    h_menu: Handle<MenuEntry>,
+    h_menu: Handle<MenuButton>,
 }
 impl MyWindow {
     pub fn new(title: &str, layout: Layout) -> Self {
@@ -18,7 +18,7 @@ impl MyWindow {
             {Open,cmd:Open},
         ]"
         );
-        w.h_menu = w.appbar_mut().add(MenuEntry::new("File", m, 0, Side::Left));
+        w.h_menu = w.appbar_mut().add(MenuButton::new("File", m, 0, Side::Left));
 
         w
     }

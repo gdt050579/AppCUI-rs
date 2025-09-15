@@ -4,7 +4,7 @@ use appcui::ui::appbar::*;
 #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue)]
 pub struct ColorCustomControl {
     col: Color,
-    h_menu: Handle<MenuEntry>,
+    h_menu: Handle<MenuButton>,
 }
 impl ColorCustomControl {
     pub fn new(layout: Layout) -> Self {
@@ -20,7 +20,7 @@ impl ColorCustomControl {
             {Blue,F3,selected:false,cmd:Blue}
         ]"
         );
-        obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ColorControl", m, 0, Side::Left));
+        obj.h_menu = obj.appbar_mut().add(MenuButton::new("ColorControl", m, 0, Side::Left));
         obj
     }
 }

@@ -20,7 +20,7 @@ struct MatrixDesktop {
     loading_chars_shown: usize,
     loading_start_time: u64,
     window_count: u32,
-    main_menu: Handle<MenuEntry>,
+    main_menu: Handle<MenuButton>,
 }
 
 impl MatrixDesktop {
@@ -132,7 +132,7 @@ impl DesktopEvents for MatrixDesktop {
             timer.start(Duration::from_millis(50)); 
         }
         
-        self.main_menu = self.appbar_mut().add(MenuEntry::new("&File", menu!("
+        self.main_menu = self.appbar_mut().add(MenuButton::new("&File", menu!("
             class: MatrixDesktop, items:[
                 {&New,cmd: New, key: Ctrl+N},
                 {-},

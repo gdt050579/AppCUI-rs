@@ -1,15 +1,15 @@
 use crate::{
     prelude::*,
-    ui::appbar::{Side, MenuEntry},
+    ui::appbar::{Side, MenuButton},
 };
 
 #[test]
 fn check_view() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
     struct MyWin {
-        m_file: Handle<MenuEntry>,
-        m_edit: Handle<MenuEntry>,
-        m_help: Handle<MenuEntry>,
+        m_file: Handle<MenuButton>,
+        m_edit: Handle<MenuButton>,
+        m_help: Handle<MenuButton>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -25,7 +25,7 @@ fn check_view() {
             m.add(menu::Command::new("&Open", key!("F3"), mywin::Commands::A));
             m.add(menu::Separator::new());
             m.add(menu::Command::new("E&xit", key!("Alt+F4"), mywin::Commands::A));
-            w.m_file = w.appbar_mut().add(MenuEntry::new("&File", m, 0, Side::Left));
+            w.m_file = w.appbar_mut().add(MenuButton::new("&File", m, 0, Side::Left));
 
             let mut m = Menu::new();
             m.add(menu::Command::new("&Copy", Key::None, mywin::Commands::B));
@@ -35,11 +35,11 @@ fn check_view() {
             m.add(menu::SingleChoice::new("Paste only text", Key::None, mywin::Commands::B, true));
             m.add(menu::SingleChoice::new("Paste only images", Key::None, mywin::Commands::B, false));
             m.add(menu::SingleChoice::new("Paste everything", Key::None, mywin::Commands::B, false));
-            w.m_edit = w.appbar_mut().add(MenuEntry::new("&Edit", m, 0, Side::Left));
+            w.m_edit = w.appbar_mut().add(MenuButton::new("&Edit", m, 0, Side::Left));
 
             let mut m = Menu::new();
             m.add(menu::Command::new("About", Key::None, mywin::Commands::C));
-            w.m_help = w.appbar_mut().add(MenuEntry::new("&Help", m, 0, Side::Left));
+            w.m_help = w.appbar_mut().add(MenuButton::new("&Help", m, 0, Side::Left));
             w
         }
     }
@@ -89,7 +89,7 @@ fn check_view() {
 fn check_scroll_button_activation() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
     struct MyWin {
-        m_file: Handle<MenuEntry>,
+        m_file: Handle<MenuButton>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -113,7 +113,7 @@ fn check_scroll_button_activation() {
                     {12,cmd:A},
                 ]"
             );
-            w.m_file = w.appbar_mut().add(MenuEntry::new("&Keywords", m, 0, Side::Left));
+            w.m_file = w.appbar_mut().add(MenuButton::new("&Keywords", m, 0, Side::Left));
             w
         }
     }
@@ -163,7 +163,7 @@ fn check_scroll_button_activation() {
 fn check_submenus_open() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
     struct MyWin {
-        m_file: Handle<MenuEntry>,
+        m_file: Handle<MenuButton>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -226,7 +226,7 @@ fn check_submenus_open() {
                 {12,cmd:A},
             ]"
             );
-            w.m_file = w.appbar_mut().add(MenuEntry::new("&Menu", m, 0, Side::Left));
+            w.m_file = w.appbar_mut().add(MenuButton::new("&Menu", m, 0, Side::Left));
             w
         }
     }
@@ -312,7 +312,7 @@ fn check_dynamic_change_menu() {
     #[Window(events = MenuEvents, commands=Increment, internal: true)]
     struct MyWin {
         m_counter: Handle<menu::Command>,
-        some_menu: Handle<MenuEntry>,
+        some_menu: Handle<MenuButton>,
         counter: u32,
     }
     impl MyWin {
@@ -325,7 +325,7 @@ fn check_dynamic_change_menu() {
             };
             let mut m = Menu::new();
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.appbar_mut().add(MenuEntry::new("Some menu", m, 0, Side::Left));
+            w.some_menu = w.appbar_mut().add(MenuButton::new("Some menu", m, 0, Side::Left));
 
             w
         }
@@ -380,7 +380,7 @@ fn check_dynamic_change_menu_2() {
     #[Window(events = MenuEvents, commands=Increment, internal: true)]
     struct MyWin {
         m_counter: Handle<menu::Command>,
-        some_menu: Handle<MenuEntry>,
+        some_menu: Handle<MenuButton>,
         counter: u32,
     }
     impl MyWin {
@@ -393,7 +393,7 @@ fn check_dynamic_change_menu_2() {
             };
             let mut m = Menu::new();
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.appbar_mut().add(MenuEntry::new("Some menu", m, 0, Side::Left));
+            w.some_menu = w.appbar_mut().add(MenuButton::new("Some menu", m, 0, Side::Left));
 
             w
         }
@@ -842,7 +842,7 @@ fn check_popup_menu_with_keys() {
 fn check_menu_checkbox_methods() {
     #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        m_desktop: Handle<MenuEntry>,
+        m_desktop: Handle<MenuButton>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -862,7 +862,7 @@ fn check_menu_checkbox_methods() {
                     {&C,cmd:C, checked: true}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop", m, 0, Side::Left));
+            self.m_desktop = self.appbar_mut().add(MenuButton::new("Desktop", m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -906,7 +906,7 @@ fn check_menu_checkbox_methods() {
 fn check_menu_singlechoice_methods() {
     #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        m_desktop: Handle<MenuEntry>,
+        m_desktop: Handle<MenuButton>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -926,7 +926,7 @@ fn check_menu_singlechoice_methods() {
                     {&C,cmd:C, selected: false}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop", m, 0, Side::Left));
+            self.m_desktop = self.appbar_mut().add(MenuButton::new("Desktop", m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -970,7 +970,7 @@ fn check_menu_singlechoice_methods() {
 fn check_menu_set_status_checkbox_and_singlechoice() {
     #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        m_desktop: Handle<MenuEntry>,
+        m_desktop: Handle<MenuButton>,
         m_cb: Handle<menu::CheckBox>,
         m_sc: Handle<menu::SingleChoice>,
     }
@@ -992,7 +992,7 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
             m.add(menu::Separator::new());
             self.m_sc = m.add(menu::SingleChoice::new("Choice One", Key::None, mydesktop::Commands::B, false));
             m.add(menu::SingleChoice::new("Choice Two", Key::None, mydesktop::Commands::C, false));
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop", m, 0, Side::Left));
+            self.m_desktop = self.appbar_mut().add(MenuButton::new("Desktop", m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -1027,7 +1027,7 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
 fn check_menu_command_methods() {
     #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        m_desktop: Handle<MenuEntry>,
+        m_desktop: Handle<MenuButton>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -1047,7 +1047,7 @@ fn check_menu_command_methods() {
                     {&C,cmd:C}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop",m, 0, Side::Left));
+            self.m_desktop = self.appbar_mut().add(MenuButton::new("Desktop",m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {

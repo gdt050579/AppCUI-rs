@@ -80,7 +80,7 @@ struct FileInformation {
 
 #[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme, internal: true)]
 struct WindowWithTheme {
-    h_file: Handle<appbar::MenuEntry>,
+    h_file: Handle<appbar::MenuButton>,
 }
 impl WindowWithTheme {
     fn new() -> Self {
@@ -89,7 +89,7 @@ impl WindowWithTheme {
             h_file: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.appbar_mut().add(appbar::MenuEntry::new(
+        w.h_file = w.appbar_mut().add(appbar::MenuButton::new(
             "&File",
             menu!(
                 "class: WindowWithTheme, items=[

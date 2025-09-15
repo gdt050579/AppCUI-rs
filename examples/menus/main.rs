@@ -3,9 +3,9 @@ use appcui::ui::appbar::*;
 
 #[Window(events : MenuEvents, commands  : A)]
 struct MyWindow {
-    h_file: Handle<MenuEntry>,
-    h_edit: Handle<MenuEntry>,
-    h_help: Handle<MenuEntry>,
+    h_file: Handle<MenuButton>,
+    h_edit: Handle<MenuButton>,
+    h_help: Handle<MenuButton>,
     lb: Handle<Label>,
 }
 impl MyWindow {
@@ -19,7 +19,7 @@ impl MyWindow {
         };
         w.lb = w.add(label!("None,a:c,w:30,h:1"));
         // construct a popup menu
-        w.h_file = w.appbar_mut().add(MenuEntry::new("&File", menu!(
+        w.h_file = w.appbar_mut().add(MenuButton::new("&File", menu!(
             "class: MyWindow, items=[
             {New,F1,cmd:A},
             {&Save,F2,cmd:A},
@@ -29,7 +29,7 @@ impl MyWindow {
             {E&xit,Alt+F4,cmd:A}
         ]"
         ),0,Side::Left));
-        w.h_edit = w.appbar_mut().add( MenuEntry::new("&Edit",menu!(
+        w.h_edit = w.appbar_mut().add( MenuButton::new("&Edit",menu!(
             "class: MyWindow, items=[
             {&Copy,Ctrl+Ins,cmd:A},
             {&Paste,Shift+Ins,cmd:A},
@@ -44,7 +44,7 @@ impl MyWindow {
             ]}            
         ]"
         ),0,Side::Left));
-        w.h_help = w.appbar_mut().add( MenuEntry::new("&Help",menu!(
+        w.h_help = w.appbar_mut().add( MenuButton::new("&Help",menu!(
             "class: MyWindow, items=[
             {&About,Ctrl+Shift+A,cmd:A},
             {&Update,F10,cmd:A},

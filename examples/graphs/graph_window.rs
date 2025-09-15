@@ -11,7 +11,7 @@ use crate::settings::Settings;
                   SetEdgeLineAsciiRound, SetEdgeLineSingleRound, SetEdgeLineBraille])]
 pub struct GraphWindow {
     graph_view: Handle<GraphView<String>>,
-    menu_graph: Handle<MenuEntry>,
+    menu_graph: Handle<MenuButton>,
     settings: Settings,
     h_arrange_none: Handle<menu::SingleChoice>, 
     h_arrange_grid: Handle<menu::SingleChoice>,
@@ -107,7 +107,7 @@ impl GraphWindow {
         win.h_highlight_incoming_edges = m.add(menu::CheckBox::new("Highlight &Incoming Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingIn, false));
         win.h_highlight_outgoing_edges = m.add(menu::CheckBox::new("Highlight &Outgoing Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingOut, false));
 
-        win.menu_graph = win.appbar_mut().add(MenuEntry::new("&Graph", m,1,Side::Left));
+        win.menu_graph = win.appbar_mut().add(MenuButton::new("&Graph", m,1,Side::Left));
         
         win
     }

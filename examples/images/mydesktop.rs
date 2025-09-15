@@ -11,8 +11,8 @@ use crate::shapes::SHAPES_PIXELS;
           commands  = Dizzy+Hello+Shapes+Ferris+Exit+Grid+Vertical+Horizontal+Cascade)]
 pub struct MyDesktop {
     index: u32,
-    menu_windows: Handle<MenuEntry>,
-    menu_arrange: Handle<MenuEntry>,
+    menu_windows: Handle<MenuButton>,
+    menu_arrange: Handle<MenuButton>,
 }
 impl MyDesktop {
     pub fn new() -> Self {
@@ -31,7 +31,7 @@ impl MyDesktop {
 impl DesktopEvents for MyDesktop {
     fn on_start(&mut self) {
         // define and register a menu
-        self.menu_windows = self.appbar_mut().add(MenuEntry::new("&Windows",menu!(
+        self.menu_windows = self.appbar_mut().add(MenuButton::new("&Windows",menu!(
             "class: MyDesktop, items:[
                 {'&Dizzy',Alt+1, cmd: Dizzy},
                 {'&Hello Rust',Alt+2, cmd: Hello},
@@ -41,7 +41,7 @@ impl DesktopEvents for MyDesktop {
                 {'E&xit',cmd: Exit},
             ]"
         ),0,Side::Left));
-        self.menu_arrange = self.appbar_mut().add(MenuEntry::new("&Arrange", menu!(
+        self.menu_arrange = self.appbar_mut().add(MenuButton::new("&Arrange", menu!(
             "class: MyDesktop, items:[
               {'&Grid',cmd: Grid},
               {'&Vertical',cmd: Vertical},

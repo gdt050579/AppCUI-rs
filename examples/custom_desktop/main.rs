@@ -25,7 +25,7 @@ const LOGO: [&str; 15] = [
 struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<MenuEntry>,
+    menu_arrange: Handle<MenuButton>,
 }
 impl MyDesktop {
     fn new() -> Self {
@@ -59,7 +59,7 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_arrange = self.appbar_mut().add(MenuEntry::new("&Windows", menu!("
+        self.menu_arrange = self.appbar_mut().add(MenuButton::new("&Windows", menu!("
             class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},

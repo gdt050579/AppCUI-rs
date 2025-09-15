@@ -4,7 +4,7 @@ use appcui::ui::appbar::*;
 #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue)]
 pub struct TextCustomControl {
     text: &'static str,
-    h_menu: Handle<MenuEntry>,
+    h_menu: Handle<MenuButton>,
 }
 impl TextCustomControl {
     pub fn new(layout: Layout) -> Self {
@@ -20,7 +20,7 @@ impl TextCustomControl {
                 {'Text->Blue',F3,selected:false,cmd:Blue}
             ]"
         );
-        obj.h_menu = obj.appbar_mut().add(MenuEntry::new("Text", m,0,Side::Left));
+        obj.h_menu = obj.appbar_mut().add(MenuButton::new("Text", m,0,Side::Left));
         obj
     }
 }

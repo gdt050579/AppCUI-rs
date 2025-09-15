@@ -5,14 +5,14 @@ use crate::system::{Handle, MenuHandleManager, RuntimeManager, Theme};
 use crate::ui::menu::Menu;
 use crate::utils::Caption;
 
-pub struct MenuEntry {
+pub struct MenuButton {
     handle: Handle<Menu>,
     receiver_control_handle: Handle<()>,
     caption: Caption,
     pub(super) base: ItemBase,
 }
 
-impl MenuEntry {
+impl MenuButton {
     pub fn new(name: &str, menu: Menu, order: u8, pos: Side) -> Self {
         let h = RuntimeManager::get().add_menu(menu);
         Self::with_handle(name, h, order, pos)
@@ -67,7 +67,7 @@ impl MenuEntry {
     }
 }
 
-impl MenuBarItem for MenuEntry {
+impl MenuBarItem for MenuButton {
     fn into_menuibartem(self) -> MenuBarItemWrapper {
         MenuBarItemWrapper::MenuEntry(self)
     }

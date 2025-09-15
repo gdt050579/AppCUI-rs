@@ -1,5 +1,5 @@
 use super::ItemBase;
-use super::MenuEntry;
+use super::MenuButton;
 use crate::graphics::Surface;
 use crate::input::*;
 use crate::system::MenuHandleManager;
@@ -16,7 +16,7 @@ pub(crate) trait MenuBarItem {
 }
 pub(crate) enum MenuBarItemWrapper {
     Separator(bool),
-    MenuEntry(MenuEntry),
+    MenuEntry(MenuButton),
     Label(bool),
     Button(bool),
     CheckBox(bool),

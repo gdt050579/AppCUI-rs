@@ -33,9 +33,9 @@ const LOGO: [&str; 15] = [
           commands  = [Lists, BaseControls, Images, Animation, TreeExample, ColorPalette, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme, LightTheme])]
 struct MyDesktop {
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<MenuEntry>,
-    menu_examples: Handle<MenuEntry>,
-    menu_theme: Handle<MenuEntry>,
+    menu_arrange: Handle<MenuButton>,
+    menu_examples: Handle<MenuButton>,
+    menu_theme: Handle<MenuButton>,
 }
 impl MyDesktop {
     fn new() -> Self {
@@ -70,7 +70,7 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_examples = self.appbar_mut().add(MenuEntry::new("&Examples", menu!("
+        self.menu_examples = self.appbar_mut().add(MenuButton::new("&Examples", menu!("
             class: MyDesktop, items:[
                 { Lists, cmd: Lists}, 
                 { 'Base Controls', cmd: BaseControls},
@@ -80,7 +80,7 @@ impl DesktopEvents for MyDesktop {
                 { 'Color Palette', cmd: ColorPalette}
             ]
         "),0,Side::Left));
-        self.menu_arrange = self.appbar_mut().add(MenuEntry::new("&Windows", menu!("
+        self.menu_arrange = self.appbar_mut().add(MenuButton::new("&Windows", menu!("
             class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
@@ -89,7 +89,7 @@ impl DesktopEvents for MyDesktop {
                 {&Grid,cmd: Grid, select: false},
             ]
         "),0,Side::Left));
-        self.menu_theme = self.appbar_mut().add(MenuEntry::new("&Theme", menu!("
+        self.menu_theme = self.appbar_mut().add(MenuButton::new("&Theme", menu!("
             class: MyDesktop, items:[
                 {&Default,cmd: DefaultTheme, select: true},
                 {'Dark &Gray',cmd: DarkGrayTheme, select: false},

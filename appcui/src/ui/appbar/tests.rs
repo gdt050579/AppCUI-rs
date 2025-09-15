@@ -1,15 +1,15 @@
 use crate::{
     prelude::*,
-    ui::appbar::{Side, MenuEntry},
+    ui::appbar::{Side, MenuButton},
 };
 
 #[test]
 fn check_menubar_order_parameter() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
     struct MyWin {
-        m_file: Handle<MenuEntry>,
-        m_edit: Handle<MenuEntry>,
-        m_help: Handle<MenuEntry>,
+        m_file: Handle<MenuButton>,
+        m_edit: Handle<MenuButton>,
+        m_help: Handle<MenuButton>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -19,9 +19,9 @@ fn check_menubar_order_parameter() {
                 m_help: Handle::None,
                 m_edit: Handle::None,
             };
-            w.m_file = w.appbar_mut().add(MenuEntry::new("&File", Menu::new(), 2, Side::Left));
-            w.m_edit = w.appbar_mut().add(MenuEntry::new("&Edit", Menu::new(), 1, Side::Left));
-            w.m_help = w.appbar_mut().add(MenuEntry::new("&Help", Menu::new(), 0, Side::Left));
+            w.m_file = w.appbar_mut().add(MenuButton::new("&File", Menu::new(), 2, Side::Left));
+            w.m_edit = w.appbar_mut().add(MenuButton::new("&Edit", Menu::new(), 1, Side::Left));
+            w.m_help = w.appbar_mut().add(MenuButton::new("&Help", Menu::new(), 0, Side::Left));
             w
         }
     }
@@ -57,7 +57,7 @@ fn check_menubar_order_parameter_multi_controls() {
             #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
             pub struct MyCustomControl {
                 col: Color,
-                h_menu: Handle<MenuEntry>,
+                h_menu: Handle<MenuButton>,
             }
             impl MyCustomControl {
                 pub fn new(layout: Layout) -> Self {
@@ -73,7 +73,7 @@ fn check_menubar_order_parameter_multi_controls() {
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ControlMenu", m, 2, appbar::Side::Left));
+                    obj.h_menu = obj.appbar_mut().add(MenuButton::new("ControlMenu", m, 2, appbar::Side::Left));
                     obj
                 }
             }
@@ -105,7 +105,7 @@ fn check_menubar_order_parameter_multi_controls() {
 
         #[Window(events = MenuEvents, commands = Copy+Paste+Cut, internal: true)]
         pub struct MyWindow {
-            h_menu: Handle<MenuEntry>,
+            h_menu: Handle<MenuButton>,
             hc: Handle<mycustomcontrol::MyCustomControl>,
         }
         impl MyWindow {
@@ -122,7 +122,7 @@ fn check_menubar_order_parameter_multi_controls() {
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.appbar_mut().add(MenuEntry::new("WindowMenu", m, 1, Side::Left));
+                w.h_menu = w.appbar_mut().add(MenuButton::new("WindowMenu", m, 1, Side::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -138,7 +138,7 @@ fn check_menubar_order_parameter_multi_controls() {
     // Desktop with menu
     #[Desktop(events = MenuEvents+DesktopEvents, commands = Settings+About, internal: true)]
     struct MyDesktop {
-        m_desktop: Handle<MenuEntry>,
+        m_desktop: Handle<MenuButton>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -157,7 +157,7 @@ fn check_menubar_order_parameter_multi_controls() {
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("DesktopMenu", m, 0, Side::Left));
+            self.m_desktop = self.appbar_mut().add(MenuButton::new("DesktopMenu", m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -192,7 +192,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
             #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
             pub struct MyCustomControl {
                 col: Color,
-                h_menu: Handle<MenuEntry>,
+                h_menu: Handle<MenuButton>,
             }
             impl MyCustomControl {
                 pub fn new(layout: Layout) -> Self {
@@ -208,7 +208,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ControlMenu", m, 0, Side::Left));
+                    obj.h_menu = obj.appbar_mut().add(MenuButton::new("ControlMenu", m, 0, Side::Left));
                     obj
                 }
             }
@@ -240,7 +240,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
 
         #[Window(events = MenuEvents, commands = Copy+Paste+Cut, internal: true)]
         pub struct MyWindow {
-            h_menu: Handle<MenuEntry>,
+            h_menu: Handle<MenuButton>,
             hc: Handle<mycustomcontrol::MyCustomControl>,
         }
         impl MyWindow {
@@ -257,7 +257,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.appbar_mut().add(MenuEntry::new("WindowMenu", m, 1, Side::Left));
+                w.h_menu = w.appbar_mut().add(MenuButton::new("WindowMenu", m, 1, Side::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -273,7 +273,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
     // Desktop with menu
     #[Desktop(events = MenuEvents+DesktopEvents, commands = Settings+About, internal: true)]
     struct MyDesktop {
-        m_desktop: Handle<MenuEntry>,
+        m_desktop: Handle<MenuButton>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -292,7 +292,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("DesktopMenu", m, 2, Side::Left));
+            self.m_desktop = self.appbar_mut().add(MenuButton::new("DesktopMenu", m, 2, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -319,7 +319,7 @@ fn check_menubar_update_multiple_menus() {
         use crate::ui::appbar::*;
         #[Window(events = MenuEvents, commands=New+Save+Open, internal: true)]
         pub struct MyWindow {
-            h_menu: Handle<MenuEntry>,
+            h_menu: Handle<MenuButton>,
         }
         impl MyWindow {
             pub fn new(title: &str, layout: Layout) -> Self {
@@ -334,7 +334,7 @@ fn check_menubar_update_multiple_menus() {
                         {Open,cmd:Open},
                     ]"
                 );
-                w.h_menu = w.appbar_mut().add(MenuEntry::new("File", m, 0, Side::Left));
+                w.h_menu = w.appbar_mut().add(MenuButton::new("File", m, 0, Side::Left));
 
                 w
             }
@@ -352,7 +352,7 @@ fn check_menubar_update_multiple_menus() {
         #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
         pub struct ColorCustomControl {
             col: Color,
-            h_menu: Handle<MenuEntry>,
+            h_menu: Handle<MenuButton>,
         }
         impl ColorCustomControl {
             pub fn new(layout: Layout) -> Self {
@@ -368,7 +368,7 @@ fn check_menubar_update_multiple_menus() {
                         {Blue,F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ColorControl", m, 0, Side::Left));
+                obj.h_menu = obj.appbar_mut().add(MenuButton::new("ColorControl", m, 0, Side::Left));
                 obj
             }
         }
@@ -401,7 +401,7 @@ fn check_menubar_update_multiple_menus() {
         #[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue, internal: true)]
         pub struct TextCustomControl {
             text: &'static str,
-            h_menu: Handle<MenuEntry>,
+            h_menu: Handle<MenuButton>,
         }
         impl TextCustomControl {
             pub fn new(layout: Layout) -> Self {
@@ -417,7 +417,7 @@ fn check_menubar_update_multiple_menus() {
                         {'Text->Blue',F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.appbar_mut().add(MenuEntry::new("Text", m, 0, Side::Left));
+                obj.h_menu = obj.appbar_mut().add(MenuButton::new("Text", m, 0, Side::Left));
                 obj
             }
         }
@@ -507,9 +507,9 @@ fn check_menubar_update_multiple_menus() {
 fn check_menubar_with_keys() {
     #[Window(events : MenuEvents, commands  : A, internal: true)]
     struct MyWindow {
-        h_file: Handle<MenuEntry>,
-        h_edit: Handle<MenuEntry>,
-        h_help: Handle<MenuEntry>,
+        h_file: Handle<MenuButton>,
+        h_edit: Handle<MenuButton>,
+        h_help: Handle<MenuButton>,
         lb: Handle<Label>,
     }
     impl MyWindow {
@@ -523,7 +523,7 @@ fn check_menubar_with_keys() {
             };
             w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
-            w.h_file = w.appbar_mut().add(MenuEntry::new(
+            w.h_file = w.appbar_mut().add(MenuButton::new(
                 "&File",
                 menu!(
                     "class: MyWindow, items=[
@@ -538,7 +538,7 @@ fn check_menubar_with_keys() {
                 0,
                 Side::Left,
             ));
-            w.h_edit = w.appbar_mut().add(MenuEntry::new(
+            w.h_edit = w.appbar_mut().add(MenuButton::new(
                 "&Edit",
                 menu!(
                     "class: MyWindow, items=[
@@ -558,7 +558,7 @@ fn check_menubar_with_keys() {
                 0,
                 Side::Left,
             ));
-            w.h_help = w.appbar_mut().add(MenuEntry::new(
+            w.h_help = w.appbar_mut().add(MenuButton::new(
                 "&Help",
                 menu!(
                     "class: MyWindow, items=[
@@ -781,9 +781,9 @@ fn check_menubar_with_keys() {
 fn check_menubar_recursive_shortcuts() {
     #[Window(events : MenuEvents, commands  : A, internal: true)]
     struct MyWindow {
-        h_file: Handle<MenuEntry>,
-        h_edit: Handle<MenuEntry>,
-        h_help: Handle<MenuEntry>,
+        h_file: Handle<MenuButton>,
+        h_edit: Handle<MenuButton>,
+        h_help: Handle<MenuButton>,
         lb: Handle<Label>,
     }
     impl MyWindow {
@@ -797,7 +797,7 @@ fn check_menubar_recursive_shortcuts() {
             };
             w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
-            w.h_file = w.appbar_mut().add(MenuEntry::new(
+            w.h_file = w.appbar_mut().add(MenuButton::new(
                 "&File",
                 menu!(
                     "class: MyWindow, items=[
@@ -812,7 +812,7 @@ fn check_menubar_recursive_shortcuts() {
                 0,
                 Side::Left,
             ));
-            w.h_edit = w.appbar_mut().add(MenuEntry::new(
+            w.h_edit = w.appbar_mut().add(MenuButton::new(
                 "&Edit",
                 menu!(
                     "class: MyWindow, items=[
@@ -832,7 +832,7 @@ fn check_menubar_recursive_shortcuts() {
                 0,
                 Side::Left,
             ));
-            w.h_help = w.appbar_mut().add(MenuEntry::new(
+            w.h_help = w.appbar_mut().add(MenuButton::new(
                 "&Help",
                 menu!(
                     "class: MyWindow, items=[

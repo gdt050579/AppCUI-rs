@@ -7,7 +7,7 @@ use appcui::prelude::*;
 #[Window(events = MenuEvents + ColorPickerEvents + ButtonEvents, commands = ForegroundColor + BackgroundColor + Char25 + Char50 + Char75 + Char100)]
 pub struct PainterWindow {
     painter: Handle<PainterControl>,
-    menu: Handle<MenuEntry>,
+    menu: Handle<MenuButton>,
     fg_color_picker: Handle<ColorPicker>,
     bg_color_picker: Handle<ColorPicker>,
     clear_button: Handle<Button>,
@@ -33,7 +33,7 @@ impl PainterWindow {
             ]
         "
         );
-        w.menu = w.appbar_mut().add(MenuEntry::new("&Options", m, 0, Side::Left));
+        w.menu = w.appbar_mut().add(MenuButton::new("&Options", m, 0, Side::Left));
         w.add(label!("'ForeColor:',t:0,l:0,w:10,h:1"));
         w.add(label!("'BackColor:',t:0,l:23,w:10,h:1"));
 

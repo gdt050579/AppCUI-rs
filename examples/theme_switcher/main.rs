@@ -14,8 +14,8 @@ struct FileInformation {
 
 #[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme)]
 struct MyWindow {
-    h_file: Handle<MenuEntry>,
-    h_theme: Handle<MenuEntry>,
+    h_file: Handle<MenuButton>,
+    h_theme: Handle<MenuButton>,
 }
 impl MyWindow {
     fn new() -> Self {
@@ -25,7 +25,7 @@ impl MyWindow {
             h_theme: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.appbar_mut().add(MenuEntry::new("&File", menu!(
+        w.h_file = w.appbar_mut().add(MenuButton::new("&File", menu!(
             "class: MyWindow, items=[
                 {New,F1,cmd:New},
                 {&Save,F2,cmd:Save},
@@ -34,7 +34,7 @@ impl MyWindow {
                 {E&xit,Alt+F4,cmd:Exit}
             ]"
         ),0,Side::Left));
-        w.h_theme = w.appbar_mut().add(MenuEntry::new("&Theme", menu!(
+        w.h_theme = w.appbar_mut().add(MenuButton::new("&Theme", menu!(
             "class: MyWindow, items=[
                 {&Default,cmd:DefaultTheme,selected: true},
                 {'Dark Gray',cmd:DarkGrayTheme, selected: false},

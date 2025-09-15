@@ -9,7 +9,7 @@ mod painter_control;
           commands = [New, Exit, Open, Save])]
 struct PainterDesktop {
     index: u32,
-    menu_file: Handle<MenuEntry>,
+    menu_file: Handle<MenuButton>,
 }
 
 impl PainterDesktop {
@@ -30,7 +30,7 @@ impl OnPaint for PainterDesktop {
 
 impl DesktopEvents for PainterDesktop {
     fn on_start(&mut self) { 
-        self.menu_file = self.appbar_mut().add(MenuEntry::new("&File", menu!("
+        self.menu_file = self.appbar_mut().add(MenuButton::new("&File", menu!("
             class: PainterDesktop, items:[
                 {'&New',cmd: New},
                 {'&Open',cmd: Open},
