@@ -12,13 +12,13 @@ impl MyWindow {
             h_menu: Handle::None,
         };
         let m = menu!(
-            "File,class:MyWindow,items=[
+            "class:MyWindow,items=[
             {New,cmd:New},
             {Save,cmd:Save},
             {Open,cmd:Open},
         ]"
         );
-        w.h_menu = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+        w.h_menu = w.menubar_mut().add(MenuEntry::new("File", m, 0, MenuBarPosition::Left));
 
         w
     }

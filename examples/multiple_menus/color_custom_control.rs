@@ -14,13 +14,13 @@ impl ColorCustomControl {
             h_menu: Handle::None,
         };
         let m = menu!(
-            "ColorControl,class:ColorCustomControl,items=[
+            "class:ColorCustomControl,items=[
             {Red,F1,selected:true,cmd:Red},
             {Green,F2,selected:false,cmd:Green},
             {Blue,F3,selected:false,cmd:Blue}
         ]"
         );
-        obj.h_menu = obj.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+        obj.h_menu = obj.menubar_mut().add(MenuEntry::new("ColorControl", m, 0, MenuBarPosition::Left));
         obj
     }
 }

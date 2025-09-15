@@ -19,8 +19,8 @@ impl MyWindow {
         };
         w.lb = w.add(label!("None,a:c,w:30,h:1"));
         // construct a popup menu
-        w.h_file = w.menubar_mut().add(MenuEntry::new(menu!(
-            "&File,class: MyWindow, items=[
+        w.h_file = w.menubar_mut().add(MenuEntry::new("&File", menu!(
+            "class: MyWindow, items=[
             {New,F1,cmd:A},
             {&Save,F2,cmd:A},
             {'&Save As ...',Alt+F2,cmd:A},
@@ -29,8 +29,8 @@ impl MyWindow {
             {E&xit,Alt+F4,cmd:A}
         ]"
         ),0,MenuBarPosition::Left));
-        w.h_edit = w.menubar_mut().add(MenuEntry::new(menu!(
-            "&Edit,class: MyWindow, items=[
+        w.h_edit = w.menubar_mut().add( MenuEntry::new("&Edit",menu!(
+            "class: MyWindow, items=[
             {&Copy,Ctrl+Ins,cmd:A},
             {&Paste,Shift+Ins,cmd:A},
             {&Cut,Ctrl+X,cmd:A},
@@ -44,8 +44,8 @@ impl MyWindow {
             ]}            
         ]"
         ),0,MenuBarPosition::Left));
-        w.h_help = w.menubar_mut().add(MenuEntry::new(menu!(
-            "&Help,class: MyWindow, items=[
+        w.h_help = w.menubar_mut().add( MenuEntry::new("&Help",menu!(
+            "class: MyWindow, items=[
             {&About,Ctrl+Shift+A,cmd:A},
             {&Update,F10,cmd:A},
             {-},

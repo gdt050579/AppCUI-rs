@@ -25,8 +25,7 @@ impl PainterWindow {
         };
 
         let m = menu!(
-            "
-            &Options,class:PainterWindow,items:[
+            "class:PainterWindow,items:[
                 {'&25% Block',1,cmd:Char25},
                 {'&50% Block',2,cmd:Char50},
                 {'&75% Block',3,cmd:Char75},
@@ -34,7 +33,7 @@ impl PainterWindow {
             ]
         "
         );
-        w.menu = w.menubar_mut().add(MenuEntry::new(m, 0, MenuBarPosition::Left));
+        w.menu = w.menubar_mut().add(MenuEntry::new("&Options", m, 0, MenuBarPosition::Left));
         w.add(label!("'ForeColor:',t:0,l:0,w:10,h:1"));
         w.add(label!("'BackColor:',t:0,l:23,w:10,h:1"));
 

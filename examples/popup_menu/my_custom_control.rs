@@ -15,19 +15,19 @@ impl MyCustomControl {
             small_menu: false,
         };
         let m = menu!(
-            "ColorControl,class:MyCustomControl,items=[
-            {&Red,selected:true,cmd:Red},
-            {&Green,selected:false,cmd:Green},
-            {Black,selected:false,cmd:Black},
-            {&Aqua,selected:false,cmd:Aqua},
-            {&Magenta,selected:false,cmd:Magenta},
-            {&Yellow,selected:false,cmd:Yellow},
-            {&Blue,selected:false,cmd:Blue},
-            {Gray,selected:false,cmd:Gray},
-            {White,selected:false,cmd:White},
-            {'Light red',selected:false,cmd:LightRed},
-            {'Light green',selected:false,cmd:LightGreen},
-        ]"
+            "class:MyCustomControl,items=[
+                {&Red,selected:true,cmd:Red},
+                {&Green,selected:false,cmd:Green},
+                {Black,selected:false,cmd:Black},
+                {&Aqua,selected:false,cmd:Aqua},
+                {&Magenta,selected:false,cmd:Magenta},
+                {&Yellow,selected:false,cmd:Yellow},
+                {&Blue,selected:false,cmd:Blue},
+                {Gray,selected:false,cmd:Gray},
+                {White,selected:false,cmd:White},
+                {'Light red',selected:false,cmd:LightRed},
+                {'Light green',selected:false,cmd:LightGreen},
+            ]"
         );
         obj.h_menu = obj.register_menu(m);
         obj

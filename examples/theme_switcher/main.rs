@@ -25,21 +25,21 @@ impl MyWindow {
             h_theme: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.menubar_mut().add(MenuEntry::new(menu!(
-            "&File,class: MyWindow, items=[
-            {New,F1,cmd:New},
-            {&Save,F2,cmd:Save},
-            {&Open,F3,cmd:Open},
-            {-},
-            {E&xit,Alt+F4,cmd:Exit}
-        ]"
+        w.h_file = w.menubar_mut().add(MenuEntry::new("&File", menu!(
+            "class: MyWindow, items=[
+                {New,F1,cmd:New},
+                {&Save,F2,cmd:Save},
+                {&Open,F3,cmd:Open},
+                {-},
+                {E&xit,Alt+F4,cmd:Exit}
+            ]"
         ),0,MenuBarPosition::Left));
-        w.h_theme = w.menubar_mut().add(MenuEntry::new(menu!(
-            "&Theme,class: MyWindow, items=[
-            {&Default,cmd:DefaultTheme,selected: true},
-            {'Dark Gray',cmd:DarkGrayTheme, selected: false},
-            {'&Light',cmd:LightTheme, selected: false}
-        ]"
+        w.h_theme = w.menubar_mut().add(MenuEntry::new("&Theme", menu!(
+            "class: MyWindow, items=[
+                {&Default,cmd:DefaultTheme,selected: true},
+                {'Dark Gray',cmd:DarkGrayTheme, selected: false},
+                {'&Light',cmd:LightTheme, selected: false}
+            ]"
         ),0,MenuBarPosition::Left));
 
         let mut splitter = vsplitter!("d:f,pos:55");

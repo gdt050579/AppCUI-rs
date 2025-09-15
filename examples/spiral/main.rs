@@ -99,8 +99,8 @@ impl DesktopEvents for SpiralDesktop {
             timer.start(Duration::from_millis(50));
         }
         
-        self.main_menu = self.menubar_mut().add(MenuEntry::new(menu!("
-            &File,class: SpiralDesktop, items:[
+        self.main_menu = self.menubar_mut().add(MenuEntry::new("&File", menu!("
+            class: SpiralDesktop, items:[
                 {&New,cmd: New, key: Ctrl+N},
                 {-},
                 {&Exit,cmd: Exit, key: Escape}

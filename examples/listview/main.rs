@@ -75,8 +75,8 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_arrange = self.menubar_mut().add(MenuEntry::new(menu!("
-            &Windows,class: MyDesktop, items:[
+        self.menu_arrange = self.menubar_mut().add(MenuEntry::new("&Windows",menu!("
+            class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
                 {&Vertical,cmd: Vertical, select: false},
@@ -84,8 +84,8 @@ impl DesktopEvents for MyDesktop {
                 {&Grid,cmd: Grid, select: false},
             ]
         "),0,MenuBarPosition::Left));
-        self.menu_example = self.menubar_mut().add(MenuEntry::new(menu!("
-            &Example,class: MyDesktop, items:[
+        self.menu_example = self.menubar_mut().add(MenuEntry::new("&Example",menu!("
+            class: MyDesktop, items:[
                 {&Countries,cmd: ShowCountries},
                 {&Music,cmd: ShowMusic},
                 {&Words,cmd: ShowWords},
@@ -100,8 +100,8 @@ impl DesktopEvents for MyDesktop {
                 {'Custom Paint', cmd: ShowCustomPaint},
             ]
         "),0,MenuBarPosition::Left));
-        self.menu_help = self.menubar_mut().add(MenuEntry::new(menu!("
-            &Help,class: MyDesktop, items:[
+        self.menu_help = self.menubar_mut().add(MenuEntry::new("&Help",menu!("
+            class: MyDesktop, items:[
                 {&About,cmd: About},
                 {E&xit,cmd: Exit},
             ]

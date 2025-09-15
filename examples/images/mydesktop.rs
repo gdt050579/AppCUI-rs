@@ -31,8 +31,8 @@ impl MyDesktop {
 impl DesktopEvents for MyDesktop {
     fn on_start(&mut self) {
         // define and register a menu
-        self.menu_windows = self.menubar_mut().add(MenuEntry::new(menu!(
-            "&Windows,class: MyDesktop, items:[
+        self.menu_windows = self.menubar_mut().add(MenuEntry::new("&Windows",menu!(
+            "class: MyDesktop, items:[
                 {'&Dizzy',Alt+1, cmd: Dizzy},
                 {'&Hello Rust',Alt+2, cmd: Hello},
                 {'&Shapes',Alt+3, cmd: Shapes},
@@ -41,8 +41,8 @@ impl DesktopEvents for MyDesktop {
                 {'E&xit',cmd: Exit},
             ]"
         ),0,MenuBarPosition::Left));
-        self.menu_arrange = self.menubar_mut().add(MenuEntry::new(menu!(
-            "&Arrange,class: MyDesktop, items:[
+        self.menu_arrange = self.menubar_mut().add(MenuEntry::new("&Arrange", menu!(
+            "class: MyDesktop, items:[
               {'&Grid',cmd: Grid},
               {'&Vertical',cmd: Vertical},
               {'&Horizontal',cmd: Horizontal},
