@@ -131,7 +131,7 @@ fn check_menus() {
     }
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
-            self.file_menu = self.menubar_mut().add(appbar::MenuEntry::new("&File",
+            self.file_menu = self.appbar_mut().add(appbar::MenuEntry::new("&File",
                 menu!(
                     "class: MyDesktop, items=[
                     {New,F1,cmd:A},

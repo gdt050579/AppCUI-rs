@@ -33,7 +33,7 @@ impl PainterWindow {
             ]
         "
         );
-        w.menu = w.menubar_mut().add(MenuEntry::new("&Options", m, 0, AppBarPosition::Left));
+        w.menu = w.appbar_mut().add(MenuEntry::new("&Options", m, 0, AppBarPosition::Left));
         w.add(label!("'ForeColor:',t:0,l:0,w:10,h:1"));
         w.add(label!("'BackColor:',t:0,l:23,w:10,h:1"));
 

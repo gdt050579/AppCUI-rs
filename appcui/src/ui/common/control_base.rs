@@ -662,8 +662,8 @@ impl ControlBase {
         None
     }
 
-    pub fn menubar_mut(&mut self)->&mut AppBar {
-        RuntimeManager::get().get_menubar()
+    pub fn appbar_mut(&mut self)->&mut AppBar {
+        RuntimeManager::get().get_appbar()
     }
 
     #[inline(always)]

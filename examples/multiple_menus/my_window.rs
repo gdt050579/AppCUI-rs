@@ -18,7 +18,7 @@ impl MyWindow {
             {Open,cmd:Open},
         ]"
         );
-        w.h_menu = w.menubar_mut().add(MenuEntry::new("File", m, 0, AppBarPosition::Left));
+        w.h_menu = w.appbar_mut().add(MenuEntry::new("File", m, 0, AppBarPosition::Left));
 
         w
     }

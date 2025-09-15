@@ -20,7 +20,7 @@ impl TextCustomControl {
                 {'Text->Blue',F3,selected:false,cmd:Blue}
             ]"
         );
-        obj.h_menu = obj.menubar_mut().add(MenuEntry::new("Text", m,0,AppBarPosition::Left));
+        obj.h_menu = obj.appbar_mut().add(MenuEntry::new("Text", m,0,AppBarPosition::Left));
         obj
     }
 }

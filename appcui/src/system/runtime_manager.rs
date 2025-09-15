@@ -65,7 +65,7 @@ pub(crate) struct RuntimeManager {
     desktop_handle: Handle<()>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
-    menubar: Option<AppBar>,
+    appbar: Option<AppBar>,
     recompute_layout: bool,
     repaint: bool,
     mouse_pos: Point,
@@ -154,7 +154,7 @@ impl RuntimeManager {
             } else {
                 None
             },
-            menubar: if builder.has_menu_bar { Some(AppBar::new(term_sz.width)) } else { None },
+            appbar: if builder.has_menu_bar { Some(AppBar::new(term_sz.width)) } else { None },
             #[cfg(feature = "EVENT_RECORDER")]
             event_recorder: super::event_recorder::EventRecorder::new(),
         };
@@ -218,7 +218,7 @@ impl RuntimeManager {
         let sz = self.backend.size();
         Rect::new(
             0,
-            if self.menubar.is_some() { 1 } else { 0 },
+            if self.appbar.is_some() { 1 } else { 0 },
             (sz.width as i32) - 1,
             if self.commandbar.is_some() {
                 (sz.height as i32) - 2
@@ -251,7 +251,7 @@ impl RuntimeManager {
             self.opened_menu_handle = Handle::None;
             self.repaint = true;
             // close menu bar (in case the opened menu was part of the menubar)
-            if let Some(menubar) = self.menubar.as_mut() {
+            if let Some(menubar) = self.appbar.as_mut() {
                 menubar.close();
             }
         }
@@ -361,7 +361,7 @@ impl RuntimeManager {
             if self.single_window {
                 let base = win.base_mut();
                 base.set_singlewindow_flag();
-                let top = self.menubar.is_some();
+                let top = self.appbar.is_some();
                 let bottom = self.commandbar.is_some();
                 base.layout = ControlLayout::from(match () {
                     _ if (!top) && (!bottom) => layout!("l:0,t:0,r:0,b:0"),
@@ -452,8 +452,8 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
-    pub(crate) fn get_menubar(&mut self)->&mut AppBar {
-        self.menubar.as_mut().unwrap()
+    pub(crate) fn get_appbar(&mut self)->&mut AppBar {
+        self.appbar.as_mut().unwrap()
     }
     pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {
         let menus = unsafe { &mut *self.menus };
@@ -884,7 +884,7 @@ impl RuntimeManager {
         self.menu_event = None;
     }
     fn update_command_and_menu_bars(&mut self) {
-        if self.commandbar.is_none() && self.menubar.is_none() {
+        if self.commandbar.is_none() && self.appbar.is_none() {
             self.request_update_command_and_menu_bars = false;
             return;
         }
@@ -906,7 +906,7 @@ impl RuntimeManager {
             cmdbar.update_positions();
         }
         // process menubar
-        if let Some(menubar) = self.menubar.as_mut() {
+        if let Some(menubar) = self.appbar.as_mut() {
             menubar.clear();
             // start from the focused control and call on_update_menubar for each control
             let mut h = focused_handle;
@@ -1092,7 +1092,7 @@ impl RuntimeManager {
         if let Some(commandbar) = self.commandbar.as_mut() {
             commandbar.set_desktop_size(new_size);
         }
-        if let Some(menubar) = self.menubar.as_mut() {
+        if let Some(menubar) = self.appbar.as_mut() {
             menubar.update_width(new_size.width);
         }
         // resize the desktop as well
@@ -1254,8 +1254,8 @@ impl PaintMethods for RuntimeManager {
         if self.commandbar.is_some() {
             self.commandbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
         }
-        if self.menubar.is_some() {
-            self.menubar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
+        if self.appbar.is_some() {
+            self.appbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
         }
         if self.tooltip.is_visible() {
             self.tooltip.paint(&mut self.surface, &self.theme);
@@ -1321,7 +1321,7 @@ impl KeyboardMethods for RuntimeManager {
                 return;
             }
             // 1.2. if menubar is opened (e.g. the current menu is part of the menu bar )
-            if let Some(menubar) = self.menubar.as_mut() {
+            if let Some(menubar) = self.appbar.as_mut() {
                 if menubar.is_opened() && menubar.on_key_event(event.key, true) == EventProcessStatus::Processed {
                     self.repaint = true;
                     return;
@@ -1342,7 +1342,7 @@ impl KeyboardMethods for RuntimeManager {
             }
         }
         // 4. check the menubar
-        if let Some(menubar) = self.menubar.as_mut() {
+        if let Some(menubar) = self.appbar.as_mut() {
             if menubar.on_key_event(event.key, false) == EventProcessStatus::Processed {
                 self.repaint = true;
                 //return;
@@ -1498,7 +1498,7 @@ impl MouseMethods for RuntimeManager {
         }
         */
 
-        if let Some(menubar) = self.menubar.as_mut() {
+        if let Some(menubar) = self.appbar.as_mut() {
             processed = menubar.on_mouse_move(x, y) == EventProcessStatus::Processed;
             self.repaint |= processed;
         }
@@ -1668,7 +1668,7 @@ impl MouseMethods for RuntimeManager {
             return;
         }
         // check main menu
-        if let Some(menu) = self.menubar.as_mut() {
+        if let Some(menu) = self.appbar.as_mut() {
             if menu.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
                 self.repaint = true;
                 self.mouse_locked_object = MouseLockedObject::MenuBar;
@@ -1747,7 +1747,7 @@ impl MouseMethods for RuntimeManager {
                 }
             }
             MouseLockedObject::MenuBar => {
-                if let Some(menubar) = self.menubar.as_mut() {
+                if let Some(menubar) = self.appbar.as_mut() {
                     menubar.on_mouse_pressed(event.x, event.y);
                 }
                 self.repaint = true;

@@ -70,7 +70,7 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_examples = self.menubar_mut().add(MenuEntry::new("&Examples", menu!("
+        self.menu_examples = self.appbar_mut().add(MenuEntry::new("&Examples", menu!("
             class: MyDesktop, items:[
                 { Lists, cmd: Lists}, 
                 { 'Base Controls', cmd: BaseControls},
@@ -80,7 +80,7 @@ impl DesktopEvents for MyDesktop {
                 { 'Color Palette', cmd: ColorPalette}
             ]
         "),0,AppBarPosition::Left));
-        self.menu_arrange = self.menubar_mut().add(MenuEntry::new("&Windows", menu!("
+        self.menu_arrange = self.appbar_mut().add(MenuEntry::new("&Windows", menu!("
             class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
@@ -89,7 +89,7 @@ impl DesktopEvents for MyDesktop {
                 {&Grid,cmd: Grid, select: false},
             ]
         "),0,AppBarPosition::Left));
-        self.menu_theme = self.menubar_mut().add(MenuEntry::new("&Theme", menu!("
+        self.menu_theme = self.appbar_mut().add(MenuEntry::new("&Theme", menu!("
             class: MyDesktop, items:[
                 {&Default,cmd: DefaultTheme, select: true},
                 {'Dark &Gray',cmd: DarkGrayTheme, select: false},

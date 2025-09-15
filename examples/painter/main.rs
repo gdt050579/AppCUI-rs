@@ -30,7 +30,7 @@ impl OnPaint for PainterDesktop {
 
 impl DesktopEvents for PainterDesktop {
     fn on_start(&mut self) { 
-        self.menu_file = self.menubar_mut().add(MenuEntry::new("&File", menu!("
+        self.menu_file = self.appbar_mut().add(MenuEntry::new("&File", menu!("
             class: PainterDesktop, items:[
                 {'&New',cmd: New},
                 {'&Open',cmd: Open},

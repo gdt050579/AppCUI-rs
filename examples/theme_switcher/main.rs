@@ -25,7 +25,7 @@ impl MyWindow {
             h_theme: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.menubar_mut().add(MenuEntry::new("&File", menu!(
+        w.h_file = w.appbar_mut().add(MenuEntry::new("&File", menu!(
             "class: MyWindow, items=[
                 {New,F1,cmd:New},
                 {&Save,F2,cmd:Save},
@@ -34,7 +34,7 @@ impl MyWindow {
                 {E&xit,Alt+F4,cmd:Exit}
             ]"
         ),0,AppBarPosition::Left));
-        w.h_theme = w.menubar_mut().add(MenuEntry::new("&Theme", menu!(
+        w.h_theme = w.appbar_mut().add(MenuEntry::new("&Theme", menu!(
             "class: MyWindow, items=[
                 {&Default,cmd:DefaultTheme,selected: true},
                 {'Dark Gray',cmd:DarkGrayTheme, selected: false},
