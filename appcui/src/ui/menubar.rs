@@ -4,6 +4,8 @@ mod item_base;
 mod menu_entry;
 mod menubar_position;
 mod item_status;
+#[cfg(test)]
+mod tests;
 
 
 use self::menu_bar_item::MenuBarItem;
