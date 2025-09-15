@@ -79,7 +79,7 @@ impl DesktopEvents for MyDesktop {
                 { 'Tree Example', cmd: TreeExample},
                 { 'Color Palette', cmd: ColorPalette}
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
         self.menu_arrange = self.appbar_mut().add(MenuEntry::new("&Windows", menu!("
             class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
@@ -88,14 +88,14 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
         self.menu_theme = self.appbar_mut().add(MenuEntry::new("&Theme", menu!("
             class: MyDesktop, items:[
                 {&Default,cmd: DefaultTheme, select: true},
                 {'Dark &Gray',cmd: DarkGrayTheme, select: false},
                 {'&Light',cmd: LightTheme, select: false}
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
     }
         
 }

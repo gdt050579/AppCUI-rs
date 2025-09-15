@@ -83,7 +83,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),2,AppBarPosition::Left));
+        "),2,Side::Left));
         
         self.menu_examples = self.appbar_mut().add(MenuEntry::new("&Examples", menu!("
             class: MyDesktop, items:[
@@ -92,14 +92,14 @@ impl DesktopEvents for MyDesktop {
                 {'&Bipartite Graph',cmd: ShowBipartite},
                 {'&Showcase Graph',cmd: ShowShowcase},
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
         
         self.menu_help = self.appbar_mut().add(MenuEntry::new("&Help", menu!("
             class: MyDesktop, items:[
                 {&About,cmd: About},
                 {E&xit,cmd: Exit},
             ]
-        "),2,AppBarPosition::Left));
+        "),2,Side::Left));
     }  
 }
 

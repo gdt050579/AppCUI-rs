@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    ui::appbar::{AppBarPosition, MenuEntry},
+    ui::appbar::{Side, MenuEntry},
 };
 
 #[test]
@@ -19,9 +19,9 @@ fn check_menubar_order_parameter() {
                 m_help: Handle::None,
                 m_edit: Handle::None,
             };
-            w.m_file = w.appbar_mut().add(MenuEntry::new("&File", Menu::new(), 2, AppBarPosition::Left));
-            w.m_edit = w.appbar_mut().add(MenuEntry::new("&Edit", Menu::new(), 1, AppBarPosition::Left));
-            w.m_help = w.appbar_mut().add(MenuEntry::new("&Help", Menu::new(), 0, AppBarPosition::Left));
+            w.m_file = w.appbar_mut().add(MenuEntry::new("&File", Menu::new(), 2, Side::Left));
+            w.m_edit = w.appbar_mut().add(MenuEntry::new("&Edit", Menu::new(), 1, Side::Left));
+            w.m_help = w.appbar_mut().add(MenuEntry::new("&Help", Menu::new(), 0, Side::Left));
             w
         }
     }
@@ -73,7 +73,7 @@ fn check_menubar_order_parameter_multi_controls() {
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ControlMenu", m, 2, AppBarPosition::Left));
+                    obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ControlMenu", m, 2, appbar::Side::Left));
                     obj
                 }
             }
@@ -122,7 +122,7 @@ fn check_menubar_order_parameter_multi_controls() {
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.appbar_mut().add(MenuEntry::new("WindowMenu", m, 1, AppBarPosition::Left));
+                w.h_menu = w.appbar_mut().add(MenuEntry::new("WindowMenu", m, 1, Side::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -157,7 +157,7 @@ fn check_menubar_order_parameter_multi_controls() {
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("DesktopMenu", m, 0, AppBarPosition::Left));
+            self.m_desktop = self.appbar_mut().add(MenuEntry::new("DesktopMenu", m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -208,7 +208,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ControlMenu", m, 0, AppBarPosition::Left));
+                    obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ControlMenu", m, 0, Side::Left));
                     obj
                 }
             }
@@ -257,7 +257,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.appbar_mut().add(MenuEntry::new("WindowMenu", m, 1, AppBarPosition::Left));
+                w.h_menu = w.appbar_mut().add(MenuEntry::new("WindowMenu", m, 1, Side::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -292,7 +292,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("DesktopMenu", m, 2, AppBarPosition::Left));
+            self.m_desktop = self.appbar_mut().add(MenuEntry::new("DesktopMenu", m, 2, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -334,7 +334,7 @@ fn check_menubar_update_multiple_menus() {
                         {Open,cmd:Open},
                     ]"
                 );
-                w.h_menu = w.appbar_mut().add(MenuEntry::new("File", m, 0, AppBarPosition::Left));
+                w.h_menu = w.appbar_mut().add(MenuEntry::new("File", m, 0, Side::Left));
 
                 w
             }
@@ -368,7 +368,7 @@ fn check_menubar_update_multiple_menus() {
                         {Blue,F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ColorControl", m, 0, AppBarPosition::Left));
+                obj.h_menu = obj.appbar_mut().add(MenuEntry::new("ColorControl", m, 0, Side::Left));
                 obj
             }
         }
@@ -417,7 +417,7 @@ fn check_menubar_update_multiple_menus() {
                         {'Text->Blue',F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.appbar_mut().add(MenuEntry::new("Text", m, 0, AppBarPosition::Left));
+                obj.h_menu = obj.appbar_mut().add(MenuEntry::new("Text", m, 0, Side::Left));
                 obj
             }
         }
@@ -536,7 +536,7 @@ fn check_menubar_with_keys() {
                 ]"
                 ),
                 0,
-                AppBarPosition::Left,
+                Side::Left,
             ));
             w.h_edit = w.appbar_mut().add(MenuEntry::new(
                 "&Edit",
@@ -556,7 +556,7 @@ fn check_menubar_with_keys() {
                 ]"
                 ),
                 0,
-                AppBarPosition::Left,
+                Side::Left,
             ));
             w.h_help = w.appbar_mut().add(MenuEntry::new(
                 "&Help",
@@ -577,7 +577,7 @@ fn check_menubar_with_keys() {
                 ]"
                 ),
                 0,
-                AppBarPosition::Left,
+                Side::Left,
             ));
             w
         }
@@ -810,7 +810,7 @@ fn check_menubar_recursive_shortcuts() {
                 ]"
                 ),
                 0,
-                AppBarPosition::Left,
+                Side::Left,
             ));
             w.h_edit = w.appbar_mut().add(MenuEntry::new(
                 "&Edit",
@@ -830,7 +830,7 @@ fn check_menubar_recursive_shortcuts() {
                 ]"
                 ),
                 0,
-                AppBarPosition::Left,
+                Side::Left,
             ));
             w.h_help = w.appbar_mut().add(MenuEntry::new(
                 "&Help",
@@ -851,7 +851,7 @@ fn check_menubar_recursive_shortcuts() {
                 ]"
                 ),
                 0,
-                AppBarPosition::Left,
+                Side::Left,
             ));
             w
         }

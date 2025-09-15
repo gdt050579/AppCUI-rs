@@ -143,7 +143,7 @@ fn check_menus() {
                 ]"
                 ),
                 0,
-                appbar::AppBarPosition::Left,
+                appbar::Side::Left,
             ));
         }
     }

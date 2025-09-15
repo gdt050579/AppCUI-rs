@@ -105,7 +105,7 @@ impl DesktopEvents for SpiralDesktop {
                 {-},
                 {&Exit,cmd: Exit, key: Escape}
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
     }
 }
 

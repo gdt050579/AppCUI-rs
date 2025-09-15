@@ -33,14 +33,14 @@ impl MyWindow {
                 {-},
                 {E&xit,Alt+F4,cmd:Exit}
             ]"
-        ),0,AppBarPosition::Left));
+        ),0,Side::Left));
         w.h_theme = w.appbar_mut().add(MenuEntry::new("&Theme", menu!(
             "class: MyWindow, items=[
                 {&Default,cmd:DefaultTheme,selected: true},
                 {'Dark Gray',cmd:DarkGrayTheme, selected: false},
                 {'&Light',cmd:LightTheme, selected: false}
             ]"
-        ),0,AppBarPosition::Left));
+        ),0,Side::Left));
 
         let mut splitter = vsplitter!("d:f,pos:55");
         let mut p_basic = panel!("'Basic controls',l:1,t:1,r:1,h:8");

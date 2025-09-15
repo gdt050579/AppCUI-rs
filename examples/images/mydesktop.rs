@@ -40,7 +40,7 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {'E&xit',cmd: Exit},
             ]"
-        ),0,AppBarPosition::Left));
+        ),0,Side::Left));
         self.menu_arrange = self.appbar_mut().add(MenuEntry::new("&Arrange", menu!(
             "class: MyDesktop, items:[
               {'&Grid',cmd: Grid},
@@ -48,7 +48,7 @@ impl DesktopEvents for MyDesktop {
               {'&Horizontal',cmd: Horizontal},
               {'&Cascade',cmd: Cascade},
           ]"
-        ),0,AppBarPosition::Left));
+        ),0,Side::Left));
     }
 }
 

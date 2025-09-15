@@ -71,7 +71,7 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {&Exit, cmd: Exit}
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
     }
 }
 

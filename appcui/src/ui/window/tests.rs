@@ -1755,7 +1755,7 @@ fn check_window_close_with_commandbar_and_menu() {
                 "File",
                 menu!("class:MyWin,items=[{New,cmd:A}]"),
                 0,
-                ui::appbar::AppBarPosition::Left,
+                ui::appbar::Side::Left,
             ));
             w
         }

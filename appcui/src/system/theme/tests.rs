@@ -101,7 +101,7 @@ impl WindowWithTheme {
                 ]"
             ),
             0,
-            appbar::AppBarPosition::Left,
+            appbar::Side::Left,
         ));
 
         let mut splitter = vsplitter!("d:f,pos:55");

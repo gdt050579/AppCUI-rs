@@ -1,11 +1,9 @@
-use std::usize;
-
 use super::{MenuBarItem, MenuBarItemWrapper};
 use crate::graphics::*;
 use crate::input::*;
-use crate::system::{Handle, Theme, RuntimeManager};
-use crate::ui::common::traits::EventProcessStatus;
+use crate::system::{Handle, RuntimeManager, Theme};
 use crate::ui::appbar::ItemStatus;
+use crate::ui::common::traits::EventProcessStatus;
 use crate::utils::HandleManager;
 
 #[derive(Copy, Clone)]
@@ -24,6 +22,7 @@ pub struct AppBar {
     current_item_index: Option<usize>,
 }
 impl AppBar {
+    const LEFT_RIGHT_MIN_SPACE: i32 = 5;
     pub(crate) fn new(width: u32) -> Self {
         Self {
             manager: HandleManager::with_capacity(16),
@@ -97,8 +96,9 @@ impl AppBar {
     pub(crate) fn update_positions(&mut self) {
         // sort the data first
         self.shown_items.sort_by_key(|i| i.order);
-        let mut left = 0;
+        let mut left = 0i32;
         let mut right = self.width as i32;
+        let mut index = 0;
         for item in &mut self.shown_items {
             let idx = item.idx as usize;
             if let Some(obj) = self.manager.element_mut(idx) {
@@ -108,16 +108,25 @@ impl AppBar {
 
                 let onleft = obj.base().is_on_left();
                 if onleft {
+                    let next = left + w as i32;
+                    if next + AppBar::LEFT_RIGHT_MIN_SPACE >= right {
+                        break;
+                    }
                     obj.base_mut().set_x(left);
                     item.x = left as i16;
                     left += w as i32;
                 } else {
                     right -= w as i32;
+                    if right - AppBar::LEFT_RIGHT_MIN_SPACE >= left {
+                        break;
+                    }
                     item.x = right as i16;
                     obj.base_mut().set_x(right);
                 }
             }
+            index += 1;
         }
+        self.shown_items.truncate(index);
     }
     #[inline(always)]
     pub(crate) fn is_opened(&self) -> bool {
@@ -130,11 +139,7 @@ impl AppBar {
         }
         if let Some(value) = self.current_item_index {
             let len = self.shown_items.len();
-            let new_index = if goto_next {
-                (value + 1) % len
-            } else {
-                (value + len - 1) % len
-            };
+            let new_index = if goto_next { (value + 1) % len } else { (value + len - 1) % len };
             self.open(new_index)
         }
     }
@@ -233,8 +238,7 @@ impl AppBar {
             let menus = RuntimeManager::get().get_menus();
             for pos in &self.shown_items {
                 if let Some(elem) = self.manager.element(pos.idx as usize) {
-                    if elem.process_shortcut(key, menus)
-                    {
+                    if elem.process_shortcut(key, menus) {
                         return EventProcessStatus::Processed;
                     }
                 }

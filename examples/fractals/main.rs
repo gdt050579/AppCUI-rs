@@ -98,7 +98,7 @@ impl DesktopEvents for FractalDesktop {
                 {-},
                 {&Exit,cmd: Exit, key: Escape}
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
     }
 }
 

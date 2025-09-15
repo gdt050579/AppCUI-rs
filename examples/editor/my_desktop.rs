@@ -61,7 +61,7 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {'E&xit',cmd: Exit, key: Escape},
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
         self.menu_arrange = self.appbar_mut().add(MenuEntry::new("&Windows", menu!("
             class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
@@ -70,7 +70,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
     }
         
 }

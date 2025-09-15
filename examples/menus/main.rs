@@ -28,7 +28,7 @@ impl MyWindow {
             {-},
             {E&xit,Alt+F4,cmd:A}
         ]"
-        ),0,AppBarPosition::Left));
+        ),0,Side::Left));
         w.h_edit = w.appbar_mut().add( MenuEntry::new("&Edit",menu!(
             "class: MyWindow, items=[
             {&Copy,Ctrl+Ins,cmd:A},
@@ -43,7 +43,7 @@ impl MyWindow {
                 {'Slot &5',Alt+5,cmd:A},
             ]}            
         ]"
-        ),0,AppBarPosition::Left));
+        ),0,Side::Left));
         w.h_help = w.appbar_mut().add( MenuEntry::new("&Help",menu!(
             "class: MyWindow, items=[
             {&About,Ctrl+Shift+A,cmd:A},
@@ -59,7 +59,7 @@ impl MyWindow {
                 ]}            
             ]}            
         ]"
-        ),0,AppBarPosition::Left));
+        ),0,Side::Left));
         w
     }
 }

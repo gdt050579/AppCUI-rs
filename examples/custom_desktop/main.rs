@@ -67,7 +67,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
     }
         
 }

@@ -1,5 +1,5 @@
 #[derive(Copy,Clone,Eq,PartialEq,Debug)]
-pub enum AppBarPosition {
+pub enum Side {
     Left,
     Right
 }

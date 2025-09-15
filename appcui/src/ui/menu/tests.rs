@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    ui::appbar::{AppBarPosition, MenuEntry},
+    ui::appbar::{Side, MenuEntry},
 };
 
 #[test]
@@ -25,7 +25,7 @@ fn check_view() {
             m.add(menu::Command::new("&Open", key!("F3"), mywin::Commands::A));
             m.add(menu::Separator::new());
             m.add(menu::Command::new("E&xit", key!("Alt+F4"), mywin::Commands::A));
-            w.m_file = w.appbar_mut().add(MenuEntry::new("&File", m, 0, AppBarPosition::Left));
+            w.m_file = w.appbar_mut().add(MenuEntry::new("&File", m, 0, Side::Left));
 
             let mut m = Menu::new();
             m.add(menu::Command::new("&Copy", Key::None, mywin::Commands::B));
@@ -35,11 +35,11 @@ fn check_view() {
             m.add(menu::SingleChoice::new("Paste only text", Key::None, mywin::Commands::B, true));
             m.add(menu::SingleChoice::new("Paste only images", Key::None, mywin::Commands::B, false));
             m.add(menu::SingleChoice::new("Paste everything", Key::None, mywin::Commands::B, false));
-            w.m_edit = w.appbar_mut().add(MenuEntry::new("&Edit", m, 0, AppBarPosition::Left));
+            w.m_edit = w.appbar_mut().add(MenuEntry::new("&Edit", m, 0, Side::Left));
 
             let mut m = Menu::new();
             m.add(menu::Command::new("About", Key::None, mywin::Commands::C));
-            w.m_help = w.appbar_mut().add(MenuEntry::new("&Help", m, 0, AppBarPosition::Left));
+            w.m_help = w.appbar_mut().add(MenuEntry::new("&Help", m, 0, Side::Left));
             w
         }
     }
@@ -113,7 +113,7 @@ fn check_scroll_button_activation() {
                     {12,cmd:A},
                 ]"
             );
-            w.m_file = w.appbar_mut().add(MenuEntry::new("&Keywords", m, 0, AppBarPosition::Left));
+            w.m_file = w.appbar_mut().add(MenuEntry::new("&Keywords", m, 0, Side::Left));
             w
         }
     }
@@ -226,7 +226,7 @@ fn check_submenus_open() {
                 {12,cmd:A},
             ]"
             );
-            w.m_file = w.appbar_mut().add(MenuEntry::new("&Menu", m, 0, AppBarPosition::Left));
+            w.m_file = w.appbar_mut().add(MenuEntry::new("&Menu", m, 0, Side::Left));
             w
         }
     }
@@ -325,7 +325,7 @@ fn check_dynamic_change_menu() {
             };
             let mut m = Menu::new();
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.appbar_mut().add(MenuEntry::new("Some menu", m, 0, AppBarPosition::Left));
+            w.some_menu = w.appbar_mut().add(MenuEntry::new("Some menu", m, 0, Side::Left));
 
             w
         }
@@ -393,7 +393,7 @@ fn check_dynamic_change_menu_2() {
             };
             let mut m = Menu::new();
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.appbar_mut().add(MenuEntry::new("Some menu", m, 0, AppBarPosition::Left));
+            w.some_menu = w.appbar_mut().add(MenuEntry::new("Some menu", m, 0, Side::Left));
 
             w
         }
@@ -862,7 +862,7 @@ fn check_menu_checkbox_methods() {
                     {&C,cmd:C, checked: true}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop", m, 0, AppBarPosition::Left));
+            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop", m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -926,7 +926,7 @@ fn check_menu_singlechoice_methods() {
                     {&C,cmd:C, selected: false}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop", m, 0, AppBarPosition::Left));
+            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop", m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -992,7 +992,7 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
             m.add(menu::Separator::new());
             self.m_sc = m.add(menu::SingleChoice::new("Choice One", Key::None, mydesktop::Commands::B, false));
             m.add(menu::SingleChoice::new("Choice Two", Key::None, mydesktop::Commands::C, false));
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop", m, 0, AppBarPosition::Left));
+            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop", m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {
@@ -1047,7 +1047,7 @@ fn check_menu_command_methods() {
                     {&C,cmd:C}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop",m, 0, AppBarPosition::Left));
+            self.m_desktop = self.appbar_mut().add(MenuEntry::new("Desktop",m, 0, Side::Left));
         }
     }
     impl MenuEvents for MyDesktop {

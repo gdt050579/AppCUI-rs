@@ -38,7 +38,7 @@ impl DesktopEvents for PainterDesktop {
                 {-},
                 {'E&xit',cmd: Exit}
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
     }
 }
 

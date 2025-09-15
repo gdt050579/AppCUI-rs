@@ -83,7 +83,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
         self.menu_example = self.appbar_mut().add(MenuEntry::new("&Example",menu!("
             class: MyDesktop, items:[
                 {&Countries,cmd: ShowCountries},
@@ -99,13 +99,13 @@ impl DesktopEvents for MyDesktop {
                 {'Custom Filter', cmd: ShowCustomFilter},
                 {'Custom Paint', cmd: ShowCustomPaint},
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
         self.menu_help = self.appbar_mut().add(MenuEntry::new("&Help",menu!("
             class: MyDesktop, items:[
                 {&About,cmd: About},
                 {E&xit,cmd: Exit},
             ]
-        "),0,AppBarPosition::Left));
+        "),0,Side::Left));
     }  
 }
 impl MenuEvents for MyDesktop {
