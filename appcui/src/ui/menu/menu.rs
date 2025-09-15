@@ -121,7 +121,6 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 /// }
 /// ```
 pub struct Menu {
-    pub(super) caption: Caption,
     pub(super) items: Vec<MenuItemWrapper>,
     pub(super) current: VectorIndex,
     pub(super) width: u16,
@@ -137,24 +136,14 @@ pub struct Menu {
 }
 
 impl Menu {
-    /// Creates a new menu with the specified name.
-    ///
-    /// The name can include the special character `&`, which designates the next 
-    /// character as a hotkey to activate the menu (e.g., "&File" makes 'F' the hotkey,
-    /// typically activated with Alt+F).
-    ///
-    /// # Parameters
-    /// * `name` - The text to display for the menu. If empty, a default caption is used.
-    ///
-    /// # Returns
-    /// A new `Menu` instance.
-    pub fn new(name: &str) -> Self {
+    /// Creates a new empty menu
+    pub fn new() -> Self {
         Self {
-            caption: if name.is_empty() {
-                Caption::default()
-            } else {
-                Caption::new(name, ExtractHotKeyMethod::AltPlusKey)
-            },
+            // caption: if name.is_empty() {
+            //     Caption::default()
+            // } else {
+            //     Caption::new(name, ExtractHotKeyMethod::AltPlusKey)
+            // },
             items: Vec::with_capacity(4),
             current: VectorIndex::Invalid,
             width: 1,
@@ -776,9 +765,9 @@ impl Menu {
         self.parent_handle
     }
 
-    pub(crate) fn caption(&self) -> &Caption {
-        &self.caption
-    }
+    // pub(crate) fn caption(&self) -> &Caption {
+    //     &self.caption
+    // }
 }
 
 impl HandleSupport<Menu> for Menu {

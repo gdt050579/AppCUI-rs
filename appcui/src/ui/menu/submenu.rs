@@ -102,19 +102,17 @@ impl SubMenu {
     /// accessible through this submenu item.
     ///
     /// # Parameters
+    /// * `name` - the name of the submenu. The name could contain a `&`` character (e.g. `&File`) to set up a hotkey for the submenu.
     /// * `menu` - The menu to be associated with this submenu.
     ///
     /// # Returns
     /// A new `SubMenu` instance.
-    pub fn new(menu: Menu) -> Self {
-        let mut caption = menu.caption.clone();        
+    pub fn new(name:&str, menu: Menu) -> Self {
         let handle = RuntimeManager::get().get_menus().add(menu);
-        // submenu hotkey should be a letter while a menu hotkey shoult be Alt+Letter
-        // as such, we will clear the Alt if it is set up
-        caption.clear_hotkey_modifier();
+        // submenu hotkey should be a letter  -> use ExtractHotKeyMethod::Key
         SubMenu {
             enabled: true,
-            caption,
+            caption: Caption::new(name, ExtractHotKeyMethod::Key),
             submenu_handle: handle,
             handle: Handle::None,
             menu_handle: Handle::None,

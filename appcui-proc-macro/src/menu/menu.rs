@@ -5,12 +5,8 @@ use crate::{
 use proc_macro::*;
 use std::str::FromStr;
 
-static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
-    PositionalParameter::new("caption", ParamType::String),
-];
+static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
-    NamedParameter::new("caption", "caption", ParamType::String),
-    NamedParameter::new("text", "caption", ParamType::String),
     NamedParameter::new("items", "items", ParamType::List),    
     NamedParameter::new("subitems", "items", ParamType::List),
     NamedParameter::new("class", "class", ParamType::String),

@@ -3,28 +3,29 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, MenuHandleManager, RuntimeManager, Theme};
 use crate::ui::menu::Menu;
+use crate::utils::Caption;
 
 pub struct MenuEntry {
     handle: Handle<Menu>,
     receiver_control_handle: Handle<()>,
-    hotkey: Key,
+    caption: Caption,
     pub(super) base: ItemBase,
 }
 
 impl MenuEntry {
-    pub fn new(menu: Menu, order: u8, pos: MenuBarPosition) -> Self {
-        let w = (menu.caption().chars_count().max(1) + 2).min(u8::MAX as usize) as u8;
-        let hotkey = menu.caption().hotkey();
+    pub fn new(name: &str, menu: Menu, order: u8, pos: MenuBarPosition) -> Self {
         let h = RuntimeManager::get().add_menu(menu);
-        Self {
-            handle: h,
-            receiver_control_handle: Handle::None,
-            base: ItemBase::new(w, order, pos, true),
-            hotkey,
-        }
+        Self::with_handle(name, h, order, pos)
     }
-    pub fn with_handle(handle: Handle<Menu>, order: u8, pos: MenuBarPosition) -> Self {
-        todo!()
+    pub fn with_handle(name: &str, handle: Handle<Menu>, order: u8, pos: MenuBarPosition) -> Self {
+        let c = Caption::new(name, crate::utils::ExtractHotKeyMethod::AltPlusKey);
+        let w = (c.chars_count().max(1) + 2).min(u8::MAX as usize) as u8;
+        Self {
+            handle: handle,
+            receiver_control_handle: Handle::None,
+            caption: c,
+            base: ItemBase::new(w, order, pos, true),
+        }
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;
@@ -38,17 +39,14 @@ impl MenuEntry {
                 Character::with_attributes(' ', status.text_attribute(theme)),
             );
         }
-        if let Some(menu) = RuntimeManager::get().get_menu(self.handle) {
-            let c = menu.caption();
-            let mut format = TextFormatBuilder::new()
-                .position(self.base.x() + 1, 0)
-                .attribute(status.text_attribute(theme))
-                .align(TextAlignment::Left)
-                .chars_count(c.chars_count() as u16)
-                .build();
-            format.set_hotkey_from_caption(status.hotkey_attribute(theme), &c);
-            surface.write_text(c.text(), &format);
-        }
+        let mut format = TextFormatBuilder::new()
+            .position(self.base.x() + 1, 0)
+            .attribute(status.text_attribute(theme))
+            .align(TextAlignment::Left)
+            .chars_count(self.caption.chars_count() as u16)
+            .build();
+        format.set_hotkey_from_caption(status.hotkey_attribute(theme), &self.caption);
+        surface.write_text(self.caption.text(), &format);
     }
     pub(super) fn on_activate(&mut self) {
         RuntimeManager::get().show_menu(self.handle, self.receiver_control_handle, self.base.x(), 1, None)
@@ -65,8 +63,8 @@ impl MenuEntry {
     }
     #[inline(always)]
     pub(super) fn hotkey(&self) -> Key {
-        self.hotkey
-    }    
+        self.caption.hotkey()
+    }
 }
 
 impl MenuBarItem for MenuEntry {
