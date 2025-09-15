@@ -1752,7 +1752,8 @@ fn check_window_close_with_commandbar_and_menu() {
                 h_menu: Handle::None,
             };
             w.h_menu = w.menubar_mut().add(ui::menubar::MenuEntry::new(
-                menu!("File,class:MyWin,items=[{New,cmd:A}]"),
+                "File",
+                menu!("class:MyWin,items=[{New,cmd:A}]"),
                 0,
                 ui::menubar::MenuBarPosition::Left,
             ));
