@@ -34,7 +34,7 @@ impl MenuEntry {
             surface.fill_horizontal_line_with_size(
                 self.base.x(),
                 0,
-                (self.base.width() as u32),
+                self.base.width() as u32,
                 Character::with_attributes(' ', status.text_attribute(theme)),
             );
         }

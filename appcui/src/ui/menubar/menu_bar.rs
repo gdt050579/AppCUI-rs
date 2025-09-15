@@ -34,12 +34,14 @@ impl MenuBar {
             current_item_index: None,
         }
     }
+    #[allow(private_bounds)]
     pub fn add<T>(&mut self, item: T) -> Handle<T>
     where
         T: MenuBarItem,
     {
         self.manager.add(item.into_menuibartem()).cast()
     }
+    #[allow(private_bounds)]
     pub fn get<T>(&self, menubaritem_hamdle: Handle<T>) -> Option<&T>
     where
         T: MenuBarItem,
@@ -53,6 +55,7 @@ impl MenuBar {
             MenuBarItemWrapper::CheckBox(_) => todo!(),
         }
     }
+    #[allow(private_bounds)]
     pub fn get_mut<T>(&mut self, menubaritem_hamdle: Handle<T>) -> Option<&mut T>
     where
         T: MenuBarItem,
@@ -247,6 +250,7 @@ impl MenuBar {
             self.update_positions();
         }
     }
+    #[allow(private_bounds)]
     pub fn show<T>(&mut self, handle: Handle<T>)
     where
         T: MenuBarItem,

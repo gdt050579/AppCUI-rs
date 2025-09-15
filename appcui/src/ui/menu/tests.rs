@@ -498,7 +498,6 @@ fn check_dynamic_change_menu_2() {
 fn check_popup_menu() {
     pub(crate) mod mycustomcontrol {
         use crate::prelude::*;
-        use crate::ui::menubar::*;
 
         #[CustomControl(events = MenuEvents, overwrite = OnPaint+OnMouseEvent, commands = Red+Green+Black+Aqua+Magenta+Yellow+Blue+Gray+White+LightRed+LightGreen, internal: true)]
         pub struct MyCustomControl {
@@ -694,7 +693,6 @@ fn check_popup_menu() {
 fn check_popup_menu_with_keys() {
     pub(crate) mod mycustomcontrol {
         use crate::prelude::*;
-        use crate::ui::menubar::*;
 
         #[CustomControl(events = MenuEvents, overwrite = OnPaint+OnMouseEvent, commands = Red+Green+Black+Aqua+Magenta+Yellow+Blue+Gray+White+LightRed+LightGreen, internal: true)]
         pub struct MyCustomControl {
