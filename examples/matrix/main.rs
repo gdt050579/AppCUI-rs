@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 use rand::Rng;
 use std::time::Duration;
 
@@ -138,7 +138,7 @@ impl DesktopEvents for MatrixDesktop {
                 {-},
                 {&Exit,cmd: Exit, key: Escape}
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
     }
 }
 
@@ -149,7 +149,7 @@ impl MenuEvents for MatrixDesktop {
             matrixdesktop::Commands::Exit => self.close(),
         }
     }
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.main_menu);
     }
 }

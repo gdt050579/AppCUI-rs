@@ -19,7 +19,7 @@ use crate::ui::common::ControlManager;
 use crate::ui::common::ControlEvent;
 use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
-use crate::ui::{Menu, MenuBar};
+use crate::ui::{Menu, AppBar};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
 
@@ -65,7 +65,7 @@ pub(crate) struct RuntimeManager {
     desktop_handle: Handle<()>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
-    menubar: Option<MenuBar>,
+    menubar: Option<AppBar>,
     recompute_layout: bool,
     repaint: bool,
     mouse_pos: Point,
@@ -154,7 +154,7 @@ impl RuntimeManager {
             } else {
                 None
             },
-            menubar: if builder.has_menu_bar { Some(MenuBar::new(term_sz.width)) } else { None },
+            menubar: if builder.has_menu_bar { Some(AppBar::new(term_sz.width)) } else { None },
             #[cfg(feature = "EVENT_RECORDER")]
             event_recorder: super::event_recorder::EventRecorder::new(),
         };
@@ -452,7 +452,7 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
-    pub(crate) fn get_menubar(&mut self)->&mut MenuBar {
+    pub(crate) fn get_menubar(&mut self)->&mut AppBar {
         self.menubar.as_mut().unwrap()
     }
     pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {

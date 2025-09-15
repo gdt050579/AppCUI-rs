@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    ui::menubar::{MenuBarPosition, MenuEntry},
+    ui::appbar::{AppBarPosition, MenuEntry},
 };
 
 #[test]
@@ -25,7 +25,7 @@ fn check_view() {
             m.add(menu::Command::new("&Open", key!("F3"), mywin::Commands::A));
             m.add(menu::Separator::new());
             m.add(menu::Command::new("E&xit", key!("Alt+F4"), mywin::Commands::A));
-            w.m_file = w.menubar_mut().add(MenuEntry::new("&File", m, 0, MenuBarPosition::Left));
+            w.m_file = w.menubar_mut().add(MenuEntry::new("&File", m, 0, AppBarPosition::Left));
 
             let mut m = Menu::new();
             m.add(menu::Command::new("&Copy", Key::None, mywin::Commands::B));
@@ -35,16 +35,16 @@ fn check_view() {
             m.add(menu::SingleChoice::new("Paste only text", Key::None, mywin::Commands::B, true));
             m.add(menu::SingleChoice::new("Paste only images", Key::None, mywin::Commands::B, false));
             m.add(menu::SingleChoice::new("Paste everything", Key::None, mywin::Commands::B, false));
-            w.m_edit = w.menubar_mut().add(MenuEntry::new("&Edit", m, 0, MenuBarPosition::Left));
+            w.m_edit = w.menubar_mut().add(MenuEntry::new("&Edit", m, 0, AppBarPosition::Left));
 
             let mut m = Menu::new();
             m.add(menu::Command::new("About", Key::None, mywin::Commands::C));
-            w.m_help = w.menubar_mut().add(MenuEntry::new("&Help", m, 0, MenuBarPosition::Left));
+            w.m_help = w.menubar_mut().add(MenuEntry::new("&Help", m, 0, AppBarPosition::Left));
             w
         }
     }
     impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.m_file);
             menubar.show(self.m_edit);
             menubar.show(self.m_help);
@@ -113,12 +113,12 @@ fn check_scroll_button_activation() {
                     {12,cmd:A},
                 ]"
             );
-            w.m_file = w.menubar_mut().add(MenuEntry::new("&Keywords", m, 0, MenuBarPosition::Left));
+            w.m_file = w.menubar_mut().add(MenuEntry::new("&Keywords", m, 0, AppBarPosition::Left));
             w
         }
     }
     impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.m_file);
         }
     }
@@ -226,12 +226,12 @@ fn check_submenus_open() {
                 {12,cmd:A},
             ]"
             );
-            w.m_file = w.menubar_mut().add(MenuEntry::new("&Menu", m, 0, MenuBarPosition::Left));
+            w.m_file = w.menubar_mut().add(MenuEntry::new("&Menu", m, 0, AppBarPosition::Left));
             w
         }
     }
     impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.m_file);
         }
     }
@@ -325,13 +325,13 @@ fn check_dynamic_change_menu() {
             };
             let mut m = Menu::new();
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.menubar_mut().add(MenuEntry::new("Some menu", m, 0, MenuBarPosition::Left));
+            w.some_menu = w.menubar_mut().add(MenuEntry::new("Some menu", m, 0, AppBarPosition::Left));
 
             w
         }
     }
     impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.some_menu);
         }
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
@@ -393,13 +393,13 @@ fn check_dynamic_change_menu_2() {
             };
             let mut m = Menu::new();
             w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-            w.some_menu = w.menubar_mut().add(MenuEntry::new("Some menu", m, 0, MenuBarPosition::Left));
+            w.some_menu = w.menubar_mut().add(MenuEntry::new("Some menu", m, 0, AppBarPosition::Left));
 
             w
         }
     }
     impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.some_menu);
         }
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
@@ -862,11 +862,11 @@ fn check_menu_checkbox_methods() {
                     {&C,cmd:C, checked: true}
                 ]"
             );
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop", m, 0, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop", m, 0, AppBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.m_desktop);
         }
 
@@ -926,11 +926,11 @@ fn check_menu_singlechoice_methods() {
                     {&C,cmd:C, selected: false}
                 ]"
             );
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop", m, 0, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop", m, 0, AppBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.m_desktop);
         }
 
@@ -992,11 +992,11 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
             m.add(menu::Separator::new());
             self.m_sc = m.add(menu::SingleChoice::new("Choice One", Key::None, mydesktop::Commands::B, false));
             m.add(menu::SingleChoice::new("Choice Two", Key::None, mydesktop::Commands::C, false));
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop", m, 0, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop", m, 0, AppBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.m_desktop);
         }
 
@@ -1047,11 +1047,11 @@ fn check_menu_command_methods() {
                     {&C,cmd:C}
                 ]"
             );
-            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop",m, 0, MenuBarPosition::Left));
+            self.m_desktop = self.menubar_mut().add(MenuEntry::new("Desktop",m, 0, AppBarPosition::Left));
         }
     }
     impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.m_desktop);
         }
 

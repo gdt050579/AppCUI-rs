@@ -1,4 +1,4 @@
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 use std::path::Path;
 
 use super::painter_control::PainterControl;
@@ -33,7 +33,7 @@ impl PainterWindow {
             ]
         "
         );
-        w.menu = w.menubar_mut().add(MenuEntry::new("&Options", m, 0, MenuBarPosition::Left));
+        w.menu = w.menubar_mut().add(MenuEntry::new("&Options", m, 0, AppBarPosition::Left));
         w.add(label!("'ForeColor:',t:0,l:0,w:10,h:1"));
         w.add(label!("'BackColor:',t:0,l:23,w:10,h:1"));
 
@@ -98,7 +98,7 @@ impl PainterWindow {
 }
 
 impl MenuEvents for PainterWindow {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.menu);
     }
 

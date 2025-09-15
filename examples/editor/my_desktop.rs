@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 use crate::Viewer;
 
 use std::fs;
@@ -61,7 +61,7 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {'E&xit',cmd: Exit, key: Escape},
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
         self.menu_arrange = self.menubar_mut().add(MenuEntry::new("&Windows", menu!("
             class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
@@ -70,7 +70,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
     }
         
 }
@@ -112,7 +112,7 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    fn on_update_menubar(&self,menubar: &mut MenuBar)
+    fn on_update_menubar(&self,menubar: &mut AppBar)
     {
         menubar.show(self.menu_file);
         menubar.show(self.menu_arrange);

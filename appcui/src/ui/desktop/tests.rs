@@ -119,7 +119,7 @@ fn check_on_resize_for_desktop() {
 fn check_menus() {
     #[Desktop(events = DesktopEvents + MenuEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        file_menu: Handle<ui::menubar::MenuEntry>,
+        file_menu: Handle<ui::appbar::MenuEntry>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -131,7 +131,7 @@ fn check_menus() {
     }
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
-            self.file_menu = self.menubar_mut().add(menubar::MenuEntry::new("&File",
+            self.file_menu = self.menubar_mut().add(appbar::MenuEntry::new("&File",
                 menu!(
                     "class: MyDesktop, items=[
                     {New,F1,cmd:A},
@@ -143,12 +143,12 @@ fn check_menus() {
                 ]"
                 ),
                 0,
-                menubar::MenuBarPosition::Left,
+                appbar::AppBarPosition::Left,
             ));
         }
     }
     impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.file_menu);
         }
     }

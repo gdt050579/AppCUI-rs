@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 
 mod countries;
 mod music;
@@ -83,7 +83,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
         self.menu_example = self.menubar_mut().add(MenuEntry::new("&Example",menu!("
             class: MyDesktop, items:[
                 {&Countries,cmd: ShowCountries},
@@ -99,13 +99,13 @@ impl DesktopEvents for MyDesktop {
                 {'Custom Filter', cmd: ShowCustomFilter},
                 {'Custom Paint', cmd: ShowCustomPaint},
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
         self.menu_help = self.menubar_mut().add(MenuEntry::new("&Help",menu!("
             class: MyDesktop, items:[
                 {&About,cmd: About},
                 {E&xit,cmd: Exit},
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
     }  
 }
 impl MenuEvents for MyDesktop {
@@ -162,7 +162,7 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    fn on_update_menubar(&self,menubar: &mut MenuBar) {
+    fn on_update_menubar(&self,menubar: &mut AppBar) {
         menubar.show(self.menu_example);
         menubar.show(self.menu_arrange);
         menubar.show(self.menu_help);

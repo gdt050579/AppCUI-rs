@@ -5,7 +5,7 @@ use crate::input::*;
 use crate::system::MenuHandleManager;
 use crate::{
     system::{Handle, HandleSupport, Theme},
-    ui::menubar::ItemStatus,
+    ui::appbar::ItemStatus,
 };
 
 // un menu bar itm are:

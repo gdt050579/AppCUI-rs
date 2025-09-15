@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 
 #[Window(events : MenuEvents, commands  : A)]
 struct MyWindow {
@@ -28,7 +28,7 @@ impl MyWindow {
             {-},
             {E&xit,Alt+F4,cmd:A}
         ]"
-        ),0,MenuBarPosition::Left));
+        ),0,AppBarPosition::Left));
         w.h_edit = w.menubar_mut().add( MenuEntry::new("&Edit",menu!(
             "class: MyWindow, items=[
             {&Copy,Ctrl+Ins,cmd:A},
@@ -43,7 +43,7 @@ impl MyWindow {
                 {'Slot &5',Alt+5,cmd:A},
             ]}            
         ]"
-        ),0,MenuBarPosition::Left));
+        ),0,AppBarPosition::Left));
         w.h_help = w.menubar_mut().add( MenuEntry::new("&Help",menu!(
             "class: MyWindow, items=[
             {&About,Ctrl+Shift+A,cmd:A},
@@ -59,7 +59,7 @@ impl MyWindow {
                 ]}            
             ]}            
         ]"
-        ),0,MenuBarPosition::Left));
+        ),0,AppBarPosition::Left));
         w
     }
 }
@@ -74,7 +74,7 @@ impl MenuEvents for MyWindow {
         }
     }
 
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.h_file);
         menubar.show(self.h_edit);
         menubar.show(self.h_help);

@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 use crate::settings::Settings;
 
 #[Window(events=[MenuEvents], 
@@ -107,7 +107,7 @@ impl GraphWindow {
         win.h_highlight_incoming_edges = m.add(menu::CheckBox::new("Highlight &Incoming Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingIn, false));
         win.h_highlight_outgoing_edges = m.add(menu::CheckBox::new("Highlight &Outgoing Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingOut, false));
 
-        win.menu_graph = win.menubar_mut().add(MenuEntry::new("&Graph", m,1,MenuBarPosition::Left));
+        win.menu_graph = win.menubar_mut().add(MenuEntry::new("&Graph", m,1,AppBarPosition::Left));
         
         win
     }
@@ -215,7 +215,7 @@ impl MenuEvents for GraphWindow {
         self.update_graph_view(false);
     }
 
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.menu_graph);
     }
 

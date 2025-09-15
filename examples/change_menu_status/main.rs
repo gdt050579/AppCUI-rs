@@ -3,7 +3,7 @@ use appcui::prelude::*;
 #[Window(events = MenuEvents, commands=Increment)]
 struct MyWin {
     m_counter: Handle<menu::Command>,
-    some_menu: Handle<menubar::MenuEntry>,
+    some_menu: Handle<appbar::MenuEntry>,
     counter: u32,
 }
 impl MyWin {
@@ -16,13 +16,13 @@ impl MyWin {
         };
         let mut m = Menu::new();
         w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-        w.some_menu = w.menubar_mut().add(menubar::MenuEntry::new("Some menu",m,0,menubar::MenuBarPosition::Left));
+        w.some_menu = w.menubar_mut().add(appbar::MenuEntry::new("Some menu",m,0,appbar::AppBarPosition::Left));
 
         w
     }
 }
 impl MenuEvents for MyWin {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.some_menu);
     }
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {

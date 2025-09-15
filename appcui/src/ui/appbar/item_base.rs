@@ -1,4 +1,4 @@
-use crate::ui::menubar::MenuBarPosition;
+use crate::ui::appbar::AppBarPosition;
 use crate::system::Handle;
 use super::MenuBarItemWrapper;
 use EnumBitFlags::EnumBitFlags;
@@ -20,9 +20,9 @@ pub(super) struct ItemBase {
     handle: Handle<MenuBarItemWrapper>
 }
 impl ItemBase {
-    pub(super) fn new(width: u8, order: u8, position: MenuBarPosition, accept_input: bool) -> Self {
+    pub(super) fn new(width: u8, order: u8, position: AppBarPosition, accept_input: bool) -> Self {
         let f = Flags::Enabled
-            | if position == MenuBarPosition::Left { Flags::OnLeft } else { Flags::None }
+            | if position == AppBarPosition::Left { Flags::OnLeft } else { Flags::None }
             | if accept_input { Flags::AcceptInput } else { Flags::None };
 
         Self {

@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 mod file_navigator;
 mod base_controls;
 mod image_win;
@@ -79,7 +79,7 @@ impl DesktopEvents for MyDesktop {
                 { 'Tree Example', cmd: TreeExample},
                 { 'Color Palette', cmd: ColorPalette}
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
         self.menu_arrange = self.menubar_mut().add(MenuEntry::new("&Windows", menu!("
             class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
@@ -88,14 +88,14 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
         self.menu_theme = self.menubar_mut().add(MenuEntry::new("&Theme", menu!("
             class: MyDesktop, items:[
                 {&Default,cmd: DefaultTheme, select: true},
                 {'Dark &Gray',cmd: DarkGrayTheme, select: false},
                 {'&Light',cmd: LightTheme, select: false}
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
     }
         
 }
@@ -127,7 +127,7 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    fn on_update_menubar(&self,menubar: &mut MenuBar) {
+    fn on_update_menubar(&self,menubar: &mut AppBar) {
         menubar.show(self.menu_examples);
         menubar.show(self.menu_arrange);
         menubar.show(self.menu_theme);

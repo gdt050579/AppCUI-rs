@@ -149,14 +149,14 @@ trait MenuEvents {
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: $(MOD_NAME)::Commands) {}
     fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, command: $(MOD_NAME)::Commands, checked: bool) {}
     fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, command: $(MOD_NAME)::Commands) {}
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {}
+    fn on_update_menubar(&self, appbar: &mut AppBar) {}
 }
 impl$(TEMPLATE_TYPE) GenericMenuEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
     fn on_menu_open(&self, menu: &mut Menu) {
         MenuEvents::on_menu_open(self, menu);
     }
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        MenuEvents::on_update_menubar(self, menubar);
+    fn on_update_menubar(&self, appbar: &mut AppBar) {
+        MenuEvents::on_update_menubar(self, appbar);
     }
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command_id: u32) {
         if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {

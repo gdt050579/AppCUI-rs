@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 use std::time::Duration;
 
 mod fractal;
@@ -98,7 +98,7 @@ impl DesktopEvents for FractalDesktop {
                 {-},
                 {&Exit,cmd: Exit, key: Escape}
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
     }
 }
 
@@ -109,7 +109,7 @@ impl MenuEvents for FractalDesktop {
             fractaldesktop::Commands::Exit => self.close(),
         }
     }
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.main_menu);
     }
 }

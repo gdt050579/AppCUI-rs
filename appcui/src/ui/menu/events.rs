@@ -1,5 +1,5 @@
 use super::{Menu, CheckBox, Command, SingleChoice};
-use crate::ui::MenuBar;
+use crate::ui::AppBar;
 
 /// A trait that defines the event handlers for menu-related interactions.
 ///
@@ -50,7 +50,7 @@ pub trait GenericMenuEvents {
     ///
     /// # Parameters
     /// * `menubar` - A mutable reference to the menu bar to update.
-    fn on_update_menubar(&self, _menubar: &mut MenuBar) {}
+    fn on_update_menubar(&self, _menubar: &mut AppBar) {}
 }
 
 use crate::system::Handle;

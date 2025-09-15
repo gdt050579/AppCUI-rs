@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 
 const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
@@ -67,7 +67,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
     }
         
 }
@@ -106,7 +106,7 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    fn on_update_menubar(&self,menubar: &mut MenuBar){
+    fn on_update_menubar(&self,menubar: &mut AppBar){
         menubar.show(self.menu_arrange);
     }
 }

@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 
 #[Window(events = MenuEvents, commands=New+Save+Open)]
 pub struct MyWindow {
@@ -18,13 +18,13 @@ impl MyWindow {
             {Open,cmd:Open},
         ]"
         );
-        w.h_menu = w.menubar_mut().add(MenuEntry::new("File", m, 0, MenuBarPosition::Left));
+        w.h_menu = w.menubar_mut().add(MenuEntry::new("File", m, 0, AppBarPosition::Left));
 
         w
     }
 }
 impl MenuEvents for MyWindow {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.h_menu);
     }
 }

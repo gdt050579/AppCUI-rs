@@ -80,7 +80,7 @@ struct FileInformation {
 
 #[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme, internal: true)]
 struct WindowWithTheme {
-    h_file: Handle<menubar::MenuEntry>,
+    h_file: Handle<appbar::MenuEntry>,
 }
 impl WindowWithTheme {
     fn new() -> Self {
@@ -89,7 +89,7 @@ impl WindowWithTheme {
             h_file: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.menubar_mut().add(menubar::MenuEntry::new(
+        w.h_file = w.menubar_mut().add(appbar::MenuEntry::new(
             "&File",
             menu!(
                 "class: WindowWithTheme, items=[
@@ -101,7 +101,7 @@ impl WindowWithTheme {
                 ]"
             ),
             0,
-            menubar::MenuBarPosition::Left,
+            appbar::AppBarPosition::Left,
         ));
 
         let mut splitter = vsplitter!("d:f,pos:55");
@@ -178,7 +178,7 @@ impl WindowWithTheme {
     }
 }
 impl MenuEvents for WindowWithTheme {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.h_file);
     }
 }

@@ -1,4 +1,4 @@
-use super::{ItemBase, ItemStatus, MenuBarItem, MenuBarItemWrapper, MenuBarPosition};
+use super::{ItemBase, ItemStatus, MenuBarItem, MenuBarItemWrapper, AppBarPosition};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, MenuHandleManager, RuntimeManager, Theme};
@@ -13,11 +13,11 @@ pub struct MenuEntry {
 }
 
 impl MenuEntry {
-    pub fn new(name: &str, menu: Menu, order: u8, pos: MenuBarPosition) -> Self {
+    pub fn new(name: &str, menu: Menu, order: u8, pos: AppBarPosition) -> Self {
         let h = RuntimeManager::get().add_menu(menu);
         Self::with_handle(name, h, order, pos)
     }
-    pub fn with_handle(name: &str, handle: Handle<Menu>, order: u8, pos: MenuBarPosition) -> Self {
+    pub fn with_handle(name: &str, handle: Handle<Menu>, order: u8, pos: AppBarPosition) -> Self {
         let c = Caption::new(name, crate::utils::ExtractHotKeyMethod::AltPlusKey);
         let w = (c.chars_count().max(1) + 2).min(u8::MAX as usize) as u8;
         Self {

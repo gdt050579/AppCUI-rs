@@ -5,25 +5,25 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, Theme, RuntimeManager};
 use crate::ui::common::traits::EventProcessStatus;
-use crate::ui::menubar::ItemStatus;
+use crate::ui::appbar::ItemStatus;
 use crate::utils::HandleManager;
 
 #[derive(Copy, Clone)]
-struct MenuBarItemPos {
+struct AppBarItemPos {
     idx: u32,
     x: i16,
     width: u8,
     order: u8,
 }
-pub struct MenuBar {
+pub struct AppBar {
     manager: HandleManager<MenuBarItemWrapper>,
-    shown_items: Vec<MenuBarItemPos>,
+    shown_items: Vec<AppBarItemPos>,
     receiver_control_handle: Handle<()>,
     width: u32,
     hovered_item_index: Option<usize>,
     current_item_index: Option<usize>,
 }
-impl MenuBar {
+impl AppBar {
     pub(crate) fn new(width: u32) -> Self {
         Self {
             manager: HandleManager::with_capacity(16),
@@ -261,7 +261,7 @@ impl MenuBar {
         if let Some(item) = self.manager.get_mut(handle.cast()) {
             item.set_receiver_control_handle(self.receiver_control_handle);
             let base = item.base();
-            self.shown_items.push(MenuBarItemPos {
+            self.shown_items.push(AppBarItemPos {
                 idx: handle.index() as u32,
                 x: base.x() as i16,
                 width: base.width(),

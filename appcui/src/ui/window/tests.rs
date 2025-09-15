@@ -1743,7 +1743,7 @@ fn check_modal_window_close() {
 fn check_window_close_with_commandbar_and_menu() {
     #[Window(events = CommandBarEvents+MenuEvents, commands: A, internal = true)]
     struct MyWin {
-        h_menu: Handle<ui::menubar::MenuEntry>,
+        h_menu: Handle<ui::appbar::MenuEntry>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -1751,11 +1751,11 @@ fn check_window_close_with_commandbar_and_menu() {
                 base: window!("Test,a:c,w:30,h:8"),
                 h_menu: Handle::None,
             };
-            w.h_menu = w.menubar_mut().add(ui::menubar::MenuEntry::new(
+            w.h_menu = w.menubar_mut().add(ui::appbar::MenuEntry::new(
                 "File",
                 menu!("class:MyWin,items=[{New,cmd:A}]"),
                 0,
-                ui::menubar::MenuBarPosition::Left,
+                ui::appbar::AppBarPosition::Left,
             ));
             w
         }
@@ -1769,7 +1769,7 @@ fn check_window_close_with_commandbar_and_menu() {
         }
     }
     impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
+        fn on_update_menubar(&self, menubar: &mut AppBar) {
             menubar.show(self.h_menu);
         }
     }

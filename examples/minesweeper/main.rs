@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 mod minesweeper_game;
 mod mywin;
 use mywin::MyWin;
@@ -37,7 +37,7 @@ impl CommandBarEvents for MyDesktop {
 }
 
 impl MenuEvents for MyDesktop {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.menu_game);
     }
     
@@ -71,7 +71,7 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {&Exit, cmd: Exit}
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
     }
 }
 

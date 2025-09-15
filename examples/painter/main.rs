@@ -1,5 +1,5 @@
 use appcui::{dialogs::{OpenFileDialogFlags, SaveFileDialogFlags}, prelude::*};
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 mod painter_window;
 use painter_window::PainterWindow;
 mod painter_control;
@@ -38,7 +38,7 @@ impl DesktopEvents for PainterDesktop {
                 {-},
                 {'E&xit',cmd: Exit}
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
     }
 }
 
@@ -75,7 +75,7 @@ impl MenuEvents for PainterDesktop {
         }
     }
 
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.menu_file);
     }
 }

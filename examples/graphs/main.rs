@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 
 mod settings;
 mod graph_window;
@@ -83,7 +83,7 @@ impl DesktopEvents for MyDesktop {
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "),2,MenuBarPosition::Left));
+        "),2,AppBarPosition::Left));
         
         self.menu_examples = self.menubar_mut().add(MenuEntry::new("&Examples", menu!("
             class: MyDesktop, items:[
@@ -92,14 +92,14 @@ impl DesktopEvents for MyDesktop {
                 {'&Bipartite Graph',cmd: ShowBipartite},
                 {'&Showcase Graph',cmd: ShowShowcase},
             ]
-        "),0,MenuBarPosition::Left));
+        "),0,AppBarPosition::Left));
         
         self.menu_help = self.menubar_mut().add(MenuEntry::new("&Help", menu!("
             class: MyDesktop, items:[
                 {&About,cmd: About},
                 {E&xit,cmd: Exit},
             ]
-        "),2,MenuBarPosition::Left));
+        "),2,AppBarPosition::Left));
     }  
 }
 
@@ -141,7 +141,7 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.menu_examples);
         menubar.show(self.menu_arrange);
         menubar.show(self.menu_help);

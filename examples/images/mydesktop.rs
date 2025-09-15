@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 
 use crate::dizzy::DIZZY_PIXELS;
 use crate::ferris::FERRIS_PIXELS;
@@ -40,7 +40,7 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {'E&xit',cmd: Exit},
             ]"
-        ),0,MenuBarPosition::Left));
+        ),0,AppBarPosition::Left));
         self.menu_arrange = self.menubar_mut().add(MenuEntry::new("&Arrange", menu!(
             "class: MyDesktop, items:[
               {'&Grid',cmd: Grid},
@@ -48,12 +48,12 @@ impl DesktopEvents for MyDesktop {
               {'&Horizontal',cmd: Horizontal},
               {'&Cascade',cmd: Cascade},
           ]"
-        ),0,MenuBarPosition::Left));
+        ),0,AppBarPosition::Left));
     }
 }
 
 impl MenuEvents for MyDesktop {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.menu_windows);
         menubar.show(self.menu_arrange);
     }

@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::menubar::*;
+use appcui::ui::appbar::*;
 use chrono::NaiveDate;
 
 #[derive(ListItem)]
@@ -33,14 +33,14 @@ impl MyWindow {
                 {-},
                 {E&xit,Alt+F4,cmd:Exit}
             ]"
-        ),0,MenuBarPosition::Left));
+        ),0,AppBarPosition::Left));
         w.h_theme = w.menubar_mut().add(MenuEntry::new("&Theme", menu!(
             "class: MyWindow, items=[
                 {&Default,cmd:DefaultTheme,selected: true},
                 {'Dark Gray',cmd:DarkGrayTheme, selected: false},
                 {'&Light',cmd:LightTheme, selected: false}
             ]"
-        ),0,MenuBarPosition::Left));
+        ),0,AppBarPosition::Left));
 
         let mut splitter = vsplitter!("d:f,pos:55");
         let mut p_basic = panel!("'Basic controls',l:1,t:1,r:1,h:8");
@@ -133,7 +133,7 @@ impl MenuEvents for MyWindow {
         }   
     }
 
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
+    fn on_update_menubar(&self, menubar: &mut AppBar) {
         menubar.show(self.h_file);
         menubar.show(self.h_theme);
     }
