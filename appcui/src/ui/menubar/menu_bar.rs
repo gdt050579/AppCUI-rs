@@ -2,9 +2,8 @@ use std::usize;
 
 use super::{MenuBarItem, MenuBarItemWrapper};
 use crate::graphics::*;
-use crate::input::Key;
-use crate::system::Handle;
-use crate::system::Theme;
+use crate::input::*;
+use crate::system::{Handle, Theme, RuntimeManager};
 use crate::ui::common::traits::EventProcessStatus;
 use crate::ui::menubar::ItemStatus;
 use crate::utils::HandleManager;
@@ -111,6 +110,21 @@ impl MenuBar {
     pub(crate) fn is_opened(&self) -> bool {
         self.current_item_index.is_some()
     }
+    fn change_current_item(&mut self, goto_next: bool) {
+        if self.shown_items.is_empty() {
+            self.current_item_index = None;
+            return;
+        }
+        if let Some(value) = self.current_item_index {
+            let len = self.shown_items.len();
+            let new_index = if goto_next {
+                (value + 1) % len
+            } else {
+                (value + len - 1) % len
+            };
+            self.open(new_index)
+        }
+    }
     fn open(&mut self, index: usize) {
         if index < self.shown_items.len() {
             self.current_item_index = Some(index);
@@ -158,11 +172,80 @@ impl MenuBar {
         }
         EventProcessStatus::Processed
     }
-    pub(crate) fn on_key_event(&mut self, key: Key, menu_is_opened: bool) -> EventProcessStatus {
-        todo!()
+    fn process_shortcut(&mut self, key: Key) -> bool {
+        for (index, pos) in self.shown_items.iter().enumerate() {
+            if let Some(elem) = self.manager.element(pos.idx as usize) {
+                if elem.is_enabled() && (key == elem.hotkey()) {
+                    self.open(index);
+                    return true;
+                }
+            }
+        }
+        false
     }
-    pub(crate) fn set_position(&mut self, x: i32, y: i32, width: u32) {
-        todo!()
+    fn process_key(&mut self, key: Key) -> EventProcessStatus {
+        match key.code {
+            KeyCode::Left => {
+                self.change_current_item(false);
+                EventProcessStatus::Processed
+            }
+            KeyCode::Right => {
+                self.change_current_item(true);
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
+    }
+
+    pub(crate) fn on_key_event(&mut self, key: Key, menu_is_opened: bool) -> EventProcessStatus {
+        if menu_is_opened {
+            if key.modifier.is_empty() {
+                return self.process_key(key);
+            }
+            if key.modifier == KeyModifier::Alt {
+                // check if a shortcut was pressed
+                if self.process_shortcut(key) {
+                    return EventProcessStatus::Processed;
+                }
+            }
+            EventProcessStatus::Ignored
+        } else {
+            if key.modifier == KeyModifier::Alt {
+                // check if a shortcut was pressed
+                if self.process_shortcut(key) {
+                    return EventProcessStatus::Processed;
+                }
+            }
+            // else check all shortcuts
+            let menus = RuntimeManager::get().get_menus();
+            for pos in &self.shown_items {
+                if let Some(elem) = self.manager.element(pos.idx as usize) {
+                    if elem.process_shortcut(key, menus)
+                    {
+                        return EventProcessStatus::Processed;
+                    }
+                }
+            }
+            // for (index, item) in self.items.iter().enumerate() {
+            //     if index >= self.count {
+            //         break;
+            //     }
+            //     if let Some(menu) = menus.get_mut(item.handle) {
+            //         if menu.process_shortcut(key, item.receiver_control_handle) {
+            //             return EventProcessStatus::Processed;
+            //         }
+            //     }
+            // }
+
+            // nothing to process
+            EventProcessStatus::Ignored
+        }
+    }
+    pub(crate) fn update_width(&mut self, width: u32) {
+        if width != self.width {
+            self.width = width;
+            self.update_positions();
+        }
     }
     pub fn show<T>(&mut self, handle: Handle<T>)
     where

@@ -1093,7 +1093,7 @@ impl RuntimeManager {
             commandbar.set_desktop_size(new_size);
         }
         if let Some(menubar) = self.menubar.as_mut() {
-            menubar.set_position(0, 0, new_size.width);
+            menubar.update_width(new_size.width);
         }
         // resize the desktop as well
         let desktop = self.get_controls_mut().desktop_mut();

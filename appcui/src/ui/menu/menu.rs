@@ -346,7 +346,7 @@ impl Menu {
         self.update_first_visible_item();
     }
 
-    pub(super) fn process_shortcut(&mut self, key: Key, receiver_control_handle: Handle<()>) -> bool {
+    pub(in super::super) fn process_shortcut(&mut self, key: Key, receiver_control_handle: Handle<()>) -> bool {
         for (index, item) in self.items.iter_mut().enumerate() {
             if !item.is_enabled() {
                 continue;

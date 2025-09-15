@@ -56,5 +56,9 @@ impl ItemBase {
     #[inline(always)]
     pub(super) fn x(&self) -> i32 {
         self.x
-    }      
+    }
+    #[inline(always)]   
+    pub(super) fn is_enabled(&self) -> bool {
+        self.flags.contains_one(Flags::Enabled)
+    }   
 }

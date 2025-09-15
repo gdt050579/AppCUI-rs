@@ -1,6 +1,8 @@
 use super::ItemBase;
 use super::MenuEntry;
 use crate::graphics::Surface;
+use crate::input::*;
+use crate::system::MenuHandleManager;
 use crate::{
     system::{Handle, HandleSupport, Theme},
     ui::menubar::ItemStatus,
@@ -34,6 +36,24 @@ impl MenuBarItemWrapper {
         match self {
             MenuBarItemWrapper::Separator(_) => todo!(),
             MenuBarItemWrapper::MenuEntry(obj) => &mut obj.base,
+            MenuBarItemWrapper::Label(_) => todo!(),
+            MenuBarItemWrapper::Button(_) => todo!(),
+            MenuBarItemWrapper::CheckBox(_) => todo!(),
+        }
+    }
+    #[inline(always)]
+    pub(super) fn is_enabled(&self) -> bool {
+        self.base().is_enabled()
+    }
+    #[inline(always)]
+    pub(super) fn hotkey(&self) -> Key {
+        Key::None
+    }
+    #[inline(always)]
+    pub(super) fn process_shortcut(&self, key: Key, menus: &mut MenuHandleManager) -> bool {
+        match self {
+            MenuBarItemWrapper::Separator(_) => todo!(),
+            MenuBarItemWrapper::MenuEntry(menu_entry) => menu_entry.process_shortcut(key, menus),
             MenuBarItemWrapper::Label(_) => todo!(),
             MenuBarItemWrapper::Button(_) => todo!(),
             MenuBarItemWrapper::CheckBox(_) => todo!(),

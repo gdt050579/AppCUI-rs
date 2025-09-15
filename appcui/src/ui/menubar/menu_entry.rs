@@ -1,6 +1,7 @@
 use super::{ItemBase, ItemStatus, MenuBarItem, MenuBarItemWrapper, MenuBarPosition};
 use crate::graphics::*;
-use crate::system::{Handle, RuntimeManager, Theme};
+use crate::input::*;
+use crate::system::{Handle, MenuHandleManager, RuntimeManager, Theme};
 use crate::ui::menu::Menu;
 
 pub struct MenuEntry {
@@ -48,6 +49,16 @@ impl MenuEntry {
     }
     pub(super) fn on_activate(&mut self) {
         RuntimeManager::get().show_menu(self.handle, self.receiver_control_handle, self.base.x(), 1, None)
+    }
+    #[inline(always)]
+    pub(super) fn process_shortcut(&self, key: Key, menus: &mut MenuHandleManager) -> bool {
+        if (self.receiver_control_handle.is_none()) || (self.handle.is_none()) {
+            false
+        } else if let Some(menu) = menus.get_mut(self.handle) {
+            menu.process_shortcut(key, self.receiver_control_handle)
+        } else {
+            false
+        }
     }
 }
 
