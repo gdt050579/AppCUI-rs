@@ -61,4 +61,8 @@ impl ItemBase {
     pub(super) fn is_enabled(&self) -> bool {
         self.flags.contains_one(Flags::Enabled)
     }   
+    #[inline(always)]   
+    pub(super) fn is_on_left(&self) -> bool {
+        self.flags.contains_one(Flags::OnLeft)
+    }     
 }

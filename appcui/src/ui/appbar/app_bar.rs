@@ -97,15 +97,25 @@ impl AppBar {
     pub(crate) fn update_positions(&mut self) {
         // sort the data first
         self.shown_items.sort_by_key(|i| i.order);
-        let mut x = 0;
+        let mut left = 0;
+        let mut right = self.width as i32;
         for item in &mut self.shown_items {
             let idx = item.idx as usize;
             if let Some(obj) = self.manager.element_mut(idx) {
-                obj.base_mut().set_x(x);
+                // refresh the width
                 let w = obj.base().width();
-                item.x = x as i16;
                 item.width = w;
-                x += w as i32;
+
+                let onleft = obj.base().is_on_left();
+                if onleft {
+                    obj.base_mut().set_x(left);
+                    item.x = left as i16;
+                    left += w as i32;
+                } else {
+                    right -= w as i32;
+                    item.x = right as i16;
+                    obj.base_mut().set_x(right);
+                }
             }
         }
     }
