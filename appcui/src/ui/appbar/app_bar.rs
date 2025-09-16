@@ -2,9 +2,21 @@ use super::AppBarItem;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, RuntimeManager, Theme};
+use crate::ui::appbar;
 use crate::ui::appbar::ItemStatus;
 use crate::ui::common::traits::EventProcessStatus;
 use crate::utils::HandleManager;
+
+macro_rules! const_cast {
+    ($obj:expr, $from:ty, $to:ty) => {
+        unsafe { &*($obj as *const $from as *const $to) }
+    };
+}
+macro_rules! mut_cast {
+    ($obj:expr, $from:ty, $to:ty) => {
+        unsafe { &mut (*(($obj as *mut $from) as *mut $to)) }
+    };
+}
 
 #[derive(Copy, Clone)]
 struct AppBarItemPos {
@@ -36,37 +48,37 @@ impl AppBar {
     #[allow(private_bounds)]
     pub fn add<T>(&mut self, item: T) -> Handle<T>
     where
-        T: Into<AppBarItem>
+        T: Into<AppBarItem>,
     {
         self.manager.add(item.into()).cast()
     }
     #[allow(private_bounds)]
     pub fn get<T>(&self, menubaritem_hamdle: Handle<T>) -> Option<&T>
     where
-        T: Into<AppBarItem>
+        T: Into<AppBarItem>,
     {
         let ref_item = self.manager.get(menubaritem_hamdle.cast())?;
-        match ref_item {
+        Some(match ref_item {
             AppBarItem::Separator(_) => todo!(),
-            AppBarItem::MenuButton(_) => todo!(),
+            AppBarItem::MenuButton(obj) => const_cast!(obj, appbar::MenuButton, T),
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
             AppBarItem::CheckBox(_) => todo!(),
-        }
+        })
     }
     #[allow(private_bounds)]
     pub fn get_mut<T>(&mut self, menubaritem_hamdle: Handle<T>) -> Option<&mut T>
     where
-        T: Into<AppBarItem>
+        T: Into<AppBarItem>,
     {
         let ref_item = self.manager.get_mut(menubaritem_hamdle.cast())?;
-        match ref_item {
+        Some(match ref_item {
             AppBarItem::Separator(_) => todo!(),
-            AppBarItem::MenuButton(_) => todo!(),
+            AppBarItem::MenuButton(obj) => mut_cast!(obj, appbar::MenuButton, T),
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
             AppBarItem::CheckBox(_) => todo!(),
-        }
+        })
     }
     #[inline(always)]
     pub(crate) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
@@ -158,7 +170,9 @@ impl AppBar {
         let current_index = self.current_item_index.unwrap_or(usize::MAX);
         for (index, item) in self.shown_items.iter().enumerate() {
             if let Some(elem) = self.manager.element(item.idx as usize) {
-                let status = if index == current_index {
+                let status = if !elem.is_enabled() {
+                    ItemStatus::Inactive
+                } else if index == current_index {
                     ItemStatus::Current
                 } else if index == hover_index {
                     ItemStatus::Hovered
@@ -267,7 +281,7 @@ impl AppBar {
     #[allow(private_bounds)]
     pub fn show<T>(&mut self, handle: Handle<T>)
     where
-        T: Into<AppBarItem>
+        T: Into<AppBarItem>,
     {
         if self.receiver_control_handle.is_none() {
             return;

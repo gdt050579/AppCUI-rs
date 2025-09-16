@@ -457,7 +457,7 @@ impl RuntimeManager {
         menus.get_mut(handle)
     }
     pub(crate) fn get_appbar(&mut self)->&mut AppBar {
-        self.appbar.as_mut().unwrap()
+        self.appbar.as_mut().expect("AppBar (application bar) was not enabled ! Have you forgot to add '.app_bar()' when you initialized the Application ? (e.g. App::new().app_bar().build())")
     }
     pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {
         let menus = unsafe { &mut *self.menus };

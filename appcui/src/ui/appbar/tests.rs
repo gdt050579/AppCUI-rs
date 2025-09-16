@@ -1009,3 +1009,67 @@ fn check_side_parameter() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+
+#[test]
+fn check_enable_disable() {
+    let script = "
+        //Paint.Enable(false)
+        Error.Disable(true)
+        Paint('1. initial state')
+        CheckHash(0xB1A6546E0A2D22B6)
+        Key.Pressed(F1)
+        Paint('2. Disabled')
+        CheckHash(0xE5CF1A3F8CBE868E)
+        Mouse.Move(2,0);
+        Paint('3. nothig happens on hovernig')
+        CheckHash(0xE5CF1A3F8CBE868E)
+        Mouse.Click(2,0,left);
+        Paint('4. nothig happens on click')
+        CheckHash(0x1EC6A227F348D572)
+        Key.Pressed(F1)
+        Paint('5. Enabled')
+        CheckHash(0x4CDD9A1678E2E012)
+        Mouse.Move(3,0);
+        Paint('6. now is hovered')
+        CheckHash(0x4CDD9A1678E2E012)
+    ";
+
+    #[Window(events = CommandBarEvents+AppBarEvents, internal=true,commands=[DoSomething])]
+    struct MyWin {
+        h: Handle<appbar::MenuButton>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", layout!("x:1,y:1,w:20,h:7"), window::Flags::None),
+                h: Handle::None,
+            };
+            me.h = me.appbar_mut().add(MenuButton::new("My Menu",Menu::new(),0,Side::Left));
+            me
+        }
+    }
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Enable/Disable", mywin::Commands::DoSomething);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            if command_id == mywin::Commands::DoSomething {
+                let h = self.h;
+                if let Some(m) = self.appbar_mut().get_mut(h) {
+                    m.set_enabled(!m.is_enabled());
+                }
+            }            
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h);
+        }
+    }
+
+    let mut a = App::debug(60, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
