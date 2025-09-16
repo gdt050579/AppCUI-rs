@@ -11,10 +11,8 @@ use crate::{
 // un menu bar itm are:
 // flag-urile: enabld / visible / to left / capture input
 // obiectul in sine (poate fi nimic la separator, un handle la un menu in MenuEntry, tc)
-pub(crate) trait AppBarItem {
-    fn into_appbaribartem(self) -> AppBarItemWrapper;
-}
-pub(crate) enum AppBarItemWrapper {
+
+pub(crate) enum AppBarItem {
     Separator(bool),
     MenuEntry(MenuButton),
     Label(bool),
@@ -22,23 +20,29 @@ pub(crate) enum AppBarItemWrapper {
     CheckBox(bool),
 }
 
-impl AppBarItemWrapper {
+impl From<super::MenuButton> for AppBarItem {
+    fn from(value: super::MenuButton) -> Self {
+        AppBarItem::MenuEntry(value)
+    }
+}
+
+impl AppBarItem {
     pub(super) fn base(&self) -> &ItemBase {
         match self {
-            AppBarItemWrapper::Separator(_) => todo!(),
-            AppBarItemWrapper::MenuEntry(obj) => &obj.base,
-            AppBarItemWrapper::Label(_) => todo!(),
-            AppBarItemWrapper::Button(_) => todo!(),
-            AppBarItemWrapper::CheckBox(_) => todo!(),
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuEntry(obj) => &obj.base,
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
         }
     }
     pub(super) fn base_mut(&mut self) -> &mut ItemBase {
         match self {
-            AppBarItemWrapper::Separator(_) => todo!(),
-            AppBarItemWrapper::MenuEntry(obj) => &mut obj.base,
-            AppBarItemWrapper::Label(_) => todo!(),
-            AppBarItemWrapper::Button(_) => todo!(),
-            AppBarItemWrapper::CheckBox(_) => todo!(),
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuEntry(obj) => &mut obj.base,
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
         }
     }
     #[inline(always)]
@@ -48,59 +52,59 @@ impl AppBarItemWrapper {
     #[inline(always)]
     pub(super) fn hotkey(&self) -> Key {
         match self {
-            AppBarItemWrapper::Separator(_) => todo!(),
-            AppBarItemWrapper::MenuEntry(menu_entry) => menu_entry.hotkey(),
-            AppBarItemWrapper::Label(_) => todo!(),
-            AppBarItemWrapper::Button(_) => todo!(),
-            AppBarItemWrapper::CheckBox(_) => todo!(),
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuEntry(menu_entry) => menu_entry.hotkey(),
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
         }
     }
     #[inline(always)]
     pub(super) fn process_shortcut(&self, key: Key, menus: &mut MenuHandleManager) -> bool {
         match self {
-            AppBarItemWrapper::Separator(_) => todo!(),
-            AppBarItemWrapper::MenuEntry(menu_entry) => menu_entry.process_shortcut(key, menus),
-            AppBarItemWrapper::Label(_) => todo!(),
-            AppBarItemWrapper::Button(_) => todo!(),
-            AppBarItemWrapper::CheckBox(_) => todo!(),
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuEntry(menu_entry) => menu_entry.process_shortcut(key, menus),
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
         }
     }
     pub(super) fn activate(&mut self) {
         match self {
-            AppBarItemWrapper::Separator(_) => todo!(),
-            AppBarItemWrapper::MenuEntry(obj) => obj.on_activate(),
-            AppBarItemWrapper::Label(_) => todo!(),
-            AppBarItemWrapper::Button(_) => todo!(),
-            AppBarItemWrapper::CheckBox(_) => todo!(),
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuEntry(obj) => obj.on_activate(),
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
         }
     }
     #[inline(always)]
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: ItemStatus) {
         match self {
-            AppBarItemWrapper::Separator(_) => todo!(),
-            AppBarItemWrapper::MenuEntry(obj) => obj.paint(surface, theme, status),
-            AppBarItemWrapper::Label(_) => todo!(),
-            AppBarItemWrapper::Button(_) => todo!(),
-            AppBarItemWrapper::CheckBox(_) => todo!(),
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuEntry(obj) => obj.paint(surface, theme, status),
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
         }
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         match self {
-            AppBarItemWrapper::Separator(_) => todo!(),
-            AppBarItemWrapper::MenuEntry(obj) => obj.set_receiver_control_handle(handle),
-            AppBarItemWrapper::Label(_) => todo!(),
-            AppBarItemWrapper::Button(_) => todo!(),
-            AppBarItemWrapper::CheckBox(_) => todo!(),
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuEntry(obj) => obj.set_receiver_control_handle(handle),
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
         }
     }
 }
 
-impl HandleSupport<AppBarItemWrapper> for AppBarItemWrapper {
-    fn handle(&self) -> Handle<AppBarItemWrapper> {
+impl HandleSupport<AppBarItem> for AppBarItem {
+    fn handle(&self) -> Handle<AppBarItem> {
         self.base().handle()
     }
 
-    fn set_handle(&mut self, handle: Handle<AppBarItemWrapper>) {
+    fn set_handle(&mut self, handle: Handle<AppBarItem>) {
         self.base_mut().update_handle(handle);
     }
 }

@@ -10,7 +10,6 @@ mod tests;
 
 
 use self::app_bar_item::AppBarItem;
-use self::app_bar_item::AppBarItemWrapper;
 use self::item_base::ItemBase;
 use self::item_status::ItemStatus;
 pub use self::menu_button::MenuButton;

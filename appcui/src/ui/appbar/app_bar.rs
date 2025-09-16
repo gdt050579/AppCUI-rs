@@ -1,4 +1,4 @@
-use super::{AppBarItem, AppBarItemWrapper};
+use super::AppBarItem;
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, RuntimeManager, Theme};
@@ -14,7 +14,7 @@ struct AppBarItemPos {
     order: u8,
 }
 pub struct AppBar {
-    manager: HandleManager<AppBarItemWrapper>,
+    manager: HandleManager<AppBarItem>,
     shown_items: Vec<AppBarItemPos>,
     receiver_control_handle: Handle<()>,
     width: u32,
@@ -36,36 +36,36 @@ impl AppBar {
     #[allow(private_bounds)]
     pub fn add<T>(&mut self, item: T) -> Handle<T>
     where
-        T: AppBarItem,
+        T: Into<AppBarItem>
     {
-        self.manager.add(item.into_appbaribartem()).cast()
+        self.manager.add(item.into()).cast()
     }
     #[allow(private_bounds)]
     pub fn get<T>(&self, menubaritem_hamdle: Handle<T>) -> Option<&T>
     where
-        T: AppBarItem,
+        T: Into<AppBarItem>
     {
         let ref_item = self.manager.get(menubaritem_hamdle.cast())?;
         match ref_item {
-            AppBarItemWrapper::Separator(_) => todo!(),
-            AppBarItemWrapper::MenuEntry(_) => todo!(),
-            AppBarItemWrapper::Label(_) => todo!(),
-            AppBarItemWrapper::Button(_) => todo!(),
-            AppBarItemWrapper::CheckBox(_) => todo!(),
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuEntry(_) => todo!(),
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
         }
     }
     #[allow(private_bounds)]
     pub fn get_mut<T>(&mut self, menubaritem_hamdle: Handle<T>) -> Option<&mut T>
     where
-        T: AppBarItem,
+        T: Into<AppBarItem>
     {
         let ref_item = self.manager.get_mut(menubaritem_hamdle.cast())?;
         match ref_item {
-            AppBarItemWrapper::Separator(_) => todo!(),
-            AppBarItemWrapper::MenuEntry(_) => todo!(),
-            AppBarItemWrapper::Label(_) => todo!(),
-            AppBarItemWrapper::Button(_) => todo!(),
-            AppBarItemWrapper::CheckBox(_) => todo!(),
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuEntry(_) => todo!(),
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
         }
     }
     #[inline(always)]
@@ -267,7 +267,7 @@ impl AppBar {
     #[allow(private_bounds)]
     pub fn show<T>(&mut self, handle: Handle<T>)
     where
-        T: AppBarItem,
+        T: Into<AppBarItem>
     {
         if self.receiver_control_handle.is_none() {
             return;
