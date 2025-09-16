@@ -5,7 +5,7 @@ use std::time::Duration;
 mod spiral;
 use spiral::Spiral;
 
-#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents], 
+#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents, AppBarEvents], 
           overwrite = OnPaint,
           commands  = [New, Exit])]
 struct SpiralDesktop {
@@ -116,8 +116,11 @@ impl MenuEvents for SpiralDesktop {
             spiraldesktop::Commands::Exit => self.close(),
         }
     }
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.main_menu);
+
+}
+impl AppBarEvents for SpiralDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.main_menu);
     }
 }
 

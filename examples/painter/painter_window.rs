@@ -4,7 +4,8 @@ use std::path::Path;
 use super::painter_control::PainterControl;
 use appcui::prelude::*;
 
-#[Window(events = MenuEvents + ColorPickerEvents + ButtonEvents, commands = ForegroundColor + BackgroundColor + Char25 + Char50 + Char75 + Char100)]
+#[Window(events = MenuEvents + ColorPickerEvents + ButtonEvents + AppBarEvents, 
+         commands = ForegroundColor + BackgroundColor + Char25 + Char50 + Char75 + Char100)]
 pub struct PainterWindow {
     painter: Handle<PainterControl>,
     menu: Handle<MenuButton>,
@@ -97,11 +98,12 @@ impl PainterWindow {
     }
 }
 
-impl MenuEvents for PainterWindow {
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.menu);
+impl AppBarEvents for PainterWindow {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu);
     }
-
+}
+impl MenuEvents for PainterWindow {
     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: painterwindow::Commands) {
         match command {
             painterwindow::Commands::Char25 => {

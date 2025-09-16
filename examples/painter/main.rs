@@ -4,7 +4,7 @@ mod painter_window;
 use painter_window::PainterWindow;
 mod painter_control;
 
-#[Desktop(events = [MenuEvents, DesktopEvents],  
+#[Desktop(events = [MenuEvents, DesktopEvents, AppBarEvents],  
           overwrite = OnPaint,
           commands = [New, Exit, Open, Save])]
 struct PainterDesktop {
@@ -74,9 +74,11 @@ impl MenuEvents for PainterDesktop {
             }
         }
     }
+}
 
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.menu_file);
+impl AppBarEvents for PainterDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu_file);
     }
 }
 

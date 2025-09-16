@@ -2,7 +2,7 @@ use appcui::prelude::*;
 use appcui::ui::appbar::*;
 use crate::settings::Settings;
 
-#[Window(events=[MenuEvents], 
+#[Window(events=[MenuEvents,AppBarEvents], 
          commands=[ArrangeNone, ArrangeGrid, ArrangeGridPacked, ArrangeCircular, 
                   ArrangeHierarchical, ArrangeHierarchicalPacked, ArrangeForceDirected,
                   ToggleArrowHeads, ToggleEdgeHighlightingIn, ToggleEdgeHighlightingOut,
@@ -215,9 +215,7 @@ impl MenuEvents for GraphWindow {
         self.update_graph_view(false);
     }
 
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.menu_graph);
-    }
+
 
     fn on_menu_open(&self,menu: &mut Menu) {
         // update the status of menu items based on the settings.
@@ -267,5 +265,10 @@ impl MenuEvents for GraphWindow {
         if let Some(item) = menu.get_mut(self.h_highlight_outgoing_edges) {
             item.set_checked(self.settings.highlight_outgoing_edges);
         }
+    }
+}
+impl AppBarEvents for GraphWindow {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu_graph);
     }
 }

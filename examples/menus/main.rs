@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 use appcui::ui::appbar::*;
 
-#[Window(events : MenuEvents, commands  : A)]
+#[Window(events : MenuEvents+AppBarEvents, commands  : A)]
 struct MyWindow {
     h_file: Handle<MenuButton>,
     h_edit: Handle<MenuButton>,
@@ -74,10 +74,14 @@ impl MenuEvents for MyWindow {
         }
     }
 
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.h_file);
-        menubar.show(self.h_edit);
-        menubar.show(self.h_help);
+
+}
+
+impl AppBarEvents for MyWindow {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.h_file);
+        appbar.show(self.h_edit);
+        appbar.show(self.h_help);
     }
 }
 

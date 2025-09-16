@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 use appcui::ui::appbar::*;
 
-#[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue)]
+#[CustomControl(events = MenuEvents+AppBarEvents, overwrite = OnPaint, commands = Red+Green+Blue)]
 pub struct ColorCustomControl {
     col: Color,
     h_menu: Handle<MenuButton>,
@@ -40,8 +40,9 @@ impl MenuEvents for ColorCustomControl {
             colorcustomcontrol::Commands::Blue => self.col = Color::Blue,
         }
     }
-
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.h_menu);
+}
+impl AppBarEvents for ColorCustomControl {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.h_menu);
     }
 }

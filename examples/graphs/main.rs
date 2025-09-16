@@ -19,7 +19,7 @@ const LOGO: [&str; 6] = [
     " ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ "                                                                          
 ];
 
-#[Desktop(events    = [MenuEvents,DesktopEvents], 
+#[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [ShowTree, ShowCircular, ShowBipartite, ShowShowcase,
                        Exit, About, 
@@ -141,10 +141,13 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.menu_examples);
-        menubar.show(self.menu_arrange);
-        menubar.show(self.menu_help);
+
+}
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu_examples);
+        appbar.show(self.menu_arrange);
+        appbar.show(self.menu_help);
     }
 }
 

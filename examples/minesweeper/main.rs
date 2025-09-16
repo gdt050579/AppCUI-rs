@@ -4,7 +4,7 @@ mod minesweeper_game;
 mod mywin;
 use mywin::MyWin;
 
-#[Desktop(events = [CommandBarEvents, MenuEvents, DesktopEvents], 
+#[Desktop(events = [CommandBarEvents, MenuEvents, DesktopEvents, AppBarEvents], 
           overwrite = OnPaint, 
           commands = [Easy, Medium, Hard, Extreme, Exit])]
 struct MyDesktop {
@@ -36,11 +36,12 @@ impl CommandBarEvents for MyDesktop {
     }
 }
 
-impl MenuEvents for MyDesktop {
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.menu_game);
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu_game);
     }
-    
+}
+impl MenuEvents for MyDesktop {
     fn on_command(&mut self, _: Handle<Menu>, _: Handle<menu::Command>, command: mydesktop::Commands) {
         match command {
             mydesktop::Commands::Easy => {

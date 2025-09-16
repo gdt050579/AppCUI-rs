@@ -19,7 +19,7 @@ const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
 ];
 
-#[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
+#[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [AddWindow,Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -105,9 +105,10 @@ impl MenuEvents for MyDesktop {
             self.arrange_windows(method);
         }
     }
-
-    fn on_update_menubar(&self,menubar: &mut AppBar){
-        menubar.show(self.menu_arrange);
+}
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self,appbar: &mut AppBar){
+        appbar.show(self.menu_arrange);
     }
 }
 

@@ -28,7 +28,7 @@ const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
 ];
 
-#[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
+#[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [Lists, BaseControls, Images, Animation, TreeExample, ColorPalette, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme, LightTheme])]
 struct MyDesktop {
@@ -125,14 +125,7 @@ impl MenuEvents for MyDesktop {
         if let Some(method) = m {
             self.arrange_windows(method);
         }
-    }
-
-    fn on_update_menubar(&self,menubar: &mut AppBar) {
-        menubar.show(self.menu_examples);
-        menubar.show(self.menu_arrange);
-        menubar.show(self.menu_theme);
-    }
-    
+    }    
     fn on_command(&mut self,_:Handle<Menu>,_:Handle<menu::Command>,command:mydesktop::Commands){
         match command {
             mydesktop::Commands::Lists => { self.add_window(file_navigator::Win::new()); },
@@ -147,6 +140,13 @@ impl MenuEvents for MyDesktop {
         if let Some(method) = m {
             self.arrange_windows(method);
         }
+    }
+}
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self,appbar: &mut AppBar) {
+        appbar.show(self.menu_examples);
+        appbar.show(self.menu_arrange);
+        appbar.show(self.menu_theme);
     }
 }
 

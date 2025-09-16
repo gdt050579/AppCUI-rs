@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 use appcui::ui::appbar::*;
 
-#[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue)]
+#[CustomControl(events = MenuEvents+AppBarEvents, overwrite = OnPaint, commands = Red+Green+Blue)]
 pub struct TextCustomControl {
     text: &'static str,
     h_menu: Handle<MenuButton>,
@@ -43,8 +43,9 @@ impl MenuEvents for TextCustomControl {
             textcustomcontrol::Commands::Blue =>self.text = "Blue",
         }
     }
-
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.h_menu);
+}
+impl AppBarEvents for TextCustomControl {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.h_menu);
     }
 }

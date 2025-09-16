@@ -1,6 +1,6 @@
 use appcui::prelude::*;
 
-#[Window(events = MenuEvents, commands=Increment)]
+#[Window(events = MenuEvents+AppBarEvents, commands=Increment)]
 struct MyWin {
     m_counter: Handle<menu::Command>,
     some_menu: Handle<appbar::MenuButton>,
@@ -22,9 +22,6 @@ impl MyWin {
     }
 }
 impl MenuEvents for MyWin {
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.some_menu);
-    }
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
         if item == self.m_counter {
             self.counter += 1;
@@ -33,6 +30,11 @@ impl MenuEvents for MyWin {
                 menuitem.set_caption(new_text.as_str());
             }
         }
+    }
+}
+impl AppBarEvents for MyWin {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.some_menu);
     }
 }
 

@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 use appcui::ui::appbar::*;
 
-#[Window(events = MenuEvents, commands=New+Save+Open)]
+#[Window(events = AppBarEvents, commands=New+Save+Open)]
 pub struct MyWindow {
     h_menu: Handle<MenuButton>,
 }
@@ -23,8 +23,8 @@ impl MyWindow {
         w
     }
 }
-impl MenuEvents for MyWindow {
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.h_menu);
+impl AppBarEvents for MyWindow {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.h_menu);
     }
 }

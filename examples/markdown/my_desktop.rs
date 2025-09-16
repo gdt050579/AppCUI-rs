@@ -15,7 +15,7 @@ const LOGO: [&str; 8] = [
 
 
 
-#[Desktop(events    = [MenuEvents,DesktopEvents], 
+#[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [Open,Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, Back])]
 pub struct MyDesktop {
@@ -116,11 +116,12 @@ impl MenuEvents for MyDesktop {
             _ => {}
         }
     }
+}
 
-    
-    fn on_update_menubar(&self,menubar: &mut AppBar)
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self,appbar: &mut AppBar)
     {
-        menubar.show(self.menu_file);
-        menubar.show(self.menu_arrange);
-    }
+        appbar.show(self.menu_file);
+        appbar.show(self.menu_arrange);
+    }    
 }

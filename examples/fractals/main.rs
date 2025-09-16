@@ -5,7 +5,7 @@ use std::time::Duration;
 mod fractal;
 use fractal::Fractal;
 
-#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents], 
+#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents, AppBarEvents], 
           overwrite = OnPaint,
           commands  = [New, Exit])]
 struct FractalDesktop {
@@ -109,8 +109,11 @@ impl MenuEvents for FractalDesktop {
             fractaldesktop::Commands::Exit => self.close(),
         }
     }
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.main_menu);
+
+}
+impl AppBarEvents for FractalDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.main_menu);
     }
 }
 

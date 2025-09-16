@@ -7,7 +7,7 @@ use crate::hello_rust::HELLO_RUST_PIXELS;
 use crate::mywin::MyWin;
 use crate::shapes::SHAPES_PIXELS;
 
-#[Desktop(events    = MenuEvents+DesktopEvents, 
+#[Desktop(events    = MenuEvents+DesktopEvents+AppBarEvents, 
           commands  = Dizzy+Hello+Shapes+Ferris+Exit+Grid+Vertical+Horizontal+Cascade)]
 pub struct MyDesktop {
     index: u32,
@@ -52,11 +52,14 @@ impl DesktopEvents for MyDesktop {
     }
 }
 
-impl MenuEvents for MyDesktop {
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.menu_windows);
-        menubar.show(self.menu_arrange);
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu_windows);
+        appbar.show(self.menu_arrange);
     }
+}
+impl MenuEvents for MyDesktop {
+
 
     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mydesktop::Commands) {
         match command {
