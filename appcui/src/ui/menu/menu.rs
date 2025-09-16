@@ -730,7 +730,7 @@ impl Menu {
 
         self.visible_items_count = menu_height - 2;
         self.width = (menu_width - 2) as u16;
-        self.text_width = self.width - ((max_hot_key_width + 2) as u16);
+        self.text_width = self.width.saturating_sub((max_hot_key_width + 2) as u16);
         // set the actual clip
         if to_left {
             if to_bottom {

@@ -156,13 +156,17 @@ impl AppBar {
         }
     }
     fn open(&mut self, index: usize) {
-        if index < self.shown_items.len() {
-            self.current_item_index = Some(index);
+        if index < self.shown_items.len() {            
             let idx = self.shown_items[index].idx as usize;
             if let Some(elem) = self.manager.element_mut(idx) {
-                elem.activate();
+                if elem.is_enabled() {
+                    elem.activate();
+                    self.current_item_index = Some(index);
+                    return;
+                }
             }
         }
+        self.current_item_index = None;
     }
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.fill_horizontal_line_with_size(0, 0, self.width, Character::with_attributes(' ', theme.menu.text.normal));

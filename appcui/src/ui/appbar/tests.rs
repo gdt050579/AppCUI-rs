@@ -1014,8 +1014,7 @@ fn check_side_parameter() {
 #[test]
 fn check_enable_disable() {
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('1. initial state')
         CheckHash(0xB1A6546E0A2D22B6)
         Key.Pressed(F1)
@@ -1026,13 +1025,13 @@ fn check_enable_disable() {
         CheckHash(0xE5CF1A3F8CBE868E)
         Mouse.Click(2,0,left);
         Paint('4. nothig happens on click')
-        CheckHash(0x1EC6A227F348D572)
+        CheckHash(0xE5CF1A3F8CBE868E)
         Key.Pressed(F1)
         Paint('5. Enabled')
-        CheckHash(0x4CDD9A1678E2E012)
+        CheckHash(0x31DB14049BEB45AE)
         Mouse.Move(3,0);
         Paint('6. now is hovered')
-        CheckHash(0x4CDD9A1678E2E012)
+        CheckHash(0x31DB14049BEB45AE)
     ";
 
     #[Window(events = CommandBarEvents+AppBarEvents, internal=true,commands=[DoSomething])]
