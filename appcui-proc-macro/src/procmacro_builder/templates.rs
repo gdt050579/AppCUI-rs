@@ -182,6 +182,42 @@ impl$(TEMPLATE_TYPE) GenericMenuEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 }
 ";
 
+pub(crate) static APPBAR_EVENTS: &str = "
+trait AppBarEvents {
+    fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: $(MOD_NAME)::Commands) {}
+    fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, command: $(MOD_NAME)::Commands, checked: bool) {}
+    fn on_update(&self, appbar: &mut AppBar) {}
+}
+impl$(TEMPLATE_TYPE) GenericAppBarEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_update(&self, appbar: &mut AppBar) {
+        AppBarEvents::on_update(self, appbar);
+    }
+    fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command_id: u32) {
+        if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {
+            AppBarEvents::on_command(self, menu, item, command);
+        } else {
+            panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
+        }
+    }
+    fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, command_id: u32, checked: bool) {
+        if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {
+            AppBarEvents::on_check(self, menu, item, command, checked);
+        } else {
+            panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
+        }
+    }
+    fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, command_id: u32) {
+        if let Ok(command) = $(MOD_NAME)::Commands::try_from(command_id) {
+            AppBarEvents::on_select(self, menu, item, command);
+        } else {
+            panic!(\"Invalid internal state (can not convert value: {} into $(MOD_NAME)::Commands\",command_id);
+        }
+    }
+}
+";
+
+
+
 pub(crate) static EMIT_EVENTS_TEMPLATE: &str = "
     #[repr(u32)]
     #[derive(Copy,Clone,Eq,PartialEq,Debug)]

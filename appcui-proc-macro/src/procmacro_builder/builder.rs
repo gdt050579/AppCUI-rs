@@ -319,6 +319,10 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         if config.get(AppCUITrait::MenuEvents) == TraitImplementation::None {
             code.push_str(templates::MENU_EVENTS);
         }
+        // add the MenudBar events wrapper if needed
+        if config.get(AppCUITrait::AppBarEvents) == TraitImplementation::None {
+            code.push_str(templates::APPBAR_EVENTS);
+        }        
         // add raise events support
         if !a.emitted_events.is_empty() {
             code.push_str(templates::RAISE_EVENTS_TEMPLATE);
