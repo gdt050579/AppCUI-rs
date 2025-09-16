@@ -121,7 +121,7 @@ impl AppCUITrait {
             AppCUITrait::TabEvents => "TabEvents",
             AppCUITrait::CharPickerEvents => "CharPickerEvents",
             AppCUITrait::GenericGraphViewEvents => "GraphViewEvents", // important to be without Generic
-            AppCUITrait::AppBarEvents => "AppBarEvents",              // important to be without Generic
+            AppCUITrait::AppBarEvents => "AppBarEvents",              
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -292,7 +292,7 @@ impl AppCUITrait {
             AppCUITrait::TabEvents => "impl$(TEMPLATE_TYPE) TabEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::CharPickerEvents => "impl$(TEMPLATE_TYPE) CharPickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericGraphViewEvents => "impl$(TEMPLATE_TYPE) GenericGraphViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
-            AppCUITrait::AppBarEvents => "impl$(TEMPLATE_TYPE) GenericAppBarEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::AppBarEvents => "impl$(TEMPLATE_TYPE) AppBarEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {

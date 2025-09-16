@@ -2,7 +2,7 @@
 use crate::ui::AppBar;
 
 /// A trait that defines the event handlers for AppBar interation
-pub trait GenericAppBarEvents {
+pub trait AppBarEvents {
 
     
     /// Called when a command menu item is activated.

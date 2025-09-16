@@ -51,7 +51,7 @@ pub use super::ui::markdown::events::MarkdownEvents;
 pub use super::ui::menu::events::GenericMenuEvents;
 pub use super::ui::menu::Menu;
 pub use super::ui::appbar::AppBar;
-pub use super::ui::appbar::events::GenericAppBarEvents;
+pub use super::ui::appbar::events::AppBarEvents;
 pub use super::ui::numericselector;
 pub use super::ui::numericselector::events::GenericNumericSelectorEvents;
 pub use super::ui::numericselector::Number;
