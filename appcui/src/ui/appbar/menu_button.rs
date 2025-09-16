@@ -13,12 +13,12 @@ pub struct MenuButton {
 }
 
 impl MenuButton {
-    pub fn new(name: &str, menu: Menu, order: u8, pos: Side) -> Self {
+    pub fn new(caption: &str, menu: Menu, order: u8, pos: Side) -> Self {
         let h = RuntimeManager::get().add_menu(menu);
-        Self::with_handle(name, h, order, pos)
+        Self::with_handle(caption, h, order, pos)
     }
-    pub fn with_handle(name: &str, handle: Handle<Menu>, order: u8, pos: Side) -> Self {
-        let c = Caption::new(name, crate::utils::ExtractHotKeyMethod::AltPlusKey);
+    pub fn with_handle(caption: &str, handle: Handle<Menu>, order: u8, pos: Side) -> Self {
+        let c = Caption::new(caption, crate::utils::ExtractHotKeyMethod::AltPlusKey);
         let w = (c.chars_count().max(1) + 2).min(u8::MAX as usize) as u8;
         Self {
             handle: handle,
@@ -26,6 +26,25 @@ impl MenuButton {
             caption: c,
             base: ItemBase::new(w, order, pos, true),
         }
+    }
+    #[inline(always)]
+    pub fn is_enabled(&self) -> bool {
+        self.base.is_enabled()
+    }
+    #[inline(always)]
+    pub fn set_enabled(&mut self, enabled: bool) {
+        self.base.set_enabled(enabled);
+    }
+    #[inline(always)]
+    pub fn caption(&self) -> &str {
+        self.caption.text()
+    }
+    #[inline(always)]
+    pub fn set_caption(&mut self, text: &str) {
+        self.caption = Caption::new(text, crate::utils::ExtractHotKeyMethod::AltPlusKey);
+        let w = (self.caption.chars_count().max(1) + 2).min(u8::MAX as usize) as u8;  
+        self.base.set_width(w);  
+        RuntimeManager::get().request_update_command_and_app_bars();    
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;
@@ -66,5 +85,3 @@ impl MenuButton {
         self.caption.hotkey()
     }
 }
-
-

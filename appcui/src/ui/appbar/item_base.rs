@@ -46,6 +46,10 @@ impl ItemBase {
         self.width
     }
     #[inline(always)]
+    pub(super) fn set_width(&mut self, width: u8) {
+        self.width = width;
+    }    
+    #[inline(always)]
     pub(super) fn order(&self) -> u8 {
         self.order
     }    
@@ -61,8 +65,17 @@ impl ItemBase {
     pub(super) fn is_enabled(&self) -> bool {
         self.flags.contains_one(Flags::Enabled)
     }   
+    #[inline(always)]  
+    pub fn set_enabled(&mut self, enabled: bool) {
+        if enabled {
+            self.flags |= Flags::Enabled;
+        } else {
+            self.flags.remove(Flags::Enabled);
+        }
+    }      
     #[inline(always)]   
     pub(super) fn is_on_left(&self) -> bool {
         self.flags.contains_one(Flags::OnLeft)
-    }     
+    }  
+ 
 }

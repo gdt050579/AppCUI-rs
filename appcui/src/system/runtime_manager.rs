@@ -72,7 +72,7 @@ pub(crate) struct RuntimeManager {
     key_modifier: KeyModifier,
     desktop_os_start_called: bool,
     recompute_parent_indexes: bool,
-    request_update_command_and_menu_bars: bool,
+    update_command_and_app_bars: bool,
     request_update_timer_threads: bool,
     single_window: bool,
     loop_status: LoopStatus,
@@ -125,7 +125,7 @@ impl RuntimeManager {
             recompute_layout: true,
             repaint: true,
             desktop_os_start_called: false,
-            request_update_command_and_menu_bars: true,
+            update_command_and_app_bars: true,
             recompute_parent_indexes: true,
             request_update_timer_threads: false,
             single_window: builder.single_window,
@@ -321,8 +321,12 @@ impl RuntimeManager {
         self.request_recompute_layout();
         self.request_repaint();
     }
+    pub(crate) fn request_update_command_and_app_bars(&mut self) {
+        self.update_command_and_app_bars = true;
+        self.repaint = true;
+    }
     pub(crate) fn request_update(&mut self) {
-        self.request_update_command_and_menu_bars = true;
+        self.update_command_and_app_bars = true;
         self.repaint = true;
         self.recompute_layout = true;
     }
@@ -520,7 +524,7 @@ impl RuntimeManager {
         if !self.to_remove_list.is_empty() {
             self.remove_deleted_controls();
             self.recompute_parent_indexes = true;
-            self.request_update_command_and_menu_bars = true;
+            self.update_command_and_app_bars = true;
         }
 
         // If we reach this point, there should not be any change in the logic of controls
@@ -534,14 +538,14 @@ impl RuntimeManager {
             self.request_focus = None;
             self.request_default_action = None;
             self.repaint = true;
-            self.request_update_command_and_menu_bars = true;
+            self.update_command_and_app_bars = true;
         }
 
         if self.recompute_layout {
             self.recompute_layouts();
         }
-        if self.request_update_command_and_menu_bars {
-            self.update_command_and_menu_bars();
+        if self.update_command_and_app_bars {
+            self.update_command_and_app_bars();
         }
         if self.repaint || self.recompute_layout {
             self.paint();
@@ -883,9 +887,9 @@ impl RuntimeManager {
         }
         self.menu_event = None;
     }
-    fn update_command_and_menu_bars(&mut self) {
+    fn update_command_and_app_bars(&mut self) {
         if self.commandbar.is_none() && self.appbar.is_none() {
-            self.request_update_command_and_menu_bars = false;
+            self.update_command_and_app_bars = false;
             return;
         }
         let focused_handle = self.get_focused_control();
@@ -905,7 +909,7 @@ impl RuntimeManager {
             }
             cmdbar.update_positions();
         }
-        // process menubar
+        // process appbar
         if let Some(appbar) = self.appbar.as_mut() {
             appbar.clear();
             // start from the focused control and call on_update_menubar for each control
@@ -921,7 +925,7 @@ impl RuntimeManager {
             appbar.update_positions();
         }
         self.process_menu_and_cmdbar_mousemove(self.mouse_pos.x, self.mouse_pos.y);
-        self.request_update_command_and_menu_bars = false;
+        self.update_command_and_app_bars = false;
     }
 
     fn find_last_leaf(&mut self, handle: Handle<()>) -> Handle<()> {
@@ -1707,7 +1711,7 @@ impl MouseMethods for RuntimeManager {
                 //if response == EventProcessStatus::Processed {
                 self.mouse_locked_object = MouseLockedObject::Control(handle);
                 self.repaint = true;
-                self.request_update_command_and_menu_bars = true;
+                self.update_command_and_app_bars = true;
                 return;
                 //}
             }
@@ -1782,7 +1786,7 @@ impl MouseMethods for RuntimeManager {
                 if response == EventProcessStatus::Processed {
                     self.mouse_locked_object = MouseLockedObject::None;
                     self.repaint = true;
-                    self.request_update_command_and_menu_bars = true;
+                    self.update_command_and_app_bars = true;
                 }
             }
         }
