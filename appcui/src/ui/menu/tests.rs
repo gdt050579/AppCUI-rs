@@ -5,7 +5,7 @@ use crate::{
 
 #[test]
 fn check_view() {
-    #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
+    #[Window(events = AppBarEvents, commands=A+B+C, internal: true)]
     struct MyWin {
         m_file: Handle<MenuButton>,
         m_edit: Handle<MenuButton>,
@@ -43,11 +43,11 @@ fn check_view() {
             w
         }
     }
-    impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
-            menubar.show(self.m_file);
-            menubar.show(self.m_edit);
-            menubar.show(self.m_help);
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_file);
+            appbar.show(self.m_edit);
+            appbar.show(self.m_help);
         }
     }
     let script = "
@@ -87,7 +87,7 @@ fn check_view() {
 
 #[test]
 fn check_scroll_button_activation() {
-    #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
+    #[Window(events = AppBarEvents, commands=A+B+C, internal: true)]
     struct MyWin {
         m_file: Handle<MenuButton>,
     }
@@ -117,9 +117,9 @@ fn check_scroll_button_activation() {
             w
         }
     }
-    impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
-            menubar.show(self.m_file);
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_file);
         }
     }
     let script = "
@@ -161,7 +161,7 @@ fn check_scroll_button_activation() {
 
 #[test]
 fn check_submenus_open() {
-    #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
+    #[Window(events = AppBarEvents, commands=A+B+C, internal: true)]
     struct MyWin {
         m_file: Handle<MenuButton>,
     }
@@ -230,8 +230,8 @@ fn check_submenus_open() {
             w
         }
     }
-    impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, menubar: &mut AppBar) {
             menubar.show(self.m_file);
         }
     }
@@ -309,7 +309,7 @@ fn check_submenus_open() {
 
 #[test]
 fn check_dynamic_change_menu() {
-    #[Window(events = MenuEvents, commands=Increment, internal: true)]
+    #[Window(events = MenuEvents+AppBarEvents, commands=Increment, internal: true)]
     struct MyWin {
         m_counter: Handle<menu::Command>,
         some_menu: Handle<MenuButton>,
@@ -331,9 +331,6 @@ fn check_dynamic_change_menu() {
         }
     }
     impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
-            menubar.show(self.some_menu);
-        }
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
             if item == self.m_counter {
                 self.counter += 1;
@@ -342,6 +339,11 @@ fn check_dynamic_change_menu() {
                     menuitem.set_caption(new_text.as_str());
                 }
             }
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, menubar: &mut AppBar) {
+            menubar.show(self.some_menu);
         }
     }
     let script = "
@@ -377,7 +379,7 @@ fn check_dynamic_change_menu() {
 
 #[test]
 fn check_dynamic_change_menu_2() {
-    #[Window(events = MenuEvents, commands=Increment, internal: true)]
+    #[Window(events = AppBarEvents+MenuEvents, commands=Increment, internal: true)]
     struct MyWin {
         m_counter: Handle<menu::Command>,
         some_menu: Handle<MenuButton>,
@@ -399,9 +401,6 @@ fn check_dynamic_change_menu_2() {
         }
     }
     impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
-            menubar.show(self.some_menu);
-        }
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
             if item == self.m_counter {
                 self.counter += 1;
@@ -410,6 +409,11 @@ fn check_dynamic_change_menu_2() {
                     menuitem.set_caption(new_text.as_str());
                 }
             }
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.some_menu);
         }
     }
     let script = "
@@ -840,7 +844,7 @@ fn check_popup_menu_with_keys() {
 
 #[test]
 fn check_menu_checkbox_methods() {
-    #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
+    #[Desktop(events =  AppBarEvents+MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
         m_desktop: Handle<MenuButton>,
     }
@@ -866,10 +870,6 @@ fn check_menu_checkbox_methods() {
         }
     }
     impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
-            menubar.show(self.m_desktop);
-        }
-
         fn on_check(&mut self, menu: Handle<Menu>, item: Handle<menu::CheckBox>, _: mydesktop::Commands, _: bool) {
             if let Some(i) = self.menuitem_mut(menu, item) {
                 assert!(i.is_checked());
@@ -881,6 +881,11 @@ fn check_menu_checkbox_methods() {
                 assert_eq!(i.shortcut(), Key::new(KeyCode::B, KeyModifier::Ctrl));
             }
         }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_desktop);
+        }        
     }
     let script = "
         Paint.Enable(false)
@@ -904,7 +909,7 @@ fn check_menu_checkbox_methods() {
 
 #[test]
 fn check_menu_singlechoice_methods() {
-    #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
+    #[Desktop(events =  AppBarEvents+MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
         m_desktop: Handle<MenuButton>,
     }
@@ -930,10 +935,6 @@ fn check_menu_singlechoice_methods() {
         }
     }
     impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
-            menubar.show(self.m_desktop);
-        }
-
         fn on_select(&mut self, menu: Handle<Menu>, item: Handle<menu::SingleChoice>, _: mydesktop::Commands) {
             if let Some(i) = self.menuitem_mut(menu, item) {
                 assert!(i.is_selected());
@@ -944,6 +945,11 @@ fn check_menu_singlechoice_methods() {
                 i.set_shortcut(key!("Ctrl+B"));
                 assert_eq!(i.shortcut(), Key::new(KeyCode::B, KeyModifier::Ctrl));
             }
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_desktop);
         }
     }
     let script = "
@@ -968,7 +974,7 @@ fn check_menu_singlechoice_methods() {
 
 #[test]
 fn check_menu_set_status_checkbox_and_singlechoice() {
-    #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
+    #[Desktop(events =  MenuEvents+DesktopEvents+AppBarEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
         m_desktop: Handle<MenuButton>,
         m_cb: Handle<menu::CheckBox>,
@@ -996,10 +1002,6 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
         }
     }
     impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
-            menubar.show(self.m_desktop);
-        }
-
         fn on_menu_open(&self, menu: &mut Menu) {
             let h1 = self.m_cb;
             let h2 = self.m_sc;
@@ -1009,6 +1011,11 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
             if let Some(i) = menu.get_mut(h2) {
                 i.set_selected();
             }
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_desktop);
         }
     }
     let script = "
@@ -1025,7 +1032,7 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
 
 #[test]
 fn check_menu_command_methods() {
-    #[Desktop(events =  MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
+    #[Desktop(events =  AppBarEvents+MenuEvents+DesktopEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
         m_desktop: Handle<MenuButton>,
     }
@@ -1051,10 +1058,6 @@ fn check_menu_command_methods() {
         }
     }
     impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
-            menubar.show(self.m_desktop);
-        }
-
         fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mydesktop::Commands) {
             if let Some(i) = self.menuitem_mut(menu, item) {
                 assert!(i.is_enabled());
@@ -1064,6 +1067,11 @@ fn check_menu_command_methods() {
                 i.set_shortcut(key!("Ctrl+B"));
                 assert_eq!(i.shortcut(), Key::new(KeyCode::B, KeyModifier::Ctrl));
             }
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_desktop);
         }
     }
     let script = "

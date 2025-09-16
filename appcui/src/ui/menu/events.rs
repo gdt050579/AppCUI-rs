@@ -42,15 +42,6 @@ pub trait GenericMenuEvents {
     /// * `command` - The command identifier associated with the menu item.
     fn on_select(&mut self, _menu: Handle<Menu>, _item: Handle<SingleChoice>, _command: u32) {}
     
-    /// Called when the menu bar needs to be updated.
-    ///
-    /// This method is used to add registered menus to the menu bar.
-    /// It is called whenever the focus changes or when a control
-    /// explicitly requests a menu bar update.
-    ///
-    /// # Parameters
-    /// * `menubar` - A mutable reference to the menu bar to update.
-    fn on_update_menubar(&self, _menubar: &mut AppBar) {}
 }
 
 use crate::system::Handle;

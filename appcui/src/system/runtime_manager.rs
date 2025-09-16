@@ -906,19 +906,19 @@ impl RuntimeManager {
             cmdbar.update_positions();
         }
         // process menubar
-        if let Some(menubar) = self.appbar.as_mut() {
-            menubar.clear();
+        if let Some(appbar) = self.appbar.as_mut() {
+            appbar.clear();
             // start from the focused control and call on_update_menubar for each control
             let mut h = focused_handle;
             while let Some(control) = controls.get_mut(h) {
-                menubar.set_receiver_control_handle(h);
-                control.control_mut().on_update_menubar(menubar);
+                appbar.set_receiver_control_handle(h);
+                AppBarEvents::on_update(control.control(), appbar);
                 h = control.base().parent;
                 if h.is_none() {
                     break;
                 }
             }
-            menubar.update_positions();
+            appbar.update_positions();
         }
         self.process_menu_and_cmdbar_mousemove(self.mouse_pos.x, self.mouse_pos.y);
         self.request_update_command_and_menu_bars = false;

@@ -78,7 +78,7 @@ struct FileInformation {
     created: NaiveDate,
 }
 
-#[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme, internal: true)]
+#[Window(events : AppBarEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme, internal: true)]
 struct WindowWithTheme {
     h_file: Handle<appbar::MenuButton>,
 }
@@ -177,9 +177,9 @@ impl WindowWithTheme {
         w
     }
 }
-impl MenuEvents for WindowWithTheme {
-    fn on_update_menubar(&self, menubar: &mut AppBar) {
-        menubar.show(self.h_file);
+impl AppBarEvents for WindowWithTheme {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.h_file);
     }
 }
 

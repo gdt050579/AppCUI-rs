@@ -74,6 +74,7 @@ pub(crate) fn generate_inner_module(a: &Arguments, config: &mut TraitsConfig, co
     } else {
         if (config.get(AppCUITrait::CommandBarEvents) != TraitImplementation::None)
             && (config.get(AppCUITrait::MenuEvents) != TraitImplementation::None)
+            && (config.get(AppCUITrait::AppBarEvents) != TraitImplementation::None)
         {
             panic!(
                 "The 'commands` attribute can only be used if one of the CommandBarEvents or MenuEvents is overwritten (via `events` attributie) !"

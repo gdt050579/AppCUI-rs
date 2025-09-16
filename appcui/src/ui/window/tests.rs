@@ -1741,7 +1741,7 @@ fn check_modal_window_close() {
 
 #[test]
 fn check_window_close_with_commandbar_and_menu() {
-    #[Window(events = CommandBarEvents+MenuEvents, commands: A, internal = true)]
+    #[Window(events = CommandBarEvents+AppBarEvents, commands: A, internal = true)]
     struct MyWin {
         h_menu: Handle<ui::appbar::MenuButton>,
     }
@@ -1768,9 +1768,9 @@ fn check_window_close_with_commandbar_and_menu() {
         fn on_event(&mut self, _: mywin::Commands) { /* do nothing */
         }
     }
-    impl MenuEvents for MyWin {
-        fn on_update_menubar(&self, menubar: &mut AppBar) {
-            menubar.show(self.h_menu);
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_menu);
         }
     }
     let script = "
