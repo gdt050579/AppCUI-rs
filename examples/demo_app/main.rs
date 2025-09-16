@@ -156,7 +156,7 @@ fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_family = "windows")]
     App::with_backend(appcui::backend::Type::WindowsVT)
         .desktop(MyDesktop::new())
-        .menu_bar()
+        .app_bar()
         .command_bar()
         .build()?
         .run();

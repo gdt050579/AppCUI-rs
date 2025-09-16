@@ -48,7 +48,7 @@ impl AppBar {
         let ref_item = self.manager.get(menubaritem_hamdle.cast())?;
         match ref_item {
             AppBarItem::Separator(_) => todo!(),
-            AppBarItem::MenuEntry(_) => todo!(),
+            AppBarItem::MenuButton(_) => todo!(),
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
             AppBarItem::CheckBox(_) => todo!(),
@@ -62,7 +62,7 @@ impl AppBar {
         let ref_item = self.manager.get_mut(menubaritem_hamdle.cast())?;
         match ref_item {
             AppBarItem::Separator(_) => todo!(),
-            AppBarItem::MenuEntry(_) => todo!(),
+            AppBarItem::MenuButton(_) => todo!(),
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
             AppBarItem::CheckBox(_) => todo!(),

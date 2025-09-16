@@ -139,6 +139,6 @@ impl TimerEvents for FractalDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(FractalDesktop::new()).menu_bar().command_bar().build()?.run();
+    App::new().desktop(FractalDesktop::new()).app_bar().command_bar().build()?.run();
     Ok(())
 } 

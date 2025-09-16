@@ -77,6 +77,6 @@ impl DesktopEvents for MyDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).app_bar().command_bar().build()?.run();
     Ok(())
 } 

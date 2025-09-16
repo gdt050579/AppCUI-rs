@@ -219,6 +219,6 @@ impl TimerEvents for MatrixDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MatrixDesktop::new()).menu_bar().command_bar().build()?.run();
+    App::new().desktop(MatrixDesktop::new()).app_bar().command_bar().build()?.run();
     Ok(())
 } 

@@ -37,7 +37,7 @@ fn check_order_parameter() {
         Paint('initial order - Help should be first, then Edit, then File')
         CheckHash(0xF06F449DDF16C472)
     ";
-    let mut a = App::debug(60, 15, script).menu_bar().build().unwrap();
+    let mut a = App::debug(60, 15, script).app_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -173,7 +173,7 @@ fn check_order_parameter_multi_controls() {
         Paint('initial state - Desktop(0), Window(1), Control(2)')
         CheckHash(0x38778794A1D87753)
     ";
-    let mut a = App::debug(60, 15, script).desktop(MyDesktop::new()).menu_bar().build().unwrap();
+    let mut a = App::debug(60, 15, script).desktop(MyDesktop::new()).app_bar().build().unwrap();
     a.add_window(mywindow::MyWindow::new());
     a.run();
 }
@@ -309,7 +309,7 @@ fn check_order_parameter_multi_controls_reversed() {
         Paint('initial state - Control(2), Window(1), Desktop(0)')
         CheckHash(0x47F641E3D761FF9B)
     ";
-    let mut a = App::debug(60, 15, script).desktop(MyDesktop::new()).menu_bar().build().unwrap();
+    let mut a = App::debug(60, 15, script).desktop(MyDesktop::new()).app_bar().build().unwrap();
     a.add_window(mywindow::MyWindow::new());
     a.run();
 }
@@ -496,7 +496,7 @@ fn check_update_multiple_menus() {
             Paint('one menu')
             CheckHash(0x6ec113e98df3ca14)
             ";
-    let mut a = App::debug(60, 24, script).menu_bar().build().unwrap();
+    let mut a = App::debug(60, 24, script).app_bar().build().unwrap();
     let mut w1 = mywin::MyWindow::new("Win-1", layout!("x:1,y:2,w:18,h:10"));
     w1.add(colorcustomcontrol::ColorCustomControl::new(layout!("x:1,y:1,w:10")));
     w1.add(button!("Button,x:1,y:3,w:10"));
@@ -778,7 +778,7 @@ fn check_with_keys() {
             Paint('State_58 (no menu visible in the menu bar)')
             CheckHash(0xD0C81ECF174389FD)
         ";
-    let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
+    let mut a = App::debug(60, 20, script).app_bar().build().unwrap();
     a.add_window(MyWindow::new());
     a.run();
 }
@@ -957,7 +957,7 @@ fn check_recursive_shortcuts() {
             Paint('State_25 (no menu visible in the menubar)')
             CheckHash(0xD0C81ECF174389FD)    
         ";
-    let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
+    let mut a = App::debug(60, 20, script).app_bar().build().unwrap();
     a.add_window(MyWindow::new());
     a.run();
 }
@@ -1005,7 +1005,7 @@ fn check_side_parameter() {
         Paint('4. Hover over Edit')
         CheckHash(0x21EDFC4F0D6D293A)
     ";
-    let mut a = App::debug(60, 15, script).menu_bar().build().unwrap();
+    let mut a = App::debug(60, 15, script).app_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

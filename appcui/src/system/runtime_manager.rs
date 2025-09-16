@@ -154,7 +154,7 @@ impl RuntimeManager {
             } else {
                 None
             },
-            appbar: if builder.has_menu_bar { Some(AppBar::new(term_sz.width)) } else { None },
+            appbar: if builder.has_app_bar { Some(AppBar::new(term_sz.width)) } else { None },
             #[cfg(feature = "EVENT_RECORDER")]
             event_recorder: super::event_recorder::EventRecorder::new(),
         };

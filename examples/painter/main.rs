@@ -85,7 +85,7 @@ impl AppBarEvents for PainterDesktop {
 fn main() -> Result<(), appcui::system::Error> {
     App::new()
         .desktop(PainterDesktop::new())
-        .menu_bar()
+        .app_bar()
         .build()?
         .run();
     Ok(())

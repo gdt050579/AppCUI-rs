@@ -195,7 +195,7 @@ fn check_default_theme() {
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::Default))
         .command_bar()
-        .menu_bar()
+        .app_bar()
         .build()
         .unwrap();
     a.add_window(WindowWithTheme::new());
@@ -214,7 +214,7 @@ fn check_darkgray_theme() {
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::DarkGray))
         .command_bar()
-        .menu_bar()
+        .app_bar()
         .build()
         .unwrap();
     a.add_window(WindowWithTheme::new());
@@ -233,7 +233,7 @@ fn check_light_theme() {
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::Light))
         .command_bar()
-        .menu_bar()
+        .app_bar()
         .build()
         .unwrap();
     a.add_window(WindowWithTheme::new());

@@ -160,7 +160,7 @@ fn check_menus() {
         Paint('Menu opem')
         CheckHash(0x610ADBDB875BBED1)
     ";
-    let a = App::debug(40, 12, script).desktop(MyDesktop::new()).menu_bar().build().unwrap();
+    let a = App::debug(40, 12, script).desktop(MyDesktop::new()).app_bar().build().unwrap();
     a.run();
 }
 
