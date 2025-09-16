@@ -117,7 +117,7 @@ impl AppBar {
                     left += w as i32;
                 } else {
                     right -= w as i32;
-                    if right - AppBar::LEFT_RIGHT_MIN_SPACE >= left {
+                    if right - AppBar::LEFT_RIGHT_MIN_SPACE <= left {
                         break;
                     }
                     item.x = right as i16;

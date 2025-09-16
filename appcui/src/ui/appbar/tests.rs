@@ -4,7 +4,7 @@ use crate::{
 };
 
 #[test]
-fn check_menubar_order_parameter() {
+fn check_order_parameter() {
     #[Window(events = MenuEvents, commands=A+B+C, internal: true)]
     struct MyWin {
         m_file: Handle<MenuButton>,
@@ -43,7 +43,7 @@ fn check_menubar_order_parameter() {
 }
 
 #[test]
-fn check_menubar_order_parameter_multi_controls() {
+fn check_order_parameter_multi_controls() {
     // Window with menu
     pub mod mywindow {
         use crate::prelude::*;
@@ -178,7 +178,7 @@ fn check_menubar_order_parameter_multi_controls() {
 }
 
 #[test]
-fn check_menubar_order_parameter_multi_controls_reversed() {
+fn check_order_parameter_multi_controls_reversed() {
     // Window with menu
     pub mod mywindow {
         use crate::prelude::*;
@@ -313,7 +313,7 @@ fn check_menubar_order_parameter_multi_controls_reversed() {
 }
 
 #[test]
-fn check_menubar_update_multiple_menus() {
+fn check_update_multiple_menus() {
     mod mywin {
         use crate::prelude::*;
         use crate::ui::appbar::*;
@@ -504,7 +504,7 @@ fn check_menubar_update_multiple_menus() {
 }
 
 #[test]
-fn check_menubar_with_keys() {
+fn check_with_keys() {
     #[Window(events : MenuEvents, commands  : A, internal: true)]
     struct MyWindow {
         h_file: Handle<MenuButton>,
@@ -778,7 +778,7 @@ fn check_menubar_with_keys() {
 }
 
 #[test]
-fn check_menubar_recursive_shortcuts() {
+fn check_recursive_shortcuts() {
     #[Window(events : MenuEvents, commands  : A, internal: true)]
     struct MyWindow {
         h_file: Handle<MenuButton>,
@@ -952,5 +952,54 @@ fn check_menubar_recursive_shortcuts() {
         ";
     let mut a = App::debug(60, 20, script).menu_bar().build().unwrap();
     a.add_window(MyWindow::new());
+    a.run();
+}
+
+
+#[test]
+fn check_side_parameter() {
+    #[Window(events: MenuEvents, commands: A, internal: true)]
+    struct MyWin {
+        m_file: Handle<MenuButton>,
+        m_edit: Handle<MenuButton>,
+        m_help: Handle<MenuButton>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,a:c,w:40,h:8"),
+                m_file: Handle::None,
+                m_help: Handle::None,
+                m_edit: Handle::None,
+            };
+            w.m_file = w.appbar_mut().add(MenuButton::new("&File", Menu::new(), 0, Side::Left));
+            w.m_edit = w.appbar_mut().add(MenuButton::new("&Edit", Menu::new(), 0, Side::Left));
+            w.m_help = w.appbar_mut().add(MenuButton::new("&Help", Menu::new(), 0, Side::Right));
+            w
+        }
+    }
+    impl MenuEvents for MyWin {
+        fn on_update_menubar(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_file);
+            appbar.show(self.m_edit);
+            appbar.show(self.m_help);
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. initial order - File,Edit on left, Help or Right')
+        CheckHash(0x57E37E1F8A5C816A)
+        Mouse.Move(59,0)
+        Paint('2. Hover over Help')
+        CheckHash(0xB305A201840FDCFA)
+        Mouse.Move(0,0)
+        Paint('3. Hover over File')
+        CheckHash(0x1F36887325D95F9A)
+        Mouse.Move(6,0)
+        Paint('4. Hover over Edit')
+        CheckHash(0x21EDFC4F0D6D293A)
+    ";
+    let mut a = App::debug(60, 15, script).menu_bar().build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
