@@ -8,7 +8,7 @@ use crate::{
     prelude::KeyModifier,
     system::{Handle, HandleSupport, RuntimeManager, Theme},
     ui::common::traits::EventProcessStatus,
-    utils::{Caption, ExtractHotKeyMethod, Strategy, VectorIndex},
+    utils::{Strategy, VectorIndex},
 };
 use std::sync::atomic::{AtomicUsize, Ordering};
 use appcui_proc_macro::key;

@@ -83,6 +83,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);
@@ -148,6 +149,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);
@@ -239,6 +241,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::Default);
@@ -303,6 +306,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::Default);
@@ -393,6 +397,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);

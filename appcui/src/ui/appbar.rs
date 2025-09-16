@@ -1,3 +1,4 @@
+pub mod events;
 mod app_bar;
 mod app_bar_item;
 mod item_base;

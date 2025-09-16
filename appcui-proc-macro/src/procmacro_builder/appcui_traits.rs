@@ -55,6 +55,7 @@ pub(crate) enum AppCUITrait {
     TabEvents = 46,
     CharPickerEvents = 47,
     GenericGraphViewEvents = 48,
+    AppBarEvents = 49,
 }
 
 #[repr(u8)]
@@ -120,7 +121,7 @@ impl AppCUITrait {
             AppCUITrait::TabEvents => "TabEvents",
             AppCUITrait::CharPickerEvents => "CharPickerEvents",
             AppCUITrait::GenericGraphViewEvents => "GraphViewEvents", // important to be without Generic
-
+            AppCUITrait::AppBarEvents => "AppBarEvents",              // important to be without Generic
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -177,6 +178,7 @@ impl AppCUITrait {
             AppCUITrait::TabEvents => TraitType::ControlEvent,
             AppCUITrait::CharPickerEvents => TraitType::ControlEvent,
             AppCUITrait::GenericGraphViewEvents => TraitType::ControlEvent,
+            AppCUITrait::AppBarEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -233,6 +235,7 @@ impl AppCUITrait {
             AppCUITrait::TabEvents => "",
             AppCUITrait::CharPickerEvents => "",
             AppCUITrait::GenericGraphViewEvents => "",
+            AppCUITrait::AppBarEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -289,6 +292,7 @@ impl AppCUITrait {
             AppCUITrait::TabEvents => "impl$(TEMPLATE_TYPE) TabEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::CharPickerEvents => "impl$(TEMPLATE_TYPE) CharPickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericGraphViewEvents => "impl$(TEMPLATE_TYPE) GenericGraphViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::AppBarEvents => "impl$(TEMPLATE_TYPE) GenericAppBarEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -322,7 +326,7 @@ impl AppCUITrait {
             "PasswordEvents" | "Password" => Some(AppCUITrait::PasswordEvents),
             "WindowEvents" | "Window" => Some(AppCUITrait::WindowEvents),
             "CommandBarEvents" | "CommandBar" => Some(AppCUITrait::CommandBarEvents),
-            "MenuEvents" | "MenuBar" => Some(AppCUITrait::MenuEvents),
+            "MenuEvents" => Some(AppCUITrait::MenuEvents),
             "DesktopEvents" | "Desktop" => Some(AppCUITrait::DesktopEvents),
             "ToolBarEvents" | "ToolBar" => Some(AppCUITrait::ToolBarEvents),
             "ColorPickerEvents" | "ColorPicker" => Some(AppCUITrait::ColorPickerEvents),
@@ -347,6 +351,9 @@ impl AppCUITrait {
             "TabEvents" | "Tab" => Some(AppCUITrait::TabEvents),
             "CharPickerEvents" | "CharPicker" => Some(AppCUITrait::CharPickerEvents),
             "GraphViewEvents" | "GraphView" => Some(AppCUITrait::GenericGraphViewEvents),
+            "AppBarEvents" | "AppBar" => Some(AppCUITrait::AppBarEvents),
+
+
             _ => None,
         }
     }
@@ -404,6 +411,7 @@ impl AppCUITrait {
             46 => Some(AppCUITrait::TabEvents),
             47 => Some(AppCUITrait::CharPickerEvents),
             48 => Some(AppCUITrait::GenericGraphViewEvents),
+            49 => Some(AppCUITrait::AppBarEvents),
             _ => None,
         };
         result?;

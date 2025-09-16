@@ -67,6 +67,7 @@ impl<T> ModalWindow<T> {
 impl<T: 'static> Control for ModalWindow<T> {}
 impl<T> OnThemeChanged for ModalWindow<T> {}
 impl<T> GenericMenuEvents for ModalWindow<T> {}
+impl<T> GenericAppBarEvents for ModalWindow<T> {}
 impl<T> DesktopEvents for ModalWindow<T> {}
 impl<T> ToolBarEvents for ModalWindow<T> {}
 impl<T> WindowEvents for ModalWindow<T> {}
