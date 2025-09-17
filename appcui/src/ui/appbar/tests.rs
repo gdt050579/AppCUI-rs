@@ -1072,3 +1072,142 @@ fn check_enable_disable() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_mouse_over_disable() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. initial state order:(File,Option,Editor ... Help,About)')
+        CheckHash(0xA38A52B34C90BD7C)
+        Mouse.Move(3,0)
+        Paint('2. Hover over File')
+        CheckHash(0xFABDCA63D641602C)
+        Mouse.Move(9,0)
+        Paint('3. Hover over Option (not selected as inactiv)')
+        CheckHash(0xA38A52B34C90BD7C)
+        Mouse.Move(17,0)
+        Paint('4. Hover over Editor')
+        CheckHash(0x64831F72959A7B3C)
+        Mouse.Move(50,0)
+        Paint('5. Hover over Help')
+        CheckHash(0xD7094A72EECA762C)
+        Mouse.Move(56,0)
+        Paint('6. Hover over About (not selected as inactiv)')
+        CheckHash(0xA38A52B34C90BD7C)        
+    ";
+
+    #[Window(events = AppBarEvents, internal=true)]
+    struct MyWin {
+        h_file: Handle<appbar::MenuButton>,
+        h_opt: Handle<appbar::MenuButton>,
+        h_edit: Handle<appbar::MenuButton>,
+        h_help: Handle<appbar::MenuButton>,
+        h_about: Handle<appbar::MenuButton>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", layout!("x:1,y:1,w:20,h:7"), window::Flags::None),
+                h_file: Handle::None,
+                h_opt: Handle::None,
+                h_edit: Handle::None,
+                h_help: Handle::None,
+                h_about: Handle::None
+            };
+            me.h_file = me.appbar_mut().add(MenuButton::new("File",Menu::new(),0,Side::Left));
+            let mut m = MenuButton::new("Option",Menu::new(),0,Side::Left);
+            m.set_enabled(false);
+            me.h_opt = me.appbar_mut().add(m);
+            me.h_edit = me.appbar_mut().add(MenuButton::new("Editor",Menu::new(),0,Side::Left));
+            me.h_help = me.appbar_mut().add(MenuButton::new("Help",Menu::new(),1,Side::Right));
+            let mut m = MenuButton::new("About",Menu::new(),0,Side::Right);
+            m.set_enabled(false);
+            me.h_about = me.appbar_mut().add(m);
+
+            me
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_file);
+            appbar.show(self.h_opt);
+            appbar.show(self.h_edit);
+            appbar.show(self.h_help);
+            appbar.show(self.h_about);
+        }
+    }
+
+    let mut a = App::debug(60, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_mouse_click_and_hover_disable() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. initial state order:(File,Option,Editor ... Help,About)')
+        CheckHash(0xA38A52B34C90BD7C)
+        Mouse.Click(3,0,left)
+        Mouse.Move(3,0)
+        Paint('2. Hover over File (File is opened)')
+        CheckHash(0xF92F32321FFA49D5)
+        Mouse.Move(9,0)
+        Paint('3. Hover over Option (not selected but File remains open)')
+        CheckHash(0xF92F32321FFA49D5)
+        Mouse.Move(17,0)
+        Paint('4. Hover over Editor (Editor is opened)')
+        CheckHash(0xA83E700EAA75E308)
+        Mouse.Move(50,0)
+        Paint('5. Hover over Help (Help is opened)')
+        CheckHash(0xB8A25E5D4D92412C)
+        Mouse.Move(56,0)
+        Paint('6. Hover over About (not selected as inactiv but Help remains open)')
+        CheckHash(0xB8A25E5D4D92412C)        
+    ";
+
+    #[Window(events = AppBarEvents, internal=true)]
+    struct MyWin {
+        h_file: Handle<appbar::MenuButton>,
+        h_opt: Handle<appbar::MenuButton>,
+        h_edit: Handle<appbar::MenuButton>,
+        h_help: Handle<appbar::MenuButton>,
+        h_about: Handle<appbar::MenuButton>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", layout!("x:1,y:1,w:20,h:7"), window::Flags::None),
+                h_file: Handle::None,
+                h_opt: Handle::None,
+                h_edit: Handle::None,
+                h_help: Handle::None,
+                h_about: Handle::None
+            };
+            me.h_file = me.appbar_mut().add(MenuButton::new("File",Menu::new(),0,Side::Left));
+            let mut m = MenuButton::new("Option",Menu::new(),0,Side::Left);
+            m.set_enabled(false);
+            me.h_opt = me.appbar_mut().add(m);
+            me.h_edit = me.appbar_mut().add(MenuButton::new("Editor",Menu::new(),0,Side::Left));
+            me.h_help = me.appbar_mut().add(MenuButton::new("Help",Menu::new(),1,Side::Right));
+            let mut m = MenuButton::new("About",Menu::new(),0,Side::Right);
+            m.set_enabled(false);
+            me.h_about = me.appbar_mut().add(m);
+
+            me
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_file);
+            appbar.show(self.h_opt);
+            appbar.show(self.h_edit);
+            appbar.show(self.h_help);
+            appbar.show(self.h_about);
+        }
+    }
+
+    let mut a = App::debug(60, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
