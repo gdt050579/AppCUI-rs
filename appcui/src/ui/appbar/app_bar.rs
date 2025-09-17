@@ -18,6 +18,28 @@ macro_rules! mut_cast {
     };
 }
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct VisibleIndex {
+    value: u32,
+}
+impl VisibleIndex {
+    #[inline(always)]
+    fn from_usize(v: usize) -> Self {
+        Self { value: v as u32 }
+    }
+    #[inline(always)]
+    fn index(&self) -> usize {
+        self.value as usize
+    }
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum MousePos {
+    None,
+    NonClickable(VisibleIndex),
+    Clickable(VisibleIndex),
+}
+
 #[derive(Copy, Clone)]
 struct AppBarItemPos {
     idx: u32,
@@ -30,8 +52,9 @@ pub struct AppBar {
     shown_items: Vec<AppBarItemPos>,
     receiver_control_handle: Handle<()>,
     width: u32,
-    hovered_item_index: Option<usize>,
+    mouse_pos: MousePos,
     current_item_index: Option<usize>,
+    last_mouse_pos: Point,
 }
 impl AppBar {
     const LEFT_RIGHT_MIN_SPACE: i32 = 5;
@@ -41,8 +64,9 @@ impl AppBar {
             shown_items: Vec::with_capacity(64),
             receiver_control_handle: Handle::None,
             width,
-            hovered_item_index: None,
+            mouse_pos: MousePos::None,
             current_item_index: None,
+            last_mouse_pos: Point::new(i32::MAX, i32::MAX),
         }
     }
     #[allow(private_bounds)]
@@ -90,20 +114,34 @@ impl AppBar {
     }
     pub(crate) fn close(&mut self) {
         self.current_item_index = None;
-        self.hovered_item_index = None;
+        self.mouse_pos = MousePos::None;
     }
-    fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {
+    fn mouse_coord_to_mouse_pos(&self, x: i32, y: i32) -> MousePos {
         if y != 0 {
-            return None;
+            return MousePos::None;
         }
         for (index, item) in self.shown_items.iter().enumerate() {
             let start = item.x as i32;
             let end = start + item.width as i32;
             if (x >= start) && (x < end) {
-                return Some(index);
+                if let Some(elem) = self.manager.element(item.idx as usize) {
+                    let base = elem.base();
+                    return if base.is_enabled() {
+                        if base.accepts_input() {
+                            MousePos::Clickable(VisibleIndex { value: index as u32 })
+                        } else {
+                            MousePos::NonClickable(VisibleIndex { value: index as u32 })
+                        }
+                    } else {
+                        // disabled
+                        MousePos::None
+                    };
+                } else {
+                    return MousePos::None;
+                }
             }
         }
-        None
+        MousePos::None
     }
     pub(crate) fn update_positions(&mut self) {
         // sort the data first
@@ -139,6 +177,7 @@ impl AppBar {
             index += 1;
         }
         self.shown_items.truncate(index);
+        self.update_mouse_pos();
     }
     #[inline(always)]
     pub(crate) fn is_opened(&self) -> bool {
@@ -152,25 +191,66 @@ impl AppBar {
         if let Some(value) = self.current_item_index {
             let len = self.shown_items.len();
             let new_index = if goto_next { (value + 1) % len } else { (value + len - 1) % len };
-            self.open(new_index)
+            self.open(VisibleIndex::from_usize(new_index))
         }
     }
-    fn open(&mut self, index: usize) {
-        if index < self.shown_items.len() {            
-            let idx = self.shown_items[index].idx as usize;
-            if let Some(elem) = self.manager.element_mut(idx) {
-                if elem.is_enabled() {
-                    elem.activate();
-                    self.current_item_index = Some(index);
-                    return;
-                }
+    fn open(&mut self, shown_index: VisibleIndex) {
+        if let Some(elem) = self.item_mut(shown_index) {
+            let base = elem.base();
+            if base.is_enabled() && base.accepts_input() {
+                elem.activate();
+                self.current_item_index = Some(shown_index.index());
+                return;
             }
         }
         self.current_item_index = None;
     }
+    #[inline(always)]
+    fn item(&self, shown_index: VisibleIndex) -> Option<&AppBarItem> {
+        self.shown_items
+            .get(shown_index.index())
+            .map(|item_pos| self.manager.element(item_pos.idx as usize))?
+    }
+    #[inline(always)]
+    fn item_mut(&mut self, shown_index: VisibleIndex) -> Option<&mut AppBarItem> {
+        self.shown_items
+            .get_mut(shown_index.index())
+            .map(|item_pos| self.manager.element_mut(item_pos.idx as usize))?
+    }
+    fn show_tooltip(&mut self, shown_index: VisibleIndex) {
+        if let Some(elem) = self.item(shown_index) {
+        } else {
+        }
+    }
+    fn update_mouse_pos(&mut self) -> bool {
+        let new_mouse_pos = self.mouse_coord_to_mouse_pos(self.last_mouse_pos.x, self.last_mouse_pos.y);
+        if new_mouse_pos == self.mouse_pos {
+            // nothing to update
+            return false;
+        }
+        self.mouse_pos = new_mouse_pos;
+        match new_mouse_pos {
+            MousePos::None => {}
+            MousePos::NonClickable(shown_index) => {
+                self.show_tooltip(shown_index);
+            }
+            MousePos::Clickable(shown_index) => {
+                // show tooltip only if not opened
+                if self.current_item_index.is_some() {
+                    self.open(shown_index);
+                } else {
+                    self.show_tooltip(shown_index);
+                }
+            }
+        }
+        true
+    }
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.fill_horizontal_line_with_size(0, 0, self.width, Character::with_attributes(' ', theme.menu.text.normal));
-        let hover_index = self.hovered_item_index.unwrap_or(usize::MAX);
+        let hover_index = match self.mouse_pos {
+            MousePos::Clickable(vi) => vi.index(),
+            _ => usize::MAX,
+        };
         let current_index = self.current_item_index.unwrap_or(usize::MAX);
         for (index, item) in self.shown_items.iter().enumerate() {
             if let Some(elem) = self.manager.element(item.idx as usize) {
@@ -188,31 +268,36 @@ impl AppBar {
         }
     }
     pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        if let Some(idx) = self.mouse_position_to_index(x, y) {
-            self.open(idx);
+        self.last_mouse_pos.x = x;
+        self.last_mouse_pos.y = y;
+        let mut res = self.update_mouse_pos();
+        match self.mouse_pos {
+            MousePos::Clickable(index) => {
+                self.open(index);
+                res = true;
+            }
+            _ => {}
+        }
+        if res {
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
         }
     }
     pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        let new_hover_pos = self.mouse_position_to_index(x, y);
-        if new_hover_pos == self.hovered_item_index {
-            return EventProcessStatus::Ignored;
+        self.last_mouse_pos.x = x;
+        self.last_mouse_pos.y = y;
+        if self.update_mouse_pos() {
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
         }
-        self.hovered_item_index = new_hover_pos;
-        if let Some(idx) = new_hover_pos {
-            if self.current_item_index.is_some() {
-                self.open(idx);
-            }
-        }
-        EventProcessStatus::Processed
     }
     fn process_shortcut(&mut self, key: Key) -> bool {
         for (index, pos) in self.shown_items.iter().enumerate() {
             if let Some(elem) = self.manager.element(pos.idx as usize) {
                 if elem.is_enabled() && (key == elem.hotkey()) {
-                    self.open(index);
+                    self.open(VisibleIndex::from_usize(index));
                     return true;
                 }
             }

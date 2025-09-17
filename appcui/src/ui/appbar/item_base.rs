@@ -65,6 +65,10 @@ impl ItemBase {
     pub(super) fn is_enabled(&self) -> bool {
         self.flags.contains_one(Flags::Enabled)
     }   
+    #[inline(always)]   
+    pub(super) fn accepts_input(&self) -> bool {
+        self.flags.contains_one(Flags::AcceptInput)
+    }     
     #[inline(always)]  
     pub fn set_enabled(&mut self, enabled: bool) {
         if enabled {
