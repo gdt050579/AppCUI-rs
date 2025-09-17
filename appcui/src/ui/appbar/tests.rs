@@ -1263,3 +1263,58 @@ fn check_separator() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_label() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. initial state order:(File ++123++ Option )')
+        CheckHash(0xD552B3F72E3CC4D1)    
+        Mouse.Move(3,0)
+        Paint('2. Hover over File')
+        CheckHash(0xF46D6B222B2BD0C1)    
+        Mouse.Move(6,0)
+        Paint('3. Hover over label (nothing is selected)')
+        CheckHash(0xD552B3F72E3CC4D1)    
+        Mouse.Click(6,0,left)
+        Paint('4. Click on label (nothing happenes)')
+        CheckHash(0xD552B3F72E3CC4D1)    
+        Mouse.Move(17,0)
+        Paint('5. Hover over Option')
+        CheckHash(0xBF17FD1669336B81)    
+    ";
+
+    #[Window(events = AppBarEvents, internal=true)]
+    struct MyWin {
+        h_file: Handle<appbar::MenuButton>,
+        h_opt: Handle<appbar::MenuButton>,
+        h_l: Handle<appbar::Label>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", layout!("x:1,y:1,w:20,h:7"), window::Flags::None),
+                h_file: Handle::None,
+                h_opt: Handle::None,
+                h_l: Handle::None,
+            };
+            me.h_file = me.appbar_mut().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
+            me.h_opt = me.appbar_mut().add(MenuButton::new("Option", Menu::new(), 0, Side::Left));
+            me.h_l = me.appbar_mut().add(appbar::Label::new("++123++", 0, Side::Left));
+
+            me
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_file);
+            appbar.show(self.h_l);
+            appbar.show(self.h_opt);
+        }
+    }
+
+    let mut a = App::debug(60, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}

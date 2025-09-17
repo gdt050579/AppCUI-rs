@@ -4,6 +4,7 @@ mod app_bar_item;
 mod item_base;
 mod menu_button;
 mod separator;
+mod label;
 mod side;
 mod item_status;
 #[cfg(test)]
@@ -15,5 +16,6 @@ use self::item_base::ItemBase;
 use self::item_status::ItemStatus;
 pub use self::menu_button::MenuButton;
 pub use self::separator::Separator;
+pub use self::label::Label;
 pub use self::app_bar::AppBar;
 pub use self::side::Side;
