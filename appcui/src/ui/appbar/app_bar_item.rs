@@ -2,6 +2,7 @@ use super::ItemBase;
 use super::Label;
 use super::MenuButton;
 use super::Separator;
+use super::Button;
 use crate::graphics::Surface;
 use crate::input::*;
 use crate::system::MenuHandleManager;
@@ -18,7 +19,7 @@ pub(crate) enum AppBarItem {
     Separator(Separator),
     MenuButton(MenuButton),
     Label(Label),
-    Button(bool),
+    Button(Button),
     CheckBox(bool),
 }
 
@@ -37,6 +38,11 @@ impl From<super::Label> for AppBarItem {
         AppBarItem::Label(value)
     }
 }
+impl From<super::Button> for AppBarItem {
+    fn from(value: super::Button) -> Self {
+        AppBarItem::Button(value)
+    }
+}
 
 impl AppBarItem {
     pub(super) fn base(&self) -> &ItemBase {
@@ -44,7 +50,7 @@ impl AppBarItem {
             AppBarItem::Separator(obj) => &obj.base,
             AppBarItem::MenuButton(obj) => &obj.base,
             AppBarItem::Label(obj) => &obj.base,
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Button(obj) => &obj.base,
             AppBarItem::CheckBox(_) => todo!(),
         }
     }
@@ -53,7 +59,7 @@ impl AppBarItem {
             AppBarItem::Separator(obj) => &mut obj.base,
             AppBarItem::MenuButton(obj) => &mut obj.base,
             AppBarItem::Label(obj) => &mut obj.base,
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Button(obj) => &mut obj.base,
             AppBarItem::CheckBox(_) => todo!(),
         }
     }
@@ -65,9 +71,9 @@ impl AppBarItem {
     pub(super) fn hotkey(&self) -> Key {
         match self {
             AppBarItem::Separator(_) => Key::None,
-            AppBarItem::MenuButton(menu_entry) => menu_entry.hotkey(),
+            AppBarItem::MenuButton(obj) => obj.hotkey(),
             AppBarItem::Label(_) => Key::None,
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Button(but) => but.hotkey(),
             AppBarItem::CheckBox(_) => todo!(),
         }
     }
@@ -77,7 +83,7 @@ impl AppBarItem {
             AppBarItem::Separator(_) => "",
             AppBarItem::MenuButton(_) => "",
             AppBarItem::Label(obj) => obj.tooltip(),
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Button(obj) => obj.tooltip(),
             AppBarItem::CheckBox(_) => todo!(),
         };
         if result.is_empty() {
@@ -90,9 +96,9 @@ impl AppBarItem {
     pub(super) fn process_shortcut(&self, key: Key, menus: &mut MenuHandleManager) -> bool {
         match self {
             AppBarItem::Separator(_) => false,
-            AppBarItem::MenuButton(menu_entry) => menu_entry.process_shortcut(key, menus),
+            AppBarItem::MenuButton(obj) => obj.process_shortcut(key, menus),
             AppBarItem::Label(_) => false,
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Button(obj) => obj.process_shortcut(key),
             AppBarItem::CheckBox(_) => todo!(),
         }
     }
@@ -111,7 +117,7 @@ impl AppBarItem {
             AppBarItem::Separator(obj) => obj.paint(surface, theme),
             AppBarItem::MenuButton(obj) => obj.paint(surface, theme, status),
             AppBarItem::Label(obj) => obj.paint(surface, theme),
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Button(obj) => obj.paint(surface, theme, status),
             AppBarItem::CheckBox(_) => todo!(),
         }
     }
@@ -120,7 +126,7 @@ impl AppBarItem {
             AppBarItem::Separator(_) => {}
             AppBarItem::MenuButton(obj) => obj.set_receiver_control_handle(handle),
             AppBarItem::Label(_) => {}
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Button(obj) => obj.set_receiver_control_handle(handle),
             AppBarItem::CheckBox(_) => todo!(),
         }
     }

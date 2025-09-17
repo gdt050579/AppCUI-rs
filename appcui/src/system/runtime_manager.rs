@@ -19,6 +19,7 @@ use crate::ui::common::ControlManager;
 use crate::ui::common::ControlEvent;
 use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
+use crate::ui::appbar::events::{AppBarEvent, AppBarEvents};
 use crate::ui::{Menu, AppBar};
 use crate::ui::window::events::WindowEvents;
 use crate::utils::VectorIndex;
@@ -85,6 +86,7 @@ pub(crate) struct RuntimeManager {
     events: Vec<ControlEvent>,
     commandbar_event: Option<CommandBarEvent>,
     menu_event: Option<MenuEvent>,
+    appbar_event: Option<AppBarEvent>,
     mouse_locked_object: MouseLockedObject,
     opened_menu_handle: Handle<Menu>,
     modal_windows: Vec<Handle<()>>,
@@ -143,6 +145,7 @@ impl RuntimeManager {
             to_remove_list: Vec::with_capacity(4),
             commandbar_event: None,
             menu_event: None,
+            appbar_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             timers_manager: TimerManager::new(builder.max_timer_count),
             task_manager: BackgroundTaskManager::new(),
@@ -305,6 +308,9 @@ impl RuntimeManager {
     pub(crate) fn set_menu_event(&mut self, event: MenuEvent) {
         self.menu_event = Some(event);
     }
+    pub(crate) fn set_appbar_event(&mut self, event: AppBarEvent) {
+        self.appbar_event = Some(event);
+    }    
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
     }
@@ -514,6 +520,11 @@ impl RuntimeManager {
         if let Some(event) = self.menu_event {
             self.process_menu_event(event);
         }
+
+        // 2. Process appbar from menu
+        if let Some(event) = self.appbar_event {
+            self.process_appbar_event(event);
+        }        
 
         // 3. Process events from controls
         if !self.events.is_empty() {
@@ -887,6 +898,18 @@ impl RuntimeManager {
         }
         self.menu_event = None;
     }
+    fn process_appbar_event(&mut self, event: AppBarEvent) {
+        let controls = unsafe { &mut *self.controls };
+        match event {
+            AppBarEvent::ButtonClick(ev) => {
+                if let Some(control) = controls.get_mut(ev.control_receiver_handle) {
+                    AppBarEvents::on_button_click(control.control_mut(), ev.button_handle);
+                    self.repaint = true;
+                }
+            }
+        }
+        self.appbar_event = None;
+    }    
     fn update_command_and_app_bars(&mut self) {
         if self.commandbar.is_none() && self.appbar.is_none() {
             self.update_command_and_app_bars = false;
