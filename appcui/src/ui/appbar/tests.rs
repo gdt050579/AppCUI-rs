@@ -1,6 +1,6 @@
 use crate::{
     prelude::*,
-    ui::appbar::{MenuButton, Side},
+    ui::appbar::{MenuButton, Separator, Side},
 };
 
 #[test]
@@ -230,12 +230,12 @@ fn check_order_parameter_multi_controls_reversed() {
                         mycustomcontrol::Commands::Green => self.col = Color::DarkGreen,
                         mycustomcontrol::Commands::Blue => self.col = Color::Blue,
                     }
-                }                    
+                }
             }
             impl AppBarEvents for MyCustomControl {
                 fn on_update(&self, appbar: &mut AppBar) {
-                     // Custom control menu with order 2 (should appear first)
-                    appbar.show(self.h_menu);                
+                    // Custom control menu with order 2 (should appear first)
+                    appbar.show(self.h_menu);
                 }
             }
         }
@@ -396,7 +396,6 @@ fn check_update_multiple_menus() {
                 appbar.show(self.h_menu);
             }
         }
-
     }
     mod textcustomcontrol {
         use crate::prelude::*;
@@ -1010,7 +1009,6 @@ fn check_side_parameter() {
     a.run();
 }
 
-
 #[test]
 fn check_enable_disable() {
     let script = "
@@ -1044,7 +1042,7 @@ fn check_enable_disable() {
                 base: Window::new("Win", layout!("x:1,y:1,w:20,h:7"), window::Flags::None),
                 h: Handle::None,
             };
-            me.h = me.appbar_mut().add(MenuButton::new("My Menu",Menu::new(),0,Side::Left));
+            me.h = me.appbar_mut().add(MenuButton::new("My Menu", Menu::new(), 0, Side::Left));
             me
         }
     }
@@ -1059,7 +1057,7 @@ fn check_enable_disable() {
                 if let Some(m) = self.appbar_mut().get_mut(h) {
                     m.set_enabled(!m.is_enabled());
                 }
-            }            
+            }
         }
     }
     impl AppBarEvents for MyWin {
@@ -1112,15 +1110,15 @@ fn check_mouse_over_disable() {
                 h_opt: Handle::None,
                 h_edit: Handle::None,
                 h_help: Handle::None,
-                h_about: Handle::None
+                h_about: Handle::None,
             };
-            me.h_file = me.appbar_mut().add(MenuButton::new("File",Menu::new(),0,Side::Left));
-            let mut m = MenuButton::new("Option",Menu::new(),0,Side::Left);
+            me.h_file = me.appbar_mut().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
+            let mut m = MenuButton::new("Option", Menu::new(), 0, Side::Left);
             m.set_enabled(false);
             me.h_opt = me.appbar_mut().add(m);
-            me.h_edit = me.appbar_mut().add(MenuButton::new("Editor",Menu::new(),0,Side::Left));
-            me.h_help = me.appbar_mut().add(MenuButton::new("Help",Menu::new(),1,Side::Right));
-            let mut m = MenuButton::new("About",Menu::new(),0,Side::Right);
+            me.h_edit = me.appbar_mut().add(MenuButton::new("Editor", Menu::new(), 0, Side::Left));
+            me.h_help = me.appbar_mut().add(MenuButton::new("Help", Menu::new(), 1, Side::Right));
+            let mut m = MenuButton::new("About", Menu::new(), 0, Side::Right);
             m.set_enabled(false);
             me.h_about = me.appbar_mut().add(m);
 
@@ -1182,15 +1180,15 @@ fn check_mouse_click_and_hover_disable() {
                 h_opt: Handle::None,
                 h_edit: Handle::None,
                 h_help: Handle::None,
-                h_about: Handle::None
+                h_about: Handle::None,
             };
-            me.h_file = me.appbar_mut().add(MenuButton::new("File",Menu::new(),0,Side::Left));
-            let mut m = MenuButton::new("Option",Menu::new(),0,Side::Left);
+            me.h_file = me.appbar_mut().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
+            let mut m = MenuButton::new("Option", Menu::new(), 0, Side::Left);
             m.set_enabled(false);
             me.h_opt = me.appbar_mut().add(m);
-            me.h_edit = me.appbar_mut().add(MenuButton::new("Editor",Menu::new(),0,Side::Left));
-            me.h_help = me.appbar_mut().add(MenuButton::new("Help",Menu::new(),1,Side::Right));
-            let mut m = MenuButton::new("About",Menu::new(),0,Side::Right);
+            me.h_edit = me.appbar_mut().add(MenuButton::new("Editor", Menu::new(), 0, Side::Left));
+            me.h_help = me.appbar_mut().add(MenuButton::new("Help", Menu::new(), 1, Side::Right));
+            let mut m = MenuButton::new("About", Menu::new(), 0, Side::Right);
             m.set_enabled(false);
             me.h_about = me.appbar_mut().add(m);
 
@@ -1204,6 +1202,60 @@ fn check_mouse_click_and_hover_disable() {
             appbar.show(self.h_edit);
             appbar.show(self.h_help);
             appbar.show(self.h_about);
+        }
+    }
+
+    let mut a = App::debug(60, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_separator() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. initial state order:(File | Option)')
+        CheckHash(0x6B9252EAA3B8099)    
+        Mouse.Move(3,0)
+        Paint('2. Hover over File')
+        CheckHash(0x6CEB644FC4509049)    
+        Mouse.Move(6,0)
+        Paint('3. Hover over separator (nothing is selected)')
+        CheckHash(0x6B9252EAA3B8099)    
+        Mouse.Click(6,0,left)
+        Paint('4. Click on separator (nothing happenes)')
+        CheckHash(0x6B9252EAA3B8099)    
+        Mouse.Move(10,0)
+        Paint('5. Hover over Option')
+        CheckHash(0x68337B1696A38369)    
+    ";
+
+    #[Window(events = AppBarEvents, internal=true)]
+    struct MyWin {
+        h_file: Handle<appbar::MenuButton>,
+        h_opt: Handle<appbar::MenuButton>,
+        h_sep: Handle<appbar::Separator>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", layout!("x:1,y:1,w:20,h:7"), window::Flags::None),
+                h_file: Handle::None,
+                h_opt: Handle::None,
+                h_sep: Handle::None,
+            };
+            me.h_file = me.appbar_mut().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
+            me.h_opt = me.appbar_mut().add(MenuButton::new("Option", Menu::new(), 0, Side::Left));
+            me.h_sep = me.appbar_mut().add(Separator::new(0, Side::Left));
+
+            me
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_file);
+            appbar.show(self.h_sep);
+            appbar.show(self.h_opt);
         }
     }
 

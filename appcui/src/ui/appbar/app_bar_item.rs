@@ -1,5 +1,6 @@
 use super::ItemBase;
 use super::MenuButton;
+use super::Separator;
 use crate::graphics::Surface;
 use crate::input::*;
 use crate::system::MenuHandleManager;
@@ -13,7 +14,7 @@ use crate::{
 // obiectul in sine (poate fi nimic la separator, un handle la un menu in MenuEntry, tc)
 
 pub(crate) enum AppBarItem {
-    Separator(bool),
+    Separator(Separator),
     MenuButton(MenuButton),
     Label(bool),
     Button(bool),
@@ -25,11 +26,16 @@ impl From<super::MenuButton> for AppBarItem {
         AppBarItem::MenuButton(value)
     }
 }
+impl From<super::Separator> for AppBarItem {
+    fn from(value: super::Separator) -> Self {
+        AppBarItem::Separator(value)
+    }
+}
 
 impl AppBarItem {
     pub(super) fn base(&self) -> &ItemBase {
         match self {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(obj) => &obj.base,
             AppBarItem::MenuButton(obj) => &obj.base,
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
@@ -38,7 +44,7 @@ impl AppBarItem {
     }
     pub(super) fn base_mut(&mut self) -> &mut ItemBase {
         match self {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(obj) => &mut obj.base,
             AppBarItem::MenuButton(obj) => &mut obj.base,
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
@@ -52,7 +58,7 @@ impl AppBarItem {
     #[inline(always)]
     pub(super) fn hotkey(&self) -> Key {
         match self {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(_) => Key::None,
             AppBarItem::MenuButton(menu_entry) => menu_entry.hotkey(),
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
@@ -62,7 +68,7 @@ impl AppBarItem {
     #[inline(always)]
     pub(super) fn tooltip(&self) -> Option<&str> {
         match self {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(_) => None,
             AppBarItem::MenuButton(_) => None,
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
@@ -72,7 +78,7 @@ impl AppBarItem {
     #[inline(always)]
     pub(super) fn process_shortcut(&self, key: Key, menus: &mut MenuHandleManager) -> bool {
         match self {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(_) => false,
             AppBarItem::MenuButton(menu_entry) => menu_entry.process_shortcut(key, menus),
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
@@ -81,7 +87,7 @@ impl AppBarItem {
     }
     pub(super) fn activate(&mut self) {
         match self {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(_) => {},
             AppBarItem::MenuButton(obj) => obj.on_activate(),
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
@@ -91,7 +97,7 @@ impl AppBarItem {
     #[inline(always)]
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: ItemStatus) {
         match self {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(obj) => obj.paint(surface, theme),
             AppBarItem::MenuButton(obj) => obj.paint(surface, theme, status),
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
@@ -100,7 +106,7 @@ impl AppBarItem {
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         match self {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(_) => {},
             AppBarItem::MenuButton(obj) => obj.set_receiver_control_handle(handle),
             AppBarItem::Label(_) => todo!(),
             AppBarItem::Button(_) => todo!(),
