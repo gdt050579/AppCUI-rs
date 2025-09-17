@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::appbar::*;
+use appcui::ui::appbar::{MenuButton,Side};
 
 #[Window(events : MenuEvents+AppBarEvents, commands  : A)]
 struct MyWindow {

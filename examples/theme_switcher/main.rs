@@ -1,5 +1,5 @@
 use appcui::prelude::*;
-use appcui::ui::appbar::*;
+use appcui::ui::appbar::{MenuButton,Side};
 use chrono::NaiveDate;
 
 #[derive(ListItem)]
