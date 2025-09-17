@@ -1,5 +1,5 @@
 use crate::ui::appbar::Side;
-use crate::system::Handle;
+use crate::system::{Handle, RuntimeManager};
 use super::AppBarItem;
 use EnumBitFlags::EnumBitFlags;
 
@@ -71,15 +71,22 @@ impl ItemBase {
     }     
     #[inline(always)]  
     pub fn set_enabled(&mut self, enabled: bool) {
+        if self.flags.contains_one(Flags::Enabled) == enabled {
+            return; // nothing to change
+        }
         if enabled {
             self.flags |= Flags::Enabled;
         } else {
             self.flags.remove(Flags::Enabled);
         }
+        self.refresh();
     }      
     #[inline(always)]   
     pub(super) fn is_on_left(&self) -> bool {
         self.flags.contains_one(Flags::OnLeft)
     }  
- 
+    #[inline(always)]
+    pub(super) fn refresh(&self) {
+        RuntimeManager::get().request_update_command_and_app_bars(); 
+    }
 }

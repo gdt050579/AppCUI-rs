@@ -60,6 +60,16 @@ impl AppBarItem {
         }
     }
     #[inline(always)]
+    pub(super) fn tooltip(&self) -> Option<&str> {
+        match self {
+            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::MenuButton(_) => None,
+            AppBarItem::Label(_) => todo!(),
+            AppBarItem::Button(_) => todo!(),
+            AppBarItem::CheckBox(_) => todo!(),
+        }
+    }    
+    #[inline(always)]
     pub(super) fn process_shortcut(&self, key: Key, menus: &mut MenuHandleManager) -> bool {
         match self {
             AppBarItem::Separator(_) => todo!(),

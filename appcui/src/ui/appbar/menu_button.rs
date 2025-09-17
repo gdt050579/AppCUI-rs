@@ -44,7 +44,7 @@ impl MenuButton {
         self.caption = Caption::new(text, crate::utils::ExtractHotKeyMethod::AltPlusKey);
         let w = (self.caption.chars_count().max(1) + 2).min(u8::MAX as usize) as u8;  
         self.base.set_width(w);  
-        RuntimeManager::get().request_update_command_and_app_bars();    
+        self.base.refresh(); 
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;

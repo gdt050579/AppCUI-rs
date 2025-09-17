@@ -217,9 +217,20 @@ impl AppBar {
             .get_mut(shown_index.index())
             .map(|item_pos| self.manager.element_mut(item_pos.idx as usize))?
     }
+    fn hide_tooltip(&mut self) {
+        RuntimeManager::get().hide_tooltip();
+    }
     fn show_tooltip(&mut self, shown_index: VisibleIndex) {
         if let Some(elem) = self.item(shown_index) {
+            if let Some(text) = elem.tooltip() {
+                let base = elem.base();
+                let r = Rect::with_size(base.x(), 0, base.width() as u16, 1);
+                RuntimeManager::get().show_tooltip(text, &r);
+            } else {
+                self.hide_tooltip();
+            }
         } else {
+            self.hide_tooltip();
         }
     }
     fn update_mouse_pos(&mut self) -> bool {
