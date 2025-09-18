@@ -67,7 +67,7 @@ impl Button {
         format.set_hotkey_from_caption(status.hotkey_attribute(theme), &self.caption);
         surface.write_text(self.caption.text(), &format);
     }
-    pub(super) fn on_execute(&mut self) {
+    pub(super) fn on_execute(&self) {
         RuntimeManager::get().set_appbar_event(AppBarEvent::ButtonClick(ButtonClickEvent {
             button_handle: self.base.handle().cast(),
             control_receiver_handle: self.receiver_control_handle,
@@ -78,7 +78,12 @@ impl Button {
         if self.receiver_control_handle.is_none() {
             false
         } else {
-            key == self.caption.hotkey()
+            if key == self.caption.hotkey() {
+                self.on_execute();
+                true
+            } else {
+                false
+            }
         }
     }
     #[inline(always)]

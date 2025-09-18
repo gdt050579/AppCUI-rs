@@ -43,12 +43,9 @@ impl Label {
         if let Some(tp) = tpos {
             self.text.truncate(tp);
         }
-        let orig_width = self.base.width();
+        //let orig_width = self.base.width();
         self.base.set_width(width as u8);
-        if orig_width != width {
-            // we need to recompute
-            RuntimeManager::get().request_update_command_and_app_bars();
-        }
+        self.base.refresh();
     }
     #[inline(always)]
     pub fn tooltip(&self) -> &str {

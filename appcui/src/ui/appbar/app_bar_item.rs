@@ -11,10 +11,6 @@ use crate::{
     ui::appbar::ItemStatus,
 };
 
-// un menu bar itm are:
-// flag-urile: enabld / visible / to left / capture input
-// obiectul in sine (poate fi nimic la separator, un handle la un menu in MenuEntry, tc)
-
 pub(crate) enum AppBarItem {
     Separator(Separator),
     MenuButton(MenuButton),
