@@ -1,6 +1,6 @@
 use super::{ItemBase, Side};
 use crate::graphics::*;
-use crate::system::Theme;
+use crate::system::{RuntimeManager, Theme};
 
 pub struct Label {
     text: String,
@@ -43,7 +43,12 @@ impl Label {
         if let Some(tp) = tpos {
             self.text.truncate(tp);
         }
+        let orig_width = self.base.width();
         self.base.set_width(width as u8);
+        if orig_width != width {
+            // we need to recompute
+            RuntimeManager::get().request_update_command_and_app_bars();
+        }
     }
     #[inline(always)]
     pub fn tooltip(&self) -> &str {

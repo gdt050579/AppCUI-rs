@@ -1,6 +1,6 @@
-use std::time::Duration;
-use flat_string::FlatString;
 use appcui::prelude::*;
+use flat_string::FlatString;
+use std::time::Duration;
 
 #[Window(events = AppBarEvents+TimerEvents, commands=A)]
 pub(crate) struct Win {
@@ -31,19 +31,52 @@ impl Win {
 }
 impl TimerEvents for Win {
     fn on_update(&mut self, _: u64) -> EventProcessStatus {
-        self.cnt = (self.cnt + 1) / 10;
-        let mut f: FlatString<20> = FlatString::new();
+        const PROG_MAX: i32 = 15;
+        self.cnt = (self.cnt + 1) % PROG_MAX;
+        let mut f: FlatString<64> = FlatString::new();
         f.push('[');
         for _ in 0..self.cnt {
             f.push(SpecialChar::BlockCentered.into());
         }
-        for _ in self.cnt..10 {
+        for _ in self.cnt..PROG_MAX-1 {
             f.push(' ');
         }
         f.push(']');
+        f.push(' ');
+        let proc = self.cnt * 100 / (PROG_MAX - 1);
+        if proc >= 100 {
+            f.push_str("100");
+        } else {
+            f.push(' ');
+            if proc >= 10 {
+                f.push((proc / 10 + 48) as u8 as char);
+            } else {
+                f.push(' ');
+            }
+            f.push((proc % 10 + 48) as u8 as char);
+        }
+        f.push('%');
+        f.push(' ');
         let h = self.h_label;
         self.appbar().get_mut(h).unwrap().set_caption(f.as_str());
-        EventProcessStatus::Ignored
+        f.clear();
+        f.push_str("Downloading ...\n");
+        f.push_str("Status: ");
+        if proc >= 100 {
+            f.push_str("100");
+        } else {
+            f.push(' ');
+            if proc >= 10 {
+                f.push((proc / 10 + 48) as u8 as char);
+            } else {
+                f.push(' ');
+            }
+            f.push((proc % 10 + 48) as u8 as char);
+        }
+        f.push('%');
+        self.appbar().get_mut(h).unwrap().set_tooltip(f.as_str());
+
+        EventProcessStatus::Processed
     }
 }
 impl AppBarEvents for Win {
