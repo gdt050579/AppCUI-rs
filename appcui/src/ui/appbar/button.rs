@@ -72,7 +72,6 @@ impl Button {
             button_handle: self.base.handle().cast(),
             control_receiver_handle: self.receiver_control_handle,
         }));
-        //RuntimeManager::get().show_menu(self.handle, self.receiver_control_handle, self.base.x(), 1, None)
     }
     #[inline(always)]
     pub(super) fn process_shortcut(&self, key: Key) -> bool {
