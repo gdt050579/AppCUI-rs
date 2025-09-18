@@ -89,7 +89,7 @@ impl WindowWithTheme {
             h_file: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.appbar_mut().add(appbar::MenuButton::new(
+        w.h_file = w.appbar().add(appbar::MenuButton::new(
             "&File",
             menu!(
                 "class: WindowWithTheme, items=[

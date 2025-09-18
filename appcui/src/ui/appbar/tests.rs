@@ -19,9 +19,9 @@ fn check_order_parameter() {
                 m_help: Handle::None,
                 m_edit: Handle::None,
             };
-            w.m_file = w.appbar_mut().add(MenuButton::new("&File", Menu::new(), 2, Side::Left));
-            w.m_edit = w.appbar_mut().add(MenuButton::new("&Edit", Menu::new(), 1, Side::Left));
-            w.m_help = w.appbar_mut().add(MenuButton::new("&Help", Menu::new(), 0, Side::Left));
+            w.m_file = w.appbar().add(MenuButton::new("&File", Menu::new(), 2, Side::Left));
+            w.m_edit = w.appbar().add(MenuButton::new("&Edit", Menu::new(), 1, Side::Left));
+            w.m_help = w.appbar().add(MenuButton::new("&Help", Menu::new(), 0, Side::Left));
             w
         }
     }
@@ -73,7 +73,7 @@ fn check_order_parameter_multi_controls() {
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.appbar_mut().add(MenuButton::new("ControlMenu", m, 2, appbar::Side::Left));
+                    obj.h_menu = obj.appbar().add(MenuButton::new("ControlMenu", m, 2, appbar::Side::Left));
                     obj
                 }
             }
@@ -123,7 +123,7 @@ fn check_order_parameter_multi_controls() {
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.appbar_mut().add(MenuButton::new("WindowMenu", m, 1, Side::Left));
+                w.h_menu = w.appbar().add(MenuButton::new("WindowMenu", m, 1, Side::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -158,7 +158,7 @@ fn check_order_parameter_multi_controls() {
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuButton::new("DesktopMenu", m, 0, Side::Left));
+            self.m_desktop = self.appbar().add(MenuButton::new("DesktopMenu", m, 0, Side::Left));
         }
     }
     impl AppBarEvents for MyDesktop {
@@ -209,7 +209,7 @@ fn check_order_parameter_multi_controls_reversed() {
                         {Blue,selected:false,cmd:Blue}
                     ]"
                     );
-                    obj.h_menu = obj.appbar_mut().add(MenuButton::new("ControlMenu", m, 0, Side::Left));
+                    obj.h_menu = obj.appbar().add(MenuButton::new("ControlMenu", m, 0, Side::Left));
                     obj
                 }
             }
@@ -259,7 +259,7 @@ fn check_order_parameter_multi_controls_reversed() {
                         {Cut,cmd:Cut}
                     ]"
                 );
-                w.h_menu = w.appbar_mut().add(MenuButton::new("WindowMenu", m, 1, Side::Left));
+                w.h_menu = w.appbar().add(MenuButton::new("WindowMenu", m, 1, Side::Left));
                 w.hc = w.add(mycustomcontrol::MyCustomControl::new(layout!("x:1,y:1,w:10,h:5")));
                 w
             }
@@ -294,7 +294,7 @@ fn check_order_parameter_multi_controls_reversed() {
                     {About,cmd:About}
                 ]"
             );
-            self.m_desktop = self.appbar_mut().add(MenuButton::new("DesktopMenu", m, 2, Side::Left));
+            self.m_desktop = self.appbar().add(MenuButton::new("DesktopMenu", m, 2, Side::Left));
         }
     }
     impl AppBarEvents for MyDesktop {
@@ -336,7 +336,7 @@ fn check_update_multiple_menus() {
                         {Open,cmd:Open},
                     ]"
                 );
-                w.h_menu = w.appbar_mut().add(MenuButton::new("File", m, 0, Side::Left));
+                w.h_menu = w.appbar().add(MenuButton::new("File", m, 0, Side::Left));
 
                 w
             }
@@ -370,7 +370,7 @@ fn check_update_multiple_menus() {
                         {Blue,F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.appbar_mut().add(MenuButton::new("ColorControl", m, 0, Side::Left));
+                obj.h_menu = obj.appbar().add(MenuButton::new("ColorControl", m, 0, Side::Left));
                 obj
             }
         }
@@ -420,7 +420,7 @@ fn check_update_multiple_menus() {
                         {'Text->Blue',F3,selected:false,cmd:Blue}
                     ]"
                 );
-                obj.h_menu = obj.appbar_mut().add(MenuButton::new("Text", m, 0, Side::Left));
+                obj.h_menu = obj.appbar().add(MenuButton::new("Text", m, 0, Side::Left));
                 obj
             }
         }
@@ -527,7 +527,7 @@ fn check_with_keys() {
             };
             w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
-            w.h_file = w.appbar_mut().add(MenuButton::new(
+            w.h_file = w.appbar().add(MenuButton::new(
                 "&File",
                 menu!(
                     "class: MyWindow, items=[
@@ -542,7 +542,7 @@ fn check_with_keys() {
                 0,
                 Side::Left,
             ));
-            w.h_edit = w.appbar_mut().add(MenuButton::new(
+            w.h_edit = w.appbar().add(MenuButton::new(
                 "&Edit",
                 menu!(
                     "class: MyWindow, items=[
@@ -562,7 +562,7 @@ fn check_with_keys() {
                 0,
                 Side::Left,
             ));
-            w.h_help = w.appbar_mut().add(MenuButton::new(
+            w.h_help = w.appbar().add(MenuButton::new(
                 "&Help",
                 menu!(
                     "class: MyWindow, items=[
@@ -802,7 +802,7 @@ fn check_recursive_shortcuts() {
             };
             w.lb = w.add(label!("None,a:c,w:30,h:1"));
             // construct a popup menu
-            w.h_file = w.appbar_mut().add(MenuButton::new(
+            w.h_file = w.appbar().add(MenuButton::new(
                 "&File",
                 menu!(
                     "class: MyWindow, items=[
@@ -817,7 +817,7 @@ fn check_recursive_shortcuts() {
                 0,
                 Side::Left,
             ));
-            w.h_edit = w.appbar_mut().add(MenuButton::new(
+            w.h_edit = w.appbar().add(MenuButton::new(
                 "&Edit",
                 menu!(
                     "class: MyWindow, items=[
@@ -837,7 +837,7 @@ fn check_recursive_shortcuts() {
                 0,
                 Side::Left,
             ));
-            w.h_help = w.appbar_mut().add(MenuButton::new(
+            w.h_help = w.appbar().add(MenuButton::new(
                 "&Help",
                 menu!(
                     "class: MyWindow, items=[
@@ -977,9 +977,9 @@ fn check_side_parameter() {
                 m_help: Handle::None,
                 m_edit: Handle::None,
             };
-            w.m_file = w.appbar_mut().add(MenuButton::new("&File", Menu::new(), 0, Side::Left));
-            w.m_edit = w.appbar_mut().add(MenuButton::new("&Edit", Menu::new(), 0, Side::Left));
-            w.m_help = w.appbar_mut().add(MenuButton::new("&Help", Menu::new(), 0, Side::Right));
+            w.m_file = w.appbar().add(MenuButton::new("&File", Menu::new(), 0, Side::Left));
+            w.m_edit = w.appbar().add(MenuButton::new("&Edit", Menu::new(), 0, Side::Left));
+            w.m_help = w.appbar().add(MenuButton::new("&Help", Menu::new(), 0, Side::Right));
             w
         }
     }
@@ -1042,7 +1042,7 @@ fn check_enable_disable() {
                 base: Window::new("Win", layout!("x:1,y:1,w:20,h:7"), window::Flags::None),
                 h: Handle::None,
             };
-            me.h = me.appbar_mut().add(MenuButton::new("My Menu", Menu::new(), 0, Side::Left));
+            me.h = me.appbar().add(MenuButton::new("My Menu", Menu::new(), 0, Side::Left));
             me
         }
     }
@@ -1054,7 +1054,7 @@ fn check_enable_disable() {
         fn on_event(&mut self, command_id: mywin::Commands) {
             if command_id == mywin::Commands::DoSomething {
                 let h = self.h;
-                if let Some(m) = self.appbar_mut().get_mut(h) {
+                if let Some(m) = self.appbar().get_mut(h) {
                     m.set_enabled(!m.is_enabled());
                 }
             }
@@ -1112,15 +1112,15 @@ fn check_mouse_over_disable() {
                 h_help: Handle::None,
                 h_about: Handle::None,
             };
-            me.h_file = me.appbar_mut().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
+            me.h_file = me.appbar().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
             let mut m = MenuButton::new("Option", Menu::new(), 0, Side::Left);
             m.set_enabled(false);
-            me.h_opt = me.appbar_mut().add(m);
-            me.h_edit = me.appbar_mut().add(MenuButton::new("Editor", Menu::new(), 0, Side::Left));
-            me.h_help = me.appbar_mut().add(MenuButton::new("Help", Menu::new(), 1, Side::Right));
+            me.h_opt = me.appbar().add(m);
+            me.h_edit = me.appbar().add(MenuButton::new("Editor", Menu::new(), 0, Side::Left));
+            me.h_help = me.appbar().add(MenuButton::new("Help", Menu::new(), 1, Side::Right));
             let mut m = MenuButton::new("About", Menu::new(), 0, Side::Right);
             m.set_enabled(false);
-            me.h_about = me.appbar_mut().add(m);
+            me.h_about = me.appbar().add(m);
 
             me
         }
@@ -1182,15 +1182,15 @@ fn check_mouse_click_and_hover_disable() {
                 h_help: Handle::None,
                 h_about: Handle::None,
             };
-            me.h_file = me.appbar_mut().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
+            me.h_file = me.appbar().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
             let mut m = MenuButton::new("Option", Menu::new(), 0, Side::Left);
             m.set_enabled(false);
-            me.h_opt = me.appbar_mut().add(m);
-            me.h_edit = me.appbar_mut().add(MenuButton::new("Editor", Menu::new(), 0, Side::Left));
-            me.h_help = me.appbar_mut().add(MenuButton::new("Help", Menu::new(), 1, Side::Right));
+            me.h_opt = me.appbar().add(m);
+            me.h_edit = me.appbar().add(MenuButton::new("Editor", Menu::new(), 0, Side::Left));
+            me.h_help = me.appbar().add(MenuButton::new("Help", Menu::new(), 1, Side::Right));
             let mut m = MenuButton::new("About", Menu::new(), 0, Side::Right);
             m.set_enabled(false);
-            me.h_about = me.appbar_mut().add(m);
+            me.h_about = me.appbar().add(m);
 
             me
         }
@@ -1244,9 +1244,9 @@ fn check_separator() {
                 h_opt: Handle::None,
                 h_sep: Handle::None,
             };
-            me.h_file = me.appbar_mut().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
-            me.h_opt = me.appbar_mut().add(MenuButton::new("Option", Menu::new(), 0, Side::Left));
-            me.h_sep = me.appbar_mut().add(Separator::new(0, Side::Left));
+            me.h_file = me.appbar().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
+            me.h_opt = me.appbar().add(MenuButton::new("Option", Menu::new(), 0, Side::Left));
+            me.h_sep = me.appbar().add(Separator::new(0, Side::Left));
 
             me
         }
@@ -1298,9 +1298,9 @@ fn check_label() {
                 h_opt: Handle::None,
                 h_l: Handle::None,
             };
-            me.h_file = me.appbar_mut().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
-            me.h_opt = me.appbar_mut().add(MenuButton::new("Option", Menu::new(), 0, Side::Left));
-            me.h_l = me.appbar_mut().add(appbar::Label::new("++123++", 0, Side::Left));
+            me.h_file = me.appbar().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
+            me.h_opt = me.appbar().add(MenuButton::new("Option", Menu::new(), 0, Side::Left));
+            me.h_l = me.appbar().add(appbar::Label::new("++123++", 0, Side::Left));
 
             me
         }
@@ -1352,11 +1352,11 @@ fn check_label_tooltip() {
                 h_opt: Handle::None,
                 h_l: Handle::None,
             };
-            me.h_file = me.appbar_mut().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
-            me.h_opt = me.appbar_mut().add(MenuButton::new("Option", Menu::new(), 0, Side::Left));
+            me.h_file = me.appbar().add(MenuButton::new("File", Menu::new(), 0, Side::Left));
+            me.h_opt = me.appbar().add(MenuButton::new("Option", Menu::new(), 0, Side::Left));
             let mut lb = appbar::Label::new("++123++", 0, Side::Left);
             lb.set_tooltip("This is a label");
-            me.h_l = me.appbar_mut().add(lb);
+            me.h_l = me.appbar().add(lb);
 
             me
         }
@@ -1434,16 +1434,16 @@ fn check_move_left_right() {
                 h_7: Handle::None,
                 h_8: Handle::None,
             };
-            me.h_1 = me.appbar_mut().add(MenuButton::new("M-1", Menu::new(), 0, Side::Left));
-            me.h_2 = me.appbar_mut().add(MenuButton::new("M-2", Menu::new(), 0, Side::Left));
-            me.h_3 = me.appbar_mut().add(appbar::Label::new("L-1", 0, Side::Left));
-            me.h_4 = me.appbar_mut().add(appbar::Separator::new(0, Side::Left));
-            me.h_5 = me.appbar_mut().add(MenuButton::new("M-3", Menu::new(), 0, Side::Right));
+            me.h_1 = me.appbar().add(MenuButton::new("M-1", Menu::new(), 0, Side::Left));
+            me.h_2 = me.appbar().add(MenuButton::new("M-2", Menu::new(), 0, Side::Left));
+            me.h_3 = me.appbar().add(appbar::Label::new("L-1", 0, Side::Left));
+            me.h_4 = me.appbar().add(appbar::Separator::new(0, Side::Left));
+            me.h_5 = me.appbar().add(MenuButton::new("M-3", Menu::new(), 0, Side::Right));
             let mut mm = MenuButton::new("M-4", Menu::new(), 0, Side::Right);
             mm.set_enabled(false);
-            me.h_6 = me.appbar_mut().add(mm);
-            me.h_7 = me.appbar_mut().add(appbar::Button::new("<B1>", 0, Side::Right));
-            me.h_8 = me.appbar_mut().add(MenuButton::new("M-5", Menu::new(), 0, Side::Right));
+            me.h_6 = me.appbar().add(mm);
+            me.h_7 = me.appbar().add(appbar::Button::new("<B1>", 0, Side::Right));
+            me.h_8 = me.appbar().add(MenuButton::new("M-5", Menu::new(), 0, Side::Right));
 
             me
         }

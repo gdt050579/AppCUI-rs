@@ -20,7 +20,7 @@ impl Win {
         w.add(label!(
             "'Three manus: File, Edit and Help, with File enabled, and Edit menu disabled (both on the left) and Help menu on the right',d:f"
         ));
-        w.h_label = w.appbar_mut().add(appbar::Label::new("", 0, appbar::Side::Right));
+        w.h_label = w.appbar().add(appbar::Label::new("", 0, appbar::Side::Right));
 
         if let Some(timer) = w.timer() {
             timer.start(Duration::from_secs(1));
@@ -42,7 +42,7 @@ impl TimerEvents for Win {
         }
         f.push(']');
         let h = self.h_label;
-        self.appbar_mut().get_mut(h).unwrap().set_caption(f.as_str());
+        self.appbar().get_mut(h).unwrap().set_caption(f.as_str());
         EventProcessStatus::Ignored
     }
 }

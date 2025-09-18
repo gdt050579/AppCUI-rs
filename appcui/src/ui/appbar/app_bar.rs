@@ -83,10 +83,10 @@ impl AppBar {
     {
         let ref_item = self.manager.get(menubaritem_hamdle.cast())?;
         Some(match ref_item {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(obj) => const_cast!(obj, appbar::Separator, T),
             AppBarItem::MenuButton(obj) => const_cast!(obj, appbar::MenuButton, T),
-            AppBarItem::Label(_) => todo!(),
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Label(obj) => const_cast!(obj, appbar::Label, T),
+            AppBarItem::Button(obj) => const_cast!(obj, appbar::Button, T),
             AppBarItem::CheckBox(_) => todo!(),
         })
     }
@@ -97,10 +97,10 @@ impl AppBar {
     {
         let ref_item = self.manager.get_mut(menubaritem_hamdle.cast())?;
         Some(match ref_item {
-            AppBarItem::Separator(_) => todo!(),
+            AppBarItem::Separator(obj) => mut_cast!(obj, appbar::Separator, T),
             AppBarItem::MenuButton(obj) => mut_cast!(obj, appbar::MenuButton, T),
-            AppBarItem::Label(_) => todo!(),
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Label(obj) => mut_cast!(obj, appbar::Label, T),
+            AppBarItem::Button(obj) => mut_cast!(obj, appbar::Button, T),
             AppBarItem::CheckBox(_) => todo!(),
         })
     }

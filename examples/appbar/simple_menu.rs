@@ -27,7 +27,7 @@ impl Win {
                 { E&xit, cmd: A, key: Alt+F4 },
             ]"
         );
-        w.h_file = w.appbar_mut().add(appbar::MenuButton::new("&File", m, 1, appbar::Side::Left));
+        w.h_file = w.appbar().add(appbar::MenuButton::new("&File", m, 1, appbar::Side::Left));
         let m = menu!(
             "class: Win, items=[
                 { &Copy, cmd: A , key: Ctrl+C },
@@ -35,14 +35,14 @@ impl Win {
                 { &Paste, cmd: A, key: Ctrl+V },
             ]"
         );
-        w.h_edit = w.appbar_mut().add(appbar::MenuButton::new("&Edit", m, 1, appbar::Side::Left));
+        w.h_edit = w.appbar().add(appbar::MenuButton::new("&Edit", m, 1, appbar::Side::Left));
         let m = menu!(
             "class: Win, items=[
                 { &About, cmd: A },
                 { Welcome, cmd: A },
             ]"
         );
-        w.h_help = w.appbar_mut().add(appbar::MenuButton::new("&Help", m, 1, appbar::Side::Left));  
+        w.h_help = w.appbar().add(appbar::MenuButton::new("&Help", m, 1, appbar::Side::Left));  
               
         w
     }

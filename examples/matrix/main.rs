@@ -132,7 +132,7 @@ impl DesktopEvents for MatrixDesktop {
             timer.start(Duration::from_millis(50)); 
         }
         
-        self.main_menu = self.appbar_mut().add(MenuButton::new("&File", menu!("
+        self.main_menu = self.appbar().add(MenuButton::new("&File", menu!("
             class: MatrixDesktop, items:[
                 {&New,cmd: New, key: Ctrl+N},
                 {-},

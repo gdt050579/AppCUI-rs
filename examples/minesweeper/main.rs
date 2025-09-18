@@ -63,7 +63,7 @@ impl MenuEvents for MyDesktop {
 
 impl DesktopEvents for MyDesktop {
     fn on_start(&mut self) {
-        self.menu_game = self.appbar_mut().add(MenuButton::new("&Game", menu!("
+        self.menu_game = self.appbar().add(MenuButton::new("&Game", menu!("
             class: MyDesktop, items:[
                 {&Easy, cmd: Easy},
                 {&Medium, cmd: Medium},

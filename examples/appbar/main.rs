@@ -70,7 +70,7 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_arrange = self.appbar_mut().add(MenuButton::new("&Windows",menu!("
+        self.menu_arrange = self.appbar().add(MenuButton::new("&Windows",menu!("
             class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
@@ -79,7 +79,7 @@ impl DesktopEvents for MyDesktop {
                 {&Grid,cmd: Grid, select: false},
             ]
         "),0,Side::Left));
-        self.menu_example = self.appbar_mut().add(MenuButton::new("&Examples",menu!("
+        self.menu_example = self.appbar().add(MenuButton::new("&Examples",menu!("
             class: MyDesktop, items:[
                 {'Simple menus',cmd: ShowSimpleMenus},
                 {'Menus with alignment', cmd: ShowAlignedMenus },

@@ -20,7 +20,7 @@ impl ColorCustomControl {
             {Blue,F3,selected:false,cmd:Blue}
         ]"
         );
-        obj.h_menu = obj.appbar_mut().add(MenuButton::new("ColorControl", m, 0, Side::Left));
+        obj.h_menu = obj.appbar().add(MenuButton::new("ColorControl", m, 0, Side::Left));
         obj
     }
 }

@@ -28,7 +28,7 @@ impl Win {
                 { E&xit, cmd: A, key: Alt+F4 },
             ]"
         );
-        w.h_left = w.appbar_mut().add(appbar::MenuButton::new("&Left", m, 1, appbar::Side::Left));
+        w.h_left = w.appbar().add(appbar::MenuButton::new("&Left", m, 1, appbar::Side::Left));
         let m = menu!(
             "class: Win, items=[
                 { &Red, cmd: A , selected: true},
@@ -36,7 +36,7 @@ impl Win {
                 { &Blue, cmd: A, selected: false },
             ]"
         );
-        w.h_color = w.appbar_mut().add(appbar::MenuButton::new("&Color", m, 2, appbar::Side::Right));
+        w.h_color = w.appbar().add(appbar::MenuButton::new("&Color", m, 2, appbar::Side::Right));
         let m = menu!(
             "class: Win, items=[
                 { 'Option &1', cmd: A, checked: true },
@@ -47,8 +47,8 @@ impl Win {
                 { 'Option &1', cmd: A, checked: true },
             ]"
         );
-        w.h_opt = w.appbar_mut().add(appbar::MenuButton::new("&Options", m, 1, appbar::Side::Right));
-        w.h_sep = w.appbar_mut().add(appbar::Separator::new(1, appbar::Side::Left));
+        w.h_opt = w.appbar().add(appbar::MenuButton::new("&Options", m, 1, appbar::Side::Right));
+        w.h_sep = w.appbar().add(appbar::Separator::new(1, appbar::Side::Left));
         w
     }
 }

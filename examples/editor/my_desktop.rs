@@ -55,14 +55,14 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_file = self.appbar_mut().add(MenuButton::new("&File", menu!("
+        self.menu_file = self.appbar().add(MenuButton::new("&File", menu!("
             class: MyDesktop, items:[
                 {'&Open',cmd: Open, key: F3},
                 {---},
                 {'E&xit',cmd: Exit, key: Escape},
             ]
         "),0,Side::Left));
-        self.menu_arrange = self.appbar_mut().add(MenuButton::new("&Windows", menu!("
+        self.menu_arrange = self.appbar().add(MenuButton::new("&Windows", menu!("
             class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},

@@ -662,7 +662,7 @@ impl ControlBase {
         None
     }
 
-    pub fn appbar_mut(&mut self)->&mut AppBar {
+    pub fn appbar(&mut self)->&mut AppBar {
         RuntimeManager::get().get_appbar()
     }
 

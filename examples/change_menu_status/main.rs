@@ -16,7 +16,7 @@ impl MyWin {
         };
         let mut m = Menu::new();
         w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-        w.some_menu = w.appbar_mut().add(appbar::MenuButton::new("Some menu",m,0,appbar::Side::Left));
+        w.some_menu = w.appbar().add(appbar::MenuButton::new("Some menu",m,0,appbar::Side::Left));
 
         w
     }
