@@ -202,7 +202,7 @@ impl AppBar {
                     }
                 };
                 // go to next element
-                next_index = (current_index + add) % len;
+                next_index = (next_index + add) % len;
             }
             if next_index != current_index {
                 self.select_menu_and_open(VisibleIndex::from_usize(next_index))

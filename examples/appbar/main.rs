@@ -1,54 +1,124 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 
-use crate::regular_menus::RegularMenus;
-mod regular_menus;
+mod simple_menu;
+mod aligned_menus;
 
+const LOGO: [&str; 11] = [
+    "   █████████                       ███████████                     ",
+    "  ███░░░░░███                     ░░███░░░░░███                    ",
+    " ░███    ░███  ████████  ████████  ░███    ░███  ██████   ████████ ",
+    " ░███████████ ░░███░░███░░███░░███ ░██████████  ░░░░░███ ░░███░░███",
+    " ░███░░░░░███  ░███ ░███ ░███ ░███ ░███░░░░░███  ███████  ░███ ░░░ ",
+    " ░███    ░███  ░███ ░███ ░███ ░███ ░███    ░███ ███░░███  ░███     ",
+    " █████   █████ ░███████  ░███████  ███████████ ░░████████ █████    ",
+    "░░░░░   ░░░░░  ░███░░░   ░███░░░  ░░░░░░░░░░░   ░░░░░░░░ ░░░░░     ",
+    "               ░███      ░███                                      ",
+    "               █████     █████                                     ",
+    "              ░░░░░     ░░░░░                                      ",
+];
 
-#[Desktop(events    = [CommandBarEvents,DesktopEvents,AppBarEvents], 
-          commands  = [Next, A])]
+#[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
+          overwrite = OnPaint, 
+          commands  = [ShowSimpleMenus, ShowAlignedMenus,
+                       Exit, About, 
+                       NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     index: u32,
-    regular_menus: Option<RegularMenus>,
+    arrange_method: Option<desktop::ArrangeWindowsMethod>,
+    menu_arrange: Handle<MenuButton>,
+    menu_example: Handle<MenuButton>,
 }
 impl MyDesktop {
     fn new() -> Self {
         Self {
             base: Desktop::new(),
             index: 1,
-            regular_menus: None,
+            arrange_method: None,
+            menu_arrange: Handle::None,
+            menu_example: Handle::None,
+        }
+    }
+    fn update_arrange_windows_method(&mut self, method: Option<desktop::ArrangeWindowsMethod>) {
+        self.arrange_method = method;
+        if let Some(method) = method {
+            self.arrange_windows(method);
+        }
+    }  
+}
+impl OnPaint for MyDesktop {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        let attr = CharAttribute::with_color(theme.desktop.character.foreground,theme.desktop.character.background);
+        surface.clear(Character::with_attributes(' ', attr));
+        let x = (surface.size().width as i32 - LOGO[0].len() as i32)/2;
+        let mut y = (surface.size().height as i32  - 12)/2;
+        for line in LOGO {
+            surface.write_string(x, y, line, attr, false);
+            y += 1;
         }
     }
 }
-
 impl DesktopEvents for MyDesktop {
+    fn on_update_window_count(&mut self, _count: usize) {
+        let m = self.arrange_method;
+        if let Some(method) = m {
+            self.arrange_windows(method);
+        }
+    }
+    
     fn on_start(&mut self) { 
         // define and register a menu
-        self.regular_menus = Some(RegularMenus::new(self.appbar_mut(), mydesktop::Commands::A));
-    }
-        
+        self.menu_arrange = self.appbar_mut().add(MenuButton::new("&Windows",menu!("
+            class: MyDesktop, items:[
+                {'&No arrangament',cmd: NoArrange, select: true},
+                {&Cascade,cmd: Cascade, select: false},
+                {&Vertical,cmd: Vertical, select: false},
+                {&Horizontal,cmd: Horizontal, select: false},
+                {&Grid,cmd: Grid, select: false},
+            ]
+        "),0,Side::Left));
+        self.menu_example = self.appbar_mut().add(MenuButton::new("&Examples",menu!("
+            class: MyDesktop, items:[
+                {'Simple menus',cmd: ShowSimpleMenus},
+                {'Menus with alignment', cmd: ShowAlignedMenus },
+            ]
+        "),0,Side::Left));
+    }  
 }
-impl CommandBarEvents for MyDesktop {
-    fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
-        commandbar.set(key!("F1"), "Next AppBar cofiguration", mydesktop::Commands::Next);
-    }
-
-    fn on_event(&mut self, command_id: mydesktop::Commands) {
-        match command_id {
-            mydesktop::Commands::Next => {
-                self.index += 1;
-            }
+impl MenuEvents for MyDesktop {
+    fn on_select(&mut self,_menu:Handle<Menu>,_item:Handle<menu::SingleChoice>,command:mydesktop::Commands){
+        match command {
+            mydesktop::Commands::NoArrange => self.update_arrange_windows_method(None),
+            mydesktop::Commands::Cascade => self.update_arrange_windows_method(Some(desktop::ArrangeWindowsMethod::Cascade)),
+            mydesktop::Commands::Vertical => self.update_arrange_windows_method(Some(desktop::ArrangeWindowsMethod::Vertical)),
+            mydesktop::Commands::Horizontal => self.update_arrange_windows_method(Some(desktop::ArrangeWindowsMethod::Horizontal)),
+            mydesktop::Commands::Grid => self.update_arrange_windows_method(Some(desktop::ArrangeWindowsMethod::Grid)),
             _ => {}
-
         }
     }
+    fn on_command(&mut self, _menu:Handle<Menu>, _item:Handle<menu::Command>,command:mydesktop::Commands) {
+        match command {
+            mydesktop::Commands::ShowSimpleMenus => { 
+                self.add_window(simple_menu::Win::new());
+            },          
+            mydesktop::Commands::ShowAlignedMenus => { 
+                self.add_window(aligned_menus::Win::new());
+            },          
+            mydesktop::Commands::Exit => self.close(),   
+            _ => { }      
+        }
+    }
+
+
 }
 impl AppBarEvents for MyDesktop {
-    fn on_update(&self,appbar: &mut AppBar){
-        self.regular_menus.as_ref().unwrap().activate(appbar);
+    fn on_update(&self,appbar: &mut AppBar) {
+        appbar.show(self.menu_example);
+        appbar.show(self.menu_arrange);
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).command_bar().app_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).app_bar().build()?.run();
     Ok(())
 }
