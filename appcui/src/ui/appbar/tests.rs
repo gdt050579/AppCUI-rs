@@ -1321,8 +1321,7 @@ fn check_label() {
 #[test]
 fn check_label_tooltip() {
     let script = "
-        //Paint.Enable(false)
-        Error.Disable(true)
+        Paint.Enable(false)
         Paint('1. initial state order:(File ++123++ Option )')
         CheckHash(0xD552B3F72E3CC4D1)    
         Mouse.Move(3,0)
@@ -1371,6 +1370,98 @@ fn check_label_tooltip() {
     }
 
     let mut a = App::debug(60, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_move_left_right() {
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. initial state Left:(M-1,M-2,L-1,|), Right:(M-5,B-1,M-4,M-3)')
+        CheckHash(0x7E08D0E9FC227B2C)   
+        Mouse.Click(2,0,left)    
+        Paint('2. M-1 selected')
+        CheckHash(0x624003D52D053481)  
+        Key.Pressed(Right) 
+        Paint('3. M-2 selected')
+        CheckHash(0x42A24CF684C9687F)  
+        Key.Pressed(Right) 
+        Paint('4. M-5 selected')
+        CheckHash(0x576E13E8CA158650)  
+        Key.Pressed(Right) 
+        Paint('5. M-3 selected')
+        CheckHash(0x584FF83E53552C48)  
+        Key.Pressed(Right) 
+        Paint('6. M-1 selected')
+        CheckHash(0x624003D52D053481)  
+        Key.Pressed(Left) 
+        Paint('7. M-3 selected')
+        CheckHash(0x584FF83E53552C48)  
+        Key.Pressed(Left) 
+        Paint('8. M-5 selected')
+        CheckHash(0x576E13E8CA158650)  
+        Key.Pressed(Left) 
+        Paint('9. M-2 selected')
+        CheckHash(0x42A24CF684C9687F)  
+        Key.Pressed(Left)  
+        Paint('10. M-1 selected')
+        CheckHash(0x624003D52D053481)                
+    ";
+
+    #[Window(events = AppBarEvents, internal=true)]
+    struct MyWin {
+        h_1: Handle<appbar::MenuButton>,
+        h_2: Handle<appbar::MenuButton>,
+        h_3: Handle<appbar::Label>,
+        h_4: Handle<appbar::Separator>,
+        h_5: Handle<appbar::MenuButton>,
+        h_6: Handle<appbar::MenuButton>,
+        h_7: Handle<appbar::Button>,
+        h_8: Handle<appbar::MenuButton>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut me = Self {
+                base: Window::new("Win", layout!("x:1,y:1,w:20,h:7"), window::Flags::None),
+                h_1: Handle::None,
+                h_2: Handle::None,
+                h_3: Handle::None,
+                h_4: Handle::None,
+                h_5: Handle::None,
+                h_6: Handle::None,
+                h_7: Handle::None,
+                h_8: Handle::None,
+            };
+            me.h_1 = me.appbar_mut().add(MenuButton::new("M-1", Menu::new(), 0, Side::Left));
+            me.h_2 = me.appbar_mut().add(MenuButton::new("M-2", Menu::new(), 0, Side::Left));
+            me.h_3 = me.appbar_mut().add(appbar::Label::new("L-1", 0, Side::Left));
+            me.h_4 = me.appbar_mut().add(appbar::Separator::new(0, Side::Left));
+            me.h_5 = me.appbar_mut().add(MenuButton::new("M-3", Menu::new(), 0, Side::Right));
+            let mut mm = MenuButton::new("M-4", Menu::new(), 0, Side::Right);
+            mm.set_enabled(false);
+            me.h_6 = me.appbar_mut().add(mm);
+            me.h_7 = me.appbar_mut().add(appbar::Button::new("<B1>", 0, Side::Right));
+            me.h_8 = me.appbar_mut().add(MenuButton::new("M-5", Menu::new(), 0, Side::Right));
+
+            me
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_1);
+            appbar.show(self.h_2);
+            appbar.show(self.h_3);
+            appbar.show(self.h_4);
+            appbar.show(self.h_5);
+            appbar.show(self.h_6);
+            appbar.show(self.h_7);
+            appbar.show(self.h_8);
+        }
+    }
+
+    let mut a = App::debug(80, 10, script).command_bar().app_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

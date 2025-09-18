@@ -177,6 +177,8 @@ impl AppBar {
             index += 1;
         }
         self.shown_items.truncate(index);
+        // sort base on x coord
+        self.shown_items.sort_by_key(|i| i.x);
         self.update_mouse_pos();
     }
     #[inline(always)]
@@ -194,6 +196,7 @@ impl AppBar {
             let add = if direction >= 0 { 1 } else { len - 1 };
             let current_index = value.index();
             let mut next_index = (current_index + add) % len;
+            let mut steps = 0;
             while next_index != current_index {
                 if let Some(elem) = self.item(VisibleIndex::from_usize(next_index)) {
                     // if the next item is a menu and it is enabled - we found a good match
@@ -203,6 +206,10 @@ impl AppBar {
                 };
                 // go to next element
                 next_index = (next_index + add) % len;
+                steps += 1;
+                if steps >= len {
+                    return;
+                }
             }
             if next_index != current_index {
                 self.select_menu_and_open(VisibleIndex::from_usize(next_index))

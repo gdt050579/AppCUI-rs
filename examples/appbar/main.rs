@@ -3,6 +3,7 @@ use appcui::ui::appbar::*;
 
 mod simple_menu;
 mod aligned_menus;
+mod disabled_menu;
 
 const LOGO: [&str; 11] = [
     "   █████████                       ███████████                     ",
@@ -20,7 +21,7 @@ const LOGO: [&str; 11] = [
 
 #[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
-          commands  = [ShowSimpleMenus, ShowAlignedMenus,
+          commands  = [ShowSimpleMenus, ShowAlignedMenus, ShowDisableMenu,
                        Exit, About, 
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -50,7 +51,7 @@ impl OnPaint for MyDesktop {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let attr = CharAttribute::with_color(theme.desktop.character.foreground,theme.desktop.character.background);
         surface.clear(Character::with_attributes(' ', attr));
-        let x = (surface.size().width as i32 - LOGO[0].len() as i32)/2;
+        let x = (surface.size().width as i32 - 50)/2;
         let mut y = (surface.size().height as i32  - 12)/2;
         for line in LOGO {
             surface.write_string(x, y, line, attr, false);
@@ -81,6 +82,7 @@ impl DesktopEvents for MyDesktop {
             class: MyDesktop, items:[
                 {'Simple menus',cmd: ShowSimpleMenus},
                 {'Menus with alignment', cmd: ShowAlignedMenus },
+                {'Disabled menu', cmd: ShowDisableMenu },
             ]
         "),0,Side::Left));
     }  
@@ -103,7 +105,10 @@ impl MenuEvents for MyDesktop {
             },          
             mydesktop::Commands::ShowAlignedMenus => { 
                 self.add_window(aligned_menus::Win::new());
-            },          
+            },     
+            mydesktop::Commands::ShowDisableMenu => { 
+                self.add_window(disabled_menu::Win::new());
+            },                   
             mydesktop::Commands::Exit => self.close(),   
             _ => { }      
         }
