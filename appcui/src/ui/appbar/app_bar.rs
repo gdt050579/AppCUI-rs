@@ -53,7 +53,7 @@ pub struct AppBar {
     receiver_control_handle: Handle<()>,
     width: u32,
     mouse_pos: MousePos,
-    current_item_index: Option<usize>,
+    opened_menu: Option<VisibleIndex>,
     last_mouse_pos: Point,
 }
 impl AppBar {
@@ -65,7 +65,7 @@ impl AppBar {
             receiver_control_handle: Handle::None,
             width,
             mouse_pos: MousePos::None,
-            current_item_index: None,
+            opened_menu: None,
             last_mouse_pos: Point::new(i32::MAX, i32::MAX),
         }
     }
@@ -113,7 +113,7 @@ impl AppBar {
         self.receiver_control_handle = Handle::None;
     }
     pub(crate) fn close(&mut self) {
-        self.current_item_index = None;
+        self.opened_menu = None;
         self.mouse_pos = MousePos::None;
     }
     fn mouse_coord_to_mouse_pos(&self, x: i32, y: i32) -> MousePos {
@@ -181,29 +181,53 @@ impl AppBar {
     }
     #[inline(always)]
     pub(crate) fn is_opened(&self) -> bool {
-        self.current_item_index.is_some()
+        self.opened_menu.is_some()
     }
-    fn change_current_item(&mut self, goto_next: bool) {
+    fn goto_next_menu(&mut self, direction: i32) {
         if self.shown_items.is_empty() {
-            self.current_item_index = None;
+            self.opened_menu = None;
             return;
         }
-        if let Some(value) = self.current_item_index {
+        if let Some(value) = self.opened_menu {
+            // len is bigger than 0
             let len = self.shown_items.len();
-            let new_index = if goto_next { (value + 1) % len } else { (value + len - 1) % len };
-            self.open(VisibleIndex::from_usize(new_index))
+            let add = if direction >= 0 { 1 } else { len - 1 };
+            let current_index = value.index();
+            let mut next_index = (current_index + add) % len;
+            while next_index != current_index {
+                if let Some(elem) = self.item(VisibleIndex::from_usize(next_index)) {
+                    // if the next item is a menu and it is enabled - we found a good match
+                    if elem.is_menu() && elem.is_enabled() {
+                        break;
+                    }
+                };
+                // go to next element
+                next_index = (current_index + add) % len;
+            }
+            if next_index != current_index {
+                self.select_menu_and_open(VisibleIndex::from_usize(next_index))
+            }
         }
     }
-    fn open(&mut self, shown_index: VisibleIndex) {
+    fn execute_action(&mut self, shown_index: VisibleIndex) {
+        if let Some(elem) = self.item_mut(shown_index) {
+            let base = elem.base();
+            if base.is_enabled() && base.accepts_input() {
+                elem.execute_action();
+                return;
+            }
+        }
+    }
+    fn select_menu_and_open(&mut self, shown_index: VisibleIndex) {
         if let Some(elem) = self.item_mut(shown_index) {
             let base = elem.base();
             if base.is_enabled() && base.accepts_input() {
                 elem.activate();
-                self.current_item_index = Some(shown_index.index());
+                self.opened_menu = Some(shown_index);
                 return;
             }
         }
-        self.current_item_index = None;
+        self.opened_menu = None;
     }
     #[inline(always)]
     fn item(&self, shown_index: VisibleIndex) -> Option<&AppBarItem> {
@@ -246,9 +270,11 @@ impl AppBar {
                 self.show_tooltip(shown_index);
             }
             MousePos::Clickable(shown_index) => {
-                // show tooltip only if not opened
-                if self.current_item_index.is_some() {
-                    self.open(shown_index);
+                // show tooltip only if no menu is selected (opened)
+                // if a menu is selected - don't show the tool (they will overlap)
+                // if no menu is selected, than we are over something else (e.g. a button) - we can show a tooltip
+                if self.opened_menu.is_some() {
+                    self.select_menu_and_open(shown_index);
                 } else {
                     self.show_tooltip(shown_index);
                 }
@@ -262,7 +288,7 @@ impl AppBar {
             MousePos::Clickable(vi) => vi.index(),
             _ => usize::MAX,
         };
-        let current_index = self.current_item_index.unwrap_or(usize::MAX);
+        let current_index = self.opened_menu.map(|vi| vi.index()).unwrap_or(usize::MAX);
         for (index, item) in self.shown_items.iter().enumerate() {
             if let Some(elem) = self.manager.element(item.idx as usize) {
                 let status = if !elem.is_enabled() {
@@ -284,7 +310,8 @@ impl AppBar {
         let mut res = self.update_mouse_pos();
         match self.mouse_pos {
             MousePos::Clickable(index) => {
-                self.open(index);
+                self.select_menu_and_open(index);
+                self.execute_action(index);
                 res = true;
             }
             _ => {}
@@ -308,7 +335,7 @@ impl AppBar {
         for (index, pos) in self.shown_items.iter().enumerate() {
             if let Some(elem) = self.manager.element(pos.idx as usize) {
                 if elem.is_enabled() && (key == elem.hotkey()) {
-                    self.open(VisibleIndex::from_usize(index));
+                    self.select_menu_and_open(VisibleIndex::from_usize(index));
                     return true;
                 }
             }
@@ -318,11 +345,11 @@ impl AppBar {
     fn process_key(&mut self, key: Key) -> EventProcessStatus {
         match key.code {
             KeyCode::Left => {
-                self.change_current_item(false);
+                self.goto_next_menu(-1);
                 EventProcessStatus::Processed
             }
             KeyCode::Right => {
-                self.change_current_item(true);
+                self.goto_next_menu(1);
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,

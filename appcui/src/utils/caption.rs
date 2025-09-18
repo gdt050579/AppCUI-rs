@@ -92,10 +92,10 @@ impl Caption {
     //     self.text.clear();
     //     self.text.push_str(caption.text.as_str());
     // }
-    #[inline(always)]
-    pub(crate) fn clear_hotkey_modifier(&mut self) {
-        self.hotkey.modifier = KeyModifier::None;
-    }
+    // #[inline(always)]
+    // pub(crate) fn clear_hotkey_modifier(&mut self) {
+    //     self.hotkey.modifier = KeyModifier::None;
+    // }
 }
 
 impl From<ExtractHotKeyMethod> for KeyModifier {

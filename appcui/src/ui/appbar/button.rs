@@ -2,6 +2,8 @@ use super::{ItemBase, ItemStatus, Side};
 use crate::graphics::*;
 use crate::input::*;
 use crate::system::{Handle, RuntimeManager, Theme};
+use crate::ui::appbar::events::AppBarEvent;
+use crate::ui::appbar::events::ButtonClickEvent;
 use crate::utils::Caption;
 
 pub struct Button {
@@ -22,7 +24,7 @@ impl Button {
             base: ItemBase::new(w, order, pos, true),
         }
     }
-    pub fn with_tooltip(caption: &str, tooltip: &str,  order: u8, pos: Side) -> Self {
+    pub fn with_tooltip(caption: &str, tooltip: &str, order: u8, pos: Side) -> Self {
         let c = Caption::new(caption, crate::utils::ExtractHotKeyMethod::AltPlusKey);
         let w = c.chars_count() as u8;
         Self {
@@ -31,7 +33,7 @@ impl Button {
             tooltip: tooltip.to_string(),
             base: ItemBase::new(w, order, pos, true),
         }
-    }    
+    }
 
     #[inline(always)]
     pub fn is_enabled(&self) -> bool {
@@ -49,8 +51,8 @@ impl Button {
     pub fn set_caption(&mut self, text: &str) {
         self.caption.set_text(text, crate::utils::ExtractHotKeyMethod::AltPlusKey);
         let w = self.caption.chars_count() as u8;
-        self.base.set_width(w);  
-        self.base.refresh(); 
+        self.base.set_width(w);
+        self.base.refresh();
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;
@@ -65,7 +67,11 @@ impl Button {
         format.set_hotkey_from_caption(status.hotkey_attribute(theme), &self.caption);
         surface.write_text(self.caption.text(), &format);
     }
-    pub(super) fn on_activate(&mut self) {
+    pub(super) fn on_execute(&mut self) {
+        RuntimeManager::get().set_appbar_event(AppBarEvent::ButtonClick(ButtonClickEvent {
+            button_handle: self.base.handle().cast(),
+            control_receiver_handle: self.receiver_control_handle,
+        }));
         //RuntimeManager::get().show_menu(self.handle, self.receiver_control_handle, self.base.x(), 1, None)
     }
     #[inline(always)]
@@ -74,13 +80,13 @@ impl Button {
             false
         } else {
             key == self.caption.hotkey()
-        } 
+        }
     }
     #[inline(always)]
     pub(super) fn hotkey(&self) -> Key {
         self.caption.hotkey()
     }
-        #[inline(always)]
+    #[inline(always)]
     pub fn tooltip(&self) -> &str {
         &self.tooltip
     }

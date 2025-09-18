@@ -1,8 +1,8 @@
+use super::Button;
 use super::ItemBase;
 use super::Label;
 use super::MenuButton;
 use super::Separator;
-use super::Button;
 use crate::graphics::Surface;
 use crate::input::*;
 use crate::system::MenuHandleManager;
@@ -93,6 +93,10 @@ impl AppBarItem {
         }
     }
     #[inline(always)]
+    pub(super) fn is_menu(&self) -> bool {
+        matches!(self, AppBarItem::MenuButton(_))
+    }
+    #[inline(always)]
     pub(super) fn process_shortcut(&self, key: Key, menus: &mut MenuHandleManager) -> bool {
         match self {
             AppBarItem::Separator(_) => false,
@@ -107,7 +111,16 @@ impl AppBarItem {
             AppBarItem::Separator(_) => {}
             AppBarItem::MenuButton(obj) => obj.on_activate(),
             AppBarItem::Label(_) => {}
-            AppBarItem::Button(_) => todo!(),
+            AppBarItem::Button(_) => {}
+            AppBarItem::CheckBox(_) => todo!(),
+        }
+    }
+    pub(super) fn execute_action(&mut self) {
+        match self {
+            AppBarItem::Separator(_) => {}
+            AppBarItem::MenuButton(obj) => obj.on_activate(),
+            AppBarItem::Label(_) => {}
+            AppBarItem::Button(obj) => obj.on_execute(),
             AppBarItem::CheckBox(_) => todo!(),
         }
     }
