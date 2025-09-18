@@ -9,7 +9,7 @@ pub(crate) struct Win {
 impl Win {
     pub(crate) fn new() -> Self {
         let mut w = Win {
-            base: window!("'Simple menus',a:c,w:40,h:8,Flags: Sizeable"),
+            base: window!("'Disable menu',a:c,w:40,h:8,Flags: Sizeable"),
             h_file: Handle::None,
             h_edit: Handle::None,
             h_help: Handle::None,

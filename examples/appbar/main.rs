@@ -4,6 +4,7 @@ use appcui::ui::appbar::*;
 mod simple_menu;
 mod aligned_menus;
 mod disabled_menu;
+mod progress_bar;
 
 const LOGO: [&str; 11] = [
     "   █████████                       ███████████                     ",
@@ -21,7 +22,7 @@ const LOGO: [&str; 11] = [
 
 #[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
-          commands  = [ShowSimpleMenus, ShowAlignedMenus, ShowDisableMenu,
+          commands  = [ShowSimpleMenus, ShowAlignedMenus, ShowDisableMenu, ShowProgressBar,
                        Exit, About, 
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -83,6 +84,7 @@ impl DesktopEvents for MyDesktop {
                 {'Simple menus',cmd: ShowSimpleMenus},
                 {'Menus with alignment', cmd: ShowAlignedMenus },
                 {'Disabled menu', cmd: ShowDisableMenu },
+                {'Progress bar', cmd: ShowProgressBar },
             ]
         "),0,Side::Left));
     }  
@@ -108,7 +110,10 @@ impl MenuEvents for MyDesktop {
             },     
             mydesktop::Commands::ShowDisableMenu => { 
                 self.add_window(disabled_menu::Win::new());
-            },                   
+            },       
+            mydesktop::Commands::ShowProgressBar => { 
+                self.add_window(progress_bar::Win::new());
+            },                           
             mydesktop::Commands::Exit => self.close(),   
             _ => { }      
         }
