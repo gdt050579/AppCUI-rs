@@ -10,15 +10,15 @@ use crate::{
     ui::common::traits::EventProcessStatus,
     utils::{Strategy, VectorIndex},
 };
-use std::sync::atomic::{AtomicUsize, Ordering};
 use appcui_proc_macro::key;
+use std::sync::atomic::{AtomicUsize, Ordering};
 const MAX_ITEMS: usize = 128;
 static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 
 /// A container for menu items that can be displayed over existing controls.
-/// 
-/// A menu is a list of items (commands, checkboxes, single choice elements) that 
-/// can be displayed over existing controls. Menus can be added to a menu bar or 
+///
+/// A menu is a list of items (commands, checkboxes, single choice elements) that
+/// can be displayed over existing controls. Menus can be added to a menu bar or
 /// displayed as popup menus.
 ///
 /// # Examples
@@ -162,11 +162,11 @@ impl Menu {
     /// Adds a new menu item to the existing menu.
     ///
     /// # Parameters
-    /// * `menuitem` - The menu item to add. This can be a Command, CheckBox, 
+    /// * `menuitem` - The menu item to add. This can be a Command, CheckBox,
     ///   SingleChoice, Separator, or SubMenu.
     ///
     /// # Returns
-    /// A handle to the added menu item, which can be used to access or modify 
+    /// A handle to the added menu item, which can be used to access or modify
     /// the item later.
     #[allow(private_bounds)]
     pub fn add<T>(&mut self, mut menuitem: T) -> Handle<T>
@@ -598,6 +598,7 @@ impl Menu {
                     receiver_control_handle,
                     (self.width as i32) + self.clip.left,
                     self.clip.top + 1 + ((index as u32 - self.first_visible_item) as i32),
+                    0,
                     None,
                 );
             }
@@ -659,7 +660,7 @@ impl Menu {
         EventProcessStatus::Ignored
     }
 
-    pub(crate) fn compute_position(&mut self, x: i32, y: i32, max_size: Size, term_size: Size) -> bool {
+    pub(crate) fn compute_position(&mut self, x: i32, y: i32, title_width: u32, max_size: Size, term_size: Size) -> bool {
         if (term_size.width < 5) || (term_size.height < 5) {
             // can not display if terminal is less than 5 x 5
             return false;
@@ -686,7 +687,7 @@ impl Menu {
         let best_width = (max_width_left + max_hot_key_width) | 1; // make sure it's not an odd number (this will help better position Arrow Up and Down)
 
         // adjust X and Y to be on the screen
-        let x = x.clamp(0, term_size.width as i32);
+        let mut x = x.clamp(0, term_size.width as i32);
         let y = y.clamp(0, term_size.height as i32);
 
         // validate max and min limits for menu width and height
@@ -711,6 +712,10 @@ impl Menu {
                 x < ((term_size.width / 2) as i32) // if x is closest to right edge - expand to left, otherwise to right
             }
         };
+
+        if (!to_left) && (title_width > 1) {
+            x = ((x + (title_width as i32)).min(term_size.width as i32)) - 1;
+        }
 
         let to_bottom = {
             if y + (menu_height as i32) <= (term_size.height as i32) {

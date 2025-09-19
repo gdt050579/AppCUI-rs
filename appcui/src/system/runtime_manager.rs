@@ -465,7 +465,7 @@ impl RuntimeManager {
     pub(crate) fn get_appbar(&mut self) -> &mut AppBar {
         self.appbar.as_mut().expect("AppBar (application bar) was not enabled ! Have you forgot to add '.app_bar()' when you initialized the Application ? (e.g. App::new().app_bar().build())")
     }
-    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {
+    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, title_width: u32, max_size: Option<Size>) {
         let menus = unsafe { &mut *self.menus };
         let controls = unsafe { &mut *self.controls };
         if let Some(menu) = menus.get_mut(handle) {
@@ -480,7 +480,7 @@ impl RuntimeManager {
                 GenericMenuEvents::on_menu_open(ctrl.control(), menu);
             }
             // 4. compute the position and show
-            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.backend.size());
+            menu.compute_position(x, y, title_width, max_size.unwrap_or(Size::new(0, 0)), self.backend.size());
             self.opened_menu_handle = handle;
         }
     }

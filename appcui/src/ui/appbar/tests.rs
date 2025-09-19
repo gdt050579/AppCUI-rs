@@ -1378,7 +1378,6 @@ fn check_label_tooltip() {
 fn check_move_left_right() {
     let script = "
         Paint.Enable(false)
-        //Error.Disable(true)
         Paint('1. initial state Left:(M-1,M-2,L-1,|), Right:(M-5,B-1,M-4,M-3)')
         CheckHash(0x7E08D0E9FC227B2C)   
         Mouse.Click(2,0,left)    
@@ -1463,5 +1462,119 @@ fn check_move_left_right() {
 
     let mut a = App::debug(80, 10, script).command_bar().app_bar().build().unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_button_with_menu_opened() {
+    #[Window(events = AppBarEvents, commands: A, internal: true)]
+    pub(crate) struct Win {
+        cnt: u8,
+        h_menu: Handle<appbar::MenuButton>,
+        h_minus: Handle<appbar::Button>,
+        h_plus: Handle<appbar::Button>,
+        h_label: Handle<appbar::Label>,
+        h_sep: Handle<appbar::Separator>,
+    }
+    impl Win {
+        pub(crate) fn new() -> Self {
+            let mut w = Win {
+                base: window!("Test,a:c,w:40,h:8,Flags: Sizeable"),
+                h_menu: Handle::None,
+                h_label: Handle::None,
+                h_plus: Handle::None,
+                h_minus: Handle::None,
+                h_sep: Handle::None,
+                cnt: 2,
+            };
+            let m = menu!(
+                "class: Win, items=[
+                    { &New, cmd: A , key: Ctrl+N },
+                    { &Save, cmd: A, key: Ctrl+S },
+                    { 'Save &as...', cmd: A },
+                    { &Open, cmd: A, key: Ctrl+O },
+                    { --- },
+                    { E&xit, cmd: A, key: Alt+F4 },
+                ]"
+            );
+            let mb = appbar::MenuButton::new("&File", m, 1, appbar::Side::Left);
+            w.h_menu = w.appbar().add(mb);
+            w.h_sep = w.appbar().add(appbar::Separator::new(1, appbar::Side::Left));
+            w.h_label = w.appbar().add(appbar::Label::new("2/5", 1, appbar::Side::Left));
+            w.h_minus = w.appbar().add(appbar::Button::with_tooltip(" < ", "Previous", 1, appbar::Side::Left));
+            w.h_plus = w.appbar().add(appbar::Button::with_tooltip(" > ", "Next", 1, appbar::Side::Left));
+
+            w
+        }
+    }
+    impl AppBarEvents for Win {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_menu);
+            appbar.show(self.h_sep);
+            appbar.show(self.h_minus);
+            appbar.show(self.h_label);
+            appbar.show(self.h_plus);
+        }
+
+        fn on_button_click(&mut self, button: Handle<appbar::Button>) {
+            if button == self.h_minus {
+                self.cnt = (self.cnt - 1).clamp(1, 5);
+            }
+            if button == self.h_plus {
+                self.cnt = (self.cnt + 1).clamp(1, 5);
+            }
+            let cnt = self.cnt;
+            let h = self.h_minus;
+            self.appbar().get_mut(h).unwrap().set_enabled(cnt > 1);
+            let h = self.h_plus;
+            self.appbar().get_mut(h).unwrap().set_enabled(cnt < 5);
+            let v: [u8; 3] = [cnt + 48, b'/', b'5'];
+            let h = self.h_label;
+            self.appbar().get_mut(h).unwrap().set_caption(str::from_utf8(&v).unwrap());
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. initial state : File | < 2/5 >')
+        CheckHash(0x6B79439B12DD53E3)  
+        Mouse.Click(3,0,left)             
+        Paint('2. File menu opened')
+        CheckHash(0x9D8C28A442A6C70A)  
+        Mouse.Move(8,0)             
+        Paint('3. Hover over < , File remains opened')
+        CheckHash(0x881DF7D4E9EC04C2)  
+        Mouse.Click(8,0,left)             
+        Paint('4. Click < , File is closed, Status: < 1/5 >, < becomes inactive, tooltip is shown')
+        CheckHash(0xD4E21DFDF8961BA4)  
+        Mouse.Click(8,0,left)             
+        Paint('5. Click < , nothing happens - is inactive, tooltip is hidden')
+        CheckHash(0x9DB1C581E6A2C950)  
+        Mouse.Click(8,0,left)             
+        Paint('6. Click < , nothing happens (same hash as 5)')
+        CheckHash(0x9DB1C581E6A2C950)  
+        Mouse.Move(14,0)             
+        Paint('7. Hover over > , tooltip is shown')
+        CheckHash(0x7E584097D7F321D6)  
+        Mouse.Hold(14,0,left)             
+        Paint('8. Press over > , tooltip is hidden, status is < 2/5 >')
+        CheckHash(0x19ACF49C9D7F43DF)  
+        Mouse.Release(14,0,left)             
+        Paint('9. Release > , tooltip is hidden, status is < 2/5 > , > remains hovered')
+        CheckHash(0x488DA51B6121B78B)  
+        Mouse.Click(3,0,left)             
+        Paint('10. File menu opened')
+        CheckHash(0x9D8C28A442A6C70A)  
+        Key.Pressed(Left)
+        Paint('11. Nothing happens, File menu remains selected and opened')
+        CheckHash(0x9D8C28A442A6C70A)  
+        Key.Pressed(Right)
+        Paint('12. Nothing happens, File menu remains selected and opened')
+        CheckHash(0x9D8C28A442A6C70A)  
+
+    ";
+
+    let mut a = App::debug(80, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(Win::new());
     a.run();
 }

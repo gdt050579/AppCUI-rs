@@ -42,9 +42,9 @@ impl MenuButton {
     #[inline(always)]
     pub fn set_caption(&mut self, text: &str) {
         self.caption = Caption::new(text, crate::utils::ExtractHotKeyMethod::AltPlusKey);
-        let w = (self.caption.chars_count().max(1) + 2).min(u8::MAX as usize) as u8;  
-        self.base.set_width(w);  
-        self.base.refresh(); 
+        let w = (self.caption.chars_count().max(1) + 2).min(u8::MAX as usize) as u8;
+        self.base.set_width(w);
+        self.base.refresh();
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
         self.receiver_control_handle = handle;
@@ -68,7 +68,14 @@ impl MenuButton {
         surface.write_text(self.caption.text(), &format);
     }
     pub(super) fn on_activate(&mut self) {
-        RuntimeManager::get().show_menu(self.handle, self.receiver_control_handle, self.base.x(), 1, None)
+        RuntimeManager::get().show_menu(
+            self.handle,
+            self.receiver_control_handle,
+            self.base.x(),
+            1,
+            self.base.width() as u32,
+            None,
+        )
     }
     #[inline(always)]
     pub(super) fn process_shortcut(&self, key: Key, menus: &mut MenuHandleManager) -> bool {
