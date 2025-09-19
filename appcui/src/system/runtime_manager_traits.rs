@@ -34,7 +34,7 @@ pub(crate) trait MouseMethods {
     fn coordinates_to_child_control(&mut self, handle: Handle<()>, x: i32, y: i32, ignore_expanded: bool) -> Handle<()>;
     fn coordinates_to_control(&mut self, x: i32, y: i32, ignore_expanded: bool) -> Handle<()>;
     fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool;
-    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32);
+    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) -> bool;
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent);
     fn process_mousedrag(&mut self, handle: Handle<()>, event: MouseMoveEvent);
     fn process_mousemove(&mut self, event: MouseMoveEvent);

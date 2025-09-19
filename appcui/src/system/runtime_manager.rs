@@ -12,16 +12,16 @@ use crate::backend::{self, Backend};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
 use crate::prelude::*;
+use crate::ui::appbar::events::{AppBarEvent, AppBarEvents};
 use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
-use crate::ui::common::ControlManager;
 use crate::ui::common::ControlEvent;
+use crate::ui::common::ControlManager;
 use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
-use crate::ui::appbar::events::{AppBarEvent, AppBarEvents};
-use crate::ui::{Menu, AppBar};
 use crate::ui::window::events::WindowEvents;
+use crate::ui::{AppBar, Menu};
 use crate::utils::VectorIndex;
 
 #[repr(u8)]
@@ -310,7 +310,7 @@ impl RuntimeManager {
     }
     pub(crate) fn set_appbar_event(&mut self, event: AppBarEvent) {
         self.appbar_event = Some(event);
-    }    
+    }
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
     }
@@ -462,7 +462,7 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
-    pub(crate) fn get_appbar(&mut self)->&mut AppBar {
+    pub(crate) fn get_appbar(&mut self) -> &mut AppBar {
         self.appbar.as_mut().expect("AppBar (application bar) was not enabled ! Have you forgot to add '.app_bar()' when you initialized the Application ? (e.g. App::new().app_bar().build())")
     }
     pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {
@@ -524,7 +524,7 @@ impl RuntimeManager {
         // 2. Process appbar from menu
         if let Some(event) = self.appbar_event {
             self.process_appbar_event(event);
-        }        
+        }
 
         // 3. Process events from controls
         if !self.events.is_empty() {
@@ -909,7 +909,7 @@ impl RuntimeManager {
             }
         }
         self.appbar_event = None;
-    }    
+    }
     fn update_command_and_app_bars(&mut self) {
         if self.commandbar.is_none() && self.appbar.is_none() {
             self.update_command_and_app_bars = false;
@@ -1553,9 +1553,11 @@ impl MouseMethods for RuntimeManager {
         processed
     }
 
-    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) {
+    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) -> bool {
+        // returns true if the mouse was processed by a menu or the menu parent or false if (x,y) are outside any menu
         let mut result = MousePressedMenuResult::None;
         let mut parent_handle = Handle::None;
+        let mut processed = false;
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
             parent_handle = menu.get_parent_handle();
@@ -1571,12 +1573,16 @@ impl MouseMethods for RuntimeManager {
         }
         match result {
             MousePressedMenuResult::None => {}
-            MousePressedMenuResult::Repaint => self.repaint = true,
+            MousePressedMenuResult::Repaint => {
+                self.repaint = true;
+                processed = true;
+            }
             MousePressedMenuResult::CheckParent => {
                 if !parent_handle.is_none() {
-                    self.process_menu_mouse_click(parent_handle, x, y);
+                    processed = self.process_menu_mouse_click(parent_handle, x, y);
                 } else {
                     self.close_opened_menu();
+                    processed = false;
                 }
             }
             MousePressedMenuResult::Activate => {
@@ -1586,8 +1592,10 @@ impl MouseMethods for RuntimeManager {
                     // trigger an on_mouse_move to force selection
                     menu.on_mouse_move(x, y);
                 }
+                processed = true;
             }
         }
+        processed
     }
 
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
@@ -1691,10 +1699,11 @@ impl MouseMethods for RuntimeManager {
         self.hide_tooltip();
         // check contextual menu
         if !self.opened_menu_handle.is_none() {
-            self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y);
-            return;
+            if self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y) {
+                return;
+            }
         }
-        // check appbar 
+        // check appbar
         if let Some(appbar) = self.appbar.as_mut() {
             if appbar.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
                 self.repaint = true;
