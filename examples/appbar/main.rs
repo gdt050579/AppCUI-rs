@@ -5,6 +5,7 @@ mod simple_menu;
 mod aligned_menus;
 mod disabled_menu;
 mod progress_bar;
+mod navigation;
 
 const LOGO: [&str; 11] = [
     "   █████████                       ███████████                     ",
@@ -22,7 +23,7 @@ const LOGO: [&str; 11] = [
 
 #[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
-          commands  = [ShowSimpleMenus, ShowAlignedMenus, ShowDisableMenu, ShowProgressBar,
+          commands  = [ShowSimpleMenus, ShowAlignedMenus, ShowDisableMenu, ShowProgressBar, ShowNavigation,
                        Exit, About, 
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -85,6 +86,7 @@ impl DesktopEvents for MyDesktop {
                 {'Menus with alignment', cmd: ShowAlignedMenus },
                 {'Disabled menu', cmd: ShowDisableMenu },
                 {'Progress bar', cmd: ShowProgressBar },
+                {'Navigation', cmd: ShowNavigation },
             ]
         "),0,Side::Left));
     }  
@@ -113,7 +115,10 @@ impl MenuEvents for MyDesktop {
             },       
             mydesktop::Commands::ShowProgressBar => { 
                 self.add_window(progress_bar::Win::new());
-            },                           
+            },     
+            mydesktop::Commands::ShowNavigation => { 
+                self.add_window(navigation::Win::new());
+            },                                    
             mydesktop::Commands::Exit => self.close(),   
             _ => { }      
         }

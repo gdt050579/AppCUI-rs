@@ -5,7 +5,6 @@ use std::time::Duration;
 #[Window(events = AppBarEvents+TimerEvents, commands=A)]
 pub(crate) struct Win {
     cnt: i32,
-    tmp: String,
     h_label: Handle<appbar::Label>,
 }
 impl Win {
@@ -14,12 +13,9 @@ impl Win {
             base: window!("'Progress Bar',a:c,w:40,h:8,Flags: Sizeable"),
             h_label: Handle::None,
             cnt: 0,
-            tmp: String::with_capacity(16),
         };
 
-        w.add(label!(
-            "'Three manus: File, Edit and Help, with File enabled, and Edit menu disabled (both on the left) and Help menu on the right',d:f"
-        ));
+        w.add(label!("'One label where we simulate a download progress bar',d:f"));
         w.h_label = w.appbar().add(appbar::Label::new("", 0, appbar::Side::Right));
 
         if let Some(timer) = w.timer() {
@@ -38,7 +34,7 @@ impl TimerEvents for Win {
         for _ in 0..self.cnt {
             f.push(SpecialChar::BlockCentered.into());
         }
-        for _ in self.cnt..PROG_MAX-1 {
+        for _ in self.cnt..PROG_MAX - 1 {
             f.push(' ');
         }
         f.push(']');

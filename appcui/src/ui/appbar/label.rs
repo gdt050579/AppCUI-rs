@@ -1,6 +1,6 @@
 use super::{ItemBase, Side};
 use crate::graphics::*;
-use crate::system::{RuntimeManager, Theme};
+use crate::system::Theme;
 
 pub struct Label {
     text: String,
