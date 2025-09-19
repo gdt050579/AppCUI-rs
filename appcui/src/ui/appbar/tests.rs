@@ -1744,3 +1744,240 @@ fn check_menu_aligned_right_opened_large_secondary_right_most_menu() {
     a.add_window(Win::new());
     a.run();
 }
+
+#[test]
+fn check_desktop_resize() {
+    // Desktop with menu
+    #[Desktop(events = AppBarEvents+DesktopEvents, commands = Settings+About, internal: true)]
+    struct MyDesktop {
+        m_1: Handle<MenuButton>,
+        m_2: Handle<MenuButton>,
+        m_3: Handle<MenuButton>,
+        m_4: Handle<MenuButton>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                m_1: Handle::None,
+                m_2: Handle::None,
+                m_3: Handle::None,
+                m_4: Handle::None,
+            }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            self.m_1 = self.appbar().add(MenuButton::new("Left-Menu-1", Menu::new(), 0, Side::Left));
+            self.m_2 = self.appbar().add(MenuButton::new("Left-Menu-2", Menu::new(), 1, Side::Left));
+            self.m_3 = self.appbar().add(MenuButton::new("Right-Menu-1", Menu::new(), 0, Side::Right));
+            self.m_4 = self.appbar().add(MenuButton::new("Right-Menu-2", Menu::new(), 1, Side::Right));
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_1);
+            appbar.show(self.m_2);
+            appbar.show(self.m_3);
+            appbar.show(self.m_4);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state - LM-1,LM-2,RM-2,RM-1')
+        CheckHash(0x23B78E48A70060F5)
+        Resize(50,10)
+        Paint('2. New width (50) - LM-1,LM-2,RM-1')
+        CheckHash(0x32F5182C91D2DD0C)
+        Resize(40,10)
+        Paint('3. New width (40) - LM-1,RM-1')
+        CheckHash(0x4490C2EE9C85A226)
+        Resize(30,10)
+        Paint('4. New width (30) - LM-1,LM-2,RM-1')
+        CheckHash(0xE68F2CCD42F41D0C)
+    ";
+    App::debug(60, 10, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_menu_button_api() {
+    // Desktop with menu
+    #[Desktop(events = AppBarEvents+DesktopEvents, internal: true)]
+    struct MyDesktop {
+        h: Handle<MenuButton>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                h: Handle::None,
+            }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            self.h = self.appbar().add(MenuButton::new("Menu", Menu::new(), 0, Side::Left));
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            let h = self.h;
+            if let Some(mb) = appbar.get_mut(h) {
+                let mut s = mb.caption().to_string();
+                s.push_str("+1");
+                mb.set_caption(&s);
+            }
+            appbar.show(self.h);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state - menu name is <Menu+1>')
+        CheckHash(0xADA1CFB8DAF362DC)
+    ";
+    App::debug(60, 10, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_label_api() {
+    // Desktop with menu
+    #[Desktop(events = AppBarEvents+DesktopEvents, internal: true)]
+    struct MyDesktop {
+        h: Handle<appbar::Label>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                h: Handle::None,
+            }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            self.h = self.appbar().add(appbar::Label::new("Label", 0, Side::Left));
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            let h = self.h;
+            if let Some(mb) = appbar.get_mut(h) {
+                let mut s = mb.caption().to_string();
+                s.push_str("+1");
+                mb.set_caption(&s);
+            }
+            appbar.show(self.h);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state - menu name is <Label+1>')
+        CheckHash(0xF0C393E648D75BAD)
+    ";
+    App::debug(60, 10, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_button_api() {
+    // Desktop with menu
+    #[Desktop(events = AppBarEvents+DesktopEvents, internal: true)]
+    struct MyDesktop {
+        h: Handle<appbar::Button>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                h: Handle::None,
+            }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            self.h = self.appbar().add(appbar::Button::new("Button", 0, Side::Left));
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            let h = self.h;
+            if let Some(mb) = appbar.get_mut(h) {
+                let mut s = mb.caption().to_string();
+                s.push_str("+1");
+                mb.set_caption(&s);
+                s = format!("Enabled: {}", mb.is_enabled());
+                mb.set_tooltip(&s);
+                assert_eq!(mb.hotkey(), Key::None);
+            }
+            appbar.show(self.h);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state - menu name is <Button+1>')
+        CheckHash(0xBB16027424F5097D)
+        Mouse.Move(3,0)
+        Paint('2. Hover - Tooltip is <Enabled: true>')
+        CheckHash(0x578201E79429C78D)
+    ";
+    App::debug(60, 10, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_button_shortcut() {
+    // Desktop with menu
+    #[Desktop(events = AppBarEvents+DesktopEvents, internal: true)]
+    struct MyDesktop {
+        h: Handle<appbar::Button>,
+        l: Handle<appbar::Label>,
+        cnt: i32,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                h: Handle::None,
+                l: Handle::None,
+                cnt: 1,
+            }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            self.h = self.appbar().add(appbar::Button::new(" &Add ", 0, Side::Left));
+            self.l = self.appbar().add(appbar::Label::new("1", 0, Side::Left));
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h);
+            appbar.show(self.l);
+        }
+        
+        fn on_button_click(&mut self, _: Handle<appbar::Button>) {
+            let h = self.l;
+            self.cnt += 1;
+            let s = format!("{}",self.cnt);
+            if let Some(lb) = self.appbar().get_mut(h) {
+                lb.set_caption(&s)
+            }
+        }
+        
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xCF08088F9E5191F9)
+        Key.Pressed(Alt+A)
+        Paint('2. Now cnt = 2')
+        CheckHash(0xE22138588EE3A3E6)
+        Mouse.Click(3,0,left)
+        Paint('3. Now cnt = 3')
+        CheckHash(0xC636FD44BF9F062F)        
+    ";
+    App::debug(60, 10, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+}

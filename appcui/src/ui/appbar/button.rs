@@ -74,19 +74,6 @@ impl Button {
         }));
     }
     #[inline(always)]
-    pub(super) fn process_shortcut(&self, key: Key) -> bool {
-        if self.receiver_control_handle.is_none() {
-            false
-        } else {
-            if key == self.caption.hotkey() {
-                self.on_execute();
-                true
-            } else {
-                false
-            }
-        }
-    }
-    #[inline(always)]
     pub(super) fn hotkey(&self) -> Key {
         self.caption.hotkey()
     }

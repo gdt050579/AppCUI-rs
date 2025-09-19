@@ -362,6 +362,7 @@ impl AppBar {
             if let Some(elem) = self.manager.element(pos.idx as usize) {
                 if elem.is_enabled() && (key == elem.hotkey()) {
                     self.select_menu_and_open(VisibleIndex::from_usize(index));
+                    self.execute_action(VisibleIndex::from_usize(index));
                     return true;
                 }
             }

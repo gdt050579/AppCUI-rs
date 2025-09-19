@@ -98,7 +98,7 @@ impl AppBarItem {
             AppBarItem::Separator(_) => false,
             AppBarItem::MenuButton(obj) => obj.process_shortcut(key, menus),
             AppBarItem::Label(_) => false,
-            AppBarItem::Button(obj) => obj.process_shortcut(key),
+            AppBarItem::Button(_) => false,
             AppBarItem::CheckBox(_) => todo!(),
         }
     }
