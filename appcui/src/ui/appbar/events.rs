@@ -3,7 +3,7 @@ use crate::ui::AppBar;
 /// A trait that defines the event handlers for AppBar interation
 pub trait AppBarEvents {
     fn on_button_click(&mut self, _button: Handle<super::Button>) {}
-    fn on_togglebutton_state_changed(&mut self, _togglebutton: Handle<super::ToggleButton>, selected: bool) {}
+    fn on_togglebutton_state_changed(&mut self, _togglebutton: Handle<super::ToggleButton>, _selected: bool) {}
 
     /// Called when a checkbox menu item's state changes.
     ///

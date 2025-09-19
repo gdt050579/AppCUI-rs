@@ -6,6 +6,7 @@ mod aligned_menus;
 mod disabled_menu;
 mod progress_bar;
 mod navigation;
+mod toggle_buttons;
 
 const LOGO: [&str; 11] = [
     "   █████████                       ███████████                     ",
@@ -24,6 +25,7 @@ const LOGO: [&str; 11] = [
 #[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [ShowSimpleMenus, ShowAlignedMenus, ShowDisableMenu, ShowProgressBar, ShowNavigation,
+                       ShowToggleButton, 
                        Exit, About, 
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -82,11 +84,12 @@ impl DesktopEvents for MyDesktop {
         "),0,Side::Left));
         self.menu_example = self.appbar().add(MenuButton::new("&Examples",menu!("
             class: MyDesktop, items:[
-                {'Simple menus',cmd: ShowSimpleMenus},
-                {'Menus with alignment', cmd: ShowAlignedMenus },
-                {'Disabled menu', cmd: ShowDisableMenu },
-                {'Progress bar', cmd: ShowProgressBar },
-                {'Navigation', cmd: ShowNavigation },
+                {'&Simple menus',cmd: ShowSimpleMenus},
+                {'Menus with &alignment', cmd: ShowAlignedMenus },
+                {'&Disabled menu', cmd: ShowDisableMenu },
+                {'&Progress bar', cmd: ShowProgressBar },
+                {'&Navigation', cmd: ShowNavigation },
+                {'&Toggle Buttons', cmd: ShowToggleButton },
             ]
         "),0,Side::Left));
     }  
@@ -118,13 +121,16 @@ impl MenuEvents for MyDesktop {
             },     
             mydesktop::Commands::ShowNavigation => { 
                 self.add_window(navigation::Win::new());
-            },                                    
+            },      
+            mydesktop::Commands::ShowToggleButton => { 
+                self.add_window(toggle_buttons::Win::new());
+            },                                           
             mydesktop::Commands::Exit => self.close(),   
             _ => { }      
         }
     }
 
-    
+
 }
 impl AppBarEvents for MyDesktop {
     fn on_update(&self,appbar: &mut AppBar) {
