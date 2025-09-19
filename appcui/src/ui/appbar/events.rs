@@ -3,6 +3,7 @@ use crate::ui::AppBar;
 /// A trait that defines the event handlers for AppBar interation
 pub trait AppBarEvents {
     fn on_button_click(&mut self, _button: Handle<super::Button>) {}
+    fn on_togglebutton_state_changed(&mut self, _togglebutton: Handle<super::ToggleButton>, selected: bool) {}
 
     /// Called when a checkbox menu item's state changes.
     ///
@@ -41,6 +42,14 @@ pub(crate) struct ButtonClickEvent {
 }
 
 #[derive(Copy, Clone)]
+pub(crate) struct ToggleButtonStatusChangedEvent {
+    pub(crate) button_handle: Handle<super::ToggleButton>,
+    pub(crate) control_receiver_handle: Handle<()>,
+    pub(crate) state: bool,
+}
+
+#[derive(Copy, Clone)]
 pub(crate) enum AppBarEvent {
     ButtonClick(ButtonClickEvent),
+    ToggleButtonStatusChanged(ToggleButtonStatusChangedEvent),
 }

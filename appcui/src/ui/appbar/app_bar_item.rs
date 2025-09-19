@@ -3,6 +3,7 @@ use super::ItemBase;
 use super::Label;
 use super::MenuButton;
 use super::Separator;
+use super::ToggleButton;
 use crate::graphics::Surface;
 use crate::input::*;
 use crate::system::MenuHandleManager;
@@ -16,7 +17,7 @@ pub(crate) enum AppBarItem {
     MenuButton(MenuButton),
     Label(Label),
     Button(Button),
-    CheckBox(bool),
+    ToggleButton(ToggleButton),
 }
 
 impl From<super::MenuButton> for AppBarItem {
@@ -39,6 +40,11 @@ impl From<super::Button> for AppBarItem {
         AppBarItem::Button(value)
     }
 }
+impl From<super::ToggleButton> for AppBarItem {
+    fn from(value: super::ToggleButton) -> Self {
+        AppBarItem::ToggleButton(value)
+    }
+}
 
 impl AppBarItem {
     pub(super) fn base(&self) -> &ItemBase {
@@ -47,7 +53,7 @@ impl AppBarItem {
             AppBarItem::MenuButton(obj) => &obj.base,
             AppBarItem::Label(obj) => &obj.base,
             AppBarItem::Button(obj) => &obj.base,
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(obj) => &obj.base,
         }
     }
     pub(super) fn base_mut(&mut self) -> &mut ItemBase {
@@ -56,7 +62,7 @@ impl AppBarItem {
             AppBarItem::MenuButton(obj) => &mut obj.base,
             AppBarItem::Label(obj) => &mut obj.base,
             AppBarItem::Button(obj) => &mut obj.base,
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(obj) => &mut obj.base,
         }
     }
     #[inline(always)]
@@ -70,7 +76,7 @@ impl AppBarItem {
             AppBarItem::MenuButton(obj) => obj.hotkey(),
             AppBarItem::Label(_) => Key::None,
             AppBarItem::Button(but) => but.hotkey(),
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(but) => but.hotkey(),
         }
     }
     #[inline(always)]
@@ -80,7 +86,7 @@ impl AppBarItem {
             AppBarItem::MenuButton(_) => "",
             AppBarItem::Label(obj) => obj.tooltip(),
             AppBarItem::Button(obj) => obj.tooltip(),
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(obj) => obj.tooltip(),
         };
         if result.is_empty() {
             None
@@ -99,7 +105,7 @@ impl AppBarItem {
             AppBarItem::MenuButton(obj) => obj.process_shortcut(key, menus),
             AppBarItem::Label(_) => false,
             AppBarItem::Button(_) => false,
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(_) => false,
         }
     }
     pub(super) fn activate(&mut self) {
@@ -108,7 +114,7 @@ impl AppBarItem {
             AppBarItem::MenuButton(obj) => obj.on_activate(),
             AppBarItem::Label(_) => {}
             AppBarItem::Button(_) => {}
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(_) => {}
         }
     }
     pub(super) fn execute_action(&mut self) {
@@ -117,7 +123,7 @@ impl AppBarItem {
             AppBarItem::MenuButton(_) => {}
             AppBarItem::Label(_) => {}
             AppBarItem::Button(obj) => obj.on_execute(),
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(obj) => obj.on_execute(),
         }
     }
     #[inline(always)]
@@ -127,7 +133,7 @@ impl AppBarItem {
             AppBarItem::MenuButton(obj) => obj.paint(surface, theme, status),
             AppBarItem::Label(obj) => obj.paint(surface, theme),
             AppBarItem::Button(obj) => obj.paint(surface, theme, status),
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(obj) => obj.paint(surface, theme, status),
         }
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
@@ -136,7 +142,7 @@ impl AppBarItem {
             AppBarItem::MenuButton(obj) => obj.set_receiver_control_handle(handle),
             AppBarItem::Label(_) => {}
             AppBarItem::Button(obj) => obj.set_receiver_control_handle(handle),
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(obj) => obj.set_receiver_control_handle(handle),
         }
     }
 }

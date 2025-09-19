@@ -89,7 +89,7 @@ impl AppBar {
             AppBarItem::MenuButton(obj) => const_cast!(obj, appbar::MenuButton, T),
             AppBarItem::Label(obj) => const_cast!(obj, appbar::Label, T),
             AppBarItem::Button(obj) => const_cast!(obj, appbar::Button, T),
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(obj) => const_cast!(obj, appbar::ToggleButton, T),
         })
     }
     #[allow(private_bounds)]
@@ -103,7 +103,7 @@ impl AppBar {
             AppBarItem::MenuButton(obj) => mut_cast!(obj, appbar::MenuButton, T),
             AppBarItem::Label(obj) => mut_cast!(obj, appbar::Label, T),
             AppBarItem::Button(obj) => mut_cast!(obj, appbar::Button, T),
-            AppBarItem::CheckBox(_) => todo!(),
+            AppBarItem::ToggleButton(obj) => mut_cast!(obj, appbar::ToggleButton, T),
         })
     }
     #[inline(always)]

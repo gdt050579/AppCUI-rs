@@ -465,7 +465,15 @@ impl RuntimeManager {
     pub(crate) fn get_appbar(&mut self) -> &mut AppBar {
         self.appbar.as_mut().expect("AppBar (application bar) was not enabled ! Have you forgot to add '.app_bar()' when you initialized the Application ? (e.g. App::new().app_bar().build())")
     }
-    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, title_width: u32, max_size: Option<Size>) {
+    pub(crate) fn show_menu(
+        &mut self,
+        handle: Handle<Menu>,
+        receiver_control_handle: Handle<()>,
+        x: i32,
+        y: i32,
+        title_width: u32,
+        max_size: Option<Size>,
+    ) {
         let menus = unsafe { &mut *self.menus };
         let controls = unsafe { &mut *self.controls };
         if let Some(menu) = menus.get_mut(handle) {
@@ -904,6 +912,12 @@ impl RuntimeManager {
             AppBarEvent::ButtonClick(ev) => {
                 if let Some(control) = controls.get_mut(ev.control_receiver_handle) {
                     AppBarEvents::on_button_click(control.control_mut(), ev.button_handle);
+                    self.repaint = true;
+                }
+            }
+            AppBarEvent::ToggleButtonStatusChanged(ev) => {
+                if let Some(control) = controls.get_mut(ev.control_receiver_handle) {
+                    AppBarEvents::on_togglebutton_state_changed(control.control_mut(), ev.button_handle, ev.state);
                     self.repaint = true;
                 }
             }
