@@ -1578,3 +1578,169 @@ fn check_button_with_menu_opened() {
     a.add_window(Win::new());
     a.run();
 }
+
+#[test]
+fn check_menu_aligned_right_opened() {
+    #[Window(events = AppBarEvents, commands=A, internal = true)]
+    pub(crate) struct Win {
+        h_sep: Handle<appbar::Separator>,
+        h_left: Handle<appbar::MenuButton>,
+        h_color: Handle<appbar::MenuButton>,
+        h_opt: Handle<appbar::MenuButton>,
+    }
+    impl Win {
+        pub(crate) fn new() -> Self {
+            let mut w = Win {
+                base: window!("'Aligned menus',a:c,w:40,h:8,Flags: Sizeable"),
+                h_sep: Handle::None,
+                h_left: Handle::None,
+                h_color: Handle::None,
+                h_opt: Handle::None,
+            };
+
+            w.add(label!("'Three manus: Left, Color and Options, and a separator from the desktop specific menus to these one. Left menu is aligned to the left, while Color and Options are aligned to th right of the application bar.',d:f"));
+
+            let m = menu!(
+                "class: Win, items=[
+                { Command-1, cmd: A , key: Ctrl+N },
+                { Command-2, cmd: A, key: Ctrl+S },
+                { Command-3, cmd: A },
+                { --- },
+                { E&xit, cmd: A, key: Alt+F4 },
+            ]"
+            );
+            w.h_left = w.appbar().add(appbar::MenuButton::new("&Left", m, 1, appbar::Side::Left));
+            let m = menu!(
+                "class: Win, items=[
+                { &Red, cmd: A , selected: true},
+                { &Green, cmd: A, selected: false },
+                { &Blue, cmd: A, selected: false },
+            ]"
+            );
+            w.h_color = w.appbar().add(appbar::MenuButton::new("&Color", m, 2, appbar::Side::Right));
+            let m = menu!(
+                "class: Win, items=[
+                { 'Option &1', cmd: A, checked: true },
+                { 'Option &2', cmd: A, checked: false },
+                { 'Option &3', cmd: A, checked: true },
+                { --- },
+                { 'Option &1', cmd: A, checked: false },
+                { 'Option &1', cmd: A, checked: true },
+            ]"
+            );
+            w.h_opt = w.appbar().add(appbar::MenuButton::new("&Options", m, 1, appbar::Side::Right));
+            w.h_sep = w.appbar().add(appbar::Separator::new(1, appbar::Side::Left));
+            w
+        }
+    }
+    impl AppBarEvents for Win {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_sep);
+            appbar.show(self.h_left);
+            appbar.show(self.h_color);
+            appbar.show(self.h_opt);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. initial state : Left ...... Color Option')
+        CheckHash(0x696029ACD06801A3)  
+        Mouse.Click(3,0,left)             
+        Paint('2. Left menu opened (direction from left to right)')
+        CheckHash(0x9B21B1A17B0C6B0B)  
+        Key.Pressed(Right)             
+        Paint('3. Color menu opened (direction from left to right)')
+        CheckHash(0x1349F1A3A7A0C6E6)  
+        Key.Pressed(Right)             
+        Paint('4. Help menu opened (direction from right to left)')
+        CheckHash(0xEA4995BF7547A2A0)  
+    ";
+
+    let mut a = App::debug(80, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(Win::new());
+    a.run();
+}
+
+#[test]
+fn check_menu_aligned_right_opened_large_secondary_right_most_menu() {
+    #[Window(events = AppBarEvents, commands=A, internal = true)]
+    pub(crate) struct Win {
+        h_sep: Handle<appbar::Separator>,
+        h_left: Handle<appbar::MenuButton>,
+        h_color: Handle<appbar::MenuButton>,
+        h_opt: Handle<appbar::MenuButton>,
+    }
+    impl Win {
+        pub(crate) fn new() -> Self {
+            let mut w = Win {
+                base: window!("'Aligned menus',a:c,w:40,h:8,Flags: Sizeable"),
+                h_sep: Handle::None,
+                h_left: Handle::None,
+                h_color: Handle::None,
+                h_opt: Handle::None,
+            };
+
+            w.add(label!("'Three manus: Left, Color and Options, and a separator from the desktop specific menus to these one. Left menu is aligned to the left, while Color and Options are aligned to th right of the application bar.',d:f"));
+
+            let m = menu!(
+                "class: Win, items=[
+                { Command-1, cmd: A , key: Ctrl+N },
+                { Command-2, cmd: A, key: Ctrl+S },
+                { Command-3, cmd: A },
+                { --- },
+                { E&xit, cmd: A, key: Alt+F4 },
+            ]"
+            );
+            w.h_left = w.appbar().add(appbar::MenuButton::new("&Left", m, 1, appbar::Side::Left));
+            let m = menu!(
+                "class: Win, items=[
+                { 'Red with nuances of gray', cmd: A , selected: true},
+                { &Green, cmd: A, selected: false },
+                { &Blue, cmd: A, selected: false },
+            ]"
+            );
+            w.h_color = w.appbar().add(appbar::MenuButton::new("&Color", m, 2, appbar::Side::Right));
+            let m = menu!(
+                "class: Win, items=[
+                { 'Option &1', cmd: A, checked: true },
+                { 'Option &2', cmd: A, checked: false },
+                { 'Option &3', cmd: A, checked: true },
+                { --- },
+                { 'Option &1', cmd: A, checked: false },
+                { 'Option &1', cmd: A, checked: true },
+            ]"
+            );
+            w.h_opt = w.appbar().add(appbar::MenuButton::new("&Options", m, 1, appbar::Side::Right));
+            w.h_sep = w.appbar().add(appbar::Separator::new(1, appbar::Side::Left));
+            w
+        }
+    }
+    impl AppBarEvents for Win {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_sep);
+            appbar.show(self.h_left);
+            appbar.show(self.h_color);
+            appbar.show(self.h_opt);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. initial state : Left ...... Color Option')
+        CheckHash(0x696029ACD06801A3)  
+        Mouse.Click(3,0,left)             
+        Paint('2. Left menu opened (direction from left to right)')
+        CheckHash(0x9B21B1A17B0C6B0B)  
+        Key.Pressed(Right)             
+        Paint('3. Color menu opened (direction from right to left)')
+        CheckHash(0xD93C87922F5D3946)  
+        Key.Pressed(Right)             
+        Paint('4. Help menu opened (direction from right to left)')
+        CheckHash(0xEA4995BF7547A2A0)  
+    ";
+
+    let mut a = App::debug(80, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(Win::new());
+    a.run();
+}
