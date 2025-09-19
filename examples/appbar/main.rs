@@ -124,7 +124,7 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-
+    
 }
 impl AppBarEvents for MyDesktop {
     fn on_update(&self,appbar: &mut AppBar) {

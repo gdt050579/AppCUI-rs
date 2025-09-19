@@ -18,7 +18,7 @@ macro_rules! mut_cast {
     };
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 struct VisibleIndex {
     value: u32,
 }
@@ -33,7 +33,7 @@ impl VisibleIndex {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 enum MousePos {
     None,
     NonClickable(VisibleIndex),
@@ -54,6 +54,7 @@ pub struct AppBar {
     width: u32,
     mouse_pos: MousePos,
     opened_menu: Option<VisibleIndex>,
+    pressed_item: Option<VisibleIndex>,
     last_mouse_pos: Point,
 }
 impl AppBar {
@@ -66,6 +67,7 @@ impl AppBar {
             width,
             mouse_pos: MousePos::None,
             opened_menu: None,
+            pressed_item: None,
             last_mouse_pos: Point::new(i32::MAX, i32::MAX),
         }
     }
@@ -77,11 +79,11 @@ impl AppBar {
         self.manager.add(item.into()).cast()
     }
     #[allow(private_bounds)]
-    pub fn get<T>(&self, menubaritem_hamdle: Handle<T>) -> Option<&T>
+    pub fn get<T>(&self, appbaritem_handle: Handle<T>) -> Option<&T>
     where
         T: Into<AppBarItem>,
     {
-        let ref_item = self.manager.get(menubaritem_hamdle.cast())?;
+        let ref_item = self.manager.get(appbaritem_handle.cast())?;
         Some(match ref_item {
             AppBarItem::Separator(obj) => const_cast!(obj, appbar::Separator, T),
             AppBarItem::MenuButton(obj) => const_cast!(obj, appbar::MenuButton, T),
@@ -91,11 +93,11 @@ impl AppBar {
         })
     }
     #[allow(private_bounds)]
-    pub fn get_mut<T>(&mut self, menubaritem_hamdle: Handle<T>) -> Option<&mut T>
+    pub fn get_mut<T>(&mut self, appbaritem_handle: Handle<T>) -> Option<&mut T>
     where
         T: Into<AppBarItem>,
     {
-        let ref_item = self.manager.get_mut(menubaritem_hamdle.cast())?;
+        let ref_item = self.manager.get_mut(appbaritem_handle.cast())?;
         Some(match ref_item {
             AppBarItem::Separator(obj) => mut_cast!(obj, appbar::Separator, T),
             AppBarItem::MenuButton(obj) => mut_cast!(obj, appbar::MenuButton, T),
@@ -230,7 +232,9 @@ impl AppBar {
             let base = elem.base();
             if base.is_enabled() && base.accepts_input() {
                 elem.activate();
-                self.opened_menu = Some(shown_index);
+                if elem.is_menu() {
+                    self.opened_menu = Some(shown_index);
+                }
                 return;
             }
         }
@@ -295,7 +299,13 @@ impl AppBar {
             MousePos::Clickable(vi) => vi.index(),
             _ => usize::MAX,
         };
-        let current_index = self.opened_menu.map(|vi| vi.index()).unwrap_or(usize::MAX);
+        let current_index = if let Some(vi) = self.pressed_item {
+            vi.index()
+        } else if let Some(vi) = self.opened_menu {
+            vi.index()
+        } else {
+            usize::MAX
+        };
         for (index, item) in self.shown_items.iter().enumerate() {
             if let Some(elem) = self.manager.element(item.idx as usize) {
                 let status = if !elem.is_enabled() {
@@ -314,20 +324,29 @@ impl AppBar {
     pub(crate) fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
         self.last_mouse_pos.x = x;
         self.last_mouse_pos.y = y;
-        let mut res = self.update_mouse_pos();
+        let mut res = if self.update_mouse_pos() {
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        };
         match self.mouse_pos {
             MousePos::Clickable(index) => {
                 self.select_menu_and_open(index);
                 self.execute_action(index);
-                res = true;
+                self.pressed_item = Some(index);
+                res = EventProcessStatus::Processed;
             }
-            _ => {}
+            _ => {
+                if self.pressed_item.is_some() {
+                    self.pressed_item = None;
+                    res = EventProcessStatus::Processed;
+                }
+            }
         }
-        if res {
-            EventProcessStatus::Processed
-        } else {
-            EventProcessStatus::Ignored
-        }
+        res
+    }
+    pub(crate) fn on_mouse_released(&mut self, _x: i32, _y: i32) {
+        self.pressed_item = None;
     }
     pub(crate) fn on_mouse_move(&mut self, x: i32, y: i32) -> EventProcessStatus {
         self.last_mouse_pos.x = x;

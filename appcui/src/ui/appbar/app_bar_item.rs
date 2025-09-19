@@ -114,7 +114,7 @@ impl AppBarItem {
     pub(super) fn execute_action(&mut self) {
         match self {
             AppBarItem::Separator(_) => {}
-            AppBarItem::MenuButton(obj) => obj.on_activate(),
+            AppBarItem::MenuButton(_) => {}
             AppBarItem::Label(_) => {}
             AppBarItem::Button(obj) => obj.on_execute(),
             AppBarItem::CheckBox(_) => todo!(),

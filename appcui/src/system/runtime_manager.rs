@@ -37,7 +37,7 @@ enum MouseLockedObject {
     None,
     Control(Handle<()>),
     CommandBar,
-    MenuBar,
+    AppBar,
 }
 
 #[derive(Default)]
@@ -1680,7 +1680,7 @@ impl MouseMethods for RuntimeManager {
             MouseLockedObject::None => self.process_mousemove(event),
             MouseLockedObject::Control(handle) => self.process_mousedrag(handle, event),
             MouseLockedObject::CommandBar => {}
-            MouseLockedObject::MenuBar => {}
+            MouseLockedObject::AppBar => {}
         }
     }
     fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {
@@ -1694,11 +1694,11 @@ impl MouseMethods for RuntimeManager {
             self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y);
             return;
         }
-        // check main menu
-        if let Some(menu) = self.appbar.as_mut() {
-            if menu.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
+        // check appbar 
+        if let Some(appbar) = self.appbar.as_mut() {
+            if appbar.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
                 self.repaint = true;
-                self.mouse_locked_object = MouseLockedObject::MenuBar;
+                self.mouse_locked_object = MouseLockedObject::AppBar;
                 return;
             }
         }
@@ -1773,9 +1773,9 @@ impl MouseMethods for RuntimeManager {
                     self.repaint |= self.commandbar_event.is_some();
                 }
             }
-            MouseLockedObject::MenuBar => {
-                if let Some(menubar) = self.appbar.as_mut() {
-                    menubar.on_mouse_pressed(event.x, event.y);
+            MouseLockedObject::AppBar => {
+                if let Some(appbar) = self.appbar.as_mut() {
+                    appbar.on_mouse_released(event.x, event.y);
                 }
                 self.repaint = true;
             }
