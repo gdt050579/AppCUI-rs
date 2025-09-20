@@ -7,15 +7,15 @@
  You can create it using either `menu::SubMenu::new(...)` method or via the `menuitem!` macro.
 
  ```rs
- let cmd = menu::SubMenu::new(Menu::new(...));
+ let submenu = menu::SubMenu::new("&Content", Menu::new());
  ```
  or
  ```rs
- let cmd = menuitem!("Content,items=[...]");
+ let submenu = menuitem!("Content,items=[...]");
  ```
  or
  ```rs
- let cmd = menuitem!("Content,class:<class-name>,items=[...]");
+ let submenu = menuitem!("Content,class:<class-name>,items=[...]");
  ```
 
 ## Macro build
@@ -56,52 +56,60 @@ The following methods are availble for a `menu::SubMenu` object:
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `set_caption(...)` | Set the new caption for the item. If the string provided contains the special character `&`, this method also sets the hotkey associated with an item. If the string provided does not contain the `&` character, this method will clear the current hotkey (if any). |
 | `caption()`        | Returns the current caption of an item                                                                                                                                                                                                                                |
-| `set_enables(...)` | Enables or disables current item                                                                                                                                                                                                                                      |
-| `is_enabled()`     | `true` if the item is enables, `false` otherwise                                                                                                                                                                                                                      |
+| `set_enabled(...)` | Enables or disables current item                                                                                                                                                                                                                                      |
+| `is_enabled()`     | `true` if the item is enabled, `false` otherwise                                                                                                                                                                                                                      |
 
 ## Example
 
-The following code creates a menu with 3 menu items (of type command). Notice that we had to initialize the application with support for menus.
+The following code creates a menu with submenus using the AppBar approach (recommended):
 
 ```rs
 use appcui::prelude::*;
 
-#[Window(events = MenuEvents, commands=Red+Green+Blue+Copy+Paste+Cut+PasteSpecial+Exit)]
+#[Window(events   = MenuEvents+AppBarEvents, 
+         commands = Red+Green+Blue+Copy+Paste+Cut+PasteSpecial+Exit)]
 struct MyWin {
-    m_submenus: Handle<Menu>,
+    main_menu: Handle<appbar::MenuButton>,
 }
 impl MyWin {
     fn new() -> Self {
         let mut w = MyWin {
             base: window!("Test,a:c,w:40,h:8"),
-            m_submenus: Handle::None,
+            main_menu: Handle::None,
         };
-        let mut m = Menu::new("Sub &Menus");
-        let mut m_colors = Menu::new("Colors");
-        m_colors.add(menuitem!("Red,selected:true,cmd:Red,class:MyWin"));
-        m_colors.add(menuitem!("Green,selected:true,cmd:Green,class:MyWin"));
-        m_colors.add(menuitem!("Blue,selected:true,cmd:Blue,class:MyWin"));
-        m.add(menu::SubMenu::new(m_colors));
+        
+        // Create the main menu
+        let mut main_menu = Menu::new();
+        
+        // Create colors submenu
+        let mut colors_menu = Menu::new();
+        colors_menu.add(menu::SingleChoice::new("&Red", Key::None, mywin::Commands::Red, true));
+        colors_menu.add(menu::SingleChoice::new("&Green", Key::None, mywin::Commands::Green, false));
+        colors_menu.add(menu::SingleChoice::new("&Blue", Key::None, mywin::Commands::Blue, false));
+        main_menu.add(menu::SubMenu::new("&Colors", colors_menu));
 
-        let mut m_clipboard = Menu::new("&Clipboard");
-        m_clipboard.add(menuitem!("Copy,Ctrl+C,cmd:Copy,class:MyWin"));
-        m_clipboard.add(menuitem!("Paste,Ctrl+V,cmd:Paste,class:MyWin"));
-        m_clipboard.add(menuitem!("Cut,Ctrl+X,cmd:Cut,class:MyWin"));
-        m_clipboard.add(menuitem!("---"));
-        m_clipboard.add(menuitem!("'Paste Special',None,cmd:PasteSpecial,class:MyWin"));
-        m.add(menu::SubMenu::new(m_clipboard));
+        // Create clipboard submenu
+        let mut clipboard_menu = Menu::new();
+        clipboard_menu.add(menu::Command::new("&Copy", key!("Ctrl+C"), mywin::Commands::Copy));
+        clipboard_menu.add(menu::Command::new("&Paste", key!("Ctrl+V"), mywin::Commands::Paste));
+        clipboard_menu.add(menu::Command::new("Cu&t", key!("Ctrl+X"), mywin::Commands::Cut));
+        clipboard_menu.add(menu::Separator::new());
+        clipboard_menu.add(menu::Command::new("Paste &Special", Key::None, mywin::Commands::PasteSpecial));
+        main_menu.add(menu::SubMenu::new("&Clipboard", clipboard_menu));
 
-        m.add(menuitem!("---"));
-        m.add(menu::Command::new("Exit", Key::None, mywin::Commands::Exit));
-        w.m_submenus = w.register_menu(m);
+        main_menu.add(menu::Separator::new());
+        main_menu.add(menu::Command::new("E&xit", key!("Alt+F4"), mywin::Commands::Exit));
+        
+        // Add to AppBar
+        w.main_menu = w.appbar().add(
+            appbar::MenuButton::new("&Actions", main_menu, 0, appbar::Side::Left)
+        );
 
         w
     }
 }
+
 impl MenuEvents for MyWin {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.m_submenus, 0);
-    }
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, command: mywin::Commands) {
         match command {
             mywin::Commands::Copy => { /* Copy command was called */ }
@@ -123,8 +131,14 @@ impl MenuEvents for MyWin {
     }
 }
 
+impl AppBarEvents for MyWin {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.main_menu);
+    }
+}
+
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().menu_bar().build()?;
+    let mut a = App::new().app_bar().build()?;
     a.add_window(MyWin::new());
     a.run();
     Ok(())
