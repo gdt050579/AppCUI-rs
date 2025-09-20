@@ -1780,7 +1780,7 @@ fn check_window_close_with_commandbar_and_menu() {
         Key.Pressed(Escape)
         Paint('window is closed - empty desktop & empty command bar, no menus')
         // we should NOT see any command visible on the command bar
-        // we should NOT see any menu in the menu bar
+        // we should NOT see any menu in the app bar
         CheckHash(0x75E8571FB3005265)
     ";
     let mut a = App::debug(60, 10, script).command_bar().app_bar().build().unwrap();
@@ -1862,7 +1862,7 @@ fn check_single_window_with_commandbar() {
 fn check_single_window_with_menubar() {
     let script = "
         Paint.Enable(false)
-        Paint('initial state (full-screen,menu bar visible)')
+        Paint('initial state (full-screen,app bar visible)')
         CheckHash(0x4E4AA2CCB6734C99)
     ";
     let mut a = App::debug(40, 10, script).single_window().app_bar().build().unwrap();

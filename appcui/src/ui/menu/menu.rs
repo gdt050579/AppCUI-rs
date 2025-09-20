@@ -18,7 +18,7 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 /// A container for menu items that can be displayed over existing controls.
 ///
 /// A menu is a list of items (commands, checkboxes, single choice elements) that
-/// can be displayed over existing controls. Menus can be added to a menu bar or
+/// can be displayed over existing controls. Menus can be added to a app bar or
 /// displayed as popup menus.
 ///
 /// # Examples

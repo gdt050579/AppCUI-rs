@@ -231,8 +231,8 @@ fn check_submenus_open() {
         }
     }
     impl AppBarEvents for MyWin {
-        fn on_update(&self, menubar: &mut AppBar) {
-            menubar.show(self.m_file);
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_file);
         }
     }
     let script = "
@@ -342,8 +342,8 @@ fn check_dynamic_change_menu() {
         }
     }
     impl AppBarEvents for MyWin {
-        fn on_update(&self, menubar: &mut AppBar) {
-            menubar.show(self.some_menu);
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.some_menu);
         }
     }
     let script = "
@@ -351,7 +351,7 @@ fn check_dynamic_change_menu() {
         Paint('initial state')
         CheckHash(0xf788ef470502e34a)
         Mouse.Move(6,0)
-        Paint('hover over menu bar')
+        Paint('hover over app bar')
         CheckHash(0x3d94307e4fc9bd2)
         Mouse.Click(6,0,left)
         Paint('increment (0)')
@@ -490,7 +490,7 @@ fn check_dynamic_change_menu_2() {
         Paint('State_21')
         CheckHash(0xf788ef470502e34a)
         Key.Pressed(Escape)
-        Paint('State_22 (desktop is empty, no menu in menubar)')
+        Paint('State_22 (desktop is empty, no menu in appbar)')
         CheckHash(0xDB84D57C7804761D)
     ";
     let mut a = App::debug(60, 24, script).app_bar().build().unwrap();

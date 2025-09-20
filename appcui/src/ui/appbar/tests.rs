@@ -774,7 +774,7 @@ fn check_with_keys() {
             Paint('State_57')
             CheckHash(0xf45c01a4988b0fe2)
             Key.Pressed(Escape)
-            Paint('State_58 (no menu visible in the menu bar)')
+            Paint('State_58 (no menu visible in the app bar)')
             CheckHash(0xD0C81ECF174389FD)
         ";
     let mut a = App::debug(60, 20, script).app_bar().build().unwrap();
@@ -953,7 +953,7 @@ fn check_recursive_shortcuts() {
             Paint('State_24')
             CheckHash(0x36480d44d0d8e490)
             Key.Pressed(Escape)
-            Paint('State_25 (no menu visible in the menubar)')
+            Paint('State_25 (no menu visible in the appbar)')
             CheckHash(0xD0C81ECF174389FD)    
         ";
     let mut a = App::debug(60, 20, script).app_bar().build().unwrap();

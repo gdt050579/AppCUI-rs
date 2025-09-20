@@ -3,9 +3,8 @@ use super::{Menu, CheckBox, Command, SingleChoice};
 /// A trait that defines the event handlers for menu-related interactions.
 ///
 /// This trait provides methods for responding to various menu events such as
-/// menu opening, command selection, checkbox state changes, single choice selections,
-/// and menu bar updates. Controls that need to handle menu events should implement
-/// this trait.
+/// menu opening, command selection, checkbox state changes and single choice selections.
+/// Controls that need to handle menu events should implement this trait.
 pub trait GenericMenuEvents {
     /// Called when a menu is about to be opened.
     ///
