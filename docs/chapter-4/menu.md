@@ -22,7 +22,7 @@ There are two ways to register and display menus in AppCUI:
 
 ### Method 1: AppBar Integration (Recommended)
 
-For desktop applications, menus are typically integrated into the AppBar using `MenuButton` components. This provides a modern menu bar experience:
+For desktop applications, menus are typically integrated into the AppBar using `MenuButton` components:
 
 ```rs
 #[Window(events = MenuEvents+AppBarEvents, commands=[New, Open, Save, Exit])]

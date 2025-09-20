@@ -162,7 +162,7 @@ fn main() -> Result<(), appcui::system::Error> {
         .run();
 
     #[cfg(not(target_family = "windows"))]
-    App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).app_bar().command_bar().build()?.run();
     Ok(())
 }
 
@@ -170,6 +170,6 @@ fn main() -> Result<(), appcui::system::Error> {
 #[wasm_bindgen(start)]
 pub fn main() {    
     // Important for WASM: the project must be a lib that should be built with `wasm-pack build --target web`
-    let app = App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build().unwrap();
+    let app = App::new().desktop(MyDesktop::new()).app().command_bar().build().unwrap();
     app.run();
 }
