@@ -411,17 +411,6 @@ impl AppBar {
                     }
                 }
             }
-            // for (index, item) in self.items.iter().enumerate() {
-            //     if index >= self.count {
-            //         break;
-            //     }
-            //     if let Some(menu) = menus.get_mut(item.handle) {
-            //         if menu.process_shortcut(key, item.receiver_control_handle) {
-            //             return EventProcessStatus::Processed;
-            //         }
-            //     }
-            // }
-
             // nothing to process
             EventProcessStatus::Ignored
         }
