@@ -340,3 +340,7 @@ path = "basic_controls/main.rs"
 [[example]]
 name = "appbar"
 path = "appbar/main.rs"
+
+[[example]]
+name = "appbar_desktop"
+path = "appbar_desktop/main.rs"
