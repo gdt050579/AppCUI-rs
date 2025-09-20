@@ -18,6 +18,7 @@ where the attribute `events` has the following form:
 
 and an `event trait` can be one of the following:
 * MenuEvents
+* AppBarEvents
 * CommandBarEvents
 * DesktopEvents
 
@@ -155,7 +156,11 @@ impl CommandBarEvents for MyDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().size(Size::new(80,20)).desktop(MyDesktop::new()).command_bar().build()?.run();
+    App::new().size(Size::new(80,20))
+             .desktop(MyDesktop::new())
+             .command_bar()
+             .build()?
+        .run();
     Ok(())
 }
 ```

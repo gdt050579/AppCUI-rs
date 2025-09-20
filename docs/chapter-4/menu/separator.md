@@ -41,9 +41,9 @@ The following code creates a menu with multiple items separated between them.
 ```rs
 use appcui::prelude::*;
 
-#[Window(events = MenuEvents, commands=Cmd1+Cmd2+Cmd3)]
+#[Window(events = AppBarEvents, commands=Cmd1+Cmd2+Cmd3)]
 struct MyWin {
-    m_commands: Handle<Menu>,
+    m_commands: Handle<MenuButton>,
 }
 impl MyWin {
     fn new() -> Self {
@@ -51,7 +51,7 @@ impl MyWin {
             base: window!("Test,a:c,w:40,h:8"),
             m_commands: Handle::None,
         };
-        let mut m = Menu::new("Separators");
+        let mut m = Menu::new();
         m.add(menu::Command::new("Fist command", Key::None, mywin::Commands::Cmd1));
         m.add(menu::Separator::new());
         m.add(menuitem!("'Choice &A',F1,cmd:Cmd3,class:MyWin,selected:true"));
@@ -59,19 +59,19 @@ impl MyWin {
         m.add(menuitem!("'Choice &C',F3,cmd:Cmd3,class:MyWin,selected:false"));
         m.add(menuitem!("---"));
         m.add(menu::Command::new("Another command", Key::None, mywin::Commands::Cmd2));
-        w.m_commands = w.register_menu(m);
+        w.m_commands = w.appbar().add(MenuButton::new("Commands", m, 0, Side::Left));
 
         w
     }
 }
-impl MenuEvents for MyWin {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.m_commands, 0);
+impl AppBarEvents for MyWin {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.m_commands);
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().menu_bar().build()?;
+    let mut a = App::new().app_bar().build()?;
     a.add_window(MyWin::new());
     a.run();
     Ok(())
