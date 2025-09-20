@@ -9,32 +9,24 @@ pub(super) enum ItemStatus {
 }
 
 impl ItemStatus {
+    pub(super) fn toggle_status(status: ItemStatus, selected: bool) -> Self {
+        match status {
+            ItemStatus::Current | ItemStatus::Inactive => status,
+            _ => {
+                if selected {
+                    ItemStatus::Current
+                } else {
+                    status
+                }
+            }
+        }
+    }
     pub(super) fn text_attribute(&self, theme: &Theme) -> CharAttribute {
         match self {
             ItemStatus::Current => theme.menu.text.pressed_or_selectd,
             ItemStatus::Hovered => theme.menu.text.hovered,
             ItemStatus::Inactive => theme.menu.text.inactive,
             ItemStatus::Normal => theme.menu.text.normal,
-        }
-    }
-    pub(super) fn text_attribute_for_toggle(&self, theme: &Theme, selected: bool) -> CharAttribute {
-        match self {
-            ItemStatus::Current => theme.menu.text.pressed_or_selectd,
-            ItemStatus::Hovered => {
-                if selected {
-                    theme.menu.text.pressed_or_selectd
-                } else {
-                    theme.menu.text.hovered
-                }
-            }
-            ItemStatus::Inactive => theme.menu.text.inactive,
-            ItemStatus::Normal => {
-                if selected {
-                    theme.menu.text.pressed_or_selectd
-                } else {
-                    theme.menu.text.normal
-                }
-            }
         }
     }
     pub(super) fn hotkey_attribute(&self, theme: &Theme) -> CharAttribute {

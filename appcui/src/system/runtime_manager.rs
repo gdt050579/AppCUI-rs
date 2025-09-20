@@ -1717,11 +1717,15 @@ impl MouseMethods for RuntimeManager {
                 return;
             }
         }
-        // check appbar
-        if let Some(appbar) = self.appbar.as_mut() {
-            if appbar.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
-                self.repaint = true;
-                self.mouse_locked_object = MouseLockedObject::AppBar;
+        // check appbar (only if y==0 - the event is on the appbar)
+        if event.y == 0 {
+            if let Some(appbar) = self.appbar.as_mut() {
+                if appbar.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
+                    self.repaint = true;
+                    self.mouse_locked_object = MouseLockedObject::AppBar;
+                }
+                // if y==0, then I am on the appbar so there is no point in sending 
+                // the event to someone else --> so just return
                 return;
             }
         }

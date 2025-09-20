@@ -69,9 +69,10 @@ impl ToggleButton {
         self.receiver_control_handle = handle;
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: ItemStatus) {
+        let status = ItemStatus::toggle_status(status, self.selected);
         let mut format = TextFormatBuilder::new()
             .position(self.base.x(), 0)
-            .attribute(status.text_attribute_for_toggle(theme, self.selected))
+            .attribute(status.text_attribute(theme))
             .align(TextAlignment::Left)
             .chars_count(self.caption.chars_count() as u16)
             .build();

@@ -45,8 +45,8 @@ impl AppBarEvents for Win {
     fn on_togglebutton_state_changed(&mut self, togglebutton: Handle<appbar::ToggleButton>, selected: bool) {
         let s = match () {
             _ if togglebutton == self.h_bold => "Bold is :",
-            _ if togglebutton == self.h_italic => "Bold is :",
-            _ if togglebutton == self.h_underline => "Bold is :",
+            _ if togglebutton == self.h_italic => "Italic is :",
+            _ if togglebutton == self.h_underline => "Underline is :",
             _ => ""
         };
         let txt = format!("{s} {selected}");
