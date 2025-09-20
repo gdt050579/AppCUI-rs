@@ -15,7 +15,9 @@ impl Win {
             h_help: Handle::None,
         };
 
-        w.add(label!("'Three manus: File, Edit and Help, arrange from left o right after the menus associated with the desktop.',d:f"));
+        w.add(label!(
+            "'Three manus: File, Edit and Help, arrange from left o right after the menus associated with the desktop.',d:f"
+        ));
 
         let m = menu!(
             "class: Win, items=[
@@ -33,6 +35,17 @@ impl Win {
                 { &Copy, cmd: A , key: Ctrl+C },
                 { C&ut, cmd: A, key: Ctrl+X },
                 { &Paste, cmd: A, key: Ctrl+V },
+                { --- },
+                { 'Sub menu one', items = [
+                      { &Time, cmd: A, Key: F1 },
+                      { &Date, cmd: A, Key: F2 },
+                      { &Conver, items = [
+                           { 'From milliseconds', cmd: A, key: Ctrl+1 },
+                           { 'From seconds', cmd: A, key: Ctrl+1 },
+                        ] 
+                       }
+                   ] 
+                }
             ]"
         );
         w.h_edit = w.appbar().add(appbar::MenuButton::new("&Edit", m, 1, appbar::Side::Left));
@@ -42,8 +55,8 @@ impl Win {
                 { Welcome, cmd: A },
             ]"
         );
-        w.h_help = w.appbar().add(appbar::MenuButton::new("&Help", m, 1, appbar::Side::Left));  
-              
+        w.h_help = w.appbar().add(appbar::MenuButton::new("&Help", m, 1, appbar::Side::Left));
+
         w
     }
 }
