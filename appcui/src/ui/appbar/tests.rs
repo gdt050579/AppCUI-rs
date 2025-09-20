@@ -2190,3 +2190,195 @@ fn check_toggle_button_shortcut() {
     ";
     App::debug(60, 10, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
 }
+
+#[test]
+fn check_switch_button() {
+    #[Window(events = AppBarEvents, internal: true)]
+    pub(crate) struct Win {
+        lb: Handle<Label>,
+        h_s_1: Handle<appbar::SwitchButton>,
+        h_s_2: Handle<appbar::SwitchButton>,
+        h_s_3: Handle<appbar::SwitchButton>,
+        h_sep: Handle<appbar::Separator>,
+    }
+    impl Win {
+        pub(crate) fn new() -> Self {
+            let mut w = Win {
+                base: window!("'Switch Buttons',a:c,w:40,h:8,Flags: Sizeable"),
+                lb: Handle::None,
+                h_s_1: Handle::None,
+                h_s_2: Handle::None,
+                h_s_3: Handle::None,
+                h_sep: Handle::None,
+            };
+
+            w.lb = w.add(label!("'Switch buttons',d:f"));
+            w.h_sep = w.appbar().add(appbar::Separator::new(1, appbar::Side::Left));
+            w.h_s_1 = w.appbar().add(appbar::SwitchButton::with_tooltip(
+                "Yes",
+                "No",
+                appbar::SwitchButtonSymbol::CheckBox,
+                "Tootip for switch 1",
+                false,
+                1,
+                appbar::Side::Left,
+            ));
+            w.h_s_2 = w.appbar().add(appbar::SwitchButton::with_symbol(
+                "Ok",
+                "Not-Ok",
+                appbar::SwitchButtonSymbol::CheckMark,
+                true,
+                1,
+                appbar::Side::Left,
+            ));
+            w.h_s_3 = w
+                .appbar()
+                .add(appbar::SwitchButton::new(" State-1 ", " State-2 ", false, 1, appbar::Side::Left));
+
+            w
+        }
+    }
+    impl AppBarEvents for Win {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h_sep);
+            appbar.show(self.h_s_1);
+            appbar.show(self.h_s_2);
+            appbar.show(self.h_s_3);
+        }
+
+        fn on_switchbutton_state_changed(&mut self, sb: Handle<appbar::SwitchButton>, selected: bool) {
+            let s = match () {
+                _ if sb == self.h_s_1 => "Switch 1 is :",
+                _ if sb == self.h_s_2 => "Switch 2 is :",
+                _ if sb == self.h_s_3 => "Switch 3 is :",
+                _ => "",
+            };
+            assert_eq!(selected, self.appbar().get(sb).unwrap().is_selected());
+            assert!(self.appbar().get(sb).unwrap().is_enabled());
+            let txt = format!("{s} {selected}");
+            let h = self.lb;
+            if let Some(lb) = self.control_mut(h) {
+                lb.set_caption(&txt);
+            }
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        //Error.Disable(true)
+        Paint('1. initial state ')
+        CheckHash(0x34199CEF8A70B116)  
+        Mouse.Move(3,0)
+        Paint('2. Over switch 1 (tooltip is shown)')
+        CheckHash(0xE6CA6E59CB2C35BD)  
+        Mouse.Move(9,0)
+        Paint('3. Over switch 2 ')
+        CheckHash(0xD6347B2FA35EF386)  
+        Mouse.Move(15,0)
+        Paint('4. Over switch 3 (state is 2)')
+        CheckHash(0xB540C1F0C0009B6E)  
+        Mouse.Click(15,0,left)
+        Paint('5. Click on switch 3 (state is 1)')
+        CheckHash(0xD2D729A13BFF4A49)  
+        Mouse.Click(9,0,left)
+        Paint('6. Click on switch 2 (now is not-ok)')
+        CheckHash(0x95281EF94C0AB084)  
+        Mouse.Click(3,0,left)
+        Paint('7. Click on switch 1 (now is yes)')
+        CheckHash(0xEA70077163C07910)  
+    ";
+
+    let mut a = App::debug(80, 10, script).command_bar().app_bar().build().unwrap();
+    a.add_window(Win::new());
+    a.run();
+}
+
+#[test]
+fn check_switchbutton_api() {
+    // Desktop with menu
+    #[Desktop(events = AppBarEvents+DesktopEvents, internal: true)]
+    struct MyDesktop {
+        h: Handle<appbar::SwitchButton>,
+        h_inactive: Handle<appbar::SwitchButton>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                h: Handle::None,
+                h_inactive: Handle::None,
+            }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            self.h = self.appbar().add(appbar::SwitchButton::new("State-A", "State-B", false, 0, Side::Left));
+            let mut m = appbar::SwitchButton::new("Inactive-A", "Inactive-B", true, 1, Side::Left);
+            m.set_enabled(false);
+            self.h_inactive = self.appbar().add(m);
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            let h = self.h;
+            if let Some(mb) = appbar.get_mut(h) {
+                let s = format!("Enabled: {},{}", mb.is_enabled(), mb.is_selected());
+                mb.set_tooltip(&s);
+                assert_eq!(mb.hotkey(), Key::None);
+            }
+            appbar.show(self.h);
+            appbar.show(self.h_inactive);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state - menu name is <ogleButton+1>')
+        CheckHash(0xFAEAE5E5E717F22E)
+        Mouse.Move(3,0)
+        Paint('2. Hover - Tooltip is <Enabled: true>')
+        CheckHash(0xA29CA62FD88E5797)
+    ";
+    App::debug(60, 10, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+}
+
+#[test]
+fn check_switchbutton_hotkey() {
+    // Desktop with menu
+    #[Desktop(events = AppBarEvents+DesktopEvents, internal: true)]
+    struct MyDesktop {
+        h: Handle<appbar::SwitchButton>,
+    }
+    impl MyDesktop {
+        fn new() -> Self {
+            Self {
+                base: Desktop::new(),
+                h: Handle::None,
+            }
+        }
+    }
+    impl DesktopEvents for MyDesktop {
+        fn on_start(&mut self) {
+            let mut sb = appbar::SwitchButton::new(" State-&A ", " State-&B ", true, 0, Side::Left);
+            sb.set_selected(false);
+            self.h = self.appbar().add(sb);
+        }
+    }
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.h);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state - State is B')
+        CheckHash(0x47A646967FF5C3C9)
+        Key.Pressed(Alt+B)
+        Paint('2. State is A')
+        CheckHash(0xBD4CCE57AE86E536)
+        Key.Pressed(Alt+A)
+        Paint('3. State is now B again (same hash as 1)')
+        CheckHash(0x47A646967FF5C3C9)
+    ";
+    App::debug(60, 10, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+}

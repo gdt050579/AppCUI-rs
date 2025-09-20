@@ -96,9 +96,9 @@ impl SwitchButton {
             &self.unselected_caption
         };
         let w = self.symbol.width();
+        // clear the entire space (some states might be smaller)
+        surface.fill_horizontal_line_with_size(self.base.x(), 0, self.base.width() as u32, Character::with_attributes(' ', attr));
         if let Some(ch) = self.symbol.char(self.selected) {
-            // clear symbol space
-            surface.fill_horizontal_line(self.base.x(), 0, self.base.x() + w, Character::with_attributes(' ', attr));
             surface.write_char(self.base.x(), 0, Character::with_attributes(ch, attr));
         }
         let mut format = TextFormatBuilder::new()
