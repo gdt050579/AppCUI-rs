@@ -7,6 +7,7 @@ mod disabled_menu;
 mod progress_bar;
 mod navigation;
 mod toggle_buttons;
+mod switch_buttons;
 
 const LOGO: [&str; 11] = [
     "   █████████                       ███████████                     ",
@@ -25,7 +26,7 @@ const LOGO: [&str; 11] = [
 #[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [ShowSimpleMenus, ShowAlignedMenus, ShowDisableMenu, ShowProgressBar, ShowNavigation,
-                       ShowToggleButton, 
+                       ShowToggleButton, ShowSwitchButton,
                        Exit, About, 
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
@@ -90,6 +91,7 @@ impl DesktopEvents for MyDesktop {
                 {'&Progress bar', cmd: ShowProgressBar },
                 {'&Navigation', cmd: ShowNavigation },
                 {'&Toggle Buttons', cmd: ShowToggleButton },
+                {'S&witch Buttons', cmd: ShowSwitchButton },                
             ]
         "),0,Side::Left));
     }  
@@ -124,7 +126,10 @@ impl MenuEvents for MyDesktop {
             },      
             mydesktop::Commands::ShowToggleButton => { 
                 self.add_window(toggle_buttons::Win::new());
-            },                                           
+            },    
+            mydesktop::Commands::ShowSwitchButton => { 
+                self.add_window(switch_buttons::Win::new());
+            },                                                   
             mydesktop::Commands::Exit => self.close(),   
             _ => { }      
         }

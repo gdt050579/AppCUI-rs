@@ -23,5 +23,6 @@ pub use self::label::Label;
 pub use self::button::Button;
 pub use self::toggle_button::ToggleButton;
 pub use self::switch_button::SwitchButton;
+pub use self::switch_button::SwitchButtonSymbol;
 pub use self::app_bar::AppBar;
 pub use self::side::Side;
