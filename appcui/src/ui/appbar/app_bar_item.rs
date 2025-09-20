@@ -4,6 +4,7 @@ use super::Label;
 use super::MenuButton;
 use super::Separator;
 use super::ToggleButton;
+use super::SwitchButton;
 use crate::graphics::Surface;
 use crate::input::*;
 use crate::system::MenuHandleManager;
@@ -18,6 +19,7 @@ pub(crate) enum AppBarItem {
     Label(Label),
     Button(Button),
     ToggleButton(ToggleButton),
+    SwitchButton(SwitchButton),
 }
 
 impl From<super::MenuButton> for AppBarItem {
@@ -45,6 +47,11 @@ impl From<super::ToggleButton> for AppBarItem {
         AppBarItem::ToggleButton(value)
     }
 }
+impl From<super::SwitchButton> for AppBarItem {
+    fn from(value: super::SwitchButton) -> Self {
+        AppBarItem::SwitchButton(value)
+    }
+}
 
 impl AppBarItem {
     pub(super) fn base(&self) -> &ItemBase {
@@ -54,6 +61,7 @@ impl AppBarItem {
             AppBarItem::Label(obj) => &obj.base,
             AppBarItem::Button(obj) => &obj.base,
             AppBarItem::ToggleButton(obj) => &obj.base,
+            AppBarItem::SwitchButton(obj) => &obj.base,
         }
     }
     pub(super) fn base_mut(&mut self) -> &mut ItemBase {
@@ -63,6 +71,7 @@ impl AppBarItem {
             AppBarItem::Label(obj) => &mut obj.base,
             AppBarItem::Button(obj) => &mut obj.base,
             AppBarItem::ToggleButton(obj) => &mut obj.base,
+            AppBarItem::SwitchButton(obj) => &mut obj.base,
         }
     }
     #[inline(always)]
@@ -77,6 +86,7 @@ impl AppBarItem {
             AppBarItem::Label(_) => Key::None,
             AppBarItem::Button(but) => but.hotkey(),
             AppBarItem::ToggleButton(but) => but.hotkey(),
+            AppBarItem::SwitchButton(but) => but.hotkey(),
         }
     }
     #[inline(always)]
@@ -87,6 +97,7 @@ impl AppBarItem {
             AppBarItem::Label(obj) => obj.tooltip(),
             AppBarItem::Button(obj) => obj.tooltip(),
             AppBarItem::ToggleButton(obj) => obj.tooltip(),
+            AppBarItem::SwitchButton(obj) => obj.tooltip(),
         };
         if result.is_empty() {
             None
@@ -106,6 +117,7 @@ impl AppBarItem {
             AppBarItem::Label(_) => false,
             AppBarItem::Button(_) => false,
             AppBarItem::ToggleButton(_) => false,
+            AppBarItem::SwitchButton(_) => false,
         }
     }
     pub(super) fn activate(&mut self) {
@@ -115,6 +127,7 @@ impl AppBarItem {
             AppBarItem::Label(_) => {}
             AppBarItem::Button(_) => {}
             AppBarItem::ToggleButton(_) => {}
+            AppBarItem::SwitchButton(_) => {}
         }
     }
     pub(super) fn execute_action(&mut self) {
@@ -124,6 +137,7 @@ impl AppBarItem {
             AppBarItem::Label(_) => {}
             AppBarItem::Button(obj) => obj.on_execute(),
             AppBarItem::ToggleButton(obj) => obj.on_execute(),
+            AppBarItem::SwitchButton(obj) => obj.on_execute(),
         }
     }
     #[inline(always)]
@@ -134,6 +148,7 @@ impl AppBarItem {
             AppBarItem::Label(obj) => obj.paint(surface, theme),
             AppBarItem::Button(obj) => obj.paint(surface, theme, status),
             AppBarItem::ToggleButton(obj) => obj.paint(surface, theme, status),
+            AppBarItem::SwitchButton(obj) => obj.paint(surface, theme, status),
         }
     }
     pub(super) fn set_receiver_control_handle(&mut self, handle: Handle<()>) {
@@ -143,6 +158,7 @@ impl AppBarItem {
             AppBarItem::Label(_) => {}
             AppBarItem::Button(obj) => obj.set_receiver_control_handle(handle),
             AppBarItem::ToggleButton(obj) => obj.set_receiver_control_handle(handle),
+            AppBarItem::SwitchButton(obj) => obj.set_receiver_control_handle(handle),
         }
     }
 }

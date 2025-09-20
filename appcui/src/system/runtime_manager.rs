@@ -921,6 +921,12 @@ impl RuntimeManager {
                     self.repaint = true;
                 }
             }
+            AppBarEvent::SwitchButtonStatusChanged(ev) => {
+                if let Some(control) = controls.get_mut(ev.control_receiver_handle) {
+                    AppBarEvents::on_switchbutton_state_changed(control.control_mut(), ev.button_handle, ev.state);
+                    self.repaint = true;
+                }
+            }            
         }
         self.appbar_event = None;
     }
