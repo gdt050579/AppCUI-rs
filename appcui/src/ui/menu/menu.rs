@@ -25,13 +25,13 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 ///
 /// Creating a menu with various items:
 ///
-/// ```
+/// ```rust, no_run
 /// use appcui::prelude::*;
 ///
 /// // Define a window with menu events and commands
-/// #[Window(events = MenuEvents, commands = New+Open+Save+Exit)]
+/// #[Window(events = MenuEvents+AppBarEvents, commands = New+Open+Save+Exit)]
 /// struct MyWindow {
-///     file_menu: Handle<Menu>,
+///     file_menu: Handle<appbar::MenuButton>,
 /// }
 ///
 /// impl MyWindow {
@@ -42,7 +42,7 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 ///         };
 ///         
 ///         // Create a menu and add items to it
-///         let mut file_menu = Menu::new("&File");
+///         let mut file_menu = Menu::new();
 ///         file_menu.add(menu::Command::new("&New", key!("Ctrl+N"), mywindow::Commands::New));
 ///         file_menu.add(menu::Command::new("&Open", key!("Ctrl+O"), mywindow::Commands::Open));
 ///         file_menu.add(menu::Command::new("&Save", key!("Ctrl+S"), mywindow::Commands::Save));
@@ -50,7 +50,10 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 ///         file_menu.add(menu::Command::new("E&xit", key!("Alt+F4"), mywindow::Commands::Exit));
 ///         
 ///         // Register the menu with the window
-///         w.file_menu = w.register_menu(file_menu);
+///         w.file_menu = w.appbar().add(
+///             appbar::MenuButton::new("&File", file_menu, 
+///                                     0, 
+///                                     appbar::Side::Left));
 ///         
 ///         w
 ///     }
@@ -58,11 +61,6 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 ///
 /// // Implement menu event handlers
 /// impl MenuEvents for MyWindow {
-///     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-///         // Add the menu to the menu bar
-///         menubar.add(self.file_menu, 0);
-///     }
-///     
 ///     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mywindow::Commands) {
 ///         match command {
 ///             mywindow::Commands::New => { /* Handle New command */ },
@@ -72,16 +70,22 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 ///         }
 ///     }
 /// }
+/// impl AppBarEvents for MyWindow {
+///     fn on_update(&self, appbar: &mut AppBar) {
+///         // Show the menu in the app bar
+///         appbar.show(self.file_menu);
+///     }
+/// }
 /// ```
 ///
 /// Using the `menu!` macro for more concise menu creation:
 ///
-/// ```
+/// ```rust, no_run
 /// use appcui::prelude::*;
 ///
-/// #[Window(events = MenuEvents, commands = New+Open+Save+Exit)]
+/// #[Window(events = MenuEvents+AppBarEvents, commands = New+Open+Save+Exit)]
 /// struct MyWindow {
-///     file_menu: Handle<Menu>,
+///     file_menu: Handle<appbar::MenuButton>,
 /// }
 ///
 /// impl MyWindow {
@@ -92,24 +96,22 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 ///         };
 ///         
 ///         // Create a menu using the menu! macro
-///         w.file_menu = w.register_menu(menu!("&File,class:MyWindow,items=[
-///             { &New,Ctrl+N,cmd:New },
-///             { &Open,Ctrl+O,cmd:Open },
-///             { &Save,Ctrl+S,cmd:Save },
-///             { --- },
-///             { E&xit,Alt+F4,cmd:Exit }
-///         ]"));
+///         w.file_menu = w.appbar().add(
+///             appbar::MenuButton::new("&File", menu!("class:MyWindow,items=[
+///                 { &New,Ctrl+N,cmd:New },
+///                 { &Open,Ctrl+O,cmd:Open },
+///                 { &Save,Ctrl+S,cmd:Save },
+///                 { --- },
+///                 { E&xit,Alt+F4,cmd:Exit }
+///             ]"), 
+///             0, 
+///             appbar::Side::Left));
 ///         
 ///         w
 ///     }
 /// }
 /// // Implement menu event handlers
 /// impl MenuEvents for MyWindow {
-///     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-///         // Add the menu to the menu bar
-///         menubar.add(self.file_menu, 0);
-///     }
-///     
 ///     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mywindow::Commands) {
 ///         match command {
 ///             mywindow::Commands::New => { /* Handle New command */ },
@@ -117,6 +119,12 @@ static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 ///             mywindow::Commands::Save => { /* Handle Save command */ },
 ///             mywindow::Commands::Exit => { /* Handle Exit command */ },
 ///         }
+///     }
+/// }
+/// impl AppBarEvents for MyWindow {
+///     fn on_update(&self, appbar: &mut AppBar) {
+///     
+///         appbar.show(self.file_menu);
 ///     }
 /// }
 /// ```

@@ -43,10 +43,10 @@ use crate::{
 ///         };
 ///         
 ///         // Create a menu for format options
-///         let mut format_menu = Menu::new("&Format");
+///         let mut format_menu = Menu::new();
 ///         
 ///         // Create a submenu for text size options
-///         let mut text_size_menu = Menu::new("Text &Size");
+///         let mut text_size_menu = Menu::new();
 ///         
 ///         // Add single choice items with the medium option initially selected
 ///         w.text_size_small = text_size_menu.add(menu::SingleChoice::new(
@@ -71,7 +71,7 @@ use crate::{
 ///         ));
 ///         
 ///         // Add the text size submenu to the format menu
-///         format_menu.add(menu::SubMenu::new(text_size_menu));
+///         format_menu.add(menu::SubMenu::new("&Text size", text_size_menu));
 ///         
 ///         // Register the format menu with the window
 ///         w.format_menu = w.register_menu(format_menu);

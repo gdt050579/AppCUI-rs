@@ -44,7 +44,7 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 ///         };
 ///         
 ///         // Create a menu for editing commands
-///         let mut edit_menu = Menu::new("&Edit");
+///         let mut edit_menu = Menu::new();
 ///         
 ///         // Add command items with keyboard shortcuts
 ///         w.cut_command = edit_menu.add(menu::Command::new("Cu&t", key!("Ctrl+X"), mywindow::Commands::Cut));
