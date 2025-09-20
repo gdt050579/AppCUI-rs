@@ -71,6 +71,15 @@ impl AppBar {
             last_mouse_pos: Point::new(i32::MAX, i32::MAX),
         }
     }
+    /// Add an item to the app bar. The item has to be converted to an AppBarItem.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `item` - The item to add
+    /// 
+    /// # Returns
+    /// 
+    /// A handle to the added item
     #[allow(private_bounds)]
     pub fn add<T>(&mut self, item: T) -> Handle<T>
     where
@@ -78,6 +87,15 @@ impl AppBar {
     {
         self.manager.add(item.into()).cast()
     }
+    /// Get an item from the app bar by its handle. The item has to be converted to an AppBarItem.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `appbaritem_handle` - The handle of the item to get
+    /// 
+    /// # Returns
+    /// 
+    /// An option containing a reference to the item if found, or None if the item doesn't exist or the handle is invalid
     #[allow(private_bounds)]
     pub fn get<T>(&self, appbaritem_handle: Handle<T>) -> Option<&T>
     where
@@ -93,6 +111,15 @@ impl AppBar {
             AppBarItem::SwitchButton(obj) => const_cast!(obj, appbar::SwitchButton, T),
         })
     }
+    /// Get a mutable reference to an item from the app bar by its handle. The item has to be converted to an AppBarItem.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `appbaritem_handle` - The handle of the item to get
+    /// 
+    /// # Returns
+    /// 
+    /// An option containing a mutable reference to the item if found, or None if the item doesn't exist or the handle is invalid
     #[allow(private_bounds)]
     pub fn get_mut<T>(&mut self, appbaritem_handle: Handle<T>) -> Option<&mut T>
     where
@@ -422,6 +449,14 @@ impl AppBar {
             self.update_positions();
         }
     }
+    
+    /// Show an item in the app bar. The item has to be converted to an AppBarItem. This method should only be called in AppBarEvents::on_update(...) method (if overwritten).
+    /// By default, all items are hidden and whenever the focus changes, the AppCUI framework hides all items and starts from the focus control and moves to its parent and calls this method to show the items. 
+    /// 
+    /// **Remark:** If you don't implement AppBarEvents::on_update(...) method, if does not matter that you have added items to your AppBar - they will be hidden (unless you call .show(...) method).
+    /// # Arguments
+    /// 
+    /// * `handle` - The handle of the item to show
     #[allow(private_bounds)]
     pub fn show<T>(&mut self, handle: Handle<T>)
     where
