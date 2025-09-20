@@ -107,7 +107,7 @@ impl SwitchButton {
             .align(TextAlignment::Left)
             .chars_count(caption.chars_count() as u16)
             .build();
-        format.set_hotkey_from_caption(status.hotkey_attribute(theme), &caption);
+        format.set_hotkey_from_caption(status.hotkey_attribute(theme), caption);
         surface.write_text(caption.text(), &format);
     }
     pub(super) fn on_execute(&mut self) {

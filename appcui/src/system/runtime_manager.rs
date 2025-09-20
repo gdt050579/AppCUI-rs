@@ -926,7 +926,7 @@ impl RuntimeManager {
                     AppBarEvents::on_switchbutton_state_changed(control.control_mut(), ev.button_handle, ev.state);
                     self.repaint = true;
                 }
-            }            
+            }
         }
         self.appbar_event = None;
     }
@@ -1718,10 +1718,8 @@ impl MouseMethods for RuntimeManager {
         // Hide ToolTip
         self.hide_tooltip();
         // check contextual menu
-        if !self.opened_menu_handle.is_none() {
-            if self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y) {
-                return;
-            }
+        if !self.opened_menu_handle.is_none() && self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y) {
+            return;
         }
         // check appbar (only if y==0 - the event is on the appbar)
         if event.y == 0 {
@@ -1730,7 +1728,7 @@ impl MouseMethods for RuntimeManager {
                     self.repaint = true;
                     self.mouse_locked_object = MouseLockedObject::AppBar;
                 }
-                // if y==0, then I am on the appbar so there is no point in sending 
+                // if y==0, then I am on the appbar so there is no point in sending
                 // the event to someone else --> so just return
                 return;
             }

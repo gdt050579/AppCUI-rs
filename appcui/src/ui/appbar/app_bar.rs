@@ -225,7 +225,6 @@ impl AppBar {
             let base = elem.base();
             if base.is_enabled() && base.accepts_input() {
                 elem.execute_action();
-                return;
             }
         }
     }

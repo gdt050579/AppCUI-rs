@@ -2360,7 +2360,7 @@ fn check_switchbutton_hotkey() {
         fn on_start(&mut self) {
             let mut sb = appbar::SwitchButton::new(" State-&A ", " State-&B ", true, 0, Side::Left);
             sb.set_selected(false);
-            self.h = self.appbar().add(sb);
+            self.h = self.appbar().add(sb); 
         }
     }
     impl AppBarEvents for MyDesktop {

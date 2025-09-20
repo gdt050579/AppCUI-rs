@@ -21,7 +21,7 @@ impl MenuButton {
         let c = Caption::new(caption, crate::utils::ExtractHotKeyMethod::AltPlusKey);
         let w = (c.chars_count().max(1) + 2).min(u8::MAX as usize) as u8;
         Self {
-            handle: handle,
+            handle,
             receiver_control_handle: Handle::None,
             caption: c,
             base: ItemBase::new(w, order, pos, true),
