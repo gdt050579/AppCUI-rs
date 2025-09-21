@@ -10,7 +10,34 @@ The application bar is unique per application. This means, that you need to enab
 let mut app = App.App::new().app_bar().build()?;
 ```
 
-Once you enabled the application bar, you will need to implement `AppBarEvents` on your window or custom control, and you will also need to add a list of menus and other specific controls when you create your window and/or custom control. A typical template of these flows look like this:
+You can not directly create an application bar. However, all controls (including windows and desktop) have an `appbar()` method that returns a mutable reference to the application bar.
+
+## Events
+
+To work with the application bar, you will need to implement `AppBarEvents` on your window or custom control.
+
+```rs
+pub trait AppBarEvents {
+    /// Called when an app bar button is being clicked.
+    fn on_button_click(&mut self, button: Handle<super::Button>);
+
+    /// Called when a toggle button's state changes.
+    fn on_togglebutton_state_changed(&mut self, 
+                                     togglebutton: Handle<super::ToggleButton>, 
+                                     selected: bool);
+
+    /// Called when a switch button's state changes.
+    fn on_switchbutton_state_changed(&mut self, 
+                                     switchbutton: Handle<super::SwitchButton>, 
+                                     selected: bool);
+
+    /// Called when the app bar needs to be updated. 
+    fn on_update(&self, appbar: &mut AppBar) {}
+}
+
+```
+
+The `on_update` method in particular is called whenever the application bar needs to be updated. At this point, you can decide which items to show in the application bar, via the `appbar.show(...)` method.
 
 ```rust
 #[Window(events = AppBarEvents]
