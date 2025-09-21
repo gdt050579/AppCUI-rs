@@ -1,6 +1,7 @@
 use appcui::prelude::*;
 
-#[Window(events = AppBarEvents, commands=A)]
+#[Window(events = [AppBarEvents, MenuEvents], 
+         commands=[New,Save,SaveAs,Open,Exit,Copy,Cut,Paste,Time,Date,Convert,About,Welcome])]
 pub(crate) struct Win {
     h_file: Handle<appbar::MenuButton>,
     h_edit: Handle<appbar::MenuButton>,
@@ -21,27 +22,27 @@ impl Win {
 
         let m = menu!(
             "class: Win, items=[
-                { &New, cmd: A , key: Ctrl+N },
-                { &Save, cmd: A, key: Ctrl+S },
-                { 'Save &as...', cmd: A },
-                { &Open, cmd: A, key: Ctrl+O },
+                { &New, cmd: New , key: Ctrl+N },
+                { &Save, cmd: Save, key: Ctrl+S },
+                { 'Save &as...', cmd: SaveAs },
+                { &Open, cmd: Open, key: Ctrl+O },
                 { --- },
-                { E&xit, cmd: A, key: Alt+F4 },
+                { E&xit, cmd: Exit, key: Alt+F4 },
             ]"
         );
         w.h_file = w.appbar().add(appbar::MenuButton::new("&File", m, 1, appbar::Side::Left));
         let m = menu!(
             "class: Win, items=[
-                { &Copy, cmd: A , key: Ctrl+C },
-                { C&ut, cmd: A, key: Ctrl+X },
-                { &Paste, cmd: A, key: Ctrl+V },
+                { &Copy, cmd: Copy , key: Ctrl+C },
+                { C&ut, cmd: Cut, key: Ctrl+X },
+                { &Paste, cmd: Paste, key: Ctrl+V },
                 { --- },
                 { 'Sub menu one', items = [
-                      { &Time, cmd: A, Key: F1 },
-                      { &Date, cmd: A, Key: F2 },
-                      { &Conver, items = [
-                           { 'From milliseconds', cmd: A, key: Ctrl+1 },
-                           { 'From seconds', cmd: A, key: Ctrl+1 },
+                      { &Time, cmd: Time, Key: F1 },
+                      { &Date, cmd: Date, Key: F2 },
+                      { &Convert, items = [
+                           { 'From milliseconds', cmd: Convert, key: Ctrl+1 },
+                           { 'From seconds', cmd: Convert, key: Ctrl+2 },
                         ] 
                        }
                    ] 
@@ -51,8 +52,8 @@ impl Win {
         w.h_edit = w.appbar().add(appbar::MenuButton::new("&Edit", m, 1, appbar::Side::Left));
         let m = menu!(
             "class: Win, items=[
-                { &About, cmd: A },
-                { Welcome, cmd: A },
+                { &About, cmd: About },
+                { Welcome, cmd: Welcome },
             ]"
         );
         w.h_help = w.appbar().add(appbar::MenuButton::new("&Help", m, 1, appbar::Side::Left));
@@ -65,5 +66,24 @@ impl AppBarEvents for Win {
         appbar.show(self.h_file);
         appbar.show(self.h_edit);
         appbar.show(self.h_help);
+    }
+}
+impl MenuEvents for Win {
+    fn on_command(&mut self, _menu:Handle<Menu>, _item:Handle<menu::Command>, command:win::Commands){
+        match command {
+            win::Commands::New => { /* Handle New command */ },
+            win::Commands::Save => { /* Handle Save command */ },
+            win::Commands::SaveAs => { /* Handle SaveAs command */ },
+            win::Commands::Open => { /* Handle Open command */ },
+            win::Commands::Exit => { /* Handle Exit command */ },
+            win::Commands::Copy => { /* Handle Copy command */ },
+            win::Commands::Cut => { /* Handle Cut command */ },
+            win::Commands::Paste => { /* Handle Paste command */ },
+            win::Commands::Time => { /* Handle Time command */ },
+            win::Commands::Date => { /* Handle Date command */ },
+            win::Commands::Convert => { /* Handle Convert command */ },
+            win::Commands::About => { /* Handle About command */ },
+            win::Commands::Welcome => { /* Handle Welcome command */ },
+        }
     }
 }
