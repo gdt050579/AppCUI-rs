@@ -69,7 +69,7 @@ pub(crate) struct Win {
 impl Win {
     pub(crate) fn new() -> Self {
         let mut w = Win {
-            base: window!("'Separators',a:c,w:40,h:8,Flags: Sizeable"),
+            base: window!("'Test Toggle Button',a:c,w:40,h:8,Flags: Sizeable"),
             h_tb1: Handle::None,
             h_tb2: Handle::None,
             h_tb3: Handle::None,

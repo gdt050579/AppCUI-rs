@@ -39,7 +39,7 @@ pub(crate) struct Win {
 impl Win {
     pub(crate) fn new() -> Self {
         let mut w = Win {
-            base: window!("'Separators',a:c,w:40,h:8,Flags: Sizeable"),
+            base: window!("'Label',a:c,w:40,h:8,Flags: Sizeable"),
             h_label: Handle::None,
         };
 
