@@ -10,6 +10,7 @@ Currently this is a work in progress - expect first version to be ready by 1st o
   - [Animations](#animations)
   - [Basic Controls](#basic-controls)
   - [Lists, Trees and Graphs](#lists-trees-and-graphs)
+  - [Application Bar, Command Bar and Menus](#application-bar-command-bar-and-menus)
 
 
 ---
@@ -71,3 +72,12 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 
 
 </details>
+
+---
+
+## Application Bar, Command Bar and Menus
+
+![Menus — preview](img/menus/appbar.gif)
+
+* **Code:** [examples/appbar](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/appbar)
+* **Elements:** [AppBar](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar.html), [Menu Button](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/menu_button.html), [Separator](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/separator.html), [Label](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/label.html), [Button](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/button.html), [ToggleButton](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/toggle_button.html), [SwitchButton](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/switch_button.html)
