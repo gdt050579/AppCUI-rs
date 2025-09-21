@@ -4,8 +4,6 @@
 //! It supports nested submenus, separators, and keyboard shortcuts for navigation.
 
 mod menu;
-mod menu_bar;
-mod menu_bar_item;
 mod menu_button_state;
 pub(crate) mod menu_item;
 mod mouse_position_info;
@@ -22,8 +20,6 @@ pub mod submenu;
 
 
 pub use self::menu::Menu;
-pub use self::menu_bar::MenuBar;
-use self::menu_bar_item::MenuBarItem;
 use self::menu_item::MenuItemWrapper;
 pub(crate) use self::menu_item::MenuItem;
 

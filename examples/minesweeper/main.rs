@@ -1,13 +1,14 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 mod minesweeper_game;
 mod mywin;
 use mywin::MyWin;
 
-#[Desktop(events = [CommandBarEvents, MenuEvents, DesktopEvents], 
+#[Desktop(events = [CommandBarEvents, MenuEvents, DesktopEvents, AppBarEvents], 
           overwrite = OnPaint, 
           commands = [Easy, Medium, Hard, Extreme, Exit])]
 struct MyDesktop {
-    menu_game: Handle<Menu>,
+    menu_game: Handle<MenuButton>,
 }
 
 impl MyDesktop {
@@ -35,11 +36,12 @@ impl CommandBarEvents for MyDesktop {
     }
 }
 
-impl MenuEvents for MyDesktop {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_game, 0);
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu_game);
     }
-    
+}
+impl MenuEvents for MyDesktop {
     fn on_command(&mut self, _: Handle<Menu>, _: Handle<menu::Command>, command: mydesktop::Commands) {
         match command {
             mydesktop::Commands::Easy => {
@@ -61,8 +63,8 @@ impl MenuEvents for MyDesktop {
 
 impl DesktopEvents for MyDesktop {
     fn on_start(&mut self) {
-        self.menu_game = self.register_menu(menu!("
-            &Game, class: MyDesktop, items:[
+        self.menu_game = self.appbar().add(MenuButton::new("&Game", menu!("
+            class: MyDesktop, items:[
                 {&Easy, cmd: Easy},
                 {&Medium, cmd: Medium},
                 {&Hard, cmd: Hard},
@@ -70,11 +72,11 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {&Exit, cmd: Exit}
             ]
-        "));
+        "),0,Side::Left));
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).app_bar().command_bar().build()?.run();
     Ok(())
 } 

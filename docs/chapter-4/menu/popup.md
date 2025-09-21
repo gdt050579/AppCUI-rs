@@ -1,6 +1,6 @@
 # Popup Menu
 
-A popup menu is a meniu that is display outside of a menubar (for example a menu that appears when right click is being pressed):
+A popup menu is a meniu that is display outside of a application bar (for example a menu that appears when right click is being pressed):
 
 <img src="img/popup.png" width=400/>
 

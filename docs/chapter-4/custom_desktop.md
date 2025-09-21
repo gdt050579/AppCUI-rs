@@ -18,6 +18,7 @@ where the attribute `events` has the following form:
 
 and an `event trait` can be one of the following:
 * MenuEvents
+* AppBarEvents
 * CommandBarEvents
 * DesktopEvents
 
@@ -81,16 +82,16 @@ fn main() -> Result<(), appcui::system::Error> {
 
 Besides the [Common methods for all Controls](../chapter-3/common_methods.md) a desktop also has the following aditional methods:
 
-| Method                 | Purpose                                                                                                                                                                                                                                                                                                                      |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `terminal_size()`      | Returns the size of the current terminal                                                                                                                                                                                                                                                                                     |
-| `desktop_rect()`       | Returns the actual rectangle for the desktop. If menu bar and command bar are prezent, the desktop rectangle provides the visible side of the desktop. For example, if the terminal size is `80x20` and we also have a coomand bar and a menu bar, then the desktop rectangle will be `[Left:0, Top:1, Right:79, bottom:18]` |
-| `add_window(...)`      | Adds a new window to the desktop                                                                                                                                                                                                                                                                                             |
-| `arrange_windows(...)` | Arranges windows on the desktop. 4 methods are provided: `Cascade`, `Verical`, `Horizontal` and `Grid`                                                                                                                                                                                                                       |
-| `close()`              | Closes the desktop and the entire app                                                                                                                                                                                                                                                                                        |
-| `active_window()`      | Returns a handle to the focused windows                                                                                                                                                                                                                                                                                      |
-| `window_mut(...)`      | Returns a mutable reference to a window with the specified handle. If the handle is not valid, an error is returned.                                                                                                                                                                                                         |
-| `window(...)`          | Returns a reference to a window with the specified handle. If the handle is not valid, an error is returned.                                                                                                                                                                                                                 |
+| Method                 | Purpose                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `terminal_size()`      | Returns the size of the current terminal                                                                                                                                                                                                                                                                                                   |
+| `desktop_rect()`       | Returns the actual rectangle for the desktop. If application bar and command bar are prezent, the desktop rectangle provides the visible side of the desktop. For example, if the terminal size is `80x20` and we also have a coomand bar and a application bar, then the desktop rectangle will be `[Left:0, Top:1, Right:79, bottom:18]` |
+| `add_window(...)`      | Adds a new window to the desktop                                                                                                                                                                                                                                                                                                           |
+| `arrange_windows(...)` | Arranges windows on the desktop. 4 methods are provided: `Cascade`, `Verical`, `Horizontal` and `Grid`                                                                                                                                                                                                                                     |
+| `close()`              | Closes the desktop and the entire app                                                                                                                                                                                                                                                                                                      |
+| `active_window()`      | Returns a handle to the focused windows                                                                                                                                                                                                                                                                                                    |
+| `window_mut(...)`      | Returns a mutable reference to a window with the specified handle. If the handle is not valid, an error is returned.                                                                                                                                                                                                                       |
+| `window(...)`          | Returns a reference to a window with the specified handle. If the handle is not valid, an error is returned.                                                                                                                                                                                                                               |
 
 
 ## Key associations
@@ -155,7 +156,11 @@ impl CommandBarEvents for MyDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().size(Size::new(80,20)).desktop(MyDesktop::new()).command_bar().build()?.run();
+    App::new().size(Size::new(80,20))
+             .desktop(MyDesktop::new())
+             .command_bar()
+             .build()?
+        .run();
     Ok(())
 }
 ```

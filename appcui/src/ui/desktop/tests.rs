@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, ui};
 
 use super::EmptyDesktop;
 
@@ -117,9 +117,9 @@ fn check_on_resize_for_desktop() {
 
 #[test]
 fn check_menus() {
-    #[Desktop(events = DesktopEvents + MenuEvents,  commands: [A,B,C], internal = true)]
+    #[Desktop(events = DesktopEvents + AppBarEvents,  commands: [A,B,C], internal = true)]
     struct MyDesktop {
-        file_menu: Handle<Menu>,
+        file_menu: Handle<ui::appbar::MenuButton>,
     }
     impl MyDesktop {
         fn new() -> Self {
@@ -131,21 +131,25 @@ fn check_menus() {
     }
     impl DesktopEvents for MyDesktop {
         fn on_start(&mut self) {
-            self.file_menu = self.register_menu(menu!(
-                "&File,class: MyDesktop, items=[
-                    {New,F1,cmd:A},
-                    {&Save,F2,cmd:B},
-                    {'&Save As ...',Alt+F2,cmd:C},
-                    {&Open,F3,cmd:A},
-                    {-},
-                    {E&xit,Alt+F4,cmd:C}
-                ]"
+            self.file_menu = self.appbar().add(appbar::MenuButton::new("&File",
+                menu!(
+                    "class: MyDesktop, items=[
+                        {New,F1,cmd:A},
+                        {&Save,F2,cmd:B},
+                        {'&Save As ...',Alt+F2,cmd:C},
+                        {&Open,F3,cmd:A},
+                        {-},
+                        {E&xit,Alt+F4,cmd:C}
+                    ]"
+                ),
+                0,
+                appbar::Side::Left,
             ));
         }
     }
-    impl MenuEvents for MyDesktop {
-        fn on_update_menubar(&self, menubar: &mut MenuBar) {
-            menubar.add(self.file_menu, 0);
+    impl AppBarEvents for MyDesktop {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.file_menu);
         }
     }
     let script = "
@@ -156,7 +160,7 @@ fn check_menus() {
         Paint('Menu opem')
         CheckHash(0x610ADBDB875BBED1)
     ";
-    let a = App::debug(40, 12, script).desktop(MyDesktop::new()).menu_bar().build().unwrap();
+    let a = App::debug(40, 12, script).desktop(MyDesktop::new()).app_bar().build().unwrap();
     a.run();
 }
 
@@ -717,9 +721,9 @@ fn check_commands_ignored() {
         }
     }
     impl DesktopEvents for MyDesktop {
-        fn on_start(&mut self) { 
+        fn on_start(&mut self) {
             // nothing should happen - set_size is ignored for desktop
-            self.set_size(1,1);
+            self.set_size(1, 1);
             self.set_enabled(false);
             self.set_visible(false);
         }

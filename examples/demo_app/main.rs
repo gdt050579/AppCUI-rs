@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 mod file_navigator;
 mod base_controls;
 mod image_win;
@@ -27,14 +28,14 @@ const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
 ];
 
-#[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
+#[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [Lists, BaseControls, Images, Animation, TreeExample, ColorPalette, Exit, NoArrange, Cascade, Vertical, Horizontal, Grid, DefaultTheme, DarkGrayTheme, LightTheme])]
 struct MyDesktop {
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<Menu>,
-    menu_examples: Handle<Menu>,
-    menu_theme: Handle<Menu>,
+    menu_arrange: Handle<MenuButton>,
+    menu_examples: Handle<MenuButton>,
+    menu_theme: Handle<MenuButton>,
 }
 impl MyDesktop {
     fn new() -> Self {
@@ -69,8 +70,8 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_examples = self.register_menu(menu!("
-            &Examples, class: MyDesktop, items:[
+        self.menu_examples = self.appbar().add(MenuButton::new("&Examples", menu!("
+            class: MyDesktop, items:[
                 { Lists, cmd: Lists}, 
                 { 'Base Controls', cmd: BaseControls},
                 { Images, cmd: Images},
@@ -78,23 +79,23 @@ impl DesktopEvents for MyDesktop {
                 { 'Tree Example', cmd: TreeExample},
                 { 'Color Palette', cmd: ColorPalette}
             ]
-        "));
-        self.menu_arrange = self.register_menu(menu!("
-            &Windows,class: MyDesktop, items:[
+        "),0,Side::Left));
+        self.menu_arrange = self.appbar().add(MenuButton::new("&Windows", menu!("
+            class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
                 {&Vertical,cmd: Vertical, select: false},
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "));
-        self.menu_theme = self.register_menu(menu!("
-            &Theme,class: MyDesktop, items:[
+        "),0,Side::Left));
+        self.menu_theme = self.appbar().add(MenuButton::new("&Theme", menu!("
+            class: MyDesktop, items:[
                 {&Default,cmd: DefaultTheme, select: true},
                 {'Dark &Gray',cmd: DarkGrayTheme, select: false},
                 {'&Light',cmd: LightTheme, select: false}
             ]
-        "));
+        "),0,Side::Left));
     }
         
 }
@@ -124,14 +125,7 @@ impl MenuEvents for MyDesktop {
         if let Some(method) = m {
             self.arrange_windows(method);
         }
-    }
-
-    fn on_update_menubar(&self,menubar: &mut MenuBar) {
-        menubar.add(self.menu_examples, 0);
-        menubar.add(self.menu_arrange, 0);
-        menubar.add(self.menu_theme, 0);
-    }
-    
+    }    
     fn on_command(&mut self,_:Handle<Menu>,_:Handle<menu::Command>,command:mydesktop::Commands){
         match command {
             mydesktop::Commands::Lists => { self.add_window(file_navigator::Win::new()); },
@@ -148,6 +142,13 @@ impl MenuEvents for MyDesktop {
         }
     }
 }
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self,appbar: &mut AppBar) {
+        appbar.show(self.menu_examples);
+        appbar.show(self.menu_arrange);
+        appbar.show(self.menu_theme);
+    }
+}
 
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -155,13 +156,13 @@ fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_family = "windows")]
     App::with_backend(appcui::backend::Type::WindowsVT)
         .desktop(MyDesktop::new())
-        .menu_bar()
+        .app_bar()
         .command_bar()
         .build()?
         .run();
 
     #[cfg(not(target_family = "windows"))]
-    App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).app_bar().command_bar().build()?.run();
     Ok(())
 }
 
@@ -169,6 +170,6 @@ fn main() -> Result<(), appcui::system::Error> {
 #[wasm_bindgen(start)]
 pub fn main() {    
     // Important for WASM: the project must be a lib that should be built with `wasm-pack build --target web`
-    let app = App::new().desktop(MyDesktop::new()).menu_bar().command_bar().build().unwrap();
+    let app = App::new().desktop(MyDesktop::new()).app().command_bar().build().unwrap();
     app.run();
 }

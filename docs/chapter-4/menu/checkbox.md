@@ -70,9 +70,9 @@ The following code creates a menu with 3 menu items (of type checkbox). Notice t
 ```rs
 use appcui::prelude::*;
 
-#[Window(events = MenuEvents, commands=Cmd1+Cmd2+Cmd3)]
+#[Window(events = MenuEvents+AppBarEvents, commands=Cmd1+Cmd2+Cmd3)]
 struct MyWin {
-    m_commands: Handle<Menu>,
+    m_commands: Handle<MenuButton>,
 }
 impl MyWin {
     fn new() -> Self {
@@ -80,13 +80,18 @@ impl MyWin {
             base: window!("Test,a:c,w:40,h:8"),
             m_commands: Handle::None,
         };
-        let mut m = Menu::new("Checkboxes");
+        let mut m = Menu::new();
         m.add(menu::CheckBox::new("&Option-1", Key::None, mywin::Commands::Cmd1,true));
         m.add(menu::CheckBox::new("Option-2", Key::None, mywin::Commands::Cmd2,false));
         m.add(menuitem!("Option-3,F1,cmd:Cmd3,class:MyWin,checked:true"));
-        w.m_commands = w.register_menu(m);
+        w.m_commands = w.appbar().add(MenuButton::new("Commands", m, 0, Side::Left));
 
         w
+    }
+}
+impl AppBarEvents for MyWin {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.m_commands);
     }
 }
 impl MenuEvents for MyWin {
@@ -98,13 +103,10 @@ impl MenuEvents for MyWin {
             mywin::Commands::Cmd3 => { /* do something with option 3 */ },
         }
     }
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.m_commands, 0);
-    }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().menu_bar().build()?;
+    let mut a = App::new().app_bar().build()?;
     a.add_window(MyWin::new());
     a.run();
     Ok(())

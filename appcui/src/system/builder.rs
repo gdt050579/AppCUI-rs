@@ -10,7 +10,7 @@ pub struct Builder {
     pub(crate) debug_script: Option<String>,
     pub(crate) title: Option<String>,
     pub(crate) desktop_manager: Option<ControlManager>,
-    pub(crate) has_menu_bar: bool,
+    pub(crate) has_app_bar: bool,
     pub(crate) has_command_bar: bool,
     pub(crate) single_window: bool,
     pub(crate) theme: Theme,
@@ -27,7 +27,7 @@ impl Builder {
             backend: None,
             debug_script: None,
             desktop_manager: None,
-            has_menu_bar: false,
+            has_app_bar: false,
             has_command_bar: false,
             single_window: false,
             max_timer_count: 4,
@@ -54,10 +54,10 @@ impl Builder {
         self.title = Some(String::from(title));
         self
     }
-    /// Enables the menu bar.
+    /// Enables the Application bar.
     #[inline(always)]
-    pub fn menu_bar(mut self) -> Self {
-        self.has_menu_bar = true;
+    pub fn app_bar(mut self) -> Self {
+        self.has_app_bar = true;
         self
     }
     /// Enables the command bar.

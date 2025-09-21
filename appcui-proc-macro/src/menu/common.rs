@@ -211,10 +211,10 @@ fn get_class(dict: &mut NamedParamsMap, inherit: Option<&str>) -> Option<String>
     }
 }
 pub(super) fn build_menu(param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
-    let mut s = String::from("{\nlet mut menu = Menu::new(");
+    let mut s = String::from("{\nlet mut menu = Menu::new();\n");
     let class_name = get_class(dict, class);
-    add_caption(&mut s, dict);
-    s.push_str(");\n");
+    // add_caption(&mut s, dict);
+    // s.push_str(");\n");
     // we should add menu items
     if let Some(value) = dict.get_list("items") {
         for subitem in value {
@@ -233,6 +233,8 @@ pub(super) fn build_menu(param_list: &str, dict: &mut NamedParamsMap, class: Opt
 }
 fn build_menuitem_submenu(param_list: &str, dict: &mut NamedParamsMap, class: Option<&str>) -> String {
     let mut s = String::from("{\nlet mut item = menu::SubMenu::new(");
+    add_caption(&mut s, dict);
+    s.push(',');
     // check to see if I provide the class or if I have to use the provded one
     // the class that I provive as a key takes priority.
     let class_name = get_class(dict, class);

@@ -1,16 +1,17 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 use std::time::Duration;
 
 mod fractal;
 use fractal::Fractal;
 
-#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents], 
+#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents, AppBarEvents], 
           overwrite = OnPaint,
           commands  = [New, Exit])]
 struct FractalDesktop {
     fractal: Fractal,
     window_count: u32,
-    main_menu: Handle<Menu>,
+    main_menu: Handle<MenuButton>,
 }
 
 impl FractalDesktop {
@@ -91,13 +92,13 @@ impl DesktopEvents for FractalDesktop {
             timer.start(Duration::from_millis(50));
         }
         
-        self.main_menu = self.register_menu(menu!("
-            &File,class: FractalDesktop, items:[
+        self.main_menu = self.appbar().add(MenuButton::new("&File", menu!("
+            class: FractalDesktop, items:[
                 {&New,cmd: New, key: Ctrl+N},
                 {-},
                 {&Exit,cmd: Exit, key: Escape}
             ]
-        "));
+        "),0,Side::Left));
     }
 }
 
@@ -108,8 +109,11 @@ impl MenuEvents for FractalDesktop {
             fractaldesktop::Commands::Exit => self.close(),
         }
     }
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.main_menu, 0);
+
+}
+impl AppBarEvents for FractalDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.main_menu);
     }
 }
 
@@ -135,6 +139,6 @@ impl TimerEvents for FractalDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(FractalDesktop::new()).menu_bar().command_bar().build()?.run();
+    App::new().desktop(FractalDesktop::new()).app_bar().command_bar().build()?.run();
     Ok(())
 } 

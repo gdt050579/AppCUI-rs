@@ -12,15 +12,16 @@ use crate::backend::{self, Backend};
 use crate::graphics::{Point, Rect, Size, Surface};
 use crate::input::{Key, KeyModifier, MouseButton, MouseEvent, MouseEventData};
 use crate::prelude::*;
+use crate::ui::appbar::events::{AppBarEvent, AppBarEvents};
 use crate::ui::command_bar::events::GenericCommandBarEvents;
 use crate::ui::command_bar::{events::CommandBarEvent, CommandBar};
 use crate::ui::common::control_manager::ParentLayout;
-use crate::ui::common::ControlManager;
 use crate::ui::common::ControlEvent;
+use crate::ui::common::ControlManager;
 use crate::ui::desktop::EmptyDesktop;
 use crate::ui::menu::events::{GenericMenuEvents, MenuEvent};
-use crate::ui::menu::{Menu, MenuBar};
 use crate::ui::window::events::WindowEvents;
+use crate::ui::{AppBar, Menu};
 use crate::utils::VectorIndex;
 
 #[repr(u8)]
@@ -36,7 +37,7 @@ enum MouseLockedObject {
     None,
     Control(Handle<()>),
     CommandBar,
-    MenuBar,
+    AppBar,
 }
 
 #[derive(Default)]
@@ -65,14 +66,14 @@ pub(crate) struct RuntimeManager {
     desktop_handle: Handle<()>,
     tooltip: ToolTip,
     commandbar: Option<CommandBar>,
-    menubar: Option<MenuBar>,
+    appbar: Option<AppBar>,
     recompute_layout: bool,
     repaint: bool,
     mouse_pos: Point,
     key_modifier: KeyModifier,
     desktop_os_start_called: bool,
     recompute_parent_indexes: bool,
-    request_update_command_and_menu_bars: bool,
+    update_command_and_app_bars: bool,
     request_update_timer_threads: bool,
     single_window: bool,
     loop_status: LoopStatus,
@@ -85,6 +86,7 @@ pub(crate) struct RuntimeManager {
     events: Vec<ControlEvent>,
     commandbar_event: Option<CommandBarEvent>,
     menu_event: Option<MenuEvent>,
+    appbar_event: Option<AppBarEvent>,
     mouse_locked_object: MouseLockedObject,
     opened_menu_handle: Handle<Menu>,
     modal_windows: Vec<Handle<()>>,
@@ -125,7 +127,7 @@ impl RuntimeManager {
             recompute_layout: true,
             repaint: true,
             desktop_os_start_called: false,
-            request_update_command_and_menu_bars: true,
+            update_command_and_app_bars: true,
             recompute_parent_indexes: true,
             request_update_timer_threads: false,
             single_window: builder.single_window,
@@ -143,6 +145,7 @@ impl RuntimeManager {
             to_remove_list: Vec::with_capacity(4),
             commandbar_event: None,
             menu_event: None,
+            appbar_event: None,
             controls: Box::into_raw(Box::new(ControlHandleManager::new())),
             timers_manager: TimerManager::new(builder.max_timer_count),
             task_manager: BackgroundTaskManager::new(),
@@ -154,7 +157,7 @@ impl RuntimeManager {
             } else {
                 None
             },
-            menubar: if builder.has_menu_bar { Some(MenuBar::new(term_sz.width)) } else { None },
+            appbar: if builder.has_app_bar { Some(AppBar::new(term_sz.width)) } else { None },
             #[cfg(feature = "EVENT_RECORDER")]
             event_recorder: super::event_recorder::EventRecorder::new(),
         };
@@ -218,7 +221,7 @@ impl RuntimeManager {
         let sz = self.backend.size();
         Rect::new(
             0,
-            if self.menubar.is_some() { 1 } else { 0 },
+            if self.appbar.is_some() { 1 } else { 0 },
             (sz.width as i32) - 1,
             if self.commandbar.is_some() {
                 (sz.height as i32) - 2
@@ -250,9 +253,9 @@ impl RuntimeManager {
         if !self.opened_menu_handle.is_none() {
             self.opened_menu_handle = Handle::None;
             self.repaint = true;
-            // close menu bar (in case the opened menu was part of the menubar)
-            if let Some(menubar) = self.menubar.as_mut() {
-                menubar.close();
+            // close app bar (in case the opened menu was part of the appbar)
+            if let Some(appbar) = self.appbar.as_mut() {
+                appbar.close();
             }
         }
     }
@@ -305,6 +308,9 @@ impl RuntimeManager {
     pub(crate) fn set_menu_event(&mut self, event: MenuEvent) {
         self.menu_event = Some(event);
     }
+    pub(crate) fn set_appbar_event(&mut self, event: AppBarEvent) {
+        self.appbar_event = Some(event);
+    }
     pub(crate) fn close(&mut self) {
         self.loop_status = LoopStatus::StopApp;
     }
@@ -321,8 +327,12 @@ impl RuntimeManager {
         self.request_recompute_layout();
         self.request_repaint();
     }
+    pub(crate) fn request_update_command_and_app_bars(&mut self) {
+        self.update_command_and_app_bars = true;
+        self.repaint = true;
+    }
     pub(crate) fn request_update(&mut self) {
-        self.request_update_command_and_menu_bars = true;
+        self.update_command_and_app_bars = true;
         self.repaint = true;
         self.recompute_layout = true;
     }
@@ -361,7 +371,7 @@ impl RuntimeManager {
             if self.single_window {
                 let base = win.base_mut();
                 base.set_singlewindow_flag();
-                let top = self.menubar.is_some();
+                let top = self.appbar.is_some();
                 let bottom = self.commandbar.is_some();
                 base.layout = ControlLayout::from(match () {
                     _ if (!top) && (!bottom) => layout!("l:0,t:0,r:0,b:0"),
@@ -452,7 +462,18 @@ impl RuntimeManager {
         let menus = unsafe { &mut *self.menus };
         menus.get_mut(handle)
     }
-    pub(crate) fn show_menu(&mut self, handle: Handle<Menu>, receiver_control_handle: Handle<()>, x: i32, y: i32, max_size: Option<Size>) {
+    pub(crate) fn get_appbar(&mut self) -> &mut AppBar {
+        self.appbar.as_mut().expect("AppBar (application bar) was not enabled ! Have you forgot to add '.app_bar()' when you initialized the Application ? (e.g. App::new().app_bar().build())")
+    }
+    pub(crate) fn show_menu(
+        &mut self,
+        handle: Handle<Menu>,
+        receiver_control_handle: Handle<()>,
+        x: i32,
+        y: i32,
+        title_width: u32,
+        max_size: Option<Size>,
+    ) {
         let menus = unsafe { &mut *self.menus };
         let controls = unsafe { &mut *self.controls };
         if let Some(menu) = menus.get_mut(handle) {
@@ -467,7 +488,7 @@ impl RuntimeManager {
                 GenericMenuEvents::on_menu_open(ctrl.control(), menu);
             }
             // 4. compute the position and show
-            menu.compute_position(x, y, max_size.unwrap_or(Size::new(0, 0)), self.backend.size());
+            menu.compute_position(x, y, title_width, max_size.unwrap_or(Size::new(0, 0)), self.backend.size());
             self.opened_menu_handle = handle;
         }
     }
@@ -508,6 +529,11 @@ impl RuntimeManager {
             self.process_menu_event(event);
         }
 
+        // 2. Process appbar from menu
+        if let Some(event) = self.appbar_event {
+            self.process_appbar_event(event);
+        }
+
         // 3. Process events from controls
         if !self.events.is_empty() {
             self.process_events_queue();
@@ -517,7 +543,7 @@ impl RuntimeManager {
         if !self.to_remove_list.is_empty() {
             self.remove_deleted_controls();
             self.recompute_parent_indexes = true;
-            self.request_update_command_and_menu_bars = true;
+            self.update_command_and_app_bars = true;
         }
 
         // If we reach this point, there should not be any change in the logic of controls
@@ -531,14 +557,14 @@ impl RuntimeManager {
             self.request_focus = None;
             self.request_default_action = None;
             self.repaint = true;
-            self.request_update_command_and_menu_bars = true;
+            self.update_command_and_app_bars = true;
         }
 
         if self.recompute_layout {
             self.recompute_layouts();
         }
-        if self.request_update_command_and_menu_bars {
-            self.update_command_and_menu_bars();
+        if self.update_command_and_app_bars {
+            self.update_command_and_app_bars();
         }
         if self.repaint || self.recompute_layout {
             self.paint();
@@ -880,9 +906,33 @@ impl RuntimeManager {
         }
         self.menu_event = None;
     }
-    fn update_command_and_menu_bars(&mut self) {
-        if self.commandbar.is_none() && self.menubar.is_none() {
-            self.request_update_command_and_menu_bars = false;
+    fn process_appbar_event(&mut self, event: AppBarEvent) {
+        let controls = unsafe { &mut *self.controls };
+        match event {
+            AppBarEvent::ButtonClick(ev) => {
+                if let Some(control) = controls.get_mut(ev.control_receiver_handle) {
+                    AppBarEvents::on_button_click(control.control_mut(), ev.button_handle);
+                    self.repaint = true;
+                }
+            }
+            AppBarEvent::ToggleButtonStatusChanged(ev) => {
+                if let Some(control) = controls.get_mut(ev.control_receiver_handle) {
+                    AppBarEvents::on_togglebutton_state_changed(control.control_mut(), ev.button_handle, ev.state);
+                    self.repaint = true;
+                }
+            }
+            AppBarEvent::SwitchButtonStatusChanged(ev) => {
+                if let Some(control) = controls.get_mut(ev.control_receiver_handle) {
+                    AppBarEvents::on_switchbutton_state_changed(control.control_mut(), ev.button_handle, ev.state);
+                    self.repaint = true;
+                }
+            }
+        }
+        self.appbar_event = None;
+    }
+    fn update_command_and_app_bars(&mut self) {
+        if self.commandbar.is_none() && self.appbar.is_none() {
+            self.update_command_and_app_bars = false;
             return;
         }
         let focused_handle = self.get_focused_control();
@@ -902,23 +952,23 @@ impl RuntimeManager {
             }
             cmdbar.update_positions();
         }
-        // process menubar
-        if let Some(menubar) = self.menubar.as_mut() {
-            menubar.clear();
+        // process appbar
+        if let Some(appbar) = self.appbar.as_mut() {
+            appbar.clear();
             // start from the focused control and call on_update_menubar for each control
             let mut h = focused_handle;
             while let Some(control) = controls.get_mut(h) {
-                menubar.set_receiver_control_handle(h);
-                control.control_mut().on_update_menubar(menubar);
+                appbar.set_receiver_control_handle(h);
+                AppBarEvents::on_update(control.control(), appbar);
                 h = control.base().parent;
                 if h.is_none() {
                     break;
                 }
             }
-            menubar.update_positions();
+            appbar.update_positions();
         }
         self.process_menu_and_cmdbar_mousemove(self.mouse_pos.x, self.mouse_pos.y);
-        self.request_update_command_and_menu_bars = false;
+        self.update_command_and_app_bars = false;
     }
 
     fn find_last_leaf(&mut self, handle: Handle<()>) -> Handle<()> {
@@ -1089,8 +1139,8 @@ impl RuntimeManager {
         if let Some(commandbar) = self.commandbar.as_mut() {
             commandbar.set_desktop_size(new_size);
         }
-        if let Some(menubar) = self.menubar.as_mut() {
-            menubar.set_position(0, 0, new_size.width);
+        if let Some(appbar) = self.appbar.as_mut() {
+            appbar.update_width(new_size.width);
         }
         // resize the desktop as well
         let desktop = self.get_controls_mut().desktop_mut();
@@ -1251,8 +1301,8 @@ impl PaintMethods for RuntimeManager {
         if self.commandbar.is_some() {
             self.commandbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
         }
-        if self.menubar.is_some() {
-            self.menubar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
+        if self.appbar.is_some() {
+            self.appbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
         }
         if self.tooltip.is_visible() {
             self.tooltip.paint(&mut self.surface, &self.theme);
@@ -1317,9 +1367,9 @@ impl KeyboardMethods for RuntimeManager {
                 self.repaint = true;
                 return;
             }
-            // 1.2. if menubar is opened (e.g. the current menu is part of the menu bar )
-            if let Some(menubar) = self.menubar.as_mut() {
-                if menubar.is_opened() && menubar.on_key_event(event.key, true) == EventProcessStatus::Processed {
+            // 1.2. if appbar is opened (e.g. the current menu is part of the app bar )
+            if let Some(appbar) = self.appbar.as_mut() {
+                if appbar.is_opened() && appbar.on_key_event(event.key, true) == EventProcessStatus::Processed {
                     self.repaint = true;
                     return;
                 }
@@ -1338,9 +1388,9 @@ impl KeyboardMethods for RuntimeManager {
                 return;
             }
         }
-        // 4. check the menubar
-        if let Some(menubar) = self.menubar.as_mut() {
-            if menubar.on_key_event(event.key, false) == EventProcessStatus::Processed {
+        // 4. check the appbar
+        if let Some(appbar) = self.appbar.as_mut() {
+            if appbar.on_key_event(event.key, false) == EventProcessStatus::Processed {
                 self.repaint = true;
                 //return;
             }
@@ -1472,7 +1522,7 @@ impl MouseMethods for RuntimeManager {
     fn process_menu_and_cmdbar_mousemove(&mut self, x: i32, y: i32) -> bool {
         let mut processed = false;
         // Process event in the following order:
-        // first the context menu and its owner, then the menu bar and then cmdbar
+        // first the context menu and its owner, then the app bar and then cmdbar
         if let Some(menu) = self.get_opened_menu() {
             match menu.on_mouse_move(x, y) {
                 menu::events::MouseMoveMenuResult::ProcessedAndRepaint => {
@@ -1484,19 +1534,9 @@ impl MouseMethods for RuntimeManager {
                 menu::events::MouseMoveMenuResult::Ignored => {}
             }
         }
-        /*
-        if (this->VisibleMenu)
-        {
-            auto* mnuC = ((MenuContext*) (this->VisibleMenu->Context));
-            processed =
-                  mnuC->OnMouseMove(x - mnuC->ScreenClip.ScreenPosition.X, y - mnuC->ScreenClip.ScreenPosition.Y, repaint);
-            if ((!processed) && (mnuC->Owner))
-                processed = mnuC->Owner->OnMouseMove(x, y, repaint);
-        }
-        */
 
-        if let Some(menubar) = self.menubar.as_mut() {
-            processed = menubar.on_mouse_move(x, y) == EventProcessStatus::Processed;
+        if let Some(appbar) = self.appbar.as_mut() {
+            processed = appbar.on_mouse_move(x, y) == EventProcessStatus::Processed;
             self.repaint |= processed;
         }
         if !processed {
@@ -1523,9 +1563,11 @@ impl MouseMethods for RuntimeManager {
         processed
     }
 
-    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) {
+    fn process_menu_mouse_click(&mut self, handle: Handle<Menu>, x: i32, y: i32) -> bool {
+        // returns true if the mouse was processed by a menu or the menu parent or false if (x,y) are outside any menu
         let mut result = MousePressedMenuResult::None;
         let mut parent_handle = Handle::None;
+        let mut processed = false;
         let menus = unsafe { &mut *self.menus };
         if let Some(menu) = menus.get_mut(handle) {
             parent_handle = menu.get_parent_handle();
@@ -1541,12 +1583,16 @@ impl MouseMethods for RuntimeManager {
         }
         match result {
             MousePressedMenuResult::None => {}
-            MousePressedMenuResult::Repaint => self.repaint = true,
+            MousePressedMenuResult::Repaint => {
+                self.repaint = true;
+                processed = true;
+            }
             MousePressedMenuResult::CheckParent => {
                 if !parent_handle.is_none() {
-                    self.process_menu_mouse_click(parent_handle, x, y);
+                    processed = self.process_menu_mouse_click(parent_handle, x, y);
                 } else {
                     self.close_opened_menu();
+                    processed = false;
                 }
             }
             MousePressedMenuResult::Activate => {
@@ -1556,8 +1602,10 @@ impl MouseMethods for RuntimeManager {
                     // trigger an on_mouse_move to force selection
                     menu.on_mouse_move(x, y);
                 }
+                processed = true;
             }
         }
+        processed
     }
 
     fn process_mousewheel_event(&mut self, event: MouseWheelEvent) {
@@ -1650,7 +1698,7 @@ impl MouseMethods for RuntimeManager {
             MouseLockedObject::None => self.process_mousemove(event),
             MouseLockedObject::Control(handle) => self.process_mousedrag(handle, event),
             MouseLockedObject::CommandBar => {}
-            MouseLockedObject::MenuBar => {}
+            MouseLockedObject::AppBar => {}
         }
     }
     fn process_mousebuttondown_event(&mut self, event: MouseButtonDownEvent) {
@@ -1660,15 +1708,18 @@ impl MouseMethods for RuntimeManager {
         // Hide ToolTip
         self.hide_tooltip();
         // check contextual menu
-        if !self.opened_menu_handle.is_none() {
-            self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y);
+        if !self.opened_menu_handle.is_none() && self.process_menu_mouse_click(self.opened_menu_handle, event.x, event.y) {
             return;
         }
-        // check main menu
-        if let Some(menu) = self.menubar.as_mut() {
-            if menu.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
-                self.repaint = true;
-                self.mouse_locked_object = MouseLockedObject::MenuBar;
+        // check appbar (only if y==0 - the event is on the appbar)
+        if event.y == 0 {
+            if let Some(appbar) = self.appbar.as_mut() {
+                if appbar.on_mouse_pressed(event.x, event.y) == EventProcessStatus::Processed {
+                    self.repaint = true;
+                    self.mouse_locked_object = MouseLockedObject::AppBar;
+                }
+                // if y==0, then I am on the appbar so there is no point in sending
+                // the event to someone else --> so just return
                 return;
             }
         }
@@ -1704,7 +1755,7 @@ impl MouseMethods for RuntimeManager {
                 //if response == EventProcessStatus::Processed {
                 self.mouse_locked_object = MouseLockedObject::Control(handle);
                 self.repaint = true;
-                self.request_update_command_and_menu_bars = true;
+                self.update_command_and_app_bars = true;
                 return;
                 //}
             }
@@ -1743,9 +1794,9 @@ impl MouseMethods for RuntimeManager {
                     self.repaint |= self.commandbar_event.is_some();
                 }
             }
-            MouseLockedObject::MenuBar => {
-                if let Some(menubar) = self.menubar.as_mut() {
-                    menubar.on_mouse_pressed(event.x, event.y);
+            MouseLockedObject::AppBar => {
+                if let Some(appbar) = self.appbar.as_mut() {
+                    appbar.on_mouse_released(event.x, event.y);
                 }
                 self.repaint = true;
             }
@@ -1779,7 +1830,7 @@ impl MouseMethods for RuntimeManager {
                 if response == EventProcessStatus::Processed {
                     self.mouse_locked_object = MouseLockedObject::None;
                     self.repaint = true;
-                    self.request_update_command_and_menu_bars = true;
+                    self.update_command_and_app_bars = true;
                 }
             }
         }

@@ -16,11 +16,11 @@ fn main() -> Result<(), appcui::system::Error> {
     App::with_backend(backend::Type::WindowsVT)
         .desktop(MyDesktop::new())
         .command_bar()
-        .menu_bar()
+        .app_bar()
         .build()?
         .run();
 
     #[cfg(not(target_family = "windows"))]
-    App::new().desktop(MyDesktop::new()).command_bar().menu_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).command_bar().app_bar().build()?.run();
     Ok(())
 }

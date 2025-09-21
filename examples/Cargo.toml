@@ -7,6 +7,7 @@ edition = "2021"
 [dev-dependencies]
 appcui = { path = "../appcui", features = ["TRUE_COLORS"] }
 appcui_proc_macro = { path = "../appcui-proc-macro"}
+flat_string = "1.0.0"
 chrono = "0.4.38"
 rand = "0.8.5"
 tempfile = "3.0"
@@ -335,3 +336,11 @@ path = "select_folder/main.rs"
 [[example]]
 name = "basic_controls"
 path = "basic_controls/main.rs"
+
+[[example]]
+name = "appbar"
+path = "appbar/main.rs"
+
+[[example]]
+name = "appbar_desktop"
+path = "appbar_desktop/main.rs"

@@ -74,6 +74,7 @@ pub(crate) fn generate_inner_module(a: &Arguments, config: &mut TraitsConfig, co
     } else {
         if (config.get(AppCUITrait::CommandBarEvents) != TraitImplementation::None)
             && (config.get(AppCUITrait::MenuEvents) != TraitImplementation::None)
+            && (config.get(AppCUITrait::AppBarEvents) != TraitImplementation::None)
         {
             panic!(
                 "The 'commands` attribute can only be used if one of the CommandBarEvents or MenuEvents is overwritten (via `events` attributie) !"
@@ -318,7 +319,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         // add the MenudBar events wrapper if needed
         if config.get(AppCUITrait::MenuEvents) == TraitImplementation::None {
             code.push_str(templates::MENU_EVENTS);
-        }
+        }    
         // add raise events support
         if !a.emitted_events.is_empty() {
             code.push_str(templates::RAISE_EVENTS_TEMPLATE);

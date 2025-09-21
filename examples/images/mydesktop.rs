@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 
 use crate::dizzy::DIZZY_PIXELS;
 use crate::ferris::FERRIS_PIXELS;
@@ -6,12 +7,12 @@ use crate::hello_rust::HELLO_RUST_PIXELS;
 use crate::mywin::MyWin;
 use crate::shapes::SHAPES_PIXELS;
 
-#[Desktop(events    = MenuEvents+DesktopEvents, 
+#[Desktop(events    = MenuEvents+DesktopEvents+AppBarEvents, 
           commands  = Dizzy+Hello+Shapes+Ferris+Exit+Grid+Vertical+Horizontal+Cascade)]
 pub struct MyDesktop {
     index: u32,
-    menu_windows: Handle<Menu>,
-    menu_arrange: Handle<Menu>,
+    menu_windows: Handle<MenuButton>,
+    menu_arrange: Handle<MenuButton>,
 }
 impl MyDesktop {
     pub fn new() -> Self {
@@ -30,8 +31,8 @@ impl MyDesktop {
 impl DesktopEvents for MyDesktop {
     fn on_start(&mut self) {
         // define and register a menu
-        self.menu_windows = self.register_menu(menu!(
-            "&Windows,class: MyDesktop, items:[
+        self.menu_windows = self.appbar().add(MenuButton::new("&Windows",menu!(
+            "class: MyDesktop, items:[
                 {'&Dizzy',Alt+1, cmd: Dizzy},
                 {'&Hello Rust',Alt+2, cmd: Hello},
                 {'&Shapes',Alt+3, cmd: Shapes},
@@ -39,23 +40,26 @@ impl DesktopEvents for MyDesktop {
                 {---},
                 {'E&xit',cmd: Exit},
             ]"
-        ));
-        self.menu_arrange = self.register_menu(menu!(
-            "&Arrange,class: MyDesktop, items:[
+        ),0,Side::Left));
+        self.menu_arrange = self.appbar().add(MenuButton::new("&Arrange", menu!(
+            "class: MyDesktop, items:[
               {'&Grid',cmd: Grid},
               {'&Vertical',cmd: Vertical},
               {'&Horizontal',cmd: Horizontal},
               {'&Cascade',cmd: Cascade},
           ]"
-        ));
+        ),0,Side::Left));
     }
 }
 
-impl MenuEvents for MyDesktop {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_windows, 0);
-        menubar.add(self.menu_arrange, 0);
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu_windows);
+        appbar.show(self.menu_arrange);
     }
+}
+impl MenuEvents for MyDesktop {
+
 
     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mydesktop::Commands) {
         match command {

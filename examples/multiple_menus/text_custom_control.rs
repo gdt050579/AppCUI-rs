@@ -1,9 +1,10 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 
-#[CustomControl(events = MenuEvents, overwrite = OnPaint, commands = Red+Green+Blue)]
+#[CustomControl(events = MenuEvents+AppBarEvents, overwrite = OnPaint, commands = Red+Green+Blue)]
 pub struct TextCustomControl {
     text: &'static str,
-    h_menu: Handle<Menu>,
+    h_menu: Handle<MenuButton>,
 }
 impl TextCustomControl {
     pub fn new(layout: Layout) -> Self {
@@ -13,13 +14,13 @@ impl TextCustomControl {
             h_menu: Handle::None,
         };
         let m = menu!(
-            "Text,class:TextCustomControl,items=[
-            {'Text->Red',F1,selected:true,cmd:Red},
-            {'Text->Green',F2,selected:false,cmd:Green},
-            {'Text->Blue',F3,selected:false,cmd:Blue}
-        ]"
+            "class:TextCustomControl,items=[
+                {'Text->Red',F1,selected:true,cmd:Red},
+                {'Text->Green',F2,selected:false,cmd:Green},
+                {'Text->Blue',F3,selected:false,cmd:Blue}
+            ]"
         );
-        obj.h_menu = obj.register_menu(m);
+        obj.h_menu = obj.appbar().add(MenuButton::new("Text", m,0,Side::Left));
         obj
     }
 }
@@ -42,8 +43,9 @@ impl MenuEvents for TextCustomControl {
             textcustomcontrol::Commands::Blue =>self.text = "Blue",
         }
     }
-
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_menu, 0);
+}
+impl AppBarEvents for TextCustomControl {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.h_menu);
     }
 }

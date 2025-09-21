@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 use crate::CSVFile;
 use crate::Viewer;
 
@@ -11,14 +12,14 @@ const LOGO: [&str; 6] = [
     "▒╚═════╝╚══════╝▒▒╚═══╝▒▒▒▒▒▒▒▒╚═══╝▒▒╚═╝╚══════╝▒╚══╝╚══╝▒╚══════╝╚═╝▒▒╚═╝",                                                                   
 ];
 
-#[Desktop(events    = [MenuEvents,DesktopEvents], 
+#[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [Open,Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
 pub struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<Menu>,
-    menu_file: Handle<Menu>,
+    menu_arrange: Handle<MenuButton>,
+    menu_file: Handle<MenuButton>,
 }
 impl MyDesktop {
     pub fn new() -> Self {
@@ -53,21 +54,21 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_file = self.register_menu(menu!("
-            &File, class: MyDesktop, items:[
+        self.menu_file = self.appbar().add(MenuButton::new("&File", menu!("
+            class: MyDesktop, items:[
                 {'&Open',cmd: Open, key: F3},
                 {'E&xit',cmd: Exit, key: Escape},
             ]
-        "));
-        self.menu_arrange = self.register_menu(menu!("
-            &Windows, class: MyDesktop, items:[
+        "),0,Side::Left));
+        self.menu_arrange = self.appbar().add(MenuButton::new("&Windows", menu!("
+            class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
                 {&Vertical,cmd: Vertical, select: false},
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "));
+        "),0,Side::Left));
     }
         
 }
@@ -109,9 +110,11 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    fn on_update_menubar(&self,menubar: &mut MenuBar)
-    {
-        menubar.add(self.menu_file, 0);
-        menubar.add(self.menu_arrange, 0);
+
+}
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self,appbar: &mut AppBar) {
+        appbar.show(self.menu_file);
+        appbar.show(self.menu_arrange);
     }
 }

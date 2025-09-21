@@ -1,7 +1,8 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 use crate::settings::Settings;
 
-#[Window(events=[MenuEvents], 
+#[Window(events=[MenuEvents,AppBarEvents], 
          commands=[ArrangeNone, ArrangeGrid, ArrangeGridPacked, ArrangeCircular, 
                   ArrangeHierarchical, ArrangeHierarchicalPacked, ArrangeForceDirected,
                   ToggleArrowHeads, ToggleEdgeHighlightingIn, ToggleEdgeHighlightingOut,
@@ -10,7 +11,7 @@ use crate::settings::Settings;
                   SetEdgeLineAsciiRound, SetEdgeLineSingleRound, SetEdgeLineBraille])]
 pub struct GraphWindow {
     graph_view: Handle<GraphView<String>>,
-    menu_graph: Handle<Menu>,
+    menu_graph: Handle<MenuButton>,
     settings: Settings,
     h_arrange_none: Handle<menu::SingleChoice>, 
     h_arrange_grid: Handle<menu::SingleChoice>,
@@ -73,8 +74,8 @@ impl GraphWindow {
         win.graph_view = win.add(gv);
 
         // create a menu and register it
-        let mut m = Menu::new("&Graph");
-        let mut a = Menu::new("&Arrangement");
+        let mut m = Menu::new();
+        let mut a = Menu::new();
         win.h_arrange_none = a.add(menu::SingleChoice::new("&None", Key::None, graphwindow::Commands::ArrangeNone, false));
         win.h_arrange_grid = a.add(menu::SingleChoice::new("&Grid", Key::None, graphwindow::Commands::ArrangeGrid, false));
         win.h_arrange_grid_packed = a.add(menu::SingleChoice::new("Grid &Packed", Key::None, graphwindow::Commands::ArrangeGridPacked, false));
@@ -82,14 +83,14 @@ impl GraphWindow {
         win.m_hierarchical = a.add(menu::SingleChoice::new("&Hierarchical", Key::None, graphwindow::Commands::ArrangeHierarchical, false));
         win.m_hierarchical_packed = a.add(menu::SingleChoice::new("Hierarchical P&acked", Key::None, graphwindow::Commands::ArrangeHierarchicalPacked, false));
         win.m_force_directed = a.add(menu::SingleChoice::new("&Force Directed", Key::None, graphwindow::Commands::ArrangeForceDirected, false));
-        m.add(menu::SubMenu::new(a));
+        m.add(menu::SubMenu::new("&Arrangement", a));
 
-        let mut er = Menu::new("&Edge routing");
+        let mut er = Menu::new();
         win.h_edge_routing_direct = er.add(menu::SingleChoice::new("&Direct", Key::None, graphwindow::Commands::SetEdgeRoutingDirect, false));
         win.h_edge_routing_orthogonal = er.add(menu::SingleChoice::new("&Orthogonal", Key::None, graphwindow::Commands::SetEdgeRoutingOrthogonal, false));
-        m.add(menu::SubMenu::new(er));
+        m.add(menu::SubMenu::new("&Edge routing", er));
         
-        let mut et = Menu::new("Edge &line type");
+        let mut et = Menu::new();
         win.h_edge_line_single = et.add(menu::SingleChoice::new("&Single", Key::None, graphwindow::Commands::SetEdgeLineSingle, false));
         win.h_edge_line_double = et.add(menu::SingleChoice::new("&Double", Key::None, graphwindow::Commands::SetEdgeLineDouble, false));
         win.h_edge_line_thick = et.add(menu::SingleChoice::new("&Thick", Key::None, graphwindow::Commands::SetEdgeLineThick, false));
@@ -98,7 +99,7 @@ impl GraphWindow {
         win.h_edge_line_ascii_round = et.add(menu::SingleChoice::new("&ASCII Round", Key::None, graphwindow::Commands::SetEdgeLineAsciiRound, false));
         win.h_edge_line_single_round = et.add(menu::SingleChoice::new("&Single Round", Key::None, graphwindow::Commands::SetEdgeLineSingleRound, false));
         win.h_edge_line_braille = et.add(menu::SingleChoice::new("&Braille", Key::None, graphwindow::Commands::SetEdgeLineBraille, false));
-        m.add(menu::SubMenu::new(et));
+        m.add(menu::SubMenu::new("Edge &line type", et));
 
         m.add(menu::Separator::new());
 
@@ -106,7 +107,7 @@ impl GraphWindow {
         win.h_highlight_incoming_edges = m.add(menu::CheckBox::new("Highlight &Incoming Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingIn, false));
         win.h_highlight_outgoing_edges = m.add(menu::CheckBox::new("Highlight &Outgoing Edges", Key::None, graphwindow::Commands::ToggleEdgeHighlightingOut, false));
 
-        win.menu_graph = win.register_menu(m);
+        win.menu_graph = win.appbar().add(MenuButton::new("&Graph", m,1,Side::Left));
         
         win
     }
@@ -214,9 +215,7 @@ impl MenuEvents for GraphWindow {
         self.update_graph_view(false);
     }
 
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_graph, 1);
-    }
+
 
     fn on_menu_open(&self,menu: &mut Menu) {
         // update the status of menu items based on the settings.
@@ -266,5 +265,10 @@ impl MenuEvents for GraphWindow {
         if let Some(item) = menu.get_mut(self.h_highlight_outgoing_edges) {
             item.set_checked(self.settings.highlight_outgoing_edges);
         }
+    }
+}
+impl AppBarEvents for GraphWindow {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu_graph);
     }
 }

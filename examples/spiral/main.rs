@@ -1,16 +1,17 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 use std::time::Duration;
 
 mod spiral;
 use spiral::Spiral;
 
-#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents], 
+#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents, AppBarEvents], 
           overwrite = OnPaint,
           commands  = [New, Exit])]
 struct SpiralDesktop {
     spiral: Spiral,
     window_count: u32,
-    main_menu: Handle<Menu>,
+    main_menu: Handle<MenuButton>,
 }
 
 impl SpiralDesktop {
@@ -98,13 +99,13 @@ impl DesktopEvents for SpiralDesktop {
             timer.start(Duration::from_millis(50));
         }
         
-        self.main_menu = self.register_menu(menu!("
-            &File,class: SpiralDesktop, items:[
+        self.main_menu = self.appbar().add(MenuButton::new("&File", menu!("
+            class: SpiralDesktop, items:[
                 {&New,cmd: New, key: Ctrl+N},
                 {-},
                 {&Exit,cmd: Exit, key: Escape}
             ]
-        "));
+        "),0,Side::Left));
     }
 }
 
@@ -115,8 +116,11 @@ impl MenuEvents for SpiralDesktop {
             spiraldesktop::Commands::Exit => self.close(),
         }
     }
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.main_menu, 0);
+
+}
+impl AppBarEvents for SpiralDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.main_menu);
     }
 }
 
@@ -142,6 +146,6 @@ impl TimerEvents for SpiralDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(SpiralDesktop::new()).menu_bar().command_bar().build()?.run();
+    App::new().desktop(SpiralDesktop::new()).app_bar().command_bar().build()?.run();
     Ok(())
 } 

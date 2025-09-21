@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 
 const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
@@ -18,13 +19,13 @@ const LOGO: [&str; 15] = [
     "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒",
 ];
 
-#[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents], 
+#[Desktop(events    = [CommandBarEvents,MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [AddWindow,Exit, NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<Menu>,
+    menu_arrange: Handle<MenuButton>,
 }
 impl MyDesktop {
     fn new() -> Self {
@@ -58,15 +59,15 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register a menu
-        self.menu_arrange = self.register_menu(menu!("
-            &Windows,class: MyDesktop, items:[
+        self.menu_arrange = self.appbar().add(MenuButton::new("&Windows", menu!("
+            class: MyDesktop, items:[
                 {'&No arrangament',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
                 {&Vertical,cmd: Vertical, select: false},
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "));
+        "),0,Side::Left));
     }
         
 }
@@ -104,13 +105,14 @@ impl MenuEvents for MyDesktop {
             self.arrange_windows(method);
         }
     }
-
-    fn on_update_menubar(&self,menubar: &mut MenuBar){
-        menubar.add(self.menu_arrange, 0);
+}
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self,appbar: &mut AppBar){
+        appbar.show(self.menu_arrange);
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).command_bar().menu_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).command_bar().app_bar().build()?.run();
     Ok(())
 }

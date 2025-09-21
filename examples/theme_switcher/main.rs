@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::{MenuButton,Side};
 use chrono::NaiveDate;
 
 #[derive(ListItem)]
@@ -11,10 +12,11 @@ struct FileInformation {
     created: NaiveDate,
 }
 
-#[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme)]
+#[Window(events : MenuEvents+AppBarEvents, 
+        commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme)]
 struct MyWindow {
-    h_file: Handle<Menu>,
-    h_theme: Handle<Menu>,
+    h_file: Handle<MenuButton>,
+    h_theme: Handle<MenuButton>,
 }
 impl MyWindow {
     fn new() -> Self {
@@ -24,22 +26,22 @@ impl MyWindow {
             h_theme: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.register_menu(menu!(
-            "&File,class: MyWindow, items=[
-            {New,F1,cmd:New},
-            {&Save,F2,cmd:Save},
-            {&Open,F3,cmd:Open},
-            {-},
-            {E&xit,Alt+F4,cmd:Exit}
-        ]"
-        ));
-        w.h_theme = w.register_menu(menu!(
-            "&Theme,class: MyWindow, items=[
-            {&Default,cmd:DefaultTheme,selected: true},
-            {'Dark Gray',cmd:DarkGrayTheme, selected: false},
-            {'&Light',cmd:LightTheme, selected: false}
-        ]"
-        ));
+        w.h_file = w.appbar().add(MenuButton::new("&File", menu!(
+            "class: MyWindow, items=[
+                {New,F1,cmd:New},
+                {&Save,F2,cmd:Save},
+                {&Open,F3,cmd:Open},
+                {-},
+                {E&xit,Alt+F4,cmd:Exit}
+            ]"
+        ),0,Side::Left));
+        w.h_theme = w.appbar().add(MenuButton::new("&Theme", menu!(
+            "class: MyWindow, items=[
+                {&Default,cmd:DefaultTheme,selected: true},
+                {'Dark Gray',cmd:DarkGrayTheme, selected: false},
+                {'&Light',cmd:LightTheme, selected: false}
+            ]"
+        ),0,Side::Left));
 
         let mut splitter = vsplitter!("d:f,pos:55");
         let mut p_basic = panel!("'Basic controls',l:1,t:1,r:1,h:8");
@@ -131,15 +133,16 @@ impl MenuEvents for MyWindow {
             App::set_theme(Theme::new(theme));
         }   
     }
-
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_file, 0);
-        menubar.add(self.h_theme, 0);
+}
+impl AppBarEvents for MyWindow {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.h_file);
+        appbar.show(self.h_theme);
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(120, 24)).menu_bar().build()?;
+    let mut a = App::new().size(Size::new(120, 24)).app_bar().build()?;
     a.add_window(MyWindow::new());
     a.run();
     Ok(())

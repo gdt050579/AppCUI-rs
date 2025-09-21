@@ -1,9 +1,9 @@
 use appcui::prelude::*;
 
-#[Window(events = MenuEvents, commands=Increment)]
+#[Window(events = MenuEvents+AppBarEvents, commands=Increment)]
 struct MyWin {
     m_counter: Handle<menu::Command>,
-    some_menu: Handle<Menu>,
+    some_menu: Handle<appbar::MenuButton>,
     counter: u32,
 }
 impl MyWin {
@@ -14,17 +14,14 @@ impl MyWin {
             some_menu: Handle::None,
             counter: 0
         };
-        let mut m = Menu::new("Some menu");
+        let mut m = Menu::new();
         w.m_counter = m.add(menuitem!("'Increment (0)',cmd:Increment,class:MyWin"));
-        w.some_menu = w.register_menu(m);
+        w.some_menu = w.appbar().add(appbar::MenuButton::new("Some menu",m,0,appbar::Side::Left));
 
         w
     }
 }
 impl MenuEvents for MyWin {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.some_menu, 0);
-    }
     fn on_command(&mut self, menu: Handle<Menu>, item: Handle<menu::Command>, _: mywin::Commands) {
         if item == self.m_counter {
             self.counter += 1;
@@ -35,9 +32,14 @@ impl MenuEvents for MyWin {
         }
     }
 }
+impl AppBarEvents for MyWin {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.some_menu);
+    }
+}
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().menu_bar().build()?;
+    let mut a = App::new().app_bar().build()?;
     a.add_window(MyWin::new());
     a.run();
     Ok(())

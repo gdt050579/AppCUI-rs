@@ -8,6 +8,7 @@ use crate::system::ThemeMethods;
 use crate::system::Timer;
 use crate::system::TimerMethods;
 use crate::system::{Handle, LayoutMethods, RuntimeManager};
+use crate::ui::AppBar;
 use crate::ui::{
     button::events::ButtonEvents, checkbox::events::CheckBoxEvents, command_bar::events::GenericCommandBarEvents, common::traits::*, common::*,
     desktop::events::DesktopEvents, layout::*, menu::events::GenericMenuEvents, menu::Menu, menu::MenuItem, window::events::ToolBarEvents,
@@ -473,12 +474,8 @@ impl ControlBase {
         self.layout.update(parent_layout.client_width, parent_layout.client_height);
         self.screen_origin.x = parent_layout.origin.x + self.layout.x();
         self.screen_origin.y = parent_layout.origin.y + self.layout.y();
-        self.screen_clip.set_with_size(
-            self.screen_origin.x,
-            self.screen_origin.y,
-            self.layout.width(),
-            self.layout.height(),
-        );
+        self.screen_clip
+            .set_with_size(self.screen_origin.x, self.screen_origin.y, self.layout.width(), self.layout.height());
         self.screen_clip.intersect_with(&parent_layout.clip);
     }
 
@@ -512,12 +509,7 @@ impl ControlBase {
 
     #[inline]
     pub(crate) fn client_clip(&self) -> ClipArea {
-        let mut c = ClipArea::with_size(
-            self.screen_origin.x,
-            self.screen_origin.y,
-            self.layout.width(),
-            self.layout.height(),
-        );
+        let mut c = ClipArea::with_size(self.screen_origin.x, self.screen_origin.y, self.layout.width(), self.layout.height());
         c.reduce_margins(
             self.margins.left as i32,
             self.margins.top as i32,
@@ -604,7 +596,7 @@ impl ControlBase {
         } else {
             RuntimeManager::get().hide_tooltip();
         }
-    }    
+    }
     pub(crate) fn show_tooltip(&self, txt: &str) {
         if self.is_visible() && self.screen_clip.is_visible() {
             let r = Rect::new(
@@ -636,7 +628,7 @@ impl ControlBase {
     }
     pub fn show_menu(&self, handle: Handle<Menu>, x: i32, y: i32, max_size: Option<Size>) {
         let r = self.absolute_rect();
-        RuntimeManager::get().show_menu(handle, self.handle, r.left() + x, r.top() + y, max_size);
+        RuntimeManager::get().show_menu(handle, self.handle, r.left() + x, r.top() + y, 0, max_size);
     }
 
     #[allow(private_bounds)]
@@ -659,6 +651,10 @@ impl ControlBase {
             return menu.get_mut(menuitem_handle);
         }
         None
+    }
+
+    pub fn appbar(&mut self) -> &mut AppBar {
+        RuntimeManager::get().get_appbar()
     }
 
     #[inline(always)]

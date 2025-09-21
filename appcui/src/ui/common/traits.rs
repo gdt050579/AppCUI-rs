@@ -3,6 +3,7 @@ use crate::{
     input::{Key, MouseEvent},
     system::{Handle, Theme},
     ui::{
+        appbar::events::AppBarEvents,
         accordion::events::AccordionEvents,
         button::events::ButtonEvents,
         checkbox::events::CheckBoxEvents,
@@ -174,6 +175,7 @@ pub trait Control:
     + TabEvents
     + CharPickerEvents
     + GenericGraphViewEvents
+    + AppBarEvents
 {
 }
 

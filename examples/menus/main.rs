@@ -1,10 +1,11 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::{MenuButton,Side};
 
-#[Window(events : MenuEvents, commands  : A)]
+#[Window(events : MenuEvents+AppBarEvents, commands  : A)]
 struct MyWindow {
-    h_file: Handle<Menu>,
-    h_edit: Handle<Menu>,
-    h_help: Handle<Menu>,
+    h_file: Handle<MenuButton>,
+    h_edit: Handle<MenuButton>,
+    h_help: Handle<MenuButton>,
     lb: Handle<Label>,
 }
 impl MyWindow {
@@ -18,8 +19,8 @@ impl MyWindow {
         };
         w.lb = w.add(label!("None,a:c,w:30,h:1"));
         // construct a popup menu
-        w.h_file = w.register_menu(menu!(
-            "&File,class: MyWindow, items=[
+        w.h_file = w.appbar().add(MenuButton::new("&File", menu!(
+            "class: MyWindow, items=[
             {New,F1,cmd:A},
             {&Save,F2,cmd:A},
             {'&Save As ...',Alt+F2,cmd:A},
@@ -27,9 +28,9 @@ impl MyWindow {
             {-},
             {E&xit,Alt+F4,cmd:A}
         ]"
-        ));
-        w.h_edit = w.register_menu(menu!(
-            "&Edit,class: MyWindow, items=[
+        ),0,Side::Left));
+        w.h_edit = w.appbar().add( MenuButton::new("&Edit",menu!(
+            "class: MyWindow, items=[
             {&Copy,Ctrl+Ins,cmd:A},
             {&Paste,Shift+Ins,cmd:A},
             {&Cut,Ctrl+X,cmd:A},
@@ -42,9 +43,9 @@ impl MyWindow {
                 {'Slot &5',Alt+5,cmd:A},
             ]}            
         ]"
-        ));
-        w.h_help = w.register_menu(menu!(
-            "&Help,class: MyWindow, items=[
+        ),0,Side::Left));
+        w.h_help = w.appbar().add( MenuButton::new("&Help",menu!(
+            "class: MyWindow, items=[
             {&About,Ctrl+Shift+A,cmd:A},
             {&Update,F10,cmd:A},
             {-},
@@ -58,7 +59,7 @@ impl MyWindow {
                 ]}            
             ]}            
         ]"
-        ));
+        ),0,Side::Left));
         w
     }
 }
@@ -73,15 +74,19 @@ impl MenuEvents for MyWindow {
         }
     }
 
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_file, 0);
-        menubar.add(self.h_edit, 0);
-        menubar.add(self.h_help, 0);
+
+}
+
+impl AppBarEvents for MyWindow {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.h_file);
+        appbar.show(self.h_edit);
+        appbar.show(self.h_help);
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().menu_bar().build()?;
+    let mut a = App::new().app_bar().build()?;
     a.add_window(MyWindow::new());
     a.run();
     Ok(())

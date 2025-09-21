@@ -83,6 +83,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);
@@ -148,6 +149,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);
@@ -239,6 +241,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::Default);
@@ -303,6 +306,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::Default);
@@ -393,6 +397,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::WindowEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MenuEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::AppBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CommandBarEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToolBarEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ColorPickerEvents, TraitImplementation::DefaultNonOverwritable);
@@ -1661,7 +1666,6 @@ pub fn menuitem(input: TokenStream) -> TokenStream {
 /// The format is `menu!("attributes")` where the attributes are pairs of key-value, separated by comma.
 /// 
 /// # Parameters
-/// * `caption` or `text` (required, first positional parameter) - The text displayed as the menu title
 /// * `items` or `subitems` - List of menu items to include in the menu (optional)
 /// * `class` - Class name for command resolution (optional)
 /// 
@@ -1678,8 +1682,7 @@ pub fn menuitem(input: TokenStream) -> TokenStream {
 /// 
 /// // Basic menu with items
 /// let menu = menu!(
-///     "'File',
-///     items: [
+///     "items: [
 ///         {'Open File', shortcut: 'Ctrl+O', cmd: 'OpenFile'},
 ///         {'Save', shortcut: 'Ctrl+S', cmd: 'SaveFile'},
 ///         {'---'},
@@ -1689,8 +1692,7 @@ pub fn menuitem(input: TokenStream) -> TokenStream {
 /// 
 /// // Menu with submenus
 /// let menu = menu!(
-///     "'View',
-///     items: [
+///     "items: [
 ///         {'Show Toolbar', shortcut: 'Ctrl+T', cmd: 'ToggleToolbar', checked: true},
 ///         {'---'},
 ///         {'Zoom',
@@ -1705,8 +1707,7 @@ pub fn menuitem(input: TokenStream) -> TokenStream {
 /// 
 /// // Menu with class specification
 /// let menu = menu!(
-///     "'Edit',
-///     class: 'MyWindow',
+///     "class: 'MyWindow',
 ///     items: [
 ///         {'Cut', shortcut: 'Ctrl+X', cmd: 'Cut'},
 ///         {'Copy', shortcut: 'Ctrl+C', cmd: 'Copy'},

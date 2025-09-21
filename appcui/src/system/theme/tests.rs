@@ -78,9 +78,9 @@ struct FileInformation {
     created: NaiveDate,
 }
 
-#[Window(events : MenuEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme, internal: true)]
+#[Window(events : AppBarEvents, commands  : New+Save+Open+Exit+DefaultTheme+DarkGrayTheme+LightTheme, internal: true)]
 struct WindowWithTheme {
-    h_file: Handle<Menu>,
+    h_file: Handle<appbar::MenuButton>,
 }
 impl WindowWithTheme {
     fn new() -> Self {
@@ -89,14 +89,19 @@ impl WindowWithTheme {
             h_file: Handle::None,
         };
         // construct a popup menu
-        w.h_file = w.register_menu(menu!(
-            "&File,class: WindowWithTheme, items=[
-            {New,F1,cmd:New},
-            {&Save,F2,cmd:Save},
-            {&Open,F3,cmd:Open},
-            {-},
-            {E&xit,Alt+F4,cmd:Exit}
-        ]"
+        w.h_file = w.appbar().add(appbar::MenuButton::new(
+            "&File",
+            menu!(
+                "class: WindowWithTheme, items=[
+                    {New,F1,cmd:New},
+                    {&Save,F2,cmd:Save},
+                    {&Open,F3,cmd:Open},
+                    {-},
+                    {E&xit,Alt+F4,cmd:Exit}
+                ]"
+            ),
+            0,
+            appbar::Side::Left,
         ));
 
         let mut splitter = vsplitter!("d:f,pos:55");
@@ -172,9 +177,9 @@ impl WindowWithTheme {
         w
     }
 }
-impl MenuEvents for WindowWithTheme {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.h_file, 0);
+impl AppBarEvents for WindowWithTheme {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.h_file);
     }
 }
 
@@ -190,13 +195,12 @@ fn check_default_theme() {
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::Default))
         .command_bar()
-        .menu_bar()
+        .app_bar()
         .build()
         .unwrap();
     a.add_window(WindowWithTheme::new());
     a.run();
 }
-
 
 #[test]
 fn check_darkgray_theme() {
@@ -210,7 +214,7 @@ fn check_darkgray_theme() {
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::DarkGray))
         .command_bar()
-        .menu_bar()
+        .app_bar()
         .build()
         .unwrap();
     a.add_window(WindowWithTheme::new());
@@ -229,7 +233,7 @@ fn check_light_theme() {
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::Light))
         .command_bar()
-        .menu_bar()
+        .app_bar()
         .build()
         .unwrap();
     a.add_window(WindowWithTheme::new());

@@ -57,3 +57,9 @@ All controls (including Window and Desktop) have a set of common methods obtaing
 | Method    | Purpose                                                                                                                                                            |
 | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `theme()` | Returns a reference to the theme object that is being used by the application. This is the same reference an objectr receives when OnPaint method is being called. |
+
+## Application Bar related methods
+
+| Method     | Purpose                                                                                                                                                                                                          |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appbar()` | Returns a reference to the application bar object that is being used by the application. This method will panic if the application bar is not enabled (via the `app_bar()` method when building the application) |

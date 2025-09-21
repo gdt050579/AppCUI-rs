@@ -1,19 +1,21 @@
+use appcui::ui::appbar::{MenuButton,Side};
 use std::path::Path;
 
-use appcui::prelude::*;
 use super::painter_control::PainterControl;
+use appcui::prelude::*;
 
-#[Window(events = MenuEvents + ColorPickerEvents + ButtonEvents, commands = ForegroundColor + BackgroundColor + Char25 + Char50 + Char75 + Char100)]
+#[Window(events = MenuEvents + ColorPickerEvents + ButtonEvents + AppBarEvents, 
+         commands = ForegroundColor + BackgroundColor + Char25 + Char50 + Char75 + Char100)]
 pub struct PainterWindow {
     painter: Handle<PainterControl>,
-    menu: Handle<Menu>,
+    menu: Handle<MenuButton>,
     fg_color_picker: Handle<ColorPicker>,
     bg_color_picker: Handle<ColorPicker>,
     clear_button: Handle<Button>,
 }
 
 impl PainterWindow {
-    fn inner_new(name: &str, path: Option<&Path>) -> Result<Self, String>  {
+    fn inner_new(name: &str, path: Option<&Path>) -> Result<Self, String> {
         let mut w = Self {
             base: Window::new(name, layout!("a:c,w:60,h:20"), window::Flags::Sizeable),
             painter: Handle::None,
@@ -23,15 +25,16 @@ impl PainterWindow {
             clear_button: Handle::None,
         };
 
-        let m = menu!("
-            &Options,class:PainterWindow,items:[
+        let m = menu!(
+            "class:PainterWindow,items:[
                 {'&25% Block',1,cmd:Char25},
                 {'&50% Block',2,cmd:Char50},
                 {'&75% Block',3,cmd:Char75},
                 {'&100% Block',4,cmd:Char100}
             ]
-        ");
-        w.menu = w.register_menu(m);
+        "
+        );
+        w.menu = w.appbar().add(MenuButton::new("&Options", m, 0, Side::Left));
         w.add(label!("'ForeColor:',t:0,l:0,w:10,h:1"));
         w.add(label!("'BackColor:',t:0,l:23,w:10,h:1"));
 
@@ -44,8 +47,7 @@ impl PainterWindow {
 
         if let Some(path) = path {
             p.load_from_file(path)?;
-            
-        } 
+        }
         w.painter = w.add(p);
         Ok(w)
     }
@@ -96,11 +98,12 @@ impl PainterWindow {
     }
 }
 
-impl MenuEvents for PainterWindow {
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu, 0);
+impl AppBarEvents for PainterWindow {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu);
     }
-
+}
+impl MenuEvents for PainterWindow {
     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: painterwindow::Commands) {
         match command {
             painterwindow::Commands::Char25 => {
@@ -143,4 +146,4 @@ impl ButtonEvents for PainterWindow {
             EventProcessStatus::Ignored
         }
     }
-} 
+}

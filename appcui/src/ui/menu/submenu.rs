@@ -18,12 +18,12 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 ///
 /// Creating a submenu and adding it to a parent menu:
 ///
-/// ```rust
+/// ```rust, no_run
 /// use appcui::prelude::*;
 ///
-/// #[Window(events = MenuEvents, commands = BoldText+ItalicText+UnderlineText)]
+/// #[Window(events = MenuEvents+AppBarEvents, commands = BoldText+ItalicText+UnderlineText)]
 /// struct MyWindow {
-///     format_menu: Handle<Menu>,
+///     format_menu: Handle<appbar::MenuButton>,
 /// }
 ///
 /// impl MyWindow {
@@ -34,10 +34,10 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 ///         };
 ///         
 ///         // Create the main format menu
-///         let mut format_menu = Menu::new("&Format");
+///         let mut format_menu = Menu::new();
 ///         
 ///         // Create a text style submenu
-///         let mut text_style_menu = Menu::new("Text &Style");
+///         let mut text_style_menu = Menu::new();
 ///         
 ///         // Add items to the text style submenu
 ///         text_style_menu.add(menu::Command::new(
@@ -59,20 +59,24 @@ use super::{menu_item::MenuItem, MenuItemWrapper};
 ///         ));
 ///         
 ///         // Create a SubMenu from the text style menu and add it to the format menu
-///         format_menu.add(menu::SubMenu::new(text_style_menu));
+///         format_menu.add(menu::SubMenu::new("&Text style", text_style_menu));
 ///         
 ///         // Register the format menu with the window
-///         w.format_menu = w.register_menu(format_menu);
+///         w.format_menu = w.appbar().add(
+///             appbar::MenuButton::new("&Format", 
+///                                     format_menu, 
+///                                     0, 
+///                                     appbar::Side::Left));
 ///         
 ///         w
 ///     }
 /// }
-///
-/// impl MenuEvents for MyWindow {
-///     fn on_update_menubar(&self, menubar: &mut MenuBar) {
-///         menubar.add(self.format_menu, 0);
+/// impl AppBarEvents for MyWindow {
+///     fn on_update(&self, appbar: &mut AppBar) {
+///         appbar.show(self.format_menu);
 ///     }
-///     
+/// }
+/// impl MenuEvents for MyWindow {
 ///     fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: mywindow::Commands) {
 ///         match command {
 ///             mywindow::Commands::BoldText => {
@@ -102,19 +106,17 @@ impl SubMenu {
     /// accessible through this submenu item.
     ///
     /// # Parameters
+    /// * `name` - the name of the submenu. The name could contain a `&`` character (e.g. `&File`) to set up a hotkey for the submenu.
     /// * `menu` - The menu to be associated with this submenu.
     ///
     /// # Returns
     /// A new `SubMenu` instance.
-    pub fn new(menu: Menu) -> Self {
-        let mut caption = menu.caption.clone();        
+    pub fn new(name:&str, menu: Menu) -> Self {
         let handle = RuntimeManager::get().get_menus().add(menu);
-        // submenu hotkey should be a letter while a menu hotkey shoult be Alt+Letter
-        // as such, we will clear the Alt if it is set up
-        caption.clear_hotkey_modifier();
+        // submenu hotkey should be a letter  -> use ExtractHotKeyMethod::Key
         SubMenu {
             enabled: true,
-            caption,
+            caption: Caption::new(name, ExtractHotKeyMethod::Key),
             submenu_handle: handle,
             handle: Handle::None,
             menu_handle: Handle::None,

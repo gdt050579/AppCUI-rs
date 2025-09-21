@@ -85,17 +85,17 @@ impl Caption {
     pub(crate) fn has_hotkey(&self) -> bool {
         self.hotkey.code != KeyCode::None
     }
-    pub(crate) fn copy_from(&mut self, caption: &Caption) {
-        self.chars_count = caption.chars_count;
-        self.hotkey = caption.hotkey;
-        self.hotkey_pos = caption.hotkey_pos;
-        self.text.clear();
-        self.text.push_str(caption.text.as_str());
-    }
-    #[inline(always)]
-    pub(crate) fn clear_hotkey_modifier(&mut self) {
-        self.hotkey.modifier = KeyModifier::None;
-    }
+    // pub(crate) fn copy_from(&mut self, caption: &Caption) {
+    //     self.chars_count = caption.chars_count;
+    //     self.hotkey = caption.hotkey;
+    //     self.hotkey_pos = caption.hotkey_pos;
+    //     self.text.clear();
+    //     self.text.push_str(caption.text.as_str());
+    // }
+    // #[inline(always)]
+    // pub(crate) fn clear_hotkey_modifier(&mut self) {
+    //     self.hotkey.modifier = KeyModifier::None;
+    // }
 }
 
 impl From<ExtractHotKeyMethod> for KeyModifier {

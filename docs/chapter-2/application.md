@@ -28,7 +28,7 @@ Using `App::new` or `App::with_backend` creates a builder object that can furthe
 * `.title(terminal_title)` to set up a terminal title
 * `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one
 * `.single_window()` if you want a single window application
-* `.menu_bar()` to enable the application top menu bar
+* `.app_bar()` to enable the application top app bar
 * `.command_bar()` to enable the application command bar
 * `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in section [Themes](chapter-6/themes.md)
 * `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
@@ -43,7 +43,7 @@ After setting up the configuration for an application, just call the `build()` m
 A typical example of using this settings is as follows:
 ```rs
 let mut a = App::new().size(Size::new(80,40))       // size should be 80x25 chars
-                      .menu_bar()                   // top menu bar should be enabled
+                      .app_bar()                    // top application bar should be enabled
                       .command_bar()                // command bar should be enabled
                       .log_file("debug.log", false) // log into debug.log
                       .color_schema(false)          // use AppCUI predefined colors

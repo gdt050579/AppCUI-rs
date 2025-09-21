@@ -1,4 +1,5 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
 use rand::Rng;
 use std::time::Duration;
 
@@ -10,7 +11,7 @@ enum DisplayState {
     Running,
 }
 
-#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents], 
+#[Desktop(events    = [DesktopEvents, TimerEvents, MenuEvents, CommandBarEvents, AppBarEvents], 
           overwrite = OnPaint,
           commands  = [New, Exit])]
 struct MatrixDesktop {
@@ -19,7 +20,7 @@ struct MatrixDesktop {
     loading_chars_shown: usize,
     loading_start_time: u64,
     window_count: u32,
-    main_menu: Handle<Menu>,
+    main_menu: Handle<MenuButton>,
 }
 
 impl MatrixDesktop {
@@ -131,13 +132,13 @@ impl DesktopEvents for MatrixDesktop {
             timer.start(Duration::from_millis(50)); 
         }
         
-        self.main_menu = self.register_menu(menu!("
-            &File,class: MatrixDesktop, items:[
+        self.main_menu = self.appbar().add(MenuButton::new("&File", menu!("
+            class: MatrixDesktop, items:[
                 {&New,cmd: New, key: Ctrl+N},
                 {-},
                 {&Exit,cmd: Exit, key: Escape}
             ]
-        "));
+        "),0,Side::Left));
     }
 }
 
@@ -148,8 +149,10 @@ impl MenuEvents for MatrixDesktop {
             matrixdesktop::Commands::Exit => self.close(),
         }
     }
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.main_menu, 0);
+}
+impl AppBarEvents for MatrixDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.main_menu);
     }
 }
 
@@ -216,6 +219,6 @@ impl TimerEvents for MatrixDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MatrixDesktop::new()).menu_bar().command_bar().build()?.run();
+    App::new().desktop(MatrixDesktop::new()).app_bar().command_bar().build()?.run();
     Ok(())
 } 

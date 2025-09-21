@@ -1,4 +1,6 @@
 use appcui::prelude::*;
+use appcui::ui::appbar::*;
+
 mod settings;
 mod graph_window;
 mod tree;
@@ -17,7 +19,7 @@ const LOGO: [&str; 6] = [
     " ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝ ╚══╝╚══╝ "                                                                          
 ];
 
-#[Desktop(events    = [MenuEvents,DesktopEvents], 
+#[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           overwrite = OnPaint, 
           commands  = [ShowTree, ShowCircular, ShowBipartite, ShowShowcase,
                        Exit, About, 
@@ -25,9 +27,9 @@ const LOGO: [&str; 6] = [
 struct MyDesktop {
     index: u32,
     arrange_method: Option<desktop::ArrangeWindowsMethod>,
-    menu_arrange: Handle<Menu>,
-    menu_examples: Handle<Menu>,
-    menu_help: Handle<Menu>,
+    menu_arrange: Handle<MenuButton>,
+    menu_examples: Handle<MenuButton>,
+    menu_help: Handle<MenuButton>,
 }
 
 impl MyDesktop {
@@ -73,31 +75,31 @@ impl DesktopEvents for MyDesktop {
     
     fn on_start(&mut self) { 
         // define and register menus
-        self.menu_arrange = self.register_menu(menu!("
-            &Windows,class: MyDesktop, items:[
+        self.menu_arrange = self.appbar().add(MenuButton::new("&Windows", menu!("
+            class: MyDesktop, items:[
                 {'&No arrangement',cmd: NoArrange, select: true},
                 {&Cascade,cmd: Cascade, select: false},
                 {&Vertical,cmd: Vertical, select: false},
                 {&Horizontal,cmd: Horizontal, select: false},
                 {&Grid,cmd: Grid, select: false},
             ]
-        "));
+        "),2,Side::Left));
         
-        self.menu_examples = self.register_menu(menu!("
-            &Examples,class: MyDesktop, items:[
+        self.menu_examples = self.appbar().add(MenuButton::new("&Examples", menu!("
+            class: MyDesktop, items:[
                 {'&Tree Graph',cmd: ShowTree},
                 {'&Circular Graph',cmd: ShowCircular},
                 {'&Bipartite Graph',cmd: ShowBipartite},
                 {'&Showcase Graph',cmd: ShowShowcase},
             ]
-        "));
+        "),0,Side::Left));
         
-        self.menu_help = self.register_menu(menu!("
-            &Help,class: MyDesktop, items:[
+        self.menu_help = self.appbar().add(MenuButton::new("&Help", menu!("
+            class: MyDesktop, items:[
                 {&About,cmd: About},
                 {E&xit,cmd: Exit},
             ]
-        "));
+        "),2,Side::Left));
     }  
 }
 
@@ -139,14 +141,17 @@ impl MenuEvents for MyDesktop {
         }
     }
 
-    fn on_update_menubar(&self, menubar: &mut MenuBar) {
-        menubar.add(self.menu_examples, 0);
-        menubar.add(self.menu_arrange, 2);
-        menubar.add(self.menu_help, 2);
+
+}
+impl AppBarEvents for MyDesktop {
+    fn on_update(&self, appbar: &mut AppBar) {
+        appbar.show(self.menu_examples);
+        appbar.show(self.menu_arrange);
+        appbar.show(self.menu_help);
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).menu_bar().build()?.run();
+    App::new().desktop(MyDesktop::new()).app_bar().build()?.run();
     Ok(())
 }

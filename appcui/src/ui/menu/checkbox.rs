@@ -40,7 +40,7 @@ use crate::{
 ///         };
 ///         
 ///         // Create a menu for view options
-///         let mut view_menu = Menu::new("&View");
+///         let mut view_menu = Menu::new();
 ///         
 ///         // Add checkbox items with initial states
 ///         w.status_bar_checkbox = view_menu.add(menu::CheckBox::new(
