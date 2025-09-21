@@ -10,3 +10,4 @@ record_events.bat
 /examples/dev_test.rs
 tarpaulin-report.html
 *.profraw
+/.idea

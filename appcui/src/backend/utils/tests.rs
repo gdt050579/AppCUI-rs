@@ -7,10 +7,10 @@ use crate::prelude::*;
 fn check_ansi_methods() {
     let mut a = AnsiFormatter::new(128, AnsiFlags::None);
     a.enable_mouse_events();
-    assert_eq!(a.text(),"\x1b[?1003h");
+    assert_eq!(a.text(),"\x1b[?1000h\x1b[?1002h\x1b[?1003h\x1b[?1006h");
     a.clear();
     a.disable_mouse_events();
-    assert_eq!(a.text(),"\x1b[?1003l");
+    assert_eq!(a.text(),"\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l");
     a.clear();
     a.write_char('a');
     assert_eq!(a.text(),"a");

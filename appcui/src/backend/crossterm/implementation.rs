@@ -4,7 +4,7 @@ use crate::{
     graphics::{CharFlags, Color, Size, Surface},
     system::{Error, SystemEvent},
 };
-use crossterm::event::EnableMouseCapture;
+use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
 use crossterm::{
     cursor::{Hide, MoveTo, Show},
     execute, queue,
@@ -243,6 +243,7 @@ impl Backend for CrossTerm {
     }
 
     fn on_close(&mut self) {
+        let _ = execute!(stdout(), DisableMouseCapture);
         let _ = execute!(stdout(), LeaveAlternateScreen, Show, ResetColor);
         let _ = disable_raw_mode();
     }

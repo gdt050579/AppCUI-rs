@@ -96,13 +96,14 @@ impl Backend for TermiosTerminal {
         let _ = std::io::stdout().flush();
     }
 
+    fn on_resize(&mut self, new_size: Size) {
+        self.size = new_size;
+    }
+
     fn size(&self) -> Size {
         self.size
     }
 
-    fn query_system_event(&mut self) -> Option<SystemEvent> {
-        None
-    }
     fn clipboard_text(&self) -> Option<String> {
         let mut ctx: ClipboardContext = ClipboardContext::new().ok()?;
         ctx.get_contents().ok()
@@ -118,8 +119,12 @@ impl Backend for TermiosTerminal {
         ctx.get_contents().is_ok()
     }
 
-    fn on_resize(&mut self, new_size: Size) {
-        self.size = new_size;
+    fn query_system_event(&mut self) -> Option<SystemEvent> {
+        None
+    }
+
+    fn is_single_threaded(&self) -> bool {
+        false
     }
 
     fn on_close(&mut self) {
@@ -129,11 +134,4 @@ impl Backend for TermiosTerminal {
         let _ = std::io::stdout().flush();
         self.orig_termios.restore();
     }
-
-    fn is_single_threaded(&self) -> bool {
-        false
-    }
 }
-
-#[derive(Debug, Default, PartialEq, Eq)]
-pub struct UnsupportedCode([u8; 5]);
