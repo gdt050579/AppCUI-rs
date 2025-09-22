@@ -19,7 +19,6 @@ mod surface;
 mod text_format;
 mod orthogonal_direction;
 mod glyph;
-mod bit_tile;
 
 #[cfg(test)]
 mod surface_tester;
@@ -47,7 +46,7 @@ pub use self::text_format::TextFormatBuilder;
 pub use self::text_format::WrapType;
 pub use self::orthogonal_direction::OrthogonalDirection;
 pub use self::glyph::Glyph;
-pub use self::bit_tile::BitTile;
+
 
 #[cfg(test)]
 pub(crate) use self::surface_tester::SurfaceTester;
