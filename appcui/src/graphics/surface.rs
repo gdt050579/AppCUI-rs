@@ -1,5 +1,7 @@
 use std::path::Path;
 
+use super::BitTile;
+use super::BitTileRenderMethod;
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
@@ -14,7 +16,6 @@ use super::Rect;
 use super::Size;
 use super::TextAlignment;
 use super::TextFormat;
-use super::BitTile;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
 
@@ -1323,12 +1324,12 @@ impl Surface {
         tile: &BitTile<STORAGE_BYTES>,
         set_bit_color: Color,
         unset_bit_color: Color,
-        large: bool,
+        render_method: BitTileRenderMethod,
     ) {
-        if large {
-            tile.paint_large(self, Point::new(x, y), set_bit_color, unset_bit_color);
-        } else {
-            tile.paint_small(self, Point::new(x, y), set_bit_color, unset_bit_color);
+        match render_method {
+            BitTileRenderMethod::SmallBlocks => tile.paint_small(self, Point::new(x, y), set_bit_color, unset_bit_color),
+            BitTileRenderMethod::LargeBlocks => tile.paint_large(self, Point::new(x, y), set_bit_color, unset_bit_color),
+            BitTileRenderMethod::Braille => todo!(),
         }
     }
 

@@ -4,6 +4,12 @@ use super::super::{CharFlags, Character, Color, Point, Size, Surface};
 use super::{StringFormatError, StringFormatParser};
 use std::str::FromStr;
 
+pub enum BitTileRenderMethod {
+    SmallBlocks,
+    LargeBlocks,
+    Braille
+}
+
 #[derive(Copy, Clone)]
 pub struct BitTile<const STORAGE_BYTES: usize> {
     width: u8,
@@ -69,18 +75,22 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
     pub(in super::super) fn paint_large(&self, surface: &mut Surface, pos: Point, set_pixel_color: Color, unset_pixel_color: Color) {
         let mut ch = Character::new(' ', Color::White, Color::Transparent, CharFlags::None);
         for y in 0..self.height {
+            let mut x_pos = pos.x;
             for x in 0..self.width {
                 if let Some(is_set) = self.get(x, y) {
                     if is_set {
                         if set_pixel_color != Color::Transparent {
                             ch.background = set_pixel_color;
-                            surface.write_char(pos.x + x as i32, pos.y + y as i32, ch);
+                            surface.write_char(x_pos, pos.y + y as i32, ch);
+                            surface.write_char(x_pos + 1, pos.y + y as i32, ch);
                         }
                     } else if unset_pixel_color != Color::Transparent {
                         ch.background = unset_pixel_color;
-                        surface.write_char(pos.x + x as i32, pos.y + y as i32, ch);
+                        surface.write_char(x_pos, pos.y + y as i32, ch);
+                        surface.write_char(x_pos + 1, pos.y + y as i32, ch);
                     }
                 }
+                x_pos += 2;
             }
         }
     }
@@ -88,19 +98,21 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
         let mut ch = Character::new(' ', set_pixel_color, unset_pixel_color, CharFlags::None);
         let mut y = 0u32;
         let h = self.height as u32;
+        let mut y_pos = pos.y;
         while y < h {
             for x in 0..self.width {
                 let px1 = self.get(x, y as u8).unwrap_or(false);
                 let px2 = self.get(x, (y + 1) as u8).unwrap_or(false);
-                ch.code = match (px1,px2) {
+                ch.code = match (px1, px2) {
                     (true, true) => SpecialChar::Block100.into(),
                     (true, false) => SpecialChar::BlockUpperHalf.into(),
                     (false, true) => SpecialChar::BlockLowerHalf.into(),
                     (false, false) => ' ',
                 };
-                surface.write_char(pos.x + x as i32, pos.y + y as i32, ch);
+                surface.write_char(pos.x + x as i32, y_pos, ch);
             }
             y += 2;
+            y_pos += 1;
         }
     }
 }
@@ -131,12 +143,12 @@ impl<const STORAGE_BYTES: usize> FromStr for BitTile<STORAGE_BYTES> {
                     // not a 0 - put 1
                     tile.data[idx] |= mask;
                 }
-            }
-            if mask < 0x80 {
-                mask <<= 1;
-            } else {
-                mask = 1;
-                idx += 1;
+                if mask < 0x80 {
+                    mask <<= 1;
+                } else {
+                    mask = 1;
+                    idx += 1;
+                }
             }
         }
 

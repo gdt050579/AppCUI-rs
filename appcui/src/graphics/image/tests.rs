@@ -1,3 +1,5 @@
+use crate::prelude::BitTile;
+
 use super::super::{Character, Color, RenderOptionsBuilder, Size, SurfaceTester};
 use super::CharacterSet;
 use super::ColorSchema;
@@ -5,6 +7,7 @@ use super::Image;
 use super::Pixel;
 use super::RenderOptions;
 use super::Scale;
+use super::BitTileRenderMethod;
 use std::str::FromStr;
 
 const HEART: &str = r#"
@@ -785,37 +788,20 @@ fn check_draw_dithered_batch_flower() {
     );
 }
 
-// #[test]
-// fn check_xxx() {
-//     let mut s = SurfaceTester::new(40, 10);
-//     let v: &[(char, Color)] = &[
-//         (' ', Color::Black),
-//         ('░', Color::Gray),
-//         ('▒', Color::Gray),
-//         ('░', Color::Silver),
-//         ('░', Color::White),
-//         ('▒', Color::Silver),
-//         ('▓', Color::Gray),
-//         ('▒', Color::White),
-//         ('▓', Color::Silver),
-//         ('▓', Color::White),
-//         ('█', Color::White),
-//     ];
+#[test]
+fn check_bit_tile_paint_small() {
+    let tile: BitTile<256> = BitTile::from_str(HEART).unwrap();
+    let mut s = SurfaceTester::new(40, 12);
+    s.draw_tile(0, 0, &tile, Color::White, Color::DarkBlue, BitTileRenderMethod::SmallBlocks);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x9D50B71B825AF4C5);
+}
 
-//     let mut x = 1;
-//     let mut idx = 48u8;
-//     for (ch, c) in v {
-//         let car = Character {
-//             code: *ch,
-//             foreground: *c,
-//             background: Color::Black,
-//             flags: CharFlags::None,
-//         };
-//         s.write_char(x, 1, car);
-//         s.write_char(x + 1, 1, car);
-//         s.write_char(x, 2, Character::new(idx, Color::Yellow, Color::Black, CharFlags::None));
-//         x += 2;
-//         idx += 1;
-//     }
-//     s.print(false);
-// }
+#[test]
+fn check_bit_tile_paint_large() {
+    let tile: BitTile<256> = BitTile::from_str(HEART).unwrap();
+    let mut s = SurfaceTester::new(40, 12);
+    s.draw_tile(0, 0, &tile, Color::White, Color::DarkBlue, BitTileRenderMethod::LargeBlocks);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xDCFFA3AAFD6E6EAD);
+}

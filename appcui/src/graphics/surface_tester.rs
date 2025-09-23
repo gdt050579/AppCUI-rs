@@ -10,36 +10,36 @@ impl SurfaceTester {
             surface: Surface::new(width, height),
         }
     }
-    // #[allow(dead_code)]
-    // pub(crate) fn print(&mut self, show_just_hash: bool) {
-    //     use crate::backend::utils::{AnsiFlags, AnsiFormatter};
-    //     if show_just_hash {
-    //         println!("Hash = 0x{:X} - Dec: {}", self.compute_hash(), self.compute_hash());
-    //     } else {
-    //         let mut tmp = AnsiFormatter::new(1024, AnsiFlags::None);
-    //         let mut x = 0u32;
+    #[allow(dead_code)]
+    pub(crate) fn print(&mut self, show_just_hash: bool) {
+        use crate::backend::utils::{AnsiFlags, AnsiFormatter};
+        if show_just_hash {
+            println!("Hash = 0x{:X} - Dec: {}", self.compute_hash(), self.compute_hash());
+        } else {
+            let mut tmp = AnsiFormatter::new(1024, AnsiFlags::None);
+            let mut x = 0u32;
 
-    //         tmp.write_string(format!("======| Hash: 0x{:X} |======", self.compute_hash()).as_str());
-    //         tmp.move_to_next_line();
-    //         for ch in &self.surface.chars {
-    //             tmp.set_color(ch.foreground, ch.background);
-    //             tmp.set_char_flags(ch.flags);
-    //             tmp.write_char(ch.code);
-    //             x += 1;
-    //             if x == self.surface.size.width {
-    //                 tmp.reset_color();
-    //                 tmp.move_to_next_line();
-    //                 x = 0;
-    //             }
-    //         }
-    //         tmp.reset_color();
-    //         for _ in 0..self.surface.size.width {
-    //             tmp.write_char('-');
-    //         }
-    //         tmp.move_to_next_line();
-    //         println!("{}", tmp.text());
-    //     }
-    // }
+            tmp.write_string(format!("======| Hash: 0x{:X} |======", self.compute_hash()).as_str());
+            tmp.move_to_next_line();
+            for ch in &self.surface.chars {
+                tmp.set_color(ch.foreground, ch.background);
+                tmp.set_char_flags(ch.flags);
+                tmp.write_char(ch.code);
+                x += 1;
+                if x == self.surface.size.width {
+                    tmp.reset_color();
+                    tmp.move_to_next_line();
+                    x = 0;
+                }
+            }
+            tmp.reset_color();
+            for _ in 0..self.surface.size.width {
+                tmp.write_char('-');
+            }
+            tmp.move_to_next_line();
+            println!("{}", tmp.text());
+        }
+    }
 
     pub(crate) fn compute_hash(&self) -> u64 {
         // use FNV algorithm ==> https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
