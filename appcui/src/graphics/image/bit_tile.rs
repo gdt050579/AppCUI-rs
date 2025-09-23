@@ -1,4 +1,6 @@
 use super::super::Size;
+use super::{StringFormatError, StringFormatParser};
+use std::str::FromStr;
 
 #[derive(Copy, Clone)]
 pub struct BitTile<const STORAGE_BYTES: usize> {
@@ -64,50 +66,71 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
     }
 }
 
-impl BitTile<4> {
-    fn from_u32(width: u8, height: u8, bits: u32) -> Option<BitTile<4>> {
-        if (width == 0) || (height == 0) {
-            return None;
+impl<const STORAGE_BYTES: usize> FromStr for BitTile<STORAGE_BYTES> {
+    type Err = StringFormatError;
+
+    fn from_str(image: &str) -> Result<Self, Self::Err> {
+        let mut f = StringFormatParser::new(image);
+        let size = f.size()?;
+        if (size.width > 0xFF) || (size.height > 0xFF) {
+            return Err(StringFormatError::ImageTooLarge);
         }
-        if (width as usize) * (height as usize) > 32 {
-            return None;
+        let required_size = ((size.width as usize) * (size.height as usize)) >> 3;
+        if required_size > STORAGE_BYTES {
+            return Err(StringFormatError::ImageDoesNotFitInAllocatedSpace);
         }
-        Some(Self {
-            width,
-            height,
-            data: bits.to_ne_bytes(),
-        })
+        let mut tile = Self {
+            width: size.width as u8,
+            height: size.height as u8,
+            data: [0; STORAGE_BYTES],
+        };
+        let mut idx = 0;
+        let mut mask = 1;
+        while let Some(line) = f.next_line() {
+            for b in line {
+                if ((*b) != b' ') && ((*b) != b'.') {
+                    // not a 0 - put 1
+                    tile.data[idx] |= mask;
+                }
+            }
+            if mask < 0x80 {
+                mask <<= 1;
+            } else {
+                mask = 1;
+                idx += 1;
+            }
+        }
+
+        Ok(tile)
     }
 }
 
-impl BitTile<8> {
-    fn from_u64(width: u8, height: u8, bits: u64) -> Option<BitTile<8>> {
-        if (width == 0) || (height == 0) {
-            return None;
+macro_rules! unsigned_int_implementation {
+    ($name: ident, $int:ty, $bytes:expr) => {
+        pub type $name = BitTile<$bytes>;
+        impl BitTile<$bytes> {
+            pub fn from_int(width: u8, height: u8, bits: $int) -> Option<Self> {
+                if width == 0 || height == 0 {
+                    return None;
+                }
+                if (width as usize) * (height as usize) > <$int>::BITS as usize {
+                    return None;
+                }
+                Some(Self {
+                    width,
+                    height,
+                    data: bits.to_ne_bytes(),
+                })
+            }
+
+            pub fn reset(&mut self, bits: $int) {
+                self.data = bits.to_ne_bytes();
+            }
         }
-        if (width as usize) * (height as usize) > 64 {
-            return None;
-        }
-        Some(Self {
-            width,
-            height,
-            data: bits.to_ne_bytes(),
-        })
-    }
+    };
 }
 
-impl BitTile<16> {
-    fn from_u128(width: u8, height: u8, bits: u128) -> Option<BitTile<16>> {
-        if (width == 0) || (height == 0) {
-            return None;
-        }
-        if (width as usize) * (height as usize) > 128 {
-            return None;
-        }
-        Some(Self {
-            width,
-            height,
-            data: bits.to_ne_bytes(),
-        })
-    }
-}
+unsigned_int_implementation!(BitTileU16, u16, 2);
+unsigned_int_implementation!(BitTileU32, u32, 4);
+unsigned_int_implementation!(BitTileU64, u64, 8);
+unsigned_int_implementation!(BitTileU128, u128, 16);

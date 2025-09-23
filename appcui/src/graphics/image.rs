@@ -47,6 +47,7 @@ mod color_schema;
 mod character_set;
 mod render_options;
 mod bit_tile;
+mod string_format_parser;
 #[cfg(test)]
 mod tests;
 
@@ -57,3 +58,6 @@ pub use character_set::CharacterSet;
 pub use color_schema::ColorSchema;
 pub use render_options::{ RenderOptions, RenderOptionsBuilder };
 pub use self::bit_tile::BitTile;
+pub use string_format_parser::StringFormatError;
+use string_format_parser::StringFormatParser;
+
