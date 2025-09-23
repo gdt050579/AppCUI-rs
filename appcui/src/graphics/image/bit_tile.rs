@@ -1,4 +1,6 @@
-use super::super::Size;
+use crate::prelude::SpecialChar;
+
+use super::super::{CharFlags, Character, Color, Point, Size, Surface};
 use super::{StringFormatError, StringFormatParser};
 use std::str::FromStr;
 
@@ -63,6 +65,43 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
     }
     pub fn clear(&mut self, value: bool) {
         self.data.fill(if value { u8::MAX } else { 0 });
+    }
+    pub(in super::super) fn paint_large(&self, surface: &mut Surface, pos: Point, set_pixel_color: Color, unset_pixel_color: Color) {
+        let mut ch = Character::new(' ', Color::White, Color::Transparent, CharFlags::None);
+        for y in 0..self.height {
+            for x in 0..self.width {
+                if let Some(is_set) = self.get(x, y) {
+                    if is_set {
+                        if set_pixel_color != Color::Transparent {
+                            ch.background = set_pixel_color;
+                            surface.write_char(pos.x + x as i32, pos.y + y as i32, ch);
+                        }
+                    } else if unset_pixel_color != Color::Transparent {
+                        ch.background = unset_pixel_color;
+                        surface.write_char(pos.x + x as i32, pos.y + y as i32, ch);
+                    }
+                }
+            }
+        }
+    }
+    pub(in super::super) fn paint_small(&self, surface: &mut Surface, pos: Point, set_pixel_color: Color, unset_pixel_color: Color) {
+        let mut ch = Character::new(' ', set_pixel_color, unset_pixel_color, CharFlags::None);
+        let mut y = 0u32;
+        let h = self.height as u32;
+        while y < h {
+            for x in 0..self.width {
+                let px1 = self.get(x, y as u8).unwrap_or(false);
+                let px2 = self.get(x, (y + 1) as u8).unwrap_or(false);
+                ch.code = match (px1,px2) {
+                    (true, true) => SpecialChar::Block100.into(),
+                    (true, false) => SpecialChar::BlockUpperHalf.into(),
+                    (false, true) => SpecialChar::BlockLowerHalf.into(),
+                    (false, false) => ' ',
+                };
+                surface.write_char(pos.x + x as i32, pos.y + y as i32, ch);
+            }
+            y += 2;
+        }
     }
 }
 

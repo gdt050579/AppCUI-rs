@@ -58,6 +58,10 @@ pub use character_set::CharacterSet;
 pub use color_schema::ColorSchema;
 pub use render_options::{ RenderOptions, RenderOptionsBuilder };
 pub use self::bit_tile::BitTile;
+pub use self::bit_tile::BitTileU16;
+pub use self::bit_tile::BitTileU32;
+pub use self::bit_tile::BitTileU64;
+pub use self::bit_tile::BitTileU128;
 pub use string_format_parser::StringFormatError;
 use string_format_parser::StringFormatParser;
 

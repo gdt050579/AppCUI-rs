@@ -5,6 +5,7 @@ use super::Character;
 use super::ClipArea;
 use super::Color;
 use super::Cursor;
+use super::Glyph;
 use super::Image;
 use super::LineType;
 use super::OrthogonalDirection;
@@ -13,7 +14,7 @@ use super::Rect;
 use super::Size;
 use super::TextAlignment;
 use super::TextFormat;
-use super::Glyph;
+use super::BitTile;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
 
@@ -761,7 +762,7 @@ impl Surface {
                 self.draw_horizontal_line(x1, y1, middle_x, line_type, attr);
                 self.draw_vertical_line(middle_x, y1, y2, line_type, attr);
                 self.draw_horizontal_line(middle_x, y2, x2, line_type, attr);
-                let (ch1,ch2) = if x1 < x2 {
+                let (ch1, ch2) = if x1 < x2 {
                     if y1 < y2 {
                         (cs.corner_top_right, cs.corner_bottom_left)
                     } else {
@@ -774,7 +775,7 @@ impl Surface {
                 };
                 self.write_char(middle_x, y1, Character::with_char(ch1));
                 self.write_char(middle_x, y2, Character::with_char(ch2));
-            }            
+            }
             OrthogonalDirection::VerticalFirst => {
                 self.draw_vertical_line(x1, y1, y2, line_type, attr);
                 self.draw_horizontal_line(x1, y2, x2, line_type, attr);
@@ -796,7 +797,7 @@ impl Surface {
                 self.draw_vertical_line(x1, y1, middle_y, line_type, attr);
                 self.draw_horizontal_line(x1, middle_y, x2, line_type, attr);
                 self.draw_vertical_line(x2, middle_y, y2, line_type, attr);
-                let (ch1,ch2) = if y1 < y2 {
+                let (ch1, ch2) = if y1 < y2 {
                     if x1 < x2 {
                         (cs.corner_bottom_left, cs.corner_top_right)
                     } else {
@@ -949,7 +950,7 @@ impl Surface {
         let mut c = Character::with_attributes(' ', attr);
         let h = glyph.size().height as i32;
         let w = glyph.size().width as i32;
-        
+
         for s_y in 0..h {
             for s_x in 0..w {
                 c.code = glyph.chars[index];
@@ -957,7 +958,7 @@ impl Surface {
                 index += 1;
             }
         }
-    } 
+    }
 
     /// Writes a string at the specified position, from left to right using a specific character attribute. If the text is outside the clip area, it will not be drawn.
     /// The `multi-line` parameter specifices if the text should interpret new line characters as a new line or not. if set to `false` the code of this method is optimized to write the text faster.
@@ -1314,6 +1315,23 @@ impl Surface {
     pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, render_options: &RenderOptions) {
         image.paint(self, x, y, render_options);
     }
+
+    pub fn draw_tile<const STORAGE_BYTES: usize>(
+        &mut self,
+        x: i32,
+        y: i32,
+        tile: &BitTile<STORAGE_BYTES>,
+        set_bit_color: Color,
+        unset_bit_color: Color,
+        large: bool,
+    ) {
+        if large {
+            tile.paint_large(self, Point::new(x, y), set_bit_color, unset_bit_color);
+        } else {
+            tile.paint_small(self, Point::new(x, y), set_bit_color, unset_bit_color);
+        }
+    }
+
     pub(crate) fn resize(&mut self, size: Size) {
         let w = size.width.clamp(1, MAX_SURFACE_WIDTH);
         let h = size.height.clamp(1, MAX_SURFACE_HEIGHT);
