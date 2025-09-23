@@ -805,3 +805,12 @@ fn check_bit_tile_paint_large() {
     //s.print(false);
     assert_eq!(s.compute_hash(), 0xDCFFA3AAFD6E6EAD);
 }
+
+#[test]
+fn check_bit_tile_paint_braille() {
+    let tile: BitTile<256> = BitTile::from_str(HEART).unwrap();
+    let mut s = SurfaceTester::new(40, 12);
+    s.draw_tile(0, 0, &tile, Color::White, Color::DarkBlue, BitTileRenderMethod::Braille);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x5364DD2B429681B1);
+}

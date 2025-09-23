@@ -1329,7 +1329,7 @@ impl Surface {
         match render_method {
             BitTileRenderMethod::SmallBlocks => tile.paint_small(self, Point::new(x, y), set_bit_color, unset_bit_color),
             BitTileRenderMethod::LargeBlocks => tile.paint_large(self, Point::new(x, y), set_bit_color, unset_bit_color),
-            BitTileRenderMethod::Braille => todo!(),
+            BitTileRenderMethod::Braille => tile.paint_braille(self, Point::new(x, y), set_bit_color, unset_bit_color),
         }
     }
 

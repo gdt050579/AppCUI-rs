@@ -7,7 +7,7 @@ use std::str::FromStr;
 pub enum BitTileRenderMethod {
     SmallBlocks,
     LargeBlocks,
-    Braille
+    Braille,
 }
 
 #[derive(Copy, Clone)]
@@ -42,8 +42,8 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
         Size::new(self.width as u32, self.height as u32)
     }
     #[inline(always)]
-    pub fn get(&self, x: u8, y: u8) -> Option<bool> {
-        if (x >= self.width) || (y >= self.height) {
+    pub fn get(&self, x: u32, y: u32) -> Option<bool> {
+        if (x >= self.width as u32) || (y >= self.height as u32) {
             None
         } else {
             let pos = (x as usize) + (y as usize) * (self.width as usize);
@@ -57,8 +57,8 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
         }
     }
     #[inline(always)]
-    pub fn set(&mut self, x: u8, y: u8, value: bool) {
-        if (x < self.width) && (y < self.height) {
+    pub fn set(&mut self, x: u32, y: u32, value: bool) {
+        if (x < self.width as u32) && (y < self.height as u32) {
             let pos = (x as usize) + (y as usize) * (self.width as usize);
             let idx = pos >> 3;
             let mask = 1 << (pos & 7);
@@ -77,7 +77,7 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
         for y in 0..self.height {
             let mut x_pos = pos.x;
             for x in 0..self.width {
-                if let Some(is_set) = self.get(x, y) {
+                if let Some(is_set) = self.get(x as u32, y as u32) {
                     if is_set {
                         if set_pixel_color != Color::Transparent {
                             ch.background = set_pixel_color;
@@ -101,8 +101,8 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
         let mut y_pos = pos.y;
         while y < h {
             for x in 0..self.width {
-                let px1 = self.get(x, y as u8).unwrap_or(false);
-                let px2 = self.get(x, (y + 1) as u8).unwrap_or(false);
+                let px1 = self.get(x as u32, y).unwrap_or(false);
+                let px2 = self.get(x as u32, y + 1).unwrap_or(false);
                 ch.code = match (px1, px2) {
                     (true, true) => SpecialChar::Block100.into(),
                     (true, false) => SpecialChar::BlockUpperHalf.into(),
@@ -112,6 +112,50 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
                 surface.write_char(pos.x + x as i32, y_pos, ch);
             }
             y += 2;
+            y_pos += 1;
+        }
+    }
+    pub(in super::super) fn paint_braille(&self, surface: &mut Surface, pos: Point, set_pixel_color: Color, unset_pixel_color: Color) {
+        let mut ch = Character::new(' ', set_pixel_color, unset_pixel_color, CharFlags::None);
+        let mut y = 0u32;
+        let h = self.height as u32;
+        let w = self.width as u32;
+        let mut y_pos = pos.y;
+        while y < h {
+            let mut x = 0u32;
+            let mut x_pos = pos.x;
+            while x < w {
+                let mut code = 0;
+                if self.get(x, y).unwrap_or(false) {
+                    code |= 1;
+                }
+                if self.get(x, y + 1).unwrap_or(false) {
+                    code |= 2;
+                }
+                if self.get(x, y + 2).unwrap_or(false) {
+                    code |= 4;
+                }
+                if self.get(x, y + 3).unwrap_or(false) {
+                    code |= 64;
+                }
+                if self.get(x + 1, y).unwrap_or(false) {
+                    code |= 8;
+                }
+                if self.get(x + 1, y + 1).unwrap_or(false) {
+                    code |= 16;
+                }
+                if self.get(x + 1, y + 2).unwrap_or(false) {
+                    code |= 32;
+                }
+                if self.get(x + 1, y + 3).unwrap_or(false) {
+                    code |= 128;
+                }
+                ch.code = unsafe { char::from_u32_unchecked(0x2800 + code) };
+                surface.write_char(x_pos, y_pos, ch);
+                x += 2;
+                x_pos += 1;
+            }
+            y += 4;
             y_pos += 1;
         }
     }
