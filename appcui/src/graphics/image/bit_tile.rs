@@ -227,7 +227,10 @@ impl<const STORAGE_BYTES: usize> FromStr for BitTile<STORAGE_BYTES> {
     ///     |......rr......|
     /// "#;
     /// 
-    /// let bit_tile = BitTile::from_str(HEART_TILE).unwrap();
+    /// // use 16 bytes to store the bit tile (14 x 9 = 126 pixels)
+    /// // a BitTile<16> implies 16 bytes x 8 bits/byte = 128 bits (128 pixels) maximum storage capacity.
+    /// // since 14 x 9 = 126 pixels, this is well within the maximum storage capacity.
+    /// let bit_tile: BitTile<16> = BitTile::from_str(HEART_TILE).unwrap();
     /// ```
     ///
     /// # Arguments
