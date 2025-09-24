@@ -1,3 +1,5 @@
+use super::StringFormatError;
+use super::StringFormatParser;
 use crate::prelude::image::character_set::{
     ascii_art_renderer, braille_renderer, dithered_shades_renderer, large_blocks_renderer, small_blocks_renderer,
 };
@@ -7,9 +9,6 @@ use super::super::{Color, Size, Surface};
 use super::pixel::Pixel;
 use super::CharacterSet;
 use std::str::FromStr;
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct ParseImageError;
 
 /// A structure representing a raster image with RGBA pixels.
 ///
@@ -281,43 +280,22 @@ impl Image {
 /// * `Some(Image)` - If the string represents a valid image
 /// * `None` - If the format is invalid
 impl FromStr for Image {
-    type Err = ParseImageError;
+    type Err = StringFormatError;
 
     fn from_str(image: &str) -> Result<Self, Self::Err> {
-        let buf = image.as_bytes();
-        let mut w = 0u32;
-        let mut h = 0u32;
-        let mut temp_w = 0u32;
-        let mut add_value = 0u32;
-        for b in buf {
-            if (*b) == b'|' {
-                add_value = 1 - add_value;
-                if add_value == 0 {
-                    h += 1;
-                    if w == 0 {
-                        w = temp_w;
-                    } else if temp_w != w {
-                        return Err(Self::Err {});
-                    }
-                    temp_w = 0;
-                }
-            } else {
-                temp_w += add_value;
-            }
+        let mut f = StringFormatParser::new(image);
+        let size = f.size()?;
+        if (size.width > 0xF000) || (size.height > 0xF000) {
+            return Err(StringFormatError::ImageTooLarge);
         }
-        if (w < 1) || (h < 1) || (w > 0xF000) || (h > 0xF000) {
-            return Err(Self::Err {});
-        }
-        let sz = (w as usize) * (h as usize);
+        let sz = (size.width as usize) * (size.height as usize);
         let mut img = Image {
-            width: w,
-            height: h,
+            width: size.width,
+            height: size.height,
             pixels: Vec::with_capacity(sz),
         };
-        for b in buf {
-            if (*b) == b'|' {
-                add_value = 1 - add_value;
-            } else if add_value == 1 {
+        while let Some(line) = f.next_line() {
+            for b in line {
                 match *b {
                     b'0' | b' ' | b'.' => img.pixels.push(Pixel::with_color(Color::Black)),
                     b'B' | b'1' => img.pixels.push(Pixel::with_color(Color::DarkBlue)),

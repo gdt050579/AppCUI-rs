@@ -18,7 +18,6 @@ impl SurfaceTester {
     //     } else {
     //         let mut tmp = AnsiFormatter::new(1024, AnsiFlags::None);
     //         let mut x = 0u32;
-
     //         tmp.write_string(format!("======| Hash: 0x{:X} |======", self.compute_hash()).as_str());
     //         tmp.move_to_next_line();
     //         for ch in &self.surface.chars {

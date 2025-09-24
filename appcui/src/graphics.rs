@@ -47,5 +47,6 @@ pub use self::text_format::WrapType;
 pub use self::orthogonal_direction::OrthogonalDirection;
 pub use self::glyph::Glyph;
 
+
 #[cfg(test)]
 pub(crate) use self::surface_tester::SurfaceTester;

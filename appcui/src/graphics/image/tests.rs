@@ -1,4 +1,7 @@
+use crate::prelude::{BitTile, BitTileU16, BitTileU32, BitTileU64, StringFormatError};
+
 use super::super::{Character, Color, RenderOptionsBuilder, Size, SurfaceTester};
+use super::BitTileRenderMethod;
 use super::CharacterSet;
 use super::ColorSchema;
 use super::Image;
@@ -785,37 +788,110 @@ fn check_draw_dithered_batch_flower() {
     );
 }
 
-// #[test]
-// fn check_xxx() {
-//     let mut s = SurfaceTester::new(40, 10);
-//     let v: &[(char, Color)] = &[
-//         (' ', Color::Black),
-//         ('░', Color::Gray),
-//         ('▒', Color::Gray),
-//         ('░', Color::Silver),
-//         ('░', Color::White),
-//         ('▒', Color::Silver),
-//         ('▓', Color::Gray),
-//         ('▒', Color::White),
-//         ('▓', Color::Silver),
-//         ('▓', Color::White),
-//         ('█', Color::White),
-//     ];
+#[test]
+fn check_bit_tile_paint_small() {
+    let tile: BitTile<256> = BitTile::from_str(HEART).unwrap();
+    let mut s = SurfaceTester::new(40, 12);
+    s.draw_tile(0, 0, &tile, Color::White, Color::DarkBlue, BitTileRenderMethod::SmallBlocks);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x9D50B71B825AF4C5);
+}
 
-//     let mut x = 1;
-//     let mut idx = 48u8;
-//     for (ch, c) in v {
-//         let car = Character {
-//             code: *ch,
-//             foreground: *c,
-//             background: Color::Black,
-//             flags: CharFlags::None,
-//         };
-//         s.write_char(x, 1, car);
-//         s.write_char(x + 1, 1, car);
-//         s.write_char(x, 2, Character::new(idx, Color::Yellow, Color::Black, CharFlags::None));
-//         x += 2;
-//         idx += 1;
-//     }
-//     s.print(false);
-// }
+#[test]
+fn check_bit_tile_paint_large() {
+    let tile: BitTile<256> = BitTile::from_str(HEART).unwrap();
+    let mut s = SurfaceTester::new(40, 12);
+    s.draw_tile(0, 0, &tile, Color::White, Color::DarkBlue, BitTileRenderMethod::LargeBlocks);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xDCFFA3AAFD6E6EAD);
+}
+
+#[test]
+fn check_bit_tile_paint_braille() {
+    let tile: BitTile<256> = BitTile::from_str(HEART).unwrap();
+    let mut s = SurfaceTester::new(40, 12);
+    s.draw_tile(0, 0, &tile, Color::White, Color::DarkBlue, BitTileRenderMethod::Braille);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x5364DD2B429681B1);
+}
+
+#[test]
+fn check_bit_tile_set() {
+    let mut tile = BitTileU32::new(5, 5).unwrap();
+    for i in 0..5 {
+        tile.set(i, i, true);
+        tile.set(4 - i, i, true);
+    }
+    let mut s = SurfaceTester::new(40, 12);
+    s.draw_tile(0, 0, &tile, Color::White, Color::DarkBlue, BitTileRenderMethod::LargeBlocks);
+    // s.print(false);
+    assert_eq!(s.compute_hash(), 0xF7443D5FDD82F011);
+}
+
+#[test]
+fn check_bit_tile_to_method() {
+    let mut tile = BitTileU64::new(8, 8).unwrap();
+    for i in 0..8 {
+        tile.set(i, i, true);
+        tile.set(7 - i, i, true);
+    }
+    assert_eq!(tile.to_u64(), 9314046665258451585u64);
+    tile.clear(false);
+    assert_eq!(tile.to_u64(), 0);
+    tile.clear(true);
+    assert_eq!(tile.to_u64(), 0xFFFFFFFF_FFFFFFFF);
+    tile.reset(0x1234567);
+    assert_eq!(tile.to_u64(), 0x1234567);
+}
+
+#[test]
+fn check_bit_tile_from_method() {
+    let tile = BitTileU64::from_u64(8, 8, 9314046665258451585u64).unwrap();
+    let mut s = SurfaceTester::new(40, 12);
+    s.draw_tile(0, 0, &tile, Color::White, Color::DarkBlue, BitTileRenderMethod::LargeBlocks);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x85513BE2FB0C4B65);
+}
+
+#[test]
+fn check_bit_tile_api() {
+    let tile = BitTileU64::new(4, 6).unwrap();
+    assert_eq!(tile.width(), 4);
+    assert_eq!(tile.height(), 6);
+    assert_eq!(tile.size(), Size::new(4, 6));
+}
+
+#[test]
+fn check_bit_tile_errors() {
+    assert!(BitTileU32::new(10, 10).is_none());
+    assert!(BitTileU32::new(10, 0).is_none());
+    assert!(BitTileU32::new(0, 10).is_none());
+    assert!(BitTileU32::new(0, 0).is_none());
+    assert!(BitTileU32::from_u32(100, 100, 0).is_none());
+    assert!(BitTileU32::from_u32(100, 0, 0).is_none());
+    assert!(BitTileU32::from_u32(0, 100, 0).is_none());
+    assert!(BitTileU32::from_u32(0, 0, 0).is_none());
+    assert!(BitTileU16::from_str("|xxxx| |xxxx| |xxxx| |xxxx|").is_ok());
+    assert_eq!(
+        BitTileU16::from_str("|xxxx| |xxxx| |xxxx| |xxxx| |xxxx|"),
+        Err(StringFormatError::ImageDoesNotFitInAllocatedSpace)
+    );
+    assert_eq!(BitTileU16::from_str("|xxxx| |xxxxxxxx|"), Err(StringFormatError::MultipleWidths));
+    assert_eq!(BitTileU16::from_str("|| ||"), Err(StringFormatError::ZeroWidth));
+    assert_eq!(BitTileU16::from_str(""), Err(StringFormatError::ZeroHeight));
+    assert_eq!(BitTileU16::from_str("|xxx"), Err(StringFormatError::MissingCorespondingMarker));
+}
+
+#[test]
+fn check_bit_tile_reverse_bits() {
+    let mut tile = BitTileU16::new(4, 4).unwrap();
+    tile.clear(true);
+    for x in 0..4 {
+        for y in 0..4 {
+            if tile.get(x, y).unwrap_or(false) {
+                tile.set(x, y, false);
+            }
+        }
+    }
+    assert_eq!(tile.to_u16(), 0);
+}
