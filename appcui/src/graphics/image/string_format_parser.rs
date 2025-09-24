@@ -1,12 +1,13 @@
 use super::super::Size;
 
-#[derive(Copy,Clone,Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum StringFormatError {
     MultipleWidths,
     ZeroHeight,
     ZeroWidth,
-    ImageTooLarge, 
-    ImageDoesNotFitInAllocatedSpace,   
+    ImageTooLarge,
+    ImageDoesNotFitInAllocatedSpace,
+    MissingCorespondingMarker,
 }
 
 pub(super) struct StringFormatParser<'a> {
@@ -42,6 +43,9 @@ impl<'a> StringFormatParser<'a> {
                 temp_w += add_value;
             }
         }
+        if add_value==1 {
+            return Err(StringFormatError::MissingCorespondingMarker);
+        }
         if h == 0 {
             return Err(StringFormatError::ZeroHeight);
         }
@@ -68,9 +72,6 @@ impl<'a> StringFormatParser<'a> {
         }
         let end = self.pos;
         self.pos += 1;
-        if end<=start {
-            return None;
-        }
         Some(&self.buf[start..end])
     }
 }

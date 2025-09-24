@@ -4,13 +4,14 @@ use super::super::{CharFlags, Character, Color, Point, Size, Surface};
 use super::{StringFormatError, StringFormatParser};
 use std::str::FromStr;
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum BitTileRenderMethod {
     SmallBlocks,
     LargeBlocks,
     Braille,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct BitTile<const STORAGE_BYTES: usize> {
     width: u8,
     height: u8,
@@ -26,11 +27,7 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
         if (width as usize) * (height as usize) > (STORAGE_BYTES << 3) {
             return None;
         }
-        Some(Self {
-            width,
-            height,
-            data: [0; STORAGE_BYTES],
-        })
+        Some(Self {width, height, data: [0; STORAGE_BYTES]})
     }
     pub fn width(&self) -> u8 {
         self.width
@@ -47,13 +44,7 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
             None
         } else {
             let pos = (x as usize) + (y as usize) * (self.width as usize);
-            let idx = pos >> 3;
-            let mask = 1 << (pos & 7);
-            if (self.data[idx] & mask) == 0 {
-                Some(false)
-            } else {
-                Some(true)
-            }
+            Some((self.data[pos >> 3] & (1 << (pos & 7))) != 0)
         }
     }
     #[inline(always)]
@@ -101,9 +92,7 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
         let mut y_pos = pos.y;
         while y < h {
             for x in 0..self.width {
-                let px1 = self.get(x as u32, y).unwrap_or(false);
-                let px2 = self.get(x as u32, y + 1).unwrap_or(false);
-                ch.code = match (px1, px2) {
+                ch.code = match (self.get(x as u32, y).unwrap_or(false), self.get(x as u32, y + 1).unwrap_or(false)) {
                     (true, true) => SpecialChar::Block100.into(),
                     (true, false) => SpecialChar::BlockUpperHalf.into(),
                     (false, true) => SpecialChar::BlockLowerHalf.into(),
@@ -170,8 +159,7 @@ impl<const STORAGE_BYTES: usize> FromStr for BitTile<STORAGE_BYTES> {
         if (size.width > 0xFF) || (size.height > 0xFF) {
             return Err(StringFormatError::ImageTooLarge);
         }
-        let required_size = ((size.width as usize) * (size.height as usize)) >> 3;
-        if required_size > STORAGE_BYTES {
+        if ((size.width as usize) * (size.height as usize)) > STORAGE_BYTES * 8 {
             return Err(StringFormatError::ImageDoesNotFitInAllocatedSpace);
         }
         let mut tile = Self {
@@ -201,21 +189,22 @@ impl<const STORAGE_BYTES: usize> FromStr for BitTile<STORAGE_BYTES> {
 }
 
 macro_rules! unsigned_int_implementation {
-    ($name: ident, $int:ty, $bytes:expr) => {
+    ($name:ident,$int:ty,$bytes:expr,$from_fn:ident,$to_fn:ident) => {
         pub type $name = BitTile<$bytes>;
+
         impl BitTile<$bytes> {
-            pub fn from_int(width: u8, height: u8, bits: $int) -> Option<Self> {
+            pub fn $from_fn(width: u8, height: u8, bits: $int) -> Option<Self> {
                 if width == 0 || height == 0 {
                     return None;
                 }
                 if (width as usize) * (height as usize) > <$int>::BITS as usize {
                     return None;
                 }
-                Some(Self {
-                    width,
-                    height,
-                    data: bits.to_ne_bytes(),
-                })
+                Some(Self {width, height, data: bits.to_ne_bytes()})
+            }
+
+            pub fn $to_fn(&self) -> $int {
+                <$int>::from_ne_bytes(self.data)
             }
 
             pub fn reset(&mut self, bits: $int) {
@@ -225,7 +214,7 @@ macro_rules! unsigned_int_implementation {
     };
 }
 
-unsigned_int_implementation!(BitTileU16, u16, 2);
-unsigned_int_implementation!(BitTileU32, u32, 4);
-unsigned_int_implementation!(BitTileU64, u64, 8);
-unsigned_int_implementation!(BitTileU128, u128, 16);
+unsigned_int_implementation!(BitTileU16, u16, 2, from_u16, to_u16);
+unsigned_int_implementation!(BitTileU32, u32, 4, from_u32, to_u32);
+unsigned_int_implementation!(BitTileU64, u64, 8, from_u64, to_u64);
+unsigned_int_implementation!(BitTileU128, u128, 16, from_u128, to_u128);
