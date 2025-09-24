@@ -11,6 +11,10 @@ pub enum BitTileRenderMethod {
     Braille,
 }
 
+/// A bit tile is a 2D array of bits. It is used to store a 2D image in a compact way (where a pixel is represented by a single bit that can be either set or unset)
+/// The size of the bit tile is the STORAGE_BYTES generic parameter plus 2 bytes for the width and height.
+/// Since the width and height are stored in 2 bytes, the maximum size of the bit tile is 255 x 255 pixels.
+/// However, the STORAGE_BYTES parameter is limited to 1024 bytes, so the size of the tile should fit in this space.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub struct BitTile<const STORAGE_BYTES: usize> {
     width: u8,
@@ -20,6 +24,18 @@ pub struct BitTile<const STORAGE_BYTES: usize> {
 
 impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
     const _ASSERT_CHECK_STORAGE_BITS_: () = assert!(STORAGE_BYTES >= 2 && STORAGE_BYTES <= 1024);
+
+    /// Creates a new bit tile with the specified width and height.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `width` - The width of the bit tile in pixels.
+    /// * `height` - The height of the bit tile in pixels.
+    /// 
+    /// # Returns
+    /// 
+    /// * `Some(BitTile)` - If the bit tile was created successfully.
+    /// * `None` - If the width or height is 0 or if the bit tile does not fit in the allocated space.
     pub fn new(width: u8, height: u8) -> Option<Self> {
         if (width == 0) || (height == 0) {
             return None;
@@ -29,15 +45,36 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
         }
         Some(Self {width, height, data: [0; STORAGE_BYTES]})
     }
+
+    /// Returns the width of the bit tile in pixels.
+    #[inline(always)]
     pub fn width(&self) -> u8 {
         self.width
     }
+
+    /// Returns the height of the bit tile in pixels.
+    #[inline(always)]
     pub fn height(&self) -> u8 {
         self.height
     }
+
+    /// Returns the size of the bit tile in pixels.
+    #[inline(always)]
     pub fn size(&self) -> Size {
         Size::new(self.width as u32, self.height as u32)
     }
+
+    /// Returns the value of the pixel (set or unset) at the specified coordinates.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `x` - The x coordinate of the pixel.
+    /// * `y` - The y coordinate of the pixel.
+    /// 
+    /// # Returns
+    /// 
+    /// * `Some(bool)` - If the pixel is set.
+    /// * `None` - If the coordinates are outside the bounds of the bit tile.
     #[inline(always)]
     pub fn get(&self, x: u32, y: u32) -> Option<bool> {
         if (x >= self.width as u32) || (y >= self.height as u32) {
@@ -47,6 +84,14 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
             Some((self.data[pos >> 3] & (1 << (pos & 7))) != 0)
         }
     }
+
+    /// Sets the value of the pixel (set or unset) at the specified coordinates. If the coordinates are outside the bounds of the bit tile, the operation is silently ignored.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `x` - The x coordinate of the pixel.
+    /// * `y` - The y coordinate of the pixel.
+    /// * `value` - The value of the pixel (set or unset).
     #[inline(always)]
     pub fn set(&mut self, x: u32, y: u32, value: bool) {
         if (x < self.width as u32) && (y < self.height as u32) {
@@ -60,6 +105,12 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
             }
         }
     }
+
+    /// Clears the bit tile by setting all pixels to the specified value.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `value` - The value to set all pixels to (set or unset).
     pub fn clear(&mut self, value: bool) {
         self.data.fill(if value { u8::MAX } else { 0 });
     }
@@ -153,6 +204,40 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
 impl<const STORAGE_BYTES: usize> FromStr for BitTile<STORAGE_BYTES> {
     type Err = StringFormatError;
 
+    /// Creates a new bit tile from a string.
+    /// The format uses pipes (characters `|`) to delimit rows, and single characters to represent different colored pixels.
+    /// Since a tile is basically a black and white image, the characters used to represent the pixels are:
+    /// * ` ` (space), `.` (point) - unset pixels
+    /// * everything else - set pixels
+    /// 
+    /// For example, the following string will create a bit tile with a width of 14 and a height of 9:
+    /// ```rust
+    /// use appcui::prelude::*;
+    /// use std::str::FromStr;
+    ///     
+    /// const HEART_TILE: &str = r#"
+    ///     |...rr....rr...|
+    ///     |..rrrr..rrrr..|
+    ///     |.rrrrrrrrrrrr.|
+    ///     |.rrrrrrrrrrrr.|
+    ///     |..rrrrrrrrrr..|
+    ///     |   rrrrrrrr   |
+    ///     |....rrrrrr....|
+    ///     |.....rrrr.....|
+    ///     |......rr......|
+    /// "#;
+    /// 
+    /// let bit_tile = BitTile::from_str(HEART_TILE).unwrap();
+    /// ```
+    ///
+    /// # Arguments
+    /// 
+    /// * `image` - The string to create the bit tile from.
+    /// 
+    /// # Returns
+    /// 
+    /// * `Ok(BitTile)` - If the bit tile was created successfully.
+    /// * `Err(StringFormatError)` - If the string is not a valid bit tile.
     fn from_str(image: &str) -> Result<Self, Self::Err> {
         let mut f = StringFormatParser::new(image);
         let size = f.size()?;

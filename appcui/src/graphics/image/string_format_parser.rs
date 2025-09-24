@@ -1,12 +1,21 @@
 use super::super::Size;
 
+/// An error that can occur when parsing a string format.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum StringFormatError {
+    /// The string format contains multiple widths
+    /// For example: `|...| |....|` contains one line with 3 pixels and another line with 4 pixels.
     MultipleWidths,
+    /// The string format contains a zero height.
     ZeroHeight,
+    /// The string format contains a zero width.
     ZeroWidth,
+    /// The string format is too large for what underline object supports. For example a a BitTileU16 only supports a maximum of 16 pixels so a line with 17 pixels will cause this error.
     ImageTooLarge,
+    /// The string format does not fit in the allocated space. For example a BitTileU16 only supports a maximum of 16 pixels so a a string representation of a 5x4 image will cause this error.
     ImageDoesNotFitInAllocatedSpace,
+    /// The string format is missing a corresponding marker.
+    /// For example: `|...` is missing the corresponding `|` at the end.
     MissingCorespondingMarker,
 }
 
