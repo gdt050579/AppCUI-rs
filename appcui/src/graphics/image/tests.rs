@@ -902,7 +902,7 @@ fn check_glyph_basic_api() {
     let mut g = Glyph::new(5, 4);
     assert_eq!(g.size(), Size::new(5, 4));
     assert_eq!(g.chars.len(), 20);
-    g.clear_with('x');
+    g.fill('x');
     for ch in &g.chars {
         assert_eq!(*ch, 'x');
     }
@@ -946,7 +946,7 @@ fn check_glyph_resize() {
     let mut g = Glyph::new(5, 4);
     assert_eq!(g.size(), Size::new(5, 4));
     assert_eq!(g.chars.len(), 20);
-    g.clear_with('x');
+    g.fill('x');
     g.resize(3, 3);
     assert_eq!(g.size(), Size::new(3, 3));
     assert_eq!(g.chars.len(), 9);
@@ -988,7 +988,7 @@ fn check_glyph_write_str() {
 fn check_glyph_write_str_outside() {
     let mut s = SurfaceTester::new(50, 10);
     let mut g = Glyph::new(4,2);
-    g.clear_with('.');
+    g.fill('.');
     g.write_str(2, 1, "Hello\nWorld");
     g.write_str(5, 2, "Test");
     s.draw_glyph(1, 1, &g, charattr!("white, darkblue"));
