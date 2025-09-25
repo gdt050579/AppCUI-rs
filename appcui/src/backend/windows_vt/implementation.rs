@@ -7,7 +7,6 @@ use crate::backend::utils::AnsiFormatter;
 use crate::graphics::*;
 use crate::system::Error;
 use crate::system::SystemEvent;
-use std::io::Write;
 use std::sync::mpsc::Sender;
 
 pub struct WindowsVTTerminal {

@@ -81,3 +81,12 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 
 * **Code:** [examples/appbar](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/appbar)
 * **Elements:** [AppBar](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar.html), [Menu Button](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/menu_button.html), [Separator](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/separator.html), [Label](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/label.html), [Button](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/button.html), [ToggleButton](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/toggle_button.html), [SwitchButton](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/switch_button.html)
+
+<details>
+  <summary>More Anmations</summary>
+
+| Image                                 | Descrption                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <img src="img/menus/popup_menu.gif" > | **Popup Menu** <br> * **Code:** [examples/popup_mnu](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/popup_menu) <br> * **Description:** The popup menu is a menu that is displayed when the user right clicks on a control. You can control the size of the menu and interact directly with the menu items. |
+
+</details>
