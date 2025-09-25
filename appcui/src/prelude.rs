@@ -72,6 +72,8 @@ pub use super::ui::textfield;
 pub use super::ui::textfield::events::TextFieldEvents;
 pub use super::ui::threestatebox;
 pub use super::ui::threestatebox::events::ThreeStateBoxEvents;
+pub use super::ui::timepicker;
+pub use super::ui::timepicker::events::TimePickerEvents;
 pub use super::ui::togglebutton;
 pub use super::ui::togglebutton::events::ToggleButtonEvents;
 pub use super::ui::treeview;

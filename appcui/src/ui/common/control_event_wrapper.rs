@@ -16,6 +16,7 @@ use crate::ui::{
     listview::events::GenericListViewEvents, markdown, markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents,
     password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
     textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
+    timepicker, timepicker::events::TimePickerEvents,
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -49,6 +50,7 @@ pub(crate) enum ControlEventData {
     Markdown(markdown::events::EventData),
     Accordion(accordion::events::EventData),
     Tab(tab::events::EventData),
+    TimePicker(timepicker::events::EventData),
     GraphView(graphview::events::EventData),
 }
 
@@ -151,6 +153,7 @@ impl ControlEvent {
             ControlEventData::CharPicker(data) => {
                 CharPickerEvents::on_char_changed(receiver, self.emitter.cast(), if data.code as u32 > 0 { Some(data.code) } else { None })
             }
+            ControlEventData::TimePicker(data) => { EventProcessStatus::Ignored },
             ControlEventData::GraphView(data) => match data.event_type {
                 graphview::events::GraphViewEventTypes::CurrentNodeChanged => {
                     GenericGraphViewEvents::on_current_node_changed(receiver, self.emitter.cast(), data.type_id)
