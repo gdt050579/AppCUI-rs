@@ -7,7 +7,7 @@ use super::Character;
 use super::ClipArea;
 use super::Color;
 use super::Cursor;
-use super::Glyph;
+use super::image::Glyph;
 use super::Image;
 use super::LineType;
 use super::OrthogonalDirection;

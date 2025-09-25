@@ -1,8 +1,8 @@
-use super::Size;
+use super::super::Size;
 
 pub struct Glyph {
     size: Size,
-    pub(super) chars: Vec<char>,
+    pub(in super::super) chars: Vec<char>,
 }
 
 impl Glyph {
