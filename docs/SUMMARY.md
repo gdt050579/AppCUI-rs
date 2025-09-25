@@ -20,6 +20,7 @@
         - [Text](chapter-2/surface/text.md)
         - [Images](chapter-2/surface/images.md)
         - [Bit Tiles](chapter-2/surface/bit_tile.md)
+        - [Glyphs](chapter-2/surface/glyph.md)
     - [Input](chapter-2/input.md)
         - [Mouse](chapter-2/mouse.md)
         - [Keyboard](chapter-2/keyboard.md)

@@ -1,5 +1,6 @@
 use super::super::Size;
 
+/// A glyph is a 2D grid of character, that can be used to draw text or images on the screen with a specific foreground and background color.
 pub struct Glyph {
     size: Size,
     pub(in super::super) chars: Vec<char>,
