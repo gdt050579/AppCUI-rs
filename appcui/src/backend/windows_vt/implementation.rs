@@ -54,8 +54,7 @@ impl Backend for WindowsVTTerminal {
         // draw characters using ANSI formatter
         let top = self.console.visible_region().top as i32;
         self.ansi_formatter.render(surface, Point::new(0, top));
-        let _ = std::io::stdout().write_all(self.ansi_formatter.text().as_bytes());
-        let _ = std::io::stdout().flush();
+        self.ansi_formatter.execute();
     }
     #[inline(always)]
     fn size(&self) -> Size {

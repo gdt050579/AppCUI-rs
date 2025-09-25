@@ -306,6 +306,14 @@ impl AnsiFormatter {
         self.text.push_str(txt);
     }
 
+    pub(crate) fn execute(&mut self) {
+        // write to stdout
+        let _ = std::io::stdout().write_all(self.text.as_bytes());
+        let _ = std::io::stdout().flush();   
+        // clear the text
+        self.text.clear();     
+    }
+
     #[inline(always)]
     fn is_wide_char(ch: char) -> bool {
         matches!(ch as u32, 0x1100..=0x115F

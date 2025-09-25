@@ -3,7 +3,7 @@
 
 use copypasta::ClipboardContext;
 use copypasta::ClipboardProvider;
-use std::{io::Write, sync::mpsc::Sender};
+use std::sync::mpsc::Sender;
 
 use super::{
     super::SystemEvent,
@@ -79,8 +79,7 @@ impl TermiosTerminal {
 
         t.ansi_buffer.clear();
         t.ansi_buffer.enable_mouse_events();
-        let _ = std::io::stdout().write_all(t.ansi_buffer.text().as_bytes());
-        let _ = std::io::stdout().flush();
+        t.ansi_buffer.execute();
 
         Input::new().start(sender.clone());
         SizeReader::new(get_resize_notification().clone()).start(sender);
@@ -130,8 +129,7 @@ impl Backend for TermiosTerminal {
     fn on_close(&mut self) {
         self.ansi_buffer.clear();
         self.ansi_buffer.disable_mouse_events();
-        let _ = std::io::stdout().write_all(self.ansi_buffer.text().as_bytes());
-        let _ = std::io::stdout().flush();
+        self.ansi_buffer.execute();
         self.orig_termios.restore();
     }
 }
