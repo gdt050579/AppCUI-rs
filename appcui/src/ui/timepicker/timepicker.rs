@@ -40,7 +40,7 @@ impl TimePicker {
             hovered_component: None,
         };
 
-        let min_width = 5 + if flags.contains(Flags::AMPM) { 3 } else { 0 } + if flags.contains(Flags::Seconds) { 3 } else { 0 };
+        let min_width = 7 + if flags.contains(Flags::AMPM) { 3 } else { 0 } + if flags.contains(Flags::Seconds) { 3 } else { 0 };
         obj.set_size_bounds(min_width, 1, u16::MAX, 1);
         obj
     }
@@ -250,7 +250,6 @@ impl OnPaint for TimePicker {
         };
         surface.clear(Character::with_attributes(' ', attr));
 
-        let attr_selected = theme.editor.pressed_or_selectd;
         let has_focus = self.has_focus();
         let sep = Character::with_attributes(':', theme.editor.inactive);
 
@@ -263,11 +262,12 @@ impl OnPaint for TimePicker {
 
         // minute
         self.paint_number(surface, theme, x, TimeComponent::Minute, attr, has_focus);
-        surface.write_char(x + 2, 0, sep);
-        x += 3;
+        x += 2;
 
         // second
         if self.flags.contains(Flags::Seconds) {
+            surface.write_char(x, 0, sep);
+            x += 1;
             self.paint_number(surface, theme, x, TimeComponent::Second, attr, has_focus);
             x += 2;
         }
