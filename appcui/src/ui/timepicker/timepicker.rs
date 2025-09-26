@@ -20,6 +20,7 @@ pub struct TimePicker {
     flags: Flags,
     selected_component: TimeComponent,
     editable_digit_is_first: bool,
+    hovered_component: Option<TimeComponent>,
 }
 
 impl TimePicker {
@@ -36,6 +37,7 @@ impl TimePicker {
             flags,
             selected_component: TimeComponent::Hour,
             editable_digit_is_first: true,
+            hovered_component: None,
         };
 
         let min_width = 5 + if flags.contains(Flags::AMPM) { 3 } else { 0 } + if flags.contains(Flags::Seconds) { 3 } else { 0 };
@@ -213,8 +215,25 @@ impl TimePicker {
         self.editable_digit_is_first = true;
     }
     #[inline(always)]
-    fn paint_number(&self, surface: &mut Surface, x: i32, num: u8, attr: CharAttribute, show_cursor: bool) {
+    fn paint_number(&self, surface: &mut Surface, theme: &Theme, x: i32, comp: TimeComponent, attr: CharAttribute, has_focus: bool) {
+        let num = match comp {
+            TimeComponent::Hour => self.hour,
+            TimeComponent::Minute => self.minute,
+            TimeComponent::Second => self.second,
+            TimeComponent::AmPm => 0,
+        };
         let buf: [u8; 2] = [48 + num / 10, 48 + num % 10];
+        let (attr, show_cursor) = if has_focus {
+            if comp == self.selected_component {
+                (theme.editor.pressed_or_selectd, true)
+            } else if Some(comp) == self.hovered_component {
+                (theme.editor.hovered, false)
+            } else {
+                (attr, false)
+            }
+        } else {
+            (attr, false)
+        };
         surface.write_ascii(x, 0, &buf, attr, false);
         if show_cursor {
             surface.set_cursor(x + if self.editable_digit_is_first { 0 } else { 1 }, 0);
@@ -227,7 +246,6 @@ impl OnPaint for TimePicker {
         let attr = match () {
             _ if !self.is_enabled() => theme.editor.inactive,
             _ if self.has_focus() => theme.editor.focused,
-            _ if self.is_mouse_over() => theme.editor.hovered,
             _ => theme.editor.normal,
         };
         surface.clear(Character::with_attributes(' ', attr));
@@ -239,66 +257,30 @@ impl OnPaint for TimePicker {
         let mut x = 1;
 
         // hour
-        self.paint_number(
-            surface,
-            x,
-            self.hour,
-            if has_focus && self.selected_component == TimeComponent::Hour {
-                attr_selected
-            } else {
-                attr
-            },
-            if self.selected_component == TimeComponent::Hour {
-                has_focus
-            } else {
-                false
-            },
-        );
+        self.paint_number(surface, theme, x, TimeComponent::Hour, attr, has_focus);
         surface.write_char(x + 2, 0, sep);
         x += 3;
 
         // minute
-        self.paint_number(
-            surface,
-            x,
-            self.minute,
-            if has_focus && self.selected_component == TimeComponent::Minute {
-                attr_selected
-            } else {
-                attr
-            },
-            if self.selected_component == TimeComponent::Minute {
-                has_focus
-            } else {
-                false
-            },
-        );
+        self.paint_number(surface, theme, x, TimeComponent::Minute, attr, has_focus);
         surface.write_char(x + 2, 0, sep);
         x += 3;
 
         // second
         if self.flags.contains(Flags::Seconds) {
-            self.paint_number(
-                surface,
-                x,
-                self.second,
-                if has_focus && self.selected_component == TimeComponent::Second {
-                    attr_selected
-                } else {
-                    attr
-                },
-                if self.selected_component == TimeComponent::Second {
-                    has_focus
-                } else {
-                    false
-                },
-            );
+            self.paint_number(surface, theme, x, TimeComponent::Second, attr, has_focus);
             x += 2;
         }
         if self.flags.contains(Flags::AMPM) {
             x += 1;
-            let attr = if has_focus && self.selected_component == TimeComponent::AmPm {
-                theme.editor.pressed_or_selectd
+            let attr = if has_focus {
+                if self.selected_component == TimeComponent::AmPm {
+                    theme.editor.pressed_or_selectd
+                } else if Some(TimeComponent::AmPm) == self.hovered_component {
+                    theme.editor.hovered
+                } else {
+                    attr
+                }
             } else {
                 attr
             };
@@ -357,17 +339,38 @@ impl OnMouseEvent for TimePicker {
                 if let Some(new_pos) = self.mouse_pos_to_component(data.x, data.y) {
                     self.selected_component = new_pos;
                 }
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
-            _ => {}
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.hovered_component = None;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(point) => {
+                let new_pos = self.mouse_pos_to_component(point.x, point.y);
+                if new_pos != self.hovered_component {
+                    self.hovered_component = new_pos;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::Wheel(dir) => {
+                match dir {
+                    MouseWheelDirection::Left => self.move_to_prev_component(),
+                    MouseWheelDirection::Right => self.move_to_next_component(),
+                    MouseWheelDirection::Up => self.increment_decrement_selected_component(true),
+                    MouseWheelDirection::Down => self.increment_decrement_selected_component(false),
+                };
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
         }
-
-        EventProcessStatus::Ignored
     }
 }
 
 impl OnFocus for TimePicker {
     fn on_focus(&mut self) {
+        self.selected_component = TimeComponent::Hour;
         self.editable_digit_is_first = true;
     }
 }
