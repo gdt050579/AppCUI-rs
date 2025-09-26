@@ -24,7 +24,12 @@ pub struct TimePicker {
 }
 
 impl TimePicker {
-    pub fn new(time: NaiveTime, layout: Layout, flags: Flags) -> Self {
+    pub fn new(time_str: &str, layout: Layout, flags: Flags) -> Self {
+        let time = time_str.parse::<NaiveTime>().unwrap();
+        Self::with_time(time, layout, flags)
+    }
+
+    pub fn with_time(time: NaiveTime, layout: Layout, flags: Flags) -> Self {
         let hour = time.hour().min(23) as u8;
         let minute = time.minute().min(59) as u8;
         let second = time.second().min(59) as u8;
