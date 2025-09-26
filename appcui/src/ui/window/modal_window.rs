@@ -83,6 +83,7 @@ impl<T> ColorPickerEvents for ModalWindow<T> {}
 impl<T> CharPickerEvents for ModalWindow<T> {}
 impl<T> ComboBoxEvents for ModalWindow<T> {}
 impl<T> DatePickerEvents for ModalWindow<T> {}
+impl<T> TimePickerEvents for ModalWindow<T> {}
 impl<T> ListBoxEvents for ModalWindow<T> {}
 impl<T> CustomEvents for ModalWindow<T> {}
 impl<T> GenericSelectorEvents for ModalWindow<T> {}

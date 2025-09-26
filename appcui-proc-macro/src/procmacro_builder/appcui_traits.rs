@@ -56,6 +56,7 @@ pub(crate) enum AppCUITrait {
     CharPickerEvents = 47,
     GenericGraphViewEvents = 48,
     AppBarEvents = 49,
+    TimePickerEvents = 50,
 }
 
 #[repr(u8)]
@@ -122,6 +123,7 @@ impl AppCUITrait {
             AppCUITrait::CharPickerEvents => "CharPickerEvents",
             AppCUITrait::GenericGraphViewEvents => "GraphViewEvents", // important to be without Generic
             AppCUITrait::AppBarEvents => "AppBarEvents",              
+            AppCUITrait::TimePickerEvents => "TimePickerEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -179,6 +181,7 @@ impl AppCUITrait {
             AppCUITrait::CharPickerEvents => TraitType::ControlEvent,
             AppCUITrait::GenericGraphViewEvents => TraitType::ControlEvent,
             AppCUITrait::AppBarEvents => TraitType::ControlEvent,
+            AppCUITrait::TimePickerEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -236,6 +239,7 @@ impl AppCUITrait {
             AppCUITrait::CharPickerEvents => "",
             AppCUITrait::GenericGraphViewEvents => "",
             AppCUITrait::AppBarEvents => "",
+            AppCUITrait::TimePickerEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -293,6 +297,7 @@ impl AppCUITrait {
             AppCUITrait::CharPickerEvents => "impl$(TEMPLATE_TYPE) CharPickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericGraphViewEvents => "impl$(TEMPLATE_TYPE) GenericGraphViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::AppBarEvents => "impl$(TEMPLATE_TYPE) AppBarEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::TimePickerEvents => "impl$(TEMPLATE_TYPE) TimePickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -352,7 +357,7 @@ impl AppCUITrait {
             "CharPickerEvents" | "CharPicker" => Some(AppCUITrait::CharPickerEvents),
             "GraphViewEvents" | "GraphView" => Some(AppCUITrait::GenericGraphViewEvents),
             "AppBarEvents" | "AppBar" => Some(AppCUITrait::AppBarEvents),
-
+            "TimePickerEvents" | "TimePicker" => Some(AppCUITrait::TimePickerEvents),
 
             _ => None,
         }
@@ -412,6 +417,7 @@ impl AppCUITrait {
             47 => Some(AppCUITrait::CharPickerEvents),
             48 => Some(AppCUITrait::GenericGraphViewEvents),
             49 => Some(AppCUITrait::AppBarEvents),
+            50 => Some(AppCUITrait::TimePickerEvents),
             _ => None,
         };
         result?;

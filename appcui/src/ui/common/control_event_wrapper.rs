@@ -153,7 +153,7 @@ impl ControlEvent {
             ControlEventData::CharPicker(data) => {
                 CharPickerEvents::on_char_changed(receiver, self.emitter.cast(), if data.code as u32 > 0 { Some(data.code) } else { None })
             }
-            ControlEventData::TimePicker(data) => { EventProcessStatus::Ignored },
+            ControlEventData::TimePicker(data) => TimePickerEvents::on_time_changed(receiver, self.emitter.cast(), data.time),
             ControlEventData::GraphView(data) => match data.event_type {
                 graphview::events::GraphViewEventTypes::CurrentNodeChanged => {
                     GenericGraphViewEvents::on_current_node_changed(receiver, self.emitter.cast(), data.type_id)

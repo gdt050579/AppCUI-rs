@@ -54,11 +54,14 @@ impl TimePicker {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
-            data: ControlEventData::TimePicker(EventData {}),
+            data: ControlEventData::TimePicker(EventData {
+                time: self.time(),
+            }),
         });
     }
 
     /// Gets the current time in 24-hour format
+    #[inline(always)]
     pub fn time(&self) -> NaiveTime {
         NaiveTime::from_hms_opt(self.hour as u32, self.minute as u32, self.second as u32).unwrap()
     }
