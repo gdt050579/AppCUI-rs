@@ -23,6 +23,28 @@ fn check_create(){
     a.run();
 }
 
+#[test]
+fn check_create_proc_macro(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')
+        CheckHash(0xFFD1CBFB9AAB7083)
+        CheckCursor(22,6)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    w.add(timepicker!("'12:30:20',x:1,y:1,w:10, flags:Seconds"));
+    w.add(timepicker!("'00:00:00',x:1,y:3,w:10, flags:Seconds"));
+    w.add(timepicker!("time = '23:59:59',x:1,y:5,w:10, flags:Seconds"));
+
+    w.add(timepicker!("'12:30:20',x:20,y:1,w:10"));
+    w.add(timepicker!("time:'00:00:00',x:20,y:3,w:10"));
+    w.add(timepicker!("'23:59:59',x:20,y:5,w:10"));
+
+    a.add_window(w);
+    a.run();
+}
+
 
 #[test]
 fn check_create_ampm(){
@@ -45,6 +67,29 @@ fn check_create_ampm(){
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_create_ampm_proc_macro(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')
+        CheckHash(0xCB62EDEF1A6707EB)
+        CheckCursor(22,6)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    w.add(timepicker!("'12:30:20',x:1,y:1,w:10, flags:[Seconds , AMPM]"));
+    w.add(timepicker!("'00:00:00',x:1,y:3,w:10, flags:[Seconds , AMPM]"));
+    w.add(timepicker!("'23:59:59',x:1,y:5,w:10, flags:[Seconds , AMPM]"));
+
+    w.add(timepicker!("'12:30:20',x:20,y:1,w:10, flags:AMPM"));
+    w.add(timepicker!("'00:00:00',x:20,y:3,w:10, flags:AMPM"));
+    w.add(timepicker!("'23:59:59',x:20,y:5,w:10, flags:AMPM"));
+
+    a.add_window(w);
+    a.run();
+}
+
 
 #[test]
 fn check_ampm_increase_decrease(){

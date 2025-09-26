@@ -2494,3 +2494,9 @@ pub fn charpicker(input: TokenStream) -> TokenStream {
 pub fn graphview(input: TokenStream) -> TokenStream {
     crate::controls::graphview::create(input)
 }
+
+
+#[proc_macro]
+pub fn timepicker(input: TokenStream) -> TokenStream {
+    crate::controls::timepicker::create(input)
+}
