@@ -59,14 +59,10 @@ impl TimePicker {
     }
 
     /// Sets the time in 24-hour format
-    pub fn set_time(&mut self, hour: u8, minute: u8, second: u8) {
-        let hour = hour.min(23);
-        let minute = minute.min(59);
-        let second = second.min(59);
-
-        self.hour = hour;
-        self.minute = minute;
-        self.second = second;
+    pub fn set_time(&mut self, time: NaiveTime) {
+        self.hour = time.hour().min(23) as u8;
+        self.minute = time.minute().min(59) as u8;
+        self.second = time.second().min(59) as u8;
     }
 
     fn mouse_pos_to_component(&self, x: i32, y: i32) -> Option<TimeComponent> {

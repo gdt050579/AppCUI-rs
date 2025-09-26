@@ -314,3 +314,24 @@ fn check_mouse_wheel(){
     a.add_window(w);
     a.run();
 }
+
+
+#[test]
+fn check_api(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State (12:35:57 PM)')
+        CheckHash(0x680415F8F44A3404)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    let mut tp = TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM);
+    let time = tp.time();
+    assert_eq!(time, NaiveTime::from_hms_opt(12, 34, 56).unwrap());
+    tp.set_time(NaiveTime::from_hms_opt(13, 35, 57).unwrap());
+    let time = tp.time();
+    assert_eq!(time, NaiveTime::from_hms_opt(13, 35, 57).unwrap());
+    w.add(tp);
+    a.add_window(w);
+    a.run();
+}
