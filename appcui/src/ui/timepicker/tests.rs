@@ -239,3 +239,78 @@ fn check_click_disabled(){
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_click(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')
+        CheckHash(0x83A02CBD3FA27F3C)
+        Mouse.Click(3,2,left)
+        Paint('2. Click over hour')
+        CheckHash(0x7789D00B3A71A68C)
+        Mouse.Click(7,2,left)
+        Paint('3. Click over minute')
+        CheckHash(0x4B567FD49ED4D168)
+        Mouse.Click(10,4,left)
+        Paint('4. Click over second')
+        CheckHash(0x611B56AAD489AD24)
+        Mouse.Click(10,6,left)
+        Paint('5. Click over AM/PM')
+        CheckHash(0x65AB7C7FA7DE5904)
+        Mouse.Click(9,8,left)
+        Paint('6. Click over Seconds')
+        CheckHash(0x459556EC8605D30C)
+        Mouse.Click(12,8,left)
+        Paint('7. Click over AM/PM')
+        CheckHash(0x67B7DC6BBB8594A4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::None));
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds));
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:5,w:10"), timepicker::Flags::AMPM));
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:7,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_mouse_wheel(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State')
+        CheckHash(0x2145A7390DE6C876)
+        Mouse.Click(3,4,left)
+        Paint('2. Click over hour')
+        CheckHash(0x2145A7390DE6C876)
+        Mouse.Wheel(3,4,down,1)
+        Paint('3. [11]:34:56 AM')
+        CheckHash(0xF94B1178150B8024)
+        Mouse.Wheel(3,4,right,1)
+        Paint('4. 11:[34]:56 AM')
+        CheckHash(0x92D241E3DDF9B660)
+        Mouse.Wheel(3,4,up,1)
+        Paint('5. 11:[35]:56 AM')
+        CheckHash(0x82DB3D673044AA15)
+        Mouse.Wheel(3,4,right,2)
+        Paint('6. 11:35:56 [AM]')
+        CheckHash(0xC1D49D6F828BFAED)
+        Mouse.Wheel(3,4,down,1)
+        Paint('7. 11:35:56 [PM]')
+        CheckHash(0x530048738DB2B7AC)
+        Mouse.Wheel(3,4,left,1)
+        Paint('8. 11:35:[56] PM')
+        CheckHash(0x8F45804C5D0EFEF4)
+        Mouse.Wheel(3,4,down,20)
+        Paint('9. 11:35:[36] PM')
+        CheckHash(0xF2C083E20A6F25F2)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+
+    a.add_window(w);
+    a.run();
+}
