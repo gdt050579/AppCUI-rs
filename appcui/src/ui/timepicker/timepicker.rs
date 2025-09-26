@@ -73,6 +73,9 @@ impl TimePicker {
         if y != 0 {
             return None;
         }
+        if !self.is_enabled() {
+            return None;
+        }
         match x {
             1 | 2 => Some(TimeComponent::Hour),
             4 | 5 => Some(TimeComponent::Minute),
@@ -146,13 +149,13 @@ impl TimePicker {
     fn increment_decrement_selected_component(&mut self, increment: bool) {
         match self.selected_component {
             TimeComponent::Hour => {
-                self.hour = Self::update_value(self.hour, 23, increment);
+                self.hour = Self::update_value(self.hour, 24, increment);
             }
             TimeComponent::Minute => {
-                self.minute = Self::update_value(self.minute, 59, increment);
+                self.minute = Self::update_value(self.minute, 60, increment);
             }
             TimeComponent::Second => {
-                self.second = Self::update_value(self.second, 59, increment);
+                self.second = Self::update_value(self.second, 60, increment);
             }
             TimeComponent::AmPm => {
                 // referse the hour to reflect AM or PM
@@ -217,7 +220,16 @@ impl TimePicker {
     #[inline(always)]
     fn paint_number(&self, surface: &mut Surface, theme: &Theme, x: i32, comp: TimeComponent, attr: CharAttribute, has_focus: bool) {
         let num = match comp {
-            TimeComponent::Hour => self.hour,
+            TimeComponent::Hour => {
+                if self.flags.contains(Flags::AMPM) {
+                    match self.hour % 12 {
+                        0 => 12,
+                        n => n,
+                    }
+                } else {
+                    self.hour
+                }
+            }
             TimeComponent::Minute => self.minute,
             TimeComponent::Second => self.second,
             TimeComponent::AmPm => 0,
@@ -231,6 +243,8 @@ impl TimePicker {
             } else {
                 (attr, false)
             }
+        } else if Some(comp) == self.hovered_component {
+            (theme.editor.hovered, false)
         } else {
             (attr, false)
         };
@@ -281,10 +295,12 @@ impl OnPaint for TimePicker {
                 } else {
                     attr
                 }
+            } else if Some(TimeComponent::AmPm) == self.hovered_component {
+                theme.editor.hovered
             } else {
                 attr
             };
-            if self.hour > 12 {
+            if self.hour >= 12 {
                 surface.write_ascii(x, 0, b"PM", attr, false);
             } else {
                 surface.write_ascii(x, 0, b"AM", attr, false);
