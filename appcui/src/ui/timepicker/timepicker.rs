@@ -2,6 +2,7 @@ use super::{events::EventData, Flags};
 use crate::input::KeyCode;
 use crate::prelude::*;
 use crate::ui::common::{ControlEvent, ControlEventData};
+use chrono::{NaiveTime, Timelike};
 
 #[derive(Clone, Copy, PartialEq)]
 enum TimeComponent {
@@ -16,41 +17,25 @@ pub struct TimePicker {
     hour: u8,
     minute: u8,
     second: u8,
-    is_pm: bool,
     flags: Flags,
     selected_component: TimeComponent,
-    input_buffer: String,
-    input_timeout: u32,
+    editable_digit_is_first: bool,
 }
 
 impl TimePicker {
-    pub fn new(hour: u8, minute: u8, second: u8, layout: Layout, flags: Flags) -> Self {
-        let hour = hour.min(23);
-        let minute = minute.min(59);
-        let second = second.min(59);
-
-        let (display_hour, is_pm) = if flags.contains(Flags::AMPM) {
-            if hour == 0 {
-                (12, false)
-            } else if hour <= 12 {
-                (hour, hour == 12)
-            } else {
-                (hour - 12, true)
-            }
-        } else {
-            (hour, false)
-        };
+    pub fn new(time: NaiveTime, layout: Layout, flags: Flags) -> Self {
+        let hour = time.hour().min(23) as u8;
+        let minute = time.minute().min(59) as u8;
+        let second = time.second().min(59) as u8;
 
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
-            hour: display_hour,
+            hour,
             minute,
             second,
-            is_pm,
             flags,
             selected_component: TimeComponent::Hour,
-            input_buffer: String::new(),
-            input_timeout: 0,
+            editable_digit_is_first: true,
         };
 
         let min_width = 5 + if flags.contains(Flags::AMPM) { 3 } else { 0 } + if flags.contains(Flags::Seconds) { 3 } else { 0 };
@@ -67,25 +52,8 @@ impl TimePicker {
     }
 
     /// Gets the current time in 24-hour format
-    pub fn get_time(&self) -> (u8, u8, u8) {
-        let hour_24 = if self.flags.contains(Flags::AMPM) {
-            if self.hour == 12 {
-                if self.is_pm {
-                    12
-                } else {
-                    0
-                }
-            } else {
-                if self.is_pm {
-                    self.hour + 12
-                } else {
-                    self.hour
-                }
-            }
-        } else {
-            self.hour
-        };
-        (hour_24, self.minute, self.second)
+    pub fn time(&self) -> NaiveTime {
+        NaiveTime::from_hms_opt(self.hour as u32, self.minute as u32, self.second as u32).unwrap()
     }
 
     /// Sets the time in 24-hour format
@@ -94,39 +62,9 @@ impl TimePicker {
         let minute = minute.min(59);
         let second = second.min(59);
 
-        let (display_hour, is_pm) = if self.flags.contains(Flags::AMPM) {
-            if hour == 0 {
-                (12, false)
-            } else if hour <= 12 {
-                (hour, hour == 12)
-            } else {
-                (hour - 12, true)
-            }
-        } else {
-            (hour, false)
-        };
-
-        self.hour = display_hour;
+        self.hour = hour;
         self.minute = minute;
         self.second = second;
-        self.is_pm = is_pm;
-
-        self.raise_time_changed_event();
-    }
-
-    fn get_component_range(&self, component: TimeComponent) -> (u8, u8) {
-        match component {
-            TimeComponent::Hour => {
-                if self.flags.contains(Flags::AMPM) {
-                    (1, 12)
-                } else {
-                    (0, 23)
-                }
-            }
-            TimeComponent::Minute => (0, 59),
-            TimeComponent::Second => (0, 59),
-            TimeComponent::AmPm => (0, 1),
-        }
     }
 
     fn mouse_pos_to_component(&self, x: i32, y: i32) -> Option<TimeComponent> {
@@ -155,114 +93,76 @@ impl TimePicker {
             _ => None,
         }
     }
-
-    fn increment_component(&mut self, component: TimeComponent, amount: i32) {
-        let (min_val, max_val) = self.get_component_range(component);
-
-        match component {
-            TimeComponent::Hour => {
-                let new_val = ((self.hour as i32 + amount - min_val as i32).rem_euclid((max_val - min_val + 1) as i32) + min_val as i32) as u8;
-                self.hour = new_val;
+    fn update_value(value: u8, max: u8, increment: bool) -> u8 {
+        let value = value % max;
+        if increment {
+            (value + 1) % max
+        } else {
+            (value + max - 1) % max
+        }
+    }
+    fn update_value_withdigit(value: u8, max: u8, digit: u8, first_digit: bool) -> Option<u8> {
+        if first_digit {
+            if digit > max / 10 {
+                None
+            } else {
+                Some((digit * 10 + (value % 10)).min(max))
             }
-            TimeComponent::Minute => {
-                let new_val = ((self.minute as i32 + amount).rem_euclid(60)) as u8;
-                self.minute = new_val;
-            }
-            TimeComponent::Second => {
-                let new_val = ((self.second as i32 + amount).rem_euclid(60)) as u8;
-                self.second = new_val;
-            }
-            TimeComponent::AmPm => {
-                self.is_pm = !self.is_pm;
+        } else {
+            let new_value = digit + ((value / 10) * 10);
+            if new_value > max {
+                None
+            } else {
+                Some(new_value)
             }
         }
-
-        self.raise_time_changed_event();
     }
 
-    fn process_digit_input(&mut self, digit: char) {
-        if !digit.is_ascii_digit() {
-            return;
+    fn update_digit(&mut self, digit: u8) {
+        let (value, max) = match self.selected_component {
+            TimeComponent::Hour => (self.hour, 23),
+            TimeComponent::Minute => (self.minute, 59),
+            TimeComponent::Second => (self.second, 59),
+            TimeComponent::AmPm => {
+                return;
+            }
+        };
+        if let Some(v) = Self::update_value_withdigit(value, max, digit, self.editable_digit_is_first) {
+            match self.selected_component {
+                TimeComponent::Hour => self.hour = v,
+                TimeComponent::Minute => self.minute = v,
+                TimeComponent::Second => self.second = v,
+                TimeComponent::AmPm => {}
+            }
+            self.editable_digit_is_first = !self.editable_digit_is_first;
+            if self.editable_digit_is_first {
+                self.move_to_next_component();
+            }
+            self.raise_time_changed_event();
         }
-
-        self.input_buffer.push(digit);
-        self.input_timeout = 100; // Reset timeout
-
-        let digit_val = digit.to_digit(10).unwrap() as u8;
-        let (min_val, max_val) = self.get_component_range(self.selected_component);
-
+    }
+    fn increment_decrement_selected_component(&mut self, increment: bool) {
         match self.selected_component {
             TimeComponent::Hour => {
-                if self.input_buffer.len() == 1 {
-                    // First digit
-                    if self.flags.contains(Flags::AMPM) {
-                        if digit_val >= 1 && digit_val <= 1 {
-                            // Could be 10, 11, 12
-                            self.hour = digit_val;
-                        } else if digit_val >= 2 && digit_val <= 9 {
-                            // Single digit hour (2-9)
-                            self.hour = digit_val;
-                            self.input_buffer.clear();
-                            self.raise_time_changed_event();
-                        }
-                    } else {
-                        if digit_val <= 2 {
-                            // Could be 20-23
-                            self.hour = digit_val;
-                        } else {
-                            // Single digit hour (3-9)
-                            self.hour = digit_val;
-                            self.input_buffer.clear();
-                            self.raise_time_changed_event();
-                        }
-                    }
-                } else if self.input_buffer.len() == 2 {
-                    // Second digit
-                    let first_digit = self.input_buffer.chars().nth(0).unwrap().to_digit(10).unwrap() as u8;
-                    let new_hour = first_digit * 10 + digit_val;
-
-                    if new_hour >= min_val && new_hour <= max_val {
-                        self.hour = new_hour;
-                        self.input_buffer.clear();
-                        self.raise_time_changed_event();
-                    }
-                }
+                self.hour = Self::update_value(self.hour, 23, increment);
             }
-            TimeComponent::Minute | TimeComponent::Second => {
-                let current_val = if self.selected_component == TimeComponent::Minute {
-                    &mut self.minute
-                } else {
-                    &mut self.second
-                };
-
-                if self.input_buffer.len() == 1 {
-                    if digit_val <= 5 {
-                        // Could be 50-59
-                        *current_val = digit_val;
-                    } else {
-                        // Single digit (6-9)
-                        *current_val = digit_val;
-                        self.input_buffer.clear();
-                        self.raise_time_changed_event();
-                    }
-                } else if self.input_buffer.len() == 2 {
-                    let first_digit = self.input_buffer.chars().nth(0).unwrap().to_digit(10).unwrap() as u8;
-                    let new_val = first_digit * 10 + digit_val;
-
-                    if new_val <= 59 {
-                        *current_val = new_val;
-                        self.input_buffer.clear();
-                        self.raise_time_changed_event();
-                    }
-                }
+            TimeComponent::Minute => {
+                self.minute = Self::update_value(self.minute, 59, increment);
+            }
+            TimeComponent::Second => {
+                self.second = Self::update_value(self.second, 59, increment);
             }
             TimeComponent::AmPm => {
-                // Toggle AM/PM on any digit
-                self.is_pm = !self.is_pm;
-                self.input_buffer.clear();
+                // referse the hour to reflect AM or PM
+                if self.hour >= 12 {
+                    self.hour -= 12;
+                } else {
+                    self.hour += 12;
+                }
                 self.raise_time_changed_event();
             }
         }
+        self.raise_time_changed_event();
     }
 
     fn move_to_next_component(&mut self) {
@@ -286,7 +186,7 @@ impl TimePicker {
             }
             TimeComponent::AmPm => TimeComponent::Hour,
         };
-        self.input_buffer.clear();
+        self.editable_digit_is_first = true;
     }
 
     fn move_to_prev_component(&mut self) {
@@ -310,12 +210,15 @@ impl TimePicker {
                 }
             }
         };
-        self.input_buffer.clear();
+        self.editable_digit_is_first = true;
     }
     #[inline(always)]
     fn paint_number(&self, surface: &mut Surface, x: i32, num: u8, attr: CharAttribute, show_cursor: bool) {
         let buf: [u8; 2] = [48 + num / 10, 48 + num % 10];
         surface.write_ascii(x, 0, &buf, attr, false);
+        if show_cursor {
+            surface.set_cursor(x + if self.editable_digit_is_first { 0 } else { 1 }, 0);
+        }
     }
 }
 
@@ -345,7 +248,11 @@ impl OnPaint for TimePicker {
             } else {
                 attr
             },
-            false,
+            if self.selected_component == TimeComponent::Hour {
+                has_focus
+            } else {
+                false
+            },
         );
         surface.write_char(x + 2, 0, sep);
         x += 3;
@@ -360,7 +267,11 @@ impl OnPaint for TimePicker {
             } else {
                 attr
             },
-            false,
+            if self.selected_component == TimeComponent::Minute {
+                has_focus
+            } else {
+                false
+            },
         );
         surface.write_char(x + 2, 0, sep);
         x += 3;
@@ -376,7 +287,11 @@ impl OnPaint for TimePicker {
                 } else {
                     attr
                 },
-                false,
+                if self.selected_component == TimeComponent::Second {
+                    has_focus
+                } else {
+                    false
+                },
             );
             x += 2;
         }
@@ -397,54 +312,31 @@ impl OnPaint for TimePicker {
 }
 
 impl OnKeyPressed for TimePicker {
-    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        if !self.is_enabled() {
-            return EventProcessStatus::Ignored;
-        }
-
-        self.input_timeout = self.input_timeout.saturating_sub(1);
-        if self.input_timeout == 0 {
-            self.input_buffer.clear();
-        }
-
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         match key.code {
             KeyCode::Up => {
-                self.increment_component(self.selected_component, 1);
+                self.increment_decrement_selected_component(true);
                 EventProcessStatus::Processed
             }
             KeyCode::Down => {
-                self.increment_component(self.selected_component, -1);
-                EventProcessStatus::Processed
-            }
-            KeyCode::PageUp => {
-                let increment = match self.selected_component {
-                    TimeComponent::Hour => 6,
-                    TimeComponent::Minute | TimeComponent::Second => 10,
-                    TimeComponent::AmPm => 1,
-                };
-                self.increment_component(self.selected_component, increment);
-                EventProcessStatus::Processed
-            }
-            KeyCode::PageDown => {
-                let increment = match self.selected_component {
-                    TimeComponent::Hour => 6,
-                    TimeComponent::Minute | TimeComponent::Second => 10,
-                    TimeComponent::AmPm => 1,
-                };
-                self.increment_component(self.selected_component, -increment);
+                self.increment_decrement_selected_component(false);
                 EventProcessStatus::Processed
             }
             KeyCode::Left => {
                 self.move_to_prev_component();
                 EventProcessStatus::Processed
             }
-            KeyCode::Right | KeyCode::Tab => {
+            KeyCode::Right => {
                 self.move_to_next_component();
                 EventProcessStatus::Processed
             }
+            KeyCode::Backspace => {
+                self.editable_digit_is_first = true;
+                EventProcessStatus::Processed
+            }
             _ => {
-                if _character.is_ascii_digit() {
-                    self.process_digit_input(_character);
+                if character.is_ascii_digit() {
+                    self.update_digit((character as u8) - b'0');
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
@@ -476,6 +368,6 @@ impl OnMouseEvent for TimePicker {
 
 impl OnFocus for TimePicker {
     fn on_focus(&mut self) {
-        self.input_buffer.clear();
+        self.editable_digit_is_first = true;
     }
 }
