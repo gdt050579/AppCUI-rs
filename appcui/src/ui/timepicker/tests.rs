@@ -335,3 +335,234 @@ fn check_api(){
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_navigate(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. [12]:34:56 PM')
+        CheckHash(0x83A02CBD3FA27F3C)
+        Key.Pressed(Right)
+        Paint('2. 12:[34]:56 PM')
+        CheckHash(0x7CD91537680532B8)
+        Key.Pressed(Right)
+        Paint('3. 12:34:[56] PM')
+        CheckHash(0x459556EC8605D30C)
+        Key.Pressed(Right)
+        Paint('4. 12:34:56 [PM]')
+        CheckHash(0x67B7DC6BBB8594A4)
+        Key.Pressed(Left)
+        Paint('5. 12:34:[56] PM')
+        CheckHash(0x459556EC8605D30C)
+        Key.Pressed(Left)
+        Paint('6. 12:[34]:56 PM')
+        CheckHash(0x7CD91537680532B8)
+        Key.Pressed(Tab)
+        Paint('7. [12]:34')
+        CheckHash(0x7789D00B3A71A68C)
+        Key.Pressed(Right)
+        Paint('8. 12:[34]')
+        CheckHash(0x4B567FD49ED4D168)
+        Key.Pressed(Right)
+        Paint('9. [12]:34')
+        CheckHash(0x7789D00B3A71A68C)
+        Key.Pressed(Tab)
+        Paint('10. [12]:34:56')
+        CheckHash(0xD78F6C87E94E4D14)
+        Key.Pressed(Left)
+        Paint('11. 12:34:[56]')
+        CheckHash(0x611B56AAD489AD24)
+        Key.Pressed(Left)
+        Paint('12. 12:[34]:56')
+        CheckHash(0x32E38D9E69C17D40)
+        Key.Pressed(Tab)
+        Paint('13. [12]:34 PM')
+        CheckHash(0x15181D772142F434)
+        Key.Pressed(Right)
+        Paint('14. 12:[34] PM')
+        CheckHash(0x2EC560ACEDCEC8B8)
+        Key.Pressed(Right)
+        Paint('15. 12:34 [PM]')
+        CheckHash(0x65AB7C7FA7DE5904)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::None));
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds));
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:5,w:10"), timepicker::Flags::AMPM));
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:7,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_change_time(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. [12]:34:56 PM')
+        CheckHash(0x83A02CBD3FA27F3C)
+        Key.TypeText('0')
+        Paint('2. [02]:34:56 PM')
+        CheckHash(0xD8346764C90F384C)
+        CheckCursor(4,8)
+        Key.Pressed(Tab)
+        Paint('3. [12]:34')
+        CheckHash(0x31E27232BB1AEC7C)
+        CheckCursor(3,2)
+        Key.TypeText('2312')
+        Paint('4. [23]:12')
+        CheckHash(0x8E94DDEA55D3486E)
+        CheckCursor(3,2)
+        Key.Pressed(Tab)
+        Key.TypeText('111')
+        Paint('5. 11:[14]:56')
+        CheckHash(0x10B2A67452174DE7)
+        CheckCursor(7,4)
+        Key.TypeText('9')
+        Paint('6. 11:19:[56] (nothing happens)')
+        CheckHash(0xF9D4D25F0B3FA7A6)
+        CheckCursor(9,4)
+        Key.Pressed(Right)
+        Paint('7. [11]:19:56')
+        CheckHash(0xDACE1E3FB44C23F6)
+        Key.TypeText('3')
+        Paint('8. [11]:19:56 (nothing happens)')
+        CheckHash(0xDACE1E3FB44C23F6)
+        Key.TypeText('19')
+        Paint('9. 19:[19]:56')
+        CheckHash(0x346D911F8B082ABE)
+        Key.Pressed(Left)
+        Paint('10. [19]:19:56')
+        CheckHash(0x108AB93793B66EFE)
+        Key.TypeText('2')
+        // 2 is valid for the first digit, but 2 follow by 9 is not so it will be normalized to 23
+        Paint('11. [23]:19:56')
+        CheckHash(0x197F2C35E0E53D1B)
+        CheckCursor(4,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::None));
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds));
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:5,w:10"), timepicker::Flags::AMPM));
+    w.add(TimePicker::new(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:7,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_increase_decrease_all(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State ([12]:35:56 PM)')
+        CheckHash(0xEED06B87151F60D7)
+        Key.Pressed(Right)
+        Paint('2. 12:[35]:56 PM')
+        CheckHash(0x310B64668BFC170F)
+        Key.Pressed(Up,24)
+        Paint('3. 12:[59]:56 PM')
+        CheckHash(0x8FD62572B6007DBD)
+        Key.Pressed(Up,3)
+        Paint('4. 12:[02]:56 PM')
+        CheckHash(0x129B44CE9C58A5E3)
+        Key.Pressed(Down,2)
+        Paint('5. 12:[00]:56 PM')
+        CheckHash(0x42B8BD8E52E1C56D)
+        Key.Pressed(Right)
+        Paint('6. 12:00:[56] PM')
+        CheckHash(0xD3EB6464EB926369)
+        Key.Pressed(Up,4)
+        Paint('7. 12:00:[00] PM')
+        CheckHash(0xE0A2CAE753F97FE)
+        Key.Pressed(Down,3)
+        Paint('8. 12:00:[57] PM')
+        CheckHash(0x66A9A3A0283BFAD4)
+        Key.Pressed(Right)
+        Paint('9. 12:00:57 [PM]')
+        CheckHash(0x37FE294B74AD6CC0)
+        Key.Pressed(Up)
+        Paint('10. 12:00:57 [AM]')
+        CheckHash(0xE0D9634B57728281)
+        Key.Pressed(Up)
+        Paint('11. 12:00:57 [PM]')
+        CheckHash(0x37FE294B74AD6CC0)
+        Key.Pressed(Down)
+        Paint('12. 12:00:57 [AM]')
+        CheckHash(0xE0D9634B57728281)
+        Key.Pressed(Down)
+        Paint('13. 12:00:57 [PM]')
+        CheckHash(0x37FE294B74AD6CC0)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    let tp = TimePicker::new(NaiveTime::from_hms_opt(12, 35, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM);
+    w.add(tp);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_type_all(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State ([12]:35:56)')
+        CheckHash(0xB2A7252480733ACE)
+        Key.TypeText('070811')
+        Paint('2. 07:08:11')
+        CheckHash(0xEC277E0EFAB776F7)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    let tp = TimePicker::new(NaiveTime::from_hms_opt(12, 35, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds);
+    w.add(tp);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_delete_digit(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State ([12]:35:56)')
+        CheckHash(0xB2A7252480733ACE)
+        Key.TypeText('0')
+        Paint('2. [02]:35:56')
+        CheckHash(0xC5759BE5B8776213)
+        CheckCursor(4,4)
+        Key.Pressed(Backspace)
+        Paint('3. [02]:35:56')
+        CheckHash(0xC5759BE5B8776213)
+        CheckCursor(3,4)
+        Key.TypeText('2')
+        Paint('4. [22]:35:56')
+        CheckHash(0xFECE992CDAFDEDE5)
+        CheckCursor(4,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    let tp = TimePicker::new(NaiveTime::from_hms_opt(12, 35, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds);
+    w.add(tp);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_navigate_rotate(){
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State ([12]:35:56 PM)')
+        CheckHash(0xEED06B87151F60D7)
+        Key.Pressed(Left)
+        Paint('2. 12:35:56 [PM]')
+        CheckHash(0xA7CA1AB0DBDD600F)
+        Key.Pressed(Right)
+        Paint('3. [12]:35:56 AM')
+        CheckHash(0xEED06B87151F60D7)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("TimePicker,d:fill");
+    let tp = TimePicker::new(NaiveTime::from_hms_opt(12, 35, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM);
+    w.add(tp);
+    a.add_window(w);
+    a.run();
+}
