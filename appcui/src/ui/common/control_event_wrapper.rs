@@ -97,7 +97,7 @@ impl ControlEvent {
             ControlEventData::ComboBox(_) => ComboBoxEvents::on_selection_changed(receiver, self.emitter.cast()),
             ControlEventData::DropDownList(data) => GenericDropDownListEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id),
             ControlEventData::NumericSelector(data) => GenericNumericSelectorEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id),
-            ControlEventData::DatePicker(data) => DatePickerEvents::on_date_change(receiver, self.emitter.cast(), data.date),
+            ControlEventData::DatePicker(data) => DatePickerEvents::on_date_changed(receiver, self.emitter.cast(), data.date),
             ControlEventData::ListBox(data) => match data.event_type {
                 listbox::events::ListBoxEventTypes::CurrentItemChanged => {
                     ListBoxEvents::on_current_item_changed(receiver, self.emitter.cast(), data.index)
