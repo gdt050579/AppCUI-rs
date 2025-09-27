@@ -1,6 +1,6 @@
 [package]
 name = "appcui_proc_macro"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["Gavrilut Dragos <gavrilut.dragos@gmail.com>"]
 description = "Procedural macros for the AppCUI TUI framework."
