@@ -84,6 +84,7 @@
         - [TextArea](chapter-3/stock-controls/textarea.md)
         - [TextField](chapter-3/stock-controls/textfield.md)
         - [ThreeStateBox](chapter-3/stock-controls/threestatebox.md)
+        - [TimePicker](chapter-3/stock-controls/timepicker.md)
         - [ToggleButton](chapter-3/stock-controls/togglebutton.md)
         - [TreeView](chapter-3/stock-controls/treeview.md)
         - [VLine](chapter-3/stock-controls/vline.md)

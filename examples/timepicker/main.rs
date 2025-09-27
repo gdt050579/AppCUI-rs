@@ -8,7 +8,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: window!("Dates,a:c,w:25,h:6"),
+            base: window!("Time,a:c,w:25,h:6"),
             dp: Handle::None,
         };
         win.dp = win.add(timepicker!("'12:34:56',x:1,y:1,w:19,flags: Seconds"));

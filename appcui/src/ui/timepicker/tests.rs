@@ -2,7 +2,7 @@ use crate::prelude::*;
 use chrono::NaiveTime;
 
 #[test]
-fn check_create(){
+fn check_create() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')
@@ -11,20 +11,44 @@ fn check_create(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 30, 20).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::Seconds));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(00, 00, 00).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(23, 59, 59).unwrap(), layout!("x:1,y:5,w:10"), timepicker::Flags::Seconds));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 30, 20).unwrap(),
+        layout!("x:1,y:1,w:10"),
+        timepicker::Flags::Seconds,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(00, 00, 00).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(23, 59, 59).unwrap(),
+        layout!("x:1,y:5,w:10"),
+        timepicker::Flags::Seconds,
+    ));
 
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 30, 20).unwrap(), layout!("x:20,y:1,w:10"), timepicker::Flags::None));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(00, 00, 00).unwrap(), layout!("x:20,y:3,w:10"), timepicker::Flags::None));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(23, 59, 59).unwrap(), layout!("x:20,y:5,w:10"), timepicker::Flags::None));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 30, 20).unwrap(),
+        layout!("x:20,y:1,w:10"),
+        timepicker::Flags::None,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(00, 00, 00).unwrap(),
+        layout!("x:20,y:3,w:10"),
+        timepicker::Flags::None,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(23, 59, 59).unwrap(),
+        layout!("x:20,y:5,w:10"),
+        timepicker::Flags::None,
+    ));
 
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn check_create_proc_macro(){
+fn check_create_proc_macro() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')
@@ -45,9 +69,8 @@ fn check_create_proc_macro(){
     a.run();
 }
 
-
 #[test]
-fn check_create_ampm(){
+fn check_create_ampm() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')
@@ -56,20 +79,44 @@ fn check_create_ampm(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 30, 20).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(00, 00, 00).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(23, 59, 59).unwrap(), layout!("x:1,y:5,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 30, 20).unwrap(),
+        layout!("x:1,y:1,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(00, 00, 00).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(23, 59, 59).unwrap(),
+        layout!("x:1,y:5,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    ));
 
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 30, 20).unwrap(), layout!("x:20,y:1,w:10"), timepicker::Flags::AMPM));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(00, 00, 00).unwrap(), layout!("x:20,y:3,w:10"), timepicker::Flags::AMPM));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(23, 59, 59).unwrap(), layout!("x:20,y:5,w:10"), timepicker::Flags::AMPM));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 30, 20).unwrap(),
+        layout!("x:20,y:1,w:10"),
+        timepicker::Flags::AMPM,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(00, 00, 00).unwrap(),
+        layout!("x:20,y:3,w:10"),
+        timepicker::Flags::AMPM,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(23, 59, 59).unwrap(),
+        layout!("x:20,y:5,w:10"),
+        timepicker::Flags::AMPM,
+    ));
 
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn check_create_ampm_proc_macro(){
+fn check_create_ampm_proc_macro() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')
@@ -90,9 +137,8 @@ fn check_create_ampm_proc_macro(){
     a.run();
 }
 
-
 #[test]
-fn check_ampm_increase_decrease(){
+fn check_ampm_increase_decrease() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State (12:00 AM)')
@@ -137,14 +183,17 @@ fn check_ampm_increase_decrease(){
     ";
     let mut a = App::debug(40, 8, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(00, 00, 00).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::AMPM));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(00, 00, 00).unwrap(),
+        layout!("x:1,y:1,w:10"),
+        timepicker::Flags::AMPM,
+    ));
     a.add_window(w);
     a.run();
 }
 
-
 #[test]
-fn check_hover(){
+fn check_hover() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')
@@ -170,17 +219,33 @@ fn check_hover(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::None));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:5,w:10"), timepicker::Flags::AMPM));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:7,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:1,w:10"),
+        timepicker::Flags::None,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:5,w:10"),
+        timepicker::Flags::AMPM,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:7,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    ));
 
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn check_hover_disabled(){
+fn check_hover_disabled() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')
@@ -225,7 +290,11 @@ fn check_hover_disabled(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    let mut tp = TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM);
+    let mut tp = TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:1,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    );
     tp.set_enabled(false);
     w.add(tp);
     a.add_window(w);
@@ -233,7 +302,7 @@ fn check_hover_disabled(){
 }
 
 #[test]
-fn check_click_disabled(){
+fn check_click_disabled() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')
@@ -278,7 +347,11 @@ fn check_click_disabled(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    let mut tp = TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM);
+    let mut tp = TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:1,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    );
     tp.set_enabled(false);
     w.add(tp);
     a.add_window(w);
@@ -286,7 +359,7 @@ fn check_click_disabled(){
 }
 
 #[test]
-fn check_click(){
+fn check_click() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')
@@ -312,17 +385,33 @@ fn check_click(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::None));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:5,w:10"), timepicker::Flags::AMPM));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:7,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:1,w:10"),
+        timepicker::Flags::None,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:5,w:10"),
+        timepicker::Flags::AMPM,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:7,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    ));
 
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn check_mouse_wheel(){
+fn check_mouse_wheel() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State')
@@ -354,15 +443,18 @@ fn check_mouse_wheel(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    ));
 
     a.add_window(w);
     a.run();
 }
 
-
 #[test]
-fn check_api(){
+fn check_api() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State (12:35:57 PM)')
@@ -370,7 +462,11 @@ fn check_api(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    let mut tp = TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM);
+    let mut tp = TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    );
     let time = tp.time();
     assert_eq!(time, NaiveTime::from_hms_opt(12, 34, 56).unwrap());
     tp.set_time(NaiveTime::from_hms_opt(13, 35, 57).unwrap());
@@ -382,7 +478,7 @@ fn check_api(){
 }
 
 #[test]
-fn check_navigate(){
+fn check_navigate() {
     let script = "
         Paint.Enable(false)
         Paint('1. [12]:34:56 PM')
@@ -432,16 +528,32 @@ fn check_navigate(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::None));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:5,w:10"), timepicker::Flags::AMPM));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:7,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:1,w:10"),
+        timepicker::Flags::None,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:5,w:10"),
+        timepicker::Flags::AMPM,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:7,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    ));
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn check_change_time(){
+fn check_change_time() {
     let script = "
         Paint.Enable(false)
         Paint('1. [12]:34:56 PM')
@@ -487,16 +599,32 @@ fn check_change_time(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:1,w:10"), timepicker::Flags::None));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:5,w:10"), timepicker::Flags::AMPM));
-    w.add(TimePicker::with_time(NaiveTime::from_hms_opt(12, 34, 56).unwrap(), layout!("x:1,y:7,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:1,w:10"),
+        timepicker::Flags::None,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:5,w:10"),
+        timepicker::Flags::AMPM,
+    ));
+    w.add(TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 34, 56).unwrap(),
+        layout!("x:1,y:7,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    ));
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn check_increase_decrease_all(){
+fn check_increase_decrease_all() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State ([12]:35:56 PM)')
@@ -540,14 +668,18 @@ fn check_increase_decrease_all(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    let tp = TimePicker::with_time(NaiveTime::from_hms_opt(12, 35, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM);
+    let tp = TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 35, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    );
     w.add(tp);
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn check_type_all(){
+fn check_type_all() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State ([12]:35:56)')
@@ -558,14 +690,18 @@ fn check_type_all(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    let tp = TimePicker::with_time(NaiveTime::from_hms_opt(12, 35, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds);
+    let tp = TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 35, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds,
+    );
     w.add(tp);
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn check_delete_digit(){
+fn check_delete_digit() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State ([12]:35:56)')
@@ -585,14 +721,18 @@ fn check_delete_digit(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    let tp = TimePicker::with_time(NaiveTime::from_hms_opt(12, 35, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds);
+    let tp = TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 35, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds,
+    );
     w.add(tp);
     a.add_window(w);
     a.run();
 }
 
 #[test]
-fn check_navigate_rotate(){
+fn check_navigate_rotate() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State ([12]:35:56 PM)')
@@ -606,15 +746,18 @@ fn check_navigate_rotate(){
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("TimePicker,d:fill");
-    let tp = TimePicker::with_time(NaiveTime::from_hms_opt(12, 35, 56).unwrap(), layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM);
+    let tp = TimePicker::with_time(
+        NaiveTime::from_hms_opt(12, 35, 56).unwrap(),
+        layout!("x:1,y:3,w:10"),
+        timepicker::Flags::Seconds | timepicker::Flags::AMPM,
+    );
     w.add(tp);
     a.add_window(w);
     a.run();
 }
 
-
 #[test]
-fn check_create_with_string(){
+fn check_create_with_string() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial State ([12]:35:56 PM)')
@@ -625,5 +768,49 @@ fn check_create_with_string(){
     let tp = TimePicker::new("12:35:56", layout!("x:1,y:3,w:10"), timepicker::Flags::Seconds | timepicker::Flags::AMPM);
     w.add(tp);
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_evnts() {
+    #[Window(events=TimePickerEvents, internal: true)]
+    struct MyWin {
+        dp: Handle<TimePicker>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = MyWin {
+                base: window!("Time,a:c,w:25,h:6"),
+                dp: Handle::None,
+            };
+            win.dp = win.add(timepicker!("'12:34:56',x:1,y:1,w:19"));
+            win
+        }
+    }
+
+    impl TimePickerEvents for MyWin {
+        fn on_time_changed(&mut self, _handle: Handle<TimePicker>, time: chrono::prelude::NaiveTime) -> EventProcessStatus {
+            self.set_title(&format!("Time: {time}"));
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial State [12]:34')
+        CheckHash(0xE14433DB3BE2DA17)
+        Key.Pressed(Left)
+        Paint('2. 12:[34]')
+        CheckHash(0x16913030333D59A3)
+        Key.Pressed(Up)
+        Paint('3. 12:[35], window title: 12:35:56')
+        CheckHash(0x9C908069A5296212)
+        Key.Pressed(Right)
+        Paint('4. [12]:35')
+        CheckHash(0xC769305066B41072)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }

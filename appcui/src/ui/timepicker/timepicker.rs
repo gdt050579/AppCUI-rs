@@ -24,11 +24,45 @@ pub struct TimePicker {
 }
 
 impl TimePicker {
+    /// Creates a new TimePicker with the given time string (e.g. "12:34:56") and layout
+    /// 
+    /// # Arguments
+    /// 
+    /// * `time_str` - The time string to parse
+    /// * `layout` - The layout to use
+    /// * `flags` - The flags to use
+    /// 
+    /// # Example
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let timepicker = TimePicker::new("12:34:56", 
+    ///                                 layout!("x:1,y:1,w:10"), 
+    ///                                 timepicker::Flags::Seconds);
+    /// ```
     pub fn new(time_str: &str, layout: Layout, flags: Flags) -> Self {
         let time = time_str.parse::<NaiveTime>().unwrap();
         Self::with_time(time, layout, flags)
     }
 
+    /// Creates a new TimePicker with the given time and layout
+    /// 
+    /// # Arguments
+    /// 
+    /// * `time` - The time to use
+    /// * `layout` - The layout to use
+    /// * `flags` - The flags to use
+    /// 
+    /// # Example
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// use chrono::NaiveTime;
+    /// 
+    /// let timepicker = TimePicker::with_time(
+    ///     NaiveTime::from_hms_opt(12, 34, 56).unwrap(), 
+    ///     layout!("x:1,y:1,w:10"), 
+    ///     timepicker::Flags::Seconds);
+    /// ```
     pub fn with_time(time: NaiveTime, layout: Layout, flags: Flags) -> Self {
         let hour = time.hour().min(23) as u8;
         let minute = time.minute().min(59) as u8;
@@ -60,13 +94,13 @@ impl TimePicker {
         });
     }
 
-    /// Gets the current time in 24-hour format
+    /// Gets the current time
     #[inline(always)]
     pub fn time(&self) -> NaiveTime {
         NaiveTime::from_hms_opt(self.hour as u32, self.minute as u32, self.second as u32).unwrap()
     }
 
-    /// Sets the time in 24-hour format
+    /// Sets the time
     pub fn set_time(&mut self, time: NaiveTime) {
         self.hour = time.hour().min(23) as u8;
         self.minute = time.minute().min(59) as u8;
