@@ -91,8 +91,9 @@ impl Backend for TermiosTerminal {
     fn update_screen(&mut self, surface: &Surface) {
         //self.clear();
         self.ansi_buffer.render(surface, Point::new(0, 0));
-        let _ = std::io::stdout().write_all(self.ansi_buffer.text().as_bytes());
-        let _ = std::io::stdout().flush();
+        self.ansi_buffer.execute();
+        // let _ = std::io::stdout().write_all(self.ansi_buffer.text().as_bytes());
+        // let _ = std::io::stdout().flush();
     }
 
     fn on_resize(&mut self, new_size: Size) {
