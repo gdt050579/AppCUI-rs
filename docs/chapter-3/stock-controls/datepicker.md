@@ -30,7 +30,7 @@ To intercept events from a DatePicker control, the following trait has to be imp
 
 ```rs
 pub trait DatePickerEvents {
-    fn on_date_change(&mut self, _handle: Handle<DatePicker>, date: chrono::prelude::NaiveDate) -> EventProcessStatus {...}
+    fn on_date_changed(&mut self, _handle: Handle<DatePicker>, date: chrono::prelude::NaiveDate) -> EventProcessStatus {...}
 }
 ```
 
@@ -62,7 +62,7 @@ On expanded calendar:
 
 | Key                                   | Purpose                                                                                                                                                                                                              |
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Enter`                               | Packs (collapses) the DatePicker control, saving the date and triggering a call to `DatePickerEvents::on_date_change(...)`.                                                                                          |
+| `Enter`                               | Packs (collapses) the DatePicker control, saving the date and triggering a call to `DatePickerEvents::on_date_changed(...)`.                                                                                          |
 | `Escape`                              | It collapses the control without saving the new date. If the DatePicker is already colapsed, this key will not be captured (meaning that one of the DatePicker ancestors will be responsable with treating this key) |
 | `Up`, `Down`, `Left`, `Right`         | Changes the date's day with 1 (left, right) or 7(up, down) days.                                                                                                                                                     |
 | `Shift+Left`, `Shift+Right`           | Changes the date's month by 1.                                                                                                                                                                                       |
@@ -103,8 +103,8 @@ impl MyWin{
 }
 
 impl DatePickerEvents for MyWin{
-    fn on_date_change(&mut self, _handle: Handle<DatePicker>, date: chrono::prelude::NaiveDate) -> EventProcessStatus {
-        self.base.set_title(&format!("Date: {}", date));
+    fn on_date_changed(&mut self, _handle: Handle<DatePicker>, date: chrono::prelude::NaiveDate) -> EventProcessStatus {
+        self.set_title(&format!("Date: {}", date));
         EventProcessStatus::Processed                                                                        
     }
 }
