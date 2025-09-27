@@ -106,6 +106,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::TimePickerEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -172,7 +173,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
-
+    config.set(AppCUITrait::TimePickerEvents, TraitImplementation::DefaultNonOverwritable);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -264,7 +265,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::TabEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
-
+    config.set(AppCUITrait::TimePickerEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
@@ -329,7 +330,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::TabEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
-
+    config.set(AppCUITrait::TimePickerEvents, TraitImplementation::Default);
 
 
     // custom events
@@ -420,7 +421,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::TabEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
-
+    config.set(AppCUITrait::TimePickerEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -2493,4 +2494,44 @@ pub fn charpicker(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn graphview(input: TokenStream) -> TokenStream {
     crate::controls::graphview::create(input)
+}
+
+
+/// Creates a new TimePicker control for selecting and editing time values.
+/// The format is `timepicker!("attributes")` where the attributes are pairs of key-value, separated by comma.
+/// 
+/// # Parameters
+/// * `time` (optional, first positional parameter) - Initial time in HH:MM:SS format or any format supported by NaiveTime
+/// * `flags` - Control flags (optional). Can be:
+///   - **Seconds** - Shows seconds in the time picker (format becomes HH:MM:SS)
+///   - **AMPM** - Shows AM/PM indicator and uses 12-hour format
+///   - Flags can be combined using `|` (e.g., `Seconds|AMPM`)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+/// 
+/// # Examples
+/// ```rustfs
+/// use appcui::prelude::*;
+/// 
+/// // Basic time picker
+/// let tp = timepicker!("'12:34:56', x=1, y=1, width=10");
+/// 
+/// // With named parameter and seconds display
+/// let tp = timepicker!("time: '14:30:45', flags: Seconds, dock: center, width: 10");
+/// 
+/// // With AM/PM format
+/// let tp = timepicker!("'09:15', flags: AMPM, x=0, y=0, width=10");
+/// 
+/// // With both seconds and AM/PM
+/// let tp = timepicker!("time: '21:45:30', flags: [Seconds,AMPM], align: center, width: 13");
+/// ```
+#[proc_macro]
+pub fn timepicker(input: TokenStream) -> TokenStream {
+    crate::controls::timepicker::create(input)
 }

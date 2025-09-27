@@ -33,6 +33,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [TextArea](stock-controls/textarea.md)               | ui::TextArea                 | `textarea!`        | <img src="stock-controls/img/textarea.png" width=300/>        |
 | [TextField](stock-controls/textfield.md)             | ui::TextField                | `textfield!`       | <img src="stock-controls/img/textfield.png" width=300/>       |
 | [ThreeStateBox](stock-controls/threestatebox.md)     | ui::ThreeStateBox            | `threestatebox!`   | <img src="stock-controls/img/threestatebox.png" width=300/>   |
+| [TimePicker](stock-controls/timepicker.md)           | ui::TimePicker               | `timepicker!`      | <img src="stock-controls/img/timepicker.png" width=300/>      |
 | [ToggleButton](stock-controls/togglebutton.md)       | ui::ToggleButton             | `togglebutton!`    | <img src="stock-controls/img/togglebutton.png" width=300/>    |
 | [TreeView](stock-controls/treeview.md)               | ui::TreeView&lt;T&gt;        | `treeview!`        | <img src="stock-controls/img/treeview.png" width=300/>        |
 | [VLine](stock-controls/vline.md)                     | ui::VLine                    | `vline!`           | <img src="stock-controls/img/vline.png" width=300/>           |

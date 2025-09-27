@@ -7,7 +7,7 @@ use super::Character;
 use super::ClipArea;
 use super::Color;
 use super::Cursor;
-use super::Glyph;
+use super::image::Glyph;
 use super::Image;
 use super::LineType;
 use super::OrthogonalDirection;
@@ -943,6 +943,22 @@ impl Surface {
         }
     }
 
+    /// Draws a glyph at the specified position. If the glyph is outside the clip area, it will not be drawn.
+    /// 
+    /// # Parameters
+    /// - `x`: The x-coordinate of the position to draw the glyph at.
+    /// - `y`: The y-coordinate of the position to draw the glyph at.
+    /// - `glyph`: The glyph to draw.
+    /// - `attr`: The character attribute to use for the glyph.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(100, 50);
+    /// let glyph = image::Glyph::with_str(10, 10, "Hello, world!");
+    /// surface.draw_glyph(10, 10, &glyph, CharAttribute::with_color(Color::White, Color::Black));
+    /// ```
     pub fn draw_glyph(&mut self, x: i32, y: i32, glyph: &Glyph, attr: CharAttribute) {
         if !self.clip.is_visible() {
             return;

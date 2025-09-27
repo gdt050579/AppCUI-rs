@@ -31,6 +31,7 @@ use crate::{
         treeview::events::GenericTreeViewEvents,
         window::events::{ToolBarEvents, WindowEvents},
         tab::events::TabEvents,
+        timepicker::events::TimePickerEvents,
     },
 };
 
@@ -176,6 +177,7 @@ pub trait Control:
     + CharPickerEvents
     + GenericGraphViewEvents
     + AppBarEvents
+    + TimePickerEvents
 {
 }
 

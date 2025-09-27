@@ -41,10 +41,12 @@ impl AnsiFormatter {
         self.text.push_str(s);
     }
 
+    #[cfg_attr(windows, allow(dead_code))]
     pub(crate) fn enable_mouse_events(&mut self) {
         self.text.push_str("\x1b[?1000h\x1b[?1002h\x1b[?1003h\x1b[?1006h");
     }
 
+    #[cfg_attr(windows, allow(dead_code))]
     pub(crate) fn disable_mouse_events(&mut self) {
         self.text.push_str("\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l");
     }
@@ -304,6 +306,14 @@ impl AnsiFormatter {
         }
         let txt = unsafe { std::str::from_utf8_unchecked(&buffer[i..]) };
         self.text.push_str(txt);
+    }
+
+    pub(crate) fn execute(&mut self) {
+        // write to stdout
+        let _ = std::io::stdout().write_all(self.text.as_bytes());
+        let _ = std::io::stdout().flush();   
+        // clear the text
+        self.text.clear();     
     }
 
     #[inline(always)]

@@ -48,6 +48,7 @@ mod character_set;
 mod render_options;
 mod bit_tile;
 mod string_format_parser;
+mod glyph;
 #[cfg(test)]
 mod tests;
 
@@ -63,6 +64,7 @@ pub use self::bit_tile::BitTileU32;
 pub use self::bit_tile::BitTileU64;
 pub use self::bit_tile::BitTileU128;
 pub use self::bit_tile::BitTileRenderMethod;
+pub use self::glyph::Glyph;
 pub use string_format_parser::StringFormatError;
 use string_format_parser::StringFormatParser;
 

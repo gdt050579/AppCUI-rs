@@ -16,6 +16,7 @@ use crate::ui::{
     listview::events::GenericListViewEvents, markdown, markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents,
     password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
     textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
+    timepicker, timepicker::events::TimePickerEvents,
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -49,6 +50,7 @@ pub(crate) enum ControlEventData {
     Markdown(markdown::events::EventData),
     Accordion(accordion::events::EventData),
     Tab(tab::events::EventData),
+    TimePicker(timepicker::events::EventData),
     GraphView(graphview::events::EventData),
 }
 
@@ -95,7 +97,7 @@ impl ControlEvent {
             ControlEventData::ComboBox(_) => ComboBoxEvents::on_selection_changed(receiver, self.emitter.cast()),
             ControlEventData::DropDownList(data) => GenericDropDownListEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id),
             ControlEventData::NumericSelector(data) => GenericNumericSelectorEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id),
-            ControlEventData::DatePicker(data) => DatePickerEvents::on_date_change(receiver, self.emitter.cast(), data.date),
+            ControlEventData::DatePicker(data) => DatePickerEvents::on_date_changed(receiver, self.emitter.cast(), data.date),
             ControlEventData::ListBox(data) => match data.event_type {
                 listbox::events::ListBoxEventTypes::CurrentItemChanged => {
                     ListBoxEvents::on_current_item_changed(receiver, self.emitter.cast(), data.index)
@@ -151,6 +153,7 @@ impl ControlEvent {
             ControlEventData::CharPicker(data) => {
                 CharPickerEvents::on_char_changed(receiver, self.emitter.cast(), if data.code as u32 > 0 { Some(data.code) } else { None })
             }
+            ControlEventData::TimePicker(data) => TimePickerEvents::on_time_changed(receiver, self.emitter.cast(), data.time),
             ControlEventData::GraphView(data) => match data.event_type {
                 graphview::events::GraphViewEventTypes::CurrentNodeChanged => {
                     GenericGraphViewEvents::on_current_node_changed(receiver, self.emitter.cast(), data.type_id)

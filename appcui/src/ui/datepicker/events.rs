@@ -3,7 +3,7 @@ use super::DatePicker;
 use chrono::NaiveDate;
 
 pub trait DatePickerEvents {
-    fn on_date_change(&mut self, _handle: Handle<DatePicker>, _date: NaiveDate) -> EventProcessStatus {
+    fn on_date_changed(&mut self, _handle: Handle<DatePicker>, _date: NaiveDate) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }

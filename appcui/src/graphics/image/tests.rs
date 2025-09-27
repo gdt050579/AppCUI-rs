@@ -1,5 +1,5 @@
-use crate::prelude::{BitTile, BitTileU16, BitTileU32, BitTileU64, StringFormatError};
-
+use crate::prelude::{BitTile, BitTileU16, BitTileU32, BitTileU64, StringFormatError, Glyph};
+use crate::prelude::*;
 use super::super::{Character, Color, RenderOptionsBuilder, Size, SurfaceTester};
 use super::BitTileRenderMethod;
 use super::CharacterSet;
@@ -894,4 +894,107 @@ fn check_bit_tile_reverse_bits() {
         }
     }
     assert_eq!(tile.to_u16(), 0);
+}
+
+
+#[test]
+fn check_glyph_basic_api() {
+    let mut g = Glyph::new(5, 4);
+    assert_eq!(g.size(), Size::new(5, 4));
+    assert_eq!(g.chars.len(), 20);
+    g.fill('x');
+    for ch in &g.chars {
+        assert_eq!(*ch, 'x');
+    }
+    g.clear();
+    g.set_char(0, 0, 'A');
+    g.set_char(1, 1, 'B');
+    g.set_char(2, 2, 'C');
+    g.set_char(3, 3, 'D');
+    for y in 0..4 {
+        for x in 0..5 {
+            let res = g.char(x, y);
+            match (x, y) {
+                (0, 0) => assert_eq!(res, Some('A')),
+                (1, 1) => assert_eq!(res, Some('B')),
+                (2, 2) => assert_eq!(res, Some('C')),
+                (3, 3) => assert_eq!(res, Some('D')),
+                _ => assert_eq!(res, Some(0 as char)),
+            }
+        }
+    }
+    // check positions
+    for (index, ch) in g.chars.iter().enumerate() {
+        match index {
+            0 => assert_eq!(*ch, 'A'),
+            6 => assert_eq!(*ch, 'B'),
+            12 => assert_eq!(*ch, 'C'),
+            18 => assert_eq!(*ch, 'D'),
+            _ => assert_eq!(*ch, 0 as char),
+        }
+    }
+    g.clear_char(2, 2);
+    assert_eq!(g.char(2, 2), Some(0 as char));
+    assert_eq!(g.char(5,4), None);
+    assert_eq!(g.char(4,4), None);
+    assert_eq!(g.char(5,3), None);
+    assert_eq!(g.char(100,100), None);
+}
+
+#[test]
+fn check_glyph_resize() {
+    let mut g = Glyph::new(5, 4);
+    assert_eq!(g.size(), Size::new(5, 4));
+    assert_eq!(g.chars.len(), 20);
+    g.fill('x');
+    g.resize(3, 3);
+    assert_eq!(g.size(), Size::new(3, 3));
+    assert_eq!(g.chars.len(), 9);
+    for ch in &g.chars {
+        assert_eq!(*ch, 0 as char);
+    }
+    g.resize_with(2, 3, 'x');
+    assert_eq!(g.size(), Size::new(2, 3));
+    assert_eq!(g.chars.len(), 6);
+    for ch in &g.chars {
+        assert_eq!(*ch, 'x');
+    }
+    g.resize(0, 4);
+    assert_eq!(g.size(), Size::new(0, 0));
+    assert!(g.chars.is_empty());
+
+    let mut g = Glyph::new(0,0);
+    assert_eq!(g.size(), Size::new(0, 0));
+    assert!(g.chars.is_empty());
+    g.resize_with(2, 3, 'x');
+    assert_eq!(g.size(), Size::new(2, 3));
+    assert_eq!(g.chars.len(), 6);
+    for ch in &g.chars {
+        assert_eq!(*ch, 'x');
+    }
+}
+
+
+#[test]
+fn check_glyph_write_str() {
+    let mut s = SurfaceTester::new(50, 10);
+    let g = Glyph::with_str(4, 3, "+==+\n|..|\n+--+");
+    s.draw_glyph(1, 1, &g, charattr!("white, darkblue"));
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x84082B81B39B9889);
+}
+
+#[test]
+fn check_glyph_write_str_outside() {
+    let mut s = SurfaceTester::new(50, 10);
+    let mut g = Glyph::new(4,2);
+    g.fill('.');
+    g.write_str(2, 1, "Hello\nWorld");
+    g.write_str(5, 2, "Test");
+    s.draw_glyph(1, 1, &g, charattr!("white, darkblue"));
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x1C056FE51ECE1BB0);
+    // we should se
+    // ....
+    // ..He
 }
