@@ -140,11 +140,17 @@ fn add_selectors(tab: &mut Tab, index: u32) {
     tab.add(index, label!("'Color picker',x:1,y:7, w: 20"));
     tab.add(index, colorpicker!("Yellow,x:25,y:7,w:30")); 
 
-    tab.add(index, label!("'Date selector',x:1,y:9, w: 20"));
-    tab.add(index, datepicker!("date:2025-09-09,x:25,y:9,w:30"));    
+    tab.add(index, label!("'Character picker',x:1,y:9, w: 20"));
+    tab.add(index, charpicker!("code=65,x:25,y:9,w:30,sets=[Ascii,Arrows,Emoticons,Shapes]"));    
 
-    tab.add(index, label!("'Character picker',x:1,y:11, w: 20"));
-    tab.add(index, charpicker!("code=65,x:25,y:11,w:30,sets=[Ascii,Arrows,Emoticons,Shapes]"));    
+    tab.add(index, label!("'Date selector',x:1,y:11, w: 20"));
+    tab.add(index, datepicker!("date:2025-09-09,x:25,y:11,w:30"));    
+
+    tab.add(index, label!("'Time selector',x:1,y:13, w: 20"));
+    tab.add(index, timepicker!("time:'12:34:56',x:25,y:13,w:30, flags: Seconds"));    
+
+    tab.add(index, label!("'Numeric selector',x:1,y:15, w: 20"));
+    tab.add(index, numericselector!("type:u32,value:5,min:1,max:100,x:25,y:15,w:30"));    
 
 }
 
