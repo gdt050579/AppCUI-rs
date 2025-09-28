@@ -11,6 +11,7 @@ Currently this is a work in progress - expect first version to be ready by 1st o
   - [Basic Controls](#basic-controls)
   - [Lists, Trees and Graphs](#lists-trees-and-graphs)
   - [Application Bar, Command Bar and Menus](#application-bar-command-bar-and-menus)
+  - [Backgroud Taks \& Timers](#backgroud-taks--timers)
 
 
 ---
@@ -23,13 +24,13 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 * **Elements:** [Custom Desktop](https://gdt050579.github.io/AppCUI-rs/chapter-4/custom_desktop.html), [Menus](https://gdt050579.github.io/AppCUI-rs/chapter-4/menu.html), [Timers](https://gdt050579.github.io/AppCUI-rs/chapter-7/timers.html)
 
 <details>
-  <summary>More Anmations</summary>
+  <summary>More Animations</summary>
 
 | Image                                   | Descrption                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | <img src="img/animations/spiral.gif" >  | **Spiral Animation** <br> * **Code:** [examples/spiral](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/spiral) <br> * **Description:** The Spiral example defines a struct that incrementally computes spiral coordinates in polar form, applies aspect-ratio correction, and updates them each frame to illustrate animated geometry generation.                                                                                                                                                       |
 | <img src="img/animations/fractal.gif" > | **Fractal Animation** <br> * **Code:** [examples/fractal](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/fractal) <br> * **Description:** The Fractal example constructs a recursive tree-like structure by generating line segments from a start point, computing endpoints using trigonometric functions, and branching at ±45° angles. Each update advances rotation, modulates scale, and regenerates points up to a configurable depth, producing an evolving visualization of recursive geometry. |
-| <img src="img/animations/timer.gif" >   | **Timer** <br> * **Code:** [examples/timer](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/timer) <br> * **Description:** The Timer example displays elapsed time using ASCII-art digits on a Canvas, updated via periodic TimerEvents. It provides Start, Pause, and Resume buttons to control execution, dynamically changing digit rendering based on paused state, and demonstrates integrating timers, custom rendering, and event handling within AppCUI.                                         |
+| <img src="img/animations/globe.gif" >   | **Globe Animation** <br> * **Code:** [examples/globe](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/globe) <br> * **Description:** The Globe example displays a rotating globe using a series of static images, updated via periodic TimerEvents. It provides a simple desktop with a globe and a timer to control the rotation.                                                                                                                                                                       |
 
 </details>
 
@@ -43,7 +44,7 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 * **Elements:** [Accordion](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/accordion.html),[Button](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/button.html), [CheckBox](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/checkbox.html), [ComboBox](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/combobox.html), [CharPicker](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/charpicker.html), [ColorPicker](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/colorpicker.html),[DatePicker](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/datepicker.html),[DropDownList](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/dropdownlist.html),[HSplitter](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/hsplitter.html),[Panel](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/panel.html),[Password](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/password.html),[RadioBox](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/radiobox.html),[Selector](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/selector.html),[Tab](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/tab.html),[TextArea](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/textarea.html),[TextField](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/textfield.html),[TreeStateBox](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/treestatebox.html),[VSplitter](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/vsplitter.html),
 
 <details>
-  <summary>More Anmations</summary>
+  <summary>More Animations</summary>
 
 | Image                                           | Descrption                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -62,7 +63,7 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 * **Elements:** [List View](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/listview.html), [List item](https://gdt050579.github.io/AppCUI-rs/chapter-3/object-traits/listitem.html), [Menus](https://gdt050579.github.io/AppCUI-rs/chapter-4/menu.html)
 
 <details>
-  <summary>More Anmations</summary>
+  <summary>More Animations</summary>
 
 | Image                                | Descrption                                                                                                                                                                                                                                                        |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -83,10 +84,30 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 * **Elements:** [AppBar](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar.html), [Menu Button](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/menu_button.html), [Separator](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/separator.html), [Label](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/label.html), [Button](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/button.html), [ToggleButton](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/toggle_button.html), [SwitchButton](https://gdt050579.github.io/AppCUI-rs/chapter-4/app_bar/switch_button.html)
 
 <details>
-  <summary>More Anmations</summary>
+  <summary>More Animations</summary>
 
-| Image                                 | Descrption                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Image                                 | Descrption                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | <img src="img/menus/popup_menu.gif" > | **Popup Menu** <br> * **Code:** [examples/popup_mnu](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/popup_menu) <br> * **Description:** The popup menu is a menu that is displayed when the user right clicks on a control. You can control the size of the menu and interact directly with the menu items. |
 
 </details>
+
+---
+
+## Backgroud Taks & Timers
+
+![Animations — preview]()
+
+<!-- * **Code:** [examples/matrix](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/matrix)
+* **Elements:** [Custom Desktop](https://gdt050579.github.io/AppCUI-rs/chapter-4/custom_desktop.html), [Menus](https://gdt050579.github.io/AppCUI-rs/chapter-4/menu.html), [Timers](https://gdt050579.github.io/AppCUI-rs/chapter-7/timers.html) -->
+
+<details>
+  <summary>More Animations</summary>
+
+| Image                                   | Descrption                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <img src="img/tasks/timer.gif" >   | **Timer** <br> * **Code:** [examples/timer](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/timer) <br> * **Description:** The Timer example displays elapsed time using ASCII-art digits on a Canvas, updated via periodic TimerEvents. It provides Start, Pause, and Resume buttons to control execution, dynamically changing digit rendering based on paused state, and demonstrates integrating timers, custom rendering, and event handling within AppCUI.                                         |
+
+</details>
+
+---
