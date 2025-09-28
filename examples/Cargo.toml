@@ -348,3 +348,7 @@ path = "appbar_desktop/main.rs"
 [[example]]
 name = "timepickerfs"
 path = "timepicker/main.rs"
+
+[[example]]
+name = "globe"
+path = "globe/main.rs"
