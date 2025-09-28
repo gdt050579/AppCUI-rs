@@ -352,3 +352,7 @@ path = "timepicker/main.rs"
 [[example]]
 name = "globe"
 path = "globe/main.rs"
+
+[[example]]
+name = "games"
+path = "games/main.rs"
