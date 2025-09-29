@@ -1,9 +1,11 @@
 use appcui::prelude::*;
 
+mod pacman;
+
 
 #[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
           commands  = [
-                       Exit, About, 
+                       Exit, About, Pacman,
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     index: u32,
@@ -52,6 +54,7 @@ impl DesktopEvents for MyDesktop {
         "),0,appbar::Side::Left));
         self.menu_example = self.appbar().add(appbar::MenuButton::new("&Example",menu!("
             class: MyDesktop, items:[
+                {'&Pacman Game',cmd: Pacman},
             ]
         "),0,appbar::Side::Left));
         self.menu_help = self.appbar().add(appbar::MenuButton::new("&Help",menu!("
@@ -75,9 +78,9 @@ impl MenuEvents for MyDesktop {
     }
     fn on_command(&mut self, _menu:Handle<Menu>, _item:Handle<menu::Command>,command:mydesktop::Commands) {
         match command {
-            // mydesktop::Commands::TicTacToe => { 
-            //     self.add_window(tic_tac_toe::Win::new());
-            // },          
+            mydesktop::Commands::Pacman => { 
+                self.add_window(pacman::PacmanWin::new());
+            },          
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
                 dialogs::message("Games Example", "This is an example of a games designed in AppCUI");
