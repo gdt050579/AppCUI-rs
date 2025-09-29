@@ -91,7 +91,6 @@ pub struct PacmanGame {
     high_score: u32,
     food_count: u32,
     total_food: u32,
-    game_ticks: u64,
     pacman_move_delay: u64,
     ghost_move_delay: u64,
     last_pacman_move: u64,
@@ -110,14 +109,13 @@ impl PacmanGame {
             high_score: 0,
             food_count: 0,
             total_food: 0,
-            game_ticks: 0,
             pacman_move_delay: 4,
             ghost_move_delay: 10,
             last_pacman_move: 0,
         };
 
         if let Some(timer) = game.timer() {
-            timer.start(Duration::from_millis(50));
+            timer.start(Duration::from_millis(250));
         }
 
         game.create_board();
@@ -162,7 +160,6 @@ impl PacmanGame {
     pub fn start_game(&mut self) {
         self.state = GameState::Playing;
         self.score = 0;
-        self.game_ticks = 0;
         self.last_pacman_move = 0;
 
         for ghost in &mut self.ghosts {
@@ -242,12 +239,6 @@ impl PacmanGame {
         }
 
         for ghost in &mut self.ghosts {
-            if self.game_ticks - ghost.last_move_time < self.ghost_move_delay {
-                continue;
-            }
-
-            ghost.last_move_time = self.game_ticks;
-
             let mut rng = rand::thread_rng();
             let mut possible_moves = Vec::new();
 
@@ -305,15 +296,6 @@ impl PacmanGame {
         }
     }
 
-    fn get_pacman_char(&self) -> char {
-        match self.pacman_direction {
-            Direction::Right => '>',
-            Direction::Left => '<',
-            Direction::Up => '^',
-            Direction::Down => 'v',
-        }
-    }
-
     fn can_move_in_direction(&self, direction: Direction) -> bool {
         let (dx, dy) = match direction {
             Direction::Up => (0, -1),
@@ -346,7 +328,7 @@ impl PacmanGame {
                     CellType::Wall(ch) => {
                         let c = Character::with_attributes(ch, CharAttribute::with_color(Color::Blue, Color::Black));
                         surface.write_char(screen_x, screen_y, c);
-                        if ch == '─' ||  ch == '┌' || ch == '└' || ch == '├' {
+                        if ch == '─' || ch == '┌' || ch == '└' || ch == '├' || ch == '┬' {
                             surface.write_char(screen_x + 1, screen_y, line);
                         }
                     }
@@ -359,14 +341,14 @@ impl PacmanGame {
         surface.write_char(
             self.pacman_pos.x * 2,
             self.pacman_pos.y + 2,
-            Character::with_attributes(self.get_pacman_char(), CharAttribute::with_color(Color::Yellow, Color::Black)),
+            Character::with_attributes('😀', CharAttribute::with_color(Color::Yellow, Color::Black)),
         );
 
         for ghost in &self.ghosts {
             surface.write_char(
                 ghost.position.x * 2,
                 ghost.position.y + 2,
-                Character::with_attributes(ghost.get_char(), CharAttribute::with_color(Color::Magenta, Color::Black)),
+                Character::with_attributes(ghost.get_char(), CharAttribute::with_color(Color::White, Color::Black)),
             );
         }
     }
@@ -475,13 +457,7 @@ impl OnPaint for PacmanGame {
 impl TimerEvents for PacmanGame {
     fn on_update(&mut self, _ticks: u64) -> EventProcessStatus {
         if self.state == GameState::Playing {
-            self.game_ticks += 1;
-
-            if self.game_ticks - self.last_pacman_move >= self.pacman_move_delay {
-                self.move_pacman();
-                self.last_pacman_move = self.game_ticks;
-            }
-
+            self.move_pacman();
             self.move_ghosts();
         }
 
