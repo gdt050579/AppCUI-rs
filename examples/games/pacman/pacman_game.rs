@@ -36,7 +36,6 @@ impl CellType {
 struct Ghost {
     position: Point,
     direction: Direction,
-    last_move_time: u64,
 }
 
 impl Ghost {
@@ -44,12 +43,7 @@ impl Ghost {
         Self {
             position: Point::new(x, y),
             direction: Direction::Up,
-            last_move_time: 0,
         }
-    }
-
-    fn get_char(&self) -> char {
-        '👻'
     }
 }
 
@@ -91,9 +85,6 @@ pub struct PacmanGame {
     high_score: u32,
     food_count: u32,
     total_food: u32,
-    pacman_move_delay: u64,
-    ghost_move_delay: u64,
-    last_pacman_move: u64,
 }
 
 impl PacmanGame {
@@ -109,9 +100,6 @@ impl PacmanGame {
             high_score: 0,
             food_count: 0,
             total_food: 0,
-            pacman_move_delay: 4,
-            ghost_move_delay: 10,
-            last_pacman_move: 0,
         };
 
         if let Some(timer) = game.timer() {
@@ -160,11 +148,6 @@ impl PacmanGame {
     pub fn start_game(&mut self) {
         self.state = GameState::Playing;
         self.score = 0;
-        self.last_pacman_move = 0;
-
-        for ghost in &mut self.ghosts {
-            ghost.last_move_time = 0;
-        }
 
         if self.board[self.pacman_pos.y as usize][self.pacman_pos.x as usize].is_wall() {
             for y in 1..BOARD_HEIGHT - 1 {
@@ -348,7 +331,7 @@ impl PacmanGame {
             surface.write_char(
                 ghost.position.x * 2,
                 ghost.position.y + 2,
-                Character::with_attributes(ghost.get_char(), CharAttribute::with_color(Color::White, Color::Black)),
+                Character::with_attributes('👻', CharAttribute::with_color(Color::White, Color::Black)),
             );
         }
     }
@@ -455,12 +438,11 @@ impl OnPaint for PacmanGame {
 }
 
 impl TimerEvents for PacmanGame {
-    fn on_update(&mut self, _ticks: u64) -> EventProcessStatus {
+    fn on_update(&mut self, _: u64) -> EventProcessStatus {
         if self.state == GameState::Playing {
             self.move_pacman();
             self.move_ghosts();
         }
-
         EventProcessStatus::Processed
     }
 }
