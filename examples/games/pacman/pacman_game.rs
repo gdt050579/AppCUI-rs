@@ -324,14 +324,14 @@ impl PacmanGame {
         surface.write_char(
             self.pacman_pos.x * 2,
             self.pacman_pos.y + 2,
-            Character::with_attributes('😀', CharAttribute::with_color(Color::Yellow, Color::Black)),
+            Character::with_attributes('⚫', CharAttribute::with_color(Color::Yellow, Color::Black)),
         );
 
         for ghost in &self.ghosts {
             surface.write_char(
                 ghost.position.x * 2,
                 ghost.position.y + 2,
-                Character::with_attributes('👻', CharAttribute::with_color(Color::White, Color::Black)),
+                Character::with_attributes('👻', CharAttribute::with_color(Color::Aqua, Color::Black)),
             );
         }
     }
