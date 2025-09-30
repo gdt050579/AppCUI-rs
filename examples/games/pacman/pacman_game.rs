@@ -335,91 +335,42 @@ impl PacmanGame {
             );
         }
     }
+    fn paint_final_message(&self, surface: &mut Surface, message: &str, back_color: Color) {
+        const X: i32 = 8;
+        const Y: i32 = 7;
+        const W: i32 = 40;
+        let r = Rect::with_size(X, Y, W as u16, 6);
+        surface.fill_rect(r, Character::new(' ', Color::White, back_color, CharFlags::None));
+        surface.write_string(X + W / 2 - (message.len() / 2) as i32, Y, message, charattr!("white"), false);
+        surface.draw_horizontal_line_with_size(X + 1, Y + 1, (W - 2) as u32, LineType::Single, charattr!("gray"));
+        surface.write_string(X + 1, Y + 2, "Score", charattr!("silver"), false);
+        surface.write_string(X + W - 4, Y + 2, format!("{:3}", self.score).as_str(), charattr!("yellow"), false);
+        surface.write_string(X + 1, Y + 3, "High score", charattr!("silver"), false);
+        surface.write_string(X + W - 4, Y + 2, format!("{:3}", self.high_score).as_str(), charattr!("yellow"), false);
+        surface.draw_horizontal_line_with_size(X + 1, Y + 4, (W - 2) as u32, LineType::Single, charattr!("gray"));
+        surface.write_string(X + 6, Y + 5, "Press SPACE to start again !", charattr!("white"), false);
+        surface.write_string(X + 12, Y + 5, "SPACE", charattr!("yellow, flags: underline+bold"), false);
+    }
 }
 
 impl OnPaint for PacmanGame {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.clear(char!("' ',black,black"));
+        self.paint_board(surface);
 
         match self.state {
             GameState::GameOver => {
-                let size = self.size();
-                let title = "GAME OVER";
-                let score = format!("Final Score: {}", self.score);
-                let high_score = format!("High Score: {}", self.high_score);
-                let restart_msg = "Press SPACE to play again";
-
-                surface.write_string(
-                    (size.width as i32 - title.len() as i32) / 2,
-                    size.height as i32 / 2 - 2,
-                    title,
-                    theme.symbol.checked,
-                    false,
-                );
-                surface.write_string(
-                    (size.width as i32 - score.len() as i32) / 2,
-                    size.height as i32 / 2,
-                    score.as_str(),
-                    theme.symbol.checked,
-                    false,
-                );
-                surface.write_string(
-                    (size.width as i32 - high_score.len() as i32) / 2,
-                    size.height as i32 / 2 + 1,
-                    high_score.as_str(),
-                    theme.symbol.checked,
-                    false,
-                );
-                surface.write_string(
-                    (size.width as i32 - restart_msg.len() as i32) / 2,
-                    size.height as i32 / 2 + 3,
-                    restart_msg,
-                    theme.symbol.checked,
-                    false,
-                );
+                surface.clear(Character::with_color(Color::Gray, Color::Black));
+                self.paint_final_message(surface, "Game Over!", Color::DarkRed);
             }
             GameState::Victory => {
-                let size = self.size();
-                let title = "VICTORY!";
-                let score = format!("Final Score: {}", self.score);
-                let high_score = format!("High Score: {}", self.high_score);
-                let restart_msg = "Press SPACE to play again";
-
-                surface.write_string(
-                    (size.width as i32 - title.len() as i32) / 2,
-                    size.height as i32 / 2 - 2,
-                    title,
-                    theme.symbol.checked,
-                    false,
-                );
-                surface.write_string(
-                    (size.width as i32 - score.len() as i32) / 2,
-                    size.height as i32 / 2,
-                    score.as_str(),
-                    theme.symbol.checked,
-                    false,
-                );
-                surface.write_string(
-                    (size.width as i32 - high_score.len() as i32) / 2,
-                    size.height as i32 / 2 + 1,
-                    high_score.as_str(),
-                    theme.symbol.checked,
-                    false,
-                );
-                surface.write_string(
-                    (size.width as i32 - restart_msg.len() as i32) / 2,
-                    size.height as i32 / 2 + 3,
-                    restart_msg,
-                    theme.symbol.checked,
-                    false,
-                );
+                surface.clear(Character::with_color(Color::Gray, Color::Black));
+                self.paint_final_message(surface, "Victory !", Color::DarkGreen);
             }
             GameState::Playing | GameState::Paused => {
                 surface.write_string(0, 0, format!("Score: {}", self.score).as_str(), theme.symbol.checked, false);
                 surface.write_string(15, 0, format!("High Score: {}", self.high_score).as_str(), theme.symbol.checked, false);
                 surface.write_string(35, 0, format!("Food Left: {}", self.food_count).as_str(), theme.symbol.checked, false);
-
-                self.paint_board(surface);
 
                 if self.state == GameState::Paused {
                     surface.clear(Character::with_color(Color::Gray, Color::Black));
