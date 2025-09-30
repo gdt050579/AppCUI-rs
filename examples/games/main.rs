@@ -1,11 +1,10 @@
-    use appcui::prelude::*;
+use appcui::prelude::*;
 
 mod pacman;
 
 
 #[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
-          commands  = [
-                       Exit, About, Pacman,
+          commands  = [Exit, About, Pacman,
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     index: u32,
@@ -79,7 +78,7 @@ impl MenuEvents for MyDesktop {
     fn on_command(&mut self, _menu:Handle<Menu>, _item:Handle<menu::Command>,command:mydesktop::Commands) {
         match command {
             mydesktop::Commands::Pacman => { 
-                self.add_window(pacman::PacmanWin::new());
+                self.add_window(pacman::Win::new());
             },          
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {

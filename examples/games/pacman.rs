@@ -1,4 +1,4 @@
-pub mod pacman_win;
+pub mod win;
 pub mod pacman_game;
 
-pub use pacman_win::PacmanWin;
+pub use win::Win;

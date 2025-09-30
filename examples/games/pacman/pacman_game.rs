@@ -418,19 +418,12 @@ impl OnPaint for PacmanGame {
                 surface.write_string(0, 0, format!("Score: {}", self.score).as_str(), theme.symbol.checked, false);
                 surface.write_string(15, 0, format!("High Score: {}", self.high_score).as_str(), theme.symbol.checked, false);
                 surface.write_string(35, 0, format!("Food Left: {}", self.food_count).as_str(), theme.symbol.checked, false);
-                surface.write_string(
-                    0,
-                    1,
-                    format!("Pos: ({},{})", self.pacman_pos.x, self.pacman_pos.y).as_str(),
-                    theme.symbol.checked,
-                    false,
-                );
 
                 self.paint_board(surface);
 
                 if self.state == GameState::Paused {
-                    let size = self.size();
-                    surface.write_string(0, (size.height - 1) as i32, "PAUSED - Press P to resume", theme.symbol.checked, false);
+                    surface.clear(Character::with_color(Color::Gray, Color::Black));
+                    surface.write_string(15, 11, "PAUSED - Press P to resume", charattr!("white,black"), false);
                 }
             }
         }
