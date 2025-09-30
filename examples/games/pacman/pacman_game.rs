@@ -221,12 +221,12 @@ impl PacmanGame {
             return;
         }
 
+        let directions = [Direction::Up, Direction::Down, Direction::Left, Direction::Right];
+        let mut rng = rand::thread_rng();
+        let mut possible_moves = Vec::with_capacity(4);
+
         for ghost in &mut self.ghosts {
-            let mut rng = rand::thread_rng();
-            let mut possible_moves = Vec::new();
-
-            let directions = [Direction::Up, Direction::Down, Direction::Left, Direction::Right];
-
+            possible_moves.clear();
             for &dir in &directions {
                 let (dx, dy) = match dir {
                     Direction::Up => (0, -1),
