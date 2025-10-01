@@ -34,89 +34,48 @@ impl SquareState {
 
 #[derive(Copy, Clone)]
 struct Tetromino {
-    shape: [[bool; 4]; 4],
+    shape: BitTileU16,
     color: Color,
 }
 
 impl Tetromino {
     fn new(tetromino_type: TetrominoType) -> Self {
-        let (shape, color) = match tetromino_type {
-            TetrominoType::I => (
-                [
-                    [false, false, false, false],
-                    [true, true, true, true],
-                    [false, false, false, false],
-                    [false, false, false, false],
-                ],
-                Color::Aqua,
-            ),
-            TetrominoType::O => (
-                [
-                    [false, false, false, false],
-                    [false, true, true, false],
-                    [false, true, true, false],
-                    [false, false, false, false],
-                ],
-                Color::Yellow,
-            ),
-            TetrominoType::T => (
-                [
-                    [false, false, false, false],
-                    [false, true, false, false],
-                    [true, true, true, false],
-                    [false, false, false, false],
-                ],
-                Color::Magenta,
-            ),
-            TetrominoType::S => (
-                [
-                    [false, false, false, false],
-                    [false, true, true, false],
-                    [true, true, false, false],
-                    [false, false, false, false],
-                ],
-                Color::Green,
-            ),
-            TetrominoType::Z => (
-                [
-                    [false, false, false, false],
-                    [true, true, false, false],
-                    [false, true, true, false],
-                    [false, false, false, false],
-                ],
-                Color::Red,
-            ),
-            TetrominoType::J => (
-                [
-                    [false, false, false, false],
-                    [true, false, false, false],
-                    [true, true, true, false],
-                    [false, false, false, false],
-                ],
-                Color::Blue,
-            ),
-            TetrominoType::L => (
-                [
-                    [false, false, false, false],
-                    [false, false, true, false],
-                    [true, true, true, false],
-                    [false, false, false, false],
-                ],
-                Color::Olive,
-            ),
+        let (shape_bits, color) = match tetromino_type {
+            TetrominoType::I => (0x0F00, Color::Aqua),      // I piece: row 1 filled
+            TetrominoType::O => (0x0660, Color::Yellow),     // O piece: 2x2 square
+            TetrominoType::T => (0x04E0, Color::Magenta),    // T piece: T shape
+            TetrominoType::S => (0x06C0, Color::Green),      // S piece: S shape
+            TetrominoType::Z => (0x0C60, Color::Red),        // Z piece: Z shape
+            TetrominoType::J => (0x08E0, Color::Blue),       // J piece: J shape
+            TetrominoType::L => (0x02E0, Color::Olive),      // L piece: L shape
         };
+        
+        let shape = BitTileU16::from_u16(4, 4, shape_bits).unwrap();
+        
         Self { shape, color }
     }
 
     fn rotate(&self) -> Self {
-        let mut rotated = [[false; 4]; 4];
-        for i in 0..4 {
-            for j in 0..4 {
-                rotated[j][3 - i] = self.shape[i][j];
+        let original_bits = self.shape.to_u16();
+        let mut rotated_bits = 0u16;
+        
+        // Rotate 90 degrees clockwise: (x,y) -> (y, 3-x)
+        for y in 0..4 {
+            for x in 0..4 {
+                let original_bit_pos = y * 4 + x;
+                let rotated_x = y;
+                let rotated_y = 3 - x;
+                let rotated_bit_pos = rotated_y * 4 + rotated_x;
+                
+                if (original_bits & (1 << original_bit_pos)) != 0 {
+                    rotated_bits |= 1 << rotated_bit_pos;
+                }
             }
         }
+        
+        let rotated_shape = BitTileU16::from_u16(4, 4, rotated_bits).unwrap();
         Self {
-            shape: rotated,
+            shape: rotated_shape,
             color: self.color,
         }
     }
@@ -191,7 +150,7 @@ impl TetrisGame {
     fn check_collision(&self, piece: Tetromino, x: i32, y: i32) -> bool {
         for py in 0..4 {
             for px in 0..4 {
-                if piece.shape[py][px] {
+                if let Some(true) = piece.shape.get(px as u32, py as u32) {
                     let board_x = x + px as i32;
                     let board_y = y + py as i32;
 
@@ -212,7 +171,7 @@ impl TetrisGame {
         if let Some(piece) = self.current_piece {
             for py in 0..4 {
                 for px in 0..4 {
-                    if piece.shape[py][px] {
+                    if let Some(true) = piece.shape.get(px as u32, py as u32) {
                         let board_x = (self.current_x + px as i32) as usize;
                         let board_y = (self.current_y + py as i32) as usize;
                         if board_y < BOARD_HEIGHT && board_x < BOARD_WIDTH {
@@ -333,7 +292,7 @@ impl TetrisGame {
         if let Some(piece) = self.current_piece {
             for py in 0..4 {
                 for px in 0..4 {
-                    if piece.shape[py][px] {
+                    if let Some(true) = piece.shape.get(px as u32, py as u32) {
                         let board_x = self.current_x + px as i32;
                         let board_y = self.current_y + py as i32;
                         if board_y >= 0 && board_y < BOARD_HEIGHT as i32 && board_x >= 0 && board_x < BOARD_WIDTH as i32 {
@@ -386,21 +345,12 @@ impl OnPaint for TetrisGame {
 
                 surface.write_string(game_width + 2, 4, "Next:", charattr!("white"), false);
 
-                let mut bit_tile = BitTileU16::new(4, 4).unwrap();
-                for py in 0..4 {
-                    for px in 0..4 {
-                        if self.next_piece.shape[py][px] {
-                            bit_tile.set(px as u32, py as u32, true);
-                        }
-                    }
-                }
-
                 let preview_x = game_width + 2;
                 let preview_y = 6;
                 surface.draw_tile(
                     preview_x,
                     preview_y,
-                    &bit_tile,
+                    &self.next_piece.shape,
                     self.next_piece.color,
                     Color::Black,
                     BitTileRenderMethod::SmallBlocks,
