@@ -11,7 +11,13 @@ pub enum GameState {
 
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum TetrominoType {
-    I, O, T, S, Z, J, L,
+    I,
+    O,
+    T,
+    S,
+    Z,
+    J,
+    L,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -161,12 +167,17 @@ impl TetrisGame {
 
     fn spawn_new_piece(&mut self) {
         let tetromino_types = [
-            TetrominoType::I, TetrominoType::O, TetrominoType::T,
-            TetrominoType::S, TetrominoType::Z, TetrominoType::J, TetrominoType::L,
+            TetrominoType::I,
+            TetrominoType::O,
+            TetrominoType::T,
+            TetrominoType::S,
+            TetrominoType::Z,
+            TetrominoType::J,
+            TetrominoType::L,
         ];
         let mut rng = rand::thread_rng();
         let random_type = tetromino_types[rng.gen_range(0..tetromino_types.len())];
-        
+
         self.current_piece = Some(self.next_piece);
         self.next_piece = Tetromino::new(random_type);
         self.current_x = (BOARD_WIDTH / 2) as i32 - 2;
@@ -217,7 +228,7 @@ impl TetrisGame {
 
     fn clear_lines(&mut self) {
         let mut lines_to_clear = Vec::new();
-        
+
         for y in 0..BOARD_HEIGHT {
             let mut is_full = true;
             for x in 0..BOARD_WIDTH {
@@ -252,7 +263,7 @@ impl TetrisGame {
                 4 => 800,
                 _ => 0,
             } * (self.level + 1);
-            
+
             self.level = (self.lines_cleared / 10) + 1;
             self.drop_timer = (1000.0 / (1.0 + self.level as f64 * 0.1)) as u64;
         }
@@ -262,7 +273,7 @@ impl TetrisGame {
         if let Some(piece) = self.current_piece {
             let new_x = self.current_x + dx;
             let new_y = self.current_y + dy;
-            
+
             if !self.check_collision(piece, new_x, new_y) {
                 self.current_x = new_x;
                 self.current_y = new_y;
@@ -297,21 +308,19 @@ impl TetrisGame {
     fn draw_square(&self, surface: &mut Surface, x: i32, y: i32, color: Color) {
         let screen_x = x * 5;
         let screen_y = y * 3;
-        
+
         let rect = Rect::with_size(screen_x, screen_y, 5, 3);
-        surface.draw_rect(rect, LineType::Single, charattr!("white,black"));
-        
+        surface.draw_rect(rect, LineType::Single, charattr!("gray,black"));
+
         let fill_char = Character::with_attributes(' ', CharAttribute::with_color(Color::Black, color));
-        surface.write_char(screen_x + 1, screen_y + 1, fill_char);
-        surface.write_char(screen_x + 2, screen_y + 1, fill_char);
-        surface.write_char(screen_x + 3, screen_y + 1, fill_char);
+        surface.fill_horizontal_line(screen_x + 1, screen_y + 1, screen_x + 3, fill_char);
     }
 
     fn paint_board(&self, surface: &mut Surface) {
         let game_width = BOARD_WIDTH * 5;
         let game_height = BOARD_HEIGHT * 3;
-        let r = Rect::with_size(0, 0, game_width as u16, game_height as u16);
-        surface.fill_rect(r, char!("' ',black,black"));
+
+        surface.draw_vertical_line(game_width as i32 + 1, 0, game_height as i32, LineType::Single, charattr!("gray,black"));
 
         for y in 0..BOARD_HEIGHT {
             for x in 0..BOARD_WIDTH {
@@ -327,8 +336,7 @@ impl TetrisGame {
                     if piece.shape[py][px] {
                         let board_x = self.current_x + px as i32;
                         let board_y = self.current_y + py as i32;
-                        if board_y >= 0 && board_y < BOARD_HEIGHT as i32 && 
-                           board_x >= 0 && board_x < BOARD_WIDTH as i32 {
+                        if board_y >= 0 && board_y < BOARD_HEIGHT as i32 && board_x >= 0 && board_x < BOARD_WIDTH as i32 {
                             self.draw_square(surface, board_x, board_y, piece.color);
                         }
                     }
@@ -338,7 +346,7 @@ impl TetrisGame {
     }
 
     fn paint_game_over(&self, surface: &mut Surface) {
-        const X: i32 = 8;
+        const X: i32 = 12;
         const Y: i32 = 8;
         const W: i32 = 40;
         let r = Rect::with_size(X, Y, W as u16, 6);
@@ -357,31 +365,47 @@ impl TetrisGame {
 impl OnPaint for TetrisGame {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         surface.clear(char!("' ',black,black"));
-        
+
         match self.state {
             GameState::GameOver => {
                 self.paint_game_over(surface);
             }
             GameState::Playing | GameState::Paused => {
                 self.paint_board(surface);
-                
+
                 let game_width = (BOARD_WIDTH * 5) as i32;
                 surface.write_string(game_width + 2, 0, format!("Score: {}", self.score).as_str(), theme.symbol.checked, false);
                 surface.write_string(game_width + 2, 1, format!("Level: {}", self.level).as_str(), theme.symbol.checked, false);
-                surface.write_string(game_width + 2, 2, format!("Lines: {}", self.lines_cleared).as_str(), theme.symbol.checked, false);
-                
+                surface.write_string(
+                    game_width + 2,
+                    2,
+                    format!("Lines: {}", self.lines_cleared).as_str(),
+                    theme.symbol.checked,
+                    false,
+                );
+
                 surface.write_string(game_width + 2, 4, "Next:", charattr!("white"), false);
+
+                let mut bit_tile = BitTileU16::new(4, 4).unwrap();
                 for py in 0..4 {
                     for px in 0..4 {
                         if self.next_piece.shape[py][px] {
-                            let preview_x = game_width + 2 + px as i32 * 2;
-                            let preview_y = 6 + py as i32;
-                            let preview_char = Character::with_attributes('█', CharAttribute::with_color(self.next_piece.color, Color::Black));
-                            surface.write_char(preview_x, preview_y, preview_char);
+                            bit_tile.set(px as u32, py as u32, true);
                         }
                     }
                 }
-                
+
+                let preview_x = game_width + 2;
+                let preview_y = 6;
+                surface.draw_tile(
+                    preview_x,
+                    preview_y,
+                    &bit_tile,
+                    self.next_piece.color,
+                    Color::Black,
+                    BitTileRenderMethod::SmallBlocks,
+                );
+
                 if self.state == GameState::Paused {
                     surface.write_string(game_width + 2, 15, "PAUSED - Press P to resume", charattr!("white,black"), false);
                 }
