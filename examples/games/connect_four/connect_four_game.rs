@@ -99,7 +99,7 @@ impl ConnectFourGame {
         if let Some((player, col, y)) = self.falling_piece {
             let new_y = y + 0.25;
 
-            let next_row = (new_y + 0.25) as i32;
+            let next_row = (new_y as i32) + 1;
             let should_stop = if next_row >= BOARD_HEIGHT as i32 {
                 true
             } else if next_row >= 0 && !self.board[next_row as usize][col as usize].is_empty() {
