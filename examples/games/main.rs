@@ -1,10 +1,12 @@
 use appcui::prelude::*;
 
 mod pacman;
+mod tetris;
+
 
 
 #[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
-          commands  = [Exit, About, Pacman,
+          commands  = [Exit, About, Pacman, Tetris,
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     index: u32,
@@ -54,6 +56,7 @@ impl DesktopEvents for MyDesktop {
         self.menu_example = self.appbar().add(appbar::MenuButton::new("&Example",menu!("
             class: MyDesktop, items:[
                 {'&Pacman Game',cmd: Pacman},
+                {'&Tetris Game',cmd: Tetris},
             ]
         "),0,appbar::Side::Left));
         self.menu_help = self.appbar().add(appbar::MenuButton::new("&Help",menu!("
@@ -79,6 +82,9 @@ impl MenuEvents for MyDesktop {
         match command {
             mydesktop::Commands::Pacman => { 
                 self.add_window(pacman::Win::new());
+            },
+            mydesktop::Commands::Tetris => { 
+                self.add_window(tetris::Win::new());
             },          
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
