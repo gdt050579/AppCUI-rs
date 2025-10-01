@@ -346,7 +346,7 @@ impl TetrisGame {
     }
 
     fn paint_game_over(&self, surface: &mut Surface) {
-        const X: i32 = 12;
+        const X: i32 = 17;
         const Y: i32 = 8;
         const W: i32 = 40;
         let r = Rect::with_size(X, Y, W as u16, 6);
