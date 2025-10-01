@@ -46,7 +46,7 @@ const BOARD_WIDTH: usize = 7;
 const BOARD_HEIGHT: usize = 6;
 
 fn create_circle_pattern() -> BitTileU64 {
-    let pattern: u64 = 0b00000000_00011000_00111100_01111110_01111110_00111100_00011000_00000000;
+    let pattern: u64 = 0b00000000_00111100_01111110_01111110_01111110_01111110_00111100_00000000;
     BitTileU64::from_u64(8, 8, pattern).unwrap()
 }
 
