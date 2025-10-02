@@ -336,25 +336,24 @@ impl OnKeyPressed for Game2048Logic {
 
 impl OnPaint for Game2048Logic {
     fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
-        surface.clear(char!("' ',black,black"));
-        
+        surface.clear(char!("' ',black,black"));        
         surface.write_string(1, 1, &format!("Score: {}", self.score), charattr!("white"), false);
         
+        const CELL_WIDTH: i32 = 8;
+        const CELL_HEIGHT: i32 = 4;
         let start_x = 2;
         let start_y = 2;
-        let cell_width = 8;
-        let cell_height = 4;
-        let grid_width = cell_width * 4 + 1;
+        let grid_width = CELL_WIDTH * 4 + 1;
         
         for i in 0..5 {
-            let y = start_y + i * cell_height;
+            let y = start_y + i * CELL_HEIGHT;
             for x in start_x..start_x + grid_width {
                 if i == 0 {
                     if x == start_x {
                         surface.write_char(x, y, Character::new('┌', Color::Gray, Color::Black, CharFlags::None));
                     } else if x == start_x + grid_width - 1 {
                         surface.write_char(x, y, Character::new('┐', Color::Gray, Color::Black, CharFlags::None));
-                    } else if (x - start_x) % cell_width == 0 {
+                    } else if (x - start_x) % CELL_WIDTH == 0 {
                         surface.write_char(x, y, Character::new('┬', Color::Gray, Color::Black, CharFlags::None));
                     } else {
                         surface.write_char(x, y, Character::new('─', Color::Gray, Color::Black, CharFlags::None));
@@ -364,7 +363,7 @@ impl OnPaint for Game2048Logic {
                         surface.write_char(x, y, Character::new('└', Color::Gray, Color::Black, CharFlags::None));
                     } else if x == start_x + grid_width - 1 {
                         surface.write_char(x, y, Character::new('┘', Color::Gray, Color::Black, CharFlags::None));
-                    } else if (x - start_x) % cell_width == 0 {
+                    } else if (x - start_x) % CELL_WIDTH == 0 {
                         surface.write_char(x, y, Character::new('┴', Color::Gray, Color::Black, CharFlags::None));
                     } else {
                         surface.write_char(x, y, Character::new('─', Color::Gray, Color::Black, CharFlags::None));
@@ -374,7 +373,7 @@ impl OnPaint for Game2048Logic {
                         surface.write_char(x, y, Character::new('├', Color::Gray, Color::Black, CharFlags::None));
                     } else if x == start_x + grid_width - 1 {
                         surface.write_char(x, y, Character::new('┤', Color::Gray, Color::Black, CharFlags::None));
-                    } else if (x - start_x) % cell_width == 0 {
+                    } else if (x - start_x) % CELL_WIDTH == 0 {
                         surface.write_char(x, y, Character::new('┼', Color::Gray, Color::Black, CharFlags::None));
                     } else {
                         surface.write_char(x, y, Character::new('─', Color::Gray, Color::Black, CharFlags::None));
@@ -384,21 +383,21 @@ impl OnPaint for Game2048Logic {
         }
         
         for j in 0..5 {
-            let x = start_x + j * cell_width;
+            let x = start_x + j * CELL_WIDTH;
             for i in 1..5 {
-                let y = start_y + i * cell_height;
-                for dy in 1..cell_height {
+                let y = start_y + i * CELL_HEIGHT;
+                for dy in 1..CELL_HEIGHT {
                     surface.write_char(x, y - dy, Character::new('│', Color::Gray, Color::Black, CharFlags::None));
                 }
             }
         }
         
-        for i in 0..4 {
-            for j in 0..4 {
-                let tile_x = start_x + 1 + j * cell_width;
-                let tile_y = start_y + 1 + i * cell_height;
+        for y in 0..4 {
+            for x in 0..4 {
+                let px = start_x + 1 + x * CELL_WIDTH;
+                let py = start_y + 1 + y * CELL_HEIGHT;
                 
-                let tile = self.grid[i as usize][j as usize];
+                let tile = self.grid[y as usize][x as usize];
                 let bg_color = match tile.value {
                     0 => Color::Black,
                     2 => Color::DarkBlue,
@@ -415,16 +414,12 @@ impl OnPaint for Game2048Logic {
                     _ => Color::Aqua,
                 };
                 
-                for dy in 0..3 {
-                    for dx in 0..7 {
-                        surface.write_char(tile_x + dx, tile_y + dy, Character::new(' ', Color::White, bg_color, CharFlags::None));
-                    }
-                }
+                surface.fill_rect(Rect::with_size(px, py, 7, 3), Character::new(' ', Color::White, bg_color, CharFlags::None));
                 
                 if tile.value > 0 {
                     let value_str = tile.value.to_string();
-                    let text_x = tile_x + (7 - value_str.len() as i32) / 2;
-                    let text_y = tile_y + 1;
+                    let text_x = px + (7 - value_str.len() as i32) / 2;
+                    let text_y = py + 1;
                     
                     let color_attr = match tile.color {
                         Color::White => charattr!("white"),
