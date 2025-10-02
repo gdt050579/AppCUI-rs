@@ -290,8 +290,8 @@ impl ConnectFourGame {
     }
 
     fn paint_game_over(&self, surface: &mut Surface) {
-        const X: i32 = 20;
-        const Y: i32 = 15;
+        const X: i32 = 10;
+        const Y: i32 = 12;
         const W: i32 = 40;
         let r = Rect::with_size(X, Y, W as u16, 6);
         surface.fill_rect(r, Character::new(' ', Color::White, Color::DarkBlue, CharFlags::None));
