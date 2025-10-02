@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 
 /// Represents a size (width and height) of a rectangle.
 #[derive(Copy, Clone, PartialEq, Debug, Eq, Default)]
@@ -32,5 +34,59 @@ impl Size {
             width: self.width.saturating_sub(value),
             height: self.height.saturating_sub(value),
         }
+    }
+}
+
+impl FromStr for Size {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let buf = s.as_bytes();
+        let mut index = 0;
+        while index < buf.len() && ((buf[index] == b' ') || (buf[index] == b'\t')) {
+            index += 1;
+        }
+        if index >= buf.len() {
+            return Err("Emptry string (expecting a size in the format 'width x height')".to_string());
+        }
+        let mut width = 0;
+        if (buf[index] < b'0') || (buf[index] > b'9') {
+            return Err(format!("Invalid width (expecting a number formed out of digits but found the character {})", buf[index] as char));
+        }
+        while index < buf.len() && (buf[index] >= b'0') && (buf[index] <= b'9') {
+            width = width * 10 + (buf[index] - b'0') as u32;
+            index += 1;
+        }
+        while index < buf.len() && ((buf[index] == b' ') || (buf[index] == b'\t')) {
+            index += 1;
+        }        
+        if index >= buf.len() {
+            return Err("Incomplete size (width is present but height is missing)".to_string());
+        }
+        if (buf[index] != b'x') && (buf[index] != b'X') && (buf[index] != b',') {
+            return Err(format!("Invalid size (expecting 'x' or ',' separated width and height but found the character {})", buf[index] as char));
+        }
+        index += 1;
+        while index < buf.len() && ((buf[index] == b' ') || (buf[index] == b'\t')) {
+            index += 1;
+        }        
+        if index >= buf.len() {
+            return Err("Incomplete size (height is missing)".to_string());
+        }
+        if (buf[index] < b'0') || (buf[index] > b'9') {
+            return Err(format!("Invalid height (expecting a number formed out of digits but found the character {})", buf[index] as char));
+        }
+        let mut height = 0;
+        while index < buf.len() && (buf[index] >= b'0') && (buf[index] <= b'9') {
+            height = height * 10 + (buf[index] - b'0') as u32;
+            index += 1;
+        }
+        while index < buf.len() && ((buf[index] == b' ') || (buf[index] == b'\t')) {
+            index += 1;
+        }
+        if index != buf.len() {
+            return Err(format!("Invalid size (expecting only width and height - but found: {} at the end)", &s[index..]));
+        }
+        Ok(Size::new(width, height))
     }
 }
