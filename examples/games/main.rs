@@ -3,11 +3,12 @@ use appcui::prelude::*;
 mod pacman;
 mod tetris;
 mod connect_four;
+mod game_2048;
 
 
 
 #[Desktop(events    = [MenuEvents,DesktopEvents,AppBarEvents], 
-          commands  = [Exit, About, Pacman, Tetris, ConnectFour,
+          commands  = [Exit, About, Pacman, Tetris, ConnectFour, Game2048,
                        NoArrange, Cascade, Vertical, Horizontal, Grid])]
 struct MyDesktop {
     index: u32,
@@ -59,6 +60,7 @@ impl DesktopEvents for MyDesktop {
                 {'&Pacman Game',cmd: Pacman},
                 {'&Tetris Game',cmd: Tetris},
                 {'&Connect Four Game',cmd: ConnectFour},
+                {'&2048 Game',cmd: Game2048},
             ]
         "),0,appbar::Side::Left));
         self.menu_help = self.appbar().add(appbar::MenuButton::new("&Help",menu!("
@@ -90,6 +92,9 @@ impl MenuEvents for MyDesktop {
             },
             mydesktop::Commands::ConnectFour => { 
                 self.add_window(connect_four::Win::new());
+            },
+            mydesktop::Commands::Game2048 => { 
+                self.add_window(game_2048::Win::new());
             },          
             mydesktop::Commands::Exit => self.close(),
             mydesktop::Commands::About => {
