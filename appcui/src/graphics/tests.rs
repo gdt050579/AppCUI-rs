@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use appcui_proc_macro::*;
 
 use crate::graphics::text_format::TextFormatBuilder;
@@ -1522,3 +1524,106 @@ fn check_draw_line_small_angle() {
     assert_eq!(s.compute_hash(), 0xF13389F6E5923425);
 }
 
+#[test]
+fn check_size_from_str() {
+    assert_eq!(Size::from_str("10x20"), Ok(Size::new(10, 20)));
+    assert_eq!(Size::from_str("5x7"), Ok(Size::new(5, 7)));
+    assert_eq!(Size::from_str("100x200"), Ok(Size::new(100, 200)));
+    assert_eq!(Size::from_str("15X25"), Ok(Size::new(15, 25)));
+    assert_eq!(Size::from_str("3X9"), Ok(Size::new(3, 9)));
+    assert_eq!(Size::from_str("500X600"), Ok(Size::new(500, 600)));
+    assert_eq!(Size::from_str("8,12"), Ok(Size::new(8, 12)));
+    assert_eq!(Size::from_str("25,30"), Ok(Size::new(25, 30)));
+    assert_eq!(Size::from_str("999,888"), Ok(Size::new(999, 888)));
+    assert_eq!(Size::from_str("   10x20   "), Ok(Size::new(10, 20)));
+    assert_eq!(Size::from_str("   10x20"), Ok(Size::new(10, 20)));
+    assert_eq!(Size::from_str("\t15X25\t"), Ok(Size::new(15, 25)));
+    assert_eq!(Size::from_str("  8,12  "), Ok(Size::new(8, 12)));
+    assert_eq!(Size::from_str("1234   x4321   "), Ok(Size::new(1234, 4321)));
+    assert_eq!(Size::from_str("1234x   4321   "), Ok(Size::new(1234, 4321)));
+    assert_eq!(Size::from_str("1234   x   4321"), Ok(Size::new(1234, 4321)));
+    assert_eq!(Size::from_str("50\tX\t75"), Ok(Size::new(50, 75)));
+    assert_eq!(Size::from_str("100 , 200"), Ok(Size::new(100, 200)));
+    assert_eq!(Size::from_str("300\t,\t400"), Ok(Size::new(300, 400)));
+    assert_eq!(Size::from_str("1234x4321   "), Ok(Size::new(1234, 4321)));
+    assert_eq!(Size::from_str("9999X8888"), Ok(Size::new(9999, 8888)));
+    assert_eq!(Size::from_str("7777,6666"), Ok(Size::new(7777, 6666)));
+    assert_eq!(Size::from_str("1x2"), Ok(Size::new(1, 2)));
+    assert_eq!(Size::from_str("3X4"), Ok(Size::new(3, 4)));
+    assert_eq!(Size::from_str("5,6"), Ok(Size::new(5, 6)));
+    assert_eq!(Size::from_str("  \t 42x84  \t "), Ok(Size::new(42, 84)));
+    assert_eq!(Size::from_str("\t\t150X300\t\t"), Ok(Size::new(150, 300)));
+    assert_eq!(Size::from_str("  200 , 400  "), Ok(Size::new(200, 400)));
+    assert_eq!(Size::from_str("65535x32767"), Ok(Size::new(65535, 32767)));
+    assert_eq!(Size::from_str("10000X20000"), Ok(Size::new(10000, 20000)));
+    assert_eq!(Size::from_str("50000,60000"), Ok(Size::new(50000, 60000)));
+    assert_eq!(Size::from_str("  0  , 0  "), Ok(Size::new(0, 0)));
+    assert_eq!(Size::from_str("0x0"), Ok(Size::new(0, 0)));
+    assert_eq!(Size::from_str("  0  , 1  "), Ok(Size::new(0, 1)));
+    assert_eq!(Size::from_str("0x1"), Ok(Size::new(0, 1)));
+    assert_eq!(Size::from_str("  1  , 0  "), Ok(Size::new(1, 0)));
+    assert_eq!(Size::from_str("1x0"), Ok(Size::new(1, 0)));
+}
+
+#[test]
+fn check_size_from_str_errors() {
+    use crate::graphics::size::SizeParseError;
+    
+    assert_eq!(Size::from_str(""), Err(SizeParseError::EmptyString));
+    assert_eq!(Size::from_str("   "), Err(SizeParseError::EmptyString));
+    assert_eq!(Size::from_str("\t\t\t"), Err(SizeParseError::EmptyString));
+    assert_eq!(Size::from_str(" \t \t "), Err(SizeParseError::EmptyString));
+    assert_eq!(Size::from_str("ax20"), Err(SizeParseError::InvalidWidth(b'a')));
+    assert_eq!(Size::from_str("!x20"), Err(SizeParseError::InvalidWidth(b'!')));
+    assert_eq!(Size::from_str("@x20"), Err(SizeParseError::InvalidWidth(b'@')));
+    assert_eq!(Size::from_str("-x20"), Err(SizeParseError::InvalidWidth(b'-')));
+    assert_eq!(Size::from_str("+x20"), Err(SizeParseError::InvalidWidth(b'+')));
+    assert_eq!(Size::from_str(".x20"), Err(SizeParseError::InvalidWidth(b'.')));
+    assert_eq!(Size::from_str("10x"), Err(SizeParseError::HeightMissing));
+    assert_eq!(Size::from_str("10X"), Err(SizeParseError::HeightMissing));
+    assert_eq!(Size::from_str("10,"), Err(SizeParseError::HeightMissing));
+    assert_eq!(Size::from_str("10x   "), Err(SizeParseError::HeightMissing));
+    assert_eq!(Size::from_str("10X\t\t"), Err(SizeParseError::HeightMissing));
+    assert_eq!(Size::from_str("10,  "), Err(SizeParseError::HeightMissing));
+    assert_eq!(Size::from_str("  10x   "), Err(SizeParseError::HeightMissing));
+    assert_eq!(Size::from_str("\t10X\t"), Err(SizeParseError::HeightMissing));
+    assert_eq!(Size::from_str("10a20"), Err(SizeParseError::MissingSeparator(b'a')));
+    assert_eq!(Size::from_str("10-20"), Err(SizeParseError::MissingSeparator(b'-')));
+    assert_eq!(Size::from_str("10+20"), Err(SizeParseError::MissingSeparator(b'+')));
+    assert_eq!(Size::from_str("10.20"), Err(SizeParseError::MissingSeparator(b'.')));
+    assert_eq!(Size::from_str("10:20"), Err(SizeParseError::MissingSeparator(b':')));
+    assert_eq!(Size::from_str("10;20"), Err(SizeParseError::MissingSeparator(b';')));
+    assert_eq!(Size::from_str("10|20"), Err(SizeParseError::MissingSeparator(b'|')));
+    assert_eq!(Size::from_str("10&20"), Err(SizeParseError::MissingSeparator(b'&')));
+    assert_eq!(Size::from_str("10#20"), Err(SizeParseError::MissingSeparator(b'#')));
+    assert_eq!(Size::from_str("10xa"), Err(SizeParseError::InvalidHeight(b'a')));
+    assert_eq!(Size::from_str("10X!"), Err(SizeParseError::InvalidHeight(b'!')));
+    assert_eq!(Size::from_str("10,@"), Err(SizeParseError::InvalidHeight(b'@')));
+    assert_eq!(Size::from_str("10x-"), Err(SizeParseError::InvalidHeight(b'-')));
+    assert_eq!(Size::from_str("10X+"), Err(SizeParseError::InvalidHeight(b'+')));
+    assert_eq!(Size::from_str("10,."), Err(SizeParseError::InvalidHeight(b'.')));
+    assert_eq!(Size::from_str("10x20a"), Err(SizeParseError::InvalidSize(b'a')));
+    assert_eq!(Size::from_str("10X20!"), Err(SizeParseError::InvalidSize(b'!')));
+    assert_eq!(Size::from_str("10,20@"), Err(SizeParseError::InvalidSize(b'@')));
+    assert_eq!(Size::from_str("10x20-"), Err(SizeParseError::InvalidSize(b'-')));
+    assert_eq!(Size::from_str("10X20+"), Err(SizeParseError::InvalidSize(b'+')));
+    assert_eq!(Size::from_str("10,20."), Err(SizeParseError::InvalidSize(b'.')));
+    assert_eq!(Size::from_str("10,20:"), Err(SizeParseError::InvalidSize(b':')));
+    assert_eq!(Size::from_str("10x20;"), Err(SizeParseError::InvalidSize(b';')));
+    assert_eq!(Size::from_str("10X20|"), Err(SizeParseError::InvalidSize(b'|')));
+    assert_eq!(Size::from_str("10,20&"), Err(SizeParseError::InvalidSize(b'&')));
+    assert_eq!(Size::from_str("10x20#"), Err(SizeParseError::InvalidSize(b'#')));
+    assert_eq!(Size::from_str("  ax20  "), Err(SizeParseError::InvalidWidth(b'a')));
+    assert_eq!(Size::from_str("  10a20  "), Err(SizeParseError::MissingSeparator(b'a')));
+    assert_eq!(Size::from_str("  10xa  "), Err(SizeParseError::InvalidHeight(b'a')));
+    assert_eq!(Size::from_str("  10x20a  "), Err(SizeParseError::InvalidSize(b'a')));
+    assert_eq!(Size::from_str("10x20\n"), Err(SizeParseError::InvalidSize(b'\n')));
+    assert_eq!(Size::from_str("10x20\r"), Err(SizeParseError::InvalidSize(b'\r')));
+    assert_eq!(Size::from_str("10x20\0"), Err(SizeParseError::InvalidSize(b'\0')));
+    assert_eq!(Size::from_str("10x20\x01"), Err(SizeParseError::InvalidSize(b'\x01')));
+    assert_eq!(Size::from_str("abcxdef"), Err(SizeParseError::InvalidWidth(b'a')));
+    assert_eq!(Size::from_str("123abc"), Err(SizeParseError::MissingSeparator(b'a')));
+    assert_eq!(Size::from_str("123xabc"), Err(SizeParseError::InvalidHeight(b'a')));
+    assert_eq!(Size::from_str("123x456abc"), Err(SizeParseError::InvalidSize(b'a')));
+    assert_eq!(Size::from_str("123x456     abc"), Err(SizeParseError::InvalidSize(b'a')));
+}

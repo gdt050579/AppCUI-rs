@@ -1,5 +1,4 @@
-use std::str::FromStr;
-
+use std::{fmt::Display, str::FromStr};
 
 /// Represents a size (width and height) of a rectangle.
 #[derive(Copy, Clone, PartialEq, Debug, Eq, Default)]
@@ -37,8 +36,33 @@ impl Size {
     }
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum SizeParseError {
+    EmptyString,
+    InvalidWidth(u8),
+    InvalidHeight(u8),
+    HeightMissing,
+    MissingSeparator(u8),
+    InvalidSize(u8),
+}
+
+impl Display for SizeParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SizeParseError::EmptyString => write!(f, "Emptry string (expecting a size in the format 'width x height')"),
+            SizeParseError::InvalidWidth(c) => write!(f, "Invalid width (expecting a number formed out of digits but found the character {})", *c as char),
+            SizeParseError::InvalidHeight(c) => write!(f, "Invalid height (expecting a number formed out of digits but found the character {})", *c as char),
+            SizeParseError::HeightMissing => write!(f, "Incomplete size (height is missing)"),
+            SizeParseError::MissingSeparator(c) => write!(f, "Incomplete size (missing separator between width and height - expecting 'x' or ',' but found the character {})", *c as char),
+            SizeParseError::InvalidSize(c) => write!(f, "Invalid size (expecting only width and height - but found: {} characters at the end)", *c as char),
+        }
+    }
+}
+
+
+
 impl FromStr for Size {
-    type Err = String;
+    type Err = SizeParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let buf = s.as_bytes();
@@ -47,11 +71,11 @@ impl FromStr for Size {
             index += 1;
         }
         if index >= buf.len() {
-            return Err("Emptry string (expecting a size in the format 'width x height')".to_string());
+            return Err(SizeParseError::EmptyString);
         }
         let mut width = 0;
         if (buf[index] < b'0') || (buf[index] > b'9') {
-            return Err(format!("Invalid width (expecting a number formed out of digits but found the character {})", buf[index] as char));
+            return Err(SizeParseError::InvalidWidth(buf[index]));
         }
         while index < buf.len() && (buf[index] >= b'0') && (buf[index] <= b'9') {
             width = width * 10 + (buf[index] - b'0') as u32;
@@ -61,20 +85,20 @@ impl FromStr for Size {
             index += 1;
         }        
         if index >= buf.len() {
-            return Err("Incomplete size (width is present but height is missing)".to_string());
+            return Err(SizeParseError::HeightMissing);
         }
         if (buf[index] != b'x') && (buf[index] != b'X') && (buf[index] != b',') {
-            return Err(format!("Invalid size (expecting 'x' or ',' separated width and height but found the character {})", buf[index] as char));
+            return Err(SizeParseError::MissingSeparator(buf[index]));
         }
         index += 1;
         while index < buf.len() && ((buf[index] == b' ') || (buf[index] == b'\t')) {
             index += 1;
         }        
         if index >= buf.len() {
-            return Err("Incomplete size (height is missing)".to_string());
+            return Err(SizeParseError::HeightMissing);
         }
         if (buf[index] < b'0') || (buf[index] > b'9') {
-            return Err(format!("Invalid height (expecting a number formed out of digits but found the character {})", buf[index] as char));
+            return Err(SizeParseError::InvalidHeight(buf[index]));
         }
         let mut height = 0;
         while index < buf.len() && (buf[index] >= b'0') && (buf[index] <= b'9') {
@@ -85,7 +109,7 @@ impl FromStr for Size {
             index += 1;
         }
         if index != buf.len() {
-            return Err(format!("Invalid size (expecting only width and height - but found: {} at the end)", &s[index..]));
+            return Err(SizeParseError::InvalidSize(buf[index]));
         }
         Ok(Size::new(width, height))
     }
