@@ -406,20 +406,20 @@ impl OnPaint for Game2048Logic {
                 let py = start_y + 1 + y * CELL_HEIGHT;
 
                 let tile = self.grid[y as usize][x as usize];
-                let bg_color = match tile.value {
-                    0 => Color::Black,
-                    2 => Color::DarkBlue,
-                    4 => Color::DarkGreen,
-                    8 => Color::DarkRed,
-                    16 => Color::Magenta,
-                    32 => Color::Olive,
-                    64 => Color::Teal,
-                    128 => Color::Blue,
-                    256 => Color::Green,
-                    512 => Color::Red,
-                    1024 => Color::Pink,
-                    2048 => Color::Yellow,
-                    _ => Color::Aqua,
+                let (fg_color,bg_color) = match tile.value {
+                    0 => (Color::Black,Color::Black),
+                    2 => (Color::White,Color::DarkBlue),
+                    4 => (Color::White,Color::DarkGreen),
+                    8 => (Color::White,Color::DarkRed),
+                    16 => (Color::White,Color::Magenta),
+                    32 => (Color::White,Color::Olive),
+                    64 => (Color::White,Color::Teal),
+                    128 => (Color::White,Color::Blue),
+                    256 => (Color::Black,Color::Green),
+                    512 => (Color::White,Color::Red),
+                    1024 => (Color::Black,Color::Pink),
+                    2048 => (Color::Black,Color::Yellow),
+                    _ => (Color::Black,Color::White),
                 };
 
                 surface.fill_rect(
@@ -428,7 +428,6 @@ impl OnPaint for Game2048Logic {
                 );
 
                 if tile.value > 0 {
-                    let fg_color = bg_color.contrast_color();
                     let tile_draw = BitTileU128::from_u128(
                         15,
                         5,
