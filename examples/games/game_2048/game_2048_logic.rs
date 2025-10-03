@@ -11,27 +11,11 @@ pub enum GameState {
 #[derive(Copy, Clone)]
 struct Tile {
     value: u32,
-    color: Color,
 }
 
 impl Tile {
     fn new(value: u32) -> Self {
-        let color = match value {
-            0 => Color::Black,
-            2 => Color::White,
-            4 => Color::Silver,
-            8 => Color::Yellow,
-            16 => Color::Yellow,
-            32 => Color::Yellow,
-            64 => Color::Red,
-            128 => Color::Red,
-            256 => Color::Pink,
-            512 => Color::Pink,
-            1024 => Color::Magenta,
-            2048 => Color::Magenta,
-            _ => Color::Aqua,
-        };
-        Self { value, color }
+        Self { value }
     }
 }
 
