@@ -339,8 +339,8 @@ impl OnPaint for Game2048Logic {
         surface.clear(char!("' ',black,black"));        
         surface.write_string(1, 1, &format!("Score: {}", self.score), charattr!("white"), false);
         
-        const CELL_WIDTH: i32 = 8;
-        const CELL_HEIGHT: i32 = 4;
+        const CELL_WIDTH: i32 = 15;
+        const CELL_HEIGHT: i32 = 6;
         let start_x = 2;
         let start_y = 2;
         let grid_width = CELL_WIDTH * 4 + 1;
@@ -414,12 +414,12 @@ impl OnPaint for Game2048Logic {
                     _ => Color::Aqua,
                 };
                 
-                surface.fill_rect(Rect::with_size(px, py, 7, 3), Character::new(' ', Color::White, bg_color, CharFlags::None));
+                surface.fill_rect(Rect::with_size(px, py, 14, 5), Character::new(' ', Color::White, bg_color, CharFlags::None));
                 
                 if tile.value > 0 {
                     let value_str = tile.value.to_string();
-                    let text_x = px + (7 - value_str.len() as i32) / 2;
-                    let text_y = py + 1;
+                    let text_x = px + (14 - value_str.len() as i32) / 2;
+                    let text_y = py + 2;
                     
                     let color_attr = match tile.color {
                         Color::White => charattr!("white"),
@@ -437,12 +437,12 @@ impl OnPaint for Game2048Logic {
         
         match self.game_state {
             GameState::Won => {
-                surface.write_string(1, 20, "Congratulations! You reached 2048!", charattr!("green"), false);
-                surface.write_string(1, 21, "Press Enter or Space to play again", charattr!("yellow"), false);
+                surface.write_string(1, 30, "Congratulations! You reached 2048!", charattr!("green"), false);
+                surface.write_string(1, 31, "Press Enter or Space to play again", charattr!("yellow"), false);
             }
             GameState::GameOver => {
-                surface.write_string(1, 20, "Game Over! No more moves available.", charattr!("red"), false);
-                surface.write_string(1, 21, "Press Enter or Space to play again", charattr!("yellow"), false);
+                surface.write_string(1, 30, "Game Over! No more moves available.", charattr!("red"), false);
+                surface.write_string(1, 31, "Press Enter or Space to play again", charattr!("yellow"), false);
             }
             GameState::Playing => {
             }
