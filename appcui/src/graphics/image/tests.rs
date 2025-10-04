@@ -896,6 +896,12 @@ fn check_bit_tile_reverse_bits() {
     assert_eq!(tile.to_u16(), 0);
 }
 
+#[test]
+fn check_bit_tile_to_string_format() {
+    let tile = BitTileU128::from_str("|  aa  | |abc   | |  a  a|").unwrap();
+    assert_eq!(tile.to_string_format(), "|..XX..|\n|XXX...|\n|..X..X|\n");
+}
+
 
 #[test]
 fn check_glyph_basic_api() {
