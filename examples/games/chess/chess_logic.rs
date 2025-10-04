@@ -1,4 +1,6 @@
 use appcui::prelude::*;
+use super::images;
+use std::str::FromStr;
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum PieceType {
@@ -36,21 +38,12 @@ impl Piece {
         Self { piece_type, color }
     }
 
-    fn symbol(&self) -> char {
-        match self.piece_type {
-            PieceType::Pawn => '♙',
-            PieceType::Rook => '♖',
-            PieceType::Knight => '♘',
-            PieceType::Bishop => '♗',
-            PieceType::Queen => '♕',
-            PieceType::King => '♔',
-        }
-    }
+
 
     fn color(&self) -> Color {
         match self.color {
-            PieceColor::White => Color::Yellow,  // Use bright yellow for white pieces
-            PieceColor::Black => Color::Red,    // Use red for black pieces
+            PieceColor::White => Color::White,  
+            PieceColor::Black => Color::Red, 
         }
     }
 }
@@ -88,8 +81,10 @@ pub enum SelectionState {
 }
 
 const BOARD_SIZE: usize = 8;
-const CELL_WIDTH: i32 = 3;
-const CELL_HEIGHT: i32 = 1;
+const CELL_WIDTH: i32 = 8;
+const CELL_HEIGHT: i32 = 4;
+const BOARD_LEFT_POS: i32 = 2;
+const BOARD_TOP_POS: i32 = 0;
 
 #[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent)]
 pub struct ChessLogic {
@@ -98,6 +93,13 @@ pub struct ChessLogic {
     game_state: GameState,
     selection_state: SelectionState,
     possible_moves: Vec<(usize, usize)>,
+    queen_image: BitTile<256>,
+    pawn_image: BitTile<256>,
+    rook_image: BitTile<256>,
+    knight_image: BitTile<256>,
+    bishop_image: BitTile<256>,
+    king_image: BitTile<256>,
+    hovered: Option<(usize, usize)>,
 }
 
 impl ChessLogic {
@@ -109,6 +111,13 @@ impl ChessLogic {
             game_state: GameState::Playing,
             selection_state: SelectionState::None,
             possible_moves: Vec::new(),
+            queen_image: BitTile::from_str(images::QUEEN_IMAGE).unwrap(),
+            pawn_image: BitTile::from_str(images::PAWN_IMAGE).unwrap(),
+            rook_image: BitTile::from_str(images::ROOK_IMAGE).unwrap(),
+            knight_image: BitTile::from_str(images::KNIGHT_IMAGE).unwrap(),
+            bishop_image: BitTile::from_str(images::BISHOP_IMAGE).unwrap(),
+            king_image: BitTile::from_str(images::KING_IMAGE).unwrap(),
+            hovered: None,
         };
 
         game.setup_initial_board();
@@ -144,23 +153,18 @@ impl ChessLogic {
     }
 
     fn draw_piece(&self, surface: &mut Surface, rect: Rect, piece: Piece) {
-        let center_x = rect.left() + rect.width() as i32 / 2;
-        let center_y = rect.top() + rect.height() as i32 / 2;
-        
-        let bg_color = if (rect.left() / CELL_WIDTH + rect.top() / CELL_HEIGHT) % 2 == 0 {
-            Color::DarkBlue
-        } else {
-            Color::Gray
+        let tile = match piece.piece_type {
+            PieceType::Queen => self.queen_image,
+            PieceType::Pawn => self.pawn_image,
+            PieceType::Rook => self.rook_image,
+            PieceType::Knight => self.knight_image,
+            PieceType::Bishop => self.bishop_image,
+            PieceType::King => self.king_image,
         };
+
+        surface.draw_tile(rect.left(), rect.top(), &tile, piece.color(), Color::Transparent, BitTileRenderMethod::Braille);
         
-        surface.fill_rect(rect, Character::new(' ', Color::White, bg_color, CharFlags::None));
         
-        surface.write_char(center_x, center_y, Character::new(
-            piece.symbol(),
-            piece.color(),
-            bg_color,
-            CharFlags::None
-        ));
     }
 
     fn get_possible_moves(&self, row: usize, col: usize) -> Vec<(usize, usize)> {
@@ -346,24 +350,21 @@ impl ChessLogic {
         }
     }
 
-    fn handle_click(&mut self, x: i32, y: i32) {
-        let board_x = 2;
-        let board_y = 2;
-        
-        if x < board_x || y < board_y {
-            return;
+    fn mouse_pos_to_board_pos(&self, x: i32, y: i32) -> Option<(usize, usize)> {        
+        if x < BOARD_LEFT_POS || y < BOARD_TOP_POS {
+            return None;
         }
-        
-        let relative_x = x - board_x;
-        let relative_y = y - board_y;
-        
-        let col = (relative_x / CELL_WIDTH) as usize;
-        let row = (relative_y / CELL_HEIGHT) as usize;
+        let col = ((x - BOARD_LEFT_POS) / CELL_WIDTH) as usize;
+        let row = ((y - BOARD_TOP_POS) / CELL_HEIGHT) as usize;
         
         if row >= BOARD_SIZE || col >= BOARD_SIZE {
-            return;
+            return None;
         }
+        
+        Some((row, col))
+    }
 
+    fn click_on_board(&mut self, col: usize, row: usize) {
         match self.selection_state {
             SelectionState::None => {
                 if let Some(piece) = self.board[row][col].piece() {
@@ -404,19 +405,19 @@ impl OnPaint for ChessLogic {
     fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
         surface.clear(char!("' ',black,black"));
         
-        let board_x = 2;
-        let board_y = 2;
+        let (hovered_row, hovered_col) = self.hovered.unwrap_or((usize::MAX, usize::MAX));
         
         for row in 0..BOARD_SIZE {
             for col in 0..BOARD_SIZE {
-                let x = board_x + (col as i32 * CELL_WIDTH);
-                let y = board_y + (row as i32 * CELL_HEIGHT);
+                let x = BOARD_LEFT_POS + (col as i32 * CELL_WIDTH);
+                let y = BOARD_TOP_POS + (row as i32 * CELL_HEIGHT);
                 let rect = Rect::with_size(x, y, CELL_WIDTH as u16, CELL_HEIGHT as u16);
                 
                 let bg_color = if (row + col) % 2 == 0 {
-                    Color::DarkBlue
+                    Color::Black
                 } else {
-                    Color::Gray
+                    Color::from_rgb(32, 32, 32)
+                    //Color::Olive
                 };
                 
                 let cell_bg = match self.selection_state {
@@ -425,7 +426,9 @@ impl OnPaint for ChessLogic {
                     _ => bg_color,
                 };
                 
-                let final_bg = if self.possible_moves.contains(&(row, col)) {
+                let final_bg = if row == hovered_row && col == hovered_col {
+                    Color::DarkRed
+                } else if self.possible_moves.contains(&(row, col)) {
                     Color::Green
                 } else {
                     cell_bg
@@ -451,7 +454,22 @@ impl OnMouseEvent for ChessLogic {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Pressed(data) => {
-                self.handle_click(data.x, data.y);
+                if let Some((row, col)) = self.mouse_pos_to_board_pos(data.x, data.y) {
+                    self.click_on_board(col, row);
+                }
+                EventProcessStatus::Processed
+            },
+            MouseEvent::Over(data) => {
+                let new_hovered = self.mouse_pos_to_board_pos(data.x, data.y);
+                if new_hovered != self.hovered {
+                    self.hovered = new_hovered;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            },
+            MouseEvent::Leave | MouseEvent::Enter => {
+                self.hovered = None;
                 EventProcessStatus::Processed
             },
             _ => EventProcessStatus::Ignored,
