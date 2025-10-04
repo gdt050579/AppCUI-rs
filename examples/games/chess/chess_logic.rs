@@ -38,12 +38,12 @@ impl Piece {
 
     fn symbol(&self) -> char {
         match self.piece_type {
-            PieceType::Pawn => 'P',
-            PieceType::Rook => 'R',
-            PieceType::Knight => 'N',
-            PieceType::Bishop => 'B',
-            PieceType::Queen => 'Q',
-            PieceType::King => 'K',
+            PieceType::Pawn => '♙',
+            PieceType::Rook => '♖',
+            PieceType::Knight => '♘',
+            PieceType::Bishop => '♗',
+            PieceType::Queen => '♕',
+            PieceType::King => '♔',
         }
     }
 
@@ -88,8 +88,8 @@ pub enum SelectionState {
 }
 
 const BOARD_SIZE: usize = 8;
-const CELL_WIDTH: i32 = 9;
-const CELL_HEIGHT: i32 = 4;
+const CELL_WIDTH: i32 = 3;
+const CELL_HEIGHT: i32 = 1;
 
 #[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent)]
 pub struct ChessLogic {
