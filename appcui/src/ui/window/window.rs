@@ -914,11 +914,11 @@ impl OnWindowRegistered for Window {
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let color_window = if self.has_focus() {
-            match self.window_type {
-                Type::Normal => theme.window.normal,
-                Type::Error => theme.window.error,
-                Type::Warning => theme.window.warning,
-                Type::Notification => theme.window.info,
+            match self.background {
+                Background::Normal => theme.window.normal,
+                Background::Error => theme.window.error,
+                Background::Warning => theme.window.warning,
+                Background::Notification => theme.window.info,
             }
         } else {
             theme.window.inactive

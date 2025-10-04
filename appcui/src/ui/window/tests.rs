@@ -1420,9 +1420,9 @@ fn check_window_background() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(window!("Normal,x:0,y:0,w:30,h:5"));
-    a.add_window(window!("Error,x:30,y:0,w:30,h:5,type=Error"));
-    a.add_window(window!("Notify,x:0,y:5,w:30,h:5,type=Notification"));
-    a.add_window(window!("Warning,x:30,y:5,w:30,h:5,type=Warning"));
+    a.add_window(window!("Error,x:30,y:0,w:30,h:5,bg=Error"));
+    a.add_window(window!("Notify,x:0,y:5,w:30,h:5,bg=Notification"));
+    a.add_window(window!("Warning,x:30,y:5,w:30,h:5,bg=Warning"));
     a.run();
 }
 
@@ -1673,7 +1673,13 @@ fn check_modal_window_close() {
     impl MyModalWin {
         fn new(value: i32) -> Self {
             let mut me = Self {
-                base: ModalWindow::with_type("Modal", layout!("a:c,w:50,h:6"), window::Flags::None, window::Type::Notification),
+                base: ModalWindow::with_type(
+                    "Modal",
+                    layout!("a:c,w:50,h:6"),
+                    window::Flags::None,
+                    window::Type::Normal,
+                    window::Background::Notification,
+                ),
                 value,
             };
             if value % 2 == 0 {

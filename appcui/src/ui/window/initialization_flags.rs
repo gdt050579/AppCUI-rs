@@ -13,9 +13,6 @@ pub enum Flags {
 pub enum Type {
     #[default]
     Normal,
-    Error,
-    Warning,
-    Notification
 }
 
 
