@@ -125,7 +125,7 @@ impl<const STORAGE_BYTES: usize> BitTile<STORAGE_BYTES> {
     }
 
     /// Returns a string representation of the bit tile in the format of:
-    /// ```
+    /// ```no_compile
     ///     |...XX....XX...|
     ///     |..XXXX..XXXX..|
     ///     |.XXXXXXXXXXXX.|
