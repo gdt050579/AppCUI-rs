@@ -1,13 +1,18 @@
 use crate::prelude::SpecialChar;
+use crate::prelude::*;
 
 use super::super::{CharFlags, Character, Color, Point, Size, Surface};
 use super::{StringFormatError, StringFormatParser};
 use std::str::FromStr;
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug, EnumSelector)]
+#[repr(u8)]
 pub enum BitTileRenderMethod {
+    #[VariantInfo(name = "Small Blocks", description = "Small blocks with half-block characters")]
     SmallBlocks,
+    #[VariantInfo(name = "Large Blocks", description = "Large blocks with full-block characters")]
     LargeBlocks,
+    #[VariantInfo(name = "Braille", description = "Braille characters")]
     Braille,
 }
 

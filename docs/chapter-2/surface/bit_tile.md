@@ -16,14 +16,15 @@ To create a BitTile, the following methods can be used:
 
 Once a BitTile is created, you can use the following methods to manipulate it:
 
-| Method             | Purpose                                                                                                                                                          |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `get(x, y)`        | Returns `Some(bool)` if the pixel at coordinates (x,y) is set, or `None` if coordinates are out of bounds                                                        |
-| `set(x, y, value)` | Sets the pixel at coordinates (x,y) to the specified boolean value. If the coordinates are outside the bounds of the BitTile, the operation is silently ignored. |
-| `width()`          | Returns the width of the BitTile in pixels (as `u8`)                                                                                                             |
-| `height()`         | Returns the height of the BitTile in pixels (as `u8`)                                                                                                            |
-| `size()`           | Returns the size (width and height) of the BitTile as a `Size` struct                                                                                            |
-| `clear(value)`     | Fills the entire BitTile with the specified boolean value (**true** for all set, **false** for all unset)                                                        |
+| Method               | Purpose                                                                                                                                                          |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get(x, y)`          | Returns `Some(bool)` if the pixel at coordinates (x,y) is set, or `None` if coordinates are out of bounds                                                        |
+| `set(x, y, value)`   | Sets the pixel at coordinates (x,y) to the specified boolean value. If the coordinates are outside the bounds of the BitTile, the operation is silently ignored. |
+| `width()`            | Returns the width of the BitTile in pixels (as `u8`)                                                                                                             |
+| `height()`           | Returns the height of the BitTile in pixels (as `u8`)                                                                                                            |
+| `size()`             | Returns the size (width and height) of the BitTile as a `Size` struct                                                                                            |
+| `clear(value)`       | Fills the entire BitTile with the specified boolean value (**true** for all set, **false** for all unset)                                                        |
+| `to_string_format()` | Returns a string representation of the BitTile using `&#124;` to delimit rows and `.` to represent unset pixels and `X` to represent set pixels                  |
 
 ## BitTile Types
 
@@ -192,4 +193,4 @@ When creating BitTiles from strings, several errors can occur:
 | `ZeroWidth`                       | Lines contain no characters between `&#x7C;` characters (for example  `&#x7C;&#x7C;`)                                                                                                             |
 | `ImageTooLarge`                   | Width or height the maximum allowed by the storage of the BitTile (for example a BitTileU16 can only have a width and height of up to 16 pixels)                                                  |
 | `ImageDoesNotFitInAllocatedSpace` | Total pixels exceed the BitTile's storage capacity (for example a BitTileU16 can only have a width and height of up to 16 pixels so a string representation of a 5x4 image will cause this error) |
-| `MissingCorrespondingMarker`      | Unmatched `&#x7C;` character in the string (for example `&#x7C;...` is missing the corresponding `&#x7C;` at the end)                                                                                                                                                       |
+| `MissingCorrespondingMarker`      | Unmatched `&#x7C;` character in the string (for example `&#x7C;...` is missing the corresponding `&#x7C;` at the end)                                                                             |
