@@ -17,3 +17,14 @@ pub enum Type {
     Warning,
     Notification
 }
+
+
+#[repr(u8)]
+#[derive(Copy,Clone,PartialEq,Eq,Default)]
+pub enum Background {
+    #[default]
+    Normal,
+    Error,
+    Warning,
+    Notification
+}

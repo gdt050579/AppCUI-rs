@@ -31,16 +31,17 @@ impl<T> ModalWindow<T> {
                 layout,
                 flags | Flags::NoCloseButton,
                 window::Type::Normal,
+                window::Background::Normal,
                 StatusFlags::ModalWindow,
             ),
             result: None,
         }
     }
-    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: window::Type) -> Self {
+    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: window::Type, background: window::Background) -> Self {
         // a Modal Window does not have an implicit close button
         // as exiting has to be done from either exit(...) or exit_with(...) method.
         Self {
-            base: Window::with_type_and_status_flags(title, layout, flags | Flags::NoCloseButton, window_type, StatusFlags::ModalWindow),
+            base: Window::with_type_and_status_flags(title, layout, flags | Flags::NoCloseButton, window_type, background, StatusFlags::ModalWindow),
             result: None,
         }
     }
