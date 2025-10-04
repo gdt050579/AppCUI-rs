@@ -25,7 +25,7 @@ use crate::ui::{AppBar, Menu};
 use crate::utils::VectorIndex;
 
 #[repr(u8)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 enum LoopStatus {
     Normal,
     StopApp,
@@ -312,6 +312,7 @@ impl RuntimeManager {
         self.appbar_event = Some(event);
     }
     pub(crate) fn close(&mut self) {
+        //log!("RUNTIME", "Request to close ==> Lopp status is now StopApp");
         self.loop_status = LoopStatus::StopApp;
     }
     pub(crate) fn request_focus_for_control(&mut self, handle: Handle<()>) {
@@ -579,25 +580,29 @@ impl RuntimeManager {
             self.request_update_timer_threads = false;
         }
 
-        // auto save changes
-        #[cfg(feature = "EVENT_RECORDER")]
-        self.event_recorder.auto_update(&self.surface);
+        // check the loop status - if it is not Normal, we need to exit
+        if self.loop_status == LoopStatus::Normal {
+            // auto save changes
+            #[cfg(feature = "EVENT_RECORDER")]
+            self.event_recorder.auto_update(&self.surface);
 
-        if single_threaded {
-            if let Some(sys_event) = self.backend.query_system_event() {
-                self.process_system_event(sys_event);
-            }
-        } else {
-            let event = if cfg!(target_arch = "wasm32") {
-                self.event_receiver.try_recv().ok()
+            if single_threaded {
+                if let Some(sys_event) = self.backend.query_system_event() {
+                    self.process_system_event(sys_event);
+                }
             } else {
-                self.event_receiver.recv().ok()
-            };
-
-            if let Some(sys_event) = event {
-                self.process_system_event(sys_event);
-                #[cfg(feature = "EVENT_RECORDER")]
-                self.event_recorder.add(&sys_event, &mut self.backend, &self.surface);
+                let event = if cfg!(target_arch = "wasm32") {
+                    self.event_receiver.try_recv().ok()
+                } else {
+                    //log!("RUNTIME", "Waiting for event");
+                    self.event_receiver.recv().ok()
+                };
+                //log!("RUNTIME", "Event received: {:?}", event);
+                if let Some(sys_event) = event {
+                    self.process_system_event(sys_event);
+                    #[cfg(feature = "EVENT_RECORDER")]
+                    self.event_recorder.add(&sys_event, &mut self.backend, &self.surface);
+                }
             }
         }
 
@@ -644,7 +649,9 @@ impl RuntimeManager {
         #[cfg(not(target_arch = "wasm32"))]
         {
             while self.loop_status == LoopStatus::Normal {
+                //log!("RUNTIME", "Loop status is Normal");
                 self.tick(single_threaded);
+                //log!("RUNTIME", "Loop status after tick: {:?}", self.loop_status);
             }
             // loop has ended
             if self.loop_status == LoopStatus::ExitCurrentLoop {
