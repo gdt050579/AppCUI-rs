@@ -10,6 +10,7 @@ Currently this is a work in progress - expect first version to be ready by 1st o
   - [Animations](#animations)
   - [Basic Controls](#basic-controls)
   - [Lists, Trees and Graphs](#lists-trees-and-graphs)
+  - [Games](#games)
   - [Application Bar, Command Bar and Menus](#application-bar-command-bar-and-menus)
   - [Backgroud Taks \& Timers](#backgroud-taks--timers)
 
@@ -73,6 +74,26 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 
 
 </details>
+
+---
+
+## Games
+
+![Games — preview](img/games/games.gif)
+
+* **Code:** [examples/games](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/games)
+* **Elements:** [Windows](https://gdt050579.github.io/AppCUI-rs/chapter-3/event-loop/window.html), [Desktop](https://gdt050579.github.io/AppCUI-rs/chapter-4/desktop.html), [Custom Controls](https://gdt050579.github.io/AppCUI-rs/chapter-3/custom_controls.html)
+
+<details>
+  <summary>More Animations</summary>
+
+| Image                                 | Descrption                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="img/menus/popup_menu.gif" > | **Popup Menu** <br> * **Code:** [examples/popup_mnu](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/popup_menu) <br> * **Description:** The popup menu is a menu that is displayed when the user right clicks on a control. You can control the size of the menu and interact directly with the menu items. |
+
+</details>
+
+
 
 ---
 
