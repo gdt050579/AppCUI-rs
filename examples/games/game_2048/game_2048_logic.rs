@@ -360,16 +360,14 @@ impl OnPaint for Game2048Logic {
                     } else {
                         surface.write_char(x, y, Character::new('─', Color::Gray, Color::Black, CharFlags::None));
                     }
+                } else if x == start_x {
+                    surface.write_char(x, y, Character::new('├', Color::Gray, Color::Black, CharFlags::None));
+                } else if x == start_x + grid_width - 1 {
+                    surface.write_char(x, y, Character::new('┤', Color::Gray, Color::Black, CharFlags::None));
+                } else if (x - start_x) % CELL_WIDTH == 0 {
+                    surface.write_char(x, y, Character::new('┼', Color::Gray, Color::Black, CharFlags::None));
                 } else {
-                    if x == start_x {
-                        surface.write_char(x, y, Character::new('├', Color::Gray, Color::Black, CharFlags::None));
-                    } else if x == start_x + grid_width - 1 {
-                        surface.write_char(x, y, Character::new('┤', Color::Gray, Color::Black, CharFlags::None));
-                    } else if (x - start_x) % CELL_WIDTH == 0 {
-                        surface.write_char(x, y, Character::new('┼', Color::Gray, Color::Black, CharFlags::None));
-                    } else {
-                        surface.write_char(x, y, Character::new('─', Color::Gray, Color::Black, CharFlags::None));
-                    }
+                    surface.write_char(x, y, Character::new('─', Color::Gray, Color::Black, CharFlags::None));
                 }
             }
         }

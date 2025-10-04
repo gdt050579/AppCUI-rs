@@ -152,7 +152,7 @@ impl PacmanGame {
         if self.board[self.pacman_pos.y as usize][self.pacman_pos.x as usize].is_wall() {
             for y in 1..BOARD_HEIGHT - 1 {
                 for x in 1..BOARD_WIDTH - 1 {
-                    if self.board[y][x].is_wall() == false {
+                    if !self.board[y][x].is_wall() {
                         self.pacman_pos = Point::new(x as i32, y as i32);
                         return;
                     }
@@ -180,7 +180,7 @@ impl PacmanGame {
             && new_y >= 0
             && new_x < BOARD_WIDTH as i32
             && new_y < BOARD_HEIGHT as i32
-            && self.board[new_y as usize][new_x as usize].is_wall() == false
+            && !self.board[new_y as usize][new_x as usize].is_wall()
         {
             match self.board[new_y as usize][new_x as usize] {
                 CellType::Food => {
@@ -242,7 +242,7 @@ impl PacmanGame {
                     && new_y >= 0
                     && new_x < BOARD_WIDTH as i32
                     && new_y < BOARD_HEIGHT as i32
-                    && self.board[new_y as usize][new_x as usize].is_wall() == false
+                    && !self.board[new_y as usize][new_x as usize].is_wall()
                 {
                     possible_moves.push((new_x, new_y, dir));
                 }

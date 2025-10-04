@@ -70,8 +70,9 @@ impl CellState {
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum GameState {
     Playing,
-    Checkmate,
-    Stalemate,
+    // This is a demo (not a full game) - the purpose is to demonstrate how it could work
+    //Checkmate,
+    //Stalemate,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]

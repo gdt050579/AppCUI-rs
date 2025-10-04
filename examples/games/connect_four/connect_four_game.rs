@@ -102,10 +102,8 @@ impl ConnectFourGame {
             let next_row = (new_y as i32) + 1;
             let should_stop = if next_row >= BOARD_HEIGHT as i32 {
                 true
-            } else if next_row >= 0 && !self.board[next_row as usize][col as usize].is_empty() {
-                true
             } else {
-                false
+                next_row >= 0 && !self.board[next_row as usize][col as usize].is_empty()
             };
 
             if should_stop {
@@ -256,7 +254,7 @@ impl ConnectFourGame {
 
         if let Some((player, col, y)) = self.falling_piece {
             if y >= 0.0 {
-                let screen_x = board_x + (col * 8) as i32;
+                let screen_x = board_x + (col * 8);
                 let screen_y = board_y + (y * 4.0) as i32 + 1;
                 self.draw_circle(surface, screen_x, screen_y, player.color());
             }

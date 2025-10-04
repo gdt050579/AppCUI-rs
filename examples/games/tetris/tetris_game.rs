@@ -151,8 +151,8 @@ impl TetrisGame {
         for py in 0..4 {
             for px in 0..4 {
                 if let Some(true) = piece.shape.get(px as u32, py as u32) {
-                    let board_x = x + px as i32;
-                    let board_y = y + py as i32;
+                    let board_x = x + px;
+                    let board_y = y + py;
 
                     if board_x < 0 || board_x >= BOARD_WIDTH as i32 || board_y >= BOARD_HEIGHT as i32 {
                         return true;
@@ -172,8 +172,8 @@ impl TetrisGame {
             for py in 0..4 {
                 for px in 0..4 {
                     if let Some(true) = piece.shape.get(px as u32, py as u32) {
-                        let board_x = (self.current_x + px as i32) as usize;
-                        let board_y = (self.current_y + py as i32) as usize;
+                        let board_x = (self.current_x + px) as usize;
+                        let board_y = (self.current_y + py) as usize;
                         if board_y < BOARD_HEIGHT && board_x < BOARD_WIDTH {
                             self.board[board_y][board_x] = SquareState::Filled(piece.color);
                         }
@@ -293,8 +293,8 @@ impl TetrisGame {
             for py in 0..4 {
                 for px in 0..4 {
                     if let Some(true) = piece.shape.get(px as u32, py as u32) {
-                        let board_x = self.current_x + px as i32;
-                        let board_y = self.current_y + py as i32;
+                        let board_x = self.current_x + px;
+                        let board_y = self.current_y + py;
                         if board_y >= 0 && board_y < BOARD_HEIGHT as i32 && board_x >= 0 && board_x < BOARD_WIDTH as i32 {
                             self.draw_square(surface, board_x, board_y, piece.color);
                         }
