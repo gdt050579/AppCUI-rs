@@ -12,7 +12,6 @@ pub enum Flags {
 #[derive(Copy,Clone,PartialEq,Eq,Default)]
 pub enum Type {
     #[default]
-    Theme,  
     Normal,
 }
 

@@ -95,7 +95,7 @@ impl GenericAlertDialog {
                     .height(window_height)
                     .build(),
                 window::Flags::NoCloseButton,
-                window::Type::Theme,
+                None,
                 background,
             ),
             b_ok: Handle::None,

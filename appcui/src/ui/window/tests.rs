@@ -1677,7 +1677,7 @@ fn check_modal_window_close() {
                     "Modal",
                     layout!("a:c,w:50,h:6"),
                     window::Flags::None,
-                    window::Type::Normal,
+                    None,
                     window::Background::Notification,
                 ),
                 value,

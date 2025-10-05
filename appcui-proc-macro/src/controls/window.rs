@@ -35,7 +35,13 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_string_parameter("title", None);
     cb.add_layout();
     cb.add_flags_parameter("flags", "window::Flags", &FLAGS);
-    cb.add_enum_parameter("type", "window::Type", &TYPES, Some("Normal"));
+    if cb.has_parameter("type") {
+        cb.add("Some(");
+        cb.add_enum_parameter("type", "window::Type", &TYPES, None);
+        cb.add("),");
+    } else {
+        cb.add(",None")
+    }
     cb.add_enum_parameter("background", "window::Background", &BACKGROUNDS, Some("Normal"));
     cb.finish_control_initialization();
     if cb.has_parameter("tag") {
