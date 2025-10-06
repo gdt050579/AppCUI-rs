@@ -108,7 +108,7 @@ impl Title {
         }
     }
     #[inline(always)]
-    pub(super) fn get_text(&self) -> &str {
+    pub(super) fn text(&self) -> &str {
         self.text.as_str()
     }
     #[inline(always)]

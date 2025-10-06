@@ -380,7 +380,7 @@ impl Window {
     /// assert_eq!(win.title(), "My Window");
     /// ```
     pub fn title(&self) -> &str {
-        self.title.get_text()
+        self.title.text()
     }
 
     /// Sets a tag for the window.
