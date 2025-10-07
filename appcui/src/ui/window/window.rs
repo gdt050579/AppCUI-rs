@@ -3,10 +3,10 @@ use crate::prelude::*;
 use super::initialization_flags::*;
 use super::toolbar;
 use super::toolbar::*;
-use super::ResizeMoveStatus;
-use super::Flags;
-use super::Title;
 use super::Border;
+use super::Flags;
+use super::ResizeMoveStatus;
+use super::Title;
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
@@ -32,7 +32,6 @@ pub struct Window {
     window_type: Type,
     background: Background,
     toolbar: ToolBar,
-    //resize_move_mode: bool,
     maximized: bool,
     rm_status: ResizeMoveStatus,
     drag_start_point: Point,
@@ -160,7 +159,14 @@ impl Window {
         Window::with_type_and_status_flags(title, layout, flags, window_type, background, StatusFlags::None)
     }
     #[inline(always)]
-    pub(super) fn with_type_and_status_flags(title: &str, layout: Layout, flags: Flags, window_type: Option<Type>, background: Background, status_flags: StatusFlags) -> Self {
+    pub(super) fn with_type_and_status_flags(
+        title: &str,
+        layout: Layout,
+        flags: Flags,
+        window_type: Option<Type>,
+        background: Background,
+        status_flags: StatusFlags,
+    ) -> Self {
         let mut win: Window = Window {
             base: ControlBase::with_status_flags(
                 layout,
@@ -171,7 +177,6 @@ impl Window {
             flags,
             window_type: window_type.unwrap_or_default(),
             background,
-            //resize_move_mode: false,
             maximized: false,
             toolbar: ToolBar::new(),
             rm_status: ResizeMoveStatus::None,
@@ -255,7 +260,7 @@ impl Window {
     ///
     /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// let label_handle = win.add(label!("'Hello World',a:c,w:12,h:1"));
-    /// 
+    ///
     /// if let Some(label) = win.control(label_handle) {
     ///     // Use the label reference
     ///     assert_eq!(label.caption(), "Hello World");
@@ -287,7 +292,7 @@ impl Window {
     ///
     /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// let label_handle = win.add(label!("'Hello World',a:c,w:12,h:1"));
-    /// 
+    ///
     /// if let Some(label) = win.control_mut(label_handle) {
     ///     // Use the mutable label reference
     ///     label.set_caption("New Text");
@@ -315,7 +320,7 @@ impl Window {
     ///
     /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// let button_handle = win.add(button!("'Click Me',a:c,w:10,h:1"));
-    /// 
+    ///
     /// // Set focus to the button
     /// win.request_focus_for_control(button_handle);
     /// ```
@@ -328,7 +333,7 @@ impl Window {
 
     /// Gets a mutable reference to the window's toolbar.
     ///
-    /// The toolbar allows adding toolbar items like buttons, checkboxes, labels, and 
+    /// The toolbar allows adding toolbar items like buttons, checkboxes, labels, and
     /// single choice items to the window.
     ///
     /// # Returns
@@ -341,7 +346,7 @@ impl Window {
     /// use appcui::prelude::*;
     ///
     /// let mut win = window!("'My Window',a:c,w:40,h:10");
-    /// 
+    ///
     /// // Create a toolbar group and add a button to it
     /// let group = win.toolbar().create_group(toolbar::GroupPosition::TopRight);
     /// let button = win.toolbar().add(group, toolbar::Button::new("Help"));
@@ -520,13 +525,11 @@ impl Window {
     /// ```
     pub fn enter_resize_mode(&mut self) {
         if (self.has_focus()) && (!self.is_singlewindow()) {
-            //self.resize_move_mode = true;
             self.rm_status = ResizeMoveStatus::ResizeMoveViaKeyboard;
             self.base.set_key_input_before_children_flag(true);
         }
     }
     pub(super) fn is_in_resize_mode(&self) -> bool {
-        //self.resize_move_mode
         self.rm_status == ResizeMoveStatus::ResizeMoveViaKeyboard
     }
 
@@ -695,7 +698,6 @@ impl Window {
     fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
         self.toolbar.set_current_item_pressed(false);
         self.rm_status = ResizeMoveStatus::None;
-        //self.resize_move_mode = false;
         self.base.set_key_input_before_children_flag(false);
 
         let item_handle = if let Some(item) = self.toolbar.get_from_position(x, y) {
@@ -724,7 +726,6 @@ impl Window {
         EventProcessStatus::Processed
     }
     fn on_mouse_drag(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        //self.resize_move_mode = false;
         self.base.set_key_input_before_children_flag(false);
         match self.rm_status {
             ResizeMoveStatus::None => EventProcessStatus::Ignored,
@@ -787,7 +788,6 @@ impl Window {
     }
     fn on_mouse_release(&mut self) -> EventProcessStatus {
         self.toolbar.set_current_item_pressed(false);
-        //self.resize_move_mode = false;
         self.base.set_key_input_before_children_flag(false);
 
         if self.rm_status != ResizeMoveStatus::None {
@@ -922,7 +922,7 @@ impl OnWindowRegistered for Window {
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let has_focus = self.has_focus();
-        let color_window = if has_focus{
+        let color_window = if has_focus {
             match self.background {
                 Background::Normal => theme.window.normal,
                 Background::Error => theme.window.error,
@@ -934,33 +934,6 @@ impl OnPaint for Window {
         };
         surface.clear(Character::with_attributes(' ', color_window));
 
-        // set some colors
-        let color_title: CharAttribute;
-        let color_border: CharAttribute;
-        let line_type: LineType;
-
-        // initialization
-        if self.has_focus() {
-            color_title = theme.text.focused;
-            let resize_move_mode = self.rm_status == ResizeMoveStatus::ResizeMoveViaKeyboard;
-            color_border = if (self.rm_status == ResizeMoveStatus::None) && (!resize_move_mode) {
-                theme.border.focused
-            } else {
-                theme.border.pressed_or_selectd
-            };
-            line_type = if (self.rm_status == ResizeMoveStatus::None) && (!resize_move_mode) {
-                LineType::Double
-            } else {
-                LineType::Single
-            };
-        } else {
-            color_title = theme.text.normal;
-            color_border = theme.border.normal;
-            line_type = LineType::Single;
-        }
-
-        // let sz = self.size();
-        // surface.draw_rect(Rect::with_size(0, 0, sz.width as u16, sz.height as u16), line_type, color_border);
         // paint border
         self.border.paint(surface, theme, self.rm_status, has_focus);
 
@@ -968,6 +941,7 @@ impl OnPaint for Window {
         self.toolbar.paint(surface, theme, has_focus, self.maximized);
 
         // paint title
+        let color_title = if has_focus { theme.text.focused } else { theme.text.normal };
         self.title.paint(surface, color_title);
     }
 }
@@ -980,11 +954,9 @@ impl OnResize for Window {
 
 impl OnKeyPressed for Window {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        //if self.resize_move_mode {
         if self.rm_status == ResizeMoveStatus::ResizeMoveViaKeyboard {
             match key.value() {
                 key!("Escape") | key!("Enter") | key!("Space") | key!("Tab") => {
-                    //self.resize_move_mode = false;
                     self.rm_status = ResizeMoveStatus::None;
                     self.base.set_key_input_before_children_flag(false);
                     return EventProcessStatus::Processed;
@@ -1063,7 +1035,6 @@ impl OnKeyPressed for Window {
                     return EventProcessStatus::Processed;
                 }
                 key!("Ctrl+Alt+M") | key!("Ctrl+Alt+R") => {
-                    //self.resize_move_mode = true;
                     self.rm_status = ResizeMoveStatus::ResizeMoveViaKeyboard;
                     self.base.set_key_input_before_children_flag(false);
                     return EventProcessStatus::Processed;
