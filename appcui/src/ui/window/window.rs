@@ -6,6 +6,7 @@ use super::toolbar::*;
 use super::DragStatus;
 use super::Flags;
 use super::Title;
+use super::Border;
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
@@ -26,6 +27,7 @@ struct Distance {
 #[derive(Default)]
 pub struct Window {
     title: Title,
+    border: Border,
     flags: Flags,
     window_type: Type,
     background: Background,
@@ -165,6 +167,7 @@ impl Window {
                 status_flags | StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl,
             ),
             title: Title::new(title),
+            border: Border::new(),
             flags,
             window_type: window_type.unwrap_or_default(),
             background,
@@ -650,6 +653,8 @@ impl Window {
         let (left, right) = self.toolbar.update_positions(size);
         // recompute title position
         self.title.set_margin(left, right);
+        // recompute border
+        self.border.set_size(size);
     }
 
     fn on_mouse_over(&mut self, x: i32, y: i32) -> EventProcessStatus {
