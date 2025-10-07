@@ -167,15 +167,16 @@ impl Window {
         background: Background,
         status_flags: StatusFlags,
     ) -> Self {
+        let wtype = window_type.unwrap_or_default();
         let mut win: Window = Window {
             base: ControlBase::with_status_flags(
                 layout,
                 status_flags | StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl,
             ),
             title: Title::new(title),
-            border: Border::new(),
+            border: Border::new(wtype),
             flags,
-            window_type: window_type.unwrap_or_default(),
+            window_type: wtype,
             background,
             maximized: false,
             toolbar: ToolBar::new(),

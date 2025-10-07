@@ -11,6 +11,7 @@ pub enum Flags {
 pub enum Type {
     #[default]
     Normal,
+    Round,
 }
 
 
