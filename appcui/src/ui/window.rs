@@ -8,7 +8,7 @@ mod window;
 mod modal_window;
 mod title;
 mod border;
-mod drag_status;
+mod resize_move_status;
 pub mod toolbar;
 pub mod events;
 #[cfg(test)]
@@ -19,6 +19,6 @@ pub use modal_window::ModalWindow;
 pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::Type;
 pub use self::initialization_flags::Background;
-use drag_status::DragStatus;
+use resize_move_status::ResizeMoveStatus;
 use title::Title;
 use border::Border;
