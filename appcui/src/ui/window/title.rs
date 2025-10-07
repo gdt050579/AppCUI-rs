@@ -178,3 +178,4 @@ impl Title {
         surface.write_char(self.right, 0, space);
     }
 }
+

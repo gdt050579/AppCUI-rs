@@ -32,7 +32,7 @@ pub struct Window {
     window_type: Type,
     background: Background,
     toolbar: ToolBar,
-    resize_move_mode: bool,
+    //resize_move_mode: bool,
     maximized: bool,
     drag_status: DragStatus,
     drag_start_point: Point,
@@ -171,7 +171,7 @@ impl Window {
             flags,
             window_type: window_type.unwrap_or_default(),
             background,
-            resize_move_mode: false,
+            //resize_move_mode: false,
             maximized: false,
             toolbar: ToolBar::new(),
             drag_status: DragStatus::None,
@@ -520,12 +520,14 @@ impl Window {
     /// ```
     pub fn enter_resize_mode(&mut self) {
         if (self.has_focus()) && (!self.is_singlewindow()) {
-            self.resize_move_mode = true;
+            //self.resize_move_mode = true;
+            self.drag_status = DragStatus::KeyboardResizeMove;
             self.base.set_key_input_before_children_flag(true);
         }
     }
     pub(super) fn is_in_resize_mode(&self) -> bool {
-        self.resize_move_mode
+        //self.resize_move_mode
+        self.drag_status == DragStatus::KeyboardResizeMove
     }
 
     fn center_to_screen(&mut self) {
@@ -693,7 +695,7 @@ impl Window {
     fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
         self.toolbar.set_current_item_pressed(false);
         self.drag_status = DragStatus::None;
-        self.resize_move_mode = false;
+        //self.resize_move_mode = false;
         self.base.set_key_input_before_children_flag(false);
 
         let item_handle = if let Some(item) = self.toolbar.get_from_position(x, y) {
@@ -722,7 +724,7 @@ impl Window {
         EventProcessStatus::Processed
     }
     fn on_mouse_drag(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        self.resize_move_mode = false;
+        //self.resize_move_mode = false;
         self.base.set_key_input_before_children_flag(false);
         match self.drag_status {
             DragStatus::None => EventProcessStatus::Ignored,
@@ -739,6 +741,7 @@ impl Window {
                 }
                 EventProcessStatus::Processed
             }
+            DragStatus::KeyboardResizeMove => EventProcessStatus::Ignored,
         }
     }
 
@@ -784,7 +787,7 @@ impl Window {
     }
     fn on_mouse_release(&mut self) -> EventProcessStatus {
         self.toolbar.set_current_item_pressed(false);
-        self.resize_move_mode = false;
+        //self.resize_move_mode = false;
         self.base.set_key_input_before_children_flag(false);
 
         if self.drag_status != DragStatus::None {
@@ -936,12 +939,13 @@ impl OnPaint for Window {
         // initialization
         if self.has_focus() {
             color_title = theme.text.focused;
-            color_border = if (self.drag_status == DragStatus::None) && (!self.resize_move_mode) {
+            let resize_move_mode = self.drag_status == DragStatus::KeyboardResizeMove;
+            color_border = if (self.drag_status == DragStatus::None) && (!resize_move_mode) {
                 theme.border.focused
             } else {
                 theme.border.pressed_or_selectd
             };
-            line_type = if (self.drag_status == DragStatus::None) && (!self.resize_move_mode) {
+            line_type = if (self.drag_status == DragStatus::None) && (!resize_move_mode) {
                 LineType::Double
             } else {
                 LineType::Single
@@ -972,10 +976,12 @@ impl OnResize for Window {
 
 impl OnKeyPressed for Window {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        if self.resize_move_mode {
+        //if self.resize_move_mode {
+        if self.drag_status == DragStatus::KeyboardResizeMove {
             match key.value() {
                 key!("Escape") | key!("Enter") | key!("Space") | key!("Tab") => {
-                    self.resize_move_mode = false;
+                    //self.resize_move_mode = false;
+                    self.drag_status = DragStatus::None;
                     self.base.set_key_input_before_children_flag(false);
                     return EventProcessStatus::Processed;
                 }
@@ -1053,7 +1059,8 @@ impl OnKeyPressed for Window {
                     return EventProcessStatus::Processed;
                 }
                 key!("Ctrl+Alt+M") | key!("Ctrl+Alt+R") => {
-                    self.resize_move_mode = true;
+                    //self.resize_move_mode = true;
+                    self.drag_status = DragStatus::KeyboardResizeMove;
                     self.base.set_key_input_before_children_flag(false);
                     return EventProcessStatus::Processed;
                 }

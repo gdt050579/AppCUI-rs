@@ -1,4 +1,5 @@
 use crate::graphics::*;
+use crate::system::*;
 
 #[derive(Default)]
 pub(super) struct Border {

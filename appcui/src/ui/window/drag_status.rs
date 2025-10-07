@@ -5,4 +5,5 @@ pub(super) enum DragStatus {
     None,
     Move,
     Resize,
+    KeyboardResizeMove, 
 }
