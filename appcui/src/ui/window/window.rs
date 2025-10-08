@@ -196,7 +196,7 @@ impl Window {
             let g = win.toolbar.create_group(GroupPosition::TopLeft);
             win.toolbar.add(g, toolbar::MaximizeRestoreButton::new());
             let g = win.toolbar.create_group(GroupPosition::BottomRight);
-            win.toolbar.add(g, toolbar::ResizeCorner::new());
+            win.toolbar.add(g, toolbar::ResizeCorner::new(wtype));
         }
         // hotkey
         let g = win.toolbar.create_group(GroupPosition::TopLeft);
