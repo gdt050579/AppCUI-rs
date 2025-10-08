@@ -32,12 +32,12 @@ impl ResizeCorner {
             let a = st.get_attr(theme, theme.symbol.resize);
             match self.wtype {
                 Type::Normal => {
-                    surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxTopLeftCornerSingleLine, a));
-                    surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
+                    surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::BoxBottomRightCornerSingleLine, a));
+                    surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
                 }
                 Type::Round => {
-                    surface.write_char(x, y, Character::with_attributes('\u{256F}', a));
-                    surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
+                    surface.write_char(x + 1, y, Character::with_attributes('\u{256F}', a));
+                    surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
                 }
             }
         }
