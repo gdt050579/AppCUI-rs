@@ -18,6 +18,7 @@ impl ResizeCorner {
         let w = match window_type {
             Type::Normal => 2,
             Type::Round => 2,
+            Type::Panel => 1,
         };
         Self {
             base: ItemBase::with_width(w, "Drag to resize this window", true),
@@ -38,6 +39,9 @@ impl ResizeCorner {
                 Type::Round => {
                     surface.write_char(x + 1, y, Character::with_attributes('\u{256F}', a));
                     surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
+                }
+                Type::Panel => {
+                    surface.write_char(x, y, Character::with_attributes('⟓', a));
                 }
             }
         }

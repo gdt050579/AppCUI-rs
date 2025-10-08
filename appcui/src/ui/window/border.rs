@@ -1,7 +1,7 @@
 use super::ResizeMoveStatus;
 use super::Type;
 use crate::graphics::*;
-use crate::system::*;
+use crate::prelude::*;
 
 #[derive(Default)]
 pub(super) struct Border {
@@ -52,10 +52,15 @@ impl Border {
             color_border,
         );
     }
+    #[inline(always)]
+    fn paint_panel(&self, surface: &mut Surface, theme: &Theme, status: ResizeMoveStatus, has_focus: bool) {
+        surface.fill_horizontal_line(0, 0, self.size.width as i32, char!("' ',black,white"));
+    }    
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: ResizeMoveStatus, has_focus: bool) {
         match self.wtype {
             Type::Normal => self.paint_classical(surface, theme, status, has_focus),
             Type::Round => self.paint_round(surface, theme, status, has_focus),
+            Type::Panel => self.paint_panel(surface, theme, status, has_focus),
         }
     }
 }

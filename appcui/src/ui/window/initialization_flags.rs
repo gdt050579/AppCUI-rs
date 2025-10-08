@@ -12,6 +12,7 @@ pub enum Type {
     #[default]
     Normal,
     Round,
+    Panel,
 }
 
 
