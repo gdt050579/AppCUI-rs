@@ -190,7 +190,7 @@ impl Window {
         win.set_margins(1, 1, 1, 1);
         if !flags.contains(Flags::NoCloseButton) {
             let g = win.toolbar.create_group(GroupPosition::TopRight);
-            win.toolbar.add(g, toolbar::CloseButton::new());
+            win.toolbar.add(g, toolbar::CloseButton::new(wtype));
         }
         if flags.contains(Flags::Sizeable) {
             let g = win.toolbar.create_group(GroupPosition::TopLeft);
