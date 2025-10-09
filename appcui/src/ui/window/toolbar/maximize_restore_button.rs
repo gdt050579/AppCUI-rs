@@ -8,7 +8,6 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 
 pub(crate) struct MaximizeRestoreButton {
     pub(super) base: ItemBase,
-    wtype: Type,
 }
 
 add_to_toolbar_impl!(MaximizeRestoreButton);
@@ -21,16 +20,15 @@ impl MaximizeRestoreButton {
             Type::Panel => 2,
         };
         Self {
-            base: ItemBase::with_width(w, "Press to maximize or restore", true),
-            wtype: window_type,
+            base: ItemBase::with_width(w, "Press to maximize or restore",window_type, true),
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
-        let x = self.base.get_left();
-        let y = self.base.get_y();
+        let x = self.base.left();
+        let y = self.base.y();
 
-        match self.wtype {
+        match self.base.window_type() {
             Type::Normal | Type::Round => {
                 surface.write_string(x, y, "[ ]", st.get_attr(theme, data.sep_attr), false);
                 let ch = match data.maximized {

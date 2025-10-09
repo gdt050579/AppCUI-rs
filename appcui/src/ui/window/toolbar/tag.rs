@@ -4,6 +4,7 @@ use crate::{
 };
 
 use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
+use super::super::Type;
 
 pub struct Tag {
     pub(super) base: ItemBase,
@@ -13,9 +14,9 @@ pub struct Tag {
 add_to_toolbar_impl!(Tag);
 
 impl Tag {
-    pub fn new() -> Self {
+    pub fn new(window_type: Type) -> Self {
         Tag {
-            base: ItemBase::new(false),
+            base: ItemBase::new(window_type, false),
             text: String::new(),
         }
     }
@@ -35,6 +36,6 @@ impl Tag {
             true => theme.text.enphasized_2,
             false => theme.text.inactive,
         };
-        surface.write_string(self.base.get_left(), self.base.get_y(), self.text.as_str(), attr, false);
+        surface.write_string(self.base.left(), self.base.y(), self.text.as_str(), attr, false);
     }
 }

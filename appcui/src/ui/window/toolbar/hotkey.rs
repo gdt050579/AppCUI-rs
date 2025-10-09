@@ -1,5 +1,8 @@
 use crate::{
-    graphics::Surface, input::{Key, KeyCode}, prelude::Character, system::{Handle, Theme}
+    graphics::Surface,
+    input::{Key, KeyCode},
+    prelude::Character,
+    system::{Handle, Theme},
 };
 
 use super::super::Type;
@@ -7,7 +10,6 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 pub(crate) struct HotKey {
     pub(super) base: ItemBase,
     key: Key,
-    wtype: Type,
 }
 
 add_to_toolbar_impl!(HotKey);
@@ -15,14 +17,13 @@ add_to_toolbar_impl!(HotKey);
 impl HotKey {
     pub fn new(window_type: Type) -> Self {
         let base = match window_type {
-            Type::Normal => ItemBase::new(false),
-            Type::Round => ItemBase::new(false),
-            Type::Panel => ItemBase::with_width(2, "", false),
+            Type::Normal => ItemBase::new(window_type, false),
+            Type::Round => ItemBase::new(window_type, false),
+            Type::Panel => ItemBase::with_width(2, "", window_type, false),
         };
         Self {
             base,
             key: Key::None,
-            wtype: window_type,
         }
     }
     pub fn set_key(&mut self, key: Key) {
@@ -37,9 +38,9 @@ impl HotKey {
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
-        let x = self.base.get_left();
-        let y = self.base.get_y();
-        match self.wtype {
+        let x = self.base.left();
+        let y = self.base.y();
+        match self.base.window_type() {
             Type::Normal | Type::Round => {
                 let attr = match data.focused {
                     true => theme.text.normal,

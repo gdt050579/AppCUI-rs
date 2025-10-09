@@ -8,7 +8,6 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 
 pub(crate) struct CloseButton {
     pub(super) base: ItemBase,
-    wtype: Type,
 }
 
 add_to_toolbar_impl!(CloseButton);
@@ -21,15 +20,14 @@ impl CloseButton {
             Type::Panel => 2,
         };
         CloseButton {
-            base: ItemBase::with_width(w, "Press to close this window", true),
-            wtype: window_type,
+            base: ItemBase::with_width(w, "Press to close this window", window_type, true),
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
-        let x = self.base.get_left();
-        let y = self.base.get_y();
-        match self.wtype {
+        let x = self.base.left();
+        let y = self.base.y();
+        match self.base.window_type() {
             Type::Normal => {
                 surface.write_string(x, y, "[ ]", st.get_attr(theme, data.sep_attr), false);
                 surface.write_char(x + 1, y, Character::with_attributes('x', st.get_attr(theme, theme.symbol.close)));

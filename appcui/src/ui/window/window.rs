@@ -204,7 +204,7 @@ impl Window {
 
         // tag
         let g = win.toolbar.create_group(GroupPosition::TopLeft);
-        win.tag_handle = win.toolbar.add(g, toolbar::Tag::new());
+        win.tag_handle = win.toolbar.add(g, toolbar::Tag::new(wtype));
 
         win
     }
@@ -667,8 +667,8 @@ impl Window {
         if let Some(item) = self.toolbar.get_from_position(x, y) {
             let base = item.get_base();
             let cx = base.center_x();
-            let y = base.get_y();
-            let tooltip = base.get_tooltip();
+            let y = base.y();
+            let tooltip = base.tooltip();
             if tooltip.is_empty() {
                 self.hide_tooltip();
             } else {

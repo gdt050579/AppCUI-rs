@@ -8,7 +8,6 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 
 pub(crate) struct ResizeCorner {
     pub(super) base: ItemBase,
-    wtype: Type,
 }
 
 add_to_toolbar_impl!(ResizeCorner);
@@ -21,17 +20,16 @@ impl ResizeCorner {
             Type::Panel => 1,
         };
         Self {
-            base: ItemBase::with_width(w, "Drag to resize this window", true),
-            wtype: window_type,
+            base: ItemBase::with_width(w, "Drag to resize this window", window_type, true),
         }
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         if data.focused {
             let st = SymbolAttrState::new(data);
-            let x = self.base.get_left();
-            let y = self.base.get_y();
+            let x = self.base.left();
+            let y = self.base.y();
             let a = st.get_attr(theme, theme.symbol.resize);
-            match self.wtype {
+            match self.base.window_type() {
                 Type::Normal => {
                     surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::BoxBottomRightCornerSingleLine, a));
                     surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));

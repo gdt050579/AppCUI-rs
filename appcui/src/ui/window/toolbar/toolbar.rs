@@ -190,7 +190,7 @@ impl ToolBar {
                 if !base.is_visible() {
                     continue;
                 }
-                let pos = base.get_position();
+                let pos = base.position();
                 let (h, on_left) = match pos {
                     GroupPosition::TopLeft => (base.update_position_from_left(&mut top_left, top_right.x), true),
                     GroupPosition::BottomLeft => (base.update_position_from_left(&mut bottom_left, bottom_right.x), true),
@@ -289,7 +289,7 @@ impl ToolBar {
     pub(crate) fn update_singlechoice_group_id(&mut self, handle: Handle<()>) {
         // get the group ID for the handle
         let group_id = if let Some(item) = self.items.get(handle.cast()) {
-            item.get_base().get_group_id()
+            item.get_base().group_id()
         } else {
             0
         };
@@ -297,8 +297,8 @@ impl ToolBar {
         // paint bar items
         for index in 0..count {
             if let Some(ToolBarItem::SingleChoice(sc)) = self.items.element_mut(index) {
-                if sc.base.get_group_id() == group_id {
-                    sc.update_select_status(handle == sc.base.get_handle());
+                if sc.base.group_id() == group_id {
+                    sc.update_select_status(handle == sc.base.handle());
                 }
             }
         }
@@ -310,7 +310,7 @@ impl ToolBar {
         for index in 0..count {
             if let Some(item) = self.items.element(index) {
                 if item.hotkey() == hotkey {
-                    return Some(item.get_base().get_handle());
+                    return Some(item.get_base().handle());
                 }
             }
         }

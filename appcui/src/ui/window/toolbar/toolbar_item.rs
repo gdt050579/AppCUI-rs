@@ -63,16 +63,16 @@ impl ToolBarItem {
         // separators
         if base.supports_markers() {
             if base.has_left_group_marker() {
-                surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('[', data.sep_attr));
+                surface.write_char(base.left() - 1, base.y(), Character::with_attributes('[', data.sep_attr));
             }
             if base.has_left_separator() {
-                surface.write_char(base.get_left() - 1, base.get_y(), Character::with_attributes('|', data.sep_attr));
+                surface.write_char(base.left() - 1, base.y(), Character::with_attributes('|', data.sep_attr));
             }
             if base.has_right_separator() {
-                surface.write_char(base.get_right(), base.get_y(), Character::with_attributes('|', data.sep_attr));
+                surface.write_char(base.right(), base.y(), Character::with_attributes('|', data.sep_attr));
             }
             if base.has_right_group_marker() {
-                surface.write_char(base.get_right(), base.get_y(), Character::with_attributes(']', data.sep_attr));
+                surface.write_char(base.right(), base.y(), Character::with_attributes(']', data.sep_attr));
             }
         }
     }
@@ -96,7 +96,7 @@ impl ToolBarItem {
 }
 impl HandleSupport<ToolBarItem> for ToolBarItem {
     fn handle(&self) -> Handle<ToolBarItem> {
-        self.get_base().get_handle().cast()
+        self.get_base().handle().cast()
     }
 
     fn set_handle(&mut self, handle: Handle<ToolBarItem>) {

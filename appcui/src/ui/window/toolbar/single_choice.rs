@@ -4,10 +4,10 @@ use crate::{
     graphics::{Surface, TextAlignment, TextFormatBuilder, WrapType},
     system::{Handle, Theme},
     utils::Caption,
-    utils::ExtractHotKeyMethod
+    utils::ExtractHotKeyMethod,
 };
 
-use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarItem, ToolBar};
+use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBar, ToolBarItem};
 
 /// A single choice is a toolbar item that can be positioned on the top or bottom part of a window
 /// and can have two states (selected or unselected).
@@ -28,7 +28,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 ///
 /// ```rust, no_run
 /// use appcui::prelude::*;
-/// 
+///
 /// #[Window(events = ToolBarEvents)]
 /// struct SingleChoiceWindow {
 ///     option_one: Handle<toolbar::SingleChoice>,
@@ -49,7 +49,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 ///         let group = win.toolbar().create_group(toolbar::GroupPosition::BottomLeft);
 ///         
 ///         // Add single choice items to the toolbar group
-///         let mut opt1 = toolbar::SingleChoice::new("Option 1"); 
+///         let mut opt1 = toolbar::SingleChoice::new("Option 1");
 ///         opt1.set_tooltip("First option");
 ///         win.option_one = win.toolbar().add(group, opt1);
 ///         
@@ -99,7 +99,7 @@ pub struct SingleChoice {
     pub(super) base: ItemBase,
     pub(super) caption: Caption,
     selected: bool,
-    pub(super) tooldbar: Option<NonNull<ToolBar>>
+    pub(super) tooldbar: Option<NonNull<ToolBar>>,
 }
 
 add_to_toolbar_impl!(SingleChoice);
@@ -107,11 +107,11 @@ add_to_toolbar_impl!(SingleChoice);
 impl SingleChoice {
     /// Creates a new SingleChoice toolbar item with the specified text.
     ///
-    /// The width (in characters) of the single choice item is calculated based on the number of characters 
+    /// The width (in characters) of the single choice item is calculated based on the number of characters
     /// in its content.
-    /// 
+    ///
     /// # Parameters
-    /// 
+    ///
     /// * `text` - The caption (text) to be displayed on the single choice item
     ///
     /// # Example
@@ -122,15 +122,15 @@ impl SingleChoice {
     /// ```
     pub fn new(text: &str) -> Self {
         let mut obj = SingleChoice {
-            base: ItemBase::new(true),
+            base: ItemBase::new(crate::ui::window::Type::Normal, true),
             caption: Caption::new("", ExtractHotKeyMethod::NoHotKey),
-            selected: false,  
-            tooldbar: None          
+            selected: false,
+            tooldbar: None,
         };
         obj.set_caption(text);
         obj
     }
-    
+
     /// Sets a new caption for the single choice item.
     ///
     /// The width of the single choice is automatically updated based on the length of the new caption.
@@ -144,13 +144,13 @@ impl SingleChoice {
         self.base.set_width(self.caption.chars_count() as u16);
         self.base.request_recompute_layout();
     }
-    
+
     /// Returns the current caption text of the single choice item.
     #[inline(always)]
     pub fn caption(&self) -> &str {
         self.caption.text()
     }
-    
+
     /// Returns the selected state of the single choice item.
     ///
     /// Returns `true` if the single choice item is selected or `false` otherwise.
@@ -158,7 +158,7 @@ impl SingleChoice {
     pub fn is_selected(&self) -> bool {
         self.selected
     }
-    
+
     /// Selects this single choice item and deselects all other single choice items in the same group.
     ///
     /// # Panics
@@ -169,7 +169,7 @@ impl SingleChoice {
     pub fn select(&mut self) {
         if let Some(toolbar_ptr) = self.tooldbar.as_mut() {
             let toolbar = unsafe { toolbar_ptr.as_mut() };
-            toolbar.update_singlechoice_group_id(self.base.get_handle());
+            toolbar.update_singlechoice_group_id(self.base.handle());
         } else {
             panic!("Attempt to use SingleChoice select without having the object added to a toolbar !");
         }
@@ -185,7 +185,7 @@ impl SingleChoice {
             st = SymbolAttrState::Pressed;
         }
         let mut format = TextFormatBuilder::new()
-            .position(self.base.get_left(), self.base.get_y())
+            .position(self.base.left(), self.base.y())
             .attribute(st.get_button_attr(theme))
             .align(TextAlignment::Left)
             .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))

@@ -3,6 +3,7 @@ use EnumBitFlags::EnumBitFlags;
 use super::{Group, GroupPosition, PositionHelper};
 use crate::prelude::RuntimeManager;
 use crate::system::Handle;
+use super::super::Type;
 
 #[EnumBitFlags(bits = 8)]
 enum StatusFlags {
@@ -20,6 +21,7 @@ pub(crate) struct ItemBase {
     width: u16,
     group: Group,
     status: StatusFlags,
+    wtype: Type,
     tooltip: String,
     handle: Handle<()>,
     window: Handle<()>,
@@ -31,14 +33,14 @@ impl ItemBase {
     //     base.tooltip.push_str(tooltip);
     //     base
     // }
-    pub(super) fn with_width(width: u16, tooltip: &str, visible: bool) -> ItemBase {
-        let mut base = ItemBase::new(visible);
+    pub(super) fn with_width(width: u16, tooltip: &str, wtype: Type, visible: bool) -> ItemBase {
+        let mut base = ItemBase::new(wtype, visible);
         base.width = width;
         base.status |= StatusFlags::NoMarker;
         base.tooltip.push_str(tooltip);
         base
     }
-    pub(super) fn new(visible: bool) -> ItemBase {
+    pub(super) fn new(wtype: Type, visible: bool) -> ItemBase {
         ItemBase {
             x: 0,
             y: 0,
@@ -47,6 +49,7 @@ impl ItemBase {
             tooltip: String::new(),
             handle: Handle::None,
             window: Handle::None,
+            wtype,
             status: if visible { StatusFlags::Visible } else { StatusFlags::None },
         }
     }
@@ -81,11 +84,11 @@ impl ItemBase {
         (self.status & (StatusFlags::Visible | StatusFlags::OutsideDrawingArea)) == StatusFlags::Visible
     }
     #[inline(always)]
-    pub(crate) fn get_position(&self) -> GroupPosition {
+    pub(crate) fn position(&self) -> GroupPosition {
         self.group.pos
     }
     #[inline(always)]
-    pub(crate) fn get_group_id(&self) -> u8 {
+    pub(crate) fn group_id(&self) -> u8 {
         self.group.id
     }
     #[inline(always)]
@@ -117,15 +120,15 @@ impl ItemBase {
         self.status |= StatusFlags::LeftGroupMarker;
     }
     #[inline(always)]
-    pub(super) fn get_left(&self) -> i32 {
+    pub(super) fn left(&self) -> i32 {
         self.x
     }
     #[inline(always)]
-    pub(super) fn get_right(&self) -> i32 {
+    pub(super) fn right(&self) -> i32 {
         self.x + (self.width as i32)
     }
     #[inline(always)]
-    pub(crate) fn get_y(&self) -> i32 {
+    pub(crate) fn y(&self) -> i32 {
         self.y
     }
     #[inline(always)]
@@ -144,7 +147,7 @@ impl ItemBase {
             && ((self.status & (StatusFlags::Visible | StatusFlags::OutsideDrawingArea)) == StatusFlags::Visible)
     }
     #[inline(always)]
-    pub(crate) fn get_tooltip(&self) -> &str {
+    pub(crate) fn tooltip(&self) -> &str {
         &self.tooltip
     }
     #[inline(always)]
@@ -153,7 +156,7 @@ impl ItemBase {
         self.tooltip.push_str(content);
     }
     #[inline(always)]
-    pub(crate) fn get_handle(&self) -> Handle<()> {
+    pub(crate) fn handle(&self) -> Handle<()> {
         self.handle
     }
     #[inline(always)]
@@ -164,6 +167,12 @@ impl ItemBase {
     pub(crate) fn set_window_handle(&mut self, handle: Handle<()>) {
         self.window = handle;
     }
+    #[inline(always)]
+    pub(crate) fn window_type(&self) -> Type {
+        self.wtype
+    }
+
+
     pub(crate) fn request_recompute_layout(&mut self) {
         let controls = RuntimeManager::get().get_controls_mut();
         if let Some(win) = controls.get_mut(self.window) {
@@ -269,8 +278,8 @@ macro_rules! add_toolbaritem_basic_methods {
 
         /// Gets the tooltip text for the toolbar item.
         #[inline(always)]
-        pub fn get_tooltip(&self) -> &str {
-            self.base.get_tooltip()
+        pub fn tooltip(&self) -> &str {
+            self.base.tooltip()
         }
 
         /// Returns **true** if the toolbar item is visible, **false** otherwise.
