@@ -194,7 +194,7 @@ impl Window {
         }
         if flags.contains(Flags::Sizeable) {
             let g = win.toolbar.create_group(GroupPosition::TopLeft);
-            win.toolbar.add(g, toolbar::MaximizeRestoreButton::new());
+            win.toolbar.add(g, toolbar::MaximizeRestoreButton::new(wtype));
             let g = win.toolbar.create_group(GroupPosition::BottomRight);
             win.toolbar.add(g, toolbar::ResizeCorner::new(wtype));
         }
