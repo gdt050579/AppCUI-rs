@@ -13,6 +13,7 @@ use super::{
     group::Group, Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner,
     SingleChoice, Tag, ToolBarItem,
 };
+use super::super::Type;
 
 pub struct ToolbarElementHandle {
     group: Group,
@@ -26,6 +27,7 @@ pub struct ToolBar {
     order: Vec<ToolbarElementHandle>,
     pressed: bool,
     last_group_index: u8,
+    wtype: Type,
     window: Handle<()>,
     // for debug purposes
     #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
@@ -50,14 +52,19 @@ macro_rules! add_to_toolbar_impl {
 }
 
 impl ToolBar {
-    pub(crate) fn new() -> Self {
-        ToolBar {
+    const CLOSE_GROUP_ID: u8 = 0;
+    const MAXIMIZE_RESTORE_GROUP_ID: u8 = 1;
+    const RESIZE_CORNER_GROUP_ID: u8 = 2;
+
+    pub(crate) fn new(windows_type: Type) -> Self {
+        Self {
             items: HandleManager::with_capacity(4),
             pressed: false,
             order: Vec::with_capacity(4),
             current_handle: Handle::None,
             window: Handle::None,
-            last_group_index: 0,
+            wtype: windows_type,
+            last_group_index: 3, // RESIZE_CORNER_GROUP_ID + 1
             #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
             debug_window_title_top_left_margin: 0,
             #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
@@ -119,6 +126,25 @@ impl ToolBar {
             }
         }
         None
+    }
+    #[inline(always)]
+    pub(crate) fn close_button_group(&self) -> Group {
+        Group {
+            pos: GroupPosition::TopRight,
+            id: ToolBar::CLOSE_GROUP_ID,
+        }
+    }
+    pub(crate) fn maximize_restore_button_group(&self) -> Group {
+        Group {
+            pos: GroupPosition::TopLeft,
+            id: ToolBar::MAXIMIZE_RESTORE_GROUP_ID,
+        }
+    }
+    pub(crate) fn resize_corner_group(&self) -> Group {
+        Group {
+            pos: GroupPosition::BottomRight,
+            id: ToolBar::RESIZE_CORNER_GROUP_ID,
+        }
     }
     #[inline(always)]
     pub(crate) fn set_current_item_handle(&mut self, handle: Handle<()>) {

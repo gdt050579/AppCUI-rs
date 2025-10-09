@@ -179,7 +179,7 @@ impl Window {
             window_type: wtype,
             background,
             maximized: false,
-            toolbar: ToolBar::new(),
+            toolbar: ToolBar::new(wtype),
             rm_status: ResizeMoveStatus::None,
             drag_start_point: Point::new(0, 0),
             old_rect: Rect::new(0, 0, 0, 0),
@@ -189,13 +189,13 @@ impl Window {
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
         if !flags.contains(Flags::NoCloseButton) {
-            let g = win.toolbar.create_group(GroupPosition::TopRight);
+            let g = win.toolbar.close_button_group();
             win.toolbar.add(g, toolbar::CloseButton::new(wtype));
         }
         if flags.contains(Flags::Sizeable) {
-            let g = win.toolbar.create_group(GroupPosition::TopLeft);
+            let g = win.toolbar.maximize_restore_button_group();
             win.toolbar.add(g, toolbar::MaximizeRestoreButton::new(wtype));
-            let g = win.toolbar.create_group(GroupPosition::BottomRight);
+            let g = win.toolbar.resize_corner_group();
             win.toolbar.add(g, toolbar::ResizeCorner::new(wtype));
         }
         // hotkey
