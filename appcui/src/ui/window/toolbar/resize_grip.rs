@@ -6,13 +6,13 @@ use crate::{
 use super::super::Type;
 use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarItem};
 
-pub(crate) struct ResizeCorner {
+pub(crate) struct ResizeGrip {
     pub(super) base: ItemBase,
 }
 
-add_to_toolbar_impl!(ResizeCorner);
+add_to_toolbar_impl!(ResizeGrip);
 
-impl ResizeCorner {
+impl ResizeGrip {
     pub fn new(window_type: Type) -> Self {
         let w = match window_type {
             Type::Normal => 2,
@@ -39,7 +39,7 @@ impl ResizeCorner {
                     surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
                 }
                 Type::Panel => {
-                    surface.write_char(x, y, Character::with_attributes('⟓', a));
+                    surface.write_char(x, y, Character::with_attributes('⇲', a));
                 }
             }
         }

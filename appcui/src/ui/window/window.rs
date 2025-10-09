@@ -196,7 +196,7 @@ impl Window {
             let g = win.toolbar.maximize_restore_button_group();
             win.toolbar.add(g, toolbar::MaximizeRestoreButton::new(wtype));
             let g = win.toolbar.resize_corner_group();
-            win.toolbar.add(g, toolbar::ResizeCorner::new(wtype));
+            win.toolbar.add(g, toolbar::ResizeGrip::new(wtype));
         }
         // hotkey
         let g = win.toolbar.create_group(GroupPosition::TopLeft);
@@ -702,7 +702,7 @@ impl Window {
         self.base.set_key_input_before_children_flag(false);
 
         let item_handle = if let Some(item) = self.toolbar.get_from_position(x, y) {
-            if let ToolBarItem::ResizeCorner(_) = item {
+            if let ToolBarItem::ResizeGrip(_) = item {
                 self.rm_status = ResizeMoveStatus::ResizeByMouse;
             }
             item.handle()
@@ -805,7 +805,7 @@ impl Window {
                     self.close();
                     return true;
                 }
-                ToolBarItem::ResizeCorner(_) => {
+                ToolBarItem::ResizeGrip(_) => {
                     self.maximize_restore();
                     return true;
                 }

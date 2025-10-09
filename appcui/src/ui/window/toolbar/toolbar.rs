@@ -10,7 +10,7 @@ use crate::{
 };
 
 use super::{
-    group::Group, Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner,
+    group::Group, Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeGrip,
     SingleChoice, Tag, ToolBarItem,
 };
 use super::super::Type;
@@ -99,7 +99,7 @@ impl ToolBar {
                 ToolBarItem::Tag(obj) => return Some(unsafe { &(*((obj as *const Tag) as *const T)) }),
                 ToolBarItem::CloseButton(obj) => return Some(unsafe { &(*((obj as *const CloseButton) as *const T)) }),
                 ToolBarItem::MaximizeRestoreButton(obj) => return Some(unsafe { &(*((obj as *const MaximizeRestoreButton) as *const T)) }),
-                ToolBarItem::ResizeCorner(obj) => return Some(unsafe { &(*((obj as *const ResizeCorner) as *const T)) }),
+                ToolBarItem::ResizeGrip(obj) => return Some(unsafe { &(*((obj as *const ResizeGrip) as *const T)) }),
                 ToolBarItem::Button(obj) => return Some(unsafe { &(*((obj as *const Button) as *const T)) }),
                 ToolBarItem::CheckBox(obj) => return Some(unsafe { &(*((obj as *const CheckBox) as *const T)) }),
                 ToolBarItem::SingleChoice(obj) => return Some(unsafe { &(*((obj as *const SingleChoice) as *const T)) }),
@@ -116,7 +116,7 @@ impl ToolBar {
                 ToolBarItem::Tag(obj) => return Some(unsafe { &mut (*((obj as *mut Tag) as *mut T)) }),
                 ToolBarItem::CloseButton(obj) => return Some(unsafe { &mut (*((obj as *mut CloseButton) as *mut T)) }),
                 ToolBarItem::MaximizeRestoreButton(obj) => return Some(unsafe { &mut (*((obj as *mut MaximizeRestoreButton) as *mut T)) }),
-                ToolBarItem::ResizeCorner(obj) => return Some(unsafe { &mut (*((obj as *mut ResizeCorner) as *mut T)) }),
+                ToolBarItem::ResizeGrip(obj) => return Some(unsafe { &mut (*((obj as *mut ResizeGrip) as *mut T)) }),
                 ToolBarItem::Button(obj) => return Some(unsafe { &mut (*((obj as *mut Button) as *mut T)) }),
                 ToolBarItem::CheckBox(obj) => return Some(unsafe { &mut (*((obj as *mut CheckBox) as *mut T)) }),
                 ToolBarItem::SingleChoice(obj) => {
@@ -136,7 +136,11 @@ impl ToolBar {
     }
     pub(crate) fn maximize_restore_button_group(&self) -> Group {
         Group {
-            pos: GroupPosition::TopLeft,
+            pos: match self.wtype {
+                Type::Normal => GroupPosition::TopRight,
+                Type::Round => GroupPosition::TopRight,
+                Type::Panel => GroupPosition::TopLeft,
+            },        
             id: ToolBar::MAXIMIZE_RESTORE_GROUP_ID,
         }
     }

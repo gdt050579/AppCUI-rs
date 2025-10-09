@@ -4,7 +4,7 @@ use crate::{
     system::{Handle, HandleSupport, Theme},
 };
 
-use super::{item_base::ItemBase, Button, CheckBox, CloseButton, HotKey, Label, MaximizeRestoreButton, PaintData, ResizeCorner, SingleChoice, Tag};
+use super::{item_base::ItemBase, Button, CheckBox, CloseButton, HotKey, Label, MaximizeRestoreButton, PaintData, ResizeGrip, SingleChoice, Tag};
 
 pub(crate) enum ToolBarItem {
     Label(Label),
@@ -12,7 +12,7 @@ pub(crate) enum ToolBarItem {
     Tag(Tag),
     CloseButton(CloseButton),
     MaximizeRestoreButton(MaximizeRestoreButton),
-    ResizeCorner(ResizeCorner),
+    ResizeGrip(ResizeGrip),
     Button(Button),
     CheckBox(CheckBox),
     SingleChoice(SingleChoice),
@@ -25,7 +25,7 @@ impl ToolBarItem {
             ToolBarItem::Tag(item) => &item.base,
             ToolBarItem::CloseButton(item) => &item.base,
             ToolBarItem::MaximizeRestoreButton(item) => &item.base,
-            ToolBarItem::ResizeCorner(item) => &item.base,
+            ToolBarItem::ResizeGrip(item) => &item.base,
             ToolBarItem::Button(item) => &item.base,
             ToolBarItem::CheckBox(item) => &item.base,
             ToolBarItem::SingleChoice(item) => &item.base,
@@ -38,7 +38,7 @@ impl ToolBarItem {
             ToolBarItem::Tag(item) => &mut item.base,
             ToolBarItem::CloseButton(item) => &mut item.base,
             ToolBarItem::MaximizeRestoreButton(item) => &mut item.base,
-            ToolBarItem::ResizeCorner(item) => &mut item.base,
+            ToolBarItem::ResizeGrip(item) => &mut item.base,
             ToolBarItem::Button(item) => &mut item.base,
             ToolBarItem::CheckBox(item) => &mut item.base,
             ToolBarItem::SingleChoice(item) => &mut item.base,
@@ -55,7 +55,7 @@ impl ToolBarItem {
             ToolBarItem::Tag(item) => item.paint(surface, theme, data),
             ToolBarItem::CloseButton(item) => item.paint(surface, theme, data),
             ToolBarItem::MaximizeRestoreButton(item) => item.paint(surface, theme, data),
-            ToolBarItem::ResizeCorner(item) => item.paint(surface, theme, data),
+            ToolBarItem::ResizeGrip(item) => item.paint(surface, theme, data),
             ToolBarItem::Button(item) => item.paint(surface, theme, data),
             ToolBarItem::CheckBox(item) => item.paint(surface, theme, data),
             ToolBarItem::SingleChoice(item) => item.paint(surface, theme, data),
@@ -83,7 +83,7 @@ impl ToolBarItem {
             ToolBarItem::Tag(_) => Key::None,
             ToolBarItem::CloseButton(_) => Key::None,
             ToolBarItem::MaximizeRestoreButton(_) => Key::None,
-            ToolBarItem::ResizeCorner(_) => Key::None,
+            ToolBarItem::ResizeGrip(_) => Key::None,
             ToolBarItem::Button(item) => item.caption.hotkey(),
             ToolBarItem::CheckBox(item) => item.caption.hotkey(),
             ToolBarItem::SingleChoice(item) => item.caption.hotkey(),
@@ -91,7 +91,7 @@ impl ToolBarItem {
     }
     #[inline(always)]
     pub(super) fn is_resize_corner(&self) -> bool {
-        matches!(self, ToolBarItem::ResizeCorner(_))
+        matches!(self, ToolBarItem::ResizeGrip(_))
     }
 }
 impl HandleSupport<ToolBarItem> for ToolBarItem {
