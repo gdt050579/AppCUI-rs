@@ -17,8 +17,8 @@ add_to_toolbar_impl!(HotKey);
 impl HotKey {
     pub fn new(window_type: Type) -> Self {
         let base = match window_type {
-            Type::Normal => ItemBase::new(window_type, false),
-            Type::Round => ItemBase::new(window_type, false),
+            Type::Classic => ItemBase::new(window_type, false),
+            Type::Rounded => ItemBase::new(window_type, false),
             Type::Panel => ItemBase::with_width(2, "", window_type, false),
         };
         Self {
@@ -41,7 +41,7 @@ impl HotKey {
         let x = self.base.left();
         let y = self.base.y();
         match self.base.window_type() {
-            Type::Normal | Type::Round => {
+            Type::Classic | Type::Rounded => {
                 let attr = match data.focused {
                     true => theme.text.normal,
                     false => theme.text.inactive,

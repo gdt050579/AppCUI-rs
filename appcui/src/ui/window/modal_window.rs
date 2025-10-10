@@ -26,7 +26,7 @@ impl<T> ModalWindow<T> {
         // a Modal Window does not have an implicit close button
         // as exiting has to be done from either exit(...) or exit_with(...) method.
         Self {
-            base: Window::with_type_and_status_flags(
+            base: Window::internal_create(
                 title,
                 layout,
                 flags | Flags::NoCloseButton,
@@ -41,7 +41,7 @@ impl<T> ModalWindow<T> {
         // a Modal Window does not have an implicit close button
         // as exiting has to be done from either exit(...) or exit_with(...) method.
         Self {
-            base: Window::with_type_and_status_flags(title, layout, flags | Flags::NoCloseButton, window_type, background, StatusFlags::ModalWindow),
+            base: Window::internal_create(title, layout, flags | Flags::NoCloseButton, window_type, background, StatusFlags::ModalWindow),
             result: None,
         }
     }

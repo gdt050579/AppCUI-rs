@@ -72,8 +72,8 @@ impl Border {
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: ResizeMoveStatus, has_focus: bool) {
         match self.wtype {
-            Type::Normal => self.paint_classical(surface, theme, status, has_focus),
-            Type::Round => self.paint_round(surface, theme, status, has_focus),
+            Type::Classic => self.paint_classical(surface, theme, status, has_focus),
+            Type::Rounded => self.paint_round(surface, theme, status, has_focus),
             Type::Panel => self.paint_panel(surface, theme, status, has_focus),
         }
     }

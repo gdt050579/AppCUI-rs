@@ -10,7 +10,7 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "NotifyWindow",
     "WarningWindow",
 ]);
-static TYPES: FlagsSignature = FlagsSignature::new(&["Normal", "Error", "Warning", "Notification"]);
+static TYPES: FlagsSignature = FlagsSignature::new(&["Classic", "Rounded", "Panel"]);
 static BACKGROUNDS: FlagsSignature = FlagsSignature::new(&["Normal", "Error", "Warning", "Notification"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("title", ParamType::String)];
@@ -35,13 +35,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_string_parameter("title", None);
     cb.add_layout();
     cb.add_flags_parameter("flags", "window::Flags", &FLAGS);
-    if cb.has_parameter("type") {
-        cb.add("Some(");
-        cb.add_enum_parameter("type", "window::Type", &TYPES, None);
-        cb.add("),");
-    } else {
-        cb.add(",None")
-    }
+    cb.add_enum_parameter("type", "window::Type", &TYPES, Some("Classic"));
     cb.add_enum_parameter("background", "window::Background", &BACKGROUNDS, Some("Normal"));
     cb.finish_control_initialization();
     if cb.has_parameter("tag") {

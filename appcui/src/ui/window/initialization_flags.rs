@@ -10,8 +10,8 @@ pub enum Flags {
 #[derive(Copy,Clone,PartialEq,Eq,Default)]
 pub enum Type {
     #[default]
-    Normal,
-    Round,
+    Classic,
+    Rounded,
     Panel,
 }
 

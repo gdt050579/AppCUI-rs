@@ -108,14 +108,14 @@ impl Title {
     #[inline(always)]
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: super::ResizeMoveStatus, has_focus: bool) {
         let attr = match self.wtype {
-            Type::Normal => {
+            Type::Classic => {
                 if has_focus {
                     theme.text.focused
                 } else {
                     theme.text.normal
                 }
             }
-            Type::Round => {
+            Type::Rounded => {
                 if has_focus {
                     theme.text.focused
                 } else {

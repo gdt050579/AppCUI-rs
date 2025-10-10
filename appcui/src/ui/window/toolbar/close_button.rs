@@ -15,8 +15,8 @@ add_to_toolbar_impl!(CloseButton);
 impl CloseButton {
     pub fn new(window_type: Type) -> Self {
         let w = match window_type {
-            Type::Normal => 3,
-            Type::Round => 3,
+            Type::Classic => 3,
+            Type::Rounded => 3,
             Type::Panel => 2,
         };
         CloseButton {
@@ -28,11 +28,11 @@ impl CloseButton {
         let x = self.base.left();
         let y = self.base.y();
         match self.base.window_type() {
-            Type::Normal => {
+            Type::Classic => {
                 surface.write_string(x, y, "[ ]", st.attr(theme, data.sep_attr), false);
                 surface.write_char(x + 1, y, Character::with_attributes('x', st.attr(theme, theme.symbol.close)));
             }
-            Type::Round => {
+            Type::Rounded => {
                 surface.write_string(x, y, "[ ]", st.attr(theme, data.sep_attr), false);
                 surface.write_char(x + 1, y, Character::with_attributes('x', st.attr(theme, theme.symbol.close)));
             }

@@ -155,11 +155,17 @@ impl Window {
         }
         Handle::None
     }
-    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Option<Type>, background: Background) -> Self {
-        Window::with_type_and_status_flags(title, layout, flags, window_type, background, StatusFlags::None)
+    
+    
+    #[inline(always)]
+    pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
+        Window::internal_create(title, layout, flags, None, Background::Normal, StatusFlags::None)
+    }    
+    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Type, background: Background) -> Self {
+        Window::internal_create(title, layout, flags, Some(window_type), background, StatusFlags::None)
     }
     #[inline(always)]
-    pub(super) fn with_type_and_status_flags(
+    pub(super) fn internal_create(
         title: &str,
         layout: Layout,
         flags: Flags,
@@ -207,10 +213,6 @@ impl Window {
         win.tag_handle = win.toolbar.add(g, toolbar::Tag::new(wtype));
 
         win
-    }
-    #[inline(always)]
-    pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
-        Window::with_type(title, layout, flags, None, Background::Normal)
     }
     /// Adds a control to the current window. Once the control was added
     /// a handle for that control wil be returned or `Handle::None` if some

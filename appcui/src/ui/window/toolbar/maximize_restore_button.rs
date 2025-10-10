@@ -15,8 +15,8 @@ add_to_toolbar_impl!(MaximizeRestoreButton);
 impl MaximizeRestoreButton {
     pub fn new(window_type: Type) -> Self {
         let w = match window_type {
-            Type::Normal => 3,
-            Type::Round => 3,
+            Type::Classic => 3,
+            Type::Rounded => 3,
             Type::Panel => 2,
         };
         Self {
@@ -29,7 +29,7 @@ impl MaximizeRestoreButton {
         let y = self.base.y();
 
         match self.base.window_type() {
-            Type::Normal | Type::Round => {
+            Type::Classic | Type::Rounded => {
                 surface.write_string(x, y, "[ ]", st.attr(theme, data.sep_attr), false);
                 let ch = match data.maximized {
                     true => SpecialChar::ArrowUpDown,

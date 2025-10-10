@@ -141,7 +141,7 @@ impl Label {
     /// ```
     pub fn new(text: &str) -> Self {
         let mut obj = Label {
-            base: ItemBase::new(crate::ui::window::Type::Normal, true),
+            base: ItemBase::new(crate::ui::window::Type::Classic, true),
             text: String::new(),
         };
         obj.set_content(text);

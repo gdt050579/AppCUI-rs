@@ -111,7 +111,7 @@ impl CheckBox {
     /// ```
     pub fn new(text: &str, checked: bool) -> Self {
         let mut obj = CheckBox {
-            base: ItemBase::new(crate::ui::window::Type::Normal, true),
+            base: ItemBase::new(crate::ui::window::Type::Classic, true),
             caption: Caption::new("", ExtractHotKeyMethod::NoHotKey),
             checked,
         };

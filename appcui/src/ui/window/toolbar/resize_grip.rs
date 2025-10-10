@@ -15,8 +15,8 @@ add_to_toolbar_impl!(ResizeGrip);
 impl ResizeGrip {
     pub fn new(window_type: Type) -> Self {
         let w = match window_type {
-            Type::Normal => 2,
-            Type::Round => 2,
+            Type::Classic => 2,
+            Type::Rounded => 2,
             Type::Panel => 1,
         };
         Self {
@@ -30,11 +30,11 @@ impl ResizeGrip {
             let y = self.base.y();
             let a = st.attr(theme, theme.symbol.resize);
             match self.base.window_type() {
-                Type::Normal => {
+                Type::Classic => {
                     surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::BoxBottomRightCornerSingleLine, a));
                     surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
                 }
-                Type::Round => {
+                Type::Rounded => {
                     surface.write_char(x + 1, y, Character::with_attributes('\u{256F}', a));
                     surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
                 }
