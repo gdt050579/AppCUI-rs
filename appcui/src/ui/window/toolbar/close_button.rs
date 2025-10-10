@@ -37,7 +37,7 @@ impl CloseButton {
                 surface.write_char(x + 1, y, Character::with_attributes('x', st.attr(theme, theme.symbol.close)));
             }
             Type::Panel => {
-                surface.write_string(x, y, "✖ ", st.attr(theme, theme.window.bar.close_button), false);
+                surface.write_string(x, y, "✖ ", st.window_bar_attr(theme, theme.window.bar.close_button), false);
             }
         }
     }

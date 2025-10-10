@@ -35,6 +35,15 @@ impl SymbolAttrState {
         }
     }
     #[inline(always)]
+    pub(super) fn window_bar_attr(&self, theme: &Theme, default_attr: CharAttribute) -> CharAttribute {
+        match self {
+            SymbolAttrState::Hovered => theme.symbol.hovered,
+            SymbolAttrState::Normal => default_attr,
+            SymbolAttrState::Pressed => theme.symbol.pressed,
+            SymbolAttrState::Inactive => theme.window.bar.normal,
+        }
+    }    
+    #[inline(always)]
     pub(super) fn button_attr(&self, theme: &Theme) -> CharAttribute {
         match self {
             SymbolAttrState::Hovered => theme.button.text.hovered,

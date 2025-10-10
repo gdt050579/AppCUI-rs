@@ -43,7 +43,7 @@ impl MaximizeRestoreButton {
                     true => "🗗 ",
                     false => "🗖 ",
                 };
-                surface.write_string(x, y, s, st.attr(theme, theme.window.bar.maximize_button), false);
+                surface.write_string(x, y, s, st.window_bar_attr(theme, theme.window.bar.maximize_button), false);
             }
         }
     }
