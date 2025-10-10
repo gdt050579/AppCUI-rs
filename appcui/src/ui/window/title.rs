@@ -1,4 +1,6 @@
-use crate::graphics::{CharAttribute, Character, SpecialChar, Surface};
+use crate::graphics::{ Character, SpecialChar, Surface};
+use super::Type;
+use crate::system::Theme;
 
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
 enum TitleDrawMode {
@@ -20,10 +22,11 @@ pub(crate) struct Title {
     start_part_size: i32,
     end_part_start: usize,
     draw_mode: TitleDrawMode,
+    wtype: Type,
 }
 
 impl Title {
-    pub(super) fn new(text: &str) -> Self {
+    pub(super) fn new(text: &str, window_type: Type) -> Self {
         let mut t = Title {
             text: String::new(),
             count: 0,
@@ -33,6 +36,7 @@ impl Title {
             end_part_start: 0,
             start_part_size: 0,
             draw_mode: TitleDrawMode::None,
+            wtype: window_type, 
         };
         t.set_text(text);
         t
@@ -112,7 +116,14 @@ impl Title {
         self.text.as_str()
     }
     #[inline(always)]
-    pub(super) fn paint(&self, surface: &mut Surface, attr: CharAttribute) {
+    pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, has_focus: bool) {
+
+        let attr = match self.wtype {
+            Type::Normal => if has_focus { theme.text.focused } else { theme.text.normal },
+            Type::Round => if has_focus { theme.text.focused } else { theme.text.normal },
+            Type::Panel => if has_focus { theme.window.bar.focus } else { theme.window.bar.normal },
+        };
+
         match self.draw_mode {
             TitleDrawMode::None => {
                 return;

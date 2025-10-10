@@ -173,7 +173,7 @@ impl Window {
                 layout,
                 status_flags | StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl,
             ),
-            title: Title::new(title),
+            title: Title::new(title, wtype),
             border: Border::new(wtype),
             flags,
             window_type: wtype,
@@ -942,8 +942,7 @@ impl OnPaint for Window {
         self.toolbar.paint(surface, theme, has_focus, self.maximized);
 
         // paint title
-        let color_title = if has_focus { theme.text.focused } else { theme.text.normal };
-        self.title.paint(surface, color_title);
+        self.title.paint(surface, theme, has_focus);
     }
 }
 
