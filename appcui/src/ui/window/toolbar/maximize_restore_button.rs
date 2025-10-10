@@ -40,8 +40,8 @@ impl MaximizeRestoreButton {
 
             Type::Panel => {
                 let s = match data.maximized {
-                    true => "🗗 ",
-                    false => "🗖 ",
+                    true => "🗗 ", // ⧉  ⮻  
+                    false => "⏹ ", // 🗖 🗖 ⏹ ■ 🗖 🞏 🗔 📰 🖵
                 };
                 surface.write_string(x, y, s, st.window_bar_attr(theme, theme.window.bar.maximize_button), false);
             }
