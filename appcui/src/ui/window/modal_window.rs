@@ -22,6 +22,16 @@ impl<T> DerefMut for ModalWindow<T> {
     }
 }
 impl<T> ModalWindow<T> {
+    /// Creates a new Modal Window with the specified title, layout, and flags.
+    /// The window type is set be the one associated with the current theme and the background to `Normal` by default.
+    ///
+    /// A Modal Window does not have an implicit close button
+    /// as exiting has to be done from either `exit(...)` or `exit_with(...)` methods.
+    ///
+    /// # Parameters
+    /// * `title` - The title of the window
+    /// * `layout` - The layout of the window (position and size)
+    /// * `flags` - The initialization flags for the window
     pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
         // a Modal Window does not have an implicit close button
         // as exiting has to be done from either exit(...) or exit_with(...) method.
@@ -32,19 +42,74 @@ impl<T> ModalWindow<T> {
                 flags | Flags::NoCloseButton,
                 None,
                 window::Background::Normal,
+                StatusFlags::ModalWindow | StatusFlags::ThemeType,
+            ),
+            result: None,
+        }
+    }
+
+    /// Creates a new Modal Window with the specified title, layout, flags and background.
+    /// The background can be one of `Normal`, `Error`, `Warning` or `Notification`.
+    /// The window type is set be the one associated with the current theme.
+    /// 
+    /// A Modal Window does not have an implicit close button
+    /// as exiting has to be done from either `exit(...)` or `exit_with(...)` methods.
+    /// 
+    /// # Parameters
+    /// * `title` - The title of the window
+    /// * `layout` - The layout of the window (position and size)
+    /// * `flags` - The initialization flags for the window
+    /// * `background` - The background of the window (Normal, Error, Warning, Notification)
+    pub fn with_background(title: &str, layout: Layout, flags: Flags, background: window::Background) -> Self {
+        // a Modal Window does not have an implicit close button
+        // as exiting has to be done from either exit(...) or exit_with(...) method.
+        Self {
+            base: Window::internal_create(
+                title,
+                layout,
+                flags | Flags::NoCloseButton,
+                None,
+                background,
+                StatusFlags::ModalWindow | StatusFlags::ThemeType,
+            ),
+            result: None,
+        }
+    }
+
+    /// Creates a new Modal Window with the specified title, layout, flags, window type and background.
+    /// The window type can be one of `Classic`, `Rounded` or `Panel`.
+    /// The background can be one of `Normal`, `Error`, `Warning` or `Notification`.
+    ///
+    /// A Modal Window does not have an implicit close button
+    /// as exiting has to be done from either `exit(...)` or `exit_with(...)` methods.
+    ///
+    /// # Parameters
+    /// * `title` - The title of the window
+    /// * `layout` - The layout of the window (position and size)
+    /// * `flags` - The initialization flags for the window
+    /// * `window_type` - The type of the window (Classic, Rounded, Panel)
+    /// * `background` - The background of the window (Normal, Error, Warning, Notification)
+    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: window::Type, background: window::Background) -> Self {
+        // a Modal Window does not have an implicit close button
+        // as exiting has to be done from either exit(...) or exit_with(...) method.
+        Self {
+            base: Window::internal_create(
+                title,
+                layout,
+                flags | Flags::NoCloseButton,
+                Some(window_type),
+                background,
                 StatusFlags::ModalWindow,
             ),
             result: None,
         }
     }
-    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Option<window::Type>, background: window::Background) -> Self {
-        // a Modal Window does not have an implicit close button
-        // as exiting has to be done from either exit(...) or exit_with(...) method.
-        Self {
-            base: Window::internal_create(title, layout, flags | Flags::NoCloseButton, window_type, background, StatusFlags::ModalWindow),
-            result: None,
-        }
-    }
+
+    /// Displays the modal window and runs its event loop.
+    /// This method will block until the window is closed, either by calling `exit_with`
+    /// or `exit` methods.
+    /// Returns an `Option<T>` containing the result set by `exit_with` method,
+    /// or `None` if the window was closed using the `exit` method or if it was cancelled.
     pub fn show<U>(object: U) -> Option<T>
     where
         U: Control + WindowControl + ModalWindowMethods<T> + 'static,

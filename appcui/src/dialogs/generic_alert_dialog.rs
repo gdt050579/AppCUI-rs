@@ -87,7 +87,7 @@ impl GenericAlertDialog {
 
         // lets create the window
         let mut w = Self {
-            base: ModalWindow::with_type(
+            base: ModalWindow::with_background(
                 title,
                 LayoutBuilder::new()
                     .alignment(Alignment::Center)
@@ -95,7 +95,6 @@ impl GenericAlertDialog {
                     .height(window_height)
                     .build(),
                 window::Flags::NoCloseButton,
-                None,
                 background,
             ),
             b_ok: Handle::None,

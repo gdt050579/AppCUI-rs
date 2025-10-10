@@ -33,6 +33,7 @@ pub enum StatusFlags {
     IncreaseRightMarginOnFocus = 0x0800,
     IncreaseBottomMarginOnFocus = 0x1000,
     SingleWindow = 0x2000,
+    ThemeType = 0x4000,
 }
 #[derive(Copy, Clone, Default)]
 pub(crate) struct Margins {

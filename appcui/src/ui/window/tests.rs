@@ -1673,11 +1673,10 @@ fn check_modal_window_close() {
     impl MyModalWin {
         fn new(value: i32) -> Self {
             let mut me = Self {
-                base: ModalWindow::with_type(
+                base: ModalWindow::with_background(
                     "Modal",
                     layout!("a:c,w:50,h:6"),
                     window::Flags::None,
-                    None,
                     window::Background::Notification,
                 ),
                 value,
