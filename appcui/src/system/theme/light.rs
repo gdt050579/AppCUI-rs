@@ -62,6 +62,10 @@ pub(crate) fn new() -> Theme {
                 focus: charattr!("w,b"),
                 normal: charattr!("w,gray"),
                 resizing: charattr!("y,magenta"),
+                close_button: charattr!("red,transparent"),
+                maximize_button: charattr!("w,transparent"),
+                tag: charattr!("green,transparent"),
+                hotkey: charattr!("aqua,transparent"),                
             }            
         },
         border: controlattr!("black", "black", "black", "gray", "y,magenta"),

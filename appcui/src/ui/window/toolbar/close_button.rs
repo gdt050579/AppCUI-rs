@@ -29,15 +29,15 @@ impl CloseButton {
         let y = self.base.y();
         match self.base.window_type() {
             Type::Normal => {
-                surface.write_string(x, y, "[ ]", st.get_attr(theme, data.sep_attr), false);
-                surface.write_char(x + 1, y, Character::with_attributes('x', st.get_attr(theme, theme.symbol.close)));
+                surface.write_string(x, y, "[ ]", st.attr(theme, data.sep_attr), false);
+                surface.write_char(x + 1, y, Character::with_attributes('x', st.attr(theme, theme.symbol.close)));
             }
             Type::Round => {
-                surface.write_string(x, y, "[ ]", st.get_attr(theme, data.sep_attr), false);
-                surface.write_char(x + 1, y, Character::with_attributes('x', st.get_attr(theme, theme.symbol.close)));
+                surface.write_string(x, y, "[ ]", st.attr(theme, data.sep_attr), false);
+                surface.write_char(x + 1, y, Character::with_attributes('x', st.attr(theme, theme.symbol.close)));
             }
             Type::Panel => {
-                surface.write_string(x, y, "✖ ", st.get_attr(theme, theme.symbol.close), false);
+                surface.write_string(x, y, "✖ ", st.attr(theme, theme.window.bar.close_button), false);
             }
         }
     }

@@ -3,8 +3,8 @@ use crate::{
     system::{Handle, Theme},
 };
 
-use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 use super::super::Type;
+use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 
 pub struct Tag {
     pub(super) base: ItemBase,
@@ -32,10 +32,18 @@ impl Tag {
         &self.text
     }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
-        let attr = match data.focused {
-            true => theme.text.enphasized_2,
-            false => theme.text.inactive,
+        let x = self.base.left();
+        let y = self.base.y();
+        let attr = match self.base.window_type() {
+            Type::Normal | Type::Round => match data.focused {
+                true => theme.text.enphasized_2,
+                false => theme.text.inactive,
+            },
+            Type::Panel => match data.focused {
+                true => theme.window.bar.tag,
+                false => theme.window.bar.normal,
+            },
         };
-        surface.write_string(self.base.left(), self.base.y(), self.text.as_str(), attr, false);
+        surface.write_string(x, y, self.text.as_str(), attr, false);
     }
 }

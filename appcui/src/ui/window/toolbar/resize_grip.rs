@@ -28,7 +28,7 @@ impl ResizeGrip {
             let st = SymbolAttrState::new(data);
             let x = self.base.left();
             let y = self.base.y();
-            let a = st.get_attr(theme, theme.symbol.resize);
+            let a = st.attr(theme, theme.symbol.resize);
             match self.base.window_type() {
                 Type::Normal => {
                     surface.write_char(x + 1, y, Character::with_attributes(SpecialChar::BoxBottomRightCornerSingleLine, a));

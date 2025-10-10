@@ -50,8 +50,8 @@ impl HotKey {
             }
             Type::Panel => {
                 let attr = match data.focused {
-                    true => theme.text.normal,
-                    false => theme.text.inactive,
+                    true => theme.window.bar.hotkey,
+                    false => theme.window.bar.normal,
                 };
                 let idx = self.key.code as u8;
                 const IDX_0: u8 = KeyCode::N0 as u8;

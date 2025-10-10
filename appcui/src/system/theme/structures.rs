@@ -54,7 +54,11 @@ pub struct MenuTheme {
 pub struct WindowBar {
     pub focus: CharAttribute,
     pub normal: CharAttribute,
-    pub resizing: CharAttribute,   
+    pub resizing: CharAttribute, 
+    pub close_button: CharAttribute,
+    pub maximize_button: CharAttribute,
+    pub tag: CharAttribute,
+    pub hotkey: CharAttribute,  
 }
 
 #[derive(Default)]

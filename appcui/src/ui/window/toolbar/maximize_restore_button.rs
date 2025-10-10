@@ -30,12 +30,12 @@ impl MaximizeRestoreButton {
 
         match self.base.window_type() {
             Type::Normal | Type::Round => {
-                surface.write_string(x, y, "[ ]", st.get_attr(theme, data.sep_attr), false);
+                surface.write_string(x, y, "[ ]", st.attr(theme, data.sep_attr), false);
                 let ch = match data.maximized {
                     true => SpecialChar::ArrowUpDown,
                     false => SpecialChar::ArrowUp,
                 };
-                surface.write_char(x+1, y, Character::with_attributes(ch, st.get_attr(theme, theme.symbol.maximized)));
+                surface.write_char(x+1, y, Character::with_attributes(ch, st.attr(theme, theme.symbol.maximized)));
             }
 
             Type::Panel => {
@@ -43,7 +43,7 @@ impl MaximizeRestoreButton {
                     true => "🗗 ",
                     false => "🗖 ",
                 };
-                surface.write_string(x, y, s, st.get_attr(theme, theme.symbol.maximized), false);
+                surface.write_string(x, y, s, st.attr(theme, theme.window.bar.maximize_button), false);
             }
         }
     }

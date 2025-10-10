@@ -162,7 +162,7 @@ impl CheckBox {
 
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
-        let text_attr = st.get_button_attr(theme);
+        let text_attr = st.button_attr(theme);
         let x = self.base.left();
         let y = self.base.y();
         let mut format = TextFormatBuilder::new()
@@ -172,7 +172,7 @@ impl CheckBox {
             .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
             .build();
         if self.caption.has_hotkey() {
-            format.set_hotkey(st.get_hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
+            format.set_hotkey(st.hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
         }
         surface.write_string(x, y, "  ", text_attr, false);
         surface.write_text(self.caption.text(), &format);
@@ -180,7 +180,7 @@ impl CheckBox {
             surface.write_char(
                 x,
                 y,
-                Character::with_attributes(SpecialChar::CheckMark, st.get_attr(theme, theme.symbol.checked)),
+                Character::with_attributes(SpecialChar::CheckMark, st.attr(theme, theme.symbol.checked)),
             );
         }
     }

@@ -145,12 +145,12 @@ impl Button {
         let st = SymbolAttrState::new(data);
         let mut format = TextFormatBuilder::new()
             .position(self.base.left(), self.base.y())
-            .attribute(st.get_button_attr(theme))
+            .attribute(st.button_attr(theme))
             .align(TextAlignment::Left)
             .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
             .build();
         if self.caption.has_hotkey() {
-            format.set_hotkey(st.get_hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
+            format.set_hotkey(st.hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
         }
         surface.write_text(self.caption.text(), &format);
     }
