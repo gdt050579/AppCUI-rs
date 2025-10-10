@@ -58,7 +58,12 @@ impl Border {
             if status == ResizeMoveStatus::None {
                 theme.window.bar.focus
             } else {
-                theme.window.bar.normal
+                // surface.draw_rect(
+                //     Rect::with_size(0, 0, self.size.width as u16, self.size.height as u16),
+                //     LineType::Braille,
+                //     theme.window.bar.resizing,
+                // );
+                theme.window.bar.resizing
             }
         } else {
             theme.window.bar.normal

@@ -942,7 +942,7 @@ impl OnPaint for Window {
         self.toolbar.paint(surface, theme, has_focus, self.maximized);
 
         // paint title
-        self.title.paint(surface, theme, has_focus);
+        self.title.paint(surface, theme, self.rm_status, has_focus);
     }
 }
 
