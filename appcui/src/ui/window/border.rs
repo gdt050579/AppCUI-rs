@@ -54,8 +54,17 @@ impl Border {
     }
     #[inline(always)]
     fn paint_panel(&self, surface: &mut Surface, theme: &Theme, status: ResizeMoveStatus, has_focus: bool) {
-        surface.fill_horizontal_line(0, 0, self.size.width as i32, char!("' ',black,white"));
-    }    
+        let attr = if has_focus {
+            if status == ResizeMoveStatus::None {
+                theme.window.bar.focus
+            } else {
+                theme.window.bar.normal
+            }
+        } else {
+            theme.window.bar.normal
+        };
+        surface.fill_horizontal_line(0, 0, self.size.width as i32, Character::with_attributes(' ', attr));
+    }
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: ResizeMoveStatus, has_focus: bool) {
         match self.wtype {
             Type::Normal => self.paint_classical(surface, theme, status, has_focus),

@@ -58,6 +58,11 @@ pub(crate) fn new() -> Theme {
             error: charattr!("black,gray"),
             warning: charattr!("black,gray"),
             info: charattr!("black,gray"),
+            bar: WindowBar {
+                focus: charattr!("black,w"),
+                normal: charattr!("black,gray"),
+                resizing: charattr!("black,silver"),
+            },            
         },
         border: controlattr!("black", "black", "black", "gray", "black,silver"),
         lines: controlattr!("black", "black", "w", "gray", "black,silver"),

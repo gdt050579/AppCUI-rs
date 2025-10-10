@@ -137,9 +137,9 @@ impl ToolBar {
     pub(crate) fn maximize_restore_button_group(&self) -> Group {
         Group {
             pos: match self.wtype {
-                Type::Normal => GroupPosition::TopRight,
-                Type::Round => GroupPosition::TopRight,
-                Type::Panel => GroupPosition::TopLeft,
+                Type::Normal => GroupPosition::TopLeft,
+                Type::Round => GroupPosition::TopLeft,
+                Type::Panel => GroupPosition::TopRight,
             },        
             id: ToolBar::MAXIMIZE_RESTORE_GROUP_ID,
         }

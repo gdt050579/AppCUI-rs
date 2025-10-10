@@ -39,7 +39,7 @@ impl ResizeGrip {
                     surface.write_char(x, y, Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, a));
                 }
                 Type::Panel => {
-                    surface.write_char(x, y, Character::with_attributes('⇲', a));
+                    surface.write_char(x, y, Character::with_attributes('⣠', a));
                 }
             }
         }
