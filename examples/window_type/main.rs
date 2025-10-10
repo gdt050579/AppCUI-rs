@@ -18,7 +18,6 @@ fn main() -> Result<(), appcui::system::Error> {
     w.set_hotkey(key!("Alt+3"));
     app.add_window(w);
 
-
     app.run();
     Ok(())
 }
