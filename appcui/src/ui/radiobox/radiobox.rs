@@ -30,7 +30,7 @@ impl RadioBox {
     /// All o the obove radio boxes will be part of the same parent control (the panel).
     /// When one of them is selected, the others will be automatically deselected.
     pub fn new(caption: &str, layout: Layout, selected: bool) -> Self {
-        Self::with_type(caption, layout, selected, Type::Standard)
+        Self::inner_create(caption, layout, selected, Type::Standard, StatusFlags::ThemeType)
     }
 
     /// Creates a new RadioBox with the specified caption, layout, initial selected state and visual type.
@@ -48,6 +48,10 @@ impl RadioBox {
     /// panel.add(RadioBox::with_type("Select me &3", layout!("x:1,y:1,w:20,h:1"), true, radiobox::Type::Ascii));
     /// ```
     pub fn with_type(caption: &str, layout: Layout, selected: bool, radio_type: Type) -> Self {
+        Self::inner_create(caption, layout, selected, radio_type, StatusFlags::None)
+    }
+
+    fn inner_create(caption: &str, layout: Layout, selected: bool, radio_type: Type, status: StatusFlags) -> Self {
         let ss = Symbol::new(radio_type.selected_symbol());
         let us = Symbol::new(radio_type.unselected_symbol());
         if ss.width() != us.width() {
@@ -58,7 +62,7 @@ impl RadioBox {
         }
         let symbol_width = ss.width() + 1;
         let mut rb = RadioBox {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | status),
             caption: Caption::new(caption, ExtractHotKeyMethod::AltPlusKey),
             selected,
             selected_symbol: ss,
@@ -69,7 +73,7 @@ impl RadioBox {
         let hotkey = rb.caption.hotkey();
         rb.set_hotkey(hotkey);
         rb
-    }
+    }    
 
     /// Returns **true** if the radio box is selected, **false** otherwise.
     #[inline(always)]
