@@ -4,9 +4,10 @@ pub enum Type {
     Circle,
     Diamond,
     Ascii,
+    Bullet,
 }
 // ⚪⚫ 
-// ◉  ○
+// ◉  ○ ⦾⦿ⵔ⭘ ◯○  ⮿
 impl Type {
     pub(super) fn selected_symbol(&self) -> &str {
         match self {
@@ -14,6 +15,7 @@ impl Type {
             Type::Ascii => "(*)",
             Type::Circle => "⚫ ",
             Type::Diamond => "◆",
+            Type::Bullet => "⦿",
         }
     }
 
@@ -23,6 +25,7 @@ impl Type {
             Type::Ascii => "( )",
             Type::Circle => "⚪ ",
             Type::Diamond => "◇",
+            Type::Bullet => "⦾",
         }
     }
 } 

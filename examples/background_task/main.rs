@@ -24,7 +24,7 @@ struct MyWin {
 impl MyWin {
     fn new() -> Self {
         let mut w = Self {
-            base: window!("'Background Task',a:c,w:50,h:8,flags:sizeable"),
+            base: window!("'Background Task',a:c,w:50,h:8,flags:sizeable,type:panel"),
             p: Handle::None,
             b_pause: Handle::None,
             b_resume: Handle::None,

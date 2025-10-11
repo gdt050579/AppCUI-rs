@@ -2,10 +2,6 @@
 
 A visual tour of AppCUI-rs. Each category shows one quick preview; expand for more.
 
-```
-Currently this is a work in progress - expect first version to be ready by 1st of October.
-```
-
 - [AppCUI-rs Gallery](#appcui-rs-gallery)
   - [Animations](#animations)
   - [Basic Controls](#basic-controls)
@@ -118,10 +114,10 @@ Currently this is a work in progress - expect first version to be ready by 1st o
 
 ## Backgroud Taks & Timers
 
-![Animations — preview]()
+![Background tasks — preview](img/tasks//task.gif)
 
-<!-- * **Code:** [examples/matrix](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/matrix)
-* **Elements:** [Custom Desktop](https://gdt050579.github.io/AppCUI-rs/chapter-4/custom_desktop.html), [Menus](https://gdt050579.github.io/AppCUI-rs/chapter-4/menu.html), [Timers](https://gdt050579.github.io/AppCUI-rs/chapter-7/timers.html) -->
+* **Code:** [examples/background_task](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/background_task)
+* **Elements:** [Background Tasks](https://gdt050579.github.io/AppCUI-rs/chapter-7/background_tasks.html)
 
 <details>
   <summary>More Examples</summary>

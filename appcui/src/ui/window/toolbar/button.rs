@@ -114,7 +114,7 @@ impl Button {
     /// ```
     pub fn new(text: &str) -> Self {
         let mut obj = Button {
-            base: ItemBase::new(true),
+            base: ItemBase::new(crate::ui::window::Type::Classic, true),
             caption: Caption::new("", ExtractHotKeyMethod::NoHotKey),
         };
         obj.set_caption(text);
@@ -144,13 +144,13 @@ impl Button {
     pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, data: &PaintData) {
         let st = SymbolAttrState::new(data);
         let mut format = TextFormatBuilder::new()
-            .position(self.base.get_left(), self.base.get_y())
-            .attribute(st.get_button_attr(theme))
+            .position(self.base.left(), self.base.y())
+            .attribute(st.button_attr(theme))
             .align(TextAlignment::Left)
             .wrap_type(WrapType::SingleLineWrap(self.caption.chars_count() as u16))
             .build();
         if self.caption.has_hotkey() {
-            format.set_hotkey(st.get_hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
+            format.set_hotkey(st.hotkey_attr(theme), self.caption.hotkey_pos().unwrap() as u32);
         }
         surface.write_text(self.caption.text(), &format);
     }

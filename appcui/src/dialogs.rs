@@ -112,7 +112,7 @@ pub enum ValidateOrCancelResult {
 /// dialogs::error("Error", "An error has occurred during the last operation");
 /// ```
 pub fn error(title: &str, caption: &str) {
-    let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Error);
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok,  window::Background::Error);
     w.show();
 }
 
@@ -139,7 +139,7 @@ pub fn error(title: &str, caption: &str) {
 /// }
 /// ```
 pub fn retry(title: &str, caption: &str) -> bool {
-    let w = GenericAlertDialog::new(title, caption, DialogButtons::RetryCancel, window::Type::Error);
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::RetryCancel, window::Background::Error);
     if let Some(result) = w.show() {
         return result == DialogResult::Retry;
     }
@@ -162,7 +162,7 @@ pub fn retry(title: &str, caption: &str) -> bool {
 /// dialogs::alert("Warning", "Low disk space detected");
 /// ```
 pub fn alert(title: &str, caption: &str) {
-    let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Warning);
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Background::Warning);
     w.show();
 }
 
@@ -189,7 +189,7 @@ pub fn alert(title: &str, caption: &str) {
 /// }
 /// ```
 pub fn proceed(title: &str, caption: &str) -> bool {
-    let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNo, window::Type::Warning);
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNo, window::Background::Warning);
     if let Some(result) = w.show() {
         return result == DialogResult::Yes;
     }
@@ -212,7 +212,7 @@ pub fn proceed(title: &str, caption: &str) -> bool {
 /// dialogs::message("Success", "All files have been copied");
 /// ```
 pub fn message(title: &str, caption: &str) {
-    let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Type::Notification);
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::Ok, window::Background::Notification);
     w.show();
 }
 
@@ -239,7 +239,7 @@ pub fn message(title: &str, caption: &str) {
 /// }
 /// ```
 pub fn validate(title: &str, caption: &str) -> bool {
-    let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNo, window::Type::Notification);
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNo, window::Background::Notification);
     if let Some(result) = w.show() {
         return result == DialogResult::Yes;
     }
@@ -275,7 +275,7 @@ pub fn validate(title: &str, caption: &str) -> bool {
 /// }
 /// ```
 pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult {
-    let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNoCancel, window::Type::Notification);
+    let w = GenericAlertDialog::new(title, caption, DialogButtons::YesNoCancel, window::Background::Notification);
     match w.show() {
         Some(DialogResult::Yes) => ValidateOrCancelResult::Yes,
         Some(DialogResult::No) => ValidateOrCancelResult::No,

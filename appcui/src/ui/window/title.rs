@@ -1,4 +1,6 @@
-use crate::graphics::{CharAttribute, Character, SpecialChar, Surface};
+use super::Type;
+use crate::graphics::{Character, SpecialChar, Surface};
+use crate::system::Theme;
 
 #[derive(Copy, Clone, PartialEq, Eq, Default)]
 enum TitleDrawMode {
@@ -20,10 +22,11 @@ pub(crate) struct Title {
     start_part_size: i32,
     end_part_start: usize,
     draw_mode: TitleDrawMode,
+    wtype: Type,
 }
 
 impl Title {
-    pub(super) fn new(text: &str) -> Self {
+    pub(super) fn new(text: &str, window_type: Type) -> Self {
         let mut t = Title {
             text: String::new(),
             count: 0,
@@ -33,6 +36,7 @@ impl Title {
             end_part_start: 0,
             start_part_size: 0,
             draw_mode: TitleDrawMode::None,
+            wtype: window_type,
         };
         t.set_text(text);
         t
@@ -42,16 +46,10 @@ impl Title {
         self.text.push_str(text);
         self.count = text.chars().count() as u16;
     }
-    fn compute_middle_split_title(
-        &mut self,
-        width: i32,
-        middle_size: i32,
-        draw_mode: TitleDrawMode,
-    ) {
+    fn compute_middle_split_title(&mut self, width: i32, middle_size: i32, draw_mode: TitleDrawMode) {
         self.start_part_size = (width - middle_size) / 2;
         let first_part_end = self.start_part_size as usize;
-        let second_part_start =
-            (self.count as usize) - (width as usize - (first_part_end + middle_size as usize));
+        let second_part_start = (self.count as usize) - (width as usize - (first_part_end + middle_size as usize));
         //let mut char_index = 0usize;
         self.start_part_end = 0;
         self.end_part_start = 0;
@@ -94,11 +92,7 @@ impl Title {
                         self.start_part_end = self.text.char_indices().nth(1).unwrap().0;
                     }
                     3 | 4 => {
-                        self.compute_middle_split_title(
-                            width,
-                            1,
-                            TitleDrawMode::SplitInMiddleWithOneSpace,
-                        );
+                        self.compute_middle_split_title(width, 1, TitleDrawMode::SplitInMiddleWithOneSpace);
                     }
                     _ => {
                         self.compute_middle_split_title(width, 3, TitleDrawMode::SplitInMiddle);
@@ -108,11 +102,39 @@ impl Title {
         }
     }
     #[inline(always)]
-    pub(super) fn get_text(&self) -> &str {
+    pub(super) fn text(&self) -> &str {
         self.text.as_str()
     }
     #[inline(always)]
-    pub(super) fn paint(&self, surface: &mut Surface, attr: CharAttribute) {
+    pub(super) fn paint(&self, surface: &mut Surface, theme: &Theme, status: super::ResizeMoveStatus, has_focus: bool) {
+        let attr = match self.wtype {
+            Type::Classic => {
+                if has_focus {
+                    theme.text.focused
+                } else {
+                    theme.text.normal
+                }
+            }
+            Type::Rounded => {
+                if has_focus {
+                    theme.text.focused
+                } else {
+                    theme.text.normal
+                }
+            }
+            Type::Panel => {
+                if has_focus {
+                    if status == super::ResizeMoveStatus::None {
+                        theme.window.bar.focus
+                    } else {
+                        theme.window.bar.resizing
+                    }
+                } else {
+                    theme.window.bar.normal
+                }
+            }
+        };
+
         match self.draw_mode {
             TitleDrawMode::None => {
                 return;
@@ -121,56 +143,22 @@ impl Title {
                 surface.write_string(self.left + 1, 0, &self.text, attr, false);
             }
             TitleDrawMode::SplitInMiddle => {
-                surface.write_string(
-                    self.left + 1,
-                    0,
-                    &self.text[..self.start_part_end],
-                    attr,
-                    false,
-                );
+                surface.write_string(self.left + 1, 0, &self.text[..self.start_part_end], attr, false);
                 surface.write_string(self.left + 1 + self.start_part_size, 0, "...", attr, false);
-                surface.write_string(
-                    self.left + 4 + self.start_part_size,
-                    0,
-                    &self.text[self.end_part_start..],
-                    attr,
-                    false,
-                );
+                surface.write_string(self.left + 4 + self.start_part_size, 0, &self.text[self.end_part_start..], attr, false);
             }
             TitleDrawMode::SplitInMiddleWithOneSpace => {
-                surface.write_string(
-                    self.left + 1,
-                    0,
-                    &self.text[..self.start_part_end],
-                    attr,
-                    false,
-                );
+                surface.write_string(self.left + 1, 0, &self.text[..self.start_part_end], attr, false);
                 surface.write_char(
                     self.left + 1 + self.start_part_size,
                     0,
                     Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr),
                 );
-                surface.write_string(
-                    self.left + 2 + self.start_part_size,
-                    0,
-                    &self.text[self.end_part_start..],
-                    attr,
-                    false,
-                );
+                surface.write_string(self.left + 2 + self.start_part_size, 0, &self.text[self.end_part_start..], attr, false);
             }
             TitleDrawMode::FirstLetter => {
-                surface.write_string(
-                    self.left + 1,
-                    0,
-                    &self.text[..self.start_part_end],
-                    attr,
-                    false,
-                );
-                surface.write_char(
-                    self.left + 2,
-                    0,
-                    Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr),
-                );
+                surface.write_string(self.left + 1, 0, &self.text[..self.start_part_end], attr, false);
+                surface.write_char(self.left + 2, 0, Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr));
             }
         }
         let space = Character::with_attributes(' ', attr);

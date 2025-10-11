@@ -3,8 +3,9 @@ use crate::prelude::*;
 use super::initialization_flags::*;
 use super::toolbar;
 use super::toolbar::*;
-use super::DragStatus;
+use super::Border;
 use super::Flags;
+use super::ResizeMoveStatus;
 use super::Title;
 
 #[repr(u8)]
@@ -26,12 +27,13 @@ struct Distance {
 #[derive(Default)]
 pub struct Window {
     title: Title,
+    border: Border,
     flags: Flags,
     window_type: Type,
+    background: Background,
     toolbar: ToolBar,
-    resize_move_mode: bool,
     maximized: bool,
-    drag_status: DragStatus,
+    rm_status: ResizeMoveStatus,
     drag_start_point: Point,
     old_rect: Rect,
     hotkey_handle: Handle<super::toolbar::HotKey>,
@@ -153,23 +155,101 @@ impl Window {
         }
         Handle::None
     }
-    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Type) -> Self {
-        Window::with_type_and_status_flags(title, layout, flags, window_type, StatusFlags::None)
-    }
+    
+    /// Creates a new window with the specified title, layout, and flags.
+    /// The window will have default type associated with the current theme and background `Background::Normal`.
+    /// 
+    /// # Parameters
+    /// * `title` - The title of the window
+    /// * `layout` - The layout of the window
+    /// * `flags` - The flags for the window
+    /// 
+    /// # Example
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut win = Window::new("My Window", 
+    ///                           layout!("a:c,w:40,h:10"), 
+    ///                           window::Flags::Sizeable);
+    /// ```
     #[inline(always)]
-    pub(super) fn with_type_and_status_flags(title: &str, layout: Layout, flags: Flags, window_type: Type, status_flags: StatusFlags) -> Self {
+    pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
+        Window::internal_create(title, layout, flags, None, Background::Normal, StatusFlags::ThemeType)
+    }   
+
+    /// Creates a new window with the specified title, layout, flags, type, and background.
+    /// The type parameter determines the visual style of the window (e.g., Classic, Rounded, Panel).
+    /// The background parameter sets the window's background color scheme.
+    /// 
+    /// # Parameters
+    /// * `title` - The title of the window
+    /// * `layout` - The layout of the window
+    /// * `flags` - The flags for the window
+    /// * `window_type` - The visual type of the window
+    /// * `background` - The background color scheme of the window
+    /// 
+    /// # Example
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut win = Window::with_type("My Panel Window",
+    ///                                 layout!("a:c,w:40,h:10"),
+    ///                                 window::Flags::Sizeable,
+    ///                                 window::Type::Panel,
+    ///                                 window::Background::Normal); 
+    /// ```
+    #[inline(always)]
+    pub fn with_type(title: &str, layout: Layout, flags: Flags, window_type: Type, background: Background) -> Self {
+        Window::internal_create(title, layout, flags, Some(window_type), background, StatusFlags::None)
+    }
+
+    /// Creates a new window with the specified title, layout, flags, and background.
+    /// The window will have default type associated with the current theme.
+    /// 
+    /// # Parameters
+    /// * `title` - The title of the window
+    /// * `layout` - The layout of the window
+    /// * `flags` - The flags for the window
+    /// * `background` - The background color scheme of the window
+    /// 
+    /// # Example
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut win = Window::with_background("My Themed Window",
+    ///                                     layout!("a:c,w:40,h:10"),
+    ///                                     window::Flags::Sizeable,
+    ///                                     window::Background::Normal);
+    /// ```
+    /// 
+    #[inline(always)]
+    pub fn with_background(title: &str, layout: Layout, flags: Flags, background: Background) -> Self {
+        Window::internal_create(title, layout, flags, None, background, StatusFlags::ThemeType)
+    }
+
+    #[inline(always)]
+    pub(super) fn internal_create(
+        title: &str,
+        layout: Layout,
+        flags: Flags,
+        window_type: Option<Type>,
+        background: Background,
+        status_flags: StatusFlags,
+    ) -> Self {
+        let wtype = window_type.unwrap_or_default();
         let mut win: Window = Window {
             base: ControlBase::with_status_flags(
                 layout,
                 status_flags | StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | StatusFlags::WindowControl,
             ),
-            title: Title::new(title),
+            title: Title::new(title, wtype),
+            border: Border::new(wtype),
             flags,
-            window_type,
-            resize_move_mode: false,
+            window_type: wtype,
+            background,
             maximized: false,
-            toolbar: ToolBar::new(),
-            drag_status: DragStatus::None,
+            toolbar: ToolBar::new(wtype),
+            rm_status: ResizeMoveStatus::None,
             drag_start_point: Point::new(0, 0),
             old_rect: Rect::new(0, 0, 0, 0),
             hotkey_handle: Handle::None,
@@ -178,28 +258,24 @@ impl Window {
         win.set_size_bounds(12, 3, u16::MAX, u16::MAX);
         win.set_margins(1, 1, 1, 1);
         if !flags.contains(Flags::NoCloseButton) {
-            let g = win.toolbar.create_group(GroupPosition::TopRight);
-            win.toolbar.add(g, toolbar::CloseButton::new());
+            let g = win.toolbar.close_button_group();
+            win.toolbar.add(g, toolbar::CloseButton::new(wtype));
         }
         if flags.contains(Flags::Sizeable) {
-            let g = win.toolbar.create_group(GroupPosition::TopLeft);
-            win.toolbar.add(g, toolbar::MaximizeRestoreButton::new());
-            let g = win.toolbar.create_group(GroupPosition::BottomRight);
-            win.toolbar.add(g, toolbar::ResizeCorner::new());
+            let g = win.toolbar.maximize_restore_button_group();
+            win.toolbar.add(g, toolbar::MaximizeRestoreButton::new(wtype));
+            let g = win.toolbar.resize_corner_group();
+            win.toolbar.add(g, toolbar::ResizeGrip::new(wtype));
         }
         // hotkey
         let g = win.toolbar.create_group(GroupPosition::TopLeft);
-        win.hotkey_handle = win.toolbar.add(g, toolbar::HotKey::new());
+        win.hotkey_handle = win.toolbar.add(g, toolbar::HotKey::new(wtype));
 
         // tag
         let g = win.toolbar.create_group(GroupPosition::TopLeft);
-        win.tag_handle = win.toolbar.add(g, toolbar::Tag::new());
+        win.tag_handle = win.toolbar.add(g, toolbar::Tag::new(wtype));
 
         win
-    }
-    #[inline(always)]
-    pub fn new(title: &str, layout: Layout, flags: Flags) -> Self {
-        Window::with_type(title, layout, flags, Type::Normal)
     }
     /// Adds a control to the current window. Once the control was added
     /// a handle for that control wil be returned or `Handle::None` if some
@@ -250,7 +326,7 @@ impl Window {
     ///
     /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// let label_handle = win.add(label!("'Hello World',a:c,w:12,h:1"));
-    /// 
+    ///
     /// if let Some(label) = win.control(label_handle) {
     ///     // Use the label reference
     ///     assert_eq!(label.caption(), "Hello World");
@@ -282,7 +358,7 @@ impl Window {
     ///
     /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// let label_handle = win.add(label!("'Hello World',a:c,w:12,h:1"));
-    /// 
+    ///
     /// if let Some(label) = win.control_mut(label_handle) {
     ///     // Use the mutable label reference
     ///     label.set_caption("New Text");
@@ -310,7 +386,7 @@ impl Window {
     ///
     /// let mut win = window!("'My Window',a:c,w:40,h:10");
     /// let button_handle = win.add(button!("'Click Me',a:c,w:10,h:1"));
-    /// 
+    ///
     /// // Set focus to the button
     /// win.request_focus_for_control(button_handle);
     /// ```
@@ -323,7 +399,7 @@ impl Window {
 
     /// Gets a mutable reference to the window's toolbar.
     ///
-    /// The toolbar allows adding toolbar items like buttons, checkboxes, labels, and 
+    /// The toolbar allows adding toolbar items like buttons, checkboxes, labels, and
     /// single choice items to the window.
     ///
     /// # Returns
@@ -336,7 +412,7 @@ impl Window {
     /// use appcui::prelude::*;
     ///
     /// let mut win = window!("'My Window',a:c,w:40,h:10");
-    /// 
+    ///
     /// // Create a toolbar group and add a button to it
     /// let group = win.toolbar().create_group(toolbar::GroupPosition::TopRight);
     /// let button = win.toolbar().add(group, toolbar::Button::new("Help"));
@@ -378,7 +454,7 @@ impl Window {
     /// assert_eq!(win.title(), "My Window");
     /// ```
     pub fn title(&self) -> &str {
-        self.title.get_text()
+        self.title.text()
     }
 
     /// Sets a tag for the window.
@@ -515,12 +591,12 @@ impl Window {
     /// ```
     pub fn enter_resize_mode(&mut self) {
         if (self.has_focus()) && (!self.is_singlewindow()) {
-            self.resize_move_mode = true;
+            self.rm_status = ResizeMoveStatus::ResizeMoveViaKeyboard;
             self.base.set_key_input_before_children_flag(true);
         }
     }
     pub(super) fn is_in_resize_mode(&self) -> bool {
-        self.resize_move_mode
+        self.rm_status == ResizeMoveStatus::ResizeMoveViaKeyboard
     }
 
     fn center_to_screen(&mut self) {
@@ -648,14 +724,16 @@ impl Window {
         let (left, right) = self.toolbar.update_positions(size);
         // recompute title position
         self.title.set_margin(left, right);
+        // recompute border
+        self.border.set_size(size);
     }
 
     fn on_mouse_over(&mut self, x: i32, y: i32) -> EventProcessStatus {
         if let Some(item) = self.toolbar.get_from_position(x, y) {
             let base = item.get_base();
             let cx = base.center_x();
-            let y = base.get_y();
-            let tooltip = base.get_tooltip();
+            let y = base.y();
+            let tooltip = base.tooltip();
             if tooltip.is_empty() {
                 self.hide_tooltip();
             } else {
@@ -685,13 +763,12 @@ impl Window {
 
     fn on_mouse_pressed(&mut self, x: i32, y: i32) -> EventProcessStatus {
         self.toolbar.set_current_item_pressed(false);
-        self.drag_status = DragStatus::None;
-        self.resize_move_mode = false;
+        self.rm_status = ResizeMoveStatus::None;
         self.base.set_key_input_before_children_flag(false);
 
         let item_handle = if let Some(item) = self.toolbar.get_from_position(x, y) {
-            if let ToolBarItem::ResizeCorner(_) = item {
-                self.drag_status = DragStatus::Resize;
+            if let ToolBarItem::ResizeGrip(_) = item {
+                self.rm_status = ResizeMoveStatus::ResizeByMouse;
             }
             item.handle()
         } else {
@@ -708,30 +785,30 @@ impl Window {
         self.hide_tooltip();
 
         if !self.flags.contains(Flags::FixedPosition) {
-            self.drag_status = DragStatus::Move;
+            self.rm_status = ResizeMoveStatus::MoveByMouse;
             self.drag_start_point.x = x;
             self.drag_start_point.y = y;
         }
         EventProcessStatus::Processed
     }
     fn on_mouse_drag(&mut self, x: i32, y: i32) -> EventProcessStatus {
-        self.resize_move_mode = false;
         self.base.set_key_input_before_children_flag(false);
-        match self.drag_status {
-            DragStatus::None => EventProcessStatus::Ignored,
-            DragStatus::Move => {
+        match self.rm_status {
+            ResizeMoveStatus::None => EventProcessStatus::Ignored,
+            ResizeMoveStatus::MoveByMouse => {
                 let left = self.screen_clip.left;
                 let top = self.screen_clip.top;
                 let p = self.drag_start_point;
                 self.set_position(x + left - p.x, y + top - p.y);
                 EventProcessStatus::Processed
             }
-            DragStatus::Resize => {
+            ResizeMoveStatus::ResizeByMouse => {
                 if (x > 0) && (y > 0) {
                     self.set_size((x + 1) as u16, (y + 1) as u16);
                 }
                 EventProcessStatus::Processed
             }
+            ResizeMoveStatus::ResizeMoveViaKeyboard => EventProcessStatus::Ignored,
         }
     }
 
@@ -777,11 +854,10 @@ impl Window {
     }
     fn on_mouse_release(&mut self) -> EventProcessStatus {
         self.toolbar.set_current_item_pressed(false);
-        self.resize_move_mode = false;
         self.base.set_key_input_before_children_flag(false);
 
-        if self.drag_status != DragStatus::None {
-            self.drag_status = DragStatus::None;
+        if self.rm_status != ResizeMoveStatus::None {
+            self.rm_status = ResizeMoveStatus::None;
         } else {
             self.on_toolbar_item_clicked(self.toolbar.get_current_item_handle());
         }
@@ -794,7 +870,7 @@ impl Window {
                     self.close();
                     return true;
                 }
-                ToolBarItem::ResizeCorner(_) => {
+                ToolBarItem::ResizeGrip(_) => {
                     self.maximize_restore();
                     return true;
                 }
@@ -911,49 +987,27 @@ impl OnWindowRegistered for Window {
 
 impl OnPaint for Window {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let color_window = if self.has_focus() {
-            match self.window_type {
-                Type::Normal => theme.window.normal,
-                Type::Error => theme.window.error,
-                Type::Warning => theme.window.warning,
-                Type::Notification => theme.window.info,
+        let has_focus = self.has_focus();
+        let color_window = if has_focus {
+            match self.background {
+                Background::Normal => theme.window.normal,
+                Background::Error => theme.window.error,
+                Background::Warning => theme.window.warning,
+                Background::Notification => theme.window.info,
             }
         } else {
             theme.window.inactive
         };
-        // set some colors
-        let color_title: CharAttribute;
-        let color_border: CharAttribute;
-        let line_type: LineType;
-
-        // initialization
-        if self.has_focus() {
-            color_title = theme.text.focused;
-            color_border = if (self.drag_status == DragStatus::None) && (!self.resize_move_mode) {
-                theme.border.focused
-            } else {
-                theme.border.pressed_or_selectd
-            };
-            line_type = if (self.drag_status == DragStatus::None) && (!self.resize_move_mode) {
-                LineType::Double
-            } else {
-                LineType::Single
-            };
-        } else {
-            color_title = theme.text.normal;
-            color_border = theme.border.normal;
-            line_type = LineType::Single;
-        }
-
-        let sz = self.size();
         surface.clear(Character::with_attributes(' ', color_window));
-        surface.draw_rect(Rect::with_size(0, 0, sz.width as u16, sz.height as u16), line_type, color_border);
+
+        // paint border
+        self.border.paint(surface, theme, self.rm_status, has_focus);
 
         // paint toolbar
-        self.toolbar.paint(surface, theme, self.has_focus(), self.maximized);
+        self.toolbar.paint(surface, theme, has_focus, self.maximized);
 
         // paint title
-        self.title.paint(surface, color_title);
+        self.title.paint(surface, theme, self.rm_status, has_focus);
     }
 }
 
@@ -965,10 +1019,10 @@ impl OnResize for Window {
 
 impl OnKeyPressed for Window {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        if self.resize_move_mode {
+        if self.rm_status == ResizeMoveStatus::ResizeMoveViaKeyboard {
             match key.value() {
                 key!("Escape") | key!("Enter") | key!("Space") | key!("Tab") => {
-                    self.resize_move_mode = false;
+                    self.rm_status = ResizeMoveStatus::None;
                     self.base.set_key_input_before_children_flag(false);
                     return EventProcessStatus::Processed;
                 }
@@ -1046,7 +1100,7 @@ impl OnKeyPressed for Window {
                     return EventProcessStatus::Processed;
                 }
                 key!("Ctrl+Alt+M") | key!("Ctrl+Alt+R") => {
-                    self.resize_move_mode = true;
+                    self.rm_status = ResizeMoveStatus::ResizeMoveViaKeyboard;
                     self.base.set_key_input_before_children_flag(false);
                     return EventProcessStatus::Processed;
                 }

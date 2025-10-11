@@ -25,7 +25,8 @@ A window supports all common parameters (as they are described in [Instantiate v
 | ------------------------------ | -------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `title` or `text` or `caption` | String         | **Yes** (first postional parameter) | The title (text) of the window                                                                                                                            |
 | `flags`                        | String or List | **No**                              | Window initialization flags                                                                                                                               |
-| `type`                         | String         | **No**                              | Window type                                                                                                                                               |
+| `type`                         | String         | **No**                              | Window type (visual)                                                                                                                                      |
+| `bg` or `back` or `background` | String         | **No**                              | The background of the window.                                                                                                                             |
 | `tag`                          | String         | **No**                              | The tag of the window                                                                                                                                     |
 | `hotkey` or `hot-key` or `key` | Key            | **No**                              | The hotkey associated with a window. You can also use the `auto` value to ask the framework to find the first available key (from `Alt`+`1` to `Alt`+`9`) |
 
@@ -45,8 +46,14 @@ A window supports the following initialization flags:
 * `window::Flags::NoCloseButton` or `NoCloseButton` (for **window!** macro) - a window without a close button
 * `window::Flags::FixedPosition` or `FixedPosition` (for **window!** macro) - a window that can not be moved
 
-and the following types:
-* `window::Type::Normal` or `Normal` (for **window!** macro) - a regular window
+the following types:
+* `window::Type::Classic` or `Classic` (for **window!** macro) - a regular window with a classic look (double border)
+* `window::Type::Rounded` or `Rounded` (for **window!** macro) - a window with rounded corners
+* `window::Type::Panel` or `Panel` (for **window!** macro) - a window with a top bar and no borders
+
+
+the following backgrounds:
+* `window::Type::Normal` or `Normal` (for **window!** macro) - a regular window (using the default background color)
 * `window::Type::Error` or `Error` (for **window!** macro) - a window with a red background to indicate an error message
 * `window::Type::Notification` or `Notification` (for **window!** macro) - a window with a different background designed for notification messages
 * `window::Type::Warning` or `Warning` (for **window!** macro) - a window with a different background designed for Warning messages

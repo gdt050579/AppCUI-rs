@@ -356,3 +356,7 @@ path = "globe/main.rs"
 [[example]]
 name = "games"
 path = "games/main.rs"
+
+[[example]]
+name = "window_type"
+path = "window_type/main.rs"

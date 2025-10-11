@@ -290,19 +290,19 @@ pub(crate) const TRANSLATION_MATRIX: [KeyCode; 256] = [
 
 pub(crate) static APPCUI_COLOR_SCEHMA: [u32; 16] = [
     0x_00_00_00, // Black
-    0x_80_00_00, // Dark Red
+    0x_80_00_00, // Dark Blue
     0x_00_80_00, // Dark Green
-    0x_80_80_00, // Olive
-    0x_00_00_80, // Dark Blue
+    0x_80_80_00, // Teal
+    0x_00_00_80, // Dark Red
     0x_80_00_80, // Magenta
-    0x_00_80_80, // Teal
+    0x_00_80_80, // Olive
     0x_C0_C0_C0, // Silver
     0x_80_80_80, // Gray
-    0x_FF_00_00, // Red
+    0x_FF_00_00, // Blue
     0x_00_FF_00, // Green
     0x_FF_FF_00, // Aqua
-    0x_00_00_FF, // Blue
-    0x_00_FF_FF, // Pink
-    0x_FF_FF_00, // Yellow
+    0x_00_00_FF, // Red
+    0x_FF_00_FF, // Pink
+    0x_00_FF_FF, // Yellow
     0x_FF_FF_FF, // White   
 ];

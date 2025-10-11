@@ -10,9 +10,10 @@ use crate::{
 };
 
 use super::{
-    group::Group, Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeCorner,
+    group::Group, Button, CheckBox, CloseButton, GroupPosition, HotKey, Label, MaximizeRestoreButton, PaintData, PositionHelper, ResizeGrip,
     SingleChoice, Tag, ToolBarItem,
 };
+use super::super::Type;
 
 pub struct ToolbarElementHandle {
     group: Group,
@@ -26,6 +27,7 @@ pub struct ToolBar {
     order: Vec<ToolbarElementHandle>,
     pressed: bool,
     last_group_index: u8,
+    wtype: Type,
     window: Handle<()>,
     // for debug purposes
     #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
@@ -50,14 +52,19 @@ macro_rules! add_to_toolbar_impl {
 }
 
 impl ToolBar {
-    pub(crate) fn new() -> Self {
-        ToolBar {
+    const CLOSE_GROUP_ID: u8 = 0;
+    const MAXIMIZE_RESTORE_GROUP_ID: u8 = 1;
+    const RESIZE_CORNER_GROUP_ID: u8 = 2;
+
+    pub(crate) fn new(windows_type: Type) -> Self {
+        Self {
             items: HandleManager::with_capacity(4),
             pressed: false,
             order: Vec::with_capacity(4),
             current_handle: Handle::None,
             window: Handle::None,
-            last_group_index: 0,
+            wtype: windows_type,
+            last_group_index: 3, // RESIZE_CORNER_GROUP_ID + 1
             #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
             debug_window_title_top_left_margin: 0,
             #[cfg(feature = "DEBUG_SHOW_WINDOW_TITLE_BOUNDERIES")]
@@ -92,7 +99,7 @@ impl ToolBar {
                 ToolBarItem::Tag(obj) => return Some(unsafe { &(*((obj as *const Tag) as *const T)) }),
                 ToolBarItem::CloseButton(obj) => return Some(unsafe { &(*((obj as *const CloseButton) as *const T)) }),
                 ToolBarItem::MaximizeRestoreButton(obj) => return Some(unsafe { &(*((obj as *const MaximizeRestoreButton) as *const T)) }),
-                ToolBarItem::ResizeCorner(obj) => return Some(unsafe { &(*((obj as *const ResizeCorner) as *const T)) }),
+                ToolBarItem::ResizeGrip(obj) => return Some(unsafe { &(*((obj as *const ResizeGrip) as *const T)) }),
                 ToolBarItem::Button(obj) => return Some(unsafe { &(*((obj as *const Button) as *const T)) }),
                 ToolBarItem::CheckBox(obj) => return Some(unsafe { &(*((obj as *const CheckBox) as *const T)) }),
                 ToolBarItem::SingleChoice(obj) => return Some(unsafe { &(*((obj as *const SingleChoice) as *const T)) }),
@@ -109,7 +116,7 @@ impl ToolBar {
                 ToolBarItem::Tag(obj) => return Some(unsafe { &mut (*((obj as *mut Tag) as *mut T)) }),
                 ToolBarItem::CloseButton(obj) => return Some(unsafe { &mut (*((obj as *mut CloseButton) as *mut T)) }),
                 ToolBarItem::MaximizeRestoreButton(obj) => return Some(unsafe { &mut (*((obj as *mut MaximizeRestoreButton) as *mut T)) }),
-                ToolBarItem::ResizeCorner(obj) => return Some(unsafe { &mut (*((obj as *mut ResizeCorner) as *mut T)) }),
+                ToolBarItem::ResizeGrip(obj) => return Some(unsafe { &mut (*((obj as *mut ResizeGrip) as *mut T)) }),
                 ToolBarItem::Button(obj) => return Some(unsafe { &mut (*((obj as *mut Button) as *mut T)) }),
                 ToolBarItem::CheckBox(obj) => return Some(unsafe { &mut (*((obj as *mut CheckBox) as *mut T)) }),
                 ToolBarItem::SingleChoice(obj) => {
@@ -119,6 +126,29 @@ impl ToolBar {
             }
         }
         None
+    }
+    #[inline(always)]
+    pub(crate) fn close_button_group(&self) -> Group {
+        Group {
+            pos: GroupPosition::TopRight,
+            id: ToolBar::CLOSE_GROUP_ID,
+        }
+    }
+    pub(crate) fn maximize_restore_button_group(&self) -> Group {
+        Group {
+            pos: match self.wtype {
+                Type::Classic => GroupPosition::TopLeft,
+                Type::Rounded => GroupPosition::TopLeft,
+                Type::Panel => GroupPosition::TopRight,
+            },        
+            id: ToolBar::MAXIMIZE_RESTORE_GROUP_ID,
+        }
+    }
+    pub(crate) fn resize_corner_group(&self) -> Group {
+        Group {
+            pos: GroupPosition::BottomRight,
+            id: ToolBar::RESIZE_CORNER_GROUP_ID,
+        }
     }
     #[inline(always)]
     pub(crate) fn set_current_item_handle(&mut self, handle: Handle<()>) {
@@ -190,7 +220,7 @@ impl ToolBar {
                 if !base.is_visible() {
                     continue;
                 }
-                let pos = base.get_position();
+                let pos = base.position();
                 let (h, on_left) = match pos {
                     GroupPosition::TopLeft => (base.update_position_from_left(&mut top_left, top_right.x), true),
                     GroupPosition::BottomLeft => (base.update_position_from_left(&mut bottom_left, bottom_right.x), true),
@@ -289,7 +319,7 @@ impl ToolBar {
     pub(crate) fn update_singlechoice_group_id(&mut self, handle: Handle<()>) {
         // get the group ID for the handle
         let group_id = if let Some(item) = self.items.get(handle.cast()) {
-            item.get_base().get_group_id()
+            item.get_base().group_id()
         } else {
             0
         };
@@ -297,8 +327,8 @@ impl ToolBar {
         // paint bar items
         for index in 0..count {
             if let Some(ToolBarItem::SingleChoice(sc)) = self.items.element_mut(index) {
-                if sc.base.get_group_id() == group_id {
-                    sc.update_select_status(handle == sc.base.get_handle());
+                if sc.base.group_id() == group_id {
+                    sc.update_select_status(handle == sc.base.handle());
                 }
             }
         }
@@ -310,7 +340,7 @@ impl ToolBar {
         for index in 0..count {
             if let Some(item) = self.items.element(index) {
                 if item.hotkey() == hotkey {
-                    return Some(item.get_base().get_handle());
+                    return Some(item.get_base().handle());
                 }
             }
         }

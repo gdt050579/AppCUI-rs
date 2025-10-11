@@ -49,6 +49,18 @@ pub struct MenuTheme {
     pub shortcut: ControlCharAttributesState,
     pub symbol: ControlCharAttributesState,
 }
+
+#[derive(Default)]
+pub struct WindowBar {
+    pub focus: CharAttribute,
+    pub normal: CharAttribute,
+    pub resizing: CharAttribute, 
+    pub close_button: CharAttribute,
+    pub maximize_button: CharAttribute,
+    pub tag: CharAttribute,
+    pub hotkey: CharAttribute,  
+}
+
 #[derive(Default)]
 pub struct WindowTheme {
     pub normal: CharAttribute,
@@ -56,6 +68,7 @@ pub struct WindowTheme {
     pub error: CharAttribute,
     pub warning: CharAttribute,
     pub info: CharAttribute,
+    pub bar: WindowBar,
 }
 #[derive(Default)]
 pub struct ButtonTheme {
