@@ -38,10 +38,17 @@ impl Input {
             return None;
         }
 
+        let key_code = self.convert_key_code(key_event.code);
         let modifiers = self.convert_modifiers(key_event.modifiers);
+        
+        let key = Key::new(key_code, modifiers);
+        let character = match key_event.code {
+            crossterm::event::KeyCode::Char(c) => c,
+            _ => '\0',
+        };
 
         // Check for modifier changes
-        if modifiers != self.last_modifiers {
+        if modifiers != self.last_modifiers && character == '\0' {
             let old_modifiers = self.last_modifiers;
             self.last_modifiers = modifiers;
             return Some(SystemEvent::KeyModifierChanged(KeyModifierChangedEvent {
@@ -49,13 +56,6 @@ impl Input {
                 old_state: old_modifiers,
             }));
         }
-
-        let key_code = self.convert_key_code(key_event.code);
-        let key = Key::new(key_code, modifiers);
-        let character = match key_event.code {
-            crossterm::event::KeyCode::Char(c) => c,
-            _ => '\0',
-        };
 
         Some(SystemEvent::KeyPressed(KeyPressedEvent { key, character }))
     }
