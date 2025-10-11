@@ -2050,3 +2050,115 @@ fn check_resize_mode_keys() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_window_type_classic() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x40447F81353AA2DB)
+        Mouse.Move(38,1)
+        Paint('2. Hover over close button (regular window)')
+        CheckHash(0x658766613B99AB73)
+        Mouse.Move(82,1)
+        Paint('3. Hover over close button (focus window)')
+        CheckHash(0x4E82FB1773BD5A64)
+        Mouse.Click(3,1,left)
+        Paint('4. Maximize window')
+        CheckHash(0x8F35BA5DC274A881)        
+    ";
+    let mut a = App::debug(90, 15, script).build().unwrap();
+    let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable");
+    w.set_tag("XYZ");
+    w.set_hotkey(key!("Alt+1"));
+    a.add_window(w);
+    let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable");
+    w.set_tag("Tag");
+    w.set_hotkey(key!("Alt+2"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_window_type_rounded() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x880DD092C6551CA)
+        Mouse.Move(38,1)
+        Paint('2. Hover over close button (regular window)')
+        CheckHash(0x90E1D9A24DF1C5A5)
+        Mouse.Move(82,1)
+        Paint('3. Hover over close button (focus window)')
+        CheckHash(0x9E640FEAEFE7640A)
+        Mouse.Click(3,1,left)
+        Paint('4. Maximize window')
+        CheckHash(0xAB292A0B70116754)        
+    ";
+    let mut a = App::debug(90, 15, script).build().unwrap();
+    let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable, type: rounded");
+    w.set_tag("XYZ");
+    w.set_hotkey(key!("Alt+1"));
+    a.add_window(w);
+    let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable, type: rounded");
+    w.set_tag("Tag");
+    w.set_hotkey(key!("Alt+2"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_window_type_panel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x54E4E9E4F80D4578)
+        Mouse.Move(38,1)
+        Paint('2. Hover over close button (regular window)')
+        CheckHash(0x2F0F74FB3663475E)
+        Mouse.Move(82,1)
+        Paint('3. Hover over close button (focus window)')
+        CheckHash(0x5D91D3F269A11613)
+        Mouse.Click(35,1,left)
+        Paint('4. Maximize window')
+        CheckHash(0xDF6AC55C98FAF6D3)        
+    ";
+    let mut a = App::debug(90, 15, script).build().unwrap();
+    let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable, type: panel");
+    w.set_tag("XYZ");
+    w.set_hotkey(key!("Alt+1"));
+    a.add_window(w);
+    let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable, type: panel");
+    w.set_tag("Tag");
+    w.set_hotkey(key!("Alt+2"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_window_type_panel_background_error() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x2F512DBD8B02E368)
+        Mouse.Move(38,1)
+        Paint('2. Hover over close button (regular window)')
+        CheckHash(0x41C35C3570BD2D15)
+        Mouse.Move(82,1)
+        Paint('3. Hover over close button (focus window)')
+        CheckHash(0xFA8F1379BD40FA94)
+        Mouse.Click(35,1,left)
+        Paint('4. Maximize window')
+        CheckHash(0xCF070970950091A3)        
+    ";
+    let mut a = App::debug(90, 15, script).build().unwrap();
+    let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable, type: panel, bg: error");
+    w.set_tag("XYZ");
+    w.set_hotkey(key!("Alt+1"));
+    a.add_window(w);
+    let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable, type: panel, bg: error");
+    w.set_tag("Tag");
+    w.set_hotkey(key!("Alt+2"));
+    a.add_window(w);
+    a.run();
+}
