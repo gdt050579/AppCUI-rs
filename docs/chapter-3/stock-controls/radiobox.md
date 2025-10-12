@@ -50,9 +50,9 @@ pub enum Type {
     Standard, // Default value
     Circle,
     Diamond,
-    Square,
-    Star,
-    Dot,
+    Ascii,
+    Bullet,
+    Target,
 }
 ```
 
@@ -60,10 +60,13 @@ The type of the radiobox describes how the radiobox state (**selected** or **uns
 
 | Type     | Selected State | Unselected State |
 | -------- | -------------- | ---------------- |
-| Standard | (●) Selected   | ( ) Unselected   |
-| Ascii    | (*) Selected   | ( ) Unselected   |
-| Circle   | ◉ Selected     | ○ Unselected     |
-| Diamond  | ◆ Selected     | ◇ Unselected     |
+| Standard | `(●)` Selected   | `( )` Unselected   |
+| Ascii    | `(*)` Selected   | `( )` Unselected   |
+| Circle   | `⚪` Selected     | `⚫` Unselected     |
+| Diamond  | `◆` Selected     | `◇` Unselected     |
+| Bullet   | `⦿` Selected     | `⦾` Unselected     |
+| Target   | `🞉` Selected     | `🞅` Unselected     |
+
 
 ## Events
 To intercept events from a radiobox, the following trait has to be implemented to the Window that processes the event loop:

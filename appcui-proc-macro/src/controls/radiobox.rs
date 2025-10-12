@@ -2,7 +2,7 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static TYPES: FlagsSignature = FlagsSignature::new(&["Standard", "Ascii", "Circle", "Diamond", "Bullet"]);
+static TYPES: FlagsSignature = FlagsSignature::new(&["Standard", "Ascii", "Circle", "Diamond", "Bullet", "Target", "XYZ"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("caption", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
@@ -15,11 +15,17 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("radiobox", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
-    cb.init_control("RadioBox::with_type");
+    if cb.has_parameter("type") {
+        cb.init_control("RadioBox::with_type");
+    } else {
+        cb.init_control("RadioBox::new");
+    }
     cb.add_string_parameter("caption", None);
     cb.add_layout();
     cb.add_bool_parameter("selected", Some(false));
-    cb.add_enum_parameter("type", "radiobox::Type", &TYPES, Some("Standard"));
+    if cb.has_parameter("type") {
+        cb.add_enum_parameter("type", "radiobox::Type", &TYPES, Some("Standard"));
+    }
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();
     cb.into()

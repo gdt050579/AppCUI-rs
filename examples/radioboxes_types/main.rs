@@ -7,7 +7,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().color_schema(false).build()?;
 
     let mut win = window!("'Radiobox types',a:c,w:80,h:15, flags:Sizeable");
-    let mut acc = accordion!("d:f,panels:['&Standard', '&Circle', '&Diamond', '&Ascii', '&Bullet']");
+    let mut acc = accordion!("d:f,panels:['&Standard', '&Circle', '&Diamond', '&Ascii', '&Bullet', '&Target']");
     
     // Standard
     acc.add(0, radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,selected:false"));
@@ -33,6 +33,11 @@ fn main() -> Result<(), appcui::system::Error> {
     acc.add(4, radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Bullet,selected:false"));
     acc.add(4, radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Bullet,selected:true"));
     acc.add(4, radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Bullet,selected:false, enabled:false"));
+
+    // Target
+    acc.add(5, radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Target,selected:false"));
+    acc.add(5, radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Target,selected:true"));
+    acc.add(5, radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Target,selected:false, enabled:false"));
 
     win.add(acc);
     app.add_window(win);
