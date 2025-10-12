@@ -283,6 +283,39 @@ fn check_radiobox_diamond_mode() {
     a.run();
 }
 
+#[test]
+fn check_radiobox_bullet_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Bullet mode')   
+        CheckHash(0x45256EA616AA01D2)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Bullet,select:false"));
+    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Bullet,select:true"));
+    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Bullet,select:false, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_radiobox_target_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Target mode')   
+        CheckHash(0xB5D3F04A3579075F)  
+        CheckCursor(7,4)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Target,select:false"));
+    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Target,select:true"));
+    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Target,select:false, enabled:false"));
+    a.add_window(w);
+    a.run();
+}
 
 #[test]
 fn check_radiobox_is_selected() {
