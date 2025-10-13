@@ -61,7 +61,7 @@ impl Panel {
     /// use appcui::prelude::*;
     ///
     /// let mut panel = Panel::new("Panel", layout!("x:1,y:1,w:10,h:10"), panel::Type::Border);
-    /// let handle_button = panel.add(Button::new("Button", layout!("x:1,y:1,w:8"), button::Type::Normal));
+    /// let handle_button = panel.add(Button::new("Button", layout!("x:1,y:1,w:8")));
     /// ```
     #[inline(always)]
     pub fn add<T>(&mut self, control: T) -> Handle<T>
