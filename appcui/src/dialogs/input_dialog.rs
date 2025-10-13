@@ -27,8 +27,8 @@ where
             validation,
         };
         me.add(Label::new(text, layout!("l:1,t:1,r:1,b:5")));
-        me.btn_ok = me.add(Button::new("&Ok", layout!("l:5,b:0,w:13"), button::Type::Normal));
-        me.add(Button::new("&Cancel", layout!("l:21,b:0,w:13"), button::Type::Normal));
+        me.btn_ok = me.add(Button::with_type("&Ok", layout!("l:5,b:0,w:13"), button::Type::Normal));
+        me.add(Button::with_type("&Cancel", layout!("l:21,b:0,w:13"), button::Type::Normal));
         let content = if let Some(value) = value {
             format! {"{value}"}
         } else {

@@ -58,7 +58,7 @@ impl GenericAlertDialog {
         nr_lines
     }
     fn add_button(text: &str, x: i32, y: i32) -> Button {
-        Button::new(text, LayoutBuilder::new().x(x).y(y).width(11).build(), button::Type::Normal)
+        Button::with_type(text, LayoutBuilder::new().x(x).y(y).width(11).build(), button::Type::Normal)
     }
     pub(super) fn new(title: &str, caption: &str, buttons: DialogButtons, background: window::Background) -> Self {
         let size = RuntimeManager::get().terminal_size();

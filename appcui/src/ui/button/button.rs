@@ -8,15 +8,32 @@ pub struct Button {
     pressed: bool,
 }
 impl Button {
+    /// Creates a new button with the specified caption and layout. The type of the button will be determined from the current theme.
+    /// 
+    /// # Examples
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut button = Button::new("Click me!", 
+    ///                              LayoutBuilder::new().x(1).y(1).width(15).build());
+    /// ```
+    pub fn new(caption: &str, layout: Layout) -> Self {
+
+        Self::inner_create(caption, layout, button::Type::Normal, StatusFlags::ThemeType)
+    }
     /// Creates a new button with the specified caption, layout and flags
     /// # Examples
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// let mut button = Button::new("Click me!", layout!("x:1,y:1,w:15"), button::Type::Normal);
+    /// let mut button = Button::with_type("Click me!", layout!("x:1,y:1,w:15"), button::Type::Normal);
     /// ```
-    pub fn new(caption: &str, layout: Layout, button_type: Type) -> Self {
+    pub fn with_type(caption: &str, layout: Layout, button_type: Type) -> Self {
+        Self::inner_create(caption, layout, button_type, StatusFlags::None)
+    }
+
+    fn inner_create(caption: &str, layout: Layout, button_type: Type, status: StatusFlags) -> Self {
         let mut but = Button {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | status),
             caption: Caption::new(caption, ExtractHotKeyMethod::AltPlusKey),
             button_type,
             pressed: false,
@@ -31,6 +48,8 @@ impl Button {
         but.set_hotkey(hotkey);
         but
     }
+
+
     /// Sets the caption of a button. Using `&` in the provided text followed by a letter or a number will automatically assign Alt+**<number|letter>** hotkey to that button.
     /// # Examples
     /// ```rust,no_run

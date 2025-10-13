@@ -2489,7 +2489,7 @@ fn pub_fn_insert_text() {
             };
             let text_initial = "Old text, new line\n";    
             me.control = me.add(TextArea::new(text_initial, layout!("d:f"), textarea::Flags::None));
-            me.button = me.add(Button::new("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
+            me.button = me.add(Button::with_type("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
 
             me
         }
@@ -2542,7 +2542,7 @@ fn pub_fn_move_set_cursor_position() {
             };
             let text_initial = "Text used to test the set_cursor_position function";    
             me.control = me.add(TextArea::new(text_initial, layout!("d:f"), textarea::Flags::None));
-            me.button = me.add(Button::new("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
+            me.button = me.add(Button::with_type("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
 
             me
         }
@@ -2594,7 +2594,7 @@ fn pub_fn_move_set_cursor_position_2() {
             };
             let text_initial = "Text used to test the set_cursor_position function";    
             me.control = me.add(TextArea::new(text_initial, layout!("d:f"), textarea::Flags::None));
-            me.button = me.add(Button::new("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
+            me.button = me.add(Button::with_type("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
 
             me
         }
@@ -2647,7 +2647,7 @@ fn pub_fn_remove_text() {
             };
             let text_initial = "Text used to test the remove_text function";    
             me.control = me.add(TextArea::new(text_initial, layout!("d:f"), textarea::Flags::None));
-            me.button = me.add(Button::new("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
+            me.button = me.add(Button::with_type("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
 
             me
         }
@@ -2694,7 +2694,7 @@ fn pub_fn_select_text() {
             };
             let text_initial = "Text used to test the select_text function";    
             me.control = me.add(TextArea::new(text_initial, layout!("d:f"), textarea::Flags::None));
-            me.button = me.add(Button::new("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
+            me.button = me.add(Button::with_type("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
 
             me
         }
@@ -2747,7 +2747,7 @@ fn pub_fn_delete_selection() {
             };
             let text_initial = "Text used to test the delete_selection function";    
             me.control = me.add(TextArea::new(text_initial, layout!("d:f"), textarea::Flags::None));
-            me.button = me.add(Button::new("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
+            me.button = me.add(Button::with_type("Test", layout!("x:45,y:7,w:10"), button::Type::Normal));
 
             me
         }

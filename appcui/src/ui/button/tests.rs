@@ -18,9 +18,9 @@ fn check_button_control() {
                 but3: Handle::None,
             };
             me.info = me.add(Label::new("<none>", layout!("x:0,y:0,w:35")));
-            me.but1 = me.add(Button::new("Button &1", layout!("x:1,y:3,w:13"), button::Type::Normal));
-            me.but2 = me.add(Button::new("Button &2", layout!("x:16,y:3,w:13"), button::Type::Normal));
-            let mut b3 = Button::new("Button &3", layout!("x:31,y:3,w:13"), button::Type::Normal);
+            me.but1 = me.add(Button::with_type("Button &1", layout!("x:1,y:3,w:13"), button::Type::Normal));
+            me.but2 = me.add(Button::with_type("Button &2", layout!("x:16,y:3,w:13"), button::Type::Normal));
+            let mut b3 = Button::with_type("Button &3", layout!("x:31,y:3,w:13"), button::Type::Normal);
             b3.set_enabled(false);
             me.but3 = me.add(b3);
             me
@@ -85,8 +85,8 @@ fn check_button_control_2() {
                 reset: Handle::None,
                 counter: 0,
             };
-            win.add = win.add(Button::new("Add (0)", layout!("x:25%,y:2,w:13,p:c"), button::Type::Normal));
-            win.reset = win.add(Button::new("Reset", layout!("x:75%,y:2,w:13,p:c"), button::Type::Normal));
+            win.add = win.add(Button::with_type("Add (0)", layout!("x:25%,y:2,w:13,p:c"), button::Type::Normal));
+            win.reset = win.add(Button::with_type("Reset", layout!("x:75%,y:2,w:13,p:c"), button::Type::Normal));
             win
         }
         fn update_add_button(&mut self) {
@@ -339,8 +339,8 @@ fn check_visible() {
                 but1: Handle::None,
                 but2: Handle::None,
             };
-            me.but1 = me.add(Button::new("Button", layout!("x:1,y:3,w:13"), button::Type::Normal));
-            me.but2 = me.add(Button::new("Show/Hide", layout!("x:16,y:3,w:14"), button::Type::Normal));
+            me.but1 = me.add(Button::with_type("Button", layout!("x:1,y:3,w:13"), button::Type::Normal));
+            me.but2 = me.add(Button::with_type("Show/Hide", layout!("x:16,y:3,w:14"), button::Type::Normal));
             me
         }
     }
