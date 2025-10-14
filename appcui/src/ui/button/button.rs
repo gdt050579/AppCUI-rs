@@ -9,16 +9,15 @@ pub struct Button {
 }
 impl Button {
     /// Creates a new button with the specified caption and layout. The type of the button will be determined from the current theme.
-    /// 
+    ///
     /// # Examples
     /// ```rust,no_run
     /// use appcui::prelude::*;
-    /// 
-    /// let mut button = Button::new("Click me!", 
+    ///
+    /// let mut button = Button::new("Click me!",
     ///                              LayoutBuilder::new().x(1).y(1).width(15).build());
     /// ```
     pub fn new(caption: &str, layout: Layout) -> Self {
-
         Self::inner_create(caption, layout, button::Type::Normal, StatusFlags::ThemeType)
     }
     /// Creates a new button with the specified caption, layout and flags
@@ -49,7 +48,6 @@ impl Button {
         but
     }
 
-
     /// Sets the caption of a button. Using `&` in the provided text followed by a letter or a number will automatically assign Alt+**<number|letter>** hotkey to that button.
     /// # Examples
     /// ```rust,no_run
@@ -66,6 +64,79 @@ impl Button {
     /// Returns the button caption.
     pub fn caption(&self) -> &str {
         self.caption.text()
+    }
+
+    fn paint_normal(&self, surface: &mut Surface, theme: &Theme) {
+        let col_text = match () {
+            _ if !self.is_enabled() => theme.button.text.inactive,
+            _ if self.has_focus() => theme.button.text.focused,
+            _ if self.is_mouse_over() => theme.button.text.hovered,
+            _ => theme.button.text.normal,
+        };
+        let w = self.size().width.saturating_sub(1);
+        let x = (w / 2) as i32;
+        let mut format = TextFormatBuilder::new()
+            .position(x, 0)
+            .attribute(col_text)
+            .align(TextAlignment::Center)
+            .chars_count(self.caption.chars_count() as u16)
+            .wrap_type(WrapType::SingleLineWrap(w as u16))
+            .build();
+
+        if self.caption.has_hotkey() {
+            format.set_hotkey(
+                match () {
+                    _ if !self.is_enabled() => theme.button.hotkey.inactive,
+                    _ if self.has_focus() => theme.button.hotkey.focused,
+                    _ if self.is_mouse_over() => theme.button.hotkey.hovered,
+                    _ => theme.button.hotkey.normal,
+                },
+                self.caption.hotkey_pos().unwrap() as u32,
+            );
+        }
+        if self.pressed {
+            surface.fill_horizontal_line_with_size(1, 0, w, Character::with_attributes(' ', col_text));
+            format.x += 1;
+            surface.write_text(self.caption.text(), &format);
+        } else {
+            surface.fill_horizontal_line_with_size(0, 0, w, Character::with_attributes(' ', col_text));
+            surface.write_text(self.caption.text(), &format);
+            surface.fill_horizontal_line_with_size(1, 1, w, Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow));
+            surface.write_char(w as i32, 0, Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow));
+        }
+    }
+    fn paint_flat(&self, surface: &mut Surface, theme: &Theme) {
+        let col_text = match () {
+            _ if !self.is_enabled() => theme.button.text.inactive,
+            _ if self.has_focus() => theme.button.text.focused,
+            _ if self.is_mouse_over() => theme.button.text.hovered,
+            _ => theme.button.text.normal,
+        };
+        let w = self.size().width;
+        let x = (w / 2) as i32;
+        let mut format = TextFormatBuilder::new()
+            .position(x, 0)
+            .attribute(col_text)
+            .align(TextAlignment::Center)
+            .chars_count(self.caption.chars_count() as u16)
+            .wrap_type(WrapType::SingleLineWrap(w as u16))
+            .build();
+
+        if self.caption.has_hotkey() {
+            format.set_hotkey(
+                match () {
+                    _ if !self.is_enabled() => theme.button.hotkey.inactive,
+                    _ if self.has_focus() => theme.button.hotkey.focused,
+                    _ if self.is_mouse_over() => theme.button.hotkey.hovered,
+                    _ => theme.button.hotkey.normal,
+                },
+                self.caption.hotkey_pos().unwrap() as u32,
+            );
+        }
+        surface.clear(Character::with_attributes(' ', col_text));
+        surface.write_text(self.caption.text(), &format);
+    }
+    fn paint_raised(&self, surface: &mut Surface, theme: &Theme) {
     }
 }
 impl OnDefaultAction for Button {
@@ -91,46 +162,10 @@ impl OnKeyPressed for Button {
 
 impl OnPaint for Button {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let col_text = match () {
-            _ if !self.is_enabled() => theme.button.text.inactive,
-            _ if self.has_focus() => theme.button.text.focused,
-            _ if self.is_mouse_over() => theme.button.text.hovered,
-            _ => theme.button.text.normal,
-        };
-        let flat = self.button_type == super::Type::Flat;
-        let w = if flat { self.size().width } else { self.size().width - 1 };
-        let x = (w / 2) as i32;
-        let mut format = TextFormatBuilder::new()
-            .position(x, 0)
-            .attribute(col_text)
-            .align(TextAlignment::Center)
-            .chars_count(self.caption.chars_count() as u16)
-            .wrap_type(WrapType::SingleLineWrap(w as u16))
-            .build();
-
-        if self.caption.has_hotkey() {
-            format.set_hotkey(
-                match () {
-                    _ if !self.is_enabled() => theme.button.hotkey.inactive,
-                    _ if self.has_focus() => theme.button.hotkey.focused,
-                    _ if self.is_mouse_over() => theme.button.hotkey.hovered,
-                    _ => theme.button.hotkey.normal,
-                },
-                self.caption.hotkey_pos().unwrap() as u32,
-            );
-        }
-        if flat {
-            surface.clear(Character::with_attributes(' ', col_text));
-            surface.write_text(self.caption.text(), &format);
-        } else if self.pressed {
-            surface.fill_horizontal_line_with_size(1, 0, w, Character::with_attributes(' ', col_text));
-            format.x += 1;
-            surface.write_text(self.caption.text(), &format);
-        } else {
-            surface.fill_horizontal_line_with_size(0, 0, w, Character::with_attributes(' ', col_text));
-            surface.write_text(self.caption.text(), &format);
-            surface.fill_horizontal_line_with_size(1, 1, w, Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow));
-            surface.write_char(w as i32, 0, Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow));
+        match self.button_type {
+            Type::Normal => self.paint_normal(surface, theme),
+            Type::Flat => self.paint_flat(surface, theme),
+            Type::Raised => self.paint_raised(surface, theme),
         }
     }
 }
