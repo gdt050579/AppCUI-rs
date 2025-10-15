@@ -1639,6 +1639,6 @@ fn check_bevel_rect() {
     s.draw_bevel_rect(Rect::new(1,7,18,11), LineType::Single, dark, light, true);
     s.draw_bevel_rect(Rect::new(23,1,38,5), LineType::Single, dark, light, false);
     s.draw_bevel_rect(Rect::new(23,7,38,11), LineType::Single, dark, light, true);
-    s.print(false);
+    //s.print(false);
     assert_eq!(s.compute_hash(), 0xEA0A386392D6725A);
 }

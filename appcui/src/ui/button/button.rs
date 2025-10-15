@@ -37,15 +37,19 @@ impl Button {
             button_type,
             pressed: false,
         };
-
-        if button_type == super::Type::Flat {
-            but.set_size_bounds(3, 1, u16::MAX, 1);
-        } else {
-            but.set_size_bounds(4, 2, u16::MAX, 2);
-        }
+        but.update_bounds_limits();
         let hotkey = but.caption.hotkey();
         but.set_hotkey(hotkey);
         but
+    }
+
+    fn update_bounds_limits(&mut self) {
+        let (min_w, min_h) = match self.button_type {
+            Type::Normal => (4, 2),
+            Type::Flat => (4, 2),
+            Type::Raised => (5, 3),
+        };
+        self.set_size_bounds(min_w, min_h, u16::MAX, min_h);
     }
 
     /// Sets the caption of a button. Using `&` in the provided text followed by a letter or a number will automatically assign Alt+**<number|letter>** hotkey to that button.
@@ -137,6 +141,7 @@ impl Button {
         surface.write_text(self.caption.text(), &format);
     }
     fn paint_raised(&self, surface: &mut Surface, theme: &Theme) {
+
     }
 }
 impl OnDefaultAction for Button {
