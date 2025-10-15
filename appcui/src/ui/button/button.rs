@@ -154,6 +154,7 @@ impl Button {
         let focus = self.has_focus();
         let col_text = match () {
             _ if !enabled => theme.button.bevel.text.inactive,
+            _ if self.pressed => theme.button.bevel.text.pressed_or_selectd,
             _ if focus => theme.button.bevel.text.focused,
             _ if self.is_mouse_over() => theme.button.bevel.text.hovered,
             _ => theme.button.bevel.text.normal,
@@ -172,6 +173,7 @@ impl Button {
             format.set_hotkey(
                 match () {
                     _ if !enabled => theme.button.bevel.hotkey.inactive,
+                    _ if self.pressed => theme.button.bevel.hotkey.pressed_or_selectd,
                     _ if focus => theme.button.bevel.hotkey.focused,
                     _ if self.is_mouse_over() => theme.button.bevel.hotkey.hovered,
                     _ => theme.button.bevel.hotkey.normal,

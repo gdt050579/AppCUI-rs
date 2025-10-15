@@ -77,9 +77,9 @@ pub(crate) fn new() -> Theme {
                 shadow: charattr!("black"),
             },
             bevel: BevelButtonTheme {
-                text: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
-                hotkey: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
-                dark_margin: charattr!("black"),
+                text: controlattr!("silver", "w", "y", "gray", "silver"),
+                hotkey: controlattr!("silver,flags: underline", "w,flags: underline", "gray,flags: underline", "gray", "silver,flags: underline"),
+                dark_margin: charattr!("gray"),
                 light_margin: charattr!("white"),
             },
         },
