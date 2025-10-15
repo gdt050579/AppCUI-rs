@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use super::image::Glyph;
 use super::BitTile;
 use super::BitTileRenderMethod;
 use super::CharAttribute;
@@ -7,7 +8,6 @@ use super::Character;
 use super::ClipArea;
 use super::Color;
 use super::Cursor;
-use super::image::Glyph;
 use super::Image;
 use super::LineType;
 use super::OrthogonalDirection;
@@ -906,6 +906,52 @@ impl Surface {
         self.write_char(left, bottom, ch);
     }
 
+    /// Draws a beveled rectangle with the specified character type, color and attributes. If the rectangle is outside the clip area, it will not be drawn.
+    /// The `raised` parameter specifies if the rectangle should appear raised or sunken.
+    ///
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::*;
+    ///
+    /// let mut surface = Surface::new(100, 50);
+    /// let r = Rect::new(10, 10, 20, 20);
+    /// surface.draw_bevel_rect(r,
+    ///                         LineType::Single,
+    ///                         charattr!("black,transparent"),
+    ///                         charattr!("white,transparent"),
+    ///                         true);
+    /// ```
+    pub fn draw_bevel_rect(&mut self, rect: Rect, line_type: LineType, dark: CharAttribute, light: CharAttribute, raised: bool) {
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
+
+        let line_chars = line_type.charset();
+
+        // light part
+        let mut ch = Character::with_attributes(' ', if raised { light } else { dark });
+        ch.code = line_chars.horizontal_on_top;
+        self.fill_horizontal_line(left, top, right, ch);
+        ch.code = line_chars.vertical_on_left;
+        self.fill_vertical_line(left, top, bottom, ch);
+        ch.code = line_chars.corner_top_left;
+        self.write_char(left, top, ch);
+        ch.code = line_chars.corner_bottom_left;
+        self.write_char(left, bottom, ch);
+
+        // dark part
+        ch = Character::with_attributes(' ', if raised { dark } else { light });
+        ch.code = line_chars.horizontal_on_bottom;
+        self.fill_horizontal_line(left + 1, bottom, right, ch); // +1 to avoid overwrite the bottom_left corner
+        ch.code = line_chars.vertical_on_right;
+        self.fill_vertical_line(right, top, bottom, ch);
+        ch.code = line_chars.corner_top_right;
+        self.write_char(right, top, ch);
+        ch.code = line_chars.corner_bottom_right;
+        self.write_char(right, bottom, ch);
+    }
+
     /// Fills a rectangle with the specified character type, color and attributes. If the rectangle is outside the clip area, it will not be drawn.
     ///
     /// Example:
@@ -944,7 +990,7 @@ impl Surface {
     }
 
     /// Draws a glyph at the specified position. If the glyph is outside the clip area, it will not be drawn.
-    /// 
+    ///
     /// # Parameters
     /// - `x`: The x-coordinate of the position to draw the glyph at.
     /// - `y`: The y-coordinate of the position to draw the glyph at.
