@@ -46,7 +46,7 @@ impl Button {
     fn update_bounds_limits(&mut self) {
         let (min_w, min_h) = match self.button_type {
             Type::Normal => (4, 2),
-            Type::Flat => (4, 2),
+            Type::Flat => (3, 1),
             Type::Raised => (5, 3),
         };
         self.set_size_bounds(min_w, min_h, u16::MAX, min_h);

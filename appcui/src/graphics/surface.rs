@@ -911,7 +911,7 @@ impl Surface {
     ///
     /// Example:
     /// ```rust
-    /// use appcui::graphics::*;
+    /// use appcui::prelude::*;
     ///
     /// let mut surface = Surface::new(100, 50);
     /// let r = Rect::new(10, 10, 20, 20);
