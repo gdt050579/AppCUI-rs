@@ -4,9 +4,10 @@ Represent a clickable button control:
 
 <img src="img/button.png" width=300/>
 
-To create a button use `Button::new` method (with 3 parameters: a caption, a layout and initialization flags).
+To create a button use `Button::new` method (with 2 parameters: a caption, a layout) or method `Button::with_type` with 3 parameters (a caption, a layout and the button type).
 ```rs
-let b = Button::new("&Start", layout!("x:10,y:5,w:15"),button::Flags::None);
+let b1 = Button::new("&Start", layout!("x:10,y:5,w:15"));
+let b2 = Button::with_type("&Start", layout!("x:10,y:5,w:15"),button::Type::Flat);
 ```
 or the macro `button!`
 ```rs
@@ -83,8 +84,8 @@ impl MyWin {
             reset: Handle::None,
             counter: 0,
         };
-        win.add = win.add(Button::new("Add (0)", layout!("x:25%,y:2,w:13,d:f"), button::Type::Normal));
-        win.reset = win.add(Button::new("&Reset", layout!("x:75%,y:2,w:13,d:f",), button::Type::Normal));
+        win.add = win.add(Button::new("Add (0)", layout!("x:25%,y:2,w:13,d:f")));
+        win.reset = win.add(Button::new("&Reset", layout!("x:75%,y:2,w:13,d:f")));
         win
     }
     fn update_add_button_caption(&mut self) {
