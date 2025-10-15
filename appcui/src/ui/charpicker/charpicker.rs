@@ -362,10 +362,10 @@ impl OnPaint for CharPicker {
         // first paint the header
         let size = self.size();
         let col_text = match () {
-            _ if !self.is_enabled() => theme.button.text.inactive,
-            _ if self.has_focus() => theme.button.text.focused,
-            _ if self.is_mouse_over() => theme.button.text.hovered,
-            _ => theme.button.text.normal,
+            _ if !self.is_enabled() => theme.button.regular.text.inactive,
+            _ if self.has_focus() => theme.button.regular.text.focused,
+            _ if self.is_mouse_over() => theme.button.regular.text.hovered,
+            _ => theme.button.regular.text.normal,
         };
 
         let space_char = Character::with_attributes(' ', col_text);

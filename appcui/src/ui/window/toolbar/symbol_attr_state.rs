@@ -46,18 +46,18 @@ impl SymbolAttrState {
     #[inline(always)]
     pub(super) fn button_attr(&self, theme: &Theme) -> CharAttribute {
         match self {
-            SymbolAttrState::Hovered => theme.button.text.hovered,
+            SymbolAttrState::Hovered => theme.button.regular.text.hovered,
             SymbolAttrState::Normal => theme.text.normal,
-            SymbolAttrState::Pressed => theme.button.text.pressed_or_selectd,
+            SymbolAttrState::Pressed => theme.button.regular.text.pressed_or_selectd,
             SymbolAttrState::Inactive => theme.text.inactive,
         }
     }
     #[inline(always)]
     pub(super) fn hotkey_attr(&self, theme: &Theme) -> CharAttribute {
         match self {
-            SymbolAttrState::Hovered => theme.button.text.hovered,
+            SymbolAttrState::Hovered => theme.button.regular.text.hovered,
             SymbolAttrState::Normal => theme.text.hot_key,
-            SymbolAttrState::Pressed => theme.button.text.pressed_or_selectd,
+            SymbolAttrState::Pressed => theme.button.regular.text.pressed_or_selectd,
             SymbolAttrState::Inactive => theme.text.inactive,
         }
     }

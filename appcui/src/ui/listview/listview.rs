@@ -1133,7 +1133,7 @@ where
                             surface.fill_horizontal_line_with_size(x, y, item_size, Character::with_attributes(0, theme.list_current_item.focus));
                         }
                         if idx == hover_pos {
-                            surface.fill_horizontal_line(hover_left, y, hover_right, Character::with_attributes(0, theme.button.text.hovered));
+                            surface.fill_horizontal_line(hover_left, y, hover_right, Character::with_attributes(0, theme.button.regular.text.hovered));
                         }
                     }
                 }
@@ -1386,7 +1386,7 @@ where
                         if idx == hover_pos {
                             surface.reset_clip();
                             surface.reset_origin();
-                            surface.write_char(hover_checkmark_x, y, Character::with_attributes(0, theme.button.text.hovered));
+                            surface.write_char(hover_checkmark_x, y, Character::with_attributes(0, theme.button.regular.text.hovered));
                         }
                     }
                 }

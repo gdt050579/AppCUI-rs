@@ -72,10 +72,10 @@ impl Button {
 
     fn paint_normal(&self, surface: &mut Surface, theme: &Theme) {
         let col_text = match () {
-            _ if !self.is_enabled() => theme.button.text.inactive,
-            _ if self.has_focus() => theme.button.text.focused,
-            _ if self.is_mouse_over() => theme.button.text.hovered,
-            _ => theme.button.text.normal,
+            _ if !self.is_enabled() => theme.button.regular.text.inactive,
+            _ if self.has_focus() => theme.button.regular.text.focused,
+            _ if self.is_mouse_over() => theme.button.regular.text.hovered,
+            _ => theme.button.regular.text.normal,
         };
         let w = self.size().width.saturating_sub(1);
         let x = (w / 2) as i32;
@@ -90,10 +90,10 @@ impl Button {
         if self.caption.has_hotkey() {
             format.set_hotkey(
                 match () {
-                    _ if !self.is_enabled() => theme.button.hotkey.inactive,
-                    _ if self.has_focus() => theme.button.hotkey.focused,
-                    _ if self.is_mouse_over() => theme.button.hotkey.hovered,
-                    _ => theme.button.hotkey.normal,
+                    _ if !self.is_enabled() => theme.button.regular.hotkey.inactive,
+                    _ if self.has_focus() => theme.button.regular.hotkey.focused,
+                    _ if self.is_mouse_over() => theme.button.regular.hotkey.hovered,
+                    _ => theme.button.regular.hotkey.normal,
                 },
                 self.caption.hotkey_pos().unwrap() as u32,
             );
@@ -105,16 +105,25 @@ impl Button {
         } else {
             surface.fill_horizontal_line_with_size(0, 0, w, Character::with_attributes(' ', col_text));
             surface.write_text(self.caption.text(), &format);
-            surface.fill_horizontal_line_with_size(1, 1, w, Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.shadow));
-            surface.write_char(w as i32, 0, Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.shadow));
+            surface.fill_horizontal_line_with_size(
+                1,
+                1,
+                w,
+                Character::with_attributes(SpecialChar::BlockUpperHalf, theme.button.regular.shadow),
+            );
+            surface.write_char(
+                w as i32,
+                0,
+                Character::with_attributes(SpecialChar::BlockLowerHalf, theme.button.regular.shadow),
+            );
         }
     }
     fn paint_flat(&self, surface: &mut Surface, theme: &Theme) {
         let col_text = match () {
-            _ if !self.is_enabled() => theme.button.text.inactive,
-            _ if self.has_focus() => theme.button.text.focused,
-            _ if self.is_mouse_over() => theme.button.text.hovered,
-            _ => theme.button.text.normal,
+            _ if !self.is_enabled() => theme.button.regular.text.inactive,
+            _ if self.has_focus() => theme.button.regular.text.focused,
+            _ if self.is_mouse_over() => theme.button.regular.text.hovered,
+            _ => theme.button.regular.text.normal,
         };
         let w = self.size().width;
         let x = (w / 2) as i32;
@@ -129,10 +138,10 @@ impl Button {
         if self.caption.has_hotkey() {
             format.set_hotkey(
                 match () {
-                    _ if !self.is_enabled() => theme.button.hotkey.inactive,
-                    _ if self.has_focus() => theme.button.hotkey.focused,
-                    _ if self.is_mouse_over() => theme.button.hotkey.hovered,
-                    _ => theme.button.hotkey.normal,
+                    _ if !self.is_enabled() => theme.button.regular.hotkey.inactive,
+                    _ if self.has_focus() => theme.button.regular.hotkey.focused,
+                    _ if self.is_mouse_over() => theme.button.regular.hotkey.hovered,
+                    _ => theme.button.regular.hotkey.normal,
                 },
                 self.caption.hotkey_pos().unwrap() as u32,
             );
@@ -144,10 +153,10 @@ impl Button {
         let enabled = self.is_enabled();
         let focus = self.has_focus();
         let col_text = match () {
-            _ if !enabled => theme.text.inactive,
-            _ if focus => theme.text.focused,
-            _ if self.is_mouse_over() => theme.text.hovered,
-            _ => theme.text.normal
+            _ if !enabled => theme.button.bevel.text.inactive,
+            _ if focus => theme.button.bevel.text.focused,
+            _ if self.is_mouse_over() => theme.button.bevel.text.hovered,
+            _ => theme.button.bevel.text.normal,
         };
         let w = self.size().width;
         let x = (w / 2) as i32;
@@ -162,10 +171,10 @@ impl Button {
         if self.caption.has_hotkey() {
             format.set_hotkey(
                 match () {
-                    _ if !enabled => theme.text.inactive,
-                    _ if focus => theme.text.hot_key,
-                    _ if self.is_mouse_over() => theme.text.hovered,
-                    _ => theme.text.hot_key,
+                    _ if !enabled => theme.button.bevel.hotkey.inactive,
+                    _ if focus => theme.button.bevel.hotkey.focused,
+                    _ if self.is_mouse_over() => theme.button.bevel.hotkey.hovered,
+                    _ => theme.button.bevel.hotkey.normal,
                 },
                 self.caption.hotkey_pos().unwrap() as u32,
             );
@@ -173,7 +182,13 @@ impl Button {
         surface.write_text(self.caption.text(), &format);
         if enabled {
             let r = Rect::with_point_and_size(Point::ORIGIN, self.size());
-            surface.draw_bevel_rect(r, LineType::SingleRound, theme.button.shadow, theme.button.light, !self.pressed);
+            surface.draw_bevel_rect(
+                r,
+                LineType::SingleRound,
+                theme.button.bevel.dark_margin,
+                theme.button.bevel.light_margin,
+                !self.pressed,
+            );
         }
     }
 }
