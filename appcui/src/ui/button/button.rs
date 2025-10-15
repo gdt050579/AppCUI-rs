@@ -141,7 +141,40 @@ impl Button {
         surface.write_text(self.caption.text(), &format);
     }
     fn paint_raised(&self, surface: &mut Surface, theme: &Theme) {
+        let enabled = self.is_enabled();
+        let focus = self.has_focus();
+        let col_text = match () {
+            _ if !enabled => theme.text.inactive,
+            _ if focus => theme.text.focused,
+            _ if self.is_mouse_over() => theme.text.hovered,
+            _ => theme.text.normal
+        };
+        let w = self.size().width;
+        let x = (w / 2) as i32;
+        let mut format = TextFormatBuilder::new()
+            .position(x, 1)
+            .attribute(col_text)
+            .align(TextAlignment::Center)
+            .chars_count(self.caption.chars_count() as u16)
+            .wrap_type(WrapType::SingleLineWrap((w as u16).saturating_sub(2)))
+            .build();
 
+        if self.caption.has_hotkey() {
+            format.set_hotkey(
+                match () {
+                    _ if !enabled => theme.text.inactive,
+                    _ if focus => theme.text.hot_key,
+                    _ if self.is_mouse_over() => theme.text.hovered,
+                    _ => theme.text.hot_key,
+                },
+                self.caption.hotkey_pos().unwrap() as u32,
+            );
+        }
+        surface.write_text(self.caption.text(), &format);
+        if enabled {
+            let r = Rect::with_point_and_size(Point::ORIGIN, self.size());
+            surface.draw_bevel_rect(r, LineType::SingleRound, theme.button.shadow, theme.button.light, !self.pressed);
+        }
     }
 }
 impl OnDefaultAction for Button {

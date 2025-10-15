@@ -5,22 +5,25 @@ struct MyWin {
     b1: Handle<Button>,
     b2: Handle<Button>,
     b3: Handle<Button>,
+    b4: Handle<Button>,
     lb: Handle<Label>,
 }
 
 impl MyWin {
     fn new() -> Self {
         let mut win = MyWin {
-            base: Window::new("Buttons example", layout!("a:c,w:40,h:7"), window::Flags::None),
+            base: Window::new("Buttons example", layout!("a:c,w:60,h:7"), window::Flags::None),
             //..Default::default()
             b1: Handle::None,
             b2: Handle::None,
             b3: Handle::None,
+            b4: Handle::None,
             lb: Handle::None,
         };
         win.b1 = win.add(button!("&Button,x:2,y:2,w:15"));
         win.b2 = win.add(button!("'&Inactive',x:19,y:2,w:15,enabled:false"));
         win.b3 = win.add(button!("&Flat,x:2,y:4,w:32,type:flat"));
+        win.b4 = win.add(button!("&Raised,x:36,y:2,w:20,type:raised"));
         win.lb = win.add(Label::new("",layout!("x:2,y:0,w:35")));
         win
     }

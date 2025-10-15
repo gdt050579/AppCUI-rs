@@ -75,6 +75,7 @@ pub struct ButtonTheme {
     pub text: ControlCharAttributesState,
     pub hotkey: ControlCharAttributesState,
     pub shadow: CharAttribute,
+    pub light: CharAttribute,
 }
 #[derive(Default)]
 pub struct TabTheme {

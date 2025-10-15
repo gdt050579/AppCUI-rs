@@ -74,6 +74,7 @@ pub(crate) fn new() -> Theme {
             text: controlattr!("black,silver", "black,gray", "black,y", "gray,black", "black,olive"),
             hotkey: controlattr!("magenta,silver", "dr,gray", "magenta,y", "gray,black", "dr,olive"),
             shadow: charattr!("black"),
+            light: charattr!("white"),
         },
         tab: TabTheme {
             text: controlattr!("black,white", "black,silver", "black,gray", "gray,?", "black,silver"),
