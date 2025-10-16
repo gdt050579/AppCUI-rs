@@ -7,6 +7,19 @@ pub struct Panel {
     panel_type: Type,
 }
 impl Panel {
+    /// Creates a new Panel control with the specified caption and layout.
+    /// The type of the panel will be obtained from the current theme.
+    /// 
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let mut panel = Panel::new("Panel",
+    ///                            layout!("x:1,y:1,w:20,h:10"));
+    /// ```
+    pub fn new(caption: &str, layout: Layout) -> Self {
+        Self::inner_create(caption, layout, Type::Border, StatusFlags::ThemeType)
+    }
     /// Creates a new Panel control with the specified caption, layout and type.
     /// The panel type is one of the following values:
     /// * `Type::Border` - a panel with a border around it
@@ -18,24 +31,33 @@ impl Panel {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut panel = Panel::new("Panel", 
-    ///                            layout!("x:1,y:1,w:20,h:10"), 
-    ///                            panel::Type::Border);
+    /// let mut panel = Panel::with_type("Panel",
+    ///                                  layout!("x:1,y:1,w:20,h:10"),
+    ///                                  panel::Type::Border);
     /// ```
-    pub fn new(caption: &str, layout: Layout, panel_type: Type) -> Self {
+    pub fn with_type(caption: &str, layout: Layout, panel_type: Type) -> Self {
+        Self::inner_create(caption, layout, panel_type, StatusFlags::None)
+    }
+
+    pub fn inner_create(caption: &str, layout: Layout, panel_type: Type, status: StatusFlags) -> Self {
         let mut panel = Panel {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | status),
             caption: Caption::new(caption, ExtractHotKeyMethod::NoHotKey),
             panel_type,
         };
-        match panel_type {
-            Type::Border => panel.base.set_margins(1, 1, 1, 1),
-            Type::Window => panel.base.set_margins(1, 1, 1, 1),
-            Type::Page => {}
-            Type::TopBar => panel.base.set_margins(0, 1, 0, 0),
-        }
+        panel.update_margins();
         panel
     }
+
+    fn update_margins(&mut self) {
+        match self.panel_type {
+            Type::Border => self.base.set_margins(1, 1, 1, 1),
+            Type::Window => self.base.set_margins(1, 1, 1, 1),
+            Type::Page => self.base.set_margins(0, 0, 0, 0),
+            Type::TopBar => self.base.set_margins(0, 1, 0, 0),
+        }
+    }
+
     /// Sets the title of the panel. The title is displayed only if the panel type is `Type::Window` , `Type::TopBar` or
     pub fn set_title(&mut self, text: &str) {
         self.caption.set_text(text, ExtractHotKeyMethod::NoHotKey);
@@ -110,7 +132,7 @@ impl Panel {
                 .wrap_type(WrapType::SingleLineWrap((sz.width - 6) as u16))
                 .chars_count(chars_count as u16)
                 .build();
-            
+
             if chars_count > (sz.width - 6) as usize {
                 surface.write_text(self.caption.text(), &format);
                 surface.write_char(2, 0, Character::with_char(' '));

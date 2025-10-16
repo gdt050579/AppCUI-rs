@@ -20,9 +20,9 @@ impl RadioBox {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut panel = Panel::new("Radioboxes group",
-    ///                            layout!("x:1,y:1,w:20,h:10"),
-    ///                            panel::Type::Border);
+    /// let mut panel = Panel::with_type("Radioboxes group",
+    ///                                   layout!("x:1,y:1,w:20,h:10"),
+    ///                                   panel::Type::Border);
     /// panel.add(RadioBox::new("Select me &1", layout!("x:1,y:1,w:20,h:1"), false));
     /// panel.add(RadioBox::new("Select me &2", layout!("x:1,y:2,w:20,h:1"), false));
     /// panel.add(RadioBox::new("Select me &3", layout!("x:1,y:3,w:20,h:1"), true));
@@ -40,9 +40,9 @@ impl RadioBox {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut panel = Panel::new("Radioboxes group",
-    ///                            layout!("x:1,y:1,w:20,h:10"),
-    ///                            panel::Type::Border);
+    /// let mut panel = Panel::with_type("Radioboxes group",
+    ///                                  layout!("x:1,y:1,w:20,h:10"),
+    ///                                  panel::Type::Border);
     /// panel.add(RadioBox::with_type("Select me &1", layout!("x:1,y:1,w:20,h:1"), false, radiobox::Type::Circle));
     /// panel.add(RadioBox::with_type("Select me &2", layout!("x:1,y:1,w:20,h:1"), false, radiobox::Type::Diamond));
     /// panel.add(RadioBox::with_type("Select me &3", layout!("x:1,y:1,w:20,h:1"), true, radiobox::Type::Ascii));
