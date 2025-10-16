@@ -160,7 +160,7 @@ impl Button {
             _ => theme.button.bevel.text.normal,
         };
         let w = self.size().width;
-        let x = (w / 2) as i32;
+        let x = (w / 2) as i32 + if self.pressed { 1 } else { 0 };
         let mut format = TextFormatBuilder::new()
             .position(x, 1)
             .attribute(col_text)

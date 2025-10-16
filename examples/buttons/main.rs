@@ -46,7 +46,7 @@ impl ButtonEvents for MyWin {
         EventProcessStatus::Ignored
     }
 }
-
+    
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_os = "windows")]
     let mut app = App::with_backend(appcui::backend::Type::WindowsVT).color_schema(false).build()?;
