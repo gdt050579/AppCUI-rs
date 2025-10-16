@@ -182,8 +182,8 @@ impl Button {
             );
         }
         surface.write_text(self.caption.text(), &format);
+        let r = Rect::with_point_and_size(Point::ORIGIN, self.size());
         if enabled {
-            let r = Rect::with_point_and_size(Point::ORIGIN, self.size());
             surface.draw_bevel_rect(
                 r,
                 LineType::SingleRound,
@@ -191,6 +191,8 @@ impl Button {
                 theme.button.bevel.light_margin,
                 !self.pressed,
             );
+        } else {
+            surface.draw_rect(r, LineType::SingleRound, theme.button.bevel.text.inactive);
         }
     }
 }
