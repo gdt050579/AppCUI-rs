@@ -48,7 +48,7 @@ impl SymbolAttrState {
         match self {
             SymbolAttrState::Hovered => theme.button.regular.text.hovered,
             SymbolAttrState::Normal => theme.text.normal,
-            SymbolAttrState::Pressed => theme.button.regular.text.pressed_or_selectd,
+            SymbolAttrState::Pressed => theme.button.regular.text.pressed_or_selected,
             SymbolAttrState::Inactive => theme.text.inactive,
         }
     }
@@ -57,7 +57,7 @@ impl SymbolAttrState {
         match self {
             SymbolAttrState::Hovered => theme.button.regular.text.hovered,
             SymbolAttrState::Normal => theme.text.hot_key,
-            SymbolAttrState::Pressed => theme.button.regular.text.pressed_or_selectd,
+            SymbolAttrState::Pressed => theme.button.regular.text.pressed_or_selected,
             SymbolAttrState::Inactive => theme.text.inactive,
         }
     }

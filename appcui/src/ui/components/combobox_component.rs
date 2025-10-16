@@ -24,7 +24,7 @@ impl ButtonState {
             ButtonState::Normal => theme.menu.text.normal,
             ButtonState::Hovered => theme.menu.text.hovered,
             ButtonState::Inactive => theme.menu.text.inactive,
-            ButtonState::Pressed => theme.menu.text.pressed_or_selectd,
+            ButtonState::Pressed => theme.menu.text.pressed_or_selected,
         }
     }
     #[inline(always)]
@@ -381,7 +381,7 @@ where
                             1,
                             format.y,
                             (size.width - 2) as i32,
-                            Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
+                            Character::with_attributes(0, theme.menu.text.pressed_or_selected),
                         );
                     } else if i == self.mouse_index {
                         surface.fill_horizontal_line(

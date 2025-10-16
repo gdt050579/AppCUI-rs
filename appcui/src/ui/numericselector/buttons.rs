@@ -19,7 +19,7 @@ impl ButtonState {
                 ButtonState::Normal => theme.button.regular.text.normal,
                 ButtonState::Hovered => theme.button.regular.text.hovered,
                 ButtonState::Inactive => theme.button.regular.text.inactive,
-                ButtonState::Pressed => theme.button.regular.text.pressed_or_selectd,
+                ButtonState::Pressed => theme.button.regular.text.pressed_or_selected,
             }
         } else {
             theme.button.regular.text.inactive

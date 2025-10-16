@@ -275,7 +275,7 @@ impl TimePicker {
         let buf: [u8; 2] = [48 + num / 10, 48 + num % 10];
         let (attr, show_cursor) = if has_focus {
             if comp == self.selected_component {
-                (theme.editor.pressed_or_selectd, true)
+                (theme.editor.pressed_or_selected, true)
             } else if Some(comp) == self.hovered_component {
                 (theme.editor.hovered, false)
             } else {
@@ -327,7 +327,7 @@ impl OnPaint for TimePicker {
             x += 1;
             let attr = if has_focus {
                 if self.selected_component == TimeComponent::AmPm {
-                    theme.editor.pressed_or_selectd
+                    theme.editor.pressed_or_selected
                 } else if Some(TimeComponent::AmPm) == self.hovered_component {
                     theme.editor.hovered
                 } else {

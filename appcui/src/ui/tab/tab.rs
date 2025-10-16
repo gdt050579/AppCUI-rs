@@ -254,8 +254,8 @@ impl Tab {
     fn get_backattr(&self, theme: &Theme) -> CharAttribute {
         match () {
             _ if !self.is_enabled() => theme.tab.text.inactive,
-            _ if self.has_focus() => theme.tab.text.pressed_or_selectd,
-            _ => theme.tab.text.pressed_or_selectd,
+            _ if self.has_focus() => theme.tab.text.pressed_or_selected,
+            _ => theme.tab.text.pressed_or_selected,
         }
     }
     #[inline(always)]
@@ -270,7 +270,7 @@ impl Tab {
         if !self.is_enabled() {
             (theme.tab.text.inactive, theme.tab.hotkey.inactive)
         } else if idx == self.focused_child_index.index() {
-            (theme.tab.text.pressed_or_selectd, theme.tab.hotkey.pressed_or_selectd)
+            (theme.tab.text.pressed_or_selected, theme.tab.hotkey.pressed_or_selected)
         } else if let Some(hovered_idx) = self.hovered_page_idx {
             if hovered_idx == idx {
                 (theme.tab.text.hovered, theme.tab.hotkey.hovered)

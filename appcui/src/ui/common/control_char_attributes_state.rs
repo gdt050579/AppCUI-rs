@@ -5,5 +5,5 @@ pub struct ControlCharAttributesState {
     pub focused: CharAttribute,
     pub hovered: CharAttribute,
     pub inactive: CharAttribute,
-    pub pressed_or_selectd: CharAttribute,
+    pub pressed_or_selected: CharAttribute,
 }

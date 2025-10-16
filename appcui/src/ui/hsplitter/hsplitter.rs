@@ -218,7 +218,7 @@ impl OnPaint for HSplitter {
                 State::OverBottomButton => (theme.lines.normal, theme.symbol.arrows, theme.symbol.hovered),
                 State::ClickedOnTopButton => (theme.lines.normal, theme.symbol.pressed, theme.symbol.arrows),
                 State::ClickedOnBottomButton => (theme.lines.normal, theme.symbol.arrows, theme.symbol.pressed),
-                State::Dragging => (theme.lines.pressed_or_selectd, theme.symbol.arrows, theme.symbol.arrows),
+                State::Dragging => (theme.lines.pressed_or_selected, theme.symbol.arrows, theme.symbol.arrows),
                 State::None => (theme.lines.normal, theme.symbol.arrows, theme.symbol.arrows),
             }
         };

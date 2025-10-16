@@ -425,7 +425,7 @@ impl OnPaint for DatePicker {
                         day_col - 2,
                         day_row,
                         4,
-                        Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
+                        Character::with_attributes(0, theme.menu.text.pressed_or_selected),
                     );
                 } else if self.virtual_date.day() == day {
                     surface.fill_horizontal_line_with_size(day_col - 2, day_row, 4, Character::with_attributes(0, theme.menu.text.hovered));

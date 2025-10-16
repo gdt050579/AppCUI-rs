@@ -230,7 +230,7 @@ impl CharPicker {
         );
         let none_attr = match self.nav.mouse_pos {
             MousePos::HoverNone => theme.menu.text.hovered,
-            MousePos::PressNone => theme.menu.text.pressed_or_selectd,
+            MousePos::PressNone => theme.menu.text.pressed_or_selected,
             _ => theme.menu.text.normal,
         };
         surface.write_string(2, size.height as i32 - 2 + self.expanded_panel_y, "[None]", none_attr, false);
@@ -251,7 +251,7 @@ impl CharPicker {
         } else {
             match self.nav.mouse_pos {
                 MousePos::HoverLeftButton => theme.menu.text.hovered,
-                MousePos::PressLeftButton => theme.menu.text.pressed_or_selectd,
+                MousePos::PressLeftButton => theme.menu.text.pressed_or_selected,
                 _ => theme.menu.text.normal,
             }
         };
@@ -262,7 +262,7 @@ impl CharPicker {
         } else {
             match self.nav.mouse_pos {
                 MousePos::HoverRightButton => theme.menu.text.hovered,
-                MousePos::PressRightButton => theme.menu.text.pressed_or_selectd,
+                MousePos::PressRightButton => theme.menu.text.pressed_or_selected,
                 _ => theme.menu.text.normal,
             }
         };
@@ -284,7 +284,7 @@ impl CharPicker {
                     x * 3 + 1,
                     y + ofs_y,
                     3,
-                    Character::with_attributes(0 as char, theme.menu.text.pressed_or_selectd),
+                    Character::with_attributes(0 as char, theme.menu.text.pressed_or_selected),
                 );
             } else if idx == mouse_idx {
                 surface.fill_horizontal_line_with_size(x * 3 + 1, y + ofs_y, 3, Character::with_attributes(0 as char, theme.menu.text.hovered));

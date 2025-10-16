@@ -1327,7 +1327,7 @@ impl OnPaint for TextArea {
 
         let (attr_text, attr_selection) = match (){
             _ if !self.is_enabled() => (theme.editor.inactive, theme.editor.inactive),
-            _ if self.has_focus() => (theme.editor.focused, theme.editor.pressed_or_selectd),
+            _ if self.has_focus() => (theme.editor.focused, theme.editor.pressed_or_selected),
             _ if self.is_mouse_over() => (theme.editor.hovered, theme.editor.hovered),
             _ => (theme.editor.normal, theme.editor.normal)
         };

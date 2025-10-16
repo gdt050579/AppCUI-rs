@@ -24,7 +24,7 @@ impl Border {
             if status == ResizeMoveStatus::None {
                 (theme.border.focused, LineType::Double)
             } else {
-                (theme.border.pressed_or_selectd, LineType::Single)
+                (theme.border.pressed_or_selected, LineType::Single)
             }
         } else {
             (theme.border.normal, LineType::Single)
@@ -41,7 +41,7 @@ impl Border {
             if status == ResizeMoveStatus::None {
                 theme.border.focused
             } else {
-                theme.border.pressed_or_selectd
+                theme.border.pressed_or_selected
             }
         } else {
             theme.border.normal

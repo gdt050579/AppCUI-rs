@@ -52,7 +52,7 @@ impl Accordion {
         if !self.is_enabled() {
             (theme.accordion.text.inactive, theme.accordion.hotkey.inactive)
         } else if idx == self.focused_child_index.index() {
-            (theme.accordion.text.pressed_or_selectd, theme.accordion.hotkey.pressed_or_selectd)
+            (theme.accordion.text.pressed_or_selected, theme.accordion.hotkey.pressed_or_selected)
         } else if let Some(hovered_idx) = self.hovered_page_idx {
             if hovered_idx == idx {
                 (theme.accordion.text.hovered, theme.accordion.hotkey.hovered)
@@ -67,7 +67,7 @@ impl Accordion {
     fn backattr(&self, theme: &Theme) -> CharAttribute {
         match () {
             _ if !self.is_enabled() => theme.accordion.text.inactive,
-            _ => theme.tab.text.pressed_or_selectd,
+            _ => theme.tab.text.pressed_or_selected,
         }
     }
     fn mouse_position_to_index(&self, x: i32, y: i32) -> Option<usize> {
