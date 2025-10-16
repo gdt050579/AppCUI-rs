@@ -73,7 +73,7 @@ pub(crate) fn new() -> Theme {
         button: ButtonTheme {
             regular: RegularButtonTheme {
                 text: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
-                hotkey: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
+                hotkey: controlattr!("dr,gray", "magenta,w", "magenta,y", "gray,black", "dr,olive"),
                 shadow: charattr!("black"),
             },
             bevel: BevelButtonTheme {
