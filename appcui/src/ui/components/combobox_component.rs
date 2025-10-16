@@ -24,7 +24,7 @@ impl ButtonState {
             ButtonState::Normal => theme.menu.text.normal,
             ButtonState::Hovered => theme.menu.text.hovered,
             ButtonState::Inactive => theme.menu.text.inactive,
-            ButtonState::Pressed => theme.menu.text.pressed_or_selectd,
+            ButtonState::Pressed => theme.menu.text.pressed_or_selected,
         }
     }
     #[inline(always)]
@@ -251,10 +251,10 @@ where
         // first paint the header
         let size = control.size();
         let col_text = match () {
-            _ if !control.is_enabled() => theme.button.text.inactive,
-            _ if control.has_focus() => theme.button.text.focused,
-            _ if control.is_mouse_over() => theme.button.text.hovered,
-            _ => theme.button.text.normal,
+            _ if !control.is_enabled() => theme.button.regular.text.inactive,
+            _ if control.has_focus() => theme.button.regular.text.focused,
+            _ if control.is_mouse_over() => theme.button.regular.text.hovered,
+            _ => theme.button.regular.text.normal,
         };
 
         let space_char = Character::with_attributes(' ', col_text);
@@ -381,7 +381,7 @@ where
                             1,
                             format.y,
                             (size.width - 2) as i32,
-                            Character::with_attributes(0, theme.menu.text.pressed_or_selectd),
+                            Character::with_attributes(0, theme.menu.text.pressed_or_selected),
                         );
                     } else if i == self.mouse_index {
                         surface.fill_horizontal_line(

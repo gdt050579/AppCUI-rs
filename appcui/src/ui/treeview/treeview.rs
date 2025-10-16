@@ -755,7 +755,7 @@ where
                             hover_checkmark_x,
                             y,
                             self.fold_sign_with as u32,
-                            Character::with_attributes(0, theme.button.text.hovered),
+                            Character::with_attributes(0, theme.button.regular.text.hovered),
                         );
                     }
                 }

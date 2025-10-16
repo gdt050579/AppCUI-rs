@@ -697,9 +697,9 @@ where
         surface.clear(Character::with_attributes(' ', attr));
         // paint
         if control.has_focus() {
-            self.paint_textbox_in_focus(surface, attr, theme.editor.pressed_or_selectd);
+            self.paint_textbox_in_focus(surface, attr, theme.editor.pressed_or_selected);
             if control.is_expanded() {
-                self.paint_suggestions_area(control, surface, attr, theme.editor.pressed_or_selectd);
+                self.paint_suggestions_area(control, surface, attr, theme.editor.pressed_or_selected);
             }
         } else {
             self.paint_textbox_out_of_focus(surface, theme);

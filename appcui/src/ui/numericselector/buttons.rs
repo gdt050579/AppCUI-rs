@@ -16,13 +16,13 @@ impl ButtonState {
     fn color(&self, theme: &Theme, is_enable: bool) -> CharAttribute {
         if is_enable {
             match self {
-                ButtonState::Normal => theme.button.text.normal,
-                ButtonState::Hovered => theme.button.text.hovered,
-                ButtonState::Inactive => theme.button.text.inactive,
-                ButtonState::Pressed => theme.button.text.pressed_or_selectd,
+                ButtonState::Normal => theme.button.regular.text.normal,
+                ButtonState::Hovered => theme.button.regular.text.hovered,
+                ButtonState::Inactive => theme.button.regular.text.inactive,
+                ButtonState::Pressed => theme.button.regular.text.pressed_or_selected,
             }
         } else {
-            theme.button.text.inactive
+            theme.button.regular.text.inactive
         }
     }
     #[inline(always)]

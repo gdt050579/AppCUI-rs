@@ -61,7 +61,7 @@ impl Panel {
     /// use appcui::prelude::*;
     ///
     /// let mut panel = Panel::new("Panel", layout!("x:1,y:1,w:10,h:10"), panel::Type::Border);
-    /// let handle_button = panel.add(Button::new("Button", layout!("x:1,y:1,w:8"), button::Type::Normal));
+    /// let handle_button = panel.add(Button::new("Button", layout!("x:1,y:1,w:8")));
     /// ```
     #[inline(always)]
     pub fn add<T>(&mut self, control: T) -> Handle<T>
@@ -129,7 +129,7 @@ impl Panel {
     fn paint_page(&self, surface: &mut Surface, theme: &Theme) {
         // title si ignored
         if self.is_enabled() {
-            surface.clear(Character::with_attributes(' ', theme.tab.text.pressed_or_selectd));
+            surface.clear(Character::with_attributes(' ', theme.tab.text.pressed_or_selected));
         } else {
             surface.clear(Character::with_char(' '));
         }
@@ -138,7 +138,7 @@ impl Panel {
     fn paint_topbar(&self, surface: &mut Surface, theme: &Theme) {
         let sz = self.size();
         if self.is_enabled() {
-            surface.clear(Character::with_attributes(' ', theme.tab.text.pressed_or_selectd));
+            surface.clear(Character::with_attributes(' ', theme.tab.text.pressed_or_selected));
             surface.fill_horizontal_line(0, 0, sz.width as i32, Character::with_attributes(' ', theme.tab.text.normal))
         } else {
             surface.clear(Character::with_char(' '));

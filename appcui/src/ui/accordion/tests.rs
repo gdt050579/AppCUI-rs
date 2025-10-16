@@ -213,11 +213,11 @@ fn check_panel_caption_methods() {
             acc.add_panel("Panel &4");
 
             // Add some content to each panel
-            acc.add(0, Button::new("P1", layout!("x:2,y:2,w:20"), button::Type::Flat));
-            acc.add(1, Button::new("P2", layout!("x:2,y:2,w:20"), button::Type::Flat));
-            acc.add(2, Button::new("Pa", layout!("x:2,y:2,w:10"), button::Type::Flat));
-            acc.add(2, Button::new("Pb", layout!("x:14,y:2,w:10"), button::Type::Flat));
-            acc.add(3, Button::new("PX", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(0, Button::with_type("P1", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(1, Button::with_type("P2", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(2, Button::with_type("Pa", layout!("x:2,y:2,w:10"), button::Type::Flat));
+            acc.add(2, Button::with_type("Pb", layout!("x:14,y:2,w:10"), button::Type::Flat));
+            acc.add(3, Button::with_type("PX", layout!("x:2,y:2,w:20"), button::Type::Flat));
 
             // Create a label to display panel information
             let l = Label::new("", layout!("x:1,y:12,w:70,h:2"));
@@ -375,11 +375,11 @@ fn check_events() {
             acc.add_panel("Panel &4");
 
             // Add some content to each panel
-            acc.add(0, Button::new("P1", layout!("x:2,y:2,w:20"), button::Type::Flat));
-            acc.add(1, Button::new("P2", layout!("x:2,y:2,w:20"), button::Type::Flat));
-            acc.add(2, Button::new("Pa", layout!("x:2,y:2,w:10"), button::Type::Flat));
-            acc.add(2, Button::new("Pb", layout!("x:14,y:2,w:10"), button::Type::Flat));
-            acc.add(3, Button::new("PX", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(0, Button::with_type("P1", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(1, Button::with_type("P2", layout!("x:2,y:2,w:20"), button::Type::Flat));
+            acc.add(2, Button::with_type("Pa", layout!("x:2,y:2,w:10"), button::Type::Flat));
+            acc.add(2, Button::with_type("Pb", layout!("x:14,y:2,w:10"), button::Type::Flat));
+            acc.add(3, Button::with_type("PX", layout!("x:2,y:2,w:20"), button::Type::Flat));
 
             // Create a label to display panel information
             let l = Label::new("", layout!("x:1,y:12,w:70,h:2"));

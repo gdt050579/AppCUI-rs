@@ -1,6 +1,6 @@
-use appcui_proc_macro::*;
 use super::structures::*;
 use crate::{controlattr, graphics::*, ui::common::ControlCharAttributesState};
+use appcui_proc_macro::*;
 
 pub(crate) fn new() -> Theme {
     Theme {
@@ -65,15 +65,23 @@ pub(crate) fn new() -> Theme {
                 close_button: charattr!("red,transparent"),
                 maximize_button: charattr!("black,transparent"),
                 tag: charattr!("silver,transparent"),
-                hotkey: charattr!("dr,transparent"),                
-            },            
+                hotkey: charattr!("dr,transparent"),
+            },
         },
         border: controlattr!("black", "black", "black", "gray", "black,silver"),
         lines: controlattr!("black", "black", "w", "gray", "black,silver"),
         button: ButtonTheme {
-            text: controlattr!("black,silver", "black,w", "black,w", "gray,black", "black,silver"),
-            hotkey: controlattr!("white,silver", "black,w", "black,w", "gray,black", "white,silver"),
-            shadow: charattr!("black"),
+            regular: RegularButtonTheme {
+                text: controlattr!("black,silver", "black,w", "black,w", "gray,black", "black,silver"),
+                hotkey: controlattr!("white,silver", "black,w", "black,w", "gray,black", "white,silver"),
+                shadow: charattr!("black"),
+            },
+            bevel: BevelButtonTheme {
+                text: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
+                hotkey: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
+                dark_margin: charattr!("black"),
+                light_margin: charattr!("silver"),
+            },
         },
         tab: TabTheme {
             text: controlattr!("black,gray", "w,gray", "black,white", "gray,?", "black,silver"),
@@ -100,7 +108,13 @@ pub(crate) fn new() -> Theme {
         },
         header: HeaderTheme {
             text: controlattr!("black,silver", "black,silver", "black,white", "gray", "black,silver"),
-            hotkey: controlattr!("w,silver,flags: Underline", "w,silver,flags: Underline", "w,silver,flags: Underline", "gray", "w,silver,flags: Underline"), 
+            hotkey: controlattr!(
+                "w,silver,flags: Underline",
+                "w,silver,flags: Underline",
+                "w,silver,flags: Underline",
+                "gray",
+                "w,silver,flags: Underline"
+            ),
             symbol: controlattr!("black,silver", "black,silver", "black,white", "gray", "black,silver"),
         },
         toggle_button: ToggleButtonTheme {
@@ -120,8 +134,8 @@ pub(crate) fn new() -> Theme {
             ordered_list: charattr!("black"),
             unordered_list: charattr!("black"),
             table: charattr!("black"),
-            table_header: charattr!("black, flags: Bold")
-        },               
+            table_header: charattr!("black, flags: Bold"),
+        },
         progressbar: ProgressBarTheme {
             background: Color::Black,
             progress: Color::Gray,

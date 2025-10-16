@@ -134,8 +134,8 @@ impl ColumnsHeader {
                 } else if index == self.selected_column_index as usize {
                     c.paint(
                         surface,
-                        theme.header.text.pressed_or_selectd,
-                        theme.header.hotkey.pressed_or_selectd,
+                        theme.header.text.pressed_or_selected,
+                        theme.header.hotkey.pressed_or_selected,
                         true,
                     );
                     surface.write_char(
@@ -147,7 +147,7 @@ impl ColumnsHeader {
                             } else {
                                 SpecialChar::ArrowDown
                             },
-                            theme.header.symbol.pressed_or_selectd,
+                            theme.header.symbol.pressed_or_selected,
                         ),
                     );
                 } else {
@@ -199,7 +199,7 @@ impl ColumnsHeader {
                     LineType::Single
                 };
                 if index == self.selected_column_line_index as usize {
-                    surface.draw_vertical_line(r, 0, height, line_type, theme.lines.pressed_or_selectd);
+                    surface.draw_vertical_line(r, 0, height, line_type, theme.lines.pressed_or_selected);
                 } else if index == hovered_index {
                     surface.draw_vertical_line(r, 0, height, line_type, theme.lines.hovered);
                 } else {

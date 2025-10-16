@@ -71,10 +71,23 @@ pub struct WindowTheme {
     pub bar: WindowBar,
 }
 #[derive(Default)]
-pub struct ButtonTheme {
+pub struct RegularButtonTheme {
     pub text: ControlCharAttributesState,
     pub hotkey: ControlCharAttributesState,
     pub shadow: CharAttribute,
+}
+#[derive(Default)]
+pub struct BevelButtonTheme {
+    pub text: ControlCharAttributesState,
+    pub hotkey: ControlCharAttributesState,
+    pub dark_margin: CharAttribute,
+    pub light_margin: CharAttribute,
+}
+
+#[derive(Default)]
+pub struct ButtonTheme {
+    pub regular: RegularButtonTheme,
+    pub bevel: BevelButtonTheme,
 }
 #[derive(Default)]
 pub struct TabTheme {

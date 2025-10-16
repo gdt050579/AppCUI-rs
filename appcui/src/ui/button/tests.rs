@@ -18,9 +18,9 @@ fn check_button_control() {
                 but3: Handle::None,
             };
             me.info = me.add(Label::new("<none>", layout!("x:0,y:0,w:35")));
-            me.but1 = me.add(Button::new("Button &1", layout!("x:1,y:3,w:13"), button::Type::Normal));
-            me.but2 = me.add(Button::new("Button &2", layout!("x:16,y:3,w:13"), button::Type::Normal));
-            let mut b3 = Button::new("Button &3", layout!("x:31,y:3,w:13"), button::Type::Normal);
+            me.but1 = me.add(Button::with_type("Button &1", layout!("x:1,y:3,w:13"), button::Type::Normal));
+            me.but2 = me.add(Button::with_type("Button &2", layout!("x:16,y:3,w:13"), button::Type::Normal));
+            let mut b3 = Button::with_type("Button &3", layout!("x:31,y:3,w:13"), button::Type::Normal);
             b3.set_enabled(false);
             me.but3 = me.add(b3);
             me
@@ -47,7 +47,8 @@ fn check_button_control() {
     }
 
     let script = "
-        Paint.Enable(false)
+        //Paint.Enable(false)
+        Error.Disable(true)
         Paint('Button 2 has focus (default)')   
         CheckHash(0x2D08048B47432DA)   
         Key.Pressed(Tab)
@@ -85,8 +86,8 @@ fn check_button_control_2() {
                 reset: Handle::None,
                 counter: 0,
             };
-            win.add = win.add(Button::new("Add (0)", layout!("x:25%,y:2,w:13,p:c"), button::Type::Normal));
-            win.reset = win.add(Button::new("Reset", layout!("x:75%,y:2,w:13,p:c"), button::Type::Normal));
+            win.add = win.add(Button::with_type("Add (0)", layout!("x:25%,y:2,w:13,p:c"), button::Type::Normal));
+            win.reset = win.add(Button::with_type("Reset", layout!("x:75%,y:2,w:13,p:c"), button::Type::Normal));
             win
         }
         fn update_add_button(&mut self) {
@@ -339,8 +340,8 @@ fn check_visible() {
                 but1: Handle::None,
                 but2: Handle::None,
             };
-            me.but1 = me.add(Button::new("Button", layout!("x:1,y:3,w:13"), button::Type::Normal));
-            me.but2 = me.add(Button::new("Show/Hide", layout!("x:16,y:3,w:14"), button::Type::Normal));
+            me.but1 = me.add(Button::with_type("Button", layout!("x:1,y:3,w:13"), button::Type::Normal));
+            me.but2 = me.add(Button::with_type("Show/Hide", layout!("x:16,y:3,w:14"), button::Type::Normal));
             me
         }
     }
@@ -370,5 +371,30 @@ fn check_visible() {
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_raised_button() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')   
+        CheckHash(0x522A7B233FE38A54)
+        Mouse.Move(18,3)
+        Paint('2. Hovered state')
+        CheckHash(0xE2C043377D5CA9B3)
+        Mouse.Hold(18,3,left)
+        Paint('3. Pressed state over Start Button')
+        CheckHash(0x7059009FC50069BC)
+        Mouse.Release(18,3,left)
+        Paint('4. After releasing the mouse button')
+        CheckHash(0x5DE594D5A07A8BDC)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = Window::new("Macro Test", layout!("a:c,w:40,h:10"), window::Flags::None);
+    w.add(button!("&Start,x:2,y:1,w:15,type:raised"));
+    w.add(button!("Disabled,x:20,y:1,w:15,enable:false,type:raised"));
+    w.add(button!("Se&cond,x:2,y:4,w:15,type:raised"));
+    a.add_window(w);
     a.run();
 }

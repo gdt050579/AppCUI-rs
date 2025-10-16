@@ -209,7 +209,7 @@ impl CommandBar {
 
             // write the key
             let col_key = match () {
-                _ if (*idx) == self.pressed_index => theme.menu.shortcut.pressed_or_selectd,
+                _ if (*idx) == self.pressed_index => theme.menu.shortcut.pressed_or_selected,
                 _ if (*idx) == self.hovered_index => theme.menu.shortcut.hovered,
                 _ => theme.menu.shortcut.normal,
             };
@@ -217,7 +217,7 @@ impl CommandBar {
 
             // write the text
             let col_text = match () {
-                _ if (*idx) == self.pressed_index => theme.menu.text.pressed_or_selectd,
+                _ if (*idx) == self.pressed_index => theme.menu.text.pressed_or_selected,
                 _ if (*idx) == self.hovered_index => theme.menu.text.hovered,
                 _ => theme.menu.text.normal,
             };

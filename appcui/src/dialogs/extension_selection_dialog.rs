@@ -28,8 +28,8 @@ impl ExtensionSelectionDialog {
         
         me.combo = me.add(combo);
         
-        me.btn_ok = me.add(Button::new("&OK", layout!("l:12,b:0,w:13"), button::Type::Normal));
-        me.btn_cancel = me.add(Button::new("&Cancel", layout!("l:26,b:0,w:13"), button::Type::Normal));
+        me.btn_ok = me.add(Button::with_type("&OK", layout!("l:12,b:0,w:13"), button::Type::Normal));
+        me.btn_cancel = me.add(Button::with_type("&Cancel", layout!("l:26,b:0,w:13"), button::Type::Normal));
         
         let combo_handle = me.combo;
         me.request_focus_for_control(combo_handle);

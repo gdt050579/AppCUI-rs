@@ -71,9 +71,17 @@ pub(crate) fn new() -> Theme {
         border: controlattr!("silver", "w", "y", "gray", "y,magenta"),
         lines: controlattr!("dg", "dg", "y", "gray", "y,magenta"),
         button: ButtonTheme {
-            text: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
-            hotkey: controlattr!("dr,gray", "magenta,w", "magenta,y", "gray,black", "dr,olive"),
-            shadow: charattr!("black"),
+            regular: RegularButtonTheme {
+                text: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
+                hotkey: controlattr!("dr,gray", "magenta,w", "magenta,y", "gray,black", "dr,olive"),
+                shadow: charattr!("black"),
+            },
+            bevel: BevelButtonTheme {
+                text: controlattr!("silver", "w", "y", "gray", "silver"),
+                hotkey: controlattr!("silver,flags: underline", "w,flags: underline", "gray,flags: underline", "gray", "silver,flags: underline"),
+                dark_margin: charattr!("gray"),
+                light_margin: charattr!("white"),
+            },
         },
         tab: TabTheme {
             text: controlattr!("black,gray", "w,gray", "black,silver", "gray,?", "w,b"),

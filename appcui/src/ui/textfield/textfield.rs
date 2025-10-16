@@ -363,7 +363,7 @@ impl OnPaint for TextField {
         let mut x = 1;
         let mut y = 0;
         let mut ch = Character::with_attributes(' ', attr);
-        let mut ch_selected = Character::with_attributes(' ', theme.editor.pressed_or_selectd);
+        let mut ch_selected = Character::with_attributes(' ', theme.editor.pressed_or_selected);
         while let Some((code, glyph_size)) = self.glyphs.glyph(pos) {
             if (show_cursor) && self.selection.contains(pos) {
                 ch_selected.code = code;

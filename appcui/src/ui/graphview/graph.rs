@@ -46,7 +46,7 @@ impl ControlState {
     fn node_attr(&self, theme: &Theme) -> CharAttribute {
         match self {
             ControlState::Disabled => theme.text.inactive,
-            ControlState::Normal | ControlState::Focused => theme.button.text.normal,
+            ControlState::Normal | ControlState::Focused => theme.button.regular.text.normal,
         }
     }
     #[inline(always)]
@@ -59,11 +59,11 @@ impl ControlState {
     }
     #[inline(always)]
     fn hovered_node_attr(&self, theme: &Theme) -> CharAttribute {
-        theme.button.text.hovered
+        theme.button.regular.text.hovered
     }
     #[inline(always)]
     fn current_node_attr(&self, theme: &Theme) -> CharAttribute {
-        theme.button.text.focused
+        theme.button.regular.text.focused
     }
 }
 

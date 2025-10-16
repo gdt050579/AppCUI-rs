@@ -1627,3 +1627,18 @@ fn check_size_from_str_errors() {
     assert_eq!(Size::from_str("123x456abc"), Err(SizeParseError::InvalidSize(b'a')));
     assert_eq!(Size::from_str("123x456     abc"), Err(SizeParseError::InvalidSize(b'a')));
 }
+
+#[test]
+fn check_bevel_rect() {
+    let mut s = SurfaceTester::new(42, 15); 
+    s.clear(char!("' ',w,gray"));
+    s.fill_rect(Rect::new(21,0,42,15), char!("' ',w,darkblue"));
+    let dark = charattr!("black,transparent");
+    let light = charattr!("white,transparent");
+    s.draw_bevel_rect(Rect::new(1,1,18,5), LineType::Single, dark, light, false);
+    s.draw_bevel_rect(Rect::new(1,7,18,11), LineType::Single, dark, light, true);
+    s.draw_bevel_rect(Rect::new(23,1,38,5), LineType::Single, dark, light, false);
+    s.draw_bevel_rect(Rect::new(23,7,38,11), LineType::Single, dark, light, true);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xEA0A386392D6725A);
+}

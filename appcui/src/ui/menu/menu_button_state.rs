@@ -16,7 +16,7 @@ impl MenuButtonState {
             match self {
                 MenuButtonState::Normal => color.text.normal,
                 MenuButtonState::Hovered => color.text.hovered,
-                MenuButtonState::Pressed => color.text.pressed_or_selectd,
+                MenuButtonState::Pressed => color.text.pressed_or_selected,
             }
         }
     }

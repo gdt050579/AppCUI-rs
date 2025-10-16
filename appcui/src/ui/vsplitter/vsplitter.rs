@@ -220,7 +220,7 @@ impl OnPaint for VSplitter {
                 State::OverRightButton => (theme.lines.normal, theme.symbol.arrows, theme.symbol.hovered),
                 State::ClickedOnLeftButton => (theme.lines.normal, theme.symbol.pressed, theme.symbol.arrows),
                 State::ClickedOnRightButton => (theme.lines.normal, theme.symbol.arrows, theme.symbol.pressed),
-                State::Dragging => (theme.lines.pressed_or_selectd, theme.symbol.arrows, theme.symbol.arrows),
+                State::Dragging => (theme.lines.pressed_or_selected, theme.symbol.arrows, theme.symbol.arrows),
                 State::None => (theme.lines.normal, theme.symbol.arrows, theme.symbol.arrows),
             }
         };

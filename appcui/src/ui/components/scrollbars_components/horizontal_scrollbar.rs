@@ -24,21 +24,21 @@ impl HScrollBar {
         let col_minimize_arrow = match () {
             _ if inactive => theme.scrollbar.arrow.inactive,
             _ if self.status == MouseOnScrollbarStatus::HoverOnMinimizeArrow => theme.scrollbar.arrow.hovered,
-            _ if self.status == MouseOnScrollbarStatus::PressedOnMinimizeArrow => theme.scrollbar.arrow.pressed_or_selectd,
+            _ if self.status == MouseOnScrollbarStatus::PressedOnMinimizeArrow => theme.scrollbar.arrow.pressed_or_selected,
             _ if control_has_focus => theme.scrollbar.arrow.focused,
             _ => theme.scrollbar.arrow.normal,
         };
         let col_maximize_arrow = match () {
             _ if inactive => theme.scrollbar.arrow.inactive,
             _ if self.status == MouseOnScrollbarStatus::HoverOnMaximizeArrow => theme.scrollbar.arrow.hovered,
-            _ if self.status == MouseOnScrollbarStatus::PressedOnMaximizeArrow => theme.scrollbar.arrow.pressed_or_selectd,
+            _ if self.status == MouseOnScrollbarStatus::PressedOnMaximizeArrow => theme.scrollbar.arrow.pressed_or_selected,
             _ if control_has_focus => theme.scrollbar.arrow.focused,
             _ => theme.scrollbar.arrow.normal,
         };
         let col_bar = match () {
             _ if inactive => theme.scrollbar.bar.inactive,
             _ if self.status == MouseOnScrollbarStatus::HoverOnBar => theme.scrollbar.bar.hovered,
-            _ if self.status == MouseOnScrollbarStatus::PressedOnBar => theme.scrollbar.bar.pressed_or_selectd,
+            _ if self.status == MouseOnScrollbarStatus::PressedOnBar => theme.scrollbar.bar.pressed_or_selected,
             _ if control_has_focus => theme.scrollbar.bar.focused,
             _ => theme.scrollbar.bar.normal,
         };
@@ -55,7 +55,7 @@ impl HScrollBar {
             let col_position = match () {
                 _ if inactive => theme.scrollbar.position.inactive,
                 _ if self.status == MouseOnScrollbarStatus::HoverOnBar => theme.scrollbar.position.hovered,
-                _ if self.status == MouseOnScrollbarStatus::PressedOnBar => theme.scrollbar.position.pressed_or_selectd,
+                _ if self.status == MouseOnScrollbarStatus::PressedOnBar => theme.scrollbar.position.pressed_or_selected,
                 _ if control_has_focus => theme.scrollbar.position.focused,
                 _ => theme.scrollbar.position.normal,
             };

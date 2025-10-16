@@ -6,7 +6,7 @@ macro_rules! controlattr {
             focused: charattr!($focused),
             hovered: charattr!($hovered),
             inactive: charattr!($inactive),
-            pressed_or_selectd: charattr!($pressed),
+            pressed_or_selected: charattr!($pressed),
         }       
     };
 }
