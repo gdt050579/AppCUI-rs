@@ -13,10 +13,16 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("panel", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
-    cb.init_control("Panel::new");
+    if cb.has_parameter("type") {
+        cb.init_control("Panel::with_type");
+    } else {
+        cb.init_control("Panel::new");
+    }    
     cb.add_string_parameter("caption", Some(""));
     cb.add_layout();
-    cb.add_enum_parameter("type", "panel::Type", &TYPES, Some("Border"));
+    if cb.has_parameter("type") {
+        cb.add_enum_parameter("type", "panel::Type", &TYPES, Some("Border"));
+    }
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();
     cb.into()
