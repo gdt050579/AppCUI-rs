@@ -27,6 +27,8 @@ A pabel supports the following types:
 * `panel::Type::Window` or `window` (for macro initialization) - this will create a panel surrounded by a border (with the title centered allined).
 * `panel::Type::Page` or `page` (for macro initialization) - this will create a panel without any border or title
 * `panel::Type::TopBar` or `topbar` (for macro initialization) - this will create a panel with a top bar and centered titled
+* `panel::Type::Raised` or `raised` (for macro initialization) - this will create 3D panel (with a raised look)
+* `panel::Type::Sunken` or `sunken` (for macro initialization) - this will create 3D panel (with a sunken look)
 
 
 
