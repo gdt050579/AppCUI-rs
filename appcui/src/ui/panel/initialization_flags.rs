@@ -4,5 +4,7 @@ pub enum Type {
     Border,
     Window,
     Page,
-    TopBar
+    TopBar,
+    Raised,
+    Sunken
 }

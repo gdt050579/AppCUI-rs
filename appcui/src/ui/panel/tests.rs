@@ -383,3 +383,31 @@ fn check_panel_api() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_panel_raised() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Raised panel with title')   
+        CheckHash(0xB83F9EDE2216F153)   
+    ";
+    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut w = window!("Title,a:c,w:78,h:11");
+    w.add(panel!("Options,x:1,y:1,w:16,h:4,type: raised"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_panel_sunken() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Raised panel with title')   
+        CheckHash(0xCFA5AD06480D095C)   
+    ";
+    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut w = window!("Title,a:c,w:78,h:11");
+    w.add(panel!("Options,x:1,y:1,w:16,h:4,type: sunken"));
+    a.add_window(w);
+    a.run();
+}
