@@ -82,7 +82,7 @@ impl Panel {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut panel = Panel::new("Panel", layout!("x:1,y:1,w:10,h:10"), panel::Type::Border);
+    /// let mut panel = Panel::new("Panel", layout!("x:1,y:1,w:10,h:10"));
     /// let handle_button = panel.add(Button::new("Button", layout!("x:1,y:1,w:8")));
     /// ```
     #[inline(always)]
