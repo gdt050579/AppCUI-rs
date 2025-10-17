@@ -78,7 +78,8 @@ impl TermiosTerminal {
         }
 
         t.ansi_buffer.clear();
-        t.ansi_buffer.enable_mouse_events();
+        //t.ansi_buffer.enable_mouse_events();
+        t.ansi_buffer.write_string("\x1b[?1000h\x1b[?1002h\x1b[?1003h");
         t.ansi_buffer.execute();
 
         Input::new().start(sender.clone());
