@@ -209,7 +209,7 @@ fn check_darkgray_theme() {
         Mouse.Click(3,0,left)
         Mouse.Move(3,2)
         Paint('Initial state')   
-        CheckHash(0x44BB8888C3906018) 
+        CheckHash(0xE2767D86935FBB7F) 
     ";
     let mut a = App::debug(120, 24, script)
         .theme(Theme::new(Themes::DarkGray))
