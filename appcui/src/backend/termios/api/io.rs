@@ -1,3 +1,5 @@
+use std::{os::fd::AsRawFd, task::Poll};
+
 use crate::{
     backend::termios::api::TermiosError,
     input::{Key, KeyModifier, MouseButton},
@@ -320,7 +322,8 @@ impl TermiosReader {
                         27 => {
                             let modifier = KeyModifier::None;
                             // We read the next character to see what this is about
-                            let byte_2 = checked_stdin_read()?;
+                            //let byte_2 = checked_stdin_read()?;
+                            let byte_2 = try_check_stdin_read().unwrap_or(0);
                             match byte_2 {
                                 79 => {
                                     // Here we read from F1 to F4 inclusive
@@ -699,4 +702,23 @@ pub fn checked_stdin_read() -> Result<u8, TermiosError> {
     }
     // println!("{}", byte);
     Ok(byte)
+}
+
+pub fn try_check_stdin_read() -> Option<u8> {
+    use std::os::unix::io::AsRawFd;
+
+    let mut byte = [0u8;1];
+    let fd = std::io::stdin().as_raw_fd();
+    let mut fds = libc::pollfd { fd, events: libc::POLLIN, revents: 0 };
+    let ret = unsafe { libc::poll(&mut fds,1, 25)};
+    if ret<=0 {
+        None
+    } else {
+        let res = unsafe { libc::read(fd, byte.as_mut_ptr() as *mut _, 1)};
+        if res == -1 {
+            None
+        } else {
+            Some(byte[0])
+        }
+    }
 }
