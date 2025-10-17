@@ -360,3 +360,7 @@ path = "games/main.rs"
 [[example]]
 name = "window_type"
 path = "window_type/main.rs"
+
+[[example]]
+name = "panels_3d"
+path = "panels_3d/main.rs"

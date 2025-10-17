@@ -73,7 +73,7 @@ fn add_buttons(tab: &mut Tab, index: u32) {
 fn add_checkboxes(tab: &mut Tab, index: u32) {
     macro_rules! add {
         ($x: expr, $y: expr, $type: expr, $name: expr) => {
-            let mut p = Panel::new($name, LayoutBuilder::new().x($x).y($y).width(20).height(9).build(), panel::Type::Window);
+            let mut p = Panel::with_type($name, LayoutBuilder::new().x($x).y($y).width(20).height(9).build(), panel::Type::Window);
             p.add(CheckBox::with_type("Checked", LayoutBuilder::new().x(1).y(1).width(18).build(), true, $type));
             p.add(CheckBox::with_type("Un-Checked", LayoutBuilder::new().x(1).y(2).width(18).build(), false, $type));
             let mut c = CheckBox::with_type("Inactive", LayoutBuilder::new().x(1).y(3).width(18).build(), false, $type);
@@ -98,7 +98,7 @@ fn add_checkboxes(tab: &mut Tab, index: u32) {
 fn add_radioboxes(tab: &mut Tab, index: u32) {
     macro_rules! add {
         ($x: expr, $y: expr, $type: expr, $name: expr) => {
-            let mut p = Panel::new($name, LayoutBuilder::new().x($x).y($y).width(20).height(9).build(), panel::Type::Window);
+            let mut p = Panel::with_type($name, LayoutBuilder::new().x($x).y($y).width(20).height(9).build(), panel::Type::Window);
             p.add(RadioBox::with_type("Checked", LayoutBuilder::new().x(1).y(1).width(18).build(), true, $type));
             p.add(RadioBox::with_type("Un-Checked", LayoutBuilder::new().x(1).y(2).width(18).build(), false, $type));
             let mut c = RadioBox::with_type("Inactive", LayoutBuilder::new().x(1).y(3).width(18).build(), false, $type);
