@@ -13,11 +13,11 @@ pub(crate) fn new() -> Theme {
         },
         text: TextTheme {
             normal: charattr!("black"),
-            hot_key: charattr!("white"),
+            hot_key: charattr!("dr"),
             inactive: charattr!("silver"),
             error: charattr!("black"),
             warning: charattr!("black"),
-            hovered: charattr!("white"),
+            hovered: charattr!("y"),
             focused: charattr!("black"),
             highlighted: charattr!("white"),
             enphasized_1: charattr!("white"),
@@ -25,7 +25,7 @@ pub(crate) fn new() -> Theme {
             enphasized_3: charattr!("white"),
         },
         symbol: SymbolTheme {
-            inactive: charattr!("gray"),
+            inactive: charattr!("silver"),
             hovered: charattr!("black,white"),
             pressed: charattr!("black,silver"),
             checked: charattr!("black"),
@@ -77,8 +77,8 @@ pub(crate) fn new() -> Theme {
                 shadow: charattr!("black"),
             },
             bevel: BevelButtonTheme {
-                text: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
-                hotkey: controlattr!("black,gray", "black,w", "black,y", "gray,black", "black,olive"),
+                text: controlattr!("black", "white", "y", "silver", "black"),
+                hotkey: controlattr!("dr,flags: underline", "y,flags: underline", "black,flags: underline", "silver,flags: underline", "dr,flags: underline"),
                 dark_margin: charattr!("black"),
                 light_margin: charattr!("silver"),
             },
