@@ -17,8 +17,16 @@ impl ThreeStateBox {
     /// The hotkey will be underlined and pressing ALT+T will trigger the default action.
     /// The default action is to change the state of the threestatebox.
     /// The state can be one of the following: Checked, Unchecked, Unknown.
+    /// 
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    /// 
+    /// let o = ThreeStateBox::new("This is a &test", 
+    ///                            layout!("a:c,w:10,h:1"), 
+    ///                            threestatebox::State::Unchecked);
+    /// ```
     pub fn new(caption: &str, layout: Layout, state: State) -> Self {
-        Self::with_type(caption, layout, state, Type::Standard)
+        Self::inner_create(caption, layout, state, Type::Standard, StatusFlags::ThemeType)
     }
 
     /// Creates a new threestatebox with the specified caption, layout and state.
@@ -39,6 +47,10 @@ impl ThreeStateBox {
     ///                                              threestatebox::Type::Ascii);
     /// ```
     pub fn with_type(caption: &str, layout: Layout, state: State, threestatebox_type: Type) -> Self {
+        Self::inner_create(caption, layout, state, threestatebox_type, StatusFlags::None)
+    }
+
+    fn inner_create(caption: &str, layout: Layout, state: State, threestatebox_type: Type, status: StatusFlags) -> Self {
         let cs = Symbol::new(threestatebox_type.check_symbol());
         let us = Symbol::new(threestatebox_type.uncheck_symbol());
         let ks = Symbol::new(threestatebox_type.unknown_symbol());
@@ -50,7 +62,7 @@ impl ThreeStateBox {
         }
         let symbol_width = cs.width() + 1;
         let mut cb = ThreeStateBox {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | status),
             caption: Caption::new(caption, ExtractHotKeyMethod::AltPlusKey),
             state,
             check_symbol: cs,
@@ -61,7 +73,7 @@ impl ThreeStateBox {
         cb.set_size_bounds(5, 1, u16::MAX, u16::MAX);
         let hotkey = cb.caption.hotkey();
         cb.set_hotkey(hotkey);
-        cb
+        cb        
     }
     
     /// Returns the current state of the threestatebox.
