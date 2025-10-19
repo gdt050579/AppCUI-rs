@@ -160,10 +160,13 @@ System events are events that are not related to the keyboard or mouse, but are 
 
 ## Other capabilities
 
-| Capabilities  | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
-| ------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
-| Set dimension | Yes             | Yes        | -       | -       | Yes          | -         |
-| Set title     | Yes             | Yes        | -       | -       | Yes          | -         |
+| Capabilities   | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
+| -------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
+| Set dimension  | Yes             | Yes        | -       | -       | Yes          | -         |
+| Set title      | Yes             | Yes        | -       | -       | Yes          | -         |
+| Restore screen | -               | -          | -       | -       | `N/A`        | -         |
+
+* `N/A` (not applicable) means that there is no original screen prior to the app execution so there is nothing to restore.
 
 ## Clipboard
 

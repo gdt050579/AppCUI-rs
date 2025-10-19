@@ -34,6 +34,7 @@ Using `App::new` or `App::with_backend` creates a builder object that can furthe
 * `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
 * `.log_file(path,append)` to set up a log file where logs will be displayed. This option will only be valid in **debug mode**. Once the file was specified, any call to [log!](logging.md) macro will be recorded in that file.
 * `.color_schema(enabled)` if set this flag will try to use the terminal color schema, otherwise it will use AppCUI predefined values (e.g. for `Color::DarkBlue` will use `RGB(0,0,128)`). This flag is enabled by default.
+* `.restore_screen(enabled)` if set the backend will attemp to restore the original screen status (content, cursor postion, etc) as it was before the application started. This option is **enabled** by default. Keep in mind that not all backends have this kind of support.
 
 After setting up the configuration for an application, just call the `build()` method to create an application. This methods returns a result of type `Result<App,Error>` from where the appcui application can be obtained via several methods such as:
 * `unwrap()` or `expect(...)` methods
@@ -47,6 +48,7 @@ let mut a = App::new().size(Size::new(80,40))       // size should be 80x25 char
                       .command_bar()                // command bar should be enabled
                       .log_file("debug.log", false) // log into debug.log
                       .color_schema(false)          // use AppCUI predefined colors
+                      .restore_screen(true)         // restore original screen when finished
                       .build()
                       .expect("Fail to create an AppCUI application");
 ```
