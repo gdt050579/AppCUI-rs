@@ -31,6 +31,7 @@ pub(crate) struct Console {
     shift_state: KeyModifier,
     last_mouse_pos: Point,
     shared_visible_region: Arc<Mutex<structs::SMALL_RECT>>,
+    restore_origial_screen: bool
 }
 
 impl Console {
@@ -157,6 +158,7 @@ impl Console {
                 shift_state: KeyModifier::None,
                 last_mouse_pos: Point::new(i32::MAX, i32::MAX),
                 shared_visible_region: Arc::new(Mutex::new(info.window)),
+                restore_origial_screen: builder.restore_screen,
             })
         }
     }
