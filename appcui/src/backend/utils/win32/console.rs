@@ -141,7 +141,7 @@ impl Console {
                     return Err(Error::new(
                         ErrorKind::InitializationFailure,
                         format!(
-                            "SetConsoleScreenBufferInfoEx failed to sey a new color schema on current console !\nWindow code error: {}",
+                            "SetConsoleScreenBufferInfoEx failed to set a new color schema on current console !\nWindow code error: {}",
                             api::GetLastError()
                         ),
                     ));                    
