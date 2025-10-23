@@ -1,7 +1,7 @@
 use super::api;
 use super::constants;
 use super::structs::*;
-use crate::graphics::{Size,Point};
+use crate::graphics::{Point, Size};
 
 #[derive(Clone)]
 pub(super) struct OriginalScreen {
@@ -45,6 +45,23 @@ impl OriginalScreen {
         })
     }
     pub(super) fn restore(self) {
-
+        let sr = SMALL_RECT {
+            left: self.pos.x as i16,
+            top: self.pos.y as i16,
+            right: ((self.pos.x + self.size.width as i32) - 1) as i16,
+            bottom: ((self.pos.y + self.size.height as i32) - 1) as i16,
+        };
+        unsafe {
+            api::WriteConsoleOutputW(
+                self.stdout,
+                self.data.as_ptr(),
+                COORD {
+                    x: self.size.width as i16,
+                    y: self.size.height as i16,
+                },
+                COORD { x: 0, y: 0 },
+                &sr,
+            );
+        }
     }
 }

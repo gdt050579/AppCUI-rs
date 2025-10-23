@@ -361,6 +361,9 @@ impl Console {
             let _ = api::SetConsoleMode(self.stdin, self.stdin_original_mode_flags);
             let _ = api::SetConsoleMode(self.stdout, self.stdout_original_mode_flags);
         }
+        if let Some(os) = self.orig_screen.take() {
+            os.restore();
+        }
     }
 
     fn screen_buffer_info(stdout: structs::HANDLE) -> Result<structs::CONSOLE_SCREEN_BUFFER_INFOEX, Error> {
