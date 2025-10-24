@@ -164,7 +164,7 @@ System events are events that are not related to the keyboard or mouse, but are 
 | -------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
 | Set dimension  | Yes             | Yes        | -       | -       | Yes          | -         |
 | Set title      | Yes             | Yes        | -       | -       | Yes          | -         |
-| Restore screen | -               | -          | -       | -       | `N/A`        | -         |
+| Restore screen | Yes             | Yes        | -       | -       | `N/A`        | -         |
 
 * `N/A` (not applicable) means that there is no original screen prior to the app execution so there is nothing to restore.
 
@@ -188,5 +188,5 @@ By default, when using initializing an `App` objct via `App::new()`, the folowin
 | OS      | Default backend | Other available backends |
 | ------- | --------------- | ------------------------ |
 | Windows | Windows Console | Windows VT, CrossTerm    |
-| Linux   | NCurses         | CrissTerm                |
+| Linux   | NCurses         | CrossTerm                |
 | Mac/OSX | Termios         | NCurses, CrossTerm       |
