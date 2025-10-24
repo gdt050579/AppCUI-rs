@@ -149,7 +149,7 @@ impl Console {
                 }
             }
             let orig_screen = if builder.restore_screen {
-                OriginalScreen::new(h_stdout, Size::new(w, h), info.window.left as i32, info.window.top as i32)
+                OriginalScreen::new(h_stdout, Size::new(w, h), info.window.left as i32, info.window.top as i32, info.cursor_pos)
             } else {
                 None
             };
