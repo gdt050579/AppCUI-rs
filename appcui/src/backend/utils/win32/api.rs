@@ -35,6 +35,15 @@ extern "system" {
     pub(crate) fn ReadConsoleInputW(handle: HANDLE, lpBuffer: *mut INPUT_RECORD, nLength: u32, lpNumberOfEventsRead: &mut u32) -> BOOL;
 
     #[warn(non_camel_case_types)]
+    pub(crate) fn ReadConsoleOutputW(
+        handle: HANDLE,
+        lpBuffer: *mut CHAR_INFO,
+        dwBufferSize: COORD,
+        dwBufferCoord: COORD,
+        lpReadRegion: *mut SMALL_RECT,
+    ) -> BOOL;
+
+    #[warn(non_camel_case_types)]
     pub(crate) fn SetConsoleWindowInfo(handle: HANDLE, bAbsolute: BOOL, lpConsoleWindow: *const SMALL_RECT) -> BOOL;
 
     #[warn(non_camel_case_types)]

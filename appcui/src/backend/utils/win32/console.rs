@@ -2,6 +2,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use super::{api, constants, structs};
+use crate::backend::utils::win32::OriginalScreen;
 use crate::input::Key;
 use crate::input::KeyCode;
 use crate::input::KeyModifier;
@@ -31,6 +32,7 @@ pub(crate) struct Console {
     shift_state: KeyModifier,
     last_mouse_pos: Point,
     shared_visible_region: Arc<Mutex<structs::SMALL_RECT>>,
+    orig_screen: Option<OriginalScreen>,
 }
 
 impl Console {
@@ -140,13 +142,17 @@ impl Console {
                     return Err(Error::new(
                         ErrorKind::InitializationFailure,
                         format!(
-                            "SetConsoleScreenBufferInfoEx failed to sey a new color schema on current console !\nWindow code error: {}",
+                            "SetConsoleScreenBufferInfoEx failed to set a new color schema on current console !\nWindow code error: {}",
                             api::GetLastError()
                         ),
-                    ));                    
+                    ));
                 }
             }
-
+            let orig_screen = if builder.restore_screen {
+                OriginalScreen::new(h_stdout, Size::new(w, h), info.window.left as i32, info.window.top as i32, info.cursor_pos)
+            } else {
+                None
+            };
             Ok(Self {
                 stdin: h_stdin,
                 stdout: h_stdout,
@@ -157,6 +163,7 @@ impl Console {
                 shift_state: KeyModifier::None,
                 last_mouse_pos: Point::new(i32::MAX, i32::MAX),
                 shared_visible_region: Arc::new(Mutex::new(info.window)),
+                orig_screen,
             })
         }
     }
@@ -353,6 +360,9 @@ impl Console {
         unsafe {
             let _ = api::SetConsoleMode(self.stdin, self.stdin_original_mode_flags);
             let _ = api::SetConsoleMode(self.stdout, self.stdout_original_mode_flags);
+        }
+        if let Some(os) = self.orig_screen.take() {
+            os.restore();
         }
     }
 

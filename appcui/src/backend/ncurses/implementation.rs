@@ -193,6 +193,7 @@ impl Backend for NcursesTerminal {
     }
 
     fn on_close(&mut self) {
+        println!("\x1b[0m\x1b[2J\x1b[3J\x1b[H");
         println!("\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l")
     }
 }

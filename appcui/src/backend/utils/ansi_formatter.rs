@@ -50,6 +50,12 @@ impl AnsiFormatter {
     pub(crate) fn disable_mouse_events(&mut self) {
         self.text.push_str("\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l");
     }
+
+    #[inline(always)]
+    pub(crate) fn reset_screen(&mut self) {
+        self.text.push_str("\x1b[0m\x1b[2J\x1b[3J\x1b[H");
+    }
+
     #[inline(always)]
     pub(crate) fn set_foreground_color(&mut self, color: Color) {
         if self.flags.contains_one(AnsiFlags::Use16ColorSchema) {

@@ -1,5 +1,3 @@
-use std::{os::fd::AsRawFd, task::Poll};
-
 use crate::{
     backend::termios::api::TermiosError,
     input::{Key, KeyModifier, MouseButton},

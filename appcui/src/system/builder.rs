@@ -1,9 +1,9 @@
+use crate::backend;
 use crate::graphics::*;
 use crate::system::*;
 use crate::ui::common::traits::*;
 use crate::ui::common::*;
-use crate::backend;
- 
+
 pub struct Builder {
     pub(crate) size: Option<Size>,
     pub(crate) backend: Option<backend::Type>,
@@ -18,6 +18,7 @@ pub struct Builder {
     pub(crate) log_file: Option<String>,
     pub(crate) log_append: bool,
     pub(crate) use_color_schema: bool,
+    pub(crate) restore_screen: bool,
 }
 impl Builder {
     pub(crate) fn new() -> Self {
@@ -35,6 +36,7 @@ impl Builder {
             log_file: None,
             log_append: false,
             use_color_schema: true,
+            restore_screen: true,
         }
     }
     /// Builds the application using the current settings.
@@ -104,6 +106,17 @@ impl Builder {
     #[inline(always)]
     pub fn color_schema(mut self, enabled: bool) -> Self {
         self.use_color_schema = enabled;
+        self
+    }
+
+    /// If enabled the backend will attempt to restore the original screen content and cursor position when the application ends.
+    /// If disabled, when the application ends the screen will be cleared.
+    /// By default this option is set.
+    /// 
+    /// **Remarks:** Not all backends have the support to restore the original screen (for those that do not have this support, the screen will always be cleared when application ends).
+    #[inline(always)]
+    pub fn restore_screen(mut self, enable: bool) -> Self {
+        self.restore_screen = enable;
         self
     }
 }
