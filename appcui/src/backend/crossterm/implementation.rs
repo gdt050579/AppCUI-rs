@@ -187,10 +187,15 @@ impl Backend for CrossTerm {
 
                     flags = ch.flags;
                 }
-                if ! position_changed { 
+                if ! position_changed {
                     queue!(stdout, MoveTo(x as u16, y as u16)).unwrap();
                     position_changed = true;
                 }
+                if ! ch.code.is_ascii() {
+                    // Errors on painting could be due to wide chars. 
+                    // Cursor must be reposition after each wide character.
+                    position_changed = false;
+                }   
                 queue!(stdout, Print(ch.code)).unwrap();
             } else if position_changed {
                 position_changed = false;
