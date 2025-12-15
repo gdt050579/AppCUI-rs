@@ -501,6 +501,7 @@ impl WebTerminal {
                     let pos_x = global_x as f32 * cell_width;
                     let pos_y = global_y as f32 * cell_height;
                     let bg_color = self.color_to_rgba(cell.background);
+                    let bg_color = [bg_color[0] / 255.0, bg_color[1] / 255.0, bg_color[2] / 255.0, bg_color[3]];
 
                     let x_ndc = 2.0 * (pos_x / canvas_width) - 1.0;
                     let y_ndc = 1.0 - 2.0 * (pos_y / canvas_height);
