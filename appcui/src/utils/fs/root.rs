@@ -1,7 +1,7 @@
-use crate::utils::NavigatorRoot;
 use crate::prelude::*;
+use crate::utils::NavigatorRoot;
 
-#[derive(Debug,Eq,PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub(crate) enum RootType {
     Fixed,
     Removable,
@@ -20,7 +20,7 @@ impl RootType {
             "ramdisk" | "ram" | "r" | "R" => Some(Self::RamDisk),
             "cdrom" | "cd" | "c" | "C" => Some(Self::CdRom),
             "unknown" | "?" => Some(Self::Unknown),
-            _ => None,            
+            _ => None,
         }
     }
     pub(crate) fn icon(&self) -> char {
@@ -67,7 +67,7 @@ impl Root {
         let name = parts.next()?;
         let type_str = parts.next()?;
         match entry_type {
-            "R"|"r"|"root" => {
+            "R" | "r" | "root" => {
                 let size = size.parse().ok()?;
                 let free_space = free_space.parse().ok()?;
                 let root_type = RootType::new(type_str)?;
@@ -78,7 +78,7 @@ impl Root {
                     free_space,
                     root_type,
                 })
-            },
+            }
             _ => None,
         }
     }
