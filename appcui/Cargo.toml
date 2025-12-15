@@ -26,6 +26,7 @@ crate-type = ["cdylib", "rlib"]
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
+libc = "0.2"
 web-sys = { version = "0.3", features = [
     "Blob",
     "BlobPropertyBag",

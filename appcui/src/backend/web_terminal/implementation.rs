@@ -58,14 +58,101 @@ unsafe impl Sync for WebTerminal {}
 impl WebTerminal {
     fn load_dom_config(document: &web_sys::Document) -> TerminalDomConfig {
         let font_size_val = Self::get_config(document, "terminal-font-size", 20);
+        let font_family = Self::get_config(document, "terminal-font", "Consolas, \"Courier New\", monospace".to_string());
+
+        let cols_config = Self::get_config(document, "terminal-cols", 0);
+        let rows_config = Self::get_config(document, "terminal-rows", 0);
+        let cell_w_config = Self::get_config(document, "terminal-cell-width", 0);
+        let cell_h_config = Self::get_config(document, "terminal-cell-height", 0);
+
+        let (cols, rows, cell_w, cell_h) = if cols_config == 0 || rows_config == 0 || cell_w_config == 0 || cell_h_config == 0 {
+            Self::calculate_optimal_dimensions(&font_family, font_size_val)
+        } else {
+            (cols_config, rows_config, cell_w_config, cell_h_config)
+        };
+
         TerminalDomConfig {
-            cols: Self::get_config(document, "terminal-cols", 211),
-            rows: Self::get_config(document, "terminal-rows", 56),
-            font_family: Self::get_config(document, "terminal-font", "Consolas".to_string()),
+            cols,
+            rows,
+            font_family,
             font_size: font_size_val,
-            cell_w: Self::get_config(document, "terminal-cell-width", 9),
-            cell_h: Self::get_config(document, "terminal-cell-height", font_size_val),
+            cell_w,
+            cell_h,
         }
+    }
+
+    fn calculate_optimal_dimensions(font_family: &str, font_size: u32) -> (u32, u32, u32, u32) {
+        let window = match window() {
+            Some(w) => w,
+            None => {
+                let default_cell_w = (font_size as f64 * 0.6).ceil() as u32;
+                let default_cell_h = (font_size as f64 * 1.3).ceil() as u32;
+                return (80, 24, default_cell_w.max(1), default_cell_h.max(1));
+            }
+        };
+
+        let document = match window.document() {
+            Some(d) => d,
+            None => {
+                let default_cell_w = (font_size as f64 * 0.6).ceil() as u32;
+                let default_cell_h = (font_size as f64 * 1.3).ceil() as u32;
+                return (80, 24, default_cell_w.max(1), default_cell_h.max(1));
+            }
+        };
+
+        let canvas = document
+            .create_element("canvas")
+            .ok()
+            .and_then(|el| el.dyn_into::<HtmlCanvasElement>().ok());
+
+        if let Some(canvas) = canvas {
+            let context_result = canvas
+                .get_context("2d")
+                .ok()
+                .flatten()
+                .and_then(|ctx| ctx.dyn_into::<CanvasRenderingContext2d>().ok());
+
+            if let Some(context) = context_result {
+                let font_style = format!("{}px {}", font_size, font_family);
+                context.set_font(&font_style);
+
+                // (M is usually widest)
+                if let Ok(metrics) = context.measure_text("M") {
+                    let char_width = metrics.width().ceil() as u32;
+                    let cell_width = char_width.saturating_sub(1).max(1);
+
+                    let cell_height = (font_size as f64 * 1.0).ceil() as u32;
+
+                    let window_width = window.inner_width().ok().and_then(|w| w.as_f64()).unwrap_or(1920.0);
+                    let window_height = window.inner_height().ok().and_then(|h| h.as_f64()).unwrap_or(1080.0);
+
+                    let cols = if cell_width > 0 {
+                        (window_width / cell_width as f64).floor() as u32
+                    } else {
+                        80
+                    };
+
+                    let rows = if cell_height > 0 {
+                        (window_height / cell_height as f64).floor() as u32
+                    } else {
+                        24
+                    };
+
+                    // Ensure minimum dimensions
+                    let cols = cols.max(40);
+                    let rows = rows.max(10);
+
+                    let cols = cols + 1;
+                    let rows = rows + 1;
+
+                    return (cols, rows, cell_width, cell_height);
+                }
+            }
+        }
+
+        let default_cell_w = ((font_size as f64 * 0.6).ceil() as u32).saturating_sub(1).max(1);
+        let default_cell_h = ((font_size as f64 * 1.3).ceil() as u32).saturating_sub(2).max(1);
+        (80, 24, default_cell_w, default_cell_h)
     }
 
     fn initialize_canvases_from_dom(
@@ -85,7 +172,7 @@ impl WebTerminal {
         gl.blend_func(GL::SRC_ALPHA, GL::ONE_MINUS_SRC_ALPHA);
         gl.clear_color(0.0, 0.0, 0.0, 0.0);
         gl.clear(GL::COLOR_BUFFER_BIT);
-        gl.viewport(0, 0, (config.cols * config.cell_w) as i32, (config.rows * config.cell_h) as i32);
+        gl.viewport(0, 0, webgl_canvas.width() as i32, webgl_canvas.height() as i32);
 
         let program = Self::init_program(&gl)?;
         let pos_attrib_location = gl.get_attrib_location(&program, "position") as u32;
@@ -149,8 +236,13 @@ impl WebTerminal {
     }
 
     fn init_canvas(canvas: &HtmlCanvasElement, cols: u32, rows: u32, cell_w: u32, cell_h: u32, z_index: u32) -> Result<(), Error> {
-        let width = cols * cell_w;
-        let height = rows * cell_h;
+        let window = window().ok_or_else(|| Error::new(ErrorKind::InitializationFailure, "Window not available".into()))?;
+        let window_width = window.inner_width().ok().and_then(|w| w.as_f64()).unwrap_or((cols * cell_w) as f64) as u32;
+        let window_height = window.inner_height().ok().and_then(|h| h.as_f64()).unwrap_or((rows * cell_h) as f64) as u32;
+
+        let width = window_width;
+        let height = window_height;
+
         canvas.set_width(width);
         canvas.set_height(height);
 
