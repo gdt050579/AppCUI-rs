@@ -12,12 +12,12 @@ mod color;
 mod cursor;
 pub mod image;
 mod line_type;
+mod orthogonal_direction;
 mod point;
 mod rect;
 mod size;
 mod surface;
 mod text_format;
-mod orthogonal_direction;
 
 #[cfg(test)]
 mod surface_tester;
@@ -34,17 +34,17 @@ pub(crate) use self::cursor::Cursor;
 pub use self::image::Image;
 pub use self::image::*;
 pub use self::line_type::LineType;
+pub use self::orthogonal_direction::OrthogonalDirection;
 pub use self::point::Point;
 pub use self::rect::Rect;
 pub use self::rect::RectAlignment;
 pub use self::size::Size;
+pub use self::surface::SixelRegion;
 pub use self::surface::Surface;
 pub use self::text_format::TextAlignment;
 pub use self::text_format::TextFormat;
 pub use self::text_format::TextFormatBuilder;
 pub use self::text_format::WrapType;
-pub use self::orthogonal_direction::OrthogonalDirection;
-
 
 #[cfg(test)]
 pub(crate) use self::surface_tester::SurfaceTester;

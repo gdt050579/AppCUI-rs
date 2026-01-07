@@ -189,12 +189,26 @@ impl AnsiFormatter {
             y += 1;
             x = 0;
         }
+
+        self.render_sixel_regions(surface, offset);
+
         // update the cursor
         if surface.cursor.is_visible() {
             self.set_cursor_position(surface.cursor.x as i32 + offset.x, surface.cursor.y as i32 + offset.y);
             self.show_cursor();
         } else {
             self.hide_cursor();
+        }
+    }
+
+    fn render_sixel_regions(&mut self, surface: &Surface, offset: Point) {
+        for region in surface.sixel_regions() {
+            // Position cursor at the start of the sixel region
+            // Note: Sixel graphics are positioned in pixels, but we're working with character cells
+            // The terminal will handle the pixel-level positioning based on cell dimensions
+            self.set_cursor_position(region.x + offset.x, region.y + offset.y);
+
+            self.text.push_str(&region.sixel_data);
         }
     }
 

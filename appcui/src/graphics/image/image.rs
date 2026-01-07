@@ -1,7 +1,7 @@
 use super::StringFormatError;
 use super::StringFormatParser;
 use crate::prelude::image::character_set::{
-    ascii_art_renderer, braille_renderer, dithered_shades_renderer, large_blocks_renderer, small_blocks_renderer,
+    ascii_art_renderer, braille_renderer, dithered_shades_renderer, large_blocks_renderer, sixel_renderer, small_blocks_renderer,
 };
 use crate::prelude::RenderOptions;
 
@@ -172,6 +172,7 @@ impl Image {
             CharacterSet::DitheredShades => dithered_shades_renderer::size(self),
             CharacterSet::Braille => braille_renderer::size(self),
             CharacterSet::AsciiArt => ascii_art_renderer::size(self),
+            CharacterSet::Sixel => sixel_renderer::size(self),
         };
         let rap = render_options.scale as u32;
         if rap == 1 {
@@ -189,7 +190,12 @@ impl Image {
             CharacterSet::DitheredShades => dithered_shades_renderer::paint(surface, self, x, y, render_options),
             CharacterSet::Braille => braille_renderer::paint(surface, self, x, y, render_options),
             CharacterSet::AsciiArt => ascii_art_renderer::paint(surface, self, x, y, render_options),
+            CharacterSet::Sixel => sixel_renderer::paint(surface, self, x, y, render_options),
         }
+    }
+
+    pub fn to_sixel(&self, render_options: &RenderOptions) -> String {
+        sixel_renderer::generate_sixel(self, render_options)
     }
 
     /// Removes the alpha channel from all pixels

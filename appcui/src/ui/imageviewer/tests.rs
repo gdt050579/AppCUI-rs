@@ -1137,6 +1137,7 @@ fn check_resize() {
                 image::CharacterSet::DitheredShades => "Method:DitheredShades",
                 image::CharacterSet::AsciiArt => "Method:AsciiArt",
                 image::CharacterSet::Braille => "Method:Braille",
+                image::CharacterSet::Sixel => "Method:Sixel",
             };
             commandbar.set(key!("F2"), rd_name, mywin::Commands::CharSet);
         }
@@ -1167,7 +1168,8 @@ fn check_resize() {
                             image::CharacterSet::LargeBlocks => image::CharacterSet::DitheredShades,
                             image::CharacterSet::DitheredShades => image::CharacterSet::Braille,
                             image::CharacterSet::Braille => image::CharacterSet::AsciiArt,
-                            image::CharacterSet::AsciiArt => image::CharacterSet::SmallBlocks,
+                            image::CharacterSet::AsciiArt => image::CharacterSet::Sixel,
+                            image::CharacterSet::Sixel => image::CharacterSet::SmallBlocks,
                         };
                         let mut opt = img.render_options().clone();
                         opt.set_character_set(new_chset);

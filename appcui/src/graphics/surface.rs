@@ -19,6 +19,15 @@ use super::TextFormat;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
 
+#[derive(Clone)]
+pub struct SixelRegion {
+    pub x: i32,
+    pub y: i32,
+    pub char_width: i32,
+    pub char_height: i32,
+    pub sixel_data: String,
+}
+
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
 enum CharacterType {
@@ -59,6 +68,8 @@ pub struct Surface {
     base_clip: ClipArea,
     right_most: i32,
     bottom_most: i32,
+    /// Sixel graphics regions to be rendered by the backend
+    pub(crate) sixel_regions: Vec<SixelRegion>,
 }
 
 impl Surface {
@@ -85,6 +96,7 @@ impl Surface {
             cursor: Cursor::new(),
             right_most: (w - 1) as i32,
             bottom_most: (h - 1) as i32,
+            sixel_regions: Vec::new(),
         };
         s.chars.resize(count, Character::default());
         s
@@ -231,6 +243,7 @@ impl Surface {
         self.reset_clip();
         self.set_base_origin(0, 0);
         self.reset_origin();
+        self.sixel_regions.clear();
     }
 
     /// Sets the position of the cursor relativ to the origin point. If the cursor is within the clip area, it will be visible. Otherwise it will be hidden.
@@ -1377,6 +1390,42 @@ impl Surface {
     /// ```
     pub fn draw_image(&mut self, x: i32, y: i32, image: &Image, render_options: &RenderOptions) {
         image.paint(self, x, y, render_options);
+    }
+
+    /// Add a sixel graphics region to be rendered by the backend
+    ///
+    /// This method stores sixel image data that will be output by the backend
+    /// at the specified character position. The actual rendering happens when
+    /// the backend processes the surface.
+    ///
+    /// # Arguments
+    /// * `x` - X position in character cells
+    /// * `y` - Y position in character cells
+    /// * `char_width` - Width of the region in character cells
+    /// * `char_height` - Height of the region in character cells
+    /// * `image` - The image to render as sixel
+    /// * `render_options` - Rendering options (scale, etc.)
+    pub fn set_sixel_region(&mut self, x: i32, y: i32, char_width: i32, char_height: i32, image: &Image, render_options: &RenderOptions) {
+        use super::image::generate_sixel;
+
+        let sixel_data = generate_sixel(image, render_options);
+        self.sixel_regions.push(SixelRegion {
+            x,
+            y,
+            char_width,
+            char_height,
+            sixel_data,
+        });
+    }
+
+    /// Get all sixel regions for backend rendering
+    pub fn sixel_regions(&self) -> &[SixelRegion] {
+        &self.sixel_regions
+    }
+
+    /// Clear all sixel regions
+    pub fn clear_sixel_regions(&mut self) {
+        self.sixel_regions.clear();
     }
 
     pub fn draw_tile<const STORAGE_BYTES: usize>(

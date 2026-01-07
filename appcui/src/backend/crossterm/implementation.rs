@@ -1,4 +1,5 @@
 use super::input::Input;
+use crate::prelude::Character;
 use crate::{
     backend::{Backend, SystemEventReader},
     graphics::{CharFlags, Color, Size, Surface},
@@ -13,7 +14,6 @@ use crossterm::{
 };
 use std::io::stdout;
 use std::sync::mpsc::Sender;
-use crate::prelude::Character;
 
 #[cfg(target_os = "windows")]
 use crate::backend::utils::win32;
@@ -26,7 +26,7 @@ use copypasta::ClipboardProvider;
 pub(crate) struct CrossTerm {
     size: Size,
     use_color_schema: bool,
-    screen_chars: Vec<Character> // Contains characters painted on screen
+    screen_chars: Vec<Character>, // Contains characters painted on screen
 }
 
 impl CrossTerm {
@@ -56,11 +56,12 @@ impl CrossTerm {
         let mut term = CrossTerm {
             size: Size::new(width as u32, height as u32),
             use_color_schema: builder.use_color_schema,
-            screen_chars: Vec::new()
+            screen_chars: Vec::new(),
         };
-        
+
         for _n in 0..(width * height) {
-          term.screen_chars.push(Character::new(0, Color::Transparent, Color::Transparent, CharFlags::None));
+            term.screen_chars
+                .push(Character::new(0, Color::Transparent, Color::Transparent, CharFlags::None));
         }
 
         if let Some(sz) = builder.size {
@@ -144,7 +145,7 @@ impl Backend for CrossTerm {
         let mut current_fg = None;
         let mut current_bg = None;
         let mut flags = CharFlags::None;
-        
+
         let mut current_screen_char_index = 0;
         let mut position_changed = true; // Controls if cursor position has been changed
 
@@ -187,20 +188,20 @@ impl Backend for CrossTerm {
 
                     flags = ch.flags;
                 }
-                if ! position_changed {
+                if !position_changed {
                     queue!(stdout, MoveTo(x as u16, y as u16)).unwrap();
                     position_changed = true;
                 }
-                if ! ch.code.is_ascii() {
-                    // Errors on painting could be due to wide chars. 
+                if !ch.code.is_ascii() {
+                    // Errors on painting could be due to wide chars.
                     // Cursor must be reposition after each wide character.
                     position_changed = false;
-                }   
+                }
                 queue!(stdout, Print(ch.code)).unwrap();
             } else if position_changed {
                 position_changed = false;
             }
-          
+
             current_screen_char_index += 1;
             x += 1;
             if x >= w {
@@ -211,6 +212,14 @@ impl Backend for CrossTerm {
                     position_changed = true;
                 }
             }
+        }
+
+        // Render sixel graphics regions
+        for region in surface.sixel_regions() {
+            // Position cursor at the start of the sixel region
+            queue!(stdout, MoveTo(region.x as u16, region.y as u16)).unwrap();
+            // Output the sixel data directly
+            queue!(stdout, Print(&region.sixel_data)).unwrap();
         }
 
         if surface.cursor.is_visible() {
@@ -224,7 +233,8 @@ impl Backend for CrossTerm {
         self.size = new_size;
         self.screen_chars = Vec::new();
         for _n in 0..(self.size.width * self.size.height) {
-          self.screen_chars.push(Character::new(0, Color::Transparent, Color::Transparent, CharFlags::None));
+            self.screen_chars
+                .push(Character::new(0, Color::Transparent, Color::Transparent, CharFlags::None));
         }
     }
 
