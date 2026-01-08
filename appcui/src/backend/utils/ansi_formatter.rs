@@ -190,7 +190,7 @@ impl AnsiFormatter {
             x = 0;
         }
 
-        self.render_sixel_regions(surface, offset);
+        self.render_sixel_regions(surface);
 
         // update the cursor
         if surface.cursor.is_visible() {
@@ -201,12 +201,9 @@ impl AnsiFormatter {
         }
     }
 
-    fn render_sixel_regions(&mut self, surface: &Surface, offset: Point) {
+    fn render_sixel_regions(&mut self, surface: &Surface) {
         for region in surface.sixel_regions() {
-            // Position cursor at the start of the sixel region
-            // Note: Sixel graphics are positioned in pixels, but we're working with character cells
-            // The terminal will handle the pixel-level positioning based on cell dimensions
-            self.set_cursor_position(region.x + offset.x, region.y + offset.y);
+            self.set_cursor_position(region.x, region.y);
 
             self.text.push_str(&region.sixel_data);
         }

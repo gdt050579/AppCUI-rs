@@ -1290,6 +1290,7 @@ impl PaintMethods for RuntimeManager {
         // reset the surface clip and hide the cursor
         self.surface.hide_cursor();
         self.surface.reset();
+        self.surface.clear_sixel_regions();
         self.surface.set_cell_size(self.backend.cell_size());
         self.paint_control(self.desktop_handle);
         if !self.modal_windows.is_empty() {

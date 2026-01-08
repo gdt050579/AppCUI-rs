@@ -2,9 +2,6 @@ use appcui::prelude::*;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use std::sync::OnceLock;
-
-static LOADED_IMAGE: OnceLock<Image> = OnceLock::new();
 
 fn load_png_image(path: &Path) -> Option<Image> {
     let img = ::image::open(path).ok()?;
@@ -79,7 +76,7 @@ struct MyWin {
 impl MyWin {
     pub fn new(img: Image) -> Self {
         let mut w = Self {
-            base: Window::new("SpongeBob - HD Image Demo", layout!("d:f"), window::Flags::Sizeable),
+            base: Window::new("SpongeBob - HD Image Demo", layout!("d:f"), window::Flags::None),
             himg: Handle::None,
         };
 
@@ -128,23 +125,6 @@ impl CommandBarEvents for MyWin {
     }
 }
 
-#[Desktop(events = DesktopEvents)]
-struct MyDesktop {}
-
-impl MyDesktop {
-    fn new() -> Self {
-        Self { base: Desktop::new() }
-    }
-}
-
-impl DesktopEvents for MyDesktop {
-    fn on_start(&mut self) {
-        if let Some(image) = LOADED_IMAGE.get() {
-            self.add_window(MyWin::new(image.clone()));
-        }
-    }
-}
-
 fn main() -> Result<(), appcui::system::Error> {
     let image_path = Path::new("/home/crandrei/personal/AppCUI-rs/spongbob.png");
 
@@ -157,8 +137,8 @@ fn main() -> Result<(), appcui::system::Error> {
     file.write_all(sixel_string.as_bytes()).expect("Failed to write sixel data");
     println!("Saved sixel to: {}", sixel_path.display());
 
-    let _ = LOADED_IMAGE.set(image);
-
-    App::new().desktop(MyDesktop::new()).command_bar().build()?.run();
+    let mut app = App::new().single_window().command_bar().build()?;
+    app.add_window(MyWin::new(image));
+    app.run();
     Ok(())
 }

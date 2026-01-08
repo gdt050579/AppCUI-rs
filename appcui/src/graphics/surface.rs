@@ -245,7 +245,6 @@ impl Surface {
         self.reset_clip();
         self.set_base_origin(0, 0);
         self.reset_origin();
-        self.sixel_regions.clear();
     }
 
     /// Sets the position of the cursor relativ to the origin point. If the cursor is within the clip area, it will be visible. Otherwise it will be hidden.
@@ -1002,6 +1001,19 @@ impl Surface {
                 index += 1;
             }
         }
+        for region in &surface.sixel_regions {
+            let abs_x = region.x + x + self.origin.x;
+            let abs_y = region.y + y + self.origin.y;
+            if abs_x < self.clip.right && abs_y < self.clip.bottom {
+                self.sixel_regions.push(SixelRegion {
+                    x: abs_x,
+                    y: abs_y,
+                    char_width: region.char_width,
+                    char_height: region.char_height,
+                    sixel_data: region.sixel_data.clone(),
+                });
+            }
+        }
     }
 
     /// Draws a glyph at the specified position. If the glyph is outside the clip area, it will not be drawn.
@@ -1465,6 +1477,7 @@ impl Surface {
         self.bottom_most = (h as i32) - 1;
         self.size.width = w;
         self.size.height = h;
+        self.sixel_regions.clear();
         self.reset();
     }
 
