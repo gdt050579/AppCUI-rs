@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use super::cell_size::CellSize;
 use super::image::Glyph;
 use super::BitTile;
 use super::BitTileRenderMethod;
@@ -68,8 +69,8 @@ pub struct Surface {
     base_clip: ClipArea,
     right_most: i32,
     bottom_most: i32,
-    /// Sixel graphics regions to be rendered by the backend
     pub(crate) sixel_regions: Vec<SixelRegion>,
+    pub(crate) cell_size: CellSize,
 }
 
 impl Surface {
@@ -97,6 +98,7 @@ impl Surface {
             right_most: (w - 1) as i32,
             bottom_most: (h - 1) as i32,
             sixel_regions: Vec::new(),
+            cell_size: CellSize::default(),
         };
         s.chars.resize(count, Character::default());
         s
@@ -1426,6 +1428,14 @@ impl Surface {
     /// Clear all sixel regions
     pub fn clear_sixel_regions(&mut self) {
         self.sixel_regions.clear();
+    }
+
+    pub fn cell_size(&self) -> CellSize {
+        self.cell_size
+    }
+
+    pub fn set_cell_size(&mut self, cell_size: CellSize) {
+        self.cell_size = cell_size;
     }
 
     pub fn draw_tile<const STORAGE_BYTES: usize>(

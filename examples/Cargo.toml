@@ -11,6 +11,7 @@ flat_string = "1.0.0"
 chrono = "0.4.38"
 rand = "0.8.5"
 tempfile = "3.0"
+image = "0.25"
 
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
@@ -364,3 +365,7 @@ path = "window_type/main.rs"
 [[example]]
 name = "panels_3d"
 path = "panels_3d/main.rs"
+
+[[example]]
+name = "sixel_demo"
+path = "sixel_demo/main.rs"

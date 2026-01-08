@@ -82,4 +82,6 @@ extern "system" {
     #[warn(non_camel_case_types)]
     pub(crate) fn GlobalUnlock(hMem: HANDLE) -> BOOL;
 
+    #[warn(non_camel_case_types)]
+    pub(crate) fn GetCurrentConsoleFontEx(hConsoleOutput: HANDLE, bMaximumWindow: BOOL, lpConsoleCurrentFontEx: *mut CONSOLE_FONT_INFOEX) -> BOOL;
 }

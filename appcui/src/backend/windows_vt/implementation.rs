@@ -46,7 +46,7 @@ impl Backend for WindowsVTTerminal {
         self.ansi_formatter.disable_mouse_events();
         self.ansi_formatter.execute();
         self.console.on_close();
-    }    
+    }
     fn update_screen(&mut self, surface: &Surface) {
         // println!("Update the screen: capacity: {}, size: {:?}, region: {:?}, surface_size: {:?}",self.chars.len(),self.size,self.visible_region,surface.size);
         // safety check --> surface size should be the same as self.width/height size
@@ -62,6 +62,10 @@ impl Backend for WindowsVTTerminal {
     #[inline(always)]
     fn size(&self) -> Size {
         self.console.size()
+    }
+
+    fn cell_size(&self) -> CellSize {
+        win32::get_cell_size()
     }
 
     fn clipboard_text(&self) -> Option<String> {

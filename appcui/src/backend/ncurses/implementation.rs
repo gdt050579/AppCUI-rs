@@ -1,13 +1,13 @@
 use super::super::SystemEvent;
-use crate::backend::Backend;
-use super::ncursesapi::lib::ncurses_wcwidth;
 use super::ncursesapi::externs::*;
+use super::ncursesapi::lib::ncurses_wcwidth;
 use crate::backend::ncurses::ncursesapi::input::Input;
+use crate::backend::Backend;
 use std::sync::mpsc::Sender;
 
+use crate::backend::SystemEventReader;
 use crate::graphics::*;
 use crate::system::Error;
-use crate::backend::SystemEventReader;
 
 use super::ncursesapi;
 use copypasta::ClipboardContext;
@@ -171,6 +171,10 @@ impl Backend for NcursesTerminal {
 
     fn size(&self) -> Size {
         self.size
+    }
+
+    fn cell_size(&self) -> CellSize {
+        crate::backend::utils::unix::get_cell_size()
     }
 
     fn clipboard_text(&self) -> Option<String> {

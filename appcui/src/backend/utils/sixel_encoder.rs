@@ -103,9 +103,9 @@ impl SixelEncoder {
         let mut best_dist = u32::MAX;
 
         for (idx, &pal_color) in self.palette.iter().enumerate() {
-            let dr = (color.r as i32 - pal_color.r as i32).abs() as u32;
-            let dg = (color.g as i32 - pal_color.g as i32).abs() as u32;
-            let db = (color.b as i32 - pal_color.b as i32).abs() as u32;
+            let dr = (color.r as i32 - pal_color.r as i32).unsigned_abs();
+            let dg = (color.g as i32 - pal_color.g as i32).unsigned_abs();
+            let db = (color.b as i32 - pal_color.b as i32).unsigned_abs();
             let dist = dr * dr + dg * dg + db * db;
             if dist < best_dist {
                 best_dist = dist;

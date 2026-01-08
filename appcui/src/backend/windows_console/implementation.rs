@@ -1,6 +1,6 @@
 use super::super::utils::win32;
-use super::super::SystemEventReader;
 use super::super::Backend;
+use super::super::SystemEventReader;
 use super::input::Input;
 use crate::backend::utils::win32::constants::*;
 use crate::backend::utils::win32::structs::*;
@@ -192,6 +192,10 @@ impl Backend for WindowsConsoleTerminal {
     #[inline(always)]
     fn size(&self) -> Size {
         self.console.size()
+    }
+
+    fn cell_size(&self) -> CellSize {
+        win32::get_cell_size()
     }
 
     fn clipboard_text(&self) -> Option<String> {

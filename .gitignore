@@ -1,4 +1,4 @@
-/target
+**/target
 /Cargo.lock
 **/Cargo.lock
 **/*.tmp
@@ -11,3 +11,4 @@ record_events.bat
 tarpaulin-report.html
 *.profraw
 /.idea
+**/pkg

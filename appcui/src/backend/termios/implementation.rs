@@ -105,6 +105,10 @@ impl Backend for TermiosTerminal {
         self.size
     }
 
+    fn cell_size(&self) -> CellSize {
+        crate::backend::utils::unix::get_cell_size()
+    }
+
     fn clipboard_text(&self) -> Option<String> {
         let mut ctx: ClipboardContext = ClipboardContext::new().ok()?;
         ctx.get_contents().ok()

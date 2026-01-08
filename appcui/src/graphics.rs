@@ -4,7 +4,9 @@
 //! * `Rect`
 //! * `Size`
 //! * `Surface`
+//! * `CellSize`
 
+mod cell_size;
 mod char_attribute;
 mod character;
 mod clip_area;
@@ -24,6 +26,7 @@ mod surface_tester;
 #[cfg(test)]
 mod tests;
 
+pub use self::cell_size::CellSize;
 pub use self::char_attribute::CharAttribute;
 pub use self::char_attribute::CharFlags;
 pub use self::character::Character;

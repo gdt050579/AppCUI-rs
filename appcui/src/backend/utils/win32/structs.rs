@@ -56,9 +56,8 @@ pub(crate) struct CONSOLE_SCREEN_BUFFER_INFOEX {
     pub max_size: COORD,
     pub popup_attr: u16,
     pub supports_full_screen: BOOL,
-    pub color_table: [u32;16]
+    pub color_table: [u32; 16],
 }
-
 
 #[repr(C)]
 #[allow(non_camel_case_types)]
@@ -118,4 +117,31 @@ pub(crate) union WindowsTerminalEvent {
 pub(crate) struct INPUT_RECORD {
     pub event_type: u16,
     pub event: WindowsTerminalEvent,
+}
+
+/// Console font information structure for GetCurrentConsoleFontEx
+#[repr(C)]
+#[allow(non_camel_case_types)]
+#[allow(clippy::upper_case_acronyms)]
+#[derive(Copy, Clone, Debug)]
+pub(crate) struct CONSOLE_FONT_INFOEX {
+    pub cb_size: u32,
+    pub n_font: u32,
+    pub dw_font_size: COORD,
+    pub font_family: u32,
+    pub font_weight: u32,
+    pub face_name: [u16; 32], // LF_FACESIZE = 32
+}
+
+impl Default for CONSOLE_FONT_INFOEX {
+    fn default() -> Self {
+        Self {
+            cb_size: std::mem::size_of::<CONSOLE_FONT_INFOEX>() as u32,
+            n_font: 0,
+            dw_font_size: COORD::default(),
+            font_family: 0,
+            font_weight: 0,
+            face_name: [0; 32],
+        }
+    }
 }

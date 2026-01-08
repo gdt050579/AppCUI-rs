@@ -5,6 +5,7 @@ use super::super::Surface;
 use super::command::Command;
 use crate::backend::utils::AnsiFlags;
 use crate::backend::utils::AnsiFormatter;
+use crate::graphics::CellSize;
 use crate::graphics::Color;
 use crate::graphics::Point;
 use crate::graphics::Size;
@@ -127,14 +128,10 @@ impl Backend for DebugTerminal {
             self.paint = false;
             if hash_to_test != surface_hash {
                 if self.errors_disabled {
-                    println!(
-                        "\x1b[91;40m[Error] Invalid hash: (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})\x1b[0m"
-                    );
+                    println!("\x1b[91;40m[Error] Invalid hash: (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})\x1b[0m");
                     //println!("        at: {}",&self.paint_title);
                 } else {
-                    panic!(
-                        "Invalid hash for surface (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})"
-                    );
+                    panic!("Invalid hash for surface (expecting: 0x{hash_to_test:X} but found 0x{surface_hash:X})");
                 }
             }
         }
@@ -150,13 +147,9 @@ impl Backend for DebugTerminal {
                 let point_pos = format!("({},{})", point.x, point.y);
                 let point_repr = if point.x < 0 { "Hidden" } else { point_pos.as_str() };
                 if self.errors_disabled {
-                    println!(
-                        "\x1b[91;40m[Error] Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}\x1b[0m"
-                    );
+                    println!("\x1b[91;40m[Error] Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}\x1b[0m");
                 } else {
-                    panic!(
-                        "Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}"
-                    );
+                    panic!("Invalid cursor position. Expectig the cursor to be {point_repr}, but found {cursor_repr}");
                 }
             }
         }
@@ -305,6 +298,10 @@ impl Backend for DebugTerminal {
 
     fn size(&self) -> Size {
         self.size
+    }
+
+    fn cell_size(&self) -> CellSize {
+        CellSize::default()
     }
 
     fn query_system_event(&mut self) -> Option<SystemEvent> {

@@ -1,20 +1,33 @@
 use crate::backend::utils::SixelEncoder;
-use crate::graphics::{Image, Size, Surface};
+use crate::graphics::{CellSize, Image, Size, Surface};
 use crate::prelude::RenderOptions;
 
 pub fn size(image: &Image) -> Size {
-    let char_width = (image.width() + 7) / 8;
-    let char_height = (image.height() + 15) / 16;
+    size_with_cell(image, CellSize::default())
+}
+
+pub fn size_with_cell(image: &Image, cell_size: CellSize) -> Size {
+    let cell_width = cell_size.width as u32;
+    let cell_height = cell_size.height as u32;
+
+    // Calculate how many characters are needed to display the image
+    let char_width = image.width().div_ceil(cell_width);
+    let char_height = image.height().div_ceil(cell_height);
     Size::new(char_width.max(1), char_height.max(1))
 }
 
 pub fn paint(surface: &mut Surface, image: &Image, x: i32, y: i32, render_options: &RenderOptions) {
+    let cell_size = surface.cell_size();
+    let cell_width_px = cell_size.width as u32;
+    let cell_height_px = cell_size.height as u32;
+
     let scale = render_options.scale() as u32;
     let scaled_width = if scale > 1 { image.width() / scale } else { image.width() };
     let scaled_height = if scale > 1 { image.height() / scale } else { image.height() };
 
-    let char_width = ((scaled_width + 7) / 8) as i32;
-    let char_height = ((scaled_height + 15) / 16) as i32;
+    // Calculate character dimensions based on actual cell size
+    let char_width = scaled_width.div_ceil(cell_width_px) as i32;
+    let char_height = scaled_height.div_ceil(cell_height_px) as i32;
 
     // Fill the character area with placeholder spaces
     use crate::graphics::{CharAttribute, Character, Color};
@@ -39,8 +52,8 @@ pub fn generate_sixel(image: &Image, render_options: &RenderOptions) -> String {
         encoder.encode(&pixels, image.width(), image.height());
     } else {
         // Scale down the image
-        let new_width = (image.width() + scale - 1) / scale;
-        let new_height = (image.height() + scale - 1) / scale;
+        let new_width = image.width().div_ceil(scale);
+        let new_height = image.height().div_ceil(scale);
         let pixels = image_to_scaled_pixels(image, new_width, new_height, scale);
         encoder.encode(&pixels, new_width, new_height);
     }

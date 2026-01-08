@@ -39,6 +39,8 @@
 //! allowing AppCUI to work consistently across different platforms while leveraging
 //! platform-specific features when available.
 
+#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+mod crossterm;
 mod debug;
 #[cfg(target_family = "unix")]
 mod ncurses;
@@ -51,17 +53,15 @@ mod web_terminal;
 mod windows_console;
 #[cfg(target_os = "windows")]
 mod windows_vt;
-#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
-mod crossterm;
 
 pub(crate) mod utils;
-
 
 #[cfg(test)]
 mod tests;
 
 use std::sync::mpsc::Sender;
 
+use super::graphics::CellSize;
 use super::graphics::Size;
 use super::graphics::Surface;
 use super::system::Error;
@@ -73,6 +73,8 @@ pub(super) use self::system_event_thread::SystemEventReader;
 
 use self::debug::DebugTerminal;
 
+#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+use self::crossterm::CrossTerm;
 #[cfg(target_family = "unix")]
 use self::ncurses::NcursesTerminal;
 #[cfg(target_family = "unix")]
@@ -83,13 +85,14 @@ use self::web_terminal::WebTerminal;
 use self::windows_console::WindowsConsoleTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_vt::WindowsVTTerminal;
-#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
-use self::crossterm::CrossTerm;
 
 pub(crate) trait Backend {
     fn update_screen(&mut self, surface: &Surface);
     fn on_resize(&mut self, new_size: Size);
     fn size(&self) -> Size;
+    fn cell_size(&self) -> CellSize {
+        CellSize::default()
+    }
     fn clipboard_text(&self) -> Option<String>;
     fn set_clipboard_text(&mut self, text: &str);
     fn has_clipboard_text(&self) -> bool;

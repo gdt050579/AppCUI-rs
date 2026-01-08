@@ -1,6 +1,6 @@
 use crate::{
     backend::Backend,
-    prelude::{CharFlags, ErrorKind, Key, KeyCode, KeyModifier, MouseButton, MouseWheelDirection, Size, Surface},
+    prelude::{CellSize, CharFlags, ErrorKind, Key, KeyCode, KeyModifier, MouseButton, MouseWheelDirection, Size, Surface},
     system::Error,
     system::{KeyPressedEvent, MouseButtonDownEvent, MouseButtonUpEvent, MouseMoveEvent, MouseWheelEvent, SystemEvent},
 };
@@ -19,37 +19,37 @@ const CURSOR_COLOR: &str = "rgba(255, 255, 255, 0.5)";
 const DEFAULT_COLOR: &str = "rgba(0, 0, 0, 0)";
 
 struct TerminalDomConfig {
-    cols: u32,
-    rows: u32,
+    cols:        u32,
+    rows:        u32,
     font_family: String,
-    font_size: u32,
-    cell_w: u32,
-    cell_h: u32,
+    font_size:   u32,
+    cell_w:      u32,
+    cell_h:      u32,
 }
 
 struct WebGLResources {
-    gl: GL,
-    program: WebGlProgram,
-    buffer: WebGlBuffer,
-    pos_attrib_location: u32,
+    gl:                    GL,
+    program:               WebGlProgram,
+    buffer:                WebGlBuffer,
+    pos_attrib_location:   u32,
     color_attrib_location: u32,
 }
 
 pub struct WebTerminal {
-    gl: GL,
-    size: Size,
-    webgl_canvas: HtmlCanvasElement,
-    text_canvas: HtmlCanvasElement,
-    program: WebGlProgram,
-    buffer: WebGlBuffer,
-    pos_attrib_location: u32,
+    gl:                    GL,
+    size:                  Size,
+    webgl_canvas:          HtmlCanvasElement,
+    text_canvas:           HtmlCanvasElement,
+    program:               WebGlProgram,
+    buffer:                WebGlBuffer,
+    pos_attrib_location:   u32,
     color_attrib_location: u32,
-    event_queue: Arc<Mutex<Vec<SystemEvent>>>,
-    font: String,
-    cell_width_px: f32,
-    cell_height_px: f32,
-    clipboard_content: Arc<Mutex<Option<String>>>,
-    rgba_color: String,
+    event_queue:           Arc<Mutex<Vec<SystemEvent>>>,
+    font:                  String,
+    cell_width_px:         f32,
+    cell_height_px:        f32,
+    clipboard_content:     Arc<Mutex<Option<String>>>,
+    rgba_color:            String,
 }
 
 unsafe impl Send for WebTerminal {}
@@ -142,9 +142,6 @@ impl WebTerminal {
                     let cols = cols.max(40);
                     let rows = rows.max(10);
 
-                    let cols = cols + 1;
-                    let rows = rows + 1;
-
                     return (cols, rows, cell_width, cell_height);
                 }
             }
@@ -204,7 +201,7 @@ impl WebTerminal {
         let term = WebTerminal {
             gl: webgl_resources.gl,
             size: Size {
-                width: dom_config.cols,
+                width:  dom_config.cols,
                 height: dom_config.rows,
             },
             webgl_canvas,
@@ -721,6 +718,10 @@ impl Backend for WebTerminal {
 
     fn size(&self) -> Size {
         self.size
+    }
+
+    fn cell_size(&self) -> CellSize {
+        CellSize::new(self.cell_width_px as u16, self.cell_height_px as u16)
     }
 
     fn clipboard_text(&self) -> Option<String> {

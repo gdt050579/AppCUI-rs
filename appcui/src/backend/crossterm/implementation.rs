@@ -2,7 +2,7 @@ use super::input::Input;
 use crate::prelude::Character;
 use crate::{
     backend::{Backend, SystemEventReader},
-    graphics::{CharFlags, Color, Size, Surface},
+    graphics::{CellSize, CharFlags, Color, Size, Surface},
     system::{Error, SystemEvent},
 };
 use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
@@ -240,6 +240,23 @@ impl Backend for CrossTerm {
 
     fn size(&self) -> Size {
         self.size
+    }
+
+    fn cell_size(&self) -> CellSize {
+        #[cfg(target_family = "unix")]
+        {
+            crate::backend::utils::unix::get_cell_size()
+        }
+
+        #[cfg(target_os = "windows")]
+        {
+            win32::get_cell_size()
+        }
+
+        #[cfg(not(any(target_family = "unix", target_os = "windows")))]
+        {
+            CellSize::default()
+        }
     }
 
     fn clipboard_text(&self) -> Option<String> {

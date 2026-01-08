@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Image Viewer - Web Demo</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #1a1a2e;
+    }
+    #canvas, #textCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #textCanvas {
+      pointer-events: none;
+    }
+    canvas, #canvas, #textCanvas {
+      background: transparent;
+    }
+    .config {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <canvas id="textCanvas"></canvas>
+
+  <!-- Terminal configuration - adjust these for your display -->
+  <div class="config">
+    <!-- <span id="terminal-cols">120</span>
+    <span id="terminal-rows">40</span> -->
+    <span id="terminal-font">Consolas, "Courier New", monospace</span>
+    <span id="terminal-font-size">16</span>
+    <span id="terminal-cell-width">10</span>
+    <span id="terminal-cell-height">18</span>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
+

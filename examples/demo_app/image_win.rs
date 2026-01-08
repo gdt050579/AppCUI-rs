@@ -824,6 +824,7 @@ impl CommandBarEvents for Win {
             image::CharacterSet::DitheredShades => "DitheredShades",
             image::CharacterSet::Braille => "Braille",
             image::CharacterSet::AsciiArt => "AsciiArt",
+            image::CharacterSet::Sixel => "Sixel",
         };
         commandbar.set(key!("F2"), chset, win::Commands::CharSet);
 
@@ -873,7 +874,8 @@ impl CommandBarEvents for Win {
                         image::CharacterSet::LargeBlocks => image::CharacterSet::DitheredShades,
                         image::CharacterSet::DitheredShades => image::CharacterSet::Braille,
                         image::CharacterSet::Braille => image::CharacterSet::AsciiArt,
-                        image::CharacterSet::AsciiArt => image::CharacterSet::SmallBlocks,
+                        image::CharacterSet::AsciiArt => image::CharacterSet::Sixel,
+                        image::CharacterSet::Sixel => image::CharacterSet::SmallBlocks,
                     };
                     let mut opt = img.render_options().clone();
                     opt.set_character_set(new_chset);

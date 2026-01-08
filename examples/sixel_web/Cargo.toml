@@ -1,0 +1,18 @@
+cargo-features = ["edition2024"]
+
+[package]
+name = "sixel_web"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+console_error_panic_hook = "0.1"
+appcui = { path = "../../appcui" }
+wasm-bindgen = { version = "0.2" }
+web-sys = { version = "*", features = ["console"] }
+
