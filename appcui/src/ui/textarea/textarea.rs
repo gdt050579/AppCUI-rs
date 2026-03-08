@@ -133,7 +133,7 @@ impl TextArea {
     /// (e.g. cursor position in line); it resets to 0 after each newline.
     fn expand_tabs_to_spaces(text: &str, initial_column: u32) -> String {
         const TAB_WIDTH: u32 = 4;
-        let mut result = String::new();
+        let mut result = String::with_capacity(text.len()+16);
         let mut column = initial_column;
         let mut chars = text.chars().peekable();
         while let Some(c) = chars.next() {
@@ -532,10 +532,15 @@ impl TextArea {
 
     fn get_absolute_position_xy(&mut self, x: usize, y: usize) -> (u32, u32) {
         let mut cursor_absolute_position = 0;
+        let line_count = self.line_sizes.len();
+        if line_count == 0 {
+            return (0, 0);
+        }
+        let y = y.min(line_count - 1);
 
         // Here I count the byte sizes of that lines above
-        for i in 0..y as u32 {
-            cursor_absolute_position += self.line_sizes[i as usize];
+        for i in 0..y {
+            cursor_absolute_position += self.line_sizes[i];
         }
 
         // Here I need the absolute position of that character, therefore I need to slice 
@@ -599,9 +604,10 @@ impl TextArea {
             line_character_counts.push(0);
         } else {
             let line_count = line_character_counts.len();
-            
-            line_sizes[line_count - 1] -= 1;
-            line_character_counts[line_count - 1] -= 1;
+            if line_count > 0 {
+                line_sizes[line_count - 1] -= 1;
+                line_character_counts[line_count - 1] -= 1;
+            }
         }
     }
 
@@ -943,6 +949,12 @@ impl TextArea {
             line_iterator += 1;
         }
 
+        // When pos_end is exactly at the end of a line, the loop never sets position_end_y/position_end_x
+        if line_iterator > 0 && counter == pos_end {
+            position_end_y = line_iterator - 1;
+            position_end_x = self.line_sizes[line_iterator - 1] as usize;
+        }
+
         // If the deletion is requested on a single line
         if position_start_y == position_end_y {
             self.line_sizes[position_start_y] -= (position_end_x - position_start_x) as u32;
@@ -1142,9 +1154,9 @@ impl TextArea {
 
     #[inline(always)]
     fn save_mouse_data(&mut self, mouse_data: &MouseEventData) {
-        // Updating the view based on the direction
-        self.mouse_x = std::cmp::min(std::cmp::max(mouse_data.x, 0) as u32, self.window_width - 1);
-        self.mouse_y = std::cmp::min(std::cmp::max(mouse_data.y, 0) as u32, self.size().height - 1);
+        // Updating the view based on the direction (saturating_sub avoids panic when width/height is 0)
+        self.mouse_x = std::cmp::min(std::cmp::max(mouse_data.x, 0) as u32, self.window_width.saturating_sub(1));
+        self.mouse_y = std::cmp::min(std::cmp::max(mouse_data.y, 0) as u32, self.size().height.saturating_sub(1));
     }
 
     fn set_cursor_pos_from_mouse(&mut self, mouse_data: &MouseEventData) {
@@ -1156,6 +1168,9 @@ impl TextArea {
         }
         self.cursor.pos_y = self.mouse_y as usize;
 
+        if self.line_sizes.is_empty() {
+            return;
+        }
         if self.cursor.pos_y >= self.line_sizes.len() {
             self.cursor.pos_y = self.line_sizes.len() - 1;
             self.move_cursor_horizontal(self.line_sizes[self.line_sizes.len() - 1] as i32);
