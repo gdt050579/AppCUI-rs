@@ -502,23 +502,27 @@ impl TextArea {
     }
 
     fn get_absolute_position_xy(&mut self, x: usize, y: usize) -> (u32, u32) {
-        let mut cursor_absolute_position = 0;
-
-        // Here I count the byte sizes of that lines above
-        for i in 0..y as u32 {
-            cursor_absolute_position += self.line_sizes[i as usize];
+        if self.line_sizes.is_empty() {
+            return (0, 0);
         }
 
-        // Here I need the absolute position of that character, therefore I need to slice 
-        // the text and extract the absolute position
-        let line_text = &self.text[cursor_absolute_position as usize .. (cursor_absolute_position + self.line_sizes[y]) as usize];
-        
+        let y = y.min(self.line_sizes.len() - 1);
+        let mut cursor_absolute_position = 0usize;
+
+        for i in 0..y {
+            cursor_absolute_position += self.line_sizes[i] as usize;
+        }
+
+        let line_byte_len = self.line_sizes[y] as usize;
+        let line_end = (cursor_absolute_position + line_byte_len).min(self.text.len());
+        let line_text = &self.text[cursor_absolute_position..line_end];
+
         let byte_index_in_line = Self::get_cursor_position_in_line(line_text, x, 0);
         if byte_index_in_line != usize::MAX {
-            cursor_absolute_position += byte_index_in_line as u32;
+            cursor_absolute_position += byte_index_in_line;
         }
 
-        (cursor_absolute_position, byte_index_in_line as u32)
+        (cursor_absolute_position as u32, byte_index_in_line as u32)
     }
 
     fn get_absolute_position_verbose(&mut self) -> (u32, u32) {
@@ -559,7 +563,7 @@ impl TextArea {
     }
 
     #[inline(always)]
-    fn parse_text_in_lines(&mut self, text: &str, line_sizes: &mut Vec<u32>, line_character_counts: &mut Vec<u32>) {
+    fn parse_text_in_lines(text: &str, line_sizes: &mut Vec<u32>, line_character_counts: &mut Vec<u32>) {
         for line in text.lines() {
             line_sizes.push(line.len() as u32 + 1); // +1 for the \n we need to keep in mind
             line_character_counts.push(line.chars().count() as u32 + 1); // +1 for the \n we need to keep in mind
@@ -1019,7 +1023,7 @@ impl TextArea {
             // First we parse the text in lines
             let mut line_sizes : Vec<u32> = Vec::new();
             let mut line_character_counts : Vec<u32> = Vec::new();
-            self.parse_text_in_lines(&_text, &mut line_sizes, &mut line_character_counts);
+            TextArea::parse_text_in_lines(&_text, &mut line_sizes, &mut line_character_counts);
 
             if byte_index_in_line == self.text.len() as u32 && !_text.ends_with('\n') {
                 let line_count = line_character_counts.len();
@@ -1175,9 +1179,12 @@ impl TextArea {
             offset_position = pos.offset().unwrap();
         }
         else if pos.line_and_collumn.is_some() {
-            let line = pos.line().unwrap();
-            let collumn = pos.collumn().unwrap();
-            (offset_position, _) = self.get_absolute_position_xy(collumn as usize, line as usize);
+            let line = pos.line().unwrap() as usize;
+            let column = pos.collumn().unwrap() as usize;
+            if self.line_sizes.is_empty() {
+                return false;
+            }
+            (offset_position, _) = self.get_absolute_position_xy(column, line);
         }
         else {
             return false; // Invalid position
@@ -1190,23 +1197,10 @@ impl TextArea {
 
     // Sets the text of the TextArea
     pub fn set_text(&mut self, text: &str) {
-        // We reset all the data we have
-        
         // Reset the selection
         self.reset_selection();
 
-        // Reset the view and cursor
-        self.line_offset = 0;
-        self.row_offset = 0;
-        self.cursor.pos_x = 0;
-        self.cursor.pos_y = 0;
-        self.reposition_cursor();
-
-        // Reset the line sizes and character counts
-        self.line_sizes.clear();
-        self.line_character_counts.clear();
-
-        // Reset the text
+        // Normalize and set the text first (so line metadata matches the actual buffer)
         self.text = text.to_string().replace('\t', "    ").replace("\r\n", "\n");
         if !self.text.ends_with('\n') {
             self.text += "\n";
@@ -1216,27 +1210,25 @@ impl TextArea {
             self.line_number_bar_size = 0;
         }
 
-        // Parse the new text and set the new data
+        // Reset and repopulate line sizes/counts from the normalized buffer (not from `text`)
+        let normalized = self.text.clone();
         let mut line_sizes = Vec::new();
         let mut line_character_counts = Vec::new();
-        self.parse_text_in_lines(text, &mut line_sizes, &mut line_character_counts);
+        TextArea::parse_text_in_lines(&normalized, &mut line_sizes, &mut line_character_counts);
         self.line_sizes = line_sizes;
         self.line_character_counts = line_character_counts;
-
-        if text.ends_with("\n") {
-            self.line_sizes.push(0);
-            self.line_character_counts.push(0);
-        }
-        else {
-            let line_count = self.line_character_counts.len();
-                
-            self.line_sizes[line_count - 1] += 1;
-            self.line_character_counts[line_count - 1] += 1;
-        }
 
         self.ensure_line_sizes();
         self.update_max_line_size();
         self.update_line_number_tab_size();
+
+        // Reset view and cursor after line metadata is valid, then reposition
+        self.line_offset = 0;
+        self.row_offset = 0;
+        self.cursor.pos_x = 0;
+        self.cursor.pos_y = 0;
+        self.reposition_cursor();
+
         self.update_scrollbar_pos();
     }
 

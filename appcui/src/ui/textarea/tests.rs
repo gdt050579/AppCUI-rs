@@ -2444,10 +2444,10 @@ fn scroll_with_scrollbars_and_linenumbers() {
 #[test]
 fn pub_fn_set_text() {
 
-        let script = "
-        // Paint.Enable(false)
+    let script = "
+        Paint.Enable(false)
         Paint('Initial State')
-        CheckHash(0x5DC89E2D2B797708)
+        CheckHash(0x684A45397E9DAF4A)
     ";
 
     let text_print = "Old text, new line\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
