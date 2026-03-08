@@ -129,14 +129,19 @@ pub struct TextArea {
 
 impl TextArea {
     /// Replaces tab characters with 1 to 4 spaces so that the next character is aligned to a 4-column boundary.
-    /// `initial_column` is the 0-based column at the start of the string (e.g. cursor position in line);
-    /// it resets to 0 after each newline.
+    /// Normalizes \r\n to \n. `initial_column` is the 0-based column at the start of the string
+    /// (e.g. cursor position in line); it resets to 0 after each newline.
     fn expand_tabs_to_spaces(text: &str, initial_column: u32) -> String {
         const TAB_WIDTH: u32 = 4;
         let mut result = String::new();
         let mut column = initial_column;
-        for c in text.chars() {
-            if c == '\t' {
+        let mut chars = text.chars().peekable();
+        while let Some(c) = chars.next() {
+            if c == '\r' && chars.peek() == Some(&'\n') {
+                chars.next();
+                result.push('\n');
+                column = 0;
+            } else if c == '\t' {
                 let spaces = TAB_WIDTH - (column % TAB_WIDTH);
                 for _ in 0..spaces {
                     result.push(' ');
@@ -663,8 +668,11 @@ impl TextArea {
     ///                              textarea::Flags::ShowLineNumber);
     /// ```
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {
-        let normalized = Self::expand_tabs_to_spaces(&text.replace("\r\n", "\n"), 0);
+        let mut normalized = Self::expand_tabs_to_spaces(text, 0);
         let original_ends_with_newline = text.ends_with('\n');
+        if !normalized.ends_with('\n') {
+            normalized.push('\n');
+        }
         let mut control = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -676,7 +684,7 @@ impl TextArea {
                     },
             ),
             flags,
-            text: normalized.clone(),
+            text: normalized,
 
             cursor: Cursor { pos_x: 0, pos_y: 0, pressed: false},
             selection: Selection {pos_start: 0, pos_end: 0, direction: SelectionDirection::None},
@@ -705,10 +713,6 @@ impl TextArea {
 
         if !flags.contains(Flags::ShowLineNumber) {
             control.line_number_bar_size = 0;
-        }
-        
-        if !control.text.ends_with('\n') {
-            control.text += "\n";
         }
 
         for line in control.text.lines() {
@@ -1028,7 +1032,7 @@ impl TextArea {
     /// Returns the number of characters inserted (after tab expansion) for cursor movement.
     fn insert_text_internal(&mut self, text: &str) -> usize {
         let column_in_line = self.row_offset + self.cursor.pos_x as u32;
-        let _text = Self::expand_tabs_to_spaces(&text.replace("\r\n", "\n"), column_in_line);
+        let _text = Self::expand_tabs_to_spaces(text, column_in_line);
 
         if _text.contains('\n') {
             // We need to calculate the absolute position in the text for the cursor and the position in line
@@ -1235,7 +1239,7 @@ impl TextArea {
         self.line_character_counts.clear();
 
         // Normalize: expand tabs to 1–4 spaces for 4-char alignment, normalize line endings
-        let mut normalized = Self::expand_tabs_to_spaces(&text.replace("\r\n", "\n"), 0);
+        let mut normalized = Self::expand_tabs_to_spaces(text, 0);
         if !normalized.ends_with('\n') {
             normalized += "\n";
         }
