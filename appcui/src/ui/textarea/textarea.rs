@@ -128,6 +128,35 @@ pub struct TextArea {
 }
 
 impl TextArea {
+    /// Replaces tab characters with 1 to 4 spaces so that the next character is aligned to a 4-column boundary.
+    /// Normalizes \r\n to \n. `initial_column` is the 0-based column at the start of the string
+    /// (e.g. cursor position in line); it resets to 0 after each newline.
+    fn expand_tabs_to_spaces(text: &str, initial_column: u32) -> String {
+        const TAB_WIDTH: u32 = 4;
+        let mut result = String::with_capacity(text.len()+16);
+        let mut column = initial_column;
+        let mut chars = text.chars().peekable();
+        while let Some(c) = chars.next() {
+            if c == '\r' && chars.peek() == Some(&'\n') {
+                chars.next();
+                result.push('\n');
+                column = 0;
+            } else if c == '\t' {
+                let spaces = TAB_WIDTH - (column % TAB_WIDTH);
+                for _ in 0..spaces {
+                    result.push(' ');
+                }
+                column += spaces;
+            } else if c == '\n' {
+                result.push(c);
+                column = 0;
+            } else {
+                result.push(c);
+                column += 1;
+            }
+        }
+        result
+    }
 
     fn get_current_character(bytes: &[u8], position: usize) -> Option<(usize, char)> {
         if position >= bytes.len() {
@@ -503,10 +532,15 @@ impl TextArea {
 
     fn get_absolute_position_xy(&mut self, x: usize, y: usize) -> (u32, u32) {
         let mut cursor_absolute_position = 0;
+        let line_count = self.line_sizes.len();
+        if line_count == 0 {
+            return (0, 0);
+        }
+        let y = y.min(line_count - 1);
 
         // Here I count the byte sizes of that lines above
-        for i in 0..y as u32 {
-            cursor_absolute_position += self.line_sizes[i as usize];
+        for i in 0..y {
+            cursor_absolute_position += self.line_sizes[i];
         }
 
         // Here I need the absolute position of that character, therefore I need to slice 
@@ -570,9 +604,10 @@ impl TextArea {
             line_character_counts.push(0);
         } else {
             let line_count = line_character_counts.len();
-            
-            line_sizes[line_count - 1] -= 1;
-            line_character_counts[line_count - 1] -= 1;
+            if line_count > 0 {
+                line_sizes[line_count - 1] -= 1;
+                line_character_counts[line_count - 1] -= 1;
+            }
         }
     }
 
@@ -639,6 +674,11 @@ impl TextArea {
     ///                              textarea::Flags::ShowLineNumber);
     /// ```
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {
+        let mut normalized = Self::expand_tabs_to_spaces(text, 0);
+        let original_ends_with_newline = text.ends_with('\n');
+        if !normalized.ends_with('\n') {
+            normalized.push('\n');
+        }
         let mut control = Self {
             base: ControlBase::with_status_flags(
                 layout,
@@ -650,7 +690,7 @@ impl TextArea {
                     },
             ),
             flags,
-            text: text.to_string().replace('\t', "    ").replace("\r\n", "\n"),
+            text: normalized,
 
             cursor: Cursor { pos_x: 0, pos_y: 0, pressed: false},
             selection: Selection {pos_start: 0, pos_end: 0, direction: SelectionDirection::None},
@@ -680,17 +720,13 @@ impl TextArea {
         if !flags.contains(Flags::ShowLineNumber) {
             control.line_number_bar_size = 0;
         }
-        
-        if !control.text.ends_with('\n') {
-            control.text += "\n";
-        }
 
-        for line in text.lines() {
+        for line in control.text.lines() {
             control.line_sizes.push(line.len() as u32 + 1); // +1 for the \n we need to keep in mind
             control.line_character_counts.push(line.chars().count() as u32 + 1); // +1 for the \n we need to keep in mind
         }
 
-        if text.ends_with("\n") {
+        if original_ends_with_newline {
             control.line_sizes.push(0);
             control.line_character_counts.push(0);
         }
@@ -913,6 +949,12 @@ impl TextArea {
             line_iterator += 1;
         }
 
+        // When pos_end is exactly at the end of a line, the loop never sets position_end_y/position_end_x
+        if line_iterator > 0 && counter == pos_end {
+            position_end_y = line_iterator - 1;
+            position_end_x = self.line_sizes[line_iterator - 1] as usize;
+        }
+
         // If the deletion is requested on a single line
         if position_start_y == position_end_y {
             self.line_sizes[position_start_y] -= (position_end_x - position_start_x) as u32;
@@ -999,9 +1041,10 @@ impl TextArea {
     }
     
     /// Inserts the text at the current cursor position within the text area.
-    fn insert_text_internal(&mut self, text: &str) {
-
-        let _text = text.replace('\t', "    ").replace("\r\n", "\n");
+    /// Returns the number of characters inserted (after tab expansion) for cursor movement.
+    fn insert_text_internal(&mut self, text: &str) -> usize {
+        let column_in_line = self.row_offset + self.cursor.pos_x as u32;
+        let _text = Self::expand_tabs_to_spaces(text, column_in_line);
 
         if _text.contains('\n') {
             // We need to calculate the absolute position in the text for the cursor and the position in line
@@ -1047,6 +1090,7 @@ impl TextArea {
         self.update_max_line_size();
         self.update_line_number_tab_size();
         self.update_scrollbar_pos();
+        _text.chars().count()
     }
 
     #[inline(always)]
@@ -1110,9 +1154,9 @@ impl TextArea {
 
     #[inline(always)]
     fn save_mouse_data(&mut self, mouse_data: &MouseEventData) {
-        // Updating the view based on the direction
-        self.mouse_x = std::cmp::min(std::cmp::max(mouse_data.x, 0) as u32, self.window_width - 1);
-        self.mouse_y = std::cmp::min(std::cmp::max(mouse_data.y, 0) as u32, self.size().height - 1);
+        // Updating the view based on the direction (saturating_sub avoids panic when width/height is 0)
+        self.mouse_x = std::cmp::min(std::cmp::max(mouse_data.x, 0) as u32, self.window_width.saturating_sub(1));
+        self.mouse_y = std::cmp::min(std::cmp::max(mouse_data.y, 0) as u32, self.size().height.saturating_sub(1));
     }
 
     fn set_cursor_pos_from_mouse(&mut self, mouse_data: &MouseEventData) {
@@ -1124,6 +1168,9 @@ impl TextArea {
         }
         self.cursor.pos_y = self.mouse_y as usize;
 
+        if self.line_sizes.is_empty() {
+            return;
+        }
         if self.cursor.pos_y >= self.line_sizes.len() {
             self.cursor.pos_y = self.line_sizes.len() - 1;
             self.move_cursor_horizontal(self.line_sizes[self.line_sizes.len() - 1] as i32);
@@ -1206,24 +1253,25 @@ impl TextArea {
         self.line_sizes.clear();
         self.line_character_counts.clear();
 
-        // Reset the text
-        self.text = text.to_string().replace('\t', "    ").replace("\r\n", "\n");
-        if !self.text.ends_with('\n') {
-            self.text += "\n";
+        // Normalize: expand tabs to 1–4 spaces for 4-char alignment, normalize line endings
+        let mut normalized = Self::expand_tabs_to_spaces(text, 0);
+        if !normalized.ends_with('\n') {
+            normalized += "\n";
         }
 
         if !self.flags.contains(Flags::ShowLineNumber) {
             self.line_number_bar_size = 0;
         }
 
-        // Parse the new text and set the new data
+        // Parse the normalized text for line sizes, then assign
         let mut line_sizes = Vec::new();
         let mut line_character_counts = Vec::new();
-        self.parse_text_in_lines(text, &mut line_sizes, &mut line_character_counts);
+        self.parse_text_in_lines(&normalized, &mut line_sizes, &mut line_character_counts);
+        self.text = normalized;
         self.line_sizes = line_sizes;
         self.line_character_counts = line_character_counts;
 
-        if text.ends_with("\n") {
+        if text.ends_with('\n') {
             self.line_sizes.push(0);
             self.line_character_counts.push(0);
         }
@@ -1246,9 +1294,9 @@ impl TextArea {
     pub fn insert_text(&mut self, pos: TextPosition, text: &str) {
         //  First we move the cursor to the position
         if self.set_cursor_position(pos) {
-            // Then we insert the text at the current cursor position
-            self.insert_text_internal(text);
-            self.move_cursor_horizontal(text.chars().count() as i32);
+            // Then we insert the text at the current cursor position (tabs expanded to 1–4 spaces)
+            let inserted_count = self.insert_text_internal(text);
+            self.move_cursor_horizontal(inserted_count as i32);
         }
     }
 
@@ -1587,8 +1635,8 @@ impl OnKeyPressed for TextArea {
                     self.reposition_cursor();
 
                     if let Some(clipboard_data) = RuntimeManager::get().backend().clipboard_text() {
-                        self.insert_text_internal(&clipboard_data);
-                        self.move_cursor_horizontal(clipboard_data.chars().count() as i32);
+                        let inserted_count = self.insert_text_internal(&clipboard_data);
+                        self.move_cursor_horizontal(inserted_count as i32);
                     }
                     return EventProcessStatus::Processed;
                 }

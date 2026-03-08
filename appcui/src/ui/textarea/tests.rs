@@ -2771,3 +2771,113 @@ fn pub_fn_delete_selection() {
     app.add_window(MyWin::new());
     app.run();
 }
+
+#[test]
+fn display_text_with_tabs_script_no_panic() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial: line1 tab line2 tab - X and Y aligned')
+        CheckHash(0xCDEAC84662E26DB7)
+        Key.Pressed(Right, 8)
+        Paint('After 8 Right')
+        CheckCursor(13, 1)
+        CheckHash(0xCDEAC84662E26DB7)
+    ";
+
+    let textarea = TextArea::new("line1\tX\nline2\tY", layout!("d:f"), textarea::Flags::None);
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Tabs display", layout!("a:c,w:52,h:10"), window::Flags::None);
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn display_text_with_tabs_stored_as_spaces() {
+    let textarea = TextArea::new("L1\tA\nL2\t\tB\nL3\t\t\tC", layout!("d:f"), textarea::Flags::None);
+    let t = textarea.text();
+    assert!(!t.contains('\t'), "TextArea should store no tab characters");
+    assert!(t.contains("L1  A"), "first line: tab to column 4 (2 spaces)");
+    assert!(t.contains("L2      B"), "second line: two tabs to column 8");
+    assert!(t.contains("L3          C"), "third line: three tabs to column 12");
+    assert!(t.ends_with('\n'), "stored text should end with newline");
+}
+
+#[test]
+fn display_text_with_tabs_multiple_lines_line_count() {
+    let textarea = TextArea::new("a\tb\nc\td\te\n\tf", layout!("d:f"), textarea::Flags::None);
+    let t = textarea.text();
+    let lines: Vec<&str> = t.lines().collect();
+    assert_eq!(lines.len(), 3, "expected 3 lines");
+    assert_eq!(lines[0], "a   b", "tab to column 4");
+    assert_eq!(lines[1], "c   d   e", "tabs to 4 and 8");
+    assert_eq!(lines[2], "    f", "tab at line start = 4 spaces");
+}
+
+// --- Unit tests for crash fixes (see CRASH_ANALYSIS.md in textarea.rs directory) ---
+
+/// set_text("") must not panic (parse_text_in_lines else branch with line_count > 0).
+#[test]
+fn crash_fix_set_text_empty() {
+    let mut textarea = TextArea::new("initial", layout!("d:f"), textarea::Flags::None);
+    textarea.set_text("");
+    let t = textarea.text();
+    assert!(t.ends_with('\n'), "empty set_text should still end with newline");
+}
+
+/// set_cursor_position with line far out of bounds must not panic (get_absolute_position_xy clamps line).
+#[test]
+fn crash_fix_set_cursor_position_line_out_of_bounds() {
+    let mut textarea = TextArea::new("a\nb\nc\n", layout!("d:f"), textarea::Flags::None);
+    let ok = textarea.set_cursor_position(TextPosition::with_line_column(100, 0));
+    assert!(ok, "set_cursor_position should succeed (clamped)");
+    let _pos = textarea.cursor_position();
+    assert!(textarea.text().len() > 0, "state remains consistent");
+}
+
+/// set_cursor_position with line 0 and column out of bounds must not panic.
+#[test]
+fn crash_fix_set_cursor_position_column_out_of_bounds() {
+    let mut textarea = TextArea::new("ab\n", layout!("d:f"), textarea::Flags::None);
+    let ok = textarea.set_cursor_position(TextPosition::with_line_column(0, 999));
+    assert!(ok, "set_cursor_position should succeed (clamped)");
+}
+
+/// remove_text that ends exactly at the end of a line must not panic and must leave consistent state.
+#[test]
+fn crash_fix_remove_text_selection_at_line_end() {
+    let mut textarea = TextArea::new("abc\ndef\n", layout!("d:f"), textarea::Flags::None);
+    textarea.remove_text(TextPosition::with_offset(0), 3);
+    let t = textarea.text();
+    assert_eq!(t, "\ndef\n", "first line content removed, newline and rest unchanged");
+}
+
+/// remove_text with selection ending at a line boundary (last line) must not panic and leave consistent state.
+#[test]
+fn crash_fix_remove_text_selection_at_last_line_end() {
+    let mut textarea = TextArea::new("ab\ncd\n", layout!("d:f"), textarea::Flags::None);
+    let len_before = textarea.text().len();
+    textarea.remove_text(TextPosition::with_offset(3), 2);
+    let t = textarea.text();
+    assert!(t.ends_with('\n'), "text still ends with newline");
+    assert_eq!(t.len(), len_before - 2, "exactly 2 bytes removed");
+}
+
+/// Mouse events on a very small (or zero-width) textarea must not panic (save_mouse_data saturating_sub).
+#[test]
+fn crash_fix_mouse_on_minimal_size_textarea() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0x5058F7764C72DA17)
+        Mouse.Click(0, 0, left)
+        Paint('After Click - the same hash')
+        CheckHash(0x5058F7764C72DA17)
+    ";
+    let textarea = TextArea::new("x\n", layout!("x:0,y:0,w:1,h:1"), textarea::Flags::None);
+    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut w = Window::new("Minimal", layout!("d:f"), window::Flags::None);
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
