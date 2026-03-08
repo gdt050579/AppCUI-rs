@@ -2771,3 +2771,45 @@ fn pub_fn_delete_selection() {
     app.add_window(MyWin::new());
     app.run();
 }
+
+#[test]
+fn display_text_with_tabs_script_no_panic() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial: line1 tab line2 tab - X and Y aligned')
+        CheckHash(0xCDEAC84662E26DB7)
+        Key.Pressed(Right, 8)
+        Paint('After 8 Right')
+        CheckCursor(13, 1)
+        CheckHash(0xCDEAC84662E26DB7)
+    ";
+
+    let textarea = TextArea::new("line1\tX\nline2\tY", layout!("d:f"), textarea::Flags::None);
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Tabs display", layout!("a:c,w:52,h:10"), window::Flags::None);
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn display_text_with_tabs_stored_as_spaces() {
+    let textarea = TextArea::new("L1\tA\nL2\t\tB\nL3\t\t\tC", layout!("d:f"), textarea::Flags::None);
+    let t = textarea.text();
+    assert!(!t.contains('\t'), "TextArea should store no tab characters");
+    assert!(t.contains("L1  A"), "first line: tab to column 4 (2 spaces)");
+    assert!(t.contains("L2      B"), "second line: two tabs to column 8");
+    assert!(t.contains("L3          C"), "third line: three tabs to column 12");
+    assert!(t.ends_with('\n'), "stored text should end with newline");
+}
+
+#[test]
+fn display_text_with_tabs_multiple_lines_line_count() {
+    let textarea = TextArea::new("a\tb\nc\td\te\n\tf", layout!("d:f"), textarea::Flags::None);
+    let t = textarea.text();
+    let lines: Vec<&str> = t.lines().collect();
+    assert_eq!(lines.len(), 3, "expected 3 lines");
+    assert_eq!(lines[0], "a   b", "tab to column 4");
+    assert_eq!(lines[1], "c   d   e", "tabs to 4 and 8");
+    assert_eq!(lines[2], "    f", "tab at line start = 4 spaces");
+}
