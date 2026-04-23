@@ -3,6 +3,8 @@
 mod attribute_text;
 mod richtextfield;
 pub mod events;
+#[cfg(test)]
+mod tests;
 
 pub use self::attribute_text::AttributeText;
 pub use self::richtextfield::RichTextField;
