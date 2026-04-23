@@ -153,6 +153,10 @@ name = "textfield"
 path = "textfield/main.rs"
 
 [[example]]
+name = "richtextfield"
+path = "richtextfield/main.rs"
+
+[[example]]
 name = "custom_desktop"
 path = "custom_desktop/main.rs"
 
