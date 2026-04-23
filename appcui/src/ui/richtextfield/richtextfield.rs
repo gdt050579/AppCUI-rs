@@ -415,6 +415,7 @@ impl OnPaint for RichTextField {
         };
         surface.clear(Character::with_attributes(' ', attr));
         let show_cursor = self.has_focus();
+        let use_on_color = self.on_color.is_some() && show_cursor;
         let sz = self.size();
         let w = (sz.width - 1) as i32;
         let mut x = 1i32;
@@ -423,27 +424,14 @@ impl OnPaint for RichTextField {
         let slice_start = self.cursor.start.min(slice_end);
         for (i, ch) in self.chars[slice_start..slice_end].iter().enumerate() {
             let actual_index = slice_start + i;
-            let paint_attr = if show_cursor && self.selection.contains(actual_index) {
-                theme.editor.pressed_or_selected
-            } else if self.on_color.is_some() {
-                let flags = if ch.flags == CharFlags::None { attr.flags } else { ch.flags };
-                CharAttribute::new(
-                    if ch.foreground == Color::Transparent {
-                        attr.foreground
-                    } else {
-                        ch.foreground
-                    },
-                    if ch.background == Color::Transparent {
-                        attr.background
-                    } else {
-                        ch.background
-                    },
-                    flags,
-                )
+            let char_to_paint = if show_cursor && self.selection.contains(actual_index) {
+                Character::with_attributes(ch.code, theme.editor.pressed_or_selected)
+            } else if use_on_color {
+                *ch
             } else {
-                attr
+                Character::with_attributes(ch.code, attr)
             };
-            surface.write_char(x, y, Character::with_attributes(ch.code, paint_attr));
+            surface.write_char(x, y, char_to_paint);
             if show_cursor && actual_index == self.cursor.pos {
                 surface.set_cursor(x, y);
             }
