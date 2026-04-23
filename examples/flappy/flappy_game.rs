@@ -163,7 +163,7 @@ impl FlappyGame {
                 self.raise_event(Events::UpdateScore);
                 
                 // Increase game speed after every 5 points
-                if self.score % 5 == 0 {
+                if self.score.is_multiple_of(5) {
                     self.game_speed += 0.1;
                     // Reduce the distance between pipes as game progresses
                     if self.next_pipe_distance > 10 {
@@ -281,7 +281,7 @@ impl TimerEvents for FlappyGame {
                 EventProcessStatus::Processed
             }
             GameState::Countdown => {
-                if ticks % 20 == 0 {
+                if ticks.is_multiple_of(20) {
                     self.countdown = self.countdown.saturating_sub(1);
                     if self.countdown == 0 {
                         self.reset_game();

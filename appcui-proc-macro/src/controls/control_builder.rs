@@ -191,7 +191,7 @@ impl<'a> ControlBuilder<'a> {
             }
             self.content.push_str(str_value.get_string());
             if as_option {
-                self.content.push_str(")");
+                self.content.push(')');
             }
         } else if let Some(default_value) = default {
             if as_option {
@@ -199,14 +199,12 @@ impl<'a> ControlBuilder<'a> {
             }
             self.content.push_str(default_value);
             if as_option {
-                self.content.push_str(")");
+                self.content.push(')');
             }
+        } else if as_option {
+            self.content.push_str("None");
         } else {
-            if as_option {
-                self.content.push_str("None");
-            } else {
-                panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
-            }
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
     pub(super) fn add_coordonate_parameter(&mut self, param_name: &str, default: Option<Coordonate>) {

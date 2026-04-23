@@ -1,4 +1,4 @@
-use crate::{graphics::{CharFlags, Character, Color}, prelude::CharAttribute};
+use crate::{graphics::Character, prelude::CharAttribute};
 
 /// Mutable view of [`RichTextField`](super::RichTextField) content passed to the `on_color` callback.
 /// Indices are glyph (character) positions; out-of-range operations are ignored (debug builds assert).

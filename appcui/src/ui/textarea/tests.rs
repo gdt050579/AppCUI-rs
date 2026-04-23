@@ -2832,7 +2832,7 @@ fn crash_fix_set_cursor_position_line_out_of_bounds() {
     let ok = textarea.set_cursor_position(TextPosition::with_line_column(100, 0));
     assert!(ok, "set_cursor_position should succeed (clamped)");
     let _pos = textarea.cursor_position();
-    assert!(textarea.text().len() > 0, "state remains consistent");
+    assert!(!textarea.text().is_empty(), "state remains consistent");
 }
 
 /// set_cursor_position with line 0 and column out of bounds must not panic.

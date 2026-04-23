@@ -271,7 +271,7 @@ impl SnakeGame {
                     self.speed_effect_timer = 15;
                 }
                 _ => {
-                    if self.score % 50 == 0 && self.base_speed > 50 {
+                    if self.score.is_multiple_of(50) && self.base_speed > 50 {
                         self.base_speed -= 25;
                         if self.speed_effect.is_none() {
                             self.speed = self.base_speed;

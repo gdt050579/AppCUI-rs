@@ -58,7 +58,7 @@ impl RichTextField {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             chars: Vec::new(),
             text_cache: String::new(),
-            parser: parser,
+            parser,
             cursor: Cursor { pos: 0, start: 0, end: 0 },
             selection: Selection::NONE,
             drag_started: false,
@@ -145,7 +145,7 @@ impl RichTextField {
         } else {
             0
         })
-        .max(1);
+        .max(1); 
 
         if self.cursor.pos < self.cursor.start {
             self.cursor.start = self.cursor.pos;

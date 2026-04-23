@@ -202,7 +202,7 @@ impl FormatNumber {
                 return None;
             }
             pos -= 1;
-            if self.group_size > 0 && digits % self.group_size == 0 {
+            if self.group_size > 0 && digits.is_multiple_of(self.group_size) {
                 buffer[pos] = self.separator_char;
                 if pos == 0 {
                     return None;
@@ -215,7 +215,7 @@ impl FormatNumber {
                 return None;
             }
             pos -= 1;
-            if self.group_size > 0 && digits % self.group_size == 0 {
+            if self.group_size > 0 && digits.is_multiple_of(self.group_size) {
                 buffer[pos] = self.separator_char;
                 if pos == 0 {
                     return None;
@@ -233,7 +233,7 @@ impl FormatNumber {
                 }
                 pos -= 1;
 
-                if self.group_size > 0 && digits % self.group_size == 0 {
+                if self.group_size > 0 && digits.is_multiple_of(self.group_size) {
                     buffer[pos] = self.separator_char;
                     if pos == 0 {
                         return None;
