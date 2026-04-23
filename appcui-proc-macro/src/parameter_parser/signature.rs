@@ -3,6 +3,7 @@
 pub(crate) enum ParamType {
     #[default]
     String,
+    Function,
     Bool,
     Flags,
     Alignment,

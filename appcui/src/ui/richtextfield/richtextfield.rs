@@ -42,11 +42,11 @@ impl RichTextField {
         Self::with_on_color_inner(text, layout, flags, None)
     }
 
-    pub fn with_on_color(text: &str, layout: Layout, flags: Flags, parser: fn(&mut AttributeText, &Theme)) -> Self {
-        Self::with_on_color_inner(text, layout, flags, Some(parser))
+    pub fn with_parser(text: &str, layout: Layout, flags: Flags, parser: fn(&mut AttributeText, &Theme)) -> Self {
+        Self::with_parser_inner(text, layout, flags, Some(parser))
     }
 
-    fn with_on_color_inner(text: &str, layout: Layout, flags: Flags, parser: Option<fn(&mut AttributeText, &Theme)>) -> Self {
+    fn with_parser_inner(text: &str, layout: Layout, flags: Flags, parser: Option<fn(&mut AttributeText, &Theme)>) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             chars: Vec::new(),

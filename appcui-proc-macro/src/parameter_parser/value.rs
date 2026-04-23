@@ -129,7 +129,7 @@ impl<'a> Value<'a> {
             return *value;
         }
         panic!("Invalid dock value: {}", self.raw_data);
-    }      
+    }
     pub(crate) fn get_alignment(&mut self) -> Option<Alignment> {
         if !self.is_value() {
             return None;
@@ -398,6 +398,40 @@ impl<'a> Value<'a> {
             self.end,
         ))
     }
+    fn validate_function(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
+        // a function starts with a letter and contains letters, number, underscores dots and :
+        if !self.raw_data.starts_with(|c: char| c.is_ascii_alphabetic()) {
+            return Err(Error::new(
+                param_list,
+                format!(
+                    "Expecting a function name for parameter '{}' but found '{}'",
+                    display_param_name, self.raw_data
+                )
+                .as_str(),
+                self.start,
+                self.end,
+            ));
+        }
+        let buf = self.raw_data.as_bytes();
+        for ch in buf {
+            match ch {
+                b'0'..=b'9' | b'a'..=b'z' | b'A'..=b'Z' | b'_' | b'.' | b':' => continue,
+                _ => {
+                    return Err(Error::new(
+                        param_list,
+                        format!(
+                            "Invalid character '{}' in function name for parameter '{}' but found '{}'",
+                            ch, display_param_name, self.raw_data
+                        )
+                        .as_str(),
+                        self.start,
+                        self.end,
+                    ))
+                }
+            }
+        }
+        Ok(())
+    }
     fn validate_size(&mut self, display_param_name: &str, param_list: &str) -> Result<(), Error> {
         if self.get_size().is_some() {
             return Ok(());
@@ -521,6 +555,7 @@ impl<'a> Value<'a> {
             super::ParamType::Percentage => self.validate_percentage(display_param_name, param_list)?,
             super::ParamType::Dimension => self.validate_dimension(display_param_name, param_list)?,
             super::ParamType::Coordonate => self.validate_coordonate(display_param_name, param_list)?,
+            super::ParamType::Function => self.validate_function(display_param_name, param_list)?,
         }
         // all good
         self.validated = true;
