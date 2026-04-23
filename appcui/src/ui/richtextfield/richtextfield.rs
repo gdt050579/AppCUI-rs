@@ -131,7 +131,8 @@ impl RichTextField {
             self.cursor.end = (self.cursor.start + visible_glyphs).min(self.chars.len());
         } else {
             self.cursor.start = self.cursor.pos.saturating_sub(visible_glyphs.saturating_sub(1));
-            self.cursor.end = self.cursor.pos;
+            // Keep the glyph at/after the cursor visible when scrolling right.
+            self.cursor.end = (self.cursor.pos + 1).min(self.chars.len());
         }
     }
 
@@ -246,6 +247,9 @@ impl RichTextField {
                     self.chars.insert(self.cursor.pos, default_character(c));
                     self.cursor.pos += 1;
                 }
+                // Insertion can increase content past previous viewport end.
+                // Keep cursor window in sync so paint does not clip newly added tail.
+                self.update_scroll_view(true);
                 modified = true;
             }
         }
@@ -360,7 +364,8 @@ impl RichTextField {
             self.delete_selection();
         }
         self.chars.insert(self.cursor.pos, default_character(character));
-        self.move_cursor_to(self.cursor.pos + 1, false, false);
+        // Keep viewport end in sync with insertions (same rationale as paste).
+        self.move_cursor_to(self.cursor.pos + 1, false, true);
         self.sync_after_mutation();
         true
     }

@@ -1,4 +1,3 @@
-//use super::CharClass;
 use crate::prelude::*;
 
 #[test]
@@ -93,7 +92,7 @@ fn check_select_left_right() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'123❤️╬▶-〓GDT',x:1,y:1,w:38,h:1"));
+    w.add(richtextfield!("'123❤╬▶-〓GDT',x:1,y:1,w:38,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -249,7 +248,7 @@ fn check_home_end() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -314,7 +313,7 @@ fn check_delete() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -338,7 +337,7 @@ fn check_delete_from_end() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -364,7 +363,7 @@ fn check_delete_after_selection() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -413,7 +412,7 @@ fn check_backspace() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -486,7 +485,7 @@ fn check_backspace_from_end() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -512,7 +511,7 @@ fn check_backspace_after_selection() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -563,20 +562,20 @@ fn check_write_unicode_text() {
         Paint('2.Text is: Hello')   
         CheckHash(0xF2A1C652DC792B72)
         CheckCursor(18,3)
-        Key.TypeText('❤️')
-        Paint('3.Text is: ello❤️')   
+        Key.TypeText('❤')
+        Paint('3.Text is: ello❤')   
         CheckHash(0xF1B75E37ED9C08B)
         CheckCursor(18,3)
-        Key.TypeText('〓rl❤️')
-        Paint('4.Text is: ❤️〓rl❤️')   
+        Key.TypeText('〓rl❤')
+        Paint('4.Text is: ❤〓rl❤')   
         CheckHash(0x3CCD819EB95146CD)
         CheckCursor(18,3)
         Key.Pressed(Home)
-        Paint('5.Text is: Hello❤️')   
+        Paint('5.Text is: Hello❤')   
         CheckHash(0x8931746B3B63B087)
         CheckCursor(13,3)
         Key.Pressed(End)
-        Paint('6.Text is: ❤️〓rl❤️')   
+        Paint('6.Text is: ❤〓rl❤')   
         CheckHash(0x3CCD819EB95146CD)
         CheckCursor(18,3)
     ";
@@ -597,28 +596,28 @@ fn check_write_multiline_text() {
         Paint('2.Text is: Hello_word')   
         CheckHash(0xF1C8594065D9D73)
         CheckCursor(18,4)
-        Key.TypeText('❤️')
-        Paint('3.Text is: Hello_word❤️')   
+        Key.TypeText('❤')
+        Paint('3.Text is: Hello_word❤')   
         CheckHash(0x300DCC6FF4C1CB86)
         CheckCursor(13,5)
-        Key.TypeText('〓rl❤️')
-        Paint('4.Text is: Hello_word❤️❤️〓rl❤️')   
+        Key.TypeText('〓rl❤')
+        Paint('4.Text is: Hello_word❤❤〓rl❤')   
         CheckHash(0x770216FAF138E89A)
         CheckCursor(17,5)
-        Key.TypeText('❤️')
-        Paint('5.Text is: Hello_word❤️❤️〓rl❤️❤️')   
+        Key.TypeText('❤')
+        Paint('5.Text is: Hello_word❤❤〓rl❤❤')   
         CheckHash(0x2B30AC2B28C6526B)
         CheckCursor(18,5)
-        Key.TypeText('❤️')
-        Paint('6.Text is: ello_word❤️❤️〓rl❤️❤️❤️')   
+        Key.TypeText('❤')
+        Paint('6.Text is: ello_word❤❤〓rl❤❤❤')   
         CheckHash(0x2476BC2CC3EF5C9E)
         CheckCursor(18,5)
         Key.TypeText('12345')
-        Paint('7.Text is: word❤️❤️〓rl❤️❤️❤️12345')   
+        Paint('7.Text is: word❤❤〓rl❤❤❤12345')   
         CheckHash(0x581C58B9161C94E2)
         CheckCursor(18,5)
         Key.Pressed(Home)
-        Paint('8.Text is: Hello_word❤️❤️〓rl❤️❤️❤️')   
+        Paint('8.Text is: Hello_word❤❤〓rl❤❤❤')   
         CheckHash(0xE60DAD19F94F1D86)
         CheckCursor(13,3)
     ";
@@ -646,7 +645,7 @@ fn check_insert_text() {
         Paint('3.Text: He|l|lo worl')   
         CheckHash(0xCC5E5369E794A320)
         CheckCursor(15,3)
-        Key.TypeText('〓rl❤️❤️❤️')
+        Key.TypeText('〓rl❤❤❤')
         Paint('4.Text: He〓rl❤❤❤|l|l')   
         CheckHash(0x9A47A09DA4CFEA69)
         CheckCursor(21,3)
@@ -675,7 +674,7 @@ fn check_insert_text_over_selection() {
         Paint('2.Selected [llo ] (Hello |w|orl)')   
         CheckHash(0xA8CA2E147025C590)
         CheckCursor(19,3)
-        Key.TypeText('〓❤️❤️❤️')
+        Key.TypeText('〓❤❤❤')
         Paint('3.Text replaces (He〓❤❤❤|w|orl)')   
         CheckHash(0x2D25F2AE8CA02B9D)
         CheckCursor(19,3)
@@ -928,7 +927,7 @@ fn check_autoselect_on_focus() {
 
 #[test]
 fn check_validation_event() {
-    #[Window(events = TextFieldEvents, internal=true)]
+    #[Window(events = RichTextFieldEvents, internal=true)]
     struct MyWin {
         info: Handle<Label>,
         txt: Handle<RichTextField>,
@@ -951,8 +950,8 @@ fn check_validation_event() {
             }
         }
     }
-    impl TextFieldEvents for MyWin {
-        fn on_validate(&mut self, _handle: Handle<TextField>, text: &str) -> EventProcessStatus {
+    impl RichTextFieldEvents for MyWin {
+        fn on_validate(&mut self, _handle: Handle<RichTextField>, text: &str) -> EventProcessStatus {
             self.set_info(text);
             EventProcessStatus::Processed
         }
@@ -1000,7 +999,7 @@ fn check_mouse_click() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
+    w.add(richtextfield!("'Hello w❤rl❤d',x:1,y:1,w:20,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -1031,7 +1030,7 @@ fn check_mouse_click_multi_line() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤️rl❤️d',x:1,y:1,w:10,h:3"));
+    w.add(richtextfield!("'Hello w❤rl❤d',x:1,y:1,w:10,h:3"));
     a.add_window(w);
     a.run();
 }
@@ -1062,7 +1061,7 @@ fn check_mouse_click_outside_bounds() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
+    w.add(richtextfield!("'Hello w❤rl❤d',x:1,y:1,w:20,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -1072,7 +1071,7 @@ fn check_mouse_selection() {
     let script = "
         Paint.Enable(false)
         Key.Pressed(Right)
-        Paint('1. Text: - I ❤️ Rust Language :)')   
+        Paint('1. Text: - I ❤ Rust Language :)')   
         CheckHash(0x480A380B10C2094C)
         CheckCursor(20,5)
         Mouse.Drag(20,3,17,5)
@@ -1080,13 +1079,13 @@ fn check_mouse_selection() {
         CheckHash(0xD374BBDDCBFB9EFB)
         CheckCursor(17,5)
         Mouse.Drag(18,3,10,2)
-        Paint('3. Selected text: ello w❤️rl❤️d - I ')   
+        Paint('3. Selected text: ello w❤rl❤d - I ')   
         CheckHash(0x57E8868A7830C0DE)
         CheckCursor(13,3)
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:10,h:3"));
+    w.add(richtextfield!("'Hello w❤rl❤d - I ❤ Rust Language :)',x:1,y:1,w:10,h:3"));
     a.add_window(w);
     a.run();
 }
@@ -1096,7 +1095,7 @@ fn check_double_click_selection() {
     let script = "
         Paint.Enable(false)
         Key.Pressed(Right)
-        Paint('1. Text: - I ❤️ Rust Language :)')   
+        Paint('1. Text: - I ❤ Rust Language :)')   
         CheckHash(0xC612D5EC66D395F)
         CheckCursor(24,5)
         Mouse.DoubleClick(17,5,left)
@@ -1106,7 +1105,7 @@ fn check_double_click_selection() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:14,h:3"));
+    w.add(richtextfield!("'Hello w❤rl❤d - I ❤ Rust Language :)',x:1,y:1,w:14,h:3"));
     a.add_window(w);
     a.run();
 }
@@ -1131,7 +1130,7 @@ fn check_select_word_for_upper_and_lowercase() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello wOrLd, I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
+    w.add(richtextfield!("'Hello wOrLd, I ❤ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -1189,7 +1188,7 @@ fn check_paste() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
+    w.add(richtextfield!("'Hello , I ❤ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -1208,25 +1207,26 @@ fn check_copy_cut() {
         Paint('2. Same text but `I ❤ Rust` is selected')   
         CheckHash(0xF417AC2E90B028C3)
         CheckCursor(29,3)
-        CheckClipboardText('I ❤️ Rust')
+        CheckClipboardText('I ❤ Rust')
         Key.Pressed('Home')
         Key.Pressed(Shift+Right,5)
         Key.Pressed('Ctrl+X')
-        Paint('3. , I ❤️ Rust Language :)')   
+        Paint('3. , I ❤ Rust Language :)')   
         CheckHash(0x6A2C27777CF8CA71)
         CheckCursor(13,3)
         CheckClipboardText('Hello')
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
+    w.add(richtextfield!("'Hello , I ❤ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();
 }
 
+
 #[test]
 fn check_text_changed_event() {
-    #[Window(events = TextFieldEvents, internal=true)]
+    #[Window(events = RichTextFieldEvents, internal=true)]
     struct MyWin {
         info: Handle<Label>,
         txt: Handle<RichTextField>,
@@ -1251,8 +1251,8 @@ fn check_text_changed_event() {
             }
         }
     }
-    impl TextFieldEvents for MyWin {
-        fn on_text_changed(&mut self, handle: Handle<TextField>) -> EventProcessStatus {
+    impl RichTextFieldEvents for MyWin {
+        fn on_text_changed(&mut self, handle: Handle<RichTextField>) -> EventProcessStatus {
             self.count += 1;
             let cnt = self.count;
             let str = format!("{cnt}:{}",self.control(handle).unwrap().text());
@@ -1305,7 +1305,7 @@ fn check_text_changed_event() {
 
 #[test]
 fn check_text_changed_event_readonly() {
-    #[Window(events = TextFieldEvents, internal=true)]
+    #[Window(events = RichTextFieldEvents, internal=true)]
     struct MyWin {
         info: Handle<Label>,
         txt: Handle<RichTextField>,
@@ -1330,8 +1330,8 @@ fn check_text_changed_event_readonly() {
             }
         }
     }
-    impl TextFieldEvents for MyWin {
-        fn on_text_changed(&mut self, handle: Handle<TextField>) -> EventProcessStatus {
+    impl RichTextFieldEvents for MyWin {
+        fn on_text_changed(&mut self, handle: Handle<RichTextField>) -> EventProcessStatus {
             self.count += 1;
             let cnt = self.count;
             let str = format!("{cnt}:{}",self.control(handle).unwrap().text());
