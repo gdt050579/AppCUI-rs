@@ -56,6 +56,8 @@ fn main() -> Result<(), appcui::system::Error> {
     w.add(richtextfield!("'',l:1,t:2,r:1,h:4,parser:markdown_like_colors"));
     w.add(label!("'Auto capitalize text',l:1,t:6,r:1,h:1"));
     w.add(richtextfield!("'',l:1,t:7,r:1,h:4,parser:all_capitals"));
+    w.add(label!("'Parser applied after each edit',l:1,t:13,r:1,h:1"));
+    w.add(richtextfield!("'**Plan**: Run `code`',l:1,t:14,r:1,h:1,parser:markdown_like_colors"));
 
     app.add_window(w);
     app.run();
