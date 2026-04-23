@@ -26,6 +26,7 @@ use crate::{
         radiobox::events::RadioBoxEvents,
         selector::events::GenericSelectorEvents,
         textfield::events::TextFieldEvents,
+        richtextfield::events::RichTextFieldEvents,
         threestatebox::events::ThreeStateBoxEvents,
         togglebutton::events::ToggleButtonEvents,
         treeview::events::GenericTreeViewEvents,
@@ -154,6 +155,7 @@ pub trait Control:
     + ColorPickerEvents
     + KeySelectorEvents
     + TextFieldEvents
+    + RichTextFieldEvents
     + GenericCommandBarEvents
     + WindowEvents
     + ToolBarEvents

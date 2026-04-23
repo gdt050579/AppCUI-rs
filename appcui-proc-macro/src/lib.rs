@@ -91,6 +91,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);
@@ -158,6 +159,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);
@@ -250,6 +252,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::Default);
@@ -315,6 +318,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::Default);
@@ -406,6 +410,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);

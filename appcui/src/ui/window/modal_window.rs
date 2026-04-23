@@ -143,6 +143,7 @@ impl<T> RadioBoxEvents for ModalWindow<T> {}
 impl<T> PasswordEvents for ModalWindow<T> {}
 impl<T> KeySelectorEvents for ModalWindow<T> {}
 impl<T> TextFieldEvents for ModalWindow<T> {}
+impl<T> RichTextFieldEvents for ModalWindow<T> {}
 impl<T> ButtonEvents for ModalWindow<T> {}
 impl<T> ToggleButtonEvents for ModalWindow<T> {}
 impl<T> ColorPickerEvents for ModalWindow<T> {}

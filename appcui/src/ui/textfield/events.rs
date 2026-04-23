@@ -2,7 +2,7 @@ use super::TextField;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub(crate) enum TextFieldEventsType {
+pub enum TextFieldEventsType {
     OnValidate,
     OnTextChanged,
 }

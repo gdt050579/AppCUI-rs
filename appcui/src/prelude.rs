@@ -70,6 +70,8 @@ pub use super::ui::tab;
 pub use super::ui::tab::events::TabEvents;
 pub use super::ui::textfield;
 pub use super::ui::textfield::events::TextFieldEvents;
+pub use super::ui::richtextfield;
+pub use super::ui::richtextfield::events::RichTextFieldEvents;
 pub use super::ui::threestatebox;
 pub use super::ui::threestatebox::events::ThreeStateBoxEvents;
 pub use super::ui::timepicker;
