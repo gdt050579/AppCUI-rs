@@ -30,7 +30,7 @@ fn is_variation_selector(c: char) -> bool {
 pub struct RichTextField {
     chars: Vec<Character>,
     text_cache: String,
-    on_color: Option<fn(&mut AttributeText, &Theme)>,
+    parser: Option<fn(&mut AttributeText, &Theme)>,
     cursor: Cursor,
     selection: Selection,
     drag_started: bool,
@@ -42,16 +42,16 @@ impl RichTextField {
         Self::with_on_color_inner(text, layout, flags, None)
     }
 
-    pub fn with_on_color(text: &str, layout: Layout, flags: Flags, on_color: fn(&mut AttributeText, &Theme)) -> Self {
-        Self::with_on_color_inner(text, layout, flags, Some(on_color))
+    pub fn with_on_color(text: &str, layout: Layout, flags: Flags, parser: fn(&mut AttributeText, &Theme)) -> Self {
+        Self::with_on_color_inner(text, layout, flags, Some(parser))
     }
 
-    fn with_on_color_inner(text: &str, layout: Layout, flags: Flags, on_color: Option<fn(&mut AttributeText, &Theme)>) -> Self {
+    fn with_on_color_inner(text: &str, layout: Layout, flags: Flags, parser: Option<fn(&mut AttributeText, &Theme)>) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             chars: Vec::new(),
             text_cache: String::new(),
-            on_color,
+            parser: parser,
             cursor: Cursor { pos: 0, start: 0, end: 0 },
             selection: Selection::NONE,
             drag_started: false,
@@ -82,13 +82,13 @@ impl RichTextField {
         self.sync_after_mutation();
     }
 
-    pub fn set_on_color(&mut self, on_color: fn(&mut AttributeText, &Theme)) {
-        self.on_color = Some(on_color);
+    pub fn set_parser(&mut self, parser: fn(&mut AttributeText, &Theme)) {
+        self.parser = Some(parser);
         self.sync_after_mutation();
     }
 
-    pub fn clear_on_color(&mut self) {
-        self.on_color = None;
+    pub fn reset_parser(&mut self) {
+        self.parser = None;
         self.sync_after_mutation();
     }
 
@@ -102,10 +102,10 @@ impl RichTextField {
             ch.background = Color::Transparent;
             ch.flags = CharFlags::None;
         }
-        if let Some(on_color) = self.on_color {
+        if let Some(parser) = self.parser {
             let theme = RuntimeManager::get().theme();
             let mut view = AttributeText { chars: &mut self.chars };
-            on_color(&mut view, theme);
+            parser(&mut view, theme);
         }
     }
 
@@ -436,7 +436,7 @@ impl OnPaint for RichTextField {
         };
         surface.clear(Character::with_attributes(' ', attr));
         let show_cursor = self.has_focus();
-        let use_on_color = self.on_color.is_some() && show_cursor;
+        let use_parser = self.parser.is_some() && show_cursor;
         let sz = self.size();
         let w = (sz.width - 1) as i32;
         let mut x = 1i32;
@@ -447,7 +447,7 @@ impl OnPaint for RichTextField {
             let actual_index = slice_start + i;
             let char_to_paint = if show_cursor && self.selection.contains(actual_index) {
                 Character::with_attributes(ch.code, theme.editor.pressed_or_selected)
-            } else if use_on_color {
+            } else if use_parser {
                 *ch
             } else {
                 Character::with_attributes(ch.code, attr)
