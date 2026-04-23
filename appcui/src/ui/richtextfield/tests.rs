@@ -29,7 +29,7 @@ fn check_move_left_right() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello world',x:1,y:1,w:38,h:1"));
+    w.add(richtextfield!("'Hello world',x:1,y:1,w:38,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -54,7 +54,7 @@ fn check_select_all() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello world',x:1,y:1,w:38,h:1"));
+    w.add(richtextfield!("'Hello world',x:1,y:1,w:38,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -93,7 +93,7 @@ fn check_select_left_right() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'123❤️╬▶-〓GDT',x:1,y:1,w:38,h:1"));
+    w.add(richtextfield!("'123❤️╬▶-〓GDT',x:1,y:1,w:38,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -171,7 +171,7 @@ fn check_move_up_down() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:3"));
+    w.add(richtextfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:3"));
     a.add_window(w);
     a.run();
 }
@@ -224,7 +224,7 @@ fn check_scroll_left_right() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -249,7 +249,7 @@ fn check_home_end() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -314,7 +314,7 @@ fn check_delete() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -338,7 +338,7 @@ fn check_delete_from_end() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -364,7 +364,7 @@ fn check_delete_after_selection() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -413,7 +413,7 @@ fn check_backspace() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -486,7 +486,7 @@ fn check_backspace_from_end() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -512,7 +512,7 @@ fn check_backspace_after_selection() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello ❤️╬▶-〓 world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -547,7 +547,7 @@ fn check_write_text() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("x:1,y:1,w:8,h:1"));
+    w.add(richtextfield!("x:1,y:1,w:8,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -582,7 +582,7 @@ fn check_write_unicode_text() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("x:1,y:1,w:8,h:1"));
+    w.add(richtextfield!("x:1,y:1,w:8,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -624,7 +624,7 @@ fn check_write_multiline_text() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("x:1,y:1,w:8,h:3"));
+    w.add(richtextfield!("x:1,y:1,w:8,h:3"));
     a.add_window(w);
     a.run();
 }
@@ -657,7 +657,7 @@ fn check_insert_text() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -698,7 +698,7 @@ fn check_insert_text_over_selection() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello world',x:1,y:1,w:12,h:1"));
+    w.add(richtextfield!("'Hello world',x:1,y:1,w:12,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -779,7 +779,7 @@ fn check_move_to_next_word() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
+    w.add(richtextfield!("'Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -860,7 +860,7 @@ fn check_move_to_previous_word() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'  Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
+    w.add(richtextfield!("'  Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -896,7 +896,7 @@ fn check_readonly_flag() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello   world',x:1,y:1,w:20,h:1,flags: ReadOnly"));
+    w.add(richtextfield!("'Hello   world',x:1,y:1,w:20,h:1,flags: ReadOnly"));
     a.add_window(w);
     a.run();
 }
@@ -919,9 +919,9 @@ fn check_autoselect_on_focus() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Text-1',x:1,y:1,w:30,h:1,flags: ReadOnly"));
-    w.add(textfield!("'Text-2',x:1,y:3,w:30,h:1"));
-    w.add(textfield!("'Text-3',x:1,y:5,w:30,h:1,flags: DisableAutoSelectOnFocus"));
+    w.add(richtextfield!("'Text-1',x:1,y:1,w:30,h:1,flags: ReadOnly"));
+    w.add(richtextfield!("'Text-2',x:1,y:3,w:30,h:1"));
+    w.add(richtextfield!("'Text-3',x:1,y:5,w:30,h:1,flags: DisableAutoSelectOnFocus"));
     a.add_window(w);
     a.run();
 }
@@ -931,7 +931,7 @@ fn check_validation_event() {
     #[Window(events = TextFieldEvents, internal=true)]
     struct MyWin {
         info: Handle<Label>,
-        txt: Handle<TextField>,
+        txt: Handle<RichTextField>,
     }
     impl MyWin {
         fn new() -> Self {
@@ -941,7 +941,7 @@ fn check_validation_event() {
                 txt: Handle::None,
             };
             me.info = me.add(label!("'',x:1,y:1,w:35"));
-            me.txt = me.add(textfield!("x:1,y:3,w:35,flags:ProcessEnter"));
+            me.txt = me.add(richtextfield!("x:1,y:3,w:35,flags:ProcessEnter"));
             me
         }
         fn set_info(&mut self, txt: &str) {
@@ -1000,7 +1000,7 @@ fn check_mouse_click() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
+    w.add(richtextfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -1031,7 +1031,7 @@ fn check_mouse_click_multi_line() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello w❤️rl❤️d',x:1,y:1,w:10,h:3"));
+    w.add(richtextfield!("'Hello w❤️rl❤️d',x:1,y:1,w:10,h:3"));
     a.add_window(w);
     a.run();
 }
@@ -1062,7 +1062,7 @@ fn check_mouse_click_outside_bounds() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
+    w.add(richtextfield!("'Hello w❤️rl❤️d',x:1,y:1,w:20,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -1086,7 +1086,7 @@ fn check_mouse_selection() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:10,h:3"));
+    w.add(richtextfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:10,h:3"));
     a.add_window(w);
     a.run();
 }
@@ -1106,7 +1106,7 @@ fn check_double_click_selection() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:14,h:3"));
+    w.add(richtextfield!("'Hello w❤️rl❤️d - I ❤️ Rust Language :)',x:1,y:1,w:14,h:3"));
     a.add_window(w);
     a.run();
 }
@@ -1131,7 +1131,7 @@ fn check_select_word_for_upper_and_lowercase() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello wOrLd, I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
+    w.add(richtextfield!("'Hello wOrLd, I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -1160,10 +1160,10 @@ fn check_mouse_hover() {
     ";
     let mut a = App::debug(60, 13, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
-    w.add(textfield!("'Hello world !',x:1,y:1,w:36,h:1"));
-    w.add(textfield!("'Read onlye text',x:1,y:3,w:36,h:1, flags: Readonly"));
-    w.add(textfield!("Inactive,x:1,y:5,w:36,h:1,enable: false"));
-    w.add(textfield!("'No auto selection',x:1,y:7,w:36,h:1, flags: DisableAutoSelectOnFocus"));
+    w.add(richtextfield!("'Hello world !',x:1,y:1,w:36,h:1"));
+    w.add(richtextfield!("'Read onlye text',x:1,y:3,w:36,h:1, flags: Readonly"));
+    w.add(richtextfield!("Inactive,x:1,y:5,w:36,h:1,enable: false"));
+    w.add(richtextfield!("'No auto selection',x:1,y:7,w:36,h:1, flags: DisableAutoSelectOnFocus"));
     a.add_window(w);
     a.run();
 }
@@ -1189,7 +1189,7 @@ fn check_paste() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
+    w.add(richtextfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -1219,7 +1219,7 @@ fn check_copy_cut() {
     ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(textfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
+    w.add(richtextfield!("'Hello , I ❤️ Rust Language :)',x:1,y:1,w:36,h:1"));
     a.add_window(w);
     a.run();
 }
@@ -1229,7 +1229,7 @@ fn check_text_changed_event() {
     #[Window(events = TextFieldEvents, internal=true)]
     struct MyWin {
         info: Handle<Label>,
-        txt: Handle<TextField>,
+        txt: Handle<RichTextField>,
         count: i32,
     }
     impl MyWin {
@@ -1241,7 +1241,7 @@ fn check_text_changed_event() {
                 count: 0,
             };
             me.info = me.add(label!("'',x:1,y:1,w:35"));
-            me.txt = me.add(textfield!("x:1,y:3,w:35"));
+            me.txt = me.add(richtextfield!("x:1,y:3,w:35"));
             me
         }
         fn set_info(&mut self, txt: &str) {
@@ -1308,7 +1308,7 @@ fn check_text_changed_event_readonly() {
     #[Window(events = TextFieldEvents, internal=true)]
     struct MyWin {
         info: Handle<Label>,
-        txt: Handle<TextField>,
+        txt: Handle<RichTextField>,
         count: i32,
     }
     impl MyWin {
@@ -1320,7 +1320,7 @@ fn check_text_changed_event_readonly() {
                 count: 0,
             };
             me.info = me.add(label!("'',x:1,y:1,w:35"));
-            me.txt = me.add(textfield!("x:1,y:3,w:35,flags: Readonly"));
+            me.txt = me.add(richtextfield!("x:1,y:3,w:35,flags: Readonly"));
             me
         }
         fn set_info(&mut self, txt: &str) {
