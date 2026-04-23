@@ -21,6 +21,11 @@ fn default_character(code: char) -> Character {
     }
 }
 
+#[inline(always)]
+fn is_variation_selector(c: char) -> bool {
+    matches!(c, '\u{FE00}'..='\u{FE0F}' | '\u{E0100}'..='\u{E01EF}')
+}
+
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct RichTextField {
     chars: Vec<Character>,
@@ -69,7 +74,8 @@ impl RichTextField {
 
     pub fn set_text(&mut self, text: &str) {
         self.chars.clear();
-        self.chars.extend(text.chars().map(default_character));
+        self.chars
+            .extend(text.chars().filter(|c| !is_variation_selector(*c)).map(default_character));
         self.selection = Selection::NONE;
         self.cursor = Cursor { pos: 0, start: 0, end: 0 };
         self.move_cursor_to(self.chars.len(), false, true);
@@ -234,6 +240,9 @@ impl RichTextField {
         if let Some(txt) = RuntimeManager::get().backend().clipboard_text() {
             if !txt.is_empty() {
                 for c in txt.chars() {
+                    if is_variation_selector(c) {
+                        continue;
+                    }
                     self.chars.insert(self.cursor.pos, default_character(c));
                     self.cursor.pos += 1;
                 }
@@ -273,7 +282,11 @@ impl RichTextField {
         let s = callback(slice.as_str());
         let old: String = self.chars[self.selection.start..self.selection.end].iter().map(|c| c.code).collect();
         let text_changed = s != old;
-        let new_chars: Vec<Character> = s.chars().map(default_character).collect();
+        let new_chars: Vec<Character> = s
+            .chars()
+            .filter(|c| !is_variation_selector(*c))
+            .map(default_character)
+            .collect();
         let start = self.selection.start;
         self.chars.splice(self.selection.start..self.selection.end, new_chars);
         self.selection = Selection::NONE;
@@ -338,6 +351,9 @@ impl RichTextField {
 
     fn add_char(&mut self, character: char) -> bool {
         if self.is_readonly() {
+            return false;
+        }
+        if is_variation_selector(character) {
             return false;
         }
         if !self.selection.is_empty() {
@@ -441,7 +457,9 @@ impl OnPaint for RichTextField {
                 y += 1;
             }
         }
-        if show_cursor && self.cursor.pos == self.chars.len() {
+        // Cursor can be exactly at the right edge of the current viewport (`slice_end`),
+        // not only at end-of-text. In that case it must still be visible.
+        if show_cursor && self.cursor.pos == slice_end {
             if (y == sz.height as i32) && (x == 1) {
                 surface.set_cursor(sz.width as i32 - 1, sz.height as i32 - 1);
             } else {
