@@ -4,8 +4,8 @@ use super::traits::{Control, CustomEvents, EventProcessStatus};
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
 use crate::prelude::{
-    colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, selector, textfield, threestatebox,
-    togglebutton, GenericSelectorEvents, PathFinderEvents, RuntimeManager, ThreeStateBoxEvents,
+    colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, richtextfield, selector, textfield,
+    threestatebox, togglebutton, GenericSelectorEvents, PathFinderEvents, RuntimeManager, ThreeStateBoxEvents,
 };
 use crate::system::Handle;
 
@@ -15,7 +15,7 @@ use crate::ui::{
     dropdownlist::events::GenericDropDownListEvents, graphview, graphview::events::GenericGraphViewEvents, listbox::events::ListBoxEvents,
     listview::events::GenericListViewEvents, markdown, markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents,
     password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
-    textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
+    richtextfield::events::RichTextFieldEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
     timepicker, timepicker::events::TimePickerEvents,
 };
 use crate::ui::{pathfinder, treeview};
@@ -38,6 +38,7 @@ pub(crate) enum ControlEventData {
     Password(password::events::EventData),
     KeySelector(keyselector::events::EventData),
     TextField(textfield::events::EventData),
+    RichTextField(textfield::events::EventData),
     Selector(selector::events::EventData),
     ComboBox(combobox::events::EventData),
     DropDownList(dropdownlist::events::EventData),
@@ -90,6 +91,21 @@ impl ControlEvent {
                         }
                     }
                     textfield::events::TextFieldEventsType::OnTextChanged => TextFieldEvents::on_text_changed(receiver, self.emitter.cast()),
+                }
+            }
+            ControlEventData::RichTextField(data) => {
+                let h: Handle<richtextfield::RichTextField> = self.emitter.cast();
+                match data.evtype {
+                    textfield::events::TextFieldEventsType::OnValidate => {
+                        if let Some(rtf) = RuntimeManager::get().get_control(h) {
+                            RichTextFieldEvents::on_validate(receiver, self.emitter.cast(), rtf.text())
+                        } else {
+                            EventProcessStatus::Ignored
+                        }
+                    }
+                    textfield::events::TextFieldEventsType::OnTextChanged => {
+                        RichTextFieldEvents::on_text_changed(receiver, self.emitter.cast())
+                    }
                 }
             }
             ControlEventData::Custom(data) => CustomEvents::on_event(receiver, self.emitter.cast(), data.class_hash, data.event_id),

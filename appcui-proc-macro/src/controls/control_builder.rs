@@ -132,18 +132,14 @@ impl<'a> ControlBuilder<'a> {
         if let Some(value) = self.parser.get(template_param) {
             let name = value.get_string();
             if name.is_empty() {
-                panic!(
-                    "Parameter `{template_param}` can not be an empty string. It should be a generic/template type to be used !"
-                );
+                panic!("Parameter `{template_param}` can not be an empty string. It should be a generic/template type to be used !");
             }
             self.content.push_str(name);
             self.content.push_str(">::");
             self.content.push_str(method);
             self.content.push('(');
         } else {
-            panic!(
-                "Parameter `{template_param}` is mandatory and must express the generic/template type to be used !"
-            );
+            panic!("Parameter `{template_param}` is mandatory and must express the generic/template type to be used !");
         }
     }
     pub(super) fn finish_control_initialization(&mut self) {
@@ -157,9 +153,7 @@ impl<'a> ControlBuilder<'a> {
                 self.content.push_str(x);
             }
         } else {
-            panic!(
-                "Parameter '{param_name}' is mandatory ! (you need to provided it as part of macro initialization)"
-            );
+            panic!("Parameter '{param_name}' is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
     pub(super) fn add_string_parameter(&mut self, param_name: &str, default: Option<&str>) {
@@ -173,9 +167,7 @@ impl<'a> ControlBuilder<'a> {
         } else if let Some(default_value) = default {
             self.add_text(default_value);
         } else {
-            panic!(
-                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
-            );
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
     pub(super) fn add_key_parameter(&mut self, param_name: &str, default: Option<&str>) {
@@ -187,9 +179,32 @@ impl<'a> ControlBuilder<'a> {
         } else if let Some(default_value) = default {
             self.content.push_str(default_value);
         } else {
-            panic!(
-                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
-            );
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
+        }
+    }
+    pub(super) fn add_function(&mut self, param_name: &str, default: Option<&str>, as_option: bool) {
+        self.add_comma();
+        let value = self.parser.get(param_name);
+        if let Some(str_value) = value {
+            if as_option {
+                self.content.push_str("Some(");
+            }
+            self.content.push_str(str_value.get_string());
+            if as_option {
+                self.content.push(')');
+            }
+        } else if let Some(default_value) = default {
+            if as_option {
+                self.content.push_str("Some(");
+            }
+            self.content.push_str(default_value);
+            if as_option {
+                self.content.push(')');
+            }
+        } else if as_option {
+            self.content.push_str("None");
+        } else {
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
     pub(super) fn add_coordonate_parameter(&mut self, param_name: &str, default: Option<Coordonate>) {
@@ -200,9 +215,7 @@ impl<'a> ControlBuilder<'a> {
         } else if let Some(default_value) = default {
             self.add_coordonate(default_value);
         } else {
-            panic!(
-                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
-            );
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
     pub(super) fn add_dimension_parameter(&mut self, param_name: &str, default: Option<Dimension>) {
@@ -213,9 +226,7 @@ impl<'a> ControlBuilder<'a> {
         } else if let Some(default_value) = default {
             self.add_dimension(default_value);
         } else {
-            panic!(
-                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
-            );
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
     pub(super) fn add_bool_parameter(&mut self, param_name: &str, default: Option<bool>) {
@@ -226,9 +237,7 @@ impl<'a> ControlBuilder<'a> {
         } else if let Some(default_value) = default {
             self.add_bool(default_value);
         } else {
-            panic!(
-                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
-            );
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
     pub(super) fn add_size_parameter(&mut self, param_name: &str, default: Option<Size>) {
@@ -239,9 +248,7 @@ impl<'a> ControlBuilder<'a> {
         } else if let Some(default_value) = default {
             self.add_size(default_value);
         } else {
-            panic!(
-                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
-            );
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
     pub(super) fn add_layout(&mut self) {
@@ -332,9 +339,7 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str("::");
             self.content.push_str(default_value);
         } else {
-            panic!(
-                "Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)"
-            );
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
     pub(super) fn add_flags_parameter(&mut self, param_name: &str, flag_name: &str, available_flags: &FlagsSignature) {

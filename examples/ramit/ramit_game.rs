@@ -220,7 +220,7 @@ impl TimerEvents for RamItGame {
                 EventProcessStatus::Processed
             }
             GameState::Countdown => {
-                if ticks % 20 == 0 {
+                if ticks.is_multiple_of(20) {
                     self.countdown = self.countdown.saturating_sub(1);
                     if self.countdown == 0 {
                         self.reset_game();

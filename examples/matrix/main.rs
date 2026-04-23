@@ -181,7 +181,7 @@ impl TimerEvents for MatrixDesktop {
                 }
                 
                 // Animate the text one character at a time (every 5 ticks = 250ms)
-                if ticks % 5 == 0 && self.loading_chars_shown < MatrixDesktop::LOADING_TEXT.len() {
+                if ticks.is_multiple_of(5) && self.loading_chars_shown < MatrixDesktop::LOADING_TEXT.len() {
                     self.loading_chars_shown += 1;
                 }
                 

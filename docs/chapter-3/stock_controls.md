@@ -28,6 +28,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [PathFinder](stock-controls/pathfinder.md)           | ui::PathFinder               | `pathfinder!`      | <img src="stock-controls/img/pathfinder.png" width=300/>      |
 | [ProgressBar](stock-controls/progressbar.md)         | ui::ProgressBar              | `progressbar!`     | <img src="stock-controls/img/progressbar.png" width=300/>     |
 | [RadioBox](stock-controls/radiobox.md)               | ui::RadioBox                 | `radiobox!`        | <img src="stock-controls/img/radiobox.png" width=300/>        |
+| [RichTextField](stock-controls/richtextfield.md)     | ui::RichTextField            | `richtextfield!`   | <img src="stock-controls/img/richtextfield.png" width=300/>   |
 | [Selector](stock-controls/selector.md)               | ui::Selector&lt;T&gt;        | `selector!`        | <img src="stock-controls/img/selector.png" width=300/>        |
 | [Tab](stock-controls/tab.md)                         | ui::Tab                      | `tab!`             | <img src="stock-controls/img/tab.png" width=300/>             |
 | [TextArea](stock-controls/textarea.md)               | ui::TextArea                 | `textarea!`        | <img src="stock-controls/img/textarea.png" width=300/>        |

@@ -79,6 +79,7 @@
         - [PathFinder](chapter-3/stock-controls/pathfinder.md)
         - [ProgressBar](chapter-3/stock-controls/progressbar.md)
         - [RadioBox](chapter-3/stock-controls/radiobox.md)
+        - [RichTextField](chapter-3/stock-controls/richtextfield.md)
         - [Selector](chapter-3/stock-controls/selector.md)
         - [Tab](chapter-3/stock-controls/tab.md)
         - [TextArea](chapter-3/stock-controls/textarea.md)
