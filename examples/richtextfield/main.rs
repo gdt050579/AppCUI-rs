@@ -2,14 +2,14 @@ use appcui::prelude::*;
 
 /// Toggle modes, no heap allocation: each `` ` `` toggles code (aqua), each `**` toggles bold (yellow), each `*` toggles italic (green). Delimiters are skipped for coloring.
 fn markdown_like_colors(t: &mut richtextfield::AttributeText, _theme: &Theme) {
-    let n = t.char_count();
+    let n = t.count();
     let mut ticks = false;
     let mut bold = false;
     let mut italic = false;
     let mut i = 0;
     while i < n {
-        let c = t.char_at(i);
-        if i + 1 < n && c == '*' && t.char_at(i + 1) == '*' {
+        let c = t.char(i).unwrap_or('\0');
+        if i + 1 < n && c == '*' && t.char(i + 1).unwrap_or('\0') == '*' {
             bold = !bold;
             i += 2;
             continue;
@@ -26,14 +26,11 @@ fn markdown_like_colors(t: &mut richtextfield::AttributeText, _theme: &Theme) {
         }
 
         if ticks {
-            t.set_color(i, Color::Aqua, Color::Transparent);
-            t.set_flags(i, CharFlags::None);
+            t.set_attr(i, CharAttribute::new(Color::Aqua, Color::Transparent, CharFlags::None));
         } else if bold {
-            t.set_color(i, Color::Yellow, Color::Transparent);
-            t.set_flags(i, CharFlags::Bold);
+            t.set_attr(i, CharAttribute::new(Color::Yellow, Color::Transparent, CharFlags::Bold));
         } else if italic {
-            t.set_color(i, Color::Green, Color::Transparent);
-            t.set_flags(i, CharFlags::Italic);
+            t.set_attr(i, CharAttribute::new(Color::Green, Color::Transparent, CharFlags::Italic));
         }
         i += 1;
     }
