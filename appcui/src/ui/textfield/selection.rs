@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub(crate) struct Selection {
     pub(crate) start: usize,
     pub(crate) end: usize,

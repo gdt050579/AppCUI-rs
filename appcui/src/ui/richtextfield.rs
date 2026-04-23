@@ -2,6 +2,7 @@
 
 mod attribute_text;
 mod richtextfield;
+mod undo;
 pub mod events;
 #[cfg(test)]
 mod tests;

@@ -1,4 +1,5 @@
 use super::attribute_text::AttributeText;
+use super::undo::{LastAction, UndoEntry, UndoOp, MAX_UNDO_DEPTH};
 use crate::prelude::*;
 use crate::ui::common::{ControlEvent, ControlEventData};
 use crate::ui::textfield::selection::Selection;
@@ -35,6 +36,9 @@ pub struct RichTextField {
     selection: Selection,
     drag_started: bool,
     flags: Flags,
+    undo_stack: Vec<UndoEntry>,
+    redo_stack: Vec<UndoEntry>,
+    last_action: LastAction,
 }
 
 impl RichTextField {
@@ -63,6 +67,9 @@ impl RichTextField {
             selection: Selection::NONE,
             drag_started: false,
             flags,
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
+            last_action: LastAction::None,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
         obj.set_text(text);
@@ -90,6 +97,9 @@ impl RichTextField {
     /// Cursor and selection are reset, variation selectors are ignored, and parser output
     /// is recomputed.
     pub fn set_text(&mut self, text: &str) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        self.last_action = LastAction::None;
         self.chars.clear();
         self.chars
             .extend(text.chars().filter(|c| !is_variation_selector(*c)).map(default_character));
@@ -261,17 +271,35 @@ impl RichTextField {
         }
         if let Some(txt) = RuntimeManager::get().backend().clipboard_text() {
             if !txt.is_empty() {
-                for c in txt.chars() {
-                    if is_variation_selector(c) {
-                        continue;
+                let insert_pos = self.cursor.pos;
+                let new_chars: Vec<Character> = txt
+                    .chars()
+                    .filter(|c| !is_variation_selector(*c))
+                    .map(default_character)
+                    .collect();
+                let count = new_chars.len();
+                if count > 0 {
+                    let entry = UndoEntry {
+                        op: UndoOp::Insert {
+                            pos: insert_pos,
+                            chars: new_chars.clone(),
+                        },
+                        cursor_before: self.cursor.pos,
+                        cursor_after: self.cursor.pos + count,
+                        selection_before: self.selection,
+                        selection_after: Selection::NONE,
+                    };
+                    self.push_undo(entry);
+                    self.last_action = LastAction::Other;
+                    for (i, ch) in new_chars.iter().enumerate() {
+                        self.chars.insert(insert_pos + i, *ch);
                     }
-                    self.chars.insert(self.cursor.pos, default_character(c));
-                    self.cursor.pos += 1;
+                    self.cursor.pos += count;
+                    // Insertion can increase content past previous viewport end.
+                    // Keep cursor window in sync so paint does not clip newly added tail.
+                    self.update_scroll_view(true);
+                    modified = true;
                 }
-                // Insertion can increase content past previous viewport end.
-                // Keep cursor window in sync so paint does not clip newly added tail.
-                self.update_scroll_view(true);
-                modified = true;
             }
         }
         if modified {
@@ -303,20 +331,33 @@ impl RichTextField {
         if self.selection.is_empty() {
             return false;
         }
-        let slice: String = self.chars[self.selection.start..self.selection.end].iter().map(|c| c.code).collect();
-        let s = callback(slice.as_str());
-        let old: String = self.chars[self.selection.start..self.selection.end].iter().map(|c| c.code).collect();
-        let text_changed = s != old;
-        let new_chars: Vec<Character> = s
+        let old_chars: Vec<Character> = self.chars[self.selection.start..self.selection.end].to_vec();
+        let old_str: String = old_chars.iter().map(|c| c.code).collect();
+        let new_str = callback(old_str.as_str());
+        let text_changed = new_str != old_str;
+        let new_chars: Vec<Character> = new_str
             .chars()
             .filter(|c| !is_variation_selector(*c))
             .map(default_character)
             .collect();
+        let entry = UndoEntry {
+            op: UndoOp::Replace {
+                pos: self.selection.start,
+                old_chars,
+                new_chars: new_chars.clone(),
+            },
+            cursor_before: self.cursor.pos,
+            cursor_after: self.selection.start + new_chars.len(),
+            selection_before: self.selection,
+            selection_after: Selection::NONE,
+        };
+        self.push_undo(entry);
+        self.last_action = LastAction::Other;
         let start = self.selection.start;
         self.chars.splice(self.selection.start..self.selection.end, new_chars);
         self.selection = Selection::NONE;
         self.cursor.pos = start;
-        let count = s.chars().count() as i32;
+        let count = new_str.chars().count() as i32;
         self.move_cursor_with(count, true);
         if text_changed {
             self.sync_after_mutation();
@@ -334,6 +375,19 @@ impl RichTextField {
         if self.selection.is_empty() {
             return false;
         }
+        let removed: Vec<Character> = self.chars[self.selection.start..self.selection.end].to_vec();
+        let entry = UndoEntry {
+            op: UndoOp::Delete {
+                pos: self.selection.start,
+                chars: removed,
+            },
+            cursor_before: self.cursor.pos,
+            cursor_after: self.selection.start,
+            selection_before: self.selection,
+            selection_after: Selection::NONE,
+        };
+        self.push_undo(entry);
+        self.last_action = LastAction::Other;
         let new_pos = self.selection.start;
         self.chars.drain(self.selection.start..self.selection.end);
         self.selection = Selection::NONE;
@@ -350,6 +404,19 @@ impl RichTextField {
             return self.delete_selection();
         }
         if self.cursor.pos < self.chars.len() {
+            let removed = self.chars[self.cursor.pos];
+            let entry = UndoEntry {
+                op: UndoOp::Delete {
+                    pos: self.cursor.pos,
+                    chars: vec![removed],
+                },
+                cursor_before: self.cursor.pos,
+                cursor_after: self.cursor.pos,
+                selection_before: self.selection,
+                selection_after: Selection::NONE,
+            };
+            self.push_undo(entry);
+            self.last_action = LastAction::Delete;
             self.chars.remove(self.cursor.pos);
             self.update_scroll_view(true);
             self.sync_after_mutation();
@@ -366,6 +433,19 @@ impl RichTextField {
             return self.delete_selection();
         }
         if self.cursor.pos > 0 {
+            let removed = self.chars[self.cursor.pos - 1];
+            let entry = UndoEntry {
+                op: UndoOp::Delete {
+                    pos: self.cursor.pos - 1,
+                    chars: vec![removed],
+                },
+                cursor_before: self.cursor.pos,
+                cursor_after: self.cursor.pos - 1,
+                selection_before: self.selection,
+                selection_after: Selection::NONE,
+            };
+            self.push_undo(entry);
+            self.last_action = LastAction::Delete;
             self.chars.remove(self.cursor.pos - 1);
             self.move_cursor_to(self.cursor.pos - 1, false, true);
             self.sync_after_mutation();
@@ -384,6 +464,30 @@ impl RichTextField {
         if !self.selection.is_empty() {
             self.delete_selection();
         }
+        let new_char_class = CharClass::from(character);
+        let can_merge = matches!(&self.last_action, LastAction::AddChar(class) if *class == new_char_class);
+        if can_merge {
+            if let Some(last) = self.undo_stack.last_mut() {
+                if let UndoOp::Insert { chars: inserted, .. } = &mut last.op {
+                    inserted.push(default_character(character));
+                    last.cursor_after = self.cursor.pos + 1;
+                    last.selection_after = Selection::NONE;
+                }
+            }
+        } else {
+            let entry = UndoEntry {
+                op: UndoOp::Insert {
+                    pos: self.cursor.pos,
+                    chars: vec![default_character(character)],
+                },
+                cursor_before: self.cursor.pos,
+                cursor_after: self.cursor.pos + 1,
+                selection_before: self.selection,
+                selection_after: Selection::NONE,
+            };
+            self.push_undo(entry);
+        }
+        self.last_action = LastAction::AddChar(new_char_class);
         self.chars.insert(self.cursor.pos, default_character(character));
         // Keep viewport end in sync with insertions (same rationale as paste).
         self.move_cursor_to(self.cursor.pos + 1, false, true);
@@ -422,6 +526,80 @@ impl RichTextField {
         let len = self.chars.len() as i32;
         let idx = (self.cursor.start as i32 + glyphs_count).clamp(0, len) as usize;
         Some(idx)
+    }
+
+    fn push_undo(&mut self, entry: UndoEntry) {
+        if self.undo_stack.len() >= MAX_UNDO_DEPTH {
+            self.undo_stack.remove(0);
+        }
+        self.undo_stack.push(entry);
+        self.redo_stack.clear();
+    }
+
+    fn apply_op_forward(chars: &mut Vec<Character>, op: &UndoOp) {
+        match op {
+            UndoOp::Insert { pos, chars: inserted } => {
+                for (i, ch) in inserted.iter().enumerate() {
+                    chars.insert(*pos + i, *ch);
+                }
+            }
+            UndoOp::Delete { pos, chars: deleted } => {
+                chars.drain(*pos..*pos + deleted.len());
+            }
+            UndoOp::Replace { pos, old_chars, new_chars } => {
+                chars.splice(*pos..*pos + old_chars.len(), new_chars.iter().cloned());
+            }
+        }
+    }
+
+    fn apply_op_inverse(chars: &mut Vec<Character>, op: &UndoOp) {
+        match op {
+            UndoOp::Insert { pos, chars: inserted } => {
+                chars.drain(*pos..*pos + inserted.len());
+            }
+            UndoOp::Delete { pos, chars: deleted } => {
+                for (i, ch) in deleted.iter().enumerate() {
+                    chars.insert(*pos + i, *ch);
+                }
+            }
+            UndoOp::Replace { pos, old_chars, new_chars } => {
+                chars.splice(*pos..*pos + new_chars.len(), old_chars.iter().cloned());
+            }
+        }
+    }
+
+    fn restore_state(&mut self, cursor_pos: usize, selection: Selection) {
+        self.cursor.pos = cursor_pos.min(self.chars.len());
+        self.selection = selection;
+        self.update_scroll_view(true);
+        self.sync_after_mutation();
+        self.notify_text_changed();
+    }
+
+    /// Reverts the last text mutation, if any, and restores the cursor and selection
+    /// to what they were before that mutation.
+    pub fn undo(&mut self) {
+        if let Some(entry) = self.undo_stack.pop() {
+            Self::apply_op_inverse(&mut self.chars, &entry.op);
+            let cursor_before = entry.cursor_before;
+            let selection_before = entry.selection_before;
+            self.redo_stack.push(entry);
+            self.last_action = LastAction::None;
+            self.restore_state(cursor_before, selection_before);
+        }
+    }
+
+    /// Re-applies the most recently undone mutation, if any, and restores the cursor and
+    /// selection to what they were right after that mutation.
+    pub fn redo(&mut self) {
+        if let Some(entry) = self.redo_stack.pop() {
+            Self::apply_op_forward(&mut self.chars, &entry.op);
+            let cursor_after = entry.cursor_after;
+            let selection_after = entry.selection_after;
+            self.undo_stack.push(entry);
+            self.last_action = LastAction::None;
+            self.restore_state(cursor_after, selection_after);
+        }
     }
 
     fn notify_text_changed(&mut self) {
@@ -499,34 +677,42 @@ impl OnKeyPressed for RichTextField {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         match key.value() {
             key!("Left") | key!("Shift+Left") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_with(-1, key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Right") | key!("Shift+Right") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Up") | key!("Shift+Up") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_with(-((self.size().width as i32) - 2), key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Down") | key!("Shift+Down") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_with((self.size().width as i32) - 2, key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Home") | key!("Shift+Home") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_to(0, key.modifier.contains(KeyModifier::Shift), false);
                 return EventProcessStatus::Processed;
             }
             key!("End") | key!("Shift+End") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_to(self.chars.len(), key.modifier.contains(KeyModifier::Shift), false);
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Left") | key!("Ctrl+Shift+Left") => {
+                self.last_action = LastAction::None;
                 self.move_to_previous_word(key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Right") | key!("Ctrl+Shift+Right") => {
+                self.last_action = LastAction::None;
                 self.move_to_next_word(key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
@@ -559,7 +745,16 @@ impl OnKeyPressed for RichTextField {
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+A") => {
+                self.last_action = LastAction::None;
                 self.select_all();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Z") => {
+                self.undo();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Y") | key!("Ctrl+Shift+Z") => {
+                self.redo();
                 return EventProcessStatus::Processed;
             }
             key!("Delete") => {
@@ -616,6 +811,7 @@ impl OnMouseEvent for RichTextField {
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(data) => {
                 if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, true) {
+                    self.last_action = LastAction::None;
                     self.move_cursor_to(new_pos, false, false);
                     self.drag_started = true;
                 }
@@ -634,6 +830,7 @@ impl OnMouseEvent for RichTextField {
             MouseEvent::Drag(data) => {
                 if self.drag_started {
                     if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, false) {
+                        self.last_action = LastAction::None;
                         self.move_cursor_to(new_pos, true, true);
                     }
                 }
