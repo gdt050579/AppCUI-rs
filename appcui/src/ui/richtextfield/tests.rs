@@ -1461,3 +1461,133 @@ fn check_text_changed_event_readonly() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+#[test]
+fn check_undo_redo_insert() {
+    // Typing a run of same-class characters should merge into a single undo entry,
+    // so a single Ctrl+Z undoes the whole run. Ctrl+Y (and Ctrl+Shift+Z) redo it.
+    let script = "
+        Paint.Enable(false)
+        // Focus auto-selects the initial text; Right clears the selection and moves to the end
+        Key.Pressed(Right)
+        Paint('1. Initial: Hello||')
+        CheckHash(0x149B93B05880B0BE)
+        CheckCursor(18,3)
+        Key.TypeText(' world')
+        Paint('2. After typing: Hello world||')
+        CheckHash(0x52EEFBBE06A52F24)
+        CheckCursor(24,3)
+        // Ctrl+Z undoes the word-class run 'world'
+        Key.Pressed(Ctrl+Z)
+        Paint('3. After 1st undo: Hello ||')
+        CheckHash(0x149B93B05880B0BE)
+        CheckCursor(19,3)
+        // Ctrl+Z undoes the single space (space-class)
+        Key.Pressed(Ctrl+Z)
+        Paint('4. After 2nd undo: Hello||')
+        CheckHash(0x149B93B05880B0BE)
+        CheckCursor(18,3)
+        // No more history on the initial text (set_text clears undo history)
+        Key.Pressed(Ctrl+Z)
+        Paint('5. No-op undo: Hello||')
+        CheckHash(0x149B93B05880B0BE)
+        CheckCursor(18,3)
+        // Ctrl+Y redoes the space
+        Key.Pressed(Ctrl+Y)
+        Paint('6. After 1st redo: Hello ||')
+        CheckHash(0x149B93B05880B0BE)
+        CheckCursor(19,3)
+        // Ctrl+Shift+Z is an alias of redo and reapplies the word run
+        Key.Pressed(Ctrl+Shift+Z)
+        Paint('7. After 2nd redo: Hello world||')
+        CheckHash(0x52EEFBBE06A52F24)
+        CheckCursor(24,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(richtextfield!("'Hello',x:1,y:1,w:38,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_undo_redo_delete() {
+    // Each Backspace / Delete on a single character produces its own undo entry,
+    // so undo reverses them one-by-one.
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right)
+        Paint('1. Initial: abc||')
+        CheckHash(0x1B38B865FFC06BC4)
+        CheckCursor(16,3)
+        Key.Pressed(Backspace,3)
+        Paint('2. After 3x Backspace: ||')
+        CheckHash(0x5D5434B3B979A184)
+        CheckCursor(13,3)
+        Key.Pressed(Ctrl+Z)
+        Paint('3. After 1st undo: a||')
+        CheckHash(0x2C5E6E25581A3E55)
+        CheckCursor(14,3)
+        Key.Pressed(Ctrl+Z)
+        Paint('4. After 2nd undo: ab||')
+        CheckHash(0xF5DA19A341067EC7)
+        CheckCursor(15,3)
+        Key.Pressed(Ctrl+Z)
+        Paint('5. After 3rd undo: abc||')
+        CheckHash(0x1B38B865FFC06BC4)
+        CheckCursor(16,3)
+        Key.Pressed(Ctrl+Y,3)
+        Paint('6. After 3x redo: ||')
+        CheckHash(0x5D5434B3B979A184)
+        CheckCursor(13,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(richtextfield!("'abc',x:1,y:1,w:38,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_undo_redo_type_over_selection() {
+    // Typing over a selection is recorded as two undo entries: the deletion of the
+    // selected range, and the subsequent character insertion. Two undos fully revert
+    // and the selection gets restored when the deletion entry is undone.
+    let script = "
+        Paint.Enable(false)
+        // On focus the whole 'Hello' is auto-selected
+        Paint('1. Initial with Hello auto-selected')
+        CheckHash(0x6F3147EEEE5049C5)
+        CheckCursor(18,3)
+        // Type 'X' over the selection -> deletes 'Hello' then inserts 'X'
+        Key.Pressed(X)
+        Paint('2. After typing X: X||')
+        CheckHash(0xED49DB503B10243C)
+        CheckCursor(14,3)
+        // First undo reverts the insert of 'X' -> empty text
+        Key.Pressed(Ctrl+Z)
+        Paint('3. After 1st undo: empty')
+        CheckHash(0x5D5434B3B979A184)
+        CheckCursor(13,3)
+        // Second undo restores the deleted selection 'Hello' (with selection re-applied)
+        Key.Pressed(Ctrl+Z)
+        Paint('4. After 2nd undo: |Hello| selected')
+        CheckHash(0x6F3147EEEE5049C5)
+        CheckCursor(18,3)
+        // Redo the delete
+        Key.Pressed(Ctrl+Y)
+        Paint('5. After 1st redo: empty')
+        CheckHash(0x5D5434B3B979A184)
+        CheckCursor(13,3)
+        // Redo the insert
+        Key.Pressed(Ctrl+Y)
+        Paint('6. After 2nd redo: X||')
+        CheckHash(0xED49DB503B10243C)
+        CheckCursor(14,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(richtextfield!("'Hello',x:1,y:1,w:38,h:1"));
+    a.add_window(w);
+    a.run();
+}
