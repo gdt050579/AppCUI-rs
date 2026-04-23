@@ -23,7 +23,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_layout();
     cb.add_flags_parameter("flags", "richtextfield::Flags", &FLAGS);
     if cb.has_parameter("parser") {
-        cb.add_function("parser", None, true);
+        cb.add_function("parser", None, false);
     }
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();

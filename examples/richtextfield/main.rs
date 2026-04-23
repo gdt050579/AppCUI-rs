@@ -36,38 +36,28 @@ fn markdown_like_colors(t: &mut richtextfield::AttributeText, _theme: &Theme) {
     }
 }
 
-#[Window()]
-struct MyWin {}
-
-impl MyWin {
-    fn new() -> Self {
-        let initial = concat!(
-            "`code` **bold** *italic* — toggles only; pair each delimiter again to exit.\n",
-            "Mix `x` with **y** and *z*; `**` still toggles bold (two stars first).",
-        );
-        let mut win = MyWin {
-            base: Window::new(
-                "RichTextField — ` ** * toggles (no alloc)",
-                layout!("a:c,w:80,h:20"),
-                window::Flags::None,
-            ),
-        };
-        win.add(label!(
-            "'` = aqua   ** = yellow+bold   * = green+italic — same stack idea, no Vec.',l:1,t:1,r:1,h:2"
-        ));
-        win.add(RichTextField::with_on_color(
-            initial,
-            layout!("l:1,t:3,r:1,h:4"),
-            richtextfield::Flags::None,
-            markdown_like_colors,
-        ));
-        win
+fn all_capitals(t: &mut richtextfield::AttributeText, theme: &Theme) {
+    let n = t.count();
+    let mut i = 0;
+    while i < n {
+        let c = t.char(i).unwrap_or('\0');
+        if c.is_ascii_lowercase() {
+            t.set_char(i, c.to_ascii_uppercase());
+            t.set_attr(i, theme.text.normal);
+        }
+        i += 1;
     }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
-    app.add_window(MyWin::new());
+    let mut w = window!("'RichTextField example',a:c,w:80,h:20");
+    w.add(label!("'Use **, * and ` to toggle colors',l:1,t:1,r:1,h:1"));
+    w.add(richtextfield!("'',l:1,t:2,r:1,h:4,parser:markdown_like_colors"));
+    w.add(label!("'Auto capitalize text',l:1,t:6,r:1,h:1"));
+    w.add(richtextfield!("'',l:1,t:7,r:1,h:4,parser:all_capitals"));
+
+    app.add_window(w);
     app.run();
     Ok(())
 }

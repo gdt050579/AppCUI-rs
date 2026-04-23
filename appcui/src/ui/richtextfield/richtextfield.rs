@@ -39,7 +39,7 @@ pub struct RichTextField {
 
 impl RichTextField {
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {
-        Self::with_on_color_inner(text, layout, flags, None)
+        Self::with_parser_inner(text, layout, flags, None)
     }
 
     pub fn with_parser(text: &str, layout: Layout, flags: Flags, parser: fn(&mut AttributeText, &Theme)) -> Self {
