@@ -1375,6 +1375,34 @@ pub fn textfield(input: TokenStream) -> TokenStream {
     crate::controls::textfield::create(input)
 }
 
+/// Creates a new richtextfield control. The format is `richtextfield!("attributes")` where the attributes are pairs of key-value, separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `text` (or `caption`) - the text displayed in the richtextfield
+/// * `flags` - the flags of the richtextfield. The following values are supported:
+///   - **ProcessEnter** - the richtextfield will process the Enter key
+///   - **ReadOnly** - the richtextfield is read-only
+///   - **DisableAutoSelectOnFocus** - the text will not be selected when the richtextfield receives focus
+/// * position attributes: `x` and `y`
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias)
+/// * margin attributes: `left` or `l` (alias), `right` or `r` (alias), `top` or `t` (alias), `bottom` or `b` (alias)
+/// * Alignment attributes:
+///   - `align` or `a` (alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d` (alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+///
+/// # Example
+///
+/// ```richtextfield!("text='Hello!', x=10, y=10, width=20, height=2")```
+///
+/// Alternatively, the first parameter (if the key is not specified) is considered the text:
+///
+/// ```richtextfield!("'Hello!', x:0, y=10, w:20")```
+#[proc_macro]
+pub fn richtextfield(input: TokenStream) -> TokenStream {
+    crate::controls::richtextfield::create(input)
+}
+
 
 /// Creates a new selector control for choosing enum values.
 /// The format is `selector!("attributes")` where the attributes are pairs of key-value, separated by comma.
