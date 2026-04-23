@@ -19,7 +19,9 @@ impl<'a> AttributeText<'a> {
         self.chars.get(index).map(|c| c.code)
     }
 
-    /// Sets the character at the specified index.
+    /// Sets the character at `index`.
+    ///
+    /// Out-of-range indices are ignored in release builds and asserted in debug builds.
     pub fn set_char(&mut self, index: usize, ch: char) {
         if let Some(c) = self.chars.get_mut(index) {
             c.code = ch;
@@ -28,7 +30,9 @@ impl<'a> AttributeText<'a> {
         }       
     }
 
-    /// Sets the attribute of the character at the specified index.
+    /// Sets the style attributes for the character at `index`.
+    ///
+    /// Out-of-range indices are ignored in release builds and asserted in debug builds.
     pub fn set_attr(&mut self, index: usize, attr: CharAttribute) {
         if let Some(ch) = self.chars.get_mut(index) {
             ch.foreground = attr.foreground;
@@ -39,7 +43,9 @@ impl<'a> AttributeText<'a> {
         }
     }
 
-    /// Sets the attribute of the characters in the specified range.
+    /// Sets the style attributes for the half-open range `[start, end)`.
+    ///
+    /// Bounds are clamped to the available text length.
     pub fn set_range_attr(&mut self, start: usize, end: usize, attr: CharAttribute) {
         let len = self.chars.len();
         let start = start.min(len);
@@ -54,11 +60,12 @@ impl<'a> AttributeText<'a> {
         }
     }
 
-    pub fn reset_all(&mut self) {
+    /// Resets all characters to the specified attributes.
+    pub fn reset_all(&mut self, attr: CharAttribute) {
         for ch in self.chars.iter_mut() {
-            ch.foreground = Color::Transparent;
-            ch.background = Color::Transparent;
-            ch.flags = CharFlags::None;
+            ch.foreground = attr.foreground;
+            ch.background = attr.background;
+            ch.flags = attr.flags;
         }
     }
 }

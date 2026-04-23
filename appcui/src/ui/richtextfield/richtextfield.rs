@@ -38,10 +38,17 @@ pub struct RichTextField {
 }
 
 impl RichTextField {
+    /// Creates a new `RichTextField` without a parser callback.
+    ///
+    /// The control starts with `text` content, `layout` position/size and behavior defined by `flags`.
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {
         Self::with_parser_inner(text, layout, flags, None)
     }
 
+    /// Creates a new `RichTextField` with a parser callback.
+    ///
+    /// The parser is called after each text mutation and can change per-character attributes
+    /// (and characters) through [`AttributeText`], using the current [`Theme`].
     pub fn with_parser(text: &str, layout: Layout, flags: Flags, parser: fn(&mut AttributeText, &Theme)) -> Self {
         Self::with_parser_inner(text, layout, flags, Some(parser))
     }
@@ -62,16 +69,26 @@ impl RichTextField {
         obj
     }
 
+    /// Returns `true` if the field is read-only.
+    ///
+    /// In read-only mode, navigation and selection still work, but text mutations are ignored.
     #[inline(always)]
     pub fn is_readonly(&self) -> bool {
         self.flags.contains(Flags::Readonly)
     }
 
+    /// Returns the current text as a borrowed string slice.
+    ///
+    /// The returned value references an internal cache rebuilt after each mutation.
     #[inline(always)]
     pub fn text(&self) -> &str {
         &self.text_cache
     }
 
+    /// Replaces the entire text content.
+    ///
+    /// Cursor and selection are reset, variation selectors are ignored, and parser output
+    /// is recomputed.
     pub fn set_text(&mut self, text: &str) {
         self.chars.clear();
         self.chars
@@ -82,11 +99,15 @@ impl RichTextField {
         self.sync_after_mutation();
     }
 
+    /// Installs or replaces the parser callback used for per-character styling.
+    ///
+    /// The callback is executed immediately on current content.
     pub fn set_parser(&mut self, parser: fn(&mut AttributeText, &Theme)) {
         self.parser = Some(parser);
         self.sync_after_mutation();
     }
 
+    /// Removes the parser callback and resets all character styling to defaults.
     pub fn reset_parser(&mut self) {
         self.parser = None;
         self.sync_after_mutation();
