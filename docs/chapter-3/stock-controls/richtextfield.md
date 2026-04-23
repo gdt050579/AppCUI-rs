@@ -40,11 +40,11 @@ let rtx2 = richtextfield!("'some text',x:10,y:5,w:20,parser:my_parser");
 
 A `RichTextField` supports all common parameters (see [Instantiate via Macros](../instantiate_via_macros.md)). Besides them, the following named parameters are also accepted:
 
-| Parameter name      | Type     | Positional parameter                | Purpose                                                                 |
-| ------------------- | -------- | ----------------------------------- | ----------------------------------------------------------------------- |
-| `text` or `caption` | String   | **Yes** (first positional parameter) | Initial text content. If omitted, an empty text is used.               |
-| `flags`             | List     | **No**                              | Initialization flags controlling read-only mode and Enter processing.   |
-| `parser`            | Function | **No**                              | Parser callback (`fn(&mut AttributeText, &Theme)`) applied after edits. |
+| Parameter name      | Type     | Positional parameter                 | Purpose                                                                 |
+| ------------------- | -------- | ------------------------------------ | ----------------------------------------------------------------------- |
+| `text` or `caption` | String   | **Yes** (first positional parameter) | Initial text content. If omitted, an empty text is used.                |
+| `flags`             | List     | **No**                               | Initialization flags controlling read-only mode and Enter processing.   |
+| `parser`            | Function | **No**                               | Parser callback (`fn(&mut AttributeText, &Theme)`) applied after edits. |
 
 A rich text field supports the following initialization flags:
 - `richtextfield::Flags::Readonly` or `Readonly` (macro) - allows viewing/selecting/copying but prevents text edits.
@@ -66,36 +66,40 @@ pub trait RichTextFieldEvents {
 
 Besides the [Common methods for all Controls](../common_methods.md), `RichTextField` has:
 
-| Method              | Purpose                                                                 |
-| ------------------- | ----------------------------------------------------------------------- |
-| `set_text(...)`     | Replaces the full text and recomputes parser styling.                  |
-| `text()`            | Returns current text.                                                   |
-| `is_readonly()`     | Returns `true` when the control is in read-only mode.                  |
-| `set_parser(...)`   | Installs/replaces parser callback and reapplies styling immediately.   |
-| `reset_parser()`    | Removes parser callback and resets character styles to defaults.        |
+| Method            | Purpose                                                              |
+| ----------------- | -------------------------------------------------------------------- |
+| `set_text(...)`   | Replaces the full text and recomputes parser styling.                |
+| `undo()`          | Undo last action.                                                    |
+| `redo()`          | Redo last action.                                                    |
+| `text()`          | Returns current text.                                                |
+| `is_readonly()`   | Returns `true` when the control is in read-only mode.                |
+| `set_parser(...)` | Installs/replaces parser callback and reapplies styling immediately. |
+| `reset_parser()`  | Removes parser callback and resets character styles to defaults.     |
 
 ## Key association
 
 The following keys are processed when a `RichTextField` has focus:
 
-| Key                                  | Purpose                                                                                                                                    |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Left`, `Right`, `Up`, `Down`        | Move cursor through text                                                                                                                   |
-| `Shift`+{`Left`,`Right`,`Up`,`Down`} | Extend/reduce selection                                                                                                                    |
-| `Ctrl`+`Left`                        | Move to beginning of previous word                                                                                                         |
-| `Shift`+`Ctrl`+`Left`                | Select from current position to beginning of previous word                                                                                 |
-| `Ctrl`+`Right`                       | Move to beginning of next word                                                                                                             |
-| `Shift`+`Ctrl`+`Right`               | Select from current position to beginning of next word                                                                                     |
-| `Home` / `End`                       | Move to start / end of text                                                                                                                |
-| `Shift` + `Home` / `Shift` + `End`   | Select from cursor to start / end                                                                                                          |
-| `Delete` / `Backspace`               | Delete current / previous character (or current selection)                                                                                 |
-| `Ctrl`+`A`                           | Select all text                                                                                                                            |
-| `Ctrl`+`U`                           | Convert selection (or current word) to lowercase                                                                                           |
-| `Ctrl`+`Shift`+`U`                   | Convert selection (or current word) to uppercase                                                                                           |
-| `Ctrl`+`C` or `Ctrl`+`Insert`        | Copy selection                                                                                                                             |
-| `Ctrl`+`V` or `Shift`+`Insert`       | Paste clipboard text                                                                                                                       |
-| `Ctrl`+`X` or `Shift`+`Delete`       | Cut selection                                                                                                                              |
-| `Enter`                              | Triggers `on_validate(...)` only when `ProcessEnter` is set                                                                               |
+| Key                                  | Purpose                                                     |
+| ------------------------------------ | ----------------------------------------------------------- |
+| `Left`, `Right`, `Up`, `Down`        | Move cursor through text                                    |
+| `Shift`+{`Left`,`Right`,`Up`,`Down`} | Extend/reduce selection                                     |
+| `Ctrl`+`Left`                        | Move to beginning of previous word                          |
+| `Shift`+`Ctrl`+`Left`                | Select from current position to beginning of previous word  |
+| `Ctrl`+`Right`                       | Move to beginning of next word                              |
+| `Shift`+`Ctrl`+`Right`               | Select from current position to beginning of next word      |
+| `Home` / `End`                       | Move to start / end of text                                 |
+| `Shift` + `Home` / `Shift` + `End`   | Select from cursor to start / end                           |
+| `Delete` / `Backspace`               | Delete current / previous character (or current selection)  |
+| `Ctrl`+`A`                           | Select all text                                             |
+| `Ctrl`+`U`                           | Convert selection (or current word) to lowercase            |
+| `Ctrl`+`Shift`+`U`                   | Convert selection (or current word) to uppercase            |
+| `Ctrl`+`C` or `Ctrl`+`Insert`        | Copy selection                                              |
+| `Ctrl`+`V` or `Shift`+`Insert`       | Paste clipboard text                                        |
+| `Ctrl`+`X` or `Shift`+`Delete`       | Cut selection                                               |
+| `Ctrl`+`Z`                           | Undo last action                                            |
+| `Ctrl`+`Shift`+`Z`                   | Redo last action                                            |
+| `Enter`                              | Triggers `on_validate(...)` only when `ProcessEnter` is set |
 
 Additionally, printable characters can be inserted directly into the text.
 
