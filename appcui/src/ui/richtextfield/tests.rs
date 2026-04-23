@@ -1,5 +1,40 @@
 use crate::prelude::*;
 
+fn markdown_like_colors_for_tests(t: &mut richtextfield::AttributeText, _theme: &Theme) {
+    let n = t.count();
+    let mut ticks = false;
+    let mut bold = false;
+    let mut italic = false;
+    let mut i = 0;
+    while i < n {
+        let c = t.char(i).unwrap_or('\0');
+        if i + 1 < n && c == '*' && t.char(i + 1).unwrap_or('\0') == '*' {
+            bold = !bold;
+            i += 2;
+            continue;
+        }
+        if c == '`' {
+            ticks = !ticks;
+            i += 1;
+            continue;
+        }
+        if c == '*' {
+            italic = !italic;
+            i += 1;
+            continue;
+        }
+
+        if ticks {
+            t.set_attr(i, CharAttribute::new(Color::Aqua, Color::Transparent, CharFlags::None));
+        } else if bold {
+            t.set_attr(i, CharAttribute::new(Color::Yellow, Color::Transparent, CharFlags::Bold));
+        } else if italic {
+            t.set_attr(i, CharAttribute::new(Color::Green, Color::Transparent, CharFlags::Italic));
+        }
+        i += 1;
+    }
+}
+
 #[test]
 fn check_move_left_right() {
     let script = "
@@ -582,6 +617,55 @@ fn check_write_unicode_text() {
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(richtextfield!("x:1,y:1,w:8,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_parser_markdown_like_delimiters() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Initial parser render with `code`, **bold** and *italic*')
+        CheckHash(0xE59B5E76D2C8A969)
+        Key.Pressed(Home)
+        Key.Pressed(Right,3)
+        Paint('2.Cursor moved inside `code` region')
+        CheckHash(0xECE3F5F6102F267D)
+        Key.Pressed(End)
+        Paint('3.Cursor at end; parser colors still applied')
+        CheckHash(0xECE3F5F6102F267D)
+    ";
+
+    let mut a = App::debug(90, 12, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:70,h:10"), window::Flags::None);
+    w.add(richtextfield!(
+        "'A `code` and **bold** plus *italic* demo',x:1,y:1,w:66,h:1,parser:markdown_like_colors_for_tests"
+    ));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_parser_markdown_like_after_edit() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1.Initial render: parse markers around code/bold/italic')
+        CheckHash(0x6B86137C740A8DFD)
+        Key.Pressed(End)
+        Key.TypeText(' and `new` **B** *i*')
+        Paint('2.After typing more delimited segments; parser should recolor all')
+        CheckHash(0xEACC9FC250C52985)
+        Key.Pressed(Home)
+        Key.Pressed(Right,8)
+        Paint('3.Cursor moved near first parsed segment for manual check')
+        CheckHash(0xEACC9FC250C52985)
+    ";
+
+    let mut a = App::debug(100, 12, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:78,h:10"), window::Flags::None);
+    w.add(richtextfield!(
+        "'Start with `x` and **y** and *z*',x:1,y:1,w:74,h:1,parser:markdown_like_colors_for_tests"
+    ));
     a.add_window(w);
     a.run();
 }
