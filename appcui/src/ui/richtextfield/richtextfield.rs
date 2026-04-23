@@ -200,12 +200,27 @@ impl RichTextField {
         self.move_cursor_to(pos, select, false);
     }
 
+    #[inline]
+    fn char_index_to_byte_offset(&self, char_index: usize) -> usize {
+        if char_index == 0 {
+            return 0;
+        }
+        if char_index >= self.chars.len() {
+            return self.text_cache.len();
+        }
+        self.text_cache
+            .char_indices()
+            .nth(char_index)
+            .map_or(self.text_cache.len(), |(byte_offset, _)| byte_offset)
+    }
+
     fn copy_text(&mut self) {
         if self.selection.is_empty() {
             return;
         }
-        let selected: String = self.chars[self.selection.start..self.selection.end].iter().map(|c| c.code).collect();
-        RuntimeManager::get().backend_mut().set_clipboard_text(&selected);
+        let start = self.char_index_to_byte_offset(self.selection.start);
+        let end = self.char_index_to_byte_offset(self.selection.end);
+        RuntimeManager::get().backend_mut().set_clipboard_text(&self.text_cache[start..end]);
     }
 
     fn paste_text(&mut self) -> bool {
@@ -238,8 +253,9 @@ impl RichTextField {
         if self.selection.is_empty() {
             return false;
         }
-        let selected: String = self.chars[self.selection.start..self.selection.end].iter().map(|c| c.code).collect();
-        RuntimeManager::get().backend_mut().set_clipboard_text(&selected);
+        let start = self.char_index_to_byte_offset(self.selection.start);
+        let end = self.char_index_to_byte_offset(self.selection.end);
+        RuntimeManager::get().backend_mut().set_clipboard_text(&self.text_cache[start..end]);
         self.delete_selection()
     }
 
