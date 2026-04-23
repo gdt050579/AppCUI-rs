@@ -25,7 +25,7 @@ fn default_character(code: char) -> Character {
 pub struct RichTextField {
     chars: Vec<Character>,
     text_cache: String,
-    on_color: Option<Box<dyn Fn(&mut AttributeText)>>,
+    on_color: Option<fn(&mut AttributeText, &Theme)>,
     cursor: Cursor,
     selection: Selection,
     drag_started: bool,
@@ -37,11 +37,11 @@ impl RichTextField {
         Self::with_on_color_inner(text, layout, flags, None)
     }
 
-    pub fn with_on_color(text: &str, layout: Layout, flags: Flags, on_color: impl Fn(&mut AttributeText) + 'static) -> Self {
-        Self::with_on_color_inner(text, layout, flags, Some(Box::new(on_color)))
+    pub fn with_on_color(text: &str, layout: Layout, flags: Flags, on_color: fn(&mut AttributeText, &Theme)) -> Self {
+        Self::with_on_color_inner(text, layout, flags, Some(on_color))
     }
 
-    fn with_on_color_inner(text: &str, layout: Layout, flags: Flags, on_color: Option<Box<dyn Fn(&mut AttributeText)>>) -> Self {
+    fn with_on_color_inner(text: &str, layout: Layout, flags: Flags, on_color: Option<fn(&mut AttributeText, &Theme)>) -> Self {
         let mut obj = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             chars: Vec::new(),
@@ -76,8 +76,8 @@ impl RichTextField {
         self.sync_after_mutation();
     }
 
-    pub fn set_on_color(&mut self, on_color: impl Fn(&mut AttributeText) + 'static) {
-        self.on_color = Some(Box::new(on_color));
+    pub fn set_on_color(&mut self, on_color: fn(&mut AttributeText, &Theme)) {
+        self.on_color = Some(on_color);
         self.sync_after_mutation();
     }
 
@@ -96,9 +96,10 @@ impl RichTextField {
             ch.background = Color::Transparent;
             ch.flags = CharFlags::None;
         }
-        if let Some(ref on_color) = self.on_color {
+        if let Some(on_color) = self.on_color {
+            let theme = RuntimeManager::get().theme();
             let mut view = AttributeText { chars: &mut self.chars };
-            on_color(&mut view);
+            on_color(&mut view, theme);
         }
     }
 

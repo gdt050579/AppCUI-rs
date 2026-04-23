@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 
 /// Toggle modes, no heap allocation: each `` ` `` toggles code (aqua), each `**` toggles bold (yellow), each `*` toggles italic (green). Delimiters are skipped for coloring.
-fn markdown_like_colors(t: &mut richtextfield::AttributeText) {
+fn markdown_like_colors(t: &mut richtextfield::AttributeText, _theme: &Theme) {
     let n = t.char_count();
     let mut ticks = false;
     let mut bold = false;
