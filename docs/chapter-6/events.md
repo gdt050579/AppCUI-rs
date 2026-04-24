@@ -1,8 +1,8 @@
 # Events
 
-Normally, the theme of the application is set up when the application is created. However, you can change the theme at any time during the execution of the application. While, the stock controls will automatically update their appearance when the theme is changed, custom controls may need to be notified about the change. This is in particular the case when a double buffer is used to draw the control (e.g. you control has an inner `Surface` object that is updated based on a different logic and that will further be used in the `on_paint` method).
+Normally, the theme of the application is set when the application is created. However, you can change the theme at any time while the application is running. While stock controls automatically update their appearance when the theme changes, custom controls may need to be notified about the change. This is particularly the case when a double buffer is used to draw the control (for example, when your control has an inner `Surface` that is updated by separate logic and is then used in `on_paint`).
 
-In these scenarios, the control must implement `OnThemeChanged`  trait in order to receive notification when the theme is updated.
+In these scenarios, the control must implement the `OnThemeChanged` trait in order to receive a notification when the theme is updated.
 
 ```rust
 impl OnThemeChanged for MyControl {
@@ -12,11 +12,11 @@ impl OnThemeChanged for MyControl {
 }
 ```
 
-**Remarks**: The `on_theme_changed` method is called only when the theme is changed and **ONLY** after the Application has been started (i.e. after the `run` method has been called). This means that you will never get notified about the theme change for the initial theme set up when the application is created.
+**Remarks:** The `on_theme_changed` method is called only when the theme is changed, and **only** after the application has been started (i.e., after the `run` method has been called). This means you will never be notified about the initial theme applied when the application is created.
 
 ## Example
 
-Let's create a simple custom control that uses an attribute from the theme to draw itself. Such a control will requre to be notified when the theme is changed in order to update its data members.
+Let's create a simple custom control that uses an attribute from the theme to draw itself. Such a control must be notified when the theme changes so it can update its fields.
 
 ```rust
 #[CustomControl(overwrite : OnThemeChanged+OnPaint)]
@@ -29,7 +29,7 @@ impl MyControl {
             base: ControlBase::new(layout!("l:1,r:1,t:1,b:1"), true),
             attr: CharAttribute::default(),
         };
-        // we set up  the attribute based on the current theme
+        // set up the attribute based on the current theme
         obj.attr = obj.theme().window.normal;
         obj
     }
