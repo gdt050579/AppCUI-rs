@@ -93,7 +93,7 @@ pub trait ListViewEvents<T: ListItem + 'static> {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a list view also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a list view also has the following additional methods:
 
 ### Adding items and groups
 
@@ -169,7 +169,7 @@ The following keys are processed by a `ListView` control if it has focus:
 | `Ctrl`+{`A`..`Z`, `0`..`9`}                                                  | If a column has a hot key associated (by using the `&` character in the column name), this will sort all items bsed on that column. If that column is already selected, this will reverse the order of the sort items (ascendent or descendent) |
 | `Ctrl`+{`Left`, `Right`}                                                     | Enter in the column resize mode.                                                                                                                                                                                                                |
 
-Aditionally, typing any character will trigger the search bar (if the flag `SearchBar` is present) and will filter the items based on the search text. While the search bar is active, the following keys are processed:
+Additionally, typing any character will trigger the search bar (if the flag `SearchBar` is present) and will filter the items based on the search text. While the search bar is active, the following keys are processed:
 * `Backspace` - removes the last character from the search text
 * `Escape` - clears the search text and closes the search bar
 * Movement keys (such as `Up`, `Down`, `Left`, `Right`, `PageUp`, `PageDown`, `Home`, `End`) - will disable the search bar, but will keep the search text
@@ -203,7 +203,7 @@ that contains the following characteristics:
 ## Populating a list view
 
 Whenever an element is being added to a listview, the listview will try to assigned to a group and if the search bar contains a filter expression, will try to filter the item based on that expression. After this steps, the listview will also try to sort the items based on the current sorting column.
-Aditionally, there might be cases where you want to add an item with a specific icon, selection status or color.
+Additionally, there might be cases where you want to add an item with a specific icon, selection status or color.
 As such, there are several methods that can be used to add items to a listview (each one design for a different scenario).
 
 These operations can be expensive if the listview contains a large number of items. 
@@ -297,7 +297,7 @@ The listview control has two ways to display the items:
 * `Details` - the items are displayed in a table with multiple columns. Each column can have a different width and alignment and contain information about various fields of the item.
 * `Columns` - the items are displayed in a table with multiple columns. Each column has one item and represents the fist content of the first column in the Details view mode.
 
-You can change the view mode of the listview by using the `view` parameter in the `listview!` macro or by using the `set_view_mode` method programatically. The default view mode is `Details`.
+You can change the view mode of the listview by using the `view` parameter in the `listview!` macro or by using the `set_view_mode` method programmatically. The default view mode is `Details`.
 
 | View mode       | Enum                           | Example                                         |
 | --------------- | ------------------------------ | ----------------------------------------------- |

@@ -1,10 +1,10 @@
 # DatePicker
 
-Represent a control from where you can choose a color:
+Represents a control from which you can choose a date:
 
 <img src="img/datepicker.png" width=300/>
 
-To create a color picker use `DatePicker::new` method (with 2 parameters: a date and a layout), or it can be created with `DatePicker::with_date` method (with 2 parameters: a NaiveDate object and a layout).
+To create a date picker, use the `DatePicker::new` method (with two parameters: a date and a layout), or create one with the `DatePicker::with_date` method (with two parameters: a `NaiveDate` object and a layout).
 
 ```rs
 let d = DatePicker::new("2024-06-13", layout!("a:c,w:19"));
@@ -22,7 +22,7 @@ A DatePicker control supports all common parameters (as they are described in [I
 
 | Parameter name | Type   | Positional parameter                | Purpose                                                                                                              |
 | -------------- | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `date`         | String | **Yes** (first postional parameter) | The initial date of the DatePicker in `YYYY-MM-DD` format or any other format supported by NaiveDate in chrono crate |
+| `date`         | String | **Yes** (first positional parameter) | The initial date of the DatePicker in `YYYY-MM-DD` format or any other format supported by NaiveDate in chrono crate |
 
 ## Events
 
@@ -36,7 +36,7 @@ pub trait DatePickerEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a DatePicker control also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a DatePicker control also has the following additional methods:
 
 | Method              | Purpose                                                                                    |
 | ------------------- | ------------------------------------------------------------------------------------------ |

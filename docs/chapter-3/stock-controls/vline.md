@@ -1,6 +1,6 @@
 # VLine
 
-Represent a vertical line:
+Represents a vertical line:
 
 <img src="img/vline.png" width=300/>
 
@@ -29,7 +29,7 @@ Where the flags are defined as follows:
 A vertical line emits no events.
 
 ## Methods
-A vertical line has no aditional methods.
+A vertical line has no additional methods.
 
 ## Key association
 A vertical line does not receive any input and as such it has no key associated with it.

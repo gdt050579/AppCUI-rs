@@ -1,9 +1,9 @@
 # Overlay on Focus support
 
-Sometimes, you may want to have aditional space in a control when it has a focus (e.g. to draw some extract components that make sense only when the control has a focus). Example of such behavior include:
+Sometimes, you may want to have additional space in a control when it has focus (e.g. to draw some extra components that only make sense when the control is focused). Examples of such behavior include:
 * **scrollbars** - when a control has scrollbars, the scrollbars are drawn only when the control has a focus.
 * **searchbar** - when a control has a focus, a search bar is drawn that the control can use to filter/find inner items.
-* **aditional information** - controls that operates over a container (e.g. a list) can use the overlay to show some aditional information about the current item or the current state of the control (e.g. number of items selected, etc).
+* **additional information** — controls that operate on a container (e.g. a list) can use the overlay to show additional information about the current item or the current state of the control (e.g. number of items selected, etc.).
 
 ## Constructor
 
@@ -14,13 +14,13 @@ use appcui::prelude::*;
 
 #[CustomControl(overwrite = OnPaint)]
 struct MyControl {
-    // aditional fields
+    // additional fields
 }
 impl MyControl {
     fn new(layout: Layout) -> Self {
         Self { 
             base: ControlBase::with_focus_overlay(layout) 
-            // initialization of aditional fields
+            // initialization of additional fields
         }
     }
 }
@@ -56,13 +56,13 @@ use appcui::prelude::*;
 
 #[CustomControl(overwrite = OnPaint)]
 struct MyControl {
-    // aditional fields
+    // additional fields
 }
 impl MyControl {
     fn new(layout: Layout) -> Self {
         Self { 
             base: ControlBase::with_focus_overlay(layout) 
-            // initialization of aditional fields
+            // initialization of additional fields
         }
     }
 }
@@ -92,13 +92,13 @@ use appcui::prelude::*;
 
 #[CustomControl(overwrite = OnPaint)]
 struct MyControl {
-    // aditional fields
+    // additional fields
 }
 impl MyControl {
     fn new(layout: Layout) -> Self {
         let mut me = Self { 
             base: ControlBase::with_focus_overlay(layout) 
-            // initialization of aditional fields
+            // initialization of additional fields
         };
         me.set_components_toolbar_margins(5,4);
         me
@@ -107,6 +107,6 @@ impl MyControl {
 ```
 
 Assuming the control size is 20 x 10 characters. Then, with this setup , when it has the focus, the overlay area will be 21 x 11 characters but the mouse event will be send only in the following cases:
-* if the mouse coordonate (relative to the control) is between **(0,0)** and **(20,10)** - the normal area
-* if the mouse coordonate (relative to the control) is between **(5,10)** and **(21,10)** - the bottom side of the overlay area (but only from the 5th character as it was specified in the `me.set_components_toolbar_margins(5,4);` command)
-* if the mouse coordonate (relative to the control) is between **(20,4)** and **(21,11)** - the right side of the overlay area (but only from the 4th character as it was specified in the `me.set_components_toolbar_margins(5,4);` command)
+* if the mouse coordinate (relative to the control) is between **(0,0)** and **(20,10)** - the normal area
+* if the mouse coordinate (relative to the control) is between **(5,10)** and **(21,10)** - the bottom side of the overlay area (but only from the 5th character as it was specified in the `me.set_components_toolbar_margins(5,4);` command)
+* if the mouse coordinate (relative to the control) is between **(20,4)** and **(21,11)** - the right side of the overlay area (but only from the 4th character as it was specified in the `me.set_components_toolbar_margins(5,4);` command)

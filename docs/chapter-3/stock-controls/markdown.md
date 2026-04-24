@@ -1,5 +1,5 @@
 # Markdown
-Represent a control that can properly display .md (Markdown) text.
+Represents a control that can properly display .md (Markdown) text.
 
 <img src="img/markdown.png" width=300/>
 
@@ -39,7 +39,7 @@ A markdown control supports all common parameters (as they are described in [Ins
 | `top-scroll-margin` or `tsm`  | Integer      | **No**                              | Defines the top margin of the right scroll bar in characters. If not provided, the default value is `0`. Only applies if `ScrollBars` is set.            |
 
 A markdown supports the following initialization flags:
-* `markdown::Flags::ScrollBars` or `ScrollBars` (for macro initialization) - thils enable a set of scrollbars that can be used to change the view of the inner surface, but only when the control has focus, as described in [Components](../components.md) section.
+* `markdown::Flags::ScrollBars` or `ScrollBars` (for macro initialization) - this enable a set of scrollbars that can be used to change the view of the inner surface, but only when the control has focus, as described in [Components](../components.md) section.
 
 Some examples that uses these paramateres:
 
@@ -88,7 +88,7 @@ pub trait MarkdownEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a canvas also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a canvas also has the following additional methods:
 
 | Method                     | Purpose                                                            |
 | -------------------------- | ------------------------------------------------------------------ |
@@ -100,7 +100,7 @@ The following keys are processed by a markdown control if it has focus:
 
 | Key                                 | Purpose                                                                                                                                |
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `Left`,`Right`,`Up`,`Down`          | Move the view port to a specified direction by one character.                                                                          |
+| `Left`,`Right`,`Up`,`Down`          | Move the viewport to a specified direction by one character.                                                                          |
 
 ## Example
 

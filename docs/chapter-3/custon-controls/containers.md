@@ -41,7 +41,7 @@ While both `#[CustomControl]` and `#[CustomContainer]` generate very similar cod
 - **Custom Controls** are typically leaf elements in the UI hierarchy - they represent individual interactive or display elements (buttons, labels, input fields, etc.)
 - **Custom Containers** are designed to hold and manage other controls - they act as layout managers or grouping elements that can contain child controls
 
-When creating a custom container, two aditional methods are available:
+When creating a custom container, two additional methods are available:
 
 | Method             | Description                                                                                                                                                                                      |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

@@ -27,7 +27,7 @@ The following parameters are supported for a toolbar checkbox:
 
 | Parameter name       | Type   | Positional parameter                | Purpose                                                                                       |
 | -------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------------------------------- |
-| `text` or `caption`  | String | **Yes** (first postional parameter) | The caption (text) written on the checkbox                                                    |
+| `text` or `caption`  | String | **Yes** (first positional parameter) | The caption (text) written on the checkbox                                                    |
 | `type`               | String | **No**                              | For a checkbox use: `type:Checkbox`                                                           |
 | `tooltip`            | String | **No**                              | The tooltip associated with the button                                                        |
 | `visible`            | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |

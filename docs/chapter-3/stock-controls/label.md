@@ -1,6 +1,6 @@
 # Label
 
-Represent a label (a text):
+Represents a label (a text):
 
 <img src="img/label.png" width=300/>
 
@@ -20,7 +20,7 @@ A label supports all common parameters (as they are described in [Instantiate vi
 
 | Parameter name                | Type   | Positional parameter                | Purpose                                 |
 | ----------------------------- | ------ | ----------------------------------- | --------------------------------------- |
-| `name` or `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the label |
+| `name` or `text` or `caption` | String | **Yes** (first positional parameter) | The caption (text) written on the label |
 
 
 
@@ -29,7 +29,7 @@ A label emits no events.
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a label also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a label also has the following additional methods:
 
 | Method             | Purpose                                                                                                                                                                                                                                                                                                |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

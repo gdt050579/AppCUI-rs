@@ -51,7 +51,7 @@ impl WindowEvents for MyWindow {
 
 # Execution flow
 
-Normaly, a modal window looks like the following template:
+Normally, a modal window looks like the following template:
 
 ```rust
 // ResponseType is a type of data that you want to return

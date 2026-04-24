@@ -1,6 +1,6 @@
 # TimePicker
 
-Represent a control from where you can choose/modify a time:
+Represents a control from which you can choose or modify a time:
 
 <img src="img/timepicker.png" width=200/>
 

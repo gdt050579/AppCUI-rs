@@ -1,6 +1,6 @@
 # TextField
 
-Represent a control where you can add/modify a text:
+Represents a control where you can add/modify a text:
 
 <img src="img/textfield.png" width=300/>
 
@@ -18,11 +18,11 @@ A textfield supports all common parameters (as they are described in [Instantiat
 
 | Parameter name      | Type   | Positional parameter                | Purpose                                                                                                              |
 | ------------------- | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) from a text field. If ommited an empty string will be considered as the caption of the textfield. |
+| `text` or `caption` | String | **Yes** (first positional parameter) | The caption (text) from a text field. If ommited an empty string will be considered as the caption of the textfield. |
 | `flags`             | List   | **No**                              | TextField initialization flags that control how Enter is process, if the textfield is readonly, etc                  |
 
 A textfield supports the following initialization flags:
-* `textfield::Type::Readonly` or `Readonly` (for macro initialization) - thils will allow you to view or copy the text but not to modify it
+* `textfield::Type::Readonly` or `Readonly` (for macro initialization) - this will allow you to view or copy the text but not to modify it
 * `textfield::Type::ProcessEnter` or `ProcessEnter` (for macro initialization) - by default the `Enter` key is not processed by this control. However, if this flag is being used, `Enter` key is being captured and when pressed the `TextFieldEvents::on_validate(...)` method is being called.
 * `textfield::Type::DisableAutoSelectOnFocus` or `DisableAutoSelectOnFocus` (for macro initialization) - by default, a textfield will automatically select its content when it receives the focus. This behavior can be disabled by adding this flag to the initialization flags.
   
@@ -44,7 +44,7 @@ pub trait TextFieldEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a textfield also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a textfield also has the following additional methods:
 
 | Method          | Purpose                                                                                                                  |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -78,11 +78,11 @@ The following keys are processed by a TextField control if it has focus:
 | `Ctrl`+`X` or `Shift`+`Delete`       | If a selection is present, it copies it into the clipboard and then delets it (acts like a `Cut` command)                                 |
 | `Enter`                              | Only if the  flag `textfield::Type::ProcessEnter` is present will trigger a call to `TextFieldEvents::on_validate(...)`                   |
 
-Aditionally, al printable characters can be used to insert / modify or edit the current text.
+Additionally, al printable characters can be used to insert / modify or edit the current text.
 
 ## Mouse actions
 
-Mouse cursor can be used to select the text. Aditionally, a double click over a word will select it.
+Mouse cursor can be used to select the text. Additionally, a double click over a word will select it.
 
 ## Example
 

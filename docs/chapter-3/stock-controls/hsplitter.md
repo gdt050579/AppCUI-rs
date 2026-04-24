@@ -23,7 +23,7 @@ A horizontal splitter supports all common parameters (as they are described in [
 
 | Parameter name                                       | Type       | Positional parameter                | Purpose                                                                                                                                      |
 | ---------------------------------------------------- | ---------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pos`                                                | Coordonate | **Yes** (first postional parameter) | The position of the splitter (can be an abosolute value - like `10` or a percentage like `50%` )                                             |
+| `pos`                                                | Coordinate | **Yes** (first positional parameter) | The position of the splitter (can be an absolute value - like `10` or a percentage like `50%` )                                             |
 | `resize` or `resize-behavior` or `on-resize` or `rb` | String     | **No**                              | The resize behavior of the splitter. Can be one of the following: `PreserveTopPanelSize`, `PreserveBottomPanelSize` or `PreserveAspectRatio` |
 | `min-top-height` or `mintopheight` or `mth`          | Dimension  | **No**                              | The minimum height of the top panel (in characters - e.g. `5`) or as a percentage (e.g. `10%`)                                               |
 | `min-bottom-height` or `minbottomheight` or `mbh`    | Dimension  | **No**                              | The minimum height of the bottom panel (in characters - e.g. `5`) or as a percentage (e.g. `10%`)                                            |
@@ -40,7 +40,7 @@ A horizontal splitter emits no events.
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a horizontal splitter also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a horizontal splitter also has the following additional methods:
 
 | Method                | Purpose                                                                                                                                                                                                                   |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

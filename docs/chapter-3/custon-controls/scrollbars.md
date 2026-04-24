@@ -99,7 +99,7 @@ A typical usage of the `ScrollBars` structure would look like this:
     }
 
 
-5. Aditionally, you can change the indexes manually (for example via an `OnKeyPressed` event) by using the `self.sb.set_indexes(...)` method. This is useful when you want to change the indexes of the scrollbars based on a specific event (e.g. a key pressed event).
+5. Additionally, you can change the indexes manually (for example via an `OnKeyPressed` event) by using the `self.sb.set_indexes(...)` method. This is useful when you want to change the indexes of the scrollbars based on a specific event (e.g. a key pressed event).
     
     ```rs
     impl OnKeyPressed for Canvas {

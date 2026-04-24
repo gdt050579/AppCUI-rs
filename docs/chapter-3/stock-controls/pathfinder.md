@@ -17,11 +17,11 @@ A pathfinder supports all common parameters (as they are described in [Instantia
 
 | Parameter name      | Type   | Positional parameter                | Purpose                                                                                                              |
 | ------------------- | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `path` | String | **Yes** (first postional parameter) | The file path used as a starting point when navigating through the file system. |
+| `path` | String | **Yes** (first positional parameter) | The file path used as a starting point when navigating through the file system. |
 | `flags`             | List   | **No**                              | PathFinder initialization flags that control if the path finder is case-sensitive, readonly, etc                  |
 
 A pathfinder supports the following initialization flags:
-* `pathfinder::Type::Readonly` or `Readonly` (for macro initialization) - thils will allow you to view or copy the text but not to modify it
+* `pathfinder::Type::Readonly` or `Readonly` (for macro initialization) - this will allow you to view or copy the text but not to modify it
 * `pathfinder::Type::CaseSensitive` or `CaseSensitive` (for macro initialization) - by default the control is case insensitive, set this if you want it to be case sensitive.
 Some examples that use these parameters:
 ```rs
@@ -40,7 +40,7 @@ pub trait PathFinderEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a pathfinder also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a pathfinder also has the following additional methods:
 
 | Method          | Purpose                                                                                                                  |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -66,11 +66,11 @@ The following keys are processed by a PathFinder control if it has focus:
 | `Ctrl`+`V` or `Shift`+`Insert`       | Paste the text from the clipboard (if any) to current position                                                                            |
 | `Ctrl`+`X` or `Shift`+`Delete`       | If a selection is present, it copies it into the clipboard and then delets it (acts like a `Cut` command)                                 |
 
-Aditionally, all printable characters can be used to insert / modify or edit the current text.
+Additionally, all printable characters can be used to insert / modify or edit the current text.
 
 ## Mouse actions
 
-Mouse cursor can be used to select the text. Aditionally, a double click over the control will select all the text.
+Mouse cursor can be used to select the text. Additionally, a double click over the control will select all the text.
 
 ## Example
 

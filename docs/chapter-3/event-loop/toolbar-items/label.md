@@ -23,7 +23,7 @@ The following parameters are supported for a toolbar label:
 
 | Parameter name      | Type   | Positional parameter                | Purpose                                                                                       |
 | ------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------------------------------- |
-| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the label                                                       |
+| `text` or `caption` | String | **Yes** (first positional parameter) | The caption (text) written on the label                                                       |
 | `type`              | String | **No**                              | For a label use: `type:Label`                                                                 |
 | `tooltip`           | String | **No**                              | The tooltip associated with the label                                                         |
 | `visible`           | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |

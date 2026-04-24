@@ -1,6 +1,6 @@
 # KeySelector
 
-Represent a control that can be used to select a key (including modifiers such as `Alt`, `Shift`, ...)
+Represents a control that can be used to select a key (including modifiers such as `Alt`, `Shift`, ...)
 
 <img src="img/keyselector.png" width=300/>
 
@@ -18,7 +18,7 @@ A keyselector supports all common parameters (as they are described in [Instanti
 
 | Parameter name | Type   | Positional parameter                | Purpose                                                        |
 | -------------- | ------ | ----------------------------------- | -------------------------------------------------------------- |
-| `key`          | String | **Yes** (first postional parameter) | The key (including modifiers such as `Alt`,`Ctrl` or `Shift`)  |
+| `key`          | String | **Yes** (first positional parameter) | The key (including modifiers such as `Alt`,`Ctrl` or `Shift`)  |
 | `flags`        | String | **No**                              | Initialization flags that describe the behavior of the control |
 
 A keyselector supports the following initialization flags:
@@ -44,7 +44,7 @@ pub trait KeySelectorEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a keyselector also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a keyselector also has the following additional methods:
 
 | Method         | Purpose                                                                                    |
 | -------------- | ------------------------------------------------------------------------------------------ |

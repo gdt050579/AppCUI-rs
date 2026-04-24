@@ -21,7 +21,7 @@ pub trait OnPaint {
 }
 ```
 
-The `surface` object will be clipped to the visible space ocupied by the control and the coordonates will be translated to corespond to the top-left corner of the control(this means that `surface.write_char(0,0,...)` will draw a character to the top-left corner of the control).
+The `surface` object will be clipped to the visible space occupied by the control and the coordinates will be translated to correspond to the top-left corner of the control (this means that `surface.write_char(0,0,...)` will draw a character to the top-left corner of the control).
 
 ## OnResize
 

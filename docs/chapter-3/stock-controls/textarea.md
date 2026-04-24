@@ -1,6 +1,6 @@
 # TextArea
 
-Represent a control where you can add/modify a text:
+Represents a control where you can add/modify a text:
 
 <img src="img/textarea.png" width=400/>
 
@@ -19,7 +19,7 @@ A textarea supports all common parameters (as they are described in [Instantiate
 
 | Parameter name      | Type   | Positional parameter                | Purpose                                                                                                              |
 | ------------------- | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `text` | String | **Yes** (first postional parameter) | The text from a text area. If ommited an empty string will be considered as the caption of the textarea. |
+| `text` | String | **Yes** (first positional parameter) | The text from a text area. If ommited an empty string will be considered as the caption of the textarea. |
 | `flags`             | List   | **No**                              | TextArea initialization flags that control how the TextArea should look and behave(ReadOnly, having line numbers)                 |
 
 Text Area supports the following initialization flags:
@@ -30,7 +30,7 @@ Text Area supports the following initialization flags:
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a textfield also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a textfield also has the following additional methods:
 
 | Method                                      | Purpose |
 |---------------------------------------------|---------|
@@ -70,7 +70,7 @@ The following keys are processed by a TextField control if it has focus:
 | **Page Up**            | Moves the view up by one page, scrolling the text accordingly. |
 | **Page Down**          | Moves the view down by one page, scrolling the text accordingly. |
 
-Aditionally, all printable characters can be used to insert / modify or edit the current text.
+Additionally, all printable characters can be used to insert / modify or edit the current text.
 
 ## Mouse actions
 

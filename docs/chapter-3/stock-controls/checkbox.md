@@ -1,10 +1,10 @@
 # CheckBox
 
-Represent a control with two states (checked and unckehed):
+Represents a control with two states (checked and unchecked):
 
 <img src="img/checkbox.png" width=300/>
 
-To create a checkbox use `CheckBox::new` method (with 3 parameters: a caption, a layout and checked status (**true** or **false**)) or method `CheckBox::with_type` (with one aditional parameter - the type of the checblx).
+To create a checkbox use `CheckBox::new` method (with 3 parameters: a caption, a layout and checked status (**true** or **false**)) or method `CheckBox::with_type` (with one additional parameter - the type of the checkbox).
 ```rs
 let b1 = CheckBox::new("A checkbox", 
                        layout!("x:10,y:5,w:15"),
@@ -32,7 +32,7 @@ A checkbox supports all common parameters (as they are described in [Instantiate
 
 | Parameter name       | Type   | Positional parameter                | Purpose                                         |
 | -------------------- | ------ | ----------------------------------- | ----------------------------------------------- |
-| `text` or `caption`  | String | **Yes** (first postional parameter) | The caption (text) written on a checkbox        |
+| `text` or `caption`  | String | **Yes** (first positional parameter) | The caption (text) written on a checkbox        |
 | `checked` or `check` | Bool   | **No**                              | Checkbox checked status: **true** for **false** |
 | `type`               | String | **No**                              | The type of the checkbox (see below)            |
 
@@ -81,7 +81,7 @@ pub trait CheckBoxEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a checkbox also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a checkbox also has the following additional methods:
 
 | Method             | Purpose                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -98,7 +98,7 @@ The following keys are processed by a Checkbox control if it has focus:
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Space` or `Enter` | Changes the checked state (checked to un-checked and vice-versa). It also emits  `CheckBoxEvents::on_status_changed(...)` event with the `checked` parameter the current chcked status of the checkbox. It has the same action clicking the checkbox with the mouse. |
 
-Aditionally, `Alt`+**letter or number** will have the same action (even if the checkbox does not have a focus) if that letter or nunber was set as a hot-key for a checkbox via its caption. 
+Additionally, `Alt`+**letter or number** will have the same action (even if the checkbox does not have a focus) if that letter or number was set as a hot-key for a checkbox via its caption. 
 
 ## Example
 

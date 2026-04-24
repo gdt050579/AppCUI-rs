@@ -1,6 +1,6 @@
 # Panel
 
-Represent a panel (a container that can have multiple children):
+Represents a panel (a container that can have multiple children):
 
 <img src="img/panel.png" width=300/>
 
@@ -19,7 +19,7 @@ A panel supports all common parameters (as they are described in [Instantiate vi
 
 | Parameter name                 | Type   | Positional parameter                | Purpose                                                               |
 | ------------------------------ | ------ | ----------------------------------- | --------------------------------------------------------------------- |
-| `title` or `text` or `caption` | String | **Yes** (first postional parameter) | The title of the panel                                                |
+| `title` or `text` or `caption` | String | **Yes** (first positional parameter) | The title of the panel                                                |
 | `type`                         | String | **No**                              | Panel type. If not provided, **Border** type is considered as default |
 
 A pabel supports the following types:
@@ -37,7 +37,7 @@ A panel emits no events.
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a button also has the following additional methods:
 
 | Method           | Purpose                                                                                                                             |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |

@@ -32,7 +32,7 @@ A numeric selector supports all common parameters (as they are described in [Ins
 
 | Parameter name                      | Type   | Positional parameter                  | Purpose                                                                                                                                          |
 | ----------------------------------- | ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `class` or `type`                   | String | **Yes** (first postional parameter)   | The name of a templetized type to be used when creating the numeric selector                                                                     |
+| `class` or `type`                   | String | **Yes** (first positional parameter)   | The name of the generic type parameter used when creating the numeric selector                                                                     |
 | `value`                             | String | **Yes** (second positional parameter) | The initial value of the numeric selector. If it is not within the bounds (`min` and `max` parameters) it will be adjusted to the closest limit. |
 | `min`                               | String | **Yes** (third positional parameter)  | The minimum value that the numeric selector can have. If the initial value is less than this, it will be adjusted to this value.                 |
 | `max`                               | String | **Yes** (fourth positional parameter) | The maximum value that the numeric selector can have. If the initial value is greater than this, it will be adjusted to this value.              |
@@ -62,7 +62,7 @@ pub trait NumericSelectorEvents<T> {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a numeric selector also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a numeric selector also has the following additional methods:
 
 | Method           | Purpose                                                                                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

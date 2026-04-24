@@ -1,6 +1,6 @@
 # Window
 
-A window is the core component of an application and it is the object where all events from children controls are being processed.
+A window is the core component of an application. It is the object where all events from child controls are processed.
 
 <img src="img/window.png"/>
 
@@ -21,14 +21,14 @@ Keep in mind that window will **NOT** handle any events from its children.
 
 A window supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name                 | Type           | Positional parameter                | Purpose                                                                                                                                                   |
-| ------------------------------ | -------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title` or `text` or `caption` | String         | **Yes** (first postional parameter) | The title (text) of the window                                                                                                                            |
-| `flags`                        | String or List | **No**                              | Window initialization flags                                                                                                                               |
-| `type`                         | String         | **No**                              | Window type (visual)                                                                                                                                      |
-| `bg` or `back` or `background` | String         | **No**                              | The background of the window.                                                                                                                             |
-| `tag`                          | String         | **No**                              | The tag of the window                                                                                                                                     |
-| `hotkey` or `hot-key` or `key` | Key            | **No**                              | The hotkey associated with a window. You can also use the `auto` value to ask the framework to find the first available key (from `Alt`+`1` to `Alt`+`9`) |
+| Parameter name                 | Type           | Positional parameter                 | Purpose                                                                                                                                                   |
+| ------------------------------ | -------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title` or `text` or `caption` | String         | **Yes** (first positional parameter) | The title (text) of the window                                                                                                                            |
+| `flags`                        | String or List | **No**                               | Window initialization flags                                                                                                                               |
+| `type`                         | String         | **No**                               | Window type (visual)                                                                                                                                      |
+| `bg` or `back` or `background` | String         | **No**                               | The background of the window.                                                                                                                             |
+| `tag`                          | String         | **No**                               | The tag of the window                                                                                                                                     |
+| `hotkey` or `hot-key` or `key` | Key            | **No**                               | The hotkey associated with a window. You can also use the `auto` value to ask the framework to find the first available key (from `Alt`+`1` to `Alt`+`9`) |
 
 
 To create a window that will handle events from its children, use `#[Window(...)]` method:
@@ -61,23 +61,23 @@ the following backgrounds:
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md), a window also has the following additional methods:
 
-| Method                           | Purpose                                                                                                           |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `add(...)`                       | Adds a new control as a child control for current window                                                          |
-| `control(...)`                   | Returns an immutable reference to a control based on its handle                                                   |
-| `control_mut(...)`               | Returns a mutable reference to a control based on its handle                                                      |
-| `request_focus_for_control(...)` | Requests the focus for a specific control given a specfic handle                                                  |
-| `toolbar()`                      | Returns a mutable reference to current window toolbar                                                             |
-| `set_title(...)`                 | Sets the title of Window.<br>Example: `win.set_title("Title")` - this will set the title of the window to `Title` |
-| `title()`                        | Returns the title of the current window                                                                           |
-| `set_tag(...)`                   | Sets the tag of Window.<br>Example: `win.set_tag("ABC")` - this will set the tag of the window to `ABC`           |
-| `tag()`                          | Returns the tag of the current window                                                                             |
-| `clear_tag()`                    | Clears the current tag. Its equivalent to `set_tag("")`                                                           |
-| `set_auto_hotkey()`              | Automatically selects a free hotkey (in a format `Alt`+{number} where `{number}` is between 1 and 9)              |
-| `enter_resize_mode()`            | Enters the resize mode programatically                                                                            |
-| `close`                          | Closes current window                                                                                             |
+| Method                           | Purpose                                                                                                     |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `add(...)`                       | Adds a new control as a child of the current window                                                         |
+| `control(...)`                   | Returns an immutable reference to a control based on its handle                                             |
+| `control_mut(...)`               | Returns a mutable reference to a control based on its handle                                                |
+| `request_focus_for_control(...)` | Requests the focus for a specific control, given a specific handle                                          |
+| `toolbar()`                      | Returns a mutable reference to the current window's toolbar                                                 |
+| `set_title(...)`                 | Sets the window title.<br>Example: `win.set_title("Title")` — this sets the title of the window to `Title`. |
+| `title()`                        | Returns the title of the current window                                                                     |
+| `set_tag(...)`                   | Sets the window tag.<br>Example: `win.set_tag("ABC")` — this sets the tag of the window to `ABC`.           |
+| `tag()`                          | Returns the tag of the current window                                                                       |
+| `clear_tag()`                    | Clears the current tag. It is equivalent to `set_tag("")`.                                                  |
+| `set_auto_hotkey()`              | Automatically selects a free hotkey (in the format `Alt`+{number} where `{number}` is between 1 and 9).     |
+| `enter_resize_mode()`            | Enters resize mode programmatically.                                                                        |
+| `close`                          | Closes the current window.                                                                                  |
 
 ## Key association
 

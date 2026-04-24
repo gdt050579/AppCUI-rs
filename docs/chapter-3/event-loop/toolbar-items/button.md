@@ -27,7 +27,7 @@ The following parameters are supported for a toolbar button:
 
 | Parameter name      | Type   | Positional parameter                | Purpose                                                                                       |
 | ------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------------------------------- |
-| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the button                                                      |
+| `text` or `caption` | String | **Yes** (first positional parameter) | The caption (text) written on the button                                                      |
 | `type`              | String | **No**                              | For a button use: `type:Button`                                                               |
 | `tooltip`           | String | **No**                              | The tooltip associated with the button                                                        |
 | `visible`           | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |

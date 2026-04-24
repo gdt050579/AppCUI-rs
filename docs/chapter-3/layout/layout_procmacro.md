@@ -16,8 +16,8 @@ Where `parameter` refects the following `LayoutBuilder` method and can be one of
 
 | Parameter | Alias<br>(short) | LayoutBuilder<br>method | Value type              | Description                                                                              |
 | --------- | ---------------- | ----------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
-| x         |                  | .x(...)                 | numerical or percentage | "X" coordonate                                                                           |
-| y         |                  | .y(...)                 | numerical or percentage | "Y" coordonate                                                                           |
+| x         |                  | .x(...)                 | numerical or percentage | "X" coordinate                                                                           |
+| y         |                  | .y(...)                 | numerical or percentage | "Y" coordinate                                                                           |
 | left      | l                | .left_anchor(...)       | numerical or percentage | left anchor for the control<br>(the space between parent left margin and control)        |
 | right     | r                | .right_anchor(...)      | numerical or percentage | right anchor for the control<br>(the space between parent right margin and control)      |
 | top       | t                | .top_anchor(...)        | numerical or percentage | top anchor for the control<br>(the space between parent top margin and control)          |

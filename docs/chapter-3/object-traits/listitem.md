@@ -109,7 +109,7 @@ impl ListItem for Student {
 }
 ```
 For this implementation to work, the columns would have to be added when the listview is created (e.g. `listview!("class:Student, d:c, columns:[{&Name,20,left},{&Grade,5,center},{&Stars,5,center}]")`).
-However, you can also add them programatically by using the `add_column` method or by overriding the `column` method from the `ListItem` trait, like in the following example:
+However, you can also add them programmatically by using the `add_column` method or by overriding the `column` method from the `ListItem` trait, like in the following example:
 
 ```rs
 impl ListItem for Student {

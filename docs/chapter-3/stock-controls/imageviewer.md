@@ -78,17 +78,17 @@ Besides the [Common methods for all Controls](../common_methods.md) an image vie
 
 The following keys are processed by an image viewer control if it has focus:
 
-| Key                                 | Purpose                                                                                                                                |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `Left`,`Right`,`Up`,`Down`          | Move the view port to a specified direction by one character.                                                                          |
-| `Shift+Left`                        | Moves the horizontal view port coordinate to 0                                                                                         |
-| `Shift+Up`                          | Moves the vertical view port coordinate to 0                                                                                           |
-| `Shift+Right`                       | Moves the horizontal view port coordinate so that the right side of the inner surface is displayed                                     |
-| `Shift+Down`                        | Moves the vertical view port coordinate so that the bottom side of the inner surface is displayed                                      |
-| `Ctrl`+{`Left`,`Right`,`Up`,`Down`} | Move the view port to a specified direction by a number of characters that is equal to the width for Left/Right or height for Up/Down. |
-| `PageUp`, `PageDown`                | has the same effect as `Ctrl`+{`Up` or `Down`}                                                                                         |
-| `Home`                              | Moves the view port to the coordinates (0,0)                                                                                           |
-| `End`                               | Moves the view port so that the bottom-right part of the inner surface is visible                                                      |
+| Key                                 | Purpose                                                                                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `Left`,`Right`,`Up`,`Down`          | Move the viewport to a specified direction by one character.                                                                          |
+| `Shift+Left`                        | Moves the horizontal viewport coordinate to 0                                                                                         |
+| `Shift+Up`                          | Moves the vertical viewport coordinate to 0                                                                                           |
+| `Shift+Right`                       | Moves the horizontal viewport coordinate so that the right side of the inner surface is displayed                                     |
+| `Shift+Down`                        | Moves the vertical viewport coordinate so that the bottom side of the inner surface is displayed                                      |
+| `Ctrl`+{`Left`,`Right`,`Up`,`Down`} | Move the viewport to a specified direction by a number of characters that is equal to the width for Left/Right or height for Up/Down. |
+| `PageUp`, `PageDown`                | has the same effect as `Ctrl`+{`Up` or `Down`}                                                                                        |
+| `Home`                              | Moves the viewport to the coordinates (0,0)                                                                                           |
+| `End`                               | Moves the viewport so that the bottom-right part of the inner surface is visible                                                      |
 
 ## Example
 

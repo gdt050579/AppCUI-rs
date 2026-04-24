@@ -50,7 +50,7 @@ pub trait ListBoxEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a listbox also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a listbox also has the following additional methods:
 
 | Method                   | Purpose                                                                                                                                                    |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |

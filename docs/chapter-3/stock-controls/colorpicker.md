@@ -1,6 +1,6 @@
 # ColorPicker
 
-Represent a control from where you can choose a color:
+Represents a control from which you can choose a color:
 
 <img src="img/colorpicker.png" width=300/>
 
@@ -19,7 +19,7 @@ A ColorPicker control supports all common parameters (as they are described in [
 
 | Parameter name | Type   | Positional parameter                | Purpose                                                                                                                                                                                                                                               |
 | -------------- | ------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `color`        | String | **Yes** (first postional parameter) | The color of the ColorPicker control (should be one of the following values: `Black`, `DarkBlue`, `DarkGreen`, `Teal`, `DarkRed`, `Magenta`, `Olive`, `Silver`,   `Gray`, `Blue`, `Green`, `Aqua`, `Red`, `Pink`, `Yellow`, `White` or `Transparent`) |
+| `color`        | String | **Yes** (first positional parameter) | The color of the ColorPicker control (should be one of the following values: `Black`, `DarkBlue`, `DarkGreen`, `Teal`, `DarkRed`, `Magenta`, `Olive`, `Silver`,   `Gray`, `Blue`, `Green`, `Aqua`, `Red`, `Pink`, `Yellow`, `White` or `Transparent`) |
 
 ## Events
 To intercept events from a ColorPicker control, the following trait has to be implemented to the Window that processes the event loop:
@@ -31,7 +31,7 @@ pub trait ColorPickerEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a ColorPicker control also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a ColorPicker control also has the following additional methods:
 
 | Method           | Purpose                                                                                  |
 | ---------------- | ---------------------------------------------------------------------------------------- |

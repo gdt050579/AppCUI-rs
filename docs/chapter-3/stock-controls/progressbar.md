@@ -1,6 +1,6 @@
 # ProgressBar
 
-Represent a progress bar that can be used to show the progress of a task.
+Represents a progress bar that can be used to show the progress of a task.
 
 <img src="img/progressbar.png" width=300/>
 
@@ -25,7 +25,7 @@ A progress supports all common parameters (as they are described in [Instantiate
 | `flags`                      | Flags   | **No**               | Additional flags for the progress bar that can be used to control how the progress bar is being displayed |
 
 A progress bar supports the following initialization types:
-* `progressbar::Type::HidePercentage` or `HidePercentage` (for macro initialization) - thils will hide the percentage displayed on the progress bar.
+* `progressbar::Type::HidePercentage` or `HidePercentage` (for macro initialization) - this will hide the percentage displayed on the progress bar.
 
 
 ## Events
@@ -33,7 +33,7 @@ A progress bar emits no events.
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a label also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md), a progress bar also has the following additional methods:
 
 | Method                 | Purpose                                                                                                                                                                                                     |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

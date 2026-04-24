@@ -1,6 +1,6 @@
 # Button
 
-Represent a clickable button control:
+Represents a clickable button control:
 
 <img src="img/button.png" width=300/>
 
@@ -21,11 +21,11 @@ A button supports all common parameters (as they are described in [Instantiate v
 
 | Parameter name                | Type   | Positional parameter                | Purpose                                |
 | ----------------------------- | ------ | ----------------------------------- | -------------------------------------- |
-| `name` or `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a button |
+| `name` or `text` or `caption` | String | **Yes** (first positional parameter) | The caption (text) written on a button |
 | `type`                        | String | **No**                              | Button type                            |
 
 A button supports the following initialization types:
-* `button::Type::Flat` or `flat` (for macro initialization) - thils will hide the shaddow of the button makeing it flat.
+* `button::Type::Flat` or `flat` (for macro initialization) - this will hide the shadow of the button making it flat.
 
 Some examples that uses these paramateres:
 ```rs
@@ -44,7 +44,7 @@ pub trait ButtonEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a button also has the following additional methods:
 
 | Method             | Purpose                                                                                                                                                                                                                                                                                                                                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -60,7 +60,7 @@ The following keys are processed by a Button control if it has focus:
 | `Space` | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action clicking the button with the mouse. |
 | `Enter` | Clicks / pushes the button and emits `ButtonEvents::on_pressed(...)` event. It has the same action clicking the button with the mouse. |
 
-Aditionally, `Alt`+**letter or number** will have the same action (even if the Button does not have a focus) if that letter or nunber was set as a hot-key for a button via its caption. For example, creating a value with the following caption: `"My b&utton"` (notice the `&` character before letter `u`) will enable `Alt+U` to be a hot-key associated with this button. Pressing this combination while the button is enabled and part of the current focused window, will change the focus to that button and will emit the `ButtonEvents::on_pressed(...)` event.
+Additionally, `Alt`+**letter or number** will have the same action (even if the Button does not have a focus) if that letter or number was set as a hot-key for a button via its caption. For example, creating a value with the following caption: `"My b&utton"` (notice the `&` character before letter `u`) will enable `Alt+U` to be a hot-key associated with this button. Pressing this combination while the button is enabled and part of the current focused window, will change the focus to that button and will emit the `ButtonEvents::on_pressed(...)` event.
 
 ## Example
 

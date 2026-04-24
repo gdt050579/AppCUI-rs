@@ -1,6 +1,6 @@
 # ThreeStateBox
 
-Represent a control with three states (checked, unckehed or unknown):
+Represents a control with three states (checked, unchecked or unknown):
 
 <img src="img/threestatebox.png" width=300/>
 
@@ -24,7 +24,7 @@ A threestatebox supports all common parameters (as they are described in [Instan
 
 | Parameter name      | Type   | Positional parameter                | Purpose                                                                                                                                                                                          |
 | ------------------- | ------ | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on a threestatebox                                                                                                                                                    |
+| `text` or `caption` | String | **Yes** (first positional parameter) | The caption (text) written on a threestatebox                                                                                                                                                    |
 | `state`             | String | **No**                              | threestatebox state: **checked**, **unchecked** or **unknown**. If the parameter is not provided, it will be defaulted to **unknown** state                                                      |
 | `type`              | String | **No**                              | threestatebox type: **Standard**, **Ascii**, **CheckBox**, **CheckMark**, **FilledBox**, **YesNo** or **PlusMinus**. If the parameter is not provided, it will be defaulted to **Standard** type |
 
@@ -60,7 +60,7 @@ pub trait ThreeStateBoxEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a checkbox also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a checkbox also has the following additional methods:
 
 | Method             | Purpose                                                                                                                                                                                                                                                                                                                                                                                                |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -77,7 +77,7 @@ The following keys are processed by the control if it has focus:
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `Space` or `Enter` | Cycle throght the states (checked to un-checked and vice-versa). It also emits `ThreeStateBoxEvents::on_status_changed(...)` event with the `state` parameter, the current state of the threestatebox. It has the same action clicking the threestatebox with the mouse. |
 
-Aditionally, `Alt`+**letter or number** will have the same action (even if the threestatebox does not have a focus) if that letter or nunber was set as a hot-key for a threestatebox via its caption. 
+Additionally, `Alt`+**letter or number** will have the same action (even if the threestatebox does not have a focus) if that letter or number was set as a hot-key for a threestatebox via its caption. 
 
 ## Example
 

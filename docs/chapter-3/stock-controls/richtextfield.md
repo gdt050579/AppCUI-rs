@@ -1,6 +1,6 @@
 # RichTextField
 
-Represent a text editing control with parser-based, per-character styling.
+Represents a text editing control with parser-based, per-character styling.
 
 <img src="img/richtextfield.png" width=300/>
 

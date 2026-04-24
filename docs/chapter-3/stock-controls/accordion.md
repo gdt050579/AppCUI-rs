@@ -15,16 +15,16 @@ let a2 = accordion!("a:c,w:15,h:10,panels:[First,Second,Third]");
 let a3 = accordion!("a:c,w:15,h:10,panels:[A,B,C],flags:TransparentBackground");
 ```
 
-The caption of each accordion may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing a accordion panel with the following caption `&Start` will set up the text of the accordion to `Start` and will set up character `S` as the hot key to activate that accordion panel.
+The caption of each accordion may contain the special character `&` that indicates that the next character is a hot-key. For example, constructing an accordion panel with the following caption `&Start` will set up the text of the accordion to `Start` and will set up character `S` as the hot key to activate that accordion panel.
 
-A accordion supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
+An accordion supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
 | Parameter name | Type | Positional parameter | Purpose                                                                           |
 | -------------- | ---- | -------------------- | --------------------------------------------------------------------------------- |
 | `flags`        | List | **No**               | Accordion initialization flags  (available list include: `TransparentBackground`) |
 | `panels`       | List | **No**               | A list of accordion panels                                                        |
 
-A accordion supports the following initialization flags:
+An accordion supports the following initialization flags:
 * `accordion::Flags::TransparentBackground` or `TransparentBackground` (for macro initialization) - this will not draw the background of the accordion
 
 Some examples that uses these paramateres:
@@ -52,7 +52,7 @@ pub trait AccordionEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a accordion also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md), an accordion also has the following additional methods:
 
 | Method                   | Purpose                                                                                                              |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
@@ -60,19 +60,19 @@ Besides the [Common methods for all Controls](../common_methods.md) a accordion 
 | `add(...)`               | Add a new control into the accordion (the index of the accordion where the control has to be added must be provided) |
 | `current_panel()`        | Provides the index of the current accordion panel                                                                    |
 | `set_current_panel(...)` | Sets the current accordion panel (this method will also change the focus to the accordion cotrol)                    |
-| `panel_caption(...)`     | Returns the caption (name) or a accordion panel based on its index                                                   |
-| `set_panel_caption(...)` | Sets the caption (name) of a accordion panel                                                                         |
+| `panel_caption(...)`     | Returns the caption (name) of an accordion panel based on its index                                                   |
+| `set_panel_caption(...)` | Sets the caption (name) of an accordion panel                                                                         |
 
 ## Key association
 
-The following keys are processed by a Accordion control if it has focus:
+The following keys are processed by an Accordion control if it has focus:
 
 | Key              | Purpose                                                                                                 |
 | ---------------- | ------------------------------------------------------------------------------------------------------- |
 | `Ctrl+Tab`       | Select the next accordion. If the current accordion is the last one, the first one will be selected.    |
 | `Ctrl+Shift+Tab` | Select the previous accordion. If the current accordion is the first one, the last one will be selected |
 
-Aditionally, `Alt`+**letter or number** will automatically select the accordion with that particular hotkey combination.
+Additionally, `Alt`+**letter or number** will automatically select the accordion with that particular hotkey combination.
 
 ## Example
 

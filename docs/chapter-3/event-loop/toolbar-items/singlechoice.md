@@ -29,7 +29,7 @@ The following parameters are supported for a toolbar singlechoice:
 
 | Parameter name      | Type   | Positional parameter                | Purpose                                                                                       |
 | ------------------- | ------ | ----------------------------------- | --------------------------------------------------------------------------------------------- |
-| `text` or `caption` | String | **Yes** (first postional parameter) | The caption (text) written on the single choice                                               |
+| `text` or `caption` | String | **Yes** (first positional parameter) | The caption (text) written on the single choice                                               |
 | `type`              | String | **No**                              | For a singlechoince use: `type:SingleChoince`                                                 |
 | `tooltip`           | String | **No**                              | The tooltip associated with the singlechoice                                                  |
 | `visible`           | Bool   | **No**                              | `true` if the toolbar item is visible (this is also the default setting) or `false` otherwise |

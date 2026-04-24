@@ -62,13 +62,13 @@ A dropdown list supports all common parameters (as they are described in [Instan
 
 | Parameter name    | Type    | Positional parameter                | Purpose                                                                                                                                    |
 | ----------------- | ------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `class` or `type` | String  | **Yes** (first postional parameter) | The name of a templetized type to be used when creating the dropdown list                                                                  |
+| `class` or `type` | String  | **Yes** (first positional parameter) | The name of the generic type parameter used when creating the dropdown list                                                                  |
 | `flags`           | String  | **No**                              | DropDownList initialization flags                                                                                                          |
 | `symbolsize`      | Numeric | **No**                              | The size (width) of the symbol in characters. It can be one of the following `0` (symbol will not be displayed), `1`, `2` or `3`           |
 | `none`            | String  | **No**                              | The display name for the `None` variant that will be displayed in the dropdown list. If not specified, the `None` variant will not be used |
 
 A dropdown list supports the following initialization flags:
-* `dropdownlist::Flags::AllowNoneSelection` or `AllowNoneSelection` (for macro initialization) - thils will allow a dropdown list to hold a `None` value (meaning that the user can select no variant) 
+* `dropdownlist::Flags::AllowNoneSelection` or `AllowNoneSelection` (for macro initialization) - this will allow a dropdown list to hold a `None` value (meaning that the user can select no variant) 
 * `dropdownlist::Flags::ShowDescription` or `ShowDescription` (for macro initialization) - this will show the description of the selected variant in the dropdown list  
 
 ## Events
@@ -82,7 +82,7 @@ pub trait DropDownListEvents<T> {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a dropdown list also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a dropdown list also has the following additional methods:
 
 | Method                   | Purpose                                                                                                                  |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |

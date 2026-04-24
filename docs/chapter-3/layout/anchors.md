@@ -84,7 +84,7 @@ When `left` and `right` anchors are used together, there are several restriction
 | A control with **left** and **right** anchors, positioned at `y` = **80%** of parent height with `height` = **20** characters and **bottom** pivot                                                                         | <img src="img/layout_anchor_lr_1.png" width=800 /> |
 | A control with **left** and **right** anchors, positioned at `y` = **50%** of parent height with `height` = **100%** of parent height and **center** pivot                                                                 | <img src="img/layout_anchor_lr_2.png" width=800 /> |
 | A control with **left** and **right** anchors, positioned at `y` = **0** with `height` = **50%** of parent height and **top** pivot                                                                                        | <img src="img/layout_anchor_lr_3.png" width=800 /> |
-| A control with **left** and **right** anchors, positioned at `y` = **80** of teh parent height, with `height` = **50%** of parent height, a fix-width that can not be streched of 50 characters and **bottom-right** pivot | <img src="img/layout_anchor_lr_4.png" width=800 /> |
+| A control with **left** and **right** anchors, positioned at `y` = **80** of the parent height, with `height` = **50%** of parent height, a fixed width that cannot be stretched (50 characters) and **bottom-right** pivot | <img src="img/layout_anchor_lr_4.png" width=800 /> |
 
 ### Examples
 

@@ -1,7 +1,7 @@
 # Tab
 
 
-Represent tabulator (tab control) where you can select the visible page:
+Represents a tabulator (tab control) where you can select the visible page:
 
 <img src="img/tab.png" width=400/>
 
@@ -62,7 +62,7 @@ pub trait AccordionEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a tab also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a tab also has the following additional methods:
 
 | Method                 | Purpose                                                                                                  |
 | ---------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -84,7 +84,7 @@ The following keys are processed by a Tab control if it has focus:
 | `Ctrl+Tab`       | Select the next tab. If the current tab is the last one, the first one will be selected.    |
 | `Ctrl+Shift+Tab` | Select the previous tab. If the current tab is the first one, the last one will be selected |
 
-Aditionally, `Alt`+**letter or number** will automatically select the tab with that particular hotkey combination.
+Additionally, `Alt`+**letter or number** will automatically select the tab with that particular hotkey combination.
 
 ## Example
 

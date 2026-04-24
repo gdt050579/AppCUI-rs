@@ -34,7 +34,7 @@ A toggle button supports all common parameters (as they are described in [Instan
 
 | Parameter name                       | Type   | Positional parameter                  | Purpose                                                                                                                                                                                                                                        |
 | ------------------------------------ | ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name` or `text` or `caption`        | String | **Yes** (first postional parameter)   | The caption (text) written on a button                                                                                                                                                                                                         |
+| `name` or `text` or `caption`        | String | **Yes** (first positional parameter)   | The caption (text) written on a button                                                                                                                                                                                                         |
 | `tooltip` or `desc` or `description` | String | **Yes** (second positional parameter) | The tool tip that will be showed if the mouse is hovered over the control. Since the text within this control is usually small (2-3 character - such as a pictogram), this is the way to convey more information on the purpose of the control |
 | `type`                               | String | **No**                                | The type of the toggle button                                                                                                                                                                                                                  |
 | `state` or `selected` or `select`    | bool   | **No**                                | The initial state of the toggle button (on/off)                                                                                                                                                                                                |
@@ -58,7 +58,7 @@ pub trait ToggleButtonEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a button also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a button also has the following additional methods:
 
 | Method              | Purpose                                                          |
 | ------------------- | ---------------------------------------------------------------- |

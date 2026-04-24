@@ -19,10 +19,10 @@ A combobox supports all common parameters (as they are described in [Instantiate
 | --------------------------- | ------- | -------------------- | --------------------------------------------------------------------------------------- |
 | `flags`                     | String  | **No**               | ComboBox initialization flags                                                           |
 | `items`                     | List    | **No**               | A list of string items to populate the combobox with.                                   |
-| `index` or `selected_index` | Numeric | **No**               | The index of the selected item (it should be a value between 0 and number if items - 1) |
+| `index` or `selected_index` | Numeric | **No**               | The index of the selected item (it should be a value between 0 and the number of items minus 1) |
 
 A combobox supports the following initialization flags:
-* `combobox::Flags::ShowDescription` or `ShowDescription` (for macro initialization) - thils will allow a combobox show the description of each item (if exists) when expanded 
+* `combobox::Flags::ShowDescription` or `ShowDescription` (for macro initialization) — this allows a combobox to show the description of each item (if it exists) when expanded.
 
 ## Events
 
@@ -37,7 +37,7 @@ pub trait ComboBoxEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a combobox also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a combobox also has the following additional methods:
 
 | Method                   | Purpose                                                                                       |
 | ------------------------ | --------------------------------------------------------------------------------------------- |
@@ -53,7 +53,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a combobox a
 | `has_selection()`        | **True** if an item is selected, **False** otherwise                                          |
 | `count()`                | Returns the number of items available in the combo box                                        |
 
-**Remarks**: Methods `selected_item` and `seletec_item_mut` return an Option over the type `combobox::Item` that is defined as follows:
+**Remarks**: Methods `selected_item` and `selected_item_mut` return an Option over the type `combobox::Item` that is defined as follows:
 
 ```rs
 pub struct Item { ...}

@@ -32,7 +32,7 @@ A radiobox supports all common parameters (as they are described in [Instantiate
 
 | Parameter name         | Type   | Positional parameter                | Purpose                                          |
 | ---------------------- | ------ | ----------------------------------- | ------------------------------------------------ |
-| `text` or `caption`    | String | **Yes** (first postional parameter) | The caption (text) written on a radiobox         |
+| `text` or `caption`    | String | **Yes** (first positional parameter) | The caption (text) written on a radiobox         |
 | `selected` or `select` | Bool   | **No**                              | Radiobox selected status: **true** for **false** |
 | `type`                 | String | **No**                              | The type of the radiobox (see below)             |
 
@@ -78,7 +78,7 @@ pub trait RadioBoxEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a radiobox also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a radiobox also has the following additional methods:
 
 | Method             | Purpose                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

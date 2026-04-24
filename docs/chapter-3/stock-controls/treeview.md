@@ -110,7 +110,7 @@ pub trait TreeViewEvents<T: ListItem + 'static> {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a tree view also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a tree view also has the following additional methods:
 
 ### Adding items
 
@@ -188,7 +188,7 @@ The following keys are processed by a `TreeView` control if it has focus:
 | `Ctrl`+{`A`..`Z`, `0`..`9`}                                | If a column has a hot key associated (by using the `&` character in the column name), this will sort all items bsed on that column. If that column is already selected, this will reverse the order of the sort items (ascendent or descendent) |
 | `Ctrl`+{`Left`, `Right`}                                   | Enter in the column resize mode.                                                                                                                                                                                                                |
 
-Aditionally, typing any character will trigger the search bar (if the flag `SearchBar` is present) and will filter the items based on the search text. While the search bar is active, the following keys are processed:
+Additionally, typing any character will trigger the search bar (if the flag `SearchBar` is present) and will filter the items based on the search text. While the search bar is active, the following keys are processed:
 * `Backspace` - removes the last character from the search text
 * `Escape` - clears the search text and closes the search bar
 * `Enter` - moves to the next match

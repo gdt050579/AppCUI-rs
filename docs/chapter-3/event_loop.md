@@ -1,6 +1,6 @@
 # Event loop
 
-`AppCUI` is an event driven framework, meaning that each control can emit events to reflect various acions or changes that occur. For example, whenever you push a button, an event will be raise. All events are process at Window level by implementing various traits. To build a Window that supports event handling, you must use a special procedural macro call `Window`, defined in the the following way:
+`AppCUI` is an event-driven framework, meaning that each control can emit events to reflect various actions or changes that occur. For example, whenever you push a button, an event will be raised. All events are processed at window level by implementing various traits. To build a window that supports event handling, you must use a special procedural macro called `Window`, defined in the following way:
 
 ```rs
 #[Window(events=..., )]
@@ -27,9 +27,9 @@ and an `event trait` can be one of the following:
 * TextFieldEvents
 
 
-These events can be implemented to receive notification on various actions that children controls are performing. 
+These traits can be implemented to receive notifications about various actions that child controls are performing.
 
-When creating a window that supports event loop in this manner, you will need to instantiate it. A common approach is the following:
+When creating a window that supports the event loop in this manner, you will need to instantiate it. A common approach is the following:
 ```rs
 #[Window(events=..., )]
 struct MyWindow {
@@ -38,18 +38,18 @@ struct MyWindow {
 impl MyWindow {
     fn new(/* extra parameters */) -> Self {
         let mut obj = MyWindow {
-            base: Window::new(title, layout, flags);
-            // initialization other fileds from MyWindow i
-        }
+            base: Window::new(title, layout, flags),
+            // initialize other fields from MyWindow here
+        };
         // other initialization (such as creating children)
         return obj;
     }
 }
 ```
 
-The initializaton `base: Window::new(title, layout, flags);` is mandatory. As for the `title`, `layout` and `flags` you can provide them as parameters in the **new** method or you can infer them / or hardcode them in a different way. More on how a Window can be created on [Window](event-loop/window.md) page.
+The initialization `base: Window::new(title, layout, flags),` is mandatory. As for the `title`, `layout`, and `flags`, you can provide them as parameters in the **new** method, or you can infer or hardcode them in another way. Read more about how a window can be created on the [Window](event-loop/window.md) page.
 
-Once you create an event loop you can add it to your application using `add_window(...)` method.
+Once you create such a window, you can add it to your application using the `add_window(...)` method.
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().build()?;
@@ -61,7 +61,7 @@ fn main() -> Result<(), appcui::system::Error> {
 
 ## A simple example
 
-Let's start with a simple example that creates such a window that has a fixed sized of `40x20` characters and two internal `i32` values.
+Let's start with a simple example that creates a window with a fixed size of `40x20` characters and two internal `i32` values.
 
 ```rs
 use appcui::prelude::*;
@@ -74,9 +74,9 @@ struct MyWindow {
 impl MyWindow {
     fn new(title: &str) -> Self {
         MyWindow {
-            base: Window::new(title, layout!("a:c,w:40,h:20"), window::Flags::None);
+            base: Window::new(title, layout!("a:c,w:40,h:20"), window::Flags::None),
             value1: 0,
-            value2: 1
+            value2: 1,
         }
     }
 }
@@ -90,7 +90,7 @@ fn main() -> Result<(), appcui::system::Error> {
 
 ## Intercepting events from a child control
 
-Usually, a window that processes events mentains a handle to various controls and enable event processing in the `#[Window(...)]` declaration.
+Usually, a window that processes events maintains handles to various controls and enables event processing in the `#[Window(...)]` declaration.
 
 ```rs
 use appcui::prelude::*;
@@ -103,9 +103,9 @@ struct MyWindow {
 impl MyWindow {
     fn new(/* parameters */) -> Self {
         let mut mywin = MyWindow {
-            base: Window::new(/*...*/);
-            control: Handle::None
-        }
+            base: Window::new(/*...*/),
+            control: Handle::None,
+        };
         // now we create the control
         mywin.control =  mywin.add(/* Code that creates a control */);
 
@@ -123,4 +123,4 @@ fn main() -> Result<(), appcui::system::Error> {
 }
 ```
 
-For every control described in [Stock Controls](stock_controls.md) an example on how that control can be used with the event loop and the type of events it emits will be presented.
+For every control described in [Stock Controls](stock_controls.md), an example of how that control can be used with the event loop and the type of events it emits is presented.

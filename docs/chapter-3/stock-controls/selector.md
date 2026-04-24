@@ -41,12 +41,12 @@ A selector supports all common parameters (as they are described in [Instantiate
 
 | Parameter name   | Type   | Positional parameter                | Purpose                                                                                                                                                                                                                       |
 | ---------------- | ------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `enum` or `type` | String | **Yes** (first postional parameter) | The name of a templetized type to be used when creating the selector                                                                                                                                                          |
+| `enum` or `type` | String | **Yes** (first positional parameter) | The name of the generic type parameter used when creating the selector                                                                                                                                                          |
 | `flags`          | String | **No**                              | Selector initialization flags                                                                                                                                                                                                 |
 | `value`          | String | **No**                              | The initial value of the selector (should be one of the variants of the enum). If not specified, `None` is assume (and you **MUST** also set the `AllowNoneVariant` flag on initalization). If you don't a panic will occur ! |
 
 A selector supports the following initialization flags:
-* `selector::Flags::AllowNoneVariant` or `AllowNoneVariant` (for macro initialization) - thils will allow a selector to hold a `None` value as well. If it is not specified, the value from a selector will always be one of the variants from the templetized type.
+* `selector::Flags::AllowNoneVariant` or `AllowNoneVariant` (for macro initialization) — this allows a selector to hold a `None` value as well. If it is not specified, the value from a selector will always be one of the variants of the generic type.
 
 ## Events
 
@@ -59,11 +59,11 @@ pub trait SelectorEvents<T> {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a selector also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a selector also has the following additional methods:
 
 | Method           | Purpose                                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `set_value(...)` | Sets the new value associated with the selector. The value will be of type `T` (that was used to templetized the selector control)      |
+| `set_value(...)` | Sets the new value associated with the selector. The value will be of type `T` (the type parameter of the selector control).      |
 | `clear_value()`  | Sets the new value of the control to `None`. If the flag `AllowNoneVariant` was not set when the control was create, a panic will occur |
 | `value()`        | Returns the current value of the control. If the current value is `None` a panic will occur                                             |
 | `try_value()`    | Returns an `Option<T>` containint the current value of the control.                                                                     |

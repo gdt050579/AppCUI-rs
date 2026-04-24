@@ -1,6 +1,6 @@
 # Canvas
 
-Represent a surface that can be drawn under a view-port:
+Represents a surface that can be drawn inside a viewport:
 
 <img src="img/canvas.png" width=300/>
 
@@ -16,16 +16,16 @@ let b2 = canvas!("'30,10',x:10,y:5,w:15");
 
 A canvas supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name                | Type         | Positional parameter                | Purpose                                                                                                                                                                                         |
-| ----------------------------- | ------------ | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `size` or `sz` or `surface`   | Size         | **Yes** (first postional parameter) | The size of the surface within the canvas                                                                                                                                                       |
-| `flags`                       | String       | **No**                              | canvas initialization flags                                                                                                                                                                     |
-| `back` or `backgroud`         | char! format | **No**                              | A character as describes in [Macro Builds](../../chapter-2/screen.md#macro-builds) - the same as with the  `char!` macro format                                                                 |
-| `lsm` or `left-scroll-margin` | Numeric      | **No**                              | The left margin of the bottom scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `Scrollbars` was set up. |
-| `tsm` or `top-scroll-margin`  | Numeric      | **No**                              | The top margin of the right scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `Scrollbars` was set up.   |
+| Parameter name                | Type         | Positional parameter                 | Purpose                                                                                                                                                                                         |
+| ----------------------------- | ------------ | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `size` or `sz` or `surface`   | Size         | **Yes** (first positional parameter) | The size of the surface within the canvas                                                                                                                                                       |
+| `flags`                       | String       | **No**                               | canvas initialization flags                                                                                                                                                                     |
+| `back` or `backgroud`         | char! format | **No**                               | A character as describes in [Macro Builds](../../chapter-2/screen.md#macro-builds) - the same as with the  `char!` macro format                                                                 |
+| `lsm` or `left-scroll-margin` | Numeric      | **No**                               | The left margin of the bottom scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `Scrollbars` was set up. |
+| `tsm` or `top-scroll-margin`  | Numeric      | **No**                               | The top margin of the right scroll bar in characters. If not provided the default value is 0. This should be a positive number and it only has an effect if the flag `Scrollbars` was set up.   |
 
 A canvas supports the following initialization flags:
-* `canvas::Flags::ScrollBars` or `ScrollBars` (for macro initialization) - thils enable a set of scrollbars that can be used to change the view of the inner surface, but only when the control has focus, as described in [Components](../components.md) section.
+* `canvas::Flags::ScrollBars` or `ScrollBars` (for macro initialization) - this enable a set of scrollbars that can be used to change the view of the inner surface, but only when the control has focus, as described in [Components](../components.md) section.
 
 Some examples that uses these paramateres:
 
@@ -43,7 +43,7 @@ A canvas emits no events.
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a canvas also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a canvas also has the following additional methods:
 
 | Method                     | Purpose                                                            |
 | -------------------------- | ------------------------------------------------------------------ |
@@ -56,17 +56,17 @@ Besides the [Common methods for all Controls](../common_methods.md) a canvas als
 
 The following keys are processed by a canvas control if it has focus:
 
-| Key                                 | Purpose                                                                                                                                |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `Left`,`Right`,`Up`,`Down`          | Move the view port to a specified direction by one character.                                                                          |
-| `Shift+Left`                        | Moves the horizontal view port coordonate to 0                                                                                         |
-| `Shift+Up`                          | Moves the vertical view port coordonate to 0                                                                                           |
-| `Shift+Right`                       | Moves the horizontal view port coordonate so that the right side of the inner surface is displayed                                     |
-| `Shift+Down`                        | Moves the vertical view port coordonate so that the bottom side of the inner surface is displayed                                      |
-| `Ctrl`+{`Left`,`Right`,`Up`,`Down`} | Move the view port to a specified direction by a number of characters that is equal to the width for Left/Right or height for Up/Down. |
-| `PageUp`, `PageDown`                | has the same effect as `Ctrl`+{`Up` or `Down`}                                                                                         |
-| `Home`                              | Moves the view port to the coordonates (0,0)                                                                                           |
-| `End`                               | Moves the view port so that the bottom-right part of the inner surface is visible                                                      |
+| Key                                 | Purpose                                                                                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `Left`,`Right`,`Up`,`Down`          | Move the viewport to a specified direction by one character.                                                                          |
+| `Shift+Left`                        | Moves the horizontal viewport coordinate to 0                                                                                         |
+| `Shift+Up`                          | Moves the vertical viewport coordinate to 0                                                                                           |
+| `Shift+Right`                       | Moves the horizontal viewport coordinate so that the right side of the inner surface is displayed                                     |
+| `Shift+Down`                        | Moves the vertical viewport coordinate so that the bottom side of the inner surface is displayed                                      |
+| `Ctrl`+{`Left`,`Right`,`Up`,`Down`} | Move the viewport to a specified direction by a number of characters that is equal to the width for Left/Right or height for Up/Down. |
+| `PageUp`, `PageDown`                | has the same effect as `Ctrl`+{`Up` or `Down`}                                                                                        |
+| `Home`                              | Moves the viewport to the coordinates (0,0)                                                                                           |
+| `End`                               | Moves the viewport so that the bottom-right part of the inner surface is visible                                                      |
 
 ## Example
 

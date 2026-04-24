@@ -1,6 +1,6 @@
 # Password
 
-Represent a clickable password control:
+Represents a clickable password control:
 
 <img src="img/password.png" width=300/>
 
@@ -42,11 +42,11 @@ pub trait PasswordEvents {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a password also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a password also has the following additional methods:
 
 | Method              | Purpose                                                                           |
 | ------------------- | --------------------------------------------------------------------------------- |
-| `set_password(...)` | Programatically sets a new password .<br>Example: `password.set_password("1234")` |
+| `set_password(...)` | Programmatically sets a new password.<br>Example: `password.set_password("1234")` |
 | `password()`        | Returns the current password                                                      |
 
 ## Key association

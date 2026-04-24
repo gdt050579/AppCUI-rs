@@ -1,6 +1,6 @@
 # HLine
 
-Represent a horizontal line:
+Represents a horizontal line:
 
 <img src="img/hline.png" width=300/>
 
@@ -19,7 +19,7 @@ A horizontal line supports all common parameters (as they are described in [Inst
 
 | Parameter name    | Type   | Positional parameter                | Purpose                                                  |
 | ----------------- | ------ | ----------------------------------- | -------------------------------------------------------- |
-| `text` or `title` | String | **Yes** (first postional parameter) | The title (text) written on the line                     |
+| `text` or `title` | String | **Yes** (first positional parameter) | The title (text) written on the line                     |
 | `flags`           | Enum   | **No**                              | Flags to specify how the horizontal line should be drawn |
 
 Where the flags are defined as follows:
@@ -33,7 +33,7 @@ A horizontal line emits no events.
 
 ## Methods
 
-Besides the [Common methods for all Controls](../common_methods.md) a horizontal line also has the following aditional methods:
+Besides the [Common methods for all Controls](../common_methods.md) a horizontal line also has the following additional methods:
 
 | Method           | Purpose                                  |
 | ---------------- | ---------------------------------------- |
