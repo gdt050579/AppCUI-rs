@@ -1,6 +1,6 @@
 # Open/Save dialogs
 
-Open/Save dialogs are predefined dialogs that allows you to select a file path that will further be used to save or load content from/into. The following methods are available:
+Open/Save dialogs are predefined dialogs that allow you to select a file path that will be used to save or load content. The following methods are available:
 * `dialogs::save`
 * `dialogs::open`
 
@@ -10,7 +10,7 @@ A save dialog is usually used whenever your application needs to save some data 
 
 <img src="img/save.png" width=500/>
 
-A save dialog can be open using the following method:
+A save dialog can be opened using the following method:
 ```rs
 fn dialogs::save(title: &str, 
                  file_name: &str, 
@@ -26,10 +26,10 @@ where:
 * `title` - the title of the dialog (usually "Save" or "Save as")
 * `file_name` - the default file name that will be displayed in the dialog
 * `location` - the location / path where the dialog will be opened (see [Location](#location) for more details)
-* `extension_mask` - a mask that will be used to filter the files that can be selected (see [Extension mask](#extension-mask) for more details). If `None` all files will be shown.
+* `extension_mask` - a mask that will be used to filter the files that can be selected (see [Extension mask](#extension-mask) for more details). If `None`, all files will be shown.
 * `flags` - additional flags that can be used to customize the dialog 
 
-The `SaveFileDialogsFlags` is defined as follows:
+The `SaveFileDialogFlags` type is defined as follows:
 ```rs
 #[EnumBitFlags(bits = 8)]
 pub enum SaveFileDialogFlags {
@@ -48,7 +48,7 @@ An open dialog is usually used whenever your application needs to load some data
 
 <img src="img/open.png" width=500/>
 
-An open dialog can be open using the following method:
+An open dialog can be opened using the following method:
 ```rs
 fn dialogs::open(title: &str, 
                  file_name: &str, 
@@ -64,10 +64,10 @@ where:
 * `title` - the title of the dialog (usually "Open" or "Load")
 * `file_name` - the default file name that will be displayed in the dialog
 * `location` - the location / path where the dialog will be opened (see [Location](#location) for more details)
-* `extension_mask` - a mask that will be used to filter the files that can be selected (see [Extension mask](#extension-mask) for more details). If `None` all files will be shown.
+* `extension_mask` - a mask that will be used to filter the files that can be selected (see [Extension mask](#extension-mask) for more details). If `None`, all files will be shown.
 * `flags` - additional flags that can be used to customize the dialog 
 
-The `OpenFileDialogsFlags` is defined as follows:
+The `OpenFileDialogFlags` type is defined as follows:
 ```rs
 #[EnumBitFlags(bits = 8)]
 pub enum OpenFileDialogFlags {
@@ -78,7 +78,7 @@ pub enum OpenFileDialogFlags {
 
 where:
 * `Icons` - show icons for files and folders
-* `CheckIfFileExists` - if the file does not exist, a error message will be shown abd the dialog will remain open
+* `CheckIfFileExists` - if the file does not exist, an error message will be shown and the dialog will remain open
 
 ## Location
 
@@ -89,14 +89,14 @@ Whenever a save or open dialog is opened, you can specify the location where the
 
 ## Extension mask
 
-The extension mask is a string that contains multiple items in the format `display-name = [extensions lists]` separated by commas that will serve as a filter for the files that can be selected. 
+The extension mask is a string that contains multiple items in the format `display-name = [extension list]`, separated by commas, that will serve as a filter for the files that can be selected. 
 
 For example, if we want to filter only the images, we will create a string that looks like the following:
 ```rs
 "Images = [jpg, jpeg, png, bmp, gif]"
 ```
 
-If we want to have multiple options for filtering, we can create multiple strings like the previous one and separte them by commas. For example, we we want to have three options for filtering: images, documents and executables, we will create a string like the following:
+If we want to have multiple options for filtering, we can create multiple strings like the previous one and separate them with commas. For example, if we want three filtering options—images, documents, and executables—we can create a string like the following:
 ```rs
 "Images = [jpg, jpeg, png, bmp, gif],
  Documents = [doc, pdf, docx, txt],
@@ -104,7 +104,7 @@ If we want to have multiple options for filtering, we can create multiple string
 "
 ```
 
-**Remarks**:
+**Remarks:**
 1. AppCUI will **ALWAYS** add an `All Files` options at the end of your options list.
 2. The **first** item from the provided list will be the default mask when opening the dialog.
 

@@ -1,6 +1,6 @@
 # Input Dialog
 
-An input dialog is a dialog that allows the user to enter a value of a generic type T and returns the value as an optional.
+An input dialog is a dialog that allows the user to enter a value of a generic type `T` and returns it as `Option<T>`.
 
 <img src="img/input_dialog.png" width=500/>
 
@@ -19,7 +19,7 @@ where
 where `InputCallback<T>` is defined as follows:
 
 ```rust
-    type InputCallback<T> = fn(&T) -> Result<(), String>;
+type InputCallback<T> = fn(&T) -> Result<(), String>;
 ```
 
 
@@ -30,9 +30,9 @@ The function takes the following parameters:
 - `value`: An optional value to pre-fill the input field with.
 - `validation`: An optional validation function that can be used to validate the input value.
 
-The function returns an optional value of type T.
+The function returns an optional value of type `T`.
 
-It is important that type T implements the following traits:
+It is important that the type `T` implements the following traits:
 * `FromStr` - to be able to parse the input value from a string.
 * `Sized` - to be able to store the value in a variable.
 * `std::fmt::Display` - to be able to display the value in the dialog.
@@ -49,7 +49,7 @@ Some examples of how to use the `input` function are shown below:
    
     ```rust
     if let Some(res) = dialogs::input::<i32>("Title", "Enter a value", None, None) {
-        // res value contains the selected value
+        // res contains the entered value
     } else {
         // the user canceled the dialog
     };
@@ -58,24 +58,24 @@ Some examples of how to use the `input` function are shown below:
 2. Input dialog with validation (the value must be positive):
    
     ```rust
-    if let Some(res) = dialogs::input::<i32>("Title", "Enter a positivevalue", None, Some(|&value| {
+    if let Some(res) = dialogs::input::<i32>("Title", "Enter a positive value", None, Some(|&value| {
         if value < 0 {
             Err("Value must be positive".to_string())
         } else {
             Ok(())
         }
     })) {
-        // res value contains the selected value
+        // res contains the entered value
     } else {
         // the user canceled the dialog
     };
     ```
 
 3. Input dialog with a pre-filled value:
-   
-       ```rust
+
+    ```rust
     if let Some(res) = dialogs::input::<i32>("Title", "Enter a value", Some(10), None) {
-        // res value contains the selected value
+        // res contains the entered value
     } else {
         // the user canceled the dialog
     };

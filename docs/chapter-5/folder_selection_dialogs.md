@@ -1,6 +1,6 @@
 # Folder Selection Dialog
 
-A folder selection dialog is usually used whenever your application needs to select a folder where some data will be saved or loaded from.
+A folder selection dialog is usually used when your application needs to choose a folder from which data will be loaded or to which data will be saved.
 
 <img src="img/folder_select.png" width=500/>
 
@@ -15,14 +15,14 @@ fn dialogs::select_folder(title: &str,
 ```
 
 where:
-* `title` - the title of the dialog (usually "Save" or "Save as")
+* `title` - the title of the dialog (for example, "Select folder")
 * `location` - the location / path where the dialog will be opened (see [Location](#location) for more details)
 * `flags` - additional flags that can be used to customize the dialog 
 
-The `SelectFolderDialogFlags` is defined as follows:
+The `SelectFolderDialogFlags` type is defined as follows:
 ```rs
 #[EnumBitFlags(bits = 8)]
-pub enum SaveFileDialogFlags {
+pub enum SelectFolderDialogFlags {
     Icons = 1,
 }
 ```
@@ -32,7 +32,7 @@ where:
 
 ## Location
 
-Whenever a save or open dialog is opened, you can specify the location where the dialog will be opened. The following locations are available:
+Whenever a folder selection dialog is opened, you can specify the location where the dialog will be opened. The following locations are available:
 * `Location::Current` - the dialog will be opened in the current directory
 * `Location::Last` - the dialog will be opened on the last location where a file was saved or opened. If no file was saved or opened, the dialog will be opened in the current directory
 * `Location::Path(...)` - the dialog will be opened in the specified path
@@ -45,7 +45,7 @@ The following example shows how to open a folder selection dialog:
 if let Some(folder_path) = dialogs::select_folder(
             "Select Folder",
             dialogs::Location::Current,
-            dialogs::SaveFileDialogFlags::None 
+            dialogs::SelectFolderDialogFlags::None 
         ) 
 {
     // do something with the folder_path    
