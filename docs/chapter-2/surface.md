@@ -10,7 +10,7 @@ A surface has the following properties:
 - a cursor (that can be moved, enabled or disabled)
 - an array (vector) of [characters](screen.md#character) that represent the content of the surface
 
-**Remarks**: A screen is in fact a surface that covers the entire console visible space and it is created automatically when the application starts.
+**Remarks:** A screen is in fact a surface that covers the entire console visible space and it is created automatically when the application starts.
 
 ## Creating a Surface
 

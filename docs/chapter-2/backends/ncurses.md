@@ -31,4 +31,4 @@ While ncurses is a powerful terminal library, it does have some limitations to b
 
 It's important to consider these limitations when using ncurses in your Rust project, especially if you need to work with wide characters or require consistent behavior across different terminals.
 
-AppCUI uses ncursesw for wide character support, in order to render multiple Unicode chars.
+AppCUI uses ncursesw for wide character support in order to render multiple Unicode characters.

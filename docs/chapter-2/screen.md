@@ -5,11 +5,11 @@ The screen in AppCUI is a 2D matrix of characters, with different widths (`w`) a
 
 It is important to note that each character is going to have the same size. 
 For each character we have the following attributes:
-* Forenground color (the color of the character that we are printing)
+* Foreground color (the color of the character that we are printing)
 * Background color (the color of the character background)
 * Attributes: Bold, Italic, Underline, Boxed
 
-The following collors are supported by AppCUI via `Color` enum from `AppCUI::graphics` module:
+The following colors are supported by AppCUI via `Color` enum from `AppCUI::graphics` module:
 
 | Color      | Enum variant       | RGB                                      | Color                                                                                                        |
 | ---------- | ------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
@@ -30,41 +30,41 @@ The following collors are supported by AppCUI via `Color` enum from `AppCUI::gra
 | Yellow     | `Color::Yellow`    | Red=**255**, Green=**255**, Blue=**0**   | <div style="width: 24px; height: 24px; background-color: rgb(255, 255, 0);border: 2px solid white;"></div>   |
 | White      | `Color::White`     | Red=**255**, Green=**255**, Blue=**255** | <div style="width: 24px; height: 24px; background-color: rgb(255, 255, 255);border: 2px solid white;"></div> |
 
-Besides this list, a special enuma variant `Color::Transparent` can be used to draw without a color (or in simple terms to keep the existing color). For example, if the current character has a forenground color `Red` writing another character on the same position with color `Transparent` will keep the color `Red` for the character.
+Besides this list, a special enum variant `Color::Transparent` can be used to draw without a color (or in simple terms to keep the existing color). For example, if the current character has a foreground color `Red` writing another character on the same position with color `Transparent` will keep the color `Red` for the character.
 
 Additionally, if the `TRUE_COLORS` feature is enabled, the following variant is supported:
 * `Color::RGB(r, g, b)` - this is a custom color that is defined by the RGB values.
 
 
 **REMARKS**: 
-1. Not all terminals support this exact set of colors. Further more, some terminals might allow changing the RGB color for certain colors in the pallete.
-2. Enabling `TRUE_COLORS` feature does not mean that the terminal supports 24-bit colors. It only means that the AppCUI framework will use 24-bit colors for the screen, but the terminal might still need to convert them to the terminal's color pallete.
+1. Not all terminals support this exact set of colors. Further more, some terminals might allow changing the RGB color for certain colors in the palette.
+2. Enabling `TRUE_COLORS` feature does not mean that the terminal supports 24-bit colors. It only means that the AppCUI framework will use 24-bit colors for the screen, but the terminal might still need to convert them to the terminal's color palette.
 3. Enabling `TRUE_COLORS` feature will make the size of the `Color` enum to be 4 bytes (instead of 1 byte without this feature). If memory is a concern and you don't need true colors, it is recommended to NOT enable this feature.
 
-The list of attributes available in AppCUI are described by `CharFlags` enum from `AppCUI::graphics` module and include the following flags:
+The list of attributes available in AppCUI is described by the `CharFlags` enum from the `AppCUI::graphics` module and includes the following flags:
 * `Bold` - bolded character
 * `Underline` - underlined character
 * `Italic` - italic character
-* `DoubleUnderline` - a character that is undelined twice
+* `DoubleUnderline` - a character that is underlined twice
 * `CurlyUnderline` - a character with a curly underline
-* `DottedUnderline` - a character with a dotted undeline
+* `DottedUnderline` - a character with a dotted underline
 * `StrikeThrough` - strike through character
 
 These flags can be used with `|` operator if you want to combine them. For example: `CharFlags::Bold | CharFlags::Underline` means a character that is both bolded and underlined.
 
 # Character
 
-As previously explained, a character is the basic unit of AppCUI (we can say that it is similar to what a pixel is for a regular UX system).
+As previously explained, a character is the basic unit of AppCUI (we can say that it is similar to what a pixel is for a regular graphical UI).
 The following method can be used to build a character:
 ```rust,no_compile
 pub fn new<T>(code: T, fore: Color, back: Color, flags: CharFlags) -> Character
 ```
 where:
-* `fore` and `back` are characters colors (foreground and background)
+* `fore` and `back` are the character colors (foreground and background)
 * `code` can be a character (like `'a'` or `'b'`) or a value of type `SpecialCharacter` that can be used to quickly access special characters (like arrows). Any type of UTF-8 character is allowed.
 * `flags` are a set of flags (like `Bold`, `Underline`, ...) that can be used. 
 
-The list of all special characters that are supported by AppCUI (as described in the `SpacialCharacter` enum) are:
+The list of all special characters that are supported by AppCUI (as described in the `SpecialCharacter` enum) is as follows:
 
 ## Box lines and corners
 
@@ -148,14 +148,14 @@ Besides `Character::new(...)` the following constructors are also available:
     ``` 
     this is the same as calling:
     ```rust, no_compile 
-    Character::new(0, fore, fore, CharFlags::None)
+    Character::new(0, fore, back, CharFlags::None)
     ```
-    **Note**: Using the character with code 0 means keeping the existing character but chainging the colors and attributes.
+    **Note:** Using the character with code 0 means keeping the existing character but changing the colors and attributes.
 
 
 # Macro builds
 
-You can also use `char!` macro to quickly create a character. The macro supports tha following positional and named parameters:
+You can also use the `char!` macro to quickly create a character. The macro supports the following positional and named parameters:
 
 | Position    | Parameter        | Type                                                                             |
 | ----------- | ---------------- | -------------------------------------------------------------------------------- |
@@ -171,7 +171,7 @@ and the named parameters:
 | `code` or `unicode`                              | Hex value | Yes      | The unicode value of a character. Using this parameter will invalidate the previous parameter                                                                                                                                                                                                                                                                                                                                                           |
 | `fore` or `foreground` or `forecolor` or `color` | Color     | Yes      | The foreground color of the character. If not specified it is defaulted to `Transparent`.                                                                                                                                                                                                                                                                                                                                                               |
 | `back` or `background` or `backcolor`            | Color     | Yes      | The background color of the character. If not specified it is defaulted to `Transparent`.                                                                                                                                                                                                                                                                                                                                                               |
-| `attr` or `attributes`                           | Flags     | Yes      | One of the following combination: `Bold`, `Italic`, `Underline`                                                                                                                                                                                                                                                                                                                                                                                         |
+| `attr` or `attributes`                           | Flags     | Yes      | One of the following combinations: `Bold`, `Italic`, `Underline`                                                                                                                                                                                                                                                                                                                                                                                         |
 
 The following values can be used as color parameters for `foreground` and `background` parameters:
           
@@ -185,7 +185,7 @@ The following values can be used as color parameters for `foreground` and `backg
 | `Magenta`            | Magenta    | `Color::Magenta`   | <div style="width: 24px; height: 24px; background-color: rgb(128, 0, 128);border: 2px solid white;"></div>   |
 | `Olive`              | Olive      | `Color::Olive`     | <div style="width: 24px; height: 24px; background-color: rgb(128, 128, 0);border: 2px solid white;"></div>   |
 | `Silver` or `Gray75` | Silver     | `Color::Silver`    | <div style="width: 24px; height: 24px; background-color: rgb(192, 192, 192);border: 2px solid white;"></div> |
-| `Gray` or `gray50`   | Gray       | `Color::Yellow`    | <div style="width: 24px; height: 24px; background-color: rgb(255, 255, 0);border: 2px solid white;"></div>   |
+| `Gray` or `gray50`   | Gray       | `Color::Gray`      | <div style="width: 24px; height: 24px; background-color: rgb(128, 128, 128);border: 2px solid white;"></div>   |
 | `Blue` or `b`        | Blue       | `Color::Blue`      | <div style="width: 24px; height: 24px; background-color: rgb(0, 0, 255);border: 2px solid white;"></div>     |
 | `Green` or `g`       | Green      | `Color::Green`     | <div style="width: 24px; height: 24px; background-color: rgb(0, 255, 0);border: 2px solid white;"></div>     |
 | `Red` or `r`         | Red        | `Color::Red`       | <div style="width: 24px; height: 24px; background-color: rgb(255, 0, 0);border: 2px solid white;"></div>     |
@@ -196,7 +196,7 @@ The following values can be used as color parameters for `foreground` and `backg
 
 For `Transparent` color you can use the following values: `transparent`, `invisible` or `?`.
 
-You can also specify special characters by either using their specific name from the enum `SpecialChars` or by using certaing adnotations as presented in the following table:
+You can also specify special characters by either using their specific name from the `SpecialCharacter` enum or by using certain annotations as presented in the following table:
 
 | Value                                    | Variant <br>(appcui::graphics::**SpecialCharacter** enum) | Visual Representation                                                                                                  |
 | ---------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -214,7 +214,7 @@ You can also specify special characters by either using their specific name from
 
 # Character attributes
 
-Sometimes, you might want to use a character with a specific color and attributes. For example, you might want to use a bolded character with a red color on a yellow background. This is in particular useful when building a theme where you just select the attributes and colors and then apply them to the characters.
+Sometimes, you might want to use a character with a specific color and attributes. For example, you might want to use a bolded character with a red color on a yellow background. This is particularly useful when building a theme where you select the attributes and colors and then apply them to the characters.
 AppCUI provides a specific structure called `CharAttribute` that allows you to define colors and attributes for a character. 
 To create a `CharAttribute` you can use the following methods:
 
@@ -226,13 +226,13 @@ impl CharAttribute {
     pub fn with_back_color(back: Color) -> CharAttribute {...}
 }
 ```
-or
-the macro `charattr!`  that works similar to `char!` but it returns a `CharAttribute` object. The macro supports tha following positional and named parameters:
+
+Or the macro `charattr!` that works similarly to `char!` but returns a `CharAttribute` object. The macro supports the following positional and named parameters:
 
 | Position    | Parameter        | Type                                                                             |
 | ----------- | ---------------- | -------------------------------------------------------------------------------- |
-| #1 (second) | foreground color | `Color` for foreground (special constants are accepted in this case - see below) |
-| #2 (third)  | background color | `Color` for background (special constants are accepted in this case - see below) |
+| #1 (first)  | foreground color | `Color` for foreground (special constants are accepted in this case - see below) |
+| #2 (second) | background color | `Color` for background (special constants are accepted in this case - see below) |
 
 and the named parameters:
 
@@ -240,12 +240,12 @@ and the named parameters:
 | ------------------------------------------------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `fore` or `foreground` or `forecolor` or `color` | Color     | Yes      | The foreground color of the character. If not specified it is defaulted to `Transparent`.                                                                                                                                                                                                                                                                                                                                                               |
 | `back` or `background` or `backcolor`            | Color     | Yes      | The background color of the character. If not specified it is defaulted to `Transparent`.                                                                                                                                                                                                                                                                                                                                                               |
-| `attr` or `attributes`                           | Flags     | Yes      | One of the following combination: `Bold`, `Italic`, `Underline`                                                                                                                                                                                                                                                                                                                                                                                         |
+| `attr` or `attributes`                           | Flags     | Yes      | One of the following combinations: `Bold`, `Italic`, `Underline`                                                                                                                                                                                                                                                                                                                                                                                         |
 
 
 # Examples
 
-**Example 1**: Letter `A` with a Red color on an Yellow background:
+**Example 1:** Letter `A` with a red foreground on a yellow background:
 ```rust,no_compile
 Character::new('A',Color::Red,Color::Yellow,CharFlags::None)
 ```
@@ -259,7 +259,7 @@ char!("A,r,y")
 ```
 
 
-**Example 2**: Letter `A` (bolded and underlined) with a White color on a Dark blue background:
+**Example 2:** Letter `A` (bold and underlined) with a white foreground on a dark blue background:
 ```rust,no_compile
 Character::new('A',Color::White,Color::DarkBlue,CharFlags::Bold | CharFlags::Underline)
 ```
@@ -273,7 +273,7 @@ char!("A,w,db,attr=Bold+Underline")
 ```
 
 
-**Example 3**: An arrow towards left a Red color while keeping the current background:
+**Example 3:** An arrow pointing left in red, while keeping the current background:
 ```rust,no_compile
 Character::new(SpecialCharacter::ArrowLeft,Color::Red,Color::Transparent,CharFlags::None)
 ```
@@ -291,7 +291,7 @@ char!("<-,r")
 ```
 
 
-**Example 4**: An arrow towards left a DarkGreen color, Bolded and Underlined while keeping the current background. We will use a CharAttribute for this example:
+**Example 4:** An arrow pointing left in dark green, bold and underlined, while keeping the current background. We will use a `CharAttribute` for this example:
 ```rust,no_compile
 let attr = CharAttribute::new(Color::DarkGreen,Color::Transparent,CharFlags::Bold | CharFlags::Underline);  
 let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr);
@@ -299,7 +299,7 @@ let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr);
 or
 ```rs,no_compile
 let attr = charattr!("DarkGreen,Transparent,attr:Bold+Underline");
-let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr));
+let c = Character::with_attr(SpecialCharacter::ArrowLeft, attr);
 ```
 or
 ```rs,no_compile

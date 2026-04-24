@@ -12,7 +12,7 @@ pub trait OnKeyPressed {
 
 This method has two parameters:
 1. the `key` parameter (that provides information about the code of the key that was pressed and its modifiers)
-2. the `character` (when this is the case). This is usually when you want insert text intro a control (for example in case of a [TextField](../chapter-3/stock-controls/textfield.md))
+2. the `character` (when this is the case). This is usually when you want to insert text into a control (for example, in a [TextField](../chapter-3/stock-controls/textfield.md)).
 
 
 ## Key
@@ -30,20 +30,20 @@ pub struct Key {
 where:
 * `code` is an enum that indicates a code for the key that was pressed and it includes:
   * F-commands (`F1` to `F12`)
-  * Letters (`A` to `Z`) - with apper case
+  * Letters (`A` to `Z`) - with upper case
   * Numbers (`0` to `9`)
   * Arrows (`Up`, `Down`, `Left`, `Right`)
   * Navigation keys (`PageUp`, `PageDown`, `Home`, `End`)
   * Deletion and Insertions (`Delete` , `Backspace`, `Insert`)
   * White-spaces (`Space`, `Tab`)
   * Other (`Enter`, `Escape`)
-* `modifier` can be one of the following (including combination between them):
+* `modifier` can be one of the following (including combinations of them):
   * Shift
   * Ctrl
   * Alt
 
 
-The crete a key use:
+To create a key, use:
 1. `Key::new(code, modifier)`  - for example:
     ```rs
     let k = Key::new(KeyCode::F1,KeyModifier::Alt | KeyModifier::Ctrl);
@@ -57,10 +57,10 @@ The crete a key use:
 3. `key!` macro - this can be used to create a key:
     ```rs
     let k1 = key!("F2");
-    let k2 = key!("Enter")
-    let k3 = key!("Alt+F4")
-    let k4 = key!("Ctrl+Alt+F")
-    let k5 = key!("Ctrl+Shift+Alt+Tab")
+    let k2 = key!("Enter");
+    let k3 = key!("Alt+F4");
+    let k4 = key!("Ctrl+Alt+F");
+    let k5 = key!("Ctrl+Shift+Alt+Tab");
     ```
 
 ## Usage
@@ -99,7 +99,7 @@ impl OnKeyPressed for <MyControl> {
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Left") => { 
-                /* Move to begining */ 
+                /* Move to beginning */ 
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Right") => { 

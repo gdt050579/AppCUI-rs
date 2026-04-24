@@ -1,6 +1,6 @@
 # Debug scenarios
 
-When using AppCUI and needing to test the interface, it is recommended to write the unit tests using `App::debug(...)` method. This method allows one to write a succesion of system events (mouse clicks, keys being pressed, etc) and validate if the output is the expected one. This succesion of command is considered an event script - form out of multiple commands, each command written on a line. A command can have parameters. You can also use `//` to comment a command.
+When using AppCUI and needing to test the interface, it is recommended to write unit tests using the `App::debug(...)` method. This method allows one to write a succession of system events (mouse clicks, keys being pressed, etc.) and validate whether the output is the expected one. This succession of commands is considered an event script, formed from multiple commands, each command written on a line. A command can have parameters. You can also use `//` to comment out a command.
 
 **General format for a script**
 ```rs,no_compile
@@ -10,8 +10,8 @@ Command-2()
 ```
 
 **Remarks**: 
-* `App::debug(...)` will panic if the script is incorect (a command is not valid, the number of parameters is incorect, etc).
-* `AppCUI` allows only one instance at one time (this is done via a mutex object). If you have multiple unit test and you try to run them with `cargo test` command, you might get an error as **cargo** might try to use multiple threads to do this and it is likely that one thread might try to start an `AppCUI` application while another one is already running on another thread. The solution in this case is to run the tests using a single thread:
+* `App::debug(...)` will panic if the script is incorrect (a command is not valid, the number of parameters is incorrect, etc.).
+* `AppCUI` allows only one instance at a time (this is done via a mutex object). If you have multiple unit tests and you try to run them with the `cargo test` command, you might get an error as **cargo** might try to use multiple threads to do this, and it is likely that one thread might try to start an `AppCUI` application while another one is already running on another thread. The solution in this case is to run the tests using a single thread:
 ```no_compile
 cargo test -- --test-threads=1
 ```
@@ -27,17 +27,17 @@ Mouse related commands are a set of commands that simulate various mouse events
 | `Mouse.Release(x,y,button)`        | simulates the release of the mouse buttons while the mouse is located at a specific screen position.  The parameters `x` and `y` are a screen position, while the parameter `button` is one of `left`, `right` or `center`                   |
 | `Mouse.Click(x,y,button)`          | simulates a click (hold and release). It is equivalent to<br> - Mouse.Hold(x,y,button)<br> - Mouse.Release(x,y)                                                                                                                              |
 | `Mouse.DoubleClick(x,y,button)`    | simulates a double-click (for a specific button)                                                                                                                                                                                             |
-| `Mouse.Move(x,y)`                  | simulates the movement of a mouse to coordonates (x,y). No mouse button are being pressed.                                                                                                                                                   |
+| `Mouse.Move(x,y)`                  | simulates the movement of the mouse to coordinates (x,y). No mouse buttons are being pressed.                                                                                                                                                   |
 | `Mouse.Drag(x1,y1,x2,y2)`          | simulates the movement of a mouse from (x1,y1) to (x2,y2) while the `left` button is being pressed                                                                                                                                           |
-| `Mouse.Wheel(x,y,direction,times)` | simulates the wheel mouse being rotated into a direction (one of `up`, `down`, `left`, `right`) for a number of times. The `times` parameter must be biggen than 0.                                                                          |
+| `Mouse.Wheel(x,y,direction,times)` | simulates the mouse wheel being rotated in a direction (one of `up`, `down`, `left`, `right`) a number of times. The `times` parameter must be greater than 0.                                                                          |
      
 ## Keyboard related commands
 
 | Command                  | Purpose                                                                                                                                                                                                                                                                                                                                         |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Key.Pressed(key,times)` | where `key` parameter can be a key name or any combination of control key and a regular key such as<br>- `Z` (for pressin the `Z` key)<br>- `Enter` (for pressing the `Enter` key)<br>-`Alt+T` (`Alt` + `T` combination)<br>-`Ctrl+Alt+F1` (`Ctrl`+`Alt`+`F1` keys). The `times` parameter can be omited. If present it has to be bigger than 1 |
-| `Key.TypeText(text)`     | where `text` parameter is a text that is being typed.<br>Example: `Key.TypeText('Hello world')` will trigger the following keys to be pressed: `H`, `e`, `l`, `l`, `o`, `Space`, `w`, `o`, `r`, `l` and `d`                                                                                                                                     |
-| `Key.Modifier(modifier)` | Simulates the pressing of a modifier key (such as `Shift`, `Ctrl` or `Alt`). The `modifier` parameter can be a combination between `Alt`, `Ctrl`, `Shift` separate by `+` or `None` if no modifier is changed. <br>For example: `Key.Modifier(Alt+Ctrl)` will simulate the pressing of `Alt` and `Ctrl` keys at the same time.                  |
+| `Key.Pressed(key,times)` | where the `key` parameter can be a key name or any combination of a control key and a regular key, such as<br>- `Z` (for pressing the `Z` key)<br>- `Enter` (for pressing the `Enter` key)<br>-`Alt+T` (`Alt` + `T` combination)<br>-`Ctrl+Alt+F1` (`Ctrl`+`Alt`+`F1` keys). The `times` parameter can be omitted. If present, it has to be greater than 1 |
+| `Key.TypeText(text)`     | where the `text` parameter is text that is being typed.<br>Example: `Key.TypeText('Hello world')` will trigger the following keys to be pressed: `H`, `e`, `l`, `l`, `o`, `Space`, `w`, `o`, `r`, `l`, and `d`.                                                                                                                                     |
+| `Key.Modifier(modifier)` | Simulates pressing a modifier key (such as `Shift`, `Ctrl`, or `Alt`). The `modifier` parameter can be a combination of `Alt`, `Ctrl`, and `Shift` separated by `+`, or `None` if no modifier is changed. <br>For example: `Key.Modifier(Alt+Ctrl)` will simulate pressing the `Alt` and `Ctrl` keys at the same time.                  |
 
 
 Usually the key parameter can have several forms:
@@ -56,13 +56,13 @@ where the list of all keys supported by this command is:
 * White-spaces (`Space`, `Tab`)
 * Other (`Enter`, `Escape`)
 
-and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
+and the list of modifiers consists of `Shift`, `Ctrl`, and `Alt`.
      
 ## Paint related commands
 
 | Command                                | Purpose                                                                                                                                                                                                                                                                                                                                                     |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Paint(staet_name)`<br>or<br>`Paint()` | paints the current virtual screen into the current screen using ANSI codes and colors. This command also computes a hash over the current virtual screen and prints it. The `state_name` is a name can be used to reflect the current execution state. This is useful if multipl `Paint` command are being used and you need to differentiate between them. |
+| `Paint(state_name)`<br>or<br>`Paint()` | paints the current virtual screen to the current screen using ANSI codes and colors. This command also computes a hash over the current virtual screen and prints it. The `state_name` is a name that can be used to reflect the current execution state. This is useful if multiple `Paint` commands are being used and you need to differentiate between them. |
 | `Paint.Enable(value)`                  | enables or disables painting. `value` is a boolean value (**true** or **false**). If set to **false** all subsequent calls to command `Paint` will be ignored. By default, all paints are enabled.                                                                                                                                                          |
 
 ## System events
@@ -82,11 +82,11 @@ and the list of modifiers consists in `Shift`, `Ctrl` and `Alt`.
 
 | Command                    | Purpose                                                                                                                                                                           |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CheckHash(hash)`          | checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing.                                                |
-| `CheckCursor(x,y)`         | checks if the cursor (caret) is at a specify position                                                                                                                             |
-| `CheckCursor(hidden)`      | checks is the cursor (caret) is hidden (not visible). You cal also check this by using `false` instead of `hidden`                                                                |
-| `CheckClipboardText(text)` | checks to see if the clipboard if the clipboard contains a specific text. This method is used to validate if the `Copy`/`Cut` to clipboard command from a control worked properly |
-| `Error.Disable(value)`     | enables or disables errors when testing the the hashes or cursor position. `value` is a boolean value (**true** or **false**). By default, errors are **NOT** disabled            |
+| `CheckHash(hash)`          | checks if the hash computed over the current virtual screen is as expected. If not, it will panic. This is useful for unit testing.                                                |
+| `CheckCursor(x,y)`         | checks if the cursor (caret) is at a specific position                                                                                                                             |
+| `CheckCursor(hidden)`      | checks if the cursor (caret) is hidden (not visible). You can also check this by using `false` instead of `hidden`.                                                                |
+| `CheckClipboardText(text)` | checks whether the clipboard contains specific text. This method is used to validate whether the `Copy`/`Cut` to clipboard command from a control worked properly. |
+| `Error.Disable(value)`     | enables or disables errors when testing the hashes or cursor position. `value` is a boolean value (**true** or **false**). By default, errors are **NOT** disabled.            |
 
 ## Example
 
@@ -112,32 +112,32 @@ fn check_if_window_can_be_moved() {
 Let's break the event script in pieces and see exactly what is supposed to happen:
 1. `Paint('initial state')` - this will print the virtual screen. It should look like the following (but with colors):
 ```no_compile
-    +===================================================================+
-    | Name  : initial state                                             |
-    | Hash  : 0xB1471A30B30F5C6C                                        |
-    | Cursor: Hidden                                                      |
-    | ------------------------------------------------------------------- |
-    |                                                                     | 11111111112222222222333333333344444444445555555555           |
-    |                                                                     | 012345678901234567890123456789012345678901234567890123456789 |
-    | ------------------------------------------------------------------- |
-    | 0                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 1                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 2                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 3                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 4                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 5                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 6                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 7                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 8                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 9                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | ------------------------------------------------------------------- |
+    +================================================================+
+    | Name  : initial state                                          |
+    | Hash  : 0xB1471A30B30F5C6C                                     |
+    | Cursor: Hidden                                                 |
+    | ---------------------------------------------------------------|
+    |             11111111112222222222333333333344444444445555555555 |
+    |   012345678901234567890123456789012345678901234567890123456789 |
+    | ---------------------------------------------------------------|
+    | 0 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 1 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 2 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 3 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 4 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 5 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 6 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 7 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 8 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 9 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | ---------------------------------------------------------------|
 ```
-We can inspect inspect if the position of the window is correct. We can also notice the hash compited for the entire virtual screen: `0xB1471A30B30F5C6C` (this could help us do further checks).
+We can inspect whether the position of the window is correct. We can also see the hash computed for the entire virtual screen: `0xB1471A30B30F5C6C` (this can help us perform further checks).
 
-2. `CheckHash(0xB1471A30B30F5C6C)` - this compute the hash for the entire virtual screen and then check it againts the expected one. The usual scenario here is that we firs apply a `Paint` command, validate it, and them write the `CheckHash` command with the hash obtained from the `Paint` command. This way, if something changes to the logic/code of the program, the new hash will be different. **If the hash for the virtual screen is not as expected the application will panic**. If used in a test, this behavior will fail the test.
+2. `CheckHash(0xB1471A30B30F5C6C)` - this computes the hash for the entire virtual screen and then checks it against the expected one. The usual scenario here is that we first apply a `Paint` command, validate it, and then write the `CheckHash` command with the hash obtained from the `Paint` command. This way, if something changes in the logic or code of the program, the new hash will be different. **If the hash for the virtual screen is not as expected, the application will panic**. If used in a test, this behavior will fail the test.
 
 3. `Mouse.Drag(30,3,35,5)` this command does the following:
-    - moves the mouse to the **(30,3)** coordonate (over the title of the window)
+    - moves the mouse to the **(30,3)** coordinate (over the title of the window)
     - click and hold the left mouse button
     - moves the mouse to a new position **(35,5)** (since we hold the mouse button, we expect the window to move as well)
     - releases the left mouse button
@@ -145,30 +145,30 @@ We can inspect inspect if the position of the window is correct. We can also not
 4. `Paint('window was moved')` now we should see something like the following. Notice that indeed, the window was moved to a new position. We also have a new hash for the virtual screen: `0x419533D4BBEFE538`
 
 ```no_compile
-    +===================================================================+
-    | Name  : window was moved                                          |
-    | Hash  : 0x419533D4BBEFE538                                        |
-    | Cursor: Hidden                                                      |
-    | ------------------------------------------------------------------- |
-    |                                                                     | 11111111112222222222333333333344444444445555555555           |
-    |                                                                     | 012345678901234567890123456789012345678901234567890123456789 |
-    | ------------------------------------------------------------------- |
-    | 0                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 1                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 2                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 3                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 4                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 5                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 6                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 7                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 8                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | 9                                                                   | ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
-    | ------------------------------------------------------------------- |
+    +================================================================+
+    | Name  : window was moved                                       |
+    | Hash  : 0x419533D4BBEFE538                                     |
+    | Cursor: Hidden                                                 |
+    | -------------------------------------------------------------- |
+    |             11111111112222222222333333333344444444445555555555 |
+    |   012345678901234567890123456789012345678901234567890123456789 |
+    | -------------------------------------------------------------- |
+    | 0 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 1 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 2 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 3 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 4 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 5 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╔════ Title ════[x]╗▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 6 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 7 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 8 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒║                  ║▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | 9 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒╚══════════════════╝▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ |
+    | -------------------------------------------------------------- |
 ```
 
-25. `CheckHash(0x419533D4BBEFE538)` - finally we check the new hash to see if it maches the one we expect.
+5. `CheckHash(0x419533D4BBEFE538)` - finally we check the new hash to see if it matches the one we expect.
 
-**Remark**: using unit tests (while it works with the `Paint` command activated) might look strange on the actual screen (especially if all you need is to validate an example). As such, it is best that after one example such as the previous one was validated, to add another command at the begining of the script: `Paint.Enable(false)`. This will not change the logic of the script, instead it will not print anything on the screen. As such, the final test function should look like this:
+**Remark:** Using unit tests (while it works with the `Paint` command activated) might look strange on the actual screen (especially if all you need is to validate an example). As such, it is best that after an example such as the previous one has been validated, you add another command at the beginning of the script: `Paint.Enable(false)`. This will not change the logic of the script; instead, it will not print anything on the screen. The final test function should then look like this:
 
 ```rs
 use appcui::prelude::*;

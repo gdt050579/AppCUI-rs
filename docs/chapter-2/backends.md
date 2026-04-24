@@ -1,14 +1,14 @@
 # Backends
 
 AppCUI supports various backends (but each one comes with advantages and drawbacks).
-A backend is the terminal that takes the information (characters) from the virtual screen of AppCUI and displays them.
+A backend is the layer that takes the information (characters) from AppCUI's virtual screen and displays it in the terminal.
 
 <img src="img/backend.png" width=400/>
 
 Each backend supported by AppCUI has the following properties:
-* **Output rendering** - each character from the AppCUI surface is display on the screen
-* **Input reading** - the backend is capable of identifying keyboard and mouse events and convert them to internal AppCUI events
-* **Clipboard support** - the backend interacts with the OS and provides functionality for Copy / Cut / Paste based on OS-es API
+* **Output rendering** - each character from the AppCUI surface is displayed on the screen
+* **Input reading** - the backend is capable of identifying keyboard and mouse events and converting them to internal AppCUI events
+* **Clipboard support** - the backend interacts with the OS and provides functionality for Copy / Cut / Paste using OS APIs
 
 The following backends are supported:
 1. Windows Console
@@ -18,10 +18,10 @@ The following backends are supported:
 5. Web Terminal
 6. CrossTerm
 
-**Remarks**: These types are available via `appcui::backend::Type` and can be used to initialize an application
+**Remarks:** These types are available via `appcui::backend::Type` and can be used to initialize an application.
 
 ```rust
-let mut a = App::with_backend(apcui::backend::/*type*/).build()?;
+let mut a = App::with_backend(appcui::backend::/*type*/).build()?;
 ```
 
 where the `appcui::backend::Type` enum is defined as follows:
@@ -48,7 +48,7 @@ pub enum Type {
 | ------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
 | Windows | Yes             | Yes        | -       | -       | -            | Yes       |
 | Linux   | -               | -          | Yes     | Yes     | -            | Yes       |
-| Mac/OSX | -               | -          | Yes     | Yes     | -            | Yes       |
+| macOS   | -               | -          | Yes     | Yes     | -            | Yes       |
 | Web     | -               | -          | -       | -       | Yes          | -         |
 
 
@@ -74,8 +74,8 @@ Each backend comes with different support related to what can be displayed on th
 | Cursor Blinking | Yes             | Yes        | -       | -       | -            | Yes       |
 
 **Remarks**:
-1. **True colors** support requires the feature `TRUE_COLORS` to be enabled (keep in mind that by doing this you also increase the size of your Color and Character structures - if you don't need this or your terminal does not support true colors, you will only allocate aditional space that will not be used).
-2. **Cursor blinking** is not supported by all terminals (the AppCUI can enable - show/hide the cursor, but it is the terminal job to make it blink)
+1. **True colors** support requires the feature `TRUE_COLORS` to be enabled (keep in mind that by doing this you also increase the size of your Color and Character structures - if you don't need this or your terminal does not support true colors, you will only allocate additional space that will not be used).
+2. **Cursor blinking** is not supported by all terminals (AppCUI can show or hide the cursor, but it is the terminal's job to make it blink).
 
 In terms of the output method, each backend uses a different approach:
 
@@ -105,7 +105,7 @@ Besides background and foreground colors, the following character attributes are
 
 ## Input
 
-Capturing the input implies the following capabilites from any backend:
+Capturing the input implies the following capabilities from any backend:
 * identifying keyboard events
 * identifying keyboard combinations such as `Alt`+Key or `Ctrl`+Key or `Alt+Ctrl`+Key
 * Identifying that the state of the `Shift`, `Ctrl` and `Alt` keys has changed (pressed or released)
@@ -137,7 +137,7 @@ Capturing the input implies the following capabilites from any backend:
 | Move & Drag  | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
 | Wheel        | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
 
-**Remarks**: Input support is highlighly dependent on the terminal and the OS. AppCUI uses the following approach to intercept the input:
+**Remarks:** Input support is highly dependent on the terminal and the OS. AppCUI uses the following approach to intercept input:
 
 | Backend         | Approach                                                                                           |
 | --------------- | -------------------------------------------------------------------------------------------------- |
@@ -179,14 +179,14 @@ AppCUI provides clipboard support for copying and pasting text. The clipboard fu
 | NCurses         | Yes               | via copypasta crate                                     |
 | Termios         | -                 | -                                                       |
 | Web Terminal    | Yes               | Browser API                                             |
-| CrossTerm       | Yes               | via copypasta crate (Linux/Mac) or Windows API (Window) |
+| CrossTerm       | Yes               | via copypasta crate (Linux/macOS) or Windows API (Windows) |
 
 ## Defaults
 
-By default, when using initializing an `App` objct via `App::new()`, the folowing backend will be used :
+By default, when initializing an `App` object via `App::new()`, the following backend will be used:
 
 | OS      | Default backend | Other available backends |
 | ------- | --------------- | ------------------------ |
 | Windows | Windows Console | Windows VT, CrossTerm    |
 | Linux   | NCurses         | CrossTerm                |
-| Mac/OSX | Termios         | NCurses, CrossTerm       |
+| macOS   | Termios         | NCurses, CrossTerm       |

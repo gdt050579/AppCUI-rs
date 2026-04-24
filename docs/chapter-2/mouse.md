@@ -52,12 +52,12 @@ and `MouseButton` is an enum with the following values:
 * `None` - indicates that the mouse wheel was not rotated
 
 
-These events are reflect the following actions:
+These events reflect the following actions:
 * `MouseEvent::Enter` - the mouse cursor entered the control
 * `MouseEvent::Leave` - the mouse cursor left the control
-* `MouseEvent::Over(Point)` - the mouse cursor was moved over the control and it is now at a the specified point
+* `MouseEvent::Over(Point)` - the mouse cursor was moved over the control and it is now at the specified point
 * `MouseEvent::Pressed(MouseEventData)` - a mouse button was pressed over the control
-* `MouseEvent::Released(MouseEventData)` - a mouse button was released. If a mouse button was pressed over the control and the control can receive input, then all of the following mouse events will be send to the control (even if the mouse cursor is outside the control) until the mouse button is released.
+* `MouseEvent::Released(MouseEventData)` - a mouse button was released. If a mouse button was pressed over the control and the control can receive input, then all of the following mouse events will be sent to the control (even if the mouse cursor is outside the control) until the mouse button is released.
 * `MouseEvent::DoubleClick(MouseEventData)` - a mouse button was double clicked over the control
 * `MouseEvent::Drag(MouseEventData)` - a mouse button was pressed over the control and the mouse cursor was moved while keeping the button pressed
 * `MouseEvent::Wheel(MouseWheelDirection)` - the mouse wheel was rotated
@@ -71,7 +71,7 @@ A typical implementation of the `OnMouseEvent` trait looks like this:
 ```rs
 impl OnMouseEvent for <MyControl> {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        // check the key
+        // handle the event
         match event {
             MouseEvent::Enter => {
                 // the mouse cursor entered the control

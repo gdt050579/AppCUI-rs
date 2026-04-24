@@ -19,7 +19,7 @@ Input (mouse / keyboard / console resize) is handled by the following APIs:
 | `GetConsoleMode(...)`             | To get information about the current mode of the console           |
 | `ReadConsoleInputW(...)`          | To read input events (keys, mouse, resizing, console closing)      |
 | `SetConsoleTitleW(...)`           | To set the title (caption) of the console                          |
-| `SetConsoleScreenBufferSize(...)` | To resize the console to a specific **width** and **heighr**       |
+| `SetConsoleScreenBufferSize(...)` | To resize the console to a specific **width** and **height**       |
 
 The output is done via VT100 escape sequences (please refer to [Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code) for more information). This backend supports true colors (24 bits per pixel) and wide characters (2 bytes per character) but it depends on the Windows version to support them.
 
@@ -27,7 +27,7 @@ The output is done via VT100 escape sequences (please refer to [Wikipedia](https
 
 Because of the way VT100 escape sequences work, the backend is much slower than a regular Windows Console backend (that renders the output directly into the console). If speed is a priority, it is recommended to use the Windows Console backend instead.
 
-Keep in mind that the speed limitation can be mitigated by using a 3rd party terminal (that use the GPU to render the output)such as:
+Keep in mind that the speed limitation can be mitigated by using a 3rd-party terminal that uses the GPU to render the output, such as:
 * [RIO](https://rioterm.com/)
 * [Alacritty](https://alacritty.org/)
 
@@ -45,7 +45,7 @@ fn main() -> Result<(), appcui::system::Error> {
 }
 ```
 
-Further more, if you also want to use `true colors` you will need to enable the `TRUE_COLORS` feature when building the application:
+Furthermore, if you also want to use true colors, you will need to enable the `TRUE_COLORS` feature when building the application:
 
 ```toml
 [dependencies]

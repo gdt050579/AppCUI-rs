@@ -2,7 +2,7 @@
 
 Writing complex debug or unit-test scenarios might be a tedious task. However, it can be automated with the record events feature from AppCUI.
 
-The first thing is to enable this feature (via `cargo.toml`) where you need to enable the feature **EVENT_RECORDER** for default building, like in the following snipped.
+The first step is to enable this feature in `Cargo.toml`: add the **EVENT_RECORDER** feature to your default features, as in the following snippet.
 
 
 ```toml
@@ -16,14 +16,14 @@ Once you do this, any program that uses AppCUI will enable a special hotkey `Ctr
 
 <img src="img/event_recorder.png" width=400/>
 
-You can use this window to perform the following action:
-1. Add a new state (by typeing its name and pressing `Enter`) - this wil efectivelly add a new `Paint` and `ChackHash` commands
-2. Enable automated mode (via shortkey `F9`). Enabling auto record mode will efectively check whenever the screen changes because of the action performed and automatiicaly add a `Paint` and `CheckHash` commands. It will also filter out all other raw events (related to key strokes and mouse).
-3. Clear all events recorded up to this moment (via hotket `F8`)
+You can use this window to perform the following actions:
+1. Add a new state (by typing its name and pressing `Enter`)—this will effectively add new `Paint` and `CheckHash` commands.
+2. Enable automated mode (via the shortcut `F9`). Enabling auto-record mode will effectively detect whenever the screen changes because of an action performed and automatically add `Paint` and `CheckHash` commands. It will also filter out all other raw events (related to keystrokes and the mouse).
+3. Clear all events recorded up to this moment (via the hotkey `F8`).
 
-The tipical way of using this feature is as follows:
-* enable the feature from `cargo.toml`
-* run you application
-* if you prefer to do this manually, perform certain action that change the state of the application, then press `Ctrl+Alt+Space` and in the configuration menu type the name of the new state and hit `Enter`.
-* if you prefer automated mode, press `Ctrl+Alt+Space` and enable automatic mode via `F9` short key.
-* Once you finish doing your scenario, exit the application. At that point a file named `events.txt` will be dropped near your application. You can use its content as part of a unit test or for debug purposes.
+The typical way of using this feature is as follows:
+* Enable the feature from `Cargo.toml`.
+* Run your application.
+* If you prefer to do this manually, perform actions that change the state of the application, then press `Ctrl+Alt+Space` and, in the configuration menu, type the name of the new state and press `Enter`.
+* If you prefer automated mode, press `Ctrl+Alt+Space` and enable automatic mode via the `F9` shortcut.
+* Once you finish your scenario, exit the application. At that point a file named `events.txt` will be written next to your application. You can use its content as part of a unit test or for debugging.
