@@ -1,4 +1,4 @@
 # Getting started
 
-In this chapter we will introduce `AppCUI` framework and write a
-first (very simplistic) application in Rust.
+In this chapter we will introduce the `AppCUI` framework and write your
+first (very simple) application in Rust.

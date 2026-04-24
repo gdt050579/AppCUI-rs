@@ -3,10 +3,10 @@
 Let's start by building a simple window that prints `Hello World` 
 on the screen.
 
-Firts, make sure that you have the following dependency added in your
-project `cargo.toml` file:
+First, make sure that you have the following dependency added to your
+project's `Cargo.toml` file:
 
-```ini
+```toml
 [dependencies]
 appcui = <version>
 ```
@@ -31,7 +31,9 @@ fn main() -> Result<(), appcui::system::Error> {
     Ok(())
 }
 ```
-or using macros to compact the code:
+
+Or use macros to make the code more compact:
+
 ```rs
 use appcui::prelude::*;
 
@@ -49,4 +51,4 @@ After compiling and executing this code you should see something like this:
 
 <img src="img/hello_world.png" width=300/>
 
-**Remarks**: Keep in mind that depending on your terminal and other settings this image might look differently.
+**Note:** Depending on your terminal and other settings, the result may look different from the screenshot.
