@@ -1,7 +1,7 @@
-# Multi Threading
+# Multi-threading
 
-While AppCUI works on a single thread, the multi-threading support is available in some scenarios such as:
+While AppCUI runs on a single thread, multi-threading support is available in some scenarios, such as:
 - Timers
 - Background tasks
 
-**Remarks**: Multi-threading support relies heavely on channels and the way terminals are implemented on the current operating system. This means that some features might not work as expected on some terminals (in particular if they are not adapted to work with multiple threads).
+**Remarks:** Multi-threading support relies heavily on channels and on how terminals are implemented on the current operating system. Some features might not work as expected on some terminals, in particular if they are not designed for use with multiple threads.

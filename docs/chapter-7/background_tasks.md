@@ -1,28 +1,28 @@
 # Background Tasks
 
-A background task is a thread that can comunicate with the main AppCUI threat and send/receive information from it, just like in the following diagram:
+A background task is a thread that can communicate with the main AppCUI thread and exchange information with it, as in the following diagram:
 
 <img src="img/background_task.png" />
 
 To start a background task, use the following command:
 
 ```rs
-pub struct BackgroundTask<T,T>
-where: 
-    T: Send + 'static, 
-    R: Send + 'static 
+pub struct BackgroundTask<T, R>
+where
+    T: Send + 'static,
+    R: Send + 'static,
 { ... }
 
 impl<T: Send, R: Send> BackgroundTask<T, R> {
-    pub fn run(task: fn(conector: &BackgroundTaskConector<T, R>), 
-               receiver: Handle<Window>) -> Handle<BackgroundTask<T, R>> 
+    pub fn run(task: fn(conector: &BackgroundTaskConector<T, R>),
+               receiver: Handle<Window>) -> Handle<BackgroundTask<T, R>>
     {...}
 }
 ```
 
 where:
-* `T` represents the type that will be send from the background thread to the main thread (the thread where AppCUI runs). It is usually an enum that reflects a status (e.g. precentage of the task) or a query (information needed by the background thread)
-* `R` represent the response for a query (meaning that if the background thread ask the main thread using type **T**, the reply will be of type **R**)
+* `T` is the type sent from the background thread to the main thread (where AppCUI runs). It is usually an enum that reflects status (for example, a percentage of work done) or a query payload the main thread should interpret.
+* `R` is the response type for a query: when the background thread asks the main thread with a value of type **T**, the main thread answers with a value of type **R** (see `query` below).
 
 A `BackgroundTask` object has the following methods:
 
@@ -41,12 +41,12 @@ A `BackgroundTaskConector<T, R>` is an object that can be used to send/receive i
 | Method          | Description                                                                                                                                                                                                                                                                                                                                                                                  |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `notify(...)`   | Sends an object of type **T** from the background thread to the main thread                                                                                                                                                                                                                                                                                                                  |
-| `query(...)`    | Sends an object of type **T** from the main thread to the background thread and waits until the main thread responds with an object of type **R**                                                                                                                                                                                                                                            |
-| `should_stop()` | Returns `true` if the background thread should stop (meaning that the main thread requested the background thread to stop) or `false` otherwise. This method also handle **Pause** and **Resume** requests (meaning that if the main thread has requested a **pause** this method will wait until the main thread will request a **resume** or will request a stop of the background thread) |
+| `query(...)`    | Sends an object of type **T** from the background thread to the main thread and blocks until the main thread responds with **`R`**. The method returns `Option<R>` (`None` if the send or receive fails).                                                                                                                                                                                                                                            |
+| `should_stop()` | Returns `true` if the background thread should stop (the main thread requested a stop), or `false` otherwise. This method also handles **Pause** and **Resume**: if the main thread requested a **pause**, it blocks until the main thread requests **resume** or **stop**. |
 
 ## Events
 
-The `BackgroundTaskEvents` event handler must be implementd on a window to receive events from a background task. It has the following methods:
+The `BackgroundTaskEvents` handler must be implemented on a window to receive events from a background task. It defines the following methods:
 
 ```rs
 trait BackgroundTaskEvents<T: Send+'static, R: Send+'static> {
@@ -74,19 +74,19 @@ trait BackgroundTaskEvents<T: Send+'static, R: Send+'static> {
 
 ## Flow
 
-An usual flow for a background task is the following:
+A typical flow for a background task is the following:
 1. The main thread starts a background task using the `BackgroundTask::run(...)` method
-2. The window that receives this background task events should overwrite the `BackgroundTaskEvents<T,R>` event handler
+2. The window that receives background task events should implement the `BackgroundTaskEvents<T, R>` trait
 3. The background thread will start and will send information to the main thread using the `BackgroundTaskConector::notify(...)` method
 4. The background thread should check from time to time if the main thread requested a stop or a pause (via the `BackgroundTaskConector::should_stop()` method)
-5. The main thread will be called via `BackgroundTaskEvents` event handler with the information sent by the background thread
+5. The main thread is notified through the `BackgroundTaskEvents` implementation when the background thread sends data
 
 **Example**
 
-1. Create the coresponding type **T** and **R** that will be send between the main thread and the background thread:
+1. Create the corresponding types **T** and **R** that will be exchanged between the main thread and the background thread:
     ```rs
     enum TaskStatus {
-        StartWithTotaltems(u64),
+        StartWithTotalItems(u64),
         Progress(u64),
         AskToContinue,
     }
@@ -108,7 +108,7 @@ An usual flow for a background task is the following:
         // send a start message and notify about the total items
         // that need to be processed by the background thread
         let total_items = 100;
-        conector.notify(TaskStatus::StartWithTotaltems(total_items));
+        conector.notify(TaskStatus::StartWithTotalItems(total_items));
 
         // start processing items
         for crt in 0..total_items {
@@ -121,7 +121,7 @@ An usual flow for a background task is the following:
             // if needed ask the main thread if it should continue
             // this part is optional
             if crt % 10 == 0 {
-                if conector.query(TaskStatus::AskToContinue) == Response::Stop {
+                if conector.query(TaskStatus::AskToContinue) == Some(Response::Stop) {
                     break;
                 }
             }
@@ -152,7 +152,7 @@ An usual flow for a background task is the following:
             // called when the background task is finished
             EventProcessStatus::Processed
         }
-        fn on_query(&mut self, value: TaskStatus, task: &BackgroundTask<Status, Response>) -> Response {
+        fn on_query(&mut self, value: TaskStatus, task: &BackgroundTask<TaskStatus, Response>) -> Response {
             // return a response to the query
             Response::Continue
         }

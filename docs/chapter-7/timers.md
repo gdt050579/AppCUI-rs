@@ -2,15 +2,15 @@
 
 Timers are internal AppCUI mechanisms that allow each control to receive a signal at a specified interval. This signal can be used to update the control's content, to animate it, or to perform other actions. 
 
-Each timer has its own thread that sends a signal to the control at a specified interval. Because of this, the total number of timers that can be used in an application is limited. By default, an application can use up to 4 timers. This number can be increased by using the `.timers_count(count)` method from the `App` builder, but it can not be more than 255. 
+Each timer has its own thread that sends a signal to the control at a specified interval. Because of this, the total number of timers that can be used in an application is limited. By default, an application can use up to 4 timers. This number can be increased by using the `.timers_count(count)` method from the `App` builder, but it cannot be more than 255.
 
-When a control is destroyes, if it has a timer associated with it, that timer will also be closed and the slot associated with it released.
+When a control is destroyed, if it has a timer associated with it, that timer is also closed and the slot is released.
 
-To use a timer, you will need the following things:
-1. access the control timer via the `.timer()` method
-2. implement `TimerEvents` trait for the control to get notification when the timer signal is received
+To use a timer, you need the following:
+1. Access the control timer via the `.timer()` method.
+2. Implement the `TimerEvents` trait for the control to receive notifications when the timer fires.
 
-The timer events is define as follows:
+The `TimerEvents` trait is defined as follows:
 ```rust
 pub trait TimerEvents {
     fn on_start(&mut self) -> EventProcessStatus {
@@ -33,9 +33,9 @@ pub trait TimerEvents {
 }
 ```
 
-The `ticks` variable represents the number of times the timer has been triggered. Whenever the timer starts this variable is set to 0, and them it is incremented each time the timer is triggered.
+The `ticks` variable represents the number of times the timer has fired. Whenever the timer starts, this value is set to `0`, and it is incremented each time the timer fires.
 
-**Remarks**: It is important to note that if you must return `EventProcessStatus::Process` from these methods if you want AppCUI framework to redraw itself (this is usually the case if you are updating a control context in the timer event).
+**Remarks:** Return `EventProcessStatus::Processed` from these methods when you want AppCUI to redraw (this is usually the case if you update control content in the timer callback).
 
 ## Timer object
 
@@ -45,19 +45,19 @@ The following methods are available for a timer:
 
 | Method              | Description                                                                                                                                                                                                                                   |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `start(...)`        | Starts the timer with the specified interval and reset the internal **tick count** to 0. If this is the first time that timer is started, a thread will also be created (otherwise the existing thread associated with the timer will be used |
-| `pause()`           | Pauses the timer. The timer thread will also be paused (but not terminated)                                                                                                                                                                   |
-| `resume()`          | Resumes the timer after it was paused                                                                                                                                                                                                         |
-| `stop()`            | Stops the timer. The timer thread will be terminated and the slot will be freed (meaning that other object can use that slot for its own timer)                                                                                               |
-| `set_interval(...)` | Sets the interval for the timer. If the timer is already started, the new interval is applied imediately. Otherwise, the new interval will be use the moment that timer is being started or resumed                                           |
+| `start(...)`        | Starts the timer with the specified interval and resets the internal **tick count** to `0`. If this is the first time the timer is started, a thread is also created; otherwise the existing thread for that timer is reused. |
+| `pause()`           | Pauses the timer. The timer thread is paused but not terminated.                                                                                                                                                                   |
+| `resume()`          | Resumes the timer after it was paused.                                                                                                                                                                                                         |
+| `stop()`            | Stops the timer. The timer thread is terminated and the slot is freed so another control can use it for its own timer.                                                                                               |
+| `set_interval(...)` | Sets the interval for the timer. If the timer is already running, the new interval applies immediately; otherwise it takes effect the next time the timer is started or resumed.                                           |
 | `is_paused()`       | Returns `true` if the timer is paused, `false` otherwise                                                                                                                                                                                      |
 | `is_running()`      | Returns `true` if the timer is started, `false` otherwise                                                                                                                                                                                     |
 
-Typical a timer is being used like this:
+Typically a timer is used like this:
 ```rust
 // assuming that we run in a control context (e.g. self refers to a control)
 if let Some(timer) = self.timer() {
-    timer.start(Duration::with_seconds(1)); // start the timer with 1 second interval
+    timer.start(Duration::from_secs(1)); // start the timer with a 1 second interval
 }
 ```
 
@@ -93,7 +93,7 @@ impl TimerEvents for MyWin {
         if let Some(lb) = self.control_mut(h) {
             lb.set_caption(&text);
         }
-        // return EventProcessStatus::Process to repaint controls
+        // return EventProcessStatus::Processed to repaint controls
         EventProcessStatus::Processed
     }
 }
