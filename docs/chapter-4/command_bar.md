@@ -4,13 +4,13 @@ A command bar is a bar (on the bottom part of a desktop and on top of every wind
 
 <img src="img/command_bar.png" width=400/>
 
-The command bar is unique per application. This means, that you need to enable it when a new application is created. A tipical way to do this is by using `.command_bar()` method when building an application, like in the following snippet:
+The command bar is unique per application. This means that you need to enable it when a new application is created. A typical way to do this is by using the `.command_bar()` method when building an application, as in the following snippet:
 
 ```rust
-let mut app = App.App::new().command_bar().build()?;
+let mut app = App::new().command_bar().build()?;
 ```
 
-Once you enabled the command bar, you will need to implement `CommandBarEvents` on your window or custom control, and you will also need to add a list of commands when you create your window and/or custom control. A tipical template of these flows look like this:
+Once you have enabled the command bar, you will need to implement `CommandBarEvents` on your window or custom control, and you will also need to add a list of commands when you create your window and/or custom control. A typical template for this flow looks like this:
 
 ```rust
 #[Window(events = CommandBarEvents, commands=[Command_1, Command_2 ... Command_n])]
@@ -28,13 +28,13 @@ impl CommandBarEvents for MyWin {
 }
 ```
 
-Its also important to note that `on_update_commandbar` is being called only if the current focus (or one of its children) has focus. This implies that except for the case where a modal window is opened, this method will always be called for the desktop object. 
+It is also important to note that `on_update_commandbar` is called only if the current focus (or one of its children) has focus. This implies that, except when a modal window is opened, this method will always be called for the desktop object.
 
-Whenever the focus changes, the command bar is clear and the method `on_update_commandbar` is being recall for each control from the focused one to its oldest ancestor (in most cases, the desktop).
+Whenever the focus changes, the command bar is cleared and the method `on_update_commandbar` is invoked again for each control from the focused control up to its oldest ancestor (in most cases, the desktop).
 
-You can always request an update to the command bar if by calling the method `.request_update()` that every control should have. This method will force AppCUI to recall `on_update_commandbar` from the focused control to its oldest ancestor. Keep in mind that this command will not neccesarely call the `on_update_commandbar` for the control that calls `request_update` , unless that control has the focus.
+You can always request an update to the command bar by calling the `.request_update()` method that every control has. This method will force AppCUI to call `on_update_commandbar` again from the focused control up to its oldest ancestor. Keep in mind that this will not necessarily call `on_update_commandbar` for the control that calls `request_update`, unless that control has the focus.
 
-All of the command that you add via the `commands` attribute, will be automatically added in a module (with the same name as you window or control, but lowercased) under the enum `Commands`. 
+All commands that you add via the `commands` attribute are automatically added to a module (with the same name as your window or control, but lowercased) under the enum `Commands`. 
 
 ## Example
 

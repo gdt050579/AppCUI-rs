@@ -20,11 +20,11 @@
 
 ## Macro build
 
-The following parameters are accepted by `menuitem!` when building a command menu item:
+The following parameters are accepted by `menuitem!` when building a separator menu item:
 
 | Parameter name | Type   | Positional parameter | Purpose                                                                                                  |
 | -------------- | ------ | -------------------- | -------------------------------------------------------------------------------------------------------- |
-| `type`         | String | **No**               | The type of the item (for a command item if this filed is being specified its value must be `separator`) |
+| `type`         | String | **No**               | The type of the item (for a separator item, if this field is specified, its value must be `separator`). |
 
 ## Events
 

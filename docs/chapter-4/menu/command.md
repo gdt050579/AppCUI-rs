@@ -28,10 +28,10 @@ The following parameters are accepted by `menuitem!` when building a command men
 
 | Parameter name                                 | Type   | Positional parameter                  | Purpose                                                                                                                                                                                                                                            |
 | ---------------------------------------------- | ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `text` or `caption`                            | String | **Yes** (first postional parameter)   | The caption (text) of the command. If the caption contains the special character `&` the next character after that will act as a short key (meaning that pressing that character while that menu is opened is equivalent to clicking on that item) |
+| `text` or `caption`                            | String | **Yes** (first positional parameter)   | The caption (text) of the command. If the caption contains the special character `&`, the next character after it acts as a shortcut (meaning that pressing that character while that menu is open is equivalent to clicking that item). |
 | `key` or `shortcut` or `shortcutket`           | String | **Yes** (second positional parameter) | The shortcut associated with the command. If not specified it will be considered `Key::None`                                                                                                                                                       |
 | `cmd` or `cmd-id` or `command` or `command-id` | String | **Yes** (third positional parameter)  | The associated command id for this item                                                                                                                                                                                                            |
-| `type`                                         | String | **No**                                | The type of the item (for a command item if this filed is being specified its value must be `command`)                                                                                                                                             |
+| `type`                                         | String | **No**                                | The type of the item (for a command item, if this field is specified, its value must be `command`).                                                                                                                                             |
 | `class`                                        | String | **No**                                | The name of the class where the menu is being implemented                                                                                                                                                                                          |
 | `enable` or `enabled`                          | Bool   | **No**                                | Use this to disable or enable a menu item                                                                                                                                                                                                          |
 
@@ -47,7 +47,7 @@ trait MenuEvents {
 
 ## Methods
 
-The following methods are availble for a `menu::Command` object:
+The following methods are available for a `menu::Command` object:
 
 | Method              | Purpose                                                                                                                                                                                                                                                               |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

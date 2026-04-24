@@ -1,10 +1,10 @@
 # Custom Desktop
 
-A custom desktop is an user defined desktop where various method can be overwritten and system events can be processed. 
+A custom desktop is a user-defined desktop where various methods can be overridden and system events can be processed.
 
 <img src="img/custom_desktop.png" width=500/>
 
-To build a custom Desktop that supports event handling, you must use a special procedural macro call `Desktop`, defined in the the following way:
+To build a custom desktop that supports event handling, you must use a special procedural macro called `Desktop`, defined in the following way:
 
 ```rs
 #[Desktop(events=..., overwrite=... )]
@@ -22,11 +22,11 @@ and an `event trait` can be one of the following:
 * CommandBarEvents
 * DesktopEvents
 
-and the `overwrite` atribute allows you to overwrite the following traits:
+and the `overwrite` attribute allows you to override the following traits:
 * OnPaint
 * OnResize
 
-In other words, a custom Desktop object can have specific logic for paint and for scenarious where it gets resized and can process its internal events as well as events from menus and command bar.
+In other words, a custom desktop object can have specific logic for painting and for scenarios where it is resized, and it can process its internal events as well as events from menus and the command bar.
 
 ## Events
 
@@ -41,9 +41,9 @@ pub trait DesktopEvents {
 ```
 
 These methods have the following purpose:
-* `on_start` is being called once (after the AppCUI framework was started). A desktop object is being constructed before AppCUI framework starts. As such, you can not instantiate other objects such as menus, windows, etc in its constructor. However, you can do this by overwriting the `on_start` method.
-* `on_close` is called whenever a desktop is being closed (usually when you pressed `Escape` key on a desktop). You can use this to performa some aditional validations (such sa saving all files, closing various handles, etc)
-* `on_update_window_count` is being called whenever a new window is being added or removed from the desktop. You can use this method to re-arange the remaining methods.
+* `on_start` is called once (after the AppCUI framework has started). A desktop object is constructed before the AppCUI framework starts. As such, you cannot instantiate other objects such as menus or windows in its constructor. However, you can do that by overriding the `on_start` method.
+* `on_close` is called whenever a desktop is being closed (usually when you press the `Escape` key on a desktop). You can use this to perform some additional validations (such as saving all files, closing various handles, etc.).
+* `on_update_window_count` is called whenever a new window is added or removed from the desktop. You can use this method to rearrange the remaining windows.
 
 ## Using the custom desktop
 
@@ -52,24 +52,24 @@ To use the custom desktop, use the `.desktop(...)` method from the **App** like 
 ```rs
 #[Desktop(events=..., overwrite=...)]
 struct MyDesktop {
-    // aditional fields
+    // additional fields
 }
 impl MyDesktop {
     fn new()->Self {...}
-    // aditional methods
+    // additional methods
 }
-// aditional implementation for events and overwritten traits
+// additional implementation for events and overridden traits
 
 fn main() -> Result<(), appcui::system::Error> {
     let a = App::new().desktop(MyDesktop::new()).build()?;
-    // do aditional stuff with the application
+    // do additional setup with the application
     // such as add some windows into it
     a.run();
     Ok(())
 }
 ```
 
-It is important to notice that usually it is prefered that the entire logic to instantiate a desktop and add windows / menus or other settings to be done via `on_start` method. From this point of view, the code from main becomes quite simple:
+It is important to note that it is usually preferable for the entire logic that instantiates a desktop and adds windows, menus, or other settings to run in the `on_start` method. From that point of view, the code in `main` becomes quite simple:
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
@@ -80,23 +80,23 @@ fn main() -> Result<(), appcui::system::Error> {
 
 ## Methods
 
-Besides the [Common methods for all Controls](../chapter-3/common_methods.md) a desktop also has the following aditional methods:
+Besides the [Common methods for all Controls](../chapter-3/common_methods.md), a desktop also has the following additional methods:
 
 | Method                 | Purpose                                                                                                                                                                                                                                                                                                                                    |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `terminal_size()`      | Returns the size of the current terminal                                                                                                                                                                                                                                                                                                   |
-| `desktop_rect()`       | Returns the actual rectangle for the desktop. If application bar and command bar are prezent, the desktop rectangle provides the visible side of the desktop. For example, if the terminal size is `80x20` and we also have a coomand bar and a application bar, then the desktop rectangle will be `[Left:0, Top:1, Right:79, bottom:18]` |
+| `desktop_rect()`       | Returns the actual rectangle for the desktop. If the application bar and command bar are present, the desktop rectangle describes the visible area of the desktop. For example, if the terminal size is `80x20` and we also have a command bar and an application bar, then the desktop rectangle might be `[Left:0, Top:1, Right:79, Bottom:18]` |
 | `add_window(...)`      | Adds a new window to the desktop                                                                                                                                                                                                                                                                                                           |
-| `arrange_windows(...)` | Arranges windows on the desktop. 4 methods are provided: `Cascade`, `Verical`, `Horizontal` and `Grid`                                                                                                                                                                                                                                     |
+| `arrange_windows(...)` | Arranges windows on the desktop. Four methods are provided: `Cascade`, `Vertical`, `Horizontal`, and `Grid`.                                                                                                                                                                                                                                     |
 | `close()`              | Closes the desktop and the entire app                                                                                                                                                                                                                                                                                                      |
-| `active_window()`      | Returns a handle to the focused windows                                                                                                                                                                                                                                                                                                    |
+| `active_window()`      | Returns a handle to the focused window                                                                                                                                                                                                                                                                                                    |
 | `window_mut(...)`      | Returns a mutable reference to a window with the specified handle. If the handle is not valid, an error is returned.                                                                                                                                                                                                                       |
 | `window(...)`          | Returns a reference to a window with the specified handle. If the handle is not valid, an error is returned.                                                                                                                                                                                                                               |
 
 
 ## Key associations
 
-A desktop intercepts the following keys (if they are not process at window level):
+A desktop intercepts the following keys (if they are not processed at window level):
 
 | Key                             | Purpose                                                                                                                |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -104,14 +104,14 @@ A desktop intercepts the following keys (if they are not process at window level
 | `Shift+Tab` or `Ctrl+Shift+Tab` | Changes the focus to the previous window                                                                               |
 | `Escape`                        | Calls the `on_close` method and if the result is `ActionRequest::Allow` closes the desktop and the entire application. |
 
-If hotkeys are present for window, `Alt+{hotkey}` is checked by the desktop window and the focused is moved to that window that has that specific hotkey association.
+If hotkeys are present for windows, `Alt+{hotkey}` is handled by the desktop, and the focus is moved to the window that has that hotkey association.
 
 
 ## Example
 
-The following example created a custom desktop that that prints `My desktop` on the top-left side of the screen with white color on a red background. The desktop has one command (`AddWindow`) to add new windows via key `Insert`.
+The following example creates a custom desktop that prints `My desktop` in the top-left corner of the screen in white on a red background. The desktop has one command (`AddWindow`) to add new windows via the `Insert` key.
 
-At the same time, `DesktopEvents::on_update_window_count(...)` is intercepted and whenever a new window is being added, it reorganize all windows in a grid.
+At the same time, `DesktopEvents::on_update_window_count(...)` is intercepted, and whenever a new window is added, it rearranges all windows in a grid.
 
 ```rs
 use appcui::prelude::*;

@@ -24,12 +24,12 @@ The following parameters are accepted by `menuitem!` when building a command men
 
 | Parameter name        | Type   | Positional parameter                | Purpose                                                                                                                                                                                                                                            |
 | --------------------- | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `text` or `caption`   | String | **Yes** (first postional parameter) | The caption (text) of the submenu. If the caption contains the special character `&` the next character after that will act as a short key (meaning that pressing that character while that menu is opened is equivalent to clicking on that item) |
-| `type`                | String | **No**                              | The type of the item (for a sub-menu item if this filed is being specified its value must be `submenu`)                                                                                                                                            |
+| `text` or `caption`   | String | **Yes** (first positional parameter) | The caption (text) of the submenu. If the caption contains the special character `&`, the next character after it acts as a shortcut (meaning that pressing that character while that menu is open is equivalent to clicking that item). |
+| `type`                | String | **No**                              | The type of the item (for a submenu item, if this field is specified, its value must be `submenu`).                                                                                                                                            |
 | `class`               | String | **No**                              | The name of the class where the menu is being implemented                                                                                                                                                                                          |
 | `enable` or `enabled` | Bool   | **No**                              | Use this to disable or enable a menu item                                                                                                                                                                                                          |
 
-**Remarks**: Using the `class` attribute in a sub-menu will trigger an inheritence of that attribute for all sub items and sub menus. Check out [Build a menu with macros](macro_builder.md) for more details.
+**Remarks:** Using the `class` attribute in a submenu will inherit that attribute for all subitems and submenus. See [Build a menu with macros](macro_builder.md) for more details.
 
 
 ## Events
@@ -41,8 +41,8 @@ trait MenuEvents {
     fn on_menu_open(&self, menu: &mut Menu) {
         // called whenever a menu is being opened
         // by AppCUI framework
-        // This method can be use to change 
-        // certain menu related aspects, such as
+        // This method can be used to change
+        // certain menu-related aspects, such as
         // - enable/disable menu items
         // - add new items
     }
@@ -50,7 +50,7 @@ trait MenuEvents {
 
 ## Methods
 
-The following methods are availble for a `menu::SubMenu` object:
+The following methods are available for a `menu::SubMenu` object:
 
 | Method             | Purpose                                                                                                                                                                                                                                                               |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

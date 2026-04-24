@@ -1,6 +1,6 @@
 # Build a menu with macros
 
-Builing a menu is not a complicated task, but it envolves multiple operations over the menu items. Let's consider the folowing menu :
+Building a menu is not a complicated task, but it involves multiple operations over the menu items. Let's consider the following menu:
 - Items:
   - `Colors` -> a sub-menu that contains the following sub-items:
     - `Red` (a single choice sub-item)
@@ -15,17 +15,17 @@ Builing a menu is not a complicated task, but it envolves multiple operations ov
   - a separator
   - `Exit` (a command with no shortcut associated)
   
-We will also considered that the following commands were added via the `command` attribute: 
+We will also assume that the following commands were added via the `commands` attribute:
 ```rs
-#[Window(... commands=Red+Green+Blue+Copy+Paste+Cut+PasteSpecial+Exit)]
-struct MyWindow { /* data memebers */ }
+#[Window(..., commands = Red+Green+Blue+Copy+Paste+Cut+PasteSpecial+Exit)]
+struct MyWindow { /* data members */ }
 ```
 
 Let's see several ways this menu can be created.
 
 ## Build this menu without any macros
 
-``` rs
+```rs
 let mut m = Menu::new();
 // build the color submenu
 let mut m_colors = Menu::new();
@@ -94,7 +94,7 @@ m.add(menuitem!("---"));
 m.add(menuitem!("Exit,cmd:Exit,class:MyWin"));
 ```
 
-The code is more readable, but we can make it even more smaller.
+The code is more readable, but we can make it even smaller.
 
 ## Building a menu using the menu! macro
 
@@ -118,9 +118,9 @@ let m = menu!("items=[
     { Exit,cmd:Exit,class:MyWin }
 ]");
 ```
-Notice that in this case, the description of a menu item looks is more condense (and easier to read) and it looks like a JSON files.
+Notice that in this case, the description of a menu item is more condensed (and easier to read) and looks like a JSON file.
 
-However, there are still some duplicate data in this form (for example: attribute `class` with value `MyWin` is present for each of the actionable items). In this case we can use the inherit properties of a menu, an specify this item only once and reduce the code even more by adding the `class` attribute to the top level menu description and we get the most compressed way of quickly creating a menu.
+However, there is still some duplicated data in this form (for example, the attribute `class` with value `MyWin` is present for each actionable item). In this case we can use the inherited properties of a menu and specify this attribute only once, reducing the code further by adding the `class` attribute to the top-level menu description. That yields the most compact way to create a menu quickly.
 
 ```rs
 let m = menu!("class:MyWin,items=[
@@ -140,4 +140,4 @@ let m = menu!("class:MyWin,items=[
     { Exit,cmd:Exit }
 ]");
 ```
-**Remarks**: Keep in mind that this method will not allow you obtain any menu item handle. If they are neccesary to change some attributes (like enable/disable status) you will not be able to do so. However, if your menu only has commands, or checboxes and assigning a command is enough for you to react to an event, this is the prefered way to create a menu.
+**Remarks:** Keep in mind that this approach will not let you obtain any menu item handles. If handles are necessary to change attributes (such as enable/disable status), you will not be able to do so. However, if your menu only has commands or checkboxes, and assigning a command is enough for you to react to an event, this is the preferred way to create a menu.

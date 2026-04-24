@@ -4,7 +4,7 @@ A menu is a list of items (that represents commands, checkboxes and single choic
 
 <img src="img/menu.png" width=400/>
 
-To create a menu, use `Menu::new()` method or the macro `menu!` (this can be used to quickly create complex static menus). 
+To create a menu, use the `Menu::new()` method or the `menu!` macro (this can be used to quickly create complex static menus). 
 
 ```rs
 let m = Menu::new()
@@ -90,7 +90,7 @@ impl MyWin {
 
 ## Events
 
-Using a menu implies that you will need to implement `MenuEvents` into the desktop / window or a custom control to receive the associated action from a menu. 
+Using a menu implies that you will need to implement `MenuEvents` on the desktop, window, or a custom control to receive the associated action from a menu. 
 
 ### MenuEvents Trait
 
@@ -167,7 +167,7 @@ impl AppBarEvents for MyWindow {
 
 ## Methods
 
-The following methods are available for every `Menu` object
+The following methods are available for every `Menu` object:
 
 | Method         | Purpose                                                               |
 | -------------- | --------------------------------------------------------------------- |
@@ -175,4 +175,4 @@ The following methods are available for every `Menu` object
 | `get(...)`     | Returns an immutable reference to a menu item                         |
 | `get_mut(...)` | Returns a mutable reference to a menu item                            |
 
-Besides this the following [methods](../chapter-3/common_methods.md#menu-related-methods) are available in each control and allow menu manipulation.
+Besides this, the following [methods](../chapter-3/common_methods.md#menu-related-methods) are available on each control and allow menu manipulation.

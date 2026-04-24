@@ -1,15 +1,15 @@
 # Menu Items
 
-Each menu is form out of menu items. AppCUI supports the following menu items:
-- [Command](command.md) : a command (clicking this item will send a command)
-- [CheckBox](checkbox.md) : a item that has two states (`checked` or `unchecked`). Clicking on this item will change the state (from `checked` to `unchecked` and vice-versa) and will send a command.
-- [SingleChoice](single_choice.md) : a item that is part of a group of items from which only one can be selected at a moment of time. Clicking on this item will select it (an implicelely unselect any other selected SingleChoice item from the group) and send a command.
-- [SubMenu](submenu.md) : a item that contains another menu. Clicking on this item will open the sub-menu.
-- [Separator](separator.md): a item that has no input and is represented by a horizontal line that separates groups or commands withing a menu.
+Each menu is formed from menu items. AppCUI supports the following menu items:
+- [Command](command.md): a command (clicking this item will send a command)
+- [CheckBox](checkbox.md): an item that has two states (`checked` or `unchecked`). Clicking this item changes the state (from `checked` to `unchecked` and vice versa) and sends a command.
+- [SingleChoice](single_choice.md): an item that is part of a group from which only one can be selected at a time. Clicking this item selects it (implicitly unselecting any other selected `SingleChoice` item in the group) and sends a command.
+- [SubMenu](submenu.md): an item that contains another menu. Clicking this item opens the submenu.
+- [Separator](separator.md): an item that has no input and is represented by a horizontal line that separates groups or commands within a menu.
 
 ## Macro
 
-All menu items can be build via `menuitem!` macro. The following attributes are can be used:
+All menu items can be built via the `menuitem!` macro. The following attributes can be used:
 
 | Attribute  | Command   | CheckBox  | SingleChoice | Sub-Menu  | Separator |
 | ---------- | --------- | --------- | ------------ | --------- | --------- |
@@ -23,14 +23,14 @@ All menu items can be build via `menuitem!` macro. The following attributes are 
 | `type`     | Yes (opt) | Yes (opt) | Yes (opt)    | Yes (opt) | Yes (opt) |
 | `class`    | Yes (opt) | Yes (opt) | Yes (opt)    | Yes (opt) | Yes (opt) |
 
-The `type` attribute is not optional. If not present , the type of the menu item is determine as follows:
-- a menuitem with only one attribute of type caption that consists only in multiple characters `-` will be consider a `Separator`
-- a menuitem that has the attribute `checked` will be considered a `CheckBox`
-- a menuitem that has the attribute `selected` will be considered a `SingleChoice`
-- a menuitem that has the attribute `items` wil be considered a `SubMenu`
-- otherwise, the menuitem will be considered of type `Command`
+The `type` attribute is not optional. If not present, the type of the menu item is determined as follows:
+- a menu item with only one attribute of type `caption` that consists only of multiple `-` characters will be considered a `Separator`
+- a menu item that has the attribute `checked` will be considered a `CheckBox`
+- a menu item that has the attribute `selected` will be considered a `SingleChoice`
+- a menu item that has the attribute `items` will be considered a `SubMenu`
+- otherwise, the menu item will be considered of type `Command`
 
-Similarly, the attribute `class` can be used to simplify the command value. Typically, the `command` attribute must include a format that resambles the following form:
+Similarly, the `class` attribute can be used to simplify the command value. Typically, the `command` attribute must use a format that resembles the following:
 
 ```rs
 "command='<module-name>::Command::<Command-ID>'"
@@ -46,7 +46,7 @@ To simplify the previous form, one can use the following:
 
 For example - assuming we have the following window:
 ```rust
-#[Window(... commands=Save+Open+New)]
+#[Window(..., commands = Save+Open+New)]
 struct MyWindow { /* data members */ }
 ```
 
@@ -62,4 +62,4 @@ or
 let item = menuitem!("... command=Save, class=MyWindow");
 ```
 
-It is also important to notice that `class` attribute will be inherit (meaning that if you specify it for a menu item that hase sub menus, the sub menu items will inherit it and as such you don't have to add it to their definition).
+It is also important to note that the `class` attribute is inherited (meaning that if you specify it for a menu item that has submenus, the submenu items inherit it, so you do not have to add it to their definitions).

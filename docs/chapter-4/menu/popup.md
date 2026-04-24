@@ -1,12 +1,12 @@
 # Popup Menu
 
-A popup menu is a meniu that is display outside of a application bar (for example a menu that appears when right click is being pressed):
+A popup menu is a menu that is displayed outside of the application bar (for example, a menu that appears when the right mouse button is pressed):
 
 <img src="img/popup.png" width=400/>
 
-**Remarks**: There is no need to enable the mouse bar when creating for a popup menu.
+**Remarks:** There is no need to enable the application bar for a popup menu.
 
-There is no special control for a popup menu. A popup menu is a menu that is being displayed differently. Usually a popup menu is associated with either a window, a custom control or a custom desktop and it implies using the method `show_menu` available on all controls:
+There is no special control for a popup menu. A popup menu is a menu that is displayed in a different way. Usually a popup menu is associated with a window, a custom control, or a custom desktop, and using the `show_menu` method available on all controls:
 
 ```rs
 fn show_menu(&self, handle: Handle<Menu>, x: i32, y: i32, max_size: Option<Size>) {
@@ -14,13 +14,13 @@ fn show_menu(&self, handle: Handle<Menu>, x: i32, y: i32, max_size: Option<Size>
 }
 ```
 where:
-* `handle` is a handle to a menu that was registered via `register_menu(...)` method
-* `x` and `y` are coordonates within the current control where the menu should be displayed. Keep in mind that by default AppCUI will try to position the menu to the bottom-right side of the provided coordonates. However, if the menu does not fit in the available space, it will try to position the menu in a different way so that it is visible on the screen.
-* `max_size` an **Option** that allows one to control the maximum size of a menu. By default, a menu will attemp to increase its width and height to show all items while being visible on the screen. This behavior can be overwritten by providing a maximum width and height (keep in mind that the maximum width has to be at least **5** characters - to have at least **3** items visible)
+* `handle` is a handle to a menu that was registered via the `register_menu(...)` method.
+* `x` and `y` are coordinates within the current control where the menu should be displayed. By default, AppCUI will try to position the menu to the bottom-right of the provided coordinates. If the menu does not fit in the available space, it will try another position so that it remains visible on the screen.
+* `max_size` is an **Option** that controls the maximum size of a menu. By default, a menu will attempt to grow its width and height to show all items while staying visible on the screen. This behavior can be overridden by providing a maximum width and height (the maximum width must be at least **5** characters so that at least **3** items are visible).
 
 ## Example
 
-The following example creates a custom control that can display a popup menu when the use right click the mouse on it:
+The following example creates a custom control that can display a popup menu when the user right-clicks it:
 
 ```rs
 use appcui::prelude::*;

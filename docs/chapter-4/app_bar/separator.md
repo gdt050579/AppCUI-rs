@@ -10,7 +10,7 @@ To create a separator, use `appbar::Separator::new(...)` method. You will also n
 let separator = appbar::Separator::new(0, appbar::Side::Left);
 ```
 
-**Remarks:** Even if a separator does not require aditional processing after it is being created, you would still be required to store that handle in order to be able to show it in the app bar.
+**Remarks:** Even if a separator does not require additional processing after it is created, you still need to store that handle in order to show it in the app bar.
 
 ## Events
 
