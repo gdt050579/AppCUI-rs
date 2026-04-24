@@ -1,7 +1,7 @@
 
 <div align="right">
   <details>
-    <summary >🌐 Language</summary>
+    <summary>🌐 Language</summary>
     <div>
       <div align="center">
         <a href="https://openaitx.github.io/view.html?user=gdt050579&project=AppCUI-rs&lang=en">English</a>
@@ -24,7 +24,7 @@
         | <a href="https://openaitx.github.io/view.html?user=gdt050579&project=AppCUI-rs&lang=tr">Türkçe</a>
         | <a href="https://openaitx.github.io/view.html?user=gdt050579&project=AppCUI-rs&lang=vi">Tiếng Việt</a>
         | <a href="https://openaitx.github.io/view.html?user=gdt050579&project=AppCUI-rs&lang=id">Bahasa Indonesia</a>
-        | <a href="https://openaitx.github.io/view.html?user=gdt050579&project=AppCUI-rs&lang=as">অসমীয়া</
+        | <a href="https://openaitx.github.io/view.html?user=gdt050579&project=AppCUI-rs&lang=as">অসমীয়া</a>
       </div>
     </div>
   </details>
@@ -40,7 +40,7 @@
 
 ![Windows Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/windows.yml/badge.svg)
 ![Linux Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/linux.yml/badge.svg)
-![MacOS Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/macos.yml/badge.svg)
+![macOS Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/macos.yml/badge.svg)
 ![Code Coverage](https://gist.githubusercontent.com/gdt050579/f7d7e7d56b2725a3b33a265e8a9d8e9c/raw/coverage.svg)
 ![License](https://img.shields.io/github/license/gdt050579/AppCUI-rs)
 [![Crates.io](https://img.shields.io/crates/v/appcui.svg)](https://crates.io/crates/appcui)
@@ -55,18 +55,18 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 
 ## ✨ Features
-- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, combo boxes, date/time pickers, color pickers, tabs, accordeons, etc.). A full list of controls can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock_controls.html) 
-- [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.). A full list of controls can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock_controls.html) 
+- [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors, or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
 - [x] menus and toolbars
-- [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, MacOS via termios)
+- [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, macOS via termios)
 - [x] multi-threading support to allow background tasks
 - [x] timers
 - [x] mouse support
 - [x] clipboard support
 - [x] color themes
 - [x] support for Unicode characters
-- [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc)
-- [x] true colors support (24 bits per pixel) for terminals that supports it.
+- [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc.)
+- [x] true-color support (24 bits per pixel) for terminals that support it.
 
 ## 📸 Screenshots 
 
@@ -76,14 +76,14 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 ## 🖥️ Backends
 
-AppCUI supports various backends based on the operating system it is being used for:
+AppCUI supports various backends depending on the operating system:
 
-* **Windows Console** - based on Win32 low level API, design for clasical windows console
-* **Windows VT** - based on ANSI sequances, designed for modern windows virtual terminals
-* **NCurses** - based on NCurses API for linux envinronments
-* **Termios** - based on ANSI sequances and low level APIs for MAC OSX
-* **Web Terminal** - designed for Web implementation (based on webgl)
-* **CrossTerm** - based on the `crossterm` crate, but enabled via a feature flag
+* **Windows Console** - based on the Win32 low-level API, designed for the classical Windows console
+* **Windows VT** - based on ANSI sequences, designed for modern Windows virtual terminals
+* **NCurses** - based on the NCurses API for Linux environments
+* **Termios** - based on ANSI sequences and low-level APIs for macOS
+* **Web Terminal** - designed for web implementations (based on WebGL)
+* **CrossTerm** - based on the `crossterm` crate, enabled via a feature flag
 
 More on the supported backends can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-2/backends.html)
 
@@ -119,7 +119,7 @@ fn main() -> Result<(), appcui::system::Error> {
 }
 ```
 
-or a more compact version using proc-macros:
+Or a more compact version using proc-macros:
 
 ```rs
 use appcui::prelude::*;
@@ -139,15 +139,15 @@ Then run the project with `cargo run`. You should see a window with the title `T
 ## 🧪 Examples
 
 AppCUI-rs comes with a set of examples to help you get started. You can find them in the [examples](examples) folder, including:
-- **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/), [Ram it](examples/ramit/), [PacMan](examples/games/), [Chees](examples/games/), [Connect Four](examples/games/), [2048](examples/games/) or [Tetris](examples/games/)
-- **Utilities** such as [Calculator](examples/calculator/), [CSV Viewer](examples/csv_viewer/), [Temperature Converter](examples/temperature_convertor/) or a [Timer](examples/timer/)
-- **Animations** such as [Matrix](examples/matrix/), [Fractals](examples/fractals/) or [Spiral](examples/spiral/)
+- **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/), [Ram it](examples/ramit/), [PacMan](examples/games/), [Chess](examples/games/), [Connect Four](examples/games/), [2048](examples/games/), or [Tetris](examples/games/)
+- **Utilities** such as [Calculator](examples/calculator/), [CSV Viewer](examples/csv_viewer/), [Temperature Converter](examples/temperature_convertor/), or a [Timer](examples/timer/)
+- **Animations** such as [Matrix](examples/matrix/), [Fractals](examples/fractals/), or [Spiral](examples/spiral/)
 - **Controls**/**Widgets** such as [Button](examples/buttons/), [CheckBox](examples/checkboxes/), [ComboBox](examples/combobox/), [DatePicker](examples/datepicker/), [ListView](examples/listview/), [TreeView](examples/treeview/) and many more.
 - **Dialogs** such as [Notification](examples/notification_dialogs/) or [Input](examples/input_dialog/)
 
 ## 🛠️ A more complex example
 
-Am example that creates a window with a button that when pressed increases a counter.
+An example that creates a window with a button that, when pressed, increases a counter.
 
 ```rust
 use appcui::prelude::*;
@@ -179,11 +179,11 @@ impl ButtonEvents for CounterWindow {
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
         // increase the counter
         self.counter += 1;
-        // create a text that containe the new counter
+        // create a text that contains the new counter
         let text = format!("{}",self.counter);
-        // aquire a mutable reference to the button using its handle
+        // acquire a mutable reference to the button using its handle
         if let Some(button) = self.control_mut(handle) {
-            // set the caption of the button to th new text
+            // set the caption of the button to the new text
             button.set_caption(&text);
         }
         // Tell the AppCUI framework that we have processed this event
@@ -197,7 +197,7 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
     // add a new window (of type CounterWindow) to the application
     a.add_window(CounterWindow::new());
-    // Run AppCUI framework (this wil start the window loop and messaage passing)
+    // Run AppCUI framework (this will start the window loop and message passing)
     a.run();
     Ok(())
 }
@@ -205,7 +205,7 @@ fn main() -> Result<(), appcui::system::Error> {
 
 ## 🛣️ Roadmap
 
-- [x] Basic set of widgets and support for Windows, Linux and MacOS
+- [x] Basic set of widgets and support for Windows, Linux, and macOS
 - [x] WebGL support
 - [ ] OpenGL / SDL / Vulkan support
 - [ ] TextArea support for code highlighting
