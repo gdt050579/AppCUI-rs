@@ -4,6 +4,7 @@
 //! and paint handling.
 
 mod editor;
+mod chunk;
 #[cfg(test)]
 mod tests;
 
