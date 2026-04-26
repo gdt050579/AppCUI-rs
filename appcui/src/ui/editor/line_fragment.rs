@@ -12,7 +12,7 @@ pub(crate) struct LineFragment {
 impl LineFragment {
     /// Inserts `ch` at byte `offset`. `offset` must lie on a UTF-8 boundary.
     /// Returns the byte offset just past the inserted character.
-    fn insert_char(&mut self, offset: u32, ch: char) -> u32 {
+    pub(super) fn insert_char(&mut self, offset: u32, ch: char) -> u32 {
         let off = offset as usize;
         let written = if (ch as u32) < 0x80 {
             self.data.insert(off, ch as u8);
@@ -35,7 +35,7 @@ impl LineFragment {
 
     /// Deletes the single UTF-8 character starting at `offset`.
     /// `offset` must lie on a UTF-8 boundary.
-    fn delete_char(&mut self, offset: u32) {
+    pub(super) fn delete_char(&mut self, offset: u32) {
         let start = offset as usize;
         if start >= self.data.len() {
             return;
@@ -48,7 +48,7 @@ impl LineFragment {
     /// Inserts a UTF-8 byte slice at `offset`.
     /// `buffer` must be valid UTF-8; `offset` must lie on a UTF-8 boundary.
     /// Returns the byte offset just past the inserted bytes.
-    fn insert_buffer(&mut self, offset: u32, buffer: &[u8]) -> u32 {
+    pub(super) fn insert_buffer(&mut self, offset: u32, buffer: &[u8]) -> u32 {
         let off = offset as usize;
         debug_assert!(std::str::from_utf8(buffer).is_ok());
 
@@ -74,7 +74,7 @@ impl LineFragment {
     }
 
     /// Deletes the byte range `range`. Both endpoints must lie on UTF-8 boundaries.
-    fn delete_range(&mut self, range: Range<u32>) {
+    pub(super) fn delete_range(&mut self, range: Range<u32>) {
         let start = range.start as usize;
         let end = range.end as usize;
         if start >= end || end > self.data.len() {
