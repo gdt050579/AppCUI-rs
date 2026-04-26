@@ -1,8 +1,6 @@
-use super::LineFragment;
+use super::{LineFragment, LineChunkSplitter};
 use std::ops::Range;
 
-/// Suggested maximum fragment size used by line storage.
-pub(crate) const LINE_FRAGMENT_THRESHOLD: usize = 4096;
 
 pub(crate) enum LineData {
     Simple(LineFragment),
@@ -14,22 +12,22 @@ pub(crate) struct Line {
     pub(crate) chars: u32,
     pub(crate) is_ascii: bool,
     pub(crate) has_tabs: bool,
-    pub(crate) has_multipline_spread: bool, // e.g. a multiline comment
 }
 
 impl Line {
-    // pub(crate) fn new(data: Vec<u8>) -> Self {
-    //     let fragment = LineFragment::new(data);
-    //     let mut line = Self {
-    //         chars: fragment.chars as u32,
-    //         is_ascii: fragment.is_ascii,
-    //         has_tabs: fragment.has_tabs,
-    //         has_multipline_spread: fragment.has_multipline_spread,
-    //         data: fragment,
-    //     };
-    //     line.refresh_metadata();
-    //     line
-    // }
+    pub(super) fn new(text: &str) -> Self {
+        let ld = if text.len() <= LineChunkSplitter::MAX_CHUNK_SIZE {
+            LineData::Simple(LineFragment::new(text))
+        } else {
+            LineData::List(LineChunkSplitter::new(text).map(LineFragment::new).collect())
+        };
+        Self {
+            data: LineData::Simple(LineFragment::new(text)),
+            chars: text.chars().count() as u32,
+            is_ascii: text.is_ascii(),
+            has_tabs: text.contains('\t'),
+        }
+    }
 
     fn offset_to_fragment(&mut self, offset: u32) -> Option<(&mut LineFragment, u32)> {
         let ofs = offset as usize;
@@ -56,29 +54,29 @@ impl Line {
     }
 
     pub(crate) fn delete_char(&mut self, byte_index: u32) {
-        if let Some((fragment, start)) = self.offset_to_fragment(byte_index) {
-            fragment.delete_char(byte_index - start);
-            self.refresh_metadata();
-        }
+        // if let Some((fragment, start)) = self.offset_to_fragment(byte_index) {
+        //     fragment.delete_char(byte_index - start);
+        //     self.refresh_metadata();
+        // }
     }
 
     pub(crate) fn insert_buffer(&mut self, byte_index: u32, buffer: &[u8]) {
-        if buffer.is_empty() {
-            return;
-        }
-        if let Some((fragment, start)) = self.offset_to_fragment(byte_index) {
-            fragment.insert_buffer(byte_index - start, buffer);
-            self.refresh_metadata();
-        }
+        // if buffer.is_empty() {
+        //     return;
+        // }
+        // if let Some((fragment, start)) = self.offset_to_fragment(byte_index) {
+        //     fragment.insert_buffer(byte_index - start, buffer);
+        //     self.refresh_metadata();
+        // }
     }
 
     pub(crate) fn delete_range(&mut self, range: Range<u32>) {
-        if let Some((fragment, start)) = self.offset_to_fragment(range.start) {
-            let st = range.start - start;
-            let end = range.end - start;
-            fragment.delete_range(st..end);
-            self.refresh_metadata();
-        }
+        // if let Some((fragment, start)) = self.offset_to_fragment(range.start) {
+        //     let st = range.start - start;
+        //     let end = range.end - start;
+        //     fragment.delete_range(st..end);
+        //     self.refresh_metadata();
+        // }
     }
 
     fn refresh_metadata(&mut self) {

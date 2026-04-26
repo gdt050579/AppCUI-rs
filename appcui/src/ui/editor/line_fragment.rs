@@ -2,104 +2,33 @@ use std::ops::Range;
 
 /// A contiguous line fragment with cached metadata.
 pub(super) struct LineFragment {
-    pub(super) data: Vec<u8>, // less than a THRESHOLD (e.g. 4096 bytes)
-    pub(super) chars: u16,
+    pub(super) data: String,
     pub(super) is_ascii: bool,
     pub(super) has_tabs: bool,
     pub(super) has_multiline_spread: bool, // e.g. a multiline comment
 }
 
 impl LineFragment {
-    /// Inserts `ch` at byte `offset`. `offset` must lie on a UTF-8 boundary.
-    /// Returns the byte offset just past the inserted character.
-    pub(super) fn insert_char(&mut self, offset: u32, ch: char) -> u32 {
-        let off = offset as usize;
-        let written = if (ch as u32) < 0x80 {
-            self.data.insert(off, ch as u8);
-            if ch == '\t' {
-                self.has_tabs = true;
-            }            
-            1
-        } else {
-            let mut buffer = [0u8; 4];
-            let encoded = ch.encode_utf8(&mut buffer);
-            let bytes = encoded.as_bytes();
-            self.data.splice(off..off, bytes.iter().copied());
-            self.is_ascii = false;
-            bytes.len()
-        };
-
-        self.chars = self.chars.saturating_add(1);
-        offset + written as u32
+    pub(super) fn new(text: &str) -> Self {
+        Self {
+            data: text.to_string(),
+            is_ascii: true,
+            has_tabs: false,
+            has_multiline_spread: false,
+        }
     }
-
-    /// Deletes the single UTF-8 character starting at `offset`.
-    /// `offset` must lie on a UTF-8 boundary.
-    pub(super) fn delete_char(&mut self, offset: u32) {
-        let start = offset as usize;
-        if start >= self.data.len() {
-            return;
-        }
-        let chw = utf8_char_width(self.data[start]);
-        self.data.drain(start..start + chw);
-        self.chars = self.chars.saturating_sub(1);
+    pub(super) fn insert_char(&mut self, byte_offset: u32, ch: char) -> u32 {
+        self.data.insert(byte_offset as usize, ch);
+        byte_offset + ch.len_utf8() as u32
     }
-
-    /// Inserts a UTF-8 byte slice at `offset`.
-    /// `buffer` must be valid UTF-8; `offset` must lie on a UTF-8 boundary.
-    /// Returns the byte offset just past the inserted bytes.
-    pub(super) fn insert_buffer(&mut self, offset: u32, buffer: &[u8]) -> u32 {
-        let off = offset as usize;
-        debug_assert!(std::str::from_utf8(buffer).is_ok());
-
-        if buffer.is_empty() {
-            return offset;
-        }
-
-        let inserted_chars = count_chars(buffer);
-        let buffer_is_ascii = buffer.is_ascii();
-        let buffer_has_tabs = buffer.contains(&b'\t');
-
-        self.data.splice(off..off, buffer.iter().copied());
-
-        self.chars = self.chars.saturating_add(inserted_chars);
-        if !buffer_is_ascii {
-            self.is_ascii = false;
-        }
-        if buffer_has_tabs {
-            self.has_tabs = true;
-        }
-
-        offset + buffer.len() as u32
+    pub(super) fn delete_char(&mut self, byte_offset: u32) {
+        self.data.remove(byte_offset as usize);
     }
-
-    /// Deletes the byte range `range`. Both endpoints must lie on UTF-8 boundaries.
+    pub(super) fn insert_string(&mut self, offset: u32, text: &str) -> u32 {
+        self.data.insert_str(offset as usize, text);
+        offset + text.len() as u32
+    }
     pub(super) fn delete_range(&mut self, range: Range<u32>) {
-        let start = range.start as usize;
-        let end = range.end as usize;
-        if start >= end || end > self.data.len() {
-            return;
-        }
-        self.data.drain(start..end);
+        self.data.drain(range.start as usize..range.end as usize);
     }
-}
-
-/// Number of bytes in a UTF-8 codepoint given its lead byte.
-#[inline]
-fn utf8_char_width(b: u8) -> usize {
-    match b {
-        0x00..=0x7F => 1,
-        0xC2..=0xDF => 2,
-        0xE0..=0xEF => 3,
-        0xF0..=0xF4 => 4,
-        _ => 1, // invalid lead byte; treat conservatively
-    }
-}
-
-/// Counts UTF-8 codepoints in a valid UTF-8 byte slice.
-#[inline]
-fn count_chars(bytes: &[u8]) -> u16 {
-    // A byte is a UTF-8 continuation byte iff its top two bits are 0b10.
-    let n = bytes.iter().filter(|&&b| (b & 0xC0) != 0x80).count();
-    n as u16
 }
