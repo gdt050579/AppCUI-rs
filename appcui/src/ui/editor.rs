@@ -6,7 +6,6 @@
 mod editor;
 mod string_pool;
 mod line_chunk_splitter;
-mod chunk;
 mod line_fragment;
 mod line;
 #[cfg(test)]
