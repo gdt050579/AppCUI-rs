@@ -1,12 +1,12 @@
 use std::ops::Range;
 
 /// A contiguous line fragment with cached metadata.
-pub(crate) struct LineFragment {
-    pub(crate) data: Vec<u8>, // less than a THRESHOLD (e.g. 4096 bytes)
-    pub(crate) chars: u16,
-    pub(crate) is_ascii: bool,
-    pub(crate) has_tabs: bool,
-    pub(crate) has_multiline_spread: bool, // e.g. a multiline comment
+pub(super) struct LineFragment {
+    pub(super) data: Vec<u8>, // less than a THRESHOLD (e.g. 4096 bytes)
+    pub(super) chars: u16,
+    pub(super) is_ascii: bool,
+    pub(super) has_tabs: bool,
+    pub(super) has_multiline_spread: bool, // e.g. a multiline comment
 }
 
 impl LineFragment {

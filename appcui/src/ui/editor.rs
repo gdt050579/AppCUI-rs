@@ -11,4 +11,4 @@ mod line;
 mod tests;
 
 pub use self::editor::Editor;
-pub(super) use self::line_fragment::LineFragment;
+pub(self) use self::line_fragment::LineFragment;
