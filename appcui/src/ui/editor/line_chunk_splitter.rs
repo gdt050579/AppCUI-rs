@@ -10,6 +10,10 @@ impl<'a> LineChunkSplitter<'a> {
     pub(super) fn new(text: &'a str) -> Self {
         Self { text, pos: 0 }
     }
+    #[inline]
+    pub(super) fn approximate_fragment_count(text: &'a str) -> usize {
+        (text.len() / Self::TARGET_CHUNK_SIZE) + 1
+    }
 }
 
 impl<'a> Iterator for LineChunkSplitter<'a> {

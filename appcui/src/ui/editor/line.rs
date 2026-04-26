@@ -19,10 +19,15 @@ impl Line {
         let ld = if text.len() <= LineChunkSplitter::MAX_CHUNK_SIZE {
             LineData::Simple(LineFragment::new(text))
         } else {
-            LineData::List(LineChunkSplitter::new(text).map(LineFragment::new).collect())
+            let mut fragments = Vec::with_capacity(LineChunkSplitter::approximate_fragment_count(text));
+            let mut splitter = LineChunkSplitter::new(text);
+            while let Some(chunk) = splitter.next() {
+                fragments.push(LineFragment::new(chunk));
+            }
+            LineData::List(fragments.into_iter().collect())
         };
         Self {
-            data: LineData::Simple(LineFragment::new(text)),
+            data: ld,
             chars: text.chars().count() as u32,
             is_ascii: text.is_ascii(),
             has_tabs: text.contains('\t'),
