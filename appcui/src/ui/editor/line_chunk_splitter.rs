@@ -4,7 +4,7 @@ pub(super) struct LineChunkSplitter<'a> {
 }
 
 impl<'a> LineChunkSplitter<'a> {
-    pub(super) const MAX_CHUNK_SIZE: usize = 1024;
+    pub(super) const MAX_CHUNK_SIZE: usize = 1000; // less than 1024 to avoid realocation 
     pub(super) const MIN_CHUNK_SIZE: usize = 512;
     pub(super) const TARGET_CHUNK_SIZE: usize = 768;
     pub(super) fn new(text: &'a str) -> Self {

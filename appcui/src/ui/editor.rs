@@ -4,6 +4,7 @@
 //! and paint handling.
 
 mod editor;
+mod document;
 mod string_pool;
 mod line_chunk_splitter;
 mod line_fragment;
@@ -15,3 +16,4 @@ pub use self::editor::Editor;
 pub(self) use self::line_fragment::LineFragment;
 pub(self) use self::line_chunk_splitter::LineChunkSplitter;
 pub(self) use self::string_pool::StringPool;
+pub(self) use self::document::Document;

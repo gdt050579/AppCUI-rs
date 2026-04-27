@@ -18,6 +18,7 @@ categories = ["gui", "command-line-interface", "command-line-utilities"]
 EnumBitFlags = "1.0.10"
 flat_string = "1.0.0"
 chrono = {version = "0.4.38", features = ["wasmbind"]}
+ropey = "1.6.1"
 appcui_proc_macro = "0.2.5"
 # appcui_proc_macro = { path = "../appcui-proc-macro" }
 
