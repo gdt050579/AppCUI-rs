@@ -5,6 +5,7 @@
 
 mod editor;
 mod document;
+mod selection;
 mod string_pool;
 mod line_chunk_splitter;
 mod line_fragment;
@@ -17,6 +18,7 @@ pub(self) use self::line_fragment::LineFragment;
 pub(self) use self::line_chunk_splitter::LineChunkSplitter;
 pub(self) use self::string_pool::StringPool;
 pub(self) use self::document::Document;
+pub(self) use self::selection::Selection;
 
 pub use self::editor::Editor;
 pub use self::initialization_flags::Flags;

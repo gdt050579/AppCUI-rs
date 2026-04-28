@@ -1,6 +1,6 @@
 use ropey::RopeSlice;
 
-use super::{Document, Flags};
+use super::{Document, Flags, Selection};
 use crate::prelude::*;
 
 struct PaintData {
@@ -9,6 +9,7 @@ struct PaintData {
     width: i32,
     horizontal_scroll: i32,
     attr: CharAttribute,
+    selection: CharAttribute,
 }
 #[derive(Default)]
 struct MarginSize {
@@ -27,6 +28,7 @@ pub struct Editor {
     flags: Flags,
     margin: MarginSize,
     view: Option<Surface>,
+    selection: Selection,
 }
 
 impl Editor {
@@ -41,6 +43,7 @@ impl Editor {
             flags,
             margin: MarginSize::default(),
             view: None,
+            selection: Selection::NONE,
         };
         editor.update_margin();
         editor
@@ -60,9 +63,15 @@ impl Editor {
             self.margin.line_number_x = 0;
         }
     }
-    fn goto_position(&mut self, position: usize) {
-        self.pos = position.min(self.document.chars_count());
-        self.current_line = self.document.position_to_line(self.pos);
+    fn goto_position(&mut self, position: usize, select: bool) {
+        let new_pos = position.min(self.document.chars_count());
+        self.current_line = self.document.position_to_line(new_pos);
+        if select {
+            self.selection.update(self.pos, new_pos);
+        } else {
+            self.selection.clear();
+        }
+        self.pos = new_pos;
         self.update_view();
     }
     fn paint_line_number(&self, surface: &mut Surface, x: i32, y: i32, line_number: u32, attr: CharAttribute) {
@@ -88,10 +97,13 @@ impl Editor {
             }
             if x >= 0 {
                 // actual paint
-                let chr = Character::with_attributes(if ch as u32 >= 32 { ch } else { ' ' }, p.attr);
-                surface.write_char(x+p.margin_width, p.y, chr);
+                let chr = Character::with_attributes(
+                    if ch as u32 >= 32 { ch } else { ' ' },
+                    if self.selection.contains(start_pos) { p.selection } else { p.attr },
+                );
+                surface.write_char(x + p.margin_width, p.y, chr);
                 if start_pos == self.pos {
-                    surface.set_cursor(x+p.margin_width, p.y);
+                    surface.set_cursor(x + p.margin_width, p.y);
                 }
             }
             if ch == '\n' {
@@ -127,6 +139,7 @@ impl Editor {
             width: (sz.width as i32 - self.margin.width as i32).max(0),
             horizontal_scroll: 0,
             attr: theme.editor.normal,
+            selection: theme.editor.pressed_or_selected,
         };
         let mut it = self.document.lines_starting_from(self.start_line);
         let mut start_pos = self.document.line_to_char(self.start_line);
@@ -166,17 +179,18 @@ impl OnPaint for Editor {
 
 impl OnKeyPressed for Editor {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        let select = key.modifier.contains(KeyModifier::Shift);
         match key.value() {
-            key!("Left") => {
-                self.goto_position(self.pos.saturating_sub(1));
+            key!("Left") | key!("Shift+Left") => {
+                self.goto_position(self.pos.saturating_sub(1), select);
                 EventProcessStatus::Processed
             }
-            key!("Right") => {
-                self.goto_position(self.pos.saturating_add(1));
+            key!("Right") | key!("Shift+Right") => {
+                self.goto_position(self.pos.saturating_add(1), select);
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
-        }       
+        }
     }
 }
 
