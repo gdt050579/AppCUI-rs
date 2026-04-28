@@ -65,13 +65,14 @@ impl Editor {
     }
     fn goto_position(&mut self, position: usize, select: bool) {
         let new_pos = position.min(self.document.chars_count());
-        self.current_line = self.document.position_to_line(new_pos);
+        let new_current_line = self.document.position_to_line(new_pos);
         if select {
             self.selection.update(self.pos, new_pos);
         } else {
             self.selection.clear();
         }
         self.pos = new_pos;
+        self.current_line = new_current_line;
         self.update_view();
     }
     fn paint_line_number(&self, surface: &mut Surface, x: i32, y: i32, line_number: u32, attr: CharAttribute) {
