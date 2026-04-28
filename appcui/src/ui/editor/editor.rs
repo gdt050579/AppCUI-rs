@@ -17,14 +17,16 @@ struct MarginSize {
     width: u8,
 }
 
-#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct Editor {
     document: Document,
     tab_align: i32,
     start_line: u32,
     pos: usize,
+    current_line: u32,
     flags: Flags,
     margin: MarginSize,
+    view: Option<Surface>,
 }
 
 impl Editor {
@@ -35,8 +37,10 @@ impl Editor {
             tab_align: 4,
             start_line: 0,
             pos: 0,
+            current_line: 0,
             flags,
             margin: MarginSize::default(),
+            view: None,
         };
         editor.update_margin();
         editor
@@ -55,6 +59,11 @@ impl Editor {
         } else {
             self.margin.line_number_x = 0;
         }
+    }
+    fn goto_position(&mut self, position: usize) {
+        self.pos = position.min(self.document.chars_count());
+        self.current_line = self.document.position_to_line(self.pos);
+        self.update_view();
     }
     fn paint_line_number(&self, surface: &mut Surface, x: i32, y: i32, line_number: u32, attr: CharAttribute) {
         let mut buffer = [b' '; 12];
@@ -97,15 +106,20 @@ impl Editor {
             start_pos += 1;
         }
     }
-}
-
-impl OnPaint for Editor {
-    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let sz = self.size();
-        surface.clear(Character::with_attributes(' ', theme.editor.normal));
+    fn update_view(&mut self) {
+        if self.view.is_none() {
+            return;
+        }
+        let mut surface = self.view.take().unwrap();
+        let theme = self.theme();
+        let col_normal = theme.editor.normal;
+        let col_inactive = theme.editor.inactive;
+        let sz = surface.size();
+        surface.clear(Character::with_attributes(' ', col_normal));
+        surface.hide_cursor();
         if self.margin.width > 0 {
             let r = Rect::new(0, 0, self.margin.width as i32 - 1, sz.height as i32 - 1);
-            surface.fill_rect(r, Character::with_attributes(' ', theme.editor.inactive));
+            surface.fill_rect(r, Character::with_attributes(' ', col_inactive));
         }
         let mut p = PaintData {
             margin_width: self.margin.width as i32,
@@ -119,10 +133,10 @@ impl OnPaint for Editor {
         let mut line_number = self.start_line;
         while let Some(line) = it.next() {
             if p.width > 0 {
-                self.paint_line(surface, &p, &line, start_pos);
+                self.paint_line(&mut surface, &p, &line, start_pos);
             }
             if self.margin.width > 0 {
-                self.paint_line_number(surface, self.margin.line_number_x as i32, p.y, line_number, theme.editor.inactive);
+                self.paint_line_number(&mut surface, self.margin.line_number_x as i32, p.y, line_number, col_inactive);
             }
             line_number += 1;
             start_pos += line.len_chars();
@@ -131,17 +145,54 @@ impl OnPaint for Editor {
                 break;
             }
         }
+        // important - must be the last
+        self.view = Some(surface);
+    }
+}
+
+impl OnPaint for Editor {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        let has_focus = self.has_focus();
+        if let Some(view) = self.view.as_ref() {
+            surface.draw_surface(0, 0, view);
+            if has_focus && view.cursor.is_visible() {
+                surface.set_cursor(view.cursor.x as i32, view.cursor.y as i32);
+            }
+        } else {
+            surface.clear(Character::with_attributes(' ', theme.editor.normal));
+        }
     }
 }
 
 impl OnKeyPressed for Editor {
-    fn on_key_pressed(&mut self, _key: Key, _character: char) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Left") => {
+                self.goto_position(self.pos.saturating_sub(1));
+                EventProcessStatus::Processed
+            }
+            key!("Right") => {
+                self.goto_position(self.pos.saturating_add(1));
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }       
     }
 }
 
 impl OnMouseEvent for Editor {
     fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
         EventProcessStatus::Ignored
+    }
+}
+
+impl OnResize for Editor {
+    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
+        if let Some(view) = self.view.as_mut() {
+            view.resize(new_size);
+        } else {
+            self.view = Some(Surface::new(new_size.width, new_size.height));
+        }
+        self.update_view();
     }
 }

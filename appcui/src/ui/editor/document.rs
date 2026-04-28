@@ -21,4 +21,10 @@ impl Document {
     pub(super) fn line_to_char(&self, line_index: u32) -> usize {
         self.rope.line_to_char(line_index as usize)
     }
+    pub(super) fn chars_count(&self) -> usize {
+        self.rope.len_chars()
+    }
+    pub(super) fn position_to_line(&self, char_index: usize) -> u32 {
+        self.rope.char_to_line(char_index) as u32
+    }
 }
