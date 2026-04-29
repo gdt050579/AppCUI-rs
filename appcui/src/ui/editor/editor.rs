@@ -1,7 +1,4 @@
-use std::f64::consts::LN_2;
-
 use ropey::RopeSlice;
-
 use super::{Document, Flags, Selection};
 use crate::prelude::*;
 
