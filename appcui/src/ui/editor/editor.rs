@@ -1,3 +1,5 @@
+use std::f64::consts::LN_2;
+
 use ropey::RopeSlice;
 
 use super::{Document, Flags, Selection};
@@ -23,8 +25,10 @@ pub struct Editor {
     document: Document,
     tab_align: i32,
     start_line: u32,
-    pos: usize,
+    visible_lines: u32,
     current_line: u32,
+    current_column: u32,
+    pos: usize,
     flags: Flags,
     margin: MarginSize,
     view: Option<Surface>,
@@ -40,6 +44,8 @@ impl Editor {
             start_line: 0,
             pos: 0,
             current_line: 0,
+            current_column: 0,
+            visible_lines: 0,
             flags,
             margin: MarginSize::default(),
             view: None,
@@ -63,9 +69,35 @@ impl Editor {
             self.margin.line_number_x = 0;
         }
     }
+    fn coordonates_to_position(&self, line: u32, column: u32) -> usize {
+        let ln = self.document.line(line);
+        let start = self.document.line_to_char(line);
+        let mut x = 0;
+        let align = self.tab_align as u32;
+        for (i, ch) in ln.chars().enumerate() {
+            if x >= column {
+                return start + i;
+            }
+            if ch == '\t' {
+                x += align - (x % align);
+            } else {
+                x += 1;
+            }
+            if ch == '\n' {
+                break;
+            }
+        }
+        let len = ln.len_chars().saturating_sub(1);
+        return start + len;
+    }
     fn goto_position(&mut self, position: usize, select: bool) {
         let new_pos = position.min(self.document.chars_count());
         let new_current_line = self.document.position_to_line(new_pos);
+        if new_current_line < self.start_line {
+            self.start_line = new_current_line;
+        } else if new_current_line >= self.start_line + self.visible_lines {
+            self.start_line = new_current_line - self.visible_lines + 1;
+        }
         if select {
             self.selection.update(self.pos, new_pos);
         } else {
@@ -74,6 +106,16 @@ impl Editor {
         self.pos = new_pos;
         self.current_line = new_current_line;
         self.update_view();
+    }
+    fn move_lines(&mut self, delta: i32, select: bool) {
+        let lines_count = self.document.lines_count();
+        if lines_count == 0 {
+            return;
+        }
+
+        let target_line = (self.current_line as i32 + delta).clamp(0, lines_count as i32 - 1) as u32;
+        let target_pos = self.coordonates_to_position(target_line, self.current_column);
+        self.goto_position(target_pos, select);
     }
     fn paint_line_number(&self, surface: &mut Surface, x: i32, y: i32, line_number: u32, attr: CharAttribute) {
         let mut buffer = [b' '; 12];
@@ -89,8 +131,9 @@ impl Editor {
         }
         surface.write_ascii(x, y, &buffer[12 - self.margin.line_number_width as usize..], attr, false);
     }
-    fn paint_line(&self, surface: &mut Surface, p: &PaintData, line: &RopeSlice, mut start_pos: usize) {
+    fn paint_line(&self, surface: &mut Surface, p: &PaintData, line: &RopeSlice, mut start_pos: usize) -> Option<u32> {
         let mut virtual_x = 0i32;
+        let mut current_column = None;
         for ch in line.chars() {
             let x = virtual_x - p.horizontal_scroll;
             if x >= p.width {
@@ -105,6 +148,7 @@ impl Editor {
                 surface.write_char(x + p.margin_width, p.y, chr);
                 if start_pos == self.pos {
                     surface.set_cursor(x + p.margin_width, p.y);
+                    current_column = Some(virtual_x as u32);
                 }
             }
             if ch == '\n' {
@@ -118,6 +162,7 @@ impl Editor {
             }
             start_pos += 1;
         }
+        current_column
     }
     fn update_view(&mut self) {
         if self.view.is_none() {
@@ -147,7 +192,9 @@ impl Editor {
         let mut line_number = self.start_line;
         while let Some(line) = it.next() {
             if p.width > 0 {
-                self.paint_line(&mut surface, &p, &line, start_pos);
+                if let Some(cc) = self.paint_line(&mut surface, &p, &line, start_pos) {
+                    self.current_column = cc;
+                }
             }
             if self.margin.width > 0 {
                 self.paint_line_number(&mut surface, self.margin.line_number_x as i32, p.y, line_number, col_inactive);
@@ -159,6 +206,7 @@ impl Editor {
                 break;
             }
         }
+        self.visible_lines = line_number - self.start_line;
         // important - must be the last
         self.view = Some(surface);
     }
@@ -190,6 +238,22 @@ impl OnKeyPressed for Editor {
                 self.goto_position(self.pos.saturating_add(1), select);
                 EventProcessStatus::Processed
             }
+            key!("Up") | key!("Shift+Up") => {
+                self.move_lines(-1, select);
+                EventProcessStatus::Processed
+            }
+            key!("Down") | key!("Shift+Down") => {
+                self.move_lines(1, select);
+                EventProcessStatus::Processed
+            }
+            key!("PageUp") | key!("Shift+PageUp") => {
+                self.move_lines(-(self.visible_lines as i32).max(1), select);
+                EventProcessStatus::Processed
+            }
+            key!("PageDown") | key!("Shift+PageDown") => {
+                self.move_lines((self.visible_lines as i32).max(1), select);
+                EventProcessStatus::Processed
+            }            
             _ => EventProcessStatus::Ignored,
         }
     }
