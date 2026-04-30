@@ -1,4 +1,4 @@
-use super::{Document, Flags, Selection};
+use super::{CharClass, Document, Flags, Selection};
 use crate::prelude::*;
 use ropey::RopeSlice;
 
@@ -146,6 +146,63 @@ impl Editor {
         let target_line = (self.cursor.line as i32 + delta).clamp(0, lines_count as i32 - 1) as u32;
         let target_pos = self.coordinates_to_position(target_line, self.cursor.column);
         self.goto_position(target_pos, select);
+    }
+    fn move_to_next_word(&mut self, select: bool) {
+        if let Some(char_class) = self.document.char_at(self.cursor.pos).map(CharClass::from) {
+            let mut pos = self.cursor.pos;
+            let mut new_char_class = char_class;
+            // skip current class
+            while let Some(c) = self.document.char_at(pos) {
+                if CharClass::from(c) != char_class {
+                    new_char_class = CharClass::from(c);
+                    break;
+                }
+                pos += 1;
+            }
+            if (new_char_class != char_class) && (new_char_class == CharClass::Space) {
+                // skip the spaces until we reach a new char class
+                while let Some(c) = self.document.char_at(pos) {
+                    if CharClass::from(c) != new_char_class {
+                        break;
+                    }
+                    pos += 1;
+                }
+            }
+            pos = pos.min(self.document.chars_count());
+            self.goto_position(pos, select);
+        }
+    }
+    fn move_to_previous_word(&mut self, select: bool) {
+        if let Some(char_class) = self.cursor.pos.checked_sub(1).and_then(|pos| self.document.char_at(pos)).map(CharClass::from) {
+            let mut pos = self.cursor.pos;
+            let mut new_char_class = char_class;
+            // skip current class
+            while pos > 0 {
+                let prev_pos = pos - 1;
+                let Some(c) = self.document.char_at(prev_pos) else {
+                    break;
+                };
+                if CharClass::from(c) != char_class {
+                    new_char_class = CharClass::from(c);
+                    break;
+                }
+                pos = prev_pos;
+            }
+            if (new_char_class != char_class) && (char_class == CharClass::Space) {
+                // skip the current class until we reach the start of it
+                while pos > 0 {
+                    let prev_pos = pos - 1;
+                    let Some(c) = self.document.char_at(prev_pos) else {
+                        break;
+                    };
+                    if CharClass::from(c) != new_char_class {
+                        break;
+                    }
+                    pos = prev_pos;
+                }
+            }
+            self.goto_position(pos, select);
+        }
     }
     fn paint_line_number(&self, surface: &mut Surface, x: i32, y: i32, line_number: u32, attr: CharAttribute) {
         let mut buffer = [b' '; 12];
@@ -296,15 +353,12 @@ impl OnKeyPressed for Editor {
                 self.update_view();
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Left") => {
-                self.horizontal_scroll = (self.horizontal_scroll - 1).max(0);
-                self.update_view();
+            key!("Ctrl+Left") | key!("Ctrl+Shift+Left") => {
+                self.move_to_previous_word(select);
                 EventProcessStatus::Processed
             }
-            key!("Ctrl+Right") => {
-                // TBD: what is the upper limit here
-                self.horizontal_scroll = self.horizontal_scroll.saturating_add(1);
-                self.update_view();
+            key!("Ctrl+Right") | key!("Ctrl+Shift+Right") => {
+                self.move_to_next_word(select);
                 EventProcessStatus::Processed
             }
             key!("Home") | key!("Shift+Home") => {
