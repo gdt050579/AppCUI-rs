@@ -1,6 +1,6 @@
-use ropey::RopeSlice;
 use super::{Document, Flags, Selection};
 use crate::prelude::*;
+use ropey::RopeSlice;
 
 struct PaintData {
     margin_width: i32,
@@ -17,15 +17,21 @@ struct MarginSize {
     width: u8,
 }
 
+#[derive(Default)]
+struct Cursor {
+    column: u32,
+    line: u32,
+    pos: usize,
+}
+
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct Editor {
     document: Document,
     tab_align: i32,
     start_line: u32,
     visible_lines: u32,
-    current_line: u32,
-    current_column: u32,
-    pos: usize,
+    horizontal_scroll: i32,
+    cursor: Cursor,
     flags: Flags,
     margin: MarginSize,
     view: Option<Surface>,
@@ -39,9 +45,8 @@ impl Editor {
             document: Document::new(text),
             tab_align: 4,
             start_line: 0,
-            pos: 0,
-            current_line: 0,
-            current_column: 0,
+            horizontal_scroll: 0,
+            cursor: Cursor::default(),
             visible_lines: 0,
             flags,
             margin: MarginSize::default(),
@@ -66,7 +71,25 @@ impl Editor {
             self.margin.line_number_x = 0;
         }
     }
-    fn coordonates_to_position(&self, line: u32, column: u32) -> usize {
+    fn position_to_virtual_column(&self, position: usize) -> u32 {
+        let line_idx = self.document.position_to_line(position);
+        let line_start = self.document.line_to_char(line_idx);
+        let line = self.document.line(line_idx);
+        let align = self.tab_align as u32;
+        let mut x = 0u32;
+        for (i, ch) in line.chars().enumerate() {
+            if line_start + i >= position {
+                break;
+            }
+            if ch == '\t' {
+                x += align - (x % align);
+            } else if ch != '\n' {
+                x += 1;
+            }
+        }
+        x
+    }
+    fn coordinates_to_position(&self, line: u32, column: u32) -> usize {
         let ln = self.document.line(line);
         let start = self.document.line_to_char(line);
         let mut x = 0;
@@ -95,13 +118,22 @@ impl Editor {
         } else if new_current_line >= self.start_line + self.visible_lines {
             self.start_line = new_current_line - self.visible_lines + 1;
         }
+        let sz = self.view.as_ref().unwrap().size();
+        let visible_width = (sz.width as i32 - self.margin.width as i32).max(0);
+        let vcol = self.position_to_virtual_column(new_pos) as i32;
+        
+        if vcol < self.horizontal_scroll {
+            self.horizontal_scroll = vcol;
+        } else if vcol >= self.horizontal_scroll + visible_width {
+            self.horizontal_scroll = vcol - visible_width + 1;
+        }        
         if select {
-            self.selection.update(self.pos, new_pos);
+            self.selection.update(self.cursor.pos, new_pos);
         } else {
             self.selection.clear();
         }
-        self.pos = new_pos;
-        self.current_line = new_current_line;
+        self.cursor.pos = new_pos;
+        self.cursor.line = new_current_line;
         self.update_view();
     }
     fn move_lines(&mut self, delta: i32, select: bool) {
@@ -110,8 +142,8 @@ impl Editor {
             return;
         }
 
-        let target_line = (self.current_line as i32 + delta).clamp(0, lines_count as i32 - 1) as u32;
-        let target_pos = self.coordonates_to_position(target_line, self.current_column);
+        let target_line = (self.cursor.line as i32 + delta).clamp(0, lines_count as i32 - 1) as u32;
+        let target_pos = self.coordinates_to_position(target_line, self.cursor.column);
         self.goto_position(target_pos, select);
     }
     fn paint_line_number(&self, surface: &mut Surface, x: i32, y: i32, line_number: u32, attr: CharAttribute) {
@@ -143,7 +175,7 @@ impl Editor {
                     if self.selection.contains(start_pos) { p.selection } else { p.attr },
                 );
                 surface.write_char(x + p.margin_width, p.y, chr);
-                if start_pos == self.pos {
+                if start_pos == self.cursor.pos {
                     surface.set_cursor(x + p.margin_width, p.y);
                     current_column = Some(virtual_x as u32);
                 }
@@ -180,7 +212,7 @@ impl Editor {
             margin_width: self.margin.width as i32,
             y: 0,
             width: (sz.width as i32 - self.margin.width as i32).max(0),
-            horizontal_scroll: 0,
+            horizontal_scroll: self.horizontal_scroll,
             attr: theme.editor.normal,
             selection: theme.editor.pressed_or_selected,
         };
@@ -190,7 +222,7 @@ impl Editor {
         while let Some(line) = it.next() {
             if p.width > 0 {
                 if let Some(cc) = self.paint_line(&mut surface, &p, &line, start_pos) {
-                    self.current_column = cc;
+                    self.cursor.column = cc;
                 }
             }
             if self.margin.width > 0 {
@@ -228,11 +260,11 @@ impl OnKeyPressed for Editor {
         let select = key.modifier.contains(KeyModifier::Shift);
         match key.value() {
             key!("Left") | key!("Shift+Left") => {
-                self.goto_position(self.pos.saturating_sub(1), select);
+                self.goto_position(self.cursor.pos.saturating_sub(1), select);
                 EventProcessStatus::Processed
             }
             key!("Right") | key!("Shift+Right") => {
-                self.goto_position(self.pos.saturating_add(1), select);
+                self.goto_position(self.cursor.pos.saturating_add(1), select);
                 EventProcessStatus::Processed
             }
             key!("Up") | key!("Shift+Up") => {
@@ -250,7 +282,7 @@ impl OnKeyPressed for Editor {
             key!("PageDown") | key!("Shift+PageDown") => {
                 self.move_lines((self.visible_lines as i32).max(1), select);
                 EventProcessStatus::Processed
-            }            
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
