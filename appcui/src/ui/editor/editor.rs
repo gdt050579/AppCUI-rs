@@ -110,6 +110,7 @@ impl Editor {
         let len = ln.len_chars().saturating_sub(1);
         return start + len;
     }
+
     fn goto_position(&mut self, position: usize, select: bool) {
         let new_pos = position.min(self.document.chars_count());
         let new_current_line = self.document.position_to_line(new_pos);
@@ -304,6 +305,25 @@ impl OnKeyPressed for Editor {
                 // TBD: what is the upper limit here
                 self.horizontal_scroll = self.horizontal_scroll.saturating_add(1);
                 self.update_view();
+                EventProcessStatus::Processed
+            }
+            key!("Home") | key!("Shift+Home") => {
+                let line = self.cursor.line;
+                self.goto_position(self.document.line_to_char(line), select);
+                EventProcessStatus::Processed
+            }
+            key!("End") | key!("Shift+End") => {
+                let line = self.cursor.line;
+                self.goto_position(self.document.line_end_position(line), select);
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Home") | key!("Ctrl+Shift+Home") => {
+                self.goto_position(0, select);
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+End") | key!("Ctrl+Shift+End") => {
+                let end = self.document.chars_count();
+                self.goto_position(end, select);
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
