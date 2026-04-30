@@ -148,61 +148,61 @@ impl Editor {
         self.goto_position(target_pos, select);
     }
     fn move_to_next_word(&mut self, select: bool) {
-        if let Some(char_class) = self.document.char_at(self.cursor.pos).map(CharClass::from) {
-            let mut pos = self.cursor.pos;
-            let mut new_char_class = char_class;
-            // skip current class
-            while let Some(c) = self.document.char_at(pos) {
-                if CharClass::from(c) != char_class {
-                    new_char_class = CharClass::from(c);
+        let mut iter = self.document.chars_iter(self.cursor.pos);
+        let Some(first) = iter.next() else {
+            return;
+        };
+        let char_class = CharClass::from(first);
+        let mut pos = self.cursor.pos + 1;
+        let mut new_char_class = char_class;
+        // skip current class
+        for c in iter.by_ref() {
+            let cc = CharClass::from(c);
+            if cc != char_class {
+                new_char_class = cc;
+                break;
+            }
+            pos += 1;
+        }
+        if (new_char_class != char_class) && (new_char_class == CharClass::Space) {
+            iter.prev();
+            for c in iter.by_ref() {
+                if CharClass::from(c) != new_char_class {
                     break;
                 }
                 pos += 1;
             }
-            if (new_char_class != char_class) && (new_char_class == CharClass::Space) {
-                // skip the spaces until we reach a new char class
-                while let Some(c) = self.document.char_at(pos) {
-                    if CharClass::from(c) != new_char_class {
-                        break;
-                    }
-                    pos += 1;
-                }
-            }
-            pos = pos.min(self.document.chars_count());
-            self.goto_position(pos, select);
         }
+        pos = pos.min(self.document.chars_count());
+        self.goto_position(pos, select);
     }
     fn move_to_previous_word(&mut self, select: bool) {
-        if let Some(char_class) = self.cursor.pos.checked_sub(1).and_then(|pos| self.document.char_at(pos)).map(CharClass::from) {
-            let mut pos = self.cursor.pos;
-            let mut new_char_class = char_class;
-            // skip current class
-            while pos > 0 {
-                let prev_pos = pos - 1;
-                let Some(c) = self.document.char_at(prev_pos) else {
-                    break;
-                };
-                if CharClass::from(c) != char_class {
-                    new_char_class = CharClass::from(c);
-                    break;
-                }
-                pos = prev_pos;
+        let mut iter = self.document.chars_iter(self.cursor.pos);
+        let Some(first) = iter.prev() else {
+            return;
+        };
+        let char_class = CharClass::from(first);
+        let mut pos = self.cursor.pos - 1;
+        let mut new_char_class = char_class;
+        // skip current class
+        while let Some(c) = iter.prev() {
+            let cc = CharClass::from(c);
+            if cc != char_class {
+                new_char_class = cc;
+                break;
             }
-            if (new_char_class != char_class) && (char_class == CharClass::Space) {
-                // skip the current class until we reach the start of it
-                while pos > 0 {
-                    let prev_pos = pos - 1;
-                    let Some(c) = self.document.char_at(prev_pos) else {
-                        break;
-                    };
-                    if CharClass::from(c) != new_char_class {
-                        break;
-                    }
-                    pos = prev_pos;
-                }
-            }
-            self.goto_position(pos, select);
+            pos -= 1;
         }
+        if (new_char_class != char_class) && (char_class == CharClass::Space) {
+            iter.next();
+            while let Some(c) = iter.prev() {
+                if CharClass::from(c) != new_char_class {
+                    break;
+                }
+                pos -= 1;
+            }
+        }
+        self.goto_position(pos, select);
     }
     fn paint_line_number(&self, surface: &mut Surface, x: i32, y: i32, line_number: u32, attr: CharAttribute) {
         let mut buffer = [b' '; 12];

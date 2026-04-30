@@ -1,5 +1,5 @@
 use ropey::{Rope, RopeSlice};
-use ropey::iter::Lines;
+use ropey::iter::{Lines, Chars};
 
 pub(super) struct Document {
     rope: ropey::Rope,
@@ -24,12 +24,15 @@ impl Document {
     pub(super) fn chars_count(&self) -> usize {
         self.rope.len_chars()
     }
-    pub(super) fn char_at(&self, char_index: usize) -> Option<char> {
+    pub(super) fn char(&self, char_index: usize) -> Option<char> {
         if char_index < self.rope.len_chars() {
             Some(self.rope.char(char_index))
         } else {
             None
         }
+    }
+    pub(super) fn chars_iter(&self, char_index: usize) -> Chars<'_> {
+        self.rope.chars_at(char_index)
     }
     pub(super) fn position_to_line(&self, char_index: usize) -> u32 {
         self.rope.char_to_line(char_index) as u32
