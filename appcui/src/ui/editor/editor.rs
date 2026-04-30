@@ -121,12 +121,12 @@ impl Editor {
         let sz = self.view.as_ref().unwrap().size();
         let visible_width = (sz.width as i32 - self.margin.width as i32).max(0);
         let vcol = self.position_to_virtual_column(new_pos) as i32;
-        
+
         if vcol < self.horizontal_scroll {
             self.horizontal_scroll = vcol;
         } else if vcol >= self.horizontal_scroll + visible_width {
             self.horizontal_scroll = vcol - visible_width + 1;
-        }        
+        }
         if select {
             self.selection.update(self.cursor.pos, new_pos);
         } else {
@@ -281,6 +281,29 @@ impl OnKeyPressed for Editor {
             }
             key!("PageDown") | key!("Shift+PageDown") => {
                 self.move_lines((self.visible_lines as i32).max(1), select);
+                EventProcessStatus::Processed
+            }
+
+            // view movement
+            key!("Ctrl+Up") => {
+                self.start_line = self.start_line.saturating_sub(1);
+                self.update_view();
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Down") => {
+                self.start_line = (self.start_line + 1).min(self.document.lines_count() as u32);
+                self.update_view();
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Left") => {
+                self.horizontal_scroll = (self.horizontal_scroll - 1).max(0);
+                self.update_view();
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Right") => {
+                // TBD: what is the upper limit here
+                self.horizontal_scroll = self.horizontal_scroll.saturating_add(1);
+                self.update_view();
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
