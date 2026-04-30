@@ -380,6 +380,14 @@ impl OnKeyPressed for Editor {
                 self.goto_position(end, select);
                 EventProcessStatus::Processed
             }
+
+            // clipboard+selectin
+            key!("Ctrl+A") => {
+                let end = self.document.chars_count();
+                self.selection.set(0, end);
+                self.goto_position(end, true);
+                EventProcessStatus::Processed
+            }
             _ => EventProcessStatus::Ignored,
         }
     }

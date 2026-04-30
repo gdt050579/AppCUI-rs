@@ -1,8 +1,8 @@
 #[derive(Copy, Clone)]
 pub(crate) struct Selection {
-    pub(crate) start: usize,
-    pub(crate) end: usize,
-    pub(crate) origin: usize,
+    start: usize,
+    end: usize,
+    origin: usize,
 }
 
 impl Selection {
@@ -32,6 +32,16 @@ impl Selection {
         } else {
             self.start = self.origin.min(end);
             self.end = self.origin.max(end);
+        }
+    }
+    #[inline(always)]
+    pub(crate) fn set(&mut self, start: usize, end: usize) {
+        if start<end {
+            self.start = start;
+            self.origin = start;
+            self.end = end;
+        } else {
+            self.clear();
         }
     }
     #[inline(always)]
