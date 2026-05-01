@@ -1,7 +1,7 @@
 //! Demonstrates editing graph node data through [`GraphView::modify_graph`].
 //!
 //! Focus the graph, move the selection with arrow keys, then use **Edit → Rename node**,
-//! **Edit → Resize node**, **Edit → Node border**, or **Edit → Cycle text color** to apply changes inside a `modify_graph` closure.
+//! **Edit → Resize node**, **Edit → Node border**, or **Edit → Text color** to apply changes inside a `modify_graph` closure.
 //! Press **Enter** on a node for `on_node_action` (same edits use the focused node).
 
 use appcui::prelude::*;
@@ -45,7 +45,23 @@ fn validate_node_size(value: &Size) -> Result<(), String> {
     commands = [
         RenameNode,
         ResizeNode,
-        CycleColor,
+        TextColorDefault,
+        TextColorBlack,
+        TextColorDarkBlue,
+        TextColorDarkGreen,
+        TextColorTeal,
+        TextColorDarkRed,
+        TextColorMagenta,
+        TextColorOlive,
+        TextColorSilver,
+        TextColorGray,
+        TextColorBlue,
+        TextColorGreen,
+        TextColorAqua,
+        TextColorRed,
+        TextColorPink,
+        TextColorYellow,
+        TextColorWhite,
         NodeBorderNone,
         NodeBorderSingle,
         NodeBorderDouble,
@@ -65,7 +81,6 @@ struct GraphEditor {
     menu_edit: Handle<MenuButton>,
     menu_graph: Handle<MenuButton>,
     menu_help: Handle<MenuButton>,
-    color_idx: usize,
 }
 
 impl GraphEditor {
@@ -76,7 +91,6 @@ impl GraphEditor {
             menu_edit: Handle::None,
             menu_graph: Handle::None,
             menu_help: Handle::None,
-            color_idx: 0,
         };
 
         let mut gv = graphview!("d:f,flags:[ScrollBars,SearchBar]");
@@ -88,7 +102,26 @@ impl GraphEditor {
             "class: GraphEditor, items=[
                 {'&Rename node…', cmd: RenameNode},
                 {'&Resize node…', cmd: ResizeNode},
-                {'Cycle &text color', cmd: CycleColor},
+                { '&Text color', items = [
+                    {'&Default (theme)', cmd: TextColorDefault},
+                    { --- },
+                    {'&Black', cmd: TextColorBlack},
+                    {'Dar&k blue', cmd: TextColorDarkBlue},
+                    {'D&ark green', cmd: TextColorDarkGreen},
+                    {'&Teal', cmd: TextColorTeal},
+                    {'Dar&k red', cmd: TextColorDarkRed},
+                    {'&Magenta', cmd: TextColorMagenta},
+                    {'&Olive', cmd: TextColorOlive},
+                    {'&Silver', cmd: TextColorSilver},
+                    {'Gr&ay', cmd: TextColorGray},
+                    {'&Blue', cmd: TextColorBlue},
+                    {'&Green', cmd: TextColorGreen},
+                    {'A&qua', cmd: TextColorAqua},
+                    {'&Red', cmd: TextColorRed},
+                    {'&Pink', cmd: TextColorPink},
+                    {'&Yellow', cmd: TextColorYellow},
+                    {'&White', cmd: TextColorWhite},
+                ]},
                 { 'Node &border', items = [
                     {'N&one (default)', cmd: NodeBorderNone},
                     { --- },
@@ -214,6 +247,33 @@ impl GraphEditor {
         }
     }
 
+    fn apply_text_color(&mut self, foreground: Option<Color>) {
+        let id = {
+            let Some(gv) = self.control(self.graph_view) else {
+                return;
+            };
+            let Some(id) = current_node_index(gv.graph()) else {
+                dialogs::message("Text color", "No node is selected. Click the graph or use arrow keys.");
+                return;
+            };
+            id
+        };
+
+        let gv_h = self.graph_view;
+        if let Some(gv) = self.control_mut(gv_h) {
+            gv.modify_graph(|g| {
+                if let Some(mut node) = g.node(id) {
+                    match foreground {
+                        None => node.clear_text_attribute(),
+                        Some(fg) => {
+                            node.set_text_attribute(CharAttribute::with_color(fg, Color::Black));
+                        }
+                    }
+                }
+            });
+        }
+    }
+
     fn apply_node_border(&mut self, border: Option<LineType>) {
         let id = {
             let Some(gv) = self.control(self.graph_view) else {
@@ -239,38 +299,6 @@ impl GraphEditor {
         }
     }
 
-    fn cycle_color_selected(&mut self) {
-        let id = {
-            let Some(gv) = self.control(self.graph_view) else {
-                return;
-            };
-            let Some(id) = current_node_index(gv.graph()) else {
-                dialogs::message("Color", "No node is selected.");
-                return;
-            };
-            id
-        };
-
-        const PALETTE: &[Color] = &[
-            Color::Green,
-            Color::Aqua,
-            Color::Yellow,
-            Color::Magenta,
-            Color::Red,
-            Color::Olive,
-        ];
-        let fg = PALETTE[self.color_idx % PALETTE.len()];
-        self.color_idx += 1;
-
-        let gv_h = self.graph_view;
-        if let Some(gv) = self.control_mut(gv_h) {
-            gv.modify_graph(|g| {
-                if let Some(mut node) = g.node(id) {
-                    node.set_text_attribute(CharAttribute::with_color(fg, Color::Black));
-                }
-            });
-        }
-    }
 }
 
 impl GraphViewEvents<String> for GraphEditor {
@@ -288,21 +316,12 @@ impl GraphViewEvents<String> for GraphEditor {
         node_index: usize,
     ) -> EventProcessStatus {
         // Same pattern as menu actions: run edits inside `modify_graph`.
-        const PALETTE: &[Color] = &[
-            Color::Blue,
-            Color::Silver,
-            Color::Pink,
-            Color::White,
-        ];
-        let fg = PALETTE[self.color_idx % PALETTE.len()];
-        self.color_idx += 1;
         let gv_h = self.graph_view;
         if let Some(gv) = self.control_mut(gv_h) {
             gv.modify_graph(|g| {
                 if let Some(mut node) = g.node(node_index) {
                     let label = node.value().clone();
                     node.set_value(format!("*{label}"));
-                    node.set_text_attribute(CharAttribute::with_color(fg, Color::Black));
                 }
             });
             gv.arrange_nodes(graphview::ArrangeMethod::GridPacked);
@@ -322,7 +341,55 @@ impl MenuEvents for GraphEditor {
         match command {
             grapheditor::Commands::RenameNode => self.rename_selected(),
             grapheditor::Commands::ResizeNode => self.resize_selected(),
-            grapheditor::Commands::CycleColor => self.cycle_color_selected(),
+            grapheditor::Commands::TextColorDefault => self.apply_text_color(None),
+            grapheditor::Commands::TextColorBlack => {
+                self.apply_text_color(Some(Color::Black));
+            }
+            grapheditor::Commands::TextColorDarkBlue => {
+                self.apply_text_color(Some(Color::DarkBlue));
+            }
+            grapheditor::Commands::TextColorDarkGreen => {
+                self.apply_text_color(Some(Color::DarkGreen));
+            }
+            grapheditor::Commands::TextColorTeal => {
+                self.apply_text_color(Some(Color::Teal));
+            }
+            grapheditor::Commands::TextColorDarkRed => {
+                self.apply_text_color(Some(Color::DarkRed));
+            }
+            grapheditor::Commands::TextColorMagenta => {
+                self.apply_text_color(Some(Color::Magenta));
+            }
+            grapheditor::Commands::TextColorOlive => {
+                self.apply_text_color(Some(Color::Olive));
+            }
+            grapheditor::Commands::TextColorSilver => {
+                self.apply_text_color(Some(Color::Silver));
+            }
+            grapheditor::Commands::TextColorGray => {
+                self.apply_text_color(Some(Color::Gray));
+            }
+            grapheditor::Commands::TextColorBlue => {
+                self.apply_text_color(Some(Color::Blue));
+            }
+            grapheditor::Commands::TextColorGreen => {
+                self.apply_text_color(Some(Color::Green));
+            }
+            grapheditor::Commands::TextColorAqua => {
+                self.apply_text_color(Some(Color::Aqua));
+            }
+            grapheditor::Commands::TextColorRed => {
+                self.apply_text_color(Some(Color::Red));
+            }
+            grapheditor::Commands::TextColorPink => {
+                self.apply_text_color(Some(Color::Pink));
+            }
+            grapheditor::Commands::TextColorYellow => {
+                self.apply_text_color(Some(Color::Yellow));
+            }
+            grapheditor::Commands::TextColorWhite => {
+                self.apply_text_color(Some(Color::White));
+            }
             grapheditor::Commands::NodeBorderNone => self.apply_node_border(None),
             grapheditor::Commands::NodeBorderSingle => {
                 self.apply_node_border(Some(LineType::Single));
@@ -359,7 +426,7 @@ impl MenuEvents for GraphEditor {
                     "About",
                     "This example edits live graph nodes through GraphView::modify_graph.\n\
 The closure receives an EditableGraph: use node(index) to change labels, size (rect), border line type, colors, alignment, or position.\n\n\
-Focus the graph: arrow keys move selection; Ctrl+arrows move the current node; Enter prefixes the node label and cycles color.",
+Focus the graph: arrow keys move selection; Ctrl+arrows move the current node; Enter prefixes the node label with *. Use Edit→Text color to set foreground color.",
                 );
             }
             grapheditor::Commands::Exit => self.close(),
