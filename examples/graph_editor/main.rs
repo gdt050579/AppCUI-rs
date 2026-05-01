@@ -2,6 +2,7 @@
 //!
 //! Focus the graph, move the selection with arrow keys, then use **Edit → Rename node**,
 //! **Edit → Resize node**, **Edit → Node border**, or **Edit → Text color** to apply changes inside a `modify_graph` closure.
+//! **Graph → Add node** / **Remove node** change the node set (`EditableGraph::add_node` / `delete_node`).
 //! Press **Enter** on a node for `on_node_action` (same edits use the focused node).
 
 use appcui::prelude::*;
@@ -72,6 +73,8 @@ fn validate_node_size(value: &Size) -> Result<(), String> {
         NodeBorderSingleRound,
         NodeBorderBraille,
         ArrangeGrid,
+        AddNode,
+        RemoveNode,
         About,
         Exit,
     ]
@@ -142,6 +145,9 @@ impl GraphEditor {
 
         let m_graph = menu!(
             "class: GraphEditor, items=[
+                {'&Add node…', cmd: AddNode},
+                {'&Remove node', cmd: RemoveNode},
+                { --- },
                 {'&Grid layout', cmd: ArrangeGrid},
             ]"
         );
@@ -272,6 +278,73 @@ impl GraphEditor {
                 }
             });
         }
+    }
+
+    fn add_node(&mut self) {
+        let anchor = {
+            let Some(gv) = self.control(self.graph_view) else {
+                return;
+            };
+            if gv.graph().nodes_count() == 0 {
+                None
+            } else {
+                current_node_index(gv.graph())
+            }
+        };
+
+        let Some(label) = dialogs::input::<String>(
+            "Add node",
+            "Label for the new node:",
+            Some("New node".to_string()),
+            None,
+        ) else {
+            return;
+        };
+
+        let gv_h = self.graph_view;
+        if let Some(gv) = self.control_mut(gv_h) {
+            gv.modify_graph(|g| {
+                let node = graphview::NodeBuilder::new(label).build();
+                let id = g.add_node(node);
+                if let Some(from) = anchor {
+                    let _ = g.add_edge(
+                        graphview::EdgeBuilder::new(from as u32, id as u32)
+                            .directed(true)
+                            .build(),
+                    );
+                }
+                g.set_current_node(id);
+            });
+        }
+        self.update_title_bar();
+    }
+
+    fn remove_selected_node(&mut self) {
+        let id = {
+            let Some(gv) = self.control(self.graph_view) else {
+                return;
+            };
+            if gv.graph().nodes_count() == 0 {
+                dialogs::message("Remove node", "The graph has no nodes.");
+                return;
+            };
+            let Some(id) = current_node_index(gv.graph()) else {
+                dialogs::message(
+                    "Remove node",
+                    "No node is selected. Focus the graph and choose a node first.",
+                );
+                return;
+            };
+            id
+        };
+
+        let gv_h = self.graph_view;
+        if let Some(gv) = self.control_mut(gv_h) {
+            gv.modify_graph(|g| {
+                g.delete_node(id);
+            });
+        }
+        self.update_title_bar();
     }
 
     fn apply_node_border(&mut self, border: Option<LineType>) {
@@ -421,12 +494,14 @@ impl MenuEvents for GraphEditor {
                     gv.arrange_nodes(graphview::ArrangeMethod::GridPacked);
                 }
             }
+            grapheditor::Commands::AddNode => self.add_node(),
+            grapheditor::Commands::RemoveNode => self.remove_selected_node(),
             grapheditor::Commands::About => {
                 dialogs::message(
                     "About",
                     "This example edits live graph nodes through GraphView::modify_graph.\n\
-The closure receives an EditableGraph: use node(index) to change labels, size (rect), border line type, colors, alignment, or position.\n\n\
-Focus the graph: arrow keys move selection; Ctrl+arrows move the current node; Enter prefixes the node label with *. Use Edit→Text color to set foreground color.",
+The closure receives an EditableGraph: use add_node/delete_node for structure; node(index) for labels, size, borders, colors, alignment, position.\n\n\
+Focus the graph: arrow keys move selection; Ctrl+arrows move the current node; Enter prefixes the node label with *. Graph→Add draws an edge from the selected node when the graph is non-empty.",
                 );
             }
             grapheditor::Commands::Exit => self.close(),

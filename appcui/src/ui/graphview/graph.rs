@@ -794,20 +794,25 @@ where
     T: GraphNode + 'a,
 {
     graph: &'a mut Graph<T>,
-    changed_nodes: bool,
-    changed_edges: bool,
-    changed_graph: bool,
+    pub(super) current_node: usize,
+    pub(super) changed_nodes: bool,
+    pub(super) changed_edges: bool,
+    pub(super) changed_graph: bool,
+    pub(super) changed_current_node: bool,
 }
 impl<'a, T> EditableGraph<'a, T>
 where
     T: GraphNode + 'a,
 {
     pub(super) fn new(graph: &'a mut Graph<T>) -> Self {
+        let current_node = graph.current_node;
         Self {
             graph,
+            current_node,
             changed_nodes: false,
             changed_edges: false,
             changed_graph: false,
+            changed_current_node: false,
         }
     }
     #[inline(always)]
@@ -844,6 +849,10 @@ where
             }
         }
         self.graph.nodes.remove(index);
+        if self.current_node >= index {
+            self.current_node = self.current_node.saturating_sub(1);
+            self.changed_current_node = true;
+        }
         self.changed_graph = true;
     }
 
@@ -877,5 +886,17 @@ where
         }
         self.graph.edges.remove(index);
         self.changed_graph = true;
+    }
+
+    #[inline(always)]
+    pub fn set_current_node(&mut self, index: usize) {
+        if (index != self.current_node) && (index < self.graph.nodes.len()) {
+            self.current_node = index;
+            self.changed_current_node = true;
+        }
+    }
+    #[inline(always)]
+    pub fn current_node(&self) -> usize {
+        self.current_node
     }
 }
