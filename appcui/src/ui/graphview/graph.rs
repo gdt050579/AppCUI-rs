@@ -827,6 +827,25 @@ where
         self.changed_graph = true;
         self.graph.nodes.len() - 1
     }
+    pub fn delete_node(&mut self, index: usize) {
+        if index >= self.graph.nodes.len() {
+            return;
+        }
+        let idx = index as u32;
+        // remove all edges towards that node
+        self.graph.edges.retain(|e| e.from_node_id != idx && e.to_node_id != idx);
+        // make sure that all now have nodes ID that are correct
+        for e in &mut self.graph.edges {
+            if e.from_node_id > idx {
+                e.from_node_id = e.from_node_id.saturating_sub(1);
+            }
+            if e.to_node_id > idx {
+                e.to_node_id = e.to_node_id.saturating_sub(1);
+            }
+        }
+        self.graph.nodes.remove(index);
+        self.changed_graph = true;
+    }
 
 
     #[inline(always)]
@@ -850,5 +869,13 @@ where
         self.graph.edges.push(edge);
         self.changed_graph = true;
         true
+    }
+
+    fn delete_edge(&mut self, index: usize) {
+        if index >= self.graph.edges.len() {
+            return;
+        }
+        self.graph.edges.remove(index);
+        self.changed_graph = true;
     }
 }
