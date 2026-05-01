@@ -790,7 +790,7 @@ where
         Self { graph }
     }
     #[inline(always)]
-    pub fn node(&'a mut self, index: usize) -> Option<EditableNode<'a, T>> {
+    pub fn node(&mut self, index: usize) -> Option<EditableNode<'_, T>> {
         if index >= self.graph.nodes.len() {
             return None;
         }

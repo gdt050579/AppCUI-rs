@@ -330,6 +330,10 @@ name = "graphs"
 path = "graphs/main.rs"
 
 [[example]]
+name = "graph_editor"
+path = "graph_editor/main.rs"
+
+[[example]]
 name = "layout_tester"
 path = "layout_tester/main.rs"
 
