@@ -1566,6 +1566,33 @@ fn check_size_from_str() {
 }
 
 #[test]
+fn check_size_display() {
+    assert_eq!(format!("{}", Size::new(10, 20)), "10 x 20");
+    assert_eq!(format!("{}", Size::new(5, 7)), "5 x 7");
+    assert_eq!(format!("{}", Size::new(0, 0)), "0 x 0");
+    assert_eq!(format!("{}", Size::new(1, 0)), "1 x 0");
+    assert_eq!(format!("{}", Size::new(0, 99)), "0 x 99");
+    assert_eq!(format!("{}", Size::new(65535, 32767)), "65535 x 32767");
+}
+
+#[test]
+fn check_size_display_round_trip_via_from_str() {
+    let sizes = [
+        Size::new(10, 20),
+        Size::new(5, 7),
+        Size::new(0, 0),
+        Size::new(1, 0),
+        Size::new(0, 1),
+        Size::new(1234, 4321),
+        Size::new(65535, 32767),
+    ];
+    for s in sizes {
+        let rendered = s.to_string();
+        assert_eq!(Size::from_str(&rendered), Ok(s), "round-trip Display→FromStr: {rendered:?}");
+    }
+}
+
+#[test]
 fn check_size_from_str_errors() {
     use crate::graphics::size::SizeParseError;
     
