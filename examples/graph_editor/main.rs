@@ -1,7 +1,7 @@
 //! Demonstrates editing graph node data through [`GraphView::modify_graph`].
 //!
 //! Focus the graph, move the selection with arrow keys, then use **Edit → Rename node**,
-//! **Edit → Resize node**, or **Edit → Cycle text color** to apply changes inside a `modify_graph` closure.
+//! **Edit → Resize node**, **Edit → Node border**, or **Edit → Cycle text color** to apply changes inside a `modify_graph` closure.
 //! Press **Enter** on a node for `on_node_action` (same edits use the focused node).
 
 use appcui::prelude::*;
@@ -42,7 +42,23 @@ fn validate_node_size(value: &Size) -> Result<(), String> {
 
 #[Window(
     events = [MenuEvents, GraphViewEvents<String>, AppBarEvents],
-    commands = [RenameNode, ResizeNode, CycleColor, ArrangeGrid, About, Exit]
+    commands = [
+        RenameNode,
+        ResizeNode,
+        CycleColor,
+        NodeBorderNone,
+        NodeBorderSingle,
+        NodeBorderDouble,
+        NodeBorderThick,
+        NodeBorderHeavy,
+        NodeBorderAscii,
+        NodeBorderAsciiRound,
+        NodeBorderSingleRound,
+        NodeBorderBraille,
+        ArrangeGrid,
+        About,
+        Exit,
+    ]
 )]
 struct GraphEditor {
     graph_view: Handle<GraphView<String>>,
@@ -73,6 +89,18 @@ impl GraphEditor {
                 {'&Rename node…', cmd: RenameNode},
                 {'&Resize node…', cmd: ResizeNode},
                 {'Cycle &text color', cmd: CycleColor},
+                { 'Node &border', items = [
+                    {'N&one (default)', cmd: NodeBorderNone},
+                    { --- },
+                    {'&Single', cmd: NodeBorderSingle},
+                    {'&Double', cmd: NodeBorderDouble},
+                    {'&Thick', cmd: NodeBorderThick},
+                    {'&Border heavy', cmd: NodeBorderHeavy},
+                    {'&ASCII', cmd: NodeBorderAscii},
+                    {'ASCII &rounded', cmd: NodeBorderAsciiRound},
+                    {'&Unicode rounded', cmd: NodeBorderSingleRound},
+                    {'&Braille', cmd: NodeBorderBraille},
+                ]},
             ]"
         );
         win.menu_edit = win
@@ -183,7 +211,31 @@ impl GraphEditor {
                     node.set_position(Rect::with_point_and_size(top_left, new_size));
                 }
             });
-            gv.arrange_nodes(graphview::ArrangeMethod::None);
+        }
+    }
+
+    fn apply_node_border(&mut self, border: Option<LineType>) {
+        let id = {
+            let Some(gv) = self.control(self.graph_view) else {
+                return;
+            };
+            let Some(id) = current_node_index(gv.graph()) else {
+                dialogs::message("Border", "No node is selected. Click the graph or use arrow keys.");
+                return;
+            };
+            id
+        };
+
+        let gv_h = self.graph_view;
+        if let Some(gv) = self.control_mut(gv_h) {
+            gv.modify_graph(|g| {
+                if let Some(mut node) = g.node(id) {
+                    match border {
+                        None => node.clear_border(),
+                        Some(lt) => node.set_border(lt),
+                    }
+                }
+            });
         }
     }
 
@@ -271,6 +323,31 @@ impl MenuEvents for GraphEditor {
             grapheditor::Commands::RenameNode => self.rename_selected(),
             grapheditor::Commands::ResizeNode => self.resize_selected(),
             grapheditor::Commands::CycleColor => self.cycle_color_selected(),
+            grapheditor::Commands::NodeBorderNone => self.apply_node_border(None),
+            grapheditor::Commands::NodeBorderSingle => {
+                self.apply_node_border(Some(LineType::Single));
+            }
+            grapheditor::Commands::NodeBorderDouble => {
+                self.apply_node_border(Some(LineType::Double));
+            }
+            grapheditor::Commands::NodeBorderThick => {
+                self.apply_node_border(Some(LineType::SingleThick));
+            }
+            grapheditor::Commands::NodeBorderHeavy => {
+                self.apply_node_border(Some(LineType::Border));
+            }
+            grapheditor::Commands::NodeBorderAscii => {
+                self.apply_node_border(Some(LineType::Ascii));
+            }
+            grapheditor::Commands::NodeBorderAsciiRound => {
+                self.apply_node_border(Some(LineType::AsciiRound));
+            }
+            grapheditor::Commands::NodeBorderSingleRound => {
+                self.apply_node_border(Some(LineType::SingleRound));
+            }
+            grapheditor::Commands::NodeBorderBraille => {
+                self.apply_node_border(Some(LineType::Braille));
+            }
             grapheditor::Commands::ArrangeGrid => {
                 let gv_h = self.graph_view;
                 if let Some(gv) = self.control_mut(gv_h) {
@@ -281,7 +358,7 @@ impl MenuEvents for GraphEditor {
                 dialogs::message(
                     "About",
                     "This example edits live graph nodes through GraphView::modify_graph.\n\
-The closure receives an EditableGraph: use node(index) to change labels, size (rect), colors, alignment, or position.\n\n\
+The closure receives an EditableGraph: use node(index) to change labels, size (rect), border line type, colors, alignment, or position.\n\n\
 Focus the graph: arrow keys move selection; Ctrl+arrows move the current node; Enter prefixes the node label and cycles color.",
                 );
             }
