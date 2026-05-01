@@ -236,6 +236,25 @@ impl<T> Graph<T>
 where
     T: GraphNode,
 {
+    pub(super) fn update_edges_in_out(&mut self) {
+        // clear the edges_in_out vectors
+        for n in &mut self.nodes {
+            n.edges_in.clear();
+            n.edges_out.clear();
+        }
+        // build the edges_in_out vectors
+        for (idx, e) in self.edges.iter().enumerate() {
+            if e.directed {
+                self.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
+                self.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
+            } else {
+                self.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
+                self.nodes[e.from_node_id as usize].edges_in.push(idx as u32);
+                self.nodes[e.to_node_id as usize].edges_out.push(idx as u32);
+                self.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
+            }
+        }
+    }
     pub fn new(nodes: Vec<Node<T>>, edges: Vec<Edge>) -> Self {
         let mut g = Self {
             nodes,
@@ -251,17 +270,7 @@ where
         let nodes_count = g.nodes.len() as u32;
         g.edges.retain(|e| (e.from_node_id < nodes_count) && (e.to_node_id < nodes_count));
         // build edges_in / edges_out for each node
-        for (idx, e) in g.edges.iter().enumerate() {
-            if e.directed {
-                g.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
-                g.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
-            } else {
-                g.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
-                g.nodes[e.from_node_id as usize].edges_in.push(idx as u32);
-                g.nodes[e.to_node_id as usize].edges_out.push(idx as u32);
-                g.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
-            }
-        }
+        g.update_edges_in_out();
         g
     }
     pub fn with_slices(nodes: &[T], edges: &[(u32, u32)], directed: bool) -> Self
