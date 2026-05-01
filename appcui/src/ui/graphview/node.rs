@@ -147,3 +147,67 @@ where
         self.node
     }
 }
+
+pub struct EditableNode<'a, T: GraphNode + 'a> {
+    node: &'a mut Node<T>,
+}
+impl<'a, T> EditableNode<'a, T>
+where
+    T: GraphNode + 'a,
+{
+    pub(super) fn new(node: &'a mut Node<T>) -> Self {  
+        Self { node }
+    }
+    #[inline(always)]
+    pub fn value(&self) -> &T {
+        &self.node.obj
+    }
+    #[inline(always)]
+    pub fn value_mut(&mut self) -> &mut T {
+        &mut self.node.obj
+    }
+    #[inline(always)]
+    pub fn set_value(&mut self, value: T) {
+        self.node.obj = value;
+    }
+    #[inline(always)]
+    pub fn position(&self) -> Rect {
+        self.node.rect
+    }
+    #[inline(always)]
+    pub fn set_position(&mut self, r: Rect) {
+        self.node.rect = r;
+    }
+    #[inline(always)]
+    pub fn text_alignment(&self) -> TextAlignment {
+        self.node.text_align
+    }
+    #[inline(always)]
+    pub fn set_text_alignment(&mut self, align: TextAlignment) {
+        self.node.text_align = align;
+    }
+    #[inline(always)]
+    pub fn text_attribute(&self) -> Option<CharAttribute> {
+        self.node.text_attr
+    }
+    #[inline(always)]
+    pub fn set_text_attribute(&mut self, attr: CharAttribute) {
+        self.node.text_attr = Some(attr);
+    }
+    #[inline(always)]
+    pub fn clear_text_attribute(&mut self) {
+        self.node.text_attr = None;
+    }
+    #[inline(always)]
+    pub fn border(&self) -> Option<LineType> {
+        self.node.border
+    }
+    #[inline(always)]
+    pub fn set_border(&mut self, border: LineType) {
+        self.node.border = Some(border);
+    }
+    #[inline(always)]
+    pub fn clear_border(&mut self) {
+        self.node.border = None;
+    }
+}
