@@ -2,6 +2,7 @@ use std::any::TypeId;
 
 use super::events::*;
 use super::graph::Graph;
+use super::graph::EditableGraph;
 use super::initialization_flags::*;
 use super::RenderingOptions;
 use crate::{prelude::*, ui::graphview::GraphNode};
@@ -343,6 +344,15 @@ where
     /// ```
     pub fn graph(&self) -> &Graph<T> {
         &self.graph
+    }
+
+    pub fn modify_graph<F>(&mut self, f: F)
+    where
+        F: FnOnce(&mut EditableGraph<'_, T>),
+    {
+        let mut editor = EditableGraph::new(&mut self.graph);
+        f(&mut editor);
+        self.graph.repaint(&self.base);
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
