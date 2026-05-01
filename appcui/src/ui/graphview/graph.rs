@@ -1,5 +1,6 @@
 use super::Edge;
 use super::EdgeBuilder;
+use super::EditableEdge;
 use super::EdgeRouting;
 use super::EditableNode;
 use super::GraphNode;
@@ -785,6 +786,7 @@ where
 {
     graph: &'a mut Graph<T>,
     changed_nodes: bool,
+    changed_edges: bool,
     changed_graph: bool,
 }
 impl<'a, T> EditableGraph<'a, T>
@@ -795,6 +797,7 @@ where
         Self {
             graph,
             changed_nodes: false,
+            changed_edges: false,
             changed_graph: false,
         }
     }
@@ -812,7 +815,31 @@ where
     #[inline(always)]
     pub fn add_node(&mut self, node: Node<T>) -> usize {
         self.graph.nodes.push(node);
-        self.changed_nodes = true;
+        self.changed_graph = true;
         self.graph.nodes.len() - 1
+    }
+
+
+    #[inline(always)]
+    pub fn edge(&mut self, index: usize) -> Option<EditableEdge<'_>> {
+        if index >= self.graph.edges.len() {
+            return None;
+        }
+        Some(EditableEdge::new(&mut self.graph.edges[index], &mut self.changed_edges))
+    }
+    #[inline(always)]
+    pub fn edges_count(&self) -> usize {
+        self.graph.edges.len()
+    }
+
+    #[inline(always)]
+    pub fn add_edge(&mut self, edge: Edge) -> bool {
+        let cnt = self.graph.nodes.len() as u32;
+        if edge.from_node_id >= cnt || edge.to_node_id >= cnt {
+            return false;
+        }
+        self.graph.edges.push(edge);
+        self.changed_graph = true;
+        true
     }
 }

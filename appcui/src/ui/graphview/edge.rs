@@ -49,3 +49,47 @@ impl EdgeBuilder {
         self.edge
     }
 }
+
+pub struct EditableEdge<'a> {
+    edge: &'a mut Edge,
+    changed: &'a mut bool,
+}
+impl<'a> EditableEdge<'a> {
+    pub(super) fn new(edge: &'a mut Edge, changed: &'a mut bool) -> Self {
+        Self { edge, changed }
+    }
+    #[inline(always)]
+    pub fn from_node_id(&self) -> u32 {
+        self.edge.from_node_id
+    }
+    #[inline(always)]
+    pub fn to_node_id(&self) -> u32 {
+        self.edge.to_node_id
+    }
+    #[inline(always)]
+    pub fn directed(&self) -> bool {
+        self.edge.directed
+    }
+    #[inline(always)]
+    pub fn attribute(&self) -> Option<CharAttribute> {
+        self.edge.attribute
+    }
+    #[inline(always)]
+    pub fn set_attribute(&mut self, attr: CharAttribute) {
+        if self.edge.attribute != Some(attr) {
+            self.edge.attribute = Some(attr);
+            *self.changed = true;
+        }
+    }
+    #[inline(always)]
+    pub fn line_type(&self) -> Option<LineType> {
+        self.edge.line_type
+    }
+    #[inline(always)]
+    pub fn set_line_type(&mut self, lt: LineType) {
+        if self.edge.line_type != Some(lt) {
+            self.edge.line_type = Some(lt);
+            *self.changed = true;
+        }
+    }
+}   

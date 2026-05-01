@@ -34,4 +34,5 @@ pub use self::node::NodeBuilder;
 pub use self::node::EditableNode;
 pub use self::edge::Edge;
 pub use self::edge::EdgeBuilder;
+pub use self::edge::EditableEdge;
 
