@@ -1,9 +1,9 @@
 use super::Edge;
 use super::EdgeBuilder;
 use super::EdgeRouting;
+use super::EditableNode;
 use super::GraphNode;
 use super::Node;
-use super::EditableNode;
 use super::NodeBuilder;
 use super::RenderingOptions;
 use crate::prelude::*;
@@ -619,7 +619,7 @@ where
     pub(super) fn surface(&self) -> &Surface {
         &self.surface
     }
-    
+
     // returns TRUE if the size was resized to adjust the scrolling bars
     pub(super) fn move_node_to(&mut self, id: usize, x: i32, y: i32, control: &ControlBase) -> bool {
         if id >= self.nodes.len() {
@@ -643,7 +643,7 @@ where
     }
     fn move_node_with(&mut self, id: usize, dx: i32, dy: i32, control: &ControlBase) {
         if id >= self.nodes.len() {
-            return ;
+            return;
         }
         let tl = self.nodes[id].rect.top_left();
         self.move_node_to(id, tl.x + dx, tl.y + dy, control);
@@ -718,7 +718,7 @@ where
     fn move_to_node_with_direction(&mut self, dir: Direction, control: &ControlBase) {
         if let Some(next_index) = self.next_node(dir) {
             self.set_current_node(next_index, control);
-        } 
+        }
     }
 
     pub(super) fn process_key_events(&mut self, key: Key, control: &ControlBase) -> bool {
@@ -743,7 +743,7 @@ where
             }
             _ => return false,
         }
-        true// key was processed
+        true // key was processed
     }
     pub(super) fn node_description(&mut self, id: usize) -> Option<&str> {
         if id >= self.nodes.len() {
@@ -779,21 +779,40 @@ where
     }
 }
 
-pub struct EditableGraph<'a, T> where T: GraphNode + 'a {
+pub struct EditableGraph<'a, T>
+where
+    T: GraphNode + 'a,
+{
     graph: &'a mut Graph<T>,
+    changed_nodes: bool,
+    changed_graph: bool,
 }
 impl<'a, T> EditableGraph<'a, T>
 where
     T: GraphNode + 'a,
 {
     pub(super) fn new(graph: &'a mut Graph<T>) -> Self {
-        Self { graph }
+        Self {
+            graph,
+            changed_nodes: false,
+            changed_graph: false,
+        }
     }
     #[inline(always)]
     pub fn node(&mut self, index: usize) -> Option<EditableNode<'_, T>> {
         if index >= self.graph.nodes.len() {
             return None;
         }
-        Some(EditableNode::new(&mut self.graph.nodes[index]))
+        Some(EditableNode::new(&mut self.graph.nodes[index], &mut self.changed_nodes))
+    }
+    #[inline(always)]
+    pub fn nodes_count(&self) -> usize {
+        self.graph.nodes.len()
+    }
+    #[inline(always)]
+    pub fn add_node(&mut self, node: Node<T>) -> usize {
+        self.graph.nodes.push(node);
+        self.changed_nodes = true;
+        self.graph.nodes.len() - 1
     }
 }

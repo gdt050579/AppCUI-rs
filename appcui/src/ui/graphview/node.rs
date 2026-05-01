@@ -150,13 +150,14 @@ where
 
 pub struct EditableNode<'a, T: GraphNode + 'a> {
     node: &'a mut Node<T>,
+    changed: &'a mut bool,
 }
 impl<'a, T> EditableNode<'a, T>
 where
     T: GraphNode + 'a,
 {
-    pub(super) fn new(node: &'a mut Node<T>) -> Self {
-        Self { node }
+    pub(super) fn new(node: &'a mut Node<T>, changed: &'a mut bool) -> Self {
+        Self { node, changed }
     }
     #[inline(always)]
     pub fn value(&self) -> &T {
@@ -169,6 +170,7 @@ where
     #[inline(always)]
     pub fn set_value(&mut self, value: T) {
         self.node.obj = value;
+        *self.changed = true;
     }
     #[inline(always)]
     pub fn position(&self) -> Rect {
@@ -176,7 +178,10 @@ where
     }
     #[inline(always)]
     pub fn set_position(&mut self, r: Rect) {
-        self.node.rect = r;
+        if self.node.rect != r {
+            self.node.rect = r;
+            *self.changed = true;
+        }
     }
     #[inline(always)]
     pub fn text_alignment(&self) -> TextAlignment {
@@ -184,7 +189,10 @@ where
     }
     #[inline(always)]
     pub fn set_text_alignment(&mut self, align: TextAlignment) {
-        self.node.text_align = align;
+        if self.node.text_align != align {
+            self.node.text_align = align;
+            *self.changed = true;
+        }
     }
     #[inline(always)]
     pub fn text_attribute(&self) -> Option<CharAttribute> {
@@ -192,11 +200,17 @@ where
     }
     #[inline(always)]
     pub fn set_text_attribute(&mut self, attr: CharAttribute) {
-        self.node.text_attr = Some(attr);
+        if self.node.text_attr != Some(attr) {
+            self.node.text_attr = Some(attr);
+            *self.changed = true;
+        }
     }
     #[inline(always)]
     pub fn clear_text_attribute(&mut self) {
-        self.node.text_attr = None;
+        if self.node.text_attr.is_some() {
+            self.node.text_attr = None;
+            *self.changed = true;
+        }
     }
     #[inline(always)]
     pub fn border(&self) -> Option<LineType> {
@@ -204,13 +218,19 @@ where
     }
     #[inline(always)]
     pub fn set_border(&mut self, border: LineType) {
-        self.node.border = Some(border);
-        if self.node.rect.height() < 3 {
-            self.node.rect.set_bottom(self.node.rect.top() + 2, false);
+        if self.node.border != Some(border) {
+            self.node.border = Some(border);
+            if self.node.rect.height() < 3 {
+                self.node.rect.set_bottom(self.node.rect.top() + 2, false);
+            }            
+            *self.changed = true;
         }
     }
     #[inline(always)]
     pub fn clear_border(&mut self) {
-        self.node.border = None;
+        if self.node.border.is_some() {
+            self.node.border = None;
+            *self.changed = true;
+        }
     }
 }
