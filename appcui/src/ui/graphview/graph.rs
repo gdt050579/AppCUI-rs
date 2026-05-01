@@ -3,6 +3,7 @@ use super::EdgeBuilder;
 use super::EdgeRouting;
 use super::GraphNode;
 use super::Node;
+use super::EditableNode;
 use super::NodeBuilder;
 use super::RenderingOptions;
 use crate::prelude::*;
@@ -775,5 +776,24 @@ where
             repr_buffer: String::new(),
             rendering_options: RenderingOptions::new(),
         }
+    }
+}
+
+pub struct EditableGraph<'a, T> where T: GraphNode + 'a {
+    graph: &'a mut Graph<T>,
+}
+impl<'a, T> EditableGraph<'a, T>
+where
+    T: GraphNode + 'a,
+{
+    pub(super) fn new(graph: &'a mut Graph<T>) -> Self {
+        Self { graph }
+    }
+    #[inline(always)]
+    pub fn node(&'a mut self, index: usize) -> Option<EditableNode<'a, T>> {
+        if index >= self.graph.nodes.len() {
+            return None;
+        }
+        Some(EditableNode::new(&mut self.graph.nodes[index]))
     }
 }
