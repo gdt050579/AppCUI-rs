@@ -25,11 +25,7 @@ impl Document {
         self.rope.len_chars()
     }
     pub(super) fn char(&self, char_index: usize) -> Option<char> {
-        if char_index < self.rope.len_chars() {
-            Some(self.rope.char(char_index))
-        } else {
-            None
-        }
+        self.rope.get_char(char_index)
     }
     pub(super) fn chars_iter(&self, char_index: usize) -> Chars<'_> {
         self.rope.chars_at(char_index)

@@ -82,11 +82,11 @@
 - [ ] `Ctrl+[` → outdent line
 
 ## Performance
-- [ ] Replace `document.char_at` loops in `move_to_next_word` / `move_to_previous_word` with ropey `Chars` iterator
+- [x] Replace `document.char_at` loops in `move_to_next_word` / `move_to_previous_word` with ropey `Chars` iterator
 - [ ] Cache cursor virtual column; update incrementally on horizontal moves instead of recomputing via `position_to_virtual_column`
 - [ ] Decide between dirty-region painting vs. cheap full-repaint before adding highlighting
 - [ ] Refactor `view: Option<Surface>` to `surface: Surface` + lazy init in `on_resize` + `needs_repaint` flag
-- [ ] Verify `Selection::contains` is O(1); if not, precompute per-line selection overlap before the char loop in `paint_line`
+- [x] Verify `Selection::contains` is O(1); if not, precompute per-line selection overlap before the char loop in `paint_line`
 - [ ] Fix off-by-one in `coordinates_to_position` for the final line of a document with no trailing newline
 - [ ] Make `update_view` panic-safe (don't leave `view` as `None` if anything between `take()` and reassign panics)
 - [ ] Skip horizontally-scrolled-off chars in `paint_line` without iterating them one by one

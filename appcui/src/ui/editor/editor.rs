@@ -137,7 +137,7 @@ impl Editor {
         self.cursor.line = new_current_line;
         self.update_view();
     }
-    fn move_lines(&mut self, delta: i32, select: bool) {
+    fn move_to_line(&mut self, delta: i32, select: bool) {
         let lines_count = self.document.lines_count();
         if lines_count == 0 {
             return;
@@ -177,6 +177,9 @@ impl Editor {
         self.goto_position(pos, select);
     }
     fn move_to_previous_word(&mut self, select: bool) {
+        if self.cursor.pos == 0 {
+            return;
+        }
         let mut iter = self.document.chars_iter(self.cursor.pos);
         let Some(first) = iter.prev() else {
             return;
@@ -326,19 +329,19 @@ impl OnKeyPressed for Editor {
                 EventProcessStatus::Processed
             }
             key!("Up") | key!("Shift+Up") => {
-                self.move_lines(-1, select);
+                self.move_to_line(-1, select);
                 EventProcessStatus::Processed
             }
             key!("Down") | key!("Shift+Down") => {
-                self.move_lines(1, select);
+                self.move_to_line(1, select);
                 EventProcessStatus::Processed
             }
             key!("PageUp") | key!("Shift+PageUp") => {
-                self.move_lines(-(self.visible_lines as i32).max(1), select);
+                self.move_to_line(-(self.visible_lines as i32).max(1), select);
                 EventProcessStatus::Processed
             }
             key!("PageDown") | key!("Shift+PageDown") => {
-                self.move_lines((self.visible_lines as i32).max(1), select);
+                self.move_to_line((self.visible_lines as i32).max(1), select);
                 EventProcessStatus::Processed
             }
 
