@@ -880,7 +880,7 @@ where
         true
     }
 
-    fn delete_edge(&mut self, index: usize) {
+    pub fn delete_edge(&mut self, index: usize) {
         if index >= self.graph.edges.len() {
             return;
         }
