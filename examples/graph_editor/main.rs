@@ -1,7 +1,7 @@
 //! Demonstrates editing graph node data through [`GraphView::modify_graph`].
 //!
-//! Focus the graph, move the selection with arrow keys, then use **Edit → Rename node**
-//! or **Edit → Cycle text color** to apply changes inside a `modify_graph` closure.
+//! Focus the graph, move the selection with arrow keys, then use **Edit → Rename node**,
+//! **Edit → Resize node**, or **Edit → Cycle text color** to apply changes inside a `modify_graph` closure.
 //! Press **Enter** on a node for `on_node_action` (same edits use the focused node).
 
 use appcui::prelude::*;
@@ -26,9 +26,23 @@ fn current_node_index(g: &graphview::Graph<String>) -> Option<usize> {
     (0..g.nodes_count()).find(|&i| g.node(i).is_some_and(|n| std::ptr::eq(cur, n)))
 }
 
+fn validate_node_size(value: &Size) -> Result<(), String> {
+    if value.width < 5 {
+        Err("Use width at least 5 columns.".into())
+    } else if value.width > 160 {
+        Err("Width must be at most 160.".into())
+    } else if value.height < 3 {
+        Err("Use height at least 3 rows.".into())
+    } else if value.height > 50 {
+        Err("Height must be at most 50.".into())
+    } else {
+        Ok(())
+    }
+}
+
 #[Window(
     events = [MenuEvents, GraphViewEvents<String>, AppBarEvents],
-    commands = [RenameNode, CycleColor, ArrangeGrid, About, Exit]
+    commands = [RenameNode, ResizeNode, CycleColor, ArrangeGrid, About, Exit]
 )]
 struct GraphEditor {
     graph_view: Handle<GraphView<String>>,
@@ -57,6 +71,7 @@ impl GraphEditor {
         let m_edit = menu!(
             "class: GraphEditor, items=[
                 {'&Rename node…', cmd: RenameNode},
+                {'&Resize node…', cmd: ResizeNode},
                 {'Cycle &text color', cmd: CycleColor},
             ]"
         );
@@ -127,6 +142,48 @@ impl GraphEditor {
                     }
                 });
             }
+        }
+    }
+
+    fn resize_selected(&mut self) {
+        let (id, top_left, size) = {
+            let gv_h = self.graph_view;
+            let Some(gv) = self.control_mut(gv_h) else {
+                return;
+            };
+            let Some(id) = current_node_index(gv.graph()) else {
+                dialogs::message("Resize", "No node is selected. Click the graph or use arrow keys.");
+                return;
+            };
+            let mut top_left = Point::ORIGIN;
+            let mut size = Size::new(1, 1);
+            gv.modify_graph(|g| {
+                if let Some(node) = g.node(id) {
+                    let r = node.position();
+                    top_left = r.top_left();
+                    size = r.size();
+                }
+            });
+            (id, top_left, size)
+        };
+
+        let Some(new_size) = dialogs::input::<Size>(
+            "Resize node",
+            "Size as width x height (e.g. 16x4):",
+            Some(size),
+            Some(validate_node_size),
+        ) else {
+            return;
+        };
+
+        let gv_h = self.graph_view;
+        if let Some(gv) = self.control_mut(gv_h) {
+            gv.modify_graph(|g| {
+                if let Some(mut node) = g.node(id) {
+                    node.set_position(Rect::with_point_and_size(top_left, new_size));
+                }
+            });
+            gv.arrange_nodes(graphview::ArrangeMethod::None);
         }
     }
 
@@ -212,6 +269,7 @@ impl MenuEvents for GraphEditor {
     ) {
         match command {
             grapheditor::Commands::RenameNode => self.rename_selected(),
+            grapheditor::Commands::ResizeNode => self.resize_selected(),
             grapheditor::Commands::CycleColor => self.cycle_color_selected(),
             grapheditor::Commands::ArrangeGrid => {
                 let gv_h = self.graph_view;
@@ -223,7 +281,7 @@ impl MenuEvents for GraphEditor {
                 dialogs::message(
                     "About",
                     "This example edits live graph nodes through GraphView::modify_graph.\n\
-The closure receives an EditableGraph: use node(index) to change labels, colors, alignment, or position.\n\n\
+The closure receives an EditableGraph: use node(index) to change labels, size (rect), colors, alignment, or position.\n\n\
 Focus the graph: arrow keys move selection; Ctrl+arrows move the current node; Enter prefixes the node label and cycles color.",
                 );
             }

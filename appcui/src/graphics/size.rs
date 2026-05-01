@@ -7,6 +7,12 @@ pub struct Size {
     pub height: u32,
 }
 
+impl Display for Size {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} x {}", self.width, self.height)
+    }
+}
+
 impl Size {
     /// Creates a new `Size` with the specified width and height.
     pub fn new(width: u32, height: u32) -> Size {
