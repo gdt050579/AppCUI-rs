@@ -155,7 +155,7 @@ impl<'a, T> EditableNode<'a, T>
 where
     T: GraphNode + 'a,
 {
-    pub(super) fn new(node: &'a mut Node<T>) -> Self {  
+    pub(super) fn new(node: &'a mut Node<T>) -> Self {
         Self { node }
     }
     #[inline(always)]
@@ -205,8 +205,8 @@ where
     #[inline(always)]
     pub fn set_border(&mut self, border: LineType) {
         self.node.border = Some(border);
-        if self.position().height() < 3 {
-            self.node.rect.set_bottom(3, false);
+        if self.node.rect.height() < 3 {
+            self.node.rect.set_bottom(self.node.rect.top() + 2, false);
         }
     }
     #[inline(always)]
