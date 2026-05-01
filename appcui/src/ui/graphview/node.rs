@@ -205,6 +205,9 @@ where
     #[inline(always)]
     pub fn set_border(&mut self, border: LineType) {
         self.node.border = Some(border);
+        if self.position().height() < 3 {
+            self.node.rect.set_bottom(3, false);
+        }
     }
     #[inline(always)]
     pub fn clear_border(&mut self) {
