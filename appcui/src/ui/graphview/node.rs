@@ -56,7 +56,7 @@ where
 
     pub(super) fn resize(&mut self, mut size: Size, multiselect_ui: bool) {
         let p = self.rect.top_left();
-        self.multiselect_gutter_cols = if multiselect_ui { 1 } else { 0 };
+        self.multiselect_gutter_cols = if multiselect_ui { 2 } else { 0 };
         if self.border.is_some() {
             // First inner row for checkbox when multi-select is on (glyph on first row of frame).
             if multiselect_ui {

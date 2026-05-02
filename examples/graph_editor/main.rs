@@ -96,7 +96,7 @@ impl GraphEditor {
             menu_help: Handle::None,
         };
 
-        let mut gv = graphview!("d:f,flags:[ScrollBars,SearchBar]");
+        let mut gv = graphview!("d:f,flags:[ScrollBars,SearchBar,MultiSelect]");
         gv.set_graph(initial_graph());
         gv.arrange_nodes(graphview::ArrangeMethod::Hierarchical);
         win.graph_view = win.add(gv);
