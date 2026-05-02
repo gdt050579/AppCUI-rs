@@ -972,6 +972,25 @@ where
                 let cn = self.current_node;
                 self.toggle_multiselect_selected(cn, control);
             }
+            key!("Ctrl+A") => {
+                if !self.rendering_options.multiselect_ui || self.nodes.is_empty() {
+                    return false;
+                }
+                let first_visible = (0..self.nodes.len()).find(|&i| !self.nodes[i].filtered);
+                let Some(fv) = first_visible else {
+                    return false;
+                };
+                let all_visible_selected = (0..self.nodes.len())
+                    .filter(|&i| !self.nodes[i].filtered)
+                    .all(|i| self.nodes[i].selected);
+                for n in &mut self.nodes {
+                    if !n.filtered {
+                        n.selected = !all_visible_selected;
+                    }
+                }
+                self.current_node = fv;
+                self.repaint(control);
+            }
             _ => return false,
         }
         true // key was processed
@@ -1171,6 +1190,24 @@ mod process_key_multiselect_tests {
         graph.rendering_options.multiselect_ui = true;
         let base = ControlBase::new(layout!("d:f"), true);
         let key = Key::new(KeyCode::Space, KeyModifier::None);
+        assert!(!graph.process_key_events(key, &base));
+    }
+
+    #[test]
+    fn ctrl_a_not_handled_when_multiselect_ui_off() {
+        let mut graph = Graph::<&'static str>::with_slices(&["A", "B"], &[], true);
+        graph.rendering_options.multiselect_ui = false;
+        let base = ControlBase::new(layout!("d:f"), true);
+        let key = Key::new(KeyCode::A, KeyModifier::Ctrl);
+        assert!(!graph.process_key_events(key, &base));
+    }
+
+    #[test]
+    fn ctrl_a_not_handled_when_multiselect_on_but_graph_empty() {
+        let mut graph: Graph<&'static str> = Graph::with_slices(&[], &[], true);
+        graph.rendering_options.multiselect_ui = true;
+        let base = ControlBase::new(layout!("d:f"), true);
+        let key = Key::new(KeyCode::A, KeyModifier::Ctrl);
         assert!(!graph.process_key_events(key, &base));
     }
 }
