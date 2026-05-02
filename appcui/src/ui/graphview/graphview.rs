@@ -1,4 +1,5 @@
 use std::any::TypeId;
+use std::mem;
 
 use super::events::*;
 use super::graph::EditableGraph;
@@ -7,15 +8,22 @@ use super::initialization_flags::*;
 use super::RenderingOptions;
 use crate::{prelude::*, ui::graphview::GraphNode};
 
-struct NodeInfo {
-    id: usize,
-    top_left: Point,
-    origin: Point,
-}
+/// Squared distance (graph coordinates) before a Ctrl+press is treated as a drag instead of a click toggle.
+const MULTISELECT_CTRL_DRAG_THRESHOLD_SQ: i32 = 9;
+
 enum Drag {
     None,
     View(Point),
-    Node(NodeInfo),
+    /// One or more nodes moving together; `anchors` are `(id, top_left_at_press)`.
+    NodeDrag {
+        origin: Point,
+        anchors: Vec<(usize, Point)>,
+    },
+    /// Ctrl+down on a node: toggle on release if the pointer does not move past [`MULTISELECT_CTRL_DRAG_THRESHOLD_SQ`].
+    CtrlClickPending {
+        node_id: usize,
+        origin: Point,
+    },
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
@@ -43,6 +51,7 @@ where
     /// - `flags`: Combination of initialization flags that control the GraphView behavior:
     ///   - `Flags::ScrollBars`: Enables scroll bars for navigating large graphs
     ///   - `Flags::SearchBar`: Enables a search bar for finding nodes
+    ///   - `Flags::MultiSelect`: Enables multi-selection UI (checkbox column and related behavior)
     ///
     /// # Example
     /// ```rust, no_run
@@ -56,7 +65,7 @@ where
     /// );
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
-        Self {
+        let mut this = Self {
             base: ControlBase::with_status_flags(
                 layout,
                 (StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput)
@@ -74,7 +83,14 @@ where
             arrange_method: ArrangeMethod::GridPacked,
             rendering_options: RenderingOptions::new(),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
-        }
+        };
+        this.sync_rendering_options_to_graph();
+        this
+    }
+
+    fn sync_rendering_options_to_graph(&mut self) {
+        self.rendering_options.multiselect_ui = self.flags.contains(Flags::MultiSelect);
+        self.graph.update_rendering_options(&self.rendering_options, &self.base);
     }
 
     /// Sets the background of the GraphView to the specified character.
@@ -151,7 +167,7 @@ where
     /// ```
     pub fn set_graph(&mut self, graph: Graph<T>) {
         self.graph = graph;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
         self.arrange_nodes(self.arrange_method);
     }
 
@@ -178,7 +194,7 @@ where
     /// ```
     pub fn set_edge_routing(&mut self, routing: EdgeRouting) {
         self.rendering_options.edge_routing = routing;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
     }
 
     /// Sets the line type used for drawing edges between nodes.
@@ -211,7 +227,7 @@ where
     /// ```
     pub fn set_edge_line_type(&mut self, line_type: LineType) {
         self.rendering_options.edge_line_type = line_type;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
     }
 
     /// Enables or disables edge highlighting for the currently selected node.
@@ -242,7 +258,7 @@ where
     pub fn enable_edge_highlighting(&mut self, incoming: bool, outgoing: bool) {
         self.rendering_options.highlight_edges_in = incoming;
         self.rendering_options.highlight_edges_out = outgoing;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
     }
 
     /// Enables or disables arrow heads on directed edges.
@@ -267,7 +283,7 @@ where
     /// ```
     pub fn enable_arrow_heads(&mut self, enabled: bool) {
         self.rendering_options.show_arrow_heads = enabled;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
     }
 
     /// Arranges the nodes in the graph using the specified layout algorithm.
@@ -655,16 +671,27 @@ where
             MouseEvent::Pressed(mouse_data) => {
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                 if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
-                    // click on a node
                     let nid = self.graph.current_node_id();
-                    self.graph.set_current_node(id, &self.base);
-                    let tl = self.graph.nodes[id].rect.top_left();
-                    self.drag = Drag::Node(NodeInfo {
-                        id,
-                        top_left: tl,
-                        origin: Point::new(data.x, data.y),
-                    });
-                    self.raise_current_node_changed(nid);
+                    let ms = self.flags.contains(Flags::MultiSelect);
+                    let ctrl = mouse_data.modifier.contains(KeyModifier::Ctrl);
+                    if ms && ctrl {
+                        self.drag = Drag::CtrlClickPending {
+                            node_id: id,
+                            origin: data,
+                        };
+                    } else {
+                        self.graph.apply_multiselect_plain_click(id, &self.base);
+                        let anchors = if ms {
+                            self.graph.selected_drag_anchors()
+                        } else {
+                            vec![(id, self.graph.nodes[id].rect.top_left())]
+                        };
+                        self.drag = Drag::NodeDrag {
+                            origin: data,
+                            anchors,
+                        };
+                        self.raise_current_node_changed(nid);
+                    }
                     return EventProcessStatus::Processed;
                 }
                 if self.flags.contains_one(Flags::ScrollBars) && (self.has_focus()) {
@@ -676,28 +703,45 @@ where
                 self.drag = Drag::View(Point::new(data.x, data.y));
                 EventProcessStatus::Processed
             }
-            MouseEvent::Released(mouse_data) => match &self.drag {
-                Drag::None => EventProcessStatus::Ignored,
-                Drag::View(p) => {
-                    self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
-                    self.drag = Drag::None;
-                    EventProcessStatus::Processed
-                }
-                Drag::Node(node_info) => {
-                    let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
-                    if self.graph.move_node_to(
-                        node_info.id,
-                        node_info.top_left.x + data.x - node_info.origin.x,
-                        node_info.top_left.y + data.y - node_info.origin.y,
-                        &self.base,
-                    ) {
-                        self.update_scroll_bars();
+            MouseEvent::Released(mouse_data) => {
+                let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
+                match mem::replace(&mut self.drag, Drag::None) {
+                    Drag::None => EventProcessStatus::Ignored,
+                    Drag::View(p) => {
+                        self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
+                        EventProcessStatus::Processed
                     }
-                    self.drag = Drag::None;
-                    self.ensure_current_node_is_visible();
-                    EventProcessStatus::Processed
+                    Drag::NodeDrag { origin, anchors } => {
+                        let resized = self.graph.move_nodes_with_press_delta(&anchors, origin, data, &self.base);
+                        if resized {
+                            self.update_scroll_bars();
+                        }
+                        self.ensure_current_node_is_visible();
+                        EventProcessStatus::Processed
+                    }
+                    Drag::CtrlClickPending { node_id, origin } => {
+                        let dx = data.x - origin.x;
+                        let dy = data.y - origin.y;
+                        if dx * dx + dy * dy <= MULTISELECT_CTRL_DRAG_THRESHOLD_SQ {
+                            let nid = self.graph.current_node_id();
+                            self.graph.toggle_multiselect_selected(node_id, &self.base);
+                            self.raise_current_node_changed(nid);
+                        } else {
+                            let anchors = if self.graph.nodes[node_id].selected {
+                                self.graph.selected_drag_anchors()
+                            } else {
+                                vec![(node_id, self.graph.nodes[node_id].rect.top_left())]
+                            };
+                            let resized = self.graph.move_nodes_with_press_delta(&anchors, origin, data, &self.base);
+                            if resized {
+                                self.update_scroll_bars();
+                            }
+                            self.ensure_current_node_is_visible();
+                        }
+                        EventProcessStatus::Processed
+                    }
                 }
-            },
+            }
             MouseEvent::DoubleClick(mouse_data) => {
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                 if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
@@ -707,27 +751,42 @@ where
                     EventProcessStatus::Ignored
                 }
             }
-            MouseEvent::Drag(mouse_data) => match &self.drag {
-                Drag::None => EventProcessStatus::Ignored,
-                Drag::View(p) => {
-                    self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
-                    self.drag = Drag::View(Point::new(mouse_data.x, mouse_data.y));
-                    EventProcessStatus::Processed
-                }
-                Drag::Node(node_info) => {
-                    let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
-                    if self.graph.move_node_to(
-                        node_info.id,
-                        node_info.top_left.x + data.x - node_info.origin.x,
-                        node_info.top_left.y + data.y - node_info.origin.y,
-                        &self.base,
-                    ) {
-                        self.update_scroll_bars();
+            MouseEvent::Drag(mouse_data) => {
+                let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
+                if let Drag::CtrlClickPending { node_id, origin } = &self.drag {
+                    let dx = data.x - origin.x;
+                    let dy = data.y - origin.y;
+                    if dx * dx + dy * dy > MULTISELECT_CTRL_DRAG_THRESHOLD_SQ {
+                        let anchors = if self.graph.nodes[*node_id].selected {
+                            self.graph.selected_drag_anchors()
+                        } else {
+                            vec![(*node_id, self.graph.nodes[*node_id].rect.top_left())]
+                        };
+                        let o = *origin;
+                        self.drag = Drag::NodeDrag {
+                            origin: o,
+                            anchors,
+                        };
                     }
-                    self.ensure_current_node_is_visible();
-                    EventProcessStatus::Processed
                 }
-            },
+                match &self.drag {
+                    Drag::None => EventProcessStatus::Ignored,
+                    Drag::View(p) => {
+                        self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
+                        self.drag = Drag::View(Point::new(mouse_data.x, mouse_data.y));
+                        EventProcessStatus::Processed
+                    }
+                    Drag::NodeDrag { origin, anchors } => {
+                        let resized = self.graph.move_nodes_with_press_delta(anchors, *origin, data, &self.base);
+                        if resized {
+                            self.update_scroll_bars();
+                        }
+                        self.ensure_current_node_is_visible();
+                        EventProcessStatus::Processed
+                    }
+                    Drag::CtrlClickPending { .. } => EventProcessStatus::Processed,
+                }
+            }
             MouseEvent::Wheel(dir) => {
                 match dir {
                     MouseWheelDirection::Left => self.move_scroll_to(self.origin_point.x + 1, self.origin_point.y),

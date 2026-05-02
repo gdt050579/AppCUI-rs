@@ -16,6 +16,10 @@ pub struct Node<T: GraphNode> {
     pub(super) edges_in: Vec<u32>,
     pub(super) edges_out: Vec<u32>,
     pub(super) filtered: bool,
+    /// Multi-selection membership when multi-select mode is enabled on the owning `GraphView`.
+    pub(super) selected: bool,
+    /// Columns reserved left of the label for ☑/☐ when multi-select UI is active (`0` or `1`).
+    pub(super) multiselect_gutter_cols: u8,
 }
 impl<T> Node<T>
 where
@@ -25,9 +29,39 @@ where
     pub fn value(&self) -> &T {
         &self.obj
     }
-    fn resize(&mut self, mut size: Size) {
-        let p = self.rect.top_left();
+
+    /// Whether this node is included in the multi-selection set (only meaningful when multi-select UI is enabled).
+    #[inline(always)]
+    pub fn is_selected(&self) -> bool {
+        self.selected
+    }
+
+    /// Label size derived from the current bounds (inverse of [`Node::resize`](Self::resize) padding rules).
+    pub(super) fn label_content_size(&self) -> Size {
+        let mut w = self.rect.width();
+        let mut h = self.rect.height();
         if self.border.is_some() {
+            w = w.saturating_sub(2);
+            h = h.saturating_sub(2);
+            // Bordered + multi-select: first inner row is reserved for ☑/☐ (see `resize` / `paint`).
+            if self.multiselect_gutter_cols > 0 {
+                h = h.saturating_sub(1);
+            }
+        } else {
+            w = w.saturating_sub(2);
+        }
+        w = w.saturating_sub(self.multiselect_gutter_cols as u32);
+        Size::new(w, h)
+    }
+
+    pub(super) fn resize(&mut self, mut size: Size, multiselect_ui: bool) {
+        let p = self.rect.top_left();
+        self.multiselect_gutter_cols = if multiselect_ui { 1 } else { 0 };
+        if self.border.is_some() {
+            // First inner row for checkbox when multi-select is on (glyph on first row of frame).
+            if multiselect_ui {
+                size.height += 1;
+            }
             // 2 characters (left/right for the border)
             // 2 characters (top/bottom for the border)
             size.width += 2;
@@ -36,6 +70,7 @@ where
             // one extra space on left and right
             size.width += 2;
         }
+        size.width += self.multiselect_gutter_cols as u32;
         self.rect = Rect::with_point_and_size(p, size);
     }
 
@@ -43,35 +78,103 @@ where
     pub(super) fn contains(&self, x: i32, y: i32) -> bool {
         self.rect.contains(Point::new(x, y))
     }
-    pub(super) fn paint(&self, surface: &mut Surface, attr: CharAttribute, out: &mut String) {
+    pub(super) fn paint(&self, surface: &mut Surface, attr: CharAttribute, out: &mut String, multiselect_ui: bool) {
         surface.fill_rect(self.rect, Character::with_attributes(' ', attr));
+        if !multiselect_ui {
+            if let Some(line_type) = self.border {
+                surface.draw_rect(self.rect, line_type, attr);
+                surface.set_relative_clip(self.rect.left() + 1, self.rect.top() + 1, self.rect.right() - 1, self.rect.bottom() - 1);
+            } else {
+                surface.set_relative_clip(self.rect.left(), self.rect.top(), self.rect.right(), self.rect.bottom());
+            }
+            let mut cx = self.rect.center_x();
+            let cy = if self.border.is_some() { 1 } else { 0 } + self.rect.top();
+            let w = self.rect.width().saturating_sub(2) as u16;
+            if (w > 0) && ((w & 1) == 0) {
+                cx += 1;
+            }
+            let format = TextFormatBuilder::new()
+                .align(self.text_align)
+                .attribute(attr)
+                .wrap_type(WrapType::WordWrap(w))
+                .position(cx, cy)
+                .build();
+            let mut sz = self.rect.size();
+            if self.border.is_some() {
+                sz = sz.reduce_by(2);
+            }
+            if self.obj.write_label(out, sz).is_err() {
+                out.clear();
+                out.push_str("???");
+            }
+            surface.write_text(out, &format);
+            surface.reset_clip();
+            return;
+        }
+
+        let g = self.multiselect_gutter_cols as i32;
+        let mark = if self.selected { '☑' } else { '☐' };
         if let Some(line_type) = self.border {
             surface.draw_rect(self.rect, line_type, attr);
-            surface.set_relative_clip(self.rect.left() + 1, self.rect.top() + 1, self.rect.right() - 1, self.rect.bottom() - 1);
+            let il = self.rect.left() + 1;
+            let it = self.rect.top() + 1;
+            let ir = self.rect.right() - 1;
+            let ib = self.rect.bottom() - 1;
+            // Top-left of inner frame, first row (spec: bordered — glyph on first row inside border).
+            surface.write_char(il, it, Character::with_attributes(mark, attr));
+            let clip_left = il + g;
+            let text_top = it + 1;
+            surface.set_relative_clip(clip_left, text_top, ir, ib);
+            let inner_w = (ir - clip_left + 1) as u32;
+            let mut cx = clip_left + (inner_w as i32 / 2);
+            if (inner_w > 0) && ((inner_w & 1) == 0) {
+                cx += 1;
+            }
+            let cy = text_top;
+            let w = inner_w as u16;
+            let format = TextFormatBuilder::new()
+                .align(self.text_align)
+                .attribute(attr)
+                .wrap_type(WrapType::WordWrap(w))
+                .position(cx, cy)
+                .build();
+            let mut sz = self.rect.size().reduce_by(2);
+            sz.width = sz.width.saturating_sub(self.multiselect_gutter_cols as u32);
+            sz.height = sz.height.saturating_sub(1);
+            if self.obj.write_label(out, sz).is_err() {
+                out.clear();
+                out.push_str("???");
+            }
+            surface.write_text(out, &format);
         } else {
-            surface.set_relative_clip(self.rect.left(), self.rect.top(), self.rect.right(), self.rect.bottom());
+            surface.write_char(
+                self.rect.left() + 1,
+                self.rect.top(),
+                Character::with_attributes(mark, attr),
+            );
+            let clip_left = self.rect.left() + 1 + g;
+            surface.set_relative_clip(clip_left, self.rect.top(), self.rect.right(), self.rect.bottom());
+            let inner_w = self.rect.width().saturating_sub(2 + self.multiselect_gutter_cols as u32);
+            let mut cx = clip_left + (inner_w as i32 / 2);
+            if (inner_w > 0) && ((inner_w & 1) == 0) {
+                cx += 1;
+            }
+            let cy = self.rect.top();
+            let w = inner_w as u16;
+            let format = TextFormatBuilder::new()
+                .align(self.text_align)
+                .attribute(attr)
+                .wrap_type(WrapType::WordWrap(w))
+                .position(cx, cy)
+                .build();
+            let mut sz = self.rect.size();
+            sz.width = sz.width.saturating_sub(2 + self.multiselect_gutter_cols as u32);
+            if self.obj.write_label(out, sz).is_err() {
+                out.clear();
+                out.push_str("???");
+            }
+            surface.write_text(out, &format);
         }
-        let mut cx = self.rect.center_x();
-        let cy = if self.border.is_some() { 1 } else { 0 } + self.rect.top();
-        let w = self.rect.width().saturating_sub(2) as u16;
-        if (w > 0) && ((w & 1) == 0) {
-            cx += 1;
-        }
-        let format = TextFormatBuilder::new()
-            .align(self.text_align)
-            .attribute(attr)
-            .wrap_type(WrapType::WordWrap(w))
-            .position(cx, cy)
-            .build();
-        let mut sz = self.rect.size();
-        if self.border.is_some() {
-            sz = sz.reduce_by(2);
-        }
-        if self.obj.write_label(out, sz).is_err() {
-            out.clear();
-            out.push_str("???");
-        }
-        surface.write_text(out, &format);
         surface.reset_clip();
     }
 }
@@ -99,6 +202,8 @@ where
                 edges_in: Vec::new(),
                 edges_out: Vec::new(),
                 filtered: false,
+                selected: false,
+                multiselect_gutter_cols: 0,
             },
             size: None,
         }
@@ -139,10 +244,10 @@ where
     #[inline(always)]
     pub fn build(mut self) -> Node<T> {
         if let Some(size) = self.size {
-            self.node.resize(size);
+            self.node.resize(size, false);
         } else {
             let sz = self.node.obj.prefered_size();
-            self.node.resize(sz);
+            self.node.resize(sz, false);
         }
         self.node
     }
