@@ -21,7 +21,7 @@ impl<T> Node<T>
 where
     T: GraphNode,
 {
-    // Returns a reference to the object of type T associated with the Node
+    /// Returns a reference to the user data (`T`) stored in this node.
     pub fn value(&self) -> &T {
         &self.obj
     }
@@ -159,23 +159,28 @@ where
     pub(super) fn new(node: &'a mut Node<T>, changed: &'a mut bool) -> Self {
         Self { node, changed }
     }
+    /// Returns an immutable reference to the node's user data.
     #[inline(always)]
     pub fn value(&self) -> &T {
         &self.node.obj
     }
+    /// Returns a mutable reference to the node's user data.
     #[inline(always)]
     pub fn value_mut(&mut self) -> &mut T {
         &mut self.node.obj
     }
+    /// Replaces the node's user data and marks the graph as changed.
     #[inline(always)]
     pub fn set_value(&mut self, value: T) {
         self.node.obj = value;
         *self.changed = true;
     }
+    /// Returns the node's bounding rectangle in graph coordinates.
     #[inline(always)]
     pub fn bounds(&self) -> Rect {
         self.node.rect
     }
+    /// Sets the node's bounding rectangle. No-op if unchanged; otherwise marks the graph as changed.
     #[inline(always)]
     pub fn set_bounds(&mut self, r: Rect) {
         if self.node.rect != r {
@@ -183,26 +188,32 @@ where
             *self.changed = true;
         }
     }
+    /// Returns the top-left corner of the node's bounds.
     #[inline(always)]
     pub fn position(&self) -> Point {
         self.node.rect.top_left()
     }
+    /// Moves the node so its top-left is `p`, preserving size.
     #[inline(always)]
     pub fn set_position(&mut self, p: Point) {
         self.set_bounds(Rect::with_point_and_size(p, self.node.rect.size()));
     }
+    /// Returns the width and height of the node's bounds.
     #[inline(always)]
     pub fn size(&self) -> Size {
         self.node.rect.size()
     }
+    /// Resizes the node, keeping its current top-left corner.
     #[inline(always)]
     pub fn set_size(&mut self, size: Size) {
         self.set_bounds(Rect::with_point_and_size(self.node.rect.top_left(), size));
     }
+    /// Returns how the label text is aligned inside the node.
     #[inline(always)]
     pub fn text_alignment(&self) -> TextAlignment {
         self.node.text_align
     }
+    /// Sets label text alignment. Marks the graph as changed if the value differs.
     #[inline(always)]
     pub fn set_text_alignment(&mut self, align: TextAlignment) {
         if self.node.text_align != align {
@@ -210,10 +221,12 @@ where
             *self.changed = true;
         }
     }
+    /// Returns the optional custom text (and border) attribute when the control is focused.
     #[inline(always)]
     pub fn text_attribute(&self) -> Option<CharAttribute> {
         self.node.text_attr
     }
+    /// Sets a custom text attribute. Marks the graph as changed if the value differs.
     #[inline(always)]
     pub fn set_text_attribute(&mut self, attr: CharAttribute) {
         if self.node.text_attr != Some(attr) {
@@ -221,6 +234,7 @@ where
             *self.changed = true;
         }
     }
+    /// Clears a previously set text attribute so theme defaults apply.
     #[inline(always)]
     pub fn clear_text_attribute(&mut self) {
         if self.node.text_attr.is_some() {
@@ -228,10 +242,12 @@ where
             *self.changed = true;
         }
     }
+    /// Returns the border line style, if any.
     #[inline(always)]
     pub fn border(&self) -> Option<LineType> {
         self.node.border
     }
+    /// Sets the border style. Ensures minimum height when enabling a border. Marks the graph as changed if needed.
     #[inline(always)]
     pub fn set_border(&mut self, border: LineType) {
         if self.node.border != Some(border) {
@@ -242,6 +258,7 @@ where
             *self.changed = true;
         }
     }
+    /// Removes the node's border. Marks the graph as changed if a border was present.
     #[inline(always)]
     pub fn clear_border(&mut self) {
         if self.node.border.is_some() {

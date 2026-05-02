@@ -45,7 +45,7 @@ A GraphView supports the following edge line types:
 
 A GraphView supports the following edge routing algorithms:
 * `graphview::EdgeRouting::Direct` or `Direct` - draw edges as direct lines between nodes
-* `graphview::EdgeRouting::Orthogonal` or `Orthogonal` - draw edges as orthogonal lines (straight lines with right-angled corners) that try to avoid other nodes and edges. This ususally creates a better visual representation of the graph (in particular, for large graphs)
+* `graphview::EdgeRouting::Orthogonal` or `Orthogonal` - draw edges as orthogonal lines (straight lines with right-angled corners) between attachment points on node rectangles. This usually produces a clearer layout than direct lines, especially on larger graphs.
 
 A GraphView supports the following node arrangement algorithms:
 * `graphview::ArrangeMethod::None` or `None` - no automatic arrangement (use custom positions)
@@ -76,36 +76,74 @@ pub trait GraphViewEvents<T> {
 
 Besides the [Common methods for all Controls](../common_methods.md) a GraphView also has the following additional methods:
 
-| Method                          | Purpose                                                                                                                                        |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `set_graph(...)`                | Sets the graph data to be displayed. Takes a `Graph<T>` object containing nodes and edges.                                                     |
-| `graph()`                       | Returns a reference to the current graph data.                                                                                                 |
-| `set_background(...)`           | Sets the background character for the GraphView.                                                                                               |
-| `clear_background()`            | Clears the background character, making it transparent.                                                                                        |
-| `set_edge_routing(...)`         | Sets the edge routing algorithm (`Direct` or `Orthogonal`).                                                                                    |
-| `set_edge_line_type(...)`       | Sets the line type used for drawing edges.                                                                                                     |
-| `enable_edge_highlighting(...)` | Enables or disables highlighting of incoming and outgoing edges for the current node. Takes two boolean parameters: `incoming` and `outgoing`. |
-| `enable_arrow_heads(...)`       | Enables or disables arrow heads on directed edges.                                                                                             |
-| `arrange_nodes(...)`            | Applies a layout algorithm to arrange the nodes in the graph. Takes an `ArrangeMethod` parameter.                                              |
+| Method                          | Purpose                                                                                                                                                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `set_graph(...)`                | Sets the graph data to be displayed. Takes a `Graph<T>` object containing nodes and edges.                                                                                                                                     |
+| `graph()`                       | Returns a reference to the current graph data.                                                                                                                                                                                 |
+| `set_background(...)`           | Sets the background character for the GraphView.                                                                                                                                                                               |
+| `clear_background()`            | Clears the background character, making it transparent.                                                                                                                                                                        |
+| `set_edge_routing(...)`         | Sets the edge routing algorithm (`Direct` or `Orthogonal`).                                                                                                                                                                    |
+| `set_edge_line_type(...)`       | Sets the line type used for drawing edges.                                                                                                                                                                                     |
+| `enable_edge_highlighting(...)` | Enables or disables highlighting of incoming and outgoing edges for the current node. Takes two boolean parameters: `incoming` and `outgoing`.                                                                                 |
+| `enable_arrow_heads(...)`       | Enables or disables arrow heads on directed edges.                                                                                                                                                                             |
+| `arrange_nodes(...)`            | Applies a layout algorithm to arrange the nodes in the graph. Takes an `ArrangeMethod` parameter.                                                                                                                              |
+| `modify_graph(...)`             | Runs a closure with an `EditableGraph` so you can add or remove nodes and edges, change the current selection, and edit node or edge properties; the control repaints and refreshes geometry when the closure reports changes. |
 
-### Graph Methods
+### Building a `Graph<T>`
 
-The graph object returned by `graph()` provides additional methods for accessing graph data:
+| Associated function                          | Purpose                                                                                                                                                                    |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Graph::new(nodes, edges)`                   | Takes owned `Vec<Node<T>>` and `Vec<Edge>`. Drops edges whose endpoints are not valid node indices, then rebuilds each node’s `edges_in` / `edges_out` lists.              |
+| `Graph::with_slices(nodes, edges, directed)` | Clones each `T` into a default-styled node via `NodeBuilder`, then builds edges from `(from, to)` pairs with the same `directed` value on every edge. Requires `T: Clone`. |
+| `Graph::with_slices_and_border(...)`         | Same as `with_slices`, but every node is created with the given `LineType` border.                                                                                         |
 
-| Method              | Purpose                                                                                    |
-| ------------------- | ------------------------------------------------------------------------------------------ |
-| `current_node_id()` | Returns the index of the currently selected node, or `None` if the graph is empty.         |
-| `current_node()`    | Returns a reference to the currently selected node, or `None` if the graph is empty.       |
-| `node(index)`       | Returns a reference to the node at the specified index, or `None` if the index is invalid. |
-| `nodes_count()`     | Returns the total number of nodes in the graph.                                            |
+`Graph::default()` yields an empty graph (no nodes, no edges) with default internal buffers.
 
-### Node Methods
+### Reading a graph (`graph()`)
 
-Node objects provide access to their contained data:
+The reference from `graph()` is `&Graph<T>`: read-only access to nodes, edges, and the current selection.
 
-| Method    | Purpose                                                                   |
-| --------- | ------------------------------------------------------------------------- |
-| `value()` | Returns a reference to the data object (of type T) contained in the node. |
+| Method           | Purpose                                                                   |
+| ---------------- | ------------------------------------------------------------------------- |
+| `current_node()` | `Some(&Node<T>)` for the focused node, or `None` when there are no nodes. |
+| `node(index)`    | `Some(&Node<T>)` at the zero-based index, or `None` if out of range.      |
+| `nodes_count()`  | Number of nodes.                                                          |
+
+### In-place editing (`modify_graph`)
+
+Call `graph_view.modify_graph(|g| { ... })` so the closure receives an `EditableGraph`. The closure can call:
+
+| Method                                     | Purpose                                                                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `node(index)`                              | `Some(EditableNode)` to read or change bounds, position, size, label alignment, text attribute, or border for that node. |
+| `nodes_count()`, `add_node`, `delete_node` | Inspect size, append a built `Node<T>`, or remove a node (incident edges removed; remaining edge endpoints renumbered).  |
+| `edge(index)`                              | `Some(EditableEdge)` to read or change per-edge line type and character attribute.                                       |
+| `edges_count()`, `add_edge`, `delete_edge` | Edge list maintenance; `add_edge` returns `false` if endpoints are invalid.                                              |
+| `set_current_node`, `current_node`         | Update or read the selection index tracked for this edit (applied to the inner `Graph` when the closure finishes).       |
+
+After the closure returns, the control updates edge connectivity, may resize the backing surface, and repaints if anything changed.
+
+```rs
+graph_view.modify_graph(|g| {
+    if let Some(mut n) = g.node(0) {
+        n.set_value("Updated");
+    }
+});
+```
+
+### `Node` and `EditableNode`
+
+On a read-only `Node<T>` from `graph().node(i)` or `graph().current_node()`:
+
+| Method    | Purpose                                                    |
+| --------- | ---------------------------------------------------------- |
+| `value()` | Reference to the user payload `T` (your `GraphNode` type). |
+
+Inside `modify_graph`, `EditableNode` also exposes layout and style APIs, for example `bounds` / `set_bounds`, `position` / `set_position`, `size` / `set_size`, `value` / `value_mut` / `set_value`, text alignment and attribute get/set/clear, and border get/set/clear. Most setters flip an internal “changed” flag so the graph view knows to repaint; `value_mut` does not set that flag by itself.
+
+### `EditableEdge`
+
+Inside `modify_graph`, `EditableEdge` exposes `from_node_id`, `to_node_id`, and `directed` (read-only), plus `attribute` / `set_attribute` and `line_type` / `set_line_type` for styling overrides.
 
 ## Key association
 
@@ -152,7 +190,7 @@ pub trait GraphNode {
 
 where:
 * `write_label` is used to write the label of the node to the formatter (this method is required and must be implemented by the data object)
-* `write_description` is used to write the description of the node. This is an optional method that if implmented is being used to display a tooltip when the user hovers over the node.
+* `write_description` is used to write the description of the node. The default implementation writes nothing; if you override it, the text can be shown as a tooltip when the user hovers over the node.
 * `prefered_size` is used to get the preferred size of the node. This method is being used when a graph is provided without an explicit size for a node.
 
 **Remarks**: By default, the `GraphNode` trait is implemented for the following types:
@@ -164,7 +202,7 @@ where:
 ## Creating a graph
 
 A graph can be created in several ways:
-* Using the `Graph::new` method (and providing a vector of nodes and a vector of edges)
+* Using the `Graph::new` method (a vector of nodes and a vector of edges; invalid edges are removed as described above)
   ```rs
   let graph = Graph::new(nodes, edges);
   ```
@@ -181,7 +219,7 @@ To create a node (that will further be used in the graph) you can use the `NodeB
 ```rs
 let node = NodeBuilder::new(node_data).build();
 ```
-with the following buiolder methods:
+with the following builder methods:
 * `size` - the size of the node (if not provided, the preferred size as it is returned by the `GraphNode` implementation will be used)
 * `position` - the position of the node (if not provided, the node will be placed at the top-left corner of the graph)
 * `border` - the border type for the node (if not provided, no border will be drawn)
@@ -197,7 +235,7 @@ with the following builder methods:
 * `attribute` - the attribute for the edge (if not provided, the edge will be displayed in the default attribute extracted from the terminal theme)
 * `line_type` - the line type for the edge (if not provided, the default line type will be used)
 
-When building an edge, the **from** and **to** parameters are the indices of the nodes in the graph. For example, ina graph with 5 nodes, the edge from node 2 to node 4 will be created with `EdgeBuilder::new(2, 4).build()` (note that the indices are 0-based).
+When building an edge, the **from** and **to** parameters are the indices of the nodes in the graph. For example, in a graph with 5 nodes, the edge from node 2 to node 4 will be created with `EdgeBuilder::new(2, 4).build()` (indices are zero-based).
 
 **Some examples on how to create a graph:**
 1. A simple graph with 5 nodes and 4 edges (using slices):
@@ -217,7 +255,7 @@ When building an edge, the **from** and **to** parameters are the indices of the
                     true                                // directed edges
                 );
    ```
-3. A mode complex graph where each node is created manually:
+3. A more complex graph where each node is created manually:
    ```rs
    let nodes = vec![
         NodeBuilder::new("A").size(Size::new(10, 1)).build(),

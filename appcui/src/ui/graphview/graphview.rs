@@ -346,6 +346,31 @@ where
         &self.graph
     }
 
+    /// Performs an in-place edit to the graph structure.
+    ///
+    /// This method allows you to modify the graph's nodes, edges, and current selection
+    /// in a single atomic operation. The changes are tracked and applied to the graph,
+    /// triggering a repaint and resize if necessary.
+    ///
+    /// # Parameters
+    /// - `f`: A closure that takes an `EditableGraph` reference and performs the desired edits.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    ///
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"),
+    ///     graphview::Flags::ScrollBars
+    /// );
+    ///
+    /// graph_view.modify_graph(|g| {
+    ///     let mut node = g.node(0).unwrap();
+    ///     node.set_value("New Value");
+    /// });
+    /// ```
     pub fn modify_graph<F>(&mut self, f: F)
     where
         F: FnOnce(&mut EditableGraph<'_, T>),

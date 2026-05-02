@@ -255,6 +255,9 @@ where
             }
         }
     }
+    /// Constructs a graph from pre-built nodes and edges.
+    ///
+    /// Edges referencing missing node indices are dropped. Incoming/outgoing edge lists per node are rebuilt.
     pub fn new(nodes: Vec<Node<T>>, edges: Vec<Edge>) -> Self {
         let mut g = Self {
             nodes,
@@ -273,6 +276,9 @@ where
         g.update_edges_in_out();
         g
     }
+    /// Builds a graph by cloning node values into default-styled nodes and creating edges from index pairs.
+    ///
+    /// Node indices in `edges` refer to positions in `nodes`. All edges share the same `directed` flag.
     pub fn with_slices(nodes: &[T], edges: &[(u32, u32)], directed: bool) -> Self
     where
         T: GraphNode + Clone,
@@ -284,6 +290,7 @@ where
             .collect();
         Self::new(v, e)
     }
+    /// Like [`Graph::with_slices`](Self::with_slices), but every node is created with the given border style.
     pub fn with_slices_and_border(nodes: &[T], edges: &[(u32, u32)], border: LineType, directed: bool) -> Self
     where
         T: GraphNode + Clone,
@@ -296,8 +303,9 @@ where
         Self::new(v, e)
     }
 
-    /// Returns the object (of type T) associated with the current node
-    /// This method returns None only if th graph is empty (no nodes) otherwise it always returns Some(&T)
+    /// Returns the graph node struct for the keyboard/mouse current selection.
+    ///
+    /// Returns `None` only when the graph has no nodes; otherwise returns `Some`.
     pub fn current_node(&self) -> Option<&Node<T>> {
         if self.current_node < self.nodes.len() {
             Some(&self.nodes[self.current_node])
@@ -311,7 +319,7 @@ where
         self.nodes.len()
     }
 
-    /// Returns a object associated with a node in the graph by its index (if the index is valid)
+    /// Returns the node at `index`, or `None` if out of range.
     pub fn node(&self, index: usize) -> Option<&Node<T>> {
         self.nodes.get(index)
     }
@@ -775,6 +783,7 @@ impl<T> Default for Graph<T>
 where
     T: GraphNode,
 {
+    /// An empty graph with default internal buffers and rendering options.
     fn default() -> Self {
         Self {
             nodes: Default::default(),
@@ -804,6 +813,7 @@ impl<'a, T> EditableGraph<'a, T>
 where
     T: GraphNode + 'a,
 {
+    /// Wraps a graph for in-place editing; tracks which aspects changed for the owning control.
     pub(crate) fn new(graph: &'a mut Graph<T>) -> Self {
         let current_node = graph.current_node;
         Self {
@@ -815,6 +825,7 @@ where
             changed_current_node: false,
         }
     }
+    /// Borrows the node at `index` for reading or mutating layout and presentation fields.
     #[inline(always)]
     pub fn node(&mut self, index: usize) -> Option<EditableNode<'_, T>> {
         if index >= self.graph.nodes.len() {
@@ -822,10 +833,12 @@ where
         }
         Some(EditableNode::new(&mut self.graph.nodes[index], &mut self.changed_nodes))
     }
+    /// Number of nodes in the graph.
     #[inline(always)]
     pub fn nodes_count(&self) -> usize {
         self.graph.nodes.len()
     }
+    /// Appends a node and returns its index. Marks the graph structure as changed.
     #[inline(always)]
     pub fn add_node(&mut self, node: Node<T>) -> usize {
         self.graph.nodes.push(node);
@@ -857,6 +870,7 @@ where
     }
 
 
+    /// Borrows the edge at `index` for reading or mutating style fields.
     #[inline(always)]
     pub fn edge(&mut self, index: usize) -> Option<EditableEdge<'_>> {
         if index >= self.graph.edges.len() {
@@ -864,11 +878,13 @@ where
         }
         Some(EditableEdge::new(&mut self.graph.edges[index], &mut self.changed_edges))
     }
+    /// Number of edges in the graph.
     #[inline(always)]
     pub fn edges_count(&self) -> usize {
         self.graph.edges.len()
     }
 
+    /// Appends an edge if both endpoints are valid node indices. Returns whether the edge was added.
     #[inline(always)]
     pub fn add_edge(&mut self, edge: Edge) -> bool {
         let cnt = self.graph.nodes.len() as u32;
@@ -880,6 +896,7 @@ where
         true
     }
 
+    /// Removes the edge at `index`. No-op if out of range.
     pub fn delete_edge(&mut self, index: usize) {
         if index >= self.graph.edges.len() {
             return;
@@ -888,6 +905,7 @@ where
         self.changed_graph = true;
     }
 
+    /// Selects the node at `index` for focus/highlighting if in range and different from the current selection.
     #[inline(always)]
     pub fn set_current_node(&mut self, index: usize) {
         if (index != self.current_node) && (index < self.graph.nodes.len()) {
@@ -895,6 +913,7 @@ where
             self.changed_current_node = true;
         }
     }
+    /// Index of the node currently selected within this editable session (may be out of range if nodes were removed).
     #[inline(always)]
     pub fn current_node(&self) -> usize {
         self.current_node
