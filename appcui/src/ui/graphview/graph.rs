@@ -804,7 +804,7 @@ impl<'a, T> EditableGraph<'a, T>
 where
     T: GraphNode + 'a,
 {
-    pub(super) fn new(graph: &'a mut Graph<T>) -> Self {
+    pub(crate) fn new(graph: &'a mut Graph<T>) -> Self {
         let current_node = graph.current_node;
         Self {
             graph,
