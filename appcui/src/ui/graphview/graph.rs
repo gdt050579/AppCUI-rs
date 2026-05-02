@@ -965,6 +965,13 @@ where
                     self.set_current_node((self.current_node + self.nodes.len() - 1) % self.nodes.len(), control);
                 }
             }
+            key!("Space") => {
+                if !self.rendering_options.multiselect_ui || self.nodes.is_empty() || self.current_node >= self.nodes.len() {
+                    return false;
+                }
+                let cn = self.current_node;
+                self.toggle_multiselect_selected(cn, control);
+            }
             _ => return false,
         }
         true // key was processed
@@ -1142,6 +1149,29 @@ where
     #[inline(always)]
     pub fn current_node(&self) -> usize {
         self.current_node
+    }
+}
+
+#[cfg(test)]
+mod process_key_multiselect_tests {
+    use super::*;
+
+    #[test]
+    fn space_not_handled_when_multiselect_ui_off() {
+        let mut graph = Graph::<&'static str>::with_slices(&["A"], &[], true);
+        graph.rendering_options.multiselect_ui = false;
+        let base = ControlBase::new(layout!("d:f"), true);
+        let key = Key::new(KeyCode::Space, KeyModifier::None);
+        assert!(!graph.process_key_events(key, &base));
+    }
+
+    #[test]
+    fn space_not_handled_when_multiselect_on_but_graph_empty() {
+        let mut graph: Graph<&'static str> = Graph::with_slices(&[], &[], true);
+        graph.rendering_options.multiselect_ui = true;
+        let base = ControlBase::new(layout!("d:f"), true);
+        let key = Key::new(KeyCode::Space, KeyModifier::None);
+        assert!(!graph.process_key_events(key, &base));
     }
 }
 
