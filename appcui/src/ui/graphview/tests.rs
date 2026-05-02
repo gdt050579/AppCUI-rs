@@ -1403,7 +1403,7 @@ fn modify_graph_add_two_nodes_and_edge_check_hash() {
 #[test]
 fn modify_graph_delete_node_with_edges_check_hash() {
     let script = "
-        Paint.Enable(false)
+        Paint.Enable(false) 
         Paint('modify_graph: delete_node(1) removes B (edges 0->1 and 1->3)')
         CheckHash(0xB2685CB981BCDA7)
     ";
