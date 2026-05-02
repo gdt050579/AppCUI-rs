@@ -1361,3 +1361,40 @@ fn modify_graph_set_color_border_and_content_check_hash() {
     a.add_window(w);
     a.run();
 }
+
+/// Builds an empty graph, then [`GraphView::modify_graph`] adds two nodes and a directed edge between them.
+#[test]
+fn modify_graph_add_two_nodes_and_edge_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: add_node x2 + add_edge(0 -> 1)')
+        CheckHash(0x2725DFCC78B2D076)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!(
+        "line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
+    );
+    let g: graphview::Graph<&'static str> = graphview::Graph::with_slices(&[], &[], true);
+    gv.set_graph(g);
+    gv.modify_graph(|g| {
+        let a = graphview::NodeBuilder::new("A")
+            .position(Point::new(2, 2))
+            .size(Size::new(8, 1))
+            .build();
+        let b = graphview::NodeBuilder::new("B")
+            .position(Point::new(22, 2))
+            .size(Size::new(8, 1))
+            .build();
+        let id_a = g.add_node(a);
+        let id_b = g.add_node(b);
+        let _ = g.add_edge(
+            graphview::EdgeBuilder::new(id_a as u32, id_b as u32)
+                .directed(true)
+                .build(),
+        );
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
