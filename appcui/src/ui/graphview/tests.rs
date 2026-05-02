@@ -1503,6 +1503,58 @@ fn multiselect_space_three_nodes_then_ctrl_arrow_move_check_hash() {
     a.run();
 }
 
+/// Same graph and **Ctrl+arrow** moves as [`multiselect_space_three_nodes_then_ctrl_arrow_move_check_hash`], but the three nodes are
+/// included via **Ctrl+left click** (`Key.Modifier(Ctrl)` + `Mouse.Click(..., left)` + `Key.Modifier(None)`), matching `GraphView` multi-select mouse handling.
+///
+/// For `App::debug(72, 22)` and a full-desktop test window, terminal coordinates **(9,2)**, **(35,2)**, and **(35,13)** hit nodes **A**, **B**, and **C** (column **x = 9** matches [`check_events_with_mouse`] for hitting the first node).
+/// Do not plain-click a node and then Ctrl+click the same pixel — the second action toggles selection off again.
+#[test]
+fn multiselect_ctrl_click_three_nodes_then_ctrl_arrow_move_check_hash() {
+    let script = "
+        Paint.Enable(false)
+
+        Paint('1. Initial state')
+        CheckHash(0x70EF36845145E78)
+        Key.Modifier(Ctrl)
+        Mouse.Click(9,2,left)
+        Key.Modifier(None)
+        Paint('2. Ctrl+click node A — A selected (same end state as Space on A)')
+        CheckHash(0xD2337DCA27E75979)
+        Key.Modifier(Ctrl)
+        Mouse.Click(35,2,left)
+        Key.Modifier(None)
+        Paint('3. Ctrl+click node B — A and B selected')
+        CheckHash(0xC42DA1AABEE24E38)
+        Key.Modifier(Ctrl)
+        Mouse.Click(35,13,left)
+        Key.Modifier(None)
+        Paint('4. Ctrl+click node C — A, B, C selected; D unselected')
+        CheckHash(0xC953EA548C428071)
+
+        Key.Pressed(Ctrl+Right,2)
+        Paint('5. Ctrl+Right x2 — group nudge right')
+        CheckHash(0x54704416FAA900F1)
+        Key.Pressed(Ctrl+Down,2)
+        Paint('6. Ctrl+Down x2 — group nudge down')
+        CheckHash(0x4ECE5E8D567387B1)
+        Key.Pressed(Ctrl+Left,2)
+        Paint('7. Ctrl+Left x2 — group nudge left')
+        CheckHash(0x438FE806A4B34071)
+        Key.Pressed(Ctrl+Up,2)
+        Paint('8. Ctrl+Up x2 — group nudge up')
+        CheckHash(0xC953EA548C428071)
+    ";
+    let mut a = App::debug(72, 22, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!(
+        "line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: None, d:f, flags:[ScrollBars,MultiSelect],lsm:2,tsm:1"
+    );
+    gv.set_graph(graph_four_nodes_multiselect_layout());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
 /// [`EditableNode`] getters match the geometry and style from [`NodeBuilder`] (including `resize` padding rules).
 #[test]
 fn editable_node_getters_match_node_builder() {
