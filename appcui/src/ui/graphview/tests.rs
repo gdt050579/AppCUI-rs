@@ -1265,3 +1265,99 @@ fn check_doc_example() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+fn modify_graph_test_graphview() -> GraphView<&'static str> {
+    let mut gv = graphview!(
+        "line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
+    );
+    let g = graphview::Graph::with_slices(&["Node"], &[], true);
+    gv.set_graph(g);
+    gv
+}
+
+/// Renders after [`GraphView::modify_graph`] calls [`EditableNode::set_text_attribute`] on node 0.
+/// Replace `CheckHash(0x0)` with the hash reported when the assertion fails.
+#[test]
+fn modify_graph_set_node_text_color_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: set_text_attribute (red foreground)')
+        CheckHash(0x5814A3858DC8E69)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = modify_graph_test_graphview();
+    gv.modify_graph(|g| {
+        if let Some(mut node) = g.node(0) {
+            node.set_text_attribute(CharAttribute::with_color(Color::Red, Color::Black));
+        }
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+/// Renders after [`GraphView::modify_graph`] calls [`EditableNode::set_border`] on node 0.
+#[test]
+fn modify_graph_set_node_border_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: set_border (double) - height will chage to support the border')
+        CheckHash(0xF48C83C7DCE8EF51)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = modify_graph_test_graphview();
+    gv.modify_graph(|g| {
+        if let Some(mut node) = g.node(0) {
+            node.set_border(LineType::Double);
+        }
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+/// Renders after [`GraphView::modify_graph`] calls [`EditableNode::set_value`] on node 0.
+#[test]
+fn modify_graph_set_node_content_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: set_value (label text)')
+        CheckHash(0xD8FD6426B4F7736D)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = modify_graph_test_graphview();
+    gv.modify_graph(|g| {
+        if let Some(mut node) = g.node(0) {
+            node.set_value("1234");
+        }
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+/// Single [`GraphView::modify_graph`] closure updating text color, border, and node value together.
+#[test]
+fn modify_graph_set_color_border_and_content_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: color + border + value in one closure')
+        CheckHash(0xD307A82D0CDA1AFB)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = modify_graph_test_graphview();
+    gv.modify_graph(|g| {
+        if let Some(mut node) = g.node(0) {
+            node.set_value("All-in-one");
+            node.set_border(LineType::Ascii);
+            node.set_position(Rect::new(6,3,20,7));
+        }
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}

@@ -353,6 +353,8 @@ where
         let mut editor = EditableGraph::new(&mut self.graph);
         f(&mut editor);
         let changed_graph = editor.changed_graph;
+        let changed_nodes = editor.changed_nodes;
+        let changed_edges = editor.changed_edges;
         let changed_current_node = editor.changed_current_node;
         let current_node = editor.current_node;
         if changed_graph {
@@ -361,7 +363,10 @@ where
         if changed_current_node {
             self.graph.set_current_node(current_node, &self.base);
         }
-        self.graph.repaint(&self.base);
+        if changed_nodes || changed_edges || changed_current_node || changed_graph {
+            self.graph.resize_graph(false);
+            self.graph.repaint(&self.base);
+        }
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
