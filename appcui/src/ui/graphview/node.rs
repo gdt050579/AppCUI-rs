@@ -173,15 +173,31 @@ where
         *self.changed = true;
     }
     #[inline(always)]
-    pub fn position(&self) -> Rect {
+    pub fn bounds(&self) -> Rect {
         self.node.rect
     }
     #[inline(always)]
-    pub fn set_position(&mut self, r: Rect) {
+    pub fn set_bounds(&mut self, r: Rect) {
         if self.node.rect != r {
             self.node.rect = r;
             *self.changed = true;
         }
+    }
+    #[inline(always)]
+    pub fn position(&self) -> Point {
+        self.node.rect.top_left()
+    }
+    #[inline(always)]
+    pub fn set_position(&mut self, p: Point) {
+        self.set_bounds(Rect::with_point_and_size(p, self.node.rect.size()));
+    }
+    #[inline(always)]
+    pub fn size(&self) -> Size {
+        self.node.rect.size()
+    }
+    #[inline(always)]
+    pub fn set_size(&mut self, size: Size) {
+        self.set_bounds(Rect::with_point_and_size(self.node.rect.top_left(), size));
     }
     #[inline(always)]
     pub fn text_alignment(&self) -> TextAlignment {

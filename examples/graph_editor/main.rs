@@ -226,7 +226,7 @@ impl GraphEditor {
             let mut size = Size::new(1, 1);
             gv.modify_graph(|g| {
                 if let Some(node) = g.node(id) {
-                    let r = node.position();
+                    let r = node.bounds();
                     top_left = r.top_left();
                     size = r.size();
                 }
@@ -247,7 +247,7 @@ impl GraphEditor {
         if let Some(gv) = self.control_mut(gv_h) {
             gv.modify_graph(|g| {
                 if let Some(mut node) = g.node(id) {
-                    node.set_position(Rect::with_point_and_size(top_left, new_size));
+                    node.set_bounds(Rect::with_point_and_size(top_left, new_size));
                 }
             });
         }

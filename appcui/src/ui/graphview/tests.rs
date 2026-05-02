@@ -1354,7 +1354,7 @@ fn modify_graph_set_color_border_and_content_check_hash() {
         if let Some(mut node) = g.node(0) {
             node.set_value("All-in-one");
             node.set_border(LineType::Ascii);
-            node.set_position(Rect::new(6,3,20,7));
+            node.set_bounds(Rect::new(6,3,20,7));
         }
     });
     w.add(gv);
