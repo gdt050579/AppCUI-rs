@@ -371,4 +371,18 @@ where
             *self.changed = true;
         }
     }
+
+    /// Sets the node's selected state. Marks the graph as changed if the value differs.
+    #[inline(always)]
+    pub fn set_selected(&mut self, selected: bool) {
+        if self.node.selected != selected {
+            self.node.selected = selected;
+            *self.changed = true;
+        }
+    }
+    /// Returns whether the node is selected.
+    #[inline(always)]
+    pub fn is_selected(&self) -> bool {
+        self.node.selected
+    }
 }
