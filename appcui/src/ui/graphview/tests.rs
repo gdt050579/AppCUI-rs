@@ -1265,3 +1265,264 @@ fn check_doc_example() {
     a.add_window(MyWin::new());
     a.run();
 }
+
+fn modify_graph_test_graphview() -> GraphView<&'static str> {
+    let mut gv = graphview!(
+        "line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
+    );
+    let g = graphview::Graph::with_slices(&["Node"], &[], true);
+    gv.set_graph(g);
+    gv
+}
+
+/// Renders after [`GraphView::modify_graph`] calls [`EditableNode::set_text_attribute`] on node 0.
+/// Replace `CheckHash(0x0)` with the hash reported when the assertion fails.
+#[test]
+fn modify_graph_set_node_text_color_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: set_text_attribute (red foreground)')
+        CheckHash(0x5814A3858DC8E69)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = modify_graph_test_graphview();
+    gv.modify_graph(|g| {
+        if let Some(mut node) = g.node(0) {
+            node.set_text_attribute(CharAttribute::with_color(Color::Red, Color::Black));
+        }
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+/// Renders after [`GraphView::modify_graph`] calls [`EditableNode::set_border`] on node 0.
+#[test]
+fn modify_graph_set_node_border_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: set_border (double) - height will chage to support the border')
+        CheckHash(0xF48C83C7DCE8EF51)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = modify_graph_test_graphview();
+    gv.modify_graph(|g| {
+        if let Some(mut node) = g.node(0) {
+            node.set_border(LineType::Double);
+        }
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+/// Renders after [`GraphView::modify_graph`] calls [`EditableNode::set_value`] on node 0.
+#[test]
+fn modify_graph_set_node_content_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: set_value (label text)')
+        CheckHash(0xD8FD6426B4F7736D)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = modify_graph_test_graphview();
+    gv.modify_graph(|g| {
+        if let Some(mut node) = g.node(0) {
+            node.set_value("1234");
+        }
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+/// Single [`GraphView::modify_graph`] closure updating text color, border, and node value together.
+#[test]
+fn modify_graph_set_color_border_and_content_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: color + border + value in one closure')
+        CheckHash(0xD307A82D0CDA1AFB)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = modify_graph_test_graphview();
+    gv.modify_graph(|g| {
+        if let Some(mut node) = g.node(0) {
+            node.set_value("All-in-one");
+            node.set_border(LineType::Ascii);
+            node.set_bounds(Rect::new(6,3,20,7));
+        }
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+/// Builds an empty graph, then [`GraphView::modify_graph`] adds two nodes and a directed edge between them.
+#[test]
+fn modify_graph_add_two_nodes_and_edge_check_hash() {
+    let script = "
+        Paint.Enable(false)
+        Paint('modify_graph: add_node x2 + add_edge(0 -> 1)')
+        CheckHash(0x2725DFCC78B2D076)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!(
+        "line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
+    );
+    let g: graphview::Graph<&'static str> = graphview::Graph::with_slices(&[], &[], true);
+    gv.set_graph(g);
+    gv.modify_graph(|g| {
+        let a = graphview::NodeBuilder::new("A")
+            .position(Point::new(2, 2))
+            .size(Size::new(8, 1))
+            .build();
+        let b = graphview::NodeBuilder::new("B")
+            .position(Point::new(22, 2))
+            .size(Size::new(8, 1))
+            .build();
+        let id_a = g.add_node(a);
+        let id_b = g.add_node(b);
+        let _ = g.add_edge(
+            graphview::EdgeBuilder::new(id_a as u32, id_b as u32)
+                .directed(true)
+                .build(),
+        );
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+/// [`GraphView::modify_graph`] deletes a node that has both incoming and outgoing edges (node `B` in A→B→D, A→C).
+#[test]
+fn modify_graph_delete_node_with_edges_check_hash() {
+    let script = "
+        Paint.Enable(false) 
+        Paint('modify_graph: delete_node(1) removes B (edges 0->1 and 1->3)')
+        CheckHash(0xB2685CB981BCDA7)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!(
+        "line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
+    );
+    let g = graphview::Graph::with_slices(
+        &["A", "B", "C", "D"],
+        &[(0, 1), (0, 2), (1, 3)],
+        true,
+    );
+    gv.set_graph(g);
+    gv.modify_graph(|g| {
+        g.delete_node(1);
+    });
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
+/// [`EditableNode`] getters match the geometry and style from [`NodeBuilder`] (including `resize` padding rules).
+#[test]
+fn editable_node_getters_match_node_builder() {
+    use super::graph::EditableGraph;
+
+    let top_left = Point::new(11, 3);
+    let inner = Size::new(5, 2);
+    let node = graphview::NodeBuilder::new("alpha")
+        .position(top_left)
+        .size(inner)
+        .text_alignment(TextAlignment::Right)
+        .build();
+    // No border: `Node::resize` widens by 2 for side padding (see `node.rs`).
+    let expected_size = Size::new(inner.width + 2, inner.height);
+    let expected_bounds = Rect::with_point_and_size(top_left, expected_size);
+
+    let mut graph = graphview::Graph::new(vec![node], vec![]);
+    let mut editor = EditableGraph::new(&mut graph);
+    let n = editor.node(0).expect("node 0");
+    assert_eq!(*n.value(), "alpha");
+    assert_eq!(n.position(), top_left);
+    assert_eq!(n.size(), expected_size);
+    assert_eq!(n.bounds(), expected_bounds);
+    assert_eq!(n.text_alignment(), TextAlignment::Right);
+    assert_eq!(n.text_attribute(), None);
+    assert_eq!(n.border(), None);
+}
+
+/// [`EditableNode`] getters for border and [`CharAttribute`]; `value_mut` is exercised and read back via `value`.
+#[test]
+fn editable_node_getters_with_border_and_text_attribute() {
+    use super::graph::EditableGraph;
+
+    let top_left = Point::new(2, 5);
+    let inner = Size::new(6, 2);
+    let attr = charattr!("yellow,blue");
+    let node = graphview::NodeBuilder::new("beta")
+        .position(top_left)
+        .size(inner)
+        .border(LineType::Single)
+        .text_alignment(TextAlignment::Center)
+        .text_attribute(attr)
+        .build();
+    // With border: `Node::resize` adds 2 to width and height.
+    let expected_size = Size::new(inner.width + 2, inner.height + 2);
+    let expected_bounds = Rect::with_point_and_size(top_left, expected_size);
+
+    let mut graph = graphview::Graph::new(vec![node], vec![]);
+    let mut editor = EditableGraph::new(&mut graph);
+    let mut n = editor.node(0).expect("node 0");
+    assert_eq!(*n.value(), "beta");
+    assert_eq!(n.position(), top_left);
+    assert_eq!(n.size(), expected_size);
+    assert_eq!(n.bounds(), expected_bounds);
+    assert_eq!(n.text_alignment(), TextAlignment::Center);
+    assert_eq!(n.text_attribute(), Some(attr));
+    assert_eq!(n.border(), Some(LineType::Single));
+
+    *n.value_mut() = "gamma";
+    assert_eq!(*n.value(), "gamma");
+}
+
+/// [`EditableGraph::delete_node`] removes incident edges and reindexes remaining edge endpoints.
+#[test]
+fn editable_graph_delete_nodes_updates_edges_and_labels() {
+    use super::graph::EditableGraph;
+
+    // A ──► B ──► D
+    // └──► C
+    let mut graph = graphview::Graph::with_slices(
+        &["A", "B", "C", "D"],
+        &[(0, 1), (0, 2), (1, 3)],
+        true,
+    );
+
+    let mut editor = EditableGraph::new(&mut graph);
+    assert_eq!(editor.nodes_count(), 4);
+    assert_eq!(editor.edges_count(), 3);
+
+    editor.delete_node(1);
+    assert_eq!(editor.nodes_count(), 3);
+    assert_eq!(editor.edges_count(), 1);
+    assert_eq!(*editor.node(0).unwrap().value(), "A");
+    assert_eq!(*editor.node(1).unwrap().value(), "C");
+    assert_eq!(*editor.node(2).unwrap().value(), "D");
+    let e0 = editor.edge(0).expect("remaining edge");
+    assert_eq!(e0.from_node_id(), 0);
+    assert_eq!(e0.to_node_id(), 1);
+    assert!(e0.directed());
+
+    // Remove D (index 2 after first deletion); the A→C edge must stay intact.
+    editor.delete_node(2);
+    assert_eq!(editor.nodes_count(), 2);
+    assert_eq!(editor.edges_count(), 1);
+    assert_eq!(*editor.node(0).unwrap().value(), "A");
+    assert_eq!(*editor.node(1).unwrap().value(), "C");
+    let e0 = editor.edge(0).expect("remaining edge");
+    assert_eq!(e0.from_node_id(), 0);
+    assert_eq!(e0.to_node_id(), 1);
+}
