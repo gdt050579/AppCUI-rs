@@ -1426,6 +1426,83 @@ fn modify_graph_delete_node_with_edges_check_hash() {
     a.run();
 }
 
+/// Four nodes **A**–**D** in fixed positions (corners of a rectangle): arrow **Right** / **Down** walks A→B→C; **D** stays unselected.
+fn graph_four_nodes_multiselect_layout() -> graphview::Graph<&'static str> {
+    graphview::Graph::new(
+        vec![
+            graphview::NodeBuilder::new("A")
+                .position(Point::new(4, 3))
+                .size(Size::new(8, 1))
+                .build(),
+            graphview::NodeBuilder::new("B")
+                .position(Point::new(30, 3))
+                .size(Size::new(8, 1))
+                .build(),
+            graphview::NodeBuilder::new("C")
+                .position(Point::new(30, 14))
+                .size(Size::new(8, 1))
+                .build(),
+            graphview::NodeBuilder::new("D")
+                .position(Point::new(4, 14))
+                .size(Size::new(8, 1))
+                .build(),
+        ],
+        vec![],
+    )
+}
+
+/// **Step 1:** four nodes, `MultiSelect` + scrollbars (no search bar so **Space** reaches the graph).
+/// **Step 2:** navigate A→B→C with arrows; **Space** on each to select three nodes (D never selected).
+/// **Step 3:** **Ctrl+arrow** nudges the selected group (all four directions).
+///
+/// Replace each `CheckHash(0x0)` with the hash printed when that assertion fails (see other `graphview` tests).
+#[test]
+fn multiselect_space_three_nodes_then_ctrl_arrow_move_check_hash() {
+    let script = "
+        Paint.Enable(false)
+
+        Paint('1. Initial state')
+        CheckHash(0x70EF36845145E78)
+        Key.Pressed(Space)
+        Paint('2. Node A is selected')
+        CheckHash(0xD2337DCA27E75979)
+        Key.Pressed(Right)
+        Paint('3. Arrow Right — current node is B, A remains selected')
+        CheckHash(0x589E5C57EF13988D)
+        Key.Pressed(Space)
+        Paint('4. A and B are selected')
+        CheckHash(0xC42DA1AABEE24E38)
+        Key.Pressed(Down)
+        Paint('5. Arrow Down — current node is C, A and B remain selected')
+        CheckHash(0x228A16F30792674)
+        Key.Pressed(Space)
+        Paint('6. A, B, C are selected, D remains unselected')
+        CheckHash(0xC953EA548C428071)
+
+        Key.Pressed(Ctrl+Right,2)
+        Paint('7: Ctrl+Right x2 — group moves to the right (A, B and C)')
+        CheckHash(0x54704416FAA900F1)
+        Key.Pressed(Ctrl+Down,2)
+        Paint('8: Ctrl+Down x2 — group moves down (A, B and C)')
+        CheckHash(0x4ECE5E8D567387B1)
+        Key.Pressed(Ctrl+Left,2)
+        Paint('9: Ctrl+Left x2 — group moves left (A, B and C)')
+        CheckHash(0x438FE806A4B34071)
+        Key.Pressed(Ctrl+Up,2)
+        Paint('10: Ctrl+Up x2 — group moves up (A, B and C)')
+        CheckHash(0xC953EA548C428071)
+    ";
+    let mut a = App::debug(72, 22, script).build().unwrap();
+    let mut w = window!("Test,d:f");
+    let mut gv = graphview!(
+        "line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: None, d:f, flags:[ScrollBars,MultiSelect],lsm:2,tsm:1"
+    );
+    gv.set_graph(graph_four_nodes_multiselect_layout());
+    w.add(gv);
+    a.add_window(w);
+    a.run();
+}
+
 /// [`EditableNode`] getters match the geometry and style from [`NodeBuilder`] (including `resize` padding rules).
 #[test]
 fn editable_node_getters_match_node_builder() {
