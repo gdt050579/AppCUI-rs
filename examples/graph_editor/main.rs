@@ -381,6 +381,15 @@ impl GraphViewEvents<String> for GraphEditor {
         }
         EventProcessStatus::Processed
     }
+    fn on_selection_changed(&mut self, handle: Handle<GraphView<String>>) -> EventProcessStatus {
+        let cnt = if let Some(gv) = self.control(handle) {
+            gv.selected_count()
+        } else {
+            0
+        };
+        self.set_title(format!("Selected count: {cnt}").as_str());
+        EventProcessStatus::Processed
+    }
 }
 
 impl MenuEvents for GraphEditor {

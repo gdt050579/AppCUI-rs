@@ -417,6 +417,11 @@ where
         }
     }
 
+    /// Returns the number of selected nodes in the graph.
+    pub fn selected_count(&self) -> usize {
+        self.graph.nodes.iter().filter(|n| n.selected).count()
+    }
+
     fn move_scroll_to(&mut self, x: i32, y: i32) {
         let sz = self.size();
         let surface_size = self.graph.size();
