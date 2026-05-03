@@ -1,5 +1,5 @@
 use std::any::TypeId;
-use crate::{system::Handle, ui::common::traits::EventProcessStatus};
+use crate::{prelude::Point, system::Handle, ui::common::traits::EventProcessStatus};
 
 pub trait GenericGraphViewEvents {
     fn on_current_node_changed(&mut self, _handle: Handle<()>, _type_id: TypeId) -> EventProcessStatus {
@@ -8,11 +8,15 @@ pub trait GenericGraphViewEvents {
     fn on_node_action(&mut self, _handle: Handle<()>, _type_id: TypeId, _node_index: usize) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
+    fn on_request_new_node(&mut self, _handle: Handle<()>, _type_id: TypeId, _p: Point) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }    
 }
 #[derive(Copy,Clone)]
 pub(crate) enum GraphViewEventTypes {
     CurrentNodeChanged,
     NodeAction(usize),
+    RequestNewNode(Point),
 }
 
 #[derive(Copy, Clone)]

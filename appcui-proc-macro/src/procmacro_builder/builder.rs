@@ -208,9 +208,11 @@ fn generate_graphview_events(a: &mut Arguments) -> String {
     }
     let mut on_current_node_changed_code = String::new();
     let mut on_node_action_code = String::new();
+    let mut on_request_new_node_code = String::new();
     for trait_name in a.template_events[&AppCUITrait::GenericGraphViewEvents].iter() {
         on_current_node_changed_code.push_str(templates::GRAPHVIEW_ON_CURRENT_NODE_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
         on_node_action_code.push_str(templates::GRAPHVIEW_ON_NODE_ACTION_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_request_new_node_code.push_str(templates::GRAPHVIEW_ON_REQUEST_NEW_NODE_DEF.replace("$(TYPE)", trait_name).as_str());
     }
     templates::GRAPHVIEW_TRAIT_DEF
         .replace(
@@ -218,6 +220,7 @@ fn generate_graphview_events(a: &mut Arguments) -> String {
             &on_current_node_changed_code,
         )
         .replace("$(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_NODE_ACTION)", &on_node_action_code)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_REQUEST_NEW_NODE)", &on_request_new_node_code)
 }
 
 fn generate_backgroundtask_events(a: &mut Arguments) -> String {
@@ -291,7 +294,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericNumericSelectorEvents => code.push_str(generate_numeric_selector_events(&mut a).as_str()),
                         AppCUITrait::GenericListViewEvents => code.push_str(generate_listview_events(&mut a).as_str()),
                         AppCUITrait::GenericTreeViewEvents => code.push_str(generate_treeview_events(&mut a).as_str()),
-                        AppCUITrait::GenericBackgroundTaskEvents=> code.push_str(generate_backgroundtask_events(&mut a).as_str()),
+                        AppCUITrait::GenericBackgroundTaskEvents => code.push_str(generate_backgroundtask_events(&mut a).as_str()),
                         AppCUITrait::GenericGraphViewEvents => code.push_str(generate_graphview_events(&mut a).as_str()),
                         _ => {}
                     }
@@ -319,7 +322,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
         // add the MenudBar events wrapper if needed
         if config.get(AppCUITrait::MenuEvents) == TraitImplementation::None {
             code.push_str(templates::MENU_EVENTS);
-        }    
+        }
         // add raise events support
         if !a.emitted_events.is_empty() {
             code.push_str(templates::RAISE_EVENTS_TEMPLATE);

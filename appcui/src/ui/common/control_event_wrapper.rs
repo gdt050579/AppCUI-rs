@@ -177,6 +177,9 @@ impl ControlEvent {
                 graphview::events::GraphViewEventTypes::NodeAction(index) => {
                     GenericGraphViewEvents::on_node_action(receiver, self.emitter.cast(), data.type_id, index)
                 }
+                graphview::events::GraphViewEventTypes::RequestNewNode(p) => {
+                    GenericGraphViewEvents::on_request_new_node(receiver, self.emitter.cast(), data.type_id, p)
+                }
             },
         }
     }

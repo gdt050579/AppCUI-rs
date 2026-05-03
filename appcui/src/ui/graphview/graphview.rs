@@ -510,6 +510,16 @@ where
             }),
         });
     }
+    fn raise_request_new_node(&mut self, p: Point) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::GraphView(EventData {
+                event_type: GraphViewEventTypes::RequestNewNode(p),
+                type_id: TypeId::of::<T>(),
+            }),
+        });
+    }
 }
 impl<T> OnResize for GraphView<T>
 where
@@ -693,7 +703,14 @@ where
                         self.raise_current_node_changed(nid);
                     }
                     return EventProcessStatus::Processed;
+                } else {
+                    // empty space within the graph area - if Ctrl is also pressed, request a new node
+                    if mouse_data.modifier.contains(KeyModifier::Ctrl) {
+                        self.raise_request_new_node(data);
+                        return EventProcessStatus::Processed;
+                    }
                 }
+                
                 if self.flags.contains_one(Flags::ScrollBars) && (self.has_focus()) {
                     let sz = self.size();
                     if (data.x == sz.width as i32) || (data.y == sz.height as i32) {
