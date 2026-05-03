@@ -520,6 +520,16 @@ where
             }),
         });
     }
+    fn raise_selection_changed(&mut self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::GraphView(EventData {
+                event_type: GraphViewEventTypes::SelectionChanged,
+                type_id: TypeId::of::<T>(),
+            }),
+        });
+    }
 }
 impl<T> OnResize for GraphView<T>
 where
