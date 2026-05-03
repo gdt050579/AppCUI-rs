@@ -232,10 +232,10 @@ where
     pub(super) edges: Vec<Edge>,
     surface_size: Size,
     surface: Surface,
-    current_node: usize,
+    pub(super) current_node: usize,
     hovered_node: Option<usize>,
     repr_buffer: String,
-    rendering_options: RenderingOptions,
+    pub(super) rendering_options: RenderingOptions,
 }
 impl<T> Graph<T>
 where
@@ -1190,85 +1190,5 @@ where
     #[inline(always)]
     pub fn current_node(&self) -> usize {
         self.current_node
-    }
-}
-
-#[cfg(test)]
-mod process_key_multiselect_tests {
-    use super::*;
-
-    #[test]
-    fn space_not_handled_when_multiselect_ui_off() {
-        let mut graph = Graph::<&'static str>::with_slices(&["A"], &[], true);
-        graph.rendering_options.multiselect_ui = false;
-        let base = ControlBase::new(layout!("d:f"), true);
-        let key = Key::new(KeyCode::Space, KeyModifier::None);
-        assert!(!graph.process_key_events(key, &base));
-    }
-
-    #[test]
-    fn space_not_handled_when_multiselect_on_but_graph_empty() {
-        let mut graph: Graph<&'static str> = Graph::with_slices(&[], &[], true);
-        graph.rendering_options.multiselect_ui = true;
-        let base = ControlBase::new(layout!("d:f"), true);
-        let key = Key::new(KeyCode::Space, KeyModifier::None);
-        assert!(!graph.process_key_events(key, &base));
-    }
-
-    #[test]
-    fn ctrl_a_not_handled_when_multiselect_ui_off() {
-        let mut graph = Graph::<&'static str>::with_slices(&["A", "B"], &[], true);
-        graph.rendering_options.multiselect_ui = false;
-        let base = ControlBase::new(layout!("d:f"), true);
-        let key = Key::new(KeyCode::A, KeyModifier::Ctrl);
-        assert!(!graph.process_key_events(key, &base));
-    }
-
-    #[test]
-    fn ctrl_a_not_handled_when_multiselect_on_but_graph_empty() {
-        let mut graph: Graph<&'static str> = Graph::with_slices(&[], &[], true);
-        graph.rendering_options.multiselect_ui = true;
-        let base = ControlBase::new(layout!("d:f"), true);
-        let key = Key::new(KeyCode::A, KeyModifier::Ctrl);
-        assert!(!graph.process_key_events(key, &base));
-    }
-}
-
-#[cfg(test)]
-mod editable_graph_delete_tests {
-    use super::*;
-
-    #[test]
-    fn delete_last_node_resets_current_index() {
-        let mut graph = Graph::<&'static str>::with_slices(&["A"], &[], true);
-        graph.current_node = 0;
-        graph.rendering_options.multiselect_ui = true;
-        graph.nodes[0].selected = true;
-
-        let mut editor = EditableGraph::new(&mut graph);
-        editor.delete_node(0);
-
-        assert_eq!(editor.nodes_count(), 0);
-        assert_eq!(editor.current_node(), 0);
-    }
-
-    #[test]
-    fn delete_node_moves_primary_to_remaining_selected() {
-        let mut graph = Graph::<&'static str>::with_slices(&["A", "B", "C"], &[], true);
-        graph.rendering_options.multiselect_ui = true;
-        graph.nodes[0].selected = true;
-        graph.nodes[2].selected = true;
-        graph.current_node = 2;
-
-        let mut editor = EditableGraph::new(&mut graph);
-        editor.delete_node(2);
-
-        assert_eq!(editor.nodes_count(), 2);
-        assert_eq!(editor.current_node(), 0);
-        assert_eq!(*editor.node(0).unwrap().value(), "A");
-        assert_eq!(*editor.node(1).unwrap().value(), "B");
-        drop(editor);
-        assert!(graph.nodes[0].selected);
-        assert!(!graph.nodes[1].selected);
     }
 }
