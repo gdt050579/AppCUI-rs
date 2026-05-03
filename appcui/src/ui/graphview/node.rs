@@ -18,8 +18,6 @@ pub struct Node<T: GraphNode> {
     pub(super) filtered: bool,
     /// Multi-selection membership when multi-select mode is enabled on the owning `GraphView`.
     pub(super) selected: bool,
-    /// Columns reserved left of the label for ☑/☐ when multi-select UI is active (`0` or `1`).
-    pub(super) multiselect_gutter_cols: u8,
 }
 impl<T> Node<T>
 where
@@ -37,26 +35,29 @@ where
     }
 
     /// Label size derived from the current bounds (inverse of [`Node::resize`](Self::resize) padding rules).
-    pub(super) fn label_content_size(&self) -> Size {
+    ///
+    /// `multiselect_ui` must match how this node’s `rect` was last laid out (same flag passed to [`Node::resize`](Self::resize)).
+    pub(super) fn label_content_size(&self, multiselect_ui: bool) -> Size {
+        let gutter = if multiselect_ui { 2u32 } else { 0u32 };
         let mut w = self.rect.width();
         let mut h = self.rect.height();
         if self.border.is_some() {
             w = w.saturating_sub(2);
             h = h.saturating_sub(2);
             // Bordered + multi-select: first inner row is reserved for ☑/☐ (see `resize` / `paint`).
-            if self.multiselect_gutter_cols > 0 {
+            if multiselect_ui {
                 h = h.saturating_sub(1);
             }
         } else {
             w = w.saturating_sub(2);
         }
-        w = w.saturating_sub(self.multiselect_gutter_cols as u32);
+        w = w.saturating_sub(gutter);
         Size::new(w, h)
     }
 
     pub(super) fn resize(&mut self, mut size: Size, multiselect_ui: bool) {
         let p = self.rect.top_left();
-        self.multiselect_gutter_cols = if multiselect_ui { 2 } else { 0 };
+        let gutter = if multiselect_ui { 2u32 } else { 0u32 };
         if self.border.is_some() {
             // First inner row for checkbox when multi-select is on (glyph on first row of frame).
             if multiselect_ui {
@@ -70,7 +71,7 @@ where
             // one extra space on left and right
             size.width += 2;
         }
-        size.width += self.multiselect_gutter_cols as u32;
+        size.width += gutter;
         self.rect = Rect::with_point_and_size(p, size);
     }
 
@@ -112,7 +113,7 @@ where
             return;
         }
 
-        let g = self.multiselect_gutter_cols as i32;
+        const G: i32 = 2;
         let mark = if self.selected { '☑' } else { '☐' };
         if let Some(line_type) = self.border {
             surface.draw_rect(self.rect, line_type, attr);
@@ -122,7 +123,7 @@ where
             let ib = self.rect.bottom() - 1;
             // Top-left of inner frame, first row (spec: bordered — glyph on first row inside border).
             surface.write_char(il, it, Character::with_attributes(mark, attr));
-            let clip_left = il + g;
+            let clip_left = il + G;
             let text_top = it + 1;
             surface.set_relative_clip(clip_left, text_top, ir, ib);
             let inner_w = (ir - clip_left + 1) as u32;
@@ -139,7 +140,7 @@ where
                 .position(cx, cy)
                 .build();
             let mut sz = self.rect.size().reduce_by(2);
-            sz.width = sz.width.saturating_sub(self.multiselect_gutter_cols as u32);
+            sz.width = sz.width.saturating_sub(2);
             sz.height = sz.height.saturating_sub(1);
             if self.obj.write_label(out, sz).is_err() {
                 out.clear();
@@ -152,9 +153,9 @@ where
                 self.rect.top(),
                 Character::with_attributes(mark, attr),
             );
-            let clip_left = self.rect.left() + 1 + g;
+            let clip_left = self.rect.left() + 1 + G;
             surface.set_relative_clip(clip_left, self.rect.top(), self.rect.right(), self.rect.bottom());
-            let inner_w = self.rect.width().saturating_sub(2 + self.multiselect_gutter_cols as u32);
+            let inner_w = self.rect.width().saturating_sub(2 + 2);
             let mut cx = clip_left + (inner_w as i32 / 2);
             if (inner_w > 0) && ((inner_w & 1) == 0) {
                 cx += 1;
@@ -168,7 +169,7 @@ where
                 .position(cx, cy)
                 .build();
             let mut sz = self.rect.size();
-            sz.width = sz.width.saturating_sub(2 + self.multiselect_gutter_cols as u32);
+            sz.width = sz.width.saturating_sub(2 + 2);
             if self.obj.write_label(out, sz).is_err() {
                 out.clear();
                 out.push_str("???");
@@ -203,7 +204,6 @@ where
                 edges_out: Vec::new(),
                 filtered: false,
                 selected: false,
-                multiselect_gutter_cols: 0,
             },
             size: None,
         }

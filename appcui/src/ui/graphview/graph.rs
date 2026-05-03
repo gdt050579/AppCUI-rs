@@ -460,18 +460,19 @@ where
     pub(super) fn update_rendering_options(&mut self, new_options: &RenderingOptions, control: &ControlBase) {
         if self.rendering_options != *new_options {
             let multiselect_changed = self.rendering_options.multiselect_ui != new_options.multiselect_ui;
+            let prev_multiselect_ui = self.rendering_options.multiselect_ui;
             self.rendering_options = *new_options;
             if multiselect_changed {
-                self.refresh_node_sizes_for_multiselect_ui();
+                self.refresh_node_sizes_for_multiselect_ui(prev_multiselect_ui);
             }
             self.repaint(control);
         }
     }
 
-    fn refresh_node_sizes_for_multiselect_ui(&mut self) {
+    fn refresh_node_sizes_for_multiselect_ui(&mut self, layout_before: bool) {
         let m = self.rendering_options.multiselect_ui;
         for node in &mut self.nodes {
-            let sz = node.label_content_size();
+            let sz = node.label_content_size(layout_before);
             node.resize(sz, m);
         }
         self.resize_graph(false);
