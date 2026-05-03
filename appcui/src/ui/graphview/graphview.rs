@@ -391,6 +391,10 @@ where
     where
         F: FnOnce(&mut EditableGraph<'_, T>),
     {
+        let selection_fp_before = self
+            .flags
+            .contains(Flags::MultiSelect)
+            .then(|| self.graph.multiselect_selection_fingerprint());
         let mut editor = EditableGraph::new(&mut self.graph);
         f(&mut editor);
         let changed_graph = editor.changed_graph;
@@ -407,6 +411,9 @@ where
         if changed_nodes || changed_edges || changed_current_node || changed_graph {
             self.graph.resize_graph(false);
             self.graph.repaint(&self.base);
+        }
+        if let Some(fp) = selection_fp_before {
+            self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
         }
     }
 
@@ -530,6 +537,14 @@ where
             }),
         });
     }
+
+    fn raise_selection_changed_if_multiselect_and_selection_changed(&mut self, selection_before: u64) {
+        if self.flags.contains(Flags::MultiSelect)
+            && selection_before != self.graph.multiselect_selection_fingerprint()
+        {
+            self.raise_selection_changed();
+        }
+    }
 }
 impl<T> OnResize for GraphView<T>
 where
@@ -567,10 +582,17 @@ where
             self.raise_current_node_changed(nid);
             return EventProcessStatus::Processed;
         }
+        let selection_fp_before = self
+            .flags
+            .contains(Flags::MultiSelect)
+            .then(|| self.graph.multiselect_selection_fingerprint());
         if self.graph.process_key_events(key, &self.base) {
             self.ensure_current_node_is_visible();
             self.comp.exit_edit_mode();
             self.raise_current_node_changed(nid);
+            if let Some(fp) = selection_fp_before {
+                self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
+            }
             return EventProcessStatus::Processed;
         }
         let result = match key.value() {
@@ -697,7 +719,11 @@ where
                     if ms && ctrl {
                         self.drag = Drag::CtrlClickPending { node_id: id, origin: data };
                     } else {
+                        let selection_fp_before = ms.then(|| self.graph.multiselect_selection_fingerprint());
                         self.graph.apply_multiselect_plain_click(id, &self.base);
+                        if let Some(fp) = selection_fp_before {
+                            self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
+                        }
                         let anchors = if ms {
                             self.graph.selected_drag_anchors()
                         } else {
@@ -733,7 +759,14 @@ where
                         self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
                         if (data.x == p.x) && (data.y == p.y) {
                             // nu s-a miscat mouse-ul
+                            let selection_fp_before = self
+                                .flags
+                                .contains(Flags::MultiSelect)
+                                .then(|| self.graph.multiselect_selection_fingerprint());
                             self.graph.clear_selection(&self.base);
+                            if let Some(fp) = selection_fp_before {
+                                self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
+                            }
                         }
                         EventProcessStatus::Processed
                     }
@@ -750,7 +783,9 @@ where
                         let dy = data.y - origin.y;
                         if dx * dx + dy * dy <= MULTISELECT_CTRL_DRAG_THRESHOLD_SQ {
                             let nid = self.graph.current_node_id();
+                            let fp = self.graph.multiselect_selection_fingerprint();
                             self.graph.toggle_multiselect_selected(node_id, &self.base);
+                            self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
                             self.raise_current_node_changed(nid);
                         } else {
                             let anchors = if self.graph.nodes[node_id].selected {

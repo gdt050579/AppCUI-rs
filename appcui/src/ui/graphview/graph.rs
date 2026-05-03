@@ -713,6 +713,17 @@ where
             .collect()
     }
 
+    /// Fingerprint of the multiselect selection set (`Node::selected`). Used to detect changes without allocating.
+    pub(super) fn multiselect_selection_fingerprint(&self) -> u64 {
+        let mut h = 0u64;
+        for (i, n) in self.nodes.iter().enumerate() {
+            if n.selected {
+                h ^= (i as u64).wrapping_mul(0x9e3779b97f4a7c15);
+            }
+        }
+        h
+    }
+
     /// Plain click selection: clear `selected`, select `id`, set `current_node`. No-op when not multi-select UI (delegates to [`set_current_node`](Self::set_current_node)).
     pub(super) fn apply_multiselect_plain_click(&mut self, id: usize, control: &ControlBase) {
         if id >= self.nodes.len() {
