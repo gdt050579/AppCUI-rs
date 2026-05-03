@@ -371,6 +371,16 @@ where
         self.surface.resize(self.surface_size);
     }
 
+    pub(super) fn clear_selection(&mut self, control: &ControlBase) {
+        let mut need_repaint = false;
+        for n in &mut self.nodes {
+            need_repaint |= n.selected;
+            n.selected = false;
+        }
+        if need_repaint {
+            self.repaint(control);
+        }
+    }
     pub(super) fn clear_filter(&mut self, control: &ControlBase) {
         let mut need_repaint = false;
         for n in &mut self.nodes {

@@ -685,10 +685,7 @@ where
                     let ms = self.flags.contains(Flags::MultiSelect);
                     let ctrl = mouse_data.modifier.contains(KeyModifier::Ctrl);
                     if ms && ctrl {
-                        self.drag = Drag::CtrlClickPending {
-                            node_id: id,
-                            origin: data,
-                        };
+                        self.drag = Drag::CtrlClickPending { node_id: id, origin: data };
                     } else {
                         self.graph.apply_multiselect_plain_click(id, &self.base);
                         let anchors = if ms {
@@ -696,10 +693,7 @@ where
                         } else {
                             vec![(id, self.graph.nodes[id].rect.top_left())]
                         };
-                        self.drag = Drag::NodeDrag {
-                            origin: data,
-                            anchors,
-                        };
+                        self.drag = Drag::NodeDrag { origin: data, anchors };
                         self.raise_current_node_changed(nid);
                     }
                     return EventProcessStatus::Processed;
@@ -710,9 +704,10 @@ where
                         return EventProcessStatus::Processed;
                     }
                 }
-                
+
                 if self.flags.contains_one(Flags::ScrollBars) && (self.has_focus()) {
                     let sz = self.size();
+                    self.drag = Drag::None;
                     if (data.x == sz.width as i32) || (data.y == sz.height as i32) {
                         return EventProcessStatus::Ignored;
                     }
@@ -726,6 +721,10 @@ where
                     Drag::None => EventProcessStatus::Ignored,
                     Drag::View(p) => {
                         self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
+                        if (data.x == p.x) && (data.y == p.y) {
+                            // nu s-a miscat mouse-ul
+                            self.graph.clear_selection(&self.base);
+                        }
                         EventProcessStatus::Processed
                     }
                     Drag::NodeDrag { origin, anchors } => {
@@ -780,10 +779,7 @@ where
                             vec![(*node_id, self.graph.nodes[*node_id].rect.top_left())]
                         };
                         let o = *origin;
-                        self.drag = Drag::NodeDrag {
-                            origin: o,
-                            anchors,
-                        };
+                        self.drag = Drag::NodeDrag { origin: o, anchors };
                     }
                 }
                 match &self.drag {
