@@ -11,12 +11,16 @@ pub trait GenericGraphViewEvents {
     fn on_request_new_node(&mut self, _handle: Handle<()>, _type_id: TypeId, _p: Point) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }    
+    fn on_selection_changed(&mut self, _handle: Handle<()>, _type_id: TypeId) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
 }
 #[derive(Copy,Clone)]
 pub(crate) enum GraphViewEventTypes {
     CurrentNodeChanged,
     NodeAction(usize),
     RequestNewNode(Point),
+    SelectionChanged,
 }
 
 #[derive(Copy, Clone)]

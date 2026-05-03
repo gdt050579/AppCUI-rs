@@ -180,6 +180,9 @@ impl ControlEvent {
                 graphview::events::GraphViewEventTypes::RequestNewNode(p) => {
                     GenericGraphViewEvents::on_request_new_node(receiver, self.emitter.cast(), data.type_id, p)
                 }
+                graphview::events::GraphViewEventTypes::SelectionChanged => {
+                    GenericGraphViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
+                }
             },
         }
     }

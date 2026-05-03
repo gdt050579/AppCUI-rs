@@ -411,6 +411,13 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 }
 ";
 
+pub(crate) static GRAPHVIEW_ON_SELECTION_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<GraphView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return GraphViewEvents::<$(TYPE)>::on_selection_changed(self, h);
+}
+";
+
 pub(crate) static GRAPHVIEW_TRAIT_DEF: &str = "
 trait GraphViewEvents<T: graphview::GraphNode+'static> {
     fn on_current_node_changed(&mut self, handle: Handle<GraphView<T>>) -> EventProcessStatus {
@@ -422,6 +429,9 @@ trait GraphViewEvents<T: graphview::GraphNode+'static> {
     fn on_request_new_node(&mut self, handle: Handle<GraphView<T>>, point: Point) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }    
+    fn on_selection_changed(&mut self, handle: Handle<GraphView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
 }
 impl$(TEMPLATE_TYPE) GenericGraphViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 
@@ -439,6 +449,11 @@ impl$(TEMPLATE_TYPE) GenericGraphViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
         $(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_REQUEST_NEW_NODE)
         return EventProcessStatus::Ignored;
     }    
+
+    fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_SELECTION_CHANGED)
+        return EventProcessStatus::Ignored;
+    }
 }
 ";
 
