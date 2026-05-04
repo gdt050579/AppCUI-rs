@@ -365,7 +365,10 @@ impl GraphViewEvents<String> for GraphEditor {
     fn on_request_new_node(&mut self, handle: Handle<GraphView<String>>, p: Point) -> EventProcessStatus {
         if let Some(gv) = self.control_mut(handle) {
             gv.modify_graph(|g| {
-                let n = graphview::NodeBuilder::new(format!("Node:{}", g.nodes_count() + 1)).position(p).build();
+                let n = graphview::NodeBuilder::new(format!("Node:{}", g.nodes_count() + 1))
+                    .position(p)
+                    .size(Size::new(12, 1))
+                    .build();
                 let id = g.add_node(n);
                 g.set_current_node(id);
             });
@@ -381,11 +384,7 @@ impl GraphViewEvents<String> for GraphEditor {
         EventProcessStatus::Processed
     }
     fn on_selection_changed(&mut self, handle: Handle<GraphView<String>>) -> EventProcessStatus {
-        let cnt = if let Some(gv) = self.control(handle) {
-            gv.selected_count()
-        } else {
-            0
-        };
+        let cnt = if let Some(gv) = self.control(handle) { gv.selected_count() } else { 0 };
         self.set_title(format!("Selected count: {cnt}").as_str());
         EventProcessStatus::Processed
     }
@@ -503,6 +502,5 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().app_bar().build()?;
     app.add_window(GraphEditor::new());
     app.run();
-    Ok(()) 
+    Ok(())
 }
- 
