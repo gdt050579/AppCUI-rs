@@ -802,12 +802,10 @@ where
                     Drag::None => EventProcessStatus::Ignored,
                     Drag::EdgeConnect { from_node } => {
                         self.graph.set_edge_preview(None, &self.base);
-                        if mouse_data.button == MouseButton::Right {
-                            self.graph.update_hover_at(data);
-                            if let Some(to) = self.graph.mouse_pos_to_index(data.x, data.y) {
-                                if to != from_node {
-                                    self.raise_request_new_edge(from_node as u32, to as u32);
-                                }
+                        self.graph.update_hover_at(data);
+                        if let Some(to) = self.graph.mouse_pos_to_index(data.x, data.y) {
+                            if to != from_node {
+                                self.raise_request_new_edge(from_node as u32, to as u32);
                             }
                         }
                         EventProcessStatus::Processed
