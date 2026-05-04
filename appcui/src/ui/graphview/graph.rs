@@ -234,6 +234,8 @@ where
     surface: Surface,
     pub(super) current_node: usize,
     hovered_node: Option<usize>,
+    /// Right-drag new edge: source node index and line endpoint in graph coordinates.
+    pending_edge_preview: Option<(usize, Point)>,
     repr_buffer: String,
     pub(super) rendering_options: RenderingOptions,
 }
@@ -271,6 +273,7 @@ where
             surface: Surface::new(200, 200),
             current_node: 0,
             hovered_node: None,
+            pending_edge_preview: None,
             repr_buffer: String::with_capacity(128),
             rendering_options: RenderingOptions::new(),
         };
@@ -505,6 +508,36 @@ where
     pub(super) fn hovered_node_id(&self) -> Option<usize> {
         self.hovered_node
     }
+
+    pub(super) fn update_hover_at(&mut self, gpoint: Point) {
+        self.hovered_node = self.mouse_pos_to_index(gpoint.x, gpoint.y);
+    }
+
+    pub(super) fn set_edge_preview(&mut self, preview: Option<(usize, Point)>, control: &ControlBase) {
+        if self.pending_edge_preview == preview {
+            return;
+        }
+        self.pending_edge_preview = preview;
+        self.repaint(control);
+    }
+
+    fn draw_pending_edge_preview(&mut self, state: ControlState, theme: &Theme) {
+        let Some((from_ix, end)) = self.pending_edge_preview else {
+            return;
+        };
+        if from_ix >= self.nodes.len() {
+            return;
+        }
+        let attr = match state {
+            ControlState::Disabled => theme.lines.inactive,
+            ControlState::Normal => theme.lines.hovered,
+            ControlState::Focused => theme.lines.hovered,
+        };
+        let mouse_rect = Rect::new(end.x, end.y, end.x, end.y);
+        let (p1, p2, _, _) = closest_points(&self.nodes[from_ix].rect, &mouse_rect);
+        let lt = self.rendering_options.edge_line_type;
+        self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, lt, attr);
+    }
     fn draw_edge(&mut self, index: u32, attr: CharAttribute) {
         let e = &self.edges[index as usize];
 
@@ -604,6 +637,7 @@ where
                 }
             }
         }
+        self.draw_pending_edge_preview(state, theme);
         let ms = self.rendering_options.multiselect_ui;
         // draw nodes
         for node in &self.nodes {
@@ -1046,6 +1080,7 @@ where
             surface: Surface::new(1, 1),
             current_node: 0,
             hovered_node: None,
+            pending_edge_preview: None,
             repr_buffer: String::new(),
             rendering_options: RenderingOptions::new(),
         }

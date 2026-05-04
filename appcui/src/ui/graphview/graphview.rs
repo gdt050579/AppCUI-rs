@@ -13,6 +13,10 @@ const MULTISELECT_CTRL_DRAG_THRESHOLD_SQ: i32 = 9;
 
 enum Drag {
     None,
+    /// Right button: drag out a tentative edge from `from_node`.
+    EdgeConnect {
+        from_node: usize,
+    },
     View(Point),
     /// One or more nodes moving together; `anchors` are `(id, top_left_at_press)`.
     NodeDrag {
@@ -689,6 +693,10 @@ where
     }
 
     fn on_lose_focus(&mut self) {
+        if matches!(self.drag, Drag::EdgeConnect { .. }) {
+            self.graph.set_edge_preview(None, &self.base);
+            self.drag = Drag::None;
+        }
         self.graph.repaint(&self.base);
     }
 }
@@ -703,14 +711,26 @@ where
             return EventProcessStatus::Processed;
         }
         match event {
-            MouseEvent::Enter | MouseEvent::Leave => {
+            MouseEvent::Enter => {
+                self.graph.reset_hover(&self.base);
+                self.hide_tooltip();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Leave => {
+                if matches!(self.drag, Drag::EdgeConnect { .. }) {
+                    self.graph.set_edge_preview(None, &self.base);
+                    self.drag = Drag::None;
+                }
                 self.graph.reset_hover(&self.base);
                 self.hide_tooltip();
                 EventProcessStatus::Processed
             }
             MouseEvent::Over(point) => {
                 let p = Point::new(point.x - self.origin_point.x, point.y - self.origin_point.y);
-                if !self.graph.process_mouse_over(&self.base, p) {
+                if let Drag::EdgeConnect { from_node } = &self.drag {
+                    self.graph.update_hover_at(p);
+                    self.graph.set_edge_preview(Some((*from_node, p)), &self.base);
+                } else if !self.graph.process_mouse_over(&self.base, p) {
                     return EventProcessStatus::Ignored;
                 }
                 if let Some(id) = self.graph.hovered_node_id() {
@@ -727,6 +747,16 @@ where
             }
             MouseEvent::Pressed(mouse_data) => {
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
+                if mouse_data.button == MouseButton::Right {
+                    if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
+                        self.drag = Drag::EdgeConnect { from_node: id };
+                        self.graph.update_hover_at(data);
+                        self.graph.set_edge_preview(Some((id, data)), &self.base);
+                    } else {
+                        self.drag = Drag::None;
+                    }
+                    return EventProcessStatus::Processed;
+                }
                 if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
                     let nid = self.graph.current_node_id();
                     let ms = self.flags.contains(Flags::MultiSelect);
@@ -770,6 +800,18 @@ where
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                 match mem::replace(&mut self.drag, Drag::None) {
                     Drag::None => EventProcessStatus::Ignored,
+                    Drag::EdgeConnect { from_node } => {
+                        self.graph.set_edge_preview(None, &self.base);
+                        if mouse_data.button == MouseButton::Right {
+                            self.graph.update_hover_at(data);
+                            if let Some(to) = self.graph.mouse_pos_to_index(data.x, data.y) {
+                                if to != from_node {
+                                    self.raise_request_new_edge(from_node as u32, to as u32);
+                                }
+                            }
+                        }
+                        EventProcessStatus::Processed
+                    }
                     Drag::View(p) => {
                         self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
                         if (data.x == p.x) && (data.y == p.y) {
@@ -819,6 +861,11 @@ where
                 }
             }
             MouseEvent::DoubleClick(mouse_data) => {
+                if matches!(self.drag, Drag::EdgeConnect { .. }) {
+                    self.graph.set_edge_preview(None, &self.base);
+                    self.drag = Drag::None;
+                    return EventProcessStatus::Processed;
+                }
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                 if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
                     self.raise_action_on_node(id);
@@ -844,6 +891,11 @@ where
                 }
                 match &self.drag {
                     Drag::None => EventProcessStatus::Ignored,
+                    Drag::EdgeConnect { from_node } => {
+                        self.graph.update_hover_at(data);
+                        self.graph.set_edge_preview(Some((*from_node, data)), &self.base);
+                        EventProcessStatus::Processed
+                    }
                     Drag::View(p) => {
                         self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
                         self.drag = Drag::View(Point::new(mouse_data.x, mouse_data.y));
