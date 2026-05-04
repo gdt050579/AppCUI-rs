@@ -1555,6 +1555,93 @@ fn multiselect_ctrl_click_three_nodes_then_ctrl_arrow_move_check_hash() {
     a.run();
 }
 
+/// Starts from an **empty** graph; [`GraphView`] raises `on_request_new_node` for **Ctrl+click on empty canvas**
+/// (`Key.Modifier(Ctrl)` + `Mouse.Click(..., left)`), matching `GraphView` mouse handling.
+/// Then **right-button drag** from node to node (`Mouse.Hold` / `Mouse.Move` / `Mouse.Release`) raises `on_request_new_edge`.
+///
+/// The debug script uses **left** for placement because empty-area node creation is wired to the primary button with Ctrl held,
+/// not the secondary mouse button (right opens edge-drag when pressed on a node).
+#[test]
+fn ctrl_click_empty_add_three_nodes_then_right_drag_edges_check_hash() {
+    #[Window(events = GraphViewEvents<String>, internal: true)]
+    struct InteractiveGraphWin {}
+
+    impl InteractiveGraphWin {
+        fn new() -> Self {
+            let mut w = Self { base: window!("Test,d:f") };
+            let mut gv: GraphView<String> = graphview!(
+                "line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: None, d:f, flags:[ScrollBars,MultiSelect],lsm:2,tsm:1"
+            );
+            gv.set_graph(graphview::Graph::<String>::new(vec![], vec![]));
+            w.add(gv);
+            w
+        }
+    }
+
+    impl GraphViewEvents<String> for InteractiveGraphWin {
+        fn on_request_new_node(&mut self, handle: Handle<GraphView<String>>, p: Point) -> EventProcessStatus {
+            if let Some(gv) = self.control_mut(handle) {
+                gv.modify_graph(|g| {
+                    let n = graphview::NodeBuilder::new(format!("N{}", g.nodes_count() + 1))
+                        .position(p)
+                        .size(Size::new(8, 1))
+                        .build();
+                    let id = g.add_node(n);
+                    g.set_current_node(id);
+                });
+            }
+            EventProcessStatus::Processed
+        }
+
+        fn on_request_new_edge(&mut self, handle: Handle<GraphView<String>>, from: u32, to: u32) -> EventProcessStatus {
+            if let Some(gv) = self.control_mut(handle) {
+                gv.modify_graph(|g| {
+                    let _ = g.add_edge(graphview::EdgeBuilder::new(from, to).directed(true).build());
+                });
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+
+        Paint('1. Empty graph')
+        CheckHash(0xE3D0E179665B4428)
+        Key.Modifier(Ctrl)
+        Mouse.Click(12,6,left)
+        Key.Modifier(None)
+        Paint('2. First node (Ctrl+click empty)')
+        CheckHash(0x9BE2DA812EC847FD)
+        Key.Modifier(Ctrl)
+        Mouse.Click(40,6,left)
+        Key.Modifier(None)
+        Paint('3. Second node')
+        CheckHash(0xEB5F01FBB5036EA3)
+        Key.Modifier(Ctrl)
+        Mouse.Click(26,14,left)
+        Key.Modifier(None)
+        Paint('4. Third node')
+        CheckHash(0x6B2F6547124C052C)
+
+        Mouse.Hold(12,6,right)
+        Mouse.Move(40,6)
+        Mouse.Release(40,6,right)
+        Paint('5. Edge 0 -> 1')
+        CheckHash(0x30FAE20E802FB2C4)
+
+        Mouse.Hold(40,6,right)
+        Mouse.Move(26,14)
+        Mouse.Release(26,14,right)
+        Paint('6. Edge 1 -> 2')
+        CheckHash(0x78809F7C6C565386)
+    ";
+
+    let mut a = App::debug(72, 22, script).build().unwrap();
+    a.add_window(InteractiveGraphWin::new());
+    a.run();
+}
+
 /// [`EditableNode`] getters match the geometry and style from [`NodeBuilder`] (including `resize` padding rules).
 #[test]
 fn editable_node_getters_match_node_builder() {
