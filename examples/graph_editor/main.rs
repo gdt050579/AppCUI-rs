@@ -1,10 +1,3 @@
-//! Demonstrates editing graph node data through [`GraphView::modify_graph`].
-//!
-//! Focus the graph, move the selection with arrow keys, then use **Edit → Rename node**,
-//! **Edit → Resize node**, **Edit → Node border**, or **Edit → Text color** to apply changes inside a `modify_graph` closure.
-//! **Graph → Add node** / **Remove node** change the node set (`EditableGraph::add_node` / `delete_node`).
-//! Press **Enter** on a node for `on_node_action` (same edits use the focused node).
-
 use appcui::prelude::*;
 use appcui::ui::appbar::{AppBar, MenuButton, Side};
 
@@ -21,7 +14,6 @@ fn initial_graph() -> graphview::Graph<String> {
     graphview::Graph::new(nodes, edges)
 }
 
-/// Resolves the index of the focused node using only the public [`graphview::Graph`] API.
 fn current_node_index(g: &graphview::Graph<String>) -> Option<usize> {
     let cur = g.current_node()?;
     (0..g.nodes_count()).find(|&i| g.node(i).is_some_and(|n| std::ptr::eq(cur, n)))
@@ -356,7 +348,6 @@ impl GraphViewEvents<String> for GraphEditor {
     }
 
     fn on_node_action(&mut self, _handle: Handle<GraphView<String>>, node_index: usize) -> EventProcessStatus {
-        // Same pattern as menu actions: run edits inside `modify_graph`.
         let gv_h = self.graph_view;
         if let Some(gv) = self.control_mut(gv_h) {
             gv.modify_graph(|g| {
