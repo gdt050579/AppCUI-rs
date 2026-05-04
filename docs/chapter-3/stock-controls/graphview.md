@@ -1,6 +1,6 @@
 # GraphView
 
-Represents a graph visualization control that can display nodes and edges with various layout algorithms and interactive features:
+Represents a graph visualization control that can display nodes and edges with various layout algorithms and interactive features. It also supports optional **multi-selection** (checkbox column and bulk shortcuts), **mouse-driven creation** of nodes (Ctrl+click on empty space) and edges (right-drag between nodes) via `GraphViewEvents`, and **tooltips** from `GraphNode::write_description` on hover.
 
 <img src="img/graphview.png" width=400/>
 
@@ -12,6 +12,7 @@ or the macro `graphview!`
 ```rs
 let gv1 = graphview!("x:10,y:5,w:40,h:20,flags:[ScrollBars,SearchBar]");
 let gv2 = graphview!("d:f,arrange:GridPacked,routing:Orthogonal");
+let gv3 = graphview!("d:f,flags:[ScrollBars,SearchBar,MultiSelect]");
 ```
 
 A GraphView supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
@@ -32,6 +33,7 @@ A GraphView supports all common parameters (as they are described in [Instantiat
 A GraphView supports the following initialization flags:
 * `graphview::Flags::ScrollBars` or `ScrollBars` (for macro initialization) - enables scrollbars for navigating large graphs.
 * `graphview::Flags::SearchBar` or `SearchBar` (for macro initialization) - enables a search bar for finding nodes.
+* `graphview::Flags::MultiSelect` or `MultiSelect` (for macro initialization) - enables multi-selection UI: a checkbox gutter on each node (☑/☐), keyboard shortcuts to toggle or bulk-select nodes, and mouse gestures for Ctrl+click toggling and moving multiple selected nodes together. When this flag is off, behavior matches single-selection graphs as before.
 
 A GraphView supports the following edge line types:
 * `LineType::Single` or `Single` - single line edges
@@ -64,13 +66,22 @@ let highlighted = graphview!("d:f,hie:true,hoe:true,back:{.,gray,black}");
 ```
 
 ## Events
-To intercept events from a GraphView, the following trait has to be implemented on the Window that processes the event loop:
+To intercept events from a GraphView, implement `GraphViewEvents<T>` on the window that runs the event loop. Every method has a default implementation that returns `EventProcessStatus::Ignored`, so you only override what you need.
+
 ```rs
 pub trait GraphViewEvents<T> {
-    fn on_current_node_changed(&mut self, handle: Handle<GraphView<T>>) -> EventProcessStatus {...}
-    fn on_node_action(&mut self, handle: Handle<GraphView<T>>, node_index: usize) -> EventProcessStatus {...}
+    fn on_current_node_changed(&mut self, handle: Handle<GraphView<T>>) -> EventProcessStatus;
+    fn on_node_action(&mut self, handle: Handle<GraphView<T>>, node_index: usize) -> EventProcessStatus;
+    // Ctrl+click on empty canvas — graph coordinates (see Mouse interaction).
+    fn on_request_new_node(&mut self, handle: Handle<GraphView<T>>, point: Point) -> EventProcessStatus;
+    // Right-drag finished on another node — zero-based indices as u32.
+    fn on_request_new_edge(&mut self, handle: Handle<GraphView<T>>, from: u32, to: u32) -> EventProcessStatus;
+    // MultiSelect only — selection set changed (user or modify_graph / set_selected).
+    fn on_selection_changed(&mut self, handle: Handle<GraphView<T>>) -> EventProcessStatus;
 }
 ```
+
+Handle `on_request_new_node` / `on_request_new_edge` by calling `GraphView::modify_graph` to append nodes or edges, or ignore them if your graph is read-only.
 
 ## Methods
 
@@ -88,6 +99,7 @@ Besides the [Common methods for all Controls](../common_methods.md) a GraphView 
 | `enable_arrow_heads(...)`       | Enables or disables arrow heads on directed edges.                                                                                                                                                                             |
 | `arrange_nodes(...)`            | Applies a layout algorithm to arrange the nodes in the graph. Takes an `ArrangeMethod` parameter.                                                                                                                              |
 | `modify_graph(...)`             | Runs a closure with an `EditableGraph` so you can add or remove nodes and edges, change the current selection, and edit node or edge properties; the control repaints and refreshes geometry when the closure reports changes. |
+| `selected_count()`              | Returns how many nodes have `selected == true` (meaningful when `MultiSelect` is enabled).                                                                                                                                     |
 
 ### Building a `Graph<T>`
 
@@ -121,7 +133,7 @@ Call `graph_view.modify_graph(|g| { ... })` so the closure receives an `Editable
 | `edges_count()`, `add_edge`, `delete_edge` | Edge list maintenance; `add_edge` returns `false` if endpoints are invalid.                                              |
 | `set_current_node`, `current_node`         | Update or read the selection index tracked for this edit (applied to the inner `Graph` when the closure finishes).       |
 
-After the closure returns, the control updates edge connectivity, may resize the backing surface, and repaints if anything changed.
+After the closure returns, the control updates edge connectivity, may resize the backing surface, and repaints if anything changed. If `MultiSelect` is enabled and the closure changes any node’s multi-selection state (`set_selected`), `on_selection_changed` may be dispatched after the closure returns.
 
 ```rs
 graph_view.modify_graph(|g| {
@@ -135,11 +147,12 @@ graph_view.modify_graph(|g| {
 
 On a read-only `Node<T>` from `graph().node(i)` or `graph().current_node()`:
 
-| Method    | Purpose                                                    |
-| --------- | ---------------------------------------------------------- |
-| `value()` | Reference to the user payload `T` (your `GraphNode` type). |
+| Method          | Purpose                                                                                                                                                              |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `value()`       | Reference to the user payload `T` (your `GraphNode` type).                                                                                                           |
+| `is_selected()` | Whether the node is in the multi-selection set. Meaningful when the GraphView was created with `Flags::MultiSelect`; otherwise this flag is not used by the control. |
 
-Inside `modify_graph`, `EditableNode` also exposes layout and style APIs, for example `bounds` / `set_bounds`, `position` / `set_position`, `size` / `set_size`, `value` / `value_mut` / `set_value`, text alignment and attribute get/set/clear, and border get/set/clear. Most setters flip an internal “changed” flag so the graph view knows to repaint; `value_mut` does not set that flag by itself.
+Inside `modify_graph`, `EditableNode` also exposes layout and style APIs, for example `bounds` / `set_bounds`, `position` / `set_position`, `size` / `set_size`, `value` / `value_mut` / `set_value`, text alignment and attribute get/set/clear, border get/set/clear, and **`set_selected` / `is_selected`** for the multi-selection checkbox state. Most setters flip an internal “changed” flag so the graph view knows to repaint; `value_mut` does not set that flag by itself.
 
 ### `EditableEdge`
 
@@ -149,30 +162,35 @@ Inside `modify_graph`, `EditableEdge` exposes `from_node_id`, `to_node_id`, and 
 
 The following keys are processed by a GraphView control if it has focus:
 
-| Key                      | Purpose                                                                                       |
-| ------------------------ | --------------------------------------------------------------------------------------------- |
-| `Arrow Keys`             | Navigate between nodes in the specified direction (finds the closest node in that direction). |
-| `Ctrl+Arrow Keys`        | Move the current node by one position in the specified direction.                             |
-| `Enter`                  | Triggers a node action event (`on_node_action`) for the current node.                         |
-| `Ctrl+Tab`               | Move to the next node in the graph (by index).                                                |
-| `Ctrl+Shift+Tab`         | Move to the previous node in the graph (by index).                                            |
-| `Alt+Arrow Keys`         | Scroll the view in the specified direction (when scrollbars are enabled).                     |
-| `Page Up/Page Down`      | Scroll the view up or down by one page.                                                       |
-| `Home`                   | Scroll to the top-left of the graph.                                                          |
-| `End`                    | Scroll to the bottom-right of the graph.                                                      |
-| `Escape`                 | Clear search text (if search bar is active), or exit search mode.                             |
-| `Enter` (in search)      | Go to next matching node.                                                                     |
-| `Ctrl+Enter` (in search) | Go to previous matching node.                                                                 |
+| Key                      | Purpose                                                                                                                                                                                                                                                                    |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Arrow Keys`             | Navigate between nodes in the specified direction (finds the closest node in that direction).                                                                                                                                                                              |
+| `Ctrl+Arrow Keys`        | Without `MultiSelect`: move the **current** node by one cell. With `MultiSelect`: move every **selected** node by one cell in that direction; if that moves nothing, falls back to nudging the current node (same as non–multi-select).                                    |
+| `Space`                  | When `MultiSelect` is enabled: toggle whether the **current** node is in the selection set (same effect as a short Ctrl+click on that node). Ignored if multi-select UI is off or the graph is empty.                                                                      |
+| `Ctrl+A`                 | When `MultiSelect` is enabled: if every **visible** (non–search-filtered) node is selected, clear selection on those nodes; otherwise select all visible nodes. Moves the current node to the first visible node. Ignored if multi-select UI is off or the graph is empty. |
+| `Enter`                  | Triggers a node action event (`on_node_action`) for the current node.                                                                                                                                                                                                      |
+| `Ctrl+Tab`               | Move to the next node in the graph (by index).                                                                                                                                                                                                                             |
+| `Ctrl+Shift+Tab`         | Move to the previous node in the graph (by index).                                                                                                                                                                                                                         |
+| `Alt+Arrow Keys`         | Scroll the view in the specified direction (when scrollbars are enabled).                                                                                                                                                                                                  |
+| `Page Up/Page Down`      | Scroll the view up or down by one page.                                                                                                                                                                                                                                    |
+| `Home`                   | Scroll to the top-left of the graph.                                                                                                                                                                                                                                       |
+| `End`                    | Scroll to the bottom-right of the graph.                                                                                                                                                                                                                                   |
+| `Escape`                 | Clear search text (if search bar is active), or exit search mode.                                                                                                                                                                                                          |
+| `Enter` (in search)      | Go to next matching node.                                                                                                                                                                                                                                                  |
+| `Ctrl+Enter` (in search) | Go to previous matching node.                                                                                                                                                                                                                                              |
 
 ## Mouse interaction
 
 The GraphView supports various mouse interactions:
 
-- **Click**: Select a node by clicking on it
-- **Double-click**: Trigger a node action event for the clicked node
-- **Drag**: Move nodes by dragging them, or scroll the view by dragging empty space
-- **Mouse wheel**: Scroll the view in the specified direction
-- **Hover**: Highlight nodes when hovering over them
+- **Click (left) on a node**: Sets that node as current. With `MultiSelect`, a normal click also clears other selected nodes and selects only this one, then begins a drag if you keep the button down (see below).
+- **Ctrl+click (left) on a node** (`MultiSelect` only): If you release without moving more than a few pixels, toggles that node’s inclusion in the selection set and raises `on_selection_changed` when the set changes. If you drag past the threshold, behaves like dragging the selection (see **Drag nodes**).
+- **Double-click (left) on a node**: Triggers `on_node_action` for that node.
+- **Drag nodes**: Press on a node and drag to move it. With `MultiSelect`, all **selected** nodes move together when you drag from a selected node; dragging from an unselected node moves only that node (and selects it on press, unless Ctrl+click mode applies).
+- **Click / drag empty graph area (left)**: Dragging pans the view (same as before). Releasing after a click with **no movement** clears the multi-selection set (`MultiSelect` only). **Ctrl+click** on empty space raises `on_request_new_node` with the graph-space `Point` under the cursor so you can create a node at that position.
+- **Right button — new edge**: Press right on a node and drag; a preview line follows the pointer. Release right on a **different** node to raise `on_request_new_edge(from, to)` with zero-based indices as `u32`. Releasing elsewhere cancels. Moving the mouse out of the control or losing focus clears the preview.
+- **Mouse wheel**: Scrolls the view (including horizontal where supported).
+- **Hover**: Updates hover highlighting; if `GraphNode::write_description` returns non-empty text, it is shown as a tooltip over the node rectangle.
 
 ## Graph item
 
@@ -276,7 +294,9 @@ When building an edge, the **from** and **to** parameters are the indices of the
 
 ## Example
 
-The following code creates a window with a GraphView displaying a simple hierarchy. When nodes are selected or activated, the window title updates to show the current action.
+The following code creates a window with a GraphView displaying a simple hierarchy. When nodes are selected or activated, the window title updates to show the current action. The other `GraphViewEvents` methods (`on_request_new_node`, `on_request_new_edge`, `on_selection_changed`) are left at their default implementations here.
+
+For a full editor sample (app bar, `modify_graph`, `MultiSelect`, and handlers for new node/edge and selection), see the `examples/graph_editor` example in the AppCUI-rs repository.
 
 ```rs
 use appcui::prelude::*;
