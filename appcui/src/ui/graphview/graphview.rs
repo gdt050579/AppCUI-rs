@@ -532,6 +532,16 @@ where
             }),
         });
     }
+    fn raise_request_new_edge(&mut self, from: u32, to: u32) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::GraphView(EventData {
+                event_type: GraphViewEventTypes::RequestNewEdge(from, to),
+                type_id: TypeId::of::<T>(),
+            }),
+        });
+    }
     fn raise_selection_changed(&mut self) {
         self.raise_event(ControlEvent {
             emitter: self.handle,

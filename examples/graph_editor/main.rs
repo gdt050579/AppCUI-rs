@@ -381,6 +381,14 @@ impl GraphViewEvents<String> for GraphEditor {
         }
         EventProcessStatus::Processed
     }
+    fn on_request_new_edge(&mut self, handle: Handle<GraphView<String>>, from: u32, to: u32) -> EventProcessStatus {
+        if let Some(gv) = self.control_mut(handle) {
+            gv.modify_graph(|g| {
+                g.add_edge(graphview::EdgeBuilder::new(from, to).directed(true).build());
+            });
+        }
+        EventProcessStatus::Processed
+    }
     fn on_selection_changed(&mut self, handle: Handle<GraphView<String>>) -> EventProcessStatus {
         let cnt = if let Some(gv) = self.control(handle) {
             gv.selected_count()

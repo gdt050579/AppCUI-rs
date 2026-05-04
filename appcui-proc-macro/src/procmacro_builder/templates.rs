@@ -411,6 +411,13 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 }
 ";
 
+pub(crate) static GRAPHVIEW_ON_REQUEST_NEW_EDGE_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<GraphView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return GraphViewEvents::<$(TYPE)>::on_request_new_edge(self, h, from, to);
+}
+";
+
 pub(crate) static GRAPHVIEW_ON_SELECTION_CHANGED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<GraphView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
@@ -429,6 +436,9 @@ trait GraphViewEvents<T: graphview::GraphNode+'static> {
     fn on_request_new_node(&mut self, handle: Handle<GraphView<T>>, point: Point) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }    
+    fn on_request_new_edge(&mut self, handle: Handle<GraphView<T>>, from: u32, to: u32) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
     fn on_selection_changed(&mut self, handle: Handle<GraphView<T>>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
@@ -447,6 +457,11 @@ impl$(TEMPLATE_TYPE) GenericGraphViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 
     fn on_request_new_node(&mut self, handle: Handle<()>, type_id: std::any::TypeId, point: Point) -> EventProcessStatus {
         $(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_REQUEST_NEW_NODE)
+        return EventProcessStatus::Ignored;
+    }    
+
+    fn on_request_new_edge(&mut self, handle: Handle<()>, type_id: std::any::TypeId, from: u32, to: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_REQUEST_NEW_EDGE)
         return EventProcessStatus::Ignored;
     }    
 
