@@ -98,11 +98,33 @@ where
         }
 
         // paint the text
-        surface.set_relative_clip(clip_rect.left(), clip_rect.top(), clip_rect.right(), clip_rect.bottom());
+        if self.obj.write_label(out, clip_rect.size()).is_err() {
+            out.clear();
+            out.push_str("???");
+        }        
         let w = clip_rect.width() as u16;
+        
         let x = match self.text_align {
             TextAlignment::Left => clip_rect.left(),
-            TextAlignment::Center => clip_rect.center_x(),
+            TextAlignment::Center => {
+                let mut len = 0;
+                for c in out.chars() {
+                    if c == '\n' || c == '\r' {
+                        break;
+                    } else {
+                        len += 1;
+                        if len >= w {
+                            break;
+                        }
+                    }
+                }        
+                if ((len + w) & 1) ==0 {
+                    // ambele pare sau ambele impare
+                    clip_rect.left() + (w / 2) as i32
+                } else {
+                    clip_rect.center_x()
+                }
+            }
             TextAlignment::Right => clip_rect.right(),
         };
         let format = TextFormatBuilder::new()
@@ -111,11 +133,7 @@ where
             .wrap_type(WrapType::WordWrap(w))
             .position(x, clip_rect.top())
             .build();
-
-        if self.obj.write_label(out, clip_rect.size()).is_err() {
-            out.clear();
-            out.push_str("???");
-        }
+        surface.set_relative_clip(clip_rect.left(), clip_rect.top(), clip_rect.right(), clip_rect.bottom());
         surface.write_text(out, &format);
         surface.reset_clip();
     }

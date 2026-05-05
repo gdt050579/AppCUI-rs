@@ -481,7 +481,7 @@ fn check_custom_graph() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')   
-        CheckHash(0xD896F64DAEC2F4B0)           
+        CheckHash(0x3A54E82DF4408030)           
     ";
     let mut a = App::debug(60, 20, script).build().unwrap();
     let mut w = window!("Test,d:f");
@@ -1012,7 +1012,7 @@ fn check_custom_nodes() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state (button has the focus)')   
-        CheckHash(0xD6DFE65F8B0720A6)    
+        CheckHash(0x75EDC95A42AF8EB2)    
     ";
     let mut a = App::debug(120, 30, script).build().unwrap();
     let mut w = window!("Test,d:f");
@@ -1368,7 +1368,7 @@ fn modify_graph_add_two_nodes_and_edge_check_hash() {
     let script = "
         Paint.Enable(false)
         Paint('modify_graph: add_node x2 + add_edge(0 -> 1)')
-        CheckHash(0x2725DFCC78B2D076)
+        CheckHash(0x8F7C724263880506)
     ";
     let mut a = App::debug(60, 10, script).build().unwrap();
     let mut w = window!("Test,d:f");
@@ -1462,35 +1462,35 @@ fn multiselect_space_three_nodes_then_ctrl_arrow_move_check_hash() {
         Paint.Enable(false)
 
         Paint('1. Initial state')
-        CheckHash(0x70EF36845145E78)
+        CheckHash(0xB25906CDFF834E58)
         Key.Pressed(Space)
         Paint('2. Node A is selected')
-        CheckHash(0xD2337DCA27E75979)
+        CheckHash(0xCE03FA1E85520AD9)
         Key.Pressed(Right)
         Paint('3. Arrow Right — current node is B, A remains selected')
-        CheckHash(0x589E5C57EF13988D)
+        CheckHash(0xA4C9A203971FA6D9)
         Key.Pressed(Space)
         Paint('4. A and B are selected')
-        CheckHash(0xC42DA1AABEE24E38)
+        CheckHash(0x6D779A01E496CB34)
         Key.Pressed(Down)
         Paint('5. Arrow Down — current node is C, A and B remain selected')
-        CheckHash(0x228A16F30792674)
+        CheckHash(0x36F086E2F7CDAEB4)
         Key.Pressed(Space)
         Paint('6. A, B, C are selected, D remains unselected')
-        CheckHash(0xC953EA548C428071)
+        CheckHash(0x10703C77CBCDC451)
 
         Key.Pressed(Ctrl+Right,2)
         Paint('7: Ctrl+Right x2 — group moves to the right (A, B and C)')
-        CheckHash(0x54704416FAA900F1)
+        CheckHash(0xE932A9CC07EA8251)
         Key.Pressed(Ctrl+Down,2)
         Paint('8: Ctrl+Down x2 — group moves down (A, B and C)')
-        CheckHash(0x4ECE5E8D567387B1)
+        CheckHash(0x4BD7935EF01B691)
         Key.Pressed(Ctrl+Left,2)
         Paint('9: Ctrl+Left x2 — group moves left (A, B and C)')
-        CheckHash(0x438FE806A4B34071)
+        CheckHash(0x866AB7194FB3DC51)
         Key.Pressed(Ctrl+Up,2)
         Paint('10: Ctrl+Up x2 — group moves up (A, B and C)')
-        CheckHash(0xC953EA548C428071)
+        CheckHash(0x10703C77CBCDC451)
     ";
     let mut a = App::debug(72, 22, script).build().unwrap();
     let mut w = window!("Test,d:f");
@@ -1514,35 +1514,35 @@ fn multiselect_ctrl_click_three_nodes_then_ctrl_arrow_move_check_hash() {
         Paint.Enable(false)
 
         Paint('1. Initial state')
-        CheckHash(0x70EF36845145E78)
+        CheckHash(0xB25906CDFF834E58)
         Key.Modifier(Ctrl)
         Mouse.Click(9,2,left)
         Key.Modifier(None)
         Paint('2. Ctrl+click node A — A selected (same end state as Space on A)')
-        CheckHash(0xD2337DCA27E75979)
+        CheckHash(0xCE03FA1E85520AD9)
         Key.Modifier(Ctrl)
         Mouse.Click(35,2,left)
         Key.Modifier(None)
         Paint('3. Ctrl+click node B — A and B selected')
-        CheckHash(0xC42DA1AABEE24E38)
+        CheckHash(0x6D779A01E496CB34)
         Key.Modifier(Ctrl)
         Mouse.Click(35,13,left)
         Key.Modifier(None)
         Paint('4. Ctrl+click node C — A, B, C selected; D unselected')
-        CheckHash(0xC953EA548C428071)
+        CheckHash(0x10703C77CBCDC451)
 
         Key.Pressed(Ctrl+Right,2)
         Paint('5. Ctrl+Right x2 — group nudge right')
-        CheckHash(0x54704416FAA900F1)
+        CheckHash(0xE932A9CC07EA8251)
         Key.Pressed(Ctrl+Down,2)
         Paint('6. Ctrl+Down x2 — group nudge down')
-        CheckHash(0x4ECE5E8D567387B1)
+        CheckHash(0x4BD7935EF01B691)
         Key.Pressed(Ctrl+Left,2)
         Paint('7. Ctrl+Left x2 — group nudge left')
-        CheckHash(0x438FE806A4B34071)
+        CheckHash(0x866AB7194FB3DC51)
         Key.Pressed(Ctrl+Up,2)
         Paint('8. Ctrl+Up x2 — group nudge up')
-        CheckHash(0xC953EA548C428071)
+        CheckHash(0x10703C77CBCDC451)
     ";
     let mut a = App::debug(72, 22, script).build().unwrap();
     let mut w = window!("Test,d:f");
@@ -1612,29 +1612,29 @@ fn ctrl_click_empty_add_three_nodes_then_right_drag_edges_check_hash() {
         Mouse.Click(12,6,left)
         Key.Modifier(None)
         Paint('2. First node (Ctrl+click empty)')
-        CheckHash(0x9BE2DA812EC847FD)
+        CheckHash(0xFA31EC1C288F3CE1)
         Key.Modifier(Ctrl)
         Mouse.Click(40,6,left)
         Key.Modifier(None)
         Paint('3. Second node')
-        CheckHash(0xEB5F01FBB5036EA3)
+        CheckHash(0xE88EC73796576F1B)
         Key.Modifier(Ctrl)
         Mouse.Click(26,14,left)
         Key.Modifier(None)
         Paint('4. Third node')
-        CheckHash(0x6B2F6547124C052C)
+        CheckHash(0xDF7079A5B7D1D42C)
 
         Mouse.Hold(12,6,right)
         Mouse.Move(40,6)
         Mouse.Release(40,6,right)
         Paint('5. Edge 0 -> 1')
-        CheckHash(0x30FAE20E802FB2C4)
+        CheckHash(0x72AD618F506F168C)
 
         Mouse.Hold(40,6,right)
         Mouse.Move(26,14)
         Mouse.Release(26,14,right)
         Paint('6. Edge 1 -> 2')
-        CheckHash(0x78809F7C6C565386)
+        CheckHash(0x8A74B28D54C70BF6)
     ";
 
     let mut a = App::debug(72, 22, script).build().unwrap();
