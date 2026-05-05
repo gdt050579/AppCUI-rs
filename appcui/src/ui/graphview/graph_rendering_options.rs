@@ -8,6 +8,8 @@ pub(super) struct RenderingOptions {
     pub(super) show_arrow_heads: bool,
     pub(super) edge_routing: EdgeRouting,
     pub(super) edge_line_type: LineType,
+    /// When true, the graph view shows multi-select UI (gutter + indicators). Set by `GraphView` from `Flags::MultiSelect`.
+    pub(super) multiselect_ui: bool,
 }
 
 impl RenderingOptions {
@@ -18,6 +20,7 @@ impl RenderingOptions {
             show_arrow_heads: true,
             edge_routing: EdgeRouting::Direct,
             edge_line_type: LineType::Single,
+            multiselect_ui: false,
         }
     }
 }

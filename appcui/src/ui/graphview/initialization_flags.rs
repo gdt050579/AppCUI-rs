@@ -5,6 +5,7 @@ use EnumBitFlags::EnumBitFlags;
 pub enum Flags {
     ScrollBars = 1,
     SearchBar = 0x02,
+    MultiSelect = 0x04,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, EnumSelector)]

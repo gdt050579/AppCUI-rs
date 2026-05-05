@@ -1,10 +1,3 @@
-//! Demonstrates editing graph node data through [`GraphView::modify_graph`].
-//!
-//! Focus the graph, move the selection with arrow keys, then use **Edit → Rename node**,
-//! **Edit → Resize node**, **Edit → Node border**, or **Edit → Text color** to apply changes inside a `modify_graph` closure.
-//! **Graph → Add node** / **Remove node** change the node set (`EditableGraph::add_node` / `delete_node`).
-//! Press **Enter** on a node for `on_node_action` (same edits use the focused node).
-
 use appcui::prelude::*;
 use appcui::ui::appbar::{AppBar, MenuButton, Side};
 
@@ -21,7 +14,6 @@ fn initial_graph() -> graphview::Graph<String> {
     graphview::Graph::new(nodes, edges)
 }
 
-/// Resolves the index of the focused node using only the public [`graphview::Graph`] API.
 fn current_node_index(g: &graphview::Graph<String>) -> Option<usize> {
     let cur = g.current_node()?;
     (0..g.nodes_count()).find(|&i| g.node(i).is_some_and(|n| std::ptr::eq(cur, n)))
@@ -96,7 +88,7 @@ impl GraphEditor {
             menu_help: Handle::None,
         };
 
-        let mut gv = graphview!("d:f,flags:[ScrollBars,SearchBar]");
+        let mut gv = graphview!("d:f,flags:[ScrollBars,SearchBar,MultiSelect]");
         gv.set_graph(initial_graph());
         gv.arrange_nodes(graphview::ArrangeMethod::Hierarchical);
         win.graph_view = win.add(gv);
@@ -139,9 +131,7 @@ impl GraphEditor {
                 ]},
             ]"
         );
-        win.menu_edit = win
-            .appbar()
-            .add(MenuButton::new("&Edit", m_edit, 1, Side::Left));
+        win.menu_edit = win.appbar().add(MenuButton::new("&Edit", m_edit, 1, Side::Left));
 
         let m_graph = menu!(
             "class: GraphEditor, items=[
@@ -151,9 +141,7 @@ impl GraphEditor {
                 {'&Grid layout', cmd: ArrangeGrid},
             ]"
         );
-        win.menu_graph = win
-            .appbar()
-            .add(MenuButton::new("&Graph", m_graph, 1, Side::Left));
+        win.menu_graph = win.appbar().add(MenuButton::new("&Graph", m_graph, 1, Side::Left));
 
         let m_help = menu!(
             "class: GraphEditor, items=[
@@ -161,9 +149,7 @@ impl GraphEditor {
                 {E&xit, cmd: Exit},
             ]"
         );
-        win.menu_help = win
-            .appbar()
-            .add(MenuButton::new("&Help", m_help, 1, Side::Left));
+        win.menu_help = win.appbar().add(MenuButton::new("&Help", m_help, 1, Side::Left));
 
         win.update_title_bar();
         win
@@ -198,9 +184,7 @@ impl GraphEditor {
             let old = gv.graph().node(id).unwrap().value().clone();
             (id, old)
         };
-        if let Some(new_label) =
-            dialogs::input::<String>("Rename node", "New label:", Some(old), None)
-        {
+        if let Some(new_label) = dialogs::input::<String>("Rename node", "New label:", Some(old), None) {
             let gv_h = self.graph_view;
             if let Some(gv) = self.control_mut(gv_h) {
                 gv.modify_graph(|g| {
@@ -234,12 +218,8 @@ impl GraphEditor {
             (id, top_left, size)
         };
 
-        let Some(new_size) = dialogs::input::<Size>(
-            "Resize node",
-            "Size as width x height (e.g. 16x4):",
-            Some(size),
-            Some(validate_node_size),
-        ) else {
+        let Some(new_size) = dialogs::input::<Size>("Resize node", "Size as width x height (e.g. 16x4):", Some(size), Some(validate_node_size))
+        else {
             return;
         };
 
@@ -292,12 +272,7 @@ impl GraphEditor {
             }
         };
 
-        let Some(label) = dialogs::input::<String>(
-            "Add node",
-            "Label for the new node:",
-            Some("New node".to_string()),
-            None,
-        ) else {
+        let Some(label) = dialogs::input::<String>("Add node", "Label for the new node:", Some("New node".to_string()), None) else {
             return;
         };
 
@@ -307,11 +282,7 @@ impl GraphEditor {
                 let node = graphview::NodeBuilder::new(label).build();
                 let id = g.add_node(node);
                 if let Some(from) = anchor {
-                    let _ = g.add_edge(
-                        graphview::EdgeBuilder::new(from as u32, id as u32)
-                            .directed(true)
-                            .build(),
-                    );
+                    let _ = g.add_edge(graphview::EdgeBuilder::new(from as u32, id as u32).directed(true).build());
                 }
                 g.set_current_node(id);
             });
@@ -329,10 +300,7 @@ impl GraphEditor {
                 return;
             };
             let Some(id) = current_node_index(gv.graph()) else {
-                dialogs::message(
-                    "Remove node",
-                    "No node is selected. Focus the graph and choose a node first.",
-                );
+                dialogs::message("Remove node", "No node is selected. Focus the graph and choose a node first.");
                 return;
             };
             id
@@ -371,24 +339,15 @@ impl GraphEditor {
             });
         }
     }
-
 }
 
 impl GraphViewEvents<String> for GraphEditor {
-    fn on_current_node_changed(
-        &mut self,
-        _handle: Handle<GraphView<String>>,
-    ) -> EventProcessStatus {
+    fn on_current_node_changed(&mut self, _handle: Handle<GraphView<String>>) -> EventProcessStatus {
         self.update_title_bar();
         EventProcessStatus::Processed
     }
 
-    fn on_node_action(
-        &mut self,
-        _handle: Handle<GraphView<String>>,
-        node_index: usize,
-    ) -> EventProcessStatus {
-        // Same pattern as menu actions: run edits inside `modify_graph`.
+    fn on_node_action(&mut self, _handle: Handle<GraphView<String>>, node_index: usize) -> EventProcessStatus {
         let gv_h = self.graph_view;
         if let Some(gv) = self.control_mut(gv_h) {
             gv.modify_graph(|g| {
@@ -402,15 +361,37 @@ impl GraphViewEvents<String> for GraphEditor {
         self.update_title_bar();
         EventProcessStatus::Processed
     }
+
+    fn on_request_new_node(&mut self, handle: Handle<GraphView<String>>, p: Point) -> EventProcessStatus {
+        if let Some(gv) = self.control_mut(handle) {
+            gv.modify_graph(|g| {
+                let n = graphview::NodeBuilder::new(format!("Node:{}", g.nodes_count() + 1))
+                    .position(p)
+                    .size(Size::new(12, 1))
+                    .build();
+                let id = g.add_node(n);
+                g.set_current_node(id);
+            });
+        }
+        EventProcessStatus::Processed
+    }
+    fn on_request_new_edge(&mut self, handle: Handle<GraphView<String>>, from: u32, to: u32) -> EventProcessStatus {
+        if let Some(gv) = self.control_mut(handle) {
+            gv.modify_graph(|g| {
+                g.add_edge(graphview::EdgeBuilder::new(from, to).directed(true).build());
+            });
+        }
+        EventProcessStatus::Processed
+    }
+    fn on_selection_changed(&mut self, handle: Handle<GraphView<String>>) -> EventProcessStatus {
+        let cnt = if let Some(gv) = self.control(handle) { gv.selected_count() } else { 0 };
+        self.set_title(format!("Selected count: {cnt}").as_str());
+        EventProcessStatus::Processed
+    }
 }
 
 impl MenuEvents for GraphEditor {
-    fn on_command(
-        &mut self,
-        _menu: Handle<Menu>,
-        _item: Handle<menu::Command>,
-        command: grapheditor::Commands,
-    ) {
+    fn on_command(&mut self, _menu: Handle<Menu>, _item: Handle<menu::Command>, command: grapheditor::Commands) {
         match command {
             grapheditor::Commands::RenameNode => self.rename_selected(),
             grapheditor::Commands::ResizeNode => self.resize_selected(),
