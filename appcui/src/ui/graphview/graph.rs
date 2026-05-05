@@ -1001,6 +1001,27 @@ where
         }
     }
 
+    /// Multi-select **Ctrl+A** semantics only (no repaint): if every visible (non-filtered) node is selected,
+    /// clears `selected` on visible nodes; otherwise selects all visible nodes.
+    ///
+    /// Returns `Some(first_visible_index)` to assign as `current_node`, or `None` when multi-select UI is off,
+    /// the graph is empty, or every node is filtered out.
+    pub(crate) fn apply_ctrl_a_visible_selection_toggle(&mut self) -> Option<usize> {
+        if !self.rendering_options.multiselect_ui || self.nodes.is_empty() {
+            return None;
+        }
+        let fv = (0..self.nodes.len()).find(|&i| !self.nodes[i].filtered)?;
+        let all_visible_selected = (0..self.nodes.len())
+            .filter(|&i| !self.nodes[i].filtered)
+            .all(|i| self.nodes[i].selected);
+        for n in &mut self.nodes {
+            if !n.filtered {
+                n.selected = !all_visible_selected;
+            }
+        }
+        Some(fv)
+    }
+
     pub(super) fn process_key_events(&mut self, key: Key, control: &ControlBase) -> bool {
         match key.value() {
             key!("Left") => self.move_to_node_with_direction(Direction::Left, control),
@@ -1029,21 +1050,9 @@ where
                 self.toggle_multiselect_selected(cn, control);
             }
             key!("Ctrl+A") => {
-                if !self.rendering_options.multiselect_ui || self.nodes.is_empty() {
-                    return false;
-                }
-                let first_visible = (0..self.nodes.len()).find(|&i| !self.nodes[i].filtered);
-                let Some(fv) = first_visible else {
+                let Some(fv) = self.apply_ctrl_a_visible_selection_toggle() else {
                     return false;
                 };
-                let all_visible_selected = (0..self.nodes.len())
-                    .filter(|&i| !self.nodes[i].filtered)
-                    .all(|i| self.nodes[i].selected);
-                for n in &mut self.nodes {
-                    if !n.filtered {
-                        n.selected = !all_visible_selected;
-                    }
-                }
                 self.current_node = fv;
                 self.repaint(control);
             }

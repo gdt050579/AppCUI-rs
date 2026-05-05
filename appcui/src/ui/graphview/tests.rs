@@ -1642,6 +1642,97 @@ fn ctrl_click_empty_add_three_nodes_then_right_drag_edges_check_hash() {
     a.run();
 }
 
+/// Same flow as [`ctrl_click_empty_add_three_nodes_then_right_drag_edges_check_hash`], but [`NodeBuilder`] uses
+/// **`LineType::Double`** borders, then **Ctrl+A** selects every visible node before the right-drag edge strokes.
+///
+/// Golden hashes are for `App::debug(72, 22)`; if the surface layout changes, re-record from the debug **found** hash.
+#[test]
+fn ctrl_click_empty_double_border_three_nodes_ctrl_a_right_drag_edges_check_hash() {
+    #[Window(events = GraphViewEvents<String>, internal: true)]
+    struct InteractiveDoubleBorderWin {}
+
+    impl InteractiveDoubleBorderWin {
+        fn new() -> Self {
+            let mut w = Self { base: window!("Test,d:f") };
+            let mut gv: GraphView<String> = graphview!(
+                "line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: None, d:f, flags:[ScrollBars,MultiSelect],lsm:2,tsm:1"
+            );
+            gv.set_graph(graphview::Graph::<String>::new(vec![], vec![]));
+            w.add(gv);
+            w
+        }
+    }
+
+    impl GraphViewEvents<String> for InteractiveDoubleBorderWin {
+        fn on_request_new_node(&mut self, handle: Handle<GraphView<String>>, p: Point) -> EventProcessStatus {
+            if let Some(gv) = self.control_mut(handle) {
+                gv.modify_graph(|g| {
+                    let n = graphview::NodeBuilder::new(format!("N{}", g.nodes_count() + 1))
+                        .position(p)
+                        .size(Size::new(8, 1))
+                        .border(LineType::Double)
+                        .text_alignment(TextAlignment::Left)
+                        .build();
+                    let id = g.add_node(n);
+                    g.set_current_node(id);
+                });
+            }
+            EventProcessStatus::Processed
+        }
+
+        fn on_request_new_edge(&mut self, handle: Handle<GraphView<String>>, from: u32, to: u32) -> EventProcessStatus {
+            if let Some(gv) = self.control_mut(handle) {
+                gv.modify_graph(|g| {
+                    let _ = g.add_edge(graphview::EdgeBuilder::new(from, to).directed(true).build());
+                });
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+
+        Paint('1. Empty graph')
+        CheckHash(0xE3D0E179665B4428)
+        Key.Modifier(Ctrl)
+        Mouse.Click(12,6,left)
+        Key.Modifier(None)
+        Paint('2. First node (double border, Ctrl+click empty)')
+        CheckHash(0x28CC91FC3D24C4D1)
+        Key.Modifier(Ctrl)
+        Mouse.Click(40,6,left)
+        Key.Modifier(None)
+        Paint('3. Second node')
+        CheckHash(0x3C19D3EE7DE179A7)
+        Key.Modifier(Ctrl)
+        Mouse.Click(26,14,left)
+        Key.Modifier(None)
+        Paint('4. Third node')
+        CheckHash(0x339294EE49A06638)
+
+        Key.Pressed(Ctrl+A)
+        Paint('5. Ctrl+A — all visible selected')
+        CheckHash(0x18408BC9E55C5721)
+
+        Mouse.Hold(12,6,right)
+        Mouse.Move(40,6)
+        Mouse.Release(40,6,right)
+        Paint('6. Edge 0 -> 1')
+        CheckHash(0xADDA35FE288D4D91)
+
+        Mouse.Hold(40,6,right)
+        Mouse.Move(26,14)
+        Mouse.Release(26,14,right)
+        Paint('7. Edge 1 -> 2')
+        CheckHash(0xF876C73CD277592B)
+    ";
+
+    let mut a = App::debug(72, 22, script).build().unwrap();
+    a.add_window(InteractiveDoubleBorderWin::new());
+    a.run();
+}
+
 /// [`EditableNode`] getters match the geometry and style from [`NodeBuilder`] (including `resize` padding rules).
 #[test]
 fn editable_node_getters_match_node_builder() {
@@ -1702,6 +1793,121 @@ fn editable_node_getters_with_border_and_text_attribute() {
 
     *n.value_mut() = "gamma";
     assert_eq!(*n.value(), "gamma");
+}
+
+/// `EditableEdge::attribute` / `set_attribute` and `line_type` / `set_line_type`.
+#[test]
+fn editable_edge_get_set_attribute_and_line_type() {
+    use super::graph::EditableGraph;
+
+    let mut graph = graphview::Graph::with_slices(&["A", "B"], &[(0, 1)], true);
+    let attr_before = charattr!("white,red");
+    let attr_after = charattr!("yellow,blue");
+
+    let mut editor = EditableGraph::new(&mut graph);
+    {
+        let mut e = editor.edge(0).expect("edge 0");
+        assert_eq!(e.from_node_id(), 0);
+        assert_eq!(e.to_node_id(), 1);
+        assert!(e.directed());
+        assert_eq!(e.attribute(), None);
+        assert_eq!(e.line_type(), None);
+
+        e.set_attribute(attr_before);
+        e.set_line_type(LineType::Double);
+    }
+    {
+        let e = editor.edge(0).expect("edge 0");
+        assert_eq!(e.attribute(), Some(attr_before));
+        assert_eq!(e.line_type(), Some(LineType::Double));
+    }
+    {
+        let mut e = editor.edge(0).expect("edge 0");
+        e.set_attribute(attr_after);
+        e.set_line_type(LineType::Ascii);
+    }
+    {
+        let e = editor.edge(0).expect("edge 0");
+        assert_eq!(e.attribute(), Some(attr_after));
+        assert_eq!(e.line_type(), Some(LineType::Ascii));
+    }
+}
+
+/// `EditableGraph::add_edge` appends an edge; `delete_edge` removes by index (same API used by the graph editor example via `GraphView::modify_graph`).
+#[test]
+fn editable_graph_add_edge_and_delete_edge() {
+    use super::graph::EditableGraph;
+
+    let mut graph = graphview::Graph::with_slices(&["A", "B", "C"], &[(0, 1)], true);
+    let mut editor = EditableGraph::new(&mut graph);
+    assert_eq!(editor.edges_count(), 1);
+
+    assert!(
+        editor.add_edge(
+            graphview::EdgeBuilder::new(1, 2).directed(false).build(),
+        )
+    );
+    assert_eq!(editor.edges_count(), 2);
+    assert_eq!(editor.edge(1).unwrap().from_node_id(), 1);
+    assert_eq!(editor.edge(1).unwrap().to_node_id(), 2);
+
+    editor.delete_edge(0);
+    assert_eq!(editor.edges_count(), 1);
+    assert_eq!(editor.edge(0).unwrap().from_node_id(), 1);
+    assert_eq!(editor.edge(0).unwrap().to_node_id(), 2);
+
+    assert!(!editor.add_edge(graphview::EdgeBuilder::new(0, 99).build()));
+    assert_eq!(editor.edges_count(), 1);
+}
+
+/// Exercises `EditableNode` setters: `set_position`, `set_size`, `set_text_alignment`, `clear_text_attribute`, `set_selected`, `clear_border`, `is_selected`.
+#[test]
+fn editable_node_set_position_size_alignment_clear_attrs_border_and_selected() {
+    use super::graph::EditableGraph;
+
+    let node = graphview::NodeBuilder::new("n")
+        .position(Point::new(1, 1))
+        .size(Size::new(10, 3))
+        .border(LineType::Single)
+        .text_alignment(TextAlignment::Center)
+        .text_attribute(charattr!("white,black"))
+        .build();
+
+    let mut graph = graphview::Graph::new(vec![node], vec![]);
+    graph.nodes[0].selected = false;
+    graph.rendering_options.multiselect_ui = true;
+
+    let mut editor = EditableGraph::new(&mut graph);
+    let mut n = editor.node(0).expect("node 0");
+
+    let pos_after = Point::new(7, 9);
+    n.set_position(pos_after);
+    assert_eq!(n.position(), pos_after);
+
+    let size_inner = Size::new(14, 4);
+    n.set_size(size_inner);
+    assert!(n.size().width >= size_inner.width);
+    assert!(n.size().height >= size_inner.height);
+
+    n.set_text_alignment(TextAlignment::Left);
+    assert_eq!(n.text_alignment(), TextAlignment::Left);
+
+    assert!(n.text_attribute().is_some());
+    n.clear_text_attribute();
+    assert_eq!(n.text_attribute(), None);
+
+    assert!(n.border().is_some());
+    n.clear_border();
+    assert_eq!(n.border(), None);
+
+    assert!(!n.is_selected());
+    n.set_selected(true);
+    assert!(n.is_selected());
+    n.set_selected(false);
+    assert!(!n.is_selected());
+
+    drop(editor);
+    assert!(!graph.nodes[0].selected);
 }
 
 /// [`EditableGraph::delete_node`] removes incident edges and reindexes remaining edge endpoints.
@@ -1780,6 +1986,75 @@ mod process_key_multiselect_tests {
         let base = ControlBase::new(layout!("d:f"), true);
         let key = Key::new(KeyCode::A, KeyModifier::Ctrl);
         assert!(!graph.process_key_events(key, &base));
+    }
+
+    #[test]
+    fn ctrl_a_selects_all_visible_when_not_all_visible_selected() {
+        let mut graph = graphview::Graph::<&'static str>::with_slices(&["A", "B", "C"], &[], true);
+        graph.rendering_options.multiselect_ui = true;
+        for n in &mut graph.nodes {
+            n.selected = false;
+        }
+        assert_eq!(graph.apply_ctrl_a_visible_selection_toggle(), Some(0));
+        assert!(graph.nodes[0].selected);
+        assert!(graph.nodes[1].selected);
+        assert!(graph.nodes[2].selected);
+    }
+
+    #[test]
+    fn ctrl_a_clears_visible_selection_when_all_visible_were_selected() {
+        let mut graph = graphview::Graph::<&'static str>::with_slices(&["A", "B"], &[], true);
+        graph.rendering_options.multiselect_ui = true;
+        graph.nodes[0].selected = true;
+        graph.nodes[1].selected = true;
+
+        assert_eq!(graph.apply_ctrl_a_visible_selection_toggle(), Some(0));
+
+        assert!(!graph.nodes[0].selected);
+        assert!(!graph.nodes[1].selected);
+    }
+
+    #[test]
+    fn ctrl_a_only_toggles_non_filtered_nodes() {
+        let mut graph = graphview::Graph::<&'static str>::with_slices(&["A", "B", "C"], &[], true);
+        graph.rendering_options.multiselect_ui = true;
+        graph.nodes[1].filtered = true;
+        graph.nodes[0].selected = false;
+        graph.nodes[1].selected = false;
+        graph.nodes[2].selected = false;
+
+        assert_eq!(graph.apply_ctrl_a_visible_selection_toggle(), Some(0));
+
+        assert!(graph.nodes[0].selected);
+        assert!(!graph.nodes[1].selected);
+        assert!(graph.nodes[2].selected);
+
+        assert_eq!(graph.apply_ctrl_a_visible_selection_toggle(), Some(0));
+
+        assert!(!graph.nodes[0].selected);
+        assert!(!graph.nodes[1].selected);
+        assert!(!graph.nodes[2].selected);
+    }
+
+    #[test]
+    fn ctrl_a_toggle_returns_none_when_all_nodes_filtered() {
+        let mut graph = graphview::Graph::<&'static str>::with_slices(&["A", "B"], &[], true);
+        graph.rendering_options.multiselect_ui = true;
+        graph.nodes[0].filtered = true;
+        graph.nodes[1].filtered = true;
+
+        assert_eq!(graph.apply_ctrl_a_visible_selection_toggle(), None);
+    }
+
+    #[test]
+    fn ctrl_a_toggle_returns_none_when_multiselect_off_or_empty() {
+        let mut graph = graphview::Graph::<&'static str>::with_slices(&["X"], &[], true);
+        graph.rendering_options.multiselect_ui = false;
+        assert_eq!(graph.apply_ctrl_a_visible_selection_toggle(), None);
+
+        let mut empty: graphview::Graph<&'static str> = graphview::Graph::with_slices(&[], &[], true);
+        empty.rendering_options.multiselect_ui = true;
+        assert_eq!(empty.apply_ctrl_a_visible_selection_toggle(), None);
     }
 }
 

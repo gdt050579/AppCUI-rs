@@ -81,101 +81,42 @@ where
     }
     pub(super) fn paint(&self, surface: &mut Surface, attr: CharAttribute, out: &mut String, multiselect_ui: bool) {
         surface.fill_rect(self.rect, Character::with_attributes(' ', attr));
-        if !multiselect_ui {
-            if let Some(line_type) = self.border {
-                surface.draw_rect(self.rect, line_type, attr);
-                surface.set_relative_clip(self.rect.left() + 1, self.rect.top() + 1, self.rect.right() - 1, self.rect.bottom() - 1);
-            } else {
-                surface.set_relative_clip(self.rect.left(), self.rect.top(), self.rect.right(), self.rect.bottom());
-            }
-            let mut cx = self.rect.center_x();
-            let cy = if self.border.is_some() { 1 } else { 0 } + self.rect.top();
-            let w = self.rect.width().saturating_sub(2) as u16;
-            if (w > 0) && ((w & 1) == 0) {
-                cx += 1;
-            }
-            let format = TextFormatBuilder::new()
-                .align(self.text_align)
-                .attribute(attr)
-                .wrap_type(WrapType::WordWrap(w))
-                .position(cx, cy)
-                .build();
-            let mut sz = self.rect.size();
-            if self.border.is_some() {
-                sz = sz.reduce_by(2);
-            }
-            if self.obj.write_label(out, sz).is_err() {
-                out.clear();
-                out.push_str("???");
-            }
-            surface.write_text(out, &format);
-            surface.reset_clip();
-            return;
+        let mut clip_rect = if let Some(line_type) = self.border {
+            surface.draw_rect(self.rect, line_type, attr);
+            Rect::new(self.rect.left() + 1, self.rect.top() + 1, self.rect.right() - 1, self.rect.bottom() - 1)
+        } else {
+            self.rect
+        };
+        // paint the checkbox
+        if multiselect_ui {
+            surface.write_char(
+                clip_rect.left(),
+                clip_rect.top(),
+                Character::with_attributes(if self.selected { '☑' } else { '☐' }, attr),
+            );
+            clip_rect.set_left(clip_rect.left() + 2, false);
         }
 
-        const G: i32 = 2;
-        let mark = if self.selected { '☑' } else { '☐' };
-        if let Some(line_type) = self.border {
-            surface.draw_rect(self.rect, line_type, attr);
-            let il = self.rect.left() + 1;
-            let it = self.rect.top() + 1;
-            let ir = self.rect.right() - 1;
-            let ib = self.rect.bottom() - 1;
-            // Top-left of inner frame, first row (spec: bordered — glyph on first row inside border).
-            surface.write_char(il, it, Character::with_attributes(mark, attr));
-            let clip_left = il + G;
-            let text_top = it + 1;
-            surface.set_relative_clip(clip_left, text_top, ir, ib);
-            let inner_w = (ir - clip_left + 1) as u32;
-            let mut cx = clip_left + (inner_w as i32 / 2);
-            if (inner_w > 0) && ((inner_w & 1) == 0) {
-                cx += 1;
-            }
-            let cy = text_top;
-            let w = inner_w as u16;
-            let format = TextFormatBuilder::new()
-                .align(self.text_align)
-                .attribute(attr)
-                .wrap_type(WrapType::WordWrap(w))
-                .position(cx, cy)
-                .build();
-            let mut sz = self.rect.size().reduce_by(2);
-            sz.width = sz.width.saturating_sub(2);
-            sz.height = sz.height.saturating_sub(1);
-            if self.obj.write_label(out, sz).is_err() {
-                out.clear();
-                out.push_str("???");
-            }
-            surface.write_text(out, &format);
-        } else {
-            surface.write_char(
-                self.rect.left() + 1,
-                self.rect.top(),
-                Character::with_attributes(mark, attr),
-            );
-            let clip_left = self.rect.left() + 1 + G;
-            surface.set_relative_clip(clip_left, self.rect.top(), self.rect.right(), self.rect.bottom());
-            let inner_w = self.rect.width().saturating_sub(2 + 2);
-            let mut cx = clip_left + (inner_w as i32 / 2);
-            if (inner_w > 0) && ((inner_w & 1) == 0) {
-                cx += 1;
-            }
-            let cy = self.rect.top();
-            let w = inner_w as u16;
-            let format = TextFormatBuilder::new()
-                .align(self.text_align)
-                .attribute(attr)
-                .wrap_type(WrapType::WordWrap(w))
-                .position(cx, cy)
-                .build();
-            let mut sz = self.rect.size();
-            sz.width = sz.width.saturating_sub(2 + 2);
-            if self.obj.write_label(out, sz).is_err() {
-                out.clear();
-                out.push_str("???");
-            }
-            surface.write_text(out, &format);
+        // paint the text
+        surface.set_relative_clip(clip_rect.left(), clip_rect.top(), clip_rect.right(), clip_rect.bottom());
+        let w = clip_rect.width() as u16;
+        let x = match self.text_align {
+            TextAlignment::Left => clip_rect.left(),
+            TextAlignment::Center => clip_rect.center_x(),
+            TextAlignment::Right => clip_rect.right(),
+        };
+        let format = TextFormatBuilder::new()
+            .align(self.text_align)
+            .attribute(attr)
+            .wrap_type(WrapType::WordWrap(w))
+            .position(x, clip_rect.top())
+            .build();
+
+        if self.obj.write_label(out, clip_rect.size()).is_err() {
+            out.clear();
+            out.push_str("???");
         }
+        surface.write_text(out, &format);
         surface.reset_clip();
     }
 }
@@ -359,7 +300,7 @@ where
             self.node.border = Some(border);
             if self.node.rect.height() < 3 {
                 self.node.rect.set_bottom(self.node.rect.top() + 2, false);
-            }            
+            }
             *self.changed = true;
         }
     }
