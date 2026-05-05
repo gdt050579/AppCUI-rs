@@ -177,6 +177,15 @@ impl ControlEvent {
                 graphview::events::GraphViewEventTypes::NodeAction(index) => {
                     GenericGraphViewEvents::on_node_action(receiver, self.emitter.cast(), data.type_id, index)
                 }
+                graphview::events::GraphViewEventTypes::RequestNewNode(p) => {
+                    GenericGraphViewEvents::on_request_new_node(receiver, self.emitter.cast(), data.type_id, p)
+                }
+                graphview::events::GraphViewEventTypes::RequestNewEdge(from, to) => {
+                    GenericGraphViewEvents::on_request_new_edge(receiver, self.emitter.cast(), data.type_id, from, to)
+                }
+                graphview::events::GraphViewEventTypes::SelectionChanged => {
+                    GenericGraphViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
+                }
             },
         }
     }

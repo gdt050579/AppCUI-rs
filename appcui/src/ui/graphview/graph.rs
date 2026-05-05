@@ -1,6 +1,8 @@
 use super::Edge;
 use super::EdgeBuilder;
+use super::EditableEdge;
 use super::EdgeRouting;
+use super::EditableNode;
 use super::GraphNode;
 use super::Node;
 use super::NodeBuilder;
@@ -64,6 +66,11 @@ impl ControlState {
     #[inline(always)]
     fn current_node_attr(&self, theme: &Theme) -> CharAttribute {
         theme.button.regular.text.focused
+    }
+    /// Extra-selected nodes in multi-select mode (non-primary); distinct from focus/current.
+    #[inline(always)]
+    fn multiselect_selected_label_attr(theme: &Theme) -> CharAttribute {
+        theme.button.regular.text.pressed_or_selected
     }
 }
 
@@ -225,15 +232,39 @@ where
     pub(super) edges: Vec<Edge>,
     surface_size: Size,
     surface: Surface,
-    current_node: usize,
+    pub(super) current_node: usize,
     hovered_node: Option<usize>,
+    /// Right-drag new edge: source node index and line endpoint in graph coordinates.
+    pending_edge_preview: Option<(usize, Point)>,
     repr_buffer: String,
-    rendering_options: RenderingOptions,
+    pub(super) rendering_options: RenderingOptions,
 }
 impl<T> Graph<T>
 where
     T: GraphNode,
 {
+    pub(super) fn update_edges_in_out(&mut self) {
+        // clear the edges_in_out vectors
+        for n in &mut self.nodes {
+            n.edges_in.clear();
+            n.edges_out.clear();
+        }
+        // build the edges_in_out vectors
+        for (idx, e) in self.edges.iter().enumerate() {
+            if e.directed {
+                self.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
+                self.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
+            } else {
+                self.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
+                self.nodes[e.from_node_id as usize].edges_in.push(idx as u32);
+                self.nodes[e.to_node_id as usize].edges_out.push(idx as u32);
+                self.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
+            }
+        }
+    }
+    /// Constructs a graph from pre-built nodes and edges.
+    ///
+    /// Edges referencing missing node indices are dropped. Incoming/outgoing edge lists per node are rebuilt.
     pub fn new(nodes: Vec<Node<T>>, edges: Vec<Edge>) -> Self {
         let mut g = Self {
             nodes,
@@ -242,6 +273,7 @@ where
             surface: Surface::new(200, 200),
             current_node: 0,
             hovered_node: None,
+            pending_edge_preview: None,
             repr_buffer: String::with_capacity(128),
             rendering_options: RenderingOptions::new(),
         };
@@ -249,19 +281,12 @@ where
         let nodes_count = g.nodes.len() as u32;
         g.edges.retain(|e| (e.from_node_id < nodes_count) && (e.to_node_id < nodes_count));
         // build edges_in / edges_out for each node
-        for (idx, e) in g.edges.iter().enumerate() {
-            if e.directed {
-                g.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
-                g.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
-            } else {
-                g.nodes[e.from_node_id as usize].edges_out.push(idx as u32);
-                g.nodes[e.from_node_id as usize].edges_in.push(idx as u32);
-                g.nodes[e.to_node_id as usize].edges_out.push(idx as u32);
-                g.nodes[e.to_node_id as usize].edges_in.push(idx as u32);
-            }
-        }
+        g.update_edges_in_out();
         g
     }
+    /// Builds a graph by cloning node values into default-styled nodes and creating edges from index pairs.
+    ///
+    /// Node indices in `edges` refer to positions in `nodes`. All edges share the same `directed` flag.
     pub fn with_slices(nodes: &[T], edges: &[(u32, u32)], directed: bool) -> Self
     where
         T: GraphNode + Clone,
@@ -273,6 +298,7 @@ where
             .collect();
         Self::new(v, e)
     }
+    /// Like [`Graph::with_slices`](Self::with_slices), but every node is created with the given border style.
     pub fn with_slices_and_border(nodes: &[T], edges: &[(u32, u32)], border: LineType, directed: bool) -> Self
     where
         T: GraphNode + Clone,
@@ -285,8 +311,9 @@ where
         Self::new(v, e)
     }
 
-    /// Returns the object (of type T) associated with the current node
-    /// This method returns None only if th graph is empty (no nodes) otherwise it always returns Some(&T)
+    /// Returns the graph node struct for the keyboard/mouse current selection.
+    ///
+    /// Returns `None` only when the graph has no nodes; otherwise returns `Some`.
     pub fn current_node(&self) -> Option<&Node<T>> {
         if self.current_node < self.nodes.len() {
             Some(&self.nodes[self.current_node])
@@ -300,7 +327,7 @@ where
         self.nodes.len()
     }
 
-    /// Returns a object associated with a node in the graph by its index (if the index is valid)
+    /// Returns the node at `index`, or `None` if out of range.
     pub fn node(&self, index: usize) -> Option<&Node<T>> {
         self.nodes.get(index)
     }
@@ -347,6 +374,16 @@ where
         self.surface.resize(self.surface_size);
     }
 
+    pub(super) fn clear_selection(&mut self, control: &ControlBase) {
+        let mut need_repaint = false;
+        for n in &mut self.nodes {
+            need_repaint |= n.selected;
+            n.selected = false;
+        }
+        if need_repaint {
+            self.repaint(control);
+        }
+    }
     pub(super) fn clear_filter(&mut self, control: &ControlBase) {
         let mut need_repaint = false;
         for n in &mut self.nodes {
@@ -435,9 +472,23 @@ where
     }
     pub(super) fn update_rendering_options(&mut self, new_options: &RenderingOptions, control: &ControlBase) {
         if self.rendering_options != *new_options {
+            let multiselect_changed = self.rendering_options.multiselect_ui != new_options.multiselect_ui;
+            let prev_multiselect_ui = self.rendering_options.multiselect_ui;
             self.rendering_options = *new_options;
+            if multiselect_changed {
+                self.refresh_node_sizes_for_multiselect_ui(prev_multiselect_ui);
+            }
             self.repaint(control);
         }
+    }
+
+    fn refresh_node_sizes_for_multiselect_ui(&mut self, layout_before: bool) {
+        let m = self.rendering_options.multiselect_ui;
+        for node in &mut self.nodes {
+            let sz = node.label_content_size(layout_before);
+            node.resize(sz, m);
+        }
+        self.resize_graph(false);
     }
     pub(super) fn mouse_pos_to_index(&self, x: i32, y: i32) -> Option<usize> {
         for (idx, n) in self.nodes.iter().enumerate() {
@@ -456,6 +507,36 @@ where
     }
     pub(super) fn hovered_node_id(&self) -> Option<usize> {
         self.hovered_node
+    }
+
+    pub(super) fn update_hover_at(&mut self, gpoint: Point) {
+        self.hovered_node = self.mouse_pos_to_index(gpoint.x, gpoint.y);
+    }
+
+    pub(super) fn set_edge_preview(&mut self, preview: Option<(usize, Point)>, control: &ControlBase) {
+        if self.pending_edge_preview == preview {
+            return;
+        }
+        self.pending_edge_preview = preview;
+        self.repaint(control);
+    }
+
+    fn draw_pending_edge_preview(&mut self, state: ControlState, theme: &Theme) {
+        let Some((from_ix, end)) = self.pending_edge_preview else {
+            return;
+        };
+        if from_ix >= self.nodes.len() {
+            return;
+        }
+        let attr = match state {
+            ControlState::Disabled => theme.lines.inactive,
+            ControlState::Normal => theme.lines.hovered,
+            ControlState::Focused => theme.lines.hovered,
+        };
+        let mouse_rect = Rect::new(end.x, end.y, end.x, end.y);
+        let (p1, p2, _, _) = closest_points(&self.nodes[from_ix].rect, &mouse_rect);
+        let lt = self.rendering_options.edge_line_type;
+        self.surface.draw_line(p1.x, p1.y, p2.x, p2.y, lt, attr);
     }
     fn draw_edge(&mut self, index: u32, attr: CharAttribute) {
         let e = &self.edges[index as usize];
@@ -478,25 +559,31 @@ where
             }
         }
     }
-    fn draw_edges_from_current(&mut self, attr: CharAttribute) {
-        if self.current_node >= self.nodes.len() {
+    fn draw_edges_from_node(&mut self, node_index: usize, attr: CharAttribute) {
+        if node_index >= self.nodes.len() {
             return;
         }
-        let len = self.nodes[self.current_node].edges_out.len();
+        let len = self.nodes[node_index].edges_out.len();
         for i in 0..len {
-            let index = self.nodes[self.current_node].edges_out[i];
+            let index = self.nodes[node_index].edges_out[i];
             self.draw_edge(index, attr);
         }
     }
-    fn draw_edges_to_current(&mut self, attr: CharAttribute) {
-        if self.current_node >= self.nodes.len() {
+    fn draw_edges_to_node(&mut self, node_index: usize, attr: CharAttribute) {
+        if node_index >= self.nodes.len() {
             return;
         }
-        let len = self.nodes[self.current_node].edges_in.len();
+        let len = self.nodes[node_index].edges_in.len();
         for i in 0..len {
-            let index = self.nodes[self.current_node].edges_in[i];
+            let index = self.nodes[node_index].edges_in[i];
             self.draw_edge(index, attr);
         }
+    }
+    fn draw_edges_from_current(&mut self, attr: CharAttribute) {
+        self.draw_edges_from_node(self.current_node, attr);
+    }
+    fn draw_edges_to_current(&mut self, attr: CharAttribute) {
+        self.draw_edges_to_node(self.current_node, attr);
     }
     pub(super) fn repaint(&mut self, control: &ControlBase) {
         // clear the entire surface
@@ -519,27 +606,53 @@ where
                 self.draw_edge(index, edge_attr);
             }
         }
-        if (state == ControlState::Focused) && (self.current_node < self.nodes.len()) {
+        // Edge highlight for incident edges: primary (`current_node`) only when multi-select UI is off;
+        // union over every `Node::selected` when multi-select UI is on (`RenderingOptions::multiselect_ui`).
+        if state == ControlState::Focused {
             let attr = theme.lines.hovered;
-            if self.rendering_options.highlight_edges_out {
-                self.draw_edges_from_current(attr);
-            }
-            if self.rendering_options.highlight_edges_in {
-                self.draw_edges_to_current(attr);
+            let ms = self.rendering_options.multiselect_ui;
+            let hi_out = self.rendering_options.highlight_edges_out;
+            let hi_in = self.rendering_options.highlight_edges_in;
+            if hi_out || hi_in {
+                if ms {
+                    let selected: Vec<usize> =
+                        (0..self.nodes.len()).filter(|&i| self.nodes[i].selected).collect();
+                    if hi_out {
+                        for idx in &selected {
+                            self.draw_edges_from_node(*idx, attr);
+                        }
+                    }
+                    if hi_in {
+                        for idx in &selected {
+                            self.draw_edges_to_node(*idx, attr);
+                        }
+                    }
+                } else if self.current_node < self.nodes.len() {
+                    if hi_out {
+                        self.draw_edges_from_current(attr);
+                    }
+                    if hi_in {
+                        self.draw_edges_to_current(attr);
+                    }
+                }
             }
         }
+        self.draw_pending_edge_preview(state, theme);
+        let ms = self.rendering_options.multiselect_ui;
         // draw nodes
         for node in &self.nodes {
             self.repr_buffer.clear();
             if state == ControlState::Focused {
                 let attr = if node.filtered {
                     ControlState::Disabled.node_attr(theme)
+                } else if ms && node.selected {
+                    node.text_attr.unwrap_or(ControlState::multiselect_selected_label_attr(theme))
                 } else {
                     node.text_attr.unwrap_or(text_attr)
                 };
-                node.paint(&mut self.surface, attr, &mut self.repr_buffer);
+                node.paint(&mut self.surface, attr, &mut self.repr_buffer, ms);
             } else {
-                node.paint(&mut self.surface, text_attr, &mut self.repr_buffer);
+                node.paint(&mut self.surface, text_attr, &mut self.repr_buffer, ms);
             };
         }
         // draw nodes related to current_node
@@ -550,13 +663,13 @@ where
             let node = &self.nodes[hover_node_id];
             let attr = state.hovered_node_attr(theme);
             self.repr_buffer.clear();
-            node.paint(&mut self.surface, attr, &mut self.repr_buffer);
+            node.paint(&mut self.surface, attr, &mut self.repr_buffer, ms);
         }
         if (state == ControlState::Focused) && (self.current_node < len) {
             let node = &self.nodes[self.current_node];
             let attr = state.current_node_attr(theme);
             self.repr_buffer.clear();
-            node.paint(&mut self.surface, attr, &mut self.repr_buffer);
+            node.paint(&mut self.surface, attr, &mut self.repr_buffer, ms);
         }
     }
     pub(super) fn paint_node(&mut self, control: &ControlBase, index: usize) {
@@ -586,6 +699,8 @@ where
                         state.hovered_node_attr(theme)
                     } else if node.filtered {
                         ControlState::Disabled.node_attr(theme)
+                    } else if self.rendering_options.multiselect_ui && node.selected {
+                        node.text_attr.unwrap_or(ControlState::multiselect_selected_label_attr(theme))
                     } else {
                         node.text_attr.unwrap_or(state.node_attr(theme))
                     }
@@ -593,7 +708,12 @@ where
             }
         };
         self.repr_buffer.clear();
-        node.paint(&mut self.surface, attr, &mut self.repr_buffer);
+        node.paint(
+            &mut self.surface,
+            attr,
+            &mut self.repr_buffer,
+            self.rendering_options.multiselect_ui,
+        );
     }
     pub(super) fn reset_hover(&mut self, control: &ControlBase) {
         let index = self.hovered_node.unwrap_or(usize::MAX);
@@ -618,7 +738,168 @@ where
     pub(super) fn surface(&self) -> &Surface {
         &self.surface
     }
-    
+
+    /// Top-left at press for every `selected` node (multi-drag).
+    pub(super) fn selected_drag_anchors(&self) -> Vec<(usize, Point)> {
+        (0..self.nodes.len())
+            .filter(|&i| self.nodes[i].selected)
+            .map(|i| (i, self.nodes[i].rect.top_left()))
+            .collect()
+    }
+
+    /// Fingerprint of the multiselect selection set (`Node::selected`). Used to detect changes without allocating.
+    pub(super) fn multiselect_selection_fingerprint(&self) -> u64 {
+        let mut h = 0u64;
+        for (i, n) in self.nodes.iter().enumerate() {
+            if n.selected {
+                h ^= (i as u64).wrapping_mul(0x9e3779b97f4a7c15);
+            }
+        }
+        h
+    }
+
+    /// Plain click selection: clear `selected`, select `id`, set `current_node`. No-op when not multi-select UI (delegates to [`set_current_node`](Self::set_current_node)).
+    pub(super) fn apply_multiselect_plain_click(&mut self, id: usize, control: &ControlBase) {
+        if id >= self.nodes.len() {
+            return;
+        }
+        if self.rendering_options.multiselect_ui {
+            for n in &mut self.nodes {
+                n.selected = false;
+            }
+            self.nodes[id].selected = true;
+            self.current_node = id;
+            self.repaint(control);
+        } else {
+            self.set_current_node(id, control);
+        }
+    }
+
+    /// Ctrl+click toggle (multi-select only). Keeps `current_node` on a selected node when possible (multi-select invariant 4).
+    pub(super) fn toggle_multiselect_selected(&mut self, id: usize, control: &ControlBase) {
+        if !self.rendering_options.multiselect_ui || id >= self.nodes.len() {
+            return;
+        }
+        self.nodes[id].selected = !self.nodes[id].selected;
+        if self.nodes[id].selected {
+            self.current_node = id;
+        } else if let Some(other) = (0..self.nodes.len()).find(|&i| self.nodes[i].selected) {
+            self.current_node = other;
+        } else {
+            self.current_node = id;
+        }
+        self.repaint(control);
+    }
+
+    /// Moves several nodes by the same delta from their press-time positions. Single `resize_graph` / `repaint` when anything changes.
+    pub(super) fn move_nodes_with_press_delta(
+        &mut self,
+        anchors: &[(usize, Point)],
+        origin: Point,
+        data: Point,
+        control: &ControlBase,
+    ) -> bool {
+        if anchors.is_empty() {
+            return false;
+        }
+        let dx = data.x - origin.x;
+        let dy = data.y - origin.y;
+        let mut changed = false;
+        for &(id, tl) in anchors {
+            if id >= self.nodes.len() {
+                continue;
+            }
+            let nx = tl.x + dx;
+            let ny = tl.y + dy;
+            let node = &mut self.nodes[id];
+            if node.rect.top_left().x != nx || node.rect.top_left().y != ny {
+                node.rect.set_left(nx, true);
+                node.rect.set_top(ny, true);
+                changed = true;
+            }
+        }
+        if !changed {
+            return false;
+        }
+        let mut resized = false;
+        for &(id, _) in anchors {
+            if id >= self.nodes.len() {
+                continue;
+            }
+            let node = &self.nodes[id];
+            let x = node.rect.left();
+            let y = node.rect.top();
+            if node.rect.right() >= (self.surface_size.width as i32)
+                || node.rect.bottom() >= (self.surface_size.height as i32)
+                || x < 0
+                || y < 0
+            {
+                resized = true;
+                break;
+            }
+        }
+        if resized {
+            self.resize_graph(false);
+        }
+        self.repaint(control);
+        resized
+    }
+
+    /// Applies the same pixel delta to every `selected` node; one `resize_graph` / `repaint` when anything moves (Ctrl+Arrow). No heap allocation.
+    /// Returns `true` if at least one selected node moved; `false` if none selected or every delta was a no-op (caller may nudge `current_node` only).
+    fn move_selected_nodes_with(&mut self, dx: i32, dy: i32, control: &ControlBase) -> bool {
+        let mut changed = false;
+        for i in 0..self.nodes.len() {
+            if !self.nodes[i].selected {
+                continue;
+            }
+            let tl = self.nodes[i].rect.top_left();
+            let nx = tl.x + dx;
+            let ny = tl.y + dy;
+            if tl.x != nx || tl.y != ny {
+                let node = &mut self.nodes[i];
+                node.rect.set_left(nx, true);
+                node.rect.set_top(ny, true);
+                changed = true;
+            }
+        }
+        if !changed {
+            return false;
+        }
+        let mut resized = false;
+        for i in 0..self.nodes.len() {
+            if !self.nodes[i].selected {
+                continue;
+            }
+            let node = &self.nodes[i];
+            let x = node.rect.left();
+            let y = node.rect.top();
+            if node.rect.right() >= (self.surface_size.width as i32)
+                || node.rect.bottom() >= (self.surface_size.height as i32)
+                || x < 0
+                || y < 0
+            {
+                resized = true;
+                break;
+            }
+        }
+        if resized {
+            self.resize_graph(false);
+        }
+        self.repaint(control);
+        true
+    }
+
+    fn ctrl_arrow_move_to(&mut self, dx: i32, dy: i32, control: &ControlBase) {
+        if self.rendering_options.multiselect_ui {
+            if !self.move_selected_nodes_with(dx, dy, control) {
+                self.move_node_with(self.current_node, dx, dy, control);
+            }
+        } else {
+            self.move_node_with(self.current_node, dx, dy, control);
+        }
+    }
+
     // returns TRUE if the size was resized to adjust the scrolling bars
     pub(super) fn move_node_to(&mut self, id: usize, x: i32, y: i32, control: &ControlBase) -> bool {
         if id >= self.nodes.len() {
@@ -642,7 +923,7 @@ where
     }
     fn move_node_with(&mut self, id: usize, dx: i32, dy: i32, control: &ControlBase) {
         if id >= self.nodes.len() {
-            return ;
+            return;
         }
         let tl = self.nodes[id].rect.top_left();
         self.move_node_to(id, tl.x + dx, tl.y + dy, control);
@@ -717,7 +998,28 @@ where
     fn move_to_node_with_direction(&mut self, dir: Direction, control: &ControlBase) {
         if let Some(next_index) = self.next_node(dir) {
             self.set_current_node(next_index, control);
-        } 
+        }
+    }
+
+    /// Multi-select **Ctrl+A** semantics only (no repaint): if every visible (non-filtered) node is selected,
+    /// clears `selected` on visible nodes; otherwise selects all visible nodes.
+    ///
+    /// Returns `Some(first_visible_index)` to assign as `current_node`, or `None` when multi-select UI is off,
+    /// the graph is empty, or every node is filtered out.
+    pub(crate) fn apply_ctrl_a_visible_selection_toggle(&mut self) -> Option<usize> {
+        if !self.rendering_options.multiselect_ui || self.nodes.is_empty() {
+            return None;
+        }
+        let fv = (0..self.nodes.len()).find(|&i| !self.nodes[i].filtered)?;
+        let all_visible_selected = (0..self.nodes.len())
+            .filter(|&i| !self.nodes[i].filtered)
+            .all(|i| self.nodes[i].selected);
+        for n in &mut self.nodes {
+            if !n.filtered {
+                n.selected = !all_visible_selected;
+            }
+        }
+        Some(fv)
     }
 
     pub(super) fn process_key_events(&mut self, key: Key, control: &ControlBase) -> bool {
@@ -726,10 +1028,10 @@ where
             key!("Right") => self.move_to_node_with_direction(Direction::Right, control),
             key!("Up") => self.move_to_node_with_direction(Direction::Top, control),
             key!("Down") => self.move_to_node_with_direction(Direction::Bottom, control),
-            key!("Ctrl+Left") => self.move_node_with(self.current_node, -1, 0, control),
-            key!("Ctrl+Right") => self.move_node_with(self.current_node, 1, 0, control),
-            key!("Ctrl+Up") => self.move_node_with(self.current_node, 0, -1, control),
-            key!("Ctrl+Down") => self.move_node_with(self.current_node, 0, 1, control),
+            key!("Ctrl+Left") => self.ctrl_arrow_move_to(-1, 0, control),
+            key!("Ctrl+Right") => self.ctrl_arrow_move_to(1, 0, control),
+            key!("Ctrl+Up") => self.ctrl_arrow_move_to(0, -1, control),
+            key!("Ctrl+Down") => self.ctrl_arrow_move_to(0, 1, control),
             key!("Ctrl+Tab") => {
                 if !self.nodes.is_empty() {
                     self.set_current_node((self.current_node + 1) % self.nodes.len(), control);
@@ -740,9 +1042,23 @@ where
                     self.set_current_node((self.current_node + self.nodes.len() - 1) % self.nodes.len(), control);
                 }
             }
+            key!("Space") => {
+                if !self.rendering_options.multiselect_ui || self.nodes.is_empty() || self.current_node >= self.nodes.len() {
+                    return false;
+                }
+                let cn = self.current_node;
+                self.toggle_multiselect_selected(cn, control);
+            }
+            key!("Ctrl+A") => {
+                let Some(fv) = self.apply_ctrl_a_visible_selection_toggle() else {
+                    return false;
+                };
+                self.current_node = fv;
+                self.repaint(control);
+            }
             _ => return false,
         }
-        true// key was processed
+        true // key was processed
     }
     pub(super) fn node_description(&mut self, id: usize) -> Option<&str> {
         if id >= self.nodes.len() {
@@ -764,6 +1080,7 @@ impl<T> Default for Graph<T>
 where
     T: GraphNode,
 {
+    /// An empty graph with default internal buffers and rendering options.
     fn default() -> Self {
         Self {
             nodes: Default::default(),
@@ -772,8 +1089,150 @@ where
             surface: Surface::new(1, 1),
             current_node: 0,
             hovered_node: None,
+            pending_edge_preview: None,
             repr_buffer: String::new(),
             rendering_options: RenderingOptions::new(),
         }
+    }
+}
+
+pub struct EditableGraph<'a, T>
+where
+    T: GraphNode + 'a,
+{
+    graph: &'a mut Graph<T>,
+    pub(super) current_node: usize,
+    pub(super) changed_nodes: bool,
+    pub(super) changed_edges: bool,
+    pub(super) changed_graph: bool,
+    pub(super) changed_current_node: bool,
+}
+impl<'a, T> EditableGraph<'a, T>
+where
+    T: GraphNode + 'a,
+{
+    /// Wraps a graph for in-place editing; tracks which aspects changed for the owning control.
+    pub(crate) fn new(graph: &'a mut Graph<T>) -> Self {
+        let current_node = graph.current_node;
+        Self {
+            graph,
+            current_node,
+            changed_nodes: false,
+            changed_edges: false,
+            changed_graph: false,
+            changed_current_node: false,
+        }
+    }
+    /// Borrows the node at `index` for reading or mutating layout and presentation fields.
+    #[inline(always)]
+    pub fn node(&mut self, index: usize) -> Option<EditableNode<'_, T>> {
+        if index >= self.graph.nodes.len() {
+            return None;
+        }
+        Some(EditableNode::new(&mut self.graph.nodes[index], &mut self.changed_nodes))
+    }
+    /// Number of nodes in the graph.
+    #[inline(always)]
+    pub fn nodes_count(&self) -> usize {
+        self.graph.nodes.len()
+    }
+    /// Appends a node and returns its index. Marks the graph structure as changed.
+    #[inline(always)]
+    pub fn add_node(&mut self, node: Node<T>) -> usize {
+        self.graph.nodes.push(node);
+        self.changed_graph = true;
+        self.graph.nodes.len() - 1
+    }
+    pub fn delete_node(&mut self, index: usize) {
+        if index >= self.graph.nodes.len() {
+            return;
+        }
+        let idx = index as u32;
+        // remove all edges towards that node
+        self.graph.edges.retain(|e| e.from_node_id != idx && e.to_node_id != idx);
+        // make sure that all now have nodes ID that are correct
+        for e in &mut self.graph.edges {
+            if e.from_node_id > idx {
+                e.from_node_id = e.from_node_id.saturating_sub(1);
+            }
+            if e.to_node_id > idx {
+                e.to_node_id = e.to_node_id.saturating_sub(1);
+            }
+        }
+        self.graph.nodes.remove(index);
+        if self.current_node >= index {
+            self.current_node = self.current_node.saturating_sub(1);
+            self.changed_current_node = true;
+        }
+        let len = self.graph.nodes.len();
+        if len == 0 {
+            self.current_node = 0;
+            self.changed_current_node = true;
+        } else {
+            if self.current_node >= len {
+                self.current_node = len - 1;
+                self.changed_current_node = true;
+            }
+            if self.graph.rendering_options.multiselect_ui {
+                let cur = self.current_node;
+                if !self.graph.nodes[cur].selected {
+                    if let Some(i) = (0..len).find(|&i| self.graph.nodes[i].selected) {
+                        self.current_node = i;
+                        self.changed_current_node = true;
+                    }
+                }
+            }
+        }
+        self.changed_graph = true;
+    }
+
+
+    /// Borrows the edge at `index` for reading or mutating style fields.
+    #[inline(always)]
+    pub fn edge(&mut self, index: usize) -> Option<EditableEdge<'_>> {
+        if index >= self.graph.edges.len() {
+            return None;
+        }
+        Some(EditableEdge::new(&mut self.graph.edges[index], &mut self.changed_edges))
+    }
+    /// Number of edges in the graph.
+    #[inline(always)]
+    pub fn edges_count(&self) -> usize {
+        self.graph.edges.len()
+    }
+
+    /// Appends an edge if both endpoints are valid node indices. Returns whether the edge was added.
+    #[inline(always)]
+    pub fn add_edge(&mut self, edge: Edge) -> bool {
+        let cnt = self.graph.nodes.len() as u32;
+        if edge.from_node_id >= cnt || edge.to_node_id >= cnt {
+            return false;
+        }
+        self.graph.edges.push(edge);
+        self.changed_graph = true;
+        true
+    }
+
+    /// Removes the edge at `index`. No-op if out of range.
+    pub fn delete_edge(&mut self, index: usize) {
+        if index >= self.graph.edges.len() {
+            return;
+        }
+        self.graph.edges.remove(index);
+        self.changed_graph = true;
+    }
+
+    /// Selects the node at `index` for focus/highlighting if in range and different from the current selection.
+    #[inline(always)]
+    pub fn set_current_node(&mut self, index: usize) {
+        if (index != self.current_node) && (index < self.graph.nodes.len()) {
+            self.current_node = index;
+            self.changed_current_node = true;
+        }
+    }
+    /// Index of the node currently selected within this editable session (may be out of range if nodes were removed).
+    #[inline(always)]
+    pub fn current_node(&self) -> usize {
+        self.current_node
     }
 }

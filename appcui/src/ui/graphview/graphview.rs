@@ -1,20 +1,33 @@
 use std::any::TypeId;
+use std::mem;
 
 use super::events::*;
+use super::graph::EditableGraph;
 use super::graph::Graph;
 use super::initialization_flags::*;
 use super::RenderingOptions;
 use crate::{prelude::*, ui::graphview::GraphNode};
 
-struct NodeInfo {
-    id: usize,
-    top_left: Point,
-    origin: Point,
-}
+/// Squared distance (graph coordinates) before a Ctrl+press is treated as a drag instead of a click toggle.
+const MULTISELECT_CTRL_DRAG_THRESHOLD_SQ: i32 = 9;
+
 enum Drag {
     None,
+    /// Right button: drag out a tentative edge from `from_node`.
+    EdgeConnect {
+        from_node: usize,
+    },
     View(Point),
-    Node(NodeInfo),
+    /// One or more nodes moving together; `anchors` are `(id, top_left_at_press)`.
+    NodeDrag {
+        origin: Point,
+        anchors: Vec<(usize, Point)>,
+    },
+    /// Ctrl+down on a node: toggle on release if the pointer does not move past [`MULTISELECT_CTRL_DRAG_THRESHOLD_SQ`].
+    CtrlClickPending {
+        node_id: usize,
+        origin: Point,
+    },
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
@@ -36,26 +49,27 @@ where
     T: GraphNode,
 {
     /// Creates a new GraphView control with the specified layout and flags.
-    /// 
+    ///
     /// # Parameters
     /// - `layout`: The layout configuration for positioning and sizing the GraphView
     /// - `flags`: Combination of initialization flags that control the GraphView behavior:
     ///   - `Flags::ScrollBars`: Enables scroll bars for navigating large graphs
     ///   - `Flags::SearchBar`: Enables a search bar for finding nodes
-    /// 
+    ///   - `Flags::MultiSelect`: Enables multi-selection UI (checkbox column and related behavior)
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let mut graph_view: GraphView<MyNode> = GraphView::new(
     ///     layout!("x:1,y:1,w:50,h:30"),
     ///     graphview::Flags::ScrollBars | graphview::Flags::SearchBar
     /// );
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
-        Self {
+        let mut this = Self {
             base: ControlBase::with_status_flags(
                 layout,
                 (StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput)
@@ -73,26 +87,33 @@ where
             arrange_method: ArrangeMethod::GridPacked,
             rendering_options: RenderingOptions::new(),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
-        }
+        };
+        this.sync_rendering_options_to_graph();
+        this
+    }
+
+    fn sync_rendering_options_to_graph(&mut self) {
+        self.rendering_options.multiselect_ui = self.flags.contains(Flags::MultiSelect);
+        self.graph.update_rendering_options(&self.rendering_options, &self.base);
     }
 
     /// Sets the background of the GraphView to the specified character.
-    /// 
+    ///
     /// This method allows you to customize the background appearance of the GraphView.
     /// The background character will be used to fill the entire control area before
     /// drawing the graph nodes and edges.
-    /// 
+    ///
     /// # Parameters
     /// - `backgroud_char`: The character to use as background, including its color and formatting
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let mut graph_view: GraphView<MyNode> = GraphView::new(
-    ///     layout!("x:1,y:1,w:30,h:10"), 
+    ///     layout!("x:1,y:1,w:30,h:10"),
     ///     graphview::Flags::ScrollBars
     /// );
     /// graph_view.set_background(Character::new('·', Color::Gray, Color::Black, CharFlags::None));
@@ -102,19 +123,19 @@ where
     }
 
     /// Clears the background character of the GraphView.
-    /// 
+    ///
     /// This method removes any previously set background character and resets the GraphView
     /// to use transparent foreground and background colors, allowing the default theme
     /// background to show through.
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let mut graph_view: GraphView<MyNode> = GraphView::new(
-    ///     layout!("x:1,y:1,w:30,h:10"), 
+    ///     layout!("x:1,y:1,w:30,h:10"),
     ///     graphview::Flags::None
     /// );
     /// graph_view.set_background(Character::new('*', Color::White, Color::Black, CharFlags::None));
@@ -125,24 +146,24 @@ where
     }
 
     /// Sets the graph data to be displayed in the GraphView.
-    /// 
+    ///
     /// This method replaces the current graph with a new one, updates the rendering options,
     /// and automatically arranges the nodes using the current arrangement method.
-    /// 
+    ///
     /// # Parameters
     /// - `graph`: The graph containing nodes and edges to be displayed
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let mut graph_view: GraphView<MyNode> = GraphView::new(
-    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     layout!("x:1,y:1,w:50,h:30"),
     ///     graphview::Flags::ScrollBars
     /// );
-    /// 
+    ///
     /// let nodes = &["A", "B", "C", "D", "E"];
     /// let edges = &[(0, 1), (0, 2), (1, 3), (2, 4)];
     /// let graph = graphview::Graph::with_slices(nodes, edges, true);
@@ -150,41 +171,41 @@ where
     /// ```
     pub fn set_graph(&mut self, graph: Graph<T>) {
         self.graph = graph;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
         self.arrange_nodes(self.arrange_method);
     }
 
     /// Sets the edge routing method for drawing connections between nodes.
-    /// 
+    ///
     /// This method determines how edges are drawn between nodes in the graph.
-    /// 
+    ///
     /// # Parameters
     /// - `routing`: The routing method to use:
     ///   - `EdgeRouting::Direct`: Draw edges as straight lines between nodes
     ///   - `EdgeRouting::Orthogonal`: Draw edges as orthogonal (right-angled) lines
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let mut graph_view: GraphView<MyNode> = GraphView::new(
-    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     layout!("x:1,y:1,w:50,h:30"),
     ///     graphview::Flags::ScrollBars
     /// );
     /// graph_view.set_edge_routing(graphview::EdgeRouting::Orthogonal);
     /// ```
     pub fn set_edge_routing(&mut self, routing: EdgeRouting) {
         self.rendering_options.edge_routing = routing;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
     }
 
     /// Sets the line type used for drawing edges between nodes.
-    /// 
+    ///
     /// This method controls the visual style of the lines used to draw edges.
     /// Different line types provide different visual appearances.
-    /// 
+    ///
     /// # Parameters
     /// - `line_type`: The line style to use:
     ///   - `LineType::Single`: Single lines with Unicode box-drawing characters
@@ -195,86 +216,86 @@ where
     ///   - `LineType::AsciiRound`: ASCII with rounded corners
     ///   - `LineType::SingleRound`: Unicode single lines with rounded corners
     ///   - `LineType::Braille`: Double lines using Braille characters
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let mut graph_view: GraphView<MyNode> = GraphView::new(
-    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     layout!("x:1,y:1,w:50,h:30"),
     ///     graphview::Flags::ScrollBars
     /// );
     /// graph_view.set_edge_line_type(LineType::Double);
     /// ```
     pub fn set_edge_line_type(&mut self, line_type: LineType) {
         self.rendering_options.edge_line_type = line_type;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
     }
 
     /// Enables or disables edge highlighting for the currently selected node.
-    /// 
+    ///
     /// When edge highlighting is enabled, edges connected to the currently selected
     /// node will be visually highlighted to make the connections more apparent.
-    /// 
+    ///
     /// # Parameters
     /// - `incoming`: Whether to highlight edges pointing to the current node
     /// - `outgoing`: Whether to highlight edges originating from the current node
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let mut graph_view: GraphView<MyNode> = GraphView::new(
-    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     layout!("x:1,y:1,w:50,h:30"),
     ///     graphview::Flags::ScrollBars
     /// );
     /// // Highlight both incoming and outgoing edges
     /// graph_view.enable_edge_highlighting(true, true);
-    /// 
+    ///
     /// // Only highlight outgoing edges
     /// graph_view.enable_edge_highlighting(false, true);
     /// ```
     pub fn enable_edge_highlighting(&mut self, incoming: bool, outgoing: bool) {
         self.rendering_options.highlight_edges_in = incoming;
         self.rendering_options.highlight_edges_out = outgoing;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
     }
 
     /// Enables or disables arrow heads on directed edges.
-    /// 
+    ///
     /// When enabled, directed edges will display arrow heads to indicate
     /// the direction of the connection between nodes.
-    /// 
+    ///
     /// # Parameters
     /// - `enabled`: Whether to show arrow heads on directed edges
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let mut graph_view: GraphView<MyNode> = GraphView::new(
-    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     layout!("x:1,y:1,w:50,h:30"),
     ///     graphview::Flags::ScrollBars
     /// );
     /// graph_view.enable_arrow_heads(true);
     /// ```
     pub fn enable_arrow_heads(&mut self, enabled: bool) {
         self.rendering_options.show_arrow_heads = enabled;
-        self.graph.update_rendering_options(&self.rendering_options, &self.base);
+        self.sync_rendering_options_to_graph();
     }
 
     /// Arranges the nodes in the graph using the specified layout algorithm.
-    /// 
+    ///
     /// This method automatically positions all nodes in the graph according to
     /// the chosen arrangement algorithm. The graph will be resized and repainted
     /// after the arrangement is complete.
-    /// 
+    ///
     /// # Parameters
     /// - `method`: The arrangement algorithm to use:
     ///   - `ArrangeMethod::None`: No automatic arrangement (manual positioning)
@@ -284,21 +305,21 @@ where
     ///   - `ArrangeMethod::Hierarchical`: Arrange nodes in hierarchical layers with spacing
     ///   - `ArrangeMethod::HierarchicalPacked`: Arrange nodes in compact hierarchical layers
     ///   - `ArrangeMethod::ForceDirected`: Use force-directed algorithm for natural positioning
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let mut graph_view: GraphView<MyNode> = GraphView::new(
-    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     layout!("x:1,y:1,w:50,h:30"),
     ///     graphview::Flags::ScrollBars
     /// );
-    /// 
+    ///
     /// // Arrange nodes in a hierarchical layout
     /// graph_view.arrange_nodes(graphview::ArrangeMethod::Hierarchical);
-    /// 
+    ///
     /// // Use force-directed layout for organic appearance
     /// graph_view.arrange_nodes(graphview::ArrangeMethod::ForceDirected);
     /// ```
@@ -318,24 +339,24 @@ where
     }
 
     /// Returns an immutable reference to the underlying graph data.
-    /// 
+    ///
     /// This method provides read-only access to the graph structure,
     /// allowing you to query nodes, edges, and other graph properties.
-    /// 
+    ///
     /// # Returns
     /// A reference to the `Graph<T>` containing all nodes and edges
-    /// 
+    ///
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
-    /// 
+    ///
     /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
-    /// 
+    ///
     /// let graph_view: GraphView<MyNode> = GraphView::new(
-    ///     layout!("x:1,y:1,w:50,h:30"), 
+    ///     layout!("x:1,y:1,w:50,h:30"),
     ///     graphview::Flags::ScrollBars
     /// );
-    /// 
+    ///
     /// let graph = graph_view.graph();
     /// if let Some(node) = graph.current_node() {
     ///     // do something with the current node
@@ -343,6 +364,66 @@ where
     /// ```
     pub fn graph(&self) -> &Graph<T> {
         &self.graph
+    }
+
+    /// Performs an in-place edit to the graph structure.
+    ///
+    /// This method allows you to modify the graph's nodes, edges, and current selection
+    /// in a single atomic operation. The changes are tracked and applied to the graph,
+    /// triggering a repaint and resize if necessary.
+    ///
+    /// # Parameters
+    /// - `f`: A closure that takes an `EditableGraph` reference and performs the desired edits.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// type MyNode = &'static str; // or any other type that implements the GraphNode trait
+    ///
+    /// let mut graph_view: GraphView<MyNode> = GraphView::new(
+    ///     layout!("x:1,y:1,w:50,h:30"),
+    ///     graphview::Flags::ScrollBars
+    /// );
+    ///
+    /// graph_view.modify_graph(|g| {
+    ///     let mut node = g.node(0).unwrap();
+    ///     node.set_value("New Value");
+    /// });
+    /// ```
+    pub fn modify_graph<F>(&mut self, f: F)
+    where
+        F: FnOnce(&mut EditableGraph<'_, T>),
+    {
+        let selection_fp_before = self
+            .flags
+            .contains(Flags::MultiSelect)
+            .then(|| self.graph.multiselect_selection_fingerprint());
+        let mut editor = EditableGraph::new(&mut self.graph);
+        f(&mut editor);
+        let changed_graph = editor.changed_graph;
+        let changed_nodes = editor.changed_nodes;
+        let changed_edges = editor.changed_edges;
+        let changed_current_node = editor.changed_current_node;
+        let current_node = editor.current_node;
+        if changed_graph {
+            self.graph.update_edges_in_out();
+        }
+        if changed_current_node {
+            self.graph.set_current_node(current_node, &self.base);
+        }
+        if changed_nodes || changed_edges || changed_current_node || changed_graph {
+            self.graph.resize_graph(false);
+            self.graph.repaint(&self.base);
+        }
+        if let Some(fp) = selection_fp_before {
+            self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
+        }
+    }
+
+    /// Returns the number of selected nodes in the graph.
+    pub fn selected_count(&self) -> usize {
+        self.graph.nodes.iter().filter(|n| n.selected).count()
     }
 
     fn move_scroll_to(&mut self, x: i32, y: i32) {
@@ -445,6 +526,44 @@ where
             }),
         });
     }
+    fn raise_request_new_node(&mut self, p: Point) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::GraphView(EventData {
+                event_type: GraphViewEventTypes::RequestNewNode(p),
+                type_id: TypeId::of::<T>(),
+            }),
+        });
+    }
+    fn raise_request_new_edge(&mut self, from: u32, to: u32) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::GraphView(EventData {
+                event_type: GraphViewEventTypes::RequestNewEdge(from, to),
+                type_id: TypeId::of::<T>(),
+            }),
+        });
+    }
+    fn raise_selection_changed(&mut self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::GraphView(EventData {
+                event_type: GraphViewEventTypes::SelectionChanged,
+                type_id: TypeId::of::<T>(),
+            }),
+        });
+    }
+
+    fn raise_selection_changed_if_multiselect_and_selection_changed(&mut self, selection_before: u64) {
+        if self.flags.contains(Flags::MultiSelect)
+            && selection_before != self.graph.multiselect_selection_fingerprint()
+        {
+            self.raise_selection_changed();
+        }
+    }
 }
 impl<T> OnResize for GraphView<T>
 where
@@ -482,10 +601,17 @@ where
             self.raise_current_node_changed(nid);
             return EventProcessStatus::Processed;
         }
+        let selection_fp_before = self
+            .flags
+            .contains(Flags::MultiSelect)
+            .then(|| self.graph.multiselect_selection_fingerprint());
         if self.graph.process_key_events(key, &self.base) {
             self.ensure_current_node_is_visible();
             self.comp.exit_edit_mode();
             self.raise_current_node_changed(nid);
+            if let Some(fp) = selection_fp_before {
+                self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
+            }
             return EventProcessStatus::Processed;
         }
         let result = match key.value() {
@@ -567,6 +693,10 @@ where
     }
 
     fn on_lose_focus(&mut self) {
+        if matches!(self.drag, Drag::EdgeConnect { .. }) {
+            self.graph.set_edge_preview(None, &self.base);
+            self.drag = Drag::None;
+        }
         self.graph.repaint(&self.base);
     }
 }
@@ -581,14 +711,26 @@ where
             return EventProcessStatus::Processed;
         }
         match event {
-            MouseEvent::Enter | MouseEvent::Leave => {
+            MouseEvent::Enter => {
+                self.graph.reset_hover(&self.base);
+                self.hide_tooltip();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Leave => {
+                if matches!(self.drag, Drag::EdgeConnect { .. }) {
+                    self.graph.set_edge_preview(None, &self.base);
+                    self.drag = Drag::None;
+                }
                 self.graph.reset_hover(&self.base);
                 self.hide_tooltip();
                 EventProcessStatus::Processed
             }
             MouseEvent::Over(point) => {
                 let p = Point::new(point.x - self.origin_point.x, point.y - self.origin_point.y);
-                if !self.graph.process_mouse_over(&self.base, p) {
+                if let Drag::EdgeConnect { from_node } = &self.drag {
+                    self.graph.update_hover_at(p);
+                    self.graph.set_edge_preview(Some((*from_node, p)), &self.base);
+                } else if !self.graph.process_mouse_over(&self.base, p) {
                     return EventProcessStatus::Ignored;
                 }
                 if let Some(id) = self.graph.hovered_node_id() {
@@ -605,21 +747,48 @@ where
             }
             MouseEvent::Pressed(mouse_data) => {
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
-                if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
-                    // click on a node
-                    let nid = self.graph.current_node_id();
-                    self.graph.set_current_node(id, &self.base);
-                    let tl = self.graph.nodes[id].rect.top_left();
-                    self.drag = Drag::Node(NodeInfo {
-                        id,
-                        top_left: tl,
-                        origin: Point::new(data.x, data.y),
-                    });
-                    self.raise_current_node_changed(nid);
+                if mouse_data.button == MouseButton::Right {
+                    if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
+                        self.drag = Drag::EdgeConnect { from_node: id };
+                        self.graph.update_hover_at(data);
+                        self.graph.set_edge_preview(Some((id, data)), &self.base);
+                    } else {
+                        self.drag = Drag::None;
+                    }
                     return EventProcessStatus::Processed;
                 }
+                if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
+                    let nid = self.graph.current_node_id();
+                    let ms = self.flags.contains(Flags::MultiSelect);
+                    let ctrl = mouse_data.modifier.contains(KeyModifier::Ctrl);
+                    if ms && ctrl {
+                        self.drag = Drag::CtrlClickPending { node_id: id, origin: data };
+                    } else {
+                        let selection_fp_before = ms.then(|| self.graph.multiselect_selection_fingerprint());
+                        self.graph.apply_multiselect_plain_click(id, &self.base);
+                        if let Some(fp) = selection_fp_before {
+                            self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
+                        }
+                        let anchors = if ms {
+                            self.graph.selected_drag_anchors()
+                        } else {
+                            vec![(id, self.graph.nodes[id].rect.top_left())]
+                        };
+                        self.drag = Drag::NodeDrag { origin: data, anchors };
+                        self.raise_current_node_changed(nid);
+                    }
+                    return EventProcessStatus::Processed;
+                } else {
+                    // empty space within the graph area - if Ctrl is also pressed, request a new node
+                    if mouse_data.modifier.contains(KeyModifier::Ctrl) {
+                        self.raise_request_new_node(data);
+                        return EventProcessStatus::Processed;
+                    }
+                }
+
                 if self.flags.contains_one(Flags::ScrollBars) && (self.has_focus()) {
                     let sz = self.size();
+                    self.drag = Drag::None;
                     if (data.x == sz.width as i32) || (data.y == sz.height as i32) {
                         return EventProcessStatus::Ignored;
                     }
@@ -627,31 +796,74 @@ where
                 self.drag = Drag::View(Point::new(data.x, data.y));
                 EventProcessStatus::Processed
             }
-            MouseEvent::Released(mouse_data) => match &self.drag {
-                Drag::None => {
-                    EventProcessStatus::Ignored
-                }
-                Drag::View(p) => {
-                    self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
-                    self.drag = Drag::None;
-                    EventProcessStatus::Processed
-                }
-                Drag::Node(node_info) => {
-                    let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
-                    if self.graph.move_node_to(
-                        node_info.id,
-                        node_info.top_left.x + data.x - node_info.origin.x,
-                        node_info.top_left.y + data.y - node_info.origin.y,
-                        &self.base,
-                    ) {
-                        self.update_scroll_bars();
+            MouseEvent::Released(mouse_data) => {
+                let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
+                match mem::replace(&mut self.drag, Drag::None) {
+                    Drag::None => EventProcessStatus::Ignored,
+                    Drag::EdgeConnect { from_node } => {
+                        self.graph.set_edge_preview(None, &self.base);
+                        self.graph.update_hover_at(data);
+                        if let Some(to) = self.graph.mouse_pos_to_index(data.x, data.y) {
+                            if to != from_node {
+                                self.raise_request_new_edge(from_node as u32, to as u32);
+                            }
+                        }
+                        EventProcessStatus::Processed
                     }
-                    self.drag = Drag::None;
-                    self.ensure_current_node_is_visible();
-                    EventProcessStatus::Processed
+                    Drag::View(p) => {
+                        self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
+                        if (data.x == p.x) && (data.y == p.y) {
+                            // nu s-a miscat mouse-ul
+                            let selection_fp_before = self
+                                .flags
+                                .contains(Flags::MultiSelect)
+                                .then(|| self.graph.multiselect_selection_fingerprint());
+                            self.graph.clear_selection(&self.base);
+                            if let Some(fp) = selection_fp_before {
+                                self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
+                            }
+                        }
+                        EventProcessStatus::Processed
+                    }
+                    Drag::NodeDrag { origin, anchors } => {
+                        let resized = self.graph.move_nodes_with_press_delta(&anchors, origin, data, &self.base);
+                        if resized {
+                            self.update_scroll_bars();
+                        }
+                        self.ensure_current_node_is_visible();
+                        EventProcessStatus::Processed
+                    }
+                    Drag::CtrlClickPending { node_id, origin } => {
+                        let dx = data.x - origin.x;
+                        let dy = data.y - origin.y;
+                        if dx * dx + dy * dy <= MULTISELECT_CTRL_DRAG_THRESHOLD_SQ {
+                            let nid = self.graph.current_node_id();
+                            let fp = self.graph.multiselect_selection_fingerprint();
+                            self.graph.toggle_multiselect_selected(node_id, &self.base);
+                            self.raise_selection_changed_if_multiselect_and_selection_changed(fp);
+                            self.raise_current_node_changed(nid);
+                        } else {
+                            let anchors = if self.graph.nodes[node_id].selected {
+                                self.graph.selected_drag_anchors()
+                            } else {
+                                vec![(node_id, self.graph.nodes[node_id].rect.top_left())]
+                            };
+                            let resized = self.graph.move_nodes_with_press_delta(&anchors, origin, data, &self.base);
+                            if resized {
+                                self.update_scroll_bars();
+                            }
+                            self.ensure_current_node_is_visible();
+                        }
+                        EventProcessStatus::Processed
+                    }
                 }
-            },
+            }
             MouseEvent::DoubleClick(mouse_data) => {
+                if matches!(self.drag, Drag::EdgeConnect { .. }) {
+                    self.graph.set_edge_preview(None, &self.base);
+                    self.drag = Drag::None;
+                    return EventProcessStatus::Processed;
+                }
                 let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
                 if let Some(id) = self.graph.mouse_pos_to_index(data.x, data.y) {
                     self.raise_action_on_node(id);
@@ -660,29 +872,44 @@ where
                     EventProcessStatus::Ignored
                 }
             }
-            MouseEvent::Drag(mouse_data) => match &self.drag {
-                Drag::None => {
-                    EventProcessStatus::Ignored
-                }
-                Drag::View(p) => {
-                    self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
-                    self.drag = Drag::View(Point::new(mouse_data.x, mouse_data.y));
-                    EventProcessStatus::Processed
-                }
-                Drag::Node(node_info) => {
-                    let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
-                    if self.graph.move_node_to(
-                        node_info.id,
-                        node_info.top_left.x + data.x - node_info.origin.x,
-                        node_info.top_left.y + data.y - node_info.origin.y,
-                        &self.base,
-                    ) {
-                        self.update_scroll_bars();
+            MouseEvent::Drag(mouse_data) => {
+                let data = Point::new(mouse_data.x - self.origin_point.x, mouse_data.y - self.origin_point.y);
+                if let Drag::CtrlClickPending { node_id, origin } = &self.drag {
+                    let dx = data.x - origin.x;
+                    let dy = data.y - origin.y;
+                    if dx * dx + dy * dy > MULTISELECT_CTRL_DRAG_THRESHOLD_SQ {
+                        let anchors = if self.graph.nodes[*node_id].selected {
+                            self.graph.selected_drag_anchors()
+                        } else {
+                            vec![(*node_id, self.graph.nodes[*node_id].rect.top_left())]
+                        };
+                        let o = *origin;
+                        self.drag = Drag::NodeDrag { origin: o, anchors };
                     }
-                    self.ensure_current_node_is_visible();
-                    EventProcessStatus::Processed
                 }
-            },
+                match &self.drag {
+                    Drag::None => EventProcessStatus::Ignored,
+                    Drag::EdgeConnect { from_node } => {
+                        self.graph.update_hover_at(data);
+                        self.graph.set_edge_preview(Some((*from_node, data)), &self.base);
+                        EventProcessStatus::Processed
+                    }
+                    Drag::View(p) => {
+                        self.move_scroll_to(self.origin_point.x + mouse_data.x - p.x, self.origin_point.y + mouse_data.y - p.y);
+                        self.drag = Drag::View(Point::new(mouse_data.x, mouse_data.y));
+                        EventProcessStatus::Processed
+                    }
+                    Drag::NodeDrag { origin, anchors } => {
+                        let resized = self.graph.move_nodes_with_press_delta(anchors, *origin, data, &self.base);
+                        if resized {
+                            self.update_scroll_bars();
+                        }
+                        self.ensure_current_node_is_visible();
+                        EventProcessStatus::Processed
+                    }
+                    Drag::CtrlClickPending { .. } => EventProcessStatus::Processed,
+                }
+            }
             MouseEvent::Wheel(dir) => {
                 match dir {
                     MouseWheelDirection::Left => self.move_scroll_to(self.origin_point.x + 1, self.origin_point.y),
