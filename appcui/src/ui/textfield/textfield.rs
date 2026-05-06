@@ -11,6 +11,26 @@ struct Cursor {
     end: usize,
 }
 
+#[allow(dead_code)]
+const MAX_UNDO_DEPTH: usize = 100;
+
+#[allow(dead_code)]
+#[derive(Copy, Clone)]
+enum LastAction {
+    None,
+    AddChar(CharClass),
+    Delete,
+    Other,
+}
+
+#[allow(dead_code)]
+#[derive(Clone)]
+struct TextSnapshot {
+    glyphs: String,
+    cursor_pos: usize,
+    selection: Selection,
+}
+
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
 pub struct TextField {
     cursor: Cursor,
@@ -18,6 +38,10 @@ pub struct TextField {
     glyphs: String,
     drag_started: bool,
     flags: Flags,
+    undo_stack: Vec<TextSnapshot>,
+    redo_stack: Vec<TextSnapshot>,
+    last_action: LastAction,
+    history_suspended: bool,
 }
 impl TextField {
     /// Creates a new TextField control with the specified text, layout and flags.
@@ -42,6 +66,10 @@ impl TextField {
             glyphs: String::from(text),
             drag_started: false,
             flags,
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
+            last_action: LastAction::None,
+            history_suspended: false,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
         obj.cursor.pos = obj.glyphs.len();
@@ -67,6 +95,10 @@ impl TextField {
         self.selection = Selection::NONE;
         self.glyphs.clear();
         self.glyphs.push_str(text);
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        self.last_action = LastAction::None;
+        self.history_suspended = false;
         self.move_cursor_to(self.glyphs.len(), false, true);
     }
 
@@ -188,14 +220,29 @@ impl TextField {
         if self.is_readonly() {
             return false;
         }
-        let mut text_was_modified = false;
-        if !self.selection.is_empty() {
-            text_was_modified = self.delete_selection();
+        let had_selection = !self.selection.is_empty();
+        let clipboard_text = RuntimeManager::get().backend().clipboard_text();
+        let has_clipboard_text = clipboard_text.as_ref().map(|txt| !txt.is_empty()).unwrap_or(false);
+        if !(had_selection || has_clipboard_text) {
+            return false;
         }
-        if let Some(txt) = RuntimeManager::get().backend().clipboard_text() {
+        if !self.history_suspended {
+            self.push_undo_snapshot();
+        }
+        let mut text_was_modified = false;
+        if had_selection {
+            let old_history_suspended = self.history_suspended;
+            self.history_suspended = true;
+            text_was_modified = self.delete_selection();
+            self.history_suspended = old_history_suspended;
+        }
+        if let Some(txt) = clipboard_text {
             self.glyphs.insert_str(self.cursor.pos, &txt);
             text_was_modified |= !txt.is_empty();
             self.move_cursor_to(self.cursor.pos + txt.len(), false, true);
+        }
+        if text_was_modified {
+            self.last_action = LastAction::Other;
         }
         text_was_modified
     }
@@ -205,10 +252,20 @@ impl TextField {
             return false;
         }
         if !self.selection.is_empty() {
+            if !self.history_suspended {
+                self.push_undo_snapshot();
+            }
             RuntimeManager::get()
                 .backend_mut()
                 .set_clipboard_text(&self.glyphs[self.selection.start..self.selection.end]);
-            self.delete_selection()
+            let old_history_suspended = self.history_suspended;
+            self.history_suspended = true;
+            let result = self.delete_selection();
+            self.history_suspended = old_history_suspended;
+            if result {
+                self.last_action = LastAction::Delete;
+            }
+            result
         } else {
             false
         }
@@ -223,6 +280,9 @@ impl TextField {
         }
 
         if !self.selection.is_empty() {
+            if !self.history_suspended {
+                self.push_undo_snapshot();
+            }
             let s = callback(&self.glyphs[self.selection.start..self.selection.end]);
             let text_changed = s != self.glyphs[self.selection.start..self.selection.end];
             self.glyphs.replace_range(self.selection.start..self.selection.end, &s);
@@ -231,6 +291,9 @@ impl TextField {
             self.selection = Selection::NONE;
             self.cursor.pos = start;
             self.move_cursor_with(count as i32, true);
+            if text_changed {
+                self.last_action = LastAction::Other;
+            }
             text_changed
         } else {
             false
@@ -238,6 +301,7 @@ impl TextField {
     }
 
     fn select_all(&mut self) {
+        self.last_action = LastAction::None;
         self.selection = Selection::NONE;
         self.selection.update(0, self.glyphs.len());
         self.move_cursor_to(self.glyphs.len(), true, false);
@@ -245,10 +309,14 @@ impl TextField {
     // true if the text was changed, false otherwise
     fn delete_selection(&mut self) -> bool {
         if !self.selection.is_empty() {
+            if !self.history_suspended {
+                self.push_undo_snapshot();
+            }
             let new_pos = self.selection.start;
             self.glyphs.replace_range(self.selection.start..self.selection.end, "");
             self.selection = Selection::NONE;
             self.move_cursor_to(new_pos, false, true);
+            self.last_action = LastAction::Delete;
             true
         } else {
             false
@@ -262,8 +330,12 @@ impl TextField {
         if self.selection.is_empty() {
             let next_pos = self.glyphs.next_pos(self.cursor.pos, 1);
             if self.cursor.pos < next_pos {
+                if !self.history_suspended {
+                    self.push_undo_snapshot();
+                }
                 self.glyphs.replace_range(self.cursor.pos..next_pos, "");
                 self.update_scroll_view(true);
+                self.last_action = LastAction::Delete;
                 return true;
             }
             false
@@ -279,9 +351,13 @@ impl TextField {
         if self.selection.is_empty() {
             let prev_pos = self.glyphs.previous_pos(self.cursor.pos, 1);
             if prev_pos < self.cursor.pos {
+                if !self.history_suspended {
+                    self.push_undo_snapshot();
+                }
                 let end_pos = self.cursor.pos;
                 self.glyphs.replace_range(prev_pos..end_pos, "");
                 self.move_cursor_to(prev_pos, false, true);
+                self.last_action = LastAction::Delete;
                 return true;
             }
             false
@@ -293,11 +369,20 @@ impl TextField {
         if self.is_readonly() {
             return false;
         }
+        let char_class = CharClass::from(character);
+        let can_coalesce = self.selection.is_empty() && matches!(self.last_action, LastAction::AddChar(prev_class) if prev_class == char_class);
+        if !can_coalesce && !self.history_suspended {
+            self.push_undo_snapshot();
+        }
         if !self.selection.is_empty() {
+            let old_history_suspended = self.history_suspended;
+            self.history_suspended = true;
             self.delete_selection();
+            self.history_suspended = old_history_suspended;
         }
         self.glyphs.insert(self.cursor.pos, character);
         self.move_cursor_with(1, false);
+        self.last_action = LastAction::AddChar(char_class);
         true
     }
     fn select_word(&mut self, offset: usize) {
@@ -319,6 +404,62 @@ impl TextField {
             std::cmp::Ordering::Less => Some(self.glyphs.previous_pos(self.cursor.start, (-glyphs_count) as usize)),
             std::cmp::Ordering::Equal => Some(self.cursor.start),
             std::cmp::Ordering::Greater => Some(self.glyphs.next_pos(self.cursor.start, glyphs_count as usize)),
+        }
+    }
+    fn make_snapshot(&self) -> TextSnapshot {
+        TextSnapshot {
+            glyphs: self.glyphs.clone(),
+            cursor_pos: self.cursor.pos,
+            selection: self.selection,
+        }
+    }
+    fn push_snapshot_with_limit(stack: &mut Vec<TextSnapshot>, snapshot: TextSnapshot) {
+        if stack.len() >= MAX_UNDO_DEPTH {
+            stack.remove(0);
+        }
+        stack.push(snapshot);
+    }
+    fn push_undo_snapshot(&mut self) {
+        let snapshot = TextSnapshot {
+            glyphs: self.glyphs.clone(),
+            cursor_pos: self.cursor.pos,
+            selection: self.selection,
+        };
+        Self::push_snapshot_with_limit(&mut self.undo_stack, snapshot);
+        self.redo_stack.clear();
+    }
+    fn restore_snapshot(&mut self, snapshot: TextSnapshot, notify: bool) {
+        self.glyphs = snapshot.glyphs;
+        self.cursor.pos = snapshot.cursor_pos.min(self.glyphs.len());
+        self.selection = snapshot.selection;
+        self.update_scroll_view(true);
+        if notify {
+            self.notify_text_changed();
+        }
+    }
+    /// Reverts the most recent text mutation, if history is available.
+    ///
+    /// Undo restores text, cursor position and selection to the previous snapshot.
+    /// If there is no undo entry, this method has no effect.
+    pub fn undo(&mut self) {
+        let current = self.make_snapshot();
+        if let Some(snapshot) = self.undo_stack.pop() {
+            Self::push_snapshot_with_limit(&mut self.redo_stack, current);
+            self.last_action = LastAction::None;
+            self.restore_snapshot(snapshot, true);
+        }
+    }
+    /// Re-applies the most recently undone text mutation, if redo history is available.
+    ///
+    /// Redo restores text, cursor position and selection to the snapshot that was
+    /// previously reverted by [`TextField::undo`]. If there is no redo entry, this
+    /// method has no effect.
+    pub fn redo(&mut self) {
+        let current = self.make_snapshot();
+        if let Some(snapshot) = self.redo_stack.pop() {
+            Self::push_snapshot_with_limit(&mut self.undo_stack, current);
+            self.last_action = LastAction::None;
+            self.restore_snapshot(snapshot, true);
         }
     }
 
@@ -401,34 +542,42 @@ impl OnKeyPressed for TextField {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         match key.value() {
             key!("Left") | key!("Shift+Left") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_with(-1, key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Right") | key!("Shift+Right") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_with(1, key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Up") | key!("Shift+Up") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_with(-((self.size().width as i32) - 2), key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Down") | key!("Shift+Down") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_with((self.size().width as i32) - 2, key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Home") | key!("Shift+Home") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_to(0, key.modifier.contains(KeyModifier::Shift), false);
                 return EventProcessStatus::Processed;
             }
             key!("End") | key!("Shift+End") => {
+                self.last_action = LastAction::None;
                 self.move_cursor_to(self.glyphs.len(), key.modifier.contains(KeyModifier::Shift), false);
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Left") | key!("Ctrl+Shift+Left") => {
+                self.last_action = LastAction::None;
                 self.move_to_previous_word(key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Right") | key!("Ctrl+Shift+Right") => {
+                self.last_action = LastAction::None;
                 self.move_to_next_word(key.modifier.contains(KeyModifier::Shift));
                 return EventProcessStatus::Processed;
             }
@@ -464,6 +613,14 @@ impl OnKeyPressed for TextField {
             }
             key!("Ctrl+A") => {
                 self.select_all();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Z") => {
+                self.undo();
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Y") | key!("Ctrl+Shift+Z") => {
+                self.redo();
                 return EventProcessStatus::Processed;
             }
             key!("Delete") => {
@@ -513,23 +670,27 @@ impl OnMouseEvent for TextField {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter | MouseEvent::Leave => {
+                self.last_action = LastAction::None;
                 self.drag_started = false;
                 EventProcessStatus::Processed
             }
             MouseEvent::Over(_) => EventProcessStatus::Ignored,
             MouseEvent::Pressed(data) => {
                 if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, true) {
+                    self.last_action = LastAction::None;
                     self.move_cursor_to(new_pos, false, false);
                     self.drag_started = true;
                 }
                 EventProcessStatus::Processed
             }
             MouseEvent::Released(_) => {
+                self.last_action = LastAction::None;
                 self.drag_started = false;
                 EventProcessStatus::Processed
             }
             MouseEvent::DoubleClick(data) => {
                 if let Some(ofs) = self.mouse_pos_to_glyph_offset(data.x, data.y, true) {
+                    self.last_action = LastAction::None;
                     self.select_word(ofs);
                 }
                 EventProcessStatus::Processed
@@ -537,6 +698,7 @@ impl OnMouseEvent for TextField {
             MouseEvent::Drag(data) => {
                 if self.drag_started {
                     if let Some(new_pos) = self.mouse_pos_to_glyph_offset(data.x, data.y, false) {
+                        self.last_action = LastAction::None;
                         self.move_cursor_to(new_pos, true, true);
                     }
                 }
