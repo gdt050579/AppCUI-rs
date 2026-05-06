@@ -46,10 +46,12 @@ pub trait TextFieldEvents {
 
 Besides the [Common methods for all Controls](../common_methods.md) a textfield also has the following additional methods:
 
-| Method          | Purpose                                                                                                                  |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `set_text(...)` | Set the new text for a textfield.                                                                                        |
-| `text()`        | Returns the current text from a textfield                                                                                |
+| Method          | Purpose                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `set_text(...)` | Set the new text for a textfield.                                                                                          |
+| `undo()`        | Undo last text editing action.                                                                                             |
+| `redo()`        | Redo the most recently undone text editing action.                                                                         |
+| `text()`        | Returns the current text from a textfield                                                                                  |
 | `is_readonly()` | Returns `true` if the current textfield is in a readonly state (was created with the readonlu flag) or `false` otherwise |
 
 ## Key association
@@ -76,9 +78,13 @@ The following keys are processed by a TextField control if it has focus:
 | `Ctrl`+`C` or `Ctrl`+`Insert`        | Copy the current selection to clipboard                                                                                                   |
 | `Ctrl`+`V` or `Shift`+`Insert`       | Paste the text from the clipboard (if any) to current position                                                                            |
 | `Ctrl`+`X` or `Shift`+`Delete`       | If a selection is present, it copies it into the clipboard and then delets it (acts like a `Cut` command)                                 |
+| `Ctrl`+`Z`                           | Undo last action                                                                                                                           |
+| `Ctrl`+`Y` or `Ctrl`+`Shift`+`Z`     | Redo last undone action                                                                                                                    |
 | `Enter`                              | Only if the  flag `textfield::Type::ProcessEnter` is present will trigger a call to `TextFieldEvents::on_validate(...)`                   |
 
 Additionally, al printable characters can be used to insert / modify or edit the current text.
+
+Undo history is optimized for normal typing: continuous typing runs are grouped, so one `Ctrl`+`Z` typically reverts the last typed run instead of just one character.
 
 ## Mouse actions
 

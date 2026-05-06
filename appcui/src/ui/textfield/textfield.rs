@@ -437,6 +437,10 @@ impl TextField {
             self.notify_text_changed();
         }
     }
+    /// Reverts the most recent text mutation, if history is available.
+    ///
+    /// Undo restores text, cursor position and selection to the previous snapshot.
+    /// If there is no undo entry, this method has no effect.
     pub fn undo(&mut self) {
         let current = self.make_snapshot();
         if let Some(snapshot) = self.undo_stack.pop() {
@@ -445,6 +449,11 @@ impl TextField {
             self.restore_snapshot(snapshot, true);
         }
     }
+    /// Re-applies the most recently undone text mutation, if redo history is available.
+    ///
+    /// Redo restores text, cursor position and selection to the snapshot that was
+    /// previously reverted by [`TextField::undo`]. If there is no redo entry, this
+    /// method has no effect.
     pub fn redo(&mut self) {
         let current = self.make_snapshot();
         if let Some(snapshot) = self.redo_stack.pop() {
