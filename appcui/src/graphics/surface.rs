@@ -1115,6 +1115,26 @@ impl Surface {
         }
     }
 
+    pub fn write_chars(&mut self, x: i32, y: i32, chars: &[Character]) {
+        if !self.clip.is_visible() {
+            return;
+        }
+        let y = y + self.origin.y;
+        if (y < self.clip.top) || (y > self.clip.bottom) {
+            return; // not visible
+        }
+        let left = x + self.origin.x;
+        if left > self.clip.right {
+            return; // outside - spre dreapte
+        }
+        let right = left + chars.len() as i32;
+        if right <= self.clip.left {
+            return; // outide - spre stange
+        }
+        // in punctul asta stiu ca ceva este vizibil - trebuie sa vad exact intersectia
+
+    }
+
     fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormat, width: u16) {
         if !self.clip.contains_y(y + self.origin.y) {
             return; // no need to draw
