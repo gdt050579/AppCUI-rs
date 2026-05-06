@@ -1225,6 +1225,83 @@ fn check_copy_cut() {
 }
 
 #[test]
+fn check_undo_redo_typing_and_coalescing() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial text, cursor at end')
+        CheckHash(0x8942552BBDA661E3)
+        Key.Pressed(X)
+        Key.Pressed(Y)
+        Key.Pressed(Z)
+        Paint('2. Appended XYZ')
+        CheckHash(0x996BE6B9E7BED2BF)
+        Key.Pressed(Ctrl+Z)
+        Paint('3. Undo typing run -> back to initial')
+        CheckHash(0x8942552BBDA661E3)
+        Key.Pressed(Ctrl+Y)
+        Paint('4. Redo typing run -> XYZ back')
+        CheckHash(0x996BE6B9E7BED2BF)
+        Key.Pressed(Ctrl+Shift+Z)
+        Paint('5. Redo alias keeps text unchanged at XYZ state')
+        CheckHash(0x996BE6B9E7BED2BF)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'abc',x:1,y:1,w:38,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_undo_redo_delete_and_backspace() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial text (cursor at end)')
+        CheckHash(0xDACACEC1C6216E64)
+        Key.Pressed(Backspace)
+        Paint('2. After Backspace')
+        CheckHash(0x5D5434B3B979A184)
+        Key.Pressed(Ctrl+Z)
+        Paint('3. Undo backspace')
+        CheckHash(0xDACACEC1C6216E64)
+        Key.Pressed(Ctrl+Y)
+        Paint('4. Redo backspace')
+        CheckHash(0x5D5434B3B979A184)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'abcd',x:1,y:1,w:38,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_redo_cleared_after_new_edit() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial text')
+        CheckHash(0x8942552BBDA661E3)
+        Key.Pressed(X)
+        Paint('2. After typing X')
+        CheckHash(0xED49DB503B10243C)
+        Key.Pressed(Ctrl+Z)
+        Paint('3. Undo typing X')
+        CheckHash(0x8942552BBDA661E3)
+        Key.Pressed(Y)
+        Paint('4. New edit after undo (redo should be cleared)')
+        CheckHash(0x3E5BEDD98C2453CD)
+        Key.Pressed(Ctrl+Y)
+        Paint('5. Ctrl+Y does nothing because redo was cleared')
+        CheckHash(0x3E5BEDD98C2453CD)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(textfield!("'abc',x:1,y:1,w:38,h:1"));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_char_class() {
     assert_eq!(CharClass::from('('), CharClass::Bracket);
     assert_eq!(CharClass::from(')'), CharClass::Bracket);
