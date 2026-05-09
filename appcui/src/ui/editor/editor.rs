@@ -320,7 +320,9 @@ impl OnPaint for Editor {
         let w = self.view.size().width;
         let h = self.view.size().height as i32;
         let mut y = 0;
+        surface.clear(Character::with_attributes(' ', theme.editor.normal));
         for line in self.view.lines() {
+            self.paint_line_number(surface, 0, y, line.line_number(), theme.editor.inactive);
             surface.write_chars(x, y, line.visible_chars(self.horizontal_scroll, self.horizontal_scroll + w));
             y += 1;
             if y >= h {

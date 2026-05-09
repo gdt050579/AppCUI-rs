@@ -35,6 +35,10 @@ impl Line {
         }
     }
     #[inline(always)]
+    pub(super) fn line_number(&self) -> u32 {
+        self.line_number
+    }
+    #[inline(always)]
     pub(super) fn visible_chars(&self, start: u32, end: u32) -> &[Character] {
         let len = self.chars.len() as u32;
         let end = end.min(len);
