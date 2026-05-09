@@ -34,4 +34,19 @@ impl Line {
             }
         }
     }
+    #[inline(always)]
+    pub(super) fn visible_chars(&self, start: u32, end: u32) -> &[Character] {
+        let len = self.chars.len() as u32;
+        let end = end.min(len);
+        if start >= end {
+            return &[];
+        }
+        &self.chars[start as usize..end as usize]
+    }
+    #[inline(always)]
+    pub(super) fn reset(&mut self) {
+        self.chars.clear();
+        self.char_to_position.clear();
+        self.line_number = u32::MAX;
+    }
 }

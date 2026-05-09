@@ -1,4 +1,4 @@
-use super::{CharClass, Document, Flags, Selection, Line};
+use super::{CharClass, Document, Flags, Selection, Line, ViewPort};
 use crate::prelude::*;
 use ropey::RopeSlice;
 
@@ -30,11 +30,11 @@ pub struct Editor {
     tab_align: i32,
     start_line: u32,
     visible_lines: u32,
-    horizontal_scroll: i32,
+    horizontal_scroll: u32,
     cursor: Cursor,
     flags: Flags,
     margin: MarginSize,
-    view: Option<Surface>,
+    view: ViewPort,
     selection: Selection,
 }
 
@@ -50,7 +50,7 @@ impl Editor {
             visible_lines: 0,
             flags,
             margin: MarginSize::default(),
-            view: None,
+            view: ViewPort::new(16),
             selection: Selection::NONE,
         };
         editor.update_margin();
@@ -119,15 +119,15 @@ impl Editor {
         } else if new_current_line >= self.start_line + self.visible_lines {
             self.start_line = new_current_line - self.visible_lines + 1;
         }
-        let sz = self.view.as_ref().unwrap().size();
+        let sz = self.view.size();
         let visible_width = (sz.width as i32 - self.margin.width as i32).max(0);
-        let vcol = self.position_to_virtual_column(new_pos) as i32;
+        let vcol = self.position_to_virtual_column(new_pos) as u32;
 
-        if vcol < self.horizontal_scroll {
-            self.horizontal_scroll = vcol;
-        } else if vcol >= self.horizontal_scroll + visible_width {
-            self.horizontal_scroll = vcol - visible_width + 1;
-        }
+        // if vcol < self.horizontal_scroll {
+        //     self.horizontal_scroll = vcol;
+        // } else if vcol >= self.horizontal_scroll + visible_width {
+        //     self.horizontal_scroll = vcol - visible_width + 1;
+        // }
         if select {
             self.selection.update(self.cursor.pos, new_pos);
         } else {
@@ -255,6 +255,16 @@ impl Editor {
         current_column
     }
     fn update_view(&mut self) {
+        let theme = self.theme();
+        let col_normal = theme.editor.normal;
+        let mut line_idx = self.start_line;
+        let end_idx = (line_idx + self.view.size().height).min(self.document.lines_count() as u32);
+        self.view.reset();
+        while line_idx < end_idx {
+            self.view.update_line(line_idx - self.start_line, line_idx, &self.document, col_normal, self.tab_align as u32);
+            line_idx += 1;
+        }
+        /* 
         if self.view.is_none() {
             return;
         }
@@ -299,19 +309,23 @@ impl Editor {
         self.visible_lines = line_number - self.start_line;
         // important - must be the last
         self.view = Some(surface);
+        */
     }
 }
 
 impl OnPaint for Editor {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let has_focus = self.has_focus();
-        if let Some(view) = self.view.as_ref() {
-            surface.draw_surface(0, 0, view);
-            if has_focus && view.cursor.is_visible() {
-                surface.set_cursor(view.cursor.x as i32, view.cursor.y as i32);
+        let x = self.margin.width as i32;
+        let w = self.view.size().width;
+        let h = self.view.size().height as i32;
+        let mut y = 0;
+        for line in self.view.lines() {
+            surface.write_chars(x, y, line.visible_chars(self.horizontal_scroll, self.horizontal_scroll + w));
+            y += 1;
+            if y >= h {
+                break;
             }
-        } else {
-            surface.clear(Character::with_attributes(' ', theme.editor.normal));
         }
     }
 }
@@ -404,11 +418,7 @@ impl OnMouseEvent for Editor {
 
 impl OnResize for Editor {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
-        if let Some(view) = self.view.as_mut() {
-            view.resize(new_size);
-        } else {
-            self.view = Some(Surface::new(new_size.width, new_size.height));
-        }
+        self.view.resize(new_size);
         self.update_view();
     }
 }

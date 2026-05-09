@@ -3799,6 +3799,6 @@ fn main() -> Result<(), appcui::system::Error> {
     let e = Editor::new(CODE, layout!("d:f"), editor::Flags::ShowLineNumbers);
     w.add(e);
     app.add_window(w);
-    app.run();
+    app.run(); 
     Ok(())
 }
