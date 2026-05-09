@@ -4,6 +4,8 @@
 //! and paint handling.
 
 mod editor;
+mod line;
+mod view_port;
 mod document;
 mod char_class;
 mod selection;
@@ -14,6 +16,8 @@ mod tests;
 pub(self) use self::document::Document;
 pub(self) use self::char_class::CharClass;
 pub(self) use self::selection::Selection;
+pub(self) use self::line::Line;
+pub(self) use self::view_port::ViewPort;
 
 pub use self::editor::Editor;
 pub use self::initialization_flags::Flags;

@@ -1,4 +1,4 @@
-use super::{CharClass, Document, Flags, Selection};
+use super::{CharClass, Document, Flags, Selection, Line};
 use crate::prelude::*;
 use ropey::RopeSlice;
 
