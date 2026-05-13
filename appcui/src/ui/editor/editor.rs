@@ -2,14 +2,6 @@ use super::{CharClass, Document, Flags, Selection, Line, ViewPort};
 use crate::prelude::*;
 use ropey::RopeSlice;
 
-struct PaintData {
-    margin_width: i32,
-    y: i32,
-    width: i32,
-    horizontal_scroll: i32,
-    attr: CharAttribute,
-    selection: CharAttribute,
-}
 #[derive(Default)]
 struct MarginSize {
     line_number_width: u8,
@@ -22,6 +14,7 @@ struct Cursor {
     column: u32,
     line: u32,
     pos: usize,
+    visible: bool,
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
@@ -71,24 +64,6 @@ impl Editor {
             self.margin.line_number_x = 0;
         }
     }
-    fn position_to_virtual_column(&self, position: usize) -> u32 {
-        let line_idx = self.document.position_to_line(position);
-        let line_start = self.document.line_to_char(line_idx);
-        let line = self.document.line(line_idx);
-        let align = self.tab_align as u32;
-        let mut x = 0u32;
-        for (i, ch) in line.chars().enumerate() {
-            if line_start + i >= position {
-                break;
-            }
-            if ch == '\t' {
-                x += align - (x % align);
-            } else if ch != '\n' {
-                x += 1;
-            }
-        }
-        x
-    }
     fn coordinates_to_position(&self, line: u32, column: u32) -> usize {
         let ln = self.document.line(line);
         let start = self.document.line_to_char(line);
@@ -113,29 +88,38 @@ impl Editor {
 
     fn goto_position(&mut self, position: usize, select: bool) {
         let new_pos = position.min(self.document.chars_count());
-        let new_current_line = self.document.position_to_line(new_pos);
-        if new_current_line < self.start_line {
-            self.start_line = new_current_line;
-        } else if new_current_line >= self.start_line + self.visible_lines {
-            self.start_line = new_current_line - self.visible_lines + 1;
-        }
-        let sz = self.view.size();
-        let visible_width = (sz.width as i32 - self.margin.width as i32).max(0);
-        let vcol = self.position_to_virtual_column(new_pos) as u32;
-
-        // if vcol < self.horizontal_scroll {
-        //     self.horizontal_scroll = vcol;
-        // } else if vcol >= self.horizontal_scroll + visible_width {
-        //     self.horizontal_scroll = vcol - visible_width + 1;
-        // }
         if select {
             self.selection.update(self.cursor.pos, new_pos);
         } else {
             self.selection.clear();
+        }        
+        let pos_info = self.document.char_to_pos_info(new_pos);
+        if !self.view.contains_line(pos_info.line_index) {
+            self.start_line = pos_info.line_index;
+            self.update_view();
         }
+        let cursor_pos = self.document.char_to_pos_info(new_pos);
+        self.cursor.line = cursor_pos.line_index;
         self.cursor.pos = new_pos;
-        self.cursor.line = new_current_line;
-        self.update_view();
+        if self.view.contains_line(cursor_pos.line_index) {
+            // sunt in view - calculez cursorul si scroll-ul
+            if let Some(line_index) = self.view.line_number_to_index(cursor_pos.line_index) {
+                if let Some(x_offset) = self.view.x_offset(cursor_pos.line_index, cursor_pos.rel_offset as usize) {
+                    self.cursor.column = x_offset;
+                    self.cursor.line = line_index;
+                    self.cursor.visible = true;                    
+                } else {
+                    self.cursor.column = 0;
+                    self.cursor.line = line_index;
+                    self.cursor.visible = false;                    
+                }
+            } else {
+                self.cursor.visible = false;
+            }
+        } else {
+            // cursor is not visible
+            self.cursor.visible = false;
+        }
     }
     fn move_to_line(&mut self, delta: i32, select: bool) {
         let lines_count = self.document.lines_count();
@@ -221,39 +205,39 @@ impl Editor {
         }
         surface.write_ascii(x, y, &buffer[12 - self.margin.line_number_width as usize..], attr, false);
     }
-    fn paint_line(&self, surface: &mut Surface, p: &PaintData, line: &RopeSlice, mut start_pos: usize) -> Option<u32> {
-        let mut virtual_x = 0i32;
-        let mut current_column = None;
-        for ch in line.chars() {
-            let x = virtual_x - p.horizontal_scroll;
-            if x >= p.width {
-                break;
-            }
-            if x >= 0 {
-                // actual paint
-                let chr = Character::with_attributes(
-                    if ch as u32 >= 32 { ch } else { ' ' },
-                    if self.selection.contains(start_pos) { p.selection } else { p.attr },
-                );
-                surface.write_char(x + p.margin_width, p.y, chr);
-                if start_pos == self.cursor.pos {
-                    surface.set_cursor(x + p.margin_width, p.y);
-                    current_column = Some(virtual_x as u32);
-                }
-            }
-            if ch == '\n' {
-                break;
-            }
-            // paint character
-            if ch == '\t' {
-                virtual_x += self.tab_align - (virtual_x % self.tab_align);
-            } else {
-                virtual_x += 1;
-            }
-            start_pos += 1;
-        }
-        current_column
-    }
+    // fn paint_line(&self, surface: &mut Surface, p: &PaintData, line: &RopeSlice, mut start_pos: usize) -> Option<u32> {
+    //     let mut virtual_x = 0i32;
+    //     let mut current_column = None;
+    //     for ch in line.chars() {
+    //         let x = virtual_x - p.horizontal_scroll;
+    //         if x >= p.width {
+    //             break;
+    //         }
+    //         if x >= 0 {
+    //             // actual paint
+    //             let chr = Character::with_attributes(
+    //                 if ch as u32 >= 32 { ch } else { ' ' },
+    //                 if self.selection.contains(start_pos) { p.selection } else { p.attr },
+    //             );
+    //             surface.write_char(x + p.margin_width, p.y, chr);
+    //             if start_pos == self.cursor.pos {
+    //                 surface.set_cursor(x + p.margin_width, p.y);
+    //                 current_column = Some(virtual_x as u32);
+    //             }
+    //         }
+    //         if ch == '\n' {
+    //             break;
+    //         }
+    //         // paint character
+    //         if ch == '\t' {
+    //             virtual_x += self.tab_align - (virtual_x % self.tab_align);
+    //         } else {
+    //             virtual_x += 1;
+    //         }
+    //         start_pos += 1;
+    //     }
+    //     current_column
+    // }
     fn update_view(&mut self) {
         let theme = self.theme();
         let col_normal = theme.editor.normal;
@@ -315,7 +299,6 @@ impl Editor {
 
 impl OnPaint for Editor {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let has_focus = self.has_focus();
         let x = self.margin.width as i32;
         let w = self.view.size().width;
         let h = self.view.size().height as i32;
@@ -327,6 +310,13 @@ impl OnPaint for Editor {
             y += 1;
             if y >= h {
                 break;
+            }
+        }
+        if self.has_focus() {
+            // TODO: paint selection
+            // show cursor
+            if self.cursor.visible {
+                surface.set_cursor(self.cursor.column as i32 + x, self.cursor.line as i32);
             }
         }
     }

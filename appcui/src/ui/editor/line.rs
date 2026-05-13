@@ -53,4 +53,8 @@ impl Line {
         self.char_to_position.clear();
         self.line_number = u32::MAX;
     }
+    #[inline(always)]
+    pub(super) fn x_offset(&self, char_index: usize) -> Option<u32> {
+        self.char_to_position.get(char_index).copied()
+    }
 }

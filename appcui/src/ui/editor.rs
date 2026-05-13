@@ -14,6 +14,7 @@ mod initialization_flags;
 mod tests;
 
 pub(self) use self::document::Document;
+pub(self) use self::document::PosInfo;
 pub(self) use self::char_class::CharClass;
 pub(self) use self::selection::Selection;
 pub(self) use self::line::Line;
