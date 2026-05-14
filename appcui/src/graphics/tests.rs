@@ -257,6 +257,22 @@ fn check_colors() {
 }
 
 #[test]
+fn check_write_chars_with_clip() {
+    let mut s = SurfaceTester::new(40, 10);
+    s.clear(Character::with_char('.'));
+    s.set_clip(5, 1, 7, 1);
+    s.clear(Character::with_char('X'));
+    // 3 X-es should be drawn (for column 5,6 and 7)
+    assert_eq!(s.compute_hash(), 0x8A59C7F9CC510193);
+    // 1 - not shown, 2 not shown, - outside the clip
+    // 3 shown (column 5), 4 shown (column 6), 5 shown (column 7), 
+    // the rest a renot shown - outside the clip
+    s.write_chars(3, 1, &chars_from_str("1234567890"));
+    // s.print(false);
+    assert_eq!(s.compute_hash(), 0xB284C0F2A6405F79);
+}
+
+#[test]
 fn check_write_string_single_line() {
     let mut s = SurfaceTester::new(40, 10);
     s.write_string(1, 1, "text", CharAttribute::with_color(Color::White, Color::DarkRed), false);
@@ -363,7 +379,7 @@ fn check_write_chars_partial_right_clipping() {
     assert_eq!(cell_code(&s, 6, 1), '.');
     assert_eq!(cell_code(&s, 7, 1), 'A');
     assert_eq!(cell_code(&s, 8, 1), 'B');
-    assert_eq!(cell_code(&s, 9, 1), '.');
+    assert_eq!(cell_code(&s, 9, 1), 'C');
 }
 
 #[test]
