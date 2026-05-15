@@ -1,6 +1,5 @@
-use super::{CharClass, Document, Flags, Selection, Line, ViewPort};
+use super::{CharClass, Document, Flags, Line, Selection, ViewPort};
 use crate::prelude::*;
-use ropey::RopeSlice;
 
 #[derive(Default)]
 struct MarginSize {
@@ -23,7 +22,6 @@ pub struct Editor {
     document: Document,
     tab_align: i32,
     start_line: u32,
-    visible_lines: u32,
     horizontal_scroll: u32,
     cursor: Cursor,
     flags: Flags,
@@ -41,7 +39,6 @@ impl Editor {
             start_line: 0,
             horizontal_scroll: 0,
             cursor: Cursor::default(),
-            visible_lines: 0,
             flags,
             margin: MarginSize::default(),
             view: ViewPort::new(16),
@@ -93,10 +90,15 @@ impl Editor {
             self.selection.update(self.cursor.pos, new_pos);
         } else {
             self.selection.clear();
-        }        
+        }
         let pos_info = self.document.char_to_pos_info(new_pos);
         if !self.view.contains_line(pos_info.line_index) {
-            self.start_line = pos_info.line_index;
+            if pos_info.line_index < self.view.first_line() {
+                self.start_line = pos_info.line_index;
+            } else if pos_info.line_index > self.view.last_line() {
+                let h = self.view.size().height.saturating_sub(1);
+                self.start_line = pos_info.line_index.saturating_sub(h);
+            }
             self.update_view();
         }
         let cursor_pos = self.document.char_to_pos_info(new_pos);
@@ -107,7 +109,7 @@ impl Editor {
             if let Some(line_index) = self.view.line_number_to_index(cursor_pos.line_index) {
                 if let Some(x_offset) = self.view.x_offset(cursor_pos.line_index, cursor_pos.rel_offset as usize) {
                     self.cursor.line = line_index;
-                    self.cursor.visible = true;                    
+                    self.cursor.visible = true;
                     // update horizontal scroll
                     let w = self.view.size().width;
                     if x_offset < self.horizontal_scroll {
@@ -120,7 +122,7 @@ impl Editor {
                 } else {
                     self.cursor.column = 0;
                     self.cursor.line = line_index;
-                    self.cursor.visible = false;                    
+                    self.cursor.visible = false;
                 }
             } else {
                 self.cursor.visible = false;
@@ -135,10 +137,10 @@ impl Editor {
         if lines_count == 0 {
             return;
         }
-
-        let target_line = (self.cursor.line as i32 + delta).clamp(0, lines_count as i32 - 1) as u32;
-        let target_pos = self.coordinates_to_position(target_line, self.cursor.column);
-        self.goto_position(target_pos, select);
+        let current_line = self.cursor.line as i32 + self.start_line as i32;
+        let new_line = (current_line + delta).clamp(0, lines_count as i32 - 1) as u32;
+        let new_pos = self.coordinates_to_position(new_line, self.cursor.column);
+        self.goto_position(new_pos, select);
     }
     fn move_to_next_word(&mut self, select: bool) {
         let mut iter = self.document.chars_iter(self.cursor.pos);
@@ -221,7 +223,8 @@ impl Editor {
         let end_idx = (line_idx + self.view.size().height).min(self.document.lines_count() as u32);
         self.view.reset();
         while line_idx < end_idx {
-            self.view.update_line(line_idx - self.start_line, line_idx, &self.document, col_normal, self.tab_align as u32);
+            self.view
+                .update_line(line_idx - self.start_line, line_idx, &self.document, col_normal, self.tab_align as u32);
             line_idx += 1;
         }
     }
@@ -274,12 +277,12 @@ impl OnKeyPressed for Editor {
                 self.move_to_line(1, select);
                 EventProcessStatus::Processed
             }
-            key!("PageUp") | key!("Shift+PageUp") => {
-                self.move_to_line(-(self.visible_lines as i32).max(1), select);
+            key!("PageUp") | key!("Shift+PageUp") => {            
+                self.move_to_line(-(self.view.size().height as i32), select);
                 EventProcessStatus::Processed
             }
             key!("PageDown") | key!("Shift+PageDown") => {
-                self.move_to_line((self.visible_lines as i32).max(1), select);
+                self.move_to_line(self.view.size().height as i32, select);
                 EventProcessStatus::Processed
             }
 
@@ -347,7 +350,8 @@ impl OnResize for Editor {
             self.view.resize(new_size);
         } else {
             self.margin.visible = true;
-            self.view.resize(Size::new(new_size.width.saturating_sub(self.margin.width as u32), new_size.height));
+            self.view
+                .resize(Size::new(new_size.width.saturating_sub(self.margin.width as u32), new_size.height));
         }
         self.update_view();
     }

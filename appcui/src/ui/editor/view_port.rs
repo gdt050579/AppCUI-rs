@@ -40,6 +40,18 @@ impl ViewPort {
         }
         line_number >= self.lines[0].line_number() && line_number <= self.lines[self.count as usize - 1].line_number()
     }
+    pub(super) fn first_line(&self) -> u32 {
+        if self.count == 0 {
+            return u32::MAX;
+        }
+        self.lines[0].line_number()
+    }
+    pub(super) fn last_line(&self) -> u32 {
+        if self.count == 0 {
+            return u32::MAX;
+        }
+        self.lines[self.count as usize - 1].line_number()
+    }
     pub(super) fn reset(&mut self) {
         self.count = 0;
     }
