@@ -1,4 +1,4 @@
-use super::{CharClass, Document, Flags, Line, Selection, ViewPort};
+use super::{CharClass, Document, Flags, Selection, ViewPort};
 use crate::prelude::*;
 
 #[derive(Default)]
@@ -101,34 +101,25 @@ impl Editor {
             }
             self.update_view();
         }
-        let cursor_pos = self.document.char_to_pos_info(new_pos);
-        self.cursor.line = cursor_pos.line_index;
         self.cursor.pos = new_pos;
-        if self.view.contains_line(cursor_pos.line_index) {
-            // sunt in view - calculez cursorul si scroll-ul
-            if let Some(line_index) = self.view.line_number_to_index(cursor_pos.line_index) {
-                if let Some(x_offset) = self.view.x_offset(cursor_pos.line_index, cursor_pos.rel_offset as usize) {
-                    self.cursor.line = line_index;
-                    self.cursor.visible = true;
-                    // update horizontal scroll
-                    let w = self.view.size().width;
-                    if x_offset < self.horizontal_scroll {
-                        self.horizontal_scroll = x_offset;
-                    }
-                    if x_offset >= self.horizontal_scroll + w {
-                        self.horizontal_scroll = (x_offset - w) + 1;
-                    }
-                    self.cursor.column = x_offset - self.horizontal_scroll;
-                } else {
-                    self.cursor.column = 0;
-                    self.cursor.line = line_index;
-                    self.cursor.visible = false;
+        self.cursor.line = pos_info.line_index;
+        if self.view.contains_line(pos_info.line_index) {
+            if let Some(x_offset) = self.view.x_offset(pos_info.line_index, pos_info.rel_offset as usize) {
+                self.cursor.visible = true;
+                // update horizontal scroll
+                let w = self.view.size().width;
+                if x_offset < self.horizontal_scroll {
+                    self.horizontal_scroll = x_offset;
                 }
+                if x_offset >= self.horizontal_scroll + w {
+                    self.horizontal_scroll = (x_offset - w) + 1;
+                }
+                self.cursor.column = x_offset - self.horizontal_scroll;
             } else {
+                self.cursor.column = 0;
                 self.cursor.visible = false;
             }
         } else {
-            // cursor is not visible
             self.cursor.visible = false;
         }
     }
@@ -137,8 +128,7 @@ impl Editor {
         if lines_count == 0 {
             return;
         }
-        let current_line = self.cursor.line as i32 + self.start_line as i32;
-        let new_line = (current_line + delta).clamp(0, lines_count as i32 - 1) as u32;
+        let new_line = (self.cursor.line as i32 + delta).clamp(0, lines_count as i32 - 1) as u32;
         let new_pos = self.coordinates_to_position(new_line, self.cursor.column);
         self.goto_position(new_pos, select);
     }
@@ -251,7 +241,8 @@ impl OnPaint for Editor {
             // TODO: paint selection
             // show cursor
             if self.cursor.visible {
-                surface.set_cursor(self.cursor.column as i32 + x, self.cursor.line as i32);
+                let y = self.cursor.line.saturating_sub(self.start_line) as i32;
+                surface.set_cursor(self.cursor.column as i32 + x, y);
             }
         }
     }

@@ -58,7 +58,7 @@ impl ViewPort {
     #[inline(always)]
     pub(super) fn update_line(&mut self, index: u32, line_number: u32, doc: &Document, attr: CharAttribute, tab_align: u32) {
         if index >= self.count {
-            if index > self.lines.len() as u32 {
+            if index >= self.lines.len() as u32 {
                 return;
             }
             while self.count <= index {
@@ -87,7 +87,12 @@ impl ViewPort {
             match mid_line.cmp(&line_number) {
                 Ordering::Equal => return Some(mid as u32),
                 Ordering::Less => left = mid + 1,
-                Ordering::Greater => right = mid - 1,
+                Ordering::Greater => {
+                    if mid == 0 {
+                        break;
+                    }
+                    right = mid - 1;
+                }
             }
         }
         None
