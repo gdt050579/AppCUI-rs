@@ -249,6 +249,47 @@ impl Editor {
         self.cursor.sticky_col = self.cursor.column + self.horizontal_scroll;
     }
 
+    /// Refresh on-screen cursor state after viewport-only scroll (Ctrl+Up/Down).
+    /// Document position is unchanged; visibility and screen column are updated.
+    fn sync_cursor_visibility(&mut self) {
+        if !self.view.contains_line(self.cursor.line) {
+            self.cursor.visible = false;
+            return;
+        }
+
+        let height = self.view.size().height as i32;
+        let screen_y = self.cursor_screen_y();
+        if screen_y < 0 || screen_y >= height {
+            self.cursor.visible = false;
+            return;
+        }
+
+        let pos_info = self.document.char_to_pos_info(self.cursor.pos);
+
+        if self.view.is_word_wrap_enabled() {
+            let Some(vp) = self.view.visual_pos(pos_info.line_index, pos_info.line_char_index) else {
+                self.cursor.visible = false;
+                return;
+            };
+            self.cursor.row_in_line = vp.row;
+            self.cursor.column = vp.col_in_row;
+            self.cursor.visible = true;
+        } else {
+            self.cursor.row_in_line = 0;
+            let Some(x_offset) = self.view.unwrapped_col(pos_info.line_index, pos_info.line_char_index) else {
+                self.cursor.visible = false;
+                return;
+            };
+            let w = self.view.size().width;
+            if w > 0 && (x_offset < self.horizontal_scroll || x_offset >= self.horizontal_scroll + w) {
+                self.cursor.visible = false;
+                return;
+            }
+            self.cursor.column = x_offset.saturating_sub(self.horizontal_scroll);
+            self.cursor.visible = true;
+        }
+    }
+
     /// Move the cursor by N visual rows. Preserves sticky column across short lines.
     fn move_visual_rows(&mut self, delta: i32, select: bool) {
         let lines_count = self.document.lines_count();
@@ -509,6 +550,7 @@ impl OnKeyPressed for Editor {
                     self.start_line = self.start_line.saturating_sub(1);
                     self.update_view();
                 }
+                self.sync_cursor_visibility();
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Down") => {
@@ -527,6 +569,7 @@ impl OnKeyPressed for Editor {
                     self.start_line = (self.start_line + 1).min(max.saturating_sub(1));
                     self.update_view();
                 }
+                self.sync_cursor_visibility();
                 EventProcessStatus::Processed
             }
 
