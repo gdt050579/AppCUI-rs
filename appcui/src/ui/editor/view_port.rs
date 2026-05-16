@@ -12,7 +12,7 @@ pub(super) struct ViewPort {
 }
 
 /// A row to paint: which logical line, which visual row within it.
-pub(super) struct RowIterator<'a> {
+pub(super) struct VisualRawRef<'a> {
     pub(super) line: &'a Line,
     pub(super) row_in_line: u32,
     pub(super) is_first_row: bool,
@@ -170,7 +170,7 @@ impl ViewPort {
     }
 
     /// Iterate paintable visual rows, top-to-bottom, clipped to viewport height.
-    pub(super) fn visual_rows(&self) -> impl Iterator<Item = RowIterator<'_>> {
+    pub(super) fn visual_rows(&self) -> impl Iterator<Item = VisualRawRef<'_>> {
         let height = self.size.height;
         let start_row = self.start_visual_row;
         let count = self.count as usize;
@@ -182,7 +182,7 @@ impl ViewPort {
             .flat_map(move |(li, line)| {
                 let total = line.visual_row_count();
                 let skip = if li == 0 { start_row } else { 0 };
-                (skip..total).map(move |r| RowIterator {
+                (skip..total).map(move |r| VisualRawRef {
                     line,
                     row_in_line: r,
                     is_first_row: r == 0,
