@@ -107,6 +107,9 @@ impl<'a> ControlBuilder<'a> {
             self.content.push_str("false");
         }
     }
+    fn add_integer(&mut self, value: i32) {
+        self.content.push_str(format!("{value}").as_str());
+    }
     fn add_size(&mut self, value: Size) {
         self.content.push_str(format!("Size::new({},{})", value.width, value.height).as_str());
     }
@@ -240,6 +243,17 @@ impl<'a> ControlBuilder<'a> {
             panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
         }
     }
+    pub(super) fn add_integer_parameter(&mut self, param_name: &str, default: Option<i32>) {
+        self.add_comma();
+        let value = self.parser.get_i32(param_name);
+        if let Some(integer_value) = value {
+            self.add_integer(integer_value);
+        } else if let Some(default_value) = default {
+            self.add_integer(default_value);
+        } else {
+            panic!("Parameter {param_name} is mandatory ! (you need to provided it as part of macro initialization)");
+        }
+    }    
     pub(super) fn add_size_parameter(&mut self, param_name: &str, default: Option<Size>) {
         self.add_comma();
         let value = self.parser.get_size(param_name);
