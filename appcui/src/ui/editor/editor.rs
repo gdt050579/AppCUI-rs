@@ -42,7 +42,17 @@ pub struct Editor {
 impl Editor {
     pub fn new(text: &str, layout: Layout, flags: Flags) -> Self {
         let mut editor = Self {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(
+                layout,
+                StatusFlags::Visible
+                    | StatusFlags::Enabled
+                    | StatusFlags::AcceptInput
+                    | if flags.contains(Flags::ScrollBars) {
+                        StatusFlags::IncreaseBottomMarginOnFocus | StatusFlags::IncreaseRightMarginOnFocus
+                    } else {
+                        StatusFlags::None
+                    },
+            ),
             document: Document::new(text),
             tab_align: 4,
             start_line: 0,
