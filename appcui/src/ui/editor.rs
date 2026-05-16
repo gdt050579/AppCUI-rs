@@ -18,6 +18,7 @@ pub(self) use self::document::PosInfo;
 pub(self) use self::char_class::CharClass;
 pub(self) use self::selection::Selection;
 pub(self) use self::line::Line;
+pub(self) use self::line::LineCharIndex;
 pub(self) use self::view_port::ViewPort;
 
 pub use self::editor::Editor;

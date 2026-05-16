@@ -1,6 +1,21 @@
 use super::Document;
 use crate::prelude::{CharAttribute, Character};
 
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[repr(transparent)]
+pub(super) struct LineCharIndex(u32);
+impl LineCharIndex {
+    #[inline(always)]
+    pub(super) fn new(index: u32) -> Self {
+        Self(index)
+    }
+    #[inline(always)]
+    pub(super) fn get(&self) -> u32 {
+        self.0
+    }
+}
+
 pub struct Line {
     line_number: u32,
     chars: Vec<Character>,
@@ -54,7 +69,14 @@ impl Line {
         self.line_number = u32::MAX;
     }
     #[inline(always)]
-    pub(super) fn x_offset(&self, char_index: usize) -> Option<u32> {
-        self.char_to_position.get(char_index).copied()
+    pub(super) fn line_char_index_to_column(&self, line_char_index: LineCharIndex) -> Option<u32> {
+        self.char_to_position.get(line_char_index.0 as usize).copied()
+    }
+    pub(super) fn column_to_line_char_index(&self, column: u32) -> Option<LineCharIndex> {
+        if self.char_to_position.is_empty() {
+            return None;
+        }
+        let idx = self.char_to_position.partition_point(|&pos| pos <= column).saturating_sub(1);
+        Some(LineCharIndex(idx as u32))
     }
 }

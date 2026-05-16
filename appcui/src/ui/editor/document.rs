@@ -1,9 +1,10 @@
 use ropey::{Rope, RopeSlice};
 use ropey::iter::{Lines, Chars};
+use super::LineCharIndex;
 
 pub(super) struct PosInfo {
     pub(super) line_index: u32,
-    pub(super) rel_offset: u32,
+    pub(super) line_char_index: LineCharIndex,
 }
 pub(super) struct Document {
     rope: ropey::Rope,
@@ -46,9 +47,7 @@ impl Document {
         let line_index = self.position_to_line(char_index);
         let start = self.rope.line_to_char(line_index as usize);
         debug_assert!(char_index >= start);
-        PosInfo {
-            line_index,
-            rel_offset: (char_index - start) as u32,
-        }
+        let line_char_index = LineCharIndex::new((char_index - start) as u32);
+        PosInfo { line_index, line_char_index }
     }
 }

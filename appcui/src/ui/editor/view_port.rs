@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use super::{Document, Line};
+use super::{Document, Line, LineCharIndex};
 use crate::prelude::{CharAttribute, Size};
 
 pub(super) struct ViewPort {
@@ -97,9 +97,16 @@ impl ViewPort {
         }
         None
     }
-    pub(super) fn x_offset(&self, line_number: u32, relative_char_index: usize) -> Option<u32> {
+    pub(super) fn x_offset(&self, line_number: u32, char_index: LineCharIndex) -> Option<u32> {
         if let Some(line_index) = self.line_number_to_index(line_number) {
-            self.lines[line_index as usize].x_offset(relative_char_index)
+            self.lines[line_index as usize].line_char_index_to_column(char_index)
+        } else {
+            None
+        }
+    }
+    pub(super) fn screen_position_to_line_char_index(&self, line_number: u32, column: u32) -> Option<LineCharIndex> {
+        if let Some(line_index) = self.line_number_to_index(line_number) {
+            self.lines[line_index as usize].column_to_line_char_index(column)
         } else {
             None
         }

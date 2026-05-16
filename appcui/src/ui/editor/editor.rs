@@ -62,28 +62,39 @@ impl Editor {
             self.margin.line_number_x = 0;
         }
     }
-    fn coordinates_to_position(&self, line: u32, column: u32) -> usize {
-        let ln = self.document.line(line);
-        let start = self.document.line_to_char(line);
-        let mut x = 0;
-        let align = self.tab_align as u32;
-        for (i, ch) in ln.chars().enumerate() {
-            if x >= column {
-                return start + i;
-            }
-            if ch == '\t' {
-                x += align - (x % align);
-            } else {
-                x += 1;
-            }
-            if ch == '\n' {
-                break;
-            }
-        }
-        let len = ln.len_chars().saturating_sub(1);
-        return start + len;
-    }
+    // fn coordinates_to_position(&self, line: u32, column: u32) -> usize {
+    //     let ln = self.document.line(line);
+    //     let start = self.document.line_to_char(line);
+    //     let mut x = 0;
+    //     let align = self.tab_align as u32;
+    //     for (i, ch) in ln.chars().enumerate() {
+    //         if x >= column {
+    //             return start + i;
+    //         }
+    //         if ch == '\t' {
+    //             x += align - (x % align);
+    //         } else {
+    //             x += 1;
+    //         }
+    //         if ch == '\n' {
+    //             break;
+    //         }
+    //     }
+    //     let len = ln.len_chars().saturating_sub(1);
+    //     return start + len;
+    // }
 
+    fn ensure_line_is_cached(&mut self, line_index: u32) {
+        if !self.view.contains_line(line_index) {
+            if line_index < self.view.first_line() {
+                self.start_line = line_index;
+            } else if line_index > self.view.last_line() {
+                let h = self.view.size().height.saturating_sub(1);
+                self.start_line = line_index.saturating_sub(h);
+            }
+            self.update_view();
+        }
+    }
     fn goto_position(&mut self, position: usize, select: bool) {
         let new_pos = position.min(self.document.chars_count());
         if select {
@@ -92,19 +103,11 @@ impl Editor {
             self.selection.clear();
         }
         let pos_info = self.document.char_to_pos_info(new_pos);
-        if !self.view.contains_line(pos_info.line_index) {
-            if pos_info.line_index < self.view.first_line() {
-                self.start_line = pos_info.line_index;
-            } else if pos_info.line_index > self.view.last_line() {
-                let h = self.view.size().height.saturating_sub(1);
-                self.start_line = pos_info.line_index.saturating_sub(h);
-            }
-            self.update_view();
-        }
+        self.ensure_line_is_cached(pos_info.line_index);
         self.cursor.pos = new_pos;
         self.cursor.line = pos_info.line_index;
         if self.view.contains_line(pos_info.line_index) {
-            if let Some(x_offset) = self.view.x_offset(pos_info.line_index, pos_info.rel_offset as usize) {
+            if let Some(x_offset) = self.view.x_offset(pos_info.line_index, pos_info.line_char_index) {
                 self.cursor.visible = true;
                 // update horizontal scroll
                 let w = self.view.size().width;
@@ -129,8 +132,10 @@ impl Editor {
             return;
         }
         let new_line = (self.cursor.line as i32 + delta).clamp(0, lines_count as i32 - 1) as u32;
-        let new_pos = self.coordinates_to_position(new_line, self.cursor.column);
-        self.goto_position(new_pos, select);
+        self.ensure_line_is_cached(new_line);
+        if let Some(new_pos) = self.view.screen_position_to_line_char_index(new_line, self.cursor.column) {
+            self.goto_position(self.document.line_to_char(new_line) + new_pos.get() as usize, select);
+        }
     }
     fn move_to_next_word(&mut self, select: bool) {
         let mut iter = self.document.chars_iter(self.cursor.pos);
@@ -268,7 +273,7 @@ impl OnKeyPressed for Editor {
                 self.move_to_line(1, select);
                 EventProcessStatus::Processed
             }
-            key!("PageUp") | key!("Shift+PageUp") => {            
+            key!("PageUp") | key!("Shift+PageUp") => {
                 self.move_to_line(-(self.view.size().height as i32), select);
                 EventProcessStatus::Processed
             }
