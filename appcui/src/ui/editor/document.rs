@@ -20,9 +20,9 @@ impl Document {
     pub(super) fn line(&self, line_index: u32) -> RopeSlice<'_> {
         self.rope.line(line_index as usize)
     }
-    pub(super) fn lines_starting_from(&self, line_index: u32) -> Lines<'_> {
-        self.rope.lines_at(line_index as usize)
-    }
+    // pub(super) fn lines_starting_from(&self, line_index: u32) -> Lines<'_> {
+    //     self.rope.lines_at(line_index as usize)
+    // }
     pub(super) fn line_to_char(&self, line_index: u32) -> usize {
         self.rope.line_to_char(line_index as usize)
     }
