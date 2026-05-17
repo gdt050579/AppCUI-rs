@@ -483,12 +483,12 @@ impl Editor {
             line_idx += 1;
         }
     }
-    fn notify_text_changed(&mut self) {
+    fn notify_document_changed(&mut self) {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
             data: ControlEventData::Editor(EventData {
-                evtype: EditorEventsType::OnTextChanged,
+                evtype: EditorEventsType::OnDocumentChanged,
             }),
         });
     }

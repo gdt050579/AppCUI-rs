@@ -167,7 +167,7 @@ impl ControlEvent {
             ControlEventData::Editor(data) => match data.evtype {
                 EditorEventsType::OnCaretMoved => EditorEvents::on_caret_moved(receiver, self.emitter.cast()),
                 EditorEventsType::OnCharPressed(ch) => EditorEvents::on_char_pressed(receiver, self.emitter.cast(), ch),
-                EditorEventsType::OnTextChanged => EditorEvents::on_text_changed(receiver, self.emitter.cast()),
+                EditorEventsType::OnDocumentChanged => EditorEvents::on_document_changed(receiver, self.emitter.cast()),
             },
         }
     }

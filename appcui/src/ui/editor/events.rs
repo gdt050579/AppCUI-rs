@@ -5,7 +5,7 @@ use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 pub enum EditorEventsType {
     OnCaretMoved,
     OnCharPressed(char),
-    OnTextChanged,
+    OnDocumentChanged,
 }
 
 pub trait EditorEvents {
@@ -15,7 +15,7 @@ pub trait EditorEvents {
     fn on_char_pressed(&mut self, _handle: Handle<Editor>, _ch: char) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
-    fn on_text_changed(&mut self, _handle: Handle<Editor>) -> EventProcessStatus {
+    fn on_document_changed(&mut self, _handle: Handle<Editor>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
