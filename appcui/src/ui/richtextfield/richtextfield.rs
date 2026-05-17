@@ -3,7 +3,7 @@ use super::undo::{LastAction, UndoEntry, UndoOp, MAX_UNDO_DEPTH};
 use crate::prelude::*;
 use crate::ui::common::{ControlEvent, ControlEventData};
 use crate::ui::textfield::selection::Selection;
-use crate::ui::textfield::events::{EventData, TextFieldEventsType};
+use crate::ui::richtextfield::events::{EventData, RichTextFieldEventsType};
 use crate::ui::textfield::{CharClass, Flags};
 
 struct Cursor {
@@ -607,7 +607,7 @@ impl RichTextField {
             emitter: self.handle,
             receiver: self.event_processor,
             data: ControlEventData::RichTextField(EventData {
-                evtype: TextFieldEventsType::OnTextChanged,
+                evtype: RichTextFieldEventsType::OnTextChanged,
             }),
         });
     }
@@ -775,7 +775,7 @@ impl OnKeyPressed for RichTextField {
                         emitter: self.handle,
                         receiver: self.event_processor,
                         data: ControlEventData::RichTextField(EventData {
-                            evtype: TextFieldEventsType::OnValidate,
+                            evtype: RichTextFieldEventsType::OnValidate,
                         }),
                     });
                     return EventProcessStatus::Processed;

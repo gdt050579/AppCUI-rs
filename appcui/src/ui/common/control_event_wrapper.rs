@@ -11,7 +11,10 @@ use crate::ui::{
     graphview::events::GenericGraphViewEvents, listbox::events::ListBoxEvents, listview::events::GenericListViewEvents, markdown,
     markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents, radiobox,
     radiobox::events::RadioBoxEvents, richtextfield::events::RichTextFieldEvents, tab, tab::events::TabEvents, textfield::events::TextFieldEvents,
-    timepicker, timepicker::events::TimePickerEvents, treeview::events::GenericTreeViewEvents,
+    timepicker, timepicker::events::TimePickerEvents, treeview::events::GenericTreeViewEvents, togglebutton::events::ToggleButtonEvents, threestatebox::events::ThreeStateBoxEvents,
+    listbox::events::ListBoxEventTypes, listview::events::ListViewEventTypes,
+    treeview::events::TreeViewEventTypes, graphview::events::GraphViewEventTypes, textfield::events::TextFieldEventsType,
+    richtextfield::events::RichTextFieldEventsType,
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -33,7 +36,7 @@ pub(crate) enum ControlEventData {
     Password(password::events::EventData),
     KeySelector(keyselector::events::EventData),
     TextField(textfield::events::EventData),
-    RichTextField(textfield::events::EventData),
+    RichTextField(richtextfield::events::EventData),
     Selector(selector::events::EventData),
     ComboBox(combobox::events::EventData),
     DropDownList(dropdownlist::events::EventData),
@@ -63,9 +66,7 @@ impl ControlEvent {
             ControlEventData::Button(_) => ButtonEvents::on_pressed(receiver, self.emitter.cast()),
             ControlEventData::CheckBox(data) => CheckBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.checked),
             ControlEventData::RadioBox(_) => RadioBoxEvents::on_selected(receiver, self.emitter.cast()),
-            ControlEventData::ToggleButton(data) => {
-                togglebutton::events::ToggleButtonEvents::on_selection_changed(receiver, self.emitter.cast(), data.status)
-            }
+            ControlEventData::ToggleButton(data) => ToggleButtonEvents::on_selection_changed(receiver, self.emitter.cast(), data.status),
             ControlEventData::ColorPicker(data) => ColorPickerEvents::on_color_changed(receiver, self.emitter.cast(), data.color),
             ControlEventData::ThreeStateBox(data) => ThreeStateBoxEvents::on_status_changed(receiver, self.emitter.cast(), data.state),
             ControlEventData::Password(data) => {
@@ -79,27 +80,27 @@ impl ControlEvent {
             ControlEventData::TextField(data) => {
                 let h: Handle<TextField> = self.emitter.cast();
                 match data.evtype {
-                    textfield::events::TextFieldEventsType::OnValidate => {
+                    TextFieldEventsType::OnValidate => {
                         if let Some(tf) = RuntimeManager::get().get_control(h) {
                             TextFieldEvents::on_validate(receiver, self.emitter.cast(), tf.text())
                         } else {
                             EventProcessStatus::Ignored
                         }
                     }
-                    textfield::events::TextFieldEventsType::OnTextChanged => TextFieldEvents::on_text_changed(receiver, self.emitter.cast()),
+                    TextFieldEventsType::OnTextChanged => TextFieldEvents::on_text_changed(receiver, self.emitter.cast()),
                 }
             }
             ControlEventData::RichTextField(data) => {
                 let h: Handle<richtextfield::RichTextField> = self.emitter.cast();
                 match data.evtype {
-                    textfield::events::TextFieldEventsType::OnValidate => {
+                    RichTextFieldEventsType::OnValidate => {
                         if let Some(rtf) = RuntimeManager::get().get_control(h) {
                             RichTextFieldEvents::on_validate(receiver, self.emitter.cast(), rtf.text())
                         } else {
                             EventProcessStatus::Ignored
                         }
                     }
-                    textfield::events::TextFieldEventsType::OnTextChanged => RichTextFieldEvents::on_text_changed(receiver, self.emitter.cast()),
+                    RichTextFieldEventsType::OnTextChanged => RichTextFieldEvents::on_text_changed(receiver, self.emitter.cast()),
                 }
             }
             ControlEventData::Custom(data) => CustomEvents::on_event(receiver, self.emitter.cast(), data.class_hash, data.event_id),
@@ -109,48 +110,36 @@ impl ControlEvent {
             ControlEventData::NumericSelector(data) => GenericNumericSelectorEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id),
             ControlEventData::DatePicker(data) => DatePickerEvents::on_date_changed(receiver, self.emitter.cast(), data.date),
             ControlEventData::ListBox(data) => match data.event_type {
-                listbox::events::ListBoxEventTypes::CurrentItemChanged => {
-                    ListBoxEvents::on_current_item_changed(receiver, self.emitter.cast(), data.index)
-                }
-                listbox::events::ListBoxEventTypes::ItemChecked => {
-                    ListBoxEvents::on_item_checked(receiver, self.emitter.cast(), data.index, data.checked)
-                }
+                ListBoxEventTypes::CurrentItemChanged => ListBoxEvents::on_current_item_changed(receiver, self.emitter.cast(), data.index),
+                ListBoxEventTypes::ItemChecked => ListBoxEvents::on_item_checked(receiver, self.emitter.cast(), data.index, data.checked),
             },
             ControlEventData::ListView(data) => match data.event_type {
-                listview::events::ListViewEventTypes::CurrentItemChanged => {
-                    GenericListViewEvents::on_current_item_changed(receiver, self.emitter.cast(), data.type_id)
-                }
-                listview::events::ListViewEventTypes::GroupFoldedOrUnfolded(group, collapsed) => {
+                ListViewEventTypes::CurrentItemChanged => GenericListViewEvents::on_current_item_changed(receiver, self.emitter.cast(), data.type_id),
+                ListViewEventTypes::GroupFoldedOrUnfolded(group, collapsed) => {
                     if collapsed {
                         GenericListViewEvents::on_group_collapsed(receiver, self.emitter.cast(), data.type_id, group)
                     } else {
                         GenericListViewEvents::on_group_expanded(receiver, self.emitter.cast(), data.type_id, group)
                     }
                 }
-                listview::events::ListViewEventTypes::SelectionChanged => {
-                    GenericListViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
-                }
-                listview::events::ListViewEventTypes::ItemAction(index) => {
-                    GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index)
-                }
+                ListViewEventTypes::SelectionChanged => GenericListViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id),
+                ListViewEventTypes::ItemAction(index) => GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index),
             },
             ControlEventData::PathFinder(_) => PathFinderEvents::on_path_updated(receiver, self.emitter.cast()),
             ControlEventData::TreeView(data) => match data.event_type {
-                treeview::events::TreeViewEventTypes::CurrentItemChanged(item_handle) => {
+                TreeViewEventTypes::CurrentItemChanged(item_handle) => {
                     GenericTreeViewEvents::on_current_item_changed(receiver, self.emitter.cast(), data.type_id, item_handle)
                 }
-                treeview::events::TreeViewEventTypes::ItemCollapsed(item_handle, recursive) => {
+                TreeViewEventTypes::ItemCollapsed(item_handle, recursive) => {
                     GenericTreeViewEvents::on_item_collapsed(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
                 }
-                treeview::events::TreeViewEventTypes::ItemExpanded(item_handle, recursive) => {
+                TreeViewEventTypes::ItemExpanded(item_handle, recursive) => {
                     GenericTreeViewEvents::on_item_expanded(receiver, self.emitter.cast(), data.type_id, item_handle, recursive)
                 }
-                treeview::events::TreeViewEventTypes::ItemAction(item_handle) => {
+                TreeViewEventTypes::ItemAction(item_handle) => {
                     GenericTreeViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, item_handle)
                 }
-                treeview::events::TreeViewEventTypes::SelectionChanged => {
-                    GenericTreeViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
-                }
+                TreeViewEventTypes::SelectionChanged => GenericTreeViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id),
             },
             ControlEventData::Markdown(data) => match &data.event_type {
                 markdown::events::Data::BackEvent => MarkdownEvents::on_backspace_navigation(receiver, self.emitter.cast()),
@@ -165,26 +154,20 @@ impl ControlEvent {
             }
             ControlEventData::TimePicker(data) => TimePickerEvents::on_time_changed(receiver, self.emitter.cast(), data.time),
             ControlEventData::GraphView(data) => match data.event_type {
-                graphview::events::GraphViewEventTypes::CurrentNodeChanged => {
+                GraphViewEventTypes::CurrentNodeChanged => {
                     GenericGraphViewEvents::on_current_node_changed(receiver, self.emitter.cast(), data.type_id)
                 }
-                graphview::events::GraphViewEventTypes::NodeAction(index) => {
-                    GenericGraphViewEvents::on_node_action(receiver, self.emitter.cast(), data.type_id, index)
-                }
-                graphview::events::GraphViewEventTypes::RequestNewNode(p) => {
-                    GenericGraphViewEvents::on_request_new_node(receiver, self.emitter.cast(), data.type_id, p)
-                }
-                graphview::events::GraphViewEventTypes::RequestNewEdge(from, to) => {
+                GraphViewEventTypes::NodeAction(index) => GenericGraphViewEvents::on_node_action(receiver, self.emitter.cast(), data.type_id, index),
+                GraphViewEventTypes::RequestNewNode(p) => GenericGraphViewEvents::on_request_new_node(receiver, self.emitter.cast(), data.type_id, p),
+                GraphViewEventTypes::RequestNewEdge(from, to) => {
                     GenericGraphViewEvents::on_request_new_edge(receiver, self.emitter.cast(), data.type_id, from, to)
                 }
-                graphview::events::GraphViewEventTypes::SelectionChanged => {
-                    GenericGraphViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
-                }
+                GraphViewEventTypes::SelectionChanged => GenericGraphViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id),
             },
             ControlEventData::Editor(data) => match data.evtype {
-                editor::events::EditorEventsType::OnCursorPositionChanged => EditorEvents::on_cursor_position_changed(receiver, self.emitter.cast()),
-                editor::events::EditorEventsType::OnCharPressed(ch) => EditorEvents::on_char_pressed(receiver, self.emitter.cast(), ch),
-                editor::events::EditorEventsType::OnTextChanged => EditorEvents::on_text_changed(receiver, self.emitter.cast()),
+                EditorEventsType::OnCursorPositionChanged => EditorEvents::on_cursor_position_changed(receiver, self.emitter.cast()),
+                EditorEventsType::OnCharPressed(ch) => EditorEvents::on_char_pressed(receiver, self.emitter.cast(), ch),
+                EditorEventsType::OnTextChanged => EditorEvents::on_text_changed(receiver, self.emitter.cast()),
             },
         }
     }
