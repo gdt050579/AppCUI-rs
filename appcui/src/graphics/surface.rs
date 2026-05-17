@@ -1119,7 +1119,7 @@ impl Surface {
     ///
     /// Example:
     /// ```rust
-    /// use appcui::graphics::{Surface, Character};
+    /// use appcui::graphics::{Surface, Character, CharFlags, Color};
     ///
     /// let mut surface = Surface::new(100, 50);
     /// let chars = vec![Character::new('H', Color::White, Color::Black, CharFlags::None),
