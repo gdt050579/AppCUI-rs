@@ -44,6 +44,7 @@ pub struct Editor {
     margin: MarginSize,
     view: ViewPort,
     selection: Selection,
+    scrollbars: ScrollBars,
 }
 
 impl Editor {
@@ -69,6 +70,7 @@ impl Editor {
             margin: MarginSize::default(),
             view: ViewPort::new(16),
             selection: Selection::NONE,
+            scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
         };
         editor.update_margin();
         editor
@@ -238,6 +240,8 @@ impl Editor {
 
         self.cursor.pos = new_pos;
         self.cursor.line = pos_info.line_index;
+        self.scrollbars.update(1, self.document.lines_count() as u64, self.size());
+        self.scrollbars.set_indexes(0, self.start_line as u64);
 
         if !self.view.contains_line(pos_info.line_index) {
             self.cursor.visible = false;
@@ -496,6 +500,10 @@ impl Editor {
 
 impl OnPaint for Editor {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        if (self.has_focus()) && (self.flags.contains(Flags::ScrollBars)) {
+            self.scrollbars.paint(surface, theme, self);
+            surface.reduce_clip_by(0,0,1,1);
+        }
         let x = if self.margin.visible { self.margin.width as i32 } else { 0 };
         let w = self.view.size().width;
         let h = self.view.size().height as i32;
@@ -685,7 +693,8 @@ impl OnMouseEvent for Editor {
 }
 
 impl OnResize for Editor {
-    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
+    fn on_resize(&mut self, _old_size: Size, new_size: Size) {  
+        self.scrollbars.resize(0, self.document.lines_count() as u64, &self.base);    
         if new_size.width <= self.margin.width as u32 {
             self.margin.visible = false;
             self.view.resize(new_size);

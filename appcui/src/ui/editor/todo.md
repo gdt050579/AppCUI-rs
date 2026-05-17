@@ -82,18 +82,9 @@
 - [ ] `Ctrl+[` → outdent line
 
 ## Performance
-- [x] Replace `document.char_at` loops in `move_to_next_word` / `move_to_previous_word` with ropey `Chars` iterator
-- [ ] Cache cursor virtual column; update incrementally on horizontal moves instead of recomputing via `position_to_virtual_column`
-- [ ] Decide between dirty-region painting vs. cheap full-repaint before adding highlighting
-- [ ] Refactor `view: Option<Surface>` to `surface: Surface` + lazy init in `on_resize` + `needs_repaint` flag
-- [x] Verify `Selection::contains` is O(1); if not, precompute per-line selection overlap before the char loop in `paint_line`
-- [ ] Fix off-by-one in `coordinates_to_position` for the final line of a document with no trailing newline
-- [ ] Make `update_view` panic-safe (don't leave `view` as `None` if anything between `take()` and reassign panics)
-- [ ] Skip horizontally-scrolled-off chars in `paint_line` without iterating them one by one
-- [ ] Design syntax highlighting: per-line `LineCache` with `state_in`/`state_out`, `Highlighter` trait, style palette indexed by `u8`
-- [ ] Implement lazy tokenization: only tokenize visible lines + buffer, track highest-tokenized-line watermark
-- [ ] Define style precedence: selection > match-highlight > syntax > default
-- [ ] Design "highlight similar selection": viewport-bounded search, debounced, cached by `(needle_hash, viewport_range)`
-- [ ] Implement viewport-bounded search using ropey `Chunks` + `memmem`, handling chunk boundaries
-- [ ] Exclude the active selection itself from the "similar matches" list
-- [ ] Add unit tests for `coordinates_to_position`, `position_to_virtual_column`, and word-motion edge cases
+
+## Visual
+- [ ] Add vertical scrollbar
+- [ ] Add horizontal scrollbar - horizontal scroll is only computed for the cache (based on the largest line in the view port)
+- [ ] Show selection(s)
+- [ ] Sybtax highlighting
