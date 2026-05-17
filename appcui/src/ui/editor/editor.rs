@@ -1,6 +1,6 @@
+use super::events::*;
 use super::{CharClass, Document, Flags, Selection, ViewPort};
 use crate::prelude::*;
-use super::events::*;
 
 #[derive(Default)]
 struct MarginSize {
@@ -23,6 +23,12 @@ struct Cursor {
     /// Sticky visual column for vertical movement. Tracks user intent across short lines.
     sticky_col: u32,
     visible: bool,
+}
+
+pub struct Caret {
+    pub column: u32,
+    pub line: u32,
+    pub pos: usize,
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
@@ -80,6 +86,21 @@ impl Editor {
             let pos = self.cursor.pos;
             self.goto_position(pos, false);
         }
+    }
+
+    /// Returns the current caret position
+    #[inline(always)]
+    pub fn caret(&self) -> Caret {
+        Caret {
+            column: self.cursor.column,
+            line: self.cursor.line,
+            pos: self.cursor.pos,
+        }
+    }
+    /// Returns the number of lines of the document that is opened in the editor
+    #[inline(always)]
+    pub fn lines_count(&self) -> usize {
+        self.document.lines_count()
     }
 
     fn update_margin(&mut self) {
@@ -471,7 +492,6 @@ impl Editor {
             }),
         });
     }
-
 }
 
 impl OnPaint for Editor {

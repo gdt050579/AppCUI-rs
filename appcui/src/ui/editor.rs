@@ -24,4 +24,5 @@ pub(self) use self::line::VisualPos;
 pub(self) use self::view_port::ViewPort;
 pub(self) use self::view_port::VisualRowRef;
 pub use self::editor::Editor;
+pub use self::editor::Caret;
 pub use self::initialization_flags::Flags;
