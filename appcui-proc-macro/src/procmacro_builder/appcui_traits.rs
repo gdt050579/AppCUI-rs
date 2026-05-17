@@ -58,6 +58,7 @@ pub(crate) enum AppCUITrait {
     AppBarEvents = 49,
     TimePickerEvents = 50,
     RichTextFieldEvents = 51,
+    EditorEvents = 52,
 }
 
 #[repr(u8)]
@@ -126,6 +127,7 @@ impl AppCUITrait {
             AppCUITrait::AppBarEvents => "AppBarEvents",              
             AppCUITrait::TimePickerEvents => "TimePickerEvents",
             AppCUITrait::RichTextFieldEvents => "RichTextFieldEvents",
+            AppCUITrait::EditorEvents => "EditorEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -185,6 +187,7 @@ impl AppCUITrait {
             AppCUITrait::AppBarEvents => TraitType::ControlEvent,
             AppCUITrait::TimePickerEvents => TraitType::ControlEvent,
             AppCUITrait::RichTextFieldEvents => TraitType::ControlEvent,
+            AppCUITrait::EditorEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -244,6 +247,7 @@ impl AppCUITrait {
             AppCUITrait::AppBarEvents => "",
             AppCUITrait::TimePickerEvents => "",
             AppCUITrait::RichTextFieldEvents => "",
+            AppCUITrait::EditorEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -303,6 +307,7 @@ impl AppCUITrait {
             AppCUITrait::AppBarEvents => "impl$(TEMPLATE_TYPE) AppBarEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::TimePickerEvents => "impl$(TEMPLATE_TYPE) TimePickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::RichTextFieldEvents => "impl$(TEMPLATE_TYPE) RichTextFieldEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::EditorEvents => "impl$(TEMPLATE_TYPE) EditorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -364,6 +369,7 @@ impl AppCUITrait {
             "AppBarEvents" | "AppBar" => Some(AppCUITrait::AppBarEvents),
             "TimePickerEvents" | "TimePicker" => Some(AppCUITrait::TimePickerEvents),
             "RichTextFieldEvents" | "RichTextField" => Some(AppCUITrait::RichTextFieldEvents),
+            "EditorEvents" | "Editor" => Some(AppCUITrait::EditorEvents),
 
             _ => None,
         }
@@ -425,6 +431,7 @@ impl AppCUITrait {
             49 => Some(AppCUITrait::AppBarEvents),
             50 => Some(AppCUITrait::TimePickerEvents),
             51 => Some(AppCUITrait::RichTextFieldEvents),
+            52 => Some(AppCUITrait::EditorEvents),
             _ => None,
         };
         result?;

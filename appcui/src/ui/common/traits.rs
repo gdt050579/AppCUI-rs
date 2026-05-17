@@ -33,6 +33,7 @@ use crate::{
         window::events::{ToolBarEvents, WindowEvents},
         tab::events::TabEvents,
         timepicker::events::TimePickerEvents,
+        editor::events::EditorEvents,
     },
 };
 
@@ -180,6 +181,7 @@ pub trait Control:
     + GenericGraphViewEvents
     + AppBarEvents
     + TimePickerEvents
+    + EditorEvents
 {
 }
 

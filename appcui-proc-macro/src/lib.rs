@@ -108,6 +108,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::EditorEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -176,6 +177,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::EditorEvents, TraitImplementation::DefaultNonOverwritable);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -269,7 +271,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::Default);
-
+    config.set(AppCUITrait::EditorEvents, TraitImplementation::Default);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
 
@@ -335,7 +337,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::Default);
-
+    config.set(AppCUITrait::EditorEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -427,7 +429,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::DefaultNonOverwritable);
-
+    config.set(AppCUITrait::EditorEvents, TraitImplementation::DefaultNonOverwritable);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 

@@ -1,22 +1,17 @@
-use textfield::TextField;
-
 use super::traits::{Control, CustomEvents, EventProcessStatus};
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
-use crate::prelude::{
-    colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, richtextfield, selector, textfield,
-    threestatebox, togglebutton, GenericSelectorEvents, PathFinderEvents, RuntimeManager, ThreeStateBoxEvents,
-};
+use crate::prelude::*;
 use crate::system::Handle;
 
 use crate::ui::{
     accordion, accordion::events::AccordionEvents, button, button::events::ButtonEvents, charpicker, charpicker::events::CharPickerEvents, checkbox,
     checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents, datepicker::events::DatePickerEvents,
-    dropdownlist::events::GenericDropDownListEvents, graphview, graphview::events::GenericGraphViewEvents, listbox::events::ListBoxEvents,
-    listview::events::GenericListViewEvents, markdown, markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents,
-    password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
-    richtextfield::events::RichTextFieldEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
-    timepicker, timepicker::events::TimePickerEvents,
+    dropdownlist::events::GenericDropDownListEvents, editor::events::EditorEvents, editor::events::EditorEventsType, graphview,
+    graphview::events::GenericGraphViewEvents, listbox::events::ListBoxEvents, listview::events::GenericListViewEvents, markdown,
+    markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents, radiobox,
+    radiobox::events::RadioBoxEvents, richtextfield::events::RichTextFieldEvents, tab, tab::events::TabEvents, textfield::events::TextFieldEvents,
+    timepicker, timepicker::events::TimePickerEvents, treeview::events::GenericTreeViewEvents,
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -53,6 +48,7 @@ pub(crate) enum ControlEventData {
     Tab(tab::events::EventData),
     TimePicker(timepicker::events::EventData),
     GraphView(graphview::events::EventData),
+    Editor(editor::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -103,9 +99,7 @@ impl ControlEvent {
                             EventProcessStatus::Ignored
                         }
                     }
-                    textfield::events::TextFieldEventsType::OnTextChanged => {
-                        RichTextFieldEvents::on_text_changed(receiver, self.emitter.cast())
-                    }
+                    textfield::events::TextFieldEventsType::OnTextChanged => RichTextFieldEvents::on_text_changed(receiver, self.emitter.cast()),
                 }
             }
             ControlEventData::Custom(data) => CustomEvents::on_event(receiver, self.emitter.cast(), data.class_hash, data.event_id),
@@ -186,6 +180,11 @@ impl ControlEvent {
                 graphview::events::GraphViewEventTypes::SelectionChanged => {
                     GenericGraphViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
                 }
+            },
+            ControlEventData::Editor(data) => match data.evtype {
+                editor::events::EditorEventsType::OnCursorPositionChanged => EditorEvents::on_cursor_position_changed(receiver, self.emitter.cast()),
+                editor::events::EditorEventsType::OnCharPressed(ch) => EditorEvents::on_char_pressed(receiver, self.emitter.cast(), ch),
+                editor::events::EditorEventsType::OnTextChanged => EditorEvents::on_text_changed(receiver, self.emitter.cast()),
             },
         }
     }

@@ -10,6 +10,7 @@ mod document;
 mod char_class;
 mod selection;
 mod initialization_flags;
+pub mod events;
 #[cfg(test)]
 mod tests;
 
@@ -21,6 +22,6 @@ pub(self) use self::line::Line;
 pub(self) use self::line::LineCharIndex;
 pub(self) use self::line::VisualPos;
 pub(self) use self::view_port::ViewPort;
-pub(self) use self::view_port::VisualRawRef;
+pub(self) use self::view_port::VisualRowRef;
 pub use self::editor::Editor;
 pub use self::initialization_flags::Flags;

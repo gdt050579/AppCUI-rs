@@ -1,5 +1,6 @@
 use super::{CharClass, Document, Flags, Selection, ViewPort};
 use crate::prelude::*;
+use super::events::*;
 
 #[derive(Default)]
 struct MarginSize {
@@ -461,6 +462,16 @@ impl Editor {
             line_idx += 1;
         }
     }
+    fn notify_text_changed(&mut self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::Editor(EventData {
+                evtype: EditorEventsType::OnTextChanged,
+            }),
+        });
+    }
+
 }
 
 impl OnPaint for Editor {
