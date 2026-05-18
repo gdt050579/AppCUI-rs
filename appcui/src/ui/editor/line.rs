@@ -26,8 +26,10 @@ pub(super) struct VisualPos {
 pub struct Line {
     line_number: u32,
     chars: Vec<Character>,
-    char_to_unwrapped_col: Vec<u32>,
+    col_map: Vec<u32>,
     wrap_points: Vec<u32>,
+    is_modified: bool,
+    last_col: u32,
 }
 
 impl Line {
@@ -37,20 +39,25 @@ impl Line {
         Self {
             line_number: u32::MAX,
             chars: Vec::with_capacity(initial_capacity),
-            char_to_unwrapped_col: Vec::with_capacity(initial_capacity),
+            col_map: Vec::with_capacity(initial_capacity),
             wrap_points,
+            is_modified: false,
+            last_col: 0,
         }
     }
 
     pub(super) fn update(&mut self, line_number: u32, doc: &Document, attr: CharAttribute, tab_align: u32) {
         self.line_number = line_number;
         self.chars.clear();
-        self.char_to_unwrapped_col.clear();
+        self.col_map.clear();
         let mut col = 0u32;
 
         for c in doc.line(line_number).chars() {
+            if c == '\n' || c == '\r' {
+                break;
+            }
             self.chars.push(Character::with_attributes(if c as u32 >= 32 { c } else { ' ' }, attr));
-            self.char_to_unwrapped_col.push(col);
+            self.col_map.push(col);
             if c == '\t' {
                 col += tab_align - (col % tab_align);
                 while (col as usize) > self.chars.len() {
@@ -59,9 +66,12 @@ impl Line {
             } else {
                 col += 1;
             }
+
         }
+        self.last_col = col;
         self.wrap_points.clear();
         self.wrap_points.push(0);
+        self.is_modified = false;
     }
 
     /// Recompute wrap break columns for the current `chars` buffer.
@@ -102,11 +112,15 @@ impl Line {
         }
     }
 
+    pub(super) fn mark_modified(&mut self) {
+        self.is_modified = true;
+    }
+
     #[inline(always)]
     pub(super) fn columns_count(&self) -> u32 {
         self.chars.len() as u32
     }
-    
+
     #[inline(always)]
     pub(super) fn line_number(&self) -> u32 {
         self.line_number
@@ -143,25 +157,36 @@ impl Line {
 
     #[inline(always)]
     pub(super) fn reset(&mut self) {
+        self.last_col = 0;
         self.chars.clear();
-        self.char_to_unwrapped_col.clear();
+        self.col_map.clear();
         self.wrap_points.clear();
         self.wrap_points.push(0);
         self.line_number = u32::MAX;
+        self.is_modified = false;
     }
 
     // --- Unwrapped-column conversions (highlighter, selection, internal use) ---
 
     #[inline(always)]
     pub(super) fn line_char_index_to_unwrapped_col(&self, lci: LineCharIndex) -> Option<u32> {
-        self.char_to_unwrapped_col.get(lci.0 as usize).copied()
+        if (lci.0 as usize) < self.col_map.len() {
+            Some(self.col_map[lci.0 as usize])
+        } else if lci.0 as usize == self.chars.len() {
+            Some(self.last_col)
+        } else {
+            None
+        }  
     }
 
     pub(super) fn unwrapped_col_to_line_char_index(&self, column: u32) -> Option<LineCharIndex> {
-        if self.char_to_unwrapped_col.is_empty() {
-            return None;
+        if self.chars.is_empty() {
+            return Some(LineCharIndex(0));
         }
-        let idx = self.char_to_unwrapped_col.partition_point(|&pos| pos <= column).saturating_sub(1);
+        if column >= self.last_col {
+            return Some(LineCharIndex(self.chars.len() as u32));
+        }
+        let idx = self.col_map.partition_point(|&pos| pos <= column).saturating_sub(1);
         Some(LineCharIndex(idx as u32))
     }
 
