@@ -3785,7 +3785,7 @@ def plot_mix_manifest_info(filepath: str, plot_filepath: str = None):
         plt.legend(loc='lower left')
 
     plt.tight_layout()
-
+    
     if plot_filepath is not None:
         plt.savefig(plot_filepath)
         plt.close()
@@ -3796,8 +3796,8 @@ def plot_mix_manifest_info(filepath: str, plot_filepath: str = None):
 fn main() -> Result<(), appcui::system::Error> {
     let mut app = App::new().app_bar().build()?;
     let mut w = window!("'Test',a:c,w:60,h:20, flags:Sizeable");
-    let mut e = Editor::new(CODE, layout!("d:f"), editor::Flags::ShowLineNumbers);
-    e.set_word_wrap(true);
+    let mut e = Editor::new(CODE, layout!("d:f"), editor::Flags::ShowLineNumbers | editor::Flags::ScrollBars);
+    //e.set_word_wrap(true);
     w.add(e);
     app.add_window(w);
     app.run(); 

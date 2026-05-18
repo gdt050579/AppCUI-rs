@@ -61,7 +61,7 @@ impl Editor {
                         StatusFlags::None
                     },
             ),
-            document: Document::new(text),
+            document: Document::new(""),
             tab_align: 4,
             start_line: 0,
             horizontal_scroll: 0,
@@ -72,8 +72,16 @@ impl Editor {
             selection: Selection::NONE,
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
         };
+        editor.set_text(text);
         editor.update_margin();
         editor
+    }
+
+    pub fn set_text(&mut self, text: &str) {
+        self.document = Document::new(text);
+        self.view.reset();
+        self.goto_position(0, false);
+        self.update_view();
     }
 
     pub fn set_word_wrap(&mut self, enabled: bool) {
@@ -282,9 +290,10 @@ impl Editor {
         // Callers that want to *preserve* sticky (vertical movement) save+restore around the call.
         self.cursor.sticky_col = self.cursor.column + self.horizontal_scroll;
         // update the scrollbars
-        self.scrollbars.update(self.view.max_columns() as u64, self.document.lines_count() as u64, self.size());
-        self.scrollbars.set_indexes(self.cursor.column as u64 + self.horizontal_scroll as u64, self.start_line as u64);
-
+        self.scrollbars
+            .update(self.view.max_columns() as u64, self.document.lines_count() as u64, self.size());
+        self.scrollbars
+            .set_indexes(self.cursor.column as u64 + self.horizontal_scroll as u64, self.start_line as u64);
     }
 
     /// Refresh on-screen cursor state after viewport-only scroll (Ctrl+Up/Down).
@@ -508,7 +517,7 @@ impl OnPaint for Editor {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if (self.has_focus()) && (self.flags.contains(Flags::ScrollBars)) {
             self.scrollbars.paint(surface, theme, self);
-            surface.reduce_clip_by(0,0,1,1);
+            surface.reduce_clip_by(0, 0, 1, 1);
         }
         let x = if self.margin.visible { self.margin.width as i32 } else { 0 };
         let w = self.view.size().width;
@@ -523,7 +532,7 @@ impl OnPaint for Editor {
             }
             if self.margin.visible {
                 if row.is_first_row {
-                    self.paint_line_number(surface, 0, y, row.line.line_number(), theme.editor.inactive);
+                    self.paint_line_number(surface, 0, y, row.line.line_number() + 1, theme.editor.inactive);
                 }
             }
 
@@ -699,8 +708,9 @@ impl OnMouseEvent for Editor {
 }
 
 impl OnResize for Editor {
-    fn on_resize(&mut self, _old_size: Size, new_size: Size) {  
-        self.scrollbars.resize(self.view.max_columns() as u64, self.document.lines_count() as u64, &self.base);    
+    fn on_resize(&mut self, _old_size: Size, new_size: Size) {
+        self.scrollbars
+            .resize(self.view.max_columns() as u64, self.document.lines_count() as u64, &self.base);
         if new_size.width <= self.margin.width as u32 {
             self.margin.visible = false;
             self.view.resize(new_size);
