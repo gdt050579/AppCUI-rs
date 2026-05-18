@@ -168,26 +168,20 @@ impl Line {
 
     // --- Unwrapped-column conversions (highlighter, selection, internal use) ---
 
-    #[inline(always)]
-    pub(super) fn line_char_index_to_unwrapped_col(&self, lci: LineCharIndex) -> Option<u32> {
+    pub(super) fn line_char_index_to_unwrapped_col(&self, lci: LineCharIndex) -> u32 {
         if (lci.0 as usize) < self.col_map.len() {
-            Some(self.col_map[lci.0 as usize])
-        } else if lci.0 as usize == self.chars.len() {
-            Some(self.last_col)
+            self.col_map[lci.0 as usize]
         } else {
-            None
-        }  
-    }
-
-    pub(super) fn unwrapped_col_to_line_char_index(&self, column: u32) -> Option<LineCharIndex> {
-        if self.chars.is_empty() {
-            return Some(LineCharIndex(0));
+            self.last_col
         }
-        if column >= self.last_col {
-            return Some(LineCharIndex(self.chars.len() as u32));
+    }
+    
+    pub(super) fn unwrapped_col_to_line_char_index(&self, column: u32) -> LineCharIndex {
+        if self.chars.is_empty() || column >= self.last_col {
+            return LineCharIndex(self.chars.len() as u32);
         }
         let idx = self.col_map.partition_point(|&pos| pos <= column).saturating_sub(1);
-        Some(LineCharIndex(idx as u32))
+        LineCharIndex(idx as u32)
     }
 
     // --- Visual conversions (cursor paint, mouse, vertical movement) ---
@@ -212,15 +206,15 @@ impl Line {
 
     /// Convenience: logical char → visual position.
     #[inline]
-    pub(super) fn line_char_index_to_visual(&self, lci: LineCharIndex) -> Option<VisualPos> {
-        let col = self.line_char_index_to_unwrapped_col(lci)?;
-        Some(self.unwrapped_col_to_visual(col))
+    pub(super) fn line_char_index_to_visual(&self, lci: LineCharIndex) -> VisualPos {
+        let col = self.line_char_index_to_unwrapped_col(lci);
+        self.unwrapped_col_to_visual(col)
     }
 
     /// Convenience: visual position → logical char.
     #[inline]
-    pub(super) fn visual_to_line_char_index(&self, row: u32, col_in_row: u32) -> Option<LineCharIndex> {
-        let col = self.visual_to_unwrapped_col(row, col_in_row)?;
+    pub(super) fn visual_to_line_char_index(&self, row: u32, col_in_row: u32) -> LineCharIndex {
+        let col = self.visual_to_unwrapped_col(row, col_in_row).unwrap_or(self.last_col);
         self.unwrapped_col_to_line_char_index(col)
     }
 }

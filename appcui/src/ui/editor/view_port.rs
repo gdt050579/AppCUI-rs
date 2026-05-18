@@ -158,12 +158,12 @@ impl ViewPort {
 
     pub(super) fn unwrapped_col(&self, line_number: u32, char_index: LineCharIndex) -> Option<u32> {
         let idx = self.line_number_to_index(line_number)?;
-        self.lines[idx as usize].line_char_index_to_unwrapped_col(char_index)
+        Some(self.lines[idx as usize].line_char_index_to_unwrapped_col(char_index))
     }
 
     pub(super) fn unwrapped_col_to_line_char_index(&self, line_number: u32, column: u32) -> Option<LineCharIndex> {
         let idx = self.line_number_to_index(line_number)?;
-        self.lines[idx as usize].unwrapped_col_to_line_char_index(column)
+        Some(self.lines[idx as usize].unwrapped_col_to_line_char_index(column))
     }
 
     // --- Visual queries (cursor paint, mouse, vertical movement) ---
@@ -171,13 +171,13 @@ impl ViewPort {
     /// Visual position of a logical char within its line (row + col_in_row).
     pub(super) fn visual_pos(&self, line_number: u32, char_index: LineCharIndex) -> Option<VisualPos> {
         let idx = self.line_number_to_index(line_number)?;
-        self.lines[idx as usize].line_char_index_to_visual(char_index)
+        Some(self.lines[idx as usize].line_char_index_to_visual(char_index))    
     }
 
     /// Map a visual position within a logical line to a logical char index.
     pub(super) fn visual_to_line_char_index(&self, line_number: u32, row_in_line: u32, col_in_row: u32) -> Option<LineCharIndex> {
         let idx = self.line_number_to_index(line_number)?;
-        self.lines[idx as usize].visual_to_line_char_index(row_in_line, col_in_row)
+        Some(self.lines[idx as usize].visual_to_line_char_index(row_in_line, col_in_row))
     }
 
     /// Iterate paintable visual rows, top-to-bottom, clipped to viewport height.
