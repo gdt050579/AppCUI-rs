@@ -240,8 +240,6 @@ impl Editor {
 
         self.cursor.pos = new_pos;
         self.cursor.line = pos_info.line_index;
-        self.scrollbars.update(1, self.document.lines_count() as u64, self.size());
-        self.scrollbars.set_indexes(0, self.start_line as u64);
 
         if !self.view.contains_line(pos_info.line_index) {
             self.cursor.visible = false;
@@ -283,6 +281,10 @@ impl Editor {
         // Update sticky column on any horizontal-aware operation.
         // Callers that want to *preserve* sticky (vertical movement) save+restore around the call.
         self.cursor.sticky_col = self.cursor.column + self.horizontal_scroll;
+        // update the scrollbars
+        self.scrollbars.update(self.view.max_columns() as u64, self.document.lines_count() as u64, self.size());
+        self.scrollbars.set_indexes(self.cursor.column as u64 + self.horizontal_scroll as u64, self.start_line as u64);
+
     }
 
     /// Refresh on-screen cursor state after viewport-only scroll (Ctrl+Up/Down).
@@ -485,6 +487,10 @@ impl Editor {
             self.view
                 .update_line(line_idx - self.start_line, line_idx, &self.document, col_normal, self.tab_align as u32);
             line_idx += 1;
+        }
+        // if scrollbars are enabled, update the max columns
+        if self.flags.contains(Flags::ScrollBars) {
+            self.view.update_max_columns();
         }
     }
     fn notify_document_changed(&mut self) {
@@ -694,7 +700,7 @@ impl OnMouseEvent for Editor {
 
 impl OnResize for Editor {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {  
-        self.scrollbars.resize(0, self.document.lines_count() as u64, &self.base);    
+        self.scrollbars.resize(self.view.max_columns() as u64, self.document.lines_count() as u64, &self.base);    
         if new_size.width <= self.margin.width as u32 {
             self.margin.visible = false;
             self.view.resize(new_size);

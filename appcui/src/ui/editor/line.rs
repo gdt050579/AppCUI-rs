@@ -103,6 +103,11 @@ impl Line {
     }
 
     #[inline(always)]
+    pub(super) fn columns_count(&self) -> u32 {
+        self.chars.len() as u32
+    }
+    
+    #[inline(always)]
     pub(super) fn line_number(&self) -> u32 {
         self.line_number
     }

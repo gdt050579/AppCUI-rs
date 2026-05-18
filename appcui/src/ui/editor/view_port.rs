@@ -6,9 +6,8 @@ pub(super) struct ViewPort {
     size: Size,
     count: u32,
     word_wrap: bool,
-    /// First visual row of `lines[0]` shown on screen. Always 0 when wrap is off.
-    /// When wrap is on, lets us scroll partway into a tall logical line.
     start_visual_row: u32,
+    max_columns: u32,
 }
 
 /// A row to paint: which logical line, which visual row within it.
@@ -26,6 +25,7 @@ impl ViewPort {
             count: 0,
             word_wrap: false,
             start_visual_row: 0,
+            max_columns: 0,
         }
     }
 
@@ -107,6 +107,7 @@ impl ViewPort {
     pub(super) fn reset(&mut self) {
         self.count = 0;
         self.start_visual_row = 0;
+        self.max_columns = 0;
     }
 
     #[inline(always)]
@@ -123,6 +124,16 @@ impl ViewPort {
         if self.word_wrap {
             self.lines[index as usize].update_wrap_points(self.size.width);
         }
+    }
+
+    #[inline(always)]
+    pub(super) fn update_max_columns(&mut self) {
+        self.max_columns = self.lines.iter().map(|line| line.columns_count()).max().unwrap_or(0);
+    }
+
+    #[inline(always)]
+    pub(super) fn max_columns(&self) -> u32 {
+        if self.word_wrap { 0 } else { self.max_columns }
     }
 
     /// O(1) — lines in the viewport are contiguous starting at `first_line()`.
