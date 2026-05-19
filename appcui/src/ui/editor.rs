@@ -9,6 +9,7 @@ mod view_port;
 mod document;
 mod char_class;
 mod selection;
+mod fold;
 mod initialization_flags;
 pub mod events;
 #[cfg(test)]
@@ -23,6 +24,8 @@ pub(self) use self::line::LineCharIndex;
 pub(self) use self::line::VisualPos;
 pub(self) use self::view_port::ViewPort;
 pub(self) use self::view_port::VisualRowRef;
+pub(self) use self::fold::Folds;
+pub(self) use self::fold::Fold;
 pub use self::editor::Editor;
 pub use self::editor::Caret;
 pub use self::initialization_flags::Flags;
