@@ -73,12 +73,12 @@ impl Editor {
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
         };
         editor.set_text(text);
-        editor.update_margin();
         editor
     }
 
     pub fn set_text(&mut self, text: &str) {
         self.document = Document::new(text);
+        self.update_margin();
         self.view.reset();
         self.goto_position(0, false);
         self.update_view();
