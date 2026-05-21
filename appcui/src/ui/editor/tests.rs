@@ -357,3 +357,328 @@ mod folds_tests {
         assert_folds_invariant(&folds);
     }
 }
+
+mod line_to_fold_tests {
+    use super::super::Folds;
+
+    fn build_folds(ranges: &[(u32, u32)]) -> Folds {
+        let mut folds = Folds::new();
+        for &(start, count) in ranges {
+            assert!(folds.add(start, count), "setup ({start}, {count})");
+        }
+        folds
+    }
+
+    fn assert_line_to_fold(folds: &Folds, line: u32, expected: Option<(u32, u32)>, label: &str) {
+        match folds.line_to_fold(line) {
+            None => assert_eq!(expected, None, "{label}: line {line}"),
+            Some(f) => {
+                let (start, count) = expected.expect("{label}: expected None");
+                assert_eq!(f.start_line(), start, "{label}: line {line} start");
+                assert_eq!(f.count(), count, "{label}: line {line} count");
+            }
+        }
+    }
+
+    struct LineToFoldCase {
+        folds: &'static [(u32, u32)],
+        line: u32,
+        expected: Option<(u32, u32)>,
+        label: &'static str,
+    }
+
+    const CASES: &[LineToFoldCase] = &[
+        // Empty
+        LineToFoldCase {
+            folds: &[],
+            line: 0,
+            expected: None,
+            label: "empty any line",
+        },
+        // Single fold (10, 5) => lines 10..=14
+        LineToFoldCase {
+            folds: &[(10, 5)],
+            line: 9,
+            expected: None,
+            label: "single before",
+        },
+        LineToFoldCase {
+            folds: &[(10, 5)],
+            line: 10,
+            expected: Some((10, 5)),
+            label: "single at start",
+        },
+        LineToFoldCase {
+            folds: &[(10, 5)],
+            line: 12,
+            expected: Some((10, 5)),
+            label: "single inside",
+        },
+        LineToFoldCase {
+            folds: &[(10, 5)],
+            line: 14,
+            expected: Some((10, 5)),
+            label: "single at end",
+        },
+        LineToFoldCase {
+            folds: &[(10, 5)],
+            line: 15,
+            expected: None,
+            label: "single after",
+        },
+        // Disjoint (10,5)=10..14, (20,5)=20..24
+        LineToFoldCase {
+            folds: &[(10, 5), (20, 5)],
+            line: 15,
+            expected: None,
+            label: "disjoint gap",
+        },
+        LineToFoldCase {
+            folds: &[(10, 5), (20, 5)],
+            line: 14,
+            expected: Some((10, 5)),
+            label: "disjoint first end",
+        },
+        LineToFoldCase {
+            folds: &[(10, 5), (20, 5)],
+            line: 20,
+            expected: Some((20, 5)),
+            label: "disjoint second start",
+        },
+        // Touching (10,5) ends 14, (15,5) starts 15
+        LineToFoldCase {
+            folds: &[(10, 5), (15, 5)],
+            line: 14,
+            expected: Some((10, 5)),
+            label: "touching first end",
+        },
+        LineToFoldCase {
+            folds: &[(10, 5), (15, 5)],
+            line: 15,
+            expected: Some((15, 5)),
+            label: "touching second start",
+        },
+        // Nested: outer (10,20)=10..29, inner (12,5)=12..16
+        LineToFoldCase {
+            folds: &[(10, 20), (12, 5)],
+            line: 10,
+            expected: Some((10, 20)),
+            label: "nested outer start only",
+        },
+        LineToFoldCase {
+            folds: &[(10, 20), (12, 5)],
+            line: 11,
+            expected: Some((10, 20)),
+            label: "nested between outer start and inner",
+        },
+        LineToFoldCase {
+            folds: &[(10, 20), (12, 5)],
+            line: 12,
+            expected: Some((12, 5)),
+            label: "nested inner start",
+        },
+        LineToFoldCase {
+            folds: &[(10, 20), (12, 5)],
+            line: 16,
+            expected: Some((12, 5)),
+            label: "nested inner end",
+        },
+        LineToFoldCase {
+            folds: &[(10, 20), (12, 5)],
+            line: 17,
+            expected: Some((10, 20)),
+            label: "nested after inner before outer end",
+        },
+        LineToFoldCase {
+            folds: &[(10, 20), (12, 5)],
+            line: 29,
+            expected: Some((10, 20)),
+            label: "nested outer end",
+        },
+        LineToFoldCase {
+            folds: &[(10, 20), (12, 5)],
+            line: 30,
+            expected: None,
+            label: "nested past outer",
+        },
+        // Three levels: (0,100), (10,80), (20,60), (30,40)
+        LineToFoldCase {
+            folds: &[(0, 100), (10, 80), (20, 60), (30, 40)],
+            line: 0,
+            expected: Some((0, 100)),
+            label: "deep outer start",
+        },
+        LineToFoldCase {
+            folds: &[(0, 100), (10, 80), (20, 60), (30, 40)],
+            line: 15,
+            expected: Some((10, 80)),
+            label: "deep middle layer",
+        },
+        LineToFoldCase {
+            folds: &[(0, 100), (10, 80), (20, 60), (30, 40)],
+            line: 35,
+            expected: Some((30, 40)),
+            label: "deep innermost",
+        },
+        LineToFoldCase {
+            folds: &[(0, 100), (10, 80), (20, 60), (30, 40)],
+            line: 69,
+            expected: Some((30, 40)),
+            label: "deep innermost end",
+        },
+        LineToFoldCase {
+            folds: &[(0, 100), (10, 80), (20, 60), (30, 40)],
+            line: 70,
+            expected: Some((20, 60)),
+            label: "deep between inner end and middle end",
+        },
+        LineToFoldCase {
+            folds: &[(0, 100), (10, 80), (20, 60), (30, 40)],
+            line: 99,
+            expected: Some((0, 100)),
+            label: "deep outer end",
+        },
+        LineToFoldCase {
+            folds: &[(0, 100), (10, 80), (20, 60), (30, 40)],
+            line: 100,
+            expected: None,
+            label: "deep past all",
+        },
+        // New fold contains existing: (12,5) then (10,20)
+        LineToFoldCase {
+            folds: &[(12, 5), (10, 20)],
+            line: 14,
+            expected: Some((12, 5)),
+            label: "storage order inner first still innermost",
+        },
+        // Single-line fold (0, 1)
+        LineToFoldCase {
+            folds: &[(0, 1)],
+            line: 0,
+            expected: Some((0, 1)),
+            label: "single line fold",
+        },
+    ];
+
+    #[test]
+    fn line_to_fold_scenarios() {
+        for case in CASES {
+            let folds = build_folds(case.folds);
+            assert_line_to_fold(&folds, case.line, case.expected, case.label);
+        }
+    }
+
+    #[test]
+    fn line_to_fold_returns_copy() {
+        let folds = build_folds(&[(10, 5)]);
+        let a = folds.line_to_fold(12).unwrap();
+        let b = folds.line_to_fold(12).unwrap();
+        assert_eq!(a.start_line(), b.start_line());
+        assert_eq!(a.count(), b.count());
+    }
+
+    #[test]
+    fn line_to_fold_unfolded_still_maps() {
+        let mut folds = Folds::new();
+        assert!(folds.add(5, 3));
+        let mut f = folds.line_to_fold(6).unwrap();
+        f.set_folded(false);
+        // Lookup does not consult folded flag.
+        let found = folds.line_to_fold(6).unwrap();
+        assert_eq!(found.start_line(), 5);
+        assert_eq!(found.count(), 3);
+        assert!(found.is_folded());
+    }
+}
+
+mod visible_lines_tests {
+    use super::super::Folds;
+
+    fn build_folds(ranges: &[(u32, u32)]) -> Folds {
+        let mut folds = Folds::new();
+        for &(start, count) in ranges {
+            assert!(folds.add(start, count), "setup ({start}, {count})");
+        }
+        folds
+    }
+
+    fn visible_lines(folds: &Folds, from: u32, count: usize) -> Vec<u32> {
+        folds.visible_lines_from(from).take(count).collect()
+    }
+
+    /// Folds `[(5, 3), (20, 4)]` (folded): headers 5 and 20 visible; 6–7 and 21–23 hidden.
+    fn example_folds() -> Folds {
+        build_folds(&[(5, 3), (20, 4)])
+    }
+
+    #[test]
+    fn visible_lines_from_zero_two_folds() {
+        let folds = example_folds();
+        assert_eq!(
+            visible_lines(&folds, 0, 10),
+            vec![0, 1, 2, 3, 4, 5, 8, 9, 10, 11],
+            "take(10): 0..4, header 5, skip 6–7, then 8.."
+        );
+        assert_eq!(
+            visible_lines(&folds, 0, 20),
+            vec![
+                0, 1, 2, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 24
+            ],
+            "take(20): through header 20, skip 21–23, resume at 24"
+        );
+    }
+
+    #[test]
+    fn visible_lines_skips_hidden_start() {
+        let folds = example_folds();
+        // Line 6 is inside folded (5, 3); iterator should advance to 8.
+        assert_eq!(visible_lines(&folds, 6, 5), vec![8, 9, 10, 11, 12]);
+        assert_eq!(visible_lines(&folds, 7, 3), vec![8, 9, 10]);
+        assert_eq!(visible_lines(&folds, 21, 4), vec![24, 25, 26, 27]);
+    }
+
+    #[test]
+    fn visible_lines_fold_header_stays_visible() {
+        let folds = example_folds();
+        assert_eq!(visible_lines(&folds, 5, 4), vec![5, 8, 9, 10]);
+        assert_eq!(visible_lines(&folds, 20, 4), vec![20, 24, 25, 26]);
+    }
+
+    #[test]
+    fn visible_lines_no_folds_is_sequential() {
+        let folds = Folds::new();
+        assert_eq!(visible_lines(&folds, 0, 5), vec![0, 1, 2, 3, 4]);
+        assert_eq!(visible_lines(&folds, 3, 4), vec![3, 4, 5, 6]);
+    }
+
+    #[test]
+    fn visible_lines_never_yields_hidden_body() {
+        let folds = example_folds();
+        let lines: Vec<u32> = folds.visible_lines_from(0).take(50).collect();
+        for hidden in [6, 7, 21, 22, 23] {
+            assert!(!lines.contains(&hidden), "hidden line {hidden} must not appear");
+        }
+        assert!(lines.contains(&5));
+        assert!(lines.contains(&20));
+    }
+
+    #[test]
+    fn visible_lines_single_fold() {
+        // (10, 5): lines 10..14, body 11..14 hidden
+        let folds = build_folds(&[(10, 5)]);
+        assert_eq!(visible_lines(&folds, 0, 12), vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15]);
+        assert_eq!(visible_lines(&folds, 12, 4), vec![15, 16, 17, 18]);
+    }
+
+    #[test]
+    fn visible_lines_before_first_fold() {
+        let folds = example_folds();
+        assert_eq!(visible_lines(&folds, 3, 5), vec![3, 4, 5, 8, 9]);
+    }
+
+    #[test]
+    fn visible_lines_between_folds() {
+        let folds = example_folds();
+        assert_eq!(visible_lines(&folds, 16, 6), vec![16, 17, 18, 19, 20, 24]);
+    }
+}

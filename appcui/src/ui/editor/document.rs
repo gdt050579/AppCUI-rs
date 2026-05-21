@@ -1,4 +1,4 @@
-use super::LineCharIndex;
+use super::{LineCharIndex, Folds};
 use ropey::iter::{Chars, Lines};
 use ropey::{Rope, RopeSlice};
 
@@ -8,11 +8,15 @@ pub(super) struct PosInfo {
 }
 pub(super) struct Document {
     rope: ropey::Rope,
+    folds: Folds,
 }
 
 impl Document {
     pub(super) fn new(text: &str) -> Self {
-        Self { rope: Rope::from(text) }
+        Self {
+            rope: Rope::from(text),
+            folds: Folds::new(),
+        }
     }
     pub(super) fn lines_count(&self) -> usize {
         self.rope.len_lines()
@@ -57,5 +61,9 @@ impl Document {
         debug_assert!(char_index >= start);
         let line_char_index = LineCharIndex::new((char_index - start) as u32);
         PosInfo { line_index, line_char_index }
+    }
+    #[inline(always)]
+    pub(super) fn folds(&self) -> &Folds {
+        &self.folds
     }
 }
