@@ -1,5 +1,3 @@
-use std::cmp::Ordering;
-
 const FOLDED_BIT: u32 = 0x8000_0000;
 const COUNT_MASK: u32 = 0x7FFF_FFFF;
 
@@ -62,224 +60,260 @@ impl Fold {
     }
 }
 
+const MAX_CHILDREN: usize = 7;
+type ArenaIndex = u32;
+enum NodeVec {
+    Stack { ids: [ArenaIndex; MAX_CHILDREN], len: u8 },
+    Heap(Vec<ArenaIndex>),
+}
+
+impl NodeVec {
+    fn new() -> Self {
+        Self::Stack {
+            ids: [0; MAX_CHILDREN],
+            len: 0,
+        }
+    }
+    fn clear(&mut self) {
+        match self {
+            NodeVec::Stack { len, .. } => *len = 0u8,
+            NodeVec::Heap(items) => items.clear(),
+        }
+    }
+    fn insert(&mut self, index: usize, id: ArenaIndex) {
+        match self {
+            NodeVec::Stack { ids, len } => {
+                if *len < MAX_CHILDREN as u8 {
+                    // move the elements to the right
+                    if index >= *len as usize {
+                        ids[*len as usize] = id;
+                    } else {
+                        ids.copy_within(index..*len as usize, index + 1);
+                        ids[index] = id;
+                    }
+                    *len += 1;
+                } else {
+                    // grow the heap
+                    let mut new_items = Vec::with_capacity(MAX_CHILDREN * 2);
+                    new_items.extend_from_slice(ids);
+                    new_items.insert(index, id);
+                    *self = NodeVec::Heap(new_items);
+                }
+            }
+            NodeVec::Heap(items) => items.insert(index, id),
+        }
+    }
+    fn remove(&mut self, index: usize) -> ArenaIndex {
+        match self {
+            NodeVec::Stack { ids, len } => {
+                let id = ids[index];
+                ids.copy_within(index + 1..*len as usize, index);
+                *len -= 1;
+                id
+            }
+            NodeVec::Heap(v) => v.remove(index),
+        }
+    }
+    fn as_slice(&self) -> &[ArenaIndex] {
+        match self {
+            NodeVec::Stack { ids, len } => &ids[..*len as usize],
+            NodeVec::Heap(items) => items.as_slice(),
+        }
+    }
+}
+
+struct Node {
+    fold: Fold,
+    children: NodeVec,
+}
+
 pub(super) struct Folds {
-    /// Keyed by `start_line`; iteration order is sorted ascending.
-    folds: Vec<Fold>,
+    arena: Vec<Node>,
+    root: NodeVec,
 }
 
 impl Folds {
     pub(super) fn new() -> Self {
         Self {
-            folds: Vec::with_capacity(8),
+            arena: Vec::new(),
+            root: NodeVec::new(),
         }
     }
-    pub(super) fn add(&mut self, start_line: u32, count: u32) -> bool {
-        let Some(fold) = Fold::new(start_line, count, true) else {
-            return false;
-        };
-        let end_line = fold.end_line();
-        let pos = self.folds.partition_point(|f| f.start_line() < start_line);
-        if pos < self.folds.len() && self.folds[pos].start_line() == start_line {
-            return false;
-        }
-        for f in self.folds[..pos].iter().rev() {
-            match f.end_line().cmp(&end_line) {
-                Ordering::Less => {
-                    if f.end_line() >= start_line {
-                        return false;
-                    }
+
+    /// Add a fold. Returns true on success, false on duplicate or partial overlap.
+    pub(super) fn add(&mut self, f: Fold) -> bool {
+        // Descend to find (parent_children_list, insert_index).
+        // parent_children is either self.root or some node's children.
+        // We track it via Option<ArenaIndex>: None = root, Some(id) = arena[id].children.
+        let mut parent: Option<ArenaIndex> = None;
+
+        let (parent, idx) = loop {
+            let kids = match parent {
+                None => self.root.as_slice(),
+                Some(id) => self.arena[id as usize].children.as_slice(),
+            };
+
+            let idx = kids.partition_point(|&c| self.arena[c as usize].fold.start_line() <= f.start_line());
+
+            if idx > 0 {
+                let cand_id = kids[idx - 1];
+                let cand = self.arena[cand_id as usize].fold;
+
+                if cand.start_line() == f.start_line() && cand.end_line() == f.end_line() {
+                    return false; // duplicate
                 }
-                Ordering::Equal => return false,
-                Ordering::Greater => break,
+                if cand.start_line() < f.start_line() && f.end_line() < cand.end_line() {
+                    parent = Some(cand_id); // descend
+                    continue;
+                }
+                if cand.end_line() >= f.start_line() {
+                    return false; // partial overlap with previous sibling
+                }
             }
-        }
-        for f in self.folds[pos..].iter() {
-            if f.start_line() > end_line {
+
+            // Validate sibling at `idx`: must start after f ends, or be fully nested in f
+            if let Some(&next_id) = kids.get(idx) {
+                let next = self.arena[next_id as usize].fold;
+                let contained = f.start_line() < next.start_line() && next.end_line() < f.end_line();
+                let after = next.start_line() > f.end_line();
+                if !contained && !after {
+                    return false;
+                }
+            }
+
+            break (parent, idx);
+        };
+
+        // Find adoption range: contiguous siblings from `idx` that are nested in f
+        let kids_slice = match parent {
+            None => self.root.as_slice(),
+            Some(id) => self.arena[id as usize].children.as_slice(),
+        };
+        let mut adopt_end = idx;
+        while adopt_end < kids_slice.len() {
+            let c = self.arena[kids_slice[adopt_end] as usize].fold;
+            if f.start_line() < c.start_line() && c.end_line() < f.end_line() {
+                adopt_end += 1;
+            } else if c.start_line() > f.end_line() {
                 break;
-            }
-            if f.end_line() >= end_line {
-                return false;
+            } else {
+                return false; // partial overlap
             }
         }
-        self.folds.insert(pos, fold);
+
+        // Build new node, adopting the contiguous range
+        let new_id = self.arena.len() as ArenaIndex;
+        let mut new_children = NodeVec::new();
+        let adopted: Vec<ArenaIndex> = kids_slice[idx..adopt_end].to_vec();
+        for (i, &c) in adopted.iter().enumerate() {
+            new_children.insert(i, c);
+        }
+        self.arena.push(Node {
+            fold: f,
+            children: new_children,
+        });
+
+        // Splice in: remove adopted from parent, insert new_id at idx
+        let parent_list = match parent {
+            None => &mut self.root,
+            Some(id) => &mut self.arena[id as usize].children,
+        };
+        for _ in idx..adopt_end {
+            parent_list.remove(idx);
+        }
+        parent_list.insert(idx, new_id);
+
         true
     }
 
-    pub(super) fn folds(&self) -> &[Fold] {
-        &self.folds
+    pub(super) fn line_to_fold(&self, line: u32) -> Option<Fold> {
+        let mut kids = self.root.as_slice();
+        let mut best: Option<Fold> = None;
+        loop {
+            let idx = kids.partition_point(|&c| self.arena[c as usize].fold.start_line() <= line);
+            if idx == 0 {
+                return best;
+            }
+            let cand = &self.arena[kids[idx - 1] as usize];
+            let f = &cand.fold;
+            if line > f.end_line() {
+                return best;
+            }
+            best = Some(*f);
+            kids = cand.children.as_slice();
+        }
     }
+
+
     pub(super) fn clear(&mut self) {
-        self.folds.clear();
+        self.arena.clear();
+        self.root.clear();
     }
-    pub(super) fn line_to_fold(&self, line_number: u32) -> Option<Fold> {
-        if self.folds.is_empty() {
-            return None;
+
+    pub(super) fn folds(&self) -> Vec<Fold> {
+        let mut out = Vec::with_capacity(self.arena.len());
+        for &id in self.root.as_slice() {
+            self.collect_subtree(id, &mut out);
         }
-        let pos = self.folds.partition_point(|f| f.start_line() <= line_number);
-        for f in self.folds[..pos].iter().rev() {
-            if f.end_line() >= line_number {
-                return Some(*f);
-            }
-        }
-        None
+        out
     }
-    /// Returns the line `delta` visible lines after `line` (delta=0 returns the first
-    /// visible line >= `line`). Walks forward, skipping folded bodies.
-    pub(super) fn next_visible_line(&self, line: u32, delta: u32) -> u32 {
-        // Hot path: no folds at all.
-        if self.folds.is_empty() {
-            return line.saturating_add(delta);
-        }
 
-        // Step 1: skip past any folded fold hiding `line`.
-        let mut current = line;
-        loop {
-            let Some(f) = self.line_to_fold(current) else {
-                break;
-            };
-            if f.is_folded() && current > f.start_line() {
-                current = f.end_line() + 1;
-                continue;
-            }
-            break;
+    fn collect_subtree(&self, id: ArenaIndex, out: &mut Vec<Fold>) {
+        let node = &self.arena[id as usize];
+        out.push(node.fold);
+        for &c in node.children.as_slice() {
+            self.collect_subtree(c, out);
         }
+    }
 
-        // Hot path: no folds at or after `current`.
-        let pos = self.folds.partition_point(|f| f.end_line() < current);
-        if pos == self.folds.len() {
-            return current.saturating_add(delta);
+    /// Iterate visible line numbers >= start_line.
+    pub(super) fn visible_lines_from(&self, start_line: u32) -> VisibleLines<'_> {
+        VisibleLines {
+            folds: self,
+            line: start_line,
         }
+    }
 
-        // Walk forward `delta` visible lines, jumping over folded bodies.
-        let mut remaining = delta;
-        let mut fold_idx = pos;
-        while remaining > 0 {
-            // Find the next folded fold whose header is at or after `current`.
-            while fold_idx < self.folds.len() && self.folds[fold_idx].end_line() < current {
-                fold_idx += 1;
-            }
-            if fold_idx >= self.folds.len() {
-                return current.saturating_add(remaining);
-            }
-            let f = &self.folds[fold_idx];
-            if f.start_line() > current {
-                // Gap of (f.start_line - current) visible lines before the next fold.
-                let gap = f.start_line() - current;
-                if remaining <= gap {
-                    return current + remaining;
+    /// If `line` is hidden by a folded ancestor, return the line just after that fold's end.
+    /// Otherwise return `line`. Descends through the tree following containment.
+    fn skip_hidden(&self, mut line: u32) -> u32 {
+        'outer: loop {
+            let mut kids = self.root.as_slice();
+            loop {
+                // Find last child with start_line <= line
+                let idx = kids.partition_point(|&c| self.arena[c as usize].fold.start_line() <= line);
+                if idx == 0 {
+                    return line;
                 }
-                remaining -= gap;
-                current = f.start_line();
-                // Fall through: now standing on the fold header.
-            }
-            // current == f.start_line(): header counts as visible.
-            if remaining == 0 {
-                return current;
-            }
-            if f.is_folded() {
-                current = f.end_line() + 1;
-            } else {
-                current += 1;
-            }
-            remaining -= 1;
-            fold_idx += 1;
-        }
-        current
-    }
+                let cand = &self.arena[kids[idx - 1] as usize];
+                let f = &cand.fold;
 
-    /// Returns the line `delta` visible lines before `line`.
-    pub(super) fn previous_visible_line(&self, line: u32, delta: u32) -> u32 {
-        if self.folds.is_empty() {
-            return line.saturating_sub(delta);
-        }
-
-        // If `line` is hidden, snap up to its enclosing fold's header.
-        let mut current = line;
-        loop {
-            let Some(f) = self.line_to_fold(current) else {
-                break;
-            };
-            if f.is_folded() && current > f.start_line() {
-                current = f.start_line();
-                continue;
+                if line > f.end_line() {
+                    return line; // past this fold; siblings start later, done
+                }
+                // line is within [f.start_line ..= f.end_line]
+                if f.hides_line(line) {
+                    // Jump past the fold and restart from the top
+                    line = f.end_line() + 1;
+                    continue 'outer;
+                }
+                // Visible at this level; descend into its children
+                kids = cand.children.as_slice();
             }
-            break;
         }
-
-        let pos = self.folds.partition_point(|f| f.start_line() < current);
-        if pos == 0 {
-            return current.saturating_sub(delta);
-        }
-
-        let mut remaining = delta;
-        let mut fold_idx = pos;
-        while remaining > 0 && current > 0 {
-            // Find previous fold ending before `current`.
-            while fold_idx > 0 && self.folds[fold_idx - 1].start_line() >= current {
-                fold_idx -= 1;
-            }
-            if fold_idx == 0 {
-                return current.saturating_sub(remaining);
-            }
-            let f = &self.folds[fold_idx - 1];
-            // Gap of (current - f.end_line() - 1) visible lines after the fold ends, before current.
-            // But if f is folded, only f.start_line() is visible; the body is hidden.
-            let visible_end = if f.is_folded() { f.start_line() } else { f.end_line() };
-            let gap = current - visible_end - 1;
-            if remaining <= gap {
-                return current - remaining;
-            }
-            remaining -= gap + 1; // +1 to step onto visible_end
-            current = visible_end;
-            fold_idx -= 1;
-        }
-        current
-    }
-    pub(super) fn visible_lines_from(&self, from: u32) -> VisibleLineIter<'_> {
-        if self.folds.is_empty() {
-            return VisibleLineIter {
-                iter: FoldsIterator::None,
-                next_line: from,
-            };
-        }
-        let mut next_line = from;
-        loop {
-            let Some(f) = self.line_to_fold(next_line) else { break; };
-            if f.is_folded() && next_line > f.start_line() {
-                next_line = f.end_line() + 1;
-                continue;
-            }
-            break;
-        }
-        VisibleLineIter { iter: FoldsIterator::Iterator(self), next_line }
     }
 }
 
-enum FoldsIterator<'a> {
-    None,
-    Iterator(&'a Folds),
+pub(super) struct VisibleLines<'a> {
+    folds: &'a Folds,
+    line: u32,
 }
 
-pub(super) struct VisibleLineIter<'a> {
-    iter: FoldsIterator<'a>,
-    next_line: u32,
-}
-
-impl<'a> Iterator for VisibleLineIter<'a> {
+impl<'a> Iterator for VisibleLines<'a> {
     type Item = u32;
-
     fn next(&mut self) -> Option<u32> {
-        match &mut self.iter {
-            FoldsIterator::None => {
-                let line = self.next_line;
-                self.next_line = line.saturating_add(1);
-                Some(line)
-            },
-            FoldsIterator::Iterator(folds) => {
-                let line = self.next_line;
-                self.next_line = folds.next_visible_line(line, 1);
-                Some(line)
-            }
-        }
+        let visible = self.folds.skip_hidden(self.line);
+        self.line = visible.checked_add(1)?;
+        Some(visible)
     }
 }

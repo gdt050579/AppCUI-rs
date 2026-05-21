@@ -1,3 +1,5 @@
+// all tests
+
 mod folds_tests {
     use super::super::{Fold, Folds};
 
@@ -43,11 +45,14 @@ mod folds_tests {
     fn run_add_case(case: &AddCase) {
         let mut folds = Folds::new();
         for &(start, count) in case.existing {
-            assert!(folds.add(start, count), "{}: setup add ({start}, {count})", case.label);
+            assert!(folds.add(Fold::new(start, count, true).unwrap()), "{}: setup add ({start}, {count})", case.label);
             assert_folds_invariant(&folds);
         }
         let before = ranges(&folds);
-        let ok = folds.add(case.new.0, case.new.1);
+        let ok = match Fold::new(case.new.0, case.new.1, true) {
+            Some(f) => folds.add(f),
+            None => false,
+        };
         assert_eq!(
             ok, case.accept,
             "{}: existing={:?} + ({}, {})",
@@ -340,7 +345,7 @@ mod folds_tests {
         let expected = &[(0, 100), (50, 10), (55, 3)];
         let mut folds = Folds::new();
         for &(start, count) in expected {
-            assert!(folds.add(start, count));
+            assert!(folds.add(Fold::new(start, count, true).unwrap()));
         }
         assert_eq!(ranges(&folds), expected);
         assert_folds_invariant(&folds);
@@ -349,22 +354,22 @@ mod folds_tests {
     #[test]
     fn folds_clear() {
         let mut folds = Folds::new();
-        assert!(folds.add(10, 5));
-        assert!(folds.add(20, 5));
+        assert!(folds.add(Fold::new(10, 5, true).unwrap()));
+        assert!(folds.add(Fold::new(20, 5, true).unwrap()));
         folds.clear();
         assert!(folds.folds().is_empty());
-        assert!(folds.add(1, 2));
+        assert!(folds.add(Fold::new(1, 2, true).unwrap()));
         assert_folds_invariant(&folds);
     }
 }
 
 mod line_to_fold_tests {
-    use super::super::Folds;
+    use super::super::{Folds, Fold};
 
     fn build_folds(ranges: &[(u32, u32)]) -> Folds {
         let mut folds = Folds::new();
         for &(start, count) in ranges {
-            assert!(folds.add(start, count), "setup ({start}, {count})");
+            assert!(folds.add(Fold::new(start, count, true).unwrap()), "setup ({start}, {count})");
         }
         folds
     }
@@ -580,7 +585,7 @@ mod line_to_fold_tests {
     #[test]
     fn line_to_fold_unfolded_still_maps() {
         let mut folds = Folds::new();
-        assert!(folds.add(5, 3));
+        assert!(folds.add(Fold::new(5, 3, true).unwrap()));
         let mut f = folds.line_to_fold(6).unwrap();
         f.set_folded(false);
         // Lookup does not consult folded flag.
@@ -592,12 +597,12 @@ mod line_to_fold_tests {
 }
 
 mod visible_lines_tests {
-    use super::super::Folds;
+    use super::super::{Folds, Fold};
 
     fn build_folds(ranges: &[(u32, u32)]) -> Folds {
         let mut folds = Folds::new();
         for &(start, count) in ranges {
-            assert!(folds.add(start, count), "setup ({start}, {count})");
+            assert!(folds.add(Fold::new(start, count, true).unwrap()), "setup ({start}, {count})");
         }
         folds
     }
