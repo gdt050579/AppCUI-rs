@@ -1,5 +1,5 @@
 use super::{LineCharIndex, Folds};
-use ropey::iter::{Chars, Lines};
+use ropey::iter::Chars;
 use ropey::{Rope, RopeSlice};
 
 pub(super) struct PosInfo {

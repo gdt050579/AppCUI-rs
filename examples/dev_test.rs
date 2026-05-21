@@ -3786,6 +3786,7 @@ def plot_mix_manifest_info(filepath: str, plot_filepath: str = None):
 
     plt.tight_layout()
 
+    
     if plot_filepath is not None:
         plt.savefig(plot_filepath)
         plt.close()

@@ -242,18 +242,16 @@ impl Folds {
                 next_line: from,
             };
         }
-        let mut iter = self.folds.iter().peekable();
-        while iter.peek().is_some_and(|f| f.end_line() < from) {
-            iter.next();
-        }
-        // Skip past `from` if it's hidden by a folded enclosing fold
         let mut next_line = from;
-        if let Some(f) = self.line_to_fold(from) {
-            if f.is_folded() && from > f.start_line() {
+        loop {
+            let Some(f) = self.line_to_fold(next_line) else { break; };
+            if f.is_folded() && next_line > f.start_line() {
                 next_line = f.end_line() + 1;
+                continue;
             }
+            break;
         }
-        VisibleLineIter { iter: FoldsIterator::Iterator(&self), next_line }
+        VisibleLineIter { iter: FoldsIterator::Iterator(self), next_line }
     }
 }
 

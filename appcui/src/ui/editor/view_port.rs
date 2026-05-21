@@ -110,19 +110,68 @@ impl ViewPort {
         self.max_columns = 0;
     }
 
-    #[inline(always)]
-    pub(super) fn update_line(&mut self, index: u32, line_number: u32, doc: &Document, attr: CharAttribute, tab_align: u32) {
-        if index >= self.lines.len() as u32 {
+    pub(super) fn update(&mut self, start_line: u32, doc: &Document, attr: CharAttribute, tab_align: u32) {
+        let total_lines = doc.lines_count() as u32;
+        let capacity = self.lines.len() as u32;
+        let folds = doc.folds();
+        let cur_count = self.count as usize;
+    
+        // Pass 1: find target[0] (the first visible line) and locate it in the current cache.
+        let first_target = {
+            let mut it = folds.visible_lines_from(start_line);
+            loop {
+                match it.next() {
+                    Some(ln) if ln < total_lines => break Some(ln),
+                    Some(_) => break None,
+                    None => break None,
+                }
+            }
+        };
+        let Some(first_target) = first_target else {
+            self.count = 0;
             return;
-        }
-        // Fill any gap with reset lines so `count` matches `index + 1` afterwards.
-        while self.count <= index {
-            self.lines[self.count as usize].reset();
-            self.count += 1;
-        }
-        self.lines[index as usize].update(line_number, doc, attr, tab_align);
-        if self.word_wrap {
-            self.lines[index as usize].update_wrap_points(self.size.width);
+        };
+    
+        let shift = (0..cur_count).find(|&i| self.lines[i].line_number() == first_target);
+        if let Some(k) = shift {
+            if k > 0 {
+                self.lines[..cur_count].rotate_left(k);
+            }
+            let preserved = cur_count - k;
+    
+            // Pass 2: walk visible lines again, update slots that don't match.
+            let mut it = folds.visible_lines_from(start_line);
+            let mut i = 0u32;
+            while i < capacity {
+                let Some(ln) = it.next() else { break; };
+                if ln >= total_lines { break; }
+                let slot = i as usize;
+                let needs_update = slot >= preserved
+                    || self.lines[slot].line_number() != ln
+                    || self.lines[slot].is_modified();
+                if needs_update {
+                    self.lines[slot].update(ln, doc, attr, tab_align);
+                    if self.word_wrap {
+                        self.lines[slot].update_wrap_points(self.size.width);
+                    }
+                }
+                i += 1;
+            }
+            self.count = i;
+        } else {
+            // No overlap — full rebuild in one pass.
+            let mut it = folds.visible_lines_from(start_line);
+            let mut i = 0u32;
+            while i < capacity {
+                let Some(ln) = it.next() else { break; };
+                if ln >= total_lines { break; }
+                self.lines[i as usize].update(ln, doc, attr, tab_align);
+                if self.word_wrap {
+                    self.lines[i as usize].update_wrap_points(self.size.width);
+                }
+                i += 1;
+            }
+            self.count = i;
         }
     }
 

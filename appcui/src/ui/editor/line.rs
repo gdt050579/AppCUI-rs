@@ -131,6 +131,11 @@ impl Line {
         self.wrap_points.len() as u32
     }
 
+    #[inline(always)]
+    pub(super) fn is_modified(&self) -> bool {
+        self.is_modified
+    }
+
     /// Cells for a given visual row, clipped to `max_width`.
     /// `row` must be < `visual_row_count()`.
     pub(super) fn visual_row_chars(&self, row: u32, max_width: u32) -> &[Character] {

@@ -487,16 +487,8 @@ impl Editor {
     }
 
     fn update_view(&mut self) {
-        let theme = self.theme();
-        let col_normal = theme.editor.normal;
-        let mut line_idx = self.start_line;
-        let end_idx = (line_idx + self.view.size().height).min(self.document.lines_count() as u32);
-        self.view.reset();
-        while line_idx < end_idx {
-            self.view
-                .update_line(line_idx - self.start_line, line_idx, &self.document, col_normal, self.tab_align as u32);
-            line_idx += 1;
-        }
+        let col_normal = self.theme().editor.normal;
+        self.view.update(self.start_line, &self.document, col_normal, self.tab_align as u32);
         // if scrollbars are enabled, update the max columns
         if self.flags.contains(Flags::ScrollBars) {
             self.view.update_max_columns();
