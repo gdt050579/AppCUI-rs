@@ -337,22 +337,27 @@ impl Editor {
         }
     }
 
-    /// Move the cursor by N visual rows. Preserves sticky column across short lines.
     fn move_visual_rows(&mut self, delta: i32, select: bool) {
         let lines_count = self.document.lines_count();
         if lines_count == 0 {
             return;
         }
-
+    
         let sticky = self.cursor.sticky_col;
-
+    
         if self.view.is_word_wrap_enabled() {
             self.move_visual_rows_wrapped(delta, sticky, select);
         } else {
-            // No wrap: visual rows == logical lines.
-            let new_line = (self.cursor.line as i32 + delta).clamp(0, lines_count as i32 - 1) as u32;
+            // No wrap: visual rows == visible logical lines. Use fold-aware navigation.
+            let folds = self.document.folds();
+            let new_line = if delta >= 0 {
+                let target = folds.next_visible_nth_line(self.cursor.line, delta as u32);
+                target.min(lines_count as u32 - 1)
+            } else {
+                folds.previous_visible_nth_line(self.cursor.line, (-delta) as u32)
+            };
+    
             self.ensure_line_is_cached(new_line);
-            // Use sticky column (in unwrapped coordinates) to pick the target char.
             let target_col = sticky;
             let lci = self
                 .view
@@ -360,17 +365,16 @@ impl Editor {
                 .unwrap_or_else(|| super::LineCharIndex::new(0));
             let new_pos = self.document.line_to_char(new_line) + lci.get() as usize;
             self.goto_position(new_pos, select);
-            // Restore sticky (goto_position overwrote it).
             self.cursor.sticky_col = sticky;
         }
     }
-
+    
     fn move_visual_rows_wrapped(&mut self, delta: i32, sticky: u32, select: bool) {
         let mut remaining = delta;
         let mut line = self.cursor.line;
         let mut row = self.cursor.row_in_line;
         let lines_count = self.document.lines_count() as u32;
-
+    
         while remaining != 0 {
             if remaining > 0 {
                 self.ensure_line_is_cached(line);
@@ -378,20 +382,26 @@ impl Editor {
                 if row + 1 < rows {
                     row += 1;
                     remaining -= 1;
-                } else if line + 1 < lines_count {
-                    line += 1;
+                } else {
+                    // Move to next visible line (skipping folded bodies).
+                    let next = self.document.folds().next_visible_nth_line(line, 1);
+                    if next == line || next >= lines_count {
+                        break; // end of document or no more visible lines
+                    }
+                    line = next;
                     row = 0;
                     remaining -= 1;
-                } else {
-                    // At end of document.
-                    break;
                 }
             } else {
                 if row > 0 {
                     row -= 1;
                     remaining += 1;
                 } else if line > 0 {
-                    line -= 1;
+                    let prev = self.document.folds().previous_visible_nth_line(line, 1);
+                    if prev == line {
+                        break; // already at top visible line
+                    }
+                    line = prev;
                     self.ensure_line_is_cached(line);
                     row = self.line_visual_row_count(line).saturating_sub(1);
                     remaining += 1;
@@ -400,7 +410,7 @@ impl Editor {
                 }
             }
         }
-
+    
         self.ensure_line_is_cached(line);
         let lci = self
             .view
@@ -493,6 +503,54 @@ impl Editor {
         if self.flags.contains(Flags::ScrollBars) {
             self.view.update_max_columns();
         }
+    }
+    fn move_viewport_down(&mut self) {
+        if self.view.is_word_wrap_enabled() {
+            let top_rows = self.view.cached_visual_row_count(self.start_line).unwrap_or(1);
+            let svr = self.view.start_visual_row();
+            if svr + 1 < top_rows {
+                self.view.set_start_visual_row(svr + 1);
+            } else {
+                let max = self.document.lines_count() as u32;
+                let next = self.document.folds().next_visible_nth_line(self.start_line, 1);
+                if next != self.start_line && next < max {
+                    self.start_line = next;
+                    self.view.set_start_visual_row(0);
+                    self.update_view();
+                }
+            }
+        } else {
+            let max = self.document.lines_count() as u32;
+            let next = self.document.folds().next_visible_nth_line(self.start_line, 1);
+            if next != self.start_line && next < max {
+                self.start_line = next;
+                self.update_view();
+            }
+        }
+        self.sync_cursor_visibility();
+    }
+    fn move_viewport_up(&mut self) {
+        if self.view.is_word_wrap_enabled() {
+            let svr = self.view.start_visual_row();
+            if svr > 0 {
+                self.view.set_start_visual_row(svr - 1);
+            } else if self.start_line > 0 {
+                let prev = self.document.folds().previous_visible_nth_line(self.start_line, 1);
+                if prev != self.start_line {
+                    self.start_line = prev;
+                    self.update_view();
+                    let rows = self.view.cached_visual_row_count(self.start_line).unwrap_or(1);
+                    self.view.set_start_visual_row(rows.saturating_sub(1));
+                }
+            }
+        } else if self.start_line > 0 {
+            let prev = self.document.folds().previous_visible_nth_line(self.start_line, 1);
+            if prev != self.start_line {
+                self.start_line = prev;
+                self.update_view();
+            }
+        }
+        self.sync_cursor_visibility();
     }
     fn notify_document_changed(&mut self) {
         self.raise_event(ControlEvent {
@@ -592,40 +650,11 @@ impl OnKeyPressed for Editor {
 
             // viewport scroll (cursor stays put)
             key!("Ctrl+Up") => {
-                if self.view.is_word_wrap_enabled() {
-                    let svr = self.view.start_visual_row();
-                    if svr > 0 {
-                        self.view.set_start_visual_row(svr - 1);
-                    } else if self.start_line > 0 {
-                        self.start_line -= 1;
-                        self.update_view();
-                        let rows = self.view.cached_visual_row_count(self.start_line).unwrap_or(1);
-                        self.view.set_start_visual_row(rows.saturating_sub(1));
-                    }
-                } else {
-                    self.start_line = self.start_line.saturating_sub(1);
-                    self.update_view();
-                }
-                self.sync_cursor_visibility();
+                self.move_viewport_up();
                 EventProcessStatus::Processed
             }
             key!("Ctrl+Down") => {
-                if self.view.is_word_wrap_enabled() {
-                    let top_rows = self.view.cached_visual_row_count(self.start_line).unwrap_or(1);
-                    let svr = self.view.start_visual_row();
-                    if svr + 1 < top_rows {
-                        self.view.set_start_visual_row(svr + 1);
-                    } else if (self.start_line as usize) + 1 < self.document.lines_count() {
-                        self.start_line += 1;
-                        self.view.set_start_visual_row(0);
-                        self.update_view();
-                    }
-                } else {
-                    let max = self.document.lines_count() as u32;
-                    self.start_line = (self.start_line + 1).min(max.saturating_sub(1));
-                    self.update_view();
-                }
-                self.sync_cursor_visibility();
+                self.move_viewport_down();
                 EventProcessStatus::Processed
             }
 
