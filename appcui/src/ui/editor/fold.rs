@@ -483,6 +483,45 @@ impl Folds {
         }
         ln
     }
+    fn visible_line_lower_limit(&self, line: u32) -> (u32, u32) {
+        let mut ln = line;
+        let lower_limit;
+        loop {
+            let (min, _, folded) = self.line_visibility_interval(ln);
+            if folded {
+                if min == 0 {
+                    ln = 0;
+                    lower_limit = 0;
+                    break;
+                }
+                ln = min - 1;
+            } else {
+                lower_limit = min;
+                break;
+            }
+        }
+        (ln, lower_limit)
+    }
+    pub(super) fn previous_visible_nth_line(&self, from_line: u32, n: u32) -> u32 {
+        let (mut ln, mut lower_limit) = self.visible_line_lower_limit(from_line);
+        let mut to_process = if ln != from_line { n.saturating_sub(1) } else { n };
+        while to_process > 0 {
+            let dif = ln - lower_limit;
+            if to_process <= dif {
+                ln -= to_process;
+                break;
+            } else {
+                to_process -= dif + 1;
+                if lower_limit == 0 {
+                    return 0;
+                }
+                let (prev_line, prev_lower_limit) = self.visible_line_lower_limit(lower_limit - 1);
+                ln = prev_line;
+                lower_limit = prev_lower_limit;
+            }
+        }
+        ln
+    }
 }
 
 pub(super) struct VisibleLines<'a> {
