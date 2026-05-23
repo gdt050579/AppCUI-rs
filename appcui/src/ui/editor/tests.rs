@@ -616,6 +616,11 @@ mod visible_lines_tests {
         build_folds(&[(5, 3), (20, 4)])
     }
 
+    /// Outer `(10, 20)` = lines 10..29, inner `(12, 5)` = lines 12..16; both folded.
+    fn nested_folds() -> Folds {
+        build_folds(&[(10, 20), (12, 5)])
+    }
+
     #[test]
     fn visible_lines_from_zero_two_folds() {
         let folds = example_folds();
@@ -754,5 +759,123 @@ mod visible_lines_tests {
             folds.next_visible_nth_line(10, 0),
             nth_visible_line(&folds, 10, 0)
         );
+    }
+
+    /// Last visible line at or before `from` (by source line), then `n` steps earlier.
+    fn nth_previous_visible_line(folds: &Folds, from: u32, n: u32) -> u32 {
+        let mut vis: Vec<u32> = Vec::new();
+        for line in folds.visible_lines_from(0) {
+            if line > from {
+                break;
+            }
+            vis.push(line);
+        }
+        vis[vis.len() - 1 - (n as usize)]
+    }
+
+    #[test]
+    fn previous_visible_nth_line_no_folds() {
+        let folds = Folds::new();
+        assert_eq!(folds.previous_visible_nth_line(0, 0), 0);
+        assert_eq!(folds.previous_visible_nth_line(4, 0), 4);
+        assert_eq!(folds.previous_visible_nth_line(4, 4), 0);
+        assert_eq!(folds.previous_visible_nth_line(5, 2), 3);
+        assert_eq!(folds.previous_visible_nth_line(5, 0), 5);
+    }
+
+    #[test]
+    fn previous_visible_nth_line_plain_run_before_fold() {
+        let folds = example_folds();
+        assert_eq!(folds.previous_visible_nth_line(8, 0), 8);
+        assert_eq!(folds.previous_visible_nth_line(8, 1), 5);
+        assert_eq!(folds.previous_visible_nth_line(4, 0), 4);
+        assert_eq!(folds.previous_visible_nth_line(4, 4), 0);
+    }
+
+    #[test]
+    fn previous_visible_nth_line_matches_reference_from_visible_line() {
+        let folds = example_folds();
+        for (from, n) in [(8, 0), (8, 1), (8, 2), (5, 0), (5, 1), (24, 0), (24, 1), (20, 0)] {
+            assert_eq!(
+                folds.previous_visible_nth_line(from, n),
+                nth_previous_visible_line(&folds, from, n),
+                "from={from} n={n}"
+            );
+        }
+    }
+
+    #[test]
+    fn previous_visible_nth_line_from_hidden_line() {
+        let folds = example_folds();
+        assert_eq!(folds.previous_visible_nth_line(6, 0), 5);
+        assert_eq!(folds.previous_visible_nth_line(6, 1), 5);
+        assert_eq!(folds.previous_visible_nth_line(7, 0), 5);
+        assert_eq!(folds.previous_visible_nth_line(22, 0), 20);
+        // From a hidden line, `n` counts steps after the snap (see `n.saturating_sub(1)`).
+        assert_eq!(folds.previous_visible_nth_line(22, 2), 19);
+    }
+
+    #[test]
+    fn previous_visible_nth_line_fold_header_and_skip() {
+        let folds = example_folds();
+        assert_eq!(folds.previous_visible_nth_line(5, 0), 5);
+        assert_eq!(folds.previous_visible_nth_line(5, 1), 4);
+        assert_eq!(folds.previous_visible_nth_line(20, 0), 20);
+        assert_eq!(folds.previous_visible_nth_line(20, 1), 19);
+        assert_eq!(folds.previous_visible_nth_line(24, 1), 20);
+    }
+
+    #[test]
+    fn previous_visible_nth_line_single_fold() {
+        let folds = build_folds(&[(10, 5)]);
+        assert_eq!(folds.previous_visible_nth_line(15, 0), 15);
+        assert_eq!(folds.previous_visible_nth_line(15, 1), 10);
+        assert_eq!(folds.previous_visible_nth_line(12, 0), 10);
+        assert_eq!(folds.previous_visible_nth_line(12, 1), 10);
+        assert_eq!(folds.previous_visible_nth_line(10, 1), 9);
+        assert_eq!(
+            folds.previous_visible_nth_line(10, 0),
+            nth_previous_visible_line(&folds, 10, 0)
+        );
+    }
+
+    #[test]
+    fn previous_visible_nth_line_crosses_multiple_folds() {
+        let folds = example_folds();
+        // Visible: 0..=5, 8..=19, 20, 24..  — one call must skip both folded bodies.
+        assert_eq!(folds.previous_visible_nth_line(25, 2), 20);
+        assert_eq!(
+            folds.previous_visible_nth_line(25, 15),
+            nth_previous_visible_line(&folds, 25, 15)
+        );
+        assert_eq!(folds.previous_visible_nth_line(25, 15), 5);
+    }
+
+    #[test]
+    fn previous_visible_nth_line_at_document_start() {
+        let folds = example_folds();
+        assert_eq!(folds.previous_visible_nth_line(0, 0), 0);
+        assert_eq!(folds.previous_visible_nth_line(0, 1), 0);
+        assert_eq!(folds.previous_visible_nth_line(0, 100), 0);
+
+        let folds = Folds::new();
+        assert_eq!(folds.previous_visible_nth_line(0, 0), 0);
+        assert_eq!(folds.previous_visible_nth_line(0, 5), 0);
+    }
+
+    #[test]
+    fn previous_visible_nth_line_nested_outer_hides_inner() {
+        let folds = nested_folds();
+        // Outer folded: only line 10 visible inside the block; inner header/body are hidden.
+        for hidden in [11, 12, 13, 14, 15, 16, 17, 28] {
+            assert_eq!(
+                folds.previous_visible_nth_line(hidden, 0),
+                10,
+                "line {hidden} should snap to outer header"
+            );
+        }
+        assert_eq!(folds.previous_visible_nth_line(10, 0), 10);
+        assert_eq!(folds.previous_visible_nth_line(10, 1), 9);
+        assert_eq!(folds.previous_visible_nth_line(30, 0), 30);
     }
 }
