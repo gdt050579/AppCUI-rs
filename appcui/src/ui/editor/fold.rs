@@ -334,22 +334,6 @@ impl Folds {
             nodes = node.children.as_slice();
         }
     }
-    fn child_index(&self, parent: ArenaIndex, child: ArenaIndex) -> Option<usize> {
-        if parent == ArenaIndex::INVALID || child == ArenaIndex::INVALID {
-            return None;
-        }
-        let node = &self.arena[parent.index()];
-        if node.children.children_count() < 8 {
-            node.children.index_of(child)
-        } else {
-            // binary search
-            let child_start_line = self.arena[child.index()].fold.start_line();
-            node.children
-                .as_slice()
-                .binary_search_by_key(&child_start_line, |&c| self.arena[c.index()].fold.start_line())
-                .ok()
-        }
-    }
     fn is_folded(&self, id: ArenaIndex) -> (bool, ArenaIndex) {
         if id == ArenaIndex::INVALID {
             return (false, ArenaIndex::INVALID);
