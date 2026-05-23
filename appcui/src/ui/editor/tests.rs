@@ -686,4 +686,73 @@ mod visible_lines_tests {
         let folds = example_folds();
         assert_eq!(visible_lines(&folds, 16, 6), vec![16, 17, 18, 19, 20, 24]);
     }
+
+    #[test]
+    fn next_visible_nth_line_no_folds() {
+        let folds = Folds::new();
+        assert_eq!(folds.next_visible_nth_line(0, 0), 0);
+        assert_eq!(folds.next_visible_nth_line(0, 4), 4);
+        assert_eq!(folds.next_visible_nth_line(3, 2), 5);
+        assert_eq!(folds.next_visible_nth_line(3, 0), 3);
+    }
+
+    fn nth_visible_line(folds: &Folds, from: u32, n: u32) -> u32 {
+        folds.visible_lines_from(from).nth(n as usize).unwrap()
+    }
+
+    #[test]
+    fn next_visible_nth_line_plain_run_before_fold() {
+        let folds = example_folds();
+        assert_eq!(folds.next_visible_nth_line(0, 0), 0);
+        assert_eq!(folds.next_visible_nth_line(0, 4), 4);
+        assert_eq!(folds.next_visible_nth_line(0, 5), 5);
+        assert_eq!(folds.next_visible_nth_line(4, 2), 8);
+    }
+
+    #[test]
+    fn next_visible_nth_line_matches_iterator_from_visible_line() {
+        let folds = example_folds();
+        for (from, n) in [(0, 0), (0, 5), (0, 6), (4, 2), (5, 0), (5, 1), (16, 5), (20, 1)] {
+            assert_eq!(
+                folds.next_visible_nth_line(from, n),
+                nth_visible_line(&folds, from, n),
+                "from={from} n={n}"
+            );
+        }
+    }
+
+    #[test]
+    fn next_visible_nth_line_from_hidden_line() {
+        let folds = example_folds();
+        // Lines 6–7 and 21–23 are hidden; snaps to the next visible line first.
+        assert_eq!(folds.next_visible_nth_line(6, 0), 8);
+        assert_eq!(folds.next_visible_nth_line(6, 1), 8);
+        assert_eq!(folds.next_visible_nth_line(7, 0), 8);
+        assert_eq!(folds.next_visible_nth_line(21, 0), 24);
+        assert_eq!(folds.next_visible_nth_line(22, 2), 25);
+    }
+
+    #[test]
+    fn next_visible_nth_line_fold_header_and_skip() {
+        let folds = example_folds();
+        assert_eq!(folds.next_visible_nth_line(5, 0), 5);
+        assert_eq!(folds.next_visible_nth_line(5, 1), 8);
+        assert_eq!(folds.next_visible_nth_line(20, 0), 20);
+        assert_eq!(folds.next_visible_nth_line(20, 1), 24);
+        assert_eq!(folds.next_visible_nth_line(16, 5), 24);
+    }
+
+    #[test]
+    fn next_visible_nth_line_single_fold() {
+        let folds = build_folds(&[(10, 5)]);
+        assert_eq!(folds.next_visible_nth_line(9, 1), 10);
+        assert_eq!(folds.next_visible_nth_line(10, 1), 15);
+        assert_eq!(folds.next_visible_nth_line(12, 0), 15);
+        // From a hidden line, `n` counts steps after the snap (see `n.saturating_sub(1)`).
+        assert_eq!(folds.next_visible_nth_line(12, 3), 17);
+        assert_eq!(
+            folds.next_visible_nth_line(10, 0),
+            nth_visible_line(&folds, 10, 0)
+        );
+    }
 }

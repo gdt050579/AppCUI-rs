@@ -447,7 +447,7 @@ impl Folds {
             }
         }
     }
-    fn next_visible_line(&self, line: u32) -> (u32, u32) {
+    fn visible_line_upper_limit(&self, line: u32) -> (u32, u32) {
         let mut ln = line;
         let upper_limit;
         loop {
@@ -465,6 +465,24 @@ impl Folds {
         }
         (ln, upper_limit)
     }
+    pub(super) fn next_visible_nth_line(&self, from_line: u32, n: u32) -> u32 {
+        let (mut ln, mut upper_limit) = self.visible_line_upper_limit(from_line);
+        let mut to_process = if ln != from_line { n.saturating_sub(1) } else { n };
+        while to_process > 0 {
+            let dif = upper_limit - ln;
+            if to_process <= dif {
+                ln += to_process;
+                break;
+            } else {
+                to_process -= dif + 1;
+                let next_start = upper_limit.saturating_add(1);
+                let (next_line, next_upper_limit) = self.visible_line_upper_limit(next_start);
+                ln = next_line;
+                upper_limit = next_upper_limit;
+            }
+        }
+        ln
+    }
 }
 
 pub(super) struct VisibleLines<'a> {
@@ -474,7 +492,7 @@ pub(super) struct VisibleLines<'a> {
 }
 impl<'a> VisibleLines<'a> {
     fn new(folds: &'a Folds, line: u32) -> Self {
-        let (line, upper_limit) = folds.next_visible_line(line);
+        let (line, upper_limit) = folds.visible_line_upper_limit(line);
         Self { folds, line, upper_limit }
     }
 }
@@ -482,12 +500,14 @@ impl<'a> VisibleLines<'a> {
 impl<'a> Iterator for VisibleLines<'a> {
     type Item = u32;
     fn next(&mut self) -> Option<u32> {
-        if self.line == u32::MAX { return None; }
+        if self.line == u32::MAX {
+            return None;
+        }
         let res = self.line;
         if self.line < self.upper_limit {
             self.line += 1;
         } else {
-            let (line, upper_limit) = self.folds.next_visible_line(self.line.saturating_add(1));
+            let (line, upper_limit) = self.folds.visible_line_upper_limit(self.line.saturating_add(1));
             self.line = line;
             self.upper_limit = upper_limit;
         }
