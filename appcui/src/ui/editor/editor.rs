@@ -126,7 +126,7 @@ impl Editor {
             self.margin.width = width + 2;
         } else {
             self.margin.line_number_x = 0;
-            self.margin.width = 0;
+            self.margin.width = if self.flags.contains(Flags::ShowFoldMarkers) { 1 } else { 0 };
         }
         self.margin.visible = width > 0;
     }
