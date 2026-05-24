@@ -293,7 +293,7 @@ impl Editor {
         self.scrollbars
             .update(self.view.max_columns() as u64, self.document.lines_count() as u64, self.size());
         self.scrollbars
-            .set_indexes(self.cursor.column as u64 + self.horizontal_scroll as u64, self.start_line as u64);
+            .set_indexes(self.horizontal_scroll as u64, self.start_line as u64);
     }
 
     /// Refresh on-screen cursor state after viewport-only scroll (Ctrl+Up/Down).
