@@ -1218,7 +1218,7 @@ impl TextArea {
         let last_line = self.last_painted_text_line_index();
         let clicked_text_line = self.line_offset + self.cursor.pos_y as u32;
         if clicked_text_line > last_line as u32 {
-            let visible_height = self.size().height as u32;
+            let visible_height = self.size().height;
             if last_line as u32 + 1 >= visible_height {
                 self.line_offset = last_line as u32 + 1 - visible_height;
             } else {
