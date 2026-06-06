@@ -242,6 +242,30 @@ fn check_selection_3() {
 }
 
 #[test]
+fn check_select_all() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right, 5)
+        Key.Pressed(Ctrl+A)
+        Paint('Select All')
+        CheckHash(0x6B8761F8A495FFD3)
+        CheckCursor(21, 1)
+        Key.Pressed(Ctrl+C)
+        CheckClipboardText('Unit Test Select All\\n')
+    ";
+
+    let text_print = "Unit Test Select All";
+    let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
+
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Unit Test Select All", layout!("d:f"), window::Flags::None);
+
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_selection_4_copy() {
     let script = "
         

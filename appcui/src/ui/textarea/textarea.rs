@@ -588,6 +588,15 @@ impl TextArea {
         self.selection.direction = SelectionDirection::None;
     }
 
+    fn select_all(&mut self) {
+        self.ensure_line_sizes();
+        let end = self.text.len();
+        self.selection.pos_start = 0;
+        self.selection.pos_end = end;
+        self.selection.direction = SelectionDirection::Right;
+        let _ = self.set_cursor_position(TextPosition::with_offset(end as u32));
+    }
+
     fn reposition_cursor(&mut self) {
         // If the cursor is outside the line its supposed to be
         if self.cursor.pos_x + self.row_offset as usize >= self.line_character_counts[self.cursor.pos_y + self.line_offset as usize] as usize {
@@ -1689,6 +1698,10 @@ impl OnKeyPressed for TextArea {
                     }
                     return EventProcessStatus::Processed;
                 }
+            }
+            key!("Ctrl+A") => {
+                self.select_all();
+                return EventProcessStatus::Processed;
             }
             key!("Ctrl+C") | key!("Ctrl+Shift+C") => {
                 if self.selection.direction != SelectionDirection::None && self.selection.pos_start != self.selection.pos_end {
