@@ -2881,3 +2881,28 @@ fn crash_fix_mouse_on_minimal_size_textarea() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_mouse_click_outside_text() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0x1A541DA4FA3CA577)
+        Mouse.Click(10, 5, left)
+        Paint('Cursor at the end of the text')
+        CheckHash(0x1F061AF79FD979F6)
+        CheckCursor(16, 4)
+    ";
+
+    let mut ta = TextArea::new("", layout!("l:1,t:1,r:1,b:3"), textarea::Flags::ShowLineNumber);
+    ta.set_text(r#"
+    $a = ((1,(((2))),3))
+            "#);    
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Test", layout!("d:f"), window::Flags::None);
+    w.add(ta);
+    w.add(button!("Test,l:1,b:0,w:10"));
+    a.add_window(w);
+    a.run();
+
+}

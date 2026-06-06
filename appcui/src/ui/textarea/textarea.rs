@@ -557,15 +557,22 @@ impl TextArea {
 
     fn get_absolute_position_verbose(&mut self) -> (u32, u32) {
         let mut cursor_absolute_position = 0;
+        let line_count = self.line_sizes.len();
+        if line_count == 0 {
+            return (0, 0);
+        }
+        let line_index = (self.line_offset + self.cursor.pos_y as u32).min(line_count as u32 - 1) as usize;
 
         // Here I count the byte sizes of that lines above
-        for i in 0..self.line_offset + self.cursor.pos_y as u32 {
-            cursor_absolute_position += self.line_sizes[i as usize];
+        for i in 0..line_index {
+            cursor_absolute_position += self.line_sizes[i];
         }
 
         // Here I need the absolute position of that character, therefore I need to slice 
         // the text and extract the absolute position
-        let line_text = &self.text[cursor_absolute_position as usize .. (cursor_absolute_position + self.line_sizes[self.line_offset as usize + self.cursor.pos_y]) as usize];
+        let start = cursor_absolute_position as usize;
+        let end = std::cmp::min(start + self.line_sizes[line_index] as usize, self.text.len());
+        let line_text = &self.text[start..end];
         
         let byte_index_in_line = Self::get_cursor_position_in_line(line_text, self.row_offset as usize + self.cursor.pos_x, 0);
         if byte_index_in_line != usize::MAX {
@@ -626,6 +633,33 @@ impl TextArea {
             self.line_sizes.push(1);
             self.line_character_counts.push(1);
         }
+    }
+
+    /// Last document line index that is actually painted in the current viewport.
+    #[inline(always)]
+    fn last_painted_text_line_index(&self) -> usize {
+        if self.line_sizes.is_empty() {
+            return 0;
+        }
+        let mut initial_offset = 0u32;
+        let mut last = self.line_offset as usize;
+        let mut painted = 0usize;
+        for (it, size) in self.line_sizes.iter().enumerate() {
+            if it < self.line_offset as usize {
+                initial_offset += *size;
+                continue;
+            }
+            if painted >= self.size().height as usize {
+                break;
+            }
+            if initial_offset + *size > self.text.len() as u32 {
+                break;
+            }
+            last = it;
+            painted += 1;
+            initial_offset += *size;
+        }
+        last
     }
 
     #[inline(always)]
@@ -1171,9 +1205,24 @@ impl TextArea {
         if self.line_sizes.is_empty() {
             return;
         }
-        if self.cursor.pos_y >= self.line_sizes.len() {
-            self.cursor.pos_y = self.line_sizes.len() - 1;
-            self.move_cursor_horizontal(self.line_sizes[self.line_sizes.len() - 1] as i32);
+
+        let last_line = self.last_painted_text_line_index();
+        let clicked_text_line = self.line_offset + self.cursor.pos_y as u32;
+        if clicked_text_line > last_line as u32 {
+            let visible_height = self.size().height as u32;
+            if last_line as u32 + 1 >= visible_height {
+                self.line_offset = last_line as u32 + 1 - visible_height;
+            } else {
+                self.line_offset = 0;
+            }
+            self.cursor.pos_y = last_line - self.line_offset as usize;
+            self.row_offset = 0;
+            self.cursor.pos_x = 0;
+            let line_index = self.line_offset as usize + self.cursor.pos_y;
+            if line_index < self.line_character_counts.len() {
+                let end_col = self.line_character_counts[line_index].saturating_sub(1) as i32;
+                self.move_cursor_horizontal(end_col);
+            }
         }
 
         self.reposition_cursor();
