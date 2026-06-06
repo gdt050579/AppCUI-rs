@@ -17,10 +17,10 @@ let textarea2 = textarea!("'some text to print',a:c,h:100%,flags:ReadOnly");
 
 A textarea supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name      | Type   | Positional parameter                | Purpose                                                                                                              |
-| ------------------- | ------ | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `text` | String | **Yes** (first positional parameter) | The text from a text area. If ommited an empty string will be considered as the caption of the textarea. |
-| `flags`             | List   | **No**                              | TextArea initialization flags that control how the TextArea should look and behave(ReadOnly, having line numbers)                 |
+| Parameter name | Type   | Positional parameter                 | Purpose                                                                                                           |
+| -------------- | ------ | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `text`         | String | **Yes** (first positional parameter) | The text from a text area. If ommited an empty string will be considered as the caption of the textarea.          |
+| `flags`        | List   | **No**                               | TextArea initialization flags that control how the TextArea should look and behave(ReadOnly, having line numbers) |
 
 Text Area supports the following initialization flags:
 * `textarea::Flags::ShowLineNumber` or `ShowLineNumber` (for macro initialization) - This flag enables the display of line numbers in the text area, typically in a gutter on the left side. It helps users keep track of their position within the text, making navigation and debugging easier. This feature is especially useful for programming and document editing, where line references are important.
@@ -32,43 +32,44 @@ Text Area supports the following initialization flags:
 
 Besides the [Common methods for all Controls](../common_methods.md) a textfield also has the following additional methods:
 
-| Method                                      | Purpose |
-|---------------------------------------------|---------|
-| **set_text** | Replaces the current content with the specified text. |
-| **insert_text** | Inserts the given text at the specified cursor position. |
-| **remove_text** | Removes a portion of the text between specified positions. |
-| **text** | Returns the full content of the text editor. |
-| **select_text** | Selects a range of text with the given start position and size. |
-| **clear_selection**      | Clears any active text selection. |
-| **has_selection**      | Returns true if there is an active text selection. |
-| **selection**      | Returns the currently selected text, if any. |
-| **delete_selection**      | Deletes the currently selected text. |
-| **is_read_only**      | Returns true if the text editor is in read-only mode. |
-| **set_cursor_position**      | Moves the cursor to the specified position. |
-| **cursor_position**      | Returns the current position of the cursor. |
+| Method                  | Purpose                                                         |
+| ----------------------- | --------------------------------------------------------------- |
+| **set_text**            | Replaces the current content with the specified text.           |
+| **insert_text**         | Inserts the given text at the specified cursor position.        |
+| **remove_text**         | Removes a portion of the text between specified positions.      |
+| **text**                | Returns the full content of the text editor.                    |
+| **select_text**         | Selects a range of text with the given start position and size. |
+| **clear_selection**     | Clears any active text selection.                               |
+| **has_selection**       | Returns true if there is an active text selection.              |
+| **selection**           | Returns the currently selected text, if any.                    |
+| **delete_selection**    | Deletes the currently selected text.                            |
+| **is_read_only**        | Returns true if the text editor is in read-only mode.           |
+| **set_cursor_position** | Moves the cursor to the specified position.                     |
+| **cursor_position**     | Returns the current position of the cursor.                     |
 
 
 ## Key association
 
-The following keys are processed by a TextField control if it has focus:
+The following keys are processed by a TextArea control if it has focus:
 
-| Key                     | Purpose |
-|-------------------------|---------|
-| **Arrow Keys**          | Move the cursor left, right, up, or down by one character or line. |
-| **Shift + Arrows**      | Extends the text selection in the direction of the arrow key. |
-| **Ctrl + Right**        | Moves the cursor to the beginning of the next word. |
-| **Ctrl + Left**         | Moves the cursor to the beginning of the previous word. |
-| **Ctrl + Shift + Right** | Extends the selection to the beginning of the next word. |
-| **Ctrl + Shift + Left**  | Extends the selection to the beginning of the previous word. |
-| **Ctrl + C**            | Copies the selected text to the clipboard. |
-| **Ctrl + V**            | Pastes the clipboard content at the cursor position. |
-| **Backspace**           | Deletes the character before the cursor. |
-| **Delete**             | Deletes the character after the cursor. |
-| **Ctrl + Backspace**    | Deletes the entire previous word. |
-| **Ctrl + Delete**       | Deletes the entire next word. |
-| **Enter**              | Inserts a new line at the cursor position. |
-| **Page Up**            | Moves the view up by one page, scrolling the text accordingly. |
-| **Page Down**          | Moves the view down by one page, scrolling the text accordingly. |
+| Key                      | Purpose                                                            |
+| ------------------------ | ------------------------------------------------------------------ |
+| **Arrow Keys**           | Move the cursor left, right, up, or down by one character or line. |
+| **Shift + Arrows**       | Extends the text selection in the direction of the arrow key.      |
+| **Ctrl + Right**         | Moves the cursor to the beginning of the next word.                |
+| **Ctrl + Left**          | Moves the cursor to the beginning of the previous word.            |
+| **Ctrl + Shift + Right** | Extends the selection to the beginning of the next word.           |
+| **Ctrl + Shift + Left**  | Extends the selection to the beginning of the previous word.       |
+| **Ctrl + A**             | Selects the entire text and moves the cursor to the end.           |
+| **Ctrl + C**             | Copies the selected text to the clipboard.                         |
+| **Ctrl + V**             | Pastes the clipboard content at the cursor position.               |
+| **Backspace**            | Deletes the character before the cursor.                           |
+| **Delete**               | Deletes the character after the cursor.                            |
+| **Ctrl + Backspace**     | Deletes the entire previous word.                                  |
+| **Ctrl + Delete**        | Deletes the entire next word.                                      |
+| **Enter**                | Inserts a new line at the cursor position.                         |
+| **Page Up**              | Moves the view up by one page, scrolling the text accordingly.     |
+| **Page Down**            | Moves the view down by one page, scrolling the text accordingly.   |
 
 Additionally, all printable characters can be used to insert / modify or edit the current text.
 
