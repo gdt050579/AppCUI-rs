@@ -5,6 +5,7 @@ use crate::prelude::*;
 pub struct BufferView<T> where T: BufferAccess {
     flags: Flags,
     buffer: T,
+    pos: usize,
 }
 
 impl<T: BufferAccess> BufferView<T> {
@@ -13,6 +14,7 @@ impl<T: BufferAccess> BufferView<T> {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             flags,
             buffer,
+            pos: 0,
         }
     }
 }
