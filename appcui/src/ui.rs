@@ -172,6 +172,7 @@ pub use progressbar::ProgressBar;
 pub use textarea::TextArea;
 pub use timepicker::TimePicker;
 pub use bufferview::BufferView;
+pub use bufferview::BufferAccess;
 pub use menu::Menu;
 pub use appbar::AppBar;
 pub use graphview::GraphView;

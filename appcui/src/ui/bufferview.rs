@@ -9,4 +9,5 @@ mod initialization_flags;
 mod tests;
 
 pub use self::bufferview::BufferView;
+pub use self::initialization_flags::BufferAccess;
 pub use self::initialization_flags::Flags;
