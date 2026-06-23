@@ -17,6 +17,58 @@ impl<T: BufferAccess> BufferView<T> {
             pos: 0,
         }
     }
+    fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: usize, len: u32, y: i32, hex: bool) {
+        if len == 0 {
+            return;
+        }
+        let mut buf: [u8;24] = [0;24];
+        let mut pos = 23;
+        let mut addr = addr;
+        if hex {
+            // hex
+            loop {
+                let digit = (addr % 16) as u8;
+                if digit < 10 {
+                    buf[pos] = digit + b'0';
+                } else {
+                    buf[pos] = digit - 10 + b'A';
+                }
+                addr /= 16;
+                pos -= 1;
+                if addr == 0 {
+                    break;
+                }
+            }
+        } else {
+            // decimal
+            loop {
+                let digit = (addr % 10) as u8;
+                buf[pos] = digit + b'0';
+                addr /= 10;
+                pos -= 1;
+                if addr == 0 {
+                    break;
+                }
+            }
+        }
+        pos += 1;
+        let addr_len = (25 - pos) as u32;
+        if addr_len > len {
+            match len {
+                1 =>  pos = 23,
+                2 => { buf[22] = b'.'; pos = 22; }
+                3 => { buf[21] = buf[pos]; buf[22] = b'.'; pos = 21; }
+                4..24 => {
+                    // 4 and more
+                    buf[24-len as usize] = buf[pos];
+                    buf[25-len as usize] = b'.';
+                    pos = 24-len as usize;
+                }
+                _ => return,
+            }
+        }
+        surface.write_ascii(0, y, &buf[pos..25], attr, false);
+    }
 }
 
 impl<T: BufferAccess> OnPaint for BufferView<T> {
