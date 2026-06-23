@@ -11,6 +11,7 @@ mod output_buffer;
 mod tests;
 
 use self::output_buffer::OutputBuffer;
+use self::format::Representation;
 
 pub use self::bufferview::BufferView;
 pub use self::initialization_flags::BufferAccess;

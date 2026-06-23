@@ -1,11 +1,16 @@
+use super::format::*;
 use super::initialization_flags::{BufferAccess, Flags};
 use crate::prelude::*;
 
 #[CustomControl(overwrite = [OnPaint, OnKeyPressed, OnMouseEvent], internal = true)]
-pub struct BufferView<T> where T: BufferAccess {
+pub struct BufferView<T>
+where
+    T: BufferAccess,
+{
     flags: Flags,
     buffer: T,
     pos: usize,
+    repr: Representation,
 }
 
 impl<T: BufferAccess> BufferView<T> {
@@ -15,13 +20,14 @@ impl<T: BufferAccess> BufferView<T> {
             flags,
             buffer,
             pos: 0,
+            repr: Representation::new(),
         }
     }
     fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: usize, len: u32, y: i32, hex: bool) {
         if len == 0 {
             return;
         }
-        let mut buf: [u8;24] = [0;24];
+        let mut buf: [u8; 24] = [0; 24];
         let mut pos = 23;
         let mut addr = addr;
         if hex {
@@ -55,14 +61,27 @@ impl<T: BufferAccess> BufferView<T> {
         let addr_len = (25 - pos) as u32;
         if addr_len > len {
             match len {
-                1 =>  pos = 23,
-                2 => { buf[22] = b'.'; pos = 22; }
-                3 => { buf[21] = buf[pos]; buf[22] = b'.'; pos = 21; }
-                4..24 => {
+                1 => pos = 23,
+                2 => {
+                    buf[22] = b'.';
+                    pos = 22;
+                }
+                3 => {
+                    buf[21] = buf[pos];
+                    buf[22] = b'.';
+                    pos = 21;
+                }
+                4 => {
+                    buf[20] = buf[pos];
+                    buf[21] = b'.';
+                    pos = 21;
+                }
+                5..24 => {
                     // 4 and more
-                    buf[24-len as usize] = buf[pos];
-                    buf[25-len as usize] = b'.';
-                    pos = 24-len as usize;
+                    buf[24 - len as usize] = buf[pos];
+                    buf[25 - len as usize] = b'.';
+                    buf[26 - len as usize] = b'.';
+                    pos = 24 - len as usize;
                 }
                 _ => return,
             }
