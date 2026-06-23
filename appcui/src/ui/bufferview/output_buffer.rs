@@ -14,4 +14,12 @@ impl OutputBuffer {
     pub(super) fn set_len(&mut self, len: u8) {
         self.len = len;
     }
+    #[inline(always)]
+    pub(super) fn as_slice(&self) -> &[u8] {
+        &self.buffer[..self.len as usize]
+    }
+    #[inline(always)]
+    pub(super) fn len(&self) -> u8 {
+        self.len
+    }
 }

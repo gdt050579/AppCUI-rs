@@ -37,12 +37,19 @@ impl Format {
             Format::Hex(bytes_count) => *bytes_count as u8,
         }
     }
+    #[inline(always)]
+    pub(super) fn display_chars(&self) -> u32 {
+        match self {
+            Format::Hex(byte_count) => (*byte_count as u32) * 2,
+        }
+    }
 }
 
 pub(super) struct Representation {
     pub(super) format: Format,
     pub(super) endian: Endian,
     pub(super) columns: Columns,
+    pub(super) columns_count: u8,
 }
 impl Representation {
     pub(super) fn new() -> Self {
@@ -50,6 +57,7 @@ impl Representation {
             format: Format::Hex(BytesCount::One),
             endian: Endian::Little,
             columns: Columns::Fixed(8),
+            columns_count: 8,
         }
     }
 }
