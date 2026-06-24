@@ -1,3 +1,5 @@
+use std::ops::SubAssign;
+
 use super::format::*;
 use super::initialization_flags::{BufferAccess, Flags};
 use super::output_buffer::OutputBuffer;
@@ -10,10 +12,13 @@ where
 {
     flags: Flags,
     buffer: T,
+    start_view: usize,
     pos: usize,
     repr: Representation,
     temp_buffer: Vec<u8>,
     buf_surface: Surface,
+    addr_width: u32,
+    label_width: u32,
 }
 
 impl<T: BufferAccess> BufferView<T> {
@@ -22,10 +27,13 @@ impl<T: BufferAccess> BufferView<T> {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             flags,
             buffer,
+            start_view: 0,
             pos: 0,
             repr: Representation::new(),
             temp_buffer: Vec::new(),
             buf_surface: Surface::new(1, 1),
+            addr_width: 0,
+            label_width: 0,
         }
     }
     fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: usize, len: u32, y: i32, hex: bool) {
@@ -127,6 +135,35 @@ impl<T: BufferAccess> BufferView<T> {
             start += self.repr.columns_count as usize * self.repr.format.bytes_count() as usize;
         }
     }
+    fn recompute_sizes(&mut self, screen_size: Size) {
+        let h = screen_size.height.saturating_sub(1).min(1);
+        let nr_columns = match self.repr.columns {
+            Columns::Fixed(count) => count as u32,
+            Columns::Auto => {
+                let mut border_width = 0;
+                if self.addr_width > 0 {
+                    border_width += (1 + self.addr_width) as u32;
+                }
+                if self.label_width > 0 {
+                    border_width += (1 + self.label_width) as u32;
+                }
+                let space_left = screen_size.width.saturating_sub(border_width);
+                let columns = if self.repr.format.is_char() {
+                    space_left
+                } else {
+                    (space_left.saturating_sub(3)) / (self.repr.format.display_chars() + 2)
+                };
+                columns.min(1) as u32
+            }
+        };
+        let w = if self.repr.format.is_char() {
+            nr_columns as u32
+        } else {
+            (self.repr.format.display_chars() + 2) * nr_columns + 3
+        };
+        self.buf_surface.resize(Size::new(w, h));
+        self.paint_buffer();
+    }
 }
 
 impl<T: BufferAccess> OnPaint for BufferView<T> {
@@ -151,7 +188,6 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
 
 impl<T: BufferAccess> OnResize for BufferView<T> {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
-        self.buf_surface.resize(new_size);
-        self.paint_buffer();
+        self.recompute_sizes(new_size);
     }
 }
