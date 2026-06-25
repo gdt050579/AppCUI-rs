@@ -3,6 +3,9 @@ use super::initialization_flags::{BufferAccess, Flags};
 use super::output_buffer::OutputBuffer;
 use crate::prelude::*;
 
+const MAX_ADDRESS_WIDTH: u32 = 24;
+const MAX_LABEL_WIDTH: u32 = 128;
+
 #[CustomControl(overwrite = [OnPaint, OnKeyPressed, OnMouseEvent, OnResize], internal = true)]
 pub struct BufferView<T>
 where
@@ -30,12 +33,28 @@ impl<T: BufferAccess> BufferView<T> {
             repr: Representation::new(),
             temp_buffer: Vec::new(),
             buf_surface: Surface::new(1, 1),
-            addr_width: 0,
-            label_width: 0,
+            addr_width: if flags.contains(Flags::ShowAddress) { 6 } else { 0 },
+            label_width: if flags.contains(Flags::ShowLabels) { 6 } else { 0 },
         }
     }
     pub fn set_columns_count(&mut self, count: ColumnsCount) {
         self.repr.columns = count;
+        self.recompute_sizes(self.size());
+    }
+    pub fn set_address_width(&mut self, width: u32) {
+        if self.flags.contains(Flags::ShowAddress) {
+            self.addr_width = width.clamp(1, MAX_ADDRESS_WIDTH);
+        } else {
+            self.addr_width = 0;
+        }
+        self.recompute_sizes(self.size());
+    }
+    pub fn set_label_width(&mut self, width: u32) {
+        if self.flags.contains(Flags::ShowLabels) {
+            self.label_width = width.clamp(1, MAX_LABEL_WIDTH);
+        } else {
+            self.label_width = 0;
+        }
         self.recompute_sizes(self.size());
     }
     fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: usize, len: u32, y: i32, hex: bool) {
@@ -73,7 +92,7 @@ impl<T: BufferAccess> BufferView<T> {
             }
         }
         pos += 1;
-        let addr_len = (25 - pos) as u32;
+        let addr_len = (24 - pos) as u32;
         if addr_len > len {
             match len {
                 1 => pos = 23,
@@ -100,8 +119,14 @@ impl<T: BufferAccess> BufferView<T> {
                 }
                 _ => return,
             }
+            surface.write_ascii(0, y, &buf[pos..24], attr, false);
+        } else {
+            let dif = len - addr_len;
+            if dif > 0 {
+                surface.fill_horizontal_line_with_size(0, y, dif as u32, Character::with_attributes(if hex { '0' } else { ' ' }, attr));
+            }
+            surface.write_ascii(dif as i32, y, &buf[pos..24], attr, false);
         }
-        surface.write_ascii(0, y, &buf[pos..25], attr, false);
     }
     fn write_line(&mut self, attr: CharAttribute, pos: usize, x: i32, y: i32) {
         let mut x = x + 1;
@@ -137,6 +162,63 @@ impl<T: BufferAccess> BufferView<T> {
             start += self.repr.columns_count as usize * self.repr.format.bytes_count() as usize;
         }
     }
+    fn paint_header(&self, surface: &mut Surface, theme: &Theme) {
+        if self.flags.contains(Flags::HideHeader) {
+            return;
+        }
+        const HEX: &[u8; 16] = b"0123456789ABCDEF";
+        let attr = theme.header.text.normal;
+        let width = self.size().width;
+        // fill the whole header row so it reads as a single band
+        surface.fill_horizontal_line_with_size(0, 0, width, Character::with_attributes(' ', attr));
+
+        let display_chars = self.repr.format.display_chars() as usize;
+        let mut digits = [b'0'; 16];
+        let mut x = self.border_width() as i32 + 1;
+        for c in 0..self.repr.columns_count as usize {
+            // column index, in hex, zero-padded to the width of a value cell
+            let mut v = c;
+            for i in (0..display_chars).rev() {
+                digits[i] = HEX[v & 0x0F];
+                v >>= 4;
+            }
+            // same horizontal layout as `write_line`: a leading space, then `display_chars + 1` per cell
+            surface.write_ascii(x, 0, &digits[..display_chars], attr, false);
+            x += (display_chars + 1) as i32;
+        }
+    }
+    fn paint_border(&self, surface: &mut Surface, theme: &Theme, top: i32) {
+        if !self.flags.contains_one(Flags::ShowAddress | Flags::ShowLabels) {
+            return;
+        }
+        let attr = theme.border.normal;
+        let mut start = self.start_view;
+        let mut y = top;
+        for _ in 0..self.repr.rows_count {
+            let mut x = 0;
+            if self.addr_width > 0 {
+                Self::write_offset(surface, attr, start, self.addr_width as u32, y, true);
+                x += (1 + self.addr_width) as i32;
+            }
+            if self.label_width > 0 {
+                //self.write_offset(surface, theme.header.text.normal, start, self.label_width, top, false);
+            }
+            start += self.repr.columns_count as usize * self.repr.format.bytes_count() as usize;
+            if start >= self.buffer.len() {
+                break;
+            }
+            y += 1;
+        }
+        let mut x = 0;
+        let bottom = self.size().height as i32;
+        if self.addr_width > 0 {
+            surface.draw_vertical_line(self.addr_width as i32, 0, bottom, LineType::Single, theme.lines.normal);
+            x += (1 + self.addr_width) as i32;
+        }
+        if self.label_width > 0 {
+            surface.draw_vertical_line(x + self.label_width as i32, 0, bottom, LineType::Single, theme.lines.normal);
+        }
+    }
     fn border_width(&self) -> u32 {
         let mut border_width = 0;
         if self.addr_width > 0 {
@@ -148,7 +230,11 @@ impl<T: BufferAccess> BufferView<T> {
         border_width
     }
     fn recompute_sizes(&mut self, screen_size: Size) {
-        let h = screen_size.height.saturating_sub(1).max(1);
+        let h = if self.flags.contains(Flags::HideHeader) {
+            screen_size.height.max(1)
+        } else {
+            screen_size.height.saturating_sub(1).max(1)
+        };
         let nr_columns = match self.repr.columns {
             ColumnsCount::Fixed(count) => count as u32,
             ColumnsCount::Auto => {
@@ -176,12 +262,15 @@ impl<T: BufferAccess> BufferView<T> {
     fn goto_position(&mut self, new_pos: usize, select: bool) -> bool {
         let new_pos = new_pos.min(self.buffer.len().saturating_sub(1));
         let old_start_view = self.start_view;
+        let cols = self.repr.columns_count as usize;
+        let rows = self.repr.rows_count as usize;
+        let visible_count = cols * rows;
+        let column = (new_pos as isize - self.start_view as isize).rem_euclid(cols as isize) as usize;
         if new_pos < self.start_view {
-            self.start_view = new_pos;
-        }
-        let visible_count = self.repr.columns_count as usize * self.repr.rows_count as usize;
-        if new_pos >= self.start_view + visible_count {
-            self.start_view = new_pos + 1 - visible_count;
+            self.start_view = new_pos.saturating_sub(column);
+        } else if new_pos >= self.start_view + visible_count {
+            let row_start = new_pos - column;
+            self.start_view = row_start.saturating_sub(rows.saturating_sub(1) * cols);
         }
         self.pos = new_pos;
         if old_start_view != self.start_view {
@@ -195,14 +284,18 @@ impl<T: BufferAccess> BufferView<T> {
 
 impl<T: BufferAccess> OnPaint for BufferView<T> {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        surface.draw_surface(0, 0, &self.buf_surface);
+        let top = if self.flags.contains(Flags::HideHeader) { 0 } else { 1 };
+        self.paint_header(surface, theme);
+        self.paint_border(surface, theme, top);
+        let border_width = self.border_width();
+        surface.draw_surface(border_width as i32, top, &self.buf_surface);
         // convert self.pos to column and row, knowing that the view starts form self.start_view
         if self.pos >= self.start_view {
             let dif = self.pos - self.start_view;
             let column = dif % self.repr.columns_count as usize;
-            let row = (dif / self.repr.columns_count as usize) as i32;
+            let row = (dif / self.repr.columns_count as usize) as i32 + top;
             let len = self.repr.format.display_chars() as u32;
-            let x = (self.border_width() + column as u32 * (len + 1)) as i32;
+            let x = (border_width + column as u32 * (len + 1)) as i32;
             surface.fill_horizontal_line_with_size(x, row, len + 2, Character::with_attributes(0, theme.editor.pressed_or_selected));
         }
     }

@@ -3,22 +3,9 @@ use EnumBitFlags::EnumBitFlags;
 #[EnumBitFlags(bits = 8)]
 pub enum Flags {
     ScrollBars = 0x0001,
-}
-
-
-pub enum ViewMode {
-    Hex(u8),
-    HexU16(u8),
-    UnsignedDecimal(u8),
-    SignedDecimal(u8),
-    UnsignedDecimalU16(u8),
-    SignedDecimalU16(u8),
-    UnsignedDecimalU32(u8),
-    SignedDecimalU32(u8),
-    UnsignedDecimalU64(u8),
-    SignedDecimalU64(u8),
-    UnsignedDecimalU128(u8),
-    SignedDecimalU128(u8),
+    HideHeader = 0x0002,
+    ShowAddress = 0x0004,
+    ShowLabels = 0x0008,
 }
 
 pub trait BufferAccess {
