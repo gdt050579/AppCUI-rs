@@ -3,7 +3,7 @@ mod hex;
 use super::OutputBuffer;
 
 #[derive(Clone, Copy)]
-pub enum Columns {
+pub enum ColumnsCount {
     Fixed(u8),
     Auto,
 }
@@ -59,16 +59,18 @@ impl Format {
 pub(super) struct Representation {
     pub(super) format: Format,
     pub(super) endian: Endian,
-    pub(super) columns: Columns,
-    pub(super) columns_count: u8,
+    pub(super) columns: ColumnsCount,
+    pub(super) columns_count: u32,
+    pub(super) rows_count: u32,
 }
 impl Representation {
     pub(super) fn new() -> Self {
         Self {
             format: Format::Hex(BytesCount::One),
             endian: Endian::Little,
-            columns: Columns::Fixed(8),
+            columns: ColumnsCount::Fixed(8),
             columns_count: 8,
+            rows_count: 1,
         }
     }
 }

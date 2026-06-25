@@ -25,7 +25,9 @@ fn main() -> Result<(), appcui::system::Error> {
         LayoutBuilder::new().alignment(Alignment::Center).width(80).height(24).build(),
         window::Flags::Sizeable,
     );
-    win.add(BufferView::new(buffer, layout!("d:f"), bufferview::Flags::ScrollBars));
+    let mut b = BufferView::new(buffer, layout!("d:f"), bufferview::Flags::ScrollBars);
+    b.set_columns_count(bufferview::ColumnsCount::Auto);
+    win.add(b);
     app.add_window(win);
     app.run();
     Ok(())
