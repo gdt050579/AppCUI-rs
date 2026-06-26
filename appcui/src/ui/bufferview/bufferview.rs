@@ -2,6 +2,7 @@ use super::format::*;
 use super::initialization_flags::{BufferAccess, Flags};
 use super::output_buffer::OutputBuffer;
 use crate::prelude::*;
+use flat_string::FlatString;
 
 const MAX_ADDRESS_WIDTH: u32 = 24;
 const MAX_LABEL_WIDTH: u32 = 128;
@@ -20,6 +21,8 @@ where
     buf_surface: Surface,
     addr_width: u32,
     label_width: u32,
+    AddrName: FlatString<14>,
+    LabelName: FlatString<14>,
 }
 
 impl<T: BufferAccess> BufferView<T> {
@@ -35,6 +38,8 @@ impl<T: BufferAccess> BufferView<T> {
             buf_surface: Surface::new(1, 1),
             addr_width: if flags.contains(Flags::ShowAddress) { 6 } else { 0 },
             label_width: if flags.contains(Flags::ShowLabels) { 6 } else { 0 },
+            AddrName: FlatString::from_str("Address"),
+            LabelName: FlatString::from_str("Label"),
         }
     }
     pub fn set_columns_count(&mut self, count: ColumnsCount) {
@@ -59,6 +64,21 @@ impl<T: BufferAccess> BufferView<T> {
     }
     pub fn label(&self, pos: usize) -> Option<&str> {
         None
+    }
+    fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
+        let chars_count = title.chars_count() as u32;
+        if chars_count <= len {
+            surface.write_string(x + ((len-chars_count)/2) as i32, 0, title.as_str(), attr, false);
+        } else {
+            let format = TextFormatBuilder::new()
+                .attribute(attr)
+                .wrap_type(WrapType::SingleLineWrap(len as u16))
+                .chars_count(chars_count as u16)
+                .align(TextAlignment::Left)
+                .position(x, 0)
+                .build();
+            surface.write_text(title.as_str(), &format);
+        }
     }
     fn write_label(surface: &mut Surface, attr: CharAttribute, label: &str, len: u32, x: i32, y: i32) {
         if len == 0 {
@@ -180,15 +200,22 @@ impl<T: BufferAccess> BufferView<T> {
         if self.flags.contains(Flags::HideHeader) {
             return;
         }
-        const HEX: &[u8; 16] = b"0123456789ABCDEF";
         let attr = theme.header.text.normal;
-        let width = self.size().width;
-        // fill the whole header row so it reads as a single band
-        surface.fill_horizontal_line_with_size(0, 0, width, Character::with_attributes(' ', attr));
+        surface.fill_horizontal_line_with_size(0, 0, self.size().width, Character::with_attributes(' ', attr));
 
+        let mut x = 0;
+        if self.addr_width > 0 {
+            Self::write_column_title(surface, attr, &self.AddrName, self.addr_width as u32, 0);
+            x += (1 + self.addr_width) as i32;
+        }
+        if self.label_width > 0 {
+            Self::write_column_title(surface, attr, &self.LabelName, self.label_width as u32, x);
+            x += (1 + self.label_width) as i32;
+        }
+        const HEX: &[u8; 16] = b"0123456789ABCDEF";
+        // fill the whole header row so it reads as a single band
         let display_chars = self.repr.format.display_chars() as usize;
         let mut digits = [b'0'; 16];
-        let mut x = self.border_width() as i32 + 1;
         for c in 0..self.repr.columns_count as usize {
             // column index, in hex, zero-padded to the width of a value cell
             let mut v = c;
