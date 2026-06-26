@@ -57,6 +57,20 @@ impl<T: BufferAccess> BufferView<T> {
         }
         self.recompute_sizes(self.size());
     }
+    pub fn label(&self, pos: usize) -> Option<&str> {
+        None
+    }
+    fn write_label(surface: &mut Surface, attr: CharAttribute, label: &str, len: u32, x: i32, y: i32) {
+        if len == 0 {
+            return;
+        }
+        let format = TextFormatBuilder::new()
+            .attribute(attr)
+            .wrap_type(WrapType::SingleLineWrap(len as u16))
+            .position(x, y)
+            .build();
+        surface.write_text(label, &format);
+    }
     fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: usize, len: u32, y: i32, hex: bool) {
         if len == 0 {
             return;
@@ -201,7 +215,11 @@ impl<T: BufferAccess> BufferView<T> {
                 x += (1 + self.addr_width) as i32;
             }
             if self.label_width > 0 {
-                //self.write_offset(surface, theme.header.text.normal, start, self.label_width, top, false);
+                if let Some(label) = self.label(start) {
+                    Self::write_label(surface, theme.header.text.normal, label, self.label_width as u32, x, y);
+                } else {
+                    surface.fill_horizontal_line_with_size(x, y, self.label_width as u32, Character::with_attributes('-', theme.header.text.normal));
+                }
             }
             start += self.repr.columns_count as usize * self.repr.format.bytes_count() as usize;
             if start >= self.buffer.len() {
@@ -280,6 +298,21 @@ impl<T: BufferAccess> BufferView<T> {
             false
         }
     }
+    fn move_view_with(&mut self, delta: i32) {
+        let unit = self.repr.format.bytes_count() as usize;
+        let mut new_pos = if delta > 0 {
+            self.start_view.saturating_add(delta as usize * unit)
+        } else {
+            self.start_view.saturating_sub((-delta) as usize * unit)
+        };
+        if new_pos >= self.buffer.len() {
+            new_pos = self.buffer.len().saturating_sub(unit);
+        }
+        if self.start_view != new_pos {
+            self.start_view = new_pos;
+            self.paint_buffer();
+        }
+    }
 }
 
 impl<T: BufferAccess> OnPaint for BufferView<T> {
@@ -343,6 +376,22 @@ impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
                         .saturating_add(self.repr.columns_count as usize * (self.repr.rows_count as usize)),
                     select,
                 );
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Left") => {
+                self.move_view_with(-1);
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Right") => {
+                self.move_view_with(1);
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Up") => {
+                self.move_view_with(-(self.repr.columns_count as i32));
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Down") => {
+                self.move_view_with(self.repr.columns_count as i32);
                 return EventProcessStatus::Processed;
             }
             _ => {}
