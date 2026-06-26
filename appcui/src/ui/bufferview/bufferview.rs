@@ -62,6 +62,12 @@ impl<T: BufferAccess> BufferView<T> {
         }
         self.recompute_sizes(self.size());
     }
+    pub fn set_address_name(&mut self, name: &str) {
+        self.AddrName.set(name);
+    }
+    pub fn set_label_name(&mut self, name: &str) {
+        self.LabelName.set(name);
+    }
     pub fn label(&self, pos: usize) -> Option<&str> {
         None
     }
