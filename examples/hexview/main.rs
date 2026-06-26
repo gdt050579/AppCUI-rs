@@ -26,7 +26,7 @@ fn main() -> Result<(), appcui::system::Error> {
         window::Flags::Sizeable,
     );
     let mut b = BufferView::new(buffer, layout!("d:f"), bufferview::Flags::ScrollBars | bufferview::Flags::ShowAddress | bufferview::Flags::ShowLabels );
-    b.set_columns_count(bufferview::ColumnsCount::Auto);
+    b.set_columns_count(bufferview::ColumnsCount::Fixed(5));
     b.set_address_width(2);
     win.add(b);
     app.add_window(win);

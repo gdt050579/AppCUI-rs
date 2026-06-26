@@ -5,7 +5,14 @@ use crate::prelude::*;
 use flat_string::FlatString;
 
 const MAX_ADDRESS_WIDTH: u32 = 24;
-const MAX_LABEL_WIDTH: u32 = 128;
+const MAX_LABEL_WIDTH: u32 = 64;
+
+/// Identifies one of the two resizable columns (address or label) by its vertical separator line.
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum Separator {
+    Address,
+    Label,
+}
 
 #[CustomControl(overwrite = [OnPaint, OnKeyPressed, OnMouseEvent, OnResize], internal = true)]
 pub struct BufferView<T>
@@ -23,6 +30,9 @@ where
     label_width: u32,
     AddrName: FlatString<14>,
     LabelName: FlatString<14>,
+    selected_separator: Option<Separator>,
+    hovered_separator: Option<Separator>,
+    mouse_capture: bool,
 }
 
 impl<T: BufferAccess> BufferView<T> {
@@ -40,6 +50,9 @@ impl<T: BufferAccess> BufferView<T> {
             label_width: if flags.contains(Flags::ShowLabels) { 6 } else { 0 },
             AddrName: FlatString::from_str("Address"),
             LabelName: FlatString::from_str("Label"),
+            selected_separator: None,
+            hovered_separator: None,
+            mouse_capture: false,
         }
     }
     pub fn set_columns_count(&mut self, count: ColumnsCount) {
@@ -260,11 +273,23 @@ impl<T: BufferAccess> BufferView<T> {
         let mut x = 0;
         let bottom = self.size().height as i32;
         if self.addr_width > 0 {
-            surface.draw_vertical_line(self.addr_width as i32, 0, bottom, LineType::Single, theme.lines.normal);
+            surface.draw_vertical_line(
+                self.addr_width as i32,
+                0,
+                bottom,
+                LineType::Single,
+                self.separator_attr(theme, Separator::Address),
+            );
             x += (1 + self.addr_width) as i32;
         }
         if self.label_width > 0 {
-            surface.draw_vertical_line(x + self.label_width as i32, 0, bottom, LineType::Single, theme.lines.normal);
+            surface.draw_vertical_line(
+                x + self.label_width as i32,
+                0,
+                bottom,
+                LineType::Single,
+                self.separator_attr(theme, Separator::Label),
+            );
         }
     }
     fn border_width(&self) -> u32 {
@@ -276,6 +301,80 @@ impl<T: BufferAccess> BufferView<T> {
             border_width += (1 + self.label_width) as u32;
         }
         border_width
+    }
+    fn separator_at(&self, x: i32) -> Option<Separator> {
+        if self.addr_width > 0 && x == self.addr_width as i32 {
+            return Some(Separator::Address);
+        }
+        if self.label_width > 0 {
+            let base = if self.addr_width > 0 { self.addr_width as i32 + 1 } else { 0 };
+            if x == base + self.label_width as i32 {
+                return Some(Separator::Label);
+            }
+        }
+        None
+    }
+    #[inline(always)]
+    fn separator_exists(&self, separator: Separator) -> bool {
+        match separator {
+            Separator::Address => self.addr_width > 0,
+            Separator::Label => self.label_width > 0,
+        }
+    }
+    fn first_separator(&self) -> Option<Separator> {
+        if self.addr_width > 0 {
+            Some(Separator::Address)
+        } else if self.label_width > 0 {
+            Some(Separator::Label)
+        } else {
+            None
+        }
+    }
+    fn set_separator_width(&mut self, separator: Separator, width: u32) -> bool {
+        let changed = match separator {
+            Separator::Address if self.addr_width > 0 => {
+                let new_width = width.clamp(1, MAX_ADDRESS_WIDTH);
+                if new_width != self.addr_width {
+                    self.addr_width = new_width;
+                    true
+                } else {
+                    false
+                }
+            }
+            Separator::Label if self.label_width > 0 => {
+                let new_width = width.clamp(1, MAX_LABEL_WIDTH);
+                if new_width != self.label_width {
+                    self.label_width = new_width;
+                    true
+                } else {
+                    false
+                }
+            }
+            _ => false,
+        };
+        if changed {
+            self.recompute_sizes(self.size());
+        }
+        changed
+    }
+    fn resize_separator_to(&mut self, separator: Separator, x: i32) -> bool {
+        let width = match separator {
+            Separator::Address => x.max(1) as u32,
+            Separator::Label => {
+                let base = if self.addr_width > 0 { self.addr_width as i32 + 1 } else { 0 };
+                (x - base).max(1) as u32
+            }
+        };
+        self.set_separator_width(separator, width)
+    }
+    fn separator_attr(&self, theme: &Theme, separator: Separator) -> CharAttribute {
+        if self.selected_separator == Some(separator) {
+            theme.lines.pressed_or_selected
+        } else if self.hovered_separator == Some(separator) {
+            theme.lines.hovered
+        } else {
+            theme.lines.normal
+        }
     }
     fn recompute_sizes(&mut self, screen_size: Size) {
         let h = if self.flags.contains(Flags::HideHeader) {
@@ -366,8 +465,54 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
 
 impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        // column resize mode (address / label columns)
+        if let Some(separator) = self.selected_separator {
+            match key.value() {
+                key!("Left") => {
+                    let width = match separator {
+                        Separator::Address => self.addr_width,
+                        Separator::Label => self.label_width,
+                    };
+                    self.set_separator_width(separator, width.saturating_sub(1));
+                    return EventProcessStatus::Processed;
+                }
+                key!("Right") => {
+                    let width = match separator {
+                        Separator::Address => self.addr_width,
+                        Separator::Label => self.label_width,
+                    };
+                    self.set_separator_width(separator, width.saturating_add(1));
+                    return EventProcessStatus::Processed;
+                }
+                key!("Tab") | key!("Ctrl+Left") | key!("Ctrl+Right") | key!("Ctrl+Alt+Left") | key!("Ctrl+Alt+Right") => {
+                    let other = match separator {
+                        Separator::Address => Separator::Label,
+                        Separator::Label => Separator::Address,
+                    };
+                    if self.separator_exists(other) {
+                        self.selected_separator = Some(other);
+                    }
+                    return EventProcessStatus::Processed;
+                }
+                key!("Escape") | key!("Enter") => {
+                    self.selected_separator = None;
+                    return EventProcessStatus::Processed;
+                }
+                _ => {
+                    self.selected_separator = None;
+                    return EventProcessStatus::Processed;
+                }
+            }
+        }
         let select = key.modifier.contains(KeyModifier::Shift);
         match key.value() {
+            key!("Ctrl+Alt+Left") | key!("Ctrl+Alt+Right") => {
+                if let Some(separator) = self.first_separator() {
+                    self.selected_separator = Some(separator);
+                    return EventProcessStatus::Processed;
+                }
+                return EventProcessStatus::Ignored;
+            }
             key!("Left") | key!("Shift+Left") => {
                 self.goto_position(self.pos.saturating_sub(1), select);
                 return EventProcessStatus::Processed;
@@ -431,9 +576,49 @@ impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
 }
 
 impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
-    fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
-        // TODO: implement mouse handling
-        EventProcessStatus::Ignored
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Leave => {
+                if self.hovered_separator.is_some() {
+                    self.hovered_separator = None;
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            MouseEvent::Over(p) => {
+                let hovered = self.separator_at(p.x);
+                if hovered != self.hovered_separator {
+                    self.hovered_separator = hovered;
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            MouseEvent::Pressed(ev) => {
+                if let Some(separator) = self.separator_at(ev.x) {
+                    self.selected_separator = Some(separator);
+                    self.mouse_capture = true;
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            MouseEvent::Drag(ev) => {
+                if let (true, Some(separator)) = (self.mouse_capture, self.selected_separator) {
+                    self.resize_separator_to(separator, ev.x);
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            MouseEvent::Released(ev) => {
+                if let (true, Some(separator)) = (self.mouse_capture, self.selected_separator) {
+                    self.resize_separator_to(separator, ev.x);
+                    self.selected_separator = None;
+                    self.mouse_capture = false;
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
 
