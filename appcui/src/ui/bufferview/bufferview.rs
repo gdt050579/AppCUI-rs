@@ -1,6 +1,7 @@
 use super::format::*;
 use super::initialization_flags::{BufferAccess, Flags};
 use super::output_buffer::OutputBuffer;
+use super::{Interval, IntervalSet, Segment};
 use crate::prelude::*;
 use flat_string::FlatString;
 
@@ -21,8 +22,8 @@ where
 {
     flags: Flags,
     buffer: T,
-    start_view: usize,
-    pos: usize,
+    start_view: u64,
+    pos: u64,
     repr: Representation,
     temp_buffer: Vec<u8>,
     buf_surface: Surface,
@@ -33,6 +34,9 @@ where
     selected_separator: Option<Separator>,
     hovered_separator: Option<Separator>,
     mouse_capture: bool,
+    intervals: IntervalSet,
+    current_segment: Segment,
+    current_segment_attr: CharAttribute,
 }
 
 impl<T: BufferAccess> BufferView<T> {
@@ -53,6 +57,9 @@ impl<T: BufferAccess> BufferView<T> {
             selected_separator: None,
             hovered_separator: None,
             mouse_capture: false,
+            intervals: IntervalSet::new(),
+            current_segment: Segment::default(),
+            current_segment_attr: CharAttribute::default(),
         }
     }
     pub fn set_columns_count(&mut self, count: ColumnsCount) {
@@ -81,13 +88,22 @@ impl<T: BufferAccess> BufferView<T> {
     pub fn set_label_name(&mut self, name: &str) {
         self.LabelName.set(name);
     }
-    pub fn label(&self, pos: usize) -> Option<&str> {
-        None
+    pub fn label(&self, pos: u64) -> Option<&str> {
+        let segment = self.intervals.pos_to_segment(pos, self.buffer.len());
+        if segment.exists() {
+            self.intervals.get(segment.index).map(|interval| interval.name.as_str())
+        } else {
+            None
+        }
+    }
+    pub fn set_intervals(&mut self, intervals: &[Interval]) {
+        self.intervals.set(intervals);
+        self.paint_buffer();
     }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;
         if chars_count <= len {
-            surface.write_string(x + ((len-chars_count)/2) as i32, 0, title.as_str(), attr, false);
+            surface.write_string(x + ((len - chars_count) / 2) as i32, 0, title.as_str(), attr, false);
         } else {
             let format = TextFormatBuilder::new()
                 .attribute(attr)
@@ -110,7 +126,7 @@ impl<T: BufferAccess> BufferView<T> {
             .build();
         surface.write_text(label, &format);
     }
-    fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: usize, len: u32, y: i32, hex: bool) {
+    fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: u64, len: u32, y: i32, hex: bool) {
         if len == 0 {
             return;
         }
@@ -181,28 +197,43 @@ impl<T: BufferAccess> BufferView<T> {
             surface.write_ascii(dif as i32, y, &buf[pos..24], attr, false);
         }
     }
-    fn write_line(&mut self, attr: CharAttribute, pos: usize, x: i32, y: i32) {
+    fn write_line(&mut self, pos: u64, x: i32, y: i32) {
         let mut x = x + 1;
         let mut output = OutputBuffer::new();
         let mut bytes = [0; 8];
         let bytes_count = self.repr.format.bytes_count() as usize;
         let to_read = bytes_count * self.repr.columns_count as usize;
         self.temp_buffer.clear();
-        self.buffer.copy(pos, to_read, &mut self.temp_buffer);
+        self.buffer.copy(pos as u64, to_read as u64, &mut self.temp_buffer);
         let mut x_char = x + ((self.repr.format.display_chars() + 1) * self.repr.columns_count as u32 + 3) as i32;
+        let mut pos = pos;
         if bytes_count == 1 {
-            let min_len = self.temp_buffer.len().min(to_read);
-            let slice = &self.temp_buffer[..min_len];
-            for val in slice {
-                bytes[0] = *val;
+            let min_len = (self.temp_buffer.len() as u64).min(to_read as u64) as usize;
+            for i in 0..min_len {
+                let val = self.temp_buffer[i];
+                if !self.current_segment.contains(pos) { self.update_current_segment(pos); }
+                bytes[0] = val;
                 self.repr.format.write(bytes, &mut output);
-                self.buf_surface.write_ascii(x, y, output.as_slice(), attr, false);
-                let ch = if *val < 0x20 || *val >= 0x7F { '?' } else { (*val) as char };
-                self.buf_surface.write_char(x_char, y, Character::with_attributes(ch, attr));
+                self.buf_surface.write_ascii(x, y, output.as_slice(), self.current_segment_attr, false);
+                let ch = if val < 0x20 || val >= 0x7F { '?' } else { val as char };
+                self.buf_surface.write_char(x_char, y, Character::with_attributes(ch, self.current_segment_attr));
                 x += (output.len() as i32) + 1;
                 x_char += 1;
+                pos += 1;
             }
         } else {
+        }
+    }
+    fn update_current_segment(&mut self, pos: u64) {
+        self.current_segment = self.intervals.pos_to_segment(pos, self.buffer.len());
+        if self.current_segment.exists() {
+            self.current_segment_attr = self
+                .intervals
+                .get(self.current_segment.index)
+                .map(|interval| interval.attr)
+                .unwrap_or(self.theme().text.inactive);
+        } else {
+            self.current_segment_attr = self.theme().text.normal;
         }
     }
     fn paint_buffer(&mut self) {
@@ -210,9 +241,10 @@ impl<T: BufferAccess> BufferView<T> {
         let mut start = self.start_view;
         let height = self.size().height as i32;
         self.buf_surface.reset(Character::with_attributes(' ', attr));
+        self.update_current_segment(start);
         for y in 0..height {
-            self.write_line(attr, start, 0, y as i32);
-            start += self.repr.columns_count as usize * self.repr.format.bytes_count() as usize;
+            self.write_line(start, 0, y as i32);
+            start += self.repr.columns_count as u64 * self.repr.format.bytes_count() as u64;
         }
     }
     fn paint_header(&self, surface: &mut Surface, theme: &Theme) {
@@ -248,7 +280,6 @@ impl<T: BufferAccess> BufferView<T> {
         if !self.flags.contains_one(Flags::ShowAddress | Flags::ShowLabels) {
             return;
         }
-        let attr = theme.border.normal;
         let mut start = self.start_view;
         let mut y = top;
         for _ in 0..self.repr.rows_count {
@@ -264,7 +295,7 @@ impl<T: BufferAccess> BufferView<T> {
                     surface.fill_horizontal_line_with_size(x, y, self.label_width as u32, Character::with_attributes('-', theme.text.inactive));
                 }
             }
-            start += self.repr.columns_count as usize * self.repr.format.bytes_count() as usize;
+            start += self.repr.columns_count as u64 * self.repr.format.bytes_count() as u64;
             if start >= self.buffer.len() {
                 break;
             }
@@ -406,13 +437,13 @@ impl<T: BufferAccess> BufferView<T> {
             self.paint_buffer();
         }
     }
-    fn goto_position(&mut self, new_pos: usize, select: bool) -> bool {
+    fn goto_position(&mut self, new_pos: u64, select: bool) -> bool {
         let new_pos = new_pos.min(self.buffer.len().saturating_sub(1));
         let old_start_view = self.start_view;
-        let cols = self.repr.columns_count as usize;
-        let rows = self.repr.rows_count as usize;
+        let cols = self.repr.columns_count as u64;
+        let rows = self.repr.rows_count as u64;
         let visible_count = cols * rows;
-        let column = (new_pos as isize - self.start_view as isize).rem_euclid(cols as isize) as usize;
+        let column = (new_pos as isize - self.start_view as isize).rem_euclid(cols as isize) as u64;
         if new_pos < self.start_view {
             self.start_view = new_pos.saturating_sub(column);
         } else if new_pos >= self.start_view + visible_count {
@@ -428,11 +459,11 @@ impl<T: BufferAccess> BufferView<T> {
         }
     }
     fn move_view_with(&mut self, delta: i32) {
-        let unit = self.repr.format.bytes_count() as usize;
+        let unit = self.repr.format.bytes_count() as u64;
         let mut new_pos = if delta > 0 {
-            self.start_view.saturating_add(delta as usize * unit)
+            self.start_view.saturating_add(delta as u64 * unit)
         } else {
-            self.start_view.saturating_sub((-delta) as usize * unit)
+            self.start_view.saturating_sub((-delta) as u64 * unit)
         };
         if new_pos >= self.buffer.len() {
             new_pos = self.buffer.len().saturating_sub(unit);
@@ -454,8 +485,8 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
         // convert self.pos to column and row, knowing that the view starts form self.start_view
         if self.pos >= self.start_view {
             let dif = self.pos - self.start_view;
-            let column = dif % self.repr.columns_count as usize;
-            let row = (dif / self.repr.columns_count as usize) as i32 + top;
+            let column = dif % self.repr.columns_count as u64;
+            let row = (dif / self.repr.columns_count as u64) as i32 + top;
             let len = self.repr.format.display_chars() as u32;
             let x = (border_width + column as u32 * (len + 1)) as i32;
             surface.fill_horizontal_line_with_size(x, row, len + 2, Character::with_attributes(0, theme.list_current_item.focus));
@@ -522,11 +553,11 @@ impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
                 return EventProcessStatus::Processed;
             }
             key!("Up") | key!("Shift+Up") => {
-                self.goto_position(self.pos.saturating_sub(self.repr.columns_count as usize), select);
+                self.goto_position(self.pos.saturating_sub(self.repr.columns_count as u64), select);
                 return EventProcessStatus::Processed;
             }
             key!("Down") | key!("Shift+Down") => {
-                self.goto_position(self.pos.saturating_add(self.repr.columns_count as usize), select);
+                self.goto_position(self.pos.saturating_add(self.repr.columns_count as u64), select);
                 return EventProcessStatus::Processed;
             }
             key!("Home") | key!("Shift+Home") => {
@@ -539,16 +570,14 @@ impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
             }
             key!("PageUp") | key!("Shift+PageUp") => {
                 self.goto_position(
-                    self.pos
-                        .saturating_sub(self.repr.columns_count as usize * (self.repr.rows_count as usize)),
+                    self.pos.saturating_sub(self.repr.columns_count as u64 * (self.repr.rows_count as u64)),
                     select,
                 );
                 return EventProcessStatus::Processed;
             }
             key!("PageDown") | key!("Shift+PageDown") => {
                 self.goto_position(
-                    self.pos
-                        .saturating_add(self.repr.columns_count as usize * (self.repr.rows_count as usize)),
+                    self.pos.saturating_add(self.repr.columns_count as u64 * (self.repr.rows_count as u64)),
                     select,
                 );
                 return EventProcessStatus::Processed;

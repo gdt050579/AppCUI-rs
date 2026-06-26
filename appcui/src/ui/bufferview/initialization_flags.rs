@@ -9,28 +9,28 @@ pub enum Flags {
 }
 
 pub trait BufferAccess {
-    fn len(&self) -> usize;
-    fn byte(&self, pos: usize) -> Option<u8>;
-    fn copy(&self, pos: usize, len: usize, output: &mut Vec<u8>);
+    fn len(&self) -> u64;
+    fn byte(&self, pos: u64) -> Option<u8>;
+    fn copy(&self, pos: u64, len: u64, output: &mut Vec<u8>);
 }
 
 impl BufferAccess for Vec<u8> {
-    fn len(&self) -> usize {
-        self.len()
+    fn len(&self) -> u64 {
+        self.len() as u64
     }
-    fn byte(&self, pos: usize) -> Option<u8> {
-        if pos < self.len() {
-            Some(self[pos])
+    fn byte(&self, pos: u64) -> Option<u8> {
+        if pos < self.len() as u64 {
+            Some(self[pos as usize])
         } else {
             None
         }
     }
-    fn copy(&self, pos: usize, len: usize, output: &mut Vec<u8>) {
+    fn copy(&self, pos: u64, len: u64, output: &mut Vec<u8>) {
         output.clear();
-        output.reserve(len);
-        if pos < self.len() {
-            let end = (pos + len).min(self.len());
-            output.extend_from_slice(&self[pos..end]);
+        output.reserve(len as usize);
+        if pos < self.len() as u64 {
+            let end = (pos + len).min(self.len() as u64);
+            output.extend_from_slice(&self[pos as usize..end as usize]);
         }
     }
 }

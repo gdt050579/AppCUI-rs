@@ -28,6 +28,12 @@ fn main() -> Result<(), appcui::system::Error> {
     let mut b = BufferView::new(buffer, layout!("d:f"), bufferview::Flags::ScrollBars | bufferview::Flags::ShowAddress | bufferview::Flags::ShowLabels );
     b.set_columns_count(bufferview::ColumnsCount::Fixed(5));
     b.set_address_width(2);
+    b.set_intervals(&[
+        bufferview::Interval::new(0, 10, CharAttribute::with_color(Color::Red, Color::Black), "ASCII"),
+        bufferview::Interval::new(10, 10, CharAttribute::with_color(Color::Green, Color::Transparent), "Unicode"),
+        bufferview::Interval::new(20, 10, CharAttribute::with_color(Color::White, Color::DarkRed), "Non-printable"),
+        bufferview::Interval::new(30, 10, CharAttribute::with_color(Color::Yellow, Color::DarkGreen), "Full range"),
+    ]);
     win.add(b);
     app.add_window(win);
     app.run();

@@ -7,11 +7,13 @@ mod bufferview;
 mod initialization_flags;
 mod format;
 mod output_buffer;
+mod interval;
 #[cfg(test)]
 mod tests;
 
 use self::output_buffer::OutputBuffer;
-use self::format::Representation;
+use self::interval::IntervalSet;
+use self::interval::Segment;
 
 pub use self::bufferview::BufferView;
 pub use self::initialization_flags::BufferAccess;
@@ -20,3 +22,4 @@ pub use self::format::ColumnsCount;
 pub use self::format::Endian;
 pub use self::format::Format;
 pub use self::format::BytesCount;
+pub use self::interval::Interval;
