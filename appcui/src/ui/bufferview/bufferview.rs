@@ -219,20 +219,17 @@ impl<T: BufferAccess> BufferView<T> {
             x += (1 + self.label_width) as i32;
         }
         const HEX: &[u8; 16] = b"0123456789ABCDEF";
-        // fill the whole header row so it reads as a single band
         let display_chars = self.repr.format.display_chars() as usize;
-        let mut digits = [b'0'; 16];
+        let mut buf = [b'0'; 3];
+        x += 1;
         for c in 0..self.repr.columns_count as usize {
-            // column index, in hex, zero-padded to the width of a value cell
-            let mut v = c;
-            for i in (0..display_chars).rev() {
-                digits[i] = HEX[v & 0x0F];
-                v >>= 4;
-            }
-            // same horizontal layout as `write_line`: a leading space, then `display_chars + 1` per cell
-            surface.write_ascii(x, 0, &digits[..display_chars], attr, false);
+            buf[0] = HEX[(c >> 4) & 0x0F];
+            buf[1] = HEX[c & 0x0F];
+            surface.write_ascii(x, 0, &buf[..2], attr, false);
             x += (display_chars + 1) as i32;
         }
+        x += 3;
+        surface.write_string(x, 0, "Characters", attr, false);
     }
     fn paint_border(&self, surface: &mut Surface, theme: &Theme, top: i32) {
         if !self.flags.contains_one(Flags::ShowAddress | Flags::ShowLabels) {
