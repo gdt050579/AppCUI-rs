@@ -226,7 +226,7 @@ impl Surface {
     }
 
     #[inline]
-    pub(crate) fn reset(&mut self) {
+    pub(crate) fn reset_clip_and_origin(&mut self) {
         self.set_base_clip(0, 0, self.right_most, self.bottom_most);
         self.reset_clip();
         self.set_base_origin(0, 0);
@@ -302,6 +302,15 @@ impl Surface {
                 }
                 pos += self.size.width as usize;
             }
+        }
+    }
+
+    /// Resets the entire surface by filling it with a provided character and by resetting the coordinates and the clip area.
+    /// You can use this method method if you want to fill a surface with a transparent character (e.g. if you want that surface to be printed on another surface via draw_surface method)
+    pub fn reset(&mut self, ch: Character) {
+        self.reset_clip_and_origin();
+        for c in &mut self.chars {
+            *c = ch;
         }
     }
 
@@ -1406,7 +1415,7 @@ impl Surface {
         self.bottom_most = (h as i32) - 1;
         self.size.width = w;
         self.size.height = h;
-        self.reset();
+        self.reset_clip_and_origin();
     }
 
     fn serialize_color(color: Color, output: &mut Vec<u8>) {

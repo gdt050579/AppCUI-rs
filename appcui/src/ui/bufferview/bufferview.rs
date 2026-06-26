@@ -177,7 +177,6 @@ impl<T: BufferAccess> BufferView<T> {
         self.temp_buffer.clear();
         self.buffer.copy(pos, to_read, &mut self.temp_buffer);
         let mut x_char = x + ((self.repr.format.display_chars() + 1) * self.repr.columns_count as u32 + 3) as i32;
-
         if bytes_count == 1 {
             let min_len = self.temp_buffer.len().min(to_read);
             let slice = &self.temp_buffer[..min_len];
@@ -194,11 +193,12 @@ impl<T: BufferAccess> BufferView<T> {
         }
     }
     fn paint_buffer(&mut self) {
-        let col = self.theme().editor.normal;
+        let attr = self.theme().text.normal;
         let mut start = self.start_view;
         let height = self.size().height as i32;
+        self.buf_surface.reset(Character::with_attributes(' ', attr));
         for y in 0..height {
-            self.write_line(col, start, 0, y as i32);
+            self.write_line(attr, start, 0, y as i32);
             start += self.repr.columns_count as usize * self.repr.format.bytes_count() as usize;
         }
     }
@@ -241,14 +241,14 @@ impl<T: BufferAccess> BufferView<T> {
         for _ in 0..self.repr.rows_count {
             let mut x = 0;
             if self.addr_width > 0 {
-                Self::write_offset(surface, attr, start, self.addr_width as u32, y, true);
+                Self::write_offset(surface, theme.text.inactive, start, self.addr_width as u32, y, true);
                 x += (1 + self.addr_width) as i32;
             }
             if self.label_width > 0 {
                 if let Some(label) = self.label(start) {
-                    Self::write_label(surface, theme.header.text.normal, label, self.label_width as u32, x, y);
+                    Self::write_label(surface, theme.text.normal, label, self.label_width as u32, x, y);
                 } else {
-                    surface.fill_horizontal_line_with_size(x, y, self.label_width as u32, Character::with_attributes('-', theme.header.text.normal));
+                    surface.fill_horizontal_line_with_size(x, y, self.label_width as u32, Character::with_attributes('-', theme.text.inactive));
                 }
             }
             start += self.repr.columns_count as usize * self.repr.format.bytes_count() as usize;
@@ -359,7 +359,7 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
             let row = (dif / self.repr.columns_count as usize) as i32 + top;
             let len = self.repr.format.display_chars() as u32;
             let x = (border_width + column as u32 * (len + 1)) as i32;
-            surface.fill_horizontal_line_with_size(x, row, len + 2, Character::with_attributes(0, theme.editor.pressed_or_selected));
+            surface.fill_horizontal_line_with_size(x, row, len + 2, Character::with_attributes(0, theme.list_current_item.focus));
         }
     }
 }

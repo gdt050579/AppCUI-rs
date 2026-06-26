@@ -1289,12 +1289,12 @@ impl PaintMethods for RuntimeManager {
     fn paint(&mut self) {
         // reset the surface clip and hide the cursor
         self.surface.hide_cursor();
-        self.surface.reset();
+        self.surface.reset_clip_and_origin();
         self.paint_control(self.desktop_handle);
         if !self.modal_windows.is_empty() {
             let count = self.modal_windows.len();
             for index in 0..count {
-                self.surface.reset();
+                self.surface.reset_clip_and_origin();
                 if index + 1 == count {
                     self.surface.clear(Character::with_color(Color::Gray, Color::Black));
                 }
@@ -1304,7 +1304,7 @@ impl PaintMethods for RuntimeManager {
         if !self.expanded_control.handle.is_none() {
             self.paint_control(self.expanded_control.handle);
         }
-        self.surface.reset();
+        self.surface.reset_clip_and_origin();
         if self.commandbar.is_some() {
             self.commandbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
         }
@@ -1315,7 +1315,7 @@ impl PaintMethods for RuntimeManager {
             self.tooltip.paint(&mut self.surface, &self.theme);
         }
         if !self.opened_menu_handle.is_none() {
-            self.surface.reset();
+            self.surface.reset_clip_and_origin();
             self.paint_menu(self.opened_menu_handle, true);
         }
         self.backend.update_screen(&self.surface);
