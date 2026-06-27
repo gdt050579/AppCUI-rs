@@ -1,7 +1,7 @@
 use super::format::*;
 use super::initialization_flags::{BufferAccess, Flags};
 use super::output_buffer::OutputBuffer;
-use super::{Interval, IntervalSet, Segment};
+use super::{Interval, IntervalSet, Segment, Codepage};
 use crate::prelude::*;
 use flat_string::FlatString;
 
@@ -37,6 +37,7 @@ where
     intervals: IntervalSet,
     current_segment: Segment,
     current_segment_attr: CharAttribute,
+    cp: Codepage,
 }
 
 impl<T: BufferAccess> BufferView<T> {
@@ -60,7 +61,16 @@ impl<T: BufferAccess> BufferView<T> {
             intervals: IntervalSet::new(),
             current_segment: Segment::default(),
             current_segment_attr: CharAttribute::default(),
+            cp: Codepage::new("Default"),
         }
+    }
+    pub fn set_codepage(&mut self, cp: Codepage) {
+        self.cp = cp;
+        self.paint_buffer();
+    }
+    #[inline(always)]
+    pub fn codepage(&self) -> &Codepage {
+        &self.cp
     }
     #[inline(always)]
     pub fn set_offset_format(&mut self, format: OffsetFormat) {
@@ -229,7 +239,7 @@ impl<T: BufferAccess> BufferView<T> {
             if !self.current_segment.contains(pos) {
                 self.update_current_segment(pos);
             }
-            let ch = if b < 0x20 || b >= 0x7F { '?' } else { b as char };
+            let ch = self.cp.get(b);
             self.buf_surface
                 .write_char(x, y, Character::with_attributes(ch, self.current_segment_attr));
             x += 1;
@@ -260,7 +270,7 @@ impl<T: BufferAccess> BufferView<T> {
                 bytes[0] = val;
                 self.repr.format.write(bytes, &mut output);
                 self.buf_surface.write_ascii(x, y, output.as_slice(), self.current_segment_attr, false);
-                let ch = if val < 0x20 || val >= 0x7F { '?' } else { val as char };
+                let ch = self.cp.get(val);
                 self.buf_surface
                     .write_char(x_char, y, Character::with_attributes(ch, self.current_segment_attr));
                 x += (output.len() as i32) + 1;
