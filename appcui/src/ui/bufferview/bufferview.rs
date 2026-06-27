@@ -34,6 +34,7 @@ where
     selected_separator: Option<Separator>,
     hovered_separator: Option<Separator>,
     mouse_capture: bool,
+    selecting: bool,
     intervals: IntervalSet,
     selection: Selection,
     current_segment: Segment,
@@ -69,6 +70,7 @@ impl<T: BufferAccess> BufferView<T> {
             selected_separator: None,
             hovered_separator: None,
             mouse_capture: false,
+            selecting: false,
             intervals: IntervalSet::new(),
             selection: Selection::NONE,
             current_segment: Segment::default(),
@@ -742,6 +744,65 @@ impl<T: BufferAccess> BufferView<T> {
             self.paint_buffer();
         }
     }
+    fn scroll_horizontal(&mut self, delta: i32) -> bool {
+        let surface_width = self.buf_surface.size().width as i32;
+        let visible_width = self.buffer_visible_width() as i32;
+        let max_off = (surface_width - visible_width).max(0);
+        let new_off = (self.h_offset as i32 + delta).clamp(0, max_off) as u32;
+        if new_off != self.h_offset {
+            self.h_offset = new_off;
+            self.update_scrollbars();
+            true
+        } else {
+            false
+        }
+    }
+    fn mouse_to_pos(&self, x: i32, y: i32) -> Option<u64> {
+        let top = if self.flags.contains(Flags::HideHeader) { 0 } else { 1 };
+        if y < top {
+            return None;
+        }
+        let surf_y = (y - top) as i64;
+        if surf_y >= self.repr.rows_count as i64 {
+            return None;
+        }
+        let border_width = self.border_width() as i32;
+        if x < border_width {
+            return None;
+        }
+        let surf_x = (x - border_width) as i64 + self.h_offset as i64;
+        let cols = self.repr.columns_count as i64;
+        let column = if self.repr.format.is_char() {
+            if !(0..cols).contains(&surf_x) {
+                return None;
+            }
+            surf_x
+        } else {
+            let cell = self.repr.format.display_chars() as i64 + 1;
+            let char_start = cols * cell + 4;
+            if surf_x >= char_start {
+                let c = surf_x - char_start;
+                if c >= cols {
+                    return None;
+                }
+                c
+            } else if surf_x >= 0 {
+                let c = surf_x / cell;
+                if c >= cols {
+                    return None;
+                }
+                c
+            } else {
+                return None;
+            }
+        };
+        let pos = self.start_view + (surf_y as u64) * (cols as u64) + (column as u64);
+        if pos >= self.buffer.len() {
+            None
+        } else {
+            Some(pos)
+        }
+    }
 }
 
 impl<T: BufferAccess> OnPaint for BufferView<T> {
@@ -853,11 +914,25 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                     self.mouse_capture = true;
                     return EventProcessStatus::Processed;
                 }
+                if ev.button == MouseButton::Left {
+                    if let Some(pos) = self.mouse_to_pos(ev.x, ev.y) {
+                        self.goto_position(pos, false);
+                        self.selecting = true;
+                        self.mouse_capture = true;
+                        return EventProcessStatus::Processed;
+                    }
+                }
                 EventProcessStatus::Ignored
             }
             MouseEvent::Drag(ev) => {
                 if let (true, Some(separator)) = (self.mouse_capture, self.selected_separator) {
                     self.resize_separator_to(separator, ev.x);
+                    return EventProcessStatus::Processed;
+                }
+                if self.selecting {
+                    if let Some(pos) = self.mouse_to_pos(ev.x, ev.y) {
+                        self.goto_position(pos, true);
+                    }
                     return EventProcessStatus::Processed;
                 }
                 EventProcessStatus::Ignored
@@ -867,6 +942,29 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                     self.resize_separator_to(separator, ev.x);
                     self.selected_separator = None;
                     self.mouse_capture = false;
+                    return EventProcessStatus::Processed;
+                }
+                if self.selecting {
+                    self.selecting = false;
+                    self.mouse_capture = false;
+                    return EventProcessStatus::Processed;
+                }
+                EventProcessStatus::Ignored
+            }
+            MouseEvent::Wheel(direction) => {
+                let processed = match direction {
+                    MouseWheelDirection::Up => {
+                        self.move_view_with(-(self.repr.columns_count as i32));
+                        true
+                    }
+                    MouseWheelDirection::Down => {
+                        self.move_view_with(self.repr.columns_count as i32);
+                        true
+                    }
+                    MouseWheelDirection::Left => self.scroll_horizontal(-1),
+                    MouseWheelDirection::Right => self.scroll_horizontal(1),
+                };
+                if processed {
                     return EventProcessStatus::Processed;
                 }
                 EventProcessStatus::Ignored

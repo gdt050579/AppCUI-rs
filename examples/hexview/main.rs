@@ -26,7 +26,7 @@ fn main() -> Result<(), appcui::system::Error> {
         window::Flags::Sizeable,
     );
     let mut b = BufferView::new(buffer, layout!("d:f"), bufferview::Flags::ScrollBars | bufferview::Flags::ShowAddress | bufferview::Flags::ShowLabels );
-    b.set_columns_count(bufferview::ColumnsCount::Fixed(16));
+    b.set_columns_count(bufferview::ColumnsCount::Auto);
     b.set_address_width(2);
     b.set_offset_format(bufferview::OffsetFormat::Dec);
     b.set_data_representation_format(bufferview::DataRepresentationFormat::Hex(bufferview::BytesCount::One));
