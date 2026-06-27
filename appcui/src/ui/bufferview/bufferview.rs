@@ -1,7 +1,7 @@
 use super::format::*;
 use super::initialization_flags::{BufferAccess, Flags};
 use super::output_buffer::OutputBuffer;
-use super::{Interval, IntervalSet, Segment, Codepage};
+use super::{Interval, IntervalSet, Segment, Codepage, Selection};
 use crate::prelude::*;
 use flat_string::FlatString;
 
@@ -35,6 +35,7 @@ where
     hovered_separator: Option<Separator>,
     mouse_capture: bool,
     intervals: IntervalSet,
+    selection: Selection,
     current_segment: Segment,
     current_segment_attr: CharAttribute,
     cp: Codepage,
@@ -69,6 +70,7 @@ impl<T: BufferAccess> BufferView<T> {
             hovered_separator: None,
             mouse_capture: false,
             intervals: IntervalSet::new(),
+            selection: Selection::NONE,
             current_segment: Segment::default(),
             current_segment_attr: CharAttribute::default(),
             cp: Codepage::new("Default"),
@@ -141,6 +143,18 @@ impl<T: BufferAccess> BufferView<T> {
     pub fn set_intervals(&mut self, intervals: &[Interval]) {
         self.intervals.set(intervals);
         self.paint_buffer();
+    }
+    /// Returns the current selection as a half-open byte range `[start, end)`, or `None` if nothing is selected.
+    #[inline(always)]
+    pub fn selection(&self) -> Option<(u64, u64)> {
+        self.selection.range()
+    }
+    #[inline(always)]
+    pub fn has_selection(&self) -> bool {
+        !self.selection.is_empty()
+    }
+    pub fn clear_selection(&mut self) {
+        self.selection.clear();
     }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;
@@ -540,6 +554,11 @@ impl<T: BufferAccess> BufferView<T> {
             let row_start = new_pos - column;
             self.start_view = row_start.saturating_sub(rows.saturating_sub(1) * cols);
         }
+        if select {
+            self.selection.update(self.pos, new_pos);
+        } else if new_pos != self.pos {
+            self.selection.clear();
+        }
         self.pos = new_pos;
         self.ensure_visible();
         self.update_scrollbars();
@@ -737,6 +756,33 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
         // clip the data area so that the horizontally scrolled buffer does not overwrite the fixed border
         surface.set_relative_clip(border_width, top, size.width as i32 - 1, size.height as i32 - 1);
         surface.draw_surface(border_width - h_offset, top, &self.buf_surface);
+        // selection overlay: recolor (char code 0 keeps the glyph, only changes the attribute)
+        // the cells of every selected byte that is currently visible, in both the data and char columns
+        if let Some((sel_start, sel_end)) = self.selection.range() {
+            let cols = self.repr.columns_count as u64;
+            let rows = self.repr.rows_count as u64;
+            let view_end = self.start_view.saturating_add(cols * rows);
+            let from = sel_start.max(self.start_view);
+            let to = sel_end.min(view_end).min(self.buffer.len());
+            let sel_ch = Character::with_attributes(0, theme.list_current_item.selected);
+            let len = self.repr.format.display_chars() as i32;
+            let mut pos = from;
+            while pos < to {
+                let dif = pos - self.start_view;
+                let column = (dif % cols) as i32;
+                let row = (dif / cols) as i32 + top;
+                if self.repr.format.is_char() {
+                    let x = border_width + column - h_offset;
+                    surface.write_char(x, row, sel_ch);
+                } else {
+                    let x = border_width + column * (len + 1) - h_offset;
+                    surface.fill_horizontal_line_with_size(x, row, (len + 1) as u32, sel_ch);
+                    let xc = border_width + self.repr.columns_count as i32 * (len + 1) + column + 4 - h_offset;
+                    surface.write_char(xc, row, sel_ch);
+                }
+                pos += 1;
+            }
+        }
         // convert self.pos to column and row, knowing that the view starts form self.start_view
         if self.pos >= self.start_view {
             let dif = self.pos - self.start_view;

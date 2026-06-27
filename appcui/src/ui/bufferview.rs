@@ -9,12 +9,14 @@ mod format;
 mod output_buffer;
 mod interval;
 mod codepage;
+mod selection;
 #[cfg(test)]
 mod tests;
 
 use self::output_buffer::OutputBuffer;
 use self::interval::IntervalSet;
 use self::interval::Segment;
+use self::selection::Selection;
 
 pub use self::bufferview::BufferView;
 pub use self::initialization_flags::BufferAccess;
