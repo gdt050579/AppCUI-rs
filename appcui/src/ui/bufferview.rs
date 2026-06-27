@@ -22,4 +22,5 @@ pub use self::format::ColumnsCount;
 pub use self::format::Endian;
 pub use self::format::Format;
 pub use self::format::BytesCount;
+pub use self::format::OffsetFormat;
 pub use self::interval::Interval;

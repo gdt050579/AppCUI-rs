@@ -62,6 +62,14 @@ impl<T: BufferAccess> BufferView<T> {
             current_segment_attr: CharAttribute::default(),
         }
     }
+    #[inline(always)]
+    pub fn set_offset_format(&mut self, format: OffsetFormat) {
+        self.repr.offset_format = format;
+    }
+    #[inline(always)]
+    pub fn offset_format(&self) -> OffsetFormat {
+        self.repr.offset_format
+    }
     pub fn set_columns_count(&mut self, count: ColumnsCount) {
         self.repr.columns = count;
         self.recompute_sizes(self.size());
@@ -126,16 +134,15 @@ impl<T: BufferAccess> BufferView<T> {
             .build();
         surface.write_text(label, &format);
     }
-    fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: u64, len: u32, y: i32, hex: bool) {
+    fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: u64, len: u32, y: i32, repr: OffsetFormat) {
         if len == 0 {
             return;
         }
         let mut buf: [u8; 24] = [0; 24];
         let mut pos = 23;
         let mut addr = addr;
-        if hex {
-            // hex
-            loop {
+        match repr {
+            OffsetFormat::Hex => loop {
                 let digit = (addr % 16) as u8;
                 if digit < 10 {
                     buf[pos] = digit + b'0';
@@ -147,10 +154,8 @@ impl<T: BufferAccess> BufferView<T> {
                 if addr == 0 {
                     break;
                 }
-            }
-        } else {
-            // decimal
-            loop {
+            },
+            OffsetFormat::Dec => loop {
                 let digit = (addr % 10) as u8;
                 buf[pos] = digit + b'0';
                 addr /= 10;
@@ -158,7 +163,7 @@ impl<T: BufferAccess> BufferView<T> {
                 if addr == 0 {
                     break;
                 }
-            }
+            },
         }
         pos += 1;
         let addr_len = (24 - pos) as u32;
@@ -192,7 +197,11 @@ impl<T: BufferAccess> BufferView<T> {
         } else {
             let dif = len - addr_len;
             if dif > 0 {
-                surface.fill_horizontal_line_with_size(0, y, dif as u32, Character::with_attributes(if hex { '0' } else { ' ' }, attr));
+                let fill_char = match repr {
+                    OffsetFormat::Hex => '0',
+                    OffsetFormat::Dec => ' ',
+                };
+                surface.fill_horizontal_line_with_size(0, y, dif as u32, Character::with_attributes(fill_char, attr));
             }
             surface.write_ascii(dif as i32, y, &buf[pos..24], attr, false);
         }
@@ -211,12 +220,15 @@ impl<T: BufferAccess> BufferView<T> {
             let min_len = (self.temp_buffer.len() as u64).min(to_read as u64) as usize;
             for i in 0..min_len {
                 let val = self.temp_buffer[i];
-                if !self.current_segment.contains(pos) { self.update_current_segment(pos); }
+                if !self.current_segment.contains(pos) {
+                    self.update_current_segment(pos);
+                }
                 bytes[0] = val;
                 self.repr.format.write(bytes, &mut output);
                 self.buf_surface.write_ascii(x, y, output.as_slice(), self.current_segment_attr, false);
                 let ch = if val < 0x20 || val >= 0x7F { '?' } else { val as char };
-                self.buf_surface.write_char(x_char, y, Character::with_attributes(ch, self.current_segment_attr));
+                self.buf_surface
+                    .write_char(x_char, y, Character::with_attributes(ch, self.current_segment_attr));
                 x += (output.len() as i32) + 1;
                 x_char += 1;
                 pos += 1;
@@ -268,9 +280,25 @@ impl<T: BufferAccess> BufferView<T> {
         let mut buf = [b'0'; 3];
         x += 1;
         for c in 0..self.repr.columns_count as usize {
-            buf[0] = HEX[(c >> 4) & 0x0F];
-            buf[1] = HEX[c & 0x0F];
-            surface.write_ascii(x, 0, &buf[..2], attr, false);
+            let output = match self.repr.offset_format {
+                OffsetFormat::Hex => {
+                    buf[0] = HEX[(c >> 4) & 0x0F];
+                    buf[1] = HEX[c & 0x0F];
+                    &buf[..2]
+                }
+                OffsetFormat::Dec => {
+                    if c < 10 {
+                        buf[0] = 32;
+                        buf[1] = c as u8 + b'0';
+                        &buf[..2]
+                    } else {
+                        buf[0] = (c.min(99) as u8 / 10) + b'0';
+                        buf[1] = (c as u8 % 10) + b'0';
+                        &buf[..2]
+                    }
+                }
+            };
+            surface.write_ascii(x, 0, output, attr, false);
             x += (display_chars + 1) as i32;
         }
         x += 3;
@@ -285,7 +313,7 @@ impl<T: BufferAccess> BufferView<T> {
         for _ in 0..self.repr.rows_count {
             let mut x = 0;
             if self.addr_width > 0 {
-                Self::write_offset(surface, theme.text.inactive, start, self.addr_width as u32, y, true);
+                Self::write_offset(surface, theme.text.inactive, start, self.addr_width as u32, y, self.repr.offset_format);
                 x += (1 + self.addr_width) as i32;
             }
             if self.label_width > 0 {

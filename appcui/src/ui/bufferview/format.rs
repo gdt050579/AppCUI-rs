@@ -2,6 +2,11 @@ mod hex;
 
 use super::OutputBuffer;
 
+#[derive(Copy, Clone)]
+pub enum OffsetFormat {
+    Hex,
+    Dec
+}
 #[derive(Clone, Copy)]
 pub enum ColumnsCount {
     Fixed(u8),
@@ -62,6 +67,7 @@ pub(super) struct Representation {
     pub(super) columns: ColumnsCount,
     pub(super) columns_count: u32,
     pub(super) rows_count: u32,
+    pub(super) offset_format: OffsetFormat,
 }
 impl Representation {
     pub(super) fn new() -> Self {
@@ -69,6 +75,7 @@ impl Representation {
             format: Format::Hex(BytesCount::One),
             endian: Endian::Little,
             columns: ColumnsCount::Fixed(8),
+            offset_format: OffsetFormat::Hex,
             columns_count: 8,
             rows_count: 1,
         }
