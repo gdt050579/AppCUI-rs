@@ -563,16 +563,18 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
         // convert self.pos to column and row, knowing that the view starts form self.start_view
         if self.pos >= self.start_view {
             let dif = self.pos - self.start_view;
-            let column = dif % self.repr.columns_count as u64;
+            let column = (dif % self.repr.columns_count as u64) as u32;
             let row = (dif / self.repr.columns_count as u64) as i32 + top;
             let ch = Character::with_attributes(0, theme.list_current_item.focus);
             if self.repr.format.is_char() {
-                let x = (border_width + column as u32) as i32;
+                let x = (border_width + column) as i32;
                 surface.write_char(x, row, ch);
             } else {
                 let len = self.repr.format.display_chars() as u32;
-                let x = (border_width + column as u32 * (len + 1)) as i32;
+                let x = (border_width + column * (len + 1)) as i32;
                 surface.fill_horizontal_line_with_size(x, row, len + 2, ch);
+                // write cursor on the characters as well
+                surface.write_char((border_width + self.repr.columns_count * (len+1) + column + 4) as i32, row, ch);
             }
         }
     }
