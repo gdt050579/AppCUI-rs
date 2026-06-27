@@ -128,7 +128,7 @@ impl Codepage {
             map: ['?';256],
             name: FlatString::from_str(name),
         };
-        for i in 32..=b'z' {
+        for i in 32..127u8 {
             me.map[i as usize] = i as char;
         }
         me
