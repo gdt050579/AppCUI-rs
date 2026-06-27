@@ -38,12 +38,22 @@ where
     current_segment: Segment,
     current_segment_attr: CharAttribute,
     cp: Codepage,
+    comp: ListScrollBars,
+    h_offset: u32,
 }
 
 impl<T: BufferAccess> BufferView<T> {
     pub fn new(buffer: T, layout: Layout, flags: Flags) -> Self {
+        let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;        
+        if flags.contains(Flags::ScrollBars) {
+            status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
+            status_flags |= StatusFlags::IncreaseRightMarginOnFocus;
+        }
+        if flags.contains(Flags::SearchBar) {
+            status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
+        }
         Self {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(layout, status_flags),
             flags,
             buffer,
             start_view: 0,
@@ -62,6 +72,8 @@ impl<T: BufferAccess> BufferView<T> {
             current_segment: Segment::default(),
             current_segment_attr: CharAttribute::default(),
             cp: Codepage::new("Default"),
+            comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
+            h_offset: 0,
         }
     }
     pub fn set_codepage(&mut self, cp: Codepage) {
@@ -529,6 +541,8 @@ impl<T: BufferAccess> BufferView<T> {
             self.start_view = row_start.saturating_sub(rows.saturating_sub(1) * cols);
         }
         self.pos = new_pos;
+        self.ensure_visible();
+        self.update_scrollbars();
         if old_start_view != self.start_view {
             self.paint_buffer();
             true
@@ -536,91 +550,96 @@ impl<T: BufferAccess> BufferView<T> {
             false
         }
     }
-    fn move_view_with(&mut self, delta: i32) {
-        let unit = self.repr.format.bytes_count() as u64;
-        let mut new_pos = if delta > 0 {
-            self.start_view.saturating_add(delta as u64 * unit)
-        } else {
-            self.start_view.saturating_sub((-delta) as u64 * unit)
-        };
-        if new_pos >= self.buffer.len() {
-            new_pos = self.buffer.len().saturating_sub(unit);
+    #[inline(always)]
+    fn buffer_visible_width(&self) -> u32 {
+        self.size().width.saturating_sub(self.border_width())
+    }
+    fn ensure_visible(&mut self) {
+        let visible_width = self.buffer_visible_width() as i32;
+        if visible_width <= 0 {
+            return;
         }
-        if self.start_view != new_pos {
-            self.start_view = new_pos;
+        let surface_width = self.buf_surface.size().width as i32;
+        let cols = (self.repr.columns_count as u64).max(1);
+        let dif = self.pos.saturating_sub(self.start_view);
+        let column = (dif % cols) as i32;
+        let (cell_x, cell_w) = if self.repr.format.is_char() {
+            (column, 1)
+        } else {
+            let len = self.repr.format.display_chars() as i32;
+            (column * (len + 1), len + 2)
+        };
+        let mut off = self.h_offset as i32;
+        if cell_x < off {
+            off = cell_x;
+        } else if cell_x + cell_w > off + visible_width {
+            off = cell_x + cell_w - visible_width;
+        }
+        let max_off = (surface_width - visible_width).max(0);
+        self.h_offset = off.clamp(0, max_off) as u32;
+    }
+    #[inline(always)]
+    fn bytes_per_line(&self) -> u64 {
+        (self.repr.columns_count as u64).max(1) * (self.repr.format.bytes_count() as u64).max(1)
+    }
+    fn update_scrollbars(&mut self) {
+        let bytes_per_line = self.bytes_per_line();
+        let total_lines = self.buffer.len().saturating_add(bytes_per_line - 1) / bytes_per_line;
+        let visible_lines = self.repr.rows_count;
+        let surface_width = self.buf_surface.size().width as u64;
+        let visible_width = self.buffer_visible_width();
+        let h_offset = self.h_offset as u64;
+        let start_line = self.start_view / bytes_per_line;
+        let visible_space = Size::new(visible_width, visible_lines);
+        self.comp.resize(surface_width, total_lines, &self.base, visible_space);
+        self.comp.set_indexes(h_offset, start_line);
+    }
+    fn update_scroll_pos_from_scrollbars(&mut self) {
+        self.h_offset = self.comp.horizontal_index() as u32;
+        let new_start = self.comp.vertical_index().saturating_mul(self.bytes_per_line());
+        if new_start != self.start_view {
+            self.start_view = new_start;
             self.paint_buffer();
         }
+        self.update_scrollbars();
     }
-}
-
-impl<T: BufferAccess> OnPaint for BufferView<T> {
-    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        let top = if self.flags.contains(Flags::HideHeader) { 0 } else { 1 };
-        self.paint_header(surface, theme);
-        self.paint_border(surface, theme, top);
-        let border_width = self.border_width();
-        surface.draw_surface(border_width as i32, top, &self.buf_surface);
-        // convert self.pos to column and row, knowing that the view starts form self.start_view
-        if self.pos >= self.start_view {
-            let dif = self.pos - self.start_view;
-            let column = (dif % self.repr.columns_count as u64) as u32;
-            let row = (dif / self.repr.columns_count as u64) as i32 + top;
-            let ch = Character::with_attributes(0, theme.list_current_item.focus);
-            if self.repr.format.is_char() {
-                let x = (border_width + column) as i32;
-                surface.write_char(x, row, ch);
-            } else {
-                let len = self.repr.format.display_chars() as u32;
-                let x = (border_width + column * (len + 1)) as i32;
-                surface.fill_horizontal_line_with_size(x, row, len + 2, ch);
-                // write cursor on the characters as well
-                surface.write_char((border_width + self.repr.columns_count * (len+1) + column + 4) as i32, row, ch);
+    fn search(&mut self, _text: &str) {}
+    fn process_selector_key(&mut self, key: Key) -> EventProcessStatus {
+        let separator = match self.selected_separator {
+            Some(separator) => separator,
+            None => return EventProcessStatus::Ignored,
+        };
+        match key.value() {
+            key!("Left") => {
+                let width = match separator {
+                    Separator::Address => self.addr_width,
+                    Separator::Label => self.label_width,
+                };
+                self.set_separator_width(separator, width.saturating_sub(1));
             }
-        }
-    }
-}
-
-impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
-    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
-        // column resize mode (address / label columns)
-        if let Some(separator) = self.selected_separator {
-            match key.value() {
-                key!("Left") => {
-                    let width = match separator {
-                        Separator::Address => self.addr_width,
-                        Separator::Label => self.label_width,
-                    };
-                    self.set_separator_width(separator, width.saturating_sub(1));
-                    return EventProcessStatus::Processed;
-                }
-                key!("Right") => {
-                    let width = match separator {
-                        Separator::Address => self.addr_width,
-                        Separator::Label => self.label_width,
-                    };
-                    self.set_separator_width(separator, width.saturating_add(1));
-                    return EventProcessStatus::Processed;
-                }
-                key!("Tab") | key!("Ctrl+Left") | key!("Ctrl+Right") | key!("Ctrl+Alt+Left") | key!("Ctrl+Alt+Right") => {
-                    let other = match separator {
-                        Separator::Address => Separator::Label,
-                        Separator::Label => Separator::Address,
-                    };
-                    if self.separator_exists(other) {
-                        self.selected_separator = Some(other);
-                    }
-                    return EventProcessStatus::Processed;
-                }
-                key!("Escape") | key!("Enter") => {
-                    self.selected_separator = None;
-                    return EventProcessStatus::Processed;
-                }
-                _ => {
-                    self.selected_separator = None;
-                    return EventProcessStatus::Processed;
+            key!("Right") => {
+                let width = match separator {
+                    Separator::Address => self.addr_width,
+                    Separator::Label => self.label_width,
+                };
+                self.set_separator_width(separator, width.saturating_add(1));
+            }
+            key!("Tab") | key!("Ctrl+Left") | key!("Ctrl+Right") | key!("Ctrl+Alt+Left") | key!("Ctrl+Alt+Right") => {
+                let other = match separator {
+                    Separator::Address => Separator::Label,
+                    Separator::Label => Separator::Address,
+                };
+                if self.separator_exists(other) {
+                    self.selected_separator = Some(other);
                 }
             }
+            _ => {
+                self.selected_separator = None;
+            }
         }
+        EventProcessStatus::Processed
+    }
+    fn process_navigation_key(&mut self, key: Key) -> EventProcessStatus {
         let select = key.modifier.contains(KeyModifier::Shift);
         match key.value() {
             key!("Ctrl+Alt+Left") | key!("Ctrl+Alt+Right") => {
@@ -686,13 +705,87 @@ impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
             }
             _ => {}
         }
-        return EventProcessStatus::Ignored;
+        EventProcessStatus::Ignored
+    }
+    fn move_view_with(&mut self, delta: i32) {
+        let unit = self.repr.format.bytes_count() as u64;
+        let mut new_pos = if delta > 0 {
+            self.start_view.saturating_add(delta as u64 * unit)
+        } else {
+            self.start_view.saturating_sub((-delta) as u64 * unit)
+        };
+        if new_pos >= self.buffer.len() {
+            new_pos = self.buffer.len().saturating_sub(unit);
+        }
+        if self.start_view != new_pos {
+            self.start_view = new_pos;
+            self.update_scrollbars();
+            self.paint_buffer();
+        }
+    }
+}
+
+impl<T: BufferAccess> OnPaint for BufferView<T> {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        let top = if self.flags.contains(Flags::HideHeader) { 0 } else { 1 };
+        // header & border are always fixed (never scrolled horizontally)
+        self.paint_header(surface, theme);
+        self.paint_border(surface, theme, top);
+        let border_width = self.border_width() as i32;
+        let h_offset = self.h_offset as i32;
+        let size = self.size();
+        // clip the data area so that the horizontally scrolled buffer does not overwrite the fixed border
+        surface.set_relative_clip(border_width, top, size.width as i32 - 1, size.height as i32 - 1);
+        surface.draw_surface(border_width - h_offset, top, &self.buf_surface);
+        // convert self.pos to column and row, knowing that the view starts form self.start_view
+        if self.pos >= self.start_view {
+            let dif = self.pos - self.start_view;
+            let column = (dif % self.repr.columns_count as u64) as i32;
+            let row = (dif / self.repr.columns_count as u64) as i32 + top;
+            let ch = Character::with_attributes(0, theme.list_current_item.focus);
+            if self.repr.format.is_char() {
+                let x = border_width + column - h_offset;
+                surface.write_char(x, row, ch);
+            } else {
+                let len = self.repr.format.display_chars() as i32;
+                let x = border_width + column * (len + 1) - h_offset;
+                surface.fill_horizontal_line_with_size(x, row, (len + 2) as u32, ch);
+                // write cursor on the characters as well
+                let xc = border_width + self.repr.columns_count as i32 * (len + 1) + column + 4 - h_offset;
+                surface.write_char(xc, row, ch);
+            }
+        }
+        surface.reset_clip();
+        // scrollbars & search bar are drawn on top, outside of the data clip area
+        self.comp.paint(surface, theme, &self.base);
+    }
+}
+
+impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        if self.process_selector_key(key) == EventProcessStatus::Processed {
+            return EventProcessStatus::Processed;
+        }
+        if self.comp.process_key_pressed(key, character) {
+            let text = self.comp.search_text().to_string();
+            self.search(&text);
+            return EventProcessStatus::Processed;
+        }
+        let status = self.process_navigation_key(key);
+        if status == EventProcessStatus::Processed {
+            self.comp.exit_edit_mode();
+        }
+        status
     }
 }
 
 impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        match event {
+        if self.comp.process_mouse_event(event) {
+            self.update_scroll_pos_from_scrollbars();
+            return EventProcessStatus::Processed;
+        }
+        let result = match event {
             MouseEvent::Leave => {
                 if self.hovered_separator.is_some() {
                     self.hovered_separator = None;
@@ -733,12 +826,17 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                 EventProcessStatus::Ignored
             }
             _ => EventProcessStatus::Ignored,
+        };
+        if result == EventProcessStatus::Ignored && self.comp.should_repaint() {
+            return EventProcessStatus::Processed;
         }
+        result
     }
 }
 
 impl<T: BufferAccess> OnResize for BufferView<T> {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.recompute_sizes(new_size);
+        self.update_scrollbars();
     }
 }

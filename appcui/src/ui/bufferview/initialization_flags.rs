@@ -3,9 +3,10 @@ use EnumBitFlags::EnumBitFlags;
 #[EnumBitFlags(bits = 8)]
 pub enum Flags {
     ScrollBars = 0x0001,
-    HideHeader = 0x0002,
-    ShowAddress = 0x0004,
-    ShowLabels = 0x0008,
+    SearchBar = 0x0002,
+    HideHeader = 0x0004,
+    ShowAddress = 0x0008,
+    ShowLabels = 0x0010,
 }
 
 pub trait BufferAccess {
