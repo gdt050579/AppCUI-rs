@@ -29,6 +29,7 @@ fn main() -> Result<(), appcui::system::Error> {
     b.set_columns_count(bufferview::ColumnsCount::Auto);
     b.set_address_width(2);
     b.set_offset_format(bufferview::OffsetFormat::Dec);
+    b.set_data_representation_format(bufferview::DataRepresentationFormat::Char);
     b.set_intervals(&[
         bufferview::Interval::new(0, 10, CharAttribute::with_color(Color::Red, Color::Black), "ASCII"),
         bufferview::Interval::new(10, 10, CharAttribute::with_color(Color::Green, Color::Transparent), "Unicode"),

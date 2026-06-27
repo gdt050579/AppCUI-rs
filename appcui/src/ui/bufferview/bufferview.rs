@@ -70,6 +70,18 @@ impl<T: BufferAccess> BufferView<T> {
     pub fn offset_format(&self) -> OffsetFormat {
         self.repr.offset_format
     }
+    #[inline(always)]
+    pub fn data_representation_format(&self) -> DataRepresentationFormat {
+        self.repr.format
+    }
+    pub fn set_data_representation_format(&mut self, format: DataRepresentationFormat) {
+        self.repr.format = format;
+        self.recompute_sizes(self.size());
+    }
+    #[inline(always)]
+    pub fn format(&self) -> DataRepresentationFormat {
+        self.repr.format
+    }
     pub fn set_columns_count(&mut self, count: ColumnsCount) {
         self.repr.columns = count;
         self.recompute_sizes(self.size());
@@ -206,6 +218,28 @@ impl<T: BufferAccess> BufferView<T> {
             surface.write_ascii(dif as i32, y, &buf[pos..24], attr, false);
         }
     }
+    fn write_chars(&mut self, pos: u64) {
+        let mut x = 0;
+        let mut y = 0;
+        let w = self.repr.columns_count as i32;
+        let h = self.repr.rows_count as i32;
+        let mut pos = pos;
+        while (pos < self.buffer.len()) && (y < h) {
+            let b = self.buffer.byte(pos).unwrap_or(0);
+            if !self.current_segment.contains(pos) {
+                self.update_current_segment(pos);
+            }
+            let ch = if b < 0x20 || b >= 0x7F { '?' } else { b as char };
+            self.buf_surface
+                .write_char(x, y, Character::with_attributes(ch, self.current_segment_attr));
+            x += 1;
+            if x >= w {
+                x = 0;
+                y += 1;
+            }
+            pos += 1;
+        }
+    }
     fn write_line(&mut self, pos: u64, x: i32, y: i32) {
         let mut x = x + 1;
         let mut output = OutputBuffer::new();
@@ -254,9 +288,13 @@ impl<T: BufferAccess> BufferView<T> {
         let height = self.size().height as i32;
         self.buf_surface.reset(Character::with_attributes(' ', attr));
         self.update_current_segment(start);
-        for y in 0..height {
-            self.write_line(start, 0, y as i32);
-            start += self.repr.columns_count as u64 * self.repr.format.bytes_count() as u64;
+        if self.repr.format.is_char() {
+            self.write_chars(start);
+        } else {
+            for y in 0..height {
+                self.write_line(start, 0, y as i32);
+                start += self.repr.columns_count as u64 * self.repr.format.bytes_count() as u64;
+            }
         }
     }
     fn paint_header(&self, surface: &mut Surface, theme: &Theme) {
@@ -275,33 +313,35 @@ impl<T: BufferAccess> BufferView<T> {
             Self::write_column_title(surface, attr, &self.LabelName, self.label_width as u32, x);
             x += (1 + self.label_width) as i32;
         }
-        const HEX: &[u8; 16] = b"0123456789ABCDEF";
-        let display_chars = self.repr.format.display_chars() as usize;
-        let mut buf = [b'0'; 3];
-        x += 1;
-        for c in 0..self.repr.columns_count as usize {
-            let output = match self.repr.offset_format {
-                OffsetFormat::Hex => {
-                    buf[0] = HEX[(c >> 4) & 0x0F];
-                    buf[1] = HEX[c & 0x0F];
-                    &buf[..2]
-                }
-                OffsetFormat::Dec => {
-                    if c < 10 {
-                        buf[0] = 32;
-                        buf[1] = c as u8 + b'0';
-                        &buf[..2]
-                    } else {
-                        buf[0] = (c.min(99) as u8 / 10) + b'0';
-                        buf[1] = (c as u8 % 10) + b'0';
+        if !self.repr.format.is_char() {
+            const HEX: &[u8; 16] = b"0123456789ABCDEF";
+            let display_chars = self.repr.format.display_chars() as usize;
+            let mut buf = [b'0'; 3];
+            x += 1;
+            for c in 0..self.repr.columns_count as usize {
+                let output = match self.repr.offset_format {
+                    OffsetFormat::Hex => {
+                        buf[0] = HEX[(c >> 4) & 0x0F];
+                        buf[1] = HEX[c & 0x0F];
                         &buf[..2]
                     }
-                }
-            };
-            surface.write_ascii(x, 0, output, attr, false);
-            x += (display_chars + 1) as i32;
+                    OffsetFormat::Dec => {
+                        if c < 10 {
+                            buf[0] = 32;
+                            buf[1] = c as u8 + b'0';
+                            &buf[..2]
+                        } else {
+                            buf[0] = (c.min(99) as u8 / 10) + b'0';
+                            buf[1] = (c as u8 % 10) + b'0';
+                            &buf[..2]
+                        }
+                    }
+                };
+                surface.write_ascii(x, 0, output, attr, false);
+                x += (display_chars + 1) as i32;
+            }
+            x += 3;
         }
-        x += 3;
         surface.write_string(x, 0, "Characters", attr, false);
     }
     fn paint_border(&self, surface: &mut Surface, theme: &Theme, top: i32) {
@@ -515,9 +555,15 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
             let dif = self.pos - self.start_view;
             let column = dif % self.repr.columns_count as u64;
             let row = (dif / self.repr.columns_count as u64) as i32 + top;
-            let len = self.repr.format.display_chars() as u32;
-            let x = (border_width + column as u32 * (len + 1)) as i32;
-            surface.fill_horizontal_line_with_size(x, row, len + 2, Character::with_attributes(0, theme.list_current_item.focus));
+            let ch = Character::with_attributes(0, theme.list_current_item.focus);
+            if self.repr.format.is_char() {
+                let x = (border_width + column as u32) as i32;
+                surface.write_char(x, row, ch);
+            } else {
+                let len = self.repr.format.display_chars() as u32;
+                let x = (border_width + column as u32 * (len + 1)) as i32;
+                surface.fill_horizontal_line_with_size(x, row, len + 2, ch);
+            }
         }
     }
 }

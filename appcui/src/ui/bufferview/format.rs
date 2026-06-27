@@ -27,42 +27,42 @@ pub enum BytesCount {
 }
 
 #[derive(Clone, Copy)]
-pub enum Format {
+pub enum DataRepresentationFormat {
     Hex(BytesCount),
     Char,
 }
-impl Format {
+impl DataRepresentationFormat {
     pub(super) fn write(&self, bytes: [u8;8], output: &mut OutputBuffer) {
         match self {
-            Format::Hex(bytes_count) => hex::write(bytes, *bytes_count, output),
-            Format::Char => todo!(),
+            DataRepresentationFormat::Hex(bytes_count) => hex::write(bytes, *bytes_count, output),
+            DataRepresentationFormat::Char => { output.set_len(1); output.set(0, bytes[0]); },
         }
     }
     #[inline(always)]
     pub(super) fn bytes_count(&self) -> u8 {
         match self {
-            Format::Hex(bytes_count) => *bytes_count as u8,
-            Format::Char => 1,
+            DataRepresentationFormat::Hex(bytes_count) => *bytes_count as u8,
+            DataRepresentationFormat::Char => 1,
         }
     }
     #[inline(always)]
     pub(super) fn display_chars(&self) -> u32 {
         match self {
-            Format::Hex(byte_count) => (*byte_count as u32) * 2,
-            Format::Char => 1,
+            DataRepresentationFormat::Hex(byte_count) => (*byte_count as u32) * 2,
+            DataRepresentationFormat::Char => 1,
         }
     }
     #[inline(always)]
     pub(super) fn is_char(&self) -> bool {
         match self {
-            Format::Char => true,
+            DataRepresentationFormat::Char => true,
             _ => false,
         }
     }
 }
 
 pub(super) struct Representation {
-    pub(super) format: Format,
+    pub(super) format: DataRepresentationFormat,
     pub(super) endian: Endian,
     pub(super) columns: ColumnsCount,
     pub(super) columns_count: u32,
@@ -72,7 +72,7 @@ pub(super) struct Representation {
 impl Representation {
     pub(super) fn new() -> Self {
         Self {
-            format: Format::Hex(BytesCount::One),
+            format: DataRepresentationFormat::Hex(BytesCount::One),
             endian: Endian::Little,
             columns: ColumnsCount::Fixed(8),
             offset_format: OffsetFormat::Hex,
