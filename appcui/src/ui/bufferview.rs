@@ -8,6 +8,7 @@ mod initialization_flags;
 mod format;
 mod output_buffer;
 mod interval;
+mod codepage;
 #[cfg(test)]
 mod tests;
 
@@ -24,3 +25,4 @@ pub use self::format::DataRepresentationFormat;
 pub use self::format::BytesCount;
 pub use self::format::OffsetFormat;
 pub use self::interval::Interval;
+pub use self::codepage::Codepage;
