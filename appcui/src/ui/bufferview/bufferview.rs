@@ -612,8 +612,10 @@ impl<T: BufferAccess> BufferView<T> {
         }
         let surface_width = self.buf_surface.size().width as i32;
         let cols = (self.repr.columns_count as u64).max(1);
+        let bytes_count = (self.repr.format.bytes_count() as u64).max(1);
+        // `pos` is a byte offset; the cursor lives in the regular column that holds its element
         let dif = self.pos.saturating_sub(self.start_view);
-        let column = (dif % cols) as i32;
+        let column = ((dif / bytes_count) % cols) as i32;
         let (cell_x, cell_w) = if self.repr.format.is_char() {
             (column, 1)
         } else {
