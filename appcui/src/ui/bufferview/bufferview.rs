@@ -576,15 +576,15 @@ impl<T: BufferAccess> BufferView<T> {
     fn goto_position(&mut self, new_pos: u64, select: bool) -> bool {
         let new_pos = new_pos.min(self.buffer.len().saturating_sub(1));
         let old_start_view = self.start_view;
-        let cols = self.repr.columns_count as u64;
         let rows = self.repr.rows_count as u64;
-        let visible_count = cols * rows;
-        let column = (new_pos as isize - self.start_view as isize).rem_euclid(cols as isize) as u64;
+        let bytes_per_line = self.bytes_per_line();
+        let visible_count = bytes_per_line * rows;
+        let line_offset = (new_pos as i64 - self.start_view as i64).rem_euclid(bytes_per_line as i64) as u64;
         if new_pos < self.start_view {
-            self.start_view = new_pos.saturating_sub(column);
+            self.start_view = new_pos.saturating_sub(line_offset);
         } else if new_pos >= self.start_view + visible_count {
-            let row_start = new_pos - column;
-            self.start_view = row_start.saturating_sub(rows.saturating_sub(1) * cols);
+            let row_start = new_pos - line_offset;
+            self.start_view = row_start.saturating_sub(rows.saturating_sub(1) * bytes_per_line);
         }
         if select {
             self.selection.update(self.pos, new_pos);
@@ -804,6 +804,7 @@ impl<T: BufferAccess> BufferView<T> {
         }
         let surf_x = (x - border_width) as i64 + self.h_offset as i64;
         let cols = self.repr.columns_count as i64;
+        let bytes_count = self.repr.format.bytes_count() as i64;
         let column = if self.repr.format.is_char() {
             if !(0..cols).contains(&surf_x) {
                 return None;
@@ -813,7 +814,8 @@ impl<T: BufferAccess> BufferView<T> {
             let cell = self.repr.format.display_chars() as i64 + 1;
             let char_start = cols * cell + 4;
             if surf_x >= char_start {
-                let c = surf_x - char_start;
+                // character display part: `bytes_count` contiguous chars per regular column
+                let c = (surf_x - char_start) / bytes_count;
                 if c >= cols {
                     return None;
                 }
@@ -828,7 +830,7 @@ impl<T: BufferAccess> BufferView<T> {
                 return None;
             }
         };
-        let pos = self.start_view + (surf_y as u64) * (cols as u64) + (column as u64);
+        let pos = self.start_view + ((surf_y as u64) * (cols as u64) + (column as u64)) * bytes_count as u64;
         if pos >= self.buffer.len() {
             None
         } else {
@@ -854,23 +856,30 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
         if let Some((sel_start, sel_end)) = self.selection.range() {
             let cols = self.repr.columns_count as u64;
             let rows = self.repr.rows_count as u64;
-            let view_end = self.start_view.saturating_add(cols * rows);
+            let bytes_count = self.repr.format.bytes_count() as u64;
+            let view_end = self.start_view.saturating_add(cols * rows * bytes_count);
             let from = sel_start.max(self.start_view);
             let to = sel_end.min(view_end).min(self.buffer.len());
             let sel_ch = Character::with_attributes(0, theme.list_current_item.selected);
             let len = self.repr.format.display_chars() as i32;
+            let char_base = self.repr.columns_count as i32 * (len + 1) + 4;
             let mut pos = from;
             while pos < to {
                 let dif = pos - self.start_view;
-                let column = (dif % cols) as i32;
-                let row = (dif / cols) as i32 + top;
+                let element = dif / bytes_count;
+                let column = (element % cols) as i32;
+                let row = (element / cols) as i32 + top;
+                let byte_in_element = (dif % bytes_count) as i32;
                 if self.repr.format.is_char() {
                     let x = border_width + column - h_offset;
                     surface.write_char(x, row, sel_ch);
                 } else {
-                    let x = border_width + column * (len + 1) - h_offset;
-                    surface.fill_horizontal_line_with_size(x, row, (len + 1) as u32, sel_ch);
-                    let xc = border_width + self.repr.columns_count as i32 * (len + 1) + column + 4 - h_offset;
+                    // highlight the whole hex cell once per element, and the exact byte in the char part
+                    if byte_in_element == 0 {
+                        let x = border_width + column * (len + 1) - h_offset;
+                        surface.fill_horizontal_line_with_size(x, row, (len + 1) as u32, sel_ch);
+                    }
+                    let xc = border_width + char_base + column * bytes_count as i32 + byte_in_element - h_offset;
                     surface.write_char(xc, row, sel_ch);
                 }
                 pos += 1;
@@ -890,9 +899,9 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
                 let len = self.repr.format.display_chars() as i32;
                 let x = border_width + column * (len + 1) - h_offset;
                 surface.fill_horizontal_line_with_size(x, row, (len + 2) as u32, ch);
-                // write cursor on the characters as well
+                // mirror the cursor over all the bytes of the element in the character part
                 let xc = border_width + self.repr.columns_count as i32 * (len + 1) + column * unit as i32 + 4 - h_offset;
-                surface.write_char(xc, row, ch);
+                surface.fill_horizontal_line_with_size(xc, row, unit as u32, ch);
             }
         }
         surface.reset_clip();
