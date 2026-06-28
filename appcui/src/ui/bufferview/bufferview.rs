@@ -15,6 +15,13 @@ enum Separator {
     Label,
 }
 
+/// Identifies which panel the cursor is currently active on (the data/hex panel or the characters panel).
+#[derive(Copy, Clone, PartialEq, Eq)]
+enum ActivePanel {
+    DataRepresentation,
+    Char,
+}
+
 #[CustomControl(overwrite = [OnPaint, OnKeyPressed, OnMouseEvent, OnResize], internal = true)]
 pub struct BufferView<T>
 where
@@ -42,6 +49,7 @@ where
     cp: Codepage,
     comp: ListScrollBars,
     h_offset: u32,
+    active_panel: ActivePanel,
 }
 
 impl<T: BufferAccess> BufferView<T> {
@@ -78,6 +86,7 @@ impl<T: BufferAccess> BufferView<T> {
             cp: Codepage::new("Default"),
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
             h_offset: 0,
+            active_panel: ActivePanel::DataRepresentation,
         }
     }
     pub fn set_codepage(&mut self, cp: Codepage) {
@@ -613,14 +622,20 @@ impl<T: BufferAccess> BufferView<T> {
         let surface_width = self.buf_surface.size().width as i32;
         let cols = (self.repr.columns_count as u64).max(1);
         let bytes_count = (self.repr.format.bytes_count() as u64).max(1);
-        // `pos` is a byte offset; the cursor lives in the regular column that holds its element
         let dif = self.pos.saturating_sub(self.start_view);
         let column = ((dif / bytes_count) % cols) as i32;
+        let byte_in_element = (dif % bytes_count) as i32;
         let (cell_x, cell_w) = if self.repr.format.is_char() {
             (column, 1)
         } else {
             let len = self.repr.format.display_chars() as i32;
-            (column * (len + 1), len + 2)
+            match self.active_panel {
+                ActivePanel::DataRepresentation => (column * (len + 1), len + 2),
+                ActivePanel::Char => {
+                    let char_base = cols as i32 * (len + 1) + 4;
+                    (char_base + column * bytes_count as i32 + byte_in_element, 1)
+                }
+            }
         };
         let mut off = self.h_offset as i32;
         if cell_x < off {
@@ -692,10 +707,32 @@ impl<T: BufferAccess> BufferView<T> {
         }
         EventProcessStatus::Processed
     }
+    fn toggle_panel(&mut self) {
+        if self.repr.format.is_char() {
+            return;
+        }
+        match self.active_panel {
+            ActivePanel::DataRepresentation => self.active_panel = ActivePanel::Char,
+            ActivePanel::Char => {
+                let bytes_count = self.repr.format.bytes_count() as u64;
+                if bytes_count > 1 {
+                    self.pos -= self.pos % bytes_count;
+                }
+                self.active_panel = ActivePanel::DataRepresentation;
+            }
+        }
+        self.ensure_visible();
+    }
     fn process_navigation_key(&mut self, key: Key) -> EventProcessStatus {
         let select = key.modifier.contains(KeyModifier::Shift);
-        let unit = self.repr.format.bytes_count() as u64;
+        let bytes_count = self.repr.format.bytes_count() as u64;
+        let h_unit = if self.active_panel == ActivePanel::Char { 1 } else { bytes_count };
+        let row = self.repr.columns_count as u64 * bytes_count;
         match key.value() {
+            key!("Ctrl+Tab") => {
+                self.toggle_panel();
+                return EventProcessStatus::Processed;
+            }
             key!("Ctrl+Alt+Left") | key!("Ctrl+Alt+Right") => {
                 if let Some(separator) = self.first_separator() {
                     self.selected_separator = Some(separator);
@@ -704,19 +741,19 @@ impl<T: BufferAccess> BufferView<T> {
                 return EventProcessStatus::Ignored;
             }
             key!("Left") | key!("Shift+Left") => {
-                self.goto_position(self.pos.saturating_sub(unit), select);
+                self.goto_position(self.pos.saturating_sub(h_unit), select);
                 return EventProcessStatus::Processed;
             }
             key!("Right") | key!("Shift+Right") => {
-                self.goto_position(self.pos.saturating_add(unit), select);
+                self.goto_position(self.pos.saturating_add(h_unit), select);
                 return EventProcessStatus::Processed;
             }
             key!("Up") | key!("Shift+Up") => {
-                self.goto_position(self.pos.saturating_sub(self.repr.columns_count as u64 * unit), select);
+                self.goto_position(self.pos.saturating_sub(row), select);
                 return EventProcessStatus::Processed;
             }
             key!("Down") | key!("Shift+Down") => {
-                self.goto_position(self.pos.saturating_add(self.repr.columns_count as u64 * unit), select);
+                self.goto_position(self.pos.saturating_add(row), select);
                 return EventProcessStatus::Processed;
             }
             key!("Home") | key!("Shift+Home") => {
@@ -728,17 +765,11 @@ impl<T: BufferAccess> BufferView<T> {
                 return EventProcessStatus::Processed;
             }
             key!("PageUp") | key!("Shift+PageUp") => {
-                self.goto_position(
-                    self.pos.saturating_sub(self.repr.columns_count as u64 * (self.repr.rows_count as u64 * unit)),
-                    select,
-                );
+                self.goto_position(self.pos.saturating_sub(row * self.repr.rows_count as u64), select);
                 return EventProcessStatus::Processed;
             }
             key!("PageDown") | key!("Shift+PageDown") => {
-                self.goto_position(
-                    self.pos.saturating_add(self.repr.columns_count as u64 * (self.repr.rows_count as u64 * unit)),
-                    select,
-                );
+                self.goto_position(self.pos.saturating_add(row * self.repr.rows_count as u64), select);
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Left") => {
@@ -750,11 +781,11 @@ impl<T: BufferAccess> BufferView<T> {
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Up") => {
-                self.move_view_with(-(self.repr.columns_count as i32 * unit as i32));
+                self.move_view_with(-(row as i32));
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Down") => {
-                self.move_view_with(self.repr.columns_count as i32 * unit as i32);
+                self.move_view_with(row as i32);
                 return EventProcessStatus::Processed;
             }
             _ => {}
@@ -791,7 +822,7 @@ impl<T: BufferAccess> BufferView<T> {
             false
         }
     }
-    fn mouse_to_pos(&self, x: i32, y: i32) -> Option<u64> {
+    fn mouse_to_pos(&self, x: i32, y: i32) -> Option<(u64, ActivePanel)> {
         let top = if self.flags.contains(Flags::HideHeader) { 0 } else { 1 };
         if y < top {
             return None;
@@ -807,36 +838,38 @@ impl<T: BufferAccess> BufferView<T> {
         let surf_x = (x - border_width) as i64 + self.h_offset as i64;
         let cols = self.repr.columns_count as i64;
         let bytes_count = self.repr.format.bytes_count() as i64;
-        let column = if self.repr.format.is_char() {
+        if self.repr.format.is_char() {
             if !(0..cols).contains(&surf_x) {
                 return None;
             }
-            surf_x
-        } else {
-            let cell = self.repr.format.display_chars() as i64 + 1;
-            let char_start = cols * cell + 4;
-            if surf_x >= char_start {
-                // character display part: `bytes_count` contiguous chars per regular column
-                let c = (surf_x - char_start) / bytes_count;
-                if c >= cols {
-                    return None;
-                }
-                c
-            } else if surf_x >= 0 {
-                let c = surf_x / cell;
-                if c >= cols {
-                    return None;
-                }
-                c
-            } else {
+            let pos = self.start_view + (surf_y as u64) * (cols as u64) + surf_x as u64;
+            return if pos >= self.buffer.len() { None } else { Some((pos, ActivePanel::Char)) };
+        }
+        let cell = self.repr.format.display_chars() as i64 + 1;
+        let char_start = cols * cell + 4;
+        // byte offset inside the row + which panel was clicked
+        let (byte_in_row, panel) = if surf_x >= char_start {
+            // character display part: each byte is one contiguous char, so the click is byte-precise
+            let off = surf_x - char_start;
+            if off >= cols * bytes_count {
                 return None;
             }
+            (off, ActivePanel::Char)
+        } else if surf_x >= 0 {
+            // hex part: snap to the start of the element under the cursor
+            let c = surf_x / cell;
+            if c >= cols {
+                return None;
+            }
+            (c * bytes_count, ActivePanel::DataRepresentation)
+        } else {
+            return None;
         };
-        let pos = self.start_view + ((surf_y as u64) * (cols as u64) + (column as u64)) * bytes_count as u64;
+        let pos = self.start_view + (surf_y as u64) * (cols as u64) * bytes_count as u64 + byte_in_row as u64;
         if pos >= self.buffer.len() {
             None
         } else {
-            Some(pos)
+            Some((pos, panel))
         }
     }
 }
@@ -893,17 +926,29 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
             let dif = (self.pos - self.start_view) / unit as u64;
             let column = (dif % self.repr.columns_count as u64) as i32;
             let row = (dif / self.repr.columns_count as u64) as i32 + top;
-            let ch = Character::with_attributes(0, theme.list_current_item.focus);
+            let active_attr = theme.list_current_item.focus;
+            // the panel that does not hold the cursor is marked with a dimmed attribute
+            let inactive_attr = theme.list_current_item.over_inactive;
             if self.repr.format.is_char() {
                 let x = border_width + column - h_offset;
-                surface.write_char(x, row, ch);
+                surface.write_char(x, row, Character::with_attributes(0, active_attr));
             } else {
                 let len = self.repr.format.display_chars() as i32;
-                let x = border_width + column * (len + 1) - h_offset;
-                surface.fill_horizontal_line_with_size(x, row, (len + 2) as u32, ch);
-                // mirror the cursor over all the bytes of the element in the character part
-                let xc = border_width + self.repr.columns_count as i32 * (len + 1) + column * unit as i32 + 4 - h_offset;
-                surface.fill_horizontal_line_with_size(xc, row, unit as u32, ch);
+                let byte_in_element = ((self.pos - self.start_view) % unit as u64) as i32;
+                let hex_x = border_width + column * (len + 1) - h_offset;
+                let char_block_x = border_width + self.repr.columns_count as i32 * (len + 1) + column * unit as i32 + 4 - h_offset;
+                match self.active_panel {
+                    ActivePanel::DataRepresentation => {
+                        // active hex element + dimmed mirror over all of its bytes in the character part
+                        surface.fill_horizontal_line_with_size(hex_x, row, (len + 2) as u32, Character::with_attributes(0, active_attr));
+                        surface.fill_horizontal_line_with_size(char_block_x, row, unit as u32, Character::with_attributes(0, inactive_attr));
+                    }
+                    ActivePanel::Char => {
+                        // active single byte in the character part + dimmed mirror over its hex element
+                        surface.fill_horizontal_line_with_size(hex_x, row, (len + 2) as u32, Character::with_attributes(0, inactive_attr));
+                        surface.write_char(char_block_x + byte_in_element, row, Character::with_attributes(0, active_attr));
+                    }
+                }
             }
         }
         surface.reset_clip();
@@ -959,7 +1004,8 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                     return EventProcessStatus::Processed;
                 }
                 if ev.button == MouseButton::Left {
-                    if let Some(pos) = self.mouse_to_pos(ev.x, ev.y) {
+                    if let Some((pos, panel)) = self.mouse_to_pos(ev.x, ev.y) {
+                        self.active_panel = panel;
                         self.goto_position(pos, false);
                         self.selecting = true;
                         self.mouse_capture = true;
@@ -974,7 +1020,7 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                     return EventProcessStatus::Processed;
                 }
                 if self.selecting {
-                    if let Some(pos) = self.mouse_to_pos(ev.x, ev.y) {
+                    if let Some((pos, _)) = self.mouse_to_pos(ev.x, ev.y) {
                         self.goto_position(pos, true);
                     }
                     return EventProcessStatus::Processed;
