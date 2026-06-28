@@ -40,6 +40,7 @@ where
     LabelName: FlatString<14>,
     selected_separator: Option<Separator>,
     hovered_separator: Option<Separator>,
+    hovered_panel: Option<ActivePanel>,
     mouse_capture: bool,
     selecting: bool,
     intervals: IntervalSet,
@@ -77,6 +78,7 @@ impl<T: BufferAccess> BufferView<T> {
             LabelName: FlatString::from_str("Label"),
             selected_separator: None,
             hovered_separator: None,
+            hovered_panel: None,
             mouse_capture: false,
             selecting: false,
             intervals: IntervalSet::new(),
@@ -378,21 +380,26 @@ impl<T: BufferAccess> BufferView<T> {
         let attr = theme.header.text.normal;
         surface.fill_horizontal_line_with_size(0, 0, self.size().width, Character::with_attributes(' ', attr));
 
-        let mut x = 0;
+        let border_width = self.border_width() as i32;
+        let mut border_x = 0;
         if self.addr_width > 0 {
-            Self::write_column_title(surface, attr, &self.AddrName, self.addr_width as u32, 0);
-            x += (1 + self.addr_width) as i32;
+            Self::write_column_title(surface, attr, &self.AddrName, self.addr_width as u32, border_x);
+            border_x += (1 + self.addr_width) as i32;
         }
         if self.label_width > 0 {
-            Self::write_column_title(surface, attr, &self.LabelName, self.label_width as u32, x);
-            x += (1 + self.label_width) as i32;
+            Self::write_column_title(surface, attr, &self.LabelName, self.label_width as u32, border_x);
         }
+        let h_offset = self.h_offset as i32;
+        let right = self.size().width as i32 - 1;
+        // the data/character header columns scroll horizontally with the buffer content
+        surface.set_relative_clip(border_width, 0, right, 0);
+        let data_x = border_width - h_offset;
         if !self.repr.format.is_char() {
-            let start_column = x;
+            let hex_start = data_x;
             const HEX: &[u8; 16] = b"0123456789ABCDEF";
             let display_chars = self.repr.format.display_chars() as usize;
             let mut buf = [b'0'; 3];
-            x += 1;
+            let mut x = data_x + 1;
             for id in 0..self.repr.columns_count as usize {
                 let c = id * self.repr.format.bytes_count() as usize;
                 let output = match self.repr.offset_format {
@@ -416,16 +423,52 @@ impl<T: BufferAccess> BufferView<T> {
                 surface.write_ascii(x, 0, output, attr, false);
                 x += (display_chars + 1) as i32;
             }
-            if self.active_panel == ActivePanel::DataRepresentation {
-                let attr = self.theme().header.text.pressed_or_selected;
-                surface.fill_horizontal_line(start_column, 0, x, Character::with_attributes(0, attr));
+            if let Some(panel_attr) = self.header_panel_attr(theme, ActivePanel::DataRepresentation) {
+                surface.fill_horizontal_line(hex_start, 0, x, Character::with_attributes(0, panel_attr));
             }
             x += 3;
+            let char_start = x;
+            surface.write_string(x, 0, "Characters", attr, false);
+            if let Some(panel_attr) = self.header_panel_attr(theme, ActivePanel::Char) {
+                surface.fill_horizontal_line(char_start - 1, 0, right, Character::with_attributes(0, panel_attr));
+            }
+        } else {
+            surface.write_string(data_x, 0, "Characters", attr, false);
         }
-        surface.write_string(x, 0, "Characters", attr, false);
-        if !self.repr.format.is_char() && self.active_panel == ActivePanel::Char {
-            let attr = self.theme().header.text.pressed_or_selected;
-            surface.fill_horizontal_line(x - 1, 0, self.size().width as i32, Character::with_attributes(0, attr));
+        surface.reset_clip();
+    }
+    /// Returns the highlight attribute for a header panel: the selected attribute when it is the
+    /// active panel, the hovered attribute when the mouse is over it, or `None` when neither applies.
+    fn header_panel_attr(&self, theme: &Theme, panel: ActivePanel) -> Option<CharAttribute> {
+        if self.active_panel == panel {
+            Some(theme.header.text.pressed_or_selected)
+        } else if self.hovered_panel == Some(panel) {
+            Some(theme.header.text.hovered)
+        } else {
+            None
+        }
+    }
+    /// Maps a header (row 0) coordinate to the panel underneath it, or `None` when the position is
+    /// outside the two switchable panels (border columns, character-only mode, or header hidden).
+    fn header_panel_at(&self, x: i32, y: i32) -> Option<ActivePanel> {
+        if y != 0 || self.flags.contains(Flags::HideHeader) || self.repr.format.is_char() {
+            return None;
+        }
+        let border_width = self.border_width() as i32;
+        if x < border_width || x >= self.size().width as i32 {
+            return None;
+        }
+        // translate screen x into the same coordinates used by `buf_surface`
+        let surf_x = x - border_width + self.h_offset as i32;
+        if surf_x < 0 {
+            return None;
+        }
+        let display_chars = self.repr.format.display_chars() as i32;
+        let char_start = self.repr.columns_count as i32 * (display_chars + 1) + 3;
+        if surf_x >= char_start {
+            Some(ActivePanel::Char)
+        } else {
+            Some(ActivePanel::DataRepresentation)
         }
     }
     fn paint_border(&self, surface: &mut Surface, theme: &Theme, top: i32) {
@@ -716,21 +759,27 @@ impl<T: BufferAccess> BufferView<T> {
         }
         EventProcessStatus::Processed
     }
-    fn toggle_panel(&mut self) {
-        if self.repr.format.is_char() {
+    fn set_active_panel(&mut self, panel: ActivePanel) {
+        if self.active_panel == panel || self.repr.format.is_char() {
             return;
         }
-        match self.active_panel {
-            ActivePanel::DataRepresentation => self.active_panel = ActivePanel::Char,
-            ActivePanel::Char => {
-                let bytes_count = self.repr.format.bytes_count() as u64;
-                if bytes_count > 1 {
-                    self.pos -= self.pos % bytes_count;
-                }
-                self.active_panel = ActivePanel::DataRepresentation;
+        if panel == ActivePanel::DataRepresentation {
+            // moving onto the hex panel: snap the position to the start of its element
+            // so that hex navigation (stepping by `bytes_count`) stays aligned
+            let bytes_count = self.repr.format.bytes_count() as u64;
+            if bytes_count > 1 {
+                self.pos -= self.pos % bytes_count;
             }
         }
+        self.active_panel = panel;
         self.ensure_visible();
+    }
+    fn toggle_panel(&mut self) {
+        let other = match self.active_panel {
+            ActivePanel::DataRepresentation => ActivePanel::Char,
+            ActivePanel::Char => ActivePanel::DataRepresentation,
+        };
+        self.set_active_panel(other);
     }
     fn process_navigation_key(&mut self, key: Key) -> EventProcessStatus {
         let select = key.modifier.contains(KeyModifier::Shift);
@@ -890,7 +939,7 @@ impl<T: BufferAccess> BufferView<T> {
 impl<T: BufferAccess> OnPaint for BufferView<T> {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let top = if self.flags.contains(Flags::HideHeader) { 0 } else { 1 };
-        // header & border are always fixed (never scrolled horizontally)
+        // header border columns stay fixed; data/character header columns scroll with h_offset
         self.paint_header(surface, theme);
         self.paint_border(surface, theme, top);
         let border_width = self.border_width() as i32;
@@ -996,16 +1045,33 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
         }
         let result = match event {
             MouseEvent::Leave => {
+                let mut changed = false;
                 if self.hovered_separator.is_some() {
                     self.hovered_separator = None;
+                    changed = true;
+                }
+                if self.hovered_panel.is_some() {
+                    self.hovered_panel = None;
+                    changed = true;
+                }
+                if changed {
                     return EventProcessStatus::Processed;
                 }
                 EventProcessStatus::Ignored
             }
             MouseEvent::Over(p) => {
                 let hovered = self.separator_at(p.x);
+                let hovered_panel = self.header_panel_at(p.x, p.y);
+                let mut changed = false;
                 if hovered != self.hovered_separator {
                     self.hovered_separator = hovered;
+                    changed = true;
+                }
+                if hovered_panel != self.hovered_panel {
+                    self.hovered_panel = hovered_panel;
+                    changed = true;
+                }
+                if changed {
                     return EventProcessStatus::Processed;
                 }
                 EventProcessStatus::Ignored
@@ -1015,6 +1081,12 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                     self.selected_separator = Some(separator);
                     self.mouse_capture = true;
                     return EventProcessStatus::Processed;
+                }
+                if ev.button == MouseButton::Left {
+                    if let Some(panel) = self.header_panel_at(ev.x, ev.y) {
+                        self.set_active_panel(panel);
+                        return EventProcessStatus::Processed;
+                    }
                 }
                 if ev.button == MouseButton::Left {
                     if let Some((pos, panel)) = self.mouse_to_pos(ev.x, ev.y) {
