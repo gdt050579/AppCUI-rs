@@ -289,7 +289,7 @@ impl<T: BufferAccess> BufferView<T> {
             pos += 1;
         }
     }
-    fn write_line(&mut self, pos: u64, x: i32, y: i32) {
+    fn write_line(&mut self, pos: u64, x: i32, y: i32, inactive_data_panel: bool, inactive_char_panel: bool) {
         let mut x = x + 1;
         let mut output = OutputBuffer::new();
         let mut bytes = [0; 8];
@@ -299,6 +299,7 @@ impl<T: BufferAccess> BufferView<T> {
         self.buffer.copy(pos as u64, to_read as u64, &mut self.temp_buffer);
         let mut x_char = x + ((self.repr.format.display_chars() + 1) * self.repr.columns_count as u32 + 3) as i32;
         let mut pos = pos;
+        let inactive_attr = self.theme().text.inactive;
         if bytes_count == 1 {
             let min_len = (self.temp_buffer.len() as u64).min(to_read as u64) as usize;
             for i in 0..min_len {
@@ -308,10 +309,12 @@ impl<T: BufferAccess> BufferView<T> {
                 }
                 bytes[0] = val;
                 self.repr.format.write(bytes, &mut output);
-                self.buf_surface.write_ascii(x, y, output.as_slice(), self.current_segment_attr, false);
+                let attr = if inactive_data_panel { inactive_attr } else { self.current_segment_attr };
+                self.buf_surface.write_ascii(x, y, output.as_slice(), attr, false);
                 let ch = self.cp.get(val);
+                let attr = if inactive_char_panel { inactive_attr } else { self.current_segment_attr };
                 self.buf_surface
-                    .write_char(x_char, y, Character::with_attributes(ch, self.current_segment_attr));
+                    .write_char(x_char, y, Character::with_attributes(ch, attr));
                 x += (output.len() as i32) + 1;
                 x_char += 1;
                 pos += 1;
@@ -333,12 +336,13 @@ impl<T: BufferAccess> BufferView<T> {
                     }
                 }
                 self.repr.format.write(bytes, &mut output);
-                self.buf_surface.write_ascii(x, y, output.as_slice(), self.current_segment_attr, false);
+                let attr = if inactive_data_panel { inactive_attr } else { self.current_segment_attr };
+                self.buf_surface.write_ascii(x, y, output.as_slice(), attr, false);
+                let attr = if inactive_char_panel { inactive_attr } else { self.current_segment_attr };
                 for k in 0..available {
                     let ch = self.cp.get(self.temp_buffer[i + k]);
-                    self.buf_surface
-                        .write_char(x_char, y, Character::with_attributes(ch, self.current_segment_attr));
-                    x_char += 1;
+                    self.buf_surface.write_char(x_char, y, Character::with_attributes(ch, attr));
+                    x_char += 1;    
                 }
                 x += (output.len() as i32) + 1;
                 i += bytes_count;
@@ -367,8 +371,18 @@ impl<T: BufferAccess> BufferView<T> {
         if self.repr.format.is_char() {
             self.write_chars(start);
         } else {
+            let inactive_data_panel = if self.flags.contains(Flags::NoPanelDimming) {
+                false
+            } else {
+                self.active_panel == ActivePanel::Char
+            };
+            let inactive_char_panel = if self.flags.contains(Flags::NoPanelDimming) {
+                false
+            } else {
+                self.active_panel == ActivePanel::DataRepresentation
+            };
             for y in 0..height {
-                self.write_line(start, 0, y as i32);
+                self.write_line(start, 0, y as i32, inactive_data_panel, inactive_char_panel);
                 start += self.repr.columns_count as u64 * self.repr.format.bytes_count() as u64;
             }
         }
@@ -772,6 +786,7 @@ impl<T: BufferAccess> BufferView<T> {
             }
         }
         self.active_panel = panel;
+        self.paint_buffer();
         self.ensure_visible();
     }
     fn toggle_panel(&mut self) {
@@ -1087,10 +1102,11 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                         self.set_active_panel(panel);
                         return EventProcessStatus::Processed;
                     }
-                }
-                if ev.button == MouseButton::Left {
                     if let Some((pos, panel)) = self.mouse_to_pos(ev.x, ev.y) {
-                        self.active_panel = panel;
+                        if panel != self.active_panel {
+                            self.active_panel = panel;
+                            self.paint_buffer();
+                        }
                         self.goto_position(pos, false);
                         self.selecting = true;
                         self.mouse_capture = true;

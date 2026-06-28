@@ -7,6 +7,7 @@ pub enum Flags {
     HideHeader = 0x0004,
     ShowAddress = 0x0008,
     ShowLabels = 0x0010,
+    NoPanelDimming = 0x0020,
 }
 
 pub trait BufferAccess {
