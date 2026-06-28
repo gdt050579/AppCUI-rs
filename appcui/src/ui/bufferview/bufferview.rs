@@ -1,7 +1,7 @@
 use super::format::*;
 use super::initialization_flags::{BufferAccess, Flags};
 use super::output_buffer::OutputBuffer;
-use super::{Interval, IntervalSet, Segment, Codepage, Selection};
+use super::{Codepage, Interval, IntervalSet, Segment, Selection};
 use crate::prelude::*;
 use flat_string::FlatString;
 
@@ -54,7 +54,7 @@ where
 
 impl<T: BufferAccess> BufferView<T> {
     pub fn new(buffer: T, layout: Layout, flags: Flags) -> Self {
-        let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;        
+        let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
         if flags.contains(Flags::ScrollBars) {
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
             status_flags |= StatusFlags::IncreaseRightMarginOnFocus;
@@ -388,6 +388,7 @@ impl<T: BufferAccess> BufferView<T> {
             x += (1 + self.label_width) as i32;
         }
         if !self.repr.format.is_char() {
+            let start_column = x;
             const HEX: &[u8; 16] = b"0123456789ABCDEF";
             let display_chars = self.repr.format.display_chars() as usize;
             let mut buf = [b'0'; 3];
@@ -415,9 +416,17 @@ impl<T: BufferAccess> BufferView<T> {
                 surface.write_ascii(x, 0, output, attr, false);
                 x += (display_chars + 1) as i32;
             }
+            if self.active_panel == ActivePanel::DataRepresentation {
+                let attr = self.theme().header.text.pressed_or_selected;
+                surface.fill_horizontal_line(start_column, 0, x, Character::with_attributes(0, attr));
+            }
             x += 3;
         }
         surface.write_string(x, 0, "Characters", attr, false);
+        if !self.repr.format.is_char() && self.active_panel == ActivePanel::Char {
+            let attr = self.theme().header.text.pressed_or_selected;
+            surface.fill_horizontal_line(x - 1, 0, self.size().width as i32, Character::with_attributes(0, attr));
+        }
     }
     fn paint_border(&self, surface: &mut Surface, theme: &Theme, top: i32) {
         if !self.flags.contains_one(Flags::ShowAddress | Flags::ShowLabels) {
@@ -843,7 +852,11 @@ impl<T: BufferAccess> BufferView<T> {
                 return None;
             }
             let pos = self.start_view + (surf_y as u64) * (cols as u64) + surf_x as u64;
-            return if pos >= self.buffer.len() { None } else { Some((pos, ActivePanel::Char)) };
+            return if pos >= self.buffer.len() {
+                None
+            } else {
+                Some((pos, ActivePanel::Char))
+            };
         }
         let cell = self.repr.format.display_chars() as i64 + 1;
         let char_start = cols * cell + 4;

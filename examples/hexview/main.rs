@@ -21,7 +21,7 @@ fn build_buffer() -> Vec<u8> {
 fn main() -> Result<(), appcui::system::Error> {
     let buffer = build_buffer();
 
-    let mut app = App::new().build()?;
+    let mut app = App::new().color_schema(false).build()?;
     let mut win = Window::new(
         "HexView",
         LayoutBuilder::new().alignment(Alignment::Center).width(80).height(24).build(),
