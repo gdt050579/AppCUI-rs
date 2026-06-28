@@ -3,6 +3,8 @@ use appcui::prelude::*;
 fn build_buffer() -> Vec<u8> {
     let mut data: Vec<u8> = Vec::new();
 
+
+    data.extend_from_slice(&[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]);
     // Plain ASCII text
     data.extend_from_slice(b"Hello, AppCUI! This is a hex view example.\n");
 
@@ -29,7 +31,7 @@ fn main() -> Result<(), appcui::system::Error> {
     b.set_columns_count(bufferview::ColumnsCount::Auto);
     b.set_address_width(2);
     b.set_offset_format(bufferview::OffsetFormat::Dec);
-    b.set_data_representation_format(bufferview::DataRepresentationFormat::Hex(bufferview::BytesCount::One));
+    b.set_data_representation_format(bufferview::DataRepresentationFormat::Hex(bufferview::BytesCount::Two));
     //b.set_codepage(bufferview::Codepage::ASCII);
     b.set_intervals(&[
         bufferview::Interval::new(0, 10, CharAttribute::with_color(Color::Red, Color::Black), "ASCII"),
