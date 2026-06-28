@@ -503,7 +503,7 @@ impl<T: BufferAccess> BufferView<T> {
                 self.addr_width as i32,
                 0,
                 bottom,
-                LineType::Single,
+                if self.label_width > 0 { LineType::Single } else { LineType::Double },
                 self.separator_attr(theme, Separator::Address),
             );
             x += (1 + self.addr_width) as i32;
@@ -513,7 +513,7 @@ impl<T: BufferAccess> BufferView<T> {
                 x + self.label_width as i32,
                 0,
                 bottom,
-                LineType::Single,
+                LineType::Double,
                 self.separator_attr(theme, Separator::Label),
             );
         }
