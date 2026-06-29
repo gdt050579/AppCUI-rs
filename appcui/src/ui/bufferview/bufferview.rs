@@ -737,7 +737,9 @@ impl<T: BufferAccess> BufferView<T> {
         }
         self.update_scrollbars();
     }
-    fn search(&mut self, _text: &str) {}
+    fn search(&mut self) {
+        let text = self.comp.search_text();
+    }
     fn process_selector_key(&mut self, key: Key) -> EventProcessStatus {
         let separator = match self.selected_separator {
             Some(separator) => separator,
@@ -1040,8 +1042,7 @@ impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
             return EventProcessStatus::Processed;
         }
         if self.comp.process_key_pressed(key, character) {
-            let text = self.comp.search_text().to_string();
-            self.search(&text);
+            self.search();
             return EventProcessStatus::Processed;
         }
         let status = self.process_navigation_key(key);

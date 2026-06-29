@@ -10,6 +10,7 @@ mod output_buffer;
 mod interval;
 mod codepage;
 mod selection;
+mod search_parser;
 #[cfg(test)]
 mod tests;
 
