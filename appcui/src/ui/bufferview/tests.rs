@@ -1,4 +1,21 @@
+use super::bufferview::BufferView;
 use super::search_parser::{parse, Error};
+
+fn hex_format(index: u32, display_chars: u32) -> ([u8; 4], u8) {
+    let mut output = [b'?'; 4];
+    let len = BufferView::<Vec<u8>>::hex_format(index, display_chars, &mut output);
+    (output, len)
+}
+
+fn dec_format(index: u32, display_chars: u32) -> ([u8; 4], u8) {
+    let mut output = [b'?'; 4];
+    let len = BufferView::<Vec<u8>>::dec_format(index, display_chars, &mut output);
+    (output, len)
+}
+
+fn formatted(output: &[u8; 4], len: u8) -> &[u8] {
+    &output[..len as usize]
+}
 
 fn parse_ok(text: &str) -> Vec<u8> {
     let mut output = Vec::new();
@@ -253,4 +270,164 @@ fn search_parser_utf16_invalid() {
 #[test]
 fn search_parser_colon_in_text_is_not_hex() {
     assert_eq!(parse_ok("http://example.com"), b"http://example.com".to_vec());
+}
+
+#[test]
+fn hex_format_skips_write_when_display_chars_at_most_two() {
+    for display_chars in [0, 1, 2] {
+        let (output, len) = hex_format(0xAB, display_chars);
+        assert_eq!(len, 2);
+        assert_eq!(output, [b'?'; 4], "display_chars={display_chars}");
+    }
+}
+
+#[test]
+fn hex_format_writes_uppercase_hex_when_display_chars_above_two() {
+    let cases = [
+        (0, 4, b"00"),
+        (1, 4, b"01"),
+        (9, 4, b"09"),
+        (10, 4, b"0A"),
+        (15, 4, b"0F"),
+        (16, 4, b"10"),
+        (0xAB, 4, b"AB"),
+        (0xFF, 4, b"FF"),
+        (0x1234, 8, b"34"),
+        (0x00, 8, b"00"),
+        (0x5A, 16, b"5A"),
+    ];
+    for (index, display_chars, expected) in cases {
+        let (output, len) = hex_format(index, display_chars);
+        assert_eq!(len, 2, "index={index}, display_chars={display_chars}");
+        assert_eq!(formatted(&output, len), expected);
+    }
+}
+
+#[test]
+fn dec_format_single_digit_indices() {
+    for display_chars in [1, 2, 3, 4, 8] {
+        for (index, expected) in [(0, b"+0"), (5, b"+5"), (9, b"+9")] {
+            let (output, len) = dec_format(index, display_chars);
+            assert_eq!(len, 2, "index={index}, display_chars={display_chars}");
+            assert_eq!(formatted(&output, len), expected);
+        }
+    }
+}
+
+#[test]
+fn dec_format_two_digit_indices_with_narrow_display() {
+    let cases = [(10, b"10"), (42, b"42"), (99, b"99")];
+    for display_chars in [1, 2] {
+        for (index, expected) in cases {
+            let (output, len) = dec_format(index, display_chars);
+            assert_eq!(len, 2, "index={index}, display_chars={display_chars}");
+            assert_eq!(formatted(&output, len), expected);
+        }
+    }
+}
+
+#[test]
+fn dec_format_two_digit_indices_with_wide_display() {
+    let cases = [(10, b"+10"), (42, b"+42"), (99, b"+99")];
+    for display_chars in [3, 4, 8] {
+        for (index, expected) in cases {
+            let (output, len) = dec_format(index, display_chars);
+            assert_eq!(len, 3, "index={index}, display_chars={display_chars}");
+            assert_eq!(formatted(&output, len), expected);
+        }
+    }
+}
+
+#[test]
+fn dec_format_three_digit_indices_with_two_display_chars() {
+    let cases = [(100, b"00"), (123, b"23"), (999, b"99")];
+    for (index, expected) in cases {
+        let (output, len) = dec_format(index, 2);
+        assert_eq!(len, 2, "index={index}");
+        assert_eq!(formatted(&output, len), expected);
+    }
+}
+
+#[test]
+fn dec_format_three_digit_indices_with_three_display_chars() {
+    let cases = [(100, b"100"), (123, b"123"), (999, b"999")];
+    for (index, expected) in cases {
+        let (output, len) = dec_format(index, 3);
+        assert_eq!(len, 3, "index={index}");
+        assert_eq!(formatted(&output, len), expected);
+    }
+}
+
+#[test]
+fn dec_format_three_digit_indices_with_wide_display() {
+    let cases = [(100, b"+100"), (123, b"+123"), (999, b"+999")];
+    for display_chars in [4, 8] {
+        for (index, expected) in cases {
+            let (output, len) = dec_format(index, display_chars);
+            assert_eq!(len, 4, "index={index}, display_chars={display_chars}");
+            assert_eq!(formatted(&output, len), expected);
+        }
+    }
+}
+
+#[test]
+fn dec_format_four_digit_indices_with_two_display_chars() {
+    let cases = [(1000, b"00"), (1234, b"34"), (9999, b"99")];
+    for (index, expected) in cases {
+        let (output, len) = dec_format(index, 2);
+        assert_eq!(len, 2, "index={index}");
+        assert_eq!(formatted(&output, len), expected);
+    }
+}
+
+#[test]
+fn dec_format_four_digit_indices_with_three_display_chars() {
+    let cases = [(1000, b"000"), (1234, b"234"), (9999, b"999")];
+    for (index, expected) in cases {
+        let (output, len) = dec_format(index, 3);
+        assert_eq!(len, 3, "index={index}");
+        assert_eq!(formatted(&output, len), expected);
+    }
+}
+
+#[test]
+fn dec_format_four_digit_indices_with_wide_display() {
+    let cases = [(1000, b"1000"), (1234, b"1234"), (9999, b"9999")];
+    for display_chars in [4, 8] {
+        for (index, expected) in cases {
+            let (output, len) = dec_format(index, display_chars);
+            assert_eq!(len, 4, "index={index}, display_chars={display_chars}");
+            assert_eq!(formatted(&output, len), expected);
+        }
+    }
+}
+
+#[test]
+fn dec_format_boundary_values() {
+    let (output, len) = dec_format(9, 2);
+    assert_eq!(formatted(&output, len), b"+9");
+    let (output, len) = dec_format(10, 2);
+    assert_eq!(formatted(&output, len), b"10");
+    let (output, len) = dec_format(10, 4);
+    assert_eq!(formatted(&output, len), b"+10");
+
+    let (output, len) = dec_format(99, 2);
+    assert_eq!(formatted(&output, len), b"99");
+    let (output, len) = dec_format(100, 2);
+    assert_eq!(formatted(&output, len), b"00");
+    let (output, len) = dec_format(100, 3);
+    assert_eq!(formatted(&output, len), b"100");
+    let (output, len) = dec_format(100, 4);
+    assert_eq!(formatted(&output, len), b"+100");
+
+    let (output, len) = dec_format(999, 3);
+    assert_eq!(formatted(&output, len), b"999");
+    let (output, len) = dec_format(999, 4);
+    assert_eq!(formatted(&output, len), b"+999");
+    let (output, len) = dec_format(1000, 2);
+    assert_eq!(formatted(&output, len), b"00");
+    let (output, len) = dec_format(1000, 3);
+    assert_eq!(formatted(&output, len), b"000");
+    let (output, len) = dec_format(1000, 4);
+    assert_eq!(formatted(&output, len), b"1000");
 }

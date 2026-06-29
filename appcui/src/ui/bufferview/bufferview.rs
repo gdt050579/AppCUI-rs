@@ -389,7 +389,7 @@ impl<T: BufferAccess> BufferView<T> {
         }
     }
 
-    fn hex_format(index: u32, display_chars: u32, output: &mut [u8; 4]) -> u8 {
+    pub(super) fn hex_format(index: u32, display_chars: u32, output: &mut [u8; 4]) -> u8 {
         const HEX: &[u8; 16] = b"0123456789ABCDEF";
 
         if display_chars > 2 {
@@ -398,7 +398,7 @@ impl<T: BufferAccess> BufferView<T> {
         }
         2
     }
-    fn dec_format(index: u32, display_chars: u32, output: &mut [u8; 4]) -> u8 {
+    pub(super) fn dec_format(index: u32, display_chars: u32, output: &mut [u8; 4]) -> u8 {
         if index < 10 {
             output[0] = b'+';
             output[1] = index as u8 + b'0';
