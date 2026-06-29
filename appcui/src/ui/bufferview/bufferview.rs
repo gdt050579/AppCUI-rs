@@ -1008,7 +1008,15 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
         let size = self.size();
         // clip the data area so that the horizontally scrolled buffer does not overwrite the fixed border
         surface.set_relative_clip(border_width, top, size.width as i32 - 1, size.height as i32 - 1);
-        surface.draw_surface(border_width - h_offset, top, &self.buf_surface);
+        if self.comp.is_in_edit_mode() {
+            // draw the surface but dimmed
+            let attr = theme.text.inactive;
+            surface.draw_surface_with_transform(border_width - h_offset, top, &self.buf_surface, |ch| {
+                Character::with_attributes(ch.code, attr)
+            });
+        } else {
+            surface.draw_surface(border_width - h_offset, top, &self.buf_surface);
+        }
         // selection overlay: recolor (char code 0 keeps the glyph, only changes the attribute)
         // the cells of every selected byte that is currently visible, in both the data and char columns
         if let Some((sel_start, sel_end)) = self.selection.range() {
