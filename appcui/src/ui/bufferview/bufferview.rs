@@ -781,8 +781,10 @@ impl<T: BufferAccess> BufferView<T> {
                 }
                 self.selection.clear();
                 self.selection.update(pos, end);
+                return;
             }
         }
+        self.selection.clear();
     }
     fn process_selector_key(&mut self, key: Key) -> EventProcessStatus {
         let separator = match self.selected_separator {
@@ -1026,7 +1028,11 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
             let view_end = self.start_view.saturating_add(cols * rows * bytes_count);
             let from = sel_start.max(self.start_view);
             let to = sel_end.min(view_end).min(self.buffer.len());
-            let sel_ch = Character::with_attributes(0, theme.list_current_item.selected);
+            let sel_ch = if self.comp.is_in_edit_mode() {
+                Character::with_attributes(0, theme.list_current_item.over_selection)
+            } else {
+                Character::with_attributes(0, theme.list_current_item.selected)
+            };
             let len = self.repr.format.display_chars() as i32;
             let char_base = self.repr.columns_count as i32 * (len + 1) + 4;
             let mut pos = from;
