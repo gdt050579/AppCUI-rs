@@ -273,33 +273,25 @@ fn search_parser_colon_in_text_is_not_hex() {
 }
 
 #[test]
-fn hex_format_skips_write_when_display_chars_at_most_two() {
-    for display_chars in [0, 1, 2] {
-        let (output, len) = hex_format(0xAB, display_chars);
-        assert_eq!(len, 2);
-        assert_eq!(output, [b'?'; 4], "display_chars={display_chars}");
-    }
-}
-
-#[test]
-fn hex_format_writes_uppercase_hex_when_display_chars_above_two() {
+fn hex_format_writes_two_uppercase_hex_digits() {
     let cases = [
-        (0, 4, b"00"),
-        (1, 4, b"01"),
-        (9, 4, b"09"),
-        (10, 4, b"0A"),
-        (15, 4, b"0F"),
-        (16, 4, b"10"),
-        (0xAB, 4, b"AB"),
-        (0xFF, 4, b"FF"),
-        (0x1234, 8, b"34"),
-        (0x00, 8, b"00"),
-        (0x5A, 16, b"5A"),
+        (0, b"00"),
+        (1, b"01"),
+        (9, b"09"),
+        (10, b"0A"),
+        (15, b"0F"),
+        (16, b"10"),
+        (0xAB, b"AB"),
+        (0xFF, b"FF"),
+        (0x1234, b"34"),
+        (0x5A, b"5A"),
     ];
-    for (index, display_chars, expected) in cases {
-        let (output, len) = hex_format(index, display_chars);
-        assert_eq!(len, 2, "index={index}, display_chars={display_chars}");
-        assert_eq!(formatted(&output, len), expected);
+    for (index, expected) in cases {
+        for display_chars in [0, 1, 2, 4, 8, 16] {
+            let (output, len) = hex_format(index, display_chars);
+            assert_eq!(len, 2, "index={index}, display_chars={display_chars}");
+            assert_eq!(formatted(&output, len), expected, "index={index}, display_chars={display_chars}");
+        }
     }
 }
 

@@ -104,10 +104,20 @@ impl<T: BufferAccess> BufferView<T> {
     #[inline(always)]
     pub fn set_offset_format(&mut self, format: OffsetFormat) {
         self.repr.offset_format = format;
+        self.paint_buffer();
     }
     #[inline(always)]
     pub fn offset_format(&self) -> OffsetFormat {
         self.repr.offset_format
+    }
+    #[inline(always)]
+    pub fn set_endian(&mut self, endian: Endian) {
+        self.repr.endian = endian;
+        self.paint_buffer();
+    }
+    #[inline(always)]
+    pub fn endian(&self) -> Endian {
+        self.repr.endian
     }
     #[inline(always)]
     pub fn data_representation_format(&self) -> DataRepresentationFormat {
@@ -389,13 +399,10 @@ impl<T: BufferAccess> BufferView<T> {
         }
     }
 
-    pub(super) fn hex_format(index: u32, display_chars: u32, output: &mut [u8; 4]) -> u8 {
+    pub(super) fn hex_format(index: u32, _display_chars: u32, output: &mut [u8; 4]) -> u8 {
         const HEX: &[u8; 16] = b"0123456789ABCDEF";
-
-        if display_chars > 2 {
-            output[0] = HEX[((index >> 4) & 0x0F) as usize];
-            output[1] = HEX[(index & 0x0F) as usize];
-        }
+        output[0] = HEX[((index >> 4) & 0x0F) as usize];
+        output[1] = HEX[(index & 0x0F) as usize];
         2
     }
     pub(super) fn dec_format(index: u32, display_chars: u32, output: &mut [u8; 4]) -> u8 {
