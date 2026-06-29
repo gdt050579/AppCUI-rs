@@ -51,6 +51,7 @@ where
     comp: ListScrollBars,
     h_offset: u32,
     active_panel: ActivePanel,
+    search_bytes: Vec<u8>,
 }
 
 impl<T: BufferAccess> BufferView<T> {
@@ -89,6 +90,7 @@ impl<T: BufferAccess> BufferView<T> {
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
             h_offset: 0,
             active_panel: ActivePanel::DataRepresentation,
+            search_bytes: Vec::new(),
         }
     }
     pub fn set_codepage(&mut self, cp: Codepage) {
@@ -313,8 +315,7 @@ impl<T: BufferAccess> BufferView<T> {
                 self.buf_surface.write_ascii(x, y, output.as_slice(), attr, false);
                 let ch = self.cp.get(val);
                 let attr = if inactive_char_panel { inactive_attr } else { self.current_segment_attr };
-                self.buf_surface
-                    .write_char(x_char, y, Character::with_attributes(ch, attr));
+                self.buf_surface.write_char(x_char, y, Character::with_attributes(ch, attr));
                 x += (output.len() as i32) + 1;
                 x_char += 1;
                 pos += 1;
@@ -342,7 +343,7 @@ impl<T: BufferAccess> BufferView<T> {
                 for k in 0..available {
                     let ch = self.cp.get(self.temp_buffer[i + k]);
                     self.buf_surface.write_char(x_char, y, Character::with_attributes(ch, attr));
-                    x_char += 1;    
+                    x_char += 1;
                 }
                 x += (output.len() as i32) + 1;
                 i += bytes_count;
@@ -737,8 +738,51 @@ impl<T: BufferAccess> BufferView<T> {
         }
         self.update_scrollbars();
     }
+    #[inline(always)]
+    fn matches_bytes(&self, pos: u64, bytes: &[u8]) -> bool {
+        if bytes.is_empty() {
+            return true;
+        }
+        if pos.saturating_add(bytes.len() as u64) > self.buffer.len() {
+            return false;
+        }
+        for (index, &byte) in bytes.iter().enumerate() {
+            if self.buffer.byte(pos + index as u64) != Some(byte) {
+                return false;
+            }
+        }
+        true
+    }
+    fn search_bytes_from_offset(&self, offset: u64, bytes: &[u8]) -> Option<u64> {
+        if bytes.is_empty() {
+            return None;
+        }
+        let buffer_len = self.buffer.len() as u64;
+        let bytes_len = bytes.len() as u64;
+        if bytes_len > buffer_len {
+            return None;
+        }
+        let start_offset = offset % buffer_len;
+        for i in 0..buffer_len - bytes_len + 1 {
+            let pos = (i + start_offset) % buffer_len;
+            if self.matches_bytes(pos, bytes) {
+                return Some(pos);
+            }
+        }
+        None
+    }
     fn search(&mut self) {
         let text = self.comp.search_text();
+        if super::search_parser::parse(text, &mut self.search_bytes).is_ok() {
+            if let Some(pos) = self.search_bytes_from_offset(self.pos, &self.search_bytes) {
+                let end = pos + self.search_bytes.len() as u64 - 1;
+                if !self.goto_position(pos, false) {
+                    self.paint_buffer();
+                }
+                self.selection.clear();
+                self.selection.update(pos, end);
+            }
+        }
     }
     fn process_selector_key(&mut self, key: Key) -> EventProcessStatus {
         let separator = match self.selected_separator {

@@ -27,7 +27,7 @@ fn main() -> Result<(), appcui::system::Error> {
         LayoutBuilder::new().alignment(Alignment::Center).width(80).height(24).build(),
         window::Flags::Sizeable,
     );
-    let mut b = BufferView::new(buffer, layout!("d:f"), bufferview::Flags::ScrollBars | bufferview::Flags::ShowAddress | bufferview::Flags::NoPanelDimming  );
+    let mut b = BufferView::new(buffer, layout!("d:f"), bufferview::Flags::ScrollBars | bufferview::Flags::ShowAddress | bufferview::Flags::SearchBara  );
     b.set_columns_count(bufferview::ColumnsCount::Fixed(8));
     b.set_address_width(2);
     b.set_offset_format(bufferview::OffsetFormat::Dec);
