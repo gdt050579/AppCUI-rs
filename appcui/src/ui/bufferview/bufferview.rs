@@ -388,6 +388,86 @@ impl<T: BufferAccess> BufferView<T> {
             }
         }
     }
+
+    fn hex_format(index: u32, display_chars: u32, output: &mut [u8; 4]) -> u8 {
+        const HEX: &[u8; 16] = b"0123456789ABCDEF";
+
+        if display_chars > 2 {
+            output[0] = HEX[((index >> 4) & 0x0F) as usize];
+            output[1] = HEX[(index & 0x0F) as usize];
+        }
+        2
+    }
+    fn dec_format(index: u32, display_chars: u32, output: &mut [u8; 4]) -> u8 {
+        if index < 10 {
+            output[0] = b'+';
+            output[1] = index as u8 + b'0';
+            2
+        } else if index < 100 {
+            if display_chars > 2 {
+                output[0] = b'+';
+                output[1] = ((index / 10) as u8) + b'0';
+                output[2] = (index as u8 % 10) + b'0';
+                3
+            } else {
+                output[0] = ((index / 10) as u8) + b'0';
+                output[1] = (index as u8 % 10) + b'0';
+                2
+            }
+        } else if index < 1000 {
+            let d1 = (index / 100) as u8;
+            let rest = index % 100;
+            let d2 = (rest / 10) as u8;
+            let d3 = (rest % 10) as u8;
+            match display_chars {
+                2 => {
+                    output[0] = d2 + b'0';
+                    output[1] = d3 + b'0';
+                    2
+                }
+                3 => {
+                    output[0] = d1 + b'0';
+                    output[1] = d2 + b'0';
+                    output[2] = d3 + b'0';
+                    3
+                }
+                _ => {
+                    output[0] = b'+';
+                    output[1] = d1 + b'0';
+                    output[2] = d2 + b'0';
+                    output[3] = d3 + b'0';
+                    4
+                }
+            }
+        } else {
+            let d1 = (index / 1000) as u8;
+            let rest = index % 1000;
+            let d2 = (rest / 100) as u8;
+            let rest = rest % 100;
+            let d3 = (rest / 10) as u8;
+            let d4 = (rest % 10) as u8;
+            match display_chars {
+                2 => {
+                    output[0] = d3 + b'0';
+                    output[1] = d4 + b'0';
+                    2
+                }
+                3 => {
+                    output[0] = d2 + b'0';
+                    output[1] = d3 + b'0';
+                    output[2] = d4 + b'0';
+                    3
+                }
+                _ => {
+                    output[0] = d1 + b'0';
+                    output[1] = d2 + b'0';
+                    output[2] = d3 + b'0';
+                    output[3] = d4 + b'0';
+                    4
+                }
+            }
+        }
+    }
     fn paint_header(&self, surface: &mut Surface, theme: &Theme) {
         if self.flags.contains(Flags::HideHeader) {
             return;
@@ -411,31 +491,16 @@ impl<T: BufferAccess> BufferView<T> {
         let data_x = border_width - h_offset;
         if !self.repr.format.is_char() {
             let hex_start = data_x;
-            const HEX: &[u8; 16] = b"0123456789ABCDEF";
-            let display_chars = self.repr.format.display_chars() as usize;
-            let mut buf = [b'0'; 3];
+            let display_chars = self.repr.format.display_chars() as u32;
+            let mut buf = [b'0'; 4];
             let mut x = data_x + 1;
-            for id in 0..self.repr.columns_count as usize {
-                let c = id * self.repr.format.bytes_count() as usize;
-                let output = match self.repr.offset_format {
-                    OffsetFormat::Hex => {
-                        buf[0] = HEX[(c >> 4) & 0x0F];
-                        buf[1] = HEX[c & 0x0F];
-                        &buf[..2]
-                    }
-                    OffsetFormat::Dec => {
-                        if c < 10 {
-                            buf[0] = 32;
-                            buf[1] = c as u8 + b'0';
-                            &buf[..2]
-                        } else {
-                            buf[0] = (c.min(99) as u8 / 10) + b'0';
-                            buf[1] = (c as u8 % 10) + b'0';
-                            &buf[..2]
-                        }
-                    }
+            for id in 0..self.repr.columns_count as u32 {
+                let c = id * self.repr.format.bytes_count() as u32;
+                let output_len = match self.repr.offset_format {
+                    OffsetFormat::Hex => Self::hex_format(c, display_chars, &mut buf),
+                    OffsetFormat::Dec => Self::dec_format(c, display_chars, &mut buf),
                 };
-                surface.write_ascii(x, 0, output, attr, false);
+                surface.write_ascii(x, 0, &buf[..output_len as usize], attr, false);
                 x += (display_chars + 1) as i32;
             }
             if let Some(panel_attr) = self.header_panel_attr(theme, ActivePanel::DataRepresentation) {
@@ -1202,13 +1267,14 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                 EventProcessStatus::Ignored
             }
             MouseEvent::Wheel(direction) => {
+                let line_bytes_count = self.repr.columns_count as i32 * self.repr.format.bytes_count() as i32;
                 let processed = match direction {
                     MouseWheelDirection::Up => {
-                        self.move_view_with(-(self.repr.columns_count as i32));
+                        self.move_view_with(-line_bytes_count);
                         true
                     }
                     MouseWheelDirection::Down => {
-                        self.move_view_with(self.repr.columns_count as i32);
+                        self.move_view_with(line_bytes_count);
                         true
                     }
                     MouseWheelDirection::Left => self.scroll_horizontal(-1),
