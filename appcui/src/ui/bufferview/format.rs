@@ -2,6 +2,9 @@ mod hex;
 mod oct;
 mod bin;
 
+#[cfg(test)]
+mod tests;
+
 use super::OutputBuffer;
 
 #[derive(Copy, Clone)]
