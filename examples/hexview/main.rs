@@ -77,7 +77,7 @@ impl HexViewWindow {
 
         let mut panel = panel!("'Configuration',d:f");
         panel.add(label!("'Representation:',l:1,t:1,w:16,h:1"));
-        w.cb_format = panel.add(combobox!("l:18,t:1,r:1,items=[Hex,Oct,Char],index:0"));
+        w.cb_format = panel.add(combobox!("l:18,t:1,r:1,items=[Hex,Oct,Bin,Char],index:0"));
         panel.add(label!("'Columns:',l:1,t:3,w:16,h:1"));
         w.cb_columns = panel.add(combobox!("l:18,t:3,r:1,items=[4,8,12,16,Auto],index:1"));
         panel.add(label!("'Offset format:',l:1,t:5,w:16,h:1"));
@@ -147,6 +147,7 @@ impl HexViewWindow {
         let repr = match format_idx {
             0 => bufferview::DataRepresentationFormat::Hex(bytes_count_from_index(grouping_idx)),
             1 => bufferview::DataRepresentationFormat::Oct,
+            2 => bufferview::DataRepresentationFormat::Bin,
             _ => bufferview::DataRepresentationFormat::Char,
         };
 
