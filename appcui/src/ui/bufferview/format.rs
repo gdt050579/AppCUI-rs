@@ -1,4 +1,5 @@
 mod hex;
+mod oct;
 
 use super::OutputBuffer;
 
@@ -29,12 +30,14 @@ pub enum BytesCount {
 #[derive(Clone, Copy)]
 pub enum DataRepresentationFormat {
     Hex(BytesCount),
+    Oct,
     Char,
 }
 impl DataRepresentationFormat {
     pub(super) fn write(&self, bytes: [u8;8], output: &mut OutputBuffer) {
         match self {
             DataRepresentationFormat::Hex(bytes_count) => hex::write(bytes, *bytes_count, output),
+            DataRepresentationFormat::Oct => oct::write(bytes, output),
             DataRepresentationFormat::Char => { output.set_len(1); output.set(0, bytes[0]); },
         }
     }
@@ -42,6 +45,7 @@ impl DataRepresentationFormat {
     pub(super) fn bytes_count(&self) -> u8 {
         match self {
             DataRepresentationFormat::Hex(bytes_count) => *bytes_count as u8,
+            DataRepresentationFormat::Oct => 1,
             DataRepresentationFormat::Char => 1,
         }
     }
@@ -49,6 +53,7 @@ impl DataRepresentationFormat {
     pub(super) fn display_chars(&self) -> u32 {
         match self {
             DataRepresentationFormat::Hex(byte_count) => (*byte_count as u32) * 2,
+            DataRepresentationFormat::Oct => 3,
             DataRepresentationFormat::Char => 1,
         }
     }

@@ -77,7 +77,7 @@ impl HexViewWindow {
 
         let mut panel = panel!("'Configuration',d:f");
         panel.add(label!("'Representation:',l:1,t:1,w:16,h:1"));
-        w.cb_format = panel.add(combobox!("l:18,t:1,r:1,items=[Hex,Char],index:0"));
+        w.cb_format = panel.add(combobox!("l:18,t:1,r:1,items=[Hex,Oct,Char],index:0"));
         panel.add(label!("'Columns:',l:1,t:3,w:16,h:1"));
         w.cb_columns = panel.add(combobox!("l:18,t:3,r:1,items=[4,8,12,16,Auto],index:1"));
         panel.add(label!("'Offset format:',l:1,t:5,w:16,h:1"));
@@ -106,6 +106,10 @@ impl HexViewWindow {
         self.combobox_index(self.cb_format) == 0
     }
 
+    fn format_index(&self) -> u32 {
+        self.combobox_index(self.cb_format)
+    }
+
     fn grouping_index(&self) -> u32 {
         self.combobox_index(self.cb_grouping)
     }
@@ -132,7 +136,7 @@ impl HexViewWindow {
     }
 
     fn apply_to_buffer(&mut self) {
-        let format_idx = self.combobox_index(self.cb_format);
+        let format_idx = self.format_index();
         let columns_idx = self.combobox_index(self.cb_columns);
         let offset_idx = self.combobox_index(self.cb_offset);
         let grouping_idx = self.grouping_index();
@@ -140,10 +144,10 @@ impl HexViewWindow {
         let codepage_idx = self.combobox_index(self.cb_codepage);
         let endian_enabled = self.endian_enabled();
 
-        let repr = if format_idx == 0 {
-            bufferview::DataRepresentationFormat::Hex(bytes_count_from_index(grouping_idx))
-        } else {
-            bufferview::DataRepresentationFormat::Char
+        let repr = match format_idx {
+            0 => bufferview::DataRepresentationFormat::Hex(bytes_count_from_index(grouping_idx)),
+            1 => bufferview::DataRepresentationFormat::Oct,
+            _ => bufferview::DataRepresentationFormat::Char,
         };
 
         let columns = match columns_idx {
