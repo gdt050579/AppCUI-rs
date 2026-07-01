@@ -184,7 +184,14 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             return;
         }
         self.selection.clear();
-        self.emit_selection_update_event();
+    }
+    #[inline(always)]
+    pub fn current_pos(&self) -> u64 {
+        self.pos
+    }
+    #[inline(always)]
+    pub fn set_current_pos(&mut self, pos: u64) {
+        self.goto_position(pos, false, false);
     }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;
