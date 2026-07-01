@@ -30,9 +30,10 @@ fn codepage_from_index(index: u32) -> bufferview::Codepage {
     }
 }
 
-#[Window(events = ComboBoxEvents)]
+#[Window(events = ComboBoxEvents+BufferViewEvents<Vec<u8>>)]
 struct HexViewWindow {
     buffer: Handle<BufferView<Vec<u8>>>,
+    lb_pos: Handle<toolbar::Label>,
     cb_format: Handle<ComboBox>,
     cb_columns: Handle<ComboBox>,
     cb_offset: Handle<ComboBox>,
@@ -46,6 +47,7 @@ impl HexViewWindow {
         let mut w = Self {
             base: window!("'HexView',a:c,w:100,h:24,flags:Sizeable"),
             buffer: Handle::None,
+            lb_pos: Handle::None,
             cb_format: Handle::None,
             cb_columns: Handle::None,
             cb_offset: Handle::None,
@@ -72,7 +74,7 @@ impl HexViewWindow {
             bufferview::Interval::new(20, 10, CharAttribute::with_color(Color::White, Color::DarkRed), "Non-printable"),
             bufferview::Interval::new(30, 10, CharAttribute::with_color(Color::Yellow, Color::DarkGreen), "Full range"),
         ]);
-        bv.set_components_toolbar_margins(2, 4);
+        bv.set_components_toolbar_margins(8, 4);
         w.buffer = vs.add(vsplitter::Panel::Left, bv);
 
         let mut panel = panel!("'Configuration',d:f");
@@ -91,9 +93,26 @@ impl HexViewWindow {
         vs.add(vsplitter::Panel::Right, panel);
 
         w.add(vs);
+
+        let pos_group = w.toolbar().create_group(toolbar::GroupPosition::BottomLeft);
+        w.lb_pos = w.toolbar().add(pos_group, toolbar::Label::new("Position: 0x0"));
+
         w.update_dependent_controls();
         w.apply_to_buffer();
+        w.update_position_label();
         w
+    }
+
+    fn  update_position_label(&mut self) {
+        let pos = self
+            .control(self.buffer)
+            .map(|bv| bv.current_pos())
+            .unwrap_or(0);
+        let text = format!("{pos:04X}");
+        let h = self.lb_pos;
+        if let Some(label) = self.toolbar().get_mut(h) {
+            label.set_content(text.as_str());
+        }
     }
 
     fn combobox_index(&self, handle: Handle<ComboBox>) -> u32 {
@@ -188,6 +207,13 @@ impl ComboBoxEvents for HexViewWindow {
     fn on_selection_changed(&mut self, _handle: Handle<ComboBox>) -> EventProcessStatus {
         self.update_dependent_controls();
         self.apply_to_buffer();
+        EventProcessStatus::Processed
+    }
+}
+
+impl BufferViewEvents<Vec<u8>> for HexViewWindow {
+    fn on_current_pos_changed(&mut self, _handle: Handle<BufferView<Vec<u8>>>) -> EventProcessStatus {
+        self.update_position_label();
         EventProcessStatus::Processed
     }
 }
