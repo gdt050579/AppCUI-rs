@@ -4,7 +4,7 @@ use super::traits::{Control, CustomEvents, EventProcessStatus};
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
 use crate::prelude::{
-    colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, richtextfield, selector, textfield,
+    bufferview, colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, richtextfield, selector, textfield,
     threestatebox, togglebutton, GenericSelectorEvents, PathFinderEvents, RuntimeManager, ThreeStateBoxEvents,
 };
 use crate::system::Handle;
@@ -13,7 +13,8 @@ use crate::ui::{
     accordion, accordion::events::AccordionEvents, button, button::events::ButtonEvents, charpicker, charpicker::events::CharPickerEvents, checkbox,
     checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents, datepicker::events::DatePickerEvents,
     dropdownlist::events::GenericDropDownListEvents, graphview, graphview::events::GenericGraphViewEvents, listbox::events::ListBoxEvents,
-    listview::events::GenericListViewEvents, markdown, markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents,
+    bufferview::events::GenericBufferViewEvents, listview::events::GenericListViewEvents, markdown, markdown::events::MarkdownEvents,
+    numericselector::events::GenericNumericSelectorEvents,
     password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
     richtextfield::events::RichTextFieldEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
     timepicker, timepicker::events::TimePickerEvents,
@@ -46,6 +47,7 @@ pub(crate) enum ControlEventData {
     DatePicker(datepicker::events::EventData),
     ListBox(listbox::events::EventData),
     ListView(listview::events::EventData),
+    BufferView(bufferview::events::EventData),
     PathFinder(pathfinder::events::EventData),
     TreeView(treeview::events::EventData),
     Markdown(markdown::events::EventData),
@@ -138,6 +140,14 @@ impl ControlEvent {
                 }
                 listview::events::ListViewEventTypes::ItemAction(index) => {
                     GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index)
+                }
+            },
+            ControlEventData::BufferView(data) => match data.event_type {
+                bufferview::events::BufferViewEventTypes::CurrentPosChanged => {
+                    GenericBufferViewEvents::on_current_pos_changed(receiver, self.emitter.cast(), data.type_id)
+                }
+                bufferview::events::BufferViewEventTypes::SelectionChanged => {
+                    GenericBufferViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
                 }
             },
             ControlEventData::PathFinder(_) => PathFinderEvents::on_path_updated(receiver, self.emitter.cast()),

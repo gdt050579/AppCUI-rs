@@ -3,6 +3,7 @@
 //! The BufferView control provides a scrollable view over an in-memory buffer.
 //! This is currently a skeleton implementation.
 
+pub mod events;
 mod bufferview;
 mod initialization_flags;
 mod format;

@@ -1,4 +1,5 @@
 use super::format::*;
+use super::events::EventData;
 use super::initialization_flags::{BufferAccess, Flags};
 use super::output_buffer::OutputBuffer;
 use super::{Codepage, Interval, IntervalSet, Segment, Selection};
@@ -25,7 +26,7 @@ enum ActivePanel {
 #[CustomControl(overwrite = [OnPaint, OnKeyPressed, OnMouseEvent, OnResize], internal = true)]
 pub struct BufferView<T>
 where
-    T: BufferAccess,
+    T: BufferAccess + 'static,
 {
     flags: Flags,
     buffer: T,
@@ -54,7 +55,7 @@ where
     search_bytes: Vec<u8>,
 }
 
-impl<T: BufferAccess> BufferView<T> {
+impl<T: BufferAccess + 'static> BufferView<T> {
     pub fn new(buffer: T, layout: Layout, flags: Flags) -> Self {
         let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
         if flags.contains(Flags::ScrollBars) {
@@ -179,7 +180,11 @@ impl<T: BufferAccess> BufferView<T> {
         !self.selection.is_empty()
     }
     pub fn clear_selection(&mut self) {
+        if self.selection.is_empty() {
+            return;
+        }
         self.selection.clear();
+        self.emit_selection_update_event();
     }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;
@@ -717,12 +722,14 @@ impl<T: BufferAccess> BufferView<T> {
             column_width * (self.repr.columns_count as u32) + 4
         };
         self.buf_surface.resize(Size::new(w, h));
-        if !self.goto_position(self.pos, false) {
+        if !self.goto_position(self.pos, false, false) {
             self.paint_buffer();
         }
     }
-    fn goto_position(&mut self, new_pos: u64, select: bool) -> bool {
+    fn goto_position(&mut self, new_pos: u64, select: bool, emit_event: bool) -> bool {
         let new_pos = new_pos.min(self.buffer.len().saturating_sub(1));
+        let old_pos = self.pos;
+        let old_selection = self.selection.range();
         let old_start_view = self.start_view;
         let rows = self.repr.rows_count as u64;
         let bytes_per_line = self.bytes_per_line();
@@ -742,6 +749,14 @@ impl<T: BufferAccess> BufferView<T> {
         self.pos = new_pos;
         self.ensure_visible();
         self.update_scrollbars();
+        if emit_event {
+            if old_pos != new_pos {
+                self.emit_current_pos_changed_event();
+            }
+            if old_selection != self.selection.range() {
+                self.emit_selection_update_event();
+            }
+        }
         if old_start_view != self.start_view {
             self.paint_buffer();
             true
@@ -843,20 +858,44 @@ impl<T: BufferAccess> BufferView<T> {
         }
         None
     }
+    fn emit_current_pos_changed_event(&self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::BufferView(EventData {
+                event_type: bufferview::events::BufferViewEventTypes::CurrentPosChanged,
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
+    }
+    fn emit_selection_update_event(&self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::BufferView(EventData {
+                event_type: bufferview::events::BufferViewEventTypes::SelectionChanged,
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
+    }
     fn search(&mut self) {
         let text = self.comp.search_text();
         if super::search_parser::parse(text, &mut self.search_bytes).is_ok() {
             if let Some(pos) = self.search_bytes_from_offset(self.pos, &self.search_bytes) {
                 let end = pos + self.search_bytes.len() as u64 - 1;
-                if !self.goto_position(pos, false) {
+                if !self.goto_position(pos, false, true) {
                     self.paint_buffer();
                 }
                 self.selection.clear();
                 self.selection.update(pos, end);
+                self.emit_selection_update_event();
                 return;
             }
         }
-        self.selection.clear();
+        if !self.selection.is_empty() {
+            self.selection.clear();
+            self.emit_selection_update_event();
+        }
     }
     fn process_selector_key(&mut self, key: Key) -> EventProcessStatus {
         let separator = match self.selected_separator {
@@ -934,35 +973,35 @@ impl<T: BufferAccess> BufferView<T> {
                 return EventProcessStatus::Ignored;
             }
             key!("Left") | key!("Shift+Left") => {
-                self.goto_position(self.pos.saturating_sub(h_unit), select);
+                self.goto_position(self.pos.saturating_sub(h_unit), select, true);
                 return EventProcessStatus::Processed;
             }
             key!("Right") | key!("Shift+Right") => {
-                self.goto_position(self.pos.saturating_add(h_unit), select);
+                self.goto_position(self.pos.saturating_add(h_unit), select, true);
                 return EventProcessStatus::Processed;
             }
             key!("Up") | key!("Shift+Up") => {
-                self.goto_position(self.pos.saturating_sub(row), select);
+                self.goto_position(self.pos.saturating_sub(row), select, true);
                 return EventProcessStatus::Processed;
             }
             key!("Down") | key!("Shift+Down") => {
-                self.goto_position(self.pos.saturating_add(row), select);
+                self.goto_position(self.pos.saturating_add(row), select, true);
                 return EventProcessStatus::Processed;
             }
             key!("Home") | key!("Shift+Home") => {
-                self.goto_position(0, select);
+                self.goto_position(0, select, true);
                 return EventProcessStatus::Processed;
             }
             key!("End") | key!("Shift+End") => {
-                self.goto_position(self.buffer.len(), select);
+                self.goto_position(self.buffer.len(), select, true);
                 return EventProcessStatus::Processed;
             }
             key!("PageUp") | key!("Shift+PageUp") => {
-                self.goto_position(self.pos.saturating_sub(row * self.repr.rows_count as u64), select);
+                self.goto_position(self.pos.saturating_sub(row * self.repr.rows_count as u64), select, true);
                 return EventProcessStatus::Processed;
             }
             key!("PageDown") | key!("Shift+PageDown") => {
-                self.goto_position(self.pos.saturating_add(row * self.repr.rows_count as u64), select);
+                self.goto_position(self.pos.saturating_add(row * self.repr.rows_count as u64), select, true);
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+Left") => {
@@ -1071,7 +1110,7 @@ impl<T: BufferAccess> BufferView<T> {
     }
 }
 
-impl<T: BufferAccess> OnPaint for BufferView<T> {
+impl<T: BufferAccess + 'static> OnPaint for BufferView<T> {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let top = if self.flags.contains(Flags::HideHeader) { 0 } else { 1 };
         // header border columns stay fixed; data/character header columns scroll with h_offset
@@ -1166,7 +1205,7 @@ impl<T: BufferAccess> OnPaint for BufferView<T> {
     }
 }
 
-impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
+impl<T: BufferAccess + 'static> OnKeyPressed for BufferView<T> {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         if self.process_selector_key(key) == EventProcessStatus::Processed {
             return EventProcessStatus::Processed;
@@ -1183,7 +1222,7 @@ impl<T: BufferAccess> OnKeyPressed for BufferView<T> {
     }
 }
 
-impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
+impl<T: BufferAccess + 'static> OnMouseEvent for BufferView<T> {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if self.comp.process_mouse_event(event) {
             self.update_scroll_pos_from_scrollbars();
@@ -1238,7 +1277,7 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                             self.active_panel = panel;
                             self.paint_buffer();
                         }
-                        self.goto_position(pos, false);
+                        self.goto_position(pos, false, true);
                         self.selecting = true;
                         self.mouse_capture = true;
                         return EventProcessStatus::Processed;
@@ -1253,7 +1292,7 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
                 }
                 if self.selecting {
                     if let Some((pos, _)) = self.mouse_to_pos(ev.x, ev.y) {
-                        self.goto_position(pos, true);
+                        self.goto_position(pos, true, true);
                     }
                     return EventProcessStatus::Processed;
                 }
@@ -1301,7 +1340,7 @@ impl<T: BufferAccess> OnMouseEvent for BufferView<T> {
     }
 }
 
-impl<T: BufferAccess> OnResize for BufferView<T> {
+impl<T: BufferAccess + 'static> OnResize for BufferView<T> {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.recompute_sizes(new_size);
         self.update_scrollbars();

@@ -17,6 +17,7 @@ use crate::{
         graphview::events::GenericGraphViewEvents,
         keyselector::events::KeySelectorEvents,
         listbox::events::ListBoxEvents,
+        bufferview::events::GenericBufferViewEvents,
         listview::events::GenericListViewEvents,
         markdown::events::MarkdownEvents,
         menu::events::GenericMenuEvents,
@@ -169,6 +170,7 @@ pub trait Control:
     + DatePickerEvents
     + ListBoxEvents
     + GenericListViewEvents
+    + GenericBufferViewEvents
     + PathFinderEvents
     + TimerEvents
     + GenericTreeViewEvents

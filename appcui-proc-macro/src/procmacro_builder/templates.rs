@@ -387,7 +387,43 @@ impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 ";
 
 
+pub(crate) static BUFFERVIEW_ON_CURRENT_POS_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<BufferView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return BufferViewEvents::<$(TYPE)>::on_current_pos_changed(self, h);
+}
+";
 
+pub(crate) static BUFFERVIEW_ON_SELECTION_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<BufferView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return BufferViewEvents::<$(TYPE)>::on_selection_changed(self, h);
+}
+";
+
+pub(crate) static BUFFERVIEW_TRAIT_DEF: &str = "
+trait BufferViewEvents<T: bufferview::BufferAccess+'static> {
+    fn on_current_pos_changed(&mut self, handle: Handle<BufferView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_selection_changed(&mut self, handle: Handle<BufferView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+impl$(TEMPLATE_TYPE) GenericBufferViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+
+    fn on_current_pos_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_BUFFERVIEW_ON_CURRENT_POS_CHANGED)
+        return EventProcessStatus::Ignored;
+    }
+
+    fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_BUFFERVIEW_ON_SELECTION_CHANGED)
+        return EventProcessStatus::Ignored;
+    }
+
+}
+";
 
 
 pub(crate) static GRAPHVIEW_ON_CURRENT_NODE_CHANGED_DEF: &str = "
