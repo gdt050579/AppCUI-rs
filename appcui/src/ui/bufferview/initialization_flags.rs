@@ -6,7 +6,7 @@ pub enum Flags {
     SearchBar = 0x0002,
     HideHeader = 0x0004,
     ShowAddress = 0x0008,
-    ShowLabels = 0x0010,
+    ShowIntervalNames = 0x0010,
     NoPanelDimming = 0x0020,
 }
 

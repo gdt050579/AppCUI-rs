@@ -7,13 +7,13 @@ use crate::prelude::*;
 use flat_string::FlatString;
 
 const MAX_ADDRESS_WIDTH: u32 = 24;
-const MAX_LABEL_WIDTH: u32 = 64;
+const MAX_INTERVAL_NAME_WIDTH: u32 = 64;
 
-/// Identifies one of the two resizable columns (address or label) by its vertical separator line.
+/// Identifies one of the two resizable columns (address or interval name) by its vertical separator line.
 #[derive(Copy, Clone, PartialEq, Eq)]
 enum Separator {
     Address,
-    Label,
+    IntervalName,
 }
 
 /// Identifies which panel the cursor is currently active on (the data/hex panel or the characters panel).
@@ -36,9 +36,9 @@ where
     temp_buffer: Vec<u8>,
     buf_surface: Surface,
     addr_width: u32,
-    label_width: u32,
+    interval_name_width: u32,
     AddrName: FlatString<14>,
-    LabelName: FlatString<14>,
+    interval_name_title: FlatString<14>,
     selected_separator: Option<Separator>,
     hovered_separator: Option<Separator>,
     hovered_panel: Option<ActivePanel>,
@@ -74,10 +74,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             repr: Representation::new(),
             temp_buffer: Vec::new(),
             buf_surface: Surface::new(1, 1),
-            addr_width: if flags.contains(Flags::ShowAddress) { 6 } else { 0 },
-            label_width: if flags.contains(Flags::ShowLabels) { 6 } else { 0 },
+            addr_width: 6,
+            interval_name_width: 6,
             AddrName: FlatString::from_str("Address"),
-            LabelName: FlatString::from_str("Label"),
+            interval_name_title: FlatString::from_str("Name"),
             selected_separator: None,
             hovered_separator: None,
             hovered_panel: None,
@@ -137,28 +137,54 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.recompute_sizes(self.size());
     }
     pub fn set_address_width(&mut self, width: u32) {
+        self.addr_width = width.clamp(1, MAX_ADDRESS_WIDTH);
         if self.flags.contains(Flags::ShowAddress) {
-            self.addr_width = width.clamp(1, MAX_ADDRESS_WIDTH);
-        } else {
-            self.addr_width = 0;
+            self.recompute_sizes(self.size());
         }
-        self.recompute_sizes(self.size());
     }
-    pub fn set_label_width(&mut self, width: u32) {
-        if self.flags.contains(Flags::ShowLabels) {
-            self.label_width = width.clamp(1, MAX_LABEL_WIDTH);
+    pub fn set_address_visible(&mut self, visible: bool) {
+        if visible == self.flags.contains(Flags::ShowAddress) {
+            return;
+        }
+        if visible {
+            self.flags.set(Flags::ShowAddress);
         } else {
-            self.label_width = 0;
+            self.flags.remove(Flags::ShowAddress);
         }
         self.recompute_sizes(self.size());
     }
     pub fn set_address_name(&mut self, name: &str) {
         self.AddrName.set(name);
     }
-    pub fn set_label_name(&mut self, name: &str) {
-        self.LabelName.set(name);
+    #[inline(always)]
+    pub fn is_address_visible(&self) -> bool {
+        self.flags.contains(Flags::ShowAddress)
     }
-    pub fn label(&self, pos: u64) -> Option<&str> {
+    pub fn set_interval_name_width(&mut self, width: u32) {
+        self.interval_name_width = width.clamp(1, MAX_INTERVAL_NAME_WIDTH);
+        if self.flags.contains(Flags::ShowIntervalNames) {
+            self.recompute_sizes(self.size());
+        }
+    }
+    pub fn set_interval_name_title(&mut self, title: &str) {
+        self.interval_name_title.set(title);
+    }
+    pub fn set_interval_names_visible(&mut self, visible: bool) {
+        if visible == self.flags.contains(Flags::ShowIntervalNames) {
+            return;
+        }
+        if visible {
+            self.flags.set(Flags::ShowIntervalNames);
+        } else {
+            self.flags.remove(Flags::ShowIntervalNames);
+        }
+        self.recompute_sizes(self.size());
+    }
+    #[inline(always)]
+    pub fn is_interval_names_visible(&self) -> bool {
+        self.flags.contains(Flags::ShowIntervalNames)
+    }
+    pub fn interval_name_at(&self, pos: u64) -> Option<&str> {
         let segment = self.intervals.pos_to_segment(pos, self.buffer.len());
         if segment.exists() {
             self.intervals.get(segment.index).map(|interval| interval.name.as_str())
@@ -208,7 +234,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             surface.write_text(title.as_str(), &format);
         }
     }
-    fn write_label(surface: &mut Surface, attr: CharAttribute, label: &str, len: u32, x: i32, y: i32) {
+    fn write_interval_name(surface: &mut Surface, attr: CharAttribute, name: &str, len: u32, x: i32, y: i32) {
         if len == 0 {
             return;
         }
@@ -217,7 +243,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             .wrap_type(WrapType::SingleLineWrap(len as u16))
             .position(x, y)
             .build();
-        surface.write_text(label, &format);
+        surface.write_text(name, &format);
     }
     fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: u64, len: u32, y: i32, repr: OffsetFormat) {
         if len == 0 {
@@ -501,12 +527,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
 
         let border_width = self.border_width() as i32;
         let mut border_x = 0;
-        if self.addr_width > 0 {
+        if self.flags.contains(Flags::ShowAddress) {
             Self::write_column_title(surface, attr, &self.AddrName, self.addr_width as u32, border_x);
             border_x += (1 + self.addr_width) as i32;
         }
-        if self.label_width > 0 {
-            Self::write_column_title(surface, attr, &self.LabelName, self.label_width as u32, border_x);
+        if self.flags.contains(Flags::ShowIntervalNames) {
+            Self::write_column_title(surface, attr, &self.interval_name_title, self.interval_name_width as u32, border_x);
         }
         let h_offset = self.h_offset as i32;
         let right = self.size().width as i32 - 1;
@@ -652,22 +678,22 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
     }
     fn paint_border(&self, surface: &mut Surface, theme: &Theme, top: i32) {
-        if !self.flags.contains_one(Flags::ShowAddress | Flags::ShowLabels) {
+        if !self.flags.contains_one(Flags::ShowAddress | Flags::ShowIntervalNames) {
             return;
         }
         let mut start = self.start_view;
         let mut y = top;
         for _ in 0..self.repr.rows_count {
             let mut x = 0;
-            if self.addr_width > 0 {
+            if self.flags.contains(Flags::ShowAddress) {
                 Self::write_offset(surface, theme.text.inactive, start, self.addr_width as u32, y, self.repr.offset_format);
                 x += (1 + self.addr_width) as i32;
             }
-            if self.label_width > 0 {
-                if let Some(label) = self.label(start) {
-                    Self::write_label(surface, theme.text.normal, label, self.label_width as u32, x, y);
+            if self.flags.contains(Flags::ShowIntervalNames) {
+                if let Some(name) = self.interval_name_at(start) {
+                    Self::write_interval_name(surface, theme.text.normal, name, self.interval_name_width as u32, x, y);
                 } else {
-                    surface.fill_horizontal_line_with_size(x, y, self.label_width as u32, Character::with_attributes('-', theme.text.inactive));
+                    surface.fill_horizontal_line_with_size(x, y, self.interval_name_width as u32, Character::with_attributes('-', theme.text.inactive));
                 }
             }
             start += self.repr.columns_count as u64 * self.repr.format.bytes_count() as u64;
@@ -678,44 +704,44 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         let mut x = 0;
         let bottom = (self.size().height as i32).saturating_sub(if self.has_focus() { 1 } else { 0 });
-        if self.addr_width > 0 {
+        if self.flags.contains(Flags::ShowAddress) {
             surface.draw_vertical_line(
                 self.addr_width as i32,
                 0,
                 bottom,
-                if self.label_width > 0 { LineType::Single } else { LineType::Double },
+                if self.flags.contains(Flags::ShowIntervalNames) { LineType::Single } else { LineType::Double },
                 self.separator_attr(theme, Separator::Address),
             );
             x += (1 + self.addr_width) as i32;
         }
-        if self.label_width > 0 {
+        if self.flags.contains(Flags::ShowIntervalNames) {
             surface.draw_vertical_line(
-                x + self.label_width as i32,
+                x + self.interval_name_width as i32,
                 0,
                 bottom,
                 LineType::Double,
-                self.separator_attr(theme, Separator::Label),
+                self.separator_attr(theme, Separator::IntervalName),
             );
         }
     }
     fn border_width(&self) -> u32 {
         let mut border_width = 0;
-        if self.addr_width > 0 {
+        if self.flags.contains(Flags::ShowAddress) {
             border_width += (1 + self.addr_width) as u32;
         }
-        if self.label_width > 0 {
-            border_width += (1 + self.label_width) as u32;
+        if self.flags.contains(Flags::ShowIntervalNames) {
+            border_width += (1 + self.interval_name_width) as u32;
         }
         border_width
     }
     fn separator_at(&self, x: i32) -> Option<Separator> {
-        if self.addr_width > 0 && x == self.addr_width as i32 {
+        if self.flags.contains(Flags::ShowAddress) && x == self.addr_width as i32 {
             return Some(Separator::Address);
         }
-        if self.label_width > 0 {
-            let base = if self.addr_width > 0 { self.addr_width as i32 + 1 } else { 0 };
-            if x == base + self.label_width as i32 {
-                return Some(Separator::Label);
+        if self.flags.contains(Flags::ShowIntervalNames) {
+            let base = if self.flags.contains(Flags::ShowAddress) { self.addr_width as i32 + 1 } else { 0 };
+            if x == base + self.interval_name_width as i32 {
+                return Some(Separator::IntervalName);
             }
         }
         None
@@ -723,22 +749,22 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     #[inline(always)]
     fn separator_exists(&self, separator: Separator) -> bool {
         match separator {
-            Separator::Address => self.addr_width > 0,
-            Separator::Label => self.label_width > 0,
+            Separator::Address => self.flags.contains(Flags::ShowAddress),
+            Separator::IntervalName => self.flags.contains(Flags::ShowIntervalNames),
         }
     }
     fn first_separator(&self) -> Option<Separator> {
-        if self.addr_width > 0 {
+        if self.flags.contains(Flags::ShowAddress) {
             Some(Separator::Address)
-        } else if self.label_width > 0 {
-            Some(Separator::Label)
+        } else if self.flags.contains(Flags::ShowIntervalNames) {
+            Some(Separator::IntervalName)
         } else {
             None
         }
     }
     fn set_separator_width(&mut self, separator: Separator, width: u32) -> bool {
         let changed = match separator {
-            Separator::Address if self.addr_width > 0 => {
+            Separator::Address if self.flags.contains(Flags::ShowAddress) => {
                 let new_width = width.clamp(1, MAX_ADDRESS_WIDTH);
                 if new_width != self.addr_width {
                     self.addr_width = new_width;
@@ -747,10 +773,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     false
                 }
             }
-            Separator::Label if self.label_width > 0 => {
-                let new_width = width.clamp(1, MAX_LABEL_WIDTH);
-                if new_width != self.label_width {
-                    self.label_width = new_width;
+            Separator::IntervalName if self.flags.contains(Flags::ShowIntervalNames) => {
+                let new_width = width.clamp(1, MAX_INTERVAL_NAME_WIDTH);
+                if new_width != self.interval_name_width {
+                    self.interval_name_width = new_width;
                     true
                 } else {
                     false
@@ -766,8 +792,8 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     fn resize_separator_to(&mut self, separator: Separator, x: i32) -> bool {
         let width = match separator {
             Separator::Address => x.max(1) as u32,
-            Separator::Label => {
-                let base = if self.addr_width > 0 { self.addr_width as i32 + 1 } else { 0 };
+            Separator::IntervalName => {
+                let base = if self.flags.contains(Flags::ShowAddress) { self.addr_width as i32 + 1 } else { 0 };
                 (x - base).max(1) as u32
             }
         };
@@ -996,21 +1022,21 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             key!("Left") => {
                 let width = match separator {
                     Separator::Address => self.addr_width,
-                    Separator::Label => self.label_width,
+                    Separator::IntervalName => self.interval_name_width,
                 };
                 self.set_separator_width(separator, width.saturating_sub(1));
             }
             key!("Right") => {
                 let width = match separator {
                     Separator::Address => self.addr_width,
-                    Separator::Label => self.label_width,
+                    Separator::IntervalName => self.interval_name_width,
                 };
                 self.set_separator_width(separator, width.saturating_add(1));
             }
             key!("Tab") | key!("Ctrl+Left") | key!("Ctrl+Right") | key!("Ctrl+Alt+Left") | key!("Ctrl+Alt+Right") => {
                 let other = match separator {
-                    Separator::Address => Separator::Label,
-                    Separator::Label => Separator::Address,
+                    Separator::Address => Separator::IntervalName,
+                    Separator::IntervalName => Separator::Address,
                 };
                 if self.separator_exists(other) {
                     self.selected_separator = Some(other);

@@ -41,6 +41,8 @@ struct HexViewWindow {
     cb_endian: Handle<ComboBox>,
     cb_codepage: Handle<ComboBox>,
     cb_enabled: Handle<CheckBox>,
+    cb_show_address: Handle<CheckBox>,
+    cb_show_interval_names: Handle<CheckBox>,
 }
 
 impl HexViewWindow {
@@ -56,6 +58,8 @@ impl HexViewWindow {
             cb_endian: Handle::None,
             cb_codepage: Handle::None,
             cb_enabled: Handle::None,
+            cb_show_address: Handle::None,
+            cb_show_interval_names: Handle::None,
         };
 
         let mut vs = vsplitter!("d:f,pos:50%,resize:PreserveLeftPanelSize,minrightwidth:28");
@@ -93,6 +97,8 @@ impl HexViewWindow {
         panel.add(label!("'Codepage:',l:1,t:11,w:16,h:1"));
         w.cb_codepage = panel.add(combobox!("l:18,t:11,r:1,items=[Default,ASCII,CP437,WINDOWS_1252],index:0"));
         w.cb_enabled = panel.add(checkbox!("'&Enabled',l:1,t:13,r:1,checked:true"));
+        w.cb_show_address = panel.add(checkbox!("'Show &address column',l:1,t:14,r:1,checked:true"));
+        w.cb_show_interval_names = panel.add(checkbox!("'Show &IntervalName column',l:1,t:15,r:1"));
         vs.add(vsplitter::Panel::Right, panel);
 
         w.add(vs);
@@ -155,6 +161,12 @@ impl HexViewWindow {
         }
     }
 
+    fn checkbox_checked(&self, handle: Handle<CheckBox>, default: bool) -> bool {
+        self.control(handle)
+            .map(|cb| cb.is_checked())
+            .unwrap_or(default)
+    }
+
     fn update_dependent_controls(&mut self) {
         let grouping_enabled = self.grouping_enabled();
         let endian_enabled = self.endian_enabled();
@@ -176,6 +188,8 @@ impl HexViewWindow {
         let endian_idx = self.combobox_index(self.cb_endian);
         let codepage_idx = self.combobox_index(self.cb_codepage);
         let endian_enabled = self.endian_enabled();
+        let show_address = self.checkbox_checked(self.cb_show_address, true);
+        let show_interval_names = self.checkbox_checked(self.cb_show_interval_names, false);
 
         let repr = match format_idx {
             0 => bufferview::DataRepresentationFormat::Hex(bytes_count_from_index(grouping_idx)),
@@ -209,6 +223,8 @@ impl HexViewWindow {
             bv.set_data_representation_format(repr);
             bv.set_columns_count(columns);
             bv.set_offset_format(offset);
+            bv.set_address_visible(show_address);
+            bv.set_interval_names_visible(show_interval_names);
             if endian_enabled {
                 bv.set_endian(endian);
             }
@@ -229,6 +245,9 @@ impl CheckBoxEvents for HexViewWindow {
     fn on_status_changed(&mut self, handle: Handle<CheckBox>, _checked: bool) -> EventProcessStatus {
         if handle == self.cb_enabled {
             self.update_buffer_enabled();
+        }
+        if handle == self.cb_show_address || handle == self.cb_show_interval_names {
+            self.apply_to_buffer();
         }
         EventProcessStatus::Processed
     }
