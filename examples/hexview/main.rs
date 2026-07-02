@@ -30,7 +30,7 @@ fn codepage_from_index(index: u32) -> bufferview::Codepage {
     }
 }
 
-#[Window(events = ComboBoxEvents+BufferViewEvents<Vec<u8>>)]
+#[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<Vec<u8>>)]
 struct HexViewWindow {
     buffer: Handle<BufferView<Vec<u8>>>,
     lb_pos: Handle<toolbar::Label>,
@@ -40,6 +40,7 @@ struct HexViewWindow {
     cb_grouping: Handle<ComboBox>,
     cb_endian: Handle<ComboBox>,
     cb_codepage: Handle<ComboBox>,
+    cb_enabled: Handle<CheckBox>,
 }
 
 impl HexViewWindow {
@@ -54,6 +55,7 @@ impl HexViewWindow {
             cb_grouping: Handle::None,
             cb_endian: Handle::None,
             cb_codepage: Handle::None,
+            cb_enabled: Handle::None,
         };
 
         let mut vs = vsplitter!("d:f,pos:50%,resize:PreserveLeftPanelSize,minrightwidth:28");
@@ -90,6 +92,7 @@ impl HexViewWindow {
         w.cb_endian = panel.add(combobox!("l:18,t:9,r:1,items=[Little,Big],index:0"));
         panel.add(label!("'Codepage:',l:1,t:11,w:16,h:1"));
         w.cb_codepage = panel.add(combobox!("l:18,t:11,r:1,items=[Default,ASCII,CP437,WINDOWS_1252],index:0"));
+        w.cb_enabled = panel.add(checkbox!("'&Enabled',l:1,t:13,r:1,checked:true"));
         vs.add(vsplitter::Panel::Right, panel);
 
         w.add(vs);
@@ -139,6 +142,17 @@ impl HexViewWindow {
 
     fn grouping_enabled(&self) -> bool {
         self.is_hex_format()
+    }
+
+    fn update_buffer_enabled(&mut self) {
+        let enabled = self
+            .control(self.cb_enabled)
+            .map(|cb| cb.is_checked())
+            .unwrap_or(true);
+        let h_buffer = self.buffer;
+        if let Some(bv) = self.control_mut(h_buffer) {
+            bv.set_enabled(enabled);
+        }
     }
 
     fn update_dependent_controls(&mut self) {
@@ -207,6 +221,15 @@ impl ComboBoxEvents for HexViewWindow {
     fn on_selection_changed(&mut self, _handle: Handle<ComboBox>) -> EventProcessStatus {
         self.update_dependent_controls();
         self.apply_to_buffer();
+        EventProcessStatus::Processed
+    }
+}
+
+impl CheckBoxEvents for HexViewWindow {
+    fn on_status_changed(&mut self, handle: Handle<CheckBox>, _checked: bool) -> EventProcessStatus {
+        if handle == self.cb_enabled {
+            self.update_buffer_enabled();
+        }
         EventProcessStatus::Processed
     }
 }
