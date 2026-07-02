@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits = 8)]
+#[EnumBitFlags(bits = 16)]
 pub enum Flags {
     ScrollBars = 0x0001,
     SearchBar = 0x0002,
@@ -8,6 +8,9 @@ pub enum Flags {
     ShowAddress = 0x0008,
     ShowIntervalNames = 0x0010,
     NoPanelDimming = 0x0020,
+    ShowAsciiStrings = 0x0040,
+    ShowUnicodeStrings = 0x0080,
+    DecodeUTF8Characters = 0x0100,
 }
 
 pub trait BufferAccess {

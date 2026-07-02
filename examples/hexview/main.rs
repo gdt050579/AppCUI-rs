@@ -43,6 +43,7 @@ struct HexViewWindow {
     cb_enabled: Handle<CheckBox>,
     cb_show_address: Handle<CheckBox>,
     cb_show_interval_names: Handle<CheckBox>,
+    cb_decode_utf8: Handle<CheckBox>,
 }
 
 impl HexViewWindow {
@@ -60,6 +61,7 @@ impl HexViewWindow {
             cb_enabled: Handle::None,
             cb_show_address: Handle::None,
             cb_show_interval_names: Handle::None,
+            cb_decode_utf8: Handle::None,
         };
 
         let mut vs = vsplitter!("d:f,pos:50%,resize:PreserveLeftPanelSize,minrightwidth:28");
@@ -67,7 +69,7 @@ impl HexViewWindow {
         let mut bv = BufferView::new(
             buffer,
             layout!("d:f"),
-            bufferview::Flags::ScrollBars | bufferview::Flags::ShowAddress | bufferview::Flags::SearchBar,
+            bufferview::Flags::ScrollBars | bufferview::Flags::ShowAddress | bufferview::Flags::SearchBar | bufferview::Flags::DecodeUTF8Characters,
         );
         bv.set_columns_count(bufferview::ColumnsCount::Fixed(8));
         bv.set_address_width(6);
@@ -99,6 +101,7 @@ impl HexViewWindow {
         w.cb_enabled = panel.add(checkbox!("'&Enabled',l:1,t:13,r:1,checked:true"));
         w.cb_show_address = panel.add(checkbox!("'Show &address column',l:1,t:14,r:1,checked:true"));
         w.cb_show_interval_names = panel.add(checkbox!("'Show &IntervalName column',l:1,t:15,r:1"));
+        w.cb_decode_utf8 = panel.add(checkbox!("'Decode UTF-&8 characters in Char view mode',l:1,t:16,r:1,checked:true"));
         vs.add(vsplitter::Panel::Right, panel);
 
         w.add(vs);
@@ -190,6 +193,7 @@ impl HexViewWindow {
         let endian_enabled = self.endian_enabled();
         let show_address = self.checkbox_checked(self.cb_show_address, true);
         let show_interval_names = self.checkbox_checked(self.cb_show_interval_names, false);
+        let decode_utf8 = self.checkbox_checked(self.cb_decode_utf8, true);
 
         let repr = match format_idx {
             0 => bufferview::DataRepresentationFormat::Hex(bytes_count_from_index(grouping_idx)),
@@ -225,6 +229,7 @@ impl HexViewWindow {
             bv.set_offset_format(offset);
             bv.set_address_visible(show_address);
             bv.set_interval_names_visible(show_interval_names);
+            bv.set_decode_utf8(decode_utf8);
             if endian_enabled {
                 bv.set_endian(endian);
             }
@@ -246,7 +251,7 @@ impl CheckBoxEvents for HexViewWindow {
         if handle == self.cb_enabled {
             self.update_buffer_enabled();
         }
-        if handle == self.cb_show_address || handle == self.cb_show_interval_names {
+        if handle == self.cb_show_address || handle == self.cb_show_interval_names || handle == self.cb_decode_utf8 {
             self.apply_to_buffer();
         }
         EventProcessStatus::Processed

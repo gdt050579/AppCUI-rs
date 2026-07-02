@@ -196,6 +196,17 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.intervals.set(intervals);
         self.paint_buffer();
     }
+    pub fn set_decode_utf8(&mut self, decode_utf8: bool) {
+        if decode_utf8 == self.flags.contains(Flags::DecodeUTF8Characters) {
+            return;
+        }
+        if decode_utf8 {
+            self.flags.set(Flags::DecodeUTF8Characters);
+        } else {
+            self.flags.remove(Flags::DecodeUTF8Characters);
+        }
+        self.paint_buffer();
+    }
     /// Returns the current selection as a half-open byte range `[start, end)`, or `None` if nothing is selected.
     #[inline(always)]
     pub fn selection(&self) -> Option<(u64, u64)> {
@@ -317,16 +328,64 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             surface.write_ascii(dif as i32, y, &buf[pos..24], attr, false);
         }
     }
+    fn decode_utf8(&self, pos: u64, b: u8) -> Option<(char, u8)> {
+        let seq_len: usize = if b & 0b1110_0000 == 0b1100_0000 {
+            2
+        } else if b & 0b1111_0000 == 0b1110_0000 {
+            3
+        } else if b & 0b1111_1000 == 0b1111_0000 {
+            4
+        } else {
+            return None;
+        };
+    
+        let mut bytes = [0u8; 4];
+        bytes[0] = b;
+    
+        for i in 1..seq_len {
+            match self.buffer.byte(pos + i as u64) {
+                Some(cont) if (cont & 0b1100_0000) == 0b1000_0000 => {
+                    bytes[i] = cont;
+                }
+                _ => return None,
+            }
+        }
+    
+        let s = std::str::from_utf8(&bytes[..seq_len]).ok()?;
+        let ch = s.chars().next()?;
+    
+        Some((ch, seq_len as u8))
+    }
     fn write_chars(&mut self, pos: u64) {
         let mut x = 0;
         let mut y = 0;
         let w = self.repr.columns_count as i32;
         let h = self.repr.rows_count as i32;
         let mut pos = pos;
+        let decode_utf8 = self.flags.contains(Flags::DecodeUTF8Characters);
+        let enph_attr_1 = self.theme().text.enphasized_1;
+        let enph_attr_2 = self.theme().text.enphasized_2;
         while (pos < self.buffer.len()) && (y < h) {
             let b = self.buffer.byte(pos).unwrap_or(0);
             if !self.current_segment.contains(pos) {
                 self.update_current_segment(pos);
+            }
+            if decode_utf8 && b >= 0x80 {
+                if let Some((ch, len)) = self.decode_utf8(pos, b) {
+                    for i in 0..len {
+                        let c = if i==0 { ch } else { ' ' };
+                        self.buf_surface.write_char(x, y, Character::with_attributes(c, enph_attr_1));
+                        x += 1;
+                        pos += 1;
+                        if x >= w {
+                            x = 0;
+                            y += 1;
+                            if y >= h {
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             let ch = self.cp.get(b);
             self.buf_surface
@@ -703,10 +762,20 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                         };
                         Self::write_interval_name(surface, attr, int.name.as_str(), self.interval_name_width as u32, x, y);
                     } else {
-                        surface.fill_horizontal_line_with_size(x, y, self.interval_name_width as u32, Character::with_attributes('-', theme.text.inactive));
+                        surface.fill_horizontal_line_with_size(
+                            x,
+                            y,
+                            self.interval_name_width as u32,
+                            Character::with_attributes('-', theme.text.inactive),
+                        );
                     }
                 } else {
-                    surface.fill_horizontal_line_with_size(x, y, self.interval_name_width as u32, Character::with_attributes('-', theme.text.inactive));
+                    surface.fill_horizontal_line_with_size(
+                        x,
+                        y,
+                        self.interval_name_width as u32,
+                        Character::with_attributes('-', theme.text.inactive),
+                    );
                 }
             }
             start += self.repr.columns_count as u64 * self.repr.format.bytes_count() as u64;
@@ -722,7 +791,11 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 self.addr_width as i32,
                 0,
                 bottom,
-                if self.flags.contains(Flags::ShowIntervalNames) { LineType::Single } else { LineType::Double },
+                if self.flags.contains(Flags::ShowIntervalNames) {
+                    LineType::Single
+                } else {
+                    LineType::Double
+                },
                 self.separator_attr(theme, Separator::Address),
             );
             x += (1 + self.addr_width) as i32;
@@ -752,7 +825,11 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             return Some(Separator::Address);
         }
         if self.flags.contains(Flags::ShowIntervalNames) {
-            let base = if self.flags.contains(Flags::ShowAddress) { self.addr_width as i32 + 1 } else { 0 };
+            let base = if self.flags.contains(Flags::ShowAddress) {
+                self.addr_width as i32 + 1
+            } else {
+                0
+            };
             if x == base + self.interval_name_width as i32 {
                 return Some(Separator::IntervalName);
             }
@@ -806,7 +883,11 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let width = match separator {
             Separator::Address => x.max(1) as u32,
             Separator::IntervalName => {
-                let base = if self.flags.contains(Flags::ShowAddress) { self.addr_width as i32 + 1 } else { 0 };
+                let base = if self.flags.contains(Flags::ShowAddress) {
+                    self.addr_width as i32 + 1
+                } else {
+                    0
+                };
                 (x - base).max(1) as u32
             }
         };
