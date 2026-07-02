@@ -1,5 +1,5 @@
-use super::format::*;
 use super::events::EventData;
+use super::format::*;
 use super::initialization_flags::{BufferAccess, Flags};
 use super::output_buffer::OutputBuffer;
 use super::{Codepage, Interval, IntervalSet, Segment, Selection};
@@ -491,7 +491,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         if self.flags.contains(Flags::HideHeader) {
             return;
         }
-        let attr = theme.header.text.normal;
+        let has_focus = self.has_focus();
+        let attr = match () {
+            _ if !self.is_enabled() => theme.header.text.inactive,
+            _ if has_focus => theme.header.text.focused,
+            _ => theme.header.text.normal,
+        };
         surface.fill_horizontal_line_with_size(0, 0, self.size().width, Character::with_attributes(' ', attr));
 
         let border_width = self.border_width() as i32;
@@ -522,14 +527,18 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 surface.write_ascii(x, 0, &buf[..output_len as usize], attr, false);
                 x += (display_chars + 1) as i32;
             }
-            if let Some(panel_attr) = self.header_panel_attr(theme, ActivePanel::DataRepresentation) {
-                surface.fill_horizontal_line(hex_start, 0, x, Character::with_attributes(0, panel_attr));
+            if has_focus {
+                if let Some(panel_attr) = self.header_panel_attr(theme, ActivePanel::DataRepresentation) {
+                    surface.fill_horizontal_line(hex_start, 0, x, Character::with_attributes(0, panel_attr));
+                }
             }
             x += 3;
             let char_start = x;
             surface.write_string(x, 0, "Characters", attr, false);
-            if let Some(panel_attr) = self.header_panel_attr(theme, ActivePanel::Char) {
-                surface.fill_horizontal_line(char_start - 1, 0, right, Character::with_attributes(0, panel_attr));
+            if has_focus {
+                if let Some(panel_attr) = self.header_panel_attr(theme, ActivePanel::Char) {
+                    surface.fill_horizontal_line(char_start - 1, 0, right, Character::with_attributes(0, panel_attr));
+                }
             }
         } else {
             surface.write_string(data_x, 0, "Characters", attr, false);
@@ -570,6 +579,78 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             Some(ActivePanel::DataRepresentation)
         }
     }
+    fn paint_cursor(&self, surface: &mut Surface, theme: &Theme, border_width: i32, top: i32) {
+        if self.pos >= self.start_view {
+            let h_offset = self.h_offset as i32;
+            let unit = self.repr.format.bytes_count();
+            let dif = (self.pos - self.start_view) / unit as u64;
+            let column = (dif % self.repr.columns_count as u64) as i32;
+            let row = (dif / self.repr.columns_count as u64) as i32 + top;
+            let active_attr = theme.list_current_item.focus;
+            // the panel that does not hold the cursor is marked with a dimmed attribute
+            let inactive_attr = theme.list_current_item.over_inactive;
+            if self.repr.format.is_char() {
+                let x = border_width + column - h_offset;
+                surface.write_char(x, row, Character::with_attributes(0, active_attr));
+            } else {
+                let len = self.repr.format.display_chars() as i32;
+                let byte_in_element = ((self.pos - self.start_view) % unit as u64) as i32;
+                let hex_x = border_width + column * (len + 1) - h_offset;
+                let char_block_x = border_width + self.repr.columns_count as i32 * (len + 1) + column * unit as i32 + 4 - h_offset;
+                match self.active_panel {
+                    ActivePanel::DataRepresentation => {
+                        // active hex element + dimmed mirror over all of its bytes in the character part
+                        surface.fill_horizontal_line_with_size(hex_x, row, (len + 2) as u32, Character::with_attributes(0, active_attr));
+                        surface.fill_horizontal_line_with_size(char_block_x, row, unit as u32, Character::with_attributes(0, inactive_attr));
+                    }
+                    ActivePanel::Char => {
+                        // active single byte in the character part + dimmed mirror over its hex element
+                        surface.fill_horizontal_line_with_size(hex_x, row, (len + 2) as u32, Character::with_attributes(0, inactive_attr));
+                        surface.write_char(char_block_x + byte_in_element, row, Character::with_attributes(0, active_attr));
+                    }
+                }
+            }
+        }
+    }
+    fn paint_selection(&self, surface: &mut Surface, theme: &Theme, border_width: i32, top: i32) {
+        if let Some((sel_start, sel_end)) = self.selection.range() {
+            let h_offset = self.h_offset as i32;
+            let cols = self.repr.columns_count as u64;
+            let rows = self.repr.rows_count as u64;
+            let bytes_count = self.repr.format.bytes_count() as u64;
+            let view_end = self.start_view.saturating_add(cols * rows * bytes_count);
+            let from = sel_start.max(self.start_view);
+            let to = sel_end.min(view_end).min(self.buffer.len());
+            let sel_ch = if self.comp.is_in_edit_mode() {
+                Character::with_attributes(0, theme.list_current_item.over_selection)
+            } else {
+                Character::with_attributes(0, theme.list_current_item.selected)
+            };
+            let len = self.repr.format.display_chars() as i32;
+            let char_base = self.repr.columns_count as i32 * (len + 1) + 4;
+            let mut pos = from;
+            while pos < to {
+                let dif = pos - self.start_view;
+                let element = dif / bytes_count;
+                let column = (element % cols) as i32;
+                let row = (element / cols) as i32 + top;
+                let byte_in_element = (dif % bytes_count) as i32;
+                if self.repr.format.is_char() {
+                    let x = border_width + column - h_offset;
+                    surface.write_char(x, row, sel_ch);
+                } else {
+                    // highlight the whole hex cell once per element, and the exact byte in the char part
+                    if byte_in_element == 0 {
+                        let x = border_width + column * (len + 1) - h_offset;
+                        surface.fill_horizontal_line_with_size(x, row, (len + 1) as u32, sel_ch);
+                    }
+                    let xc = border_width + char_base + column * bytes_count as i32 + byte_in_element - h_offset;
+                    surface.write_char(xc, row, sel_ch);
+                }
+                pos += 1;
+            }
+        }
+    }
     fn paint_border(&self, surface: &mut Surface, theme: &Theme, top: i32) {
         if !self.flags.contains_one(Flags::ShowAddress | Flags::ShowLabels) {
             return;
@@ -596,7 +677,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             y += 1;
         }
         let mut x = 0;
-        let bottom = self.size().height as i32;
+        let bottom = (self.size().height as i32).saturating_sub(if self.has_focus() { 1 } else { 0 });
         if self.addr_width > 0 {
             surface.draw_vertical_line(
                 self.addr_width as i32,
@@ -693,7 +774,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.set_separator_width(separator, width)
     }
     fn separator_attr(&self, theme: &Theme, separator: Separator) -> CharAttribute {
-        if self.selected_separator == Some(separator) {
+        if !self.is_enabled() {
+            theme.lines.inactive
+        } else if self.selected_separator == Some(separator) {
             theme.lines.pressed_or_selected
         } else if self.hovered_separator == Some(separator) {
             theme.lines.hovered
@@ -1120,95 +1203,34 @@ impl<T: BufferAccess + 'static> BufferView<T> {
 impl<T: BufferAccess + 'static> OnPaint for BufferView<T> {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let top = if self.flags.contains(Flags::HideHeader) { 0 } else { 1 };
-        // header border columns stay fixed; data/character header columns scroll with h_offset
-        self.paint_header(surface, theme);
-        self.paint_border(surface, theme, top);
+        let has_focus = self.has_focus();
         let border_width = self.border_width() as i32;
         let h_offset = self.h_offset as i32;
         let size = self.size();
-        // clip the data area so that the horizontally scrolled buffer does not overwrite the fixed border
+
+        self.paint_header(surface, theme);
+        self.paint_border(surface, theme, top);
+
         surface.set_relative_clip(border_width, top, size.width as i32 - 1, size.height as i32 - 1);
-        if self.comp.is_in_edit_mode() {
-            // draw the surface but dimmed
-            let attr = theme.text.inactive;
+        let attr_overwrite = match () {
+            _ if !self.is_enabled() => Some(theme.text.inactive),
+            _ if self.comp.is_in_edit_mode() => Some(theme.text.inactive),
+            _ if !has_focus => Some(theme.text.normal),
+            _ => None,
+        };
+        if let Some(attr) = attr_overwrite {
             surface.draw_surface_with_transform(border_width - h_offset, top, &self.buf_surface, |ch| {
                 Character::with_attributes(ch.code, attr)
             });
         } else {
             surface.draw_surface(border_width - h_offset, top, &self.buf_surface);
         }
-        // selection overlay: recolor (char code 0 keeps the glyph, only changes the attribute)
-        // the cells of every selected byte that is currently visible, in both the data and char columns
-        if let Some((sel_start, sel_end)) = self.selection.range() {
-            let cols = self.repr.columns_count as u64;
-            let rows = self.repr.rows_count as u64;
-            let bytes_count = self.repr.format.bytes_count() as u64;
-            let view_end = self.start_view.saturating_add(cols * rows * bytes_count);
-            let from = sel_start.max(self.start_view);
-            let to = sel_end.min(view_end).min(self.buffer.len());
-            let sel_ch = if self.comp.is_in_edit_mode() {
-                Character::with_attributes(0, theme.list_current_item.over_selection)
-            } else {
-                Character::with_attributes(0, theme.list_current_item.selected)
-            };
-            let len = self.repr.format.display_chars() as i32;
-            let char_base = self.repr.columns_count as i32 * (len + 1) + 4;
-            let mut pos = from;
-            while pos < to {
-                let dif = pos - self.start_view;
-                let element = dif / bytes_count;
-                let column = (element % cols) as i32;
-                let row = (element / cols) as i32 + top;
-                let byte_in_element = (dif % bytes_count) as i32;
-                if self.repr.format.is_char() {
-                    let x = border_width + column - h_offset;
-                    surface.write_char(x, row, sel_ch);
-                } else {
-                    // highlight the whole hex cell once per element, and the exact byte in the char part
-                    if byte_in_element == 0 {
-                        let x = border_width + column * (len + 1) - h_offset;
-                        surface.fill_horizontal_line_with_size(x, row, (len + 1) as u32, sel_ch);
-                    }
-                    let xc = border_width + char_base + column * bytes_count as i32 + byte_in_element - h_offset;
-                    surface.write_char(xc, row, sel_ch);
-                }
-                pos += 1;
-            }
+        if has_focus {
+            self.paint_selection(surface, theme, border_width, top);
+            self.paint_cursor(surface, theme, border_width, top);
+            surface.reset_clip();
+            self.comp.paint(surface, theme, &self.base);
         }
-        // convert self.pos to column and row, knowing that the view starts form self.start_view
-        if self.pos >= self.start_view {
-            let unit = self.repr.format.bytes_count();
-            let dif = (self.pos - self.start_view) / unit as u64;
-            let column = (dif % self.repr.columns_count as u64) as i32;
-            let row = (dif / self.repr.columns_count as u64) as i32 + top;
-            let active_attr = theme.list_current_item.focus;
-            // the panel that does not hold the cursor is marked with a dimmed attribute
-            let inactive_attr = theme.list_current_item.over_inactive;
-            if self.repr.format.is_char() {
-                let x = border_width + column - h_offset;
-                surface.write_char(x, row, Character::with_attributes(0, active_attr));
-            } else {
-                let len = self.repr.format.display_chars() as i32;
-                let byte_in_element = ((self.pos - self.start_view) % unit as u64) as i32;
-                let hex_x = border_width + column * (len + 1) - h_offset;
-                let char_block_x = border_width + self.repr.columns_count as i32 * (len + 1) + column * unit as i32 + 4 - h_offset;
-                match self.active_panel {
-                    ActivePanel::DataRepresentation => {
-                        // active hex element + dimmed mirror over all of its bytes in the character part
-                        surface.fill_horizontal_line_with_size(hex_x, row, (len + 2) as u32, Character::with_attributes(0, active_attr));
-                        surface.fill_horizontal_line_with_size(char_block_x, row, unit as u32, Character::with_attributes(0, inactive_attr));
-                    }
-                    ActivePanel::Char => {
-                        // active single byte in the character part + dimmed mirror over its hex element
-                        surface.fill_horizontal_line_with_size(hex_x, row, (len + 2) as u32, Character::with_attributes(0, inactive_attr));
-                        surface.write_char(char_block_x + byte_in_element, row, Character::with_attributes(0, active_attr));
-                    }
-                }
-            }
-        }
-        surface.reset_clip();
-        // scrollbars & search bar are drawn on top, outside of the data clip area
-        self.comp.paint(surface, theme, &self.base);
     }
 }
 
