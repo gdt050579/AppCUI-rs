@@ -683,6 +683,8 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         let mut start = self.start_view;
         let mut y = top;
+        let has_focus = self.has_focus();
+        let is_in_edit_mode = self.comp.is_in_edit_mode();
         for _ in 0..self.repr.rows_count {
             let mut x = 0;
             if self.flags.contains(Flags::ShowAddress) {
@@ -690,8 +692,19 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 x += (1 + self.addr_width) as i32;
             }
             if self.flags.contains(Flags::ShowIntervalNames) {
-                if let Some(name) = self.interval_name_at(start) {
-                    Self::write_interval_name(surface, theme.text.normal, name, self.interval_name_width as u32, x, y);
+                let segment = self.intervals.pos_to_segment(start, self.buffer.len());
+                if segment.exists() {
+                    if let Some(int) = self.intervals.get(segment.index) {
+                        let attr = match () {
+                            _ if !self.is_enabled() => theme.text.inactive,
+                            _ if is_in_edit_mode => theme.text.inactive,
+                            _ if has_focus => int.attr,
+                            _ => theme.text.normal,
+                        };
+                        Self::write_interval_name(surface, attr, int.name.as_str(), self.interval_name_width as u32, x, y);
+                    } else {
+                        surface.fill_horizontal_line_with_size(x, y, self.interval_name_width as u32, Character::with_attributes('-', theme.text.inactive));
+                    }
                 } else {
                     surface.fill_horizontal_line_with_size(x, y, self.interval_name_width as u32, Character::with_attributes('-', theme.text.inactive));
                 }
