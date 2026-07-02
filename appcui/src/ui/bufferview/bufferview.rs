@@ -196,6 +196,21 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.intervals.set(intervals);
         self.paint_buffer();
     }
+    pub fn set_ascii_strings_visible(&mut self, visible: bool) {
+        if visible == self.flags.contains(Flags::ShowAsciiStrings) {
+            return;
+        }
+        if visible {
+            self.flags.set(Flags::ShowAsciiStrings);
+        } else {
+            self.flags.remove(Flags::ShowAsciiStrings);
+        }
+        self.paint_buffer();
+    }
+    #[inline(always)]
+    pub fn is_ascii_strings_visible(&self) -> bool {
+        self.flags.contains(Flags::ShowAsciiStrings)
+    }
     pub fn set_decode_utf8(&mut self, decode_utf8: bool) {
         if decode_utf8 == self.flags.contains(Flags::DecodeUTF8Characters) {
             return;
@@ -328,6 +343,34 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             surface.write_ascii(dif as i32, y, &buf[pos..24], attr, false);
         }
     }
+    #[inline(always)]
+    fn is_ascii_char(&self, b: u8) -> bool {
+        match b {
+            b'A' ..= b'Z' | b'a' ..= b'z' | b'0' ..= b'9' => true,
+            b'\t' | b'\n' | b'\r' | b' ' => true,
+            b'<' | b'>' | b'=' | b'+' | b'-' | b'*' | b'/' | b'|' | b'\\' | b'\"' | b'.' | b',' | b';' | b':' | b'!' | b'?' | b'(' | b')' | b'[' | b']' => true,
+            _ => false, 
+        }
+    }
+    fn decode_ascii(&self, pos: u64, b: u8) -> Option<u32> {
+        let mut len = 0;
+        let mut pos = pos;
+        let size = self.size();
+        let end = pos.saturating_add(size.width as u64 * size.height as u64).min(self.buffer.len());
+        while pos < end {
+            if let Some(b) = self.buffer.byte(pos) {
+                if self.is_ascii_char(b) {
+                    len += 1;
+                    pos += 1;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        if len > 3 { Some(len) } else { None }
+    }
     fn decode_utf8(&self, pos: u64, b: u8) -> Option<(char, u8)> {
         let seq_len: usize = if b & 0b1110_0000 == 0b1100_0000 {
             2
@@ -363,6 +406,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let h = self.repr.rows_count as i32;
         let mut pos = pos;
         let decode_utf8 = self.flags.contains(Flags::DecodeUTF8Characters);
+        let show_ascii = self.flags.contains(Flags::ShowAsciiStrings);
         let enph_attr_1 = self.theme().text.enphasized_1;
         let enph_attr_2 = self.theme().text.enphasized_2;
         while (pos < self.buffer.len()) && (y < h) {
@@ -375,6 +419,23 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     for i in 0..len {
                         let c = if i==0 { ch } else { ' ' };
                         self.buf_surface.write_char(x, y, Character::with_attributes(c, enph_attr_1));
+                        x += 1;
+                        pos += 1;
+                        if x >= w {
+                            x = 0;
+                            y += 1;
+                            if y >= h {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if show_ascii && self.is_ascii_char(b) {
+                if let Some(len) = self.decode_ascii(pos, b) {
+                    for _ in 0..len {
+                        let c = self.buffer.byte(pos).unwrap_or(b' ');
+                        self.buf_surface.write_char(x, y, Character::with_attributes(c, enph_attr_2));
                         x += 1;
                         pos += 1;
                         if x >= w {

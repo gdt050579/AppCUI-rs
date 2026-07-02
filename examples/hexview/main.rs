@@ -3,7 +3,9 @@ use appcui::prelude::*;
 fn build_buffer() -> Vec<u8> {
     let mut data: Vec<u8> = Vec::new();
 
-    data.extend_from_slice(&[0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]);
+    data.extend_from_slice(&[
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+    ]);
     data.extend_from_slice(b"Hello, AppCUI! This is a hex view example.\n");
     data.extend_from_slice("Unicode: ăîșțâ Ω 你好 こんにちは €$ 😀\n".as_bytes());
     data.extend_from_slice(&[0x00, 0x01, 0x02, 0x07, 0x08, 0x09, 0x0A, 0x0D, 0x1B, 0x7F]);
@@ -43,6 +45,7 @@ struct HexViewWindow {
     cb_enabled: Handle<CheckBox>,
     cb_show_address: Handle<CheckBox>,
     cb_show_interval_names: Handle<CheckBox>,
+    cb_show_ascii_strings: Handle<CheckBox>,
     cb_decode_utf8: Handle<CheckBox>,
 }
 
@@ -61,6 +64,7 @@ impl HexViewWindow {
             cb_enabled: Handle::None,
             cb_show_address: Handle::None,
             cb_show_interval_names: Handle::None,
+            cb_show_ascii_strings: Handle::None,
             cb_decode_utf8: Handle::None,
         };
 
@@ -69,7 +73,11 @@ impl HexViewWindow {
         let mut bv = BufferView::new(
             buffer,
             layout!("d:f"),
-            bufferview::Flags::ScrollBars | bufferview::Flags::ShowAddress | bufferview::Flags::SearchBar | bufferview::Flags::DecodeUTF8Characters,
+            bufferview::Flags::ScrollBars
+                | bufferview::Flags::ShowAddress
+                | bufferview::Flags::SearchBar
+                | bufferview::Flags::DecodeUTF8Characters
+                | bufferview::Flags::ShowAsciiStrings,
         );
         bv.set_columns_count(bufferview::ColumnsCount::Fixed(8));
         bv.set_address_width(6);
@@ -101,7 +109,8 @@ impl HexViewWindow {
         w.cb_enabled = panel.add(checkbox!("'&Enabled',l:1,t:13,r:1,checked:true"));
         w.cb_show_address = panel.add(checkbox!("'Show &address column',l:1,t:14,r:1,checked:true"));
         w.cb_show_interval_names = panel.add(checkbox!("'Show &IntervalName column',l:1,t:15,r:1"));
-        w.cb_decode_utf8 = panel.add(checkbox!("'Decode UTF-&8 characters in Char view mode',l:1,t:16,r:1,checked:true"));
+        w.cb_show_ascii_strings = panel.add(checkbox!("'Show &ASCII strings in Char view mode',l:1,t:16,r:1,checked:true"));
+        w.cb_decode_utf8 = panel.add(checkbox!("'Decode UTF-&8 characters in Char view mode',l:1,t:17,r:1,checked:true"));
         vs.add(vsplitter::Panel::Right, panel);
 
         w.add(vs);
@@ -115,11 +124,8 @@ impl HexViewWindow {
         w
     }
 
-    fn  update_position_label(&mut self) {
-        let pos = self
-            .control(self.buffer)
-            .map(|bv| bv.current_pos())
-            .unwrap_or(0);
+    fn update_position_label(&mut self) {
+        let pos = self.control(self.buffer).map(|bv| bv.current_pos()).unwrap_or(0);
         let text = format!("{pos:04X}");
         let h = self.lb_pos;
         if let Some(label) = self.toolbar().get_mut(h) {
@@ -128,9 +134,7 @@ impl HexViewWindow {
     }
 
     fn combobox_index(&self, handle: Handle<ComboBox>) -> u32 {
-        self.control(handle)
-            .and_then(|cb| cb.index())
-            .unwrap_or(0)
+        self.control(handle).and_then(|cb| cb.index()).unwrap_or(0)
     }
 
     fn is_hex_format(&self) -> bool {
@@ -154,10 +158,7 @@ impl HexViewWindow {
     }
 
     fn update_buffer_enabled(&mut self) {
-        let enabled = self
-            .control(self.cb_enabled)
-            .map(|cb| cb.is_checked())
-            .unwrap_or(true);
+        let enabled = self.control(self.cb_enabled).map(|cb| cb.is_checked()).unwrap_or(true);
         let h_buffer = self.buffer;
         if let Some(bv) = self.control_mut(h_buffer) {
             bv.set_enabled(enabled);
@@ -165,9 +166,7 @@ impl HexViewWindow {
     }
 
     fn checkbox_checked(&self, handle: Handle<CheckBox>, default: bool) -> bool {
-        self.control(handle)
-            .map(|cb| cb.is_checked())
-            .unwrap_or(default)
+        self.control(handle).map(|cb| cb.is_checked()).unwrap_or(default)
     }
 
     fn update_dependent_controls(&mut self) {
@@ -193,6 +192,7 @@ impl HexViewWindow {
         let endian_enabled = self.endian_enabled();
         let show_address = self.checkbox_checked(self.cb_show_address, true);
         let show_interval_names = self.checkbox_checked(self.cb_show_interval_names, false);
+        let show_ascii_strings = self.checkbox_checked(self.cb_show_ascii_strings, true);
         let decode_utf8 = self.checkbox_checked(self.cb_decode_utf8, true);
 
         let repr = match format_idx {
@@ -229,6 +229,7 @@ impl HexViewWindow {
             bv.set_offset_format(offset);
             bv.set_address_visible(show_address);
             bv.set_interval_names_visible(show_interval_names);
+            bv.set_ascii_strings_visible(show_ascii_strings);
             bv.set_decode_utf8(decode_utf8);
             if endian_enabled {
                 bv.set_endian(endian);
@@ -251,7 +252,11 @@ impl CheckBoxEvents for HexViewWindow {
         if handle == self.cb_enabled {
             self.update_buffer_enabled();
         }
-        if handle == self.cb_show_address || handle == self.cb_show_interval_names || handle == self.cb_decode_utf8 {
+        if handle == self.cb_show_address
+            || handle == self.cb_show_interval_names
+            || handle == self.cb_show_ascii_strings
+            || handle == self.cb_decode_utf8
+        {
             self.apply_to_buffer();
         }
         EventProcessStatus::Processed
