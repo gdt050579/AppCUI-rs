@@ -1233,10 +1233,18 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             }),
         });
     }
-    fn search(&mut self) {
+    fn search(&mut self, next: bool) {
+        if self.buffer.len() == 0 {
+            return;
+        }
+        let start_search_pos = if next {
+            self.pos.saturating_add(1) % self.buffer.len()
+        } else {
+            self.pos
+        };
         let text = self.comp.search_text();
         if super::search_parser::parse(text, &mut self.search_bytes).is_ok() {
-            if let Some(pos) = self.search_bytes_from_offset(self.pos) {
+            if let Some(pos) = self.search_bytes_from_offset(start_search_pos) {
                 let end = pos + self.search_bytes.len() as u64 - 1;
                 if !self.goto_position(pos, false, true) {
                     self.paint_buffer();
@@ -1309,6 +1317,22 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             ActivePanel::Char => ActivePanel::DataRepresentation,
         };
         self.set_active_panel(other);
+    }
+    fn process_search_key(&mut self, key: Key, character: char) -> EventProcessStatus {
+        if self.comp.process_key_pressed(key, character) {
+            self.search(false);
+            return EventProcessStatus::Processed;
+        }
+        if self.comp.is_in_edit_mode() {
+            match key.value() {
+                key!("Enter") => {
+                    self.search(true);
+                    return EventProcessStatus::Processed;
+                }
+                _ => {}
+            }
+        }
+        EventProcessStatus::Ignored
     }
     fn process_navigation_key(&mut self, key: Key) -> EventProcessStatus {
         let select = key.modifier.contains(KeyModifier::Shift);
@@ -1504,8 +1528,7 @@ impl<T: BufferAccess + 'static> OnKeyPressed for BufferView<T> {
         if self.process_selector_key(key) == EventProcessStatus::Processed {
             return EventProcessStatus::Processed;
         }
-        if self.comp.process_key_pressed(key, character) {
-            self.search();
+        if self.process_search_key(key, character) == EventProcessStatus::Processed {
             return EventProcessStatus::Processed;
         }
         let status = self.process_navigation_key(key);
