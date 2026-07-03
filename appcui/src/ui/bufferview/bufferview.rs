@@ -476,118 +476,126 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let enph_attr_2 = self.theme().text.enphasized_2;
         let enph_attr_3 = self.theme().text.enphasized_3;
         while cwp.is_valid() {
-            let b = self.buffer.byte(cwp.pos).unwrap_or(0);
-            if !self.current_segment.contains(cwp.pos) {
-                self.update_current_segment(cwp.pos);
-            }
-            if decode_utf8 && b >= 0x80 {
-                if let Some((ch, len)) = self.decode_utf8(cwp.pos, b) {
-                    for i in 0..len {
-                        let c = if i == 0 { ch } else { ' ' };
-                        self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_1));
-                        if !cwp.move_cursor(1) {
-                            break;
-                        }
-                    }
-                    continue;
+            if let Some(b) = self.buffer.byte(cwp.pos) {
+                if !self.current_segment.contains(cwp.pos) {
+                    self.update_current_segment(cwp.pos);
                 }
-            }
-            if show_ascii && Self::is_ascii_char(b) {
-                if let Some(len) = self.decode_ascii(cwp.pos) {
-                    for _ in 0..len {
-                        let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
-                        self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_2));
-                        if !cwp.move_cursor(1) {
-                            break;
-                        }
-                    }
-                    continue;
-                }
-            }
-            if show_unicode && Self::is_ascii_char(b) {
-                if let Some(len) = self.decode_unicode(cwp.pos) {
-                    for _ in 0..len {
-                        let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
-                        self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_3));
-                        if !cwp.move_cursor(2) {
-                            break;
-                        }
-                    }
-                    if cwp.is_valid() {
-                        let c = Character::with_attributes(' ', enph_attr_3);
-                        for _ in 0..len {
-                            self.buf_surface.write_char(cwp.x, cwp.y, c);
-                            if !cwp.move_cursor(0) {
+                if decode_utf8 && b >= 0x80 {
+                    if let Some((ch, len)) = self.decode_utf8(cwp.pos, b) {
+                        for i in 0..len {
+                            let c = if i == 0 { ch } else { ' ' };
+                            self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_1));
+                            if !cwp.move_cursor(1) {
                                 break;
                             }
                         }
+                        continue;
                     }
-                    continue;
                 }
+                if show_ascii && Self::is_ascii_char(b) {
+                    if let Some(len) = self.decode_ascii(cwp.pos) {
+                        for _ in 0..len {
+                            let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
+                            self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_2));
+                            if !cwp.move_cursor(1) {
+                                break;
+                            }
+                        }
+                        continue;
+                    }
+                }
+                if show_unicode && Self::is_ascii_char(b) {
+                    if let Some(len) = self.decode_unicode(cwp.pos) {
+                        for _ in 0..len {
+                            let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
+                            self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_3));
+                            if !cwp.move_cursor(2) {
+                                break;
+                            }
+                        }
+                        if cwp.is_valid() {
+                            let c = Character::with_attributes(' ', enph_attr_3);
+                            for _ in 0..len {
+                                self.buf_surface.write_char(cwp.x, cwp.y, c);
+                                if !cwp.move_cursor(0) {
+                                    break;
+                                }
+                            }
+                        }
+                        continue;
+                    }
+                }
+                let ch = self.cp.get(b);
+                self.buf_surface
+                    .write_char(cwp.x, cwp.y, Character::with_attributes(ch, self.current_segment_attr));
+                cwp.move_cursor(1);
+            } else {
+                // error - unable to reach character / byte
+                self.buf_surface
+                    .write_char(cwp.x, cwp.y, Character::with_attributes('?', self.theme().text.error));
+                cwp.move_cursor(1);
             }
-            let ch = self.cp.get(b);
-            self.buf_surface
-                .write_char(cwp.x, cwp.y, Character::with_attributes(ch, self.current_segment_attr));
-            cwp.move_cursor(1);
         }
     }
-    fn write_line(&mut self, pos: u64, x: i32, y: i32, inactive_data_panel: bool, inactive_char_panel: bool) {
-        let mut x = x + 1;
+    fn write_panels(&mut self, position: u64) {
+        let mut cwp = CharWriterPos::new(self.repr.columns_count as i32, self.repr.rows_count as i32, position, self.buffer.len());
         let mut output = OutputBuffer::new();
-        let mut bytes = [0; 8];
+        let mut bytes = [0; 8]; 
+        let mut chars = [0 as char; 8];
+        let errch = Character::with_attributes('?', self.theme().text.error);
+        let bytes_count = self.repr.format.bytes_count().min(8) as usize; 
+        let display_chars_width = (self.repr.format.display_chars() + 1) as i32;
         let inactive_attr = self.theme().text.inactive;
-        let bytes_count = self.repr.format.bytes_count() as usize;
-        let to_read = bytes_count * self.repr.columns_count as usize;
-        self.buffer.copy(pos, to_read as u16, &mut self.temp_buffer);
-        let mut x_char = x + ((self.repr.format.display_chars() + 1) * self.repr.columns_count as u32 + 3) as i32;
-        let mut pos = pos;
-        if bytes_count == 1 {
-            let min_len = (self.temp_buffer.len() as u64).min(to_read as u64) as usize;
-            for i in 0..min_len {
-                let val = self.temp_buffer[i];
-                if !self.current_segment.contains(pos) {
-                    self.update_current_segment(pos);
-                }
-                bytes[0] = val;
-                self.repr.format.write(bytes, &mut output);
-                let attr = if inactive_data_panel { inactive_attr } else { self.current_segment_attr };
-                self.buf_surface.write_ascii(x, y, output.as_slice(), attr, false);
-                let ch = self.cp.get(val);
-                let attr = if inactive_char_panel { inactive_attr } else { self.current_segment_attr };
-                self.buf_surface.write_char(x_char, y, Character::with_attributes(ch, attr));
-                x += (output.len() as i32) + 1;
-                x_char += 1;
-                pos += 1;
-            }
+        let start_x_char = 1 + ((self.repr.format.display_chars() + 1) * self.repr.columns_count as u32 + 3) as i32;
+        let inactive_data_panel = if self.flags.contains(Flags::NoPanelDimming) {
+            false
         } else {
-            let total = (self.temp_buffer.len()).min(to_read);
+            self.active_panel == ActivePanel::Char
+        };
+        let inactive_char_panel = if self.flags.contains(Flags::NoPanelDimming) {
+            false
+        } else {
+            self.active_panel == ActivePanel::DataRepresentation
+        };        
+     
+        while cwp.is_valid() {
             let mut i = 0;
-            while i < total {
-                if !self.current_segment.contains(pos) {
-                    self.update_current_segment(pos);
-                }
-                let available = (total - i).min(bytes_count);
-                bytes = [0; 8];
-                for k in 0..available {
-                    let val = self.temp_buffer[i + k];
-                    match self.repr.endian {
-                        Endian::Little => bytes[bytes_count - 1 - k] = val,
-                        Endian::Big => bytes[k] = val,
+            let read_ok = loop {
+                if let Some(b) = self.buffer.byte(cwp.pos + i as u64) {
+                    bytes[i] = b;
+                    i += 1;
+                    if i == bytes_count {
+                        break true;
                     }
+                } else {
+                    break false;
+                }
+            };
+            if read_ok {
+                if !self.current_segment.contains(cwp.pos) {
+                    self.update_current_segment(cwp.pos);
                 }
                 self.repr.format.write(bytes, &mut output);
                 let attr = if inactive_data_panel { inactive_attr } else { self.current_segment_attr };
-                self.buf_surface.write_ascii(x, y, output.as_slice(), attr, false);
-                let attr = if inactive_char_panel { inactive_attr } else { self.current_segment_attr };
-                for k in 0..available {
-                    let ch = self.cp.get(self.temp_buffer[i + k]);
-                    self.buf_surface.write_char(x_char, y, Character::with_attributes(ch, attr));
-                    x_char += 1;
+                let x = cwp.x * display_chars_width + 1;
+                self.buf_surface.write_ascii(x, cwp.y, output.as_slice(), attr, false);
+                for i in 0..bytes_count {
+                    chars[i] = self.cp.get(bytes[i]);
                 }
-                x += (output.len() as i32) + 1;
-                i += bytes_count;
-                pos += available as u64;
+                let attr = if inactive_char_panel { inactive_attr } else { self.current_segment_attr };
+                let x = start_x_char + cwp.x;
+                //self.buf_surface.write_string(x, cwp.y, &chars[..bytes_count], attr, false);
+                for i in 0..bytes_count {
+                    self.buf_surface.write_char(x + i as i32, cwp.y, Character::with_attributes(chars[i], attr));
+                }
+            } else {
+                // error - unable to reach byte
+                let x = cwp.x * display_chars_width + 1;
+                self.buf_surface.fill_horizontal_line_with_size(x, cwp.y, self.repr.format.display_chars(), errch);
+                let x = start_x_char + cwp.x;
+                self.buf_surface.fill_horizontal_line_with_size(x, cwp.y, bytes_count as u32, errch);
             }
+            cwp.move_cursor(bytes_count as u64);
         }
     }
     fn update_current_segment(&mut self, pos: u64) {
@@ -604,27 +612,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     }
     fn paint_buffer(&mut self) {
         let attr = self.theme().text.normal;
-        let mut start = self.start_view;
-        let height = self.size().height as i32;
         self.buf_surface.reset(Character::with_attributes(' ', attr));
-        self.update_current_segment(start);
+        self.update_current_segment(self.start_view);
         if self.repr.format.is_char() {
-            self.write_chars(start);
+            self.write_chars(self.start_view);
         } else {
-            let inactive_data_panel = if self.flags.contains(Flags::NoPanelDimming) {
-                false
-            } else {
-                self.active_panel == ActivePanel::Char
-            };
-            let inactive_char_panel = if self.flags.contains(Flags::NoPanelDimming) {
-                false
-            } else {
-                self.active_panel == ActivePanel::DataRepresentation
-            };
-            for y in 0..height {
-                self.write_line(start, 0, y as i32, inactive_data_panel, inactive_char_panel);
-                start += self.repr.columns_count as u64 * self.repr.format.bytes_count() as u64;
-            }
+            self.write_panels(self.start_view);
         }
     }
 

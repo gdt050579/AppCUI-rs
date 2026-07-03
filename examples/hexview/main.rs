@@ -1,18 +1,56 @@
 use appcui::prelude::*;
 
-fn build_buffer() -> Vec<u8> {
-    let mut data: Vec<u8> = Vec::new();
+struct MyBuffer {
+    data: Vec<u8>,
+    start: u64,
+}
+impl MyBuffer {
+    fn new() -> Self {
+        let mut data: Vec<u8> = Vec::new();
 
-    data.extend_from_slice(&[
-        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-    ]);
-    data.extend_from_slice(b"Hello, AppCUI! This is a hex view example.\n");
-    data.extend_from_slice(&[0,0,0,0,0,b'H', 0, b'e', 0, b'l', 0, b'l', 0, b'o', 0, b',', 0, b' ', 0, b'A', 0, b'p', 0, b'p', 0, b'C', 0, b'U', 0, b'I', 0, b'!', 0, b' ', 0, b'T', 0, b'h', 0, b'i', 0, b's', 0, b' ', 0, b'i', 0, b's', 0, b' ', 0, b'a', 0, b' ', 0, b'h', 0, b'e', 0, b'x', 0, b' ', 0, b'v', 0, b'i', 0, b'e', 0, b'w', 0, b' ', 0, b'e', 0, b'x', 0, b'a', 0, b'm', 0, b'p', 0, b'l', 0, b'e', 0, b'.', 0, b'\n']);
-    data.extend_from_slice("Unicode: ăîșțâ Ω 你好 こんにちは €$ 😀\n".as_bytes());
-    data.extend_from_slice(&[0x00, 0x01, 0x02, 0x07, 0x08, 0x09, 0x0A, 0x0D, 0x1B, 0x7F]);
-    data.extend((0u16..=255u16).map(|b| b as u8));
-
-    data
+        data.extend_from_slice(&[
+            0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+        ]);
+        data.extend_from_slice(b"Hello, AppCUI! This is a hex view example.\n");
+        data.extend_from_slice(&[
+            0, 0, 0, 0, 0, b'H', 0, b'e', 0, b'l', 0, b'l', 0, b'o', 0, b',', 0, b' ', 0, b'A', 0, b'p', 0, b'p', 0, b'C', 0, b'U', 0, b'I', 0, b'!',
+            0, b' ', 0, b'T', 0, b'h', 0, b'i', 0, b's', 0, b' ', 0, b'i', 0, b's', 0, b' ', 0, b'a', 0, b' ', 0, b'h', 0, b'e', 0, b'x', 0, b' ', 0,
+            b'v', 0, b'i', 0, b'e', 0, b'w', 0, b' ', 0, b'e', 0, b'x', 0, b'a', 0, b'm', 0, b'p', 0, b'l', 0, b'e', 0, b'.', 0, b'\n',
+        ]);
+        data.extend_from_slice("Unicode: ăîșțâ Ω 你好 こんにちは €$ 😀\n".as_bytes());
+        data.extend_from_slice(&[0x00, 0x01, 0x02, 0x07, 0x08, 0x09, 0x0A, 0x0D, 0x1B, 0x7F]);
+        data.extend((0u16..=255u16).map(|b| b as u8));
+        // add 100 byte that are not accesible
+        let start = data.len() as u64;
+        for _ in 0..100 {
+            data.push(0xFF);
+        }
+        data.extend_from_slice(b"End of the buffer example !\n");
+        Self { data, start }
+    }
+}
+impl BufferAccess for MyBuffer {
+    fn len(&self) -> u64 {
+        self.data.len() as u64
+    }
+    fn byte(&mut self, pos: u64) -> Option<u8> {
+        if (pos < self.data.len() as u64) && ((pos < self.start) || (pos >= (self.start + 100))) {
+            Some(self.data[pos as usize])
+        } else {
+            None
+        }
+    }
+    fn slice(&mut self, pos: u64, len: u16) -> Option<&[u8]> {
+        if pos < self.start {
+            let buf_len = (self.start - pos).min(len as u64) as usize;
+            Some(&self.data[pos as usize..pos as usize + buf_len])
+        } else if (pos >= self.start + 100) && (pos < self.data.len() as u64) {
+            let buf_len = (self.data.len() as u64 - pos).min(len as u64) as usize;
+            Some(&self.data[pos as usize..pos as usize + buf_len])
+        } else {
+            None
+        }
+    }
 }
 
 fn bytes_count_from_index(index: u32) -> bufferview::BytesCount {
@@ -35,7 +73,7 @@ fn codepage_from_index(index: u32) -> bufferview::Codepage {
 
 #[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<Vec<u8>>)]
 struct HexViewWindow {
-    buffer: Handle<BufferView<Vec<u8>>>,
+    buffer: Handle<BufferView<MyBuffer>>,
     lb_pos: Handle<toolbar::Label>,
     cb_format: Handle<ComboBox>,
     cb_columns: Handle<ComboBox>,
@@ -52,7 +90,7 @@ struct HexViewWindow {
 }
 
 impl HexViewWindow {
-    fn new(buffer: Vec<u8>) -> Self {
+    fn new(buffer: MyBuffer) -> Self {
         let mut w = Self {
             base: window!("'HexView',a:c,w:100,h:24,flags:Sizeable"),
             buffer: Handle::None,
@@ -278,9 +316,8 @@ impl BufferViewEvents<Vec<u8>> for HexViewWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let buffer = build_buffer();
     let mut app = App::new().color_schema(false).build()?;
-    app.add_window(HexViewWindow::new(buffer));
+    app.add_window(HexViewWindow::new(MyBuffer::new()));
     app.run();
     Ok(())
 }
