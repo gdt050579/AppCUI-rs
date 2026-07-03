@@ -68,7 +68,6 @@ where
     start_view: u64,
     pos: u64,
     repr: Representation,
-    temp_buffer: Vec<u8>,
     buf_surface: Surface,
     addr_width: u32,
     interval_name_width: u32,
@@ -88,6 +87,7 @@ where
     h_offset: u32,
     active_panel: ActivePanel,
     search_bytes: Vec<u8>,
+    temp_buffer: Vec<u8>,
 }
 
 impl<T: BufferAccess + 'static> BufferView<T> {
@@ -107,7 +107,6 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             start_view: 0,
             pos: 0,
             repr: Representation::new(),
-            temp_buffer: Vec::new(),
             buf_surface: Surface::new(1, 1),
             addr_width: 6,
             interval_name_width: 6,
@@ -127,6 +126,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             h_offset: 0,
             active_panel: ActivePanel::DataRepresentation,
             search_bytes: Vec::new(),
+            temp_buffer: Vec::new(),
         }
     }
     pub fn set_codepage(&mut self, cp: Codepage) {
@@ -394,7 +394,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
     }
     #[inline(always)]
-    fn is_ascii_char(&self, b: u8) -> bool {
+    fn is_ascii_char(b: u8) -> bool {
         match b {
             b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' => true,
             b'\t' | b'\n' | b'\r' | b' ' => true,
@@ -403,14 +403,14 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             _ => false,
         }
     }
-    fn decode_ascii(&self, pos: u64) -> Option<u32> {
+    fn decode_ascii(&mut self, pos: u64) -> Option<u32> {
         let mut len = 0;
         let mut pos = pos;
         let size = self.size();
         let end = pos.saturating_add(size.width as u64 * size.height as u64).min(self.buffer.len());
         while pos < end {
             if let Some(b) = self.buffer.byte(pos) {
-                if self.is_ascii_char(b) {
+                if Self::is_ascii_char(b) {
                     len += 1;
                     pos += 1;
                 } else {
@@ -426,22 +426,23 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             None
         }
     }
-    fn decode_unicode(&self, pos: u64) -> Option<u32> {
+    fn decode_unicode(&mut self, pos: u64) -> Option<u32> {
         let mut len = 0;
         let mut pos = pos;
         let size = self.size();
         let end = pos.saturating_add(size.width as u64 * size.height as u64).min(self.buffer.len());
-        let mut buf = [0u8; 2];
         while pos < end {
-            let n = self.buffer.copy_buffer(pos, 2, &mut buf);
-            if n != 2 {
+            if let Some(slice) = self.buffer.slice(pos, 2) {
+                if slice.len() == 2 {
+                    if (slice[1] != 0) || !Self::is_ascii_char(slice[0]) {
+                        break;
+                    }
+                    pos += 2;
+                    len += 1;
+                }
+            } else {
                 break;
             }
-            if (buf[1] != 0) || !self.is_ascii_char(buf[0]) {
-                break;
-            }
-            pos += 2;
-            len += 1;
         }
         if len > 3 {
             Some(len)
@@ -449,7 +450,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             None
         }
     }
-    fn decode_utf8(&self, pos: u64, b: u8) -> Option<(char, u8)> {
+    fn decode_utf8(&mut self, pos: u64, b: u8) -> Option<(char, u8)> {
         let seq_len: usize = if b & 0b1110_0000 == 0b1100_0000 {
             2
         } else if b & 0b1111_0000 == 0b1110_0000 {
@@ -460,18 +461,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             return None;
         };
 
-        let mut bytes = [0u8; 4];
-        bytes[0] = b;
-
-        for i in 1..seq_len {
-            match self.buffer.byte(pos + i as u64) {
-                Some(cont) if (cont & 0b1100_0000) == 0b1000_0000 => {
-                    bytes[i] = cont;
-                }
-                _ => return None,
-            }
-        }
-
+        let bytes = self.buffer.slice(pos, seq_len as u16)?;
         let s = std::str::from_utf8(&bytes[..seq_len]).ok()?;
         let ch = s.chars().next()?;
 
@@ -502,7 +492,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     continue;
                 }
             }
-            if show_ascii && self.is_ascii_char(b) {
+            if show_ascii && Self::is_ascii_char(b) {
                 if let Some(len) = self.decode_ascii(cwp.pos) {
                     for _ in 0..len {
                         let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
@@ -514,7 +504,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     continue;
                 }
             }
-            if show_unicode && self.is_ascii_char(b) {
+            if show_unicode && Self::is_ascii_char(b) {
                 if let Some(len) = self.decode_unicode(cwp.pos) {
                     for _ in 0..len {
                         let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
@@ -545,13 +535,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let mut x = x + 1;
         let mut output = OutputBuffer::new();
         let mut bytes = [0; 8];
+        let inactive_attr = self.theme().text.inactive;
         let bytes_count = self.repr.format.bytes_count() as usize;
         let to_read = bytes_count * self.repr.columns_count as usize;
-        self.temp_buffer.clear();
-        self.buffer.copy(pos as u64, to_read as u64, &mut self.temp_buffer);
+        self.buffer.copy(pos, to_read as u16, &mut self.temp_buffer);
         let mut x_char = x + ((self.repr.format.display_chars() + 1) * self.repr.columns_count as u32 + 3) as i32;
         let mut pos = pos;
-        let inactive_attr = self.theme().text.inactive;
         if bytes_count == 1 {
             let min_len = (self.temp_buffer.len() as u64).min(to_read as u64) as usize;
             for i in 0..min_len {
@@ -1179,7 +1168,8 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.update_scrollbars();
     }
     #[inline(always)]
-    fn matches_bytes(&self, pos: u64, bytes: &[u8]) -> bool {
+    fn matches_bytes(&mut self, pos: u64) -> bool {
+        let bytes = &self.search_bytes;
         if bytes.is_empty() {
             return true;
         }
@@ -1193,7 +1183,8 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         true
     }
-    fn search_bytes_from_offset(&self, offset: u64, bytes: &[u8]) -> Option<u64> {
+    fn search_bytes_from_offset(&mut self, offset: u64) -> Option<u64> {
+        let bytes = &self.search_bytes;
         if bytes.is_empty() {
             return None;
         }
@@ -1205,7 +1196,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let start_offset = offset % buffer_len;
         for i in 0..buffer_len - bytes_len + 1 {
             let pos = (i + start_offset) % buffer_len;
-            if self.matches_bytes(pos, bytes) {
+            if self.matches_bytes(pos) {
                 return Some(pos);
             }
         }
@@ -1234,7 +1225,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     fn search(&mut self) {
         let text = self.comp.search_text();
         if super::search_parser::parse(text, &mut self.search_bytes).is_ok() {
-            if let Some(pos) = self.search_bytes_from_offset(self.pos, &self.search_bytes) {
+            if let Some(pos) = self.search_bytes_from_offset(self.pos) {
                 let end = pos + self.search_bytes.len() as u64 - 1;
                 if !self.goto_position(pos, false, true) {
                     self.paint_buffer();
