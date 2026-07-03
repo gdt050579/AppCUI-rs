@@ -8,6 +8,10 @@ use flat_string::FlatString;
 
 const MAX_ADDRESS_WIDTH: u32 = 24;
 const MAX_INTERVAL_NAME_WIDTH: u32 = 64;
+#[cfg(target_endian = "little")]
+const NATIVE_ENDIAN: Endian = Endian::Little;
+#[cfg(target_endian = "big")]
+const NATIVE_ENDIAN: Endian = Endian::Big;
 
 /// Identifies one of the two resizable columns (address or interval name) by its vertical separator line.
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -87,7 +91,6 @@ where
     h_offset: u32,
     active_panel: ActivePanel,
     search_bytes: Vec<u8>,
-    temp_buffer: Vec<u8>,
 }
 
 impl<T: BufferAccess + 'static> BufferView<T> {
@@ -121,12 +124,11 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             selection: Selection::NONE,
             current_segment: Segment::default(),
             current_segment_attr: CharAttribute::default(),
-            cp: Codepage::new("Default"),
+            cp: Codepage::CP437,
             comp: ListScrollBars::new(flags.contains(Flags::ScrollBars), flags.contains(Flags::SearchBar)),
             h_offset: 0,
             active_panel: ActivePanel::DataRepresentation,
             search_bytes: Vec::new(),
-            temp_buffer: Vec::new(),
         }
     }
     pub fn set_codepage(&mut self, cp: Codepage) {
@@ -551,10 +553,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     fn write_panels(&mut self, position: u64) {
         let mut cwp = CharWriterPos::new(self.repr.columns_count as i32, self.repr.rows_count as i32, position, self.buffer.len());
         let mut output = OutputBuffer::new();
-        let mut bytes = [0; 8]; 
+        let mut bytes = [0; 8];
         let mut chars = [0 as char; 8];
         let errch = Character::with_attributes('?', self.theme().text.error);
-        let bytes_count = self.repr.format.bytes_count().min(8) as usize; 
+        let bytes_count = self.repr.format.bytes_count().min(8) as usize;
         let display_chars_width = (self.repr.format.display_chars() + 1) as i32;
         let inactive_attr = self.theme().text.inactive;
         let start_x_char = 1 + ((self.repr.format.display_chars() + 1) * self.repr.columns_count as u32 + 3) as i32;
@@ -567,8 +569,8 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             false
         } else {
             self.active_panel == ActivePanel::DataRepresentation
-        };        
-     
+        };
+
         while cwp.is_valid() {
             let mut i = 0;
             let read_ok = loop {
@@ -586,23 +588,28 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 if !self.current_segment.contains(cwp.pos) {
                     self.update_current_segment(cwp.pos);
                 }
+                // mai intai copii ca sa nu ma impacteze inversarea de la BE
+                for i in 0..bytes_count {
+                    chars[i] = self.cp.get(bytes[i]);
+                }
+                if self.repr.endian != NATIVE_ENDIAN && bytes_count > 1 {
+                    bytes[0..bytes_count].reverse();
+                }
                 self.repr.format.write(bytes, &mut output);
                 let attr = if inactive_data_panel { inactive_attr } else { self.current_segment_attr };
                 let x = cwp.x * display_chars_width + 1;
                 self.buf_surface.write_ascii(x, cwp.y, output.as_slice(), attr, false);
-                for i in 0..bytes_count {
-                    chars[i] = self.cp.get(bytes[i]);
-                }
                 let attr = if inactive_char_panel { inactive_attr } else { self.current_segment_attr };
                 let x = start_x_char + cwp.x;
-                //self.buf_surface.write_string(x, cwp.y, &chars[..bytes_count], attr, false);
                 for i in 0..bytes_count {
-                    self.buf_surface.write_char(x + i as i32, cwp.y, Character::with_attributes(chars[i], attr));
+                    self.buf_surface
+                        .write_char(x + i as i32, cwp.y, Character::with_attributes(chars[i], attr));
                 }
             } else {
                 // error - unable to reach byte
                 let x = cwp.x * display_chars_width + 1;
-                self.buf_surface.fill_horizontal_line_with_size(x, cwp.y, self.repr.format.display_chars(), errch);
+                self.buf_surface
+                    .fill_horizontal_line_with_size(x, cwp.y, self.repr.format.display_chars(), errch);
                 let x = start_x_char + cwp.x;
                 self.buf_surface.fill_horizontal_line_with_size(x, cwp.y, bytes_count as u32, errch);
             }

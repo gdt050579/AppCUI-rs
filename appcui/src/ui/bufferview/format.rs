@@ -17,7 +17,7 @@ pub enum ColumnsCount {
     Fixed(u8),
     Auto,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Endian {
     Little,
     Big,
