@@ -23,6 +23,41 @@ enum ActivePanel {
     Char,
 }
 
+struct CharWriterPos {
+    x: i32,
+    y: i32,
+    w: i32,
+    h: i32,
+    pos: u64,
+    len: u64,
+}
+
+impl CharWriterPos {
+    fn new(w: i32, h: i32, pos: u64, len: u64) -> Self {
+        Self { x: 0, y: 0, w, h, pos, len }
+    }
+    #[inline(always)]
+    fn move_cursor(&mut self) -> bool {
+        self.pos += 1;
+        if self.pos >= self.len {
+            return false;
+        }
+        self.x += 1;
+        if self.x >= self.w {
+            self.x = 0;
+            self.y += 1;
+            if self.y >= self.h {
+                return false;
+            }
+        }
+        true
+    }
+    #[inline(always)]
+    fn is_valid(&self) -> bool {
+        self.pos < self.len && self.y < self.h
+    }
+}
+
 #[CustomControl(overwrite = [OnPaint, OnKeyPressed, OnMouseEvent, OnResize], internal = true)]
 pub struct BufferView<T>
 where
@@ -346,13 +381,14 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     #[inline(always)]
     fn is_ascii_char(&self, b: u8) -> bool {
         match b {
-            b'A' ..= b'Z' | b'a' ..= b'z' | b'0' ..= b'9' => true,
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' => true,
             b'\t' | b'\n' | b'\r' | b' ' => true,
-            b'<' | b'>' | b'=' | b'+' | b'-' | b'*' | b'/' | b'|' | b'\\' | b'\"' | b'.' | b',' | b';' | b':' | b'!' | b'?' | b'(' | b')' | b'[' | b']' => true,
-            _ => false, 
+            b'<' | b'>' | b'=' | b'+' | b'-' | b'*' | b'/' | b'|' | b'\\' | b'\"' | b'.' | b',' | b';' | b':' | b'!' | b'?' | b'(' | b')' | b'['
+            | b']' => true,
+            _ => false,
         }
     }
-    fn decode_ascii(&self, pos: u64, b: u8) -> Option<u32> {
+    fn decode_ascii(&self, pos: u64) -> Option<u32> {
         let mut len = 0;
         let mut pos = pos;
         let size = self.size();
@@ -369,7 +405,11 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 break;
             }
         }
-        if len > 3 { Some(len) } else { None }
+        if len > 3 {
+            Some(len)
+        } else {
+            None
+        }
     }
     fn decode_utf8(&self, pos: u64, b: u8) -> Option<(char, u8)> {
         let seq_len: usize = if b & 0b1110_0000 == 0b1100_0000 {
@@ -381,10 +421,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         } else {
             return None;
         };
-    
+
         let mut bytes = [0u8; 4];
         bytes[0] = b;
-    
+
         for i in 1..seq_len {
             match self.buffer.byte(pos + i as u64) {
                 Some(cont) if (cont & 0b1100_0000) == 0b1000_0000 => {
@@ -393,70 +433,47 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 _ => return None,
             }
         }
-    
+
         let s = std::str::from_utf8(&bytes[..seq_len]).ok()?;
         let ch = s.chars().next()?;
-    
+
         Some((ch, seq_len as u8))
     }
-    fn write_chars(&mut self, pos: u64) {
-        let mut x = 0;
-        let mut y = 0;
-        let w = self.repr.columns_count as i32;
-        let h = self.repr.rows_count as i32;
-        let mut pos = pos;
+    fn write_chars(&mut self, position: u64) {
+        let mut cwp = CharWriterPos::new(self.repr.columns_count as i32, self.repr.rows_count as i32, position, self.buffer.len());
         let decode_utf8 = self.flags.contains(Flags::DecodeUTF8Characters);
         let show_ascii = self.flags.contains(Flags::ShowAsciiStrings);
         let enph_attr_1 = self.theme().text.enphasized_1;
         let enph_attr_2 = self.theme().text.enphasized_2;
-        while (pos < self.buffer.len()) && (y < h) {
-            let b = self.buffer.byte(pos).unwrap_or(0);
-            if !self.current_segment.contains(pos) {
-                self.update_current_segment(pos);
+        while cwp.is_valid() {
+            let b = self.buffer.byte(cwp.pos).unwrap_or(0);
+            if !self.current_segment.contains(cwp.pos) {
+                self.update_current_segment(cwp.pos);
             }
             if decode_utf8 && b >= 0x80 {
-                if let Some((ch, len)) = self.decode_utf8(pos, b) {
+                if let Some((ch, len)) = self.decode_utf8(cwp.pos, b) {
                     for i in 0..len {
-                        let c = if i==0 { ch } else { ' ' };
-                        self.buf_surface.write_char(x, y, Character::with_attributes(c, enph_attr_1));
-                        x += 1;
-                        pos += 1;
-                        if x >= w {
-                            x = 0;
-                            y += 1;
-                            if y >= h {
-                                break;
-                            }
-                        }
+                        let c = if i == 0 { ch } else { ' ' };
+                        self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_1));
+                        if !cwp.move_cursor() { break;}
                     }
+                    continue;
                 }
             }
             if show_ascii && self.is_ascii_char(b) {
-                if let Some(len) = self.decode_ascii(pos, b) {
+                if let Some(len) = self.decode_ascii(cwp.pos) {
                     for _ in 0..len {
-                        let c = self.buffer.byte(pos).unwrap_or(b' ');
-                        self.buf_surface.write_char(x, y, Character::with_attributes(c, enph_attr_2));
-                        x += 1;
-                        pos += 1;
-                        if x >= w {
-                            x = 0;
-                            y += 1;
-                            if y >= h {
-                                break;
-                            }
-                        }
+                        let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
+                        self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_2));
+                        if !cwp.move_cursor() { break;}
                     }
+                    continue;
                 }
             }
             let ch = self.cp.get(b);
             self.buf_surface
-                .write_char(x, y, Character::with_attributes(ch, self.current_segment_attr));
-            x += 1;
-            if x >= w {
-                x = 0;
-                y += 1;
-            }
-            pos += 1;
+                .write_char(cwp.x, cwp.y, Character::with_attributes(ch, self.current_segment_attr));
+            cwp.move_cursor();
         }
     }
     fn write_line(&mut self, pos: u64, x: i32, y: i32, inactive_data_panel: bool, inactive_char_panel: bool) {
