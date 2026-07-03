@@ -7,6 +7,7 @@ fn build_buffer() -> Vec<u8> {
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
     ]);
     data.extend_from_slice(b"Hello, AppCUI! This is a hex view example.\n");
+    data.extend_from_slice(&[0,0,0,0,0,b'H', 0, b'e', 0, b'l', 0, b'l', 0, b'o', 0, b',', 0, b' ', 0, b'A', 0, b'p', 0, b'p', 0, b'C', 0, b'U', 0, b'I', 0, b'!', 0, b' ', 0, b'T', 0, b'h', 0, b'i', 0, b's', 0, b' ', 0, b'i', 0, b's', 0, b' ', 0, b'a', 0, b' ', 0, b'h', 0, b'e', 0, b'x', 0, b' ', 0, b'v', 0, b'i', 0, b'e', 0, b'w', 0, b' ', 0, b'e', 0, b'x', 0, b'a', 0, b'm', 0, b'p', 0, b'l', 0, b'e', 0, b'.', 0, b'\n']);
     data.extend_from_slice("Unicode: ăîșțâ Ω 你好 こんにちは €$ 😀\n".as_bytes());
     data.extend_from_slice(&[0x00, 0x01, 0x02, 0x07, 0x08, 0x09, 0x0A, 0x0D, 0x1B, 0x7F]);
     data.extend((0u16..=255u16).map(|b| b as u8));
@@ -46,6 +47,7 @@ struct HexViewWindow {
     cb_show_address: Handle<CheckBox>,
     cb_show_interval_names: Handle<CheckBox>,
     cb_show_ascii_strings: Handle<CheckBox>,
+    cb_show_unicode_strings: Handle<CheckBox>,
     cb_decode_utf8: Handle<CheckBox>,
 }
 
@@ -65,6 +67,7 @@ impl HexViewWindow {
             cb_show_address: Handle::None,
             cb_show_interval_names: Handle::None,
             cb_show_ascii_strings: Handle::None,
+            cb_show_unicode_strings: Handle::None,
             cb_decode_utf8: Handle::None,
         };
 
@@ -110,7 +113,8 @@ impl HexViewWindow {
         w.cb_show_address = panel.add(checkbox!("'Show &address column',l:1,t:14,r:1,checked:true"));
         w.cb_show_interval_names = panel.add(checkbox!("'Show &IntervalName column',l:1,t:15,r:1"));
         w.cb_show_ascii_strings = panel.add(checkbox!("'Show &ASCII strings in Char view mode',l:1,t:16,r:1,checked:true"));
-        w.cb_decode_utf8 = panel.add(checkbox!("'Decode UTF-&8 characters in Char view mode',l:1,t:17,r:1,checked:true"));
+        w.cb_show_unicode_strings = panel.add(checkbox!("'Show &Unicode strings in Char view mode',l:1,t:17,r:1"));
+        w.cb_decode_utf8 = panel.add(checkbox!("'Decode UTF-&8 characters in Char view mode',l:1,t:18,r:1,checked:true"));
         vs.add(vsplitter::Panel::Right, panel);
 
         w.add(vs);
@@ -193,6 +197,7 @@ impl HexViewWindow {
         let show_address = self.checkbox_checked(self.cb_show_address, true);
         let show_interval_names = self.checkbox_checked(self.cb_show_interval_names, false);
         let show_ascii_strings = self.checkbox_checked(self.cb_show_ascii_strings, true);
+        let show_unicode_strings = self.checkbox_checked(self.cb_show_unicode_strings, false);
         let decode_utf8 = self.checkbox_checked(self.cb_decode_utf8, true);
 
         let repr = match format_idx {
@@ -230,6 +235,7 @@ impl HexViewWindow {
             bv.set_address_visible(show_address);
             bv.set_interval_names_visible(show_interval_names);
             bv.set_ascii_strings_visible(show_ascii_strings);
+            bv.set_unicode_strings_visible(show_unicode_strings);
             bv.set_decode_utf8(decode_utf8);
             if endian_enabled {
                 bv.set_endian(endian);
@@ -255,6 +261,7 @@ impl CheckBoxEvents for HexViewWindow {
         if handle == self.cb_show_address
             || handle == self.cb_show_interval_names
             || handle == self.cb_show_ascii_strings
+            || handle == self.cb_show_unicode_strings
             || handle == self.cb_decode_utf8
         {
             self.apply_to_buffer();

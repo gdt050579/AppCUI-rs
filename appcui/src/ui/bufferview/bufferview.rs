@@ -37,8 +37,8 @@ impl CharWriterPos {
         Self { x: 0, y: 0, w, h, pos, len }
     }
     #[inline(always)]
-    fn move_cursor(&mut self) -> bool {
-        self.pos += 1;
+    fn move_cursor(&mut self, delta_pos: u64) -> bool {
+        self.pos += delta_pos;
         if self.pos >= self.len {
             return false;
         }
@@ -246,6 +246,21 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     pub fn is_ascii_strings_visible(&self) -> bool {
         self.flags.contains(Flags::ShowAsciiStrings)
     }
+    pub fn set_unicode_strings_visible(&mut self, visible: bool) {
+        if visible == self.flags.contains(Flags::ShowUnicodeStrings) {
+            return;
+        }
+        if visible {
+            self.flags.set(Flags::ShowUnicodeStrings);
+        } else {
+            self.flags.remove(Flags::ShowUnicodeStrings);
+        }
+        self.paint_buffer();
+    }
+    #[inline(always)]
+    pub fn is_unicode_strings_visible(&self) -> bool {
+        self.flags.contains(Flags::ShowUnicodeStrings)
+    }
     pub fn set_decode_utf8(&mut self, decode_utf8: bool) {
         if decode_utf8 == self.flags.contains(Flags::DecodeUTF8Characters) {
             return;
@@ -411,6 +426,29 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             None
         }
     }
+    fn decode_unicode(&self, pos: u64) -> Option<u32> {
+        let mut len = 0;
+        let mut pos = pos;
+        let size = self.size();
+        let end = pos.saturating_add(size.width as u64 * size.height as u64).min(self.buffer.len());
+        let mut buf = [0u8; 2];
+        while pos < end {
+            let n = self.buffer.copy_buffer(pos, 2, &mut buf);
+            if n != 2 {
+                break;
+            }
+            if (buf[1] != 0) || !self.is_ascii_char(buf[0]) {
+                break;
+            }
+            pos += 2;
+            len += 1;
+        }
+        if len > 3 {
+            Some(len)
+        } else {
+            None
+        }
+    }
     fn decode_utf8(&self, pos: u64, b: u8) -> Option<(char, u8)> {
         let seq_len: usize = if b & 0b1110_0000 == 0b1100_0000 {
             2
@@ -443,8 +481,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let mut cwp = CharWriterPos::new(self.repr.columns_count as i32, self.repr.rows_count as i32, position, self.buffer.len());
         let decode_utf8 = self.flags.contains(Flags::DecodeUTF8Characters);
         let show_ascii = self.flags.contains(Flags::ShowAsciiStrings);
+        let show_unicode = self.flags.contains(Flags::ShowUnicodeStrings);
         let enph_attr_1 = self.theme().text.enphasized_1;
         let enph_attr_2 = self.theme().text.enphasized_2;
+        let enph_attr_3 = self.theme().text.enphasized_3;
         while cwp.is_valid() {
             let b = self.buffer.byte(cwp.pos).unwrap_or(0);
             if !self.current_segment.contains(cwp.pos) {
@@ -455,7 +495,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     for i in 0..len {
                         let c = if i == 0 { ch } else { ' ' };
                         self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_1));
-                        if !cwp.move_cursor() { break;}
+                        if !cwp.move_cursor(1) {
+                            break;
+                        }
                     }
                     continue;
                 }
@@ -465,7 +507,30 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     for _ in 0..len {
                         let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
                         self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_2));
-                        if !cwp.move_cursor() { break;}
+                        if !cwp.move_cursor(1) {
+                            break;
+                        }
+                    }
+                    continue;
+                }
+            }
+            if show_unicode && self.is_ascii_char(b) {
+                if let Some(len) = self.decode_unicode(cwp.pos) {
+                    for _ in 0..len {
+                        let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
+                        self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_3));
+                        if !cwp.move_cursor(2) {
+                            break;
+                        }
+                    }
+                    if cwp.is_valid() {
+                        let c = Character::with_attributes(' ', enph_attr_3);
+                        for _ in 0..len {
+                            self.buf_surface.write_char(cwp.x, cwp.y, c);
+                            if !cwp.move_cursor(0) {
+                                break;
+                            }
+                        }
                     }
                     continue;
                 }
@@ -473,7 +538,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             let ch = self.cp.get(b);
             self.buf_surface
                 .write_char(cwp.x, cwp.y, Character::with_attributes(ch, self.current_segment_attr));
-            cwp.move_cursor();
+            cwp.move_cursor(1);
         }
     }
     fn write_line(&mut self, pos: u64, x: i32, y: i32, inactive_data_panel: bool, inactive_char_panel: bool) {

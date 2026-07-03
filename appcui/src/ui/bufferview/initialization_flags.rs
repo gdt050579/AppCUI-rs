@@ -17,6 +17,7 @@ pub trait BufferAccess {
     fn len(&self) -> u64;
     fn byte(&self, pos: u64) -> Option<u8>;
     fn copy(&self, pos: u64, len: u64, output: &mut Vec<u8>);
+    fn copy_buffer(&self, pos: u64, len: u64, output: &mut [u8]) -> usize;
 }
 
 impl BufferAccess for Vec<u8> {
@@ -36,6 +37,15 @@ impl BufferAccess for Vec<u8> {
         if pos < self.len() as u64 {
             let end = (pos + len).min(self.len() as u64);
             output.extend_from_slice(&self[pos as usize..end as usize]);
+        }
+    }
+    fn copy_buffer(&self, pos: u64, len: u64, output: &mut [u8]) -> usize {
+        if pos < self.len() as u64 {
+            let end = (pos + len).min(self.len() as u64);
+            output.copy_from_slice(&self[pos as usize..end as usize]);
+            end as usize - pos as usize
+        } else {
+            0
         }
     }
 }
