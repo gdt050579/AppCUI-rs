@@ -409,7 +409,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let size = self.size();
         let end = pos.saturating_add(size.width as u64 * size.height as u64).min(self.buffer.len());
         while pos < end {
-            if let Some(b) = self.buffer.byte(pos) {
+            if let Some(b) = self.buffer.get(pos) {
                 if Self::is_ascii_char(b) {
                     len += 1;
                     pos += 1;
@@ -431,15 +431,14 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let mut pos = pos;
         let size = self.size();
         let end = pos.saturating_add(size.width as u64 * size.height as u64).min(self.buffer.len());
+        let mut bytes = [0; 2];
         while pos < end {
-            if let Some(slice) = self.buffer.slice(pos, 2) {
-                if slice.len() == 2 {
-                    if (slice[1] != 0) || !Self::is_ascii_char(slice[0]) {
-                        break;
-                    }
-                    pos += 2;
-                    len += 1;
+            if self.buffer.read_bytes(pos, &mut bytes) {
+                if bytes[1] != 0 || !Self::is_ascii_char(bytes[0]) {
+                    break;
                 }
+                pos += 2;
+                len += 1;
             } else {
                 break;
             }
@@ -451,21 +450,33 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
     }
     fn decode_utf8(&mut self, pos: u64, b: u8) -> Option<(char, u8)> {
-        let seq_len: usize = if b & 0b1110_0000 == 0b1100_0000 {
-            2
+        if b & 0b1110_0000 == 0b1100_0000 {
+            let mut bytes = [0; 2];
+            if !self.buffer.read_bytes(pos, &mut bytes) {
+                return None;
+            }
+            let s = std::str::from_utf8(&bytes).ok()?;
+            let ch = s.chars().next()?;
+            Some((ch, 2))
         } else if b & 0b1111_0000 == 0b1110_0000 {
-            3
+            let mut bytes = [0; 3];
+            if !self.buffer.read_bytes(pos, &mut bytes) {
+                return None;
+            }
+            let s = std::str::from_utf8(&bytes).ok()?;
+            let ch = s.chars().next()?;
+            Some((ch, 3))
         } else if b & 0b1111_1000 == 0b1111_0000 {
-            4
+            let mut bytes = [0; 4];
+            if !self.buffer.read_bytes(pos, &mut bytes) {
+                return None;
+            }
+            let s = std::str::from_utf8(&bytes).ok()?;
+            let ch = s.chars().next()?;
+            Some((ch, 4))
         } else {
-            return None;
-        };
-
-        let bytes = self.buffer.slice(pos, seq_len as u16)?;
-        let s = std::str::from_utf8(&bytes[..seq_len]).ok()?;
-        let ch = s.chars().next()?;
-
-        Some((ch, seq_len as u8))
+            None
+        }
     }
     fn write_chars(&mut self, position: u64) {
         let mut cwp = CharWriterPos::new(self.repr.columns_count as i32, self.repr.rows_count as i32, position, self.buffer.len());
@@ -476,7 +487,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let enph_attr_2 = self.theme().text.enphasized_2;
         let enph_attr_3 = self.theme().text.enphasized_3;
         while cwp.is_valid() {
-            if let Some(b) = self.buffer.byte(cwp.pos) {
+            if let Some(b) = self.buffer.get(cwp.pos) {
                 if !self.current_segment.contains(cwp.pos) {
                     self.update_current_segment(cwp.pos);
                 }
@@ -495,7 +506,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 if show_ascii && Self::is_ascii_char(b) {
                     if let Some(len) = self.decode_ascii(cwp.pos) {
                         for _ in 0..len {
-                            let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
+                            let c = self.buffer.get(cwp.pos).unwrap_or(b' ');
                             self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_2));
                             if !cwp.move_cursor(1) {
                                 break;
@@ -507,7 +518,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 if show_unicode && Self::is_ascii_char(b) {
                     if let Some(len) = self.decode_unicode(cwp.pos) {
                         for _ in 0..len {
-                            let c = self.buffer.byte(cwp.pos).unwrap_or(b' ');
+                            let c = self.buffer.get(cwp.pos).unwrap_or(b' ');
                             self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_3));
                             if !cwp.move_cursor(2) {
                                 break;
@@ -561,7 +572,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         while cwp.is_valid() {
             let mut i = 0;
             let read_ok = loop {
-                if let Some(b) = self.buffer.byte(cwp.pos + i as u64) {
+                if let Some(b) = self.buffer.get(cwp.pos + i as u64) {
                     bytes[i] = b;
                     i += 1;
                     if i == bytes_count {
@@ -1170,7 +1181,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             return false;
         }
         for (index, &byte) in bytes.iter().enumerate() {
-            if self.buffer.byte(pos + index as u64) != Some(byte) {
+            if self.buffer.get(pos + index as u64) != Some(byte) {
                 return false;
             }
         }

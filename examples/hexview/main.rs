@@ -33,20 +33,9 @@ impl BufferAccess for MyBuffer {
     fn len(&self) -> u64 {
         self.data.len() as u64
     }
-    fn byte(&mut self, pos: u64) -> Option<u8> {
+    fn get(&mut self, pos: u64) -> Option<u8> {
         if (pos < self.data.len() as u64) && ((pos < self.start) || (pos >= (self.start + 100))) {
             Some(self.data[pos as usize])
-        } else {
-            None
-        }
-    }
-    fn slice(&mut self, pos: u64, len: u16) -> Option<&[u8]> {
-        if pos < self.start {
-            let buf_len = (self.start - pos).min(len as u64) as usize;
-            Some(&self.data[pos as usize..pos as usize + buf_len])
-        } else if (pos >= self.start + 100) && (pos < self.data.len() as u64) {
-            let buf_len = (self.data.len() as u64 - pos).min(len as u64) as usize;
-            Some(&self.data[pos as usize..pos as usize + buf_len])
         } else {
             None
         }
