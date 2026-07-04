@@ -80,56 +80,31 @@ fn ascii_to_hex(b: u8) -> Option<u8> {
     }
     None
 }
-fn get_hex_value(buf: &[u8], pos: usize) -> Option<u8> {
-    let Some(Some(b1)) = buf.get(pos).map(|v| ascii_to_hex(*v)) else { return None; };
-    let Some(Some(b2)) = buf.get(pos+1).map(|v| ascii_to_hex(*v)) else { return None; };
-    Some(b1 << 4 | b2)
-}
-pub(super) fn convert_to_bytes(text: &str, bytes_count: BytesCount) -> ([u8; 8], u8) {
+// fn get_hex_value(buf: &[u8], pos: usize) -> Option<u8> {
+//     let Some(Some(b1)) = buf.get(pos).map(|v| ascii_to_hex(*v)) else { return None; };
+//     let Some(Some(b2)) = buf.get(pos+1).map(|v| ascii_to_hex(*v)) else { return None; };
+//     Some(b1 << 4 | b2)
+// }
+pub(super) fn convert_to_bytes(text: &str) -> ([u8; 8], u8) {
     let buf = text.as_bytes();
     let mut output = [0; 8];
-    match bytes_count {
-        BytesCount::One => {
-            let Some(v1) = get_hex_value(buf, 0) else { return (output, 0); };
-            output[0] = v1;
-            (output, 1)
-        }
-        BytesCount::Two => {
-            let Some(v1) = get_hex_value(buf, 0) else { return (output, 0); };
-            let Some(v2) = get_hex_value(buf, 2) else { return (output, 0); };
-            output[0] = v1;
-            output[1] = v2;
-            (output, 2)
-        }
-        BytesCount::Four => {
-            let Some(v1) = get_hex_value(buf, 0) else { return (output, 0); };
-            let Some(v2) = get_hex_value(buf, 2) else { return (output, 0); };
-            let Some(v3) = get_hex_value(buf, 4) else { return (output, 0); };
-            let Some(v4) = get_hex_value(buf, 6) else { return (output, 0); };
-            output[0] = v1;
-            output[1] = v2;
-            output[2] = v3;
-            output[3] = v4;
-            (output, 4)
-        }
-        BytesCount::Eight => {
-            let Some(v1) = get_hex_value(buf, 0) else { return (output, 0); };
-            let Some(v2) = get_hex_value(buf, 2) else { return (output, 0); };
-            let Some(v3) = get_hex_value(buf, 4) else { return (output, 0); };
-            let Some(v4) = get_hex_value(buf, 6) else { return (output, 0); };
-            let Some(v5) = get_hex_value(buf, 8) else { return (output, 0); };
-            let Some(v6) = get_hex_value(buf, 10) else { return (output, 0); };
-            let Some(v7) = get_hex_value(buf, 12) else { return (output, 0); };
-            let Some(v8) = get_hex_value(buf, 14) else { return (output, 0); };
-            output[0] = v1;
-            output[1] = v2;
-            output[2] = v3;
-            output[3] = v4;
-            output[4] = v5;
-            output[5] = v6;
-            output[6] = v7;
-            output[7] = v8;
-            (output, 8)
+
+    let mut pos = 0;
+    let mut i = 0;
+    for b in buf {
+        if let Some(v) = ascii_to_hex(*b) {
+            if pos >= 8 {
+                return ([0; 8],0);
+            }
+            output[pos] = output[pos] << 4 | v;
+            i += 1;
+            if i == 2 {
+                i = 0;
+                pos += 1;
+            }
+        } else {
+            return ([0; 8],0);
         }
     }
+    (output, pos as u8 + 1)
 }

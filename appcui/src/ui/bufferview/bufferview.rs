@@ -1371,12 +1371,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         };
         if len > 0 {
             let _ = self.buffer.write_bytes(self.pos, &bytes[..len as usize]);
+            // daca nu s-a updatat si paint-ul - redesenam
+            if !self.goto_position(self.pos.saturating_add(len as u64), false, true) {
+                self.paint_buffer();
+            }
         }
         self.edit_text.clear();
-        // daca nu s-a updatat si paint-ul - redesenam
-        if !self.goto_position(self.pos.saturating_add(len as u64), false, true) {
-            self.paint_buffer();
-        }
     }
     fn process_edit_key(&mut self, key: Key, character: char) -> EventProcessStatus {
         if !self.can_edit() {
@@ -1391,7 +1391,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     return EventProcessStatus::Ignored;
                 }
             }
-            key!("Enter") => {
+            key!("Enter") | key!("Ctrl+Enter") | key!("Shift+Enter") | key!("Tab") | key!("Left") => {
                 if self.edit_text.len() > 0 {
                     self.update_buffer_content();
                     return EventProcessStatus::Processed;
