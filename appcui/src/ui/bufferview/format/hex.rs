@@ -85,7 +85,7 @@ fn ascii_to_hex(b: u8) -> Option<u8> {
 //     let Some(Some(b2)) = buf.get(pos+1).map(|v| ascii_to_hex(*v)) else { return None; };
 //     Some(b1 << 4 | b2)
 // }
-pub(super) fn convert_to_bytes(text: &str) -> ([u8; 8], u8) {
+pub(super) fn convert_to_bytes(text: &str, bytes_count: BytesCount) -> ([u8; 8], u8) {
     let buf = text.as_bytes();
     let mut output = [0; 8];
 
@@ -106,5 +106,5 @@ pub(super) fn convert_to_bytes(text: &str) -> ([u8; 8], u8) {
             return ([0; 8],0);
         }
     }
-    (output, pos as u8 + 1)
+    (output, bytes_count as u8)
 }

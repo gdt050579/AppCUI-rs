@@ -95,7 +95,7 @@ impl DataRepresentationFormat {
             return ([0; 8], 0);
         }
         match self {
-            DataRepresentationFormat::Hex(_) => hex::convert_to_bytes(text),
+            DataRepresentationFormat::Hex(bytes_count) => hex::convert_to_bytes(text, *bytes_count),
             DataRepresentationFormat::Oct => oct::convert_to_bytes(text),
             DataRepresentationFormat::Bin => bin::convert_to_bytes(text),
             DataRepresentationFormat::Char => {

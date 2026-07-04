@@ -608,7 +608,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 let x = cwp.x * display_chars_width + 1;
                 self.buf_surface.write_ascii(x, cwp.y, output.as_slice(), attr, false);
                 let attr = if inactive_char_panel { inactive_attr } else { self.current_segment_attr };
-                let x = start_x_char + cwp.x;
+                let x = start_x_char + cwp.x * bytes_count as i32;
                 for i in 0..bytes_count {
                     self.buf_surface
                         .write_char(x + i as i32, cwp.y, Character::with_attributes(chars[i], attr));
@@ -618,7 +618,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 let x = cwp.x * display_chars_width + 1;
                 self.buf_surface
                     .fill_horizontal_line_with_size(x, cwp.y, self.repr.format.display_chars(), errch);
-                let x = start_x_char + cwp.x;
+                let x = start_x_char + cwp.x * bytes_count as i32;
                 self.buf_surface.fill_horizontal_line_with_size(x, cwp.y, bytes_count as u32, errch);
             }
             cwp.move_cursor(bytes_count as u64);
