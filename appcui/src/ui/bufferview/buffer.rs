@@ -2,7 +2,10 @@
 pub trait BufferAccess {
     fn len(&self) -> u64;
     fn get(&mut self, pos: u64) -> Option<u8>;
-
+    fn can_write(&self) -> bool;
+    fn set(&mut self, pos: u64, value: u8) -> bool;
+    fn can_resize(&self) -> bool;
+    fn resize(&mut self, new_size: u64) -> bool;
 }
 
 pub struct Buffer<T: BufferAccess> {
@@ -45,6 +48,24 @@ impl BufferAccess for Vec<u8> {
             Some(self[pos as usize])
         } else {
             None
+        }
+    }
+    fn can_resize(&self) -> bool {
+        true
+    }
+    fn resize(&mut self, new_size: u64) -> bool {
+        self.resize(new_size as usize, 0u8);
+        true
+    }
+    fn can_write(&self) -> bool {
+        true
+    }
+    fn set(&mut self, pos: u64, value: u8) -> bool {
+        if pos < self.len() as u64 {
+            self[pos as usize] = value;
+            true
+        } else {
+            false
         }
     }
 }
