@@ -1,6 +1,6 @@
 use super::events::EventData;
 use super::format::*;
-use super::initialization_flags::{BufferAccess, Flags};
+use super::*;
 use super::output_buffer::OutputBuffer;
 use super::{Codepage, Interval, IntervalSet, Segment, Selection};
 use crate::prelude::*;
@@ -68,7 +68,7 @@ where
     T: BufferAccess + 'static,
 {
     flags: Flags,
-    buffer: T,
+    buffer: Buffer<T>,
     start_view: u64,
     pos: u64,
     repr: Representation,
@@ -106,7 +106,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         Self {
             base: ControlBase::with_status_flags(layout, status_flags),
             flags,
-            buffer,
+            buffer: Buffer::new(buffer),
             start_view: 0,
             pos: 0,
             repr: Representation::new(),
@@ -1218,7 +1218,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             emitter: self.handle,
             receiver: self.event_processor,
             data: ControlEventData::BufferView(EventData {
-                event_type: bufferview::events::BufferViewEventTypes::CurrentPosChanged,
+                event_type: super::events::BufferViewEventTypes::CurrentPosChanged,
                 type_id: std::any::TypeId::of::<T>(),
             }),
         });
@@ -1228,7 +1228,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             emitter: self.handle,
             receiver: self.event_processor,
             data: ControlEventData::BufferView(EventData {
-                event_type: bufferview::events::BufferViewEventTypes::SelectionChanged,
+                event_type: super::events::BufferViewEventTypes::SelectionChanged,
                 type_id: std::any::TypeId::of::<T>(),
             }),
         });

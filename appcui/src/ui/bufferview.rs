@@ -12,6 +12,7 @@ mod interval;
 mod codepage;
 mod selection;
 mod search_parser;
+mod buffer;
 #[cfg(test)]
 mod tests;
 
@@ -21,7 +22,6 @@ use self::interval::Segment;
 use self::selection::Selection;
 
 pub use self::bufferview::BufferView;
-pub use self::initialization_flags::BufferAccess;
 pub use self::initialization_flags::Flags;
 pub use self::format::ColumnsCount;
 pub use self::format::Endian;
@@ -30,3 +30,5 @@ pub use self::format::BytesCount;
 pub use self::format::OffsetFormat;
 pub use self::interval::Interval;
 pub use self::codepage::Codepage;
+pub use self::buffer::Buffer;
+pub use self::buffer::BufferAccess;
