@@ -41,7 +41,7 @@ pub enum DataRepresentationFormat {
 #[derive(Clone, Copy)]
 pub(super) enum ValidateResult {
     Valid,
-    RemoveLast,
+    FormatError,
     Update
 }
 impl DataRepresentationFormat {
@@ -84,7 +84,7 @@ impl DataRepresentationFormat {
             return ValidateResult::Valid;
         }
         match self {
-            DataRepresentationFormat::Hex(bytes_count) => todo!(),
+            DataRepresentationFormat::Hex(bytes_count) => hex::validate(text, *bytes_count),
             DataRepresentationFormat::Oct => todo!(),
             DataRepresentationFormat::Bin => todo!(),
             DataRepresentationFormat::Char => ValidateResult::Update,
@@ -101,7 +101,7 @@ impl DataRepresentationFormat {
             DataRepresentationFormat::Char => {
                 let b = text.as_bytes();
                 let mut output = [0; 8];
-                let len = output.len().min(8);
+                let len = b.len().min(8);
                 output[..len].copy_from_slice(&b[..len]);
                 (output, len as u8)
             },

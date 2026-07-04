@@ -1350,7 +1350,24 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     fn can_edit(&self) -> bool {
         self.buffer.can_edit() && !self.flags.contains(Flags::ReadOnly)
     }
-    fn update_buffer_content(&mut self) {}
+    fn update_buffer_content(&mut self) {
+        let (bytes, len) = if !self.repr.format.is_char() {
+            match self.active_panel {
+                ActivePanel::DataRepresentation => self.repr.format.convert_to_bytes(&self.edit_text),
+                ActivePanel::Char => DataRepresentationFormat::Char.convert_to_bytes(&self.edit_text),
+            }
+        } else {
+            self.repr.format.convert_to_bytes(&self.edit_text)
+        };
+        if len > 0 {
+            let _ = self.buffer.write_bytes(self.pos, &bytes[..len as usize]);
+        }
+        self.edit_text.clear();
+        // daca nu s-a updatat si paint-ul - redesenam
+        if !self.goto_position(self.pos.saturating_add(len as u64), false, true) {
+            self.paint_buffer();
+        }
+    }
     fn process_edit_key(&mut self, key: Key, character: char) -> EventProcessStatus {
         if !self.can_edit() {
             return EventProcessStatus::Ignored;
@@ -1375,13 +1392,22 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         if character >= ' ' {
             self.edit_text.push(character);
-            match self.repr.format.validate(&self.edit_text) {
+            let res = if !self.repr.format.is_char() {
+                match self.active_panel {
+                    ActivePanel::DataRepresentation => self.repr.format.validate(&self.edit_text),
+                    ActivePanel::Char => DataRepresentationFormat::Char.validate(&self.edit_text),
+                }
+            } else {
+                self.repr.format.validate(&self.edit_text)
+            };
+            match res {
                 ValidateResult::Valid => {} // do nothing
-                ValidateResult::RemoveLast => {
+                ValidateResult::FormatError => {
                     self.edit_text.pop();
                 }
                 ValidateResult::Update => self.update_buffer_content(),
             };
+            return EventProcessStatus::Processed;
         }
         EventProcessStatus::Ignored
     }

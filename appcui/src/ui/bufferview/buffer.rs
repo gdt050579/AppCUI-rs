@@ -37,6 +37,21 @@ impl<T: BufferAccess> Buffer<T> {
             true
         }
     }
+    pub fn write_bytes(&mut self, pos: u64, bytes: &[u8]) -> bool {
+        if pos + bytes.len() as u64 > self.len() {
+            if !self.data.resize(pos + bytes.len() as u64) {
+                return false;
+            }
+        }
+        let mut p = pos;
+        for b in bytes {
+            if !self.data.set(p, *b) {
+                return false;
+            }
+            p += 1;
+        }
+        true
+    }
     #[inline(always)]
     pub(super) fn can_edit(&self) -> bool {
         self.data.can_write()
