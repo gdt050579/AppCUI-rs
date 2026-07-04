@@ -56,6 +56,17 @@ impl<T: BufferAccess> Buffer<T> {
     pub(super) fn can_edit(&self) -> bool {
         self.data.can_write()
     }
+    #[inline(always)]
+    pub(super) fn can_resize(&self) -> bool {
+        self.data.can_resize()
+    }
+    pub(super) fn delete(&mut self, pos: u64, count: u64) -> bool {
+        if pos > self.data.len() || count == 0 || !self.data.can_resize() {
+            return false;
+        }
+        let new_len = (self.data.len() - pos).min(count);
+        todo!()
+    }
 }
 
 impl BufferAccess for Vec<u8> {

@@ -16,40 +16,40 @@ pub(super) fn write(bytes: [u8; 8], bytes_count: BytesCount, output: &mut Output
             output.set_len(2);
         }
         BytesCount::Two => {
-            output.set(0, HEX_CHARS[(bytes[0] >> 4) as usize]);
-            output.set(1, HEX_CHARS[(bytes[0] & 0x0F) as usize]);
-            output.set(2, HEX_CHARS[(bytes[1] >> 4) as usize]);
-            output.set(3, HEX_CHARS[(bytes[1] & 0x0F) as usize]);
+            output.set(0, HEX_CHARS[(bytes[1] >> 4) as usize]);
+            output.set(1, HEX_CHARS[(bytes[1] & 0x0F) as usize]);
+            output.set(2, HEX_CHARS[(bytes[0] >> 4) as usize]);
+            output.set(3, HEX_CHARS[(bytes[0] & 0x0F) as usize]);
             output.set_len(4);
         }
         BytesCount::Four => {
-            output.set(0, HEX_CHARS[(bytes[0] >> 4) as usize]);
-            output.set(1, HEX_CHARS[(bytes[0] & 0x0F) as usize]);
-            output.set(2, HEX_CHARS[(bytes[1] >> 4) as usize]);
-            output.set(3, HEX_CHARS[(bytes[1] & 0x0F) as usize]);
-            output.set(4, HEX_CHARS[(bytes[2] >> 4) as usize]);
-            output.set(5, HEX_CHARS[(bytes[2] & 0x0F) as usize]);
-            output.set(6, HEX_CHARS[(bytes[3] >> 4) as usize]);
-            output.set(7, HEX_CHARS[(bytes[3] & 0x0F) as usize]);
+            output.set(0, HEX_CHARS[(bytes[3] >> 4) as usize]);
+            output.set(1, HEX_CHARS[(bytes[3] & 0x0F) as usize]);
+            output.set(2, HEX_CHARS[(bytes[2] >> 4) as usize]);
+            output.set(3, HEX_CHARS[(bytes[2] & 0x0F) as usize]);
+            output.set(4, HEX_CHARS[(bytes[1] >> 4) as usize]);
+            output.set(5, HEX_CHARS[(bytes[1] & 0x0F) as usize]);
+            output.set(6, HEX_CHARS[(bytes[0] >> 4) as usize]);
+            output.set(7, HEX_CHARS[(bytes[0] & 0x0F) as usize]);
             output.set_len(8);
         }
         BytesCount::Eight => {
-            output.set(0, HEX_CHARS[(bytes[0] >> 4) as usize]);
-            output.set(1, HEX_CHARS[(bytes[0] & 0x0F) as usize]);
-            output.set(2, HEX_CHARS[(bytes[1] >> 4) as usize]);
-            output.set(3, HEX_CHARS[(bytes[1] & 0x0F) as usize]);
-            output.set(4, HEX_CHARS[(bytes[2] >> 4) as usize]);
-            output.set(5, HEX_CHARS[(bytes[2] & 0x0F) as usize]);
-            output.set(6, HEX_CHARS[(bytes[3] >> 4) as usize]);
-            output.set(7, HEX_CHARS[(bytes[3] & 0x0F) as usize]);
-            output.set(8, HEX_CHARS[(bytes[4] >> 4) as usize]);
-            output.set(9, HEX_CHARS[(bytes[4] & 0x0F) as usize]);
-            output.set(10, HEX_CHARS[(bytes[5] >> 4) as usize]);
-            output.set(11, HEX_CHARS[(bytes[5] & 0x0F) as usize]);
-            output.set(12, HEX_CHARS[(bytes[6] >> 4) as usize]);
-            output.set(13, HEX_CHARS[(bytes[6] & 0x0F) as usize]);
-            output.set(14, HEX_CHARS[(bytes[7] >> 4) as usize]);
-            output.set(15, HEX_CHARS[(bytes[7] & 0x0F) as usize]);
+            output.set(0, HEX_CHARS[(bytes[7] >> 4) as usize]);
+            output.set(1, HEX_CHARS[(bytes[7] & 0x0F) as usize]);
+            output.set(2, HEX_CHARS[(bytes[6] >> 4) as usize]);
+            output.set(3, HEX_CHARS[(bytes[6] & 0x0F) as usize]);
+            output.set(4, HEX_CHARS[(bytes[5] >> 4) as usize]);
+            output.set(5, HEX_CHARS[(bytes[5] & 0x0F) as usize]);
+            output.set(6, HEX_CHARS[(bytes[4] >> 4) as usize]);
+            output.set(7, HEX_CHARS[(bytes[4] & 0x0F) as usize]);
+            output.set(8, HEX_CHARS[(bytes[3] >> 4) as usize]);
+            output.set(9, HEX_CHARS[(bytes[3] & 0x0F) as usize]);
+            output.set(10, HEX_CHARS[(bytes[2] >> 4) as usize]);
+            output.set(11, HEX_CHARS[(bytes[2] & 0x0F) as usize]);
+            output.set(12, HEX_CHARS[(bytes[1] >> 4) as usize]);
+            output.set(13, HEX_CHARS[(bytes[1] & 0x0F) as usize]);
+            output.set(14, HEX_CHARS[(bytes[0] >> 4) as usize]);
+            output.set(15, HEX_CHARS[(bytes[0] & 0x0F) as usize]);
             output.set_len(16);
         }
     }
