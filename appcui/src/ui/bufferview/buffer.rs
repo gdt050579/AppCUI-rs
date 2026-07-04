@@ -37,6 +37,10 @@ impl<T: BufferAccess> Buffer<T> {
             true
         }
     }
+    #[inline(always)]
+    pub(super) fn can_edit(&self) -> bool {
+        self.data.can_write()
+    }
 }
 
 impl BufferAccess for Vec<u8> {

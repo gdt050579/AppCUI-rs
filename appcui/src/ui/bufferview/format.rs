@@ -38,6 +38,12 @@ pub enum DataRepresentationFormat {
     Bin,
     Char,
 }
+#[derive(Clone, Copy)]
+pub(super) enum ValidateResult {
+    Valid,
+    RemoveLast,
+    Update
+}
 impl DataRepresentationFormat {
     pub(super) fn write(&self, bytes: [u8;8], output: &mut OutputBuffer) {
         match self {
@@ -70,6 +76,35 @@ impl DataRepresentationFormat {
         match self {
             DataRepresentationFormat::Char => true,
             _ => false,
+        }
+    }
+    #[inline(always)]
+    pub(super) fn validate(&self, text: &str) -> ValidateResult {
+        if text.is_empty() {
+            return ValidateResult::Valid;
+        }
+        match self {
+            DataRepresentationFormat::Hex(bytes_count) => todo!(),
+            DataRepresentationFormat::Oct => todo!(),
+            DataRepresentationFormat::Bin => todo!(),
+            DataRepresentationFormat::Char => ValidateResult::Update,
+        }
+    }
+    pub(super) fn convert_to_bytes(&self, text: &str) -> ([u8; 8], u8) {
+        if text.is_empty() {
+            return ([0; 8], 0);
+        }
+        match self {
+            DataRepresentationFormat::Hex(bytes_count) => hex::convert_to_bytes(text, *bytes_count),
+            DataRepresentationFormat::Oct => oct::convert_to_bytes(text),
+            DataRepresentationFormat::Bin => bin::convert_to_bytes(text),
+            DataRepresentationFormat::Char => {
+                let b = text.as_bytes();
+                let mut output = [0; 8];
+                let len = output.len().min(8);
+                output[..len].copy_from_slice(&b[..len]);
+                (output, len as u8)
+            },
         }
     }
 }

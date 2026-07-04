@@ -40,6 +40,24 @@ impl BufferAccess for MyBuffer {
             None
         }
     }
+    fn can_write(&self) -> bool {
+        true
+    }
+    fn set(&mut self, pos: u64, value: u8) -> bool {
+        if (pos < self.data.len() as u64) && ((pos < self.start) || (pos >= (self.start + 100))) {
+            self.data[pos as usize] = value;
+            true
+        } else {
+            false
+        } 
+    }
+    fn can_resize(&self) -> bool {
+        true
+    }
+    fn resize(&mut self, new_size: u64) -> bool {
+        self.data.resize(new_size as usize, 0u8);
+        true
+    }
 }
 
 fn bytes_count_from_index(index: u32) -> bufferview::BytesCount {

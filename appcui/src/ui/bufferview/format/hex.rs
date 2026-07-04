@@ -49,3 +49,6 @@ pub(super) fn write(bytes: [u8;8], bytes_count: BytesCount, output: &mut OutputB
         }
     }
 }
+pub(super) fn convert_to_bytes(text: &str, bytes_count: BytesCount) -> ([u8; 8], u8) {
+    todo!()
+}

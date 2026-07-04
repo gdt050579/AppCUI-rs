@@ -8,3 +8,6 @@ pub(super) fn write(bytes: [u8; 8], output: &mut OutputBuffer) {
     }
     output.set_len(8);
 }
+pub(super) fn convert_to_bytes(text: &str) -> ([u8; 8], u8) {
+    todo!()
+}

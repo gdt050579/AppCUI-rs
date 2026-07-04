@@ -11,4 +11,5 @@ pub enum Flags {
     ShowAsciiStrings = 0x0040,
     ShowUnicodeStrings = 0x0080,
     DecodeUTF8Characters = 0x0100,
+    ReadOnly = 0x0200,
 }

@@ -1,7 +1,7 @@
 use super::events::EventData;
 use super::format::*;
-use super::*;
 use super::output_buffer::OutputBuffer;
+use super::*;
 use super::{Codepage, Interval, IntervalSet, Segment, Selection};
 use crate::prelude::*;
 use flat_string::FlatString;
@@ -91,6 +91,7 @@ where
     h_offset: u32,
     active_panel: ActivePanel,
     search_bytes: Vec<u8>,
+    edit_text: FlatString<32>,
 }
 
 impl<T: BufferAccess + 'static> BufferView<T> {
@@ -129,6 +130,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             h_offset: 0,
             active_panel: ActivePanel::DataRepresentation,
             search_bytes: Vec::new(),
+            edit_text: FlatString::new(),
         }
     }
     pub fn set_codepage(&mut self, cp: Codepage) {
@@ -815,11 +817,15 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             let column = (dif % self.repr.columns_count as u64) as i32;
             let row = (dif / self.repr.columns_count as u64) as i32 + top;
             let active_attr = theme.list_current_item.focus;
+            let can_edit = self.can_edit();
             // the panel that does not hold the cursor is marked with a dimmed attribute
             let inactive_attr = theme.list_current_item.over_inactive;
             if self.repr.format.is_char() {
                 let x = border_width + column - h_offset;
                 surface.write_char(x, row, Character::with_attributes(0, active_attr));
+                if can_edit {
+                    surface.set_cursor(x + self.edit_text.len() as i32, row);
+                }
             } else {
                 let len = self.repr.format.display_chars() as i32;
                 let byte_in_element = ((self.pos - self.start_view) % unit as u64) as i32;
@@ -830,11 +836,17 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                         // active hex element + dimmed mirror over all of its bytes in the character part
                         surface.fill_horizontal_line_with_size(hex_x, row, (len + 2) as u32, Character::with_attributes(0, active_attr));
                         surface.fill_horizontal_line_with_size(char_block_x, row, unit as u32, Character::with_attributes(0, inactive_attr));
+                        if can_edit {
+                            surface.set_cursor(hex_x + 1 + self.edit_text.len() as i32, row);
+                        }
                     }
                     ActivePanel::Char => {
                         // active single byte in the character part + dimmed mirror over its hex element
                         surface.fill_horizontal_line_with_size(hex_x, row, (len + 2) as u32, Character::with_attributes(0, inactive_attr));
                         surface.write_char(char_block_x + byte_in_element, row, Character::with_attributes(0, active_attr));
+                        if can_edit {
+                            surface.set_cursor(char_block_x + byte_in_element + self.edit_text.len() as i32, row);
+                        }
                     }
                 }
             }
@@ -1334,6 +1346,45 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         EventProcessStatus::Ignored
     }
+    #[inline(always)]
+    fn can_edit(&self) -> bool {
+        self.buffer.can_edit() && !self.flags.contains(Flags::ReadOnly)
+    }
+    fn update_buffer_content(&mut self) {}
+    fn process_edit_key(&mut self, key: Key, character: char) -> EventProcessStatus {
+        if !self.can_edit() {
+            return EventProcessStatus::Ignored;
+        }
+        match key.value() {
+            key!("Backspace") => {
+                if self.edit_text.len() > 0 {
+                    self.edit_text.pop();
+                    return EventProcessStatus::Processed;
+                } else {
+                    return EventProcessStatus::Ignored;
+                }
+            }
+            key!("Enter") => {
+                if self.edit_text.len() > 0 {
+                    self.update_buffer_content();
+                    return EventProcessStatus::Processed;
+                }
+                return EventProcessStatus::Ignored;
+            }
+            _ => {}
+        }
+        if character >= ' ' {
+            self.edit_text.push(character);
+            match self.repr.format.validate(&self.edit_text) {
+                ValidateResult::Valid => {} // do nothing
+                ValidateResult::RemoveLast => {
+                    self.edit_text.pop();
+                }
+                ValidateResult::Update => self.update_buffer_content(),
+            };
+        }
+        EventProcessStatus::Ignored
+    }
     fn process_navigation_key(&mut self, key: Key) -> EventProcessStatus {
         let select = key.modifier.contains(KeyModifier::Shift);
         let bytes_count = self.repr.format.bytes_count() as u64;
@@ -1528,14 +1579,26 @@ impl<T: BufferAccess + 'static> OnKeyPressed for BufferView<T> {
         if self.process_selector_key(key) == EventProcessStatus::Processed {
             return EventProcessStatus::Processed;
         }
-        if self.process_search_key(key, character) == EventProcessStatus::Processed {
+        if self.comp.is_in_edit_mode() {
+            // daca sunt in edit mode - procesez doar search key
+            if self.process_search_key(key, character) == EventProcessStatus::Processed {
+                return EventProcessStatus::Processed;
+            }
+        } else {
+            // daca nu sunt in edit mode, mai intai edit_key si daca nu search key
+            if self.process_edit_key(key, character) == EventProcessStatus::Processed {
+                return EventProcessStatus::Processed;
+            }
+            if self.process_search_key(key, character) == EventProcessStatus::Processed {
+                return EventProcessStatus::Processed;
+            }
+        }
+        if self.process_navigation_key(key) == EventProcessStatus::Processed {
+            self.comp.exit_edit_mode();
             return EventProcessStatus::Processed;
         }
-        let status = self.process_navigation_key(key);
-        if status == EventProcessStatus::Processed {
-            self.comp.exit_edit_mode();
-        }
-        status
+
+        EventProcessStatus::Ignored
     }
 }
 
