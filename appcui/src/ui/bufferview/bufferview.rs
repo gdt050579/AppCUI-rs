@@ -817,6 +817,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             let column = (dif % self.repr.columns_count as u64) as i32;
             let row = (dif / self.repr.columns_count as u64) as i32 + top;
             let active_attr = theme.list_current_item.focus;
+            let attr_just_text = CharAttribute::new(Color::Transparent, Color::Transparent, CharFlags::None);
             let can_edit = self.can_edit();
             // the panel that does not hold the cursor is marked with a dimmed attribute
             let inactive_attr = theme.list_current_item.over_inactive;
@@ -825,6 +826,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 surface.write_char(x, row, Character::with_attributes(0, active_attr));
                 if can_edit {
                     surface.set_cursor(x + self.edit_text.len() as i32, row);
+                    if !self.edit_text.is_empty() {
+                        surface.write_string(x, row, self.edit_text.as_str(), attr_just_text, false);
+                    }
                 }
             } else {
                 let len = self.repr.format.display_chars() as i32;
@@ -838,6 +842,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                         surface.fill_horizontal_line_with_size(char_block_x, row, unit as u32, Character::with_attributes(0, inactive_attr));
                         if can_edit {
                             surface.set_cursor(hex_x + 1 + self.edit_text.len() as i32, row);
+                            if !self.edit_text.is_empty() {
+                                surface.write_string(hex_x + 1, row, self.edit_text.as_str(), attr_just_text, false);
+                            }
                         }
                     }
                     ActivePanel::Char => {
@@ -846,6 +853,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                         surface.write_char(char_block_x + byte_in_element, row, Character::with_attributes(0, active_attr));
                         if can_edit {
                             surface.set_cursor(char_block_x + byte_in_element + self.edit_text.len() as i32, row);
+                            if !self.edit_text.is_empty() {
+                                surface.write_string(char_block_x + byte_in_element, row, self.edit_text.as_str(), attr_just_text, false);
+                            }
                         }
                     }
                 }
