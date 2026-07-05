@@ -219,7 +219,7 @@ fn write_scientific(bytes: [u8; 8], format: FloatFormat, output: &mut OutputBuff
 // Fixed "+III.DDD" layout: sign, zero-padded integer, dot, fixed decimal digits.
 fn write_fixed_decimal(v: f64, int_digits: usize, dec_digits: usize, width: usize, output: &mut OutputBuffer) {
     if !v.is_finite() {
-        let s: &str = if v.is_nan() { "NaN" } else if v > 0.0 { "+inf" } else { "-inf" };
+        let s: &str = if v.is_nan() { "NaN" } else if v > 0.0 { "inf" } else { "-inf" };
         emit_padded(s.as_bytes(), width, output);
         return;
     }

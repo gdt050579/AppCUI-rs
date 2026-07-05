@@ -53,6 +53,8 @@ pub enum IntFormat {
 pub enum FloatFormat {
     Scientific32,
     Scientific64,
+    E4M3,
+    E5M2,
 }
 
 #[derive(Clone, Copy)]
