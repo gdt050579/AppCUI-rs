@@ -68,43 +68,11 @@ pub(super) fn validate(text: &str, bytes_count: BytesCount) -> ValidateResult {
         ValidateResult::Valid
     }
 }
-fn ascii_to_hex(b: u8) -> Option<u8> {
-    if b >= b'0' && b <= b'9' {
-        return Some(b - b'0');
-    }
-    if b >= b'A' && b <= b'F' {
-        return Some(b - b'A' + 10);
-    }
-    if b >= b'a' && b <= b'f' {
-        return Some(b - b'a' + 10);
-    }
-    None
-}
-// fn get_hex_value(buf: &[u8], pos: usize) -> Option<u8> {
-//     let Some(Some(b1)) = buf.get(pos).map(|v| ascii_to_hex(*v)) else { return None; };
-//     let Some(Some(b2)) = buf.get(pos+1).map(|v| ascii_to_hex(*v)) else { return None; };
-//     Some(b1 << 4 | b2)
-// }
 pub(super) fn convert_to_bytes(text: &str, bytes_count: BytesCount) -> ([u8; 8], u8) {
-    let buf = text.as_bytes();
-    let mut output = [0; 8];
-
-    let mut pos = 0;
-    let mut i = 0;
-    for b in buf {
-        if let Some(v) = ascii_to_hex(*b) {
-            if pos >= 8 {
-                return ([0; 8],0);
-            }
-            output[pos] = output[pos] << 4 | v;
-            i += 1;
-            if i == 2 {
-                i = 0;
-                pos += 1;
-            }
-        } else {
-            return ([0; 8],0);
-        }
+    if let Ok(n) = u64::from_str_radix(text, 16) {
+        let bytes = n.to_ne_bytes();
+        (bytes, bytes_count as u8)
+    } else {
+        ([0; 8], 0)
     }
-    (output, bytes_count as u8)
 }
