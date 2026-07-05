@@ -299,11 +299,21 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     pub fn set_current_pos(&mut self, pos: u64) {
         self.goto_position(pos, false, false);
     }
-    pub fn delete(&mut self, pos: u64, count: u64) -> bool {
+    pub fn delete_bytes(&mut self, pos: u64, count: u64) -> bool {
         if self.flags.contains(Flags::ReadOnly) {
             return false;
         }
-        self.buffer.delete(pos, count)
+        let result = self.buffer.delete(pos, count);
+        self.paint_buffer();
+        result
+    }
+    pub fn insert_bytes(&mut self, pos: u64, bytes: &[u8]) -> bool {
+        if self.flags.contains(Flags::ReadOnly) {
+            return false;
+        }
+        let result = self.buffer.insert(pos, bytes);
+        self.paint_buffer();
+        result
     }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;

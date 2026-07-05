@@ -78,7 +78,7 @@ fn codepage_from_index(index: u32) -> bufferview::Codepage {
     }
 }
 
-#[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<Vec<u8>>)]
+#[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<MyBuffer>+CommandBarEvents, commands = [DeleteSelection, InsertText])]
 struct HexViewWindow {
     buffer: Handle<BufferView<MyBuffer>>,
     lb_pos: Handle<toolbar::Label>,
@@ -171,6 +171,46 @@ impl HexViewWindow {
         w.apply_to_buffer();
         w.update_position_label();
         w
+    }
+
+    fn delete_selection(&mut self) {
+        let h_buffer = self.buffer;
+        if let Some(bv) = self.control_mut(h_buffer) {
+            let Some((start, end)) = bv.selection() else {
+                return;
+            };
+            let count = end - start;
+            if count == 0 {
+                return;
+            }
+            let message = format!(
+                "Are you sure that you want to delete {count} byte(s) from offset 0x{start:X} to 0x{}?",
+                end - 1
+            );
+            if dialogs::validate("Delete Selection", message.as_str()) && bv.delete_bytes(start, count) {
+                bv.clear_selection();
+                self.update_position_label();
+            }
+        }
+    }
+
+    fn insert_text(&mut self) {
+        let h_buffer = self.buffer;
+        if let Some(bv) = self.control_mut(h_buffer) {
+            let pos = bv.current_pos();
+            let caption = format!("Enter text to insert at offset 0x{pos:X}:");
+            let Some(text) = dialogs::input::<String>("Insert Text", caption.as_str(), None, None) else {
+                return;
+            };
+            if text.is_empty() {
+                return;
+            }
+            if bv.insert_bytes(pos, text.as_bytes()) {
+                self.update_position_label();
+            } else {
+                dialogs::message("Insert Text", format!("Failed to insert text '{text}' at offset 0x{pos:X}").as_str());
+            }
+        }
     }
 
     fn update_position_label(&mut self) {
@@ -315,15 +355,35 @@ impl CheckBoxEvents for HexViewWindow {
     }
 }
 
-impl BufferViewEvents<Vec<u8>> for HexViewWindow {
-    fn on_current_pos_changed(&mut self, _handle: Handle<BufferView<Vec<u8>>>) -> EventProcessStatus {
+impl BufferViewEvents<MyBuffer> for HexViewWindow {
+    fn on_current_pos_changed(&mut self, _handle: Handle<BufferView<MyBuffer>>) -> EventProcessStatus {
         self.update_position_label();
+        EventProcessStatus::Processed
+    }
+
+    fn on_selection_changed(&mut self, _handle: Handle<BufferView<MyBuffer>>) -> EventProcessStatus {
+        self.request_update();
         EventProcessStatus::Processed
     }
 }
 
+impl CommandBarEvents for HexViewWindow {
+    fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+        commandbar.set(key!("F8"), "Delete Selection", hexviewwindow::Commands::DeleteSelection);
+        commandbar.set(key!("F9"), "Insert", hexviewwindow::Commands::InsertText);
+    }
+
+    fn on_event(&mut self, command_id: hexviewwindow::Commands) {
+        match command_id {
+            hexviewwindow::Commands::DeleteSelection => self.delete_selection(),
+            hexviewwindow::Commands::InsertText => self.insert_text(),
+        }
+        self.request_update();
+    }
+}
+
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().color_schema(false).build()?;
+    let mut app = App::new().color_schema(false).command_bar().build()?;
     app.add_window(HexViewWindow::new(MyBuffer::new()));
     app.run();
     Ok(())
