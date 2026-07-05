@@ -292,6 +292,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.selection.clear();
     }
     #[inline(always)]
+    pub fn set_selection(&mut self, start: u64, end: u64) {
+        self.selection = Selection::new(start, end);
+    }
+    #[inline(always)]
     pub fn current_pos(&self) -> u64 {
         self.pos
     }

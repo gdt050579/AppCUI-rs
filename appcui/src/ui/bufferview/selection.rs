@@ -12,6 +12,13 @@ impl Selection {
         origin: u64::MAX,
     };
 
+    pub(super) fn new(start: u64, end: u64) -> Self {
+        Selection {
+            start,
+            end,
+            origin: start,
+        }
+    }
     #[inline(always)]
     pub(super) fn is_empty(&self) -> bool {
         self.origin == u64::MAX
