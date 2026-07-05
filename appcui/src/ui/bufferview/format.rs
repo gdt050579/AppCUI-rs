@@ -50,10 +50,9 @@ pub enum IntFormat {
     I64 = 8,
 }
 #[derive(Clone, Copy)]
-#[repr(u8)]
 pub enum FloatFormat {
-    F32 = 4,
-    F64 = 8,
+    Scientific32,
+    Scientific64,
 }
 
 #[derive(Clone, Copy)]
@@ -90,7 +89,7 @@ impl DataRepresentationFormat {
             DataRepresentationFormat::Hex(format) => *format as u8,
             DataRepresentationFormat::UInt(format) => *format as u8,
             DataRepresentationFormat::Int(format) => *format as u8,
-            DataRepresentationFormat::Float(format) => *format as u8,
+            DataRepresentationFormat::Float(format) => float::bytes_count(*format),
             DataRepresentationFormat::Oct => 1,
             DataRepresentationFormat::Bin => 1,
             DataRepresentationFormat::Char => 1,

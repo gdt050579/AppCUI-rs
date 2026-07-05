@@ -12,25 +12,33 @@ const F64_MANT: usize = 15;
 const F64_EXP: usize = 3;   // f64 |exp| <= 308
 const F64_WIDTH: usize = 3 + F64_MANT + 2 + F64_EXP;
 
+#[inline(always)]
+pub(super) fn bytes_count(format: FloatFormat) -> u8 {
+    match format {
+        FloatFormat::Scientific32 => 4,
+        FloatFormat::Scientific64 => 8,
+    }
+}
+
 fn value_from_bytes(bytes: [u8; 8], format: FloatFormat) -> f64 {
     match format {
         // NOTE: le, not ne — file endianness is defined, host endianness is not.
-        FloatFormat::F32 => f32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as f64,
-        FloatFormat::F64 => f64::from_le_bytes(bytes),
+        FloatFormat::Scientific32 => f32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as f64,
+        FloatFormat::Scientific64 => f64::from_le_bytes(bytes),
     }
 }
 
 pub(super) fn display_chars(format: FloatFormat) -> u32 {
     match format {
-        FloatFormat::F32 => F32_WIDTH as u32, // 9
-        FloatFormat::F64 => F64_WIDTH as u32, // 22
+        FloatFormat::Scientific32 => F32_WIDTH as u32, // 9
+        FloatFormat::Scientific64 => F64_WIDTH as u32, // 22
     }
 }
 
 pub(super) fn write(bytes: [u8; 8], format: FloatFormat, output: &mut OutputBuffer) {
     let (mant, exp_digits, width) = match format {
-        FloatFormat::F32 => (F32_MANT, F32_EXP, F32_WIDTH),
-        FloatFormat::F64 => (F64_MANT, F64_EXP, F64_WIDTH),
+        FloatFormat::Scientific32 => (F32_MANT, F32_EXP, F32_WIDTH),
+        FloatFormat::Scientific64 => (F64_MANT, F64_EXP, F64_WIDTH),
     };
     let v = value_from_bytes(bytes, format);
 
@@ -68,7 +76,7 @@ pub(super) fn write(bytes: [u8; 8], format: FloatFormat, output: &mut OutputBuff
     let mut n = 0usize;
 
     // sign slot: '-' or ' ' (space keeps columns aligned)
-    buf[n] = if neg { b'-' } else { b' ' }; n += 1;
+    buf[n] = if neg { b'-' } else { b'+' }; n += 1;
 
     // leading digit
     let lead = m.trunc() as u8; // 0..=9
@@ -127,11 +135,11 @@ pub(super) fn convert_to_bytes(text: &str, format: FloatFormat) -> ([u8; 8], u8)
     let t = text.trim();
     let mut out = [0u8; 8];
     match format {
-        FloatFormat::F32 => match t.parse::<f32>() {
+        FloatFormat::Scientific32 => match t.parse::<f32>() {
             Ok(v) => { out[..4].copy_from_slice(&v.to_le_bytes()); (out, 4) }
             Err(_) => (out, 0), // commit fails; validate should have caught most
         },
-        FloatFormat::F64 => match t.parse::<f64>() {
+        FloatFormat::Scientific64 => match t.parse::<f64>() {
             Ok(v) => { out.copy_from_slice(&v.to_le_bytes()); (out, 8) }
             Err(_) => (out, 0),
         },

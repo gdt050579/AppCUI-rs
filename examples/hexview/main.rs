@@ -89,8 +89,8 @@ fn int_format_from_index(index: u32) -> bufferview::IntFormat {
 
 fn float_format_from_index(index: u32) -> bufferview::FloatFormat {
     match index {
-        1 => bufferview::FloatFormat::F64,
-        _ => bufferview::FloatFormat::F32,
+        1 => bufferview::FloatFormat::Scientific64,
+        _ => bufferview::FloatFormat::Scientific32,
     }
 }
 
@@ -328,7 +328,7 @@ impl HexViewWindow {
                     0 => &["Byte", "Word", "DWord", "QWord"],
                     3 => &["U8", "U16", "U32", "U64"],
                     4 => &["I8", "I16", "I32", "I64"],
-                    5 => &["F32", "F64"],
+                    5 => &["Scientific32", "Scientific64"],
                     _ => &[],
                 };
                 for item in items {
