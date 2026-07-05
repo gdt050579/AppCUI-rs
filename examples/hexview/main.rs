@@ -78,7 +78,7 @@ fn codepage_from_index(index: u32) -> bufferview::Codepage {
     }
 }
 
-#[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<MyBuffer>+CommandBarEvents, commands = [DeleteSelection, InsertText, ResizeBuffer])]
+#[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<MyBuffer>+CommandBarEvents, commands = [FillSelection, DeleteSelection, InsertText, ResizeBuffer])]
 struct HexViewWindow {
     buffer: Handle<BufferView<MyBuffer>>,
     lb_pos: Handle<toolbar::Label>,
@@ -171,6 +171,34 @@ impl HexViewWindow {
         w.apply_to_buffer();
         w.update_position_label();
         w
+    }
+
+    fn fill_selection(&mut self) {
+        let h_buffer = self.buffer;
+        if let Some(bv) = self.control_mut(h_buffer) {
+            let Some((start, end)) = bv.selection() else {
+                return;
+            };
+            let count = end - start;
+            if count == 0 {
+                return;
+            }
+            let caption = format!(
+                "Fill {count} byte(s) from offset 0x{start:X} to 0x{}.\nEnter fill value (0-255):",
+                end - 1
+            );
+            let Some(value) = dialogs::input::<u8>("Fill Selection", caption.as_str(), Some(0), None) else {
+                return;
+            };
+            if bv.fill_buffer(start, count, value) {
+                self.update_position_label();
+            } else {
+                dialogs::message(
+                    "Fill Selection",
+                    format!("Failed to fill selection with value 0x{value:02X}.").as_str(),
+                );
+            }
+        }
     }
 
     fn delete_selection(&mut self) {
@@ -391,6 +419,7 @@ impl BufferViewEvents<MyBuffer> for HexViewWindow {
 
 impl CommandBarEvents for HexViewWindow {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+        commandbar.set(key!("F6"), "Fill Selection", hexviewwindow::Commands::FillSelection);
         commandbar.set(key!("F8"), "Delete Selection", hexviewwindow::Commands::DeleteSelection);
         commandbar.set(key!("F9"), "Insert", hexviewwindow::Commands::InsertText);
         commandbar.set(key!("F10"), "Resize", hexviewwindow::Commands::ResizeBuffer);
@@ -398,6 +427,7 @@ impl CommandBarEvents for HexViewWindow {
 
     fn on_event(&mut self, command_id: hexviewwindow::Commands) {
         match command_id {
+            hexviewwindow::Commands::FillSelection => self.fill_selection(),
             hexviewwindow::Commands::DeleteSelection => self.delete_selection(),
             hexviewwindow::Commands::InsertText => self.insert_text(),
             hexviewwindow::Commands::ResizeBuffer => self.resize_buffer(),

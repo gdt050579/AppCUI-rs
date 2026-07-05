@@ -335,14 +335,14 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         result
     }
-    // pub fn fill_bytes(&mut self, pos: u64, count: u64, value: u8) -> bool {
-    //     if self.flags.contains(Flags::ReadOnly) {
-    //         return false;
-    //     }
-    //     let result = self.buffer.fill(pos, count, value);
-    //     self.paint_buffer();
-    //     result
-    // }
+    pub fn fill_buffer(&mut self, pos: u64, count: u64, value: u8) -> bool {
+        if self.flags.contains(Flags::ReadOnly) {
+            return false;
+        }
+        let result = self.buffer.fill(pos, count, value);
+        self.paint_buffer();
+        result
+    }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;
         if chars_count <= len {

@@ -94,7 +94,7 @@ impl<T: BufferAccess> Buffer<T> {
             return false;
         }
         if count == 0 || pos >= len {
-            return true;                
+            return true;
         }
         let count = count.min(len - pos);
         let mut src = pos + count;
@@ -111,7 +111,7 @@ impl<T: BufferAccess> Buffer<T> {
             src += n;
             dst += n;
         }
-        self.data.resize(len - count,0u8)
+        self.data.resize(len - count, 0u8)
     }
     pub(super) fn insert(&mut self, pos: u64, bytes: &[u8]) -> bool {
         let old_len = self.data.len();
@@ -149,6 +149,27 @@ impl<T: BufferAccess> Buffer<T> {
         } else {
             false
         }
+    }
+    pub(super) fn fill(&mut self, pos: u64, count: u64, value: u8) -> bool {
+        if count == 0 {
+            return true;
+        }
+        if !self.data.can_write() {
+            return false;
+        }
+        match pos.checked_add(count) {
+            Some(end) if end <= self.data.len() => {}
+            _ => return false,
+        }
+        let mut p = pos;
+        let end = pos + count;
+        while p < end {
+            if !self.data.set(p, value) {
+                return false;
+            }
+            p += 1;
+        }
+        true
     }
 }
 
