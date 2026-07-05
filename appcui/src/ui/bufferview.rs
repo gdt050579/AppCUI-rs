@@ -29,6 +29,7 @@ pub use self::format::DataRepresentationFormat;
 pub use self::format::HexFormat;
 pub use self::format::IntFormat;
 pub use self::format::UIntFormat;
+pub use self::format::FloatFormat;
 pub use self::format::OffsetFormat;
 pub use self::interval::Interval;
 pub use self::codepage::Codepage;

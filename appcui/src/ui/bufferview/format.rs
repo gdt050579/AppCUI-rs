@@ -3,6 +3,7 @@ mod oct;
 mod bin;
 mod uint;
 mod int;
+mod float;
 
 #[cfg(test)]
 mod tests;
@@ -48,6 +49,12 @@ pub enum IntFormat {
     I32 = 4,
     I64 = 8,
 }
+#[derive(Clone, Copy)]
+#[repr(u8)]
+pub enum FloatFormat {
+    F32 = 4,
+    F64 = 8,
+}
 
 #[derive(Clone, Copy)]
 pub enum DataRepresentationFormat {
@@ -56,6 +63,7 @@ pub enum DataRepresentationFormat {
     Bin,
     UInt(UIntFormat),
     Int(IntFormat),
+    Float(FloatFormat),
     Char,
 }
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -73,6 +81,7 @@ impl DataRepresentationFormat {
             DataRepresentationFormat::Char => { output.set_len(1); output.set(0, bytes[0]); },
             DataRepresentationFormat::UInt(format) => uint::write(bytes, *format, output),
             DataRepresentationFormat::Int(format) => int::write(bytes, *format, output),
+            DataRepresentationFormat::Float(format) => float::write(bytes, *format, output),
         }
     }
     #[inline(always)]
@@ -81,6 +90,7 @@ impl DataRepresentationFormat {
             DataRepresentationFormat::Hex(format) => *format as u8,
             DataRepresentationFormat::UInt(format) => *format as u8,
             DataRepresentationFormat::Int(format) => *format as u8,
+            DataRepresentationFormat::Float(format) => *format as u8,
             DataRepresentationFormat::Oct => 1,
             DataRepresentationFormat::Bin => 1,
             DataRepresentationFormat::Char => 1,
@@ -92,6 +102,7 @@ impl DataRepresentationFormat {
             DataRepresentationFormat::Hex(format) => (*format as u32) * 2,
             DataRepresentationFormat::UInt(format) => uint::display_chars(*format),
             DataRepresentationFormat::Int(format) => int::display_chars(*format),
+            DataRepresentationFormat::Float(format) => float::display_chars(*format),
             DataRepresentationFormat::Oct => 3,
             DataRepresentationFormat::Bin => 8,
             DataRepresentationFormat::Char => 1,
@@ -116,6 +127,7 @@ impl DataRepresentationFormat {
             DataRepresentationFormat::Oct => oct::validate(text),
             DataRepresentationFormat::Bin => bin::validate(text),
             DataRepresentationFormat::Char => ValidateResult::Update,
+            DataRepresentationFormat::Float(format) => float::validate(text, *format),
         }
     }
     pub(super) fn convert_to_bytes(&self, text: &str) -> ([u8; 8], u8) {
@@ -135,6 +147,7 @@ impl DataRepresentationFormat {
                 output[..len].copy_from_slice(&b[..len]);
                 (output, len as u8)
             },
+            DataRepresentationFormat::Float(format) => float::convert_to_bytes(text, *format),
         }
     }
 }

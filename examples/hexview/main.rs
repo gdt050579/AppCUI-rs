@@ -87,6 +87,13 @@ fn int_format_from_index(index: u32) -> bufferview::IntFormat {
     }
 }
 
+fn float_format_from_index(index: u32) -> bufferview::FloatFormat {
+    match index {
+        1 => bufferview::FloatFormat::F64,
+        _ => bufferview::FloatFormat::F32,
+    }
+}
+
 fn codepage_from_index(index: u32) -> bufferview::Codepage {
     match index {
         1 => bufferview::Codepage::ASCII,
@@ -161,7 +168,7 @@ impl HexViewWindow {
 
         let mut panel = panel!("'Configuration',d:f");
         panel.add(label!("'Representation:',l:1,t:1,w:16,h:1"));
-        w.cb_format = panel.add(combobox!("l:18,t:1,r:1,items=[Hex,Oct,Bin,UInt,Int,Char],index:0"));
+        w.cb_format = panel.add(combobox!("l:18,t:1,r:1,items=[Hex,Oct,Bin,UInt,Int,Float,Char],index:0"));
         panel.add(label!("'Format:',l:1,t:3,w:16,h:1"));
         w.cb_data_format = panel.add(combobox!("l:18,t:3,r:1,items=[Byte,Word,DWord,QWord],index:0"));
         panel.add(label!("'Columns:',l:1,t:5,w:16,h:1"));
@@ -303,7 +310,7 @@ impl HexViewWindow {
     }
 
     fn representation_has_format(&self) -> bool {
-        matches!(self.format_index(), 0 | 3 | 4)
+        matches!(self.format_index(), 0 | 3 | 4 | 5)
     }
 
     fn endian_enabled(&self) -> bool {
@@ -321,6 +328,7 @@ impl HexViewWindow {
                     0 => &["Byte", "Word", "DWord", "QWord"],
                     3 => &["U8", "U16", "U32", "U64"],
                     4 => &["I8", "I16", "I32", "I64"],
+                    5 => &["F32", "F64"],
                     _ => &[],
                 };
                 for item in items {
@@ -374,6 +382,7 @@ impl HexViewWindow {
             2 => bufferview::DataRepresentationFormat::Bin,
             3 => bufferview::DataRepresentationFormat::UInt(uint_format_from_index(data_format_idx)),
             4 => bufferview::DataRepresentationFormat::Int(int_format_from_index(data_format_idx)),
+            5 => bufferview::DataRepresentationFormat::Float(float_format_from_index(data_format_idx)),
             _ => bufferview::DataRepresentationFormat::Char,
         };
 
