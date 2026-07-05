@@ -4,7 +4,7 @@ pub trait BufferAccess {
     fn can_write(&self) -> bool;
     fn set(&mut self, pos: u64, value: u8) -> bool;
     fn can_resize(&self) -> bool;
-    fn resize(&mut self, new_size: u64) -> bool;
+    fn resize(&mut self, new_size: u64, fill_byte: u8) -> bool;
 }
 
 pub struct Buffer<T: BufferAccess> {
@@ -74,7 +74,7 @@ impl<T: BufferAccess> Buffer<T> {
             if !self.can_resize() {
                 return false;
             }
-            if !self.data.resize(new_len) {
+            if !self.data.resize(new_len, 0u8) {
                 return false;
             }
         }
@@ -111,7 +111,7 @@ impl<T: BufferAccess> Buffer<T> {
             src += n;
             dst += n;
         }
-        self.data.resize(len - count)
+        self.data.resize(len - count,0u8)
     }
     pub(super) fn insert(&mut self, pos: u64, bytes: &[u8]) -> bool {
         let old_len = self.data.len();
@@ -122,7 +122,7 @@ impl<T: BufferAccess> Buffer<T> {
             return true;
         }
         let k = bytes.len() as u64;
-        if !self.data.resize(old_len + k) {
+        if !self.data.resize(old_len + k, 0u8) {
             return false;
         }
         let mut remaining = old_len - pos;
@@ -142,6 +142,14 @@ impl<T: BufferAccess> Buffer<T> {
         }
         self.overwrite_bytes(pos, bytes)
     }
+    #[inline(always)]
+    pub(super) fn resize(&mut self, new_size: u64, fill_byte: u8) -> bool {
+        if self.data.can_resize() {
+            self.data.resize(new_size, fill_byte)
+        } else {
+            false
+        }
+    }
 }
 
 impl BufferAccess for Vec<u8> {
@@ -158,8 +166,8 @@ impl BufferAccess for Vec<u8> {
     fn can_resize(&self) -> bool {
         true
     }
-    fn resize(&mut self, new_size: u64) -> bool {
-        self.resize(new_size as usize, 0u8);
+    fn resize(&mut self, new_size: u64, fill_byte: u8) -> bool {
+        self.resize(new_size as usize, fill_byte);
         true
     }
     fn can_write(&self) -> bool {

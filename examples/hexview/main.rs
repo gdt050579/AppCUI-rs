@@ -54,8 +54,8 @@ impl BufferAccess for MyBuffer {
     fn can_resize(&self) -> bool {
         true
     }
-    fn resize(&mut self, new_size: u64) -> bool {
-        self.data.resize(new_size as usize, 0u8);
+    fn resize(&mut self, new_size: u64, value: u8) -> bool {
+        self.data.resize(new_size as usize, value);
         true
     }
 }
@@ -78,7 +78,7 @@ fn codepage_from_index(index: u32) -> bufferview::Codepage {
     }
 }
 
-#[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<MyBuffer>+CommandBarEvents, commands = [DeleteSelection, InsertText])]
+#[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<MyBuffer>+CommandBarEvents, commands = [DeleteSelection, InsertText, ResizeBuffer])]
 struct HexViewWindow {
     buffer: Handle<BufferView<MyBuffer>>,
     lb_pos: Handle<toolbar::Label>,
@@ -209,6 +209,28 @@ impl HexViewWindow {
                 self.update_position_label();
             } else {
                 dialogs::message("Insert Text", format!("Failed to insert text '{text}' at offset 0x{pos:X}").as_str());
+            }
+        }
+    }
+
+    fn resize_buffer(&mut self) {
+        let h_buffer = self.buffer;
+        if let Some(bv) = self.control_mut(h_buffer) {
+            let current_size = bv.bytes_count();
+            let caption = format!(
+                "Current buffer size is {current_size} byte(s).\nEnter the new size in bytes:"
+            );
+            let Some(new_size) = dialogs::input::<u64>("Resize Buffer", caption.as_str(), Some(current_size), None) else {
+                return;
+            };
+            if bv.resize_buffer(new_size, 0u8) {
+                bv.clear_selection();
+                self.update_position_label();
+            } else {
+                dialogs::message(
+                    "Resize Buffer",
+                    format!("Failed to resize buffer to {new_size} byte(s).").as_str(),
+                );
             }
         }
     }
@@ -371,12 +393,14 @@ impl CommandBarEvents for HexViewWindow {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
         commandbar.set(key!("F8"), "Delete Selection", hexviewwindow::Commands::DeleteSelection);
         commandbar.set(key!("F9"), "Insert", hexviewwindow::Commands::InsertText);
+        commandbar.set(key!("F10"), "Resize", hexviewwindow::Commands::ResizeBuffer);
     }
 
     fn on_event(&mut self, command_id: hexviewwindow::Commands) {
         match command_id {
             hexviewwindow::Commands::DeleteSelection => self.delete_selection(),
             hexviewwindow::Commands::InsertText => self.insert_text(),
+            hexviewwindow::Commands::ResizeBuffer => self.resize_buffer(),
         }
         self.request_update();
     }

@@ -42,7 +42,7 @@ impl BufferAccess for ReadOnlyBuffer {
         false
     }
 
-    fn resize(&mut self, _new_size: u64) -> bool {
+    fn resize(&mut self, _new_size: u64, _: u8) -> bool {
         false
     }
 }
@@ -81,7 +81,7 @@ impl BufferAccess for ResizeFailsBuffer {
         true
     }
 
-    fn resize(&mut self, _new_size: u64) -> bool {
+    fn resize(&mut self, _new_size: u64, _value: u8) -> bool {
         false
     }
 }
@@ -124,8 +124,8 @@ impl BufferAccess for SetFailsAtBuffer {
         true
     }
 
-    fn resize(&mut self, new_size: u64) -> bool {
-        self.data.resize(new_size as usize, 0);
+    fn resize(&mut self, new_size: u64, value: u8) -> bool {
+        self.data.resize(new_size as usize, value);
         true
     }
 }
@@ -168,8 +168,8 @@ impl BufferAccess for GetFailsAtBuffer {
         true
     }
 
-    fn resize(&mut self, new_size: u64) -> bool {
-        self.data.resize(new_size as usize, 0);
+    fn resize(&mut self, new_size: u64, value: u8) -> bool {
+        self.data.resize(new_size as usize, value);
         true
     }
 }
@@ -505,7 +505,7 @@ fn buffer_vec_access_set_and_resize() {
     assert_eq!(data, vec![1, 9, 3]);
     assert!(!BufferAccess::set(&mut data, 3, 4));
 
-    assert!(BufferAccess::resize(&mut data, 5));
+    assert!(BufferAccess::resize(&mut data, 5, 0u8));
     assert_eq!(data.len(), 5);
     assert_eq!(data[3], 0);
     assert_eq!(data[4], 0);

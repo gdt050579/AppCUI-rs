@@ -299,6 +299,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     pub fn set_current_pos(&mut self, pos: u64) {
         self.goto_position(pos, false, false);
     }
+    #[inline(always)]
+    pub fn bytes_count(&self) -> u64 {
+        self.buffer.len()
+    }
     pub fn delete_bytes(&mut self, pos: u64, count: u64) -> bool {
         if self.flags.contains(Flags::ReadOnly) {
             return false;
@@ -315,6 +319,30 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.paint_buffer();
         result
     }
+    pub fn resize_buffer(&mut self, new_size: u64, fill_byte: u8) -> bool {
+        if self.flags.contains(Flags::ReadOnly) {
+            return false;
+        }
+        self.clear_selection();
+        let result = self.buffer.resize(new_size, fill_byte);
+        if self.pos >= self.buffer.len() {
+            let new_pos = self.buffer.len().saturating_sub(1);
+            if !self.goto_position(new_pos, false, false) {
+                self.paint_buffer();
+            }
+        } else {
+            self.paint_buffer();
+        }
+        result
+    }
+    // pub fn fill_bytes(&mut self, pos: u64, count: u64, value: u8) -> bool {
+    //     if self.flags.contains(Flags::ReadOnly) {
+    //         return false;
+    //     }
+    //     let result = self.buffer.fill(pos, count, value);
+    //     self.paint_buffer();
+    //     result
+    // }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;
         if chars_count <= len {
