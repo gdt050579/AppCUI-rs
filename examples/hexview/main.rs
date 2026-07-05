@@ -60,12 +60,30 @@ impl BufferAccess for MyBuffer {
     }
 }
 
-fn bytes_count_from_index(index: u32) -> bufferview::BytesCount {
+fn hex_format_from_index(index: u32) -> bufferview::HexFormat {
     match index {
-        1 => bufferview::BytesCount::Two,
-        2 => bufferview::BytesCount::Four,
-        3 => bufferview::BytesCount::Eight,
-        _ => bufferview::BytesCount::One,
+        1 => bufferview::HexFormat::Word,
+        2 => bufferview::HexFormat::DWord,
+        3 => bufferview::HexFormat::QWord,
+        _ => bufferview::HexFormat::Byte,
+    }
+}
+
+fn uint_format_from_index(index: u32) -> bufferview::UIntFormat {
+    match index {
+        1 => bufferview::UIntFormat::U16,
+        2 => bufferview::UIntFormat::U32,
+        3 => bufferview::UIntFormat::U64,
+        _ => bufferview::UIntFormat::U8,
+    }
+}
+
+fn int_format_from_index(index: u32) -> bufferview::IntFormat {
+    match index {
+        1 => bufferview::IntFormat::I16,
+        2 => bufferview::IntFormat::I32,
+        3 => bufferview::IntFormat::I64,
+        _ => bufferview::IntFormat::I8,
     }
 }
 
@@ -85,7 +103,7 @@ struct HexViewWindow {
     cb_format: Handle<ComboBox>,
     cb_columns: Handle<ComboBox>,
     cb_offset: Handle<ComboBox>,
-    cb_grouping: Handle<ComboBox>,
+    cb_data_format: Handle<ComboBox>,
     cb_endian: Handle<ComboBox>,
     cb_codepage: Handle<ComboBox>,
     cb_enabled: Handle<CheckBox>,
@@ -105,7 +123,7 @@ impl HexViewWindow {
             cb_format: Handle::None,
             cb_columns: Handle::None,
             cb_offset: Handle::None,
-            cb_grouping: Handle::None,
+            cb_data_format: Handle::None,
             cb_endian: Handle::None,
             cb_codepage: Handle::None,
             cb_enabled: Handle::None,
@@ -130,7 +148,7 @@ impl HexViewWindow {
         bv.set_columns_count(bufferview::ColumnsCount::Fixed(8));
         bv.set_address_width(6);
         bv.set_offset_format(bufferview::OffsetFormat::Hex);
-        bv.set_data_representation_format(bufferview::DataRepresentationFormat::Hex(bufferview::BytesCount::One));
+        bv.set_data_representation_format(bufferview::DataRepresentationFormat::Hex(bufferview::HexFormat::Byte));
         bv.set_endian(bufferview::Endian::Little);
         bv.set_intervals(&[
             bufferview::Interval::new(0, 10, CharAttribute::with_color(Color::Red, Color::Black), "ASCII"),
@@ -144,12 +162,12 @@ impl HexViewWindow {
         let mut panel = panel!("'Configuration',d:f");
         panel.add(label!("'Representation:',l:1,t:1,w:16,h:1"));
         w.cb_format = panel.add(combobox!("l:18,t:1,r:1,items=[Hex,Oct,Bin,UInt,Int,Char],index:0"));
-        panel.add(label!("'Columns:',l:1,t:3,w:16,h:1"));
-        w.cb_columns = panel.add(combobox!("l:18,t:3,r:1,items=[4,8,12,16,Auto],index:1"));
-        panel.add(label!("'Offset format:',l:1,t:5,w:16,h:1"));
-        w.cb_offset = panel.add(combobox!("l:18,t:5,r:1,items=[Hex,Dec],index:0"));
-        panel.add(label!("'Grouping:',l:1,t:7,w:16,h:1"));
-        w.cb_grouping = panel.add(combobox!("l:18,t:7,r:1,items=[Byte,Word,DWord,QWord],index:0"));
+        panel.add(label!("'Format:',l:1,t:3,w:16,h:1"));
+        w.cb_data_format = panel.add(combobox!("l:18,t:3,r:1,items=[Byte,Word,DWord,QWord],index:0"));
+        panel.add(label!("'Columns:',l:1,t:5,w:16,h:1"));
+        w.cb_columns = panel.add(combobox!("l:18,t:5,r:1,items=[4,8,12,16,Auto],index:1"));
+        panel.add(label!("'Offset format:',l:1,t:7,w:16,h:1"));
+        w.cb_offset = panel.add(combobox!("l:18,t:7,r:1,items=[Hex,Dec],index:0"));
         panel.add(label!("'Endian:',l:1,t:9,w:16,h:1"));
         w.cb_endian = panel.add(combobox!("l:18,t:9,r:1,items=[Little,Big],index:0"));
         panel.add(label!("'Codepage:',l:1,t:11,w:16,h:1"));
@@ -280,20 +298,40 @@ impl HexViewWindow {
         self.combobox_index(self.cb_format)
     }
 
-    fn grouping_index(&self) -> u32 {
-        self.combobox_index(self.cb_grouping)
+    fn data_format_index(&self) -> u32 {
+        self.combobox_index(self.cb_data_format)
     }
 
-    fn format_uses_grouping(&self) -> bool {
+    fn representation_has_format(&self) -> bool {
         matches!(self.format_index(), 0 | 3 | 4)
     }
 
     fn endian_enabled(&self) -> bool {
-        self.format_uses_grouping() && self.grouping_index() >= 1
+        self.representation_has_format() && self.data_format_index() >= 1
     }
 
-    fn grouping_enabled(&self) -> bool {
-        self.format_uses_grouping()
+    fn update_format_combobox(&mut self) {
+        let repr_idx = self.format_index();
+        let has_format = self.representation_has_format();
+        let h = self.cb_data_format;
+        if let Some(cb) = self.control_mut(h) {
+            cb.clear();
+            if has_format {
+                let items: &[&str] = match repr_idx {
+                    0 => &["Byte", "Word", "DWord", "QWord"],
+                    3 => &["U8", "U16", "U32", "U64"],
+                    4 => &["I8", "I16", "I32", "I64"],
+                    _ => &[],
+                };
+                for item in items {
+                    cb.add(item);
+                }
+                cb.set_index(0);
+                cb.set_enabled(true);
+            } else {
+                cb.set_enabled(false);
+            }
+        }
     }
 
     fn update_buffer_enabled(&mut self) {
@@ -309,12 +347,7 @@ impl HexViewWindow {
     }
 
     fn update_dependent_controls(&mut self) {
-        let grouping_enabled = self.grouping_enabled();
         let endian_enabled = self.endian_enabled();
-        let h_grouping = self.cb_grouping;
-        if let Some(cb) = self.control_mut(h_grouping) {
-            cb.set_enabled(grouping_enabled);
-        }
         let h_endian = self.cb_endian;
         if let Some(cb) = self.control_mut(h_endian) {
             cb.set_enabled(endian_enabled);
@@ -325,7 +358,7 @@ impl HexViewWindow {
         let format_idx = self.format_index();
         let columns_idx = self.combobox_index(self.cb_columns);
         let offset_idx = self.combobox_index(self.cb_offset);
-        let grouping_idx = self.grouping_index();
+        let data_format_idx = self.data_format_index();
         let endian_idx = self.combobox_index(self.cb_endian);
         let codepage_idx = self.combobox_index(self.cb_codepage);
         let endian_enabled = self.endian_enabled();
@@ -336,11 +369,11 @@ impl HexViewWindow {
         let decode_utf8 = self.checkbox_checked(self.cb_decode_utf8, true);
 
         let repr = match format_idx {
-            0 => bufferview::DataRepresentationFormat::Hex(bytes_count_from_index(grouping_idx)),
+            0 => bufferview::DataRepresentationFormat::Hex(hex_format_from_index(data_format_idx)),
             1 => bufferview::DataRepresentationFormat::Oct,
             2 => bufferview::DataRepresentationFormat::Bin,
-            3 => bufferview::DataRepresentationFormat::UInt(bytes_count_from_index(grouping_idx)),
-            4 => bufferview::DataRepresentationFormat::Int(bytes_count_from_index(grouping_idx)),
+            3 => bufferview::DataRepresentationFormat::UInt(uint_format_from_index(data_format_idx)),
+            4 => bufferview::DataRepresentationFormat::Int(int_format_from_index(data_format_idx)),
             _ => bufferview::DataRepresentationFormat::Char,
         };
 
@@ -383,7 +416,10 @@ impl HexViewWindow {
 }
 
 impl ComboBoxEvents for HexViewWindow {
-    fn on_selection_changed(&mut self, _handle: Handle<ComboBox>) -> EventProcessStatus {
+    fn on_selection_changed(&mut self, handle: Handle<ComboBox>) -> EventProcessStatus {
+        if handle == self.cb_format {
+            self.update_format_combobox();
+        }
         self.update_dependent_controls();
         self.apply_to_buffer();
         EventProcessStatus::Processed
