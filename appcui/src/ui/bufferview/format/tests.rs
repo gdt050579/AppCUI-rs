@@ -1,5 +1,5 @@
-use super::{bin, hex, int, oct, uint, HexFormat, IntFormat, UIntFormat, ValidateResult};
 use super::super::OutputBuffer;
+use super::{bin, float, hex, int, oct, uint, FloatFormat, HexFormat, IntFormat, UIntFormat, ValidateResult};
 
 fn write_hex(bytes: [u8; 8], format: HexFormat) -> Vec<u8> {
     let mut output = OutputBuffer::new();
@@ -31,6 +31,12 @@ fn write_uint(bytes: [u8; 8], format: UIntFormat) -> Vec<u8> {
     output.as_slice().to_vec()
 }
 
+fn write_float(bytes: [u8; 8], format: FloatFormat) -> Vec<u8> {
+    let mut output = OutputBuffer::new();
+    float::write(bytes, format, &mut output);
+    output.as_slice().to_vec()
+}
+
 #[test]
 fn hex_write_one_byte() {
     assert_eq!(write_hex([0x00, 0, 0, 0, 0, 0, 0, 0], HexFormat::Byte), b"00");
@@ -47,10 +53,7 @@ fn hex_write_two_bytes() {
 
 #[test]
 fn hex_write_four_bytes() {
-    assert_eq!(
-        write_hex([0x67, 0x45, 0x23, 0x01, 0, 0, 0, 0], HexFormat::DWord),
-        b"01234567"
-    );
+    assert_eq!(write_hex([0x67, 0x45, 0x23, 0x01, 0, 0, 0, 0], HexFormat::DWord), b"01234567");
 }
 
 #[test]
@@ -173,14 +176,8 @@ fn int_write_signed_values() {
     assert_eq!(write_int([0x00, 0, 0, 0, 0, 0, 0, 0], IntFormat::I8), b"  +0");
     assert_eq!(write_int([0x7F, 0, 0, 0, 0, 0, 0, 0], IntFormat::I8), b"+127");
     assert_eq!(write_int([0x80, 0, 0, 0, 0, 0, 0, 0], IntFormat::I8), b"-128");
-    assert_eq!(
-        write_int([0x00, 0x01, 0, 0, 0, 0, 0, 0], IntFormat::I16),
-        b"  +256"
-    );
-    assert_eq!(
-        write_int([0x00, 0x80, 0, 0, 0, 0, 0, 0], IntFormat::I16),
-        b"-32768"
-    );
+    assert_eq!(write_int([0x00, 0x01, 0, 0, 0, 0, 0, 0], IntFormat::I16), b"  +256");
+    assert_eq!(write_int([0x00, 0x80, 0, 0, 0, 0, 0, 0], IntFormat::I16), b"-32768");
 }
 
 #[test]
@@ -217,14 +214,8 @@ fn int_convert_to_bytes_returns_zero_on_parse_failure() {
 fn uint_write_unsigned_values() {
     assert_eq!(write_uint([0x00, 0, 0, 0, 0, 0, 0, 0], UIntFormat::U8), b"  0");
     assert_eq!(write_uint([0xFF, 0, 0, 0, 0, 0, 0, 0], UIntFormat::U8), b"255");
-    assert_eq!(
-        write_uint([0x00, 0x01, 0, 0, 0, 0, 0, 0], UIntFormat::U16),
-        b"  256"
-    );
-    assert_eq!(
-        write_uint([0xFF, 0xFF, 0, 0, 0, 0, 0, 0], UIntFormat::U16),
-        b"65535"
-    );
+    assert_eq!(write_uint([0x00, 0x01, 0, 0, 0, 0, 0, 0], UIntFormat::U16), b"  256");
+    assert_eq!(write_uint([0xFF, 0xFF, 0, 0, 0, 0, 0, 0], UIntFormat::U16), b"65535");
 }
 
 #[test]
@@ -254,3 +245,36 @@ fn uint_convert_to_bytes_parses_by_format() {
 fn uint_convert_to_bytes_returns_zero_on_parse_failure() {
     assert_eq!(uint::convert_to_bytes("not-a-number", UIntFormat::U32), ([0; 8], 0));
 }
+
+#[test]
+fn e4m3_write_fixed_decimal() {
+    assert_eq!(write_float([0x00, 0, 0, 0, 0, 0, 0, 0], FloatFormat::E4M3), b"+000.000");
+    assert_eq!(write_float([0x38, 0, 0, 0, 0, 0, 0, 0], FloatFormat::E4M3), b"+001.000");
+    assert_eq!(write_float([0x77, 0, 0, 0, 0, 0, 0, 0], FloatFormat::E4M3), b"+240.000");
+    assert_eq!(write_float([0xF7, 0, 0, 0, 0, 0, 0, 0], FloatFormat::E4M3), b"-240.000");
+    assert_eq!(write_float([0x7F, 0, 0, 0, 0, 0, 0, 0], FloatFormat::E4M3), b"     NaN");
+}
+
+#[test]
+fn e5m2_write_fixed_decimal() {
+    assert_eq!(write_float([0x00, 0, 0, 0, 0, 0, 0, 0], FloatFormat::E5M2), b"+00000.000000");
+    assert_eq!(write_float([0x7C, 0, 0, 0, 0, 0, 0, 0], FloatFormat::E5M2), b"          inf");
+    assert_eq!(write_float([0xFC, 0, 0, 0, 0, 0, 0, 0], FloatFormat::E5M2), b"         -inf");
+    assert_eq!(write_float([0x7F, 0, 0, 0, 0, 0, 0, 0], FloatFormat::E5M2), b"          NaN");
+}
+
+#[test]
+fn fp8_validate_rejects_scientific_notation() {
+    assert_eq!(float::validate("1.2e3", FloatFormat::E4M3), ValidateResult::FormatError);
+    assert_eq!(float::validate("1.2e3", FloatFormat::E5M2), ValidateResult::FormatError);
+    assert_eq!(float::validate("+240.000", FloatFormat::E4M3), ValidateResult::Valid);
+}
+
+#[test]
+fn e4m3_convert_to_bytes_roundtrip() {
+    let (bytes, count) = float::convert_to_bytes("+240.000", FloatFormat::E4M3);
+    assert_eq!(count, 1);
+    assert_eq!(bytes[0], 0x77);
+    assert_eq!(write_float(bytes, FloatFormat::E4M3), b"+240.000");
+}
+    

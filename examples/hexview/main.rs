@@ -49,7 +49,7 @@ impl BufferAccess for MyBuffer {
             true
         } else {
             false
-        } 
+        }
     }
     fn can_resize(&self) -> bool {
         true
@@ -90,6 +90,8 @@ fn int_format_from_index(index: u32) -> bufferview::IntFormat {
 fn float_format_from_index(index: u32) -> bufferview::FloatFormat {
     match index {
         1 => bufferview::FloatFormat::Scientific64,
+        2 => bufferview::FloatFormat::E4M3,
+        3 => bufferview::FloatFormat::E5M2,
         _ => bufferview::FloatFormat::Scientific32,
     }
 }
@@ -218,10 +220,7 @@ impl HexViewWindow {
             if bv.fill_buffer(start, count, value) {
                 self.update_position_label();
             } else {
-                dialogs::message(
-                    "Fill Selection",
-                    format!("Failed to fill selection with value 0x{value:02X}.").as_str(),
-                );
+                dialogs::message("Fill Selection", format!("Failed to fill selection with value 0x{value:02X}.").as_str());
             }
         }
     }
@@ -270,9 +269,7 @@ impl HexViewWindow {
         let h_buffer = self.buffer;
         if let Some(bv) = self.control_mut(h_buffer) {
             let current_size = bv.bytes_count();
-            let caption = format!(
-                "Current buffer size is {current_size} byte(s).\nEnter the new size in bytes:"
-            );
+            let caption = format!("Current buffer size is {current_size} byte(s).\nEnter the new size in bytes:");
             let Some(new_size) = dialogs::input::<u64>("Resize Buffer", caption.as_str(), Some(current_size), None) else {
                 return;
             };
@@ -280,10 +277,7 @@ impl HexViewWindow {
                 bv.clear_selection();
                 self.update_position_label();
             } else {
-                dialogs::message(
-                    "Resize Buffer",
-                    format!("Failed to resize buffer to {new_size} byte(s).").as_str(),
-                );
+                dialogs::message("Resize Buffer", format!("Failed to resize buffer to {new_size} byte(s).").as_str());
             }
         }
     }
@@ -328,7 +322,7 @@ impl HexViewWindow {
                     0 => &["Byte", "Word", "DWord", "QWord"],
                     3 => &["U8", "U16", "U32", "U64"],
                     4 => &["I8", "I16", "I32", "I64"],
-                    5 => &["Scientific32", "Scientific64"],
+                    5 => &["Scientific32", "Scientific64", "E4M3", "E5M2"],
                     _ => &[],
                 };
                 for item in items {
