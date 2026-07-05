@@ -1,5 +1,517 @@
+use super::buffer::{Buffer, BufferAccess};
 use super::bufferview::BufferView;
 use super::search_parser::{parse, Error};
+
+fn buffer(data: impl Into<Vec<u8>>) -> Buffer<Vec<u8>> {
+    Buffer::new(data.into())
+}
+
+fn snapshot(buf: &mut Buffer<Vec<u8>>) -> Vec<u8> {
+    let len = buf.len() as usize;
+    let mut out = vec![0u8; len];
+    buf.read_bytes(0, &mut out);
+    out
+}
+
+struct ReadOnlyBuffer {
+    data: Vec<u8>,
+}
+
+impl BufferAccess for ReadOnlyBuffer {
+    fn len(&self) -> u64 {
+        self.data.len() as u64
+    }
+
+    fn get(&mut self, pos: u64) -> Option<u8> {
+        if pos < self.data.len() as u64 {
+            Some(self.data[pos as usize])
+        } else {
+            None
+        }
+    }
+
+    fn can_write(&self) -> bool {
+        false
+    }
+
+    fn set(&mut self, _pos: u64, _value: u8) -> bool {
+        false
+    }
+
+    fn can_resize(&self) -> bool {
+        false
+    }
+
+    fn resize(&mut self, _new_size: u64) -> bool {
+        false
+    }
+}
+
+struct ResizeFailsBuffer {
+    data: Vec<u8>,
+}
+
+impl BufferAccess for ResizeFailsBuffer {
+    fn len(&self) -> u64 {
+        self.data.len() as u64
+    }
+
+    fn get(&mut self, pos: u64) -> Option<u8> {
+        if pos < self.data.len() as u64 {
+            Some(self.data[pos as usize])
+        } else {
+            None
+        }
+    }
+
+    fn can_write(&self) -> bool {
+        true
+    }
+
+    fn set(&mut self, pos: u64, value: u8) -> bool {
+        if pos < self.data.len() as u64 {
+            self.data[pos as usize] = value;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn can_resize(&self) -> bool {
+        true
+    }
+
+    fn resize(&mut self, _new_size: u64) -> bool {
+        false
+    }
+}
+
+struct SetFailsAtBuffer {
+    data: Vec<u8>,
+    fail_at: u64,
+}
+
+impl BufferAccess for SetFailsAtBuffer {
+    fn len(&self) -> u64 {
+        self.data.len() as u64
+    }
+
+    fn get(&mut self, pos: u64) -> Option<u8> {
+        if pos < self.data.len() as u64 {
+            Some(self.data[pos as usize])
+        } else {
+            None
+        }
+    }
+
+    fn can_write(&self) -> bool {
+        true
+    }
+
+    fn set(&mut self, pos: u64, value: u8) -> bool {
+        if pos == self.fail_at {
+            return false;
+        }
+        if pos < self.data.len() as u64 {
+            self.data[pos as usize] = value;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn can_resize(&self) -> bool {
+        true
+    }
+
+    fn resize(&mut self, new_size: u64) -> bool {
+        self.data.resize(new_size as usize, 0);
+        true
+    }
+}
+
+struct GetFailsAtBuffer {
+    data: Vec<u8>,
+    fail_at: u64,
+}
+
+impl BufferAccess for GetFailsAtBuffer {
+    fn len(&self) -> u64 {
+        self.data.len() as u64
+    }
+
+    fn get(&mut self, pos: u64) -> Option<u8> {
+        if pos == self.fail_at {
+            return None;
+        }
+        if pos < self.data.len() as u64 {
+            Some(self.data[pos as usize])
+        } else {
+            None
+        }
+    }
+
+    fn can_write(&self) -> bool {
+        true
+    }
+
+    fn set(&mut self, pos: u64, value: u8) -> bool {
+        if pos < self.data.len() as u64 {
+            self.data[pos as usize] = value;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn can_resize(&self) -> bool {
+        true
+    }
+
+    fn resize(&mut self, new_size: u64) -> bool {
+        self.data.resize(new_size as usize, 0);
+        true
+    }
+}
+
+#[test]
+fn buffer_read_bytes_exact_zero_length() {
+    let mut buf = buffer(b"abc".to_vec());
+    let mut out = [0u8; 0];
+    assert!(buf.read_bytes_exact(0, &mut out));
+    assert!(buf.read_bytes_exact(3, &mut out));
+    assert!(!buf.read_bytes_exact(4, &mut out));
+}
+
+#[test]
+fn buffer_delete_fails_when_final_resize_fails() {
+    let mut buf = Buffer::new(ResizeFailsBuffer {
+        data: b"hello".to_vec(),
+    });
+    assert!(!buf.delete(0, 1));
+}
+
+#[test]
+fn buffer_delete_fails_when_shift_overwrite_fails() {
+    let mut buf = Buffer::new(SetFailsAtBuffer {
+        data: b"0123456789".to_vec(),
+        fail_at: 1,
+    });
+    assert!(!buf.delete(0, 2));
+}
+
+#[test]
+fn buffer_insert_fails_when_shift_read_fails() {
+    let mut buf = Buffer::new(GetFailsAtBuffer {
+        data: b"0123456789".to_vec(),
+        fail_at: 2,
+    });
+    assert!(!buf.insert(1, b"XY"));
+}
+
+#[test]
+fn buffer_insert_fails_when_shift_overwrite_fails() {
+    let mut buf = Buffer::new(SetFailsAtBuffer {
+        data: b"0123456789".to_vec(),
+        fail_at: 5,
+    });
+    assert!(!buf.insert(1, b"XY"));
+}
+
+#[test]
+fn buffer_write_bytes_empty_slice() {
+    let mut buf = buffer(b"abc".to_vec());
+    assert!(buf.write_bytes(0, b""));
+    assert!(buf.write_bytes(3, b""));
+    assert_eq!(snapshot(&mut buf), b"abc".to_vec());
+}
+
+#[test]
+fn buffer_vec_access_len_and_get() {
+    let mut empty = buffer(vec![]);
+    assert_eq!(empty.len(), 0);
+    assert_eq!(empty.get(0), None);
+
+    let mut data = buffer(b"hello".to_vec());
+    assert_eq!(data.len(), 5);
+    assert_eq!(data.get(0), Some(b'h'));
+    assert_eq!(data.get(4), Some(b'o'));
+    assert_eq!(data.get(5), None);
+    assert_eq!(data.get(u64::MAX), None);
+}
+
+#[test]
+fn buffer_vec_access_can_edit_and_resize() {
+    let editable = buffer(vec![1, 2, 3]);
+    assert!(editable.can_edit());
+    assert!(editable.can_resize());
+}
+
+#[test]
+fn buffer_read_bytes_exact_success_and_bounds() {
+    let mut buf = buffer(b"ABCDEF".to_vec());
+
+    let mut out = [0u8; 3];
+    assert!(buf.read_bytes_exact(0, &mut out));
+    assert_eq!(&out, b"ABC");
+
+    let mut out = [0u8; 2];
+    assert!(buf.read_bytes_exact(4, &mut out));
+    assert_eq!(&out, b"EF");
+
+    let mut out = [0u8; 1];
+    assert!(buf.read_bytes_exact(5, &mut out));
+    assert_eq!(&out, b"F");
+
+    let mut out = [0u8; 4];
+    assert!(!buf.read_bytes_exact(3, &mut out));
+
+    let mut out = [0u8; 1];
+    assert!(!buf.read_bytes_exact(6, &mut out));
+
+    let mut out = [0u8; 4];
+    assert!(!buf.read_bytes_exact(u64::MAX - 2, &mut out));
+}
+
+#[test]
+fn buffer_read_bytes_exact_fails_when_get_returns_none() {
+    let mut buf = Buffer::new(GetFailsAtBuffer {
+        data: b"ABCDE".to_vec(),
+        fail_at: 2,
+    });
+    let mut out = [0u8; 3];
+    assert!(!buf.read_bytes_exact(0, &mut out));
+}
+
+#[test]
+fn buffer_read_bytes_partial_and_empty() {
+    let mut buf = buffer(b"hello".to_vec());
+
+    let mut out = [0u8; 0];
+    assert_eq!(buf.read_bytes(0, &mut out), 0);
+
+    let mut out = [0u8; 3];
+    assert_eq!(buf.read_bytes(0, &mut out), 3);
+    assert_eq!(&out, b"hel");
+
+    let mut out = [0u8; 10];
+    assert_eq!(buf.read_bytes(0, &mut out), 5);
+    assert_eq!(&out[..5], b"hello");
+
+    let mut out = [0u8; 2];
+    assert_eq!(buf.read_bytes(3, &mut out), 2);
+    assert_eq!(&out, b"lo");
+
+    assert_eq!(buf.read_bytes(5, &mut [0u8; 4]), 0);
+    assert_eq!(buf.read_bytes(100, &mut [0u8; 4]), 0);
+}
+
+#[test]
+fn buffer_read_bytes_stops_when_get_returns_none() {
+    let mut buf = Buffer::new(GetFailsAtBuffer {
+        data: b"ABCDE".to_vec(),
+        fail_at: 2,
+    });
+    let mut out = [0u8; 5];
+    assert_eq!(buf.read_bytes(0, &mut out), 2);
+    assert_eq!(&out[..2], b"AB");
+}
+
+#[test]
+fn buffer_overwrite_bytes_success_and_failure() {
+    let mut buf = buffer(b"hello world".to_vec());
+
+    assert!(buf.overwrite_bytes(0, b"HELLO"));
+    assert_eq!(snapshot(&mut buf), b"HELLO world".to_vec());
+
+    assert!(buf.overwrite_bytes(6, b"WORLD"));
+    assert_eq!(snapshot(&mut buf), b"HELLO WORLD".to_vec());
+
+    assert!(buf.overwrite_bytes(8, b"!!!"));
+    assert_eq!(snapshot(&mut buf), b"HELLO WO!!!".to_vec());
+
+    assert!(buf.overwrite_bytes(11, b""));
+
+    assert!(!buf.overwrite_bytes(9, b"!!!"));
+    assert!(!buf.overwrite_bytes(100, b"x"));
+    assert!(!buf.overwrite_bytes(11, b"x"));
+}
+
+#[test]
+fn buffer_overwrite_bytes_fails_when_set_fails() {
+    let mut buf = Buffer::new(SetFailsAtBuffer {
+        data: b"hello".to_vec(),
+        fail_at: 2,
+    });
+    assert!(!buf.overwrite_bytes(0, b"HELLO"));
+}
+
+#[test]
+fn buffer_write_bytes_without_resize() {
+    let mut buf = buffer(b"abcdef".to_vec());
+
+    assert!(buf.write_bytes(0, b"ABC"));
+    assert_eq!(snapshot(&mut buf), b"ABCdef".to_vec());
+
+    assert!(buf.write_bytes(3, b"DEF"));
+    assert_eq!(snapshot(&mut buf), b"ABCDEF".to_vec());
+
+    assert!(buf.write_bytes(6, b""));
+    assert_eq!(snapshot(&mut buf), b"ABCDEF".to_vec());
+}
+
+#[test]
+fn buffer_write_bytes_extends_with_resize() {
+    let mut buf = buffer(b"abc".to_vec());
+
+    assert!(buf.write_bytes(3, b"def"));
+    assert_eq!(snapshot(&mut buf), b"abcdef".to_vec());
+
+    assert!(buf.write_bytes(6, b"gh"));
+    assert_eq!(snapshot(&mut buf), b"abcdefgh".to_vec());
+}
+
+#[test]
+fn buffer_write_bytes_fails_when_cannot_resize() {
+    let mut buf = Buffer::new(ReadOnlyBuffer {
+        data: b"abc".to_vec(),
+    });
+    assert!(!buf.write_bytes(3, b"x"));
+    assert!(!buf.write_bytes(0, b"X"));
+}
+
+#[test]
+fn buffer_write_bytes_fails_when_resize_fails() {
+    let mut buf = Buffer::new(ResizeFailsBuffer {
+        data: b"abc".to_vec(),
+    });
+    assert!(buf.write_bytes(0, b"xy"));
+    assert!(!buf.write_bytes(3, b"def"));
+}
+
+#[test]
+fn buffer_delete_noop_and_guard_conditions() {
+    let mut buf = buffer(b"hello".to_vec());
+
+    assert!(buf.delete(0, 0));
+    assert_eq!(snapshot(&mut buf), b"hello".to_vec());
+
+    assert!(buf.delete(5, 10));
+    assert_eq!(snapshot(&mut buf), b"hello".to_vec());
+
+    assert!(buf.delete(100, 1));
+    assert_eq!(snapshot(&mut buf), b"hello".to_vec());
+
+    let mut read_only = Buffer::new(ReadOnlyBuffer {
+        data: b"hello".to_vec(),
+    });
+    assert!(!read_only.delete(0, 1));
+}
+
+#[test]
+fn buffer_delete_from_start_middle_and_end() {
+    let mut buf = buffer(b"0123456789".to_vec());
+
+    assert!(buf.delete(0, 3));
+    assert_eq!(snapshot(&mut buf), b"3456789".to_vec());
+
+    assert!(buf.delete(2, 2));
+    assert_eq!(snapshot(&mut buf), b"34789".to_vec());
+
+    assert!(buf.delete(2, 100));
+    assert_eq!(snapshot(&mut buf), b"34".to_vec());
+}
+
+#[test]
+fn buffer_delete_all_and_single_byte() {
+    let mut buf = buffer(b"abc".to_vec());
+    assert!(buf.delete(0, 3));
+    assert_eq!(buf.len(), 0);
+
+    let mut buf = buffer(b"abc".to_vec());
+    assert!(buf.delete(1, 1));
+    assert_eq!(snapshot(&mut buf), b"ac".to_vec());
+}
+
+#[test]
+fn buffer_delete_large_buffer_crosses_internal_chunk_size() {
+    let data: Vec<u8> = (0..5000u16).map(|v| (v % 256) as u8).collect();
+    let mut buf = buffer(data.clone());
+
+    assert!(buf.delete(100, 2000));
+    let mut expected = data;
+    expected.drain(100..2100);
+    assert_eq!(snapshot(&mut buf), expected);
+}
+
+#[test]
+fn buffer_insert_empty_and_invalid_position() {
+    let mut buf = buffer(b"abc".to_vec());
+
+    assert!(buf.insert(1, b""));
+    assert_eq!(snapshot(&mut buf), b"abc".to_vec());
+
+    assert!(!buf.insert(4, b"x"));
+    assert!(!buf.insert(100, b"x"));
+
+    let mut read_only = Buffer::new(ReadOnlyBuffer {
+        data: b"abc".to_vec(),
+    });
+    assert!(!read_only.insert(0, b"x"));
+}
+
+#[test]
+fn buffer_insert_at_start_middle_and_end() {
+    let mut buf = buffer(b"def".to_vec());
+
+    assert!(buf.insert(0, b"abc"));
+    assert_eq!(snapshot(&mut buf), b"abcdef".to_vec());
+
+    let mut buf = buffer(b"adef".to_vec());
+    assert!(buf.insert(1, b"bc"));
+    assert_eq!(snapshot(&mut buf), b"abcdef".to_vec());
+
+    let mut buf = buffer(b"abc".to_vec());
+    assert!(buf.insert(3, b"def"));
+    assert_eq!(snapshot(&mut buf), b"abcdef".to_vec());
+}
+
+#[test]
+fn buffer_insert_fails_when_resize_fails() {
+    let mut buf = Buffer::new(ResizeFailsBuffer {
+        data: b"abc".to_vec(),
+    });
+    assert!(!buf.insert(1, b"XY"));
+}
+
+#[test]
+fn buffer_insert_large_buffer_crosses_internal_chunk_size() {
+    let data: Vec<u8> = (0..5000u16).map(|v| (v % 256) as u8).collect();
+    let mut buf = buffer(data.clone());
+    let insert_bytes: Vec<u8> = (100..110).map(|v| (v % 256) as u8).collect();
+
+    assert!(buf.insert(2500, &insert_bytes));
+    let mut expected = data;
+    for (i, b) in insert_bytes.iter().enumerate() {
+        expected.insert(2500 + i, *b);
+    }
+    assert_eq!(snapshot(&mut buf), expected);
+}
+
+#[test]
+fn buffer_vec_access_set_and_resize() {
+    let mut data = vec![1u8, 2, 3];
+    assert!(BufferAccess::set(&mut data, 1, 9));
+    assert_eq!(data, vec![1, 9, 3]);
+    assert!(!BufferAccess::set(&mut data, 3, 4));
+
+    assert!(BufferAccess::resize(&mut data, 5));
+    assert_eq!(data.len(), 5);
+    assert_eq!(data[3], 0);
+    assert_eq!(data[4], 0);
+    assert!(BufferAccess::can_write(&data));
+    assert!(BufferAccess::can_resize(&data));
+}
 
 fn hex_format(index: u32, display_chars: u32) -> ([u8; 4], u8) {
     let mut output = [b'?'; 4];

@@ -443,7 +443,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let end = pos.saturating_add(size.width as u64 * size.height as u64).min(self.buffer.len());
         let mut bytes = [0; 2];
         while pos < end {
-            if self.buffer.read_bytes(pos, &mut bytes) {
+            if self.buffer.read_bytes_exact(pos, &mut bytes) {
                 if bytes[1] != 0 || !Self::is_ascii_char(bytes[0]) {
                     break;
                 }
@@ -462,7 +462,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     fn decode_utf8(&mut self, pos: u64, b: u8) -> Option<(char, u8)> {
         if b & 0b1110_0000 == 0b1100_0000 {
             let mut bytes = [0; 2];
-            if !self.buffer.read_bytes(pos, &mut bytes) {
+            if !self.buffer.read_bytes_exact(pos, &mut bytes) {
                 return None;
             }
             let s = std::str::from_utf8(&bytes).ok()?;
@@ -470,7 +470,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             Some((ch, 2))
         } else if b & 0b1111_0000 == 0b1110_0000 {
             let mut bytes = [0; 3];
-            if !self.buffer.read_bytes(pos, &mut bytes) {
+            if !self.buffer.read_bytes_exact(pos, &mut bytes) {
                 return None;
             }
             let s = std::str::from_utf8(&bytes).ok()?;
@@ -478,7 +478,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             Some((ch, 3))
         } else if b & 0b1111_1000 == 0b1111_0000 {
             let mut bytes = [0; 4];
-            if !self.buffer.read_bytes(pos, &mut bytes) {
+            if !self.buffer.read_bytes_exact(pos, &mut bytes) {
                 return None;
             }
             let s = std::str::from_utf8(&bytes).ok()?;
