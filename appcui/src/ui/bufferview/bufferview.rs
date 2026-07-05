@@ -1439,7 +1439,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     return EventProcessStatus::Ignored;
                 }
             }
-            key!("Enter") | key!("Ctrl+Enter") | key!("Shift+Enter") | key!("Tab") | key!("Left") => {
+            key!("Enter") | key!("Ctrl+Enter") | key!("Shift+Enter") | key!("Tab") | key!("Right") => {
                 if self.edit_text.len() > 0 {
                     self.update_buffer_content();
                     return EventProcessStatus::Processed;
@@ -1679,6 +1679,7 @@ impl<T: BufferAccess + 'static> OnKeyPressed for BufferView<T> {
         }
         if self.process_navigation_key(key) == EventProcessStatus::Processed {
             self.comp.exit_edit_mode();
+            self.edit_text.clear();
             return EventProcessStatus::Processed;
         }
 

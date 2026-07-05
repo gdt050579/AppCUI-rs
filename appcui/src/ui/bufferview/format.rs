@@ -85,8 +85,8 @@ impl DataRepresentationFormat {
         }
         match self {
             DataRepresentationFormat::Hex(bytes_count) => hex::validate(text, *bytes_count),
-            DataRepresentationFormat::Oct => todo!(),
-            DataRepresentationFormat::Bin => todo!(),
+            DataRepresentationFormat::Oct => oct::validate(text),
+            DataRepresentationFormat::Bin => bin::validate(text),
             DataRepresentationFormat::Char => ValidateResult::Update,
         }
     }

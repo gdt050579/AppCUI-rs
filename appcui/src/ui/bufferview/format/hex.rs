@@ -1,5 +1,3 @@
-use std::ascii;
-
 use super::super::BytesCount;
 use super::super::OutputBuffer;
 use super::ValidateResult;
