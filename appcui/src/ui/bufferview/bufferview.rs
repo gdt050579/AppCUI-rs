@@ -849,7 +849,11 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                         if can_edit {
                             surface.set_cursor(hex_x + 1 + self.edit_text.len() as i32, row);
                             if !self.edit_text.is_empty() {
-                                surface.write_string(hex_x + 1, row, self.edit_text.as_str(), attr_just_text, false);
+                                let display_chars = self.repr.format.display_chars();
+                                surface.fill_horizontal_line_with_size(hex_x + 1, row, display_chars, Character::with_attributes(' ', attr_just_text));
+                                surface.write_char(hex_x, row, Character::with_attributes('[', theme.list_current_item.over_selection));
+                                surface.write_char(hex_x + display_chars as i32 + 1, row, Character::with_attributes(']', theme.list_current_item.over_selection));
+                                surface.write_string(hex_x + 1, row, self.edit_text.as_str(), theme.list_current_item.focus, false);
                             }
                         }
                     }
