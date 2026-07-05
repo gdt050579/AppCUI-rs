@@ -1,4 +1,4 @@
-use super::super::BytesCount;
+use super::HexFormat;
 use super::super::OutputBuffer;
 use super::ValidateResult;
 
@@ -6,21 +6,21 @@ static HEX_CHARS: [u8; 16] = [
     b'0', b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9', b'A', b'B', b'C', b'D', b'E', b'F',
 ];
 
-pub(super) fn write(bytes: [u8; 8], bytes_count: BytesCount, output: &mut OutputBuffer) {
-    match bytes_count {
-        BytesCount::One => {
+pub(super) fn write(bytes: [u8; 8], format: HexFormat, output: &mut OutputBuffer) {
+    match format {
+        HexFormat::Byte => {
             output.set(0, HEX_CHARS[(bytes[0] >> 4) as usize]);
             output.set(1, HEX_CHARS[(bytes[0] & 0x0F) as usize]);
             output.set_len(2);
         }
-        BytesCount::Two => {
+        HexFormat::Word => {
             output.set(0, HEX_CHARS[(bytes[1] >> 4) as usize]);
             output.set(1, HEX_CHARS[(bytes[1] & 0x0F) as usize]);
             output.set(2, HEX_CHARS[(bytes[0] >> 4) as usize]);
             output.set(3, HEX_CHARS[(bytes[0] & 0x0F) as usize]);
             output.set_len(4);
         }
-        BytesCount::Four => {
+        HexFormat::DWord => {
             output.set(0, HEX_CHARS[(bytes[3] >> 4) as usize]);
             output.set(1, HEX_CHARS[(bytes[3] & 0x0F) as usize]);
             output.set(2, HEX_CHARS[(bytes[2] >> 4) as usize]);
@@ -31,7 +31,7 @@ pub(super) fn write(bytes: [u8; 8], bytes_count: BytesCount, output: &mut Output
             output.set(7, HEX_CHARS[(bytes[0] & 0x0F) as usize]);
             output.set_len(8);
         }
-        BytesCount::Eight => {
+        HexFormat::QWord => {
             output.set(0, HEX_CHARS[(bytes[7] >> 4) as usize]);
             output.set(1, HEX_CHARS[(bytes[7] & 0x0F) as usize]);
             output.set(2, HEX_CHARS[(bytes[6] >> 4) as usize]);
@@ -52,7 +52,7 @@ pub(super) fn write(bytes: [u8; 8], bytes_count: BytesCount, output: &mut Output
         }
     }
 }
-pub(super) fn validate(text: &str, bytes_count: BytesCount) -> ValidateResult {
+pub(super) fn validate(text: &str, format: HexFormat) -> ValidateResult {
     let buf = text.as_bytes();
     for b in buf {
         if !matches!(*b, b'0'..=b'9' | b'A'..=b'F' | b'a'..=b'f' ) {
@@ -60,16 +60,16 @@ pub(super) fn validate(text: &str, bytes_count: BytesCount) -> ValidateResult {
         }
     }
     // check to see if I sould complete
-    if buf.len() == (bytes_count as usize) * 2 {
+    if buf.len() == (format as usize) * 2 {
         ValidateResult::Update
     } else {
         ValidateResult::Valid
     }
 }
-pub(super) fn convert_to_bytes(text: &str, bytes_count: BytesCount) -> ([u8; 8], u8) {
+pub(super) fn convert_to_bytes(text: &str, format: HexFormat) -> ([u8; 8], u8) {
     if let Ok(n) = u64::from_str_radix(text, 16) {
         let bytes = n.to_ne_bytes();
-        (bytes, bytes_count as u8)
+        (bytes, format as u8)
     } else {
         ([0; 8], 0)
     }

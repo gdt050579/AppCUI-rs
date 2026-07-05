@@ -1,9 +1,9 @@
-use super::{bin, hex, oct, BytesCount, ValidateResult};
+use super::{bin, hex, int, oct, uint, HexFormat, IntFormat, UIntFormat, ValidateResult};
 use super::super::OutputBuffer;
 
-fn write_hex(bytes: [u8; 8], bytes_count: BytesCount) -> Vec<u8> {
+fn write_hex(bytes: [u8; 8], format: HexFormat) -> Vec<u8> {
     let mut output = OutputBuffer::new();
-    hex::write(bytes, bytes_count, &mut output);
+    hex::write(bytes, format, &mut output);
     output.as_slice().to_vec()
 }
 
@@ -19,24 +19,36 @@ fn write_bin(bytes: [u8; 8]) -> Vec<u8> {
     output.as_slice().to_vec()
 }
 
+fn write_int(bytes: [u8; 8], format: IntFormat) -> Vec<u8> {
+    let mut output = OutputBuffer::new();
+    int::write(bytes, format, &mut output);
+    output.as_slice().to_vec()
+}
+
+fn write_uint(bytes: [u8; 8], format: UIntFormat) -> Vec<u8> {
+    let mut output = OutputBuffer::new();
+    uint::write(bytes, format, &mut output);
+    output.as_slice().to_vec()
+}
+
 #[test]
 fn hex_write_one_byte() {
-    assert_eq!(write_hex([0x00, 0, 0, 0, 0, 0, 0, 0], BytesCount::One), b"00");
-    assert_eq!(write_hex([0x0A, 0, 0, 0, 0, 0, 0, 0], BytesCount::One), b"0A");
-    assert_eq!(write_hex([0xAB, 0, 0, 0, 0, 0, 0, 0], BytesCount::One), b"AB");
-    assert_eq!(write_hex([0xFF, 0, 0, 0, 0, 0, 0, 0], BytesCount::One), b"FF");
+    assert_eq!(write_hex([0x00, 0, 0, 0, 0, 0, 0, 0], HexFormat::Byte), b"00");
+    assert_eq!(write_hex([0x0A, 0, 0, 0, 0, 0, 0, 0], HexFormat::Byte), b"0A");
+    assert_eq!(write_hex([0xAB, 0, 0, 0, 0, 0, 0, 0], HexFormat::Byte), b"AB");
+    assert_eq!(write_hex([0xFF, 0, 0, 0, 0, 0, 0, 0], HexFormat::Byte), b"FF");
 }
 
 #[test]
 fn hex_write_two_bytes() {
-    assert_eq!(write_hex([0x34, 0x12, 0, 0, 0, 0, 0, 0], BytesCount::Two), b"1234");
-    assert_eq!(write_hex([0xFF, 0x00, 0, 0, 0, 0, 0, 0], BytesCount::Two), b"00FF");
+    assert_eq!(write_hex([0x34, 0x12, 0, 0, 0, 0, 0, 0], HexFormat::Word), b"1234");
+    assert_eq!(write_hex([0xFF, 0x00, 0, 0, 0, 0, 0, 0], HexFormat::Word), b"00FF");
 }
 
 #[test]
 fn hex_write_four_bytes() {
     assert_eq!(
-        write_hex([0x67, 0x45, 0x23, 0x01, 0, 0, 0, 0], BytesCount::Four),
+        write_hex([0x67, 0x45, 0x23, 0x01, 0, 0, 0, 0], HexFormat::DWord),
         b"01234567"
     );
 }
@@ -44,7 +56,7 @@ fn hex_write_four_bytes() {
 #[test]
 fn hex_write_eight_bytes() {
     assert_eq!(
-        write_hex([0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01], BytesCount::Eight),
+        write_hex([0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01], HexFormat::QWord),
         b"0123456789ABCDEF"
     );
 }
@@ -98,33 +110,33 @@ fn bin_convert_to_bytes_returns_zero_on_parse_failure() {
 
 #[test]
 fn hex_validate_accepts_hex_digits() {
-    assert_eq!(hex::validate("A", BytesCount::One), ValidateResult::Valid);
-    assert_eq!(hex::validate("AB", BytesCount::One), ValidateResult::Update);
-    assert_eq!(hex::validate("ab", BytesCount::One), ValidateResult::Update);
-    assert_eq!(hex::validate("12", BytesCount::Two), ValidateResult::Valid);
-    assert_eq!(hex::validate("1234", BytesCount::Two), ValidateResult::Update);
+    assert_eq!(hex::validate("A", HexFormat::Byte), ValidateResult::Valid);
+    assert_eq!(hex::validate("AB", HexFormat::Byte), ValidateResult::Update);
+    assert_eq!(hex::validate("ab", HexFormat::Byte), ValidateResult::Update);
+    assert_eq!(hex::validate("12", HexFormat::Word), ValidateResult::Valid);
+    assert_eq!(hex::validate("1234", HexFormat::Word), ValidateResult::Update);
 }
 
 #[test]
 fn hex_validate_rejects_invalid_digits() {
-    assert_eq!(hex::validate("GH", BytesCount::One), ValidateResult::FormatError);
-    assert_eq!(hex::validate("12G4", BytesCount::Two), ValidateResult::FormatError);
+    assert_eq!(hex::validate("GH", HexFormat::Byte), ValidateResult::FormatError);
+    assert_eq!(hex::validate("12G4", HexFormat::Word), ValidateResult::FormatError);
 }
 
 #[test]
 fn hex_convert_to_bytes_parses_by_bytes_count() {
-    let (bytes, count) = hex::convert_to_bytes("AB", BytesCount::One);
-    assert_eq!(count, BytesCount::One as u8);
+    let (bytes, count) = hex::convert_to_bytes("AB", HexFormat::Byte);
+    assert_eq!(count, HexFormat::Byte as u8);
     assert_eq!(bytes, 0xAB_u64.to_ne_bytes());
 
-    let (bytes, count) = hex::convert_to_bytes("1234", BytesCount::Two);
-    assert_eq!(count, BytesCount::Two as u8);
+    let (bytes, count) = hex::convert_to_bytes("1234", HexFormat::Word);
+    assert_eq!(count, HexFormat::Word as u8);
     assert_eq!(bytes, 0x1234_u64.to_ne_bytes());
 }
 
 #[test]
 fn hex_convert_to_bytes_returns_zero_on_parse_failure() {
-    assert_eq!(hex::convert_to_bytes("GG", BytesCount::One), ([0; 8], 0));
+    assert_eq!(hex::convert_to_bytes("GG", HexFormat::Byte), ([0; 8], 0));
 }
 
 #[test]
@@ -154,4 +166,91 @@ fn oct_convert_to_bytes_parses_three_digit_value() {
 #[test]
 fn oct_convert_to_bytes_returns_zero_on_parse_failure() {
     assert_eq!(oct::convert_to_bytes("999"), ([0; 8], 0));
+}
+
+#[test]
+fn int_write_signed_values() {
+    assert_eq!(write_int([0x00, 0, 0, 0, 0, 0, 0, 0], IntFormat::I8), b"  +0");
+    assert_eq!(write_int([0x7F, 0, 0, 0, 0, 0, 0, 0], IntFormat::I8), b"+127");
+    assert_eq!(write_int([0x80, 0, 0, 0, 0, 0, 0, 0], IntFormat::I8), b"-128");
+    assert_eq!(
+        write_int([0x00, 0x01, 0, 0, 0, 0, 0, 0], IntFormat::I16),
+        b"  +256"
+    );
+    assert_eq!(
+        write_int([0x00, 0x80, 0, 0, 0, 0, 0, 0], IntFormat::I16),
+        b"-32768"
+    );
+}
+
+#[test]
+fn int_validate_accepts_signed_decimal_digits() {
+    assert_eq!(int::validate("123", IntFormat::I32), ValidateResult::Valid);
+    assert_eq!(int::validate("-42", IntFormat::I32), ValidateResult::Valid);
+    assert_eq!(int::validate("+7", IntFormat::I8), ValidateResult::Valid);
+    assert_eq!(int::validate("  99 ", IntFormat::I16), ValidateResult::Valid);
+}
+
+#[test]
+fn int_validate_rejects_invalid_digits() {
+    assert_eq!(int::validate("12a", IntFormat::I32), ValidateResult::FormatError);
+    assert_eq!(int::validate("1.5", IntFormat::I32), ValidateResult::FormatError);
+}
+
+#[test]
+fn int_convert_to_bytes_parses_by_format() {
+    let (bytes, count) = int::convert_to_bytes("-128", IntFormat::I8);
+    assert_eq!(count, IntFormat::I8 as u8);
+    assert_eq!(bytes, (-128_i64).to_ne_bytes());
+
+    let (bytes, count) = int::convert_to_bytes("256", IntFormat::I16);
+    assert_eq!(count, IntFormat::I16 as u8);
+    assert_eq!(bytes, 256_i64.to_ne_bytes());
+}
+
+#[test]
+fn int_convert_to_bytes_returns_zero_on_parse_failure() {
+    assert_eq!(int::convert_to_bytes("not-a-number", IntFormat::I32), ([0; 8], 0));
+}
+
+#[test]
+fn uint_write_unsigned_values() {
+    assert_eq!(write_uint([0x00, 0, 0, 0, 0, 0, 0, 0], UIntFormat::U8), b"  0");
+    assert_eq!(write_uint([0xFF, 0, 0, 0, 0, 0, 0, 0], UIntFormat::U8), b"255");
+    assert_eq!(
+        write_uint([0x00, 0x01, 0, 0, 0, 0, 0, 0], UIntFormat::U16),
+        b"  256"
+    );
+    assert_eq!(
+        write_uint([0xFF, 0xFF, 0, 0, 0, 0, 0, 0], UIntFormat::U16),
+        b"65535"
+    );
+}
+
+#[test]
+fn uint_validate_accepts_decimal_digits() {
+    assert_eq!(uint::validate("255", UIntFormat::U8), ValidateResult::Valid);
+    assert_eq!(uint::validate(" 42 ", UIntFormat::U16), ValidateResult::Valid);
+}
+
+#[test]
+fn uint_validate_rejects_invalid_digits() {
+    assert_eq!(uint::validate("-1", UIntFormat::U8), ValidateResult::FormatError);
+    assert_eq!(uint::validate("12a", UIntFormat::U32), ValidateResult::FormatError);
+}
+
+#[test]
+fn uint_convert_to_bytes_parses_by_format() {
+    let (bytes, count) = uint::convert_to_bytes("255", UIntFormat::U8);
+    assert_eq!(count, UIntFormat::U8 as u8);
+    assert_eq!(bytes, 255_u64.to_ne_bytes());
+
+    let (bytes, count) = uint::convert_to_bytes("65535", UIntFormat::U16);
+    assert_eq!(count, UIntFormat::U16 as u8);
+    assert_eq!(bytes, 65535_u64.to_ne_bytes());
+}
+
+#[test]
+fn uint_convert_to_bytes_returns_zero_on_parse_failure() {
+    assert_eq!(uint::convert_to_bytes("not-a-number", UIntFormat::U32), ([0; 8], 0));
 }

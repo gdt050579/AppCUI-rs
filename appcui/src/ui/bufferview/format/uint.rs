@@ -1,19 +1,19 @@
-use super::super::BytesCount;
+use super::UIntFormat;
 use super::super::OutputBuffer;
 use super::ValidateResult;
 
-fn value_from_bytes(bytes: [u8; 8], bytes_count: BytesCount) -> u64 {
-    match bytes_count {
-        BytesCount::One => bytes[0] as u64,
-        BytesCount::Two => u16::from_ne_bytes([bytes[0], bytes[1]]) as u64,
-        BytesCount::Four => u32::from_ne_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as u64,
-        BytesCount::Eight => u64::from_ne_bytes(bytes),
+fn value_from_bytes(bytes: [u8; 8], format: UIntFormat) -> u64 {
+    match format {
+        UIntFormat::U8 => bytes[0] as u64,
+        UIntFormat::U16 => u16::from_ne_bytes([bytes[0], bytes[1]]) as u64,
+        UIntFormat::U32 => u32::from_ne_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]) as u64,
+        UIntFormat::U64 => u64::from_ne_bytes(bytes),
     }
 }
 
-pub(super) fn write(bytes: [u8; 8], bytes_count: BytesCount, output: &mut OutputBuffer) {
-    let value = value_from_bytes(bytes, bytes_count);
-    let width = display_chars(bytes_count) as usize;
+pub(super) fn write(bytes: [u8; 8], format: UIntFormat, output: &mut OutputBuffer) {
+    let value = value_from_bytes(bytes, format);
+    let width = display_chars(format) as usize;
     let mut buf = [b' '; 20];
     let mut v = value;
     let mut pos = width;
@@ -31,7 +31,7 @@ pub(super) fn write(bytes: [u8; 8], bytes_count: BytesCount, output: &mut Output
     }
     output.set_len(width as u8);
 }
-pub(super) fn validate(text: &str, bytes_count: BytesCount) -> ValidateResult {
+pub(super) fn validate(text: &str, format: UIntFormat) -> ValidateResult {
     let buf = text.as_bytes();
     for b in buf {
         if !matches!(*b, b'0'..=b'9' | b' ') {
@@ -40,19 +40,19 @@ pub(super) fn validate(text: &str, bytes_count: BytesCount) -> ValidateResult {
     }
     ValidateResult::Valid
 }
-pub(super) fn convert_to_bytes(text: &str, bytes_count: BytesCount) -> ([u8; 8], u8) {
+pub(super) fn convert_to_bytes(text: &str, format: UIntFormat) -> ([u8; 8], u8) {
     if let Ok(n) = text.trim().parse::<u64>() {
         let bytes = n.to_ne_bytes();
-        (bytes, bytes_count as u8)
+        (bytes, format as u8)
     } else {
         ([0; 8], 0)
     }
 }
-pub(super) fn display_chars(bytes_count: BytesCount) -> u32 {
-    match bytes_count {
-        BytesCount::One => 3,
-        BytesCount::Two => 5,
-        BytesCount::Four => 10,
-        BytesCount::Eight => 20,
+pub(super) fn display_chars(format: UIntFormat) -> u32 {
+    match format {
+        UIntFormat::U8 => 3,
+        UIntFormat::U16 => 5,
+        UIntFormat::U32 => 10,
+        UIntFormat::U64 => 20,
     }
 }
