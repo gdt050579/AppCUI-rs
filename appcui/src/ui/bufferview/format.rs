@@ -38,7 +38,7 @@ pub enum DataRepresentationFormat {
     Bin,
     Char,
 }
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub(super) enum ValidateResult {
     Valid,
     FormatError,
