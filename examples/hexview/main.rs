@@ -143,7 +143,7 @@ impl HexViewWindow {
 
         let mut panel = panel!("'Configuration',d:f");
         panel.add(label!("'Representation:',l:1,t:1,w:16,h:1"));
-        w.cb_format = panel.add(combobox!("l:18,t:1,r:1,items=[Hex,Oct,Bin,Char],index:0"));
+        w.cb_format = panel.add(combobox!("l:18,t:1,r:1,items=[Hex,Oct,Bin,UInt,Int,Char],index:0"));
         panel.add(label!("'Columns:',l:1,t:3,w:16,h:1"));
         w.cb_columns = panel.add(combobox!("l:18,t:3,r:1,items=[4,8,12,16,Auto],index:1"));
         panel.add(label!("'Offset format:',l:1,t:5,w:16,h:1"));
@@ -276,10 +276,6 @@ impl HexViewWindow {
         self.control(handle).and_then(|cb| cb.index()).unwrap_or(0)
     }
 
-    fn is_hex_format(&self) -> bool {
-        self.combobox_index(self.cb_format) == 0
-    }
-
     fn format_index(&self) -> u32 {
         self.combobox_index(self.cb_format)
     }
@@ -288,12 +284,16 @@ impl HexViewWindow {
         self.combobox_index(self.cb_grouping)
     }
 
+    fn format_uses_grouping(&self) -> bool {
+        matches!(self.format_index(), 0 | 3 | 4)
+    }
+
     fn endian_enabled(&self) -> bool {
-        self.is_hex_format() && self.grouping_index() >= 1
+        self.format_uses_grouping() && self.grouping_index() >= 1
     }
 
     fn grouping_enabled(&self) -> bool {
-        self.is_hex_format()
+        self.format_uses_grouping()
     }
 
     fn update_buffer_enabled(&mut self) {
@@ -339,6 +339,8 @@ impl HexViewWindow {
             0 => bufferview::DataRepresentationFormat::Hex(bytes_count_from_index(grouping_idx)),
             1 => bufferview::DataRepresentationFormat::Oct,
             2 => bufferview::DataRepresentationFormat::Bin,
+            3 => bufferview::DataRepresentationFormat::UInt(bytes_count_from_index(grouping_idx)),
+            4 => bufferview::DataRepresentationFormat::Int(bytes_count_from_index(grouping_idx)),
             _ => bufferview::DataRepresentationFormat::Char,
         };
 

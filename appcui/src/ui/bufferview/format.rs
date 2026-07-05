@@ -1,6 +1,8 @@
 mod hex;
 mod oct;
 mod bin;
+mod uint;
+mod int;
 
 #[cfg(test)]
 mod tests;
@@ -36,6 +38,8 @@ pub enum DataRepresentationFormat {
     Hex(BytesCount),
     Oct,
     Bin,
+    UInt(BytesCount),
+    Int(BytesCount),
     Char,
 }
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -51,12 +55,16 @@ impl DataRepresentationFormat {
             DataRepresentationFormat::Oct => oct::write(bytes, output),
             DataRepresentationFormat::Bin => bin::write(bytes, output),
             DataRepresentationFormat::Char => { output.set_len(1); output.set(0, bytes[0]); },
+            DataRepresentationFormat::UInt(bytes_count) => uint::write(bytes, *bytes_count, output),
+            DataRepresentationFormat::Int(bytes_count) => int::write(bytes, *bytes_count, output),
         }
     }
     #[inline(always)]
     pub(super) fn bytes_count(&self) -> u8 {
         match self {
             DataRepresentationFormat::Hex(bytes_count) => *bytes_count as u8,
+            DataRepresentationFormat::UInt(bytes_count) => *bytes_count as u8,
+            DataRepresentationFormat::Int(bytes_count) => *bytes_count as u8,
             DataRepresentationFormat::Oct => 1,
             DataRepresentationFormat::Bin => 1,
             DataRepresentationFormat::Char => 1,
@@ -66,6 +74,8 @@ impl DataRepresentationFormat {
     pub(super) fn display_chars(&self) -> u32 {
         match self {
             DataRepresentationFormat::Hex(byte_count) => (*byte_count as u32) * 2,
+            DataRepresentationFormat::UInt(byte_count) => uint::display_chars(*byte_count),
+            DataRepresentationFormat::Int(byte_count) => int::display_chars(*byte_count),
             DataRepresentationFormat::Oct => 3,
             DataRepresentationFormat::Bin => 8,
             DataRepresentationFormat::Char => 1,
@@ -85,6 +95,8 @@ impl DataRepresentationFormat {
         }
         match self {
             DataRepresentationFormat::Hex(bytes_count) => hex::validate(text, *bytes_count),
+            DataRepresentationFormat::UInt(bytes_count) => uint::validate(text, *bytes_count),
+            DataRepresentationFormat::Int(bytes_count) => int::validate(text, *bytes_count),
             DataRepresentationFormat::Oct => oct::validate(text),
             DataRepresentationFormat::Bin => bin::validate(text),
             DataRepresentationFormat::Char => ValidateResult::Update,
@@ -96,6 +108,8 @@ impl DataRepresentationFormat {
         }
         match self {
             DataRepresentationFormat::Hex(bytes_count) => hex::convert_to_bytes(text, *bytes_count),
+            DataRepresentationFormat::UInt(bytes_count) => uint::convert_to_bytes(text, *bytes_count),
+            DataRepresentationFormat::Int(bytes_count) => int::convert_to_bytes(text, *bytes_count),
             DataRepresentationFormat::Oct => oct::convert_to_bytes(text),
             DataRepresentationFormat::Bin => bin::convert_to_bytes(text),
             DataRepresentationFormat::Char => {
