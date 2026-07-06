@@ -1,3 +1,8 @@
+//! Display and editing formats for the data panel of a [`super::BufferView`].
+//!
+//! These types control how raw bytes are rendered, grouped into columns, and interpreted
+//! when the user edits values in place.
+
 mod hex;
 mod oct;
 mod bin;
@@ -10,64 +15,106 @@ mod tests;
 
 use super::OutputBuffer;
 
+/// How byte offsets are shown in the address column of a [`super::BufferView`].
 #[derive(Copy, Clone)]
 pub enum OffsetFormat {
+    /// Offsets are shown as hexadecimal values.
     Hex,
-    Dec
+    /// Offsets are shown as decimal values.
+    Dec,
 }
+
+/// How many data values are laid out on each row of the data panel.
 #[derive(Clone, Copy)]
 pub enum ColumnsCount {
+    /// A fixed number of columns per row.
     Fixed(u8),
+    /// As many columns as fit in the current control width.
     Auto,
 }
+
+/// Byte order used when reading and writing multi-byte numeric values.
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Endian {
+    /// Least-significant byte first.
     Little,
+    /// Most-significant byte first.
     Big,
 }
+
+/// Width of a single hex value in the data panel.
 #[derive(Clone, Copy)]
 #[repr(u8)]
 pub enum HexFormat {
+    /// One byte (`NN`).
     Byte = 1,
+    /// Two bytes (`NNNN`).
     Word = 2,
+    /// Four bytes (`NNNNNNNN`).
     DWord = 4,
+    /// Eight bytes (`NNNNNNNNNNNNNNNN`).
     QWord = 8,
 }
+
+/// Width of an unsigned integer value in the data panel.
 #[derive(Clone, Copy)]
 #[repr(u8)]
 pub enum UIntFormat {
+    /// 8-bit unsigned integer.
     U8 = 1,
+    /// 16-bit unsigned integer.
     U16 = 2,
+    /// 32-bit unsigned integer.
     U32 = 4,
+    /// 64-bit unsigned integer.
     U64 = 8,
 }
+
+/// Width of a signed integer value in the data panel.
 #[derive(Clone, Copy)]
 #[repr(u8)]
 pub enum IntFormat {
+    /// 8-bit signed integer.
     I8 = 1,
+    /// 16-bit signed integer.
     I16 = 2,
+    /// 32-bit signed integer.
     I32 = 4,
+    /// 64-bit signed integer.
     I64 = 8,
 }
+
+/// Floating-point encoding shown in the data panel.
 #[derive(Clone, Copy)]
 pub enum FloatFormat {
+    /// 32-bit IEEE 754 value in scientific notation.
     Scientific32,
+    /// 64-bit IEEE 754 value in scientific notation.
     Scientific64,
+    /// 8-bit OCP FP8 E4M3 value.
     E4M3,
+    /// 8-bit OCP FP8 E5M2 value.
     E5M2,
 }
 
+/// Active data representation for the main panel of a [`super::BufferView`].
 #[derive(Clone, Copy)]
 pub enum DataRepresentationFormat {
+    /// Hexadecimal values with the given width.
     Hex(HexFormat),
+    /// Octal byte values.
     Oct,
+    /// Binary byte values.
     Bin,
+    /// Unsigned integers with the given width.
     UInt(UIntFormat),
+    /// Signed integers with the given width.
     Int(IntFormat),
+    /// Floating-point values with the given encoding.
     Float(FloatFormat),
+    /// Raw characters (one byte per column).
     Char,
-}
-#[derive(Clone, Copy, Debug, PartialEq)]
+}#[derive(Clone, Copy, Debug, PartialEq)]
 pub(super) enum ValidateResult {
     Valid,
     FormatError,
