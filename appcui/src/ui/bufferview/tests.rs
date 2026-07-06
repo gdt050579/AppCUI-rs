@@ -2502,6 +2502,54 @@ fn check_bufferview_search() {
 }
 
 #[test]
+fn check_bufferview_search_bar_mouse_hex() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x04ED34329C80A874)
+        Mouse.Click(3,12,left)
+        Key.TypeText('hex:05')
+        Paint('2. Search for 0x05')
+        CheckHash(0x2646A1F4F66D9A47)
+        Key.Pressed(Enter)
+        Paint('3. Find next 0x05 match')
+        CheckHash(0x1298E3D2B27D3E74)
+        Key.Pressed(Escape)
+        Paint('4. Clear search')
+        CheckHash(0x062E51AD63B789E)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_large_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_search_bar_mouse_text() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6F386642B4BD3242)
+        Mouse.Click(3,12,left)
+        Key.TypeText('text:Hello')
+        Paint('2. Search for Hello')
+        CheckHash(0xCA141C0D46AD4D79)
+        Key.Pressed(Enter)
+        Paint('3. Find next Hello match')
+        CheckHash(0x37A4B939ABC9114B)
+        Key.Pressed(Escape)
+        Paint('4. Clear search')
+        CheckHash(0x3116CE71CD75C896)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_bufferview_resize_window() {
     let script = "
         Paint.Enable(false)
