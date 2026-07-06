@@ -7,7 +7,7 @@ pub trait BufferAccess {
     fn resize(&mut self, new_size: u64, fill_byte: u8) -> bool;
 }
 
-pub struct Buffer<T: BufferAccess> {
+pub(super) struct Buffer<T: BufferAccess> {
     data: T,
 }
 impl<T: BufferAccess> Buffer<T> {
@@ -15,14 +15,14 @@ impl<T: BufferAccess> Buffer<T> {
         Self { data }
     }
     #[inline(always)]
-    pub fn len(&self) -> u64 {
+    pub(super) fn len(&self) -> u64 {
         self.data.len()
     }
     #[inline(always)]
-    pub fn get(&mut self, pos: u64) -> Option<u8> {
+    pub(super) fn get(&mut self, pos: u64) -> Option<u8> {
         self.data.get(pos)
     }
-    pub fn read_bytes_exact<const N: usize>(&mut self, pos: u64, output: &mut [u8; N]) -> bool {
+    pub(super) fn read_bytes_exact<const N: usize>(&mut self, pos: u64, output: &mut [u8; N]) -> bool {
         if let Some(new_addr) = pos.checked_add(N as u64) {
             if new_addr > self.len() {
                 false
@@ -40,7 +40,7 @@ impl<T: BufferAccess> Buffer<T> {
             false
         }
     }
-    pub fn read_bytes(&mut self, pos: u64, output: &mut [u8]) -> u64 {
+    pub(super) fn read_bytes(&mut self, pos: u64, output: &mut [u8]) -> u64 {
         let len = self.len();
         let mut i = 0;
         let mut pos = pos;
@@ -55,7 +55,7 @@ impl<T: BufferAccess> Buffer<T> {
         }
         i as u64
     }
-    pub fn overwrite_bytes(&mut self, pos: u64, bytes: &[u8]) -> bool {
+    pub(super) fn overwrite_bytes(&mut self, pos: u64, bytes: &[u8]) -> bool {
         if pos.saturating_add(bytes.len() as u64) > self.len() {
             return false;
         }
@@ -68,7 +68,7 @@ impl<T: BufferAccess> Buffer<T> {
         }
         true
     }
-    pub fn write_bytes(&mut self, pos: u64, bytes: &[u8]) -> bool {
+    pub(super) fn write_bytes(&mut self, pos: u64, bytes: &[u8]) -> bool {
         let new_len = pos.saturating_add(bytes.len() as u64);
         if new_len > self.len() {
             if !self.can_resize() {

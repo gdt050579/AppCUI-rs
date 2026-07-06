@@ -20,6 +20,7 @@ use self::output_buffer::OutputBuffer;
 use self::interval::IntervalSet;
 use self::interval::Segment;
 use self::selection::Selection;
+use self::buffer::Buffer;
 
 pub use self::bufferview::BufferView;
 pub use self::initialization_flags::Flags;
@@ -33,5 +34,4 @@ pub use self::format::FloatFormat;
 pub use self::format::OffsetFormat;
 pub use self::interval::Interval;
 pub use self::codepage::Codepage;
-pub use self::buffer::Buffer;
 pub use self::buffer::BufferAccess;

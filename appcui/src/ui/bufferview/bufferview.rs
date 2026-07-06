@@ -323,6 +323,14 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.paint_buffer();
         result
     }
+    pub fn overwrite_bytes(&mut self, pos: u64, bytes: &[u8]) -> bool {
+        if self.flags.contains(Flags::ReadOnly) {
+            return false;
+        }
+        let result = self.buffer.overwrite_bytes(pos, bytes);
+        self.paint_buffer();
+        result
+    }
     pub fn resize_buffer(&mut self, new_size: u64, fill_byte: u8) -> bool {
         if self.flags.contains(Flags::ReadOnly) {
             return false;
@@ -346,6 +354,18 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let result = self.buffer.fill(pos, count, value);
         self.paint_buffer();
         result
+    }
+    pub fn read_bytes(&mut self, pos: u64, output: &mut [u8]) -> u64 {
+        if self.flags.contains(Flags::ReadOnly) {
+            return 0;
+        }
+        self.buffer.read_bytes(pos, output)
+    }
+    pub fn read_bytes_into_vec(&mut self, pos: u64, count: u64, output: &mut Vec<u8>) {
+        let start = output.len();
+        output.resize(start + count as usize, 0);       
+        let n = self.read_bytes(pos, &mut output[start..]) as usize;
+        output.truncate(start + n);                      
     }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;
