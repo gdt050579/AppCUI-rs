@@ -429,9 +429,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     /// The vector is truncated to the number of bytes that could actually be read.
     pub fn read_bytes_into_vec(&mut self, pos: u64, count: u64, output: &mut Vec<u8>) {
         let start = output.len();
-        output.resize(start + count as usize, 0);       
+        output.resize(start + count as usize, 0);
         let n = self.read_bytes(pos, &mut output[start..]) as usize;
-        output.truncate(start + n);                      
+        output.truncate(start + n);
     }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;
@@ -895,7 +895,8 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     OffsetFormat::Hex => Self::hex_format(c, display_chars, &mut buf),
                     OffsetFormat::Dec => Self::dec_format(c, display_chars, &mut buf),
                 };
-                surface.write_ascii(x, 0, &buf[..output_len as usize], attr, false);
+                let px = x + (display_chars as i32 - output_len as i32) / 2;
+                surface.write_ascii(px, 0, &buf[..output_len as usize], attr, false);
                 x += (display_chars + 1) as i32;
             }
             if has_focus {
@@ -985,9 +986,18 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                             surface.set_cursor(hex_x + 1 + self.edit_text.len() as i32, row);
                             if !self.edit_text.is_empty() {
                                 let display_chars = self.repr.format.display_chars();
-                                surface.fill_horizontal_line_with_size(hex_x + 1, row, display_chars, Character::with_attributes(' ', attr_just_text));
+                                surface.fill_horizontal_line_with_size(
+                                    hex_x + 1,
+                                    row,
+                                    display_chars,
+                                    Character::with_attributes(' ', attr_just_text),
+                                );
                                 surface.write_char(hex_x, row, Character::with_attributes('[', theme.list_current_item.over_selection));
-                                surface.write_char(hex_x + display_chars as i32 + 1, row, Character::with_attributes(']', theme.list_current_item.over_selection));
+                                surface.write_char(
+                                    hex_x + display_chars as i32 + 1,
+                                    row,
+                                    Character::with_attributes(']', theme.list_current_item.over_selection),
+                                );
                                 surface.write_string(hex_x + 1, row, self.edit_text.as_str(), theme.list_current_item.focus, false);
                             }
                         }

@@ -1671,6 +1671,18 @@ fn make_bufferview_char_mode(data: Vec<u8>) -> BufferView<Vec<u8>> {
     bv
 }
 
+fn make_bufferview_int_i8(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(8));
+    bv.set_data_representation_format(DataRepresentationFormat::Int(IntFormat::I8));
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
 #[test]
 fn bufferview_create_defaults() {
     let bv = BufferView::new(
@@ -1899,7 +1911,7 @@ fn check_bufferview_big_endian_uint16() {
     let script = "
         Paint.Enable(false)
         Paint('Big endian u16')
-        CheckHash(0xC2508C1AF5B326CC)
+        CheckHash(0x2B8EDFBE0E457FEC)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
@@ -1974,6 +1986,76 @@ fn check_bufferview_create() {
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_int_i8_large_buffer_navigation_with_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF99606F54DC84450)
+        Key.Pressed(Right)
+        Paint('2. Right')
+        CheckHash(0x83154247E8246C30)
+        Key.Pressed(Down)
+        Paint('3. Down')
+        CheckHash(0x051859861A698854)
+        Key.Pressed(Left)
+        Paint('4. Left')
+        CheckHash(0x7A00479BACE50790)
+        Key.Pressed(Up)
+        Paint('5. Up')
+        CheckHash(0xF99606F54DC84450)
+        Key.Pressed(PageDown)
+        Paint('6. PageDown')
+        CheckHash(0x9E288BEF1DDF15B2)
+        Key.Pressed(PageUp)
+        Paint('7. PageUp')
+        CheckHash(0xF99606F54DC84450)
+        Key.Pressed(Ctrl+Down)
+        Paint('8. Ctrl+Down')
+        CheckHash(0x4FC99B4FC264B220)
+        Key.Pressed(Ctrl+Up)
+        Paint('9. Ctrl+Up')
+        CheckHash(0xF99606F54DC84450)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_int_i8(test_large_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_int_i8_large_buffer_selection_with_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF99606F54DC84450)
+        Key.Pressed(Shift+Right)
+        Paint('2. Shift+Right')
+        CheckHash(0x0D4D663F73B92988)
+        Key.Pressed(Shift+Down)
+        Paint('3. Shift+Down')
+        CheckHash(0x7D0A746A8862A2BB)
+        Key.Pressed(Shift+Left)
+        Paint('4. Shift+Left')
+        CheckHash(0xF4F9002BE8DB76D7)
+        Key.Pressed(Shift+Up)
+        Paint('5. Shift+Up')
+        CheckHash(0xF99606F54DC84450)
+        Key.Pressed(Shift+PageDown)
+        Paint('6. Shift+PageDown')
+        CheckHash(0x7725673268052EDE)
+        Key.Pressed(Shift+PageUp)
+        Paint('7. Shift+PageUp')
+        CheckHash(0xF99606F54DC84450)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_int_i8(test_large_buffer_data()));
     a.add_window(w);
     a.run();
 }
