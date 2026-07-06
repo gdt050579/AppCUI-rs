@@ -213,16 +213,15 @@ impl HexViewWindow {
             }
             let mut s = String::new();
             let mut v: Vec<u8> = Vec::new();
-            bv.read_bytes_into_vec(pos, count, output);
-            if values.is_empty() {
+            bv.read_bytes_into_vec(start, end - start, &mut v);
+            if v.is_empty() {
                 dialogs::message("Read Selection", "Unable to read selection.");
                 return;
             }
-            let message = format!(
-                "Selection 0x{start:X}..0x{end:X} ({} byte(s)):\n{}",
-                end - start,
-                values.join("\n")
-            );
+            for i in v {
+                s.push_str(&format!("{i:02X} "));
+            }
+            let message = format!("Selection 0x{start:X}..0x{end:X} ({} byte(s)):\n{}", end - start, s);
             dialogs::message("Read Selection", message.as_str());
         }
     }
