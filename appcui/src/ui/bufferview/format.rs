@@ -114,14 +114,16 @@ pub enum DataRepresentationFormat {
     Float(FloatFormat),
     /// Raw characters (one byte per column).
     Char,
-}#[derive(Clone, Copy, Debug, PartialEq)]
-pub(super) enum ValidateResult {
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) enum ValidateResult {
     Valid,
     FormatError,
     Update
 }
 impl DataRepresentationFormat {
-    pub(super) fn write(&self, bytes: [u8;8], output: &mut OutputBuffer) {
+    pub(crate) fn write(&self, bytes: [u8; 8], output: &mut OutputBuffer) {
         match self {
             DataRepresentationFormat::Hex(format) => hex::write(bytes, *format, output),
             DataRepresentationFormat::Oct => oct::write(bytes, output),
@@ -133,7 +135,7 @@ impl DataRepresentationFormat {
         }
     }
     #[inline(always)]
-    pub(super) fn bytes_count(&self) -> u8 {
+    pub(crate) fn bytes_count(&self) -> u8 {
         match self {
             DataRepresentationFormat::Hex(format) => *format as u8,
             DataRepresentationFormat::UInt(format) => *format as u8,
@@ -145,7 +147,7 @@ impl DataRepresentationFormat {
         }
     }
     #[inline(always)]
-    pub(super) fn display_chars(&self) -> u32 {
+    pub(crate) fn display_chars(&self) -> u32 {
         match self {
             DataRepresentationFormat::Hex(format) => (*format as u32) * 2,
             DataRepresentationFormat::UInt(format) => uint::display_chars(*format),
@@ -157,14 +159,14 @@ impl DataRepresentationFormat {
         }
     }
     #[inline(always)]
-    pub(super) fn is_char(&self) -> bool {
+    pub(crate) fn is_char(&self) -> bool {
         match self {
             DataRepresentationFormat::Char => true,
             _ => false,
         }
     }
     #[inline(always)]
-    pub(super) fn validate(&self, text: &str) -> ValidateResult {
+    pub(crate) fn validate(&self, text: &str) -> ValidateResult {
         if text.is_empty() {
             return ValidateResult::Valid;
         }
@@ -178,7 +180,7 @@ impl DataRepresentationFormat {
             DataRepresentationFormat::Float(format) => float::validate(text, *format),
         }
     }
-    pub(super) fn convert_to_bytes(&self, text: &str) -> ([u8; 8], u8) {
+    pub(crate) fn convert_to_bytes(&self, text: &str) -> ([u8; 8], u8) {
         if text.is_empty() {
             return ([0; 8], 0);
         }

@@ -211,23 +211,9 @@ impl HexViewWindow {
                 dialogs::message("Read Selection", "Selection is empty.");
                 return;
             }
-            let repr = bv.data_representation_format();
-            let endian = bv.endian();
-            let bytes_count = repr.bytes_count() as u64;
-            let mut pos = start;
-            if bytes_count > 1 {
-                pos -= pos % bytes_count;
-            }
-            let mut values = Vec::new();
-            while pos + bytes_count <= end {
-                let mut bytes = [0u8; 8];
-                let n = bv.read_bytes(pos, &mut bytes[..bytes_count as usize]);
-                if n < bytes_count {
-                    break;
-                }
-                values.push(repr.bytes_to_text(bytes, endian));
-                pos += bytes_count;
-            }
+            let mut s = String::new();
+            let mut v: Vec<u8> = Vec::new();
+            bv.read_bytes_into_vec(pos, count, output);
             if values.is_empty() {
                 dialogs::message("Read Selection", "Unable to read selection.");
                 return;

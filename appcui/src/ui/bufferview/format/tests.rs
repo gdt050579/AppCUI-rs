@@ -1,5 +1,30 @@
 use super::super::OutputBuffer;
-use super::{bin, float, hex, int, oct, uint, FloatFormat, HexFormat, IntFormat, UIntFormat, ValidateResult};
+use super::{
+    bin, float, hex, int, oct, uint, DataRepresentationFormat, FloatFormat, HexFormat, IntFormat,
+    UIntFormat, ValidateResult,
+};
+
+fn f32_bytes(v: f32) -> [u8; 8] {
+    let mut bytes = [0u8; 8];
+    bytes[..4].copy_from_slice(&v.to_le_bytes());
+    bytes
+}
+
+fn f64_bytes(v: f64) -> [u8; 8] {
+    v.to_le_bytes()
+}
+
+fn extend_bytes<const N: usize>(prefix: [u8; N]) -> [u8; 8] {
+    let mut bytes = [0u8; 8];
+    bytes[..N].copy_from_slice(&prefix);
+    bytes
+}
+
+fn write_format(bytes: [u8; 8], format: DataRepresentationFormat) -> Vec<u8> {
+    let mut output = OutputBuffer::new();
+    format.write(bytes, &mut output);
+    output.as_slice().to_vec()
+}
 
 fn write_hex(bytes: [u8; 8], format: HexFormat) -> Vec<u8> {
     let mut output = OutputBuffer::new();
@@ -276,5 +301,193 @@ fn e4m3_convert_to_bytes_roundtrip() {
     assert_eq!(count, 1);
     assert_eq!(bytes[0], 0x77);
     assert_eq!(write_float(bytes, FloatFormat::E4M3), b"+240.000");
+}
+
+#[test]
+fn hex_convert_to_bytes_parses_dword_and_qword() {
+    let (bytes, count) = hex::convert_to_bytes("01234567", HexFormat::DWord);
+    assert_eq!(count, HexFormat::DWord as u8);
+    assert_eq!(bytes, 0x0123_4567_u64.to_ne_bytes());
+
+    let (bytes, count) = hex::convert_to_bytes("0123456789ABCDEF", HexFormat::QWord);
+    assert_eq!(count, HexFormat::QWord as u8);
+    assert_eq!(bytes, 0x0123_4567_89AB_CDEF_u64.to_ne_bytes());
+}
+
+#[test]
+fn int_write_i32_and_i64() {
+    assert_eq!(
+        write_int(extend_bytes(1000_i32.to_ne_bytes()), IntFormat::I32),
+        b"      +1000"
+    );
+    assert_eq!(
+        write_int(extend_bytes(i32::MAX.to_ne_bytes()), IntFormat::I32),
+        b"+2147483647"
+    );
+    assert_eq!(
+        write_int(extend_bytes(i32::MIN.to_ne_bytes()), IntFormat::I32),
+        b"-2147483648"
+    );
+    assert_eq!(
+        write_int(1_000_000_i64.to_ne_bytes(), IntFormat::I64),
+        b"            +1000000"
+    );
+}
+
+#[test]
+fn uint_write_u32_and_u64() {
+    assert_eq!(
+        write_uint(extend_bytes(1_000_000_u32.to_ne_bytes()), UIntFormat::U32),
+        b"   1000000"
+    );
+    assert_eq!(
+        write_uint(extend_bytes(u32::MAX.to_ne_bytes()), UIntFormat::U32),
+        b"4294967295"
+    );
+    assert_eq!(
+        write_uint(u64::MAX.to_ne_bytes(), UIntFormat::U64),
+        b"18446744073709551615"
+    );
+}
+
+#[test]
+fn scientific32_write_values() {
+    assert_eq!(write_float(f32_bytes(0.0), FloatFormat::Scientific32), b"+0.00e+00");
+    assert_eq!(write_float(f32_bytes(1.0), FloatFormat::Scientific32), b"+1.00e+00");
+    assert_eq!(write_float(f32_bytes(-2.5), FloatFormat::Scientific32), b"-2.50e+00");
+    assert_eq!(
+        write_float(f32_bytes(f32::INFINITY), FloatFormat::Scientific32),
+        b"      inf"
+    );
+    assert_eq!(
+        write_float(f32_bytes(f32::NEG_INFINITY), FloatFormat::Scientific32),
+        b"     -inf"
+    );
+    assert_eq!(write_float(f32_bytes(f32::NAN), FloatFormat::Scientific32), b"      NaN");
+}
+
+#[test]
+fn scientific64_write_values() {
+    assert_eq!(write_float(f64_bytes(0.0), FloatFormat::Scientific64), b"+0.000000000000000e+000");
+    assert_eq!(
+        write_float(f64_bytes(1.0), FloatFormat::Scientific64),
+        b"+1.000000000000000e+000"
+    );
+    assert_eq!(
+        write_float(f64_bytes(-2.5), FloatFormat::Scientific64),
+        b"-2.500000000000000e+000"
+    );
+    assert_eq!(
+        write_float(f64_bytes(f64::INFINITY), FloatFormat::Scientific64),
+        b"                    inf"
+    );
+    assert_eq!(
+        write_float(f64_bytes(f64::NEG_INFINITY), FloatFormat::Scientific64),
+        b"                   -inf"
+    );
+    assert_eq!(
+        write_float(f64_bytes(f64::NAN), FloatFormat::Scientific64),
+        b"                    NaN"
+    );
+}
+
+#[test]
+fn scientific_validate_accepts_float_prefixes() {
+    assert_eq!(
+        float::validate("1.2", FloatFormat::Scientific32),
+        ValidateResult::Valid
+    );
+    assert_eq!(
+        float::validate("1.2e3", FloatFormat::Scientific32),
+        ValidateResult::Valid
+    );
+    assert_eq!(
+        float::validate("-inf", FloatFormat::Scientific64),
+        ValidateResult::Valid
+    );
+    assert_eq!(float::validate("nan", FloatFormat::Scientific64), ValidateResult::Valid);
+}
+
+#[test]
+fn scientific_validate_rejects_invalid_prefixes() {
+    assert_eq!(
+        float::validate("1.2.3", FloatFormat::Scientific32),
+        ValidateResult::FormatError
+    );
+    assert_eq!(
+        float::validate("abc", FloatFormat::Scientific64),
+        ValidateResult::FormatError
+    );
+}
+
+#[test]
+fn scientific32_convert_to_bytes_roundtrip() {
+    let (bytes, count) = float::convert_to_bytes("1.5", FloatFormat::Scientific32);
+    assert_eq!(count, 4);
+    assert_eq!(bytes[..4], 1.5_f32.to_le_bytes());
+    assert_eq!(write_float(bytes, FloatFormat::Scientific32), b"+1.50e+00");
+}
+
+#[test]
+fn scientific64_convert_to_bytes_roundtrip() {
+    let (bytes, count) = float::convert_to_bytes("-2.5", FloatFormat::Scientific64);
+    assert_eq!(count, 8);
+    assert_eq!(bytes, (-2.5_f64).to_le_bytes());
+    assert_eq!(write_float(bytes, FloatFormat::Scientific64), b"-2.500000000000000e+000");
+}
+
+#[test]
+fn e5m2_convert_to_bytes_roundtrip() {
+    let (bytes, count) = float::convert_to_bytes("+57344.000000", FloatFormat::E5M2);
+    assert_eq!(count, 1);
+    assert_eq!(write_float(bytes, FloatFormat::E5M2), b"+57344.000000");
+}
+
+#[test]
+fn fp8_validate_accepts_inf_and_nan_prefixes() {
+    assert_eq!(float::validate("inf", FloatFormat::E5M2), ValidateResult::Valid);
+    assert_eq!(float::validate("NaN", FloatFormat::E4M3), ValidateResult::Valid);
+}
+
+#[test]
+fn data_representation_format_char() {
+    let format = DataRepresentationFormat::Char;
+    assert!(format.is_char());
+    assert_eq!(write_format([b'A', 0, 0, 0, 0, 0, 0, 0], format), b"A");
+    assert_eq!(format.validate(""), ValidateResult::Valid);
+    assert_eq!(format.validate("Z"), ValidateResult::Update);
+    let (bytes, count) = format.convert_to_bytes("Hi");
+    assert_eq!(count, 2);
+    assert_eq!(&bytes[..2], b"Hi");
+}
+
+#[test]
+fn data_representation_format_empty_input() {
+    let format = DataRepresentationFormat::Hex(HexFormat::Byte);
+    assert_eq!(format.validate(""), ValidateResult::Valid);
+    assert_eq!(format.convert_to_bytes(""), ([0; 8], 0));
+}
+
+#[test]
+fn data_representation_format_bytes_count_and_display_chars() {
+    assert_eq!(
+        DataRepresentationFormat::Hex(HexFormat::Word).bytes_count(),
+        2
+    );
+    assert_eq!(
+        DataRepresentationFormat::Hex(HexFormat::Word).display_chars(),
+        4
+    );
+    assert_eq!(
+        DataRepresentationFormat::Float(FloatFormat::Scientific32).bytes_count(),
+        4
+    );
+    assert_eq!(
+        DataRepresentationFormat::Float(FloatFormat::Scientific64).display_chars(),
+        23
+    );
+    assert_eq!(DataRepresentationFormat::Oct.bytes_count(), 1);
+    assert_eq!(DataRepresentationFormat::Bin.display_chars(), 8);
+    assert_eq!(DataRepresentationFormat::Char.display_chars(), 1);
 }
     
