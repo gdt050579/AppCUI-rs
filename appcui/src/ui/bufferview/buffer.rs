@@ -1,9 +1,20 @@
+/// Random-access storage backing a [`super::BufferView`].
+///
+/// Implement this trait to connect arbitrary data sources (files, memory-mapped regions,
+/// sparse buffers, and so on) to the control. A [`Vec<u8>`] implementation is provided.
 pub trait BufferAccess {
+    /// Returns the number of bytes currently available in the buffer.
     fn len(&self) -> u64;
+    /// Returns the byte at `pos`, or `None` if the position is not readable.
     fn get(&mut self, pos: u64) -> Option<u8>;
+    /// Returns whether individual bytes can be modified through [`Self::set`].
     fn can_write(&self) -> bool;
+    /// Writes `value` at `pos`. Returns `false` if the write is not allowed or out of range.
     fn set(&mut self, pos: u64, value: u8) -> bool;
+    /// Returns whether the buffer length can be changed through [`Self::resize`].
     fn can_resize(&self) -> bool;
+    /// Changes the buffer length to `new_size`, filling any newly added bytes with `fill_byte`.
+    /// Returns `false` if resizing is not supported.
     fn resize(&mut self, new_size: u64, fill_byte: u8) -> bool;
 }
 

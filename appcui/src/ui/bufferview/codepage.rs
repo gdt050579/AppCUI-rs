@@ -108,14 +108,20 @@ static ASCII: [char; 256] = [
     ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', // 0xF8
 ];
 
+/// A 256-entry mapping from byte values to display characters.
+///
+/// Used by [`super::BufferView`] to render the character panel for non-UTF-8 data.
 #[derive(Clone, Copy)]
 pub struct Codepage {
     pub(super) map: [char; 256],
     pub(super) name: FlatString<22>,
 }
 impl Codepage {
+    /// IBM PC code page 437.
     pub const CP437: Self = Self::from_parts(&CP437, "CP437");
+    /// Windows-1252 (Western European) code page.
     pub const WINDOWS_1252: Self = Self::from_parts(&WINDOWS_1252, "WINDOWS_1252");
+    /// 7-bit ASCII; control characters and bytes above `0x7F` are shown as spaces.
     pub const ASCII: Self = Self::from_parts(&ASCII, "ASCII");
     const fn from_parts(map: &'static [char; 256], name: &'static str) -> Self {
         Self {
@@ -123,6 +129,8 @@ impl Codepage {
             name: FlatString::from_str(name),
         }
     }
+    /// Creates a custom code page initialized with printable ASCII (`0x20`..`0x7F`)
+    /// and `'?'` for all other entries.
     pub fn new(name: &str) -> Self {
         let mut me = Self {
             map: ['?'; 256],
@@ -133,30 +141,37 @@ impl Codepage {
         }
         me
     }
+    /// Returns the display name of this code page.
     #[inline(always)]
     pub fn name(&self) -> &str {
         self.name.as_str()
     }
+    /// Returns the full byte-to-character translation table.
     #[inline(always)]
     pub fn map(&self) -> &[char; 256] {
         &self.map
     }
+    /// Replaces the entire translation table.
     #[inline(always)]
     pub fn set_map(&mut self, map: [char; 256]) {
         self.map = map;
     }
+    /// Sets the display name of this code page.
     #[inline(always)]
     pub fn set_name(&mut self, name: &str) {
         self.name = FlatString::from_str(name);
     }
+    /// Maps a single byte value to a display character.
     #[inline(always)]
     pub fn set(&mut self, index: u8, ch: char) {
         self.map[index as usize] = ch;
     }
+    /// Returns the display character for a byte value.
     #[inline(always)]
     pub fn get(&self, index: u8) -> char {
         self.map[index as usize]
     }
+    /// Sets every entry in the translation table to the same character.
     pub fn fill(&mut self, ch: char) {
         for i in 0..256 {
             self.map[i] = ch;

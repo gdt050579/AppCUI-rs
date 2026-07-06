@@ -1,7 +1,8 @@
-//! A bufferview UI control for displaying and navigating a buffer of data.
+//! A hex-editor style UI control for displaying and navigating a byte buffer.
 //!
-//! The BufferView control provides a scrollable view over an in-memory buffer.
-//! This is currently a skeleton implementation.
+//! [`BufferView`] renders buffer data in multiple representations (hex, decimal, binary,
+//! integers, floats, characters) with optional address and interval-name columns, string
+//! decoding, selection, search, and in-place editing when the backing buffer allows it.
 
 pub mod events;
 mod bufferview;

@@ -63,6 +63,11 @@ impl CharWriterPos {
 }
 
 #[CustomControl(overwrite = [OnPaint, OnKeyPressed, OnMouseEvent, OnResize], internal = true)]
+/// A scrollable hex-editor control over a [`BufferAccess`] data source.
+///
+/// `BufferView` displays buffer contents in a configurable data representation, optional
+/// address and interval-name columns, and optional ASCII/Unicode string panels. It supports
+/// navigation, selection, search, and editing when the backing buffer and [`Flags`] allow it.
 pub struct BufferView<T>
 where
     T: BufferAccess + 'static,
@@ -95,6 +100,10 @@ where
 }
 
 impl<T: BufferAccess + 'static> BufferView<T> {
+    /// Creates a new buffer view bound to `buffer` at the given `layout`.
+    ///
+    /// `flags` control optional UI features such as scroll bars, the search bar, column
+    /// visibility, read-only mode, and string decoding. See [`Flags`] for the full list.
     pub fn new(buffer: T, layout: Layout, flags: Flags) -> Self {
         let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
         if flags.contains(Flags::ScrollBars) {
@@ -133,54 +142,68 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             edit_text: FlatString::new(),
         }
     }
+    /// Sets the code page used to render bytes in the character panel.
     pub fn set_codepage(&mut self, cp: Codepage) {
         self.cp = cp;
         self.paint_buffer();
     }
+    /// Returns the code page used to render bytes in the character panel.
     #[inline(always)]
     pub fn codepage(&self) -> &Codepage {
         &self.cp
     }
+    /// Sets how byte offsets are displayed in the address column.
     #[inline(always)]
     pub fn set_offset_format(&mut self, format: OffsetFormat) {
         self.repr.offset_format = format;
         self.paint_buffer();
     }
+    /// Returns how byte offsets are displayed in the address column.
     #[inline(always)]
     pub fn offset_format(&self) -> OffsetFormat {
         self.repr.offset_format
     }
+    /// Sets the byte order used when interpreting multi-byte numeric formats.
     #[inline(always)]
     pub fn set_endian(&mut self, endian: Endian) {
         self.repr.endian = endian;
         self.paint_buffer();
     }
+    /// Returns the byte order used when interpreting multi-byte numeric formats.
     #[inline(always)]
     pub fn endian(&self) -> Endian {
         self.repr.endian
     }
+    /// Returns the active data representation format (hex, integers, floats, and so on).
     #[inline(always)]
     pub fn data_representation_format(&self) -> DataRepresentationFormat {
         self.repr.format
     }
+    /// Sets the active data representation format and recomputes the layout.
     pub fn set_data_representation_format(&mut self, format: DataRepresentationFormat) {
         self.repr.format = format;
         self.recompute_sizes(self.size());
     }
+    /// Returns the active data representation format.
+    ///
+    /// This is an alias for [`Self::data_representation_format`].
     #[inline(always)]
     pub fn format(&self) -> DataRepresentationFormat {
         self.repr.format
     }
+    /// Sets the number of data columns per row and recomputes the layout.
     pub fn set_columns_count(&mut self, count: ColumnsCount) {
         self.repr.columns = count;
         self.recompute_sizes(self.size());
     }
+    /// Sets the width of the address column in characters (clamped to 1..=24).
     pub fn set_address_width(&mut self, width: u32) {
         self.addr_width = width.clamp(1, MAX_ADDRESS_WIDTH);
         if self.flags.contains(Flags::ShowAddress) {
             self.recompute_sizes(self.size());
         }
     }
+    /// Shows or hides the address column.
     pub fn set_address_visible(&mut self, visible: bool) {
         if visible == self.flags.contains(Flags::ShowAddress) {
             return;
@@ -192,22 +215,27 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         self.recompute_sizes(self.size());
     }
+    /// Sets the header title displayed above the address column.
     pub fn set_address_name(&mut self, name: &str) {
         self.AddrName.set(name);
     }
+    /// Returns whether the address column is visible.
     #[inline(always)]
     pub fn is_address_visible(&self) -> bool {
         self.flags.contains(Flags::ShowAddress)
     }
+    /// Sets the width of the interval-name column in characters (clamped to 1..=64).
     pub fn set_interval_name_width(&mut self, width: u32) {
         self.interval_name_width = width.clamp(1, MAX_INTERVAL_NAME_WIDTH);
         if self.flags.contains(Flags::ShowIntervalNames) {
             self.recompute_sizes(self.size());
         }
     }
+    /// Sets the header title displayed above the interval-name column.
     pub fn set_interval_name_title(&mut self, title: &str) {
         self.interval_name_title.set(title);
     }
+    /// Shows or hides the interval-name column.
     pub fn set_interval_names_visible(&mut self, visible: bool) {
         if visible == self.flags.contains(Flags::ShowIntervalNames) {
             return;
@@ -219,10 +247,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         self.recompute_sizes(self.size());
     }
+    /// Returns whether the interval-name column is visible.
     #[inline(always)]
     pub fn is_interval_names_visible(&self) -> bool {
         self.flags.contains(Flags::ShowIntervalNames)
     }
+    /// Returns the name of the innermost [`Interval`] covering `pos`, if any.
     pub fn interval_name_at(&self, pos: u64) -> Option<&str> {
         let segment = self.intervals.pos_to_segment(pos, self.buffer.len());
         if segment.exists() {
@@ -231,10 +261,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             None
         }
     }
+    /// Replaces the set of labeled intervals shown in the interval-name column.
     pub fn set_intervals(&mut self, intervals: &[Interval]) {
         self.intervals.set(intervals);
         self.paint_buffer();
     }
+    /// Shows or hides the ASCII string panel below the data area.
     pub fn set_ascii_strings_visible(&mut self, visible: bool) {
         if visible == self.flags.contains(Flags::ShowAsciiStrings) {
             return;
@@ -246,10 +278,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         self.paint_buffer();
     }
+    /// Returns whether the ASCII string panel is visible.
     #[inline(always)]
     pub fn is_ascii_strings_visible(&self) -> bool {
         self.flags.contains(Flags::ShowAsciiStrings)
     }
+    /// Shows or hides the Unicode string panel below the data area.
     pub fn set_unicode_strings_visible(&mut self, visible: bool) {
         if visible == self.flags.contains(Flags::ShowUnicodeStrings) {
             return;
@@ -261,10 +295,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         self.paint_buffer();
     }
+    /// Returns whether the Unicode string panel is visible.
     #[inline(always)]
     pub fn is_unicode_strings_visible(&self) -> bool {
         self.flags.contains(Flags::ShowUnicodeStrings)
     }
+    /// Enables or disables UTF-8 decoding in the character panel.
     pub fn set_decode_utf8(&mut self, decode_utf8: bool) {
         if decode_utf8 == self.flags.contains(Flags::DecodeUTF8Characters) {
             return;
@@ -281,32 +317,43 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     pub fn selection(&self) -> Option<(u64, u64)> {
         self.selection.range()
     }
+    /// Returns whether a non-empty byte range is selected.
     #[inline(always)]
     pub fn has_selection(&self) -> bool {
         !self.selection.is_empty()
     }
+    /// Clears the current selection without changing the cursor position.
     pub fn clear_selection(&mut self) {
         if self.selection.is_empty() {
             return;
         }
         self.selection.clear();
     }
+    /// Sets the selection to the half-open byte range `[start, end)`.
     #[inline(always)]
     pub fn set_selection(&mut self, start: u64, end: u64) {
         self.selection = Selection::new(start, end);
     }
+    /// Returns the cursor position as a byte offset into the buffer.
     #[inline(always)]
     pub fn current_pos(&self) -> u64 {
         self.pos
     }
+    /// Moves the cursor to `pos`, scrolling the view if needed.
+    ///
+    /// `pos` is clamped to the last valid byte in the buffer.
     #[inline(always)]
     pub fn set_current_pos(&mut self, pos: u64) {
         self.goto_position(pos, false, false);
     }
+    /// Returns the total number of bytes in the backing buffer.
     #[inline(always)]
     pub fn bytes_count(&self) -> u64 {
         self.buffer.len()
     }
+    /// Removes `count` bytes starting at `pos`.
+    ///
+    /// Returns `false` if the control is read-only or the underlying buffer cannot be resized.
     pub fn delete_bytes(&mut self, pos: u64, count: u64) -> bool {
         if self.flags.contains(Flags::ReadOnly) {
             return false;
@@ -315,6 +362,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.paint_buffer();
         result
     }
+    /// Inserts `bytes` at `pos`, shifting existing data to the right.
+    ///
+    /// Returns `false` if the control is read-only or the underlying buffer cannot be resized.
     pub fn insert_bytes(&mut self, pos: u64, bytes: &[u8]) -> bool {
         if self.flags.contains(Flags::ReadOnly) {
             return false;
@@ -323,6 +373,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.paint_buffer();
         result
     }
+    /// Overwrites existing bytes at `pos` with `bytes` without changing the buffer length.
+    ///
+    /// Returns `false` if the control is read-only, the range is out of bounds, or a write fails.
     pub fn overwrite_bytes(&mut self, pos: u64, bytes: &[u8]) -> bool {
         if self.flags.contains(Flags::ReadOnly) {
             return false;
@@ -331,6 +384,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.paint_buffer();
         result
     }
+    /// Changes the buffer length to `new_size`, filling any newly added bytes with `fill_byte`.
+    ///
+    /// Clears the selection and adjusts the cursor if it would fall past the new end.
+    /// Returns `false` if the control is read-only or resizing is not supported.
     pub fn resize_buffer(&mut self, new_size: u64, fill_byte: u8) -> bool {
         if self.flags.contains(Flags::ReadOnly) {
             return false;
@@ -347,6 +404,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         result
     }
+    /// Sets `count` consecutive bytes starting at `pos` to `value`.
+    ///
+    /// Returns `false` if the control is read-only or the range is invalid.
     pub fn fill_buffer(&mut self, pos: u64, count: u64, value: u8) -> bool {
         if self.flags.contains(Flags::ReadOnly) {
             return false;
@@ -355,12 +415,18 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.paint_buffer();
         result
     }
+    /// Reads bytes from `pos` into `output`.
+    ///
+    /// Returns the number of bytes actually read. Returns `0` when the control is read-only.
     pub fn read_bytes(&mut self, pos: u64, output: &mut [u8]) -> u64 {
         if self.flags.contains(Flags::ReadOnly) {
             return 0;
         }
         self.buffer.read_bytes(pos, output)
     }
+    /// Appends up to `count` bytes read from `pos` to the end of `output`.
+    ///
+    /// The vector is truncated to the number of bytes that could actually be read.
     pub fn read_bytes_into_vec(&mut self, pos: u64, count: u64, output: &mut Vec<u8>) {
         let start = output.len();
         output.resize(start + count as usize, 0);       

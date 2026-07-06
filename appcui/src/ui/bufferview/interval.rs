@@ -3,6 +3,7 @@ use flat_string::FlatString;
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
+/// A labeled, styled byte range displayed in the interval-name column of a [`super::BufferView`].
 #[derive(Debug, Copy, Clone)]
 pub struct Interval {
     pub(super) start: u64,
@@ -12,6 +13,10 @@ pub struct Interval {
 }
 
 impl Interval {
+    /// Creates an interval covering `size` bytes beginning at `start`.
+    ///
+    /// `attr` controls how the interval name is rendered, and `name` is shown in the
+    /// interval-name column for every byte inside the range.
     pub fn new(start: u64, size: u64, attr: CharAttribute, name: &str) -> Self {
         let end = start.saturating_add(size.saturating_sub(1));
         Self {
