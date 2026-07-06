@@ -2454,6 +2454,30 @@ fn check_bufferview_mouse_wheel_horizontal_scroll() {
     a.run();
 }
 
+// For App::debug(60, 15) with window("Test,a:c,w:40,h:12"):
+//   y=1 window title, y=2 column headers, y=3-11 data rows, y=12 horizontal scrollbar
+//   x=49 vertical scrollbar, x=15-28 horizontal scrollbar track on row 12
+
+#[test]
+fn check_bufferview_mouse_drag_scrollbars() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial view')
+        CheckHash(0xCF6A659FFD85E28D)
+        Mouse.Drag(49,3,49,9)
+        Paint('2. Vertical scrollbar dragged')
+        CheckHash(0x9794D33B0FAA9712)
+        Mouse.Drag(15,12,28,12)
+        Paint('3. Horizontal scrollbar dragged')
+        CheckHash(0xBFDD15A7C38EAF0D)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:40,h:12,flags: Sizeable");
+    w.add(make_bufferview_for_mouse(test_large_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
 #[test]
 fn check_bufferview_search() {
     let script = "
