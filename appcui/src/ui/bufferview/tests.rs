@@ -1638,6 +1638,18 @@ fn make_bufferview(data: Vec<u8>) -> BufferView<Vec<u8>> {
     bv
 }
 
+fn make_bufferview_for_mouse(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(8));
+    bv.set_data_representation_format(DataRepresentationFormat::Hex(HexFormat::Byte));
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
 fn make_bufferview_with_intervals(data: Vec<u8>) -> BufferView<Vec<u8>> {
     let mut bv = make_bufferview(data);
     bv.set_interval_names_visible(true);
@@ -2183,20 +2195,179 @@ fn check_bufferview_horizontal_scroll() {
     a.run();
 }
 
+// Mouse coordinates in App::debug scripts are absolute desktop positions.
+// For App::debug(60, 15) with window("Test,a:c,w:60,h:12"):
+//   y=1 window title, y=2 column headers, y=3+ data rows
+//   x=7 address separator, x=9 hex data, x=38 char data, x=45 char header
+
 #[test]
-fn check_bufferview_mouse_selection() {
+fn check_bufferview_mouse_selection_hex_panel() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0x6F386642B4BD3242)
         Key.Pressed(Home)
-        Mouse.Drag(8,1,20,1)
-        Paint('2. Drag selection across first row')
-        CheckHash(0xC8CF8D62F52F7B52)
+        Mouse.Drag(9,3,21,3)
+        Paint('2. Drag selection across hex panel')
+        CheckHash(0x7535A9D8B019620E)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_click_hex_panel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial hex panel')
+        CheckHash(0xF9BBE4D7A406E4C7)
+        Mouse.Click(38,3,left)
+        Paint('2. Char panel via data click')
+        CheckHash(0xCE0B00E3E5EC6514)
+        Mouse.Click(10,3,left)
+        Paint('3. Hex panel via data click')
+        CheckHash(0xF9BBE4D7A406E4C7)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_for_mouse(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_click_char_panel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial hex panel')
+        CheckHash(0xF9BBE4D7A406E4C7)
+        Mouse.Click(38,3,left)
+        Paint('2. Click char panel')
+        CheckHash(0xCE0B00E3E5EC6514)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_for_mouse(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_selection_char_panel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(Home)
+        Mouse.Drag(38,3,48,3)
+        Paint('2. Drag selection in char panel')
+        CheckHash(0xF9918796DB5FB399)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_resize_address_column() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial')
+        CheckHash(0xF9BBE4D7A406E4C7)
+        Mouse.Drag(7,3,12,3)
+        Paint('2. Wider address column')
+        CheckHash(0x7D07C76FC76E53E4)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_for_mouse(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_resize_interval_column() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. With intervals')
+        CheckHash(0x633434DA55BE779A)
+        Mouse.Move(19,3)
+        Paint('2. Hover over interval column')
+        CheckHash(0x7EAB4BD247931F62)
+        Mouse.Drag(19,3,25,3)
+        Paint('3. Wider interval column')
+        CheckHash(0xD0678206131347B6)
+    ";
+    let mut a = App::debug(80, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
+    w.add(make_bufferview_with_intervals(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_header_switch_panel() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Hex panel active')
+        CheckHash(0xF9BBE4D7A406E4C7)
+        Mouse.Click(45,2,left)
+        Mouse.Click(38,3,left)
+        Paint('2. Char panel via header')
+        CheckHash(0xCE0B00E3E5EC6514)
+        Mouse.Click(12,2,left)
+        Mouse.Click(10,3,left)
+        Paint('3. Hex panel via header')
+        CheckHash(0xF9BBE4D7A406E4C7)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_for_mouse(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_wheel_vertical_scroll() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Top of large buffer')
+        CheckHash(0x04ED34329C80A874)
+        Mouse.Wheel(30,4,down,2)
+        Paint('2. Scrolled down')
+        CheckHash(0x267D1EB007F7B5CC)
+        Mouse.Wheel(30,4,up,2)
+        Paint('3. Scrolled back up')
+        CheckHash(0x04ED34329C80A874)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_large_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_wheel_horizontal_scroll() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial view')
+        CheckHash(0xC8FA57F31BCEBD5A)
+        Mouse.Wheel(20,4,right,2)
+        Paint('2. Scrolled right')
+        CheckHash(0x23DA88FCE0286327)
+        Mouse.Wheel(20,4,left,2)
+        Paint('3. Scrolled back left')
+        CheckHash(0xC8FA57F31BCEBD5A)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:40,h:12,flags: Sizeable");
+    w.add(make_bufferview_for_mouse(test_buffer_data()));
     a.add_window(w);
     a.run();
 }
