@@ -105,7 +105,7 @@ fn codepage_from_index(index: u32) -> bufferview::Codepage {
     }
 }
 
-#[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<MyBuffer>+CommandBarEvents, commands = [FillSelection, DeleteSelection, InsertText, ResizeBuffer])]
+#[Window(events = ComboBoxEvents+CheckBoxEvents+BufferViewEvents<MyBuffer>+CommandBarEvents, commands = [ReadSelection, OverwriteText, FillSelection, DeleteSelection, InsertText, ResizeBuffer])]
 struct HexViewWindow {
     buffer: Handle<BufferView<MyBuffer>>,
     lb_pos: Handle<toolbar::Label>,
@@ -198,6 +198,66 @@ impl HexViewWindow {
         w.apply_to_buffer();
         w.update_position_label();
         w
+    }
+
+    fn read_selection(&mut self) {
+        let h_buffer = self.buffer;
+        if let Some(bv) = self.control_mut(h_buffer) {
+            let Some((start, end)) = bv.selection() else {
+                dialogs::message("Read Selection", "No selection.");
+                return;
+            };
+            if end <= start {
+                dialogs::message("Read Selection", "Selection is empty.");
+                return;
+            }
+            let repr = bv.data_representation_format();
+            let endian = bv.endian();
+            let bytes_count = repr.bytes_count() as u64;
+            let mut pos = start;
+            if bytes_count > 1 {
+                pos -= pos % bytes_count;
+            }
+            let mut values = Vec::new();
+            while pos + bytes_count <= end {
+                let mut bytes = [0u8; 8];
+                let n = bv.read_bytes(pos, &mut bytes[..bytes_count as usize]);
+                if n < bytes_count {
+                    break;
+                }
+                values.push(repr.bytes_to_text(bytes, endian));
+                pos += bytes_count;
+            }
+            if values.is_empty() {
+                dialogs::message("Read Selection", "Unable to read selection.");
+                return;
+            }
+            let message = format!(
+                "Selection 0x{start:X}..0x{end:X} ({} byte(s)):\n{}",
+                end - start,
+                values.join("\n")
+            );
+            dialogs::message("Read Selection", message.as_str());
+        }
+    }
+
+    fn overwrite_text(&mut self) {
+        let h_buffer = self.buffer;
+        if let Some(bv) = self.control_mut(h_buffer) {
+            let pos = bv.current_pos();
+            let caption = format!("Enter value to overwrite at offset 0x{pos:X}:");
+            let Some(text) = dialogs::input::<String>("Overwrite", caption.as_str(), None, None) else {
+                return;
+            };
+            if text.is_empty() {
+                return;
+            }
+            if bv.overwrite_bytes(pos, text.as_bytes()) {
+                self.update_position_label();
+            } else {
+                dialogs::message("Overwrite", format!("Failed to overwrite at offset 0x{pos:X}.").as_str());
+            }
+        }
     }
 
     fn fill_selection(&mut self) {
@@ -460,6 +520,8 @@ impl BufferViewEvents<MyBuffer> for HexViewWindow {
 
 impl CommandBarEvents for HexViewWindow {
     fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+        commandbar.set(key!("F3"), "Overwrite", hexviewwindow::Commands::OverwriteText);
+        commandbar.set(key!("F4"), "Read Selection", hexviewwindow::Commands::ReadSelection);
         commandbar.set(key!("F6"), "Fill Selection", hexviewwindow::Commands::FillSelection);
         commandbar.set(key!("F8"), "Delete Selection", hexviewwindow::Commands::DeleteSelection);
         commandbar.set(key!("F9"), "Insert", hexviewwindow::Commands::InsertText);
@@ -468,6 +530,8 @@ impl CommandBarEvents for HexViewWindow {
 
     fn on_event(&mut self, command_id: hexviewwindow::Commands) {
         match command_id {
+            hexviewwindow::Commands::ReadSelection => self.read_selection(),
+            hexviewwindow::Commands::OverwriteText => self.overwrite_text(),
             hexviewwindow::Commands::FillSelection => self.fill_selection(),
             hexviewwindow::Commands::DeleteSelection => self.delete_selection(),
             hexviewwindow::Commands::InsertText => self.insert_text(),
