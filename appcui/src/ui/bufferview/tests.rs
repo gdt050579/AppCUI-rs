@@ -1622,6 +1622,10 @@ fn test_buffer_data() -> Vec<u8> {
     data
 }
 
+fn test_large_buffer_data() -> Vec<u8> {
+    (0u32..200_001).map(|i| (i % 256) as u8).collect()
+}
+
 fn make_bufferview(data: Vec<u8>) -> BufferView<Vec<u8>> {
     let mut bv = BufferView::new(
         data,
@@ -2053,6 +2057,108 @@ fn check_bufferview_address_separator_resize() {
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_address_column_widths_1_to_6() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Address column resize mode')
+        Key.Pressed(Ctrl+Alt+Left)
+        CheckHash(0x7063C9C2CB8614BE)
+        Key.Pressed(Left,5)
+        Paint('2. Address width 1')
+        CheckHash(0xBA5C0A8634AF9970)
+        Key.Pressed(Right)
+        Paint('3. Address width 2')
+        CheckHash(0xBEC97B4F8722E21A)
+        Key.Pressed(Right)
+        Paint('4. Address width 3')
+        CheckHash(0xEA125174CADB42FA)
+        Key.Pressed(Right)
+        Paint('5. Address width 4')
+        CheckHash(0x5B7593B2CF80649C)
+        Key.Pressed(Right)
+        Paint('6. Address width 5')
+        CheckHash(0x67A69CE3345658CD)
+        Key.Pressed(Right)
+        Paint('7. Address width 6')
+        CheckHash(0x7063C9C2CB8614BE)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_large_buffer_address_column_widths_1_to_6() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Address column resize mode')
+        Key.Pressed(Ctrl+Alt+Left)
+        CheckHash(0x3FCE180396C01AC8)
+        Key.Pressed(Left,5)
+        Paint('2. Address width 1')
+        CheckHash(0x5C7293AE7C35B9C8)
+        Key.Pressed(Right)
+        Paint('3. Address width 2')
+        CheckHash(0x7E3D71801237766C)
+        Key.Pressed(Right)
+        Paint('4. Address width 3')
+        CheckHash(0x204DA662702AEB70)
+        Key.Pressed(Right)
+        Paint('5. Address width 4')
+        CheckHash(0x71DF1C41AC295BB2)
+        Key.Pressed(Right)
+        Paint('6. Address width 5')
+        CheckHash(0xAF26CCF49026B75F)
+        Key.Pressed(Right)
+        Paint('7. Address width 6')
+        CheckHash(0x3FCE180396C01AC8)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_large_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_large_buffer_end_address_column_widths_1_to_6() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(End)
+        Paint('1. Cursor at end of large buffer')
+        CheckHash(0x210BF035F3BCFF98)
+        Paint('2. Address column resize mode')
+        Key.Pressed(Ctrl+Alt+Left)
+        CheckHash(0x47680DF6BA034F24)
+        Key.Pressed(Left,5)
+        Paint('3. Address width 1')
+        CheckHash(0xD0771BA94A93460B)
+        Key.Pressed(Right)
+        Paint('4. Address width 2')
+        CheckHash(0x662E1EA95FC946C9)
+        Key.Pressed(Right)
+        Paint('5. Address width 3')
+        CheckHash(0xD4F0A515004AF0AA)
+        Key.Pressed(Right)
+        Paint('6. Address width 4')
+        CheckHash(0x4453075645DB408)
+        Key.Pressed(Right)
+        Paint('7. Address width 5')
+        CheckHash(0xA5278F728F229EA3)
+        Key.Pressed(Right)
+        Paint('8. Address width 6')
+        CheckHash(0x47680DF6BA034F24)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_large_buffer_data()));
     a.add_window(w);
     a.run();
 }

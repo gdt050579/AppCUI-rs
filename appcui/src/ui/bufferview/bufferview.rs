@@ -490,6 +490,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 }
             },
         }
+        let mut point_pos = None;
         pos += 1;
         let addr_len = (24 - pos) as u32;
         if addr_len > len {
@@ -498,27 +499,33 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 2 => {
                     buf[22] = b'.';
                     pos = 22;
+                    point_pos = Some(0);
                 }
                 3 => {
                     buf[21] = buf[pos];
                     buf[22] = b'.';
                     pos = 21;
+                    point_pos = Some(1);
                 }
                 4 => {
                     buf[20] = buf[pos];
                     buf[21] = b'.';
-                    pos = 21;
+                    pos = 20;
+                    point_pos = Some(1);
                 }
                 5..24 => {
                     // 4 and more
                     buf[24 - len as usize] = buf[pos];
                     buf[25 - len as usize] = b'.';
-                    buf[26 - len as usize] = b'.';
                     pos = 24 - len as usize;
+                    point_pos = Some(1);
                 }
                 _ => return,
             }
             surface.write_ascii(0, y, &buf[pos..24], attr, false);
+            if let Some(point_pos) = point_pos {
+                surface.write_char(point_pos, y, Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr));
+            }
         } else {
             let dif = len - addr_len;
             if dif > 0 {
