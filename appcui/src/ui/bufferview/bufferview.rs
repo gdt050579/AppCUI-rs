@@ -594,7 +594,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             None
         }
     }
-    fn decode_utf8(&mut self, pos: u64, b: u8) -> Option<(char, u8)> {
+    pub(super) fn decode_utf8(&mut self, pos: u64, b: u8) -> Option<(char, u8)> {
         if b & 0b1110_0000 == 0b1100_0000 {
             let mut bytes = [0; 2];
             if !self.buffer.read_bytes_exact(pos, &mut bytes) {

@@ -1870,6 +1870,86 @@ fn test_buffer_utf8_chars() -> Vec<u8> {
     vec![b'H', 0xC3, 0xA9, b'l', b'l', b'o', 0x00, 0x00, 0x00, 0x00]
 }
 
+fn test_buffer_char_mode_mixed() -> Vec<u8> {
+    let mut data = vec![0u8; 4];
+    data.extend_from_slice(b"HelloWorld");
+    data.extend_from_slice(&[0xFF, 0xFF]);
+    for c in "Tests!!!!".chars() {
+        data.push(c as u8);
+        data.push(0);
+    }
+    data.push(0xFF);
+    data.extend_from_slice(&[0xC3, 0xA9, b'|', 0xE2, 0x82, 0xAC, b'|', 0xF0, 0x9F, 0x98, 0x80]);
+    data.extend_from_slice(&[0u8; 6]);
+    data
+}
+
+fn make_bufferview_char_mode_all_decodings(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = make_bufferview_char_mode(data);
+    bv.set_ascii_strings_visible(true);
+    bv.set_unicode_strings_visible(true);
+    bv.set_decode_utf8(true);
+    bv
+}
+
+#[test]
+fn test_buffer_char_mode_mixed_contains_utf8_sequences() {
+    let data = test_buffer_char_mode_mixed();
+    assert!(data.starts_with(&[0, 0, 0, 0]));
+    assert_eq!(&data[4..14], b"HelloWorld");
+
+    let utf16_start = 16usize;
+    let mut pos = utf16_start;
+    for c in "Tests!!!!".chars() {
+        assert_eq!(data[pos], c as u8);
+        assert_eq!(data[pos + 1], 0);
+        pos += 2;
+    }
+
+    let two_byte = &data[35..37];
+    let three_byte = &data[38..41];
+    let four_byte = &data[42..46];
+    assert_eq!(two_byte, [0xC3, 0xA9]);
+    assert_eq!(three_byte, [0xE2, 0x82, 0xAC]);
+    assert_eq!(four_byte, [0xF0, 0x9F, 0x98, 0x80]);
+    assert_eq!(std::str::from_utf8(two_byte).unwrap(), "é");
+    assert_eq!(std::str::from_utf8(three_byte).unwrap(), "€");
+    assert_eq!(std::str::from_utf8(four_byte).unwrap(), "😀");
+}
+
+fn decode_utf8_from(data: &[u8], pos: u64, b: u8) -> Option<(char, u8)> {
+    let mut bv = BufferView::new(
+        data.to_vec(),
+        layout!("d:f"),
+        Flags::from_value(0).expect("empty flags"),
+    );
+    bv.decode_utf8(pos, b)
+}
+
+#[test]
+fn decode_utf8_two_byte_sequence() {
+    let data = [0xC3, 0xA9, b'x'];
+    assert_eq!(decode_utf8_from(&data, 0, data[0]), Some(('é', 2)));
+}
+
+#[test]
+fn decode_utf8_three_byte_sequence() {
+    let data = [0xE2, 0x82, 0xAC, b'x'];
+    assert_eq!(decode_utf8_from(&data, 0, data[0]), Some(('€', 3)));
+}
+
+#[test]
+fn decode_utf8_four_byte_sequence() {
+    let data = [0xF0, 0x9F, 0x98, 0x80, b'x'];
+    assert_eq!(decode_utf8_from(&data, 0, data[0]), Some(('😀', 4)));
+}
+
+#[test]
+fn decode_utf8_invalid_lead_byte() {
+    let data = [0xFF, 0x00];
+    assert_eq!(decode_utf8_from(&data, 0, data[0]), None);
+}
+
 #[test]
 fn bufferview_read_only_blocks_edits() {
     let mut bv = BufferView::new(
@@ -2700,6 +2780,37 @@ fn check_bufferview_decode_utf8_disabled() {
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_char_mode(test_buffer_utf8_chars()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_char_mode_all_decodings() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. All char decodings enabled')
+        CheckHash(0x9EEA6610A78D3C90)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_char_mode_all_decodings(test_buffer_char_mode_mixed()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_char_mode_all_decodings_utf8_section() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Top of mixed buffer')
+        CheckHash(0x9EEA6610A78D3C90)
+        Key.Pressed(Right,35)
+        Paint('2. UTF-8 section in view')
+        CheckHash(0xB81E6F94013F482C)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_char_mode_all_decodings(test_buffer_char_mode_mixed()));
     a.add_window(w);
     a.run();
 }

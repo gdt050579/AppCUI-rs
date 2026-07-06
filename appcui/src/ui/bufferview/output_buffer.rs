@@ -18,8 +18,4 @@ impl OutputBuffer {
     pub(super) fn as_slice(&self) -> &[u8] {
         &self.buffer[..self.len as usize]
     }
-    #[inline(always)]
-    pub(super) fn len(&self) -> u8 {
-        self.len
-    }
 }
