@@ -1,6 +1,11 @@
+use crate::prelude::*;
+
 use super::buffer::{Buffer, BufferAccess};
 use super::bufferview::BufferView;
 use super::search_parser::{parse, Error};
+use super::{
+    ColumnsCount, DataRepresentationFormat, Endian, Flags, HexFormat, Interval, OffsetFormat,
+};
 
 fn buffer(data: impl Into<Vec<u8>>) -> Buffer<Vec<u8>> {
     Buffer::new(data.into())
@@ -1046,4 +1051,325 @@ fn dec_format_boundary_values() {
     assert_eq!(formatted(&output, len), b"000");
     let (output, len) = dec_format(1000, 4);
     assert_eq!(formatted(&output, len), b"1000");
+}
+
+// --- BufferView unit tests ---
+
+fn test_buffer_data() -> Vec<u8> {
+    let mut data: Vec<u8> = (0..32).collect();
+    data.extend_from_slice(b"Hello!");
+    data
+}
+
+fn make_bufferview(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(8));
+    bv.set_data_representation_format(DataRepresentationFormat::Hex(HexFormat::Byte));
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
+fn make_bufferview_with_intervals(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = make_bufferview(data);
+    bv.set_interval_names_visible(true);
+    bv.set_intervals(&[
+        Interval::new(0, 16, CharAttribute::with_fore_color(Color::Red), "Header"),
+        Interval::new(16, 16, CharAttribute::with_fore_color(Color::Green), "Body"),
+    ]);
+    bv
+}
+
+fn make_bufferview_char_mode(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(16));
+    bv.set_data_representation_format(DataRepresentationFormat::Char);
+    bv
+}
+
+#[test]
+fn bufferview_create_defaults() {
+    let bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
+    );
+    assert_eq!(bv.bytes_count(), 38);
+    assert_eq!(bv.current_pos(), 0);
+    assert!(!bv.has_selection());
+    assert!(bv.is_address_visible());
+    assert!(!bv.is_interval_names_visible());
+    assert!(!bv.is_ascii_strings_visible());
+    assert!(!bv.is_unicode_strings_visible());
+    assert!(matches!(bv.offset_format(), OffsetFormat::Hex));
+    assert!(matches!(bv.endian(), Endian::Little));
+    assert!(matches!(bv.format(), DataRepresentationFormat::Hex(HexFormat::Byte)));
+}
+
+#[test]
+fn bufferview_selection_api() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::from_value(0).expect("empty flags"),
+    );
+    bv.set_selection(2, 6);
+    assert!(bv.has_selection());
+    assert_eq!(bv.selection(), Some((2, 6)));
+    bv.clear_selection();
+    assert!(!bv.has_selection());
+    assert_eq!(bv.selection(), None);
+}
+
+#[test]
+fn bufferview_read_only_blocks_edits() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ReadOnly,
+    );
+    assert!(!bv.delete_bytes(0, 1));
+    assert!(!bv.insert_bytes(0, b"x"));
+    assert!(!bv.overwrite_bytes(0, b"x"));
+    assert!(!bv.resize_buffer(10, 0));
+    assert!(!bv.fill_buffer(0, 1, 0));
+    assert_eq!(bv.read_bytes(0, &mut [0u8; 1]), 0);
+}
+
+#[test]
+fn check_bufferview_create() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x6F386642B4BD3242)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_navigation_with_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(Right,3)
+        Paint('2. Move right 3 bytes')
+        CheckHash(0xA7B831471BE92232)
+        Key.Pressed(Down,2)
+        Paint('3. Move down 2 rows')
+        CheckHash(0x980A7B28D25C843E)
+        Key.Pressed(Home)
+        Paint('4. Home')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(End)
+        Paint('5. End')
+        CheckHash(0xDCC14E43416C4B62)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_selection_with_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(Shift+Right,4)
+        Paint('2. Select 4 bytes')
+        CheckHash(0x7535A9D8B019620E)
+        Key.Pressed(Shift+Down)
+        Paint('3. Extend selection down')
+        CheckHash(0x6588F96C95851AEA)
+        Key.Pressed(Home)
+        Paint('4. Clear selection via navigation')
+        CheckHash(0x6F386642B4BD3242)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_panel_toggle() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state on hex panel')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(End)
+        Paint('2. Move to end')
+        CheckHash(0xDCC14E43416C4B62)
+        Key.Pressed(Ctrl+Tab)
+        Paint('3. Switch to character panel')
+        CheckHash(0x97F5B14CB49601B9)
+        Key.Pressed(Ctrl+Tab)
+        Paint('4. Switch back to hex panel')
+        CheckHash(0xDCC14E43416C4B62)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_address_separator_resize() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(Ctrl+Alt+Left)
+        Paint('2. Address separator selected')
+        CheckHash(0x7063C9C2CB8614BE)
+        Key.Pressed(Right,2)
+        Paint('3. Widen address column')
+        CheckHash(0xA1F22FB44A9AAA9)
+        Key.Pressed(Escape)
+        Paint('4. Deselect separator')
+        CheckHash(0xF15104EF97AE3D2D)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_horizontal_scroll() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(Ctrl+Right,3)
+        Paint('2. Scroll view right')
+        CheckHash(0x9DE18EF14198BEFA)
+        Key.Pressed(Ctrl+Left,3)
+        Paint('3. Scroll view back')
+        CheckHash(0x6F386642B4BD3242)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_selection() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(Home)
+        Mouse.Drag(8,1,20,1)
+        Paint('2. Drag selection across first row')
+        CheckHash(0xC8CF8D62F52F7B52)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_search() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6F386642B4BD3242)
+        Key.TypeText('hex:05')
+        Paint('2. Search for 0x05')
+        CheckHash(0x7FB0D059F32AD815)
+        Key.Pressed(Enter)
+        Paint('3. Find next match')
+        CheckHash(0x6A4FB0875345E87E)
+        Key.Pressed(Escape)
+        Paint('4. Clear search')
+        CheckHash(0x97CFA8E09EF9879D)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_resize_window() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6F386642B4BD3242)
+        Resize(50,10)
+        Paint('2. Smaller window')
+        CheckHash(0x4E726C2EA666518F)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_interval_names() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. With interval names')
+        CheckHash(0x153E93FE5224A01A)
+        Key.Pressed(Down,4)
+        Paint('2. Cursor in body interval')
+        CheckHash(0x1790DAF1F71A76BA)
+        Key.Pressed(Ctrl+Alt+Left)
+        Key.Pressed(Tab)
+        Paint('3. Interval separator selected')
+        CheckHash(0x3313D640B7233296)
+        Key.Pressed(Right,3)
+        Paint('4. Widen interval column')
+        CheckHash(0xACAB1828B1E631BB)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
+    w.add(make_bufferview_with_intervals(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_char_mode_navigation() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Character mode initial')
+        CheckHash(0x88532F2DCC1AD765)
+        Key.Pressed(Right,5)
+        Paint('2. Move right 5 characters')
+        CheckHash(0x360EC5EBED1B9F31)
+        Key.Pressed(Down)
+        Paint('3. Move down one row')
+        CheckHash(0x3AF4D6D579EA196D)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_char_mode(test_buffer_data()));
+    a.add_window(w);
+    a.run();
 }
