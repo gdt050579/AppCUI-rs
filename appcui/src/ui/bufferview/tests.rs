@@ -4,8 +4,11 @@ use super::buffer::{Buffer, BufferAccess};
 use super::bufferview::BufferView;
 use super::search_parser::{parse, Error};
 use super::{
-    ColumnsCount, DataRepresentationFormat, Endian, Flags, HexFormat, Interval, OffsetFormat,
+    ColumnsCount, DataRepresentationFormat, Endian, Flags, FloatFormat, HexFormat, IntFormat,
+    Interval, OffsetFormat, UIntFormat, Codepage,
 };
+use super::format::ValidateResult;
+use super::output_buffer::OutputBuffer;
 
 fn buffer(data: impl Into<Vec<u8>>) -> Buffer<Vec<u8>> {
     Buffer::new(data.into())
@@ -1053,6 +1056,564 @@ fn dec_format_boundary_values() {
     assert_eq!(formatted(&output, len), b"1000");
 }
 
+// --- Codepage unit tests ---
+
+#[test]
+fn codepage_builtin_names() {
+    assert_eq!(Codepage::CP437.name(), "CP437");
+    assert_eq!(Codepage::WINDOWS_1252.name(), "WINDOWS_1252");
+    assert_eq!(Codepage::ASCII.name(), "ASCII");
+}
+
+#[test]
+fn codepage_cp437_known_mappings() {
+    let cp = Codepage::CP437;
+    assert_eq!(cp.get(0x00), ' ');
+    assert_eq!(cp.get(0x41), 'A');
+    assert_eq!(cp.get(0x61), 'a');
+    assert_eq!(cp.get(0xB0), '░');
+    assert_eq!(cp.get(0xE0), 'α');
+    assert_eq!(cp.get(0xFF), ' ');
+}
+
+#[test]
+fn codepage_ascii_known_mappings() {
+    let cp = Codepage::ASCII;
+    assert_eq!(cp.get(0x00), ' ');
+    assert_eq!(cp.get(0x09), ' ');
+    assert_eq!(cp.get(0x20), ' ');
+    assert_eq!(cp.get(0x41), 'A');
+    assert_eq!(cp.get(0x7E), '~');
+    assert_eq!(cp.get(0x7F), ' ');
+    assert_eq!(cp.get(0x80), ' ');
+    assert_eq!(cp.get(0xFF), ' ');
+}
+
+#[test]
+fn codepage_windows_1252_known_mappings() {
+    let cp = Codepage::WINDOWS_1252;
+    assert_eq!(cp.get(0x41), 'A');
+    assert_eq!(cp.get(0x80), '€');
+    assert_eq!(cp.get(0xA9), '©');
+    assert_eq!(cp.get(0xFF), 'ÿ');
+}
+
+#[test]
+fn codepage_new_initializes_printable_ascii() {
+    let cp = Codepage::new("Custom");
+    assert_eq!(cp.name(), "Custom");
+    assert_eq!(cp.get(0x00), '?');
+    assert_eq!(cp.get(0x1F), '?');
+    assert_eq!(cp.get(0x20), ' ');
+    assert_eq!(cp.get(0x41), 'A');
+    assert_eq!(cp.get(0x7E), '~');
+    assert_eq!(cp.get(0x7F), '?');
+    assert_eq!(cp.get(0xFF), '?');
+}
+
+#[test]
+fn codepage_set_and_get() {
+    let mut cp = Codepage::new("Editable");
+    cp.set(0x42, 'X');
+    cp.set(0xFF, '!');
+    assert_eq!(cp.get(0x42), 'X');
+    assert_eq!(cp.get(0xFF), '!');
+    assert_eq!(cp.get(0x41), 'A');
+}
+
+#[test]
+fn codepage_set_name() {
+    let mut cp = Codepage::new("Old");
+    cp.set_name("NewName");
+    assert_eq!(cp.name(), "NewName");
+}
+
+#[test]
+fn codepage_set_map_replaces_table() {
+    let mut cp = Codepage::CP437;
+    let mut replacement = ['?'; 256];
+    replacement[0x41] = 'Z';
+    cp.set_map(replacement);
+    assert_eq!(cp.get(0x41), 'Z');
+    assert_eq!(cp.get(0x42), '?');
+    assert_eq!(cp.map(), &replacement);
+}
+
+#[test]
+fn codepage_fill() {
+    let mut cp = Codepage::new("Filled");
+    cp.fill('.');
+    for i in 0u16..256 {
+        assert_eq!(cp.get(i as u8), '.', "byte 0x{i:02X} should be '.'");
+    }
+}
+
+#[test]
+fn codepage_map_returns_full_table() {
+    let cp = Codepage::ASCII;
+    assert_eq!(cp.map().len(), 256);
+    assert_eq!(cp.map()[0x41], 'A');
+    assert_eq!(cp.map()[0x80], ' ');
+}
+
+// --- DataRepresentationFormat unit tests ---
+
+fn format_write(format: DataRepresentationFormat, bytes: [u8; 8]) -> Vec<u8> {
+    let mut output = OutputBuffer::new();
+    format.write(bytes, &mut output);
+    output.as_slice().to_vec()
+}
+
+fn extend_format_bytes<const N: usize>(prefix: [u8; N]) -> [u8; 8] {
+    let mut bytes = [0u8; 8];
+    bytes[..N].copy_from_slice(&prefix);
+    bytes
+}
+
+fn f32_le_bytes(v: f32) -> [u8; 8] {
+    let mut bytes = [0u8; 8];
+    bytes[..4].copy_from_slice(&v.to_le_bytes());
+    bytes
+}
+
+fn f64_le_bytes(v: f64) -> [u8; 8] {
+    v.to_le_bytes()
+}
+
+#[test]
+fn data_format_hex_byte() {
+    let format = DataRepresentationFormat::Hex(HexFormat::Byte);
+    assert_eq!(format.bytes_count(), 1);
+    assert_eq!(format.display_chars(), 2);
+    assert_eq!(format_write(format, [0xAB, 0, 0, 0, 0, 0, 0, 0]), b"AB");
+    assert_eq!(format.validate("A"), ValidateResult::Valid);
+    let (bytes, count) = format.convert_to_bytes("AB");
+    assert_eq!(count, 1);
+    assert_eq!(bytes[0], 0xAB);
+}
+
+#[test]
+fn data_format_hex_word() {
+    let format = DataRepresentationFormat::Hex(HexFormat::Word);
+    assert_eq!(format.bytes_count(), 2);
+    assert_eq!(format.display_chars(), 4);
+    assert_eq!(format_write(format, [0x34, 0x12, 0, 0, 0, 0, 0, 0]), b"1234");
+    let (bytes, count) = format.convert_to_bytes("1234");
+    assert_eq!(count, 2);
+    assert_eq!(bytes[..2], 0x1234_u16.to_le_bytes());
+}
+
+#[test]
+fn data_format_hex_dword() {
+    let format = DataRepresentationFormat::Hex(HexFormat::DWord);
+    assert_eq!(format.bytes_count(), 4);
+    assert_eq!(format.display_chars(), 8);
+    assert_eq!(
+        format_write(format, [0x67, 0x45, 0x23, 0x01, 0, 0, 0, 0]),
+        b"01234567"
+    );
+    let (bytes, count) = format.convert_to_bytes("01234567");
+    assert_eq!(count, 4);
+    assert_eq!(bytes[..4], 0x0123_4567_u32.to_le_bytes());
+}
+
+#[test]
+fn data_format_hex_qword() {
+    let format = DataRepresentationFormat::Hex(HexFormat::QWord);
+    assert_eq!(format.bytes_count(), 8);
+    assert_eq!(format.display_chars(), 16);
+    assert_eq!(
+        format_write(format, [0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01]),
+        b"0123456789ABCDEF"
+    );
+    let (bytes, count) = format.convert_to_bytes("0123456789ABCDEF");
+    assert_eq!(count, 8);
+    assert_eq!(bytes, 0x0123_4567_89AB_CDEF_u64.to_le_bytes());
+}
+
+#[test]
+fn data_format_oct() {
+    let format = DataRepresentationFormat::Oct;
+    assert_eq!(format.bytes_count(), 1);
+    assert_eq!(format.display_chars(), 3);
+    assert_eq!(format_write(format, [0xFF, 0, 0, 0, 0, 0, 0, 0]), b"377");
+    assert_eq!(format.validate("37"), ValidateResult::Valid);
+    let (bytes, count) = format.convert_to_bytes("377");
+    assert_eq!(count, 1);
+    assert_eq!(bytes[0], 0xFF);
+}
+
+#[test]
+fn data_format_bin() {
+    let format = DataRepresentationFormat::Bin;
+    assert_eq!(format.bytes_count(), 1);
+    assert_eq!(format.display_chars(), 8);
+    assert_eq!(format_write(format, [0xAB, 0, 0, 0, 0, 0, 0, 0]), b"10101011");
+    assert_eq!(format.validate("101"), ValidateResult::Valid);
+    let (bytes, count) = format.convert_to_bytes("10101011");
+    assert_eq!(count, 1);
+    assert_eq!(bytes[0], 0xAB);
+}
+
+#[test]
+fn data_format_uint_u8() {
+    let format = DataRepresentationFormat::UInt(UIntFormat::U8);
+    assert_eq!(format.bytes_count(), 1);
+    assert_eq!(format_write(format, [0xFF, 0, 0, 0, 0, 0, 0, 0]), b"255");
+    let (bytes, count) = format.convert_to_bytes("255");
+    assert_eq!(count, 1);
+    assert_eq!(bytes[0], 255);
+}
+
+#[test]
+fn data_format_uint_u16() {
+    let format = DataRepresentationFormat::UInt(UIntFormat::U16);
+    assert_eq!(format.bytes_count(), 2);
+    assert_eq!(
+        format_write(format, extend_format_bytes([0xFF, 0xFF])),
+        b"65535"
+    );
+    let (bytes, count) = format.convert_to_bytes("65535");
+    assert_eq!(count, 2);
+    assert_eq!(bytes[..2], 65535_u16.to_le_bytes());
+}
+
+#[test]
+fn data_format_uint_u32() {
+    let format = DataRepresentationFormat::UInt(UIntFormat::U32);
+    assert_eq!(format.bytes_count(), 4);
+    assert_eq!(
+        format_write(format, extend_format_bytes(u32::MAX.to_le_bytes())),
+        b"4294967295"
+    );
+    let (bytes, count) = format.convert_to_bytes("1000000");
+    assert_eq!(count, 4);
+    assert_eq!(bytes[..4], 1_000_000_u32.to_le_bytes());
+}
+
+#[test]
+fn data_format_uint_u64() {
+    let format = DataRepresentationFormat::UInt(UIntFormat::U64);
+    assert_eq!(format.bytes_count(), 8);
+    assert_eq!(
+        format_write(format, u64::MAX.to_le_bytes()),
+        b"18446744073709551615"
+    );
+    let (bytes, count) = format.convert_to_bytes("42");
+    assert_eq!(count, 8);
+    assert_eq!(bytes, 42_u64.to_le_bytes());
+}
+
+#[test]
+fn data_format_int_i8() {
+    let format = DataRepresentationFormat::Int(IntFormat::I8);
+    assert_eq!(format.bytes_count(), 1);
+    assert_eq!(format_write(format, [0x80, 0, 0, 0, 0, 0, 0, 0]), b"-128");
+    let (bytes, count) = format.convert_to_bytes("-128");
+    assert_eq!(count, 1);
+    assert_eq!(bytes[0] as i8, -128);
+}
+
+#[test]
+fn data_format_int_i16() {
+    let format = DataRepresentationFormat::Int(IntFormat::I16);
+    assert_eq!(format.bytes_count(), 2);
+    assert_eq!(
+        format_write(format, extend_format_bytes([0x00, 0x80])),
+        b"-32768"
+    );
+    let (bytes, count) = format.convert_to_bytes("256");
+    assert_eq!(count, 2);
+    assert_eq!(bytes[..2], 256_i16.to_le_bytes());
+}
+
+#[test]
+fn data_format_int_i32() {
+    let format = DataRepresentationFormat::Int(IntFormat::I32);
+    assert_eq!(format.bytes_count(), 4);
+    assert_eq!(
+        format_write(format, extend_format_bytes(i32::MIN.to_le_bytes())),
+        b"-2147483648"
+    );
+    let (bytes, count) = format.convert_to_bytes("1000");
+    assert_eq!(count, 4);
+    assert_eq!(bytes[..4], 1000_i32.to_le_bytes());
+}
+
+#[test]
+fn data_format_int_i64() {
+    let format = DataRepresentationFormat::Int(IntFormat::I64);
+    assert_eq!(format.bytes_count(), 8);
+    assert_eq!(
+        format_write(format, 1_000_000_i64.to_le_bytes()),
+        b"            +1000000"
+    );
+    let (bytes, count) = format.convert_to_bytes("-1");
+    assert_eq!(count, 8);
+    assert_eq!(bytes, (-1_i64).to_le_bytes());
+}
+
+#[test]
+fn data_format_float_scientific32() {
+    let format = DataRepresentationFormat::Float(FloatFormat::Scientific32);
+    assert_eq!(format.bytes_count(), 4);
+    assert_eq!(format.display_chars(), 9);
+    assert_eq!(format_write(format, f32_le_bytes(1.0)), b"+1.00e+00");
+    assert_eq!(format.validate("1.5"), ValidateResult::Valid);
+    let (bytes, count) = format.convert_to_bytes("1.5");
+    assert_eq!(count, 4);
+    assert_eq!(bytes[..4], 1.5_f32.to_le_bytes());
+}
+
+#[test]
+fn data_format_float_scientific64() {
+    let format = DataRepresentationFormat::Float(FloatFormat::Scientific64);
+    assert_eq!(format.bytes_count(), 8);
+    assert_eq!(format.display_chars(), 23);
+    assert_eq!(
+        format_write(format, f64_le_bytes(-2.5)),
+        b"-2.500000000000000e+000"
+    );
+    let (bytes, count) = format.convert_to_bytes("-2.5");
+    assert_eq!(count, 8);
+    assert_eq!(bytes, (-2.5_f64).to_le_bytes());
+}
+
+#[test]
+fn data_format_float_e4m3() {
+    let format = DataRepresentationFormat::Float(FloatFormat::E4M3);
+    assert_eq!(format.bytes_count(), 1);
+    assert_eq!(format_write(format, [0x77, 0, 0, 0, 0, 0, 0, 0]), b"+240.000");
+    assert_eq!(format.validate("+240.000"), ValidateResult::Valid);
+    let (bytes, count) = format.convert_to_bytes("+240.000");
+    assert_eq!(count, 1);
+    assert_eq!(bytes[0], 0x77);
+}
+
+#[test]
+fn data_format_float_e5m2() {
+    let format = DataRepresentationFormat::Float(FloatFormat::E5M2);
+    assert_eq!(format.bytes_count(), 1);
+    assert_eq!(format_write(format, [0x7C, 0, 0, 0, 0, 0, 0, 0]), b"          inf");
+    assert_eq!(format.validate("inf"), ValidateResult::Valid);
+    let (bytes, count) = format.convert_to_bytes("+57344.000000");
+    assert_eq!(count, 1);
+    assert_eq!(format_write(format, bytes), b"+57344.000000");
+}
+
+#[test]
+fn data_format_char() {
+    let format = DataRepresentationFormat::Char;
+    assert!(format.is_char());
+    assert_eq!(format.bytes_count(), 1);
+    assert_eq!(format.display_chars(), 1);
+    assert_eq!(format_write(format, [b'Z', 0, 0, 0, 0, 0, 0, 0]), b"Z");
+    assert_eq!(format.validate("A"), ValidateResult::Update);
+    let (bytes, count) = format.convert_to_bytes("Hi");
+    assert_eq!(count, 2);
+    assert_eq!(&bytes[..2], b"Hi");
+}
+
+// --- DataRepresentationFormat::validate unit tests ---
+
+#[test]
+fn data_format_validate_empty_for_all_formats() {
+    let formats = [
+        DataRepresentationFormat::Hex(HexFormat::Byte),
+        DataRepresentationFormat::Hex(HexFormat::Word),
+        DataRepresentationFormat::Hex(HexFormat::DWord),
+        DataRepresentationFormat::Hex(HexFormat::QWord),
+        DataRepresentationFormat::Oct,
+        DataRepresentationFormat::Bin,
+        DataRepresentationFormat::UInt(UIntFormat::U8),
+        DataRepresentationFormat::UInt(UIntFormat::U16),
+        DataRepresentationFormat::UInt(UIntFormat::U32),
+        DataRepresentationFormat::UInt(UIntFormat::U64),
+        DataRepresentationFormat::Int(IntFormat::I8),
+        DataRepresentationFormat::Int(IntFormat::I16),
+        DataRepresentationFormat::Int(IntFormat::I32),
+        DataRepresentationFormat::Int(IntFormat::I64),
+        DataRepresentationFormat::Float(FloatFormat::Scientific32),
+        DataRepresentationFormat::Float(FloatFormat::Scientific64),
+        DataRepresentationFormat::Float(FloatFormat::E4M3),
+        DataRepresentationFormat::Float(FloatFormat::E5M2),
+        DataRepresentationFormat::Char,
+    ];
+    for format in formats {
+        assert_eq!(format.validate(""), ValidateResult::Valid);
+    }
+}
+
+#[test]
+fn data_format_validate_hex_byte() {
+    let format = DataRepresentationFormat::Hex(HexFormat::Byte);
+    assert_eq!(format.validate("A"), ValidateResult::Valid);
+    assert_eq!(format.validate("a"), ValidateResult::Valid);
+    assert_eq!(format.validate("AB"), ValidateResult::Update);
+    assert_eq!(format.validate("ab"), ValidateResult::Update);
+    assert_eq!(format.validate("G"), ValidateResult::FormatError);
+    assert_eq!(format.validate("1Z"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_hex_word() {
+    let format = DataRepresentationFormat::Hex(HexFormat::Word);
+    assert_eq!(format.validate("123"), ValidateResult::Valid);
+    assert_eq!(format.validate("1234"), ValidateResult::Update);
+    assert_eq!(format.validate("12G4"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_hex_dword() {
+    let format = DataRepresentationFormat::Hex(HexFormat::DWord);
+    assert_eq!(format.validate("0123456"), ValidateResult::Valid);
+    assert_eq!(format.validate("01234567"), ValidateResult::Update);
+    assert_eq!(format.validate("0123456G"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_hex_qword() {
+    let format = DataRepresentationFormat::Hex(HexFormat::QWord);
+    assert_eq!(format.validate("0123456789ABCDE"), ValidateResult::Valid);
+    assert_eq!(format.validate("0123456789ABCDEF"), ValidateResult::Update);
+    assert_eq!(format.validate("0123456789ABCDEG"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_oct() {
+    let format = DataRepresentationFormat::Oct;
+    assert_eq!(format.validate("25"), ValidateResult::Valid);
+    assert_eq!(format.validate("377"), ValidateResult::Update);
+    assert_eq!(format.validate("28"), ValidateResult::FormatError);
+    assert_eq!(format.validate("9"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_bin() {
+    let format = DataRepresentationFormat::Bin;
+    assert_eq!(format.validate("1010101"), ValidateResult::Valid);
+    assert_eq!(format.validate("10101011"), ValidateResult::Update);
+    assert_eq!(format.validate("10101012"), ValidateResult::FormatError);
+    assert_eq!(format.validate("abcdefgh"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_uint_u8() {
+    let format = DataRepresentationFormat::UInt(UIntFormat::U8);
+    assert_eq!(format.validate("25"), ValidateResult::Valid);
+    assert_eq!(format.validate("255"), ValidateResult::Valid);
+    assert_eq!(format.validate(" 42 "), ValidateResult::Valid);
+    assert_eq!(format.validate("-1"), ValidateResult::FormatError);
+    assert_eq!(format.validate("12a"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_uint_u16() {
+    let format = DataRepresentationFormat::UInt(UIntFormat::U16);
+    assert_eq!(format.validate("6553"), ValidateResult::Valid);
+    assert_eq!(format.validate("65535"), ValidateResult::Valid);
+    assert_eq!(format.validate("+42"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_uint_u32() {
+    let format = DataRepresentationFormat::UInt(UIntFormat::U32);
+    assert_eq!(format.validate("1000000"), ValidateResult::Valid);
+    assert_eq!(format.validate("  99  "), ValidateResult::Valid);
+    assert_eq!(format.validate("1.5"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_uint_u64() {
+    let format = DataRepresentationFormat::UInt(UIntFormat::U64);
+    assert_eq!(format.validate("1844674407370955161"), ValidateResult::Valid);
+    assert_eq!(format.validate("0"), ValidateResult::Valid);
+    assert_eq!(format.validate("abc"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_int_i8() {
+    let format = DataRepresentationFormat::Int(IntFormat::I8);
+    assert_eq!(format.validate("+7"), ValidateResult::Valid);
+    assert_eq!(format.validate("-128"), ValidateResult::Valid);
+    assert_eq!(format.validate("  99 "), ValidateResult::Valid);
+    assert_eq!(format.validate("12a"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_int_i16() {
+    let format = DataRepresentationFormat::Int(IntFormat::I16);
+    assert_eq!(format.validate("256"), ValidateResult::Valid);
+    assert_eq!(format.validate("-32768"), ValidateResult::Valid);
+    assert_eq!(format.validate("1.5"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_int_i32() {
+    let format = DataRepresentationFormat::Int(IntFormat::I32);
+    assert_eq!(format.validate("123"), ValidateResult::Valid);
+    assert_eq!(format.validate("-42"), ValidateResult::Valid);
+    assert_eq!(format.validate("++1"), ValidateResult::Valid);
+    assert_eq!(format.validate("12a"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_int_i64() {
+    let format = DataRepresentationFormat::Int(IntFormat::I64);
+    assert_eq!(format.validate("1000000"), ValidateResult::Valid);
+    assert_eq!(format.validate("-1"), ValidateResult::Valid);
+    assert_eq!(format.validate("1e3"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_float_scientific32() {
+    let format = DataRepresentationFormat::Float(FloatFormat::Scientific32);
+    assert_eq!(format.validate("1.2"), ValidateResult::Valid);
+    assert_eq!(format.validate("1.2e3"), ValidateResult::Valid);
+    assert_eq!(format.validate("-inf"), ValidateResult::Valid);
+    assert_eq!(format.validate("nan"), ValidateResult::Valid);
+    assert_eq!(format.validate("1.2.3"), ValidateResult::FormatError);
+    assert_eq!(format.validate("abc"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_float_scientific64() {
+    let format = DataRepresentationFormat::Float(FloatFormat::Scientific64);
+    assert_eq!(format.validate("-2.5"), ValidateResult::Valid);
+    assert_eq!(format.validate("1.2e+03"), ValidateResult::Valid);
+    assert_eq!(format.validate("NaN"), ValidateResult::Valid);
+    assert_eq!(format.validate("1.2.3"), ValidateResult::FormatError);
+    assert_eq!(format.validate("xyz"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_float_e4m3() {
+    let format = DataRepresentationFormat::Float(FloatFormat::E4M3);
+    assert_eq!(format.validate("+240.000"), ValidateResult::Valid);
+    assert_eq!(format.validate("-0.5"), ValidateResult::Valid);
+    assert_eq!(format.validate("NaN"), ValidateResult::Valid);
+    assert_eq!(format.validate("1.2e3"), ValidateResult::FormatError);
+    assert_eq!(format.validate("1..0"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_float_e5m2() {
+    let format = DataRepresentationFormat::Float(FloatFormat::E5M2);
+    assert_eq!(format.validate("inf"), ValidateResult::Valid);
+    assert_eq!(format.validate("+57344.000000"), ValidateResult::Valid);
+    assert_eq!(format.validate("-inf"), ValidateResult::Valid);
+    assert_eq!(format.validate("1.2e3"), ValidateResult::FormatError);
+    assert_eq!(format.validate("not-a-number"), ValidateResult::FormatError);
+}
+
+#[test]
+fn data_format_validate_char() {
+    let format = DataRepresentationFormat::Char;
+    assert_eq!(format.validate("A"), ValidateResult::Update);
+    assert_eq!(format.validate("Hi"), ValidateResult::Update);
+    assert_eq!(format.validate(" "), ValidateResult::Update);
+}
+
 // --- BufferView unit tests ---
 
 fn test_buffer_data() -> Vec<u8> {
@@ -1129,6 +1690,159 @@ fn bufferview_selection_api() {
 }
 
 #[test]
+fn bufferview_default_codepage_endian_and_format() {
+    let bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ShowAddress,
+    );
+    assert_eq!(bv.codepage().name(), "CP437");
+    assert!(matches!(bv.endian(), Endian::Little));
+    assert!(matches!(
+        bv.data_representation_format(),
+        DataRepresentationFormat::Hex(HexFormat::Byte)
+    ));
+    assert!(matches!(bv.format(), DataRepresentationFormat::Hex(HexFormat::Byte)));
+}
+
+#[test]
+fn bufferview_address_visible_noop_when_unchanged() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ShowAddress,
+    );
+    assert!(bv.is_address_visible());
+    bv.set_address_visible(true);
+    assert!(bv.is_address_visible());
+
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::SearchBar,
+    );
+    assert!(!bv.is_address_visible());
+    bv.set_address_visible(false);
+    assert!(!bv.is_address_visible());
+}
+
+fn test_buffer_high_bytes() -> Vec<u8> {
+    vec![0x00, 0x7F, 0x80, 0xFF, 0xB0, 0xE0, 0x12, 0x34]
+}
+
+#[test]
+fn bufferview_set_address_name() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ShowAddress,
+    );
+    bv.set_address_name("Offset");
+    bv.set_address_name("Memory");
+}
+
+#[test]
+fn bufferview_set_address_width_while_hidden() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::SearchBar,
+    );
+    bv.set_address_width(100);
+    bv.set_address_width(0);
+    bv.set_address_name("Addr");
+}
+
+#[test]
+fn bufferview_set_interval_name_title() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ShowAddress,
+    );
+    bv.set_interval_name_title("Section");
+    bv.set_interval_name_title("Region");
+}
+
+#[test]
+fn bufferview_set_interval_name_width_while_hidden() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ShowAddress,
+    );
+    assert!(!bv.is_interval_names_visible());
+    bv.set_interval_name_width(100);
+    bv.set_interval_name_width(0);
+}
+
+#[test]
+fn bufferview_ascii_strings_visible_noop_when_unchanged() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ShowAddress,
+    );
+    assert!(!bv.is_ascii_strings_visible());
+    bv.set_ascii_strings_visible(false);
+    assert!(!bv.is_ascii_strings_visible());
+}
+
+#[test]
+fn bufferview_unicode_strings_visible_noop_when_unchanged() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ShowAddress,
+    );
+    assert!(!bv.is_unicode_strings_visible());
+    bv.set_unicode_strings_visible(false);
+    assert!(!bv.is_unicode_strings_visible());
+}
+
+#[test]
+fn bufferview_decode_utf8_noop_when_unchanged() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ShowAddress,
+    );
+    bv.set_decode_utf8(false);
+    bv.set_decode_utf8(false);
+}
+
+#[test]
+fn bufferview_interval_name_at() {
+    let _a = App::debug(60, 15, "Paint.Enable(false)").build().unwrap();
+    let bv = make_bufferview_with_intervals(test_buffer_data());
+    assert_eq!(bv.interval_name_at(0), Some("Header"));
+    assert_eq!(bv.interval_name_at(15), Some("Header"));
+    assert_eq!(bv.interval_name_at(16), Some("Body"));
+    assert_eq!(bv.interval_name_at(31), Some("Body"));
+    assert_eq!(bv.interval_name_at(32), None);
+    assert_eq!(bv.interval_name_at(100), None);
+}
+
+fn test_buffer_ascii_strings() -> Vec<u8> {
+    let mut data = vec![0u8; 8];
+    data.extend_from_slice(b"HelloWorld!!!!");
+    data
+}
+
+fn test_buffer_unicode_strings() -> Vec<u8> {
+    let mut data = vec![0u8; 4];
+    for c in "Hello!!".chars() {
+        data.push(c as u8);
+        data.push(0);
+    }
+    data
+}
+
+fn test_buffer_utf8_chars() -> Vec<u8> {
+    vec![b'H', 0xC3, 0xA9, b'l', b'l', b'o', 0x00, 0x00, 0x00, 0x00]
+}
+
+#[test]
 fn bufferview_read_only_blocks_edits() {
     let mut bv = BufferView::new(
         test_buffer_data(),
@@ -1141,6 +1855,97 @@ fn bufferview_read_only_blocks_edits() {
     assert!(!bv.resize_buffer(10, 0));
     assert!(!bv.fill_buffer(0, 1, 0));
     assert_eq!(bv.read_bytes(0, &mut [0u8; 1]), 0);
+}
+
+#[test]
+fn check_bufferview_ascii_codepage() {
+    let script = "
+        Paint.Enable(false)
+        Paint('ASCII codepage')
+        CheckHash(0xEB04DE43EB28189B)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = BufferView::new(
+        test_buffer_high_bytes(),
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(4));
+    bv.set_codepage(Codepage::ASCII);
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_big_endian_uint16() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Big endian u16')
+        CheckHash(0xC2508C1AF5B326CC)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = BufferView::new(
+        test_buffer_high_bytes(),
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(4));
+    bv.set_data_representation_format(DataRepresentationFormat::UInt(UIntFormat::U16));
+    bv.set_endian(Endian::Big);
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_custom_address_name() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Custom address title')
+        CheckHash(0x212D5CD189C85A12)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = make_bufferview(test_buffer_data());
+    bv.set_address_name("Offset");
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_wide_address_column() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Wide address column')
+        CheckHash(0xD78FF8C6527DD441)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = make_bufferview(test_buffer_data());
+    bv.set_address_width(14);
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_address_hidden() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Address column hidden')
+        CheckHash(0x7AF587C34BAFFFBA)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = make_bufferview(test_buffer_data());
+    bv.set_address_visible(false);
+    w.add(bv);
+    a.add_window(w);
+    a.run();
 }
 
 #[test]
@@ -1370,6 +2175,100 @@ fn check_bufferview_char_mode_navigation() {
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_char_mode(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_interval_name_title() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Custom interval title')
+        CheckHash(0xD10E808E690B2C7E)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
+    let mut bv = make_bufferview_with_intervals(test_buffer_data());
+    bv.set_interval_name_title("Section");
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_interval_name_width() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Wide interval column')
+        CheckHash(0x8330455F2F84A636)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
+    let mut bv = make_bufferview_with_intervals(test_buffer_data());
+    bv.set_interval_name_width(12);
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_ascii_strings_visible() {
+    let script = "
+        Paint.Enable(false)
+        Paint('ASCII strings on')
+        CheckHash(0x91B452D970FDCC4A)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = make_bufferview_char_mode(test_buffer_ascii_strings());
+    bv.set_ascii_strings_visible(true);
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_unicode_strings_visible() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Unicode strings on')
+        CheckHash(0x88DDC3F309F563D2)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = make_bufferview_char_mode(test_buffer_unicode_strings());
+    bv.set_unicode_strings_visible(true);
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_decode_utf8_enabled() {
+    let script = "
+        Paint.Enable(false)
+        Paint('UTF-8 decode on')
+        CheckHash(0x67A496C8F49A9A1)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = make_bufferview_char_mode(test_buffer_utf8_chars());
+    bv.set_decode_utf8(true);
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_decode_utf8_disabled() {
+    let script = "
+        Paint.Enable(false)
+        Paint('UTF-8 decode off')
+        CheckHash(0x23D42635D30312EE)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_char_mode(test_buffer_utf8_chars()));
     a.add_window(w);
     a.run();
 }
