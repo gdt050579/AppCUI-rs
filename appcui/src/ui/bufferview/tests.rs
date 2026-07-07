@@ -1770,6 +1770,66 @@ fn make_bufferview_int_i8(data: Vec<u8>) -> BufferView<Vec<u8>> {
     bv
 }
 
+fn make_bufferview_uint_u8(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(8));
+    bv.set_data_representation_format(DataRepresentationFormat::UInt(UIntFormat::U8));
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
+fn make_bufferview_int_edit_i8(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(8));
+    bv.set_data_representation_format(DataRepresentationFormat::Int(IntFormat::I8));
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
+fn make_bufferview_float_e4m3(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(8));
+    bv.set_data_representation_format(DataRepresentationFormat::Float(FloatFormat::E4M3));
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
+fn make_bufferview_bin(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(8));
+    bv.set_data_representation_format(DataRepresentationFormat::Bin);
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
+fn make_bufferview_oct(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(8));
+    bv.set_data_representation_format(DataRepresentationFormat::Oct);
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
 #[test]
 fn bufferview_create_defaults() {
     let bv = BufferView::new(
@@ -2256,6 +2316,134 @@ fn check_bufferview_insert_and_overwrite_bytes_with_commands() {
 
     let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_bufferview_bin_edit_with_tab_and_right() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6D1403D1B65FE07F)
+        Key.TypeText('10101010')
+        Paint('2. First byte fully written')
+        CheckHash(0x81D9CF40AEBAA9AF)
+        Key.TypeText('1111')
+        Key.Pressed(Tab)
+        Paint('3. Second byte committed with Tab')
+        CheckHash(0xDC7F7AC34C9DA3E6)
+        Key.TypeText('0011')
+        Key.Pressed(Right)
+        Paint('4. Third byte committed with Right')
+        CheckHash(0x83EE8CC0DBECCCCF)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_bin(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_oct_edit_with_tab_and_right() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x48418EB0061457AC)
+        Key.TypeText('377')
+        Paint('2. First byte fully written')
+        CheckHash(0x975FEBE0425ADDA7)
+        Key.TypeText('12')
+        Key.Pressed(Tab)
+        Paint('3. Second byte committed with Tab')
+        CheckHash(0xF526FA131AE10C4F)
+        Key.TypeText('7')
+        Key.Pressed(Right)
+        Paint('4. Third byte committed with Right')
+        CheckHash(0x9303DEA38DA4498D)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_oct(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_uint_edit_with_tab_enter_and_right() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x67C5151D18D655E2)
+        Key.TypeText('255')
+        Key.Pressed(Tab)
+        Paint('2. First byte committed with Tab')
+        CheckHash(0x7F83D904B7084BB8)
+        Key.TypeText('42')
+        Key.Pressed(Enter)
+        Paint('3. Second byte committed with Enter')
+        CheckHash(0x9BAE79A8E449BF65)
+        Key.TypeText('7')
+        Key.Pressed(Right)
+        Paint('4. Third byte committed with Right')
+        CheckHash(0xA05BBB3ABA4EE57B)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_uint_u8(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_int_edit_with_tab_enter_and_right() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC31C67AA0F903E4E)
+        Key.TypeText('-1')
+        Key.Pressed(Tab)
+        Paint('2. First byte committed with Tab')
+        CheckHash(0x21403C761E4D6061)
+        Key.TypeText('12')
+        Key.Pressed(Enter)
+        Paint('3. Second byte committed with Enter')
+        CheckHash(0xE0F2C458B15A4FA9)
+        Key.TypeText('-7')
+        Key.Pressed(Right)
+        Paint('4. Third byte committed with Right')
+        CheckHash(0x7CAADAA48536E9B8)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_int_edit_i8(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_float_edit_with_tab_enter_and_right() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x14322C23B27E27A7)
+        Key.TypeText('+240.000')
+        Key.Pressed(Tab)
+        Paint('2. First byte committed with Tab')
+        CheckHash(0x62108A34EE1C9B25)
+        Key.TypeText('+0.500')
+        Key.Pressed(Enter)
+        Paint('3. Second byte committed with Enter')
+        CheckHash(0x7FD13B93098BD4DE)
+        Key.TypeText('+1.500')
+        Key.Pressed(Right)
+        Paint('4. Third byte committed with Right')
+        CheckHash(0xEA681B51D283EA4E)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_float_e4m3(test_buffer_data()));
+    a.add_window(w);
     a.run();
 }
 
