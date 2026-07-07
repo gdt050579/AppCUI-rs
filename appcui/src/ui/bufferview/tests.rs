@@ -1971,6 +1971,42 @@ fn test_buffer_char_mode_mixed() -> Vec<u8> {
     data
 }
 
+fn test_buffer_char_mode_large() -> Vec<u8> {
+    let mut data: Vec<u8> = (0u8..200).collect();
+    data.extend_from_slice(b"HelloWorldASCII!!");
+    for c in "Hello".chars() {
+        data.push(c as u8);
+        data.push(0);
+    }
+    data.extend_from_slice(&[0, 0]);
+    for c in "Tests!!!!".chars() {
+        data.push(c as u8);
+        data.push(0);
+    }
+    data.extend_from_slice(&[0xC3, 0xA9, b'|', 0xE2, 0x82, 0xAC, b'|', 0xF0, 0x9F, 0x98, 0x80]);
+    while data.len() <= 1024 {
+        data.extend_from_slice(b"PAD");
+    }
+    assert!(data.len() > 1024);
+    data
+}
+
+fn make_bufferview_char_mode_features(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(32));
+    bv.set_data_representation_format(DataRepresentationFormat::Char);
+    bv.set_intervals(&[
+        Interval::new(0, 256, CharAttribute::with_fore_color(Color::Red), "Header"),
+        Interval::new(256, 512, CharAttribute::with_fore_color(Color::Green), "Unicode"),
+        Interval::new(768, 256, CharAttribute::with_fore_color(Color::Yellow), "Tail"),
+    ]);
+    bv
+}
+
 fn make_bufferview_char_mode_all_decodings(data: Vec<u8>) -> BufferView<Vec<u8>> {
     let mut bv = make_bufferview_char_mode(data);
     bv.set_ascii_strings_visible(true);
@@ -2143,6 +2179,77 @@ fn check_bufferview_resize_buffer_with_commands() {
             match command_id {
                 mywin::Commands::A => self.resize_smaller(),
                 mywin::Commands::B => self.resize_bigger(),
+            }
+        }
+    }
+
+    let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_bufferview_insert_and_overwrite_bytes_with_commands() {
+    const INSERT_BYTES: &[u8] = b"ABC";
+    const OVERWRITE_BYTES: &[u8] = b"XY";
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x76270CE76FCBA0DC)
+        Key.Pressed(End)
+        Paint('2. Cursor at end')
+        CheckHash(0xB79FD1E5D3F89AFC)
+        Key.Pressed(F3)
+        Paint('3. Insert bytes')
+        CheckHash(0x6A4AB3D62B9B8ED1)
+        Key.Pressed(F4)
+        Paint('4. Overwrite bytes')
+        CheckHash(0xFA4F3E2E8D8F1F85)
+    ";
+
+    #[Window(events=CommandBarEvents,commands:A+B, internal:true)]
+    struct MyWin {
+        buffer_handle: Handle<BufferView<Vec<u8>>>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,a:c,w:60,h:12,flags: Sizeable"),
+                buffer_handle: Handle::None,
+            };
+            w.buffer_handle = w.add(make_bufferview_for_mouse(test_buffer_data()));
+            w
+        }
+
+        fn insert_at_cursor(&mut self) {
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                let pos = bv.current_pos();
+                bv.insert_bytes(pos, INSERT_BYTES);
+            }
+        }
+
+        fn overwrite_at_cursor(&mut self) {
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                let pos = bv.current_pos();
+                bv.overwrite_bytes(pos, OVERWRITE_BYTES);
+            }
+        }
+    }
+
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F3"), "Insert Bytes", mywin::Commands::A);
+            commandbar.set(key!("F4"), "Overwrite Bytes", mywin::Commands::B);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            match command_id {
+                mywin::Commands::A => self.insert_at_cursor(),
+                mywin::Commands::B => self.overwrite_at_cursor(),
             }
         }
     }
@@ -3101,5 +3208,112 @@ fn check_bufferview_char_mode_all_decodings_utf8_section() {
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_char_mode_all_decodings(test_buffer_char_mode_mixed()));
     a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_char_mode_feature_toggles_with_commands() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. All features off')
+        CheckHash(0x9077A224ABA7974E)
+        Key.Pressed(F1)
+        Paint('2. Address visible')
+        CheckHash(0xACA7A6D7BEA85544)
+        Key.Pressed(F2)
+        Paint('3. Address hidden')
+        CheckHash(0x9077A224ABA7974E)
+        Key.Pressed(F3)
+        Paint('4. Interval names visible')
+        CheckHash(0xBDDBB7B2E8804D88)
+        Key.Pressed(F4)
+        Paint('5. Interval names hidden')
+        CheckHash(0x9077A224ABA7974E)
+        Key.Pressed(F5)
+        Paint('6. Unicode strings visible')
+        CheckHash(0x7495A6A3A4C292F6)
+        Key.Pressed(F6)
+        Paint('7. Unicode strings hidden')
+        CheckHash(0x9077A224ABA7974E)
+        Key.Pressed(F7)
+        Paint('8. UTF-8 decode on')
+        CheckHash(0x62238A0B5BC623C4)
+        Key.Pressed(F8)
+        Paint('9. UTF-8 decode off')
+        CheckHash(0x9077A224ABA7974E)
+    ";
+
+    #[Window(events=CommandBarEvents,commands:A+B+C+D+E+F+G+H, internal:true)]
+    struct MyWin {
+        buffer_handle: Handle<BufferView<Vec<u8>>>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,a:c,w:70,h:14,flags: Sizeable"),
+                buffer_handle: Handle::None,
+            };
+            w.buffer_handle = w.add(make_bufferview_char_mode_features(test_buffer_char_mode_large()));
+            w
+        }
+
+        fn set_address_visible(&mut self, visible: bool) {
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                bv.set_address_visible(visible);
+            }
+        }
+
+        fn set_interval_names_visible(&mut self, visible: bool) {
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                bv.set_interval_names_visible(visible);
+            }
+        }
+
+        fn set_unicode_strings_visible(&mut self, visible: bool) {
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                bv.set_unicode_strings_visible(visible);
+            }
+        }
+
+        fn set_decode_utf8(&mut self, enabled: bool) {
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                bv.set_decode_utf8(enabled);
+            }
+        }
+    }
+
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F1"), "Address On", mywin::Commands::A);
+            commandbar.set(key!("F2"), "Address Off", mywin::Commands::B);
+            commandbar.set(key!("F3"), "Intervals On", mywin::Commands::C);
+            commandbar.set(key!("F4"), "Intervals Off", mywin::Commands::D);
+            commandbar.set(key!("F5"), "Unicode On", mywin::Commands::E);
+            commandbar.set(key!("F6"), "Unicode Off", mywin::Commands::F);
+            commandbar.set(key!("F7"), "UTF-8 On", mywin::Commands::G);
+            commandbar.set(key!("F8"), "UTF-8 Off", mywin::Commands::H);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            match command_id {
+                mywin::Commands::A => self.set_address_visible(true),
+                mywin::Commands::B => self.set_address_visible(false),
+                mywin::Commands::C => self.set_interval_names_visible(true),
+                mywin::Commands::D => self.set_interval_names_visible(false),
+                mywin::Commands::E => self.set_unicode_strings_visible(true),
+                mywin::Commands::F => self.set_unicode_strings_visible(false),
+                mywin::Commands::G => self.set_decode_utf8(true),
+                mywin::Commands::H => self.set_decode_utf8(false),
+            }
+        }
+    }
+
+    let mut a = App::debug(80, 18, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
     a.run();
 }
