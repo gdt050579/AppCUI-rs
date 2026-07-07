@@ -2553,6 +2553,30 @@ fn check_bufferview_create() {
 }
 
 #[test]
+fn check_bufferview_disabled_ignores_key_and_mouse() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Disabled initial state')
+        CheckHash(0x7C4CBB97ED2BFF63)
+        Key.Pressed(Right,3)
+        Key.Pressed(End)
+        Paint('2. Keys ignored')
+        CheckHash(0x7C4CBB97ED2BFF63)
+        Mouse.Click(20,5,left)
+        Mouse.Wheel(20,5,down,2)
+        Paint('3. Mouse ignored')
+        CheckHash(0x7C4CBB97ED2BFF63)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = make_bufferview_for_mouse(test_buffer_data());
+    bv.set_enabled(false);
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_bufferview_int_i8_large_buffer_navigation_with_keys() {
     let script = "
         Paint.Enable(false)
