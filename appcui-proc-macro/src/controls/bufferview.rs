@@ -20,12 +20,10 @@ static ENDIAN: FlagsSignature = FlagsSignature::new(&["Little", "Big"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("type", ParamType::String),
-    PositionalParameter::new("buffer", ParamType::String),
 ];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
     NamedParameter::new("class", "type", ParamType::String),
-    NamedParameter::new("buffer", "buffer", ParamType::String),
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("left-scroll-margin", "lsm", ParamType::Integer),
     NamedParameter::new("lsm", "lsm", ParamType::Integer),
@@ -125,7 +123,6 @@ fn codepage_code(value: &str) -> String {
 pub(crate) fn create(input: TokenStream) -> TokenStream {
     let mut cb = ControlBuilder::new("bufferview", input, POSILITIONAL_PARAMETERS, NAMED_PARAMETERS, true);
     cb.init_control_with_template("BufferView", "new", "type");
-    cb.add_param_value("buffer");
     cb.add_layout();
     cb.add_flags_parameter("flags", "bufferview::Flags", &FLAGS);
     cb.finish_control_initialization();
@@ -171,8 +168,8 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     }
 
     if let Some(width) = cb.get_i32("address-width") {
-        if width < 0 {
-            panic!("Parameter `address-width` can not be negative");
+        if width < 1 {
+            panic!("Parameter `address-width` can not be less than 1");
         }
         cb.add_line(format!("control.set_address_width({width} as u32);").as_str());
     }
@@ -184,8 +181,8 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     }
 
     if let Some(width) = cb.get_i32("interval-name-width") {
-        if width < 0 {
-            panic!("Parameter `interval-name-width` can not be negative");
+        if width < 1 {
+            panic!("Parameter `interval-name-width` can not be less than 1");
         }
         cb.add_line(format!("control.set_interval_name_width({width} as u32);").as_str());
     }

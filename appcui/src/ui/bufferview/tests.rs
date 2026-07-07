@@ -22,6 +22,7 @@ fn snapshot(buf: &mut Buffer<Vec<u8>>) -> Vec<u8> {
     out
 }
 
+#[derive(Default)]
 struct ReadOnlyBuffer {
     data: Vec<u8>,
 }
@@ -55,7 +56,7 @@ impl BufferAccess for ReadOnlyBuffer {
         false
     }
 }
-
+#[derive(Default)]
 struct ResizeFailsBuffer {
     data: Vec<u8>,
 }
@@ -94,7 +95,7 @@ impl BufferAccess for ResizeFailsBuffer {
         false
     }
 }
-
+#[derive(Default)]
 struct SetFailsAtBuffer {
     data: Vec<u8>,
     fail_at: u64,
@@ -139,6 +140,7 @@ impl BufferAccess for SetFailsAtBuffer {
     }
 }
 
+#[derive(Default)]
 struct GetFailsAtBuffer {
     data: Vec<u8>,
     fail_at: u64,
@@ -1691,7 +1693,7 @@ fn test_large_buffer_data() -> Vec<u8> {
 }
 
 fn make_bufferview(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
@@ -1703,7 +1705,7 @@ fn make_bufferview(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_for_mouse(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress,
@@ -1725,7 +1727,7 @@ fn make_bufferview_with_intervals(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_char_mode(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress,
@@ -1736,7 +1738,7 @@ fn make_bufferview_char_mode(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_oct_auto(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress,
@@ -1748,7 +1750,7 @@ fn make_bufferview_oct_auto(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_char_auto(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress,
@@ -1759,7 +1761,7 @@ fn make_bufferview_char_auto(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_int_i8(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
@@ -1771,7 +1773,7 @@ fn make_bufferview_int_i8(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_uint_u8(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress,
@@ -1783,7 +1785,7 @@ fn make_bufferview_uint_u8(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_int_edit_i8(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress,
@@ -1795,7 +1797,7 @@ fn make_bufferview_int_edit_i8(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_float_e4m3(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress,
@@ -1807,7 +1809,7 @@ fn make_bufferview_float_e4m3(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_bin(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress,
@@ -1819,7 +1821,7 @@ fn make_bufferview_bin(data: Vec<u8>) -> BufferView<Vec<u8>> {
 }
 
 fn make_bufferview_oct(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress,
@@ -1832,7 +1834,7 @@ fn make_bufferview_oct(data: Vec<u8>) -> BufferView<Vec<u8>> {
 
 #[test]
 fn bufferview_create_defaults() {
-    let bv = BufferView::new(
+    let bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
@@ -1851,7 +1853,7 @@ fn bufferview_create_defaults() {
 
 #[test]
 fn bufferview_selection_api() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::from_value(0).expect("empty flags"),
@@ -1866,7 +1868,7 @@ fn bufferview_selection_api() {
 
 #[test]
 fn bufferview_set_selection_valid_ranges() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::from_value(0).expect("empty flags"),
@@ -1888,7 +1890,7 @@ fn bufferview_set_selection_valid_ranges() {
 
 #[test]
 fn bufferview_set_selection_rejects_invalid_ranges() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::from_value(0).expect("empty flags"),
@@ -1919,7 +1921,7 @@ fn bufferview_set_selection_rejects_invalid_ranges() {
 
 #[test]
 fn bufferview_default_codepage_endian_and_format() {
-    let bv = BufferView::new(
+    let bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ShowAddress,
@@ -1935,7 +1937,7 @@ fn bufferview_default_codepage_endian_and_format() {
 
 #[test]
 fn bufferview_address_visible_noop_when_unchanged() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ShowAddress,
@@ -1944,7 +1946,7 @@ fn bufferview_address_visible_noop_when_unchanged() {
     bv.set_address_visible(true);
     assert!(bv.is_address_visible());
 
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::SearchBar,
@@ -1960,7 +1962,7 @@ fn test_buffer_high_bytes() -> Vec<u8> {
 
 #[test]
 fn bufferview_set_address_name() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ShowAddress,
@@ -1971,7 +1973,7 @@ fn bufferview_set_address_name() {
 
 #[test]
 fn bufferview_set_address_width_while_hidden() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::SearchBar,
@@ -1983,7 +1985,7 @@ fn bufferview_set_address_width_while_hidden() {
 
 #[test]
 fn bufferview_set_interval_name_title() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ShowAddress,
@@ -1994,7 +1996,7 @@ fn bufferview_set_interval_name_title() {
 
 #[test]
 fn bufferview_set_interval_name_width_while_hidden() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ShowAddress,
@@ -2006,7 +2008,7 @@ fn bufferview_set_interval_name_width_while_hidden() {
 
 #[test]
 fn bufferview_ascii_strings_visible_noop_when_unchanged() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ShowAddress,
@@ -2018,7 +2020,7 @@ fn bufferview_ascii_strings_visible_noop_when_unchanged() {
 
 #[test]
 fn bufferview_utf16_ascii_strings_visible_noop_when_unchanged() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ShowAddress,
@@ -2030,7 +2032,7 @@ fn bufferview_utf16_ascii_strings_visible_noop_when_unchanged() {
 
 #[test]
 fn bufferview_decode_utf8_noop_when_unchanged() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ShowAddress,
@@ -2105,7 +2107,7 @@ fn test_buffer_char_mode_large() -> Vec<u8> {
 }
 
 fn make_bufferview_char_mode_features(data: Vec<u8>) -> BufferView<Vec<u8>> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data,
         layout!("d:f"),
         Flags::ScrollBars,
@@ -2154,7 +2156,7 @@ fn test_buffer_char_mode_mixed_contains_utf8_sequences() {
 }
 
 fn decode_utf8_from(data: &[u8], pos: u64, b: u8) -> Option<(char, u8)> {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         data.to_vec(),
         layout!("d:f"),
         Flags::from_value(0).expect("empty flags"),
@@ -2188,7 +2190,7 @@ fn decode_utf8_invalid_lead_byte() {
 
 #[test]
 fn bufferview_read_only_blocks_edits() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ReadOnly,
@@ -2203,7 +2205,7 @@ fn bufferview_read_only_blocks_edits() {
 
 #[test]
 fn bufferview_read_bytes_into_vec() {
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::from_value(0).expect("empty flags"),
@@ -2217,7 +2219,7 @@ fn bufferview_read_bytes_into_vec() {
     bv.read_bytes_into_vec(35, 10, &mut partial);
     assert_eq!(partial, b"lo!");
 
-    let mut bv_ro = BufferView::new(
+    let mut bv_ro = BufferView::with_buffer(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ReadOnly,
@@ -2509,7 +2511,7 @@ fn check_bufferview_ascii_codepage() {
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_high_bytes(),
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
@@ -2530,7 +2532,7 @@ fn check_bufferview_big_endian_uint16() {
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
-    let mut bv = BufferView::new(
+    let mut bv = BufferView::with_buffer(
         test_buffer_high_bytes(),
         layout!("d:f"),
         Flags::ScrollBars | Flags::ShowAddress | Flags::SearchBar,
@@ -2614,9 +2616,9 @@ fn check_bufferview_create_with_macro() {
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
-    w.add(bufferview!(
-        "Vec<u8>,test_buffer_data(),d:f,flags:ScrollBars+ShowAddress+SearchBar,columns:8,format:Hex,offset:Hex"
-    ));
+    let mut bv = bufferview!("Vec<u8>,d:f,flags:ScrollBars+ShowAddress+SearchBar,columns:8,format:Hex,offset:Hex");
+    bv.set_buffer(test_buffer_data());
+    w.add(bv);
     a.add_window(w);
     a.run();
 }

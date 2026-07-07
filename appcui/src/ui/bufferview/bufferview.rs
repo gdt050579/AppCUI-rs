@@ -104,7 +104,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     ///
     /// `flags` control optional UI features such as scroll bars, the search bar, column
     /// visibility, read-only mode, and string decoding. See [`Flags`] for the full list.
-    pub fn new(buffer: T, layout: Layout, flags: Flags) -> Self {
+    pub fn with_buffer(buffer: T, layout: Layout, flags: Flags) -> Self {
         let mut status_flags = StatusFlags::Enabled | StatusFlags::Visible | StatusFlags::AcceptInput;
         if flags.contains(Flags::ScrollBars) {
             status_flags |= StatusFlags::IncreaseBottomMarginOnFocus;
@@ -141,6 +141,20 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             search_bytes: Vec::new(),
             edit_text: FlatString::new(),
         }
+    }
+    pub fn new(layout: Layout, flags: Flags) -> Self {
+        Self::with_buffer(T::default(), layout, flags)
+    }
+    pub fn set_buffer(&mut self, buffer: T) {
+        self.reset();
+        self.buffer = Buffer::new(buffer);
+        self.paint_buffer();
+    }
+    pub fn take_buffer(&mut self) -> T {
+        self.reset();
+        let obj = self.buffer.take();
+        self.paint_buffer();
+        obj
     }
     /// Sets the code page used to render bytes in the character panel.
     pub fn set_codepage(&mut self, cp: Codepage) {
@@ -429,6 +443,20 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         output.resize(start + count as usize, 0);
         let n = self.read_bytes(pos, &mut output[start..]) as usize;
         output.truncate(start + n);
+    }
+    fn reset(&mut self) {
+        self.pos = 0;
+        self.selection.clear();
+        self.start_view = 0;
+        self.intervals.clear(); // TBD - poate e mai bine sa il tin.
+        self.current_segment = Segment::default();
+        self.current_segment_attr = CharAttribute::default();
+        self.edit_text.clear();
+        self.search_bytes.clear();
+        self.hovered_separator = None;
+        self.hovered_panel = None;
+        self.mouse_capture = false;
+        self.selecting = false;
     }
     fn validate_position_is_in_buffer(&mut self) {
         if self.pos >= self.buffer.len() {

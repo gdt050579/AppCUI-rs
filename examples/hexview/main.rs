@@ -1,5 +1,6 @@
 use appcui::prelude::*;
 
+#[derive(Default)]
 struct MyBuffer {
     data: Vec<u8>,
     start: u64,
@@ -143,7 +144,7 @@ impl HexViewWindow {
 
         let mut vs = vsplitter!("d:f,pos:50%,resize:PreserveLeftPanelSize,minrightwidth:28");
 
-        let mut bv = BufferView::new(
+        let mut bv = BufferView::with_buffer(
             buffer,
             layout!("d:f"),
             bufferview::Flags::ScrollBars

@@ -141,4 +141,8 @@ impl IntervalSet {
         let end = next_start.saturating_sub(1).min(length.saturating_sub(1));
         Segment { start: pos, end, index: NONE }
     }
+    pub(super) fn clear(&mut self) {
+        self.intervals.clear();
+        self.map.clear();
+    }
 }

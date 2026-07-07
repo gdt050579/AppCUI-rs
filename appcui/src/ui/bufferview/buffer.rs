@@ -2,7 +2,7 @@
 ///
 /// Implement this trait to connect arbitrary data sources (files, memory-mapped regions,
 /// sparse buffers, and so on) to the control. A [`Vec<u8>`] implementation is provided.
-pub trait BufferAccess {
+pub trait BufferAccess : Default {
     /// Returns the number of bytes currently available in the buffer.
     fn count(&self) -> u64;
     /// Returns the byte at `pos`, or `None` if the position is not readable.
@@ -24,6 +24,10 @@ pub(super) struct Buffer<T: BufferAccess> {
 impl<T: BufferAccess> Buffer<T> {
     pub(super) fn new(data: T) -> Self {
         Self { data }
+    }
+    #[inline(always)]
+    pub(super) fn take(&mut self) -> T {
+        std::mem::take(&mut self.data)
     }
     #[inline(always)]
     pub(super) fn len(&self) -> u64 {
