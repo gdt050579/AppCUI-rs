@@ -142,14 +142,27 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             edit_text: FlatString::new(),
         }
     }
+    /// Creates a new buffer view with a default [`BufferAccess`] instance at the given `layout`.
+    ///
+    /// Equivalent to [`Self::with_buffer`] with `T::default()`. Use [`Self::with_buffer`] when
+    /// the initial backing store should not be empty or default-constructed.
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self::with_buffer(T::default(), layout, flags)
     }
+    /// Replaces the backing [`BufferAccess`] object with `buffer`.
+    ///
+    /// Resets cursor position, scroll offset, selection, intervals, search state, and other
+    /// transient view state, then repaints the control. Display settings (format, code page,
+    /// column layout, and so on) are preserved.
     pub fn set_buffer(&mut self, buffer: T) {
         self.reset();
         self.buffer = Buffer::new(buffer);
         self.paint_buffer();
     }
+    /// Moves the backing [`BufferAccess`] object out of the control.
+    ///
+    /// The control is left bound to `T::default()` and its view state is reset the same way as
+    /// [`Self::set_buffer`]. The removed buffer is returned for saving, inspection, or reuse.
     pub fn take_buffer(&mut self) -> T {
         self.reset();
         let obj = self.buffer.take();

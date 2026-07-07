@@ -2574,6 +2574,93 @@ pub fn timepicker(input: TokenStream) -> TokenStream {
     crate::controls::timepicker::create(input)
 }
 
+/// Creates a new [`BufferView`] control for displaying and editing a byte buffer.
+/// The format is `bufferview!("attributes")` where the attributes are pairs of key-value, separated by comma.
+///
+/// The control is created with a default-constructed backing buffer. Load data at runtime with
+/// [`bufferview::BufferView::set_buffer`] or [`bufferview::BufferView::take_buffer`].
+///
+/// # Parameters
+/// * `type` or `class` (required, first positional parameter) - The [`bufferview::BufferAccess`] type
+///   used as the backing store (for example `Vec<u8>` or a custom type)
+/// * `flags` - Control flags (optional). Can be:
+///   - **ScrollBars** - Shows scroll bars
+///   - **SearchBar** - Enables the search bar
+///   - **HideHeader** - Hides the column header row
+///   - **ShowAddress** - Shows the address column
+///   - **ShowIntervalNames** - Shows the interval-name column
+///   - **NoPanelDimming** - Disables dimming of inactive panels
+///   - **ShowAsciiStrings** - Shows the ASCII strings panel
+///   - **ShowUtf16AsciiStrings** - Shows the UTF-16 ASCII strings panel
+///   - **DecodeUTF8Characters** - Decodes UTF-8 in the character panel
+///   - **ReadOnly** - Disables in-place editing
+/// * `offset-format` or `offset` or `address-format` - Address column format (optional). Can be:
+///   - **Hex** (default)
+///   - **Dec**
+/// * `endian` - Multi-byte value endianness (optional). Can be:
+///   - **Little**
+///   - **Big**
+/// * `format` or `data-format` or `representation` - Data panel format (optional). Shorthand values include:
+///   - **Hex**, **Hex(Word)**, **Hex(DWord)**, **Hex(QWord)**
+///   - **Oct**, **Bin**, **Char**
+///   - **UInt**, **UInt(U16)**, **UInt(U32)**, **UInt(U64)**
+///   - **Int**, **Int(I16)**, **Int(I32)**, **Int(I64)**
+///   - **Float**, **Float(Scientific64)**, **Float(E4M3)**, **Float(E5M2)**
+/// * `columns` or `columns-count` - Number of data columns (optional). Can be:
+///   - **Auto**
+///   - **Fixed(N)** or an integer from 1 to 255
+/// * `codepage` or `cp` - Character panel code page (optional). Can be:
+///   - **Default**, **ASCII**, **CP437**, **WINDOWS_1252**, or a custom name
+/// * `address-width` or `aw` - Address column width in characters (optional, minimum 1)
+/// * `address-name` or `address` - Address column title (optional)
+/// * `interval-name-width` or `inw` - Interval-name column width in characters (optional, minimum 1)
+/// * `interval-name-title` or `interval-title` - Interval-name column title (optional)
+/// * `intervals` - Initial interval definitions (optional)
+/// * `selection-start` and `selection-end` - Initial byte selection range (optional, both required together)
+/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
+/// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+///
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
+/// // Basic hex view with a Vec<u8> backing store
+/// let mut bv = bufferview!("Vec<u8>, x=1, y=1, width=60, height=20");
+/// bv.set_buffer(vec![0x48, 0x65, 0x6C, 0x6C, 0x6F]);
+///
+/// // Hex view with scroll bars, search, and display options
+/// let mut bv = bufferview!(
+///     "Vec<u8>,
+///     flags: ScrollBars+ShowAddress+SearchBar,
+///     columns: 8,
+///     format: Hex,
+///     offset: Hex,
+///     x=2, y=2, width=60, height=25"
+/// );
+/// bv.set_buffer(test_buffer_data());
+///
+/// // Custom BufferAccess type with intervals and initial selection
+/// let mut bv = bufferview!(
+///     "type: MyBuffer,
+///     flags: ShowAddress+ShowIntervalNames,
+///     format: Hex(Word),
+///     endian: Little,
+///     intervals: &[Interval::new(0, 16, CharAttribute::default(), 'header')],
+///     selection-start: 4,
+///     selection-end: 12,
+///     dock: center, width=70, height=30"
+/// );
+/// ```
+///
+/// The type `T` must implement [`bufferview::BufferAccess`] and [`Default`].
 #[proc_macro]
 pub fn bufferview(input: TokenStream) -> TokenStream {
     crate::controls::bufferview::create(input)
