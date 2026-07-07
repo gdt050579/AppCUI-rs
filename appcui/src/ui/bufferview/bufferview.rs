@@ -459,7 +459,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             .build();
         surface.write_text(name, &format);
     }
-    fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: u64, len: u32, y: i32, repr: OffsetFormat) {
+    pub(super) fn write_offset(surface: &mut Surface, attr: CharAttribute, addr: u64, len: u32, y: i32, repr: OffsetFormat) {
         if len == 0 {
             return;
         }

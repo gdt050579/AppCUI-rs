@@ -1,3 +1,4 @@
+use crate::graphics::{CharAttribute, Surface};
 use crate::prelude::*;
 
 use super::buffer::{Buffer, BufferAccess};
@@ -643,6 +644,69 @@ fn dec_format(index: u32, display_chars: u32) -> ([u8; 4], u8) {
     let mut output = [b'?'; 4];
     let len = BufferView::<Vec<u8>>::dec_format(index, display_chars, &mut output);
     (output, len)
+}
+
+fn dec_offset_line(addr: u64, len: u32) -> String {
+    let mut surface = Surface::new(len.max(1), 1);
+    BufferView::<Vec<u8>>::write_offset(
+        &mut surface,
+        CharAttribute::default(),
+        addr,
+        len,
+        0,
+        OffsetFormat::Dec,
+    );
+    (0..len as i32)
+        .filter_map(|x| surface.char(x, 0).map(|c| c.code))
+        .collect()
+}
+
+#[test]
+fn write_offset_dec_zero_padded() {
+    assert_eq!(dec_offset_line(0, 4), "   0");
+    assert_eq!(dec_offset_line(0, 1), "0");
+}
+
+#[test]
+fn write_offset_dec_space_padded() {
+    assert_eq!(dec_offset_line(5, 4), "   5");
+    assert_eq!(dec_offset_line(42, 4), "  42");
+    assert_eq!(dec_offset_line(123, 6), "   123");
+}
+
+#[test]
+fn write_offset_dec_exact_width() {
+    assert_eq!(dec_offset_line(999, 3), "999");
+    assert_eq!(dec_offset_line(1234, 4), "1234");
+}
+
+#[test]
+fn write_offset_dec_truncated_with_ellipsis() {
+    assert_eq!(dec_offset_line(1234, 2), "…4");
+    assert_eq!(dec_offset_line(12345, 4), "1…45");
+    assert_eq!(dec_offset_line(123456, 5), "1…456");
+}
+
+#[test]
+fn write_offset_dec_zero_length_is_noop() {
+    let mut surface = Surface::new(4, 1);
+    surface.write_string(0, 0, "----", CharAttribute::default(), false);
+    BufferView::<Vec<u8>>::write_offset(
+        &mut surface,
+        CharAttribute::default(),
+        42,
+        0,
+        0,
+        OffsetFormat::Dec,
+    );
+    for x in 0..4 {
+        assert_eq!(surface.char(x, 0).map(|c| c.code), Some('-'));
+    }
+}
+
+#[test]
+fn write_offset_dec_large_address() {
+    assert_eq!(dec_offset_line(1_234_567, 8), " 1234567");
 }
 
 fn formatted(output: &[u8; 4], len: u8) -> &[u8] {
@@ -2625,6 +2689,51 @@ fn check_bufferview_search_bar_mouse_text() {
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_search_bar_backspace_then_enter() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x6F386642B4BD3242)
+        Mouse.Click(3,12,left)
+        Key.TypeText('text:Hello')
+        Paint('2. Search for Hello')
+        CheckHash(0xCA141C0D46AD4D79)
+        Key.Pressed(Backspace,2)
+        Paint('3. Backspace twice')
+        CheckHash(0x7E4B024AD0043F16)
+        Key.Pressed(Enter)
+        Paint('4. Find next match')
+        CheckHash(0x5984B53AE5B978F8)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_search_without_search_bar_ignored() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF9BBE4D7A406E4C7)
+        Mouse.Click(3,12,left)
+        Key.TypeText('text:Hello')
+        Paint('2. Search ignored without search bar')
+        CheckHash(0x32434095719B8557)
+        Key.Pressed(Enter)
+        Paint('3. Enter ignored without search bar')
+        CheckHash(0x32434095719B8557)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_for_mouse(test_buffer_data()));
     a.add_window(w);
     a.run();
 }
