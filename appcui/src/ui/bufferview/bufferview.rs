@@ -66,7 +66,7 @@ impl CharWriterPos {
 /// A scrollable hex-editor control over a [`BufferAccess`] data source.
 ///
 /// `BufferView` displays buffer contents in a configurable data representation, optional
-/// address and interval-name columns, and optional ASCII/Unicode string panels. It supports
+/// address and interval-name columns, and optional ASCII/UTF-16 ASCII string panels. It supports
 /// navigation, selection, search, and editing when the backing buffer and [`Flags`] allow it.
 pub struct BufferView<T>
 where
@@ -283,22 +283,22 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     pub fn is_ascii_strings_visible(&self) -> bool {
         self.flags.contains(Flags::ShowAsciiStrings)
     }
-    /// Shows or hides the Unicode string panel below the data area.
-    pub fn set_unicode_strings_visible(&mut self, visible: bool) {
-        if visible == self.flags.contains(Flags::ShowUnicodeStrings) {
+    /// Shows or hides UTF-16LE ASCII string highlighting in the character panel.
+    pub fn set_utf16_ascii_strings_visible(&mut self, visible: bool) {
+        if visible == self.flags.contains(Flags::ShowUtf16AsciiStrings) {
             return;
         }
         if visible {
-            self.flags.set(Flags::ShowUnicodeStrings);
+            self.flags.set(Flags::ShowUtf16AsciiStrings);
         } else {
-            self.flags.remove(Flags::ShowUnicodeStrings);
+            self.flags.remove(Flags::ShowUtf16AsciiStrings);
         }
         self.paint_buffer();
     }
-    /// Returns whether the Unicode string panel is visible.
+    /// Returns whether UTF-16LE ASCII string highlighting is enabled in the character panel.
     #[inline(always)]
-    pub fn is_unicode_strings_visible(&self) -> bool {
-        self.flags.contains(Flags::ShowUnicodeStrings)
+    pub fn is_utf16_ascii_strings_visible(&self) -> bool {
+        self.flags.contains(Flags::ShowUtf16AsciiStrings)
     }
     /// Enables or disables UTF-8 decoding in the character panel.
     pub fn set_decode_utf8(&mut self, decode_utf8: bool) {
@@ -331,8 +331,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     }
     /// Sets the selection to the half-open byte range `[start, end)`.
     #[inline(always)]
-    pub fn set_selection(&mut self, start: u64, end: u64) {
+    pub fn set_selection(&mut self, start: u64, end: u64) -> bool {
+        if start >= end || end > self.buffer.len() {
+            return false;
+        }
         self.selection = Selection::new(start, end);
+        true
     }
     /// Returns the cursor position as a byte offset into the buffer.
     #[inline(always)]
@@ -359,7 +363,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             return false;
         }
         let result = self.buffer.delete(pos, count);
-        self.paint_buffer();
+        self.validate_position_is_in_buffer();
         result
     }
     /// Inserts `bytes` at `pos`, shifting existing data to the right.
@@ -370,7 +374,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             return false;
         }
         let result = self.buffer.insert(pos, bytes);
-        self.paint_buffer();
+        self.validate_position_is_in_buffer();
         result
     }
     /// Overwrites existing bytes at `pos` with `bytes` without changing the buffer length.
@@ -394,14 +398,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         self.clear_selection();
         let result = self.buffer.resize(new_size, fill_byte);
-        if self.pos >= self.buffer.len() {
-            let new_pos = self.buffer.len().saturating_sub(1);
-            if !self.goto_position(new_pos, false, false) {
-                self.paint_buffer();
-            }
-        } else {
-            self.paint_buffer();
-        }
+        self.validate_position_is_in_buffer();
         result
     }
     /// Sets `count` consecutive bytes starting at `pos` to `value`.
@@ -432,6 +429,16 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         output.resize(start + count as usize, 0);
         let n = self.read_bytes(pos, &mut output[start..]) as usize;
         output.truncate(start + n);
+    }
+    fn validate_position_is_in_buffer(&mut self) {
+        if self.pos >= self.buffer.len() {
+            let new_pos = self.buffer.len().saturating_sub(1);
+            if !self.goto_position(new_pos, false, false) {
+                self.paint_buffer();
+            }
+        } else {
+            self.paint_buffer();
+        }
     }
     fn write_column_title(surface: &mut Surface, attr: CharAttribute, title: &FlatString<14>, len: u32, x: i32) {
         let chars_count = title.chars_count() as u32;
@@ -571,7 +578,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             None
         }
     }
-    fn decode_unicode(&mut self, pos: u64) -> Option<u32> {
+    fn decode_utf16_ascii(&mut self, pos: u64) -> Option<u32> {
         let mut len = 0;
         let mut pos = pos;
         let size = self.size();
@@ -627,7 +634,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let mut cwp = CharWriterPos::new(self.repr.columns_count as i32, self.repr.rows_count as i32, position, self.buffer.len());
         let decode_utf8 = self.flags.contains(Flags::DecodeUTF8Characters);
         let show_ascii = self.flags.contains(Flags::ShowAsciiStrings);
-        let show_unicode = self.flags.contains(Flags::ShowUnicodeStrings);
+        let show_utf16_ascii = self.flags.contains(Flags::ShowUtf16AsciiStrings);
         let enph_attr_1 = self.theme().text.enphasized_1;
         let enph_attr_2 = self.theme().text.enphasized_2;
         let enph_attr_3 = self.theme().text.enphasized_3;
@@ -660,8 +667,8 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                         continue;
                     }
                 }
-                if show_unicode && Self::is_ascii_char(b) {
-                    if let Some(len) = self.decode_unicode(cwp.pos) {
+                if show_utf16_ascii && Self::is_ascii_char(b) {
+                    if let Some(len) = self.decode_utf16_ascii(cwp.pos) {
                         for _ in 0..len {
                             let c = self.buffer.get(cwp.pos).unwrap_or(b' ');
                             self.buf_surface.write_char(cwp.x, cwp.y, Character::with_attributes(c, enph_attr_3));

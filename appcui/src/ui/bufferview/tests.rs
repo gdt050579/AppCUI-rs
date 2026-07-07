@@ -1843,7 +1843,7 @@ fn bufferview_create_defaults() {
     assert!(bv.is_address_visible());
     assert!(!bv.is_interval_names_visible());
     assert!(!bv.is_ascii_strings_visible());
-    assert!(!bv.is_unicode_strings_visible());
+    assert!(!bv.is_utf16_ascii_strings_visible());
     assert!(matches!(bv.offset_format(), OffsetFormat::Hex));
     assert!(matches!(bv.endian(), Endian::Little));
     assert!(matches!(bv.format(), DataRepresentationFormat::Hex(HexFormat::Byte)));
@@ -1856,12 +1856,65 @@ fn bufferview_selection_api() {
         layout!("d:f"),
         Flags::from_value(0).expect("empty flags"),
     );
-    bv.set_selection(2, 6);
+    assert!(bv.set_selection(2, 6));
     assert!(bv.has_selection());
     assert_eq!(bv.selection(), Some((2, 6)));
     bv.clear_selection();
     assert!(!bv.has_selection());
     assert_eq!(bv.selection(), None);
+}
+
+#[test]
+fn bufferview_set_selection_valid_ranges() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::from_value(0).expect("empty flags"),
+    );
+    let len = bv.bytes_count();
+
+    assert!(bv.set_selection(0, 1));
+    assert_eq!(bv.selection(), Some((0, 1)));
+
+    assert!(bv.set_selection(2, 6));
+    assert_eq!(bv.selection(), Some((2, 6)));
+
+    assert!(bv.set_selection(37, len));
+    assert_eq!(bv.selection(), Some((37, len)));
+
+    assert!(bv.set_selection(0, len));
+    assert_eq!(bv.selection(), Some((0, len)));
+}
+
+#[test]
+fn bufferview_set_selection_rejects_invalid_ranges() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::from_value(0).expect("empty flags"),
+    );
+    let len = bv.bytes_count();
+
+    assert!(bv.set_selection(4, 10));
+    assert_eq!(bv.selection(), Some((4, 10)));
+
+    assert!(!bv.set_selection(4, 4));
+    assert_eq!(bv.selection(), Some((4, 10)));
+
+    assert!(!bv.set_selection(10, 4));
+    assert_eq!(bv.selection(), Some((4, 10)));
+
+    assert!(!bv.set_selection(0, len + 1));
+    assert_eq!(bv.selection(), Some((4, 10)));
+
+    assert!(!bv.set_selection(len, len));
+    assert_eq!(bv.selection(), Some((4, 10)));
+
+    assert!(!bv.set_selection(len - 1, len + 1));
+    assert_eq!(bv.selection(), Some((4, 10)));
+
+    assert!(!bv.set_selection(100, 200));
+    assert_eq!(bv.selection(), Some((4, 10)));
 }
 
 #[test]
@@ -1964,15 +2017,15 @@ fn bufferview_ascii_strings_visible_noop_when_unchanged() {
 }
 
 #[test]
-fn bufferview_unicode_strings_visible_noop_when_unchanged() {
+fn bufferview_utf16_ascii_strings_visible_noop_when_unchanged() {
     let mut bv = BufferView::new(
         test_buffer_data(),
         layout!("d:f"),
         Flags::ShowAddress,
     );
-    assert!(!bv.is_unicode_strings_visible());
-    bv.set_unicode_strings_visible(false);
-    assert!(!bv.is_unicode_strings_visible());
+    assert!(!bv.is_utf16_ascii_strings_visible());
+    bv.set_utf16_ascii_strings_visible(false);
+    assert!(!bv.is_utf16_ascii_strings_visible());
 }
 
 #[test]
@@ -2004,7 +2057,7 @@ fn test_buffer_ascii_strings() -> Vec<u8> {
     data
 }
 
-fn test_buffer_unicode_strings() -> Vec<u8> {
+fn test_buffer_utf16_ascii_strings() -> Vec<u8> {
     let mut data = vec![0u8; 4];
     for c in "Hello!!".chars() {
         data.push(c as u8);
@@ -2070,7 +2123,7 @@ fn make_bufferview_char_mode_features(data: Vec<u8>) -> BufferView<Vec<u8>> {
 fn make_bufferview_char_mode_all_decodings(data: Vec<u8>) -> BufferView<Vec<u8>> {
     let mut bv = make_bufferview_char_mode(data);
     bv.set_ascii_strings_visible(true);
-    bv.set_unicode_strings_visible(true);
+    bv.set_utf16_ascii_strings_visible(true);
     bv.set_decode_utf8(true);
     bv
 }
@@ -3347,16 +3400,16 @@ fn check_bufferview_ascii_strings_visible() {
 }
 
 #[test]
-fn check_bufferview_unicode_strings_visible() {
+fn check_bufferview_utf16_ascii_strings_visible() {
     let script = "
         Paint.Enable(false)
-        Paint('Unicode strings on')
+        Paint('UTF-16 ASCII strings on')
         CheckHash(0x88DDC3F309F563D2)
     ";
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
-    let mut bv = make_bufferview_char_mode(test_buffer_unicode_strings());
-    bv.set_unicode_strings_visible(true);
+    let mut bv = make_bufferview_char_mode(test_buffer_utf16_ascii_strings());
+    bv.set_utf16_ascii_strings_visible(true);
     w.add(bv);
     a.add_window(w);
     a.run();
@@ -3442,10 +3495,10 @@ fn check_bufferview_char_mode_feature_toggles_with_commands() {
         Paint('5. Interval names hidden')
         CheckHash(0x9077A224ABA7974E)
         Key.Pressed(F5)
-        Paint('6. Unicode strings visible')
+        Paint('6. UTF-16 ASCII strings visible')
         CheckHash(0x7495A6A3A4C292F6)
         Key.Pressed(F6)
-        Paint('7. Unicode strings hidden')
+        Paint('7. UTF-16 ASCII strings hidden')
         CheckHash(0x9077A224ABA7974E)
         Key.Pressed(F7)
         Paint('8. UTF-8 decode on')
@@ -3484,10 +3537,10 @@ fn check_bufferview_char_mode_feature_toggles_with_commands() {
             }
         }
 
-        fn set_unicode_strings_visible(&mut self, visible: bool) {
+        fn set_utf16_ascii_strings_visible(&mut self, visible: bool) {
             let h = self.buffer_handle;
             if let Some(bv) = self.control_mut(h) {
-                bv.set_unicode_strings_visible(visible);
+                bv.set_utf16_ascii_strings_visible(visible);
             }
         }
 
@@ -3517,8 +3570,8 @@ fn check_bufferview_char_mode_feature_toggles_with_commands() {
                 mywin::Commands::B => self.set_address_visible(false),
                 mywin::Commands::C => self.set_interval_names_visible(true),
                 mywin::Commands::D => self.set_interval_names_visible(false),
-                mywin::Commands::E => self.set_unicode_strings_visible(true),
-                mywin::Commands::F => self.set_unicode_strings_visible(false),
+                mywin::Commands::E => self.set_utf16_ascii_strings_visible(true),
+                mywin::Commands::F => self.set_utf16_ascii_strings_visible(false),
                 mywin::Commands::G => self.set_decode_utf8(true),
                 mywin::Commands::H => self.set_decode_utf8(false),
             }
