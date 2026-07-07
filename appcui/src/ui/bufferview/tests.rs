@@ -1735,6 +1735,29 @@ fn make_bufferview_char_mode(data: Vec<u8>) -> BufferView<Vec<u8>> {
     bv
 }
 
+fn make_bufferview_oct_auto(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Auto);
+    bv.set_data_representation_format(DataRepresentationFormat::Oct);
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
+fn make_bufferview_char_auto(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::new(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Auto);
+    bv.set_data_representation_format(DataRepresentationFormat::Char);
+    bv
+}
+
 fn make_bufferview_int_i8(data: Vec<u8>) -> BufferView<Vec<u8>> {
     let mut bv = BufferView::new(
         data,
@@ -2734,6 +2757,63 @@ fn check_bufferview_search_without_search_bar_ignored() {
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_for_mouse(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_oct_auto_columns_resize_window() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Narrow window')
+        CheckHash(0x9A28583258DF4ED8)
+        Mouse.Hold(84,12,left)
+        Mouse.Move(119,12)
+        Paint('2. Wider window')
+        CheckHash(0xDE4C17B58AD74773)
+        Mouse.Release(119,12,left)
+    ";
+    let mut a = App::debug(120, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
+    w.add(make_bufferview_oct_auto(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_char_auto_columns_resize_window() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Narrow window')
+        CheckHash(0xE3C2615AE67D5849)
+        Mouse.Hold(84,12,left)
+        Mouse.Move(119,12)
+        Paint('2. Wider window')
+        CheckHash(0x0826A0DB4C1E085D)
+        Mouse.Release(119,12,left)
+    ";
+    let mut a = App::debug(120, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
+    w.add(make_bufferview_char_auto(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_char_auto_columns_resize_window_large_buffer() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Narrow window')
+        CheckHash(0x40D8324ED5567A4B)
+        Mouse.Hold(84,12,left)
+        Mouse.Move(119,12)
+        Paint('2. Wider window')
+        CheckHash(0x7326734E0EB4959D)
+        Mouse.Release(119,12,left)
+    ";
+    let mut a = App::debug(120, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
+    w.add(make_bufferview_char_auto(test_large_buffer_data()));
     a.add_window(w);
     a.run();
 }
