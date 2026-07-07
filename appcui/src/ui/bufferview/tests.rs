@@ -2053,6 +2053,106 @@ fn bufferview_read_only_blocks_edits() {
 }
 
 #[test]
+fn bufferview_read_bytes_into_vec() {
+    let mut bv = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::from_value(0).expect("empty flags"),
+    );
+
+    let mut output = vec![0xAA, 0xBB];
+    bv.read_bytes_into_vec(32, 6, &mut output);
+    assert_eq!(output, vec![0xAA, 0xBB, b'H', b'e', b'l', b'l', b'o', b'!']);
+
+    let mut partial = Vec::new();
+    bv.read_bytes_into_vec(35, 10, &mut partial);
+    assert_eq!(partial, b"lo!");
+
+    let mut bv_ro = BufferView::new(
+        test_buffer_data(),
+        layout!("d:f"),
+        Flags::ReadOnly,
+    );
+    let mut read_only_output = vec![1, 2, 3];
+    bv_ro.read_bytes_into_vec(0, 4, &mut read_only_output);
+    assert_eq!(read_only_output, vec![1, 2, 3]);
+}
+
+#[test]
+fn check_bufferview_resize_buffer_with_commands() {
+    const SHRINK_SIZE: u64 = 20;
+    const GROW_STEP: u64 = 8;
+    const FILL_BYTE: u8 = 0xFE;
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x54588344E8C41577)
+        Key.Pressed(End)
+        Paint('2. Cursor at end')
+        CheckHash(0x4465F6C039F70697)
+        Key.Pressed(F3)
+        Paint('3. Resize smaller')
+        CheckHash(0x33E7D9CFB22E16E8)
+        Key.Pressed(F4)
+        Paint('4. Resize bigger once')
+        CheckHash(0x192587547D66F859)
+        Key.Pressed(F4)
+        Paint('5. Resize bigger twice')
+        CheckHash(0x58A114604C574F67)
+    ";
+
+    #[Window(events=CommandBarEvents,commands:A+B, internal:true)]
+    struct MyWin {
+        buffer_handle: Handle<BufferView<Vec<u8>>>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,a:c,w:60,h:12,flags: Sizeable"),
+                buffer_handle: Handle::None,
+            };
+            w.buffer_handle = w.add(make_bufferview_for_mouse(test_buffer_data()));
+            w
+        }
+
+        fn resize_smaller(&mut self) {
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                bv.resize_buffer(SHRINK_SIZE, 0);
+            }
+        }
+
+        fn resize_bigger(&mut self) {
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                let new_size = bv.bytes_count() + GROW_STEP;
+                bv.resize_buffer(new_size, FILL_BYTE);
+            }
+        }
+    }
+
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F3"), "Resize Small", mywin::Commands::A);
+            commandbar.set(key!("F4"), "Resize Big", mywin::Commands::B);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            match command_id {
+                mywin::Commands::A => self.resize_smaller(),
+                mywin::Commands::B => self.resize_bigger(),
+            }
+        }
+    }
+
+    let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
 fn check_bufferview_ascii_codepage() {
     let script = "
         Paint.Enable(false)
