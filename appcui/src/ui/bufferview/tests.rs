@@ -2606,6 +2606,22 @@ fn check_bufferview_create() {
 }
 
 #[test]
+fn check_bufferview_create_with_macro() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')
+        CheckHash(0x6F386642B4BD3242)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(bufferview!(
+        "Vec<u8>,test_buffer_data(),d:f,flags:ScrollBars+ShowAddress+SearchBar,columns:8,format:Hex,offset:Hex"
+    ));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_bufferview_disabled_ignores_key_and_mouse() {
     let script = "
         Paint.Enable(false)
