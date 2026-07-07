@@ -160,10 +160,7 @@ impl DataRepresentationFormat {
     }
     #[inline(always)]
     pub(crate) fn is_char(&self) -> bool {
-        match self {
-            DataRepresentationFormat::Char => true,
-            _ => false,
-        }
+        matches!(self, DataRepresentationFormat::Char)
     }
     #[inline(always)]
     pub(crate) fn validate(&self, text: &str) -> ValidateResult {

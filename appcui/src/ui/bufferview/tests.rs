@@ -27,7 +27,7 @@ struct ReadOnlyBuffer {
 }
 
 impl BufferAccess for ReadOnlyBuffer {
-    fn len(&self) -> u64 {
+    fn count(&self) -> u64 {
         self.data.len() as u64
     }
 
@@ -61,7 +61,7 @@ struct ResizeFailsBuffer {
 }
 
 impl BufferAccess for ResizeFailsBuffer {
-    fn len(&self) -> u64 {
+    fn count(&self) -> u64 {
         self.data.len() as u64
     }
 
@@ -101,7 +101,7 @@ struct SetFailsAtBuffer {
 }
 
 impl BufferAccess for SetFailsAtBuffer {
-    fn len(&self) -> u64 {
+    fn count(&self) -> u64 {
         self.data.len() as u64
     }
 
@@ -145,7 +145,7 @@ struct GetFailsAtBuffer {
 }
 
 impl BufferAccess for GetFailsAtBuffer {
-    fn len(&self) -> u64 {
+    fn count(&self) -> u64 {
         self.data.len() as u64
     }
 

@@ -40,12 +40,12 @@ pub(super) fn write(bytes: [u8; 8], format: IntFormat, output: &mut OutputBuffer
     }
     pos -= 1;
     buf[pos] = sign;
-    for i in 0..width {
-        output.set(i, buf[i]);
+    for (i, val) in buf.iter().enumerate().take(width) {
+        output.set(i, *val);
     }
     output.set_len(width as u8);
 }
-pub(super) fn validate(text: &str, format: IntFormat) -> ValidateResult {
+pub(super) fn validate(text: &str, _format: IntFormat) -> ValidateResult {
     let buf = text.as_bytes();
     for b in buf {
         if !matches!(*b, b'0'..=b'9' | b' ' | b'+' | b'-') {

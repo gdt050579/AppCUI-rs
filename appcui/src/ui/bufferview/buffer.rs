@@ -4,7 +4,7 @@
 /// sparse buffers, and so on) to the control. A [`Vec<u8>`] implementation is provided.
 pub trait BufferAccess {
     /// Returns the number of bytes currently available in the buffer.
-    fn len(&self) -> u64;
+    fn count(&self) -> u64;
     /// Returns the byte at `pos`, or `None` if the position is not readable.
     fn get(&mut self, pos: u64) -> Option<u8>;
     /// Returns whether individual bytes can be modified through [`Self::set`].
@@ -27,7 +27,7 @@ impl<T: BufferAccess> Buffer<T> {
     }
     #[inline(always)]
     pub(super) fn len(&self) -> u64 {
-        self.data.len()
+        self.data.count()
     }
     #[inline(always)]
     pub(super) fn get(&mut self, pos: u64) -> Option<u8> {
@@ -38,9 +38,11 @@ impl<T: BufferAccess> Buffer<T> {
             if new_addr > self.len() {
                 false
             } else {
-                for i in 0..N {
-                    if let Some(b) = self.data.get(pos + i as u64) {
-                        output[i] = b;
+                let mut pos = pos;
+                for o in output.iter_mut() {
+                    if let Some(b) = self.data.get(pos) {
+                        *o = b;
+                        pos += 1;
                     } else {
                         return false;
                     }
@@ -100,7 +102,7 @@ impl<T: BufferAccess> Buffer<T> {
         self.data.can_resize()
     }
     pub(super) fn delete(&mut self, pos: u64, count: u64) -> bool {
-        let len = self.data.len();
+        let len = self.data.count();
         if !self.data.can_resize() {
             return false;
         }
@@ -125,7 +127,7 @@ impl<T: BufferAccess> Buffer<T> {
         self.data.resize(len - count, 0u8)
     }
     pub(super) fn insert(&mut self, pos: u64, bytes: &[u8]) -> bool {
-        let old_len = self.data.len();
+        let old_len = self.data.count();
         if pos > old_len || !self.data.can_resize() {
             return false;
         }
@@ -169,7 +171,7 @@ impl<T: BufferAccess> Buffer<T> {
             return false;
         }
         match pos.checked_add(count) {
-            Some(end) if end <= self.data.len() => {}
+            Some(end) if end <= self.data.count() => {}
             _ => return false,
         }
         let mut p = pos;
@@ -185,7 +187,7 @@ impl<T: BufferAccess> Buffer<T> {
 }
 
 impl BufferAccess for Vec<u8> {
-    fn len(&self) -> u64 {
+    fn count(&self) -> u64 {
         self.len() as u64
     }
     fn get(&mut self, pos: u64) -> Option<u8> {

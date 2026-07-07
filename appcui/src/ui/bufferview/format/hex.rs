@@ -55,7 +55,7 @@ pub(super) fn write(bytes: [u8; 8], format: HexFormat, output: &mut OutputBuffer
 pub(super) fn validate(text: &str, format: HexFormat) -> ValidateResult {
     let buf = text.as_bytes();
     for b in buf {
-        if !matches!(*b, b'0'..=b'9' | b'A'..=b'F' | b'a'..=b'f' ) {
+        if !b.is_ascii_hexdigit() {
             return ValidateResult::FormatError;
         }
     }

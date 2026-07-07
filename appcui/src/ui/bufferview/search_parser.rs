@@ -26,7 +26,7 @@ fn is_ascii_whitespace_byte(byte: u8) -> bool {
     matches!(byte, b' ' | b'\t' | b'\n' | b'\r')
 }
 
-fn quoted_content<'a>(text: &'a str) -> Result<&'a str, Error> {
+fn quoted_content(text: &str) -> Result<&str, Error> {
     let bytes = text.as_bytes();
     let quote = match bytes.first() {
         Some(b'"' | b'\'') => bytes[0],
@@ -51,7 +51,7 @@ fn parse_quoted_text(text: &str, output: &mut Vec<u8>) -> Result<(), Error> {
     Ok(())
 }
 
-fn parse_string_content<'a>(text: &'a str) -> Result<&'a str, Error> {
+fn parse_string_content(text: &str) -> Result<&str, Error> {
     let text = text.trim_start();
     if text.is_empty() {
         return Err(Error::EmptySearch);
@@ -170,46 +170,46 @@ pub(super) fn parse(text: &str, output: &mut Vec<u8>) -> Result<(), Error> {
     if to_search.is_empty() {
         return Err(Error::EmptySearch);
     }
-    if to_search.starts_with("hex:") {
-        return parse_hex(&to_search[4..], output);
+    if let Some(p) = to_search.strip_prefix("hex:") {
+        return parse_hex(p, output);
     }
-    if to_search.starts_with("u8:") {
-        return parse_u8(&to_search[3..], output);
+    if let Some(p) = to_search.strip_prefix("u8:") {
+        return parse_u8(p, output);
     }
-    if to_search.starts_with("u16:") {
-        return parse_u16(&to_search[4..], output);
+    if let Some(p) = to_search.strip_prefix("u16:") {
+        return parse_u16(p, output);
     }
-    if to_search.starts_with("u32:") {
-        return parse_u32(&to_search[4..], output);
+    if let Some(p) = to_search.strip_prefix("u32:") {
+        return parse_u32(p, output);
     }
-    if to_search.starts_with("u64:") {
-        return parse_u64(&to_search[4..], output);
+    if let Some(p) = to_search.strip_prefix("u64:") {
+        return parse_u64(p, output);
     }
-    if to_search.starts_with("i8:") {
-        return parse_i8(&to_search[3..], output);
+    if let Some(p) = to_search.strip_prefix("i8:") {
+        return parse_i8(p, output);
     }
-    if to_search.starts_with("i16:") {
-        return parse_i16(&to_search[4..], output);
+    if let Some(p) = to_search.strip_prefix("i16:") {
+        return parse_i16(p, output);
     }
-    if to_search.starts_with("i32:") {
-        return parse_i32(&to_search[4..], output);
+    if let Some(p) = to_search.strip_prefix("i32:") {
+        return parse_i32(p, output);
     }
-    if to_search.starts_with("i64:") {
-        return parse_i64(&to_search[4..], output);
+    if let Some(p) = to_search.strip_prefix("i64:") {
+        return parse_i64(p, output);
     }
-    if to_search.starts_with("f32:") {
-        return parse_f32(&to_search[4..], output);
+    if let Some(p) = to_search.strip_prefix("f32:") {
+        return parse_f32(p, output);
     }
-    if to_search.starts_with("f64:") {
-        return parse_f64(&to_search[4..], output);
+    if let Some(p) = to_search.strip_prefix("f64:") {
+        return parse_f64(p, output);
     }
-    if to_search.starts_with("utf16:") {
-        return parse_utf16(&to_search[6..], output);
+    if let Some(p) = to_search.strip_prefix("utf16:") {
+        return parse_utf16(p, output);
     }
-    if to_search.starts_with("text:") {
-        return parse_text(&to_search[5..], output);
+    if let Some(p) = to_search.strip_prefix("text:") {
+        return parse_text(p, output);
     }
 
     // if no prefix, assume its a regular text and parse it as it is
-    parse_text(to_search, output)
+    parse_text(to_search.trim(), output)
 }

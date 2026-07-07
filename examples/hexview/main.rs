@@ -22,15 +22,13 @@ impl MyBuffer {
         data.extend((0u16..=255u16).map(|b| b as u8));
         // add 100 byte that are not accesible
         let start = data.len() as u64;
-        for _ in 0..100 {
-            data.push(0xFF);
-        }
+        data.extend(std::iter::repeat_n(0xFF, 100));
         data.extend_from_slice(b"End of the buffer example !\n");
         Self { data, start }
     }
 }
 impl BufferAccess for MyBuffer {
-    fn len(&self) -> u64 {
+    fn count(&self) -> u64 {
         self.data.len() as u64
     }
     fn get(&mut self, pos: u64) -> Option<u8> {

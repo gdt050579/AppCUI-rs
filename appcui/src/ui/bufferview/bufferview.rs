@@ -540,20 +540,15 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                     OffsetFormat::Hex => '0',
                     OffsetFormat::Dec => ' ',
                 };
-                surface.fill_horizontal_line_with_size(0, y, dif as u32, Character::with_attributes(fill_char, attr));
+                surface.fill_horizontal_line_with_size(0, y, dif, Character::with_attributes(fill_char, attr));
             }
             surface.write_ascii(dif as i32, y, &buf[pos..24], attr, false);
         }
     }
     #[inline(always)]
     fn is_ascii_char(b: u8) -> bool {
-        match b {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' => true,
-            b'\t' | b'\n' | b'\r' | b' ' => true,
-            b'<' | b'>' | b'=' | b'+' | b'-' | b'*' | b'/' | b'|' | b'\\' | b'\"' | b'.' | b',' | b';' | b':' | b'!' | b'?' | b'(' | b')' | b'['
-            | b']' => true,
-            _ => false,
-        }
+        matches!(b, b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'\t' | b'\n' | b'\r' | b' ' | b'<' | b'>' | b'=' | b'+' | b'-' | b'*' | b'/' | b'|' | b'\\' | b'\"' | b'.' | b',' | b';' | b':' | b'!' | b'?' | b'(' | b')' | b'['
+            | b']')
     }
     fn decode_ascii(&mut self, pos: u64) -> Option<u32> {
         let mut len = 0;
@@ -709,7 +704,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let bytes_count = self.repr.format.bytes_count().min(8) as usize;
         let display_chars_width = (self.repr.format.display_chars() + 1) as i32;
         let inactive_attr = self.theme().text.inactive;
-        let start_x_char = 1 + ((self.repr.format.display_chars() + 1) * self.repr.columns_count as u32 + 3) as i32;
+        let start_x_char = 1 + ((self.repr.format.display_chars() + 1) * self.repr.columns_count + 3) as i32;
         let inactive_data_panel = if self.flags.contains(Flags::NoPanelDimming) {
             false
         } else {
@@ -751,9 +746,8 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 self.buf_surface.write_ascii(x, cwp.y, output.as_slice(), attr, false);
                 let attr = if inactive_char_panel { inactive_attr } else { self.current_segment_attr };
                 let x = start_x_char + cwp.x * bytes_count as i32;
-                for i in 0..bytes_count {
-                    self.buf_surface
-                        .write_char(x + i as i32, cwp.y, Character::with_attributes(chars[i], attr));
+                for (i, ch) in chars.iter().enumerate().take(bytes_count) {
+                    self.buf_surface.write_char(x + i as i32, cwp.y, Character::with_attributes(*ch, attr));
                 }
             } else {
                 // error - unable to reach byte
@@ -880,11 +874,11 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let border_width = self.border_width() as i32;
         let mut border_x = 0;
         if self.flags.contains(Flags::ShowAddress) {
-            Self::write_column_title(surface, attr, &self.AddrName, self.addr_width as u32, border_x);
+            Self::write_column_title(surface, attr, &self.AddrName, self.addr_width, border_x);
             border_x += (1 + self.addr_width) as i32;
         }
         if self.flags.contains(Flags::ShowIntervalNames) {
-            Self::write_column_title(surface, attr, &self.interval_name_title, self.interval_name_width as u32, border_x);
+            Self::write_column_title(surface, attr, &self.interval_name_title, self.interval_name_width, border_x);
         }
         let h_offset = self.h_offset as i32;
         let right = self.size().width as i32 - 1;
@@ -893,10 +887,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         let data_x = border_width - h_offset;
         if !self.repr.format.is_char() {
             let hex_start = data_x;
-            let display_chars = self.repr.format.display_chars() as u32;
+            let display_chars = self.repr.format.display_chars();
             let mut buf = [b'0'; 4];
             let mut x = data_x + 1;
-            for id in 0..self.repr.columns_count as u32 {
+            for id in 0..self.repr.columns_count {
                 let c = id * self.repr.format.bytes_count() as u32;
                 let output_len = match self.repr.offset_format {
                     OffsetFormat::Hex => Self::hex_format(c, display_chars, &mut buf),
@@ -1074,7 +1068,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         for _ in 0..self.repr.rows_count {
             let mut x = 0;
             if self.flags.contains(Flags::ShowAddress) {
-                Self::write_offset(surface, theme.text.inactive, start, self.addr_width as u32, y, self.repr.offset_format);
+                Self::write_offset(surface, theme.text.inactive, start, self.addr_width, y, self.repr.offset_format);
                 x += (1 + self.addr_width) as i32;
             }
             if self.flags.contains(Flags::ShowIntervalNames) {
@@ -1087,22 +1081,12 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                             _ if has_focus => int.attr,
                             _ => theme.text.normal,
                         };
-                        Self::write_interval_name(surface, attr, int.name.as_str(), self.interval_name_width as u32, x, y);
+                        Self::write_interval_name(surface, attr, int.name.as_str(), self.interval_name_width, x, y);
                     } else {
-                        surface.fill_horizontal_line_with_size(
-                            x,
-                            y,
-                            self.interval_name_width as u32,
-                            Character::with_attributes('-', theme.text.inactive),
-                        );
+                        surface.fill_horizontal_line_with_size(x, y, self.interval_name_width, Character::with_attributes('-', theme.text.inactive));
                     }
                 } else {
-                    surface.fill_horizontal_line_with_size(
-                        x,
-                        y,
-                        self.interval_name_width as u32,
-                        Character::with_attributes('-', theme.text.inactive),
-                    );
+                    surface.fill_horizontal_line_with_size(x, y, self.interval_name_width, Character::with_attributes('-', theme.text.inactive));
                 }
             }
             start += self.repr.columns_count as u64 * self.repr.format.bytes_count() as u64;
@@ -1140,10 +1124,10 @@ impl<T: BufferAccess + 'static> BufferView<T> {
     fn border_width(&self) -> u32 {
         let mut border_width = 0;
         if self.flags.contains(Flags::ShowAddress) {
-            border_width += (1 + self.addr_width) as u32;
+            border_width += 1 + self.addr_width;
         }
         if self.flags.contains(Flags::ShowIntervalNames) {
-            border_width += (1 + self.interval_name_width) as u32;
+            border_width += 1 + self.interval_name_width;
         }
         border_width
     }
@@ -1248,15 +1232,15 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 } else {
                     space_left.saturating_sub(4) / column_width
                 };
-                columns.max(1) as u32
+                columns.max(1)
             }
         };
         self.repr.columns_count = nr_columns.clamp(1, 255);
         self.repr.rows_count = h;
         let w = if self.repr.format.is_char() {
-            self.repr.columns_count as u32
+            self.repr.columns_count
         } else {
-            column_width * (self.repr.columns_count as u32) + 4
+            column_width * self.repr.columns_count + 4
         };
         self.buf_surface.resize(Size::new(w, h));
         if !self.goto_position(self.pos, false, false) {
@@ -1383,7 +1367,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         if bytes.is_empty() {
             return None;
         }
-        let buffer_len = self.buffer.len() as u64;
+        let buffer_len = self.buffer.len();
         let bytes_len = bytes.len() as u64;
         if bytes_len > buffer_len {
             return None;
@@ -1546,7 +1530,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
         match key.value() {
             key!("Backspace") => {
-                if self.edit_text.len() > 0 {
+                if !self.edit_text.is_empty() {
                     self.edit_text.pop();
                     return EventProcessStatus::Processed;
                 } else {
@@ -1554,7 +1538,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 }
             }
             key!("Enter") | key!("Ctrl+Enter") | key!("Shift+Enter") | key!("Tab") | key!("Right") => {
-                if self.edit_text.len() > 0 {
+                if !self.edit_text.is_empty() {
                     self.update_buffer_content();
                     return EventProcessStatus::Processed;
                 }
