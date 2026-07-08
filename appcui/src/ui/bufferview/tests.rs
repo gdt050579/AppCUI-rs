@@ -3586,6 +3586,84 @@ fn check_bufferview_mouse_hover_header_panels() {
 }
 
 #[test]
+fn check_bufferview_mouse_leave_when_moving_to_button() {
+    let script = "
+        Paint.Enable(false)
+        Error.Disable(true)
+        Paint('1. Initial state')
+        CheckHash(0x66450A3D1F767CA6)
+        Mouse.Move(52,4)
+        Paint('2. Move over button')
+        CheckHash(0x66450A3D1F767CA6)
+        Mouse.Click(52,4,left)
+        Paint('3. Click button')
+        CheckHash(0xA453F89074D984F6)
+        Mouse.Move(20,5)
+        Paint('4. Move over buffer view header')
+        CheckHash(0xA453F89074D984F6)
+        Mouse.Click(20,5,left)
+        Paint('5. Click buffer view')
+        CheckHash(0xA4E7142989E6CBC9)
+        Mouse.Move(52,4)
+        Paint('6. Move over button again')
+        CheckHash(0x1E4977062E94E5F1)
+        Mouse.Click(52,4,left)
+        Paint('7. Click button again')
+        CheckHash(0x675C979E6AFB1C1D)
+    ";
+
+    #[Window(events = ButtonEvents, internal = true)]
+    struct MyWin {
+        button_handle: Handle<Button>,
+        click_count: u32,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,a:c,w:60,h:12,flags: Sizeable"),
+                button_handle: Handle::None,
+                click_count: 0,
+            };
+            let mut bv = BufferView::with_buffer(
+                test_buffer_data(),
+                layout!("x:0,y:1,w:45,h:9"),
+                Flags::ScrollBars | Flags::ShowAddress,
+            );
+            bv.set_columns_count(ColumnsCount::Fixed(8));
+            bv.set_data_representation_format(DataRepresentationFormat::Hex(HexFormat::Byte));
+            bv.set_offset_format(OffsetFormat::Hex);
+            w.add(bv);
+            w.button_handle = w.add(Button::with_type("Test", layout!("x:46,y:2,w:13,h:3"), button::Type::Normal));
+            w
+        }
+
+        fn update_button_caption(&mut self) {
+            let h = self.button_handle;
+            let caption = format!("Test ({})", self.click_count);
+            if let Some(button) = self.control_mut(h) {
+                button.set_caption(caption.as_str());
+            }
+        }
+    }
+
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, button_handle: Handle<Button>) -> EventProcessStatus {
+            if self.button_handle == button_handle {
+                self.click_count += 1;
+                self.update_button_caption();
+                return EventProcessStatus::Processed;
+            }
+            EventProcessStatus::Ignored
+        }
+    }
+
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
 fn check_bufferview_hex_dword_edit_backspace_enter() {
     let script = "
         Paint.Enable(false)
@@ -3856,6 +3934,138 @@ fn check_bufferview_char_mode_feature_toggles_with_commands() {
     }
 
     let mut a = App::debug(80, 18, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_bufferview_on_current_pos_changed_event() {
+    #[Window(events = BufferViewEvents<Vec<u8>>, internal = true)]
+    struct MyWin {
+        bv_handle: Handle<BufferView<Vec<u8>>>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,a:c,w:60,h:12,flags: Sizeable"),
+                bv_handle: Handle::None,
+            };
+            w.bv_handle = w.add(make_bufferview(test_buffer_data()));
+            w.update_title();
+            w
+        }
+
+        fn update_title(&mut self) {
+            let h = self.bv_handle;
+            let title = if let Some(bv) = self.control(h) {
+                format!("P:{}", bv.current_pos())
+            } else {
+                return;
+            };
+            self.set_title(&title);
+        }
+    }
+
+    impl BufferViewEvents<Vec<u8>> for MyWin {
+        fn on_current_pos_changed(&mut self, handle: Handle<BufferView<Vec<u8>>>) -> EventProcessStatus {
+            if handle == self.bv_handle {
+                self.update_title();
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial cursor at position 0')
+        CheckHash(0xF99C122E3A067C25)
+        Key.Pressed(Right)
+        Paint('2. Right moves cursor to position 1')
+        CheckHash(0x96E719BFAC9E04C0)
+        Key.Pressed(Right,5)
+        Paint('3. Five more right moves cursor to position 6')
+        CheckHash(0x0B019B20EDD057FF)
+        Key.Pressed(Down)
+        Paint('4. Down moves cursor to position 14')
+        CheckHash(0xB9B4B3BE1F429E7F)
+        Key.Pressed(Home)
+        Paint('5. Home moves cursor back to position 0')
+        CheckHash(0xF99C122E3A067C25)
+        Mouse.Click(21,3,left)
+        Paint('6. Mouse click moves cursor to byte 4')
+        CheckHash(0x45523880CA3B5C89)
+    ";
+
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_bufferview_on_selection_changed_event() {
+    #[Window(events = BufferViewEvents<Vec<u8>>, internal = true)]
+    struct MyWin {
+        bv_handle: Handle<BufferView<Vec<u8>>>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,a:c,w:60,h:12,flags: Sizeable"),
+                bv_handle: Handle::None,
+            };
+            w.bv_handle = w.add(make_bufferview(test_buffer_data()));
+            w.update_title();
+            w
+        }
+
+        fn update_title(&mut self) {
+            let h = self.bv_handle;
+            let title = if let Some(bv) = self.control(h) {
+                let selection = match bv.selection() {
+                    Some((start, end)) => format!("{}-{}", start, end),
+                    None => "-".to_string(),
+                };
+                format!("S:{}", selection)
+            } else {
+                return;
+            };
+            self.set_title(&title);
+        }
+    }
+
+    impl BufferViewEvents<Vec<u8>> for MyWin {
+        fn on_selection_changed(&mut self, handle: Handle<BufferView<Vec<u8>>>) -> EventProcessStatus {
+            if handle == self.bv_handle {
+                self.update_title();
+            }
+            EventProcessStatus::Processed
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. No selection')
+        CheckHash(0xCA238466708B34EB)
+        Key.Pressed(Shift+Right,3)
+        Paint('2. Shift+Right selects range S:0-4')
+        CheckHash(0xA33DA93B73BD11E7)
+        Key.Pressed(Right)
+        Paint('3. Right clears selection')
+        CheckHash(0xFEEFD1B1359DFFD3)
+        Key.Pressed(Home)
+        Paint('4. Home clears selection at position 0')
+        CheckHash(0xCA238466708B34EB)
+        Mouse.Drag(9,3,21,3)
+        Paint('5. Mouse drag selects hex panel range')
+        CheckHash(0x7023EB711F8A9F3A)
+        Key.Pressed(Home)
+        Paint('6. Home clears drag selection')
+        CheckHash(0xCA238466708B34EB)
+    ";
+
+    let mut a = App::debug(60, 15, script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
