@@ -37,4 +37,5 @@ pub (crate) mod markdown;
 pub (crate) mod progressbar;
 pub (crate) mod textarea;
 pub (crate) mod graphview;
+pub (crate) mod bufferview;
 pub (crate) mod timepicker;

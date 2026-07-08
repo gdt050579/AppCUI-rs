@@ -55,7 +55,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 
 ## ✨ Features
-- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.). A full list of controls can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock_controls.html) 
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.). A full list of controls can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock_controls.html) 
 - [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors, or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
 - [x] menus and toolbars
 - [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, macOS via termios)
@@ -140,7 +140,7 @@ Then run the project with `cargo run`. You should see a window with the title `T
 
 AppCUI-rs comes with a set of examples to help you get started. You can find them in the [examples](examples) folder, including:
 - **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/), [Ram it](examples/ramit/), [PacMan](examples/games/), [Chess](examples/games/), [Connect Four](examples/games/), [2048](examples/games/), or [Tetris](examples/games/)
-- **Utilities** such as [Calculator](examples/calculator/), [CSV Viewer](examples/csv_viewer/), [Temperature Converter](examples/temperature_convertor/), or a [Timer](examples/timer/)
+- **Utilities** such as [Calculator](examples/calculator/), [CSV Viewer](examples/csv_viewer/), [Temperature Converter](examples/temperature_convertor/), [HexViewer](examples/hexview/), or a [Timer](examples/timer/)
 - **Animations** such as [Matrix](examples/matrix/), [Fractals](examples/fractals/), or [Spiral](examples/spiral/)
 - **Controls**/**Widgets** such as [Button](examples/buttons/), [CheckBox](examples/checkboxes/), [ComboBox](examples/combobox/), [DatePicker](examples/datepicker/), [ListView](examples/listview/), [TreeView](examples/treeview/) and many more.
 - **Dialogs** such as [Notification](examples/notification_dialogs/) or [Input](examples/input_dialog/)
@@ -206,9 +206,12 @@ fn main() -> Result<(), appcui::system::Error> {
 ## 🛣️ Roadmap
 
 - [x] Basic set of widgets and support for Windows, Linux, and macOS
-- [x] WebGL support
+- [x] WebGL / WebAssembly support
 - [ ] OpenGL / SDL / Vulkan support
-- [ ] TextArea support for code highlighting
+- [ ] Editor support (syntax highlighting, code folding, etc.)
+- [x] Rich Text support (rich text editing, formatting, etc.)
+- [ ] Sixel support for terminal graphics
+- [ ] Property Grid control
 
 ## 🤝 Contributing
 

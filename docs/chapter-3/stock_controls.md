@@ -5,6 +5,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | Control                                              | Class                        | Macro              | Image                                                         |
 | ---------------------------------------------------- | ---------------------------- | ------------------ | ------------------------------------------------------------- |
 | [Accordion](stock-controls/accordion.md)             | ui::Accordion                | `accordion!`       | <img src="stock-controls/img/accordion.png" width=300/>       |
+| [BufferView](stock-controls/bufferview.md)           | ui::BufferView               | `bufferview!`      | <img src="stock-controls/img/bufferview.png" width=300/>      |
 | [Button](stock-controls/button.md)                   | ui::Button                   | `button!`          | <img src="stock-controls/img/button.png" width=300/>          |
 | [Canvas](stock-controls/canvas.md)                   | ui::Canvas                   | `canvas!`          | <img src="stock-controls/img/canvas.png" width=300/>          |
 | [CheckBox](stock-controls/checkbox.md)               | ui::CheckBox                 | `checkbox!`        | <img src="stock-controls/img/checkbox.png" width=300/>        |

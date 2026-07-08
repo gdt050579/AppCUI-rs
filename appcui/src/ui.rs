@@ -123,6 +123,7 @@ pub mod progressbar;
 pub mod textarea;
 pub mod graphview;
 pub mod timepicker;
+pub mod bufferview;
 
 // re-export
 pub use common::ControlBase;
@@ -170,6 +171,8 @@ pub use treeview::TreeView;
 pub use progressbar::ProgressBar;
 pub use textarea::TextArea;
 pub use timepicker::TimePicker;
+pub use bufferview::BufferView;
+pub use bufferview::BufferAccess;
 pub use menu::Menu;
 pub use appbar::AppBar;
 pub use graphview::GraphView;

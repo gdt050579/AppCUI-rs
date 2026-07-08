@@ -226,7 +226,7 @@ impl Surface {
     }
 
     #[inline]
-    pub(crate) fn reset(&mut self) {
+    pub(crate) fn reset_clip_and_origin(&mut self) {
         self.set_base_clip(0, 0, self.right_most, self.bottom_most);
         self.reset_clip();
         self.set_base_origin(0, 0);
@@ -302,6 +302,15 @@ impl Surface {
                 }
                 pos += self.size.width as usize;
             }
+        }
+    }
+
+    /// Resets the entire surface by filling it with a provided character and by resetting the coordinates and the clip area.
+    /// You can use this method method if you want to fill a surface with a transparent character (e.g. if you want that surface to be printed on another surface via draw_surface method)
+    pub fn reset(&mut self, ch: Character) {
+        self.reset_clip_and_origin();
+        for c in &mut self.chars {
+            *c = ch;
         }
     }
 
@@ -976,6 +985,28 @@ impl Surface {
         }
     }
 
+    /// Copies all characters from another surface onto this one at the specified position.
+    /// Each source character is written using [`write_char`](Self::write_char), so positions outside the clip area are skipped.
+    /// If the clip area is not visible, nothing is drawn.
+    ///
+    /// Characters with transparent foreground or background colors do not overwrite the corresponding
+    /// components of the destination character, which allows layered compositing when the source
+    /// surface was prepared with transparent characters (for example via [`reset`](Self::reset)).
+    ///
+    /// # Parameters
+    /// - `x`: The x-coordinate of the top-left corner where the source surface is placed.
+    /// - `y`: The y-coordinate of the top-left corner where the source surface is placed.
+    /// - `surface`: The source surface to copy.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::{Surface, Character, Color, CharFlags};
+    ///
+    /// let mut destination = Surface::new(20, 10);
+    /// let mut source = Surface::new(5, 3);
+    /// source.clear(Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
+    /// destination.draw_surface(2, 2, &source);
+    /// ```
     pub fn draw_surface(&mut self, x: i32, y: i32, surface: &Surface) {
         if !self.clip.is_visible() {
             return;
@@ -984,6 +1015,42 @@ impl Surface {
         for s_y in 0..=surface.bottom_most {
             for s_x in 0..=surface.right_most {
                 self.write_char(x + s_x, y + s_y, surface.chars[index]);
+                index += 1;
+            }
+        }
+    }
+
+    /// Copies all characters from another surface onto this one at the specified position,
+    /// applying a transformation to each source character before it is written.
+    /// This behaves like [`draw_surface`](Self::draw_surface), but the `transform` callback can remap
+    /// character codes, colors, or flags (for example to tint or mask the copied content).
+    /// If the clip area is not visible, nothing is drawn.
+    ///
+    /// # Parameters
+    /// - `x`: The x-coordinate of the top-left corner where the source surface is placed.
+    /// - `y`: The y-coordinate of the top-left corner where the source surface is placed.
+    /// - `surface`: The source surface to copy.
+    /// - `transform`: A function called for each source character; its return value is written to the destination.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::{Surface, Character, Color, CharFlags};
+    ///
+    /// let mut destination = Surface::new(20, 10);
+    /// let mut source = Surface::new(5, 3);
+    /// source.clear(Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
+    /// destination.draw_surface_with_transform(2, 2, &source, |ch| {
+    ///     Character::new(ch.code, Color::Red, ch.background, ch.flags)
+    /// });
+    /// ```
+    pub fn draw_surface_with_transform<F: Fn(Character) -> Character>(&mut self, x: i32, y: i32, surface: &Surface, transform: F) {
+        if !self.clip.is_visible() {
+            return;
+        }
+        let mut index = 0usize;
+        for s_y in 0..=surface.bottom_most {
+            for s_x in 0..=surface.right_most {
+                self.write_char(x + s_x, y + s_y, transform(surface.chars[index]));
                 index += 1;
             }
         }
@@ -1406,7 +1473,7 @@ impl Surface {
         self.bottom_most = (h as i32) - 1;
         self.size.width = w;
         self.size.height = h;
-        self.reset();
+        self.reset_clip_and_origin();
     }
 
     fn serialize_color(color: Color, output: &mut Vec<u8>) {
