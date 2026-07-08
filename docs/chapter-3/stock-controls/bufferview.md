@@ -272,8 +272,12 @@ impl HexWindow {
             buffer_view: Handle::None,
         };
         let mut bv = bufferview!(
-            "Vec<u8>, d:f, flags: ScrollBars+ShowAddress+ShowIntervalNames+SearchBar,
-            columns: 8, format: Hex, offset: Hex"
+            "Vec<u8>, 
+            d:f, 
+            flags: ScrollBars+ShowAddress+ShowIntervalNames+SearchBar,
+            columns: 8, 
+            format: Hex, 
+            offset: Hex"
         );
         bv.set_buffer(b"Hello, AppCUI!".to_vec());
         bv.set_intervals(&[

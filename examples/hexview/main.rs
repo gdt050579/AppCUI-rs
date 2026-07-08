@@ -159,10 +159,8 @@ impl HexViewWindow {
         bv.set_data_representation_format(bufferview::DataRepresentationFormat::Hex(bufferview::HexFormat::Byte));
         bv.set_endian(bufferview::Endian::Little);
         bv.set_intervals(&[
-            bufferview::Interval::new(0, 10, CharAttribute::with_color(Color::Red, Color::Black), "ASCII"),
-            bufferview::Interval::new(10, 10, CharAttribute::with_color(Color::Green, Color::Transparent), "Unicode"),
-            bufferview::Interval::new(20, 10, CharAttribute::with_color(Color::White, Color::DarkRed), "Non-printable"),
-            bufferview::Interval::new(30, 10, CharAttribute::with_color(Color::Yellow, Color::DarkGreen), "Full range"),
+            bufferview::Interval::new(0, 16, CharAttribute::with_color(Color::Yellow, Color::Transparent), "Header"),
+            bufferview::Interval::new(32, 64, CharAttribute::with_color(Color::Aqua, Color::Transparent), "Ref."),
         ]);
         bv.set_components_toolbar_margins(8, 4);
         w.buffer = vs.add(vsplitter::Panel::Left, bv);
