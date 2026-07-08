@@ -56,6 +56,7 @@
         - [Single Window Apps](chapter-3/event-loop/single_window.md)
     - [Stock controls](chapter-3/stock_controls.md)
         - [Accordion](chapter-3/stock-controls/accordion.md)
+        - [BufferView](chapter-3/stock-controls/bufferview.md)
         - [Button](chapter-3/stock-controls/button.md)
         - [Canvas](chapter-3/stock-controls/canvas.md)
         - [CheckBox](chapter-3/stock-controls/checkbox.md)
