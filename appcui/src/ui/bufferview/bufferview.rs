@@ -1618,6 +1618,13 @@ impl<T: BufferAccess + 'static> BufferView<T> {
                 self.toggle_panel();
                 return EventProcessStatus::Processed;
             }
+            key!("Tab") => {
+                if self.flags.contains(Flags::TabSwitchesActivePanel) {
+                    self.toggle_panel();
+                    return EventProcessStatus::Processed;
+                }
+                return EventProcessStatus::Ignored;
+            }
             key!("Ctrl+Alt+Left") | key!("Ctrl+Alt+Right") => {
                 if let Some(separator) = self.first_separator() {
                     self.selected_separator = Some(separator);

@@ -12,4 +12,5 @@ pub enum Flags {
     ShowUtf16AsciiStrings = 0x0080,
     DecodeUTF8Characters = 0x0100,
     ReadOnly = 0x0200,
+    TabSwitchesActivePanel = 0x0400,
 }

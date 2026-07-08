@@ -2790,6 +2790,53 @@ fn check_bufferview_panel_toggle() {
 }
 
 #[test]
+fn check_bufferview_tab_switches_active_panel_flag() {
+    let script_with_flag = "
+        Paint.Enable(false)
+        Paint('1. TabSwitchesActivePanel: initial hex panel')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(End)
+        Paint('2. TabSwitchesActivePanel: move to end')
+        CheckHash(0xDCC14E43416C4B62)
+        Key.Pressed(Tab)
+        Paint('3. TabSwitchesActivePanel: Tab switches to char panel')
+        CheckHash(0x97F5B14CB49601B9)
+        Key.Pressed(Tab)
+        Paint('4. TabSwitchesActivePanel: Tab switches back to hex panel')
+        CheckHash(0xDCC14E43416C4B62)
+    ";
+    let mut a = App::debug(60, 15, script_with_flag).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    let mut bv = bufferview!(
+        "Vec<u8>,d:f,flags:ScrollBars+ShowAddress+SearchBar+TabSwitchesActivePanel,columns:8,format:Hex,offset:Hex"
+    );
+    bv.set_buffer(test_buffer_data());
+    w.add(bv);
+    a.add_window(w);
+    a.run();
+
+    let script_without_flag = "
+        Paint.Enable(false)
+        Paint('1. Without flag: initial hex panel')
+        CheckHash(0x6F386642B4BD3242)
+        Key.Pressed(End)
+        Paint('2. Without flag: move to end')
+        CheckHash(0xDCC14E43416C4B62)
+        Key.Pressed(Tab)
+        Paint('3. Without flag: Tab ignored, panel unchanged')
+        CheckHash(0xDCC14E43416C4B62)
+        Key.Pressed(Tab)
+        Paint('4. Without flag: Tab still ignored')
+        CheckHash(0xDCC14E43416C4B62)
+    ";
+    let mut a = App::debug(60, 15, script_without_flag).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_bufferview_address_separator_resize() {
     let script = "
         Paint.Enable(false)

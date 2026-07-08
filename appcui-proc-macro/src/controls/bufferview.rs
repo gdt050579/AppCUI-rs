@@ -13,6 +13,7 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "ShowUtf16AsciiStrings",
     "DecodeUTF8Characters",
     "ReadOnly",
+    "TabSwitchesActivePanel",
 ]);
 
 static OFFSET_FORMAT: FlagsSignature = FlagsSignature::new(&["Hex", "Dec"]);
