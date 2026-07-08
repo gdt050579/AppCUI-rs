@@ -2296,7 +2296,7 @@ fn check_bufferview_set_current_pos() {
 #[test]
 fn check_bufferview_take_buffer() {
     std::thread_local! {
-        static TAKE_BUFFER_RESULT: std::cell::Cell<Option<(Vec<u8>, u64, bool)>> = std::cell::Cell::new(None);
+        static TAKE_BUFFER_RESULT: std::cell::Cell<Option<(Vec<u8>, u64, bool)>> = const { std::cell::Cell::new(None) };
     }
 
     let script = "
