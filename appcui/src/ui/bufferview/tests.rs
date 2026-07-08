@@ -1832,6 +1832,18 @@ fn make_bufferview_oct(data: Vec<u8>) -> BufferView<Vec<u8>> {
     bv
 }
 
+fn make_bufferview_hex_dword(data: Vec<u8>) -> BufferView<Vec<u8>> {
+    let mut bv = BufferView::with_buffer(
+        data,
+        layout!("d:f"),
+        Flags::ScrollBars | Flags::ShowAddress,
+    );
+    bv.set_columns_count(ColumnsCount::Fixed(4));
+    bv.set_data_representation_format(DataRepresentationFormat::Hex(HexFormat::DWord));
+    bv.set_offset_format(OffsetFormat::Hex);
+    bv
+}
+
 #[test]
 fn bufferview_create_defaults() {
     let bv = BufferView::with_buffer(
@@ -2227,6 +2239,122 @@ fn bufferview_read_bytes_into_vec() {
     let mut read_only_output = vec![1, 2, 3];
     bv_ro.read_bytes_into_vec(0, 4, &mut read_only_output);
     assert_eq!(read_only_output, vec![1, 2, 3]);
+}
+
+#[test]
+fn check_bufferview_set_current_pos() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial cursor at position 0')
+        CheckHash(0x838CCA34E88EF086)
+        Key.Pressed(F3)
+        Paint('2. set_current_pos(20)')
+        CheckHash(0x850AB4DCACDA780A)
+        Key.Pressed(F4)
+        Paint('3. set_current_pos(1000) clamps to last byte')
+        CheckHash(0x1A1506CA7FFB00A6)
+    ";
+
+    #[Window(events=CommandBarEvents, commands:A+B, internal:true)]
+    struct MyWin {
+        buffer_handle: Handle<BufferView<Vec<u8>>>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,a:c,w:60,h:12,flags: Sizeable"),
+                buffer_handle: Handle::None,
+            };
+            w.buffer_handle = w.add(make_bufferview(test_buffer_data()));
+            w
+        }
+    }
+
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F3"), "Set Pos 20", mywin::Commands::A);
+            commandbar.set(key!("F4"), "Set Pos 1000", mywin::Commands::B);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                match command_id {
+                    mywin::Commands::A => bv.set_current_pos(20),
+                    mywin::Commands::B => bv.set_current_pos(1000),
+                }
+            }
+        }
+    }
+
+    let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
+
+#[test]
+fn check_bufferview_take_buffer() {
+    std::thread_local! {
+        static TAKE_BUFFER_RESULT: std::cell::Cell<Option<(Vec<u8>, u64, bool)>> = std::cell::Cell::new(None);
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Buffer with data')
+        CheckHash(0xF40B8C83B445A8B8)
+        Key.Pressed(F3)
+        Paint('2. take_buffer leaves an empty control')
+        CheckHash(0xC5060C822359467D)
+    ";
+
+    #[Window(events=CommandBarEvents, commands:A, internal:true)]
+    struct MyWin {
+        buffer_handle: Handle<BufferView<Vec<u8>>>,
+    }
+
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = Self {
+                base: window!("Test,a:c,w:60,h:12,flags: Sizeable"),
+                buffer_handle: Handle::None,
+            };
+            let mut bv = make_bufferview_with_intervals(test_buffer_data());
+            bv.set_current_pos(10);
+            assert!(bv.set_selection(2, 6));
+            w.buffer_handle = w.add(bv);
+            w
+        }
+    }
+
+    impl CommandBarEvents for MyWin {
+        fn on_update_commandbar(&self, commandbar: &mut CommandBar) {
+            commandbar.set(key!("F3"), "Take Buffer", mywin::Commands::A);
+        }
+
+        fn on_event(&mut self, command_id: mywin::Commands) {
+            if command_id != mywin::Commands::A {
+                return;
+            }
+            let h = self.buffer_handle;
+            if let Some(bv) = self.control_mut(h) {
+                let taken = bv.take_buffer();
+                TAKE_BUFFER_RESULT.set(Some((taken, bv.bytes_count(), bv.has_selection())));
+            }
+        }
+    }
+
+    TAKE_BUFFER_RESULT.set(None);
+    let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+
+    let (taken, bytes_count, has_selection) = TAKE_BUFFER_RESULT
+        .take()
+        .expect("take_buffer should have been called");
+    assert_eq!(taken, test_buffer_data());
+    assert_eq!(bytes_count, 0);
+    assert!(!has_selection);
 }
 
 #[test]
@@ -3392,6 +3520,90 @@ fn check_bufferview_interval_names() {
     let mut a = App::debug(60, 15, script).build().unwrap();
     let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
     w.add(make_bufferview_with_intervals(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_separator_switch_with_selector_keys() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. With intervals, no separator selected')
+        CheckHash(0x633434DA55BE779A)
+        Key.Pressed(Ctrl+Alt+Left)
+        Paint('2. Address separator selected')
+        CheckHash(0x6737E06335791C9E)
+        Key.Pressed(Tab)
+        Paint('3. Tab switches to interval separator')
+        CheckHash(0xD8BA9EAE9FC6B286)
+        Key.Pressed(Ctrl+Left)
+        Paint('4. Ctrl+Left switches back to address separator')
+        CheckHash(0x6737E06335791C9E)
+        Key.Pressed(Ctrl+Right)
+        Paint('5. Ctrl+Right switches to interval separator')
+        CheckHash(0xD8BA9EAE9FC6B286)
+        Key.Pressed(Ctrl+Alt+Left)
+        Paint('6. Ctrl+Alt+Left switches back to address separator')
+        CheckHash(0x6737E06335791C9E)
+        Key.Pressed(Ctrl+Alt+Right)
+        Paint('7. Ctrl+Alt+Right switches to interval separator')
+        CheckHash(0xD8BA9EAE9FC6B286)
+    ";
+    let mut a = App::debug(80, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
+    w.add(make_bufferview_with_intervals(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_mouse_hover_header_panels() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Hex panel active, no separator selected')
+        CheckHash(0xF9BBE4D7A406E4C7)
+        Mouse.Move(45,2)
+        Paint('2. Hover character column header')
+        CheckHash(0x8CAC8CA781947DEB)
+        Mouse.Move(12,2)
+        Paint('3. Hover hex column header')
+        CheckHash(0xF9BBE4D7A406E4C7)
+        Mouse.Click(38,3,left)
+        Paint('4. Character panel active')
+        CheckHash(0xCE0B00E3E5EC6514)
+        Mouse.Move(12,2)
+        Paint('5. Hover hex column header while char active')
+        CheckHash(0x227693E3E6198144)
+        Mouse.Move(45,2)
+        Paint('6. Hover character column header while char active')
+        CheckHash(0xCE0B00E3E5EC6514)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_for_mouse(test_buffer_data()));
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_bufferview_hex_dword_edit_backspace_enter() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. DWord hex initial state')
+        CheckHash(0xCA1C7E6FCDB38DCD)
+        Key.TypeText('1234')
+        Paint('2. Four hex digits typed')
+        CheckHash(0xF94D2C5190CEB413)
+        Key.Pressed(Backspace,2)
+        Paint('3. Backspace twice leaves two digits')
+        CheckHash(0x1FB03E4D7715EFFC)
+        Key.Pressed(Enter)
+        Paint('4. Enter commits DWORD from first two digits')
+        CheckHash(0xE8CEE275B66EAE42)
+    ";
+    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
+    w.add(make_bufferview_hex_dword(test_buffer_data()));
     a.add_window(w);
     a.run();
 }

@@ -461,7 +461,7 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         self.pos = 0;
         self.selection.clear();
         self.start_view = 0;
-        self.intervals.clear(); // TBD - poate e mai bine sa il tin.
+        self.intervals.clear();
         self.current_segment = Segment::default();
         self.current_segment_attr = CharAttribute::default();
         self.edit_text.clear();
@@ -994,6 +994,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
     }
     fn paint_cursor(&self, surface: &mut Surface, theme: &Theme, border_width: i32, top: i32) {
+        if self.buffer.len() == 0 {
+            return;
+        }
         if self.pos >= self.start_view {
             let h_offset = self.h_offset as i32;
             let unit = self.repr.format.bytes_count();
@@ -1060,6 +1063,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
         }
     }
     fn paint_selection(&self, surface: &mut Surface, theme: &Theme, border_width: i32, top: i32) {
+        if self.buffer.len() == 0 {
+            return;
+        }
         if let Some((sel_start, sel_end)) = self.selection.range() {
             let h_offset = self.h_offset as i32;
             let cols = self.repr.columns_count as u64;
