@@ -2,6 +2,7 @@ use self::layout::Dimension;
 
 use super::ResizeBehavior;
 use super::SplitterPanel;
+use super::Flags;
 use crate::prelude::*;
 use crate::ui::layout::Coordinate;
 
@@ -26,6 +27,7 @@ pub struct HSplitter {
     preserve_pos: i32,
     resize_behavior: ResizeBehavior,
     state: State,
+    flags: Flags,
 }
 impl HSplitter {
     /// Creates a new Horizontal Splitter control with the specified position, layout and resize behavior
@@ -43,7 +45,7 @@ impl HSplitter {
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// ```
-    pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior) -> Self
+    pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior, flags: Flags) -> Self
     where
         Coordinate: From<T>,
     {
@@ -57,6 +59,7 @@ impl HSplitter {
             state: State::None,
             resize_behavior,
             preserve_pos: 0,
+            flags,
         };
         obj.set_size_bounds(1, 3, u16::MAX, u16::MAX);
         obj.top = obj.add_child(SplitterPanel::new());
@@ -227,6 +230,10 @@ impl OnPaint for HSplitter {
         surface.draw_horizontal_line_with_size(0, y, sz.width, LineType::Single, col_line);
         surface.write_char(1, y, Character::with_attributes(SpecialChar::TriangleUp, col_b1));
         surface.write_char(2, y, Character::with_attributes(SpecialChar::TriangleDown, col_b2));
+        if self.flags.contains(Flags::MergeBorders) {
+            surface.write_box_junction(-1, y);
+            surface.write_box_junction(sz.width as i32, y);
+        }
     }
 }
 impl OnKeyPressed for HSplitter {
