@@ -30,18 +30,24 @@ pub struct VSplitter {
 }
 impl VSplitter {
 
-    /// Creates a new Vertical Splitter control with the specified position, layout and resize behavior
+    /// Creates a new Vertical Splitter control with the specified position, layout, resize behavior and flags
     /// The position can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
     /// The resize behavior can be one of the following values:
     /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when the splitter is resized
     /// * `ResizeBehavior::PreserveLeftPanelSize` - the size of the left panel is preserved when the splitter is resized
     /// * `ResizeBehavior::PreserveRightPanelSize` - the size of the right panel is preserved when the splitter is resized
+    /// The flags can be a combination of the following values:
+    /// * `Flags::None` - no flags
+    /// * `Flags::MergeBorders` - merge the borders of the splitter with the borders of the window
     /// 
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = VSplitter::new(0.5,layout!("d:f"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// let mut vs = VSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             vsplitter::ResizeBehavior::PreserveRightPanelSize,
+    ///                             vsplitter::Flags::None);
     /// vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     /// vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     /// ``` 
@@ -102,7 +108,10 @@ impl VSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = VSplitter::new(0.5,layout!("d:f"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// let mut vs = VSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             vsplitter::ResizeBehavior::PreserveRightPanelSize,
+    ///                             vsplitter::Flags::None);
     /// vs.add(vsplitter::Panel::Left,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(vsplitter::Panel::Right,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 10 chars from left

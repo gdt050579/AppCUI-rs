@@ -30,18 +30,24 @@ pub struct HSplitter {
     flags: Flags,
 }
 impl HSplitter {
-    /// Creates a new Horizontal Splitter control with the specified position, layout and resize behavior
+    /// Creates a new Horizontal Splitter control with the specified position, layout, resize behavior and flags
     /// The position can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
     /// The resize behavior can be one of the following values:
     /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when resizing the control
     /// * `ResizeBehavior::PreserveTopPanelSize` - the size of the top panel is preserved when resizing the control
     /// * `ResizeBehavior::PreserveBottomPanelSize` - the size of the bottom panel is preserved when resizing the control
+    /// The flags can be a combination of the following values:
+    /// * `Flags::None` - no flags
+    /// * `Flags::MergeBorders` - merge the borders of the splitter with the borders of the window
     /// 
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             hsplitter::ResizeBehavior::PreserveTopPanelSize,
+    ///                             hsplitter::Flags::None);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// ```
@@ -73,7 +79,10 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             hsplitter::ResizeBehavior::PreserveTopPanelSize,
+    ///                             hsplitter::Flags::None);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));   
     /// ```
@@ -98,7 +107,10 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             hsplitter::ResizeBehavior::PreserveTopPanelSize,
+    ///                             hsplitter::Flags::None);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 2 chars from Top
