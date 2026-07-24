@@ -1767,6 +1767,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// * `flags` - Line initialization flags (optional). Can be:
 ///   - **DoubleLine** - Uses double line characters instead of single
 ///   - **HasTitle** - Shows the text/caption in the middle of the line
+///   - **MergeBorders** - Merges the borders of the line with the borders of the window (use box junctions to draw the line)
 /// * Position and size:
 ///   - `x`, `y` - Position coordinates
 ///   - `width`/`w` - Width of the line (required)
@@ -1797,6 +1798,7 @@ pub fn hline(input: TokenStream) -> TokenStream {
 /// # Parameters
 /// * `flags` - Line initialization flags (optional). Can be:
 ///   - **DoubleLine** - Uses double line characters instead of single
+///   - **MergeBorders** - Merges the borders of the line with the borders of the window (use box junctions to draw the line)
 /// * Position and size:
 ///   - `x`, `y` - Position coordinates
 ///   - `height`/`h` - Height of the line (required)
