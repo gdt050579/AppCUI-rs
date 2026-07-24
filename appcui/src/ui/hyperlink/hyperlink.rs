@@ -10,12 +10,12 @@ pub struct HyperLink {
 impl HyperLink {
     /// Creates a hyperlink where the displayed text is the link itself.
     pub fn new(link: &str, layout: Layout) -> Self {
-        Self::inner_create(link, "", "", layout, StatusFlags::ThemeType)
+        Self::inner_create(link, "", "", layout, StatusFlags::None)
     }
 
     /// Creates a hyperlink with a custom display name.
     pub fn with_name(link: &str, name: &str, layout: Layout) -> Self {
-        Self::inner_create(link, name, "", layout, StatusFlags::ThemeType)
+        Self::inner_create(link, name, "", layout, StatusFlags::None)
     }
 
     /// Creates a hyperlink with a description (shown as a tooltip).
@@ -44,11 +44,11 @@ impl HyperLink {
             _ if !self.is_enabled() => theme.text.inactive,
             _ if self.has_focus() => theme.text.focused,
             _ if self.is_mouse_over() => theme.text.hovered,
-            _ => theme.button.regular.text.normal,
+            _ => theme.text.normal,
         };
 
         let name = if self.name.trim().is_empty() { &self.link } else { &self.name };
-        let attr = if self.is_enabled() && (self.is_mouse_over() || self.has_focus()) {
+        let attr = if self.is_enabled() && self.is_mouse_over() {
             CharAttribute::new(col_text.foreground, col_text.background, CharFlags::Underline | col_text.flags)
         } else {
             col_text
@@ -57,12 +57,12 @@ impl HyperLink {
         let w = self.size().width;
         let format = TextFormatBuilder::new()
             .position(0, 0)
-            .attribute(col_text)
+            .attribute(attr)
             .align(TextAlignment::Left)
             .chars_count(name.chars().count() as u16)
             .wrap_type(WrapType::SingleLineWrap(w as u16))
             .build();
-        surface.write_text(&name, &format);
+        surface.write_text(name, &format);
     }
 
     /// Sets the URL associated with this hyperlink.
