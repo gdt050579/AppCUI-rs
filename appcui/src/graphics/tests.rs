@@ -1885,3 +1885,81 @@ fn check_box_junction_non_box_chars_contribute_nothing() {
     assert_eq!(BOX_JUNCTION.mask_of('\u{24FF}'), 0);
     assert_eq!(BOX_JUNCTION.mask_of('\u{2580}'), 0);
 }
+
+#[test]
+fn check_box_junction_on_surface_rect_simple() {
+    /*
+┌───┬───────────────────╥─────┐         
+│   │                   ║     │         
+│   │                   ║     │         
+│   │                   ║     │         
+├───┼───────────────────╫─────┤         
+│   │                   ║     │         
+│   │                   ║     │         
+╞═══╪═══════════════════╬═════╡         
+│   │                   ║     │         
+└───┴───────────────────╨─────┘       
+     */
+    let mut s = SurfaceTester::new(40, 10);
+    s.draw_line(0, 4, 30, 4, LineType::Single, charattr!("r"));
+    s.draw_line(0, 7, 30, 7, LineType::Double, charattr!("r"));
+    s.draw_line(4, 0, 4, 10, LineType::Single, charattr!("r"));
+    s.draw_line(24, 0, 24, 10, LineType::Double, charattr!("r"));
+    s.draw_rect(Rect::new(0,0,30,9), LineType::Single, charattr!("y"));
+    // junctions
+    s.write_box_junction(4,4);
+    s.write_box_junction(24,4);
+    s.write_box_junction(4,7);
+    s.write_box_junction(24,7);
+
+    s.write_box_junction(0,4);
+    s.write_box_junction(30,4);
+    s.write_box_junction(4,0);
+    s.write_box_junction(24,0);
+    s.write_box_junction(4,9);
+    s.write_box_junction(24,9);
+    s.write_box_junction(0,7);
+    s.write_box_junction(30,7);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x5049C7F2D1D4FB7A);
+}
+
+#[test]
+fn check_box_junction_on_surface_rect_double() {
+    /*
+╔═══╤═══════════════════╦═════╗         
+║   │                   ║     ║         
+║   │                   ║     ║         
+║   │                   ║     ║         
+╟───┼───────────────────╫─────╢         
+║   │                   ║     ║         
+║   │                   ║     ║         
+╠═══╪═══════════════════╬═════╣         
+║   │                   ║     ║         
+╚═══╧═══════════════════╩═════╝    
+     */
+    let mut s = SurfaceTester::new(40, 10);
+    s.draw_line(0, 4, 30, 4, LineType::Single, charattr!("r"));
+    s.draw_line(0, 7, 30, 7, LineType::Double, charattr!("r"));
+    s.draw_line(4, 0, 4, 10, LineType::Single, charattr!("r"));
+    s.draw_line(24, 0, 24, 10, LineType::Double, charattr!("r"));
+    s.draw_rect(Rect::new(0,0,30,9), LineType::Double, charattr!("y"));
+    // junctions
+    s.write_box_junction(4,4);
+    s.write_box_junction(24,4);
+    s.write_box_junction(4,7);
+    s.write_box_junction(24,7);
+
+    s.write_box_junction(0,4);
+    s.write_box_junction(30,4);
+    s.write_box_junction(4,0);
+    s.write_box_junction(24,0);
+    s.write_box_junction(4,9);
+    s.write_box_junction(24,9);
+    s.write_box_junction(0,7);
+    s.write_box_junction(30,7);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xBADCD5976D211FFE);
+}
