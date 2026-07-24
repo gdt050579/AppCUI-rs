@@ -36,6 +36,7 @@ impl VSplitter {
     /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when the splitter is resized
     /// * `ResizeBehavior::PreserveLeftPanelSize` - the size of the left panel is preserved when the splitter is resized
     /// * `ResizeBehavior::PreserveRightPanelSize` - the size of the right panel is preserved when the splitter is resized
+    /// 
     /// The flags can be a combination of the following values:
     /// * `Flags::None` - no flags
     /// * `Flags::MergeBorders` - merge the borders of the splitter with the borders of the window

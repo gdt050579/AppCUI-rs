@@ -36,6 +36,7 @@ impl HSplitter {
     /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when resizing the control
     /// * `ResizeBehavior::PreserveTopPanelSize` - the size of the top panel is preserved when resizing the control
     /// * `ResizeBehavior::PreserveBottomPanelSize` - the size of the bottom panel is preserved when resizing the control
+    /// 
     /// The flags can be a combination of the following values:
     /// * `Flags::None` - no flags
     /// * `Flags::MergeBorders` - merge the borders of the splitter with the borders of the window
