@@ -83,3 +83,19 @@ fn check_apis() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_merge_borders() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0x5E3EBF28EA9681D8)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
+    
+    w.add(HLine::new("", layout!("x:0,y:1,w:100%"), Flags::MergeBorders));
+    w.add(HLine::new("TestLine", layout!("x:0,y:3,w:100%"), Flags::DoubleLine | Flags::HasTitle | Flags::MergeBorders));
+    a.add_window(w);
+    a.run();
+}

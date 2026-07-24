@@ -14,4 +14,5 @@ use self::splitter_panel::SplitterPanel;
 pub use self::vsplitter::VSplitter;
 pub use self::initialization_flags::ResizeBehavior;
 pub use self::initialization_flags::Panel;
+pub use self::initialization_flags::Flags;
 

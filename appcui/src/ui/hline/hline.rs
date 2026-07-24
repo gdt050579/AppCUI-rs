@@ -66,5 +66,9 @@ impl OnPaint for HLine {
                 .build();
             surface.write_text(&self.title, &format);
         }
+        if self.flags.contains(Flags::MergeBorders) {
+            surface.write_box_junction(-1, 0);
+            surface.write_box_junction(self.size().width as i32, 0);
+        }
     }
 }

@@ -32,3 +32,19 @@ fn check_procmacro(){
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_merge_borders(){
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial State')
+        CheckHash(0x17B0E89C8C223D61)
+    ";
+    let mut a = App::debug(60, 40, script).build().unwrap();
+    let mut w = window!("Title,a:c,w:40,h:25,flags:Sizeable");
+
+    w.add(VLine::new( layout!("x:7,y:0,h:100%"), Flags::MergeBorders));
+    w.add(VLine::new( layout!("x:33,y:0,h:100%"), Flags::DoubleLine | Flags::MergeBorders));
+    a.add_window(w);
+    a.run();
+}
