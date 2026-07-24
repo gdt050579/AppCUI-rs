@@ -13,7 +13,7 @@ or the macro `vline!`
 ```rs
 let hl1 = vline!("x:1,y:1,h:10");
 let hl2 = vline!("x:3,y:1,h:20,flags:DoubleLine");
-```
+``
 
 A vertical line supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
