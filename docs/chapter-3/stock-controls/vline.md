@@ -23,7 +23,7 @@ A vertical line supports all common parameters (as they are described in [Instan
 
 Where the flags are defined as follows:
 * `vline::Flags::DoubleLine` or `DoubleLine` (for macro initialization) - this will draw a double line instead of a single one.
-
+* `vline::Flags::MergeBorders` or `MergeBorders` (for macro initialization) - this will merge the borders of the line with the borders of the window (use box junctions to draw the line).
 
 ## Events
 A vertical line emits no events.
