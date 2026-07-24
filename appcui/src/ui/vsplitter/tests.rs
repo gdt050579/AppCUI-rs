@@ -477,3 +477,25 @@ fn check_mouse_wheel_and_doubleclicked() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_merge_borders() {
+    let script = "
+        Paint.Enable(false)
+        // ┌─ Left ─────────────┐
+        // ┌─ Right ────────────┐
+        Paint('1.Initial state')   
+        CheckHash(0xACB83650CE5A2116)
+        Mouse.Drag(30,8,40,8);
+        Paint('2.Move to the right')   
+        CheckHash(0x17D51501F7180D32)
+    ";
+    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:51,h:10,flags: Sizeable");
+    let mut vs = VSplitter::new(0.5, layout!("d:f"), vsplitter::ResizeBehavior::PreserveAspectRatio, vsplitter::Flags::MergeBorders);
+    vs.add(vsplitter::Panel::Left, panel!("Left,l:1,r:1,t:1,b:1"));
+    vs.add(vsplitter::Panel::Right, panel!("Right,l:1,r:1,t:1,b:1"));
+    w.add(vs);
+    a.add_window(w);
+    a.run();
+}
