@@ -233,3 +233,20 @@ fn check_resize_preserve_top_size() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_merge_borders() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xC91D70C78B2CEABC)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:51,h:11,flags: Sizeable");
+    let mut hs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio, hsplitter::Flags::MergeBorders);
+    hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
+    hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
+    w.add(hs);
+    a.add_window(w);
+    a.run();
+}
