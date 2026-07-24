@@ -39,36 +39,11 @@ impl HyperLink {
         hyper_link
     }
 
-    fn paint_normal(&self, surface: &mut Surface, theme: &Theme) {
-        let col_text = match () {
-            _ if !self.is_enabled() => theme.text.inactive,
-            _ if self.has_focus() => theme.text.focused,
-            _ if self.is_mouse_over() => theme.text.hovered,
-            _ => theme.text.normal,
-        };
-
-        let name = if self.name.trim().is_empty() { &self.link } else { &self.name };
-        let attr = if self.is_enabled() && self.is_mouse_over() {
-            CharAttribute::new(col_text.foreground, col_text.background, CharFlags::Underline | col_text.flags)
-        } else {
-            col_text
-        };
-
-        let w = self.size().width;
-        let format = TextFormatBuilder::new()
-            .position(0, 0)
-            .attribute(attr)
-            .align(TextAlignment::Left)
-            .chars_count(name.chars().count() as u16)
-            .wrap_type(WrapType::SingleLineWrap(w as u16))
-            .build();
-        surface.write_text(name, &format);
-    }
-
     /// Sets the URL associated with this hyperlink.
     /// The displayed text is not affected, unless no name was set (in which case the link itself is displayed).
     pub fn set_link(&mut self, link: &str) {
-        self.link = link.to_string();
+        self.link.clear();
+        self.link.push_str(link);
     }
 
     /// Returns the URL associated with this hyperlink.
@@ -78,7 +53,8 @@ impl HyperLink {
 
     /// Sets the description of this hyperlink.
     pub fn set_desc(&mut self, desc: &str) {
-        self.desc = desc.to_string();
+        self.desc.clear();
+        self.desc.push_str(desc);
     }
 
     /// Returns the description of this hyperlink or an empty string if none was set.
@@ -89,7 +65,8 @@ impl HyperLink {
     /// Sets the text displayed by this hyperlink.
     /// If set to an empty string, the link itself will be displayed instead.
     pub fn set_name(&mut self, name: &str) {
-        self.name = name.to_string();
+        self.name.clear();
+        self.name.push_str(name);
     }
 
     /// Returns the text explicitly set for this hyperlink or an empty string if none was set.
@@ -122,14 +99,36 @@ impl OnKeyPressed for HyperLink {
 
 impl OnPaint for HyperLink {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        self.paint_normal(surface, theme);
+        let col_text = match () {
+            _ if !self.is_enabled() => theme.text.inactive,
+            _ if self.has_focus() => theme.text.focused,
+            _ if self.is_mouse_over() => theme.text.hovered,
+            _ => theme.text.normal,
+        };
+
+        let name = if self.name.trim().is_empty() { &self.link } else { &self.name };
+        let attr = if self.is_enabled() && self.is_mouse_over() {
+            CharAttribute::new(col_text.foreground, col_text.background, CharFlags::Underline | col_text.flags)
+        } else {
+            col_text
+        };
+
+        let w = self.size().width;
+        let format = TextFormatBuilder::new()
+            .position(0, 0)
+            .attribute(attr)
+            .align(TextAlignment::Left)
+            .chars_count(name.chars().count() as u16)
+            .wrap_type(WrapType::SingleLineWrap(w as u16))
+            .build();
+        surface.write_text(name, &format);
     }
 }
 impl OnMouseEvent for HyperLink {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         match event {
             MouseEvent::Enter => {
-                if !self.desc().trim().is_empty() {
+                if !self.desc.trim().is_empty() {
                     self.show_tooltip(&self.desc);
                 }
                 EventProcessStatus::Processed
