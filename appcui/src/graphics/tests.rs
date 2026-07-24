@@ -1766,15 +1766,16 @@ fn check_box_junction_heavy_line() {
 
 #[test]
 fn check_box_junction_half_lines() {
-    assert_eq!(box_junction('─', GAP, GAP, GAP), Some('╴'));
-    assert_eq!(box_junction(GAP, '│', GAP, GAP), Some('╵'));
-    assert_eq!(box_junction(GAP, GAP, '─', GAP), Some('╶'));
-    assert_eq!(box_junction(GAP, GAP, GAP, '│'), Some('╷'));
+    // nu sunt macar doua character din setul de box junctions --> None
+    assert_eq!(box_junction('─', GAP, GAP, GAP), None);
+    assert_eq!(box_junction(GAP, '│', GAP, GAP), None);
+    assert_eq!(box_junction(GAP, GAP, '─', GAP), None);
+    assert_eq!(box_junction(GAP, GAP, GAP, '│'), None);
 
-    assert_eq!(box_junction('━', GAP, GAP, GAP), Some('╸'));
-    assert_eq!(box_junction(GAP, '┃', GAP, GAP), Some('╹'));
-    assert_eq!(box_junction(GAP, GAP, '━', GAP), Some('╺'));
-    assert_eq!(box_junction(GAP, GAP, GAP, '┃'), Some('╻'));
+    assert_eq!(box_junction('━', GAP, GAP, GAP), None);
+    assert_eq!(box_junction(GAP, '┃', GAP, GAP), None);
+    assert_eq!(box_junction(GAP, GAP, '━', GAP), None);
+    assert_eq!(box_junction(GAP, GAP, GAP, '┃'), None);
 }
 
 #[test]
@@ -1841,14 +1842,10 @@ fn check_box_junction_single_double_mix() {
 
 #[test]
 fn check_box_junction_facing_sides_only() {
-    // ╝ connects north and west, so as a left neighbour its east side is
-    // empty and it pulls nothing.
+    // nu sunt macar doua character din setul de box junctions --> None
     assert_eq!(box_junction('╝', GAP, GAP, GAP), None);
-    // ╔ connects east and south, so as a left neighbour it does pull.
-    assert_eq!(box_junction('╔', GAP, GAP, GAP), Some('╴'));
-    // ┌ above offers its south side.
-    assert_eq!(box_junction(GAP, '┌', GAP, GAP), Some('╵'));
-    // ┌ below offers its north side, which is empty.
+    assert_eq!(box_junction('╔', GAP, GAP, GAP), None);
+    assert_eq!(box_junction(GAP, '┌', GAP, GAP), None);
     assert_eq!(box_junction(GAP, GAP, GAP, '┌'), None);
 }
 

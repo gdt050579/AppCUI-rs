@@ -171,6 +171,13 @@ const fn coerce_to_weight(m: u8, weight: u8) -> u8 {
     mask(n, e, s, w)
 }
 
+#[inline(always)]
+const fn connection_count(m: u8) -> u32 {
+    // Fold each 2-bit field down to 1 if either bit is set, then popcount.
+    let folded = (m | (m >> 1)) & 0b0101_0101;
+    folded.count_ones()
+}
+
 pub struct BoxJunction {
     to_mask: [u8; 256],
     to_char: [u8; 256],
@@ -227,6 +234,9 @@ impl BoxJunction {
             north(self.mask_of(down)),
             east(self.mask_of(left)),
         );
+        if connection_count(m) < 2 {
+            return None;
+        }
         let idx = self.to_char[m as usize];
         if idx == NO_GLYPH {
             None
