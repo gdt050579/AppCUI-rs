@@ -7,8 +7,8 @@ Renders a vertical splitter that allows the user to resize the two panes it sepa
 To create a vertical splitter use `VSplitter::new` method or the `vsplitter!` macro.
 
 ```rust
-let vs_1 = VSplitter::new(0.5,layout!("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
-let vs_2 = VSplitter::new(20,layout!("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+let vs_1 = VSplitter::new(0.5,layout!("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize,vsplitter::Flags::None);
+let vs_2 = VSplitter::new(20,layout!("x:1,y:1,w:20,h:10"),vsplitter::ResizeBehavior::PreserveRightPanelSize,vsplitter::Flags::MergeBorders);
 ```
 
 or
@@ -16,22 +16,27 @@ or
 ```rust
 let vs_3 = vsplitter!("x:1,y:1,w:20,h:10,pos:50%");
 let vs_4 = vsplitter!("x:1,y:1,w:20,h:10,pos:20,resize:PreserveRightPanelSize");
+let vs_5 = vsplitter!("x:1,y:1,w:20,h:10,pos:50%,flags:MergeBorders");
 ```
 
 
 A vertical splitter supports all common parameters (as they are described in [Instantiate via Macros](../instantiate_via_macros.md) section). Besides them, the following **named parameters** are also accepted:
 
-| Parameter name                                       | Type       | Positional parameter                | Purpose                                                                                                                                      |
-| ---------------------------------------------------- | ---------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pos`                                                | Coordinate | **Yes** (first positional parameter) | The position of the splitter (can be an absolute value - like `10` or a percentage like `50%` )                                             |
-| `resize` or `resize-behavior` or `on-resize` or `rb` | String     | **No**                              | The resize behavior of the splitter. Can be one of the following: `PreserveLeftPanelSize`, `PreserveRightPanelSize` or `PreserveAspectRatio` |
-| `min-left-width` or `minleftwidth` or `mlw`          | Dimension  | **No**                              | The minimum width of the left panel (in characters - e.g. `5`) or as a percentage (e.g. `10%`)                                               |
-| `min-right-width` or `minrightwidth` or `mrw`        | Dimension  | **No**                              | The minimum width of the right panel (in characters - e.g. `5`) or as a percentage (e.g. `10%`)                                              |
+| Parameter name                                       | Type       | Positional parameter                 | Purpose                                                                                                                                      |
+| ---------------------------------------------------- | ---------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pos`                                                | Coordinate | **Yes** (first positional parameter) | The position of the splitter (can be an absolute value - like `10` or a percentage like `50%` )                                              |
+| `resize` or `resize-behavior` or `on-resize` or `rb` | String     | **No**                               | The resize behavior of the splitter. Can be one of the following: `PreserveLeftPanelSize`, `PreserveRightPanelSize` or `PreserveAspectRatio` |
+| `min-left-width` or `minleftwidth` or `mlw`          | Dimension  | **No**                               | The minimum width of the left panel (in characters - e.g. `5`) or as a percentage (e.g. `10%`)                                               |
+| `min-right-width` or `minrightwidth` or `mrw`        | Dimension  | **No**                               | The minimum width of the right panel (in characters - e.g. `5`) or as a percentage (e.g. `10%`)                                              |
+| `flags`                                              | Flags      | **No**                               | Vertical splitter initialization flags                                                                                                       |
 
-A vertial splitters supports the following resize modes:
+A vertical splitter supports the following resize modes:
 * `vsplitter::ResizeBehavior::PreserveLeftPanelSize` or `PreserveLeftPanelSize` (for macro initialization) - this will keep the size of the left panel constant when resizing the splitter  
 * `vsplitter::ResizeBehavior::PreserveRightPanelSize` or `PreserveRightPanelSize` (for macro initialization) - this will keep the size of the right panel constant when resizing the splitter   
 * `vsplitter::ResizeBehavior::PreserveAspectRatio` or `PreserveAspectRatio` (for macro initialization) - this will keep the aspect ratio of the two panels constant when resizing the splitter  
+
+and the following flags:
+* `vsplitter::Flags::MergeBorders` or `MergeBorders` (for macro initialization) - this will merge the borders of the splitter with the borders of the window (use box junctions to draw the splitter).
 
 
 ## Events
@@ -70,7 +75,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
     let mut w = window!("'Vertical Splitter',a:c,w:50,h:10,flags: Sizeable");
-    let mut vs = vsplitter!("50%,d:f,resize:PreserveRightPanelSize");
+    let mut vs = vsplitter!("50%,d:f,resize:PreserveRightPanelSize,flags:MergeBorders");
     vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     w.add(vs);
