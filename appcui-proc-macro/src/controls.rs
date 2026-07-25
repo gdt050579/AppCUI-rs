@@ -39,3 +39,4 @@ pub (crate) mod textarea;
 pub (crate) mod graphview;
 pub (crate) mod bufferview;
 pub (crate) mod timepicker;
+pub (crate) mod hyperlink;
