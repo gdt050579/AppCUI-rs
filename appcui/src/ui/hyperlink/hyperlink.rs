@@ -121,23 +121,18 @@ impl OnKeyPressed for HyperLink {
 impl OnPaint for HyperLink {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let col_text = match () {
-            _ if !self.is_enabled() => theme.text.inactive,
-            _ if self.has_focus() => theme.text.focused,
-            _ if self.is_mouse_over() => theme.text.hovered,
-            _ => theme.text.normal,
+            _ if !self.is_enabled() => theme.hyperlink.inactive,
+            _ if self.has_focus() => theme.hyperlink.focused,
+            _ if self.is_mouse_over() => theme.hyperlink.hovered,
+            _ => theme.hyperlink.normal,
         };
 
         let name = if self.name.trim().is_empty() { &self.url } else { &self.name };
-        let attr = if self.is_enabled() && self.is_mouse_over() {
-            CharAttribute::new(col_text.foreground, col_text.background, CharFlags::Underline | col_text.flags)
-        } else {
-            col_text
-        };
 
         let w = self.size().width;
         let format = TextFormatBuilder::new()
             .position(0, 0)
-            .attribute(attr)
+            .attribute(col_text)
             .align(TextAlignment::Left)
             .chars_count(name.chars().count() as u16)
             .wrap_type(WrapType::SingleLineWrap(w as u16))
