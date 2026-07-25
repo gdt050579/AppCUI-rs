@@ -78,6 +78,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
@@ -147,6 +148,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
@@ -241,6 +243,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
@@ -308,6 +311,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
@@ -401,6 +405,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
