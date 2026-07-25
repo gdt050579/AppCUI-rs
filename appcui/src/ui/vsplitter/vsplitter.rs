@@ -1,5 +1,5 @@
 use self::layout::Dimension;
-
+use super::Flags;
 use super::ResizeBehavior;
 use super::SplitterPanel;
 use crate::prelude::*;
@@ -26,25 +26,33 @@ pub struct VSplitter {
     preserve_pos: i32,
     resize_behavior: ResizeBehavior,
     state: State,
+    flags: Flags,
 }
 impl VSplitter {
 
-    /// Creates a new Vertical Splitter control with the specified position, layout and resize behavior
+    /// Creates a new Vertical Splitter control with the specified position, layout, resize behavior and flags
     /// The position can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
     /// The resize behavior can be one of the following values:
     /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when the splitter is resized
     /// * `ResizeBehavior::PreserveLeftPanelSize` - the size of the left panel is preserved when the splitter is resized
     /// * `ResizeBehavior::PreserveRightPanelSize` - the size of the right panel is preserved when the splitter is resized
     /// 
+    /// The flags can be a combination of the following values:
+    /// * `Flags::None` - no flags
+    /// * `Flags::MergeBorders` - merge the borders of the splitter with the borders of the window
+    /// 
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = VSplitter::new(0.5,layout!("d:f"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// let mut vs = VSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             vsplitter::ResizeBehavior::PreserveRightPanelSize,
+    ///                             vsplitter::Flags::None);
     /// vs.add(vsplitter::Panel::Left,panel!("Left,l:1,r:1,t:1,b:1"));
     /// vs.add(vsplitter::Panel::Right,panel!("Right,l:1,r:1,t:1,b:1"));
     /// ``` 
-    pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior) -> Self
+    pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior, flags: Flags) -> Self
     where
         Coordinate: From<T>,
     {
@@ -58,6 +66,7 @@ impl VSplitter {
             state: State::None,
             resize_behavior,
             preserve_pos: 0,
+            flags,
         };
         obj.set_size_bounds(3, 1, u16::MAX, u16::MAX);
         obj.left = obj.add_child(SplitterPanel::new());
@@ -71,7 +80,10 @@ impl VSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = VSplitter::new(0.5,layout!("d:f"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// let mut vs = VSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             vsplitter::ResizeBehavior::PreserveRightPanelSize, 
+    ///                             vsplitter::Flags::None);
     /// vs.add(vsplitter::Panel::Left,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(vsplitter::Panel::Right,button!("PressMe,x:1,y:1,w:12"));   
     /// ```
@@ -97,7 +109,10 @@ impl VSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = VSplitter::new(0.5,layout!("d:f"),vsplitter::ResizeBehavior::PreserveRightPanelSize);
+    /// let mut vs = VSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             vsplitter::ResizeBehavior::PreserveRightPanelSize,
+    ///                             vsplitter::Flags::None);
     /// vs.add(vsplitter::Panel::Left,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(vsplitter::Panel::Right,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 10 chars from left
@@ -229,6 +244,10 @@ impl OnPaint for VSplitter {
         surface.draw_vertical_line_with_size(x, 0, sz.height, LineType::Single, col_line);
         surface.write_char(x, 1, Character::with_attributes(SpecialChar::TriangleLeft, col_b1));
         surface.write_char(x, 2, Character::with_attributes(SpecialChar::TriangleRight, col_b2));
+        if self.flags.contains(Flags::MergeBorders) {
+            surface.write_box_junction(x, -1);
+            surface.write_box_junction(x, sz.height as i32);
+        }
     }
 }
 impl OnKeyPressed for VSplitter {

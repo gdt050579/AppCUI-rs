@@ -25,6 +25,7 @@ A horizontal line supports all common parameters (as they are described in [Inst
 Where the flags are defined as follows:
 * `hline::Flags::DoubleLine` or `DoubleLine` (for macro initialization) - this will draw a double line instead of a single one.
 * `hline::Flags::HasTitle` or `HasTitle` (for macro initialization) - this will draw a title (a text) centered on the line.
+* `hline::Flags::MergeBorders` or `MergeBorders` (for macro initialization) - this will merge the borders of the line with the borders of the window (use box junctions to draw the line).
 
 
 

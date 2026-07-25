@@ -18,6 +18,7 @@ use super::TextAlignment;
 use super::TextFormat;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
+use super::BOX_JUNCTION;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -982,6 +983,45 @@ impl Surface {
                     self.chars[pos].set(ch);
                 }
             }
+        }
+    }
+
+    pub fn write_box_junction(&mut self, x: i32, y: i32) {
+        if !self.clip.is_visible() {
+            return;
+        }
+        let abs_x = x + self.origin.x;
+        let abs_y = y + self.origin.y;
+        if abs_x < 0 || abs_x >= self.size.width as i32 || abs_y < 0 || abs_y >= self.size.height as i32 {
+            return;
+        }
+        // validam cu clip-ul dar permitem o usoara extingdere (i character la dreapta / standa / sus si jos)
+        if abs_x < (self.clip.left - 1) || abs_x > (self.clip.right + 1) || abs_y < (self.clip.top - 1) || abs_y > (self.clip.bottom + 1) {
+            return;
+        }
+        let x_p = abs_x as usize;
+        let y_p = abs_y as usize;
+        let pos = y_p * (self.size.width as usize) + x_p;
+        // obtinem caracterele
+        let left = if abs_x > 0 { self.chars[pos - 1].code } else { ' ' };
+        let up = if abs_y > 0 {
+            self.chars[pos - self.size.width as usize].code
+        } else {
+            ' '
+        };
+        let right = if abs_x < self.size.width as i32 - 1 {
+            self.chars[pos + 1].code
+        } else {
+            ' '
+        };
+        let down = if abs_y < self.size.height as i32 - 1 {
+            self.chars[pos + self.size.width as usize].code
+        } else {
+            ' '
+        };
+        // obtinem junction-ul - daca e valid il suprascriem (dar doar character)
+        if let Some(junction) = BOX_JUNCTION.resolve(left, up, right, down) {
+            self.chars[pos].code = junction;
         }
     }
 

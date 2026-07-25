@@ -1767,6 +1767,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// * `flags` - Line initialization flags (optional). Can be:
 ///   - **DoubleLine** - Uses double line characters instead of single
 ///   - **HasTitle** - Shows the text/caption in the middle of the line
+///   - **MergeBorders** - Merges the borders of the line with the borders of the window (use box junctions to draw the line)
 /// * Position and size:
 ///   - `x`, `y` - Position coordinates
 ///   - `width`/`w` - Width of the line (required)
@@ -1797,6 +1798,7 @@ pub fn hline(input: TokenStream) -> TokenStream {
 /// # Parameters
 /// * `flags` - Line initialization flags (optional). Can be:
 ///   - **DoubleLine** - Uses double line characters instead of single
+///   - **MergeBorders** - Merges the borders of the line with the borders of the window (use box junctions to draw the line)
 /// * Position and size:
 ///   - `x`, `y` - Position coordinates
 ///   - `height`/`h` - Height of the line (required)
@@ -1830,6 +1832,8 @@ pub fn vline(input: TokenStream) -> TokenStream {
 ///   - **PreserveAspectRatio** (default) - Maintains relative sizes when parent resizes
 ///   - **PreserveLeftPanelSize** - Keeps left panel size fixed
 ///   - **PreserveRightPanelSize** - Keeps right panel size fixed
+/// * `flags` - Splitter initialization flags (optional). Can be:
+///   - **MergeBorders** - Merges the borders of the splitter with the borders of the window (use box junctions to draw the splitter)
 /// * `min-left-width`, `mintopwidth`, `mlw` - Minimum width for the left panel
 /// * `min-right-width`, `minbottomwidth`, `mrw` - Minimum width for the right panel
 /// * Position and size:
@@ -1852,6 +1856,7 @@ pub fn vline(input: TokenStream) -> TokenStream {
 /// let split = vsplitter!(
 ///     "x=0, y=0, height=20, width=40,
 ///     resize: PreserveLeftPanelSize, 
+///     flags: MergeBorders,
 ///     minleftwidth: 30, 
 ///     minrightwidth: 40"
 /// );
@@ -1870,6 +1875,8 @@ pub fn vsplitter(input: TokenStream) -> TokenStream {
 ///   - **PreserveAspectRatio** (default) - Maintains relative sizes when parent resizes
 ///   - **PreserveTopPanelSize** - Keeps top panel size fixed
 ///   - **PreserveBottomPanelSize** - Keeps bottom panel size fixed
+/// * `flags` - Splitter initialization flags (optional). Can be:
+///   - **MergeBorders** - Merges the borders of the splitter with the borders of the window (use box junctions to draw the splitter)
 /// * `min-top-height`, `mintopheight`, `mth` - Minimum height for the top panel
 /// * `min-bottom-height`, `minbottomheight`, `mbh` - Minimum height for the bottom panel
 /// * Position and size:
@@ -1892,6 +1899,7 @@ pub fn vsplitter(input: TokenStream) -> TokenStream {
 /// let split = hsplitter!(
 ///     "x=0, y=0, width=40, height=20,
 ///     resize: PreserveTopPanelSize, 
+///     flags: MergeBorders,
 ///     mintopheight: 10, 
 ///     minbottomheight: 15"
 /// );

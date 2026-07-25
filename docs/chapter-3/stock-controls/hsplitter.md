@@ -7,8 +7,8 @@ Renders a horizontal splitter that allows the user to resize the two panels it s
 To create a horizontal splitter use `HSplitter::new` method or the `hsplitter!` macro.
 
 ```rust
-let vs_1 = HSplitter::new(0.5,layout!("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
-let vs_2 = HSplitter::new(20,layout!("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize);
+let vs_1 = HSplitter::new(0.5,layout!("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize,hsplitter::Flags::None);
+let vs_2 = HSplitter::new(20,layout!("x:1,y:1,w:20,h:10"),hsplitter::ResizeBehavior::PreserveBottomPanelSize,hsplitter::Flags::MergeBorders);
 ```
 
 or
@@ -16,6 +16,7 @@ or
 ```rust
 let vs_3 = hsplitter!("x:1,y:1,w:20,h:10,pos:50%");
 let vs_4 = hsplitter!("x:1,y:1,w:20,h:10,pos:20,resize:PreserveBottomPanelSize");
+let vs_5 = hsplitter!("x:1,y:1,w:20,h:10,pos:50%,flags:MergeBorders");
 ```
 
 
@@ -27,11 +28,15 @@ A horizontal splitter supports all common parameters (as they are described in [
 | `resize` or `resize-behavior` or `on-resize` or `rb` | String     | **No**                              | The resize behavior of the splitter. Can be one of the following: `PreserveTopPanelSize`, `PreserveBottomPanelSize` or `PreserveAspectRatio` |
 | `min-top-height` or `mintopheight` or `mth`          | Dimension  | **No**                              | The minimum height of the top panel (in characters - e.g. `5`) or as a percentage (e.g. `10%`)                                               |
 | `min-bottom-height` or `minbottomheight` or `mbh`    | Dimension  | **No**                              | The minimum height of the bottom panel (in characters - e.g. `5`) or as a percentage (e.g. `10%`)                                            |
+| `flags`                                              | Flags      | **No**                              | Horizontal splitter initialization flags                                                                                                     |
 
-A vertial splitters supports the following resize modes:
+A horizontal splitter supports the following resize modes:
 * `hsplitter::ResizeBehavior::PreserveTopPanelSize` or `PreserveTopPanelSize` (for macro initialization) - this will keep the size of the top panel constant when resizing the splitter  
 * `hsplitter::ResizeBehavior::PreserveBottomPanelSize` or `PreserveBottomPanelSize` (for macro initialization) - this will keep the size of the bottom panel constant when resizing the splitter   
 * `hsplitter::ResizeBehavior::PreserveAspectRatio` or `PreserveAspectRatio` (for macro initialization) - this will keep the aspect ratio of the two panels constant when resizing the splitter  
+
+and the following flags:
+* `hsplitter::Flags::MergeBorders` or `MergeBorders` (for macro initialization) - this will merge the borders of the splitter with the borders of the window (use box junctions to draw the splitter).
 
 
 ## Events
@@ -70,7 +75,7 @@ use appcui::prelude::*;
 fn main() -> Result<(), appcui::system::Error> {
     let mut a = App::new().build()?;
     let mut w = window!("'Horizontal Splitter',a:c,w:50,h:11,flags: Sizeable");
-    let mut hs = hsplitter!("50%,d:f,resize:PreserveBottomPanelSize");
+    let mut hs = hsplitter!("50%,d:f,resize:PreserveBottomPanelSize,flags:MergeBorders");
     hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
     hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
     w.add(hs);

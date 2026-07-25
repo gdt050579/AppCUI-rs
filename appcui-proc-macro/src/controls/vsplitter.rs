@@ -3,6 +3,7 @@ use crate::parameter_parser::*;
 use proc_macro::*;
 
 static RESIZE_BEHAVIOR: FlagsSignature = FlagsSignature::new(&["PreserveAspectRatio", "PreserveLeftPanelSize", "PreserveRightPanelSize"]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&["MergeBorders"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("pos", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
@@ -17,6 +18,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("min-right-width", "mrw", ParamType::Dimension),
     NamedParameter::new("minrightwidth", "mrw", ParamType::Dimension),
     NamedParameter::new("mrw", "mrw", ParamType::Dimension),
+    NamedParameter::new("flags", "flags", ParamType::Flags),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
@@ -25,6 +27,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_coordonate_parameter("pos", None);
     cb.add_layout();
     cb.add_enum_parameter("resize", "vsplitter::ResizeBehavior", &RESIZE_BEHAVIOR, Some("PreserveAspectRatio"));
+    cb.add_flags_parameter("flags", "vsplitter::Flags", &FLAGS);
     cb.finish_control_initialization();
     if cb.has_parameter("mlw") {
         cb.add("control.set_min_width(vsplitter::Panel::Left");

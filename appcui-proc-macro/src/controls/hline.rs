@@ -2,7 +2,7 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static FLAGS: FlagsSignature = FlagsSignature::new(&["DoubleLine", "HasTitle"]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&["DoubleLine", "HasTitle", "MergeBorders"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("text", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[

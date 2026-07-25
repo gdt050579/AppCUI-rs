@@ -3,6 +3,8 @@ use crate::parameter_parser::*;
 use proc_macro::*;
 
 static RESIZE_BEHAVIOR: FlagsSignature = FlagsSignature::new(&["PreserveAspectRatio", "PreserveTopPanelSize", "PreserveBottomPanelSize"]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&["MergeBorders"]);
+
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("pos", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
@@ -17,6 +19,7 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("min-bottom-height", "mbh", ParamType::Dimension),
     NamedParameter::new("minbottomheight", "mbh", ParamType::Dimension),
     NamedParameter::new("mbh", "mbh", ParamType::Dimension),
+    NamedParameter::new("flags", "flags", ParamType::Flags),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
@@ -25,6 +28,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_coordonate_parameter("pos", None);
     cb.add_layout();
     cb.add_enum_parameter("resize", "hsplitter::ResizeBehavior", &RESIZE_BEHAVIOR, Some("PreserveAspectRatio"));
+    cb.add_flags_parameter("flags", "hsplitter::Flags", &FLAGS);
     cb.finish_control_initialization();
     if cb.has_parameter("mth") {
         cb.add("control.set_min_height(hsplitter::Panel::Top");
