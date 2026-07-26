@@ -141,5 +141,6 @@ pub(crate) fn new() -> Theme {
             progress: Color::Gray,
             text: Color::White,
         },
+        hyperlink: controlattr!("aqua,flags:Underline", "w,flags:Underline", "y,flags:Underline", "gray", "black,white,flags:Underline"),
     }
 }

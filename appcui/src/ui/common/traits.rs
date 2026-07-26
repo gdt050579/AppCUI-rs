@@ -34,6 +34,7 @@ use crate::{
         window::events::{ToolBarEvents, WindowEvents},
         tab::events::TabEvents,
         timepicker::events::TimePickerEvents,
+        hyperlink::events::HyperLinkEvents,
     },
 };
 
@@ -182,6 +183,7 @@ pub trait Control:
     + GenericGraphViewEvents
     + AppBarEvents
     + TimePickerEvents
+    + HyperLinkEvents
 {
 }
 

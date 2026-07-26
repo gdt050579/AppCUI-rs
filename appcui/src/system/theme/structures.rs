@@ -183,6 +183,7 @@ pub struct Theme {
     pub toggle_button: ToggleButtonTheme,
     pub markdown: MarkdownTheme,
     pub progressbar: ProgressBarTheme,
+    pub hyperlink: ControlCharAttributesState,
 }
 impl Theme {
     pub fn new(theme: Themes) -> Self {

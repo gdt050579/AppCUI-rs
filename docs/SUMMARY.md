@@ -71,6 +71,7 @@
         - [ListView](chapter-3/stock-controls/listview.md)
         - [HLine](chapter-3/stock-controls/hline.md)
         - [HSplitter](chapter-3/stock-controls/hsplitter.md)
+        - [HyperLink](chapter-3/stock-controls/hyperlink.md)
         - [ImageViewer](chapter-3/stock-controls/imageviewer.md)
         - [KeySelector](chapter-3/stock-controls/keyselector.md)
         - [Markdown](chapter-3/stock-controls/markdown.md)

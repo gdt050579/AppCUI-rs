@@ -78,6 +78,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
@@ -147,6 +148,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
@@ -241,6 +243,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
@@ -308,6 +311,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
@@ -401,6 +405,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
@@ -871,6 +876,34 @@ pub fn headercolumn(input: TokenStream) -> TokenStream {
 pub fn button(input: TokenStream) -> TokenStream {
     crate::controls::button::create(input)
 }
+
+
+/// Creates a new hyperlink control. The format is `hyperlink!("attributes")` where the attributes are pairs of key-value, separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `name` or `text` - the text displayed by the hyperlink. If not specified, the url itself will be displayed.
+/// * `url` or `link` - the url the hyperlink points to (required)
+/// * `tooltip` - the text shown when the mouse hovers over the hyperlink
+/// * position attributes: `x` and `y`,
+/// * size attributes: `width` or `w` (alias)
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignment attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+///
+/// # Example
+///
+/// ```hyperlink!("name='AppCUI-rs', url='https://github.com/gdt050579/AppCUI-rs', tooltip='A cross-platform TUI framework for Rust', x=1, y=1, w=10")```
+///
+/// Alternatively, the first parameter (if the key is not specified) is considered the name:
+///
+/// ```hyperlink!("'AppCUI-rs', url:'https://github.com/gdt050579/AppCUI-rs', x:1, y:1, w:10")```
+#[proc_macro]
+pub fn hyperlink(input: TokenStream) -> TokenStream {
+    crate::controls::hyperlink::create(input)
+}
+
 
 /// Creates a new checkbox control. The format is `checkbox!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
 /// If the `value` is a string, use single quotes to delimit the value.

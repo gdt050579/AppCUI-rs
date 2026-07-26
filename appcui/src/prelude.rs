@@ -40,6 +40,8 @@ pub use super::ui::dropdownlist::DropDownListType;
 pub use super::ui::graphview;
 pub use super::ui::graphview::events::GenericGraphViewEvents;
 pub use super::ui::hsplitter;
+pub use super::ui::hyperlink;
+pub use super::ui::hyperlink::events::HyperLinkEvents;
 pub use super::ui::imageviewer;
 pub use super::ui::keyselector;
 pub use super::ui::keyselector::events::KeySelectorEvents;

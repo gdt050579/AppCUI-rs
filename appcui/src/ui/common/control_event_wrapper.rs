@@ -17,7 +17,7 @@ use crate::ui::{
     numericselector::events::GenericNumericSelectorEvents,
     password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
     richtextfield::events::RichTextFieldEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
-    timepicker, timepicker::events::TimePickerEvents,
+    timepicker, timepicker::events::TimePickerEvents, hyperlink, hyperlink::events::HyperLinkEvents,
 };
 use crate::ui::{pathfinder, treeview};
 
@@ -55,6 +55,7 @@ pub(crate) enum ControlEventData {
     Tab(tab::events::EventData),
     TimePicker(timepicker::events::EventData),
     GraphView(graphview::events::EventData),
+    HyperLink(hyperlink::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -197,6 +198,7 @@ impl ControlEvent {
                     GenericGraphViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
                 }
             },
+            ControlEventData::HyperLink(_) => HyperLinkEvents::on_open(receiver, self.emitter.cast()),
         }
     }
 }
