@@ -137,6 +137,6 @@ pub(crate) fn new() -> Theme {
             text: Color::White,
         },
         
-        hyperlink: controlattr!("gray", "w,flags:Underline", "w,flags:Underline", "gray", "w,flags:Underline"),
+        hyperlink: controlattr!("aqua,flags:Underline", "w,flags:Underline", "y,flags:Underline", "gray", "black,white,flags:Underline"),
     }
 }

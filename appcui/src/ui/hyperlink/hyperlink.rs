@@ -6,6 +6,7 @@ pub struct HyperLink {
     url: String,
     tooltip: String,
     name: String,
+    pressed: bool,
 }
 impl HyperLink {
     /// Creates a hyperlink that displays `name` and points to `url`.
@@ -55,6 +56,7 @@ impl HyperLink {
             url: url.to_string(),
             tooltip: tooltip.to_string(),
             name: name.to_string(),
+            pressed: false,
         };
         hyper_link.set_size_bounds(1, 1, u16::MAX, 1);
         hyper_link
@@ -122,13 +124,14 @@ impl OnPaint for HyperLink {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         let col_text = match () {
             _ if !self.is_enabled() => theme.hyperlink.inactive,
+            _ if self.pressed => theme.hyperlink.pressed_or_selected,
             _ if self.has_focus() => theme.hyperlink.focused,
             _ if self.is_mouse_over() => theme.hyperlink.hovered,
             _ => theme.hyperlink.normal,
         };
-
+        
         let name = if self.name.trim().is_empty() { &self.url } else { &self.name };
-
+        
         let w = self.size().width;
         let format = TextFormatBuilder::new()
             .position(0, 0)
@@ -147,14 +150,23 @@ impl OnMouseEvent for HyperLink {
                 if !self.tooltip.trim().is_empty() {
                     self.show_tooltip(&self.tooltip);
                 }
+                self.pressed = false;
                 EventProcessStatus::Processed
             }
             MouseEvent::Leave => {
                 self.hide_tooltip();
+                self.pressed = false;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Pressed(_) => {
+                self.pressed = true;
                 EventProcessStatus::Processed
             }
             MouseEvent::Released(_) => {
-                self.on_default_action();
+                if self.pressed {
+                    self.on_default_action();
+                }
+                self.pressed = false;
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,

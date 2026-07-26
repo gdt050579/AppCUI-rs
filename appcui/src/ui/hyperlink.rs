@@ -5,6 +5,7 @@
 
 pub mod events;
 mod hyperlink;
+#[cfg(test)]
 mod tests;
 
 pub use self::hyperlink::HyperLink;
