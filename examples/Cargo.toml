@@ -376,3 +376,7 @@ path = "panels_3d/main.rs"
 [[example]]
 name = "hexview"
 path = "hexview/main.rs"
+
+[[example]]
+name = "hyperlink"
+path = "hyperlink/main.rs"

@@ -5,5 +5,6 @@
 
 pub mod events;
 mod hyperlink;
+mod tests;
 
 pub use self::hyperlink::HyperLink;
