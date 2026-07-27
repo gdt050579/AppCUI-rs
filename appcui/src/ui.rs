@@ -125,6 +125,7 @@ pub mod textarea;
 pub mod graphview;
 pub mod timepicker;
 pub mod bufferview;
+pub mod hslider;
 
 // re-export
 pub use common::ControlBase;
@@ -178,3 +179,4 @@ pub use bufferview::BufferAccess;
 pub use menu::Menu;
 pub use appbar::AppBar;
 pub use graphview::GraphView;
+pub use hslider::HSlider;

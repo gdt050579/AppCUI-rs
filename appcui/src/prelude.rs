@@ -42,6 +42,8 @@ pub use super::ui::graphview::events::GenericGraphViewEvents;
 pub use super::ui::hsplitter;
 pub use super::ui::hyperlink;
 pub use super::ui::hyperlink::events::HyperLinkEvents;
+pub use super::ui::hslider;
+pub use super::ui::hslider::events::HSliderEvents;
 pub use super::ui::imageviewer;
 pub use super::ui::keyselector;
 pub use super::ui::keyselector::events::KeySelectorEvents;
