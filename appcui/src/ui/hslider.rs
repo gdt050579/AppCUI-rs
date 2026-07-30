@@ -1,7 +1,8 @@
-//! A hyperlink UI control that displays a clickable text and triggers an action when activated.
+//! A horizontal slider UI control that lets the user pick a numeric value from a range.
 //!
-//! The HyperLink control shows a text (usually associated with an URL) that can be
-//! activated with the mouse or with the Enter key. It is underlined when hovered or focused.
+//! The HSlider control displays a horizontal bar with a movable marker. The value can be
+//! changed by dragging the marker with the mouse or by using the arrow keys, and is always
+//! kept within the configured minimum and maximum bounds.
 
 mod initialization_flags;
 mod hslider;
