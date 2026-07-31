@@ -30,6 +30,15 @@ impl<T> HSlider<T>
 where
     T: Number + 'static,
 {
+    /// Creates a horizontal slider bounded by `min` and `max`, with the given `step`, visual `hslider_type` and `flags`.
+    /// The initial value is set to `min`.
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let slider = HSlider::new(0, 10, 1, hslider::Type::Standard, hslider::Flags::None, layout!("x:1,y:1,w:20,h:1"));
+    /// ```
     pub fn new(min: T, max: T, step: T, hslider_type: Type, hslider_falgs: Flags, layout: Layout) -> Self {
         Self::inner_create(min, max, step, hslider_type, hslider_falgs, layout, StatusFlags::None)
     }
@@ -52,21 +61,88 @@ where
             hslider_pos: 0,
             buffer_value_max_len: 0,
         };
-        hslider.update_layout();
+        hslider.update_metrics();
         hslider.set_buffer_value();
         hslider.set_size_bounds(1, 1, u16::MAX, 1);
         hslider
     }
 
+    /// Sets the number of tick marks displayed along the slider.
+    /// The ticks are only shown when the `Ticks` flag is set.
     pub fn set_ticks(&mut self, val: u32) {
         self.tick_value = val;
+        self.request_update();
+    }
+
+    /// Sets the current value of the slider.
+    /// The value is clamped to the `[min, max]` range, and the marker is repositioned accordingly.
+    pub fn set_value(&mut self, value: T) {
+        let v = value.to_f64().clamp(self.min.to_f64(), self.max.to_f64());
+        self.value = T::from_f64(v);
+        self.marker_pos = self.get_marker_x_position();
+        self.set_buffer_value();
+        self.request_update();
+    }
+
+    /// Sets the lower bound of the slider.
+    /// If the current value falls below the new minimum, it is clamped up to it.
+    pub fn set_min(&mut self, min: T) {
+        self.min = min;
+        let v = self.value.to_f64().clamp(self.min.to_f64(), self.max.to_f64());
+        self.value = T::from_f64(v);
+        self.update_metrics();
+        self.marker_pos = self.get_marker_x_position();
+        self.set_buffer_value();
+        self.request_update();
+    }
+
+    /// Sets the upper bound of the slider.
+    /// If the current value exceeds the new maximum, it is clamped down to it.
+    pub fn set_max(&mut self, max: T) {
+        self.max = max;
+        let v = self.value.to_f64().clamp(self.min.to_f64(), self.max.to_f64());
+        self.value = T::from_f64(v);
+        self.update_metrics();
+        self.marker_pos = self.get_marker_x_position();
+        self.set_buffer_value();
+        self.request_update();
+    }
+
+    /// Sets the increment used when the slider value changes by one step.
+    pub fn set_step(&mut self, step: T) {
+        self.step = step;
+    }
+
+    /// Returns the number of tick marks configured for the slider.
+    pub fn tick(&self) -> u32 {
+        self.tick_value
+    }
+    
+    /// Returns the current value of the slider.
+    pub fn value(&self) -> T {
+        self.value
+    }
+    
+    /// Returns the lower bound of the slider.
+    pub fn min(&self) -> T {
+        self.min
+    }
+    
+    /// Returns the upper bound of the slider.
+    pub fn max(&self) -> T {
+        self.max
+    }
+    
+    /// Returns the increment used when the slider value changes by one step.
+    pub fn step(&self) -> T {
+        self.step
     }
 
     fn set_buffer_value(&mut self) {
         self.value.write_to_string(&mut self.buffer_value, self.format);
     }
 
-    fn update_layout(&mut self) {
+    fn update_metrics(&mut self) {
         self.hslider_pos = 0;
         self.hslider_width = self.size().width;
         if self.flags.contains(Flags::ShowValue) || self.flags.contains(Flags::ValueAsMarker) {
@@ -172,25 +248,39 @@ where
     }
 
     fn paint_standard(&self, surface: &mut Surface, theme: &Theme) {
-        let attr = match () {
+        let hslider_theme = &theme.hslider;
+
+        let left_marker_line_attr = hslider_theme.left_line;
+        let right_marker_line_attr = hslider_theme.right_line;
+
+        let left_tick_attr = hslider_theme.left_line;
+        let right_tick_attr = hslider_theme.right_line;
+
+        let marker_attr = match () {
+            _ if !self.is_enabled() => hslider_theme.marker.inactive,
+            _ if self.pressed => hslider_theme.marker.pressed_or_selected,
+            _ if self.has_focus() => hslider_theme.marker.focused,
+            _ if self.is_mouse_over() => hslider_theme.marker.hovered,
+            _ => hslider_theme.marker.normal,
+        };
+        let left_marker_attr = match () {
+            _ if !self.is_enabled() => hslider_theme.marker_border.inactive,
+            _ if self.pressed => hslider_theme.marker_border.pressed_or_selected,
+            _ if self.has_focus() => hslider_theme.marker_border.focused,
+            _ if self.is_mouse_over() => hslider_theme.marker_border.hovered,
+            _ => hslider_theme.marker_border.normal,
+        };
+        let right_marker_attr = left_marker_attr;
+
+        let left_cap_attr = hslider_theme.cap;
+        let right_cap_attr = hslider_theme.cap;
+
+        let text_attr = match () {
             _ if !self.is_enabled() => theme.text.inactive,
             _ if self.has_focus() => theme.text.focused,
             _ if self.is_mouse_over() => theme.text.hovered,
             _ => theme.text.normal,
         };
-
-        //I will modify them later, I will take them from the specific hslider theme
-        let left_marker_line_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let right_marker_line_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let tick_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let left_tick_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let right_tick_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let marker_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let left_marker_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let right_marker_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let left_cap_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let right_cap_attr = CharAttribute::new(Color::Green, Color::Transparent, CharFlags::None);
-        let text_attr = attr;
 
         let mw = self.marker_width();
 
@@ -204,26 +294,38 @@ where
         surface.fill_horizontal_line_with_size(right_start as i32, 0, size, right_marker_line);
 
         if self.flags.contains(Flags::Ticks) {
-            let tick = Character::with_attributes(self.hslider_type.char_set().tick, tick_attr);
+            let last = self.hslider_width.saturating_sub(1);
+            let marker_start = self.marker_pos;
+            let marker_end = self.marker_pos + mw;
+
             let left_tick = Character::with_attributes(self.hslider_type.char_set().left_tick, left_tick_attr);
             let right_tick = Character::with_attributes(self.hslider_type.char_set().right_tick, right_tick_attr);
+            let tick_left = Character::with_attributes(self.hslider_type.char_set().tick, left_marker_line_attr);
+            let tick_right = Character::with_attributes(self.hslider_type.char_set().tick, right_marker_line_attr);
 
-            let last = self.hslider_width.saturating_sub(1);
+            let draw_tick = |surface: &mut Surface, x: u32, ch| {
+                if x < marker_start || x >= marker_end {
+                    surface.write_char(x as i32, 0, ch);
+                }
+            };
 
             if self.tick_value == 1 {
-                surface.write_char(self.hslider_pos as i32, 0, left_tick);
+                draw_tick(surface, self.hslider_pos, left_tick);
             } else if self.tick_value >= 2 {
                 let n = self.tick_value - 1;
                 for k in 0..=n {
                     let offset = ((k as f64 / n as f64) * last as f64).round() as u32;
+                    let x = self.hslider_pos + offset;
                     let ch = if k == 0 {
                         left_tick
                     } else if k == n {
                         right_tick
+                    } else if x < marker_start {
+                        tick_left
                     } else {
-                        tick
+                        tick_right
                     };
-                    surface.write_char((self.hslider_pos + offset) as i32, 0, ch);
+                    draw_tick(surface, x, ch);
                 }
             }
         }
@@ -244,7 +346,7 @@ where
                 self.marker_pos as i32 + self.buffer_value_max_len.saturating_sub(self.buffer_value.len() as u32) as i32,
                 0,
                 &self.buffer_value,
-                marker_attr,
+                text_attr,
                 false,
             );
         } else {
@@ -270,38 +372,6 @@ where
                 false,
             );
         }
-    }
-
-    fn paint_progress_bar(&self, surface: &mut Surface, theme: &Theme) {
-        // let attr = match () {
-        //     _ if !self.is_enabled() => theme.text.inactive,
-        //     _ if self.has_focus() => theme.text.focused,
-        //     _ if self.is_mouse_over() => theme.text.hovered,
-        //     _ => theme.text.normal,
-        // };
-
-        let attr1 = CharAttribute::new(Color::Transparent, Color::Green, CharFlags::None);
-        let attr2 = CharAttribute::new(Color::Transparent, Color::Gray, CharFlags::None);
-        let attr_text = CharAttribute::new(Color::Black, Color::Transparent, CharFlags::None);
-
-        let width = self.size().width;
-        let size1 = self.marker_pos + 1;
-        let size2 = width.saturating_sub(self.marker_pos);
-
-        surface.fill_horizontal_line_with_size(0, 0, size1, Character::with_attributes(' ', attr1));
-
-        surface.fill_horizontal_line_with_size(size1 as i32, 0, size2, Character::with_attributes(' ', attr2));
-
-        let pos = (size1 as i32 - self.buffer_value.len() as i32).max(0);
-        let format = TextFormatBuilder::new()
-            .position(pos, 0)
-            .attribute(attr_text)
-            .align(TextAlignment::Left)
-            .chars_count(self.buffer_value.chars().count() as u16)
-            .wrap_type(WrapType::SingleLineWrap(width as u16))
-            .build();
-
-        surface.write_text(&self.buffer_value, &format);
     }
 }
 
@@ -343,7 +413,7 @@ where
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         match &self.hslider_type {
             Type::Standard => self.paint_standard(surface, theme),
-            Type::ProgressBar => {} // not yet
+            Type::ProgressBar => self.paint_standard(surface, theme),
             Type::Inline => self.paint_standard(surface, theme),
         }
     }
@@ -356,9 +426,7 @@ where
         match event {
             MouseEvent::Pressed(mouse) => {
                 self.pressed = true;
-                if self.flags.contains(Flags::ShowTooltip) {
-                    self.show_tooltip(&self.buffer_value);
-                }
+                self.show_tooltip(&self.buffer_value);
                 self.set_marker_position_from_x(mouse.x);
                 EventProcessStatus::Processed
             }
@@ -369,15 +437,11 @@ where
             }
             MouseEvent::Drag(mouse) => {
                 self.set_marker_position_from_x(mouse.x);
-                if self.flags.contains(Flags::ShowTooltip) {
-                    self.show_tooltip(&self.buffer_value);
-                }
+                self.show_tooltip(&self.buffer_value);
                 EventProcessStatus::Processed
             }
             MouseEvent::Enter => {
-                if self.flags.contains(Flags::ShowTooltip) {
-                    self.show_tooltip(&self.buffer_value);
-                }
+                self.show_tooltip(&self.buffer_value);
                 EventProcessStatus::Processed
             }
             MouseEvent::Leave => {
@@ -394,6 +458,7 @@ where
     T: Number + 'static,
 {
     fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
-        self.update_layout();
+        self.update_metrics();
+        self.marker_pos = self.get_marker_x_position();
     }
 }

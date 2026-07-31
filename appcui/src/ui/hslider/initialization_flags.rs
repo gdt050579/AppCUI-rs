@@ -63,8 +63,8 @@ static INLINE: CharSet = CharSet {
     right_marker: None,
     left_marker_line: '━',
     right_marker_line: '━',
-    left_cap: None, //Some('['),
-    right_cap: None, //Some(']'),
+    left_cap: None,
+    right_cap: None,
     tick: '┿',
     left_tick: '┝',
     right_tick: '┥',
@@ -73,9 +73,7 @@ static INLINE: CharSet = CharSet {
 
 #[EnumBitFlags(bits=16)]
 pub enum Flags {
-    None          = 0x0000,
     ShowValue     = 0x0001,
     Ticks         = 0x0002,
     ValueAsMarker = 0x0004,
-    ShowTooltip   = 0x0008,
 }
