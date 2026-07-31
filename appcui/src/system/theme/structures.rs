@@ -162,9 +162,9 @@ pub struct ProgressBarTheme {
 }
 
 #[derive(Default)]
-pub struct HSliderTheme {
-    pub left_line: CharAttribute,
-    pub right_line: CharAttribute,
+pub struct SliderTheme {
+    pub before_line: CharAttribute,
+    pub after_line: CharAttribute,
     pub marker: ControlCharAttributesState,
     pub marker_border: ControlCharAttributesState,
     pub cap: CharAttribute,
@@ -193,7 +193,7 @@ pub struct Theme {
     pub markdown: MarkdownTheme,
     pub progressbar: ProgressBarTheme,
     pub hyperlink: ControlCharAttributesState,
-    pub hslider: HSliderTheme,
+    pub hslider: SliderTheme,
 }
 impl Theme {
     pub fn new(theme: Themes) -> Self {

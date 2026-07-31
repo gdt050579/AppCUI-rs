@@ -250,11 +250,11 @@ where
     fn paint_standard(&self, surface: &mut Surface, theme: &Theme) {
         let hslider_theme = &theme.hslider;
 
-        let left_marker_line_attr = hslider_theme.left_line;
-        let right_marker_line_attr = hslider_theme.right_line;
+        let left_marker_line_attr = hslider_theme.before_line;
+        let right_marker_line_attr = hslider_theme.after_line;
 
-        let left_tick_attr = hslider_theme.left_line;
-        let right_tick_attr = hslider_theme.right_line;
+        let left_tick_attr = hslider_theme.before_line;
+        let right_tick_attr = hslider_theme.after_line;
 
         let marker_attr = match () {
             _ if !self.is_enabled() => hslider_theme.marker.inactive,
