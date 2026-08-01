@@ -2026,3 +2026,19 @@ fn check_move_cursor_to() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_merge_borders() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Cursor should be at last item')
+        CheckHash(0x253A476013BABCA9) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::MergeBorders);
+    Course::populate_with_courses_batch(&mut tv);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
