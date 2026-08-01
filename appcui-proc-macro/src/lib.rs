@@ -1985,6 +1985,7 @@ pub fn datepicker(input: TokenStream) -> TokenStream {
 ///   - **LargeIcons** - Uses large icons
 ///   - **CustomFilter** - Enables custom filtering
 ///   - **NoSelection** - Disables item selection
+///   - **MergeBorders** - Merges the borders of the list view with the borders of the window (use box junctions to draw the list view)
 /// * `view` or `viewmode` or `vm` - View mode (optional). Can be:
 ///   - **Details** - Shows items in details view with columns
 ///   - **Columns(N)** - Shows items in N columns (N from 1 to 10)
@@ -2109,6 +2110,7 @@ pub fn pathfinder(input: TokenStream) -> TokenStream {
 ///   - **CustomFilter** - Enables custom filtering
 ///   - **NoSelection** - Disables item selection
 ///   - **HideHeader** - Hides the column header
+///   - **MergeBorders** - Merges the borders of the tree view with the borders of the window (use box junctions to draw the tree view)
 /// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
 /// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
 /// * Position and size:
