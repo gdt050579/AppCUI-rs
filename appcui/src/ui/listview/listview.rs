@@ -1325,6 +1325,11 @@ where
             for _ in 0..count {
                 x += item_size;
                 surface.draw_vertical_line_with_size(x, 0, h, LineType::Single, attr);
+                // doar pentru modul de afisare in coloane
+                if self.flags.contains(Flags::MergeBorders) {
+                    surface.write_box_junction(x, h as i32);
+                    surface.write_box_junction(x, - 1);
+                }
                 x += 1;
             }
         }
@@ -1780,7 +1785,7 @@ where
                 // paint items
                 let has_groups = self.paint_items(surface, theme);
                 // paint separation lines (columns)
-                self.header.paint_columns(surface, theme, &self.base);
+                self.header.paint_columns(surface, theme, &self.base, self.flags.contains(Flags::MergeBorders));
                 // paint groups if visible
                 if has_groups {
                     self.paint_groups(surface, theme);

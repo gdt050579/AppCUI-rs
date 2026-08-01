@@ -11,6 +11,7 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "LargeIcons",
     "CustomFilter",
     "NoSelection",
+    "MergeBorders",
 ]);
 
 static VIEW_MODES: FlagsSignature = FlagsSignature::new(&[

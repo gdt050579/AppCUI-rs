@@ -110,7 +110,7 @@ impl Enum {
         let mut index = start;
         let token_type = TokenType::try_from(tokens, index, "Expecting a valid attribute name")?;
         if token_type != TokenType::Name {
-            return Err(format!("Expecting an attribute name but found: '{:?}'", &tokens[index]));
+            return Err(format!("Expecting an attribute name but found: '{:?}'", tokens[index]));
         }
         let key = if prefix.is_empty() {
             Self::token_to_string(&tokens[index])
@@ -149,13 +149,13 @@ impl Enum {
                 }
             }
             _ => {
-                return Err(format!("Expecting '=' or a value definition but found: '{:?}' for attribute: '{}'", &tokens[index], key));
+                return Err(format!("Expecting '=' or a value definition but found: '{:?}' for attribute: '{}'", tokens[index], key));
             }
         }
         if index < tokens.len() {
             let token_type = TokenType::try_from(tokens, index, "Expecting a comma")?;
             if token_type != TokenType::Comma {
-                return Err(format!("Expecting a comma but found: '{:?}'", &tokens[index]));
+                return Err(format!("Expecting a comma but found: '{:?}'", tokens[index]));
             }
             index += 1;
         }

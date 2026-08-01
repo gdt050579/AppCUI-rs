@@ -314,11 +314,10 @@ impl OnKeyPressed for FlappyGame {
                     self.state = GameState::Playing;
                 }
             }
-            GameState::GameOver => {
-                if key.code == KeyCode::Space {
+            GameState::GameOver
+                if key.code == KeyCode::Space => {
                     self.reset_game();
                 }
-            }
             _ => {}
         }
         EventProcessStatus::Processed

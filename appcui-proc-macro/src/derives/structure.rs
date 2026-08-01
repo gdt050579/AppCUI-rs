@@ -87,7 +87,7 @@ impl Structure {
         let mut index = start;
         let token_type = TokenType::try_from(tokens, index, "Expecting a valid attribute name")?;
         if token_type != TokenType::Name {
-            return Err(format!("Expecting an attribute name definition but found: '{:?}'", &tokens[index]));
+            return Err(format!("Expecting an attribute name definition but found: '{:?}'", tokens[index]));
         };
         let key = if prefix.is_empty() {
             Self::token_to_string(&tokens[index])
@@ -130,7 +130,7 @@ impl Structure {
             _ => {
                 return Err(format!(
                     "Expecting an equal sign or a value definition but found: '{:?}' for attribute: '{}'",
-                    &tokens[index], key
+                    tokens[index], key
                 ));
             }
         }
@@ -139,7 +139,7 @@ impl Structure {
         }
         let token_type = TokenType::try_from(tokens, index, "Expecting a comma")?;
         if token_type != TokenType::Comma {
-            return Err(format!("Expecting a comma but found: '{:?}'", &tokens[index]));
+            return Err(format!("Expecting a comma but found: '{:?}'", tokens[index]));
         }
         Ok(index + 1)
     }

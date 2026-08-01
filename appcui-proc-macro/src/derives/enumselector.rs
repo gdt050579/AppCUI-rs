@@ -62,7 +62,7 @@ fn generate_variant_match_arms(variant: &EnumVariant, index: usize) -> (String, 
                 _ => {
                     panic!(
                         "Unknown attribute: '{}' for field '{}'. Available attributes are: 'name' and 'description' and 'init'.",
-                        &attr_name,
+                        attr_name,
                         variant.name
                     );
                 }
