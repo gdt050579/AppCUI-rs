@@ -269,9 +269,10 @@ impl ToolBar {
         if !bottom_right.last_handle.is_none() {
             if let Some(item) = self.items.get_mut(bottom_right.last_handle.cast()) {
                 item.get_base_mut().set_left_marker();
-                if item.get_base().supports_markers() {
-                    bottom_right.x -= 1;
-                }
+                // nu se utilizeaza mai departe
+                // if item.get_base().supports_markers() {
+                //     bottom_right.x -= 1;
+                // }
             }
         }
         let left_pos = top_left.x;
