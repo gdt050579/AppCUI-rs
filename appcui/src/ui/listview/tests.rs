@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use chrono::{Duration, NaiveDate, NaiveDateTime, NaiveTime};
 use listview::Group;
+use crate::ui::listview::ViewMode;
 
 struct TestItem {}
 impl listview::ListItem for TestItem {
@@ -6727,6 +6728,27 @@ fn check_current_item() {
     assert_eq!(lv.current_item_mut().unwrap().name,"Popescu");
     assert_eq!(lv.item_mut(0).unwrap().name,"Popescu");
 
+    w.add(lv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_merge_border_mode_with_columns_view() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xD3F7CA6D4CB267DC)
+   ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+
+    let mut lv = ListView::<TestItem>::new(LayoutBuilder::new().dock(Dock::Fill).build(), listview::Flags::MergeBorders);
+    lv.set_view_mode(ViewMode::Columns(8));
+    lv.add_column(Column::new("C1", 4, TextAlignment::Left));
+    lv.add_column(Column::new("C2", 6, TextAlignment::Left));
+    lv.add_column(Column::new("C3", 8, TextAlignment::Left));
+    lv.add_column(Column::new("C4", 10, TextAlignment::Left));
     w.add(lv);
     a.add_window(w);
     a.run();

@@ -1325,8 +1325,10 @@ where
             for _ in 0..count {
                 x += item_size;
                 surface.draw_vertical_line_with_size(x, 0, h, LineType::Single, attr);
+                // doar pentru modul de afisare in coloane
                 if self.flags.contains(Flags::MergeBorders) {
                     surface.write_box_junction(x, h as i32);
+                    surface.write_box_junction(x, - 1);
                 }
                 x += 1;
             }
