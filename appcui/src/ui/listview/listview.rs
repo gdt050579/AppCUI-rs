@@ -1785,7 +1785,7 @@ where
                 // paint items
                 let has_groups = self.paint_items(surface, theme);
                 // paint separation lines (columns)
-                self.header.paint_columns(surface, theme, &self.base);
+                self.header.paint_columns(surface, theme, &self.base, self.flags.contains(Flags::MergeBorders));
                 // paint groups if visible
                 if has_groups {
                     self.paint_groups(surface, theme);

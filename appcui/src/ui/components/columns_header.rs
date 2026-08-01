@@ -159,7 +159,7 @@ impl ColumnsHeader {
         }
         surface.reset_clip();
     }
-    pub fn paint_columns(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase) {
+    pub fn paint_columns(&self, surface: &mut Surface, theme: &Theme, control: &ControlBase, merge_borders: bool) {
         let is_active = control.is_active();
         let attr = match () {
             _ if !is_active => theme.lines.inactive,
@@ -207,6 +207,9 @@ impl ColumnsHeader {
                 }
             } else {
                 surface.draw_vertical_line(r, 0, height, LineType::Single, attr);
+            }
+            if merge_borders {
+                surface.write_box_junction(r, height as i32);
             }
         }
     }
