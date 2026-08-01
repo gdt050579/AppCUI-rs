@@ -247,6 +247,17 @@ fn generate_graphview_events(a: &mut Arguments) -> String {
         .replace("$(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code)
 }
 
+fn generate_hslider_events(a: &mut Arguments) -> String {
+    if !a.template_events.contains_key(&AppCUITrait::GenericHSliderEvents) {
+        panic!("Missing generic type for HSlider event (Have you used events=HSliderEvents<Type> ?)");
+    }
+    let mut s = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericHSliderEvents].iter() {
+        s.push_str(templates::HSLIDER_SELECT_ON_VALUE_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());
+    }
+    templates::HSLIDER_SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_HSLIDER)", s.as_str())
+}
+
 fn generate_backgroundtask_events(a: &mut Arguments) -> String {
     if !a.template_events.contains_key(&AppCUITrait::GenericBackgroundTaskEvents) {
         panic!("Missing generic type for BackgroundTask event (Have you used events=BackgroundTask<Type-1,Type-2> ?)");
@@ -321,6 +332,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericTreeViewEvents => code.push_str(generate_treeview_events(&mut a).as_str()),
                         AppCUITrait::GenericBackgroundTaskEvents => code.push_str(generate_backgroundtask_events(&mut a).as_str()),
                         AppCUITrait::GenericGraphViewEvents => code.push_str(generate_graphview_events(&mut a).as_str()),
+                        AppCUITrait::GenericHSliderEvents => code.push_str(generate_hslider_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

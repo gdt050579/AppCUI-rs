@@ -4,7 +4,7 @@ use crate::prelude::*;
 use crate::ui::hslider::{events::EventData, Flags, Type};
 use crate::ui::numericselector::Format;
 
-#[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct HSlider<T>
 where
     T: Number + 'static,
@@ -13,7 +13,6 @@ where
     min: T,
     max: T,
     step: T,
-    page_step: T,
     tick_value: u32,
     hslider_type: Type,
     marker_pos: u32,
@@ -49,7 +48,6 @@ where
             min: min,
             max: max,
             step: step,
-            page_step: step,
             tick_value: 0,
             hslider_type: hslider_type,
             marker_pos: 0,
@@ -82,6 +80,7 @@ where
         self.marker_pos = self.get_marker_x_position();
         self.set_buffer_value();
         self.request_update();
+        self.emit_value_changed();
     }
 
     /// Sets the lower bound of the slider.
@@ -94,6 +93,7 @@ where
         self.marker_pos = self.get_marker_x_position();
         self.set_buffer_value();
         self.request_update();
+        self.emit_value_changed();
     }
 
     /// Sets the upper bound of the slider.
@@ -106,6 +106,7 @@ where
         self.marker_pos = self.get_marker_x_position();
         self.set_buffer_value();
         self.request_update();
+        self.emit_value_changed();
     }
 
     /// Sets the increment used when the slider value changes by one step.
@@ -117,25 +118,67 @@ where
     pub fn tick(&self) -> u32 {
         self.tick_value
     }
-    
+
     /// Returns the current value of the slider.
     pub fn value(&self) -> T {
         self.value
     }
-    
+
     /// Returns the lower bound of the slider.
     pub fn min(&self) -> T {
         self.min
     }
-    
+
     /// Returns the upper bound of the slider.
     pub fn max(&self) -> T {
         self.max
     }
-    
+
     /// Returns the increment used when the slider value changes by one step.
     pub fn step(&self) -> T {
         self.step
+    }
+
+    fn next_tick_value(&self, value: T) -> T {
+        if self.tick_value < 2 {
+            return value;
+        }
+        let min = self.min.to_f64();
+        let max = self.max.to_f64();
+        let n = (self.tick_value - 1) as f64;
+        let seg = (max - min) / n;
+        let v = value.to_f64();
+
+        let idx = ((v - min) / seg).floor() + 1.0;
+        let next = (min + idx * seg).min(max);
+        T::from_f64(next)
+    }
+
+    fn prev_tick_value(&self, value: T) -> T {
+        if self.tick_value < 2 {
+            return value;
+        }
+        let min = self.min.to_f64();
+        let max = self.max.to_f64();
+        let n = (self.tick_value - 1) as f64;
+        let seg = (max - min) / n;
+        let v = value.to_f64();
+
+        let idx = ((v - min) / seg).ceil() - 1.0;
+        let prev = (min + idx * seg).max(min);
+        T::from_f64(prev)
+    }
+
+    fn nearest_tick_value(&self, value: f64) -> f64 {
+        if self.tick_value < 2 {
+            return value.clamp(self.min.to_f64(), self.max.to_f64());
+        }
+        let min = self.min.to_f64();
+        let max = self.max.to_f64();
+        let n = (self.tick_value - 1) as f64;
+        let seg = (max - min) / n;
+        let idx = ((value - min) / seg).round();
+        (min + idx * seg).clamp(min, max)
     }
 
     fn set_buffer_value(&mut self) {
@@ -185,24 +228,39 @@ where
     }
 
     fn add_step_value(&mut self) {
-        self.value = self.value + self.step;
-        if self.value > self.max {
-            self.value = self.max;
+        let new_val = if self.flags.contains(Flags::Ticks) {
+            self.next_tick_value(self.value)
+        } else {
+            let v = (self.value.to_f64() + self.step.to_f64()).min(self.max.to_f64());
+            T::from_f64(v)
+        };
+        if self.value != new_val {
+            self.value = new_val;
+            self.marker_pos = self.get_marker_x_position();
+            self.set_buffer_value();
+            self.request_update();
+            self.emit_value_changed();
         }
-        self.marker_pos = self.get_marker_x_position();
-        self.set_buffer_value();
     }
 
     fn sub_step_value(&mut self) {
-        self.value = self.value - self.step;
-        if self.value < self.min {
-            self.value = self.min;
+        let new_val = if self.flags.contains(Flags::Ticks) {
+            self.prev_tick_value(self.value)
+        } else {
+            let v = (self.value.to_f64() - self.step.to_f64()).max(self.min.to_f64());
+            T::from_f64(v)
+        };
+        if self.value != new_val {
+            self.value = new_val;
+            self.marker_pos = self.get_marker_x_position();
+            self.set_buffer_value();
+            self.request_update();
+            self.emit_value_changed();
         }
-        self.marker_pos = self.get_marker_x_position();
-        self.set_buffer_value();
     }
 
     fn set_marker_position_from_x(&mut self, x: i32) {
+        let old = self.value;
         let (lo, hi) = self.marker_bounds();
         let span = hi.saturating_sub(lo);
         let min = self.min.to_f64();
@@ -219,16 +277,24 @@ where
             min + (rel / span as f64) * (max - min)
         };
 
-        let step = self.step.to_f64();
-        let snapped = if step > 0.0 {
-            (min + ((raw - min) / step).round() * step).clamp(min, max)
+        let snapped = if self.flags.contains(Flags::Ticks) && self.tick_value >= 2 {
+            self.nearest_tick_value(raw)
         } else {
-            raw.clamp(min, max)
+            let step = self.step.to_f64();
+            if step > 0.0 {
+                (min + ((raw - min) / step).round() * step).clamp(min, max)
+            } else {
+                raw.clamp(min, max)
+            }
         };
 
         self.value = T::from_f64(snapped);
-        self.marker_pos = self.get_marker_x_position();
-        self.set_buffer_value();
+
+        if old != self.value {
+            self.emit_value_changed();
+            self.marker_pos = self.get_marker_x_position();
+            self.set_buffer_value();
+        }
     }
 
     fn get_marker_x_position(&self) -> u32 {
@@ -373,20 +439,18 @@ where
             );
         }
     }
-}
 
-impl<T> OnDefaultAction for HSlider<T>
-where
-    T: Number + 'static,
-{
-    fn on_default_action(&mut self) {
-        // self.raise_event(ControlEvent {
-        //     emitter: self.handle,
-        //     receiver: self.event_processor,
-        //     data: ControlEventData::HyperLink(EventData),
-        // });
+    fn emit_value_changed(&mut self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::HSliderEvents(EventData {
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
     }
 }
+
 impl<T> OnKeyPressed for HSlider<T>
 where
     T: Number + 'static,
@@ -446,6 +510,14 @@ where
             }
             MouseEvent::Leave => {
                 self.hide_tooltip();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(dir) => {
+                match dir {
+                    MouseWheelDirection::Down => self.sub_step_value(),
+                    MouseWheelDirection::Up => self.add_step_value(),
+                    _ => {},
+                }
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,

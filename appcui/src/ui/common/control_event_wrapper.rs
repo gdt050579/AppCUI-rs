@@ -18,8 +18,8 @@ use crate::ui::{
     password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
     richtextfield::events::RichTextFieldEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
     timepicker, timepicker::events::TimePickerEvents, hyperlink, hyperlink::events::HyperLinkEvents,
+    hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview,
 };
-use crate::ui::{pathfinder, treeview};
 
 #[derive(Copy, Clone)]
 pub(crate) struct CustomEventData {
@@ -56,6 +56,7 @@ pub(crate) enum ControlEventData {
     TimePicker(timepicker::events::EventData),
     GraphView(graphview::events::EventData),
     HyperLink(hyperlink::events::EventData),
+    HSliderEvents(hslider::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -199,6 +200,7 @@ impl ControlEvent {
                 }
             },
             ControlEventData::HyperLink(_) => HyperLinkEvents::on_open(receiver, self.emitter.cast()),
+            ControlEventData::HSliderEvents(data) => GenericHSliderEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id),
         }
     }
 }

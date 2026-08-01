@@ -35,6 +35,7 @@ use crate::{
         tab::events::TabEvents,
         timepicker::events::TimePickerEvents,
         hyperlink::events::HyperLinkEvents,
+        hslider::events::GenericHSliderEvents,
     },
 };
 
@@ -184,6 +185,7 @@ pub trait Control:
     + AppBarEvents
     + TimePickerEvents
     + HyperLinkEvents
+    + GenericHSliderEvents
 {
 }
 

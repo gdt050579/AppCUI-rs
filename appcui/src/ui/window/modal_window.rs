@@ -157,6 +157,7 @@ impl<T> CustomEvents for ModalWindow<T> {}
 impl<T> GenericSelectorEvents for ModalWindow<T> {}
 impl<T> GenericDropDownListEvents for ModalWindow<T> {}
 impl<T> GenericNumericSelectorEvents for ModalWindow<T> {}
+impl<T> GenericHSliderEvents for ModalWindow<T> {}
 impl<T> GenericListViewEvents for ModalWindow<T> {}
 impl<T> GenericBufferViewEvents for ModalWindow<T> {}
 impl<T> GenericTreeViewEvents for ModalWindow<T> {}
