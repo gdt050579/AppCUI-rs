@@ -50,15 +50,15 @@ fn render(surface: &mut Surface, img: &Image, x: i32, y: i32, lmin: u8, rap: u32
             let braille_char = char::from_u32(0x2800 + pattern as u32).unwrap_or('\u{2800}');
 
             // Compute average color and apply color function
-            let foreground = if pixel_count > 0 {
-                let avg_r = (total_r / pixel_count) as u8;
-                let avg_g = (total_g / pixel_count) as u8;
-                let avg_b = (total_b / pixel_count) as u8;
-                let avg_a = (total_a / pixel_count) as u8;
-                let avg_pixel = Pixel::new(avg_r, avg_g, avg_b, avg_a);
-                f(avg_pixel)
-            } else {
-                Color::Black
+            let foreground = match pixel_count {
+                0 => Color::Black,
+                n => {
+                    let avg_r = (total_r / n) as u8;
+                    let avg_g = (total_g / n) as u8;
+                    let avg_b = (total_b / n) as u8;
+                    let avg_a = (total_a / n) as u8;
+                    f(Pixel::new(avg_r, avg_g, avg_b, avg_a))
+                }
             };
 
             let ch = Character::new(braille_char, foreground, Color::Black, CharFlags::None);
