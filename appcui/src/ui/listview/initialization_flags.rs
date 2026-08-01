@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-#[EnumBitFlags(bits = 8)]
+#[EnumBitFlags(bits = 16)]
 pub enum Flags {
     ScrollBars = 0x01,
     SearchBar = 0x02,
@@ -10,5 +10,6 @@ pub enum Flags {
     LargeIcons = 0x20,
     CustomFilter = 0x40,
     NoSelection = 0x80,
+    MergeBorders = 0x100,
 }
 
