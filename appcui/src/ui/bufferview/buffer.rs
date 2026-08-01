@@ -76,12 +76,10 @@ impl<T: BufferAccess> Buffer<T> {
         if pos.saturating_add(bytes.len() as u64) > self.len() {
             return false;
         }
-        let mut p = pos;
-        for b in bytes {
+        for (p, b) in (pos..).zip(bytes.iter()) {
             if !self.data.set(p, *b) {
                 return false;
             }
-            p += 1;
         }
         true
     }

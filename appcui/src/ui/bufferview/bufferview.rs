@@ -1109,10 +1109,9 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             return;
         }
         let mut start = self.start_view;
-        let mut y = top;
         let has_focus = self.has_focus();
         let is_in_edit_mode = self.comp.is_in_edit_mode();
-        for _ in 0..self.repr.rows_count {
+        for y in (top..).take(self.repr.rows_count as usize) {
             let mut x = 0;
             if self.flags.contains(Flags::ShowAddress) {
                 Self::write_offset(surface, theme.text.inactive, start, self.addr_width, y, self.repr.offset_format);
@@ -1140,7 +1139,6 @@ impl<T: BufferAccess + 'static> BufferView<T> {
             if start >= self.buffer.len() {
                 break;
             }
-            y += 1;
         }
         let mut x = 0;
         let bottom = (self.size().height as i32).saturating_sub(if self.has_focus() { 1 } else { 0 });

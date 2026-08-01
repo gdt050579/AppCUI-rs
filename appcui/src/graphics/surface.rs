@@ -1150,13 +1150,11 @@ impl Surface {
             if !self.clip.contains_y(y + self.origin.y) {
                 return; // no need to draw
             }
-            let mut p_x = x;
-            for ch in text.chars() {
+            for (p_x, ch) in (x..).zip(text.chars()) {
                 if let Some(pos) = self.coords_to_position(p_x, y) {
                     c.code = ch;
                     self.chars[pos].set(c);
                 }
-                p_x += 1;
             }
         } else {
             let mut p_x = x;
@@ -1196,13 +1194,11 @@ impl Surface {
             if !self.clip.contains_y(y + self.origin.y) {
                 return; // no need to draw
             }
-            let mut p_x = x;
-            for ch in ascii_buffer {
+            for (p_x, ch) in (x..).zip(ascii_buffer.iter()) {
                 if let Some(pos) = self.coords_to_position(p_x, y) {
                     c.code = *ch as char;
                     self.chars[pos].set(c);
                 }
-                p_x += 1;
             }
         } else {
             let mut p_x = x;
@@ -1242,8 +1238,7 @@ impl Surface {
 
         if format.has_hotkey() {
             let hkpos = format.hotkey_pos as usize;
-            let mut cpos = ch_index;
-            for ch in text.chars() {
+            for (cpos, ch) in (ch_index..).zip(text.chars()) {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
                         if cpos == hkpos {
@@ -1255,10 +1250,9 @@ impl Surface {
                     }
                 }
                 x += 1;
-                cpos += 1;
             }
         } else {
-            for ch in text.chars() {
+            for (_, ch) in (ch_index..).zip(text.chars()) {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
                         c.code = ch;

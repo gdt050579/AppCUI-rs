@@ -1305,11 +1305,11 @@ impl PaintMethods for RuntimeManager {
             self.paint_control(self.expanded_control.handle);
         }
         self.surface.reset_clip_and_origin();
-        if self.commandbar.is_some() {
-            self.commandbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
+        if let Some(commandbar) = &self.commandbar {
+            commandbar.paint(&mut self.surface, &self.theme);
         }
-        if self.appbar.is_some() {
-            self.appbar.as_ref().unwrap().paint(&mut self.surface, &self.theme);
+        if let Some(appbar) = &self.appbar {
+            appbar.paint(&mut self.surface, &self.theme);
         }
         if self.tooltip.is_visible() {
             self.tooltip.paint(&mut self.surface, &self.theme);

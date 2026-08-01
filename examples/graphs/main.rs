@@ -57,10 +57,8 @@ impl OnPaint for MyDesktop {
         let attr = CharAttribute::with_color(theme.desktop.character.foreground, theme.desktop.character.background);
         surface.clear(Character::with_attributes(' ', attr));
         let x = (surface.size().width as i32) - 70;
-        let mut y = (surface.size().height as i32) - 7;
-        for line in LOGO {
+        for (y, line) in ((surface.size().height as i32) - 7..).zip(LOGO) {
             surface.write_string(x, y, line, attr, false);
-            y += 1;
         }
     }
 }
