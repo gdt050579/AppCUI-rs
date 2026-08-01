@@ -6754,9 +6754,9 @@ fn check_merge_border_mode_with_columns_view() {
 #[test]
 fn check_merge_border_mode_with_details_view() {
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('1. Initial state')
-        //CheckHash(0xD3F7CA6D4CB267DC)
+        CheckHash(0x633BD4603C8BF753)
    ";
     let mut a = App::debug(60, 11, script).build().unwrap();
     let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");

@@ -209,7 +209,7 @@ impl ColumnsHeader {
                 surface.draw_vertical_line(r, 0, height, LineType::Single, attr);
             }
             if merge_borders {
-                surface.write_box_junction(r, height as i32);
+                surface.write_box_junction(r, height as i32 + 1);
             }
         }
     }
