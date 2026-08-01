@@ -943,7 +943,7 @@ fn check_on_item_colapse_expanded() {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
                     let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
-                    self.set_title(format!("CLP: {}", &s).as_str());
+                    self.set_title(format!("CLP: {}", s).as_str());
                 }
             }
             EventProcessStatus::Processed
@@ -953,7 +953,7 @@ fn check_on_item_colapse_expanded() {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
                     let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
-                    self.set_title(format!("EXP: {}", &s).as_str());
+                    self.set_title(format!("EXP: {}", s).as_str());
                 }
             }
             EventProcessStatus::Processed
@@ -1085,7 +1085,7 @@ fn check_delete_item() {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
                     let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
-                    self.set_title(format!("Current: {}", &s).as_str());
+                    self.set_title(format!("Current: {}", s).as_str());
                 }
             }
             EventProcessStatus::Processed

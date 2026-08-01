@@ -186,7 +186,7 @@ impl Backend for DebugTerminal {
             self.ansi_buffer.write_char(' ');
         }
         self.ansi_buffer.reset_color();
-        println!("{}", &self.ansi_buffer.text());
+        println!("{}", self.ansi_buffer.text());
         self.ansi_buffer.clear();
 
         // hash
@@ -197,7 +197,7 @@ impl Backend for DebugTerminal {
             self.ansi_buffer.write_char(' ');
         }
         self.ansi_buffer.reset_color();
-        println!("{}", &self.ansi_buffer.text());
+        println!("{}", self.ansi_buffer.text());
         self.ansi_buffer.clear();
 
         // cursor
@@ -212,7 +212,7 @@ impl Backend for DebugTerminal {
             self.ansi_buffer.write_char(' ');
         }
         self.ansi_buffer.reset_color();
-        println!("{}", &self.ansi_buffer.text());
+        println!("{}", self.ansi_buffer.text());
         self.ansi_buffer.clear();
 
         // separator line
@@ -221,7 +221,7 @@ impl Backend for DebugTerminal {
             self.ansi_buffer.write_char('-');
         }
         self.ansi_buffer.write_char('|');
-        println!("{}", &self.ansi_buffer.text());
+        println!("{}", self.ansi_buffer.text());
         self.ansi_buffer.clear();
 
         // second digit
@@ -261,7 +261,7 @@ impl Backend for DebugTerminal {
             self.ansi_buffer.write_char('-');
         }
         self.ansi_buffer.write_char('|');
-        println!("{}", &self.ansi_buffer.text());
+        println!("{}", self.ansi_buffer.text());
         self.ansi_buffer.clear();
 
         let mut x = 0u32;
@@ -285,9 +285,9 @@ impl Backend for DebugTerminal {
             x += 1;
             if x == self.size.width {
                 if (y as i32) == self.mouse_pos.y {
-                    println!("|\x1b[97m\x1b[41m{:>3} \x1b[0m| {} |", y, &self.ansi_buffer.text());
+                    println!("|\x1b[97m\x1b[41m{:>3} \x1b[0m| {} |", y, self.ansi_buffer.text());
                 } else {
-                    println!("|{:>3} | {} |", y, &self.ansi_buffer.text());
+                    println!("|{:>3} | {} |", y, self.ansi_buffer.text());
                 }
                 self.ansi_buffer.clear();
                 x = 0;
@@ -300,7 +300,7 @@ impl Backend for DebugTerminal {
             self.ansi_buffer.write_char('-');
         }
         self.ansi_buffer.write_char('|');
-        println!("{}", &self.ansi_buffer.text());
+        println!("{}", self.ansi_buffer.text());
     }
 
     fn size(&self) -> Size {
