@@ -380,3 +380,7 @@ path = "hexview/main.rs"
 [[example]]
 name = "hyperlink"
 path = "hyperlink/main.rs"
+
+[[example]]
+name = "hslider"
+path = "hslider/main.rs"

@@ -36,9 +36,9 @@ where
     /// ```rust,no_run
     /// use appcui::prelude::*;
     ///
-    /// let slider = HSlider::new(0, 10, 1, hslider::Type::Standard, hslider::Flags::None, layout!("x:1,y:1,w:20,h:1"));
+    /// let slider = HSlider::new(0, 10, 1, hslider::Type::Standard, layout!("x:1,y:1,w:20,h:1"), hslider::Flags::None);
     /// ```
-    pub fn new(min: T, max: T, step: T, hslider_type: Type, hslider_falgs: Flags, layout: Layout) -> Self {
+    pub fn new(min: T, max: T, step: T, hslider_type: Type, layout: Layout, hslider_falgs: Flags) -> Self {
         Self::inner_create(min, max, step, hslider_type, hslider_falgs, layout, StatusFlags::None)
     }
     fn inner_create(min: T, max: T, step: T, hslider_type: Type, hslider_falgs: Flags, layout: Layout, status: StatusFlags) -> Self {
