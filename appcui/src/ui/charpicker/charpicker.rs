@@ -588,15 +588,14 @@ impl OnMouseEvent for CharPicker {
                         }
                         MousePos::HoverLeftButton => self.goto_set(self.nav.set_index.saturating_sub(1)),
                         MousePos::HoverRightButton => self.goto_set(self.nav.set_index + 1),
-                        MousePos::HoverNone => {
-                            if self.character.is_some() {
+                        MousePos::HoverNone
+                            if self.character.is_some() => {
                                 self.character = None;
                                 self.emit_change_char_event();
                                 if self.is_expanded() {
                                     self.pack();
                                 }
                             }
-                        }
                         _ => (),
                     }
                     self.nav.mouse_pos = mpos;

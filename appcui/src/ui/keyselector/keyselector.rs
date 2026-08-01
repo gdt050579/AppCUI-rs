@@ -89,11 +89,10 @@ impl OnKeyPressed for KeySelector {
                     return EventProcessStatus::Ignored;
                 }
             }
-            KeyCode::Tab => {
-                if (!self.flags.contains(Flags::AcceptTab)) || (self.flags.contains(Flags::ReadOnly)) {
+            KeyCode::Tab
+                if ((!self.flags.contains(Flags::AcceptTab)) || (self.flags.contains(Flags::ReadOnly))) => {
                     return EventProcessStatus::Ignored;
                 }
-            }
             _ => {}
         }
         if !self.flags.contains(Flags::ReadOnly) && self.key != key {

@@ -49,8 +49,8 @@ impl DebugTerminal {
         v
     }
     pub(crate) fn new(builder: &crate::system::Builder) -> Result<Self, Error> {
-        let mut w = if builder.size.is_none() { 80 } else { builder.size.unwrap().width };
-        let mut h = if builder.size.is_none() { 40 } else { builder.size.unwrap().height };
+        let mut w = builder.size.map(|s| s.width).unwrap_or(80);
+        let mut h = builder.size.map(|s| s.height).unwrap_or(40);
         w = w.clamp(10, 1000);
         h = h.clamp(10, 1000);
         let commands = DebugTerminal::build_commands(builder.debug_script.as_ref().unwrap().as_str());
