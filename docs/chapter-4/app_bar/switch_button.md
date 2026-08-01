@@ -43,11 +43,11 @@ let switch_button = appbar::SwitchButton::with_tooltip(
 
 The following symbols are available:
 
-| Symbol                          | Selected | Unselected |
-| ------------------------------- | -------- | ---------- |
-| `SwitchButtonSymbol::None`      | -        | -          |
-| `SwitchButtonSymbol::CheckMark` | ✓        | <space>    |
-| `SwitchButtonSymbol::CheckBox`  | 🗹        | ☐          |
+| Symbol                          | Selected | Unselected      |
+| ------------------------------- | -------- | --------------- |
+| `SwitchButtonSymbol::None`      | -        | -               |
+| `SwitchButtonSymbol::CheckMark` | ✓        | space character |
+| `SwitchButtonSymbol::CheckBox`  | 🗹        | ☐               |
 
 **Remark:** The `SwitchButtonSymbol::None` implies that no symbol will be displayed.
 
@@ -69,14 +69,14 @@ impl AppBarEvents for /* Window, Desktop or custom control */ {
 
 The following methods are available for a switch button:
 
-| Method              | Purpose                                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------------ |
-| `is_selected()`     | Returns **true** if the switch button is selected, **false** otherwise.                                  |
-| `set_selected(...)` | Set the selected state of the switch button.                                                           |
-| `set_enabled(...)`  | Set the enabled state of the switch button.                                                            |
-| `is_enabled()`      | Returns **true** if the switch button is enabled, **false** otherwise.                                  |
-| `set_tooltip(...)`  | Set the tooltip of the switch button.                                                                   |
-| `tooltip()`         | Returns the current tooltip of a switch button.                                                          |
+| Method              | Purpose                                                                 |
+| ------------------- | ----------------------------------------------------------------------- |
+| `is_selected()`     | Returns **true** if the switch button is selected, **false** otherwise. |
+| `set_selected(...)` | Set the selected state of the switch button.                            |
+| `set_enabled(...)`  | Set the enabled state of the switch button.                             |
+| `is_enabled()`      | Returns **true** if the switch button is enabled, **false** otherwise.  |
+| `set_tooltip(...)`  | Set the tooltip of the switch button.                                   |
+| `tooltip()`         | Returns the current tooltip of a switch button.                         |
 
 ## Example
 
