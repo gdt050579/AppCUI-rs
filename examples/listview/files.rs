@@ -12,10 +12,10 @@ struct File {
 }
 
 #[Window(events = ToggleButtonEvents)]
-pub(crate) struct Win { 
+pub(crate) struct Win {
     l: Handle<ListView<File>>,
     details: Handle<ToggleButton>,
-    columns: Handle<ToggleButton>,   
+    columns: Handle<ToggleButton>,
 }
 
 impl Win {
@@ -27,8 +27,13 @@ impl Win {
             columns: Handle::None,
         };
         me.details = me.add(togglebutton!("'▤','Show details for each file',r:1,t:0,w:1, selected: true, group: true"));
-        me.columns = me.add(togglebutton!("'‖','Simplified mode (only the file name on multiple columns)',r:2,t:0,w:1,group:true "));
-        let mut lv = listview!("class: File,l:0,t:1,r:0,b:0,flags: ScrollBars+SearchBar+LargeIcons");
+        me.columns = me.add(togglebutton!(
+            "'‖','Simplified mode (only the file name on multiple columns)',r:2,t:0,w:1,group:true "
+        ));
+        let mut lv = ListView::<File>::new(
+            LayoutBuilder::new().left_anchor(0).right_anchor(0).top_anchor(1).bottom_anchor(0).build(),
+            listview::Flags::ScrollBars | listview::Flags::SearchBar | listview::Flags::LargeIcons | listview::Flags::MergeBorders,
+        );
 
         let g_folder = lv.add_group("Folders");
         lv.add_item(listview::Item::new(
@@ -74,7 +79,7 @@ impl Win {
             },
             false,
             Some(CharAttribute::with_fore_color(Color::Yellow)),
-            ['🗔', ' '], 
+            ['🗔', ' '],
             g_folder,
         ));
         lv.add_item(listview::Item::new(

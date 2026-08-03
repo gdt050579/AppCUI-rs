@@ -11,6 +11,7 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "CustomFilter",
     "NoSelection",
     "HideHeader",
+    "MergeBorders",
 ]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("type", ParamType::String)];

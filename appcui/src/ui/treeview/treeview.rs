@@ -1196,7 +1196,7 @@ where
         // paint items
         self.paint_items(surface, theme);
         // paint separation lines (columns) - show wheather or not HideHeader is set or not
-        self.header.paint_columns(surface, theme, &self.base);
+        self.header.paint_columns(surface, theme, &self.base, self.flags.contains(Flags::MergeBorders));
         // paint scroll bars and searh bars
         self.comp.paint(surface, theme, &self.base);
     }

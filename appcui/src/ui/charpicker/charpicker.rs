@@ -373,7 +373,7 @@ impl OnPaint for CharPicker {
         surface.fill_horizontal_line_with_size(0, self.header_y_ofs, size.width.saturating_sub(4), space_char);
         if let Some(character) = self.character {
             surface.write_char(1, self.header_y_ofs, Character::with_attributes(character, col_text));
-            let mut arr: [u8; 9] = [b'(', b'U', b'+', b'0', b'0', b'0', b'0', b'0', b')'];
+            let mut arr: [u8; 9] = *b"(U+00000)";
             let mut code = character as u32;
             let mut pos = 7;
             while (code > 0) && (pos > 2) {
@@ -588,15 +588,14 @@ impl OnMouseEvent for CharPicker {
                         }
                         MousePos::HoverLeftButton => self.goto_set(self.nav.set_index.saturating_sub(1)),
                         MousePos::HoverRightButton => self.goto_set(self.nav.set_index + 1),
-                        MousePos::HoverNone => {
-                            if self.character.is_some() {
+                        MousePos::HoverNone
+                            if self.character.is_some() => {
                                 self.character = None;
                                 self.emit_change_char_event();
                                 if self.is_expanded() {
                                     self.pack();
                                 }
                             }
-                        }
                         _ => (),
                     }
                     self.nav.mouse_pos = mpos;

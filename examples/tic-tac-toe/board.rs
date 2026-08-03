@@ -187,8 +187,8 @@ impl Board {
     }
     fn show_result(&mut self, result: GameResult) {
         match result {
-            GameResult::WinnerX => dialogs::message("Game over", format!("{} wins !", &self.player_X).as_str()),
-            GameResult::WinnerO => dialogs::message("Game over", format!("{} wins !", &self.player_O).as_str()),
+            GameResult::WinnerX => dialogs::message("Game over", format!("{} wins !", self.player_X).as_str()),
+            GameResult::WinnerO => dialogs::message("Game over", format!("{} wins !", self.player_O).as_str()),
             GameResult::Draw => dialogs::message("Game over", "Draw game !"),
         }
         self.raise_event(board::Events::GameOver);

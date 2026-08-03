@@ -943,7 +943,7 @@ fn check_on_item_colapse_expanded() {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
                     let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
-                    self.set_title(format!("CLP: {}", &s).as_str());
+                    self.set_title(format!("CLP: {}", s).as_str());
                 }
             }
             EventProcessStatus::Processed
@@ -953,7 +953,7 @@ fn check_on_item_colapse_expanded() {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
                     let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
-                    self.set_title(format!("EXP: {}", &s).as_str());
+                    self.set_title(format!("EXP: {}", s).as_str());
                 }
             }
             EventProcessStatus::Processed
@@ -1085,7 +1085,7 @@ fn check_delete_item() {
             if let Some(tv) = self.control(handle) {
                 if let Some(item) = tv.item(item_handle) {
                     let s: FlatString<32> = FlatString::from_str(item.value().name.as_str());
-                    self.set_title(format!("Current: {}", &s).as_str());
+                    self.set_title(format!("Current: {}", s).as_str());
                 }
             }
             EventProcessStatus::Processed
@@ -2022,6 +2022,22 @@ fn check_move_cursor_to() {
     let len = tv.root_items().len();
     let h = tv.root_items()[len - 1];
     tv.move_cursor_to(h);
+    w.add(tv);
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
+fn check_merge_borders() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Cursor should be at last item')
+        CheckHash(0x253A476013BABCA9) 
+    ";
+    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut w = window!("Test,d:f,flags: Sizeable");
+    let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::MergeBorders);
+    Course::populate_with_courses_batch(&mut tv);
     w.add(tv);
     a.add_window(w);
     a.run();

@@ -54,6 +54,7 @@ A treeview supports the following initialization flags:
 * `treeview::Flags::CustomFilter` or `CustomFilter` (for macro initialization) - this enables the custom filter that can be used to filter the list of items. The custom filter should be provided by the user in the [ListItem](../object-traits/listitem.md) implementation.
 * `treeview::Flags::NoSelection` or `NoSelection` (for macro initialization) - this disables the selection of items from the tree view. This flag is useful when the tree view is used only for displaying information and the selection is not needed (such as a Save or Open file dialog).
 * `treeview::Flags::HideHeader` or `HideHeader` (for macro initialization) - this hides the header of the tree view. This flag is useful when the tree view is used only for displaying information and the header is not needed.
+* `treeview::Flags::MergeBorders` or `MergeBorders` (for macro initialization) - this will merge the borders of the tree view with the borders of the window (use box junctions to draw the tree view).
 
 ## Events
 

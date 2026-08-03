@@ -9,4 +9,5 @@ pub enum Flags {
     CustomFilter = 0x10,
     NoSelection = 0x20,
     HideHeader = 0x40,
+    MergeBorders = 0x80,
 }

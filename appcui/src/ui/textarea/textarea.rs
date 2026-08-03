@@ -52,24 +52,14 @@ impl TextPosition {
         self.offset
     }
 
+    #[inline(always)]
     pub fn line(&self) -> Option<u32> {
-        if self.line_and_collumn.is_none() {
-            None
-        }
-        else {
-            let value = self.line_and_collumn.unwrap();
-            Some((value >> 32) as u32)
-        }
+        self.line_and_collumn.map(|value| (value >> 32) as u32)
     }
 
+    #[inline(always)]
     pub fn collumn(&self) -> Option<u32> {
-        if self.line_and_collumn.is_none() {
-            None
-        }
-        else {
-            let value = self.line_and_collumn.unwrap();
-            Some((value & 0xFFFFFFFF) as u32)
-        }
+        self.line_and_collumn.map(|value| (value & 0xFFFFFFFF) as u32)
     }
 }
 
@@ -1473,11 +1463,9 @@ impl OnPaint for TextArea {
                 
                 if self.flags.contains(Flags::ShowLineNumber) {
                     let line_number_text = (it + 1).to_string();
-                    let mut offset = self.line_number_bar_size as i32 - line_number_text.len() as i32 - 1;
 
-                    for ch in line_number_text.chars() {
+                    for (offset, ch) in (self.line_number_bar_size as i32 - line_number_text.len() as i32 - 1..).zip(line_number_text.chars()) {
                         surface.write_char(offset, y, Character::with_attributes(ch, attr_line_number));
-                        offset += 1;
                     }
                 }
                 

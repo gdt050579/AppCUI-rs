@@ -14,21 +14,21 @@ fn generate_commands(a: &Arguments) -> String {
     // step 1 --> generate the list of enum variants
     temp.clear();
     for (idx, cmd) in a.commands.iter().enumerate() {
-        write!(temp, "{} = {}, ", &cmd, idx).unwrap();
+        write!(temp, "{} = {}, ", cmd, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(COMMANDS_IDS)", &temp);
 
     // step 2 --> generate the conversion code (from u32 to commands)
     temp.clear();
     for (idx, cmd) in a.commands.iter().enumerate() {
-        writeln!(temp, "{} => Ok(Commands::{}),", idx, &cmd).unwrap();
+        writeln!(temp, "{} => Ok(Commands::{}),", idx, cmd).unwrap();
     }
     cmd_code = cmd_code.replace("$(U32_TO_COMMANDS)", &temp);
 
     // step 3 --> generate the conversion code (from commands to u32)
     temp.clear();
     for (idx, cmd) in a.commands.iter().enumerate() {
-        writeln!(temp, "Commands::{} => {},", &cmd, idx).unwrap();
+        writeln!(temp, "Commands::{} => {},", cmd, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(COMMANDS_TO_U32)", &temp);
     cmd_code
@@ -41,21 +41,21 @@ fn generate_emitted_events(a: &Arguments) -> String {
     // step 1 --> generate the list of enum variants
     temp.clear();
     for (idx, event_name) in a.emitted_events.iter().enumerate() {
-        write!(temp, "{} = {}, ", &event_name, idx).unwrap();
+        write!(temp, "{} = {}, ", event_name, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(EVENTS_IDS)", &temp);
 
     // step 2 --> generate the conversion code (from u32 to events)
     temp.clear();
     for (idx, cmd) in a.emitted_events.iter().enumerate() {
-        writeln!(temp, "{} => Ok(Events::{}),", idx, &cmd).unwrap();
+        writeln!(temp, "{} => Ok(Events::{}),", idx, cmd).unwrap();
     }
     cmd_code = cmd_code.replace("$(U32_TO_EVENTS)", &temp);
 
     // step 3 --> generate the conversion code (from events to u32)
     temp.clear();
     for (idx, cmd) in a.emitted_events.iter().enumerate() {
-        writeln!(temp, "Events::{} => {},", &cmd, idx).unwrap();
+        writeln!(temp, "Events::{} => {},", cmd, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(EVENTS_TO_U32)", &temp);
     cmd_code

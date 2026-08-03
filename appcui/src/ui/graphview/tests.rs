@@ -1906,7 +1906,7 @@ fn editable_node_set_position_size_alignment_clear_attrs_border_and_selected() {
     n.set_selected(false);
     assert!(!n.is_selected());
 
-    drop(editor);
+    //drop(editor);
     assert!(!graph.nodes[0].selected);
 }
 
@@ -2091,7 +2091,7 @@ mod editable_graph_delete_tests {
         assert_eq!(editor.current_node(), 0);
         assert_eq!(*editor.node(0).unwrap().value(), "A");
         assert_eq!(*editor.node(1).unwrap().value(), "B");
-        drop(editor);
+        //drop(editor);
         assert!(graph.nodes[0].selected);
         assert!(!graph.nodes[1].selected);
     }

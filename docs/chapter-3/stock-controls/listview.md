@@ -56,6 +56,7 @@ A listview supports the following initialization flags:
 * `listview::Flags::LargeIcons` or `LargeIcons` (for macro initialization) - this enables the large icons (two characters or unicode surrogates) view mode for the list view.
 * `listview::Flags::CustomFilter` or `CustomFilter` (for macro initialization) - this enables the custom filter that can be used to filter the list of items. The custom filter should be provided by the user in the [ListItem](../object-traits/listitem.md) implementation.
 * `listview::Flags::NoSelection` or `NoSelection` (for macro initialization) - this disables the selection of items from the list view. This flag is useful when the list view is used only for displaying information and the selection is not needed (such as a Save or Open file dialog). Using this flag together with the `CheckBoxes` flag will result in a panic.
+* `listview::Flags::MergeBorders` or `MergeBorders` (for macro initialization) - this will merge the borders of the list view with the borders of the window (use box junctions to draw the list view).
 
 
 ## Events
