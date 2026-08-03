@@ -16,6 +16,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [DropDownList](stock-controls/dropdownlist.md)       | ui::DropDownList&lt;T&gt;    | `dropdownlist!`    | <img src="stock-controls/img/dropdownlist.png" width=300/>    |
 | [GraphView](stock-controls/graphview.md)             | ui::GraphView&lt;T&gt;       | `graphview!`       | <img src="stock-controls/img/graphview.png" width=300/>       |
 | [HLine](stock-controls/hline.md)                     | ui::HLine                    | `hline!`           | <img src="stock-controls/img/hline.png" width=300/>           |
+| [HSlider](stock-controls/hslider.md)                 | ui::HSlider&lt;T&gt;         | `hslider!`         | <img src="stock-controls/img/hslider.png" width=300/>         |
 | [HSplitter](stock-controls/hsplitter.md)             | ui::HSplitter                | `hsplitter!`       | <img src="stock-controls/img/hsplitter.png" width=300/>       |
 | [HyperLink](stock-controls/hyperlink.md)             | ui::HyperLink                | `hyperlink!`       | <img src="stock-controls/img/hyperlink.png" width=300/>       |
 | [ImageViewer](stock-controls/imageviewer.md)         | ui::ImageViewer              | `imageviewer!`     | <img src="stock-controls/img/imageviewer.png" width=300/>     |

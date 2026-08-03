@@ -115,7 +115,7 @@ where
     }
 
     /// Returns the number of tick marks configured for the slider.
-    pub fn tick(&self) -> u32 {
+    pub fn ticks(&self) -> u32 {
         self.tick_value
     }
 
@@ -430,13 +430,10 @@ where
         }
 
         if self.flags.contains(Flags::ShowValue) {
-            surface.write_string(
-                (self.hslider_pos + self.hslider_width + self.buffer_value_max_len.saturating_sub(self.buffer_value.len() as u32)) as i32 + 2,
-                0,
-                &self.buffer_value,
-                text_attr,
-                false,
-            );
+            let cap = if self.hslider_type.char_set().right_cap.is_some() { 1 } else { 0 };
+            let pad = self.buffer_value_max_len.saturating_sub(self.buffer_value.len() as u32);
+            let text_x = (self.hslider_pos + self.hslider_width + pad) as i32 + cap + 1;
+            surface.write_string(text_x, 0, &self.buffer_value, text_attr, false);
         }
     }
 
@@ -459,10 +456,12 @@ where
         match key.value() {
             key!("Left") => {
                 self.sub_step_value();
+                self.hide_tooltip();
                 EventProcessStatus::Processed
             }
             key!("Right") => {
                 self.add_step_value();
+                self.hide_tooltip();
                 EventProcessStatus::Processed
             }
             _ => EventProcessStatus::Ignored,
@@ -490,8 +489,8 @@ where
         match event {
             MouseEvent::Pressed(mouse) => {
                 self.pressed = true;
-                self.show_tooltip(&self.buffer_value);
                 self.set_marker_position_from_x(mouse.x);
+                self.show_tooltip(&self.buffer_value);
                 EventProcessStatus::Processed
             }
             MouseEvent::Released(_) => {
@@ -514,8 +513,14 @@ where
             }
             MouseEvent::Wheel(dir) => {
                 match dir {
-                    MouseWheelDirection::Down => self.sub_step_value(),
-                    MouseWheelDirection::Up => self.add_step_value(),
+                    MouseWheelDirection::Down => {
+                        self.sub_step_value();
+                        self.show_tooltip(&self.buffer_value);
+                    }
+                    MouseWheelDirection::Up => {
+                        self.add_step_value();
+                        self.show_tooltip(&self.buffer_value);
+                    }
                     _ => {},
                 }
                 EventProcessStatus::Processed
