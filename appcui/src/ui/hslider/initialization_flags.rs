@@ -6,6 +6,8 @@ pub enum Type {
     Standard,
     ProgressBar,
     Inline,
+    Blocks,
+    Ruler,
 }
 
 impl Type {
@@ -14,6 +16,8 @@ impl Type {
            Type::Standard => &STANDARD,
            Type::ProgressBar => &PROGRESS_BAR,
            Type::Inline => &INLINE,
+           Type::Blocks => &BLOCKS,
+           Type::Ruler => &RULER,
        } 
     }
 }
@@ -70,6 +74,31 @@ static INLINE: CharSet = CharSet {
     right_tick: '┥',
 };
 
+static BLOCKS: CharSet = CharSet {
+    marker: '█',
+    left_marker: None,
+    right_marker: None,
+    left_marker_line: '█',
+    right_marker_line: '░',
+    left_cap: None,
+    right_cap: None,
+    tick: '│',
+    left_tick: '│',
+    right_tick: '│',
+};
+
+static RULER: CharSet = CharSet {
+    marker: '●',
+    left_marker: None,
+    right_marker: None,
+    left_marker_line: '━',
+    right_marker_line: '━',
+    left_cap: None,
+    right_cap: None,
+    tick: '┷',
+    left_tick: '┕',
+    right_tick: '┙',
+};
 
 #[EnumBitFlags(bits=16)]
 pub enum Flags {

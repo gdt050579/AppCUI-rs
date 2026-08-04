@@ -3,7 +3,7 @@ use crate::parameter_parser::*;
 use proc_macro::*;
 
 static FLAGS: FlagsSignature = FlagsSignature::new(&["ShowValue", "Ticks", "ValueAsMarker"]);
-static TYPES: FlagsSignature = FlagsSignature::new(&["Standard", "ProgressBar", "Inline"]);
+static TYPES: FlagsSignature = FlagsSignature::new(&["Standard", "ProgressBar", "Inline", "Blocks", "Ruler"]);
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[
     PositionalParameter::new("class", ParamType::String),

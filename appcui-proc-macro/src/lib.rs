@@ -916,7 +916,7 @@ pub fn hyperlink(input: TokenStream) -> TokenStream {
 /// * `min` - the lower bound of the slider (**required**)
 /// * `max` - the upper bound of the slider (**required**)
 /// * `step` - the increment used when the value changes by one step (**required**)
-/// * `type` - the visual style of the slider, one of **Standard**, **ProgressBar** or **Inline** (defaults to **Standard**)
+/// * `type` - the visual style of the slider, one of **Standard**, **ProgressBar**, **Blocks**, **Ruler** or **Inline** (defaults to **Standard**)
 /// * `flags` - one or more of **ShowValue**, **Ticks** or **ValueAsMarker**, separated by `|`
 /// * position attributes: `x` and `y`,
 /// * size attributes: `width` or `w` (alias), `height` or `h` (alias)
