@@ -7,6 +7,8 @@
 mod initialization_flags;
 mod hslider;
 pub mod events;
+#[cfg(test)]
+mod tests;
 
 pub use self::hslider::HSlider;
 pub use self::initialization_flags::Type;

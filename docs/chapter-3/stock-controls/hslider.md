@@ -1,6 +1,6 @@
 # HSlider
 
-The `HSlider` control is a horizontal slider that allows the user to select a number from a range of numbers by dragging a marker along a track. It can display the current value, tick marks along the track, and can be styled in different visual variants (a standard slider, a progress-bar-like slider or an inline slider).
+The `HSlider` control is a horizontal slider that allows the user to select a number from a range of numbers by dragging a marker along a track. It can display the current value, tick marks along the track, and can be styled in different visual variants (a standard slider, a progress-bar-like slider, an inline slider, a block slider or a ruler).
 
 <img src="img/hslider.png" width=300/>
 
@@ -45,11 +45,13 @@ An HSlider supports all common parameters (as they are described in [Instantiate
 An HSlider supports the following visual types (set via the `type` parameter):
 * `hslider::Type::Standard` or `Standard` (for macro initialization) - a standard slider with `[` `]` caps, a `X` marker delimited by `[` `]` and a dotted track
 * `hslider::Type::ProgressBar` or `ProgressBar` (for macro initialization) - a progress-bar-like slider where the filled part is drawn with `=`, the empty part is left blank and the marker is a `>`
-* `hslider::Type::Inline` or `Inline` (for macro initialization) - an inline slider drawn with a solid `━` line and a `●` marker, without caps
+* `hslider::Type::Inline` or `Inline` (for macro initialization) - an inline slider drawn with a solid `━` line and a `●` marker, without caps. Its ticks cross the line (`┝`, `┿`, `┥`)
+* `hslider::Type::Blocks` or `Blocks` (for macro initialization) - a slider drawn with solid blocks, where the filled part and the marker are `█`, the empty part is `░` and the ticks are `│`, without caps
+* `hslider::Type::Ruler` or `Ruler` (for macro initialization) - same line and marker as `Inline`, but with ruler-like graduation ticks (`┕`, `┷`, `┙`) instead of ticks that cross the line
 
 An HSlider supports the following initialization flags:
 * `hslider::Flags::ShowValue` or `ShowValue` (for macro initialization) - displays the current value to the right of the slider
-* `hslider::Flags::Ticks` or `Ticks` (for macro initialization) - draws tick marks along the track. When this flag is set, the value moves from one tick to another instead of moving by `step`. The number of ticks is set separately via the `set_ticks(...)` method.
+* `hslider::Flags::Ticks` or `Ticks` (for macro initialization) - draws tick marks along the track. When this flag is set, the value moves from one tick to another instead of moving by `step`. The number of ticks is set separately via the `set_ticks(...)` method, and at least two of them are required (the two ends of the track). Until then the flag has no effect: nothing is drawn and the value keeps moving by `step`.
 * `hslider::Flags::ValueAsMarker` or `ValueAsMarker` (for macro initialization) - displays the current value in place of the marker, on the track itself
 
 ## Events
@@ -75,7 +77,7 @@ Besides the [Common methods for all Controls](../common_methods.md) an HSlider a
 | `max()`           | Returns the upper bound of the slider.                                                                                                                           |
 | `set_step(...)`   | Sets the increment used when the slider value changes by one step.                                                                                              |
 | `step()`          | Returns the increment used when the slider value changes by one step.                                                                                           |
-| `set_ticks(...)`  | Sets the number of tick marks displayed along the slider. The ticks are only shown when the `Ticks` flag is set.                                                 |
+| `set_ticks(...)`  | Sets the number of tick marks displayed along the slider. The ticks are only shown when the `Ticks` flag is set and the count is at least 2 - a single mark defines no scale, so both `0` and `1` mean "no ticks". |
 | `ticks()`         | Returns the number of tick marks configured for the slider.                                                                                                      |
 
 ## Key association

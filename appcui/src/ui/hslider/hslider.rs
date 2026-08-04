@@ -147,7 +147,6 @@ where
         self.step
     }
 
-
     fn rebuild_ticks(&mut self) {
         self.tick_pos.clear();
         let (lo, hi) = self.track_bounds();
@@ -192,21 +191,30 @@ where
     }
 
     fn value_to_tick_index(&self, value: T) -> usize {
-        if self.tick_value < 2 { return 0; }
+        if self.tick_value < 2 {
+            return 0;
+        }
         let min = self.min.to_f64();
         let max = self.max.to_f64();
-        if max - min == 0.0 { return 0; }
+        if max - min == 0.0 {
+            return 0;
+        }
         let n = (self.tick_value - 1) as f64;
         let seg = (max - min) / n;
-        (((value.to_f64() - min) / seg).round() as i64)
-            .clamp(0, (self.tick_value - 1) as i64) as usize
+        (((value.to_f64() - min) / seg).round() as i64).clamp(0, (self.tick_value - 1) as i64) as usize
     }
 
     fn index_to_value(&self, idx: usize) -> T {
-        if self.tick_value < 2 { return self.min; }
+        if self.tick_value < 2 {
+            return self.min;
+        }
         let n = (self.tick_value - 1) as usize;
-        if idx == 0 { return self.min; }
-        if idx >= n { return self.max; }
+        if idx == 0 {
+            return self.min;
+        }
+        if idx >= n {
+            return self.max;
+        }
         let min = self.min.to_f64();
         let max = self.max.to_f64();
         T::from_f64(min + idx as f64 * (max - min) / n as f64)
@@ -266,6 +274,7 @@ where
     }
 
     fn add_step_value(&mut self) {
+        let old = self.value;
         if self.ticks_active() {
             if self.tick_index + 1 >= self.tick_pos.len() {
                 return;
@@ -282,10 +291,13 @@ where
         self.marker_pos = self.get_marker_x_position();
         self.set_buffer_value();
         self.request_update();
-        self.emit_value_changed();
+        if self.value != old {
+            self.emit_value_changed();
+        }
     }
 
     fn sub_step_value(&mut self) {
+        let old = self.value;
         if self.ticks_active() {
             if self.tick_index == 0 {
                 return;
@@ -302,7 +314,9 @@ where
         self.marker_pos = self.get_marker_x_position();
         self.set_buffer_value();
         self.request_update();
-        self.emit_value_changed();
+        if self.value != old {
+            self.emit_value_changed();
+        }
     }
 
     fn set_marker_position_from_x(&mut self, x: i32) {
@@ -312,9 +326,10 @@ where
         let changed = if self.ticks_active() {
             let (tlo, thi) = self.track_bounds();
             let idx = self.tick_index_from_x((x.max(0) as u32).clamp(tlo, thi));
-            let changed = idx != self.tick_index;
             self.tick_index = idx;
-            self.value = self.index_to_value(idx);
+            let new_val = self.index_to_value(idx);
+            let changed = new_val != self.value;
+            self.value = new_val;
             changed
         } else {
             let clamped = ((x - (mw as i32) / 2).max(0) as u32).clamp(lo, hi);
@@ -354,11 +369,15 @@ where
         }
         let (lo, hi) = self.marker_bounds();
         let span = hi.saturating_sub(lo);
-        if span == 0 { return lo; }
+        if span == 0 {
+            return lo;
+        }
         let value = self.value.to_f64();
         let min = self.min.to_f64();
         let max = self.max.to_f64();
-        if max - min == 0.0 { return lo; }
+        if max - min == 0.0 {
+            return lo;
+        }
         let rel = ((value - min) / (max - min) * span as f64).round().clamp(0.0, span as f64) as u32;
         lo + rel
     }
@@ -412,31 +431,30 @@ where
         if self.flags.contains(Flags::Ticks) {
             let marker_start = self.marker_pos;
             let marker_end = self.marker_pos + mw;
-        
-            let left_tick  = Character::with_attributes(self.hslider_type.char_set().left_tick, left_tick_attr);
+
+            let left_tick = Character::with_attributes(self.hslider_type.char_set().left_tick, left_tick_attr);
             let right_tick = Character::with_attributes(self.hslider_type.char_set().right_tick, right_tick_attr);
-            let tick_left  = Character::with_attributes(self.hslider_type.char_set().tick, left_marker_line_attr);
+            let tick_left = Character::with_attributes(self.hslider_type.char_set().tick, left_marker_line_attr);
             let tick_right = Character::with_attributes(self.hslider_type.char_set().tick, right_marker_line_attr);
-        
+
             let draw_tick = |surface: &mut Surface, x: u32, ch| {
                 if x < marker_start || x >= marker_end {
                     surface.write_char(x as i32, 0, ch);
                 }
             };
-        
+
             let n = self.tick_pos.len();
             for (k, &xp) in self.tick_pos.iter().enumerate() {
+                if k == 0 || k + 1 == n {
+                    continue;
+                }
                 let x = xp as u32;
-                let ch = if k == 0 {
-                    left_tick
-                } else if k + 1 == n {
-                    right_tick
-                } else if x < marker_start {
-                    tick_left
-                } else {
-                    tick_right
-                };
+                let ch = if x < marker_start { tick_left } else { tick_right };
                 draw_tick(surface, x, ch);
+            }
+            if n >= 2 {
+                draw_tick(surface, self.tick_pos[0] as u32, left_tick);
+                draw_tick(surface, self.tick_pos[n - 1] as u32, right_tick);
             }
         }
 
