@@ -97,6 +97,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
@@ -167,6 +168,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
@@ -262,6 +264,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
@@ -330,6 +333,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
@@ -424,6 +428,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
@@ -904,6 +909,36 @@ pub fn hyperlink(input: TokenStream) -> TokenStream {
     crate::controls::hyperlink::create(input)
 }
 
+/// Creates a new horizontal slider control. The format is `hslider!("attributes")` where the attributes are pairs of key-value, separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `class` - the numeric type used by the slider (**required**). Must be one of: `i8`, `i16`, `i32`, `i64`, `i128`, `u8`, `u16`, `u32`, `u64`, `u128`, `isize`, `usize`, `f32`, `f64`.
+/// * `min` - the lower bound of the slider (**required**)
+/// * `max` - the upper bound of the slider (**required**)
+/// * `step` - the increment used when the value changes by one step (**required**)
+/// * `type` - the visual style of the slider, one of **Standard**, **ProgressBar**, **Blocks**, **Ruler** or **Inline** (defaults to **Standard**)
+/// * `flags` - one or more of **ShowValue**, **Ticks** or **ValueAsMarker**, separated by `|`
+/// * position attributes: `x` and `y`,
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias)
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignment attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+///
+/// The first four positional parameters (if the key is not specified) are considered, in order, `class`, `min`, `max` and `step`.
+///
+/// # Example
+///
+/// ```hslider!("class:f32, min:0f32, max:10f32, step:1.5f32, x:0, y:1, w:20, h:1, flags:ShowValue")```
+///
+/// Alternatively, the first four parameters can be given positionally (class, min, max, step):
+///
+/// ```hslider!("i32, 0, 10, 1, x:0, y:0, w:20, h:1")```
+#[proc_macro]
+pub fn hslider(input: TokenStream) -> TokenStream {
+    crate::controls::hslider::create(input)
+}
 
 /// Creates a new checkbox control. The format is `checkbox!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
 /// If the `value` is a string, use single quotes to delimit the value.

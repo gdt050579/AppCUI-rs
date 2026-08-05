@@ -70,6 +70,7 @@
         - [ListBox](chapter-3/stock-controls/listbox.md)
         - [ListView](chapter-3/stock-controls/listview.md)
         - [HLine](chapter-3/stock-controls/hline.md)
+        - [HSlider](chapter-3/stock-controls/hslider.md)
         - [HSplitter](chapter-3/stock-controls/hsplitter.md)
         - [HyperLink](chapter-3/stock-controls/hyperlink.md)
         - [ImageViewer](chapter-3/stock-controls/imageviewer.md)

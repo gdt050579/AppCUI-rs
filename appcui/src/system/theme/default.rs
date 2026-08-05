@@ -138,5 +138,13 @@ pub(crate) fn new() -> Theme {
         },
         
         hyperlink: controlattr!("aqua,flags:Underline", "w,flags:Underline", "y,flags:Underline", "gray", "black,white,flags:Underline"),
+
+        hslider: SliderTheme {
+            before_line: charattr!("teal"),
+            after_line: charattr!("gray"),
+            marker: controlattr!("teal", "aqua", "aqua", "gray", "aqua"),
+            marker_border: controlattr!("teal", "aqua", "aqua", "gray", "aqua"),
+            cap: charattr!("silver"),
+        },
     }
 }

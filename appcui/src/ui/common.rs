@@ -9,6 +9,8 @@ pub(crate) mod control_char_attributes_state;
 pub(crate) mod control_base;
 pub(crate) mod container_base;
 pub(crate) mod control_manager;
+pub(crate) mod number;
+pub(crate) mod number_format;
 
 pub(crate) use control_char_attributes_state::ControlCharAttributesState;
 pub(crate) use control_event_wrapper::ControlEvent;
@@ -17,3 +19,5 @@ pub(crate) use control_manager::ControlManager;
 pub(crate) use control_base::StatusFlags;
 pub use control_base::ControlBase;
 pub use container_base::ContainerBase;
+pub use number::Number;
+pub use number_format::NumberFormat;

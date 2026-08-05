@@ -1,4 +1,5 @@
 use EnumBitFlags::EnumBitFlags;
+use crate::ui::common::NumberFormat;
 
 #[EnumBitFlags(bits = 8)]
 pub enum Flags {
@@ -14,4 +15,16 @@ pub enum Format {
     DigitGrouping,
     Hex,
     Size, 
+}
+
+impl From<Format> for NumberFormat {
+    fn from(f: Format) -> Self {
+        match f {
+            Format::Decimal => NumberFormat::Decimal,
+            Format::Percentage => NumberFormat::Percentage,
+            Format::DigitGrouping => NumberFormat::DigitGrouping,
+            Format::Hex => NumberFormat::Hex,
+            Format::Size => NumberFormat::Size,
+        }
+    }
 }

@@ -40,3 +40,4 @@ pub (crate) mod graphview;
 pub (crate) mod bufferview;
 pub (crate) mod timepicker;
 pub (crate) mod hyperlink;
+pub (crate) mod hslider;

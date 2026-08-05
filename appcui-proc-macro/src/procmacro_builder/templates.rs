@@ -303,6 +303,29 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 ";
 
 
+pub(crate) static HSLIDER_SELECTOR_TRAIT_DEF: &str = "
+trait HSliderEvents<T: Number+'static> {
+    fn on_value_changed(&mut self, handle: Handle<HSlider<T>>, value: T) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericHSliderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_value_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HSLIDER)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+pub(crate) static HSLIDER_SELECT_ON_VALUE_CHANGE_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HSlider<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if let Some(obj) = self.control(h) {
+        let value = obj.value();
+        return HSliderEvents::<$(TYPE)>::on_value_changed(self, h, value);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+
 pub(crate) static LISTVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
