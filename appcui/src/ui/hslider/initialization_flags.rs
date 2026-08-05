@@ -13,11 +13,11 @@ pub enum Type {
 impl Type {
     pub (super) fn char_set(&self ) -> &'static CharSet {
        match &self {
-           Type::Standard => &STANDARD,
-           Type::ProgressBar => &PROGRESS_BAR,
-           Type::Inline => &INLINE,
-           Type::Blocks => &BLOCKS,
-           Type::Ruler => &RULER,
+            Type::Standard => &STANDARD,
+            Type::ProgressBar => &PROGRESS_BAR,
+            Type::Inline => &INLINE,
+            Type::Blocks => &BLOCKS,
+            Type::Ruler => &RULER,
        } 
     }
 }

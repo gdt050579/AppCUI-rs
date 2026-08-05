@@ -665,7 +665,7 @@ fn check_more_ticks_than_columns() {
         CheckHash(0x69833AD0E1D3385C)
         Mouse.Drag(3,3,22,3)
         Paint('dragged across the whole track')
-        CheckHash(0x3EDF9BB4663A1011)
+        CheckHash(0x76B762C8B9ACDEFF)
     ";
     let mut a = App::debug(40, 10, script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:5");

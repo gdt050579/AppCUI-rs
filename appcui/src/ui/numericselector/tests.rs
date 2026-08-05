@@ -1,5 +1,4 @@
 use crate::{prelude::*, ui::numericselector::Format};
-use super::number::Number;
 use crate::ui::numericselector::NumericSelector;
 
 

@@ -2,7 +2,7 @@ use super::events::EventData;
 use super::Buttons;
 use super::Flags;
 use super::Format;
-use super::Number;
+use crate::ui::common::Number;
 use crate::prelude::*;
 use std::fmt::Write;
 use std::str::FromStr;

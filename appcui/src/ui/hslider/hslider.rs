@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use crate::ui::hslider::{events::EventData, Flags, Type};
-use crate::ui::numericselector::Format;
+use crate::ui::common::NumberFormat;
+
+const TICK_SCALE: u64 = 1000;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
 pub struct HSlider<T>
@@ -18,10 +20,11 @@ where
     buffer_value_max_len: u32,
     hslider_width: u32,
     hslider_pos: u32,
-    format: Format,
+    format: NumberFormat,
     flags: Flags,
     pressed: bool,
-    tick_pos: Vec<u16>,
+    tick_normal_size: u32,
+    tick_last_size: u32,
     tick_index: usize,
 }
 
@@ -54,11 +57,12 @@ where
             flags: hslider_falgs,
             pressed: false,
             buffer_value: String::new(),
-            format: Format::Decimal,
+            format: NumberFormat::Decimal,
             hslider_width: 0,
             hslider_pos: 0,
             buffer_value_max_len: 0,
-            tick_pos: Vec::new(),
+            tick_normal_size: 0,
+            tick_last_size: 0,
             tick_index: 0,
         };
         hslider.update_metrics();
@@ -148,37 +152,42 @@ where
     }
 
     fn rebuild_ticks(&mut self) {
-        self.tick_pos.clear();
-        let (lo, hi) = self.track_bounds();
-        match self.tick_value {
-            0 | 1 => {}
-            _ => {
-                let n = (self.tick_value - 1) as u64;
-                let span = hi.saturating_sub(lo) as u64;
-                for k in 0..=n {
-                    let x = lo + ((k * span + n / 2) / n) as u32;
-                    self.tick_pos.push(x as u16);
-                }
-            }
+        if self.tick_value < 2 {
+            self.tick_normal_size = 0;
+            self.tick_last_size = 0;
+            self.tick_index = 0;
+            return;
         }
-        self.tick_index = self.tick_index.min(self.tick_pos.len().saturating_sub(1));
+        let (lo, hi) = self.track_bounds();
+        let span = (hi - lo) as u64 * TICK_SCALE;
+        let segs = (self.tick_value - 1) as u64;
+        let mut normal = (span + segs / 2) / segs;
+        if segs > 1 && normal * (segs - 1) > span {
+            normal = span / (segs - 1);
+        }
+        self.tick_normal_size = normal as u32;
+        self.tick_last_size = (span - normal * (segs - 1)) as u32;
+        self.tick_index = self.tick_index.min(segs as usize);
     }
 
     fn ticks_active(&self) -> bool {
-        self.flags.contains(Flags::Ticks) && self.tick_pos.len() >= 2
+        self.flags.contains(Flags::Ticks) && self.tick_value >= 2
     }
 
     fn tick_index_from_x(&self, x: u32) -> usize {
-        let mut best = 0usize;
-        let mut best_dist = u32::MAX;
-        for (idx, &tick_x) in self.tick_pos.iter().enumerate() {
-            let dist = (tick_x as u32).abs_diff(x);
-            if dist < best_dist || (dist == best_dist && idx == self.tick_index) {
-                best_dist = dist;
-                best = idx;
-            }
+        let (lo, hi) = self.track_bounds();
+        let x = x.clamp(lo, hi);
+        let segs = (self.tick_value - 1) as u64;
+        let normal = self.tick_normal_size as u64;
+        let prev_x = lo + ((normal * (segs - 1) + TICK_SCALE / 2) / TICK_SCALE) as u32;
+        if x + x >= prev_x + hi {
+            return segs as usize;
         }
-        best
+        if normal == 0 {
+            return 0;
+        }
+        let rel = (x - lo) as u64 * TICK_SCALE;
+        (((rel + normal / 2) / normal).min(segs - 1)) as usize
     }
 
     fn sync_tick_index(&mut self) {
@@ -276,7 +285,7 @@ where
     fn add_step_value(&mut self) {
         let old = self.value;
         if self.ticks_active() {
-            if self.tick_index + 1 >= self.tick_pos.len() {
+            if self.tick_index + 1 >= self.tick_value as usize {
                 return;
             }
             self.tick_index += 1;
@@ -324,8 +333,7 @@ where
         let mw = self.marker_width();
 
         let changed = if self.ticks_active() {
-            let (tlo, thi) = self.track_bounds();
-            let idx = self.tick_index_from_x((x.max(0) as u32).clamp(tlo, thi));
+            let idx = self.tick_index_from_x(x.max(0) as u32);
             self.tick_index = idx;
             let new_val = self.index_to_value(idx);
             let changed = new_val != self.value;
@@ -363,7 +371,16 @@ where
 
     fn get_marker_x_position(&self) -> u32 {
         if self.ticks_active() {
-            let tick_x = self.tick_pos[self.tick_index.min(self.tick_pos.len() - 1)] as u32;
+            let (tlo, _) = self.track_bounds();
+            let segs = (self.tick_value - 1) as u64;
+            let idx = (self.tick_index as u64).min(segs);
+            let normal = self.tick_normal_size as u64;
+            let offset = if idx == segs {
+                normal * (segs - 1) + self.tick_last_size as u64
+            } else {
+                idx * normal
+            };
+            let tick_x = tlo + ((offset + TICK_SCALE / 2) / TICK_SCALE) as u32;
             let (lo, hi) = self.marker_bounds();
             return tick_x.saturating_sub(self.marker_width() / 2).clamp(lo, hi);
         }
@@ -428,7 +445,7 @@ where
         let size = (self.hslider_pos + self.hslider_width).saturating_sub(right_start);
         surface.fill_horizontal_line_with_size(right_start as i32, 0, size, right_marker_line);
 
-        if self.flags.contains(Flags::Ticks) {
+        if self.flags.contains(Flags::Ticks) && self.tick_value >= 2 {
             let marker_start = self.marker_pos;
             let marker_end = self.marker_pos + mw;
 
@@ -443,19 +460,17 @@ where
                 }
             };
 
-            let n = self.tick_pos.len();
-            for (k, &xp) in self.tick_pos.iter().enumerate() {
-                if k == 0 || k + 1 == n {
-                    continue;
-                }
-                let x = xp as u32;
+            let (tlo, _) = self.track_bounds();
+            let segs = (self.tick_value - 1) as u64;
+            let normal = self.tick_normal_size as u64;
+            for k in 1..segs {
+                let x = tlo + ((k * normal + TICK_SCALE / 2) / TICK_SCALE) as u32;
                 let ch = if x < marker_start { tick_left } else { tick_right };
                 draw_tick(surface, x, ch);
             }
-            if n >= 2 {
-                draw_tick(surface, self.tick_pos[0] as u32, left_tick);
-                draw_tick(surface, self.tick_pos[n - 1] as u32, right_tick);
-            }
+            draw_tick(surface, tlo, left_tick);
+            let last = normal * (segs - 1) + self.tick_last_size as u64;
+            draw_tick(surface, tlo + ((last + TICK_SCALE / 2) / TICK_SCALE) as u32, right_tick);
         }
 
         if let Some(code) = self.hslider_type.char_set().left_marker {
