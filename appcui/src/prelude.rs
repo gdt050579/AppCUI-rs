@@ -55,6 +55,7 @@ pub use super::ui::listview::events::GenericListViewEvents;
 pub use super::ui::listview::ListItem;
 pub use super::ui::markdown;
 pub use super::ui::markdown::events::MarkdownEvents;
+pub use super::ui::markdown_composer::events::MarkdownComposerEvents;
 pub use super::ui::menu::events::GenericMenuEvents;
 pub use super::ui::menu::Menu;
 pub use super::ui::appbar;
