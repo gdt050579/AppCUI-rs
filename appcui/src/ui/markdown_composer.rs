@@ -13,4 +13,4 @@ mod parser;
 
 pub use self::markdown_composer::MarkdownComposer;
 pub use self::initialization_flags::Flags;
-pub use self::parser::{Parser, Span};
+pub use self::parser::{Parser, Span, SpanType};
