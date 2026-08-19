@@ -1,5 +1,7 @@
 use EnumBitFlags::EnumBitFlags;
 
+const CODE_MARGIN: u32 = 1;
+
 #[EnumBitFlags(bits = 16)]
 pub(crate) enum SpanType {
     Normal = 0x000,
@@ -257,7 +259,7 @@ impl Parser {
         self.markers.sort_unstable_by_key(|marker| marker.start);
     }
 
-    pub fn parse_spans(&mut self, text: &String) {
+    pub fn parse_spans(&mut self, text: &str) {
         let bytes = text.as_bytes();
 
         self.match_markers(bytes);
@@ -332,7 +334,7 @@ impl Parser {
         SpanType::Normal
     }
 
-    pub fn parse_links(&mut self, text: &String) {
+    pub fn parse_links(&mut self, text: &str) {
         self.buffer.clear();
 
         let bytes = text.as_bytes();
@@ -452,7 +454,7 @@ impl Parser {
         0
     }
 
-    pub fn parse_lists(&mut self, text: &String) {
+    pub fn parse_lists(&mut self, text: &str) {
         if self.show_markers {
             return;
         }
@@ -514,7 +516,7 @@ impl Parser {
         width
     }
 
-    pub fn parse_lines(&mut self, text: &String, line_width: u32) {
+    pub fn parse_lines(&mut self, text: &str, line_width: u32) {
         self.buffer.clear();
 
         let bytes = text.as_bytes();
@@ -529,6 +531,17 @@ impl Parser {
             let span_start = span.start as usize;
             let span_end = span.end as usize;
 
+            let block = !self.show_markers && span.span_type.contains(SpanType::CodeBlock);
+            let margin = if block { CODE_MARGIN } else { 0 };
+            let limit = if block {
+                line_width.saturating_sub(CODE_MARGIN).max(1)
+            } else {
+                line_width
+            };
+            if block {
+                indent = margin.min(limit - 1);
+            }
+
             let mut seg_start = span_start;
             let mut seg_x = x;
             let mut i = span_start;
@@ -542,11 +555,15 @@ impl Parser {
                 if ch == '\n' {
                     Self::push_span(&mut self.buffer, seg_start, i, seg_x, y, style);
                     y += 1;
-                    x = 0;
+                    x = margin;
                     i += len;
                     seg_start = i;
-                    seg_x = 0;
-                    indent = Self::list_indent(bytes, i).min(line_width - 1);
+                    seg_x = margin;
+                    indent = if block {
+                        margin.min(limit - 1)
+                    } else {
+                        Self::list_indent(bytes, i).min(line_width - 1)
+                    };
                     quote = !self.show_markers && Self::quoted_line(bytes, i);
                     continue;
                 }
@@ -554,7 +571,7 @@ impl Parser {
                 if !ch.is_whitespace()
                     && Self::is_word_start(bytes, span_start, i)
                     && x > indent
-                    && x + Self::word_width(bytes, i, span_end) > line_width
+                    && x + Self::word_width(bytes, i, span_end) > limit
                 {
                     Self::push_span(&mut self.buffer, seg_start, i, seg_x, y, style);
                     y += 1;
@@ -563,7 +580,7 @@ impl Parser {
                     seg_x = indent;
                 }
 
-                if x > indent && x + w > line_width {
+                if x > indent && x + w > limit {
                     if ch.is_whitespace() {
                         Self::push_span(&mut self.buffer, seg_start, i + len, seg_x, y, style);
                         y += 1;
@@ -596,7 +613,7 @@ impl Parser {
         std::mem::swap(&mut self.spans, &mut self.buffer);
     }
 
-    pub fn parse(&mut self, text: &String, line_width: u32) -> &[Span] {
+    pub fn parse(&mut self, text: &str, line_width: u32) -> &[Span] {
         self.parse_spans(text);
         self.parse_links(text);
         self.parse_lists(text);
@@ -627,7 +644,7 @@ impl Parser {
         count
     }
 
-    pub fn next_offset(text: &String, offset: u32) -> u32 {
+    pub fn next_offset(text: &str, offset: u32) -> u32 {
         let bytes = text.as_bytes();
         let i = (offset as usize).min(bytes.len());
         if i >= bytes.len() {
@@ -636,7 +653,7 @@ impl Parser {
         (i + Self::get_char_len(bytes[i])).min(bytes.len()) as u32
     }
 
-    pub fn prev_offset(text: &String, offset: u32) -> u32 {
+    pub fn prev_offset(text: &str, offset: u32) -> u32 {
         let bytes = text.as_bytes();
         let mut i = (offset as usize).min(bytes.len());
         if i == 0 {
@@ -669,7 +686,7 @@ impl Parser {
         offset
     }
 
-    pub fn next_visible_offset(&self, text: &String, offset: u32) -> u32 {
+    pub fn next_visible_offset(&self, text: &str, offset: u32) -> u32 {
         if self.show_markers {
             return Self::next_offset(text, offset);
         }
@@ -681,7 +698,7 @@ impl Parser {
         self.skip_markers_forward(Self::next_offset(text, offset))
     }
 
-    pub fn prev_visible_offset(&self, text: &String, offset: u32) -> u32 {
+    pub fn prev_visible_offset(&self, text: &str, offset: u32) -> u32 {
         if self.show_markers {
             return Self::prev_offset(text, offset);
         }
@@ -692,7 +709,7 @@ impl Parser {
         self.skip_markers_backward(Self::prev_offset(text, offset))
     }
 
-    pub fn get_position_from_offset(&self, text: &String, offset: u32) -> (u32, u32) {
+    pub fn get_position_from_offset(&self, text: &str, offset: u32) -> (u32, u32) {
         let bytes = text.as_bytes();
         let offset = (offset as usize).min(bytes.len());
 
@@ -728,11 +745,11 @@ impl Parser {
         }
     }
 
-    pub fn rows(&self, text: &String) -> u32 {
+    pub fn rows(&self, text: &str) -> u32 {
         self.get_position_from_offset(text, text.len() as u32).1 + 1
     }
 
-    pub fn get_offset_from_position(&self, text: &String, x: u32, y: u32) -> u32 {
+    pub fn get_offset_from_position(&self, text: &str, x: u32, y: u32) -> u32 {
         let bytes = text.as_bytes();
         let mut row_last: Option<&Span> = None;
 

@@ -20,7 +20,9 @@ mod markdown_composer;
 mod initialization_flags;
 pub mod events;
 mod parser;
+mod list;
 
 pub use self::markdown_composer::MarkdownComposer;
 pub use self::initialization_flags::Flags;
 pub use self::parser::Parser;
+pub use self::list::List;
