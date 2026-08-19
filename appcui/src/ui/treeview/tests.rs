@@ -1163,6 +1163,7 @@ fn check_clear() {
                 mywin::Commands::Clear => {
                     if let Some(tv) = self.control_mut(h) {
                         tv.clear();
+                        assert_eq!(tv.items_count(), 0);
                     }
                 }
                 mywin::Commands::Add => {

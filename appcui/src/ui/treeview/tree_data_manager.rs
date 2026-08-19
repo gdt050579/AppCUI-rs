@@ -141,6 +141,7 @@ where
         self.free.clear();
         self.roots.clear();
         self.selected_count = 0;
+        self.count = 0;
     }
     #[inline(always)]
     pub(super) fn roots(&self) -> &[Handle<Item<T>>] {
