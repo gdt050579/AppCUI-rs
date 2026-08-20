@@ -285,6 +285,9 @@ where
         if self.flags.contains(Flags::NoSelection) {
             item.set_checked(false);
         }
+        if item.is_checked() {
+            self.selected_items_count += 1;
+        }
         self.data.push(item);
         // refilter everything
         self.refilter();
