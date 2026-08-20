@@ -987,3 +987,50 @@ fn check_scroll_from_mouse_wheel() {
     a.add_window(w);
     a.run();
 }
+
+#[test]
+fn check_search_enter_on_empty_or_cleared_list_does_not_overflow() {
+    // Empty list: pos is the usize::MAX "no selection" sentinel.
+    // Typing a character enters search/edit mode; Enter used to overflow on `pos + 1`.
+    let mut empty = ListBox::new(layout!("d:f"), listbox::Flags::SearchBar);
+    assert_eq!(empty.count(), 0);
+    assert_eq!(empty.index(), usize::MAX);
+    assert!(OnKeyPressed::on_key_pressed(&mut empty, Key::from('a'), 'a') == EventProcessStatus::Processed);
+    assert!(OnKeyPressed::on_key_pressed(&mut empty, Key::from(KeyCode::Enter), 0 as char) == EventProcessStatus::Processed);
+    assert_eq!(empty.count(), 0);
+    assert_eq!(empty.index(), usize::MAX);
+
+    // After clear(), pos is reset to the same sentinel.
+    let mut cleared = ListBox::new(layout!("d:f"), listbox::Flags::SearchBar);
+    cleared.add("one");
+    cleared.add("two");
+    assert_eq!(cleared.index(), 0);
+    cleared.clear();
+    assert_eq!(cleared.count(), 0);
+    assert_eq!(cleared.index(), usize::MAX);
+    assert!(OnKeyPressed::on_key_pressed(&mut cleared, Key::from('a'), 'a') == EventProcessStatus::Processed);
+    assert!(OnKeyPressed::on_key_pressed(&mut cleared, Key::from(KeyCode::Enter), 0 as char) == EventProcessStatus::Processed);
+    assert_eq!(cleared.count(), 0);
+    assert_eq!(cleared.index(), usize::MAX);
+}
+
+#[test]
+fn check_search_enter_on_empty_list_ui() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial empty list')
+        CheckHash(0x66C560163CE331EB)
+        Key.TypeText('a')
+        Paint('Search mode with letter a')
+        CheckHash(0x1F2C0EA31A130551)
+        Key.Pressed(Enter)
+        Paint('Enter in search mode on empty list (no overflow)')
+        CheckHash(0x1F2C0EA31A130551)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
+    let l = ListBox::new(layout!("d:f"), listbox::Flags::SearchBar);
+    w.add(l);
+    a.add_window(w);
+    a.run();
+}
