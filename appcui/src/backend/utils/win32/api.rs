@@ -82,4 +82,7 @@ extern "system" {
     #[warn(non_camel_case_types)]
     pub(crate) fn GlobalUnlock(hMem: HANDLE) -> BOOL;
 
+    #[warn(non_camel_case_types)]
+    pub(crate) fn GlobalSize(hMem: HANDLE) -> usize;
+
 }
