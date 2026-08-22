@@ -2930,3 +2930,68 @@ fn check_mouse_click_outside_text() {
     a.run();
 
 }
+
+/// Deleting a selection that starts after multi-byte UTF-8 must place the cursor
+/// on a character column, not a byte offset (remove_text_selection).
+/// Without the fix, "éé" is 4 bytes so the cursor would land at column 4 instead of 2.
+#[test]
+fn delete_selection_after_multibyte_cursor_column() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right, 2)
+        Key.Pressed(Shift+Right, 5)
+        Key.Pressed(Backspace)
+        Paint('After deleting hello')
+        CheckCursor(3, 1)
+        CheckHash(0x6E10362D92DE705B)
+    ";
+
+    let textarea = TextArea::new("ééhello", layout!("d:f"), textarea::Flags::None);
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("UTF-8 column", layout!("d:f"), window::Flags::None);
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+/// Same mix-up with CJK (3-byte) characters, deleted via Delete.
+#[test]
+fn delete_selection_after_cjk_cursor_column() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right, 2)
+        Key.Pressed(Shift+Right, 2)
+        Key.Pressed(Delete)
+        Paint('After deleting xx')
+        CheckCursor(3, 1)
+        CheckHash(0x147C2B824033A0FF)
+    ";
+
+    let textarea = TextArea::new("你你xx", layout!("d:f"), textarea::Flags::None);
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("CJK column", layout!("d:f"), window::Flags::None);
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}
+
+/// Horizontal scroll past the window must skip by character columns, not byte offsets.
+/// Each '你' is 3 UTF-8 bytes; treating row_offset as a byte index paints the wrong slice.
+#[test]
+fn paint_horizontal_scroll_multibyte_uses_char_columns() {
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right, 20)
+        Paint('Scrolled past window over CJK')
+        CheckCursor(18, 1)
+        CheckHash(0x9D9531C91F91044)
+    ";
+
+    let text_print = "你".repeat(40);
+    let textarea = TextArea::new(&text_print, layout!("d:f"), textarea::Flags::None);
+    let mut a = App::debug(20, 8, script).build().unwrap();
+    let mut w = Window::new("CJK scroll", layout!("d:f"), window::Flags::None);
+    w.add(textarea);
+    a.add_window(w);
+    a.run();
+}

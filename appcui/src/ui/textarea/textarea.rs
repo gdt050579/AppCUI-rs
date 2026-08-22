@@ -1029,19 +1029,23 @@ impl TextArea {
         // Remove the selected text
         self.text.drain(pos_start..pos_end);
         
-        // Reposition the cursor to the start of the selection
+        // Reposition the cursor to the start of the selection.
+        // position_start_x is a byte offset within the line (used against line_sizes);
+        // cursor.pos_x and row_offset are character columns.
+        let line_start_byte = pos_start - position_start_x;
+        let position_start_char_x = self.text[line_start_byte..pos_start].chars().count();
         
         log!("Info", "Starting position: ({}, {})", position_start_x, position_start_y);
         log!("Info", "Cursor position: ({}, {})", self.cursor.pos_x, self.cursor.pos_y);
         log!("Info", "line_offset: {}, row_offset: {}", self.line_offset, self.row_offset);
         // Check if cursor can be position in current view for horizontal
-        if self.row_offset <= position_start_x as u32 && (position_start_x as u32) < self.row_offset + self.window_width {
-            self.cursor.pos_x = position_start_x - self.row_offset as usize;
+        if self.row_offset <= position_start_char_x as u32 && (position_start_char_x as u32) < self.row_offset + self.window_width {
+            self.cursor.pos_x = position_start_char_x - self.row_offset as usize;
         }
         // It does not, updating the view
         else {
             self.cursor.pos_x = 0;
-            self.row_offset = position_start_x as u32;
+            self.row_offset = position_start_char_x as u32;
         }
 
         // Check if cursor can be position in current view for vertical
@@ -1474,8 +1478,9 @@ impl OnPaint for TextArea {
                     let current_line_view = current_line;
                 
                     let mut counter = x as usize;
-                    for (ch_index, ch) in current_line_view.char_indices() {
-                        if ch_index < self.row_offset as usize {
+                    // row_offset is a character-column; char_indices() yields byte offsets
+                    for (char_col, (byte_idx, ch)) in current_line_view.char_indices().enumerate() {
+                        if char_col < self.row_offset as usize {
                             continue;
                         }
                         
@@ -1487,7 +1492,7 @@ impl OnPaint for TextArea {
                             continue;
                         }
 
-                        let absolute_position = initial_offset + ch_index as u32;
+                        let absolute_position = initial_offset + byte_idx as u32;
 
                         if self.selection.pos_start <= absolute_position as usize && (absolute_position as usize) < self.selection.pos_end {
                             surface.write_char(x, y, Character::with_attributes(ch, attr_selection));
