@@ -184,6 +184,39 @@ fn check_invalid_keys() {
 }
 
 #[test]
+fn check_unicode_char_count() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. initial state with café via set_password')
+        CheckCursor(17,3)
+        Key.TypeText('é')
+        Paint('2. typed extra multi-byte char')
+        CheckCursor(18,3)
+        Key.Pressed(Backspace)
+        Paint('3. deleted last char (back to café)')
+        CheckCursor(17,3)
+        Key.Pressed(Backspace,4)
+        Paint('4. empty after deleting café')
+        CheckCursor(13,3)
+        Key.TypeText('café')
+        Paint('5. typed café')
+        CheckCursor(17,3)
+        Mouse.Hold(20,3,left)
+        Paint('6. show password café')
+        CheckCursor(17,3)
+        Mouse.Release(20,3,left)
+        Paint('7. hide password')
+        CheckCursor(17,3)
+    ";
+    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+    w.add(password!("x:1,y:1,w:30,pass:café"));
+
+    a.add_window(w);
+    a.run();
+}
+
+#[test]
 fn check_no_events_implementation() {
     let script = "
         Paint.Enable(false)
