@@ -4,6 +4,7 @@ use crate::ui::password::events::EventData;
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
 pub struct Password {
     pass: String,
+    chars_count: u32,
     visible: bool,
 }
 impl Password {
@@ -20,6 +21,7 @@ impl Password {
         let mut p = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             pass: String::new(),
+            chars_count: 0,
             visible: false,
         };
         p.set_size_bounds(4, 1, u16::MAX, 1);
@@ -30,6 +32,7 @@ impl Password {
     pub fn set_password(&mut self, password: &str) {
         self.pass.clear();
         self.pass.push_str(password);
+        self.chars_count = password.chars().count() as u32;
     }
 
     /// Returns the current password string.
@@ -46,7 +49,7 @@ impl OnPaint for Password {
             _ if self.is_mouse_over() => theme.editor.hovered,
             _ => theme.editor.normal,
         };
-        let mut sz = self.pass.len() as u32;
+        let mut sz = self.chars_count;
         let w = self.size().width;
         if (sz + 3) >= w {
             sz = w - 3;
@@ -84,11 +87,14 @@ impl OnKeyPressed for Password {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
         if character as u32 > 0 {
             self.pass.push(character);
+            self.chars_count += 1;
             return EventProcessStatus::Processed;
         }
         match key.value() {
             key!("Back") => {
-                self.pass.pop();
+                if self.pass.pop().is_some() {
+                    self.chars_count -= 1;
+                }
                 return EventProcessStatus::Processed;
             }
             key!("Enter") => {
