@@ -5621,6 +5621,89 @@ fn check_proc_macro_listviewitem_order_from_0() {
 }
 
 #[test]
+fn check_prechecked_item_updates_selected_count() {
+    let mut lv = listview!("Person,d:f,flags:CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    lv.add_item(listview::Item::new(
+        Person::new("Alice", "9", "Paris"),
+        true,
+        None,
+        [' ', ' '],
+        listview::Group::None,
+    ));
+    lv.add_item(listview::Item::new(
+        Person::new("Bob", "10", "London"),
+        false,
+        None,
+        [' ', ' '],
+        listview::Group::None,
+    ));
+    assert_eq!(lv.selected_items_count(), 1);
+    assert!(lv.is_item_selected(0));
+    assert!(!lv.is_item_selected(1));
+
+    // Unchecking a pre-checked item must not underflow selected_items_count.
+    lv.select_item(0, false);
+    assert_eq!(lv.selected_items_count(), 0);
+
+    lv.add_batch(|lv| {
+        lv.add_item(listview::Item::new(
+            Person::new("Carol", "11", "Rome"),
+            true,
+            None,
+            [' ', ' '],
+            listview::Group::None,
+        ));
+        lv.add_item(listview::Item::new(
+            Person::new("Dave", "12", "Madrid"),
+            true,
+            None,
+            [' ', ' '],
+            listview::Group::None,
+        ));
+    });
+    assert_eq!(lv.selected_items_count(), 2);
+
+    lv.select_item(2, false);
+    assert_eq!(lv.selected_items_count(), 1);
+}
+
+#[test]
+fn check_prechecked_items_mixed_selection_count() {
+    let mut lv = listview!("Person,d:f,flags:CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+    lv.add_item(listview::Item::new(
+        Person::new("Alice", "9", "Paris"),
+        true,
+        None,
+        [' ', ' '],
+        listview::Group::None,
+    ));
+    lv.add_item(listview::Item::new(
+        Person::new("Bob", "10", "London"),
+        true,
+        None,
+        [' ', ' '],
+        listview::Group::None,
+    ));
+    lv.add_item(listview::Item::new(
+        Person::new("Carol", "11", "Rome"),
+        false,
+        None,
+        [' ', ' '],
+        listview::Group::None,
+    ));
+    assert_eq!(lv.items_count(), 3);
+    assert_eq!(lv.selected_items_count(), 2);
+    assert!(lv.is_item_selected(0));
+    assert!(lv.is_item_selected(1));
+    assert!(!lv.is_item_selected(2));
+
+    lv.select_item(0, false);
+    assert_eq!(lv.selected_items_count(), 1);
+    lv.select_item(1, false);
+    assert_eq!(lv.selected_items_count(), 0);
+}
+
+#[test]
 fn check_select_item_method() {
     #[Window(events=ListViewEvents<Person>, internal: true)]
     struct MyWin {}

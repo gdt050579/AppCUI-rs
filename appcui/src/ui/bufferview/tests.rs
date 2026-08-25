@@ -930,7 +930,7 @@ fn search_parser_f32_invalid() {
 
 #[test]
 fn search_parser_f64_prefix() {
-    assert_eq!(parse_ok("f64:3.14"), 3.14f64.to_le_bytes().to_vec());
+    assert_eq!(parse_ok("f64:2.625"), 2.625f64.to_le_bytes().to_vec());
     assert_eq!(parse_ok("f64:0, -1.0"), {
         let mut bytes = Vec::new();
         bytes.extend_from_slice(&0f64.to_le_bytes());

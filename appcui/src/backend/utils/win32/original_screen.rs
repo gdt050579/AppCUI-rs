@@ -15,8 +15,7 @@ pub(super) struct OriginalScreen {
 impl OriginalScreen {
     pub(super) fn new(stdout: HANDLE, size: Size, x: i32, y: i32, cursor_pos: COORD) -> Option<Self> {
         let sz = size.width as usize * size.height as usize;
-        let mut v: Vec<CHAR_INFO> = Vec::with_capacity(sz);
-        v.fill(CHAR_INFO { code: 0, attr: 0 });
+        let mut v: Vec<CHAR_INFO> = vec![CHAR_INFO { code: 0, attr: 0 }; sz];
         let mut sr = SMALL_RECT {
             left: x as i16,
             top: y as i16,

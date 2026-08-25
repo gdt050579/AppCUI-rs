@@ -19,11 +19,11 @@ impl Clipboard {
                 api::CloseClipboard();
                 return None;
             }
-            let mut len = 0;
-            let mut p = ptr;
-            while *p != 0 {
+            let byte_size = api::GlobalSize(hmem);
+            let max_chars = byte_size / std::mem::size_of::<u16>();
+            let mut len = 0usize;
+            while len < max_chars && *ptr.add(len) != 0 {
                 len += 1;
-                p = p.add(1);
             }
             let s = String::from_utf16_lossy(std::slice::from_raw_parts(ptr as *const u16, len));
             api::GlobalUnlock(hmem);
