@@ -30,7 +30,7 @@
 #![allow(dead_code)]
 
 use std::ffi::{CStr, CString};
-use std::{mem, ptr};
+use std::ptr;
 use super::constants::*;
 use super::externs::*;
 use super::structs::{LcCategory, WchResult, CURSOR_VISIBILITY, MEVENT};
@@ -233,12 +233,10 @@ pub(crate) fn ncurses_mvaddstr(y: i32, x: i32, s: &str) -> Result<i32, std::ffi:
 
 pub(crate) fn ncurses_curs_set(visibility: CURSOR_VISIBILITY) -> Option<CURSOR_VISIBILITY>
 {
-  unsafe
-  {
-    match curs_set(visibility as i32)
-    {
-      ERR => None,
-      ret => Some(mem::transmute::<i8, CURSOR_VISIBILITY>(ret as i8)),
+    match unsafe { curs_set(visibility as i32) } {
+        0 => Some(CURSOR_VISIBILITY::CURSOR_INVISIBLE),
+        1 => Some(CURSOR_VISIBILITY::CURSOR_VISIBLE),
+        2 => Some(CURSOR_VISIBILITY::CURSOR_VERY_VISIBLE),
+        _ => None,
     }
-  }
 }
