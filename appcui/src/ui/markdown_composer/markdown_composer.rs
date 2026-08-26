@@ -1,9 +1,10 @@
-use crate::graphics::SpecialChar;
 use crate::prelude::*;
-use crate::ui::markdown_composer::parser::{Span, SpanType};
 use crate::ui::markdown_composer::Flags;
-use crate::ui::markdown_composer::List;
 use crate::ui::markdown_composer::Parser;
+use crate::ui::markdown_composer::parser::{Span, SpanType};
+use crate::graphics::SpecialChar;
+use crate::system::RuntimeManager;
+use crate::ui::markdown_composer::List;
 
 const WHEEL_ROWS: u32 = 3;
 const BULLET: SpecialChar = SpecialChar::CircleFilled;
@@ -20,7 +21,17 @@ struct Popup {
     first: u32,
 }
 
-#[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed+OnExpand, internal=true)]
+impl Popup {
+    fn scroll_to_index(&mut self) {
+        if self.index < self.first {
+            self.first = self.index;
+        } else if self.index >= self.first + POPUP_ROWS {
+            self.first = self.index - POPUP_ROWS + 1;
+        }
+    }
+}
+
+#[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed+OnFocus, internal=true)]
 pub struct MarkdownComposer {
     text: String,
     surface: Surface,
@@ -33,8 +44,6 @@ pub struct MarkdownComposer {
     rows: u32,
     lists: Vec<List>,
     popup: Option<Popup>,
-    expanded: bool,
-    expanded_offset: i32,
 }
 
 impl MarkdownComposer {
@@ -52,8 +61,6 @@ impl MarkdownComposer {
             rows: 1,
             lists: Vec::new(),
             popup: None,
-            expanded: false,
-            expanded_offset: 0,
         };
         mc
     }
@@ -72,8 +79,6 @@ impl MarkdownComposer {
             rows: 1,
             lists: Vec::new(),
             popup: None,
-            expanded: false,
-            expanded_offset: 0,
         };
         mc
     }
@@ -149,7 +154,14 @@ impl MarkdownComposer {
             CharAttribute::new(foreground, background, CharFlags::None),
         ));
 
-        Self::paint_normal(&self.text, self.parser.spans(), &mut self.surface, foreground, background, self.first_row);
+        Self::paint_normal(
+            &self.text,
+            self.parser.spans(),
+            &mut self.surface,
+            foreground,
+            background,
+            self.first_row,
+        );
     }
 
     fn clamp_first_row(&mut self) {
@@ -228,15 +240,14 @@ impl MarkdownComposer {
 
     fn popup_close_list(&mut self) {
         self.popup = None;
-        self.pack();
     }
 
     fn popup_match_items(&mut self) {
-        let Some(mut popup) = self.popup.take() else {
+        let Some((list, start)) = self.popup.as_ref().map(|popup| (popup.list, popup.start)) else {
             return;
         };
 
-        let from = popup.start as usize + self.lists[popup.list].trigger().len_utf8();
+        let from = start as usize + self.lists[list].trigger().len_utf8();
         let to = self.cursor_offset as usize;
 
         if from > to || to > self.text.len() || self.text[from..to].contains('\n') {
@@ -245,35 +256,28 @@ impl MarkdownComposer {
         }
 
         let filter = self.text[from..to].to_lowercase();
-        popup.matches.clear();
+        let mut matches = Vec::new();
 
-        {
-            let list = &self.lists[popup.list];
-            for index in 0..list.len() {
-                let matched = match list.item(index) {
-                    Some(item) => filter.is_empty() || item.to_lowercase().contains(&filter),
-                    None => false,
-                };
-                if matched {
-                    popup.matches.push(index);
-                }
+        for index in 0..self.lists[list].len() {
+            let matched = match self.lists[list].item(index) {
+                Some(item) => filter.is_empty() || item.to_lowercase().contains(&filter),
+                None => false,
+            };
+            if matched {
+                matches.push(index);
             }
         }
 
-        if popup.matches.is_empty() {
+        if matches.is_empty() {
             self.popup_close_list();
             return;
         }
 
-        popup.index = popup.index.min(popup.matches.len() as u32 - 1);
-        if popup.index < popup.first {
-            popup.first = popup.index;
-        } else if popup.index >= popup.first + POPUP_ROWS {
-            popup.first = popup.index - POPUP_ROWS + 1;
+        if let Some(popup) = self.popup.as_mut() {
+            popup.matches = matches;
+            popup.index = popup.index.min(popup.matches.len() as u32 - 1);
+            popup.scroll_to_index();
         }
-
-        self.popup = Some(popup);
-        self.popup_expand_list();
     }
 
     fn popup_move_selection(&mut self, delta: i32) {
@@ -287,20 +291,17 @@ impl MarkdownComposer {
         }
 
         popup.index = (popup.index as i32 + delta).clamp(0, count - 1) as u32;
-
-        if popup.index < popup.first {
-            popup.first = popup.index;
-        } else if popup.index >= popup.first + POPUP_ROWS {
-            popup.first = popup.index - POPUP_ROWS + 1;
-        }
+        popup.scroll_to_index();
     }
 
     fn popup_insert_item(&mut self) {
-        let Some(popup) = self.popup.take() else {
+        let Some(popup) = self.popup.as_ref() else {
             return;
         };
 
+        let start = popup.start as usize;
         let mut replacement = String::new();
+
         if let Some(&item) = popup.matches.get(popup.index as usize) {
             let list = &self.lists[popup.list];
             if let Some(value) = list.item(item) {
@@ -314,7 +315,6 @@ impl MarkdownComposer {
             return;
         }
 
-        let start = popup.start as usize;
         let end = (self.cursor_offset as usize).min(self.text.len()).max(start);
         self.text.replace_range(start..end, &replacement);
         self.cursor_offset = (start + replacement.len()) as u32;
@@ -322,7 +322,15 @@ impl MarkdownComposer {
         self.update_surface();
     }
 
-    fn popup_get_list_rect(&self) -> Option<(i32, i32, u32, u32)> {
+    fn popup_get_trigger_row(&self) -> i32 {
+        let Some(popup) = self.popup.as_ref() else {
+            return 0;
+        };
+        let (_, trigger_y) = self.parser.get_position_from_offset(&self.text, popup.start);
+        trigger_y as i32 - self.first_row as i32
+    }
+
+    fn popup_get_list_size(&self) -> Option<(u32, u32)> {
         let popup = self.popup.as_ref()?;
         let list = self.lists.get(popup.list)?;
 
@@ -335,77 +343,80 @@ impl MarkdownComposer {
 
         let width = (text_width + 4).clamp(POPUP_MIN_WIDTH, POPUP_MAX_WIDTH);
         let height = (popup.matches.len() as u32).min(POPUP_ROWS) + 2;
+        Some((width, height))
+    }
+
+    fn popup_get_screen_limits(&self) -> (i32, i32) {
+        let terminal = RuntimeManager::get().terminal_size();
+        let top = -self.screen_origin.y;
+        let bottom = terminal.height as i32 - self.screen_origin.y;
+        (top, bottom)
+    }
+
+    fn popup_get_list_rect(&self) -> Option<Rect> {
+        let popup = self.popup.as_ref()?;
+        let (width, mut height) = self.popup_get_list_size()?;
 
         let size = self.size();
-        let (trigger_x, trigger_y) = self.parser.get_position_from_offset(&self.text, popup.start);
+        let (trigger_x, _) = self.parser.get_position_from_offset(&self.text, popup.start);
         let x = (trigger_x as i32).clamp(0, (size.width as i32 - width as i32).max(0));
-        let row = trigger_y as i32 - self.first_row as i32;
+        let row = self.popup_get_trigger_row();
+        let (top, bottom) = self.popup_get_screen_limits();
 
         let below = row + 1;
-        if below + (height as i32) <= size.height as i32 {
-            return Some((x, below, width, height));
+        if below + height as i32 <= bottom {
+            return Some(Rect::with_size(x, below, width as u16, height as u16));
         }
 
         let above = row - height as i32;
-        if above >= 0 {
-            return Some((x, above, width, height));
+        if above >= top {
+            return Some(Rect::with_size(x, above, width as u16, height as u16));
         }
 
-        Some((x, size.height as i32, width, height))
-    }
-
-    fn popup_get_paint_rect(&self) -> Option<(i32, i32, u32, u32)> {
-        let (x, y, width, height) = self.popup_get_list_rect()?;
-        if self.expanded {
-            return Some((x, y, width, height));
-        }
-        let limit = (self.size().height as i32 - height as i32).max(0);
-        Some((x, y.min(limit), width, height))
-    }
-
-    fn popup_expand_list(&mut self) {
-        let Some((_, y, _, _)) = self.popup_get_list_rect() else {
-            self.pack();
-            return;
-        };
-
-        let full = POPUP_ROWS + 2;
-        let needed = (y + full as i32 - self.size().height as i32).max(0) as u32;
-
-        if needed == 0 {
-            self.pack();
-            return;
+        height = height.min((bottom - top).max(0) as u32);
+        if height < 3 {
+            return None;
         }
 
-        let size = self.size();
-        let expanded = Size::new(size.width, size.height + needed);
-        self.expand(expanded, expanded);
+        let y = below.clamp(top, bottom - height as i32);
+        Some(Rect::with_size(x, y, width as u16, height as u16))
     }
 
     fn popup_paint_list(&self, surface: &mut Surface, theme: &Theme) {
         let Some(popup) = self.popup.as_ref() else {
             return;
         };
-        let Some((x, y, width, height)) = self.popup_get_paint_rect() else {
+        let Some(frame) = self.popup_get_list_rect() else {
             return;
         };
         let Some(list) = self.lists.get(popup.list) else {
             return;
         };
 
-        let y = y + self.expanded_offset;
+        let terminal = surface.size();
+        surface.set_base_clip(0, 0, terminal.width as i32 - 1, terminal.height as i32 - 1);
+        surface.reset_clip();
+
         let normal = theme.menu.text.normal;
         let selected = theme.menu.text.pressed_or_selected;
-        let frame = Rect::with_size(x, y, width as u16, height as u16);
+        let x = frame.left();
+        let y = frame.top();
 
         surface.fill_rect(frame, Character::with_attributes(' ', normal));
         surface.draw_rect(frame, LineType::Single, normal);
 
-        let inner = width - 2;
-        let visible = (popup.matches.len() as u32 - popup.first).min(POPUP_ROWS);
+        let inner = frame.width() - 2;
+        let rows = frame.height() - 2;
+
+        let mut first = popup.first;
+        if popup.index >= first + rows {
+            first = popup.index - rows + 1;
+        }
+
+        let visible = (popup.matches.len() as u32 - first).min(rows);
 
         for row in 0..visible {
-            let index = popup.first + row;
+            let index = first + row;
             let Some(&item) = popup.matches.get(index as usize) else {
                 continue;
             };
@@ -426,6 +437,10 @@ impl MarkdownComposer {
                 .build();
             surface.write_text(value, &format);
         }
+
+        let clip = self.screen_clip;
+        surface.set_base_clip(clip.left, clip.top, clip.right, clip.bottom);
+        surface.reset_clip();
     }
 
     fn span_attr(span_type: SpanType, foreground: Color, background: Color) -> CharAttribute {
@@ -518,7 +533,9 @@ impl MarkdownComposer {
                 continue;
             }
 
-            let busy = spans.iter().any(|span| span.y_pos == top - 1 || span.y_pos == bottom + 1);
+            let busy = spans
+                .iter()
+                .any(|span| span.y_pos == top - 1 || span.y_pos == bottom + 1);
             if busy {
                 continue;
             }
@@ -529,11 +546,22 @@ impl MarkdownComposer {
                 continue;
             }
 
-            surface.draw_rect(Rect::new(left as i32 - 1, outer_top, right as i32, outer_bottom), LineType::Single, attr);
+            surface.draw_rect(
+                Rect::new(left as i32 - 1, outer_top, right as i32, outer_bottom),
+                LineType::Single,
+                attr,
+            );
         }
     }
 
-    fn paint_normal(text: &str, spans: &[Span], surface: &mut Surface, foreground: Color, background: Color, first_row: u32) {
+    fn paint_normal(
+        text: &str,
+        spans: &[Span],
+        surface: &mut Surface,
+        foreground: Color,
+        background: Color,
+        first_row: u32,
+    ) {
         let bytes = text.as_bytes();
         let size = surface.size();
         let height = size.height as i32;
@@ -548,7 +576,11 @@ impl MarkdownComposer {
                 continue;
             }
 
-            surface.write_char(0, y, Character::with_attributes(QUOTE_BAR, Self::quote_bar_attr(background)));
+            surface.write_char(
+                0,
+                y,
+                Character::with_attributes(QUOTE_BAR, Self::quote_bar_attr(background)),
+            );
         }
 
         for span in spans {
@@ -569,7 +601,11 @@ impl MarkdownComposer {
 
             while i < span.end as usize {
                 let len = Parser::get_char_len(bytes[i]);
-                let ch = if bullet { BULLET.into() } else { Parser::get_char(bytes, i, len) };
+                let ch = if bullet {
+                    BULLET.into()
+                } else {
+                    Parser::get_char(bytes, i, len)
+                };
 
                 surface.write_char(x, y, Character::with_attributes(ch, attr));
 
@@ -595,7 +631,7 @@ impl MarkdownComposer {
                 continue;
             }
 
-            let y = span.y_pos as i32 - self.first_row as i32 + self.expanded_offset;
+            let y = span.y_pos as i32 - self.first_row as i32;
             if y < 0 || y >= height {
                 continue;
             }
@@ -786,20 +822,22 @@ impl MarkdownComposer {
 
 impl OnPaint for MarkdownComposer {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        surface.draw_surface(0, self.expanded_offset, &self.surface);
+        surface.draw_surface(0, 0, &self.surface);
         self.paint_selection(surface, theme);
-        self.popup_paint_list(surface, theme);
 
         if self.has_focus() {
-            surface.set_cursor(self.cursor_x as i32, self.cursor_y as i32 - self.first_row as i32 + self.expanded_offset);
+            surface.set_cursor(self.cursor_x as i32, self.cursor_y as i32 - self.first_row as i32);
         } else {
             surface.hide_cursor();
         }
+
+        self.popup_paint_list(surface, theme);
     }
 }
 
 impl OnResize for MarkdownComposer {
     fn on_resize(&mut self, _old_size: Size, _new_size: Size) {
+        self.popup_close_list();
         self.update_surface();
     }
 }
@@ -986,23 +1024,8 @@ impl OnKeyPressed for MarkdownComposer {
     }
 }
 
-impl OnExpand for MarkdownComposer {
-    fn on_expand(&mut self, direction: ExpandedDirection) {
-        match direction {
-            ExpandedDirection::OnBottom => {
-                self.expanded = true;
-                self.expanded_offset = 0;
-            }
-            ExpandedDirection::OnTop => {
-                self.expanded = false;
-                self.expanded_offset = 0;
-                self.pack();
-            }
-        }
-    }
-
-    fn on_pack(&mut self) {
-        self.expanded = false;
-        self.expanded_offset = 0;
+impl OnFocus for MarkdownComposer {
+    fn on_lose_focus(&mut self) {
+        self.popup_close_list();
     }
 }
