@@ -1401,6 +1401,39 @@ fn check_window_resize_mode_keys() {
     a.run();
 }
 
+/// A Sizeable window larger than the terminal must not panic in move/resize mode
+/// when Alt+arrows snap it to a desktop edge (`move_window_pos_to` clamp with a
+/// negative max bound: `screen_size - window_size`).
+#[test]
+fn check_window_move_when_larger_than_terminal() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Normal window enabled')
+        CheckHash(0x8A08E884EB4DC7F7)
+        Key.Pressed(Ctrl+Alt+M)
+        Paint('2. Resize mode enabled')
+        CheckHash(0x82668CAE1725EBFC)
+        Key.Pressed(Alt+Left)
+        Paint('3. Window moved to left')
+        CheckHash(0x82668CAE1725EBFC)
+        Key.Pressed(Alt+Right)
+        Paint('4. Window moved to right')
+        CheckHash(0x82668CAE1725EBFC)
+        Key.Pressed(Alt+Up)
+        Paint('5. Window moved to top')
+        CheckHash(0x82668CAE1725EBFC)
+        Key.Pressed(Alt+Down)
+        Paint('6. Window moved to bottom')
+        CheckHash(0x82668CAE1725EBFC)
+        Key.Pressed(Escape)
+        Paint('7. Resize mode disabled')
+        CheckHash(0x8A08E884EB4DC7F7)
+    ";
+    let mut a = App::debug(80, 24, script).build().unwrap();
+    a.add_window(Window::new("Title", layout!("x:0,y:0,w:200,h:60"), window::Flags::Sizeable));
+    a.run();
+}
+
 #[test]
 fn check_window_background() {
     let script = "
@@ -1673,12 +1706,7 @@ fn check_modal_window_close() {
     impl MyModalWin {
         fn new(value: i32) -> Self {
             let mut me = Self {
-                base: ModalWindow::with_background(
-                    "Modal",
-                    layout!("a:c,w:50,h:6"),
-                    window::Flags::None,
-                    window::Background::Notification,
-                ),
+                base: ModalWindow::with_background("Modal", layout!("a:c,w:50,h:6"), window::Flags::None, window::Background::Notification),
                 value,
             };
             if value % 2 == 0 {
