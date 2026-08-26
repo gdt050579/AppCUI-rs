@@ -617,8 +617,8 @@ impl Window {
         let screen_size = RuntimeManager::get().terminal_size();
         let mut pos = self.position();
         if keep_in_desktop_bounderies {
-            pos.x = (pos.x + add_x).clamp(0, screen_size.width as i32 - size.width as i32);
-            pos.y = (pos.y + add_y).clamp(0, screen_size.height as i32 - size.height as i32);
+            pos.x = (pos.x + add_x).clamp(0, (screen_size.width as i32 - size.width as i32).max(0));
+            pos.y = (pos.y + add_y).clamp(0, (screen_size.height as i32 - size.height as i32).max(0));
         } else {
             pos.x = (pos.x + add_x).clamp(0, screen_size.width as i32 - 1);
             pos.y = (pos.y + add_y).clamp(0, screen_size.height as i32 - 1);
