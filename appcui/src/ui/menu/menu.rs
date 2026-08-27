@@ -8,11 +8,10 @@ use crate::{
     prelude::KeyModifier,
     system::{Handle, HandleSupport, RuntimeManager, Theme},
     ui::common::traits::EventProcessStatus,
-    utils::{Strategy, VectorIndex},
+    utils::{Strategy, TempVec, VectorIndex},
 };
 use appcui_proc_macro::key;
 use std::sync::atomic::{AtomicUsize, Ordering};
-const MAX_ITEMS: usize = 128;
 static GLOBAL_MENUITEM_ID: AtomicUsize = AtomicUsize::new(0);
 
 /// A container for menu items that can be displayed over existing controls.
@@ -274,8 +273,7 @@ impl Menu {
     }
 
     fn move_currentitem_to(&mut self, key: Key) {
-        let mut idx: [usize; MAX_ITEMS] = [0usize; MAX_ITEMS];
-        let mut idx_count = 0usize;
+        let mut idx: TempVec<usize, 64> = TempVec::new();
         let items_count = self.items.len();
         for i in 0usize..items_count {
             let item = &self.items[i];
@@ -283,26 +281,23 @@ impl Menu {
                 continue;
             }
             if item.can_be_selected() {
-                idx[idx_count] = i;
-                idx_count += 1;
-            }
-            if idx_count >= items_count {
-                break;
+                idx.push(i);
             }
         }
-        if idx_count == 0 {
+        if idx.is_empty() {
             // no items or all items are disabled
             self.current = VectorIndex::Invalid;
             return;
         }
         // if CurrentItem is MenuItem::INVALID_INDEX ==> select the first available item
         if !self.current.in_range(items_count) {
-            self.current.set(idx[0], self.items.len(), false);
+            self.current.set(idx.as_slice()[0], self.items.len(), false);
         } else {
             // make sure that this->CurrentItem is part of the list
             let mut current_idx = VectorIndex::Invalid;
             let mut best_diff = usize::MAX;
-            for (index, item) in idx.iter().enumerate().take(idx_count) {
+            let idx_count = idx.len();
+            for (index, item) in idx.as_slice().iter().enumerate() {
                 let val = *item;
                 let diff = if val < self.current.index() {
                     self.current.index() - val
@@ -337,7 +332,7 @@ impl Menu {
                 KeyCode::End => current_idx = VectorIndex::last(idx_count),
                 _ => {}
             }
-            self.current.set(idx[current_idx.index()], self.items.len(), false);
+            self.current.set(idx.as_slice()[current_idx.index()], self.items.len(), false);
         }
 
         self.update_first_visible_item();
