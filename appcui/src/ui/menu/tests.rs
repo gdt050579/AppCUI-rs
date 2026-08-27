@@ -1121,7 +1121,7 @@ fn check_more_than_128_selectable_items_keyboard_navigation() {
         }
     }
     let script = "
-        //Paint.Enable(false)
+        Paint.Enable(false)
         Paint('1. Initial state')
         CheckHash(0xF8DE3D7F827850B3)
         Mouse.Click(3,0,left)
@@ -1129,7 +1129,7 @@ fn check_more_than_128_selectable_items_keyboard_navigation() {
         CheckHash(0xD2B4AACCDF294807)
         Key.Pressed(Down)
         Paint('3. Move down')
-        CheckHash(0x769320EBFCBC2E03)
+        CheckHash(0xF3887626D712DA4F)
     ";
     let mut a = App::debug(60, 12, script).app_bar().build().unwrap();
     a.add_window(MyWin::new());

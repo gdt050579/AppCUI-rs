@@ -9,6 +9,7 @@ pub (crate) mod navigator;
 pub (crate) mod log;
 pub (crate) mod fs;
 pub (crate) mod temp_buffer;
+pub (crate) mod temp_vec;
 pub (crate) mod string_comparison;
 #[cfg(test)]
 mod tests;
@@ -32,5 +33,6 @@ pub (crate) use self::navigator::NavigatorRoot;
 #[cfg(test)]
 pub (crate) use self::temp_buffer::TempBuffer;
 pub (crate) use self::temp_buffer::TempString;
+pub (crate) use self::temp_vec::TempVec;
 
 
