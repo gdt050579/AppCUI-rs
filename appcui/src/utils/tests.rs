@@ -6,6 +6,7 @@ use super::GlyphParser;
 use super::Strategy;
 use super::TempBuffer;
 use super::TempString;
+use super::TempVec;
 use super::VectorIndex;
 use crate::input::Key;
 use crate::input::KeyCode;
@@ -778,6 +779,97 @@ fn check_temp_buffer() {
     let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert!(buf.is_on_heap());
+}
+
+#[test]
+fn check_temp_vec() {
+    let mut v: TempVec<u8, 4> = TempVec::new();
+    assert!(v.is_empty());
+    assert_eq!(v.len(), 0);
+    assert_eq!(v.as_slice(), &[] as &[u8]);
+    assert!(!v.is_on_heap());
+    assert_eq!(v.get(0), None);
+    assert!(v.get_mut(0).is_none());
+
+    v.push(10);
+    v.push(20);
+    v.push(30);
+    assert!(!v.is_empty());
+    assert_eq!(v.len(), 3);
+    assert_eq!(v.as_slice(), &[10, 20, 30]);
+    assert!(!v.is_on_heap());
+    assert_eq!(v.get(0), Some(&10));
+    assert_eq!(v.get(1), Some(&20));
+    assert_eq!(v.get(2), Some(&30));
+    assert_eq!(v.get(3), None);
+
+    *v.get_mut(1).unwrap() = 21;
+    assert_eq!(v.as_slice(), &[10, 21, 30]);
+
+    v.push(40);
+    assert_eq!(v.len(), 4);
+    assert_eq!(v.as_slice(), &[10, 21, 30, 40]);
+    assert!(!v.is_on_heap());
+}
+
+#[test]
+fn check_temp_vec_moves_to_heap() {
+    let mut v: TempVec<u8, 3> = TempVec::new();
+    v.push(1);
+    v.push(2);
+    v.push(3);
+    assert!(!v.is_on_heap());
+    assert_eq!(v.as_slice(), &[1, 2, 3]);
+
+    v.push(4);
+    assert!(v.is_on_heap());
+    assert_eq!(v.len(), 4);
+    assert_eq!(v.as_slice(), &[1, 2, 3, 4]);
+    assert_eq!(v.get(0), Some(&1));
+    assert_eq!(v.get(3), Some(&4));
+    assert_eq!(v.get(4), None);
+
+    *v.get_mut(0).unwrap() = 9;
+    v.push(5);
+    assert!(v.is_on_heap());
+    assert_eq!(v.as_slice(), &[9, 2, 3, 4, 5]);
+}
+
+#[test]
+fn check_temp_vec_clear() {
+    let mut v: TempVec<i32, 2> = TempVec::new();
+    v.push(1);
+    v.push(2);
+    v.clear();
+    assert!(v.is_empty());
+    assert_eq!(v.len(), 0);
+    assert!(!v.is_on_heap());
+    assert!(v.get_mut(0).is_none());
+
+    v.push(3);
+    v.push(4);
+    v.push(5);
+    assert!(v.is_on_heap());
+    v.clear();
+    assert!(v.is_empty());
+    assert_eq!(v.as_slice(), &[] as &[i32]);
+    assert!(v.is_on_heap());
+
+    v.push(6);
+    assert_eq!(v.as_slice(), &[6]);
+    assert!(v.is_on_heap());
+}
+
+#[test]
+#[should_panic(expected = "N must be greater than 0")]
+fn check_temp_vec_n_zero() {
+    let _v: TempVec<u8, 0> = TempVec::new();
+}
+
+#[test]
+#[should_panic(expected = "N must be less than 65535")]
+fn check_temp_vec_n_too_large() {
+    let _v: TempVec<u8, 65535> = TempVec::new();
 }
 
 #[test]
