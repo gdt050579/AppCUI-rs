@@ -1093,3 +1093,45 @@ fn check_menu_command_methods() {
     ";
     App::debug(60, 15, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
 }
+
+#[test]
+fn check_more_than_128_selectable_items_keyboard_navigation() {
+    #[Window(events = AppBarEvents, commands=A, internal: true)]
+    struct MyWin {
+        m_file: Handle<MenuButton>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,a:c,w:40,h:8"),
+                m_file: Handle::None,
+            };
+            let mut m = Menu::new();
+            for i in 0..129 {
+                let caption = format!("Item {i}");
+                m.add(menu::Command::new(&caption, Key::None, mywin::Commands::A));
+            }
+            w.m_file = w.appbar().add(MenuButton::new("&Items", m, 0, Side::Left));
+            w
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_file);
+        }
+    }
+    let script = "
+        //Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF8DE3D7F827850B3)
+        Mouse.Click(3,0,left)
+        Paint('2. Menu open')
+        CheckHash(0xD2B4AACCDF294807)
+        Key.Pressed(Down)
+        Paint('3. Move down')
+        CheckHash(0x769320EBFCBC2E03)
+    ";
+    let mut a = App::debug(60, 12, script).app_bar().build().unwrap();
+    a.add_window(MyWin::new());
+    a.run();
+}
