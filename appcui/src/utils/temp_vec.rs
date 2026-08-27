@@ -39,6 +39,8 @@ impl<T: Copy, const N: usize> TempVec<T, N> {
             }
         }
     }
+    #[inline(always)]
+    #[cfg(test)]
     pub(crate) fn clear(&mut self) {
         match &mut self.inner {
             InnerTempVec::StackVec(vec) => {
@@ -57,6 +59,7 @@ impl<T: Copy, const N: usize> TempVec<T, N> {
         }
     }
     #[inline(always)]
+    #[cfg(test)]
     pub(crate) fn get(&self, index: usize) -> Option<&T> {
         match &self.inner {
             InnerTempVec::StackVec(vec) => {
@@ -72,6 +75,7 @@ impl<T: Copy, const N: usize> TempVec<T, N> {
         }
     }
     #[inline(always)]
+    #[cfg(test)]
     pub(crate) fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         match &mut self.inner {
             InnerTempVec::StackVec(vec) => {
