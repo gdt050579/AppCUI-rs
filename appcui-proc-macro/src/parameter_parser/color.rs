@@ -1,6 +1,62 @@
-#[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
 pub(crate) enum Color {
+    Black ,
+    DarkBlue,
+    DarkGreen,
+    Teal,
+    DarkRed,
+    Magenta,
+    Olive,
+    Silver,
+    Gray,
+    Blue,
+    Green,
+    Aqua,
+    Red,
+    Pink,
+    Yellow,
+    White,
+    Transparent,
+    RGB(u8, u8, u8),
+}
+
+impl Color {
+    fn from_hash_color_id(hash_color_id: HashColorID) -> Color {
+        match hash_color_id {
+            HashColorID::Black => Color::Black,
+            HashColorID::DarkBlue => Color::DarkBlue,
+            HashColorID::DarkGreen => Color::DarkGreen,
+            HashColorID::Teal => Color::Teal,
+            HashColorID::DarkRed => Color::DarkRed,
+            HashColorID::Magenta => Color::Magenta,
+            HashColorID::Olive => Color::Olive,
+            HashColorID::Silver => Color::Silver,
+            HashColorID::Gray => Color::Gray,
+            HashColorID::Blue => Color::Blue,
+            HashColorID::Green => Color::Green,
+            HashColorID::Aqua => Color::Aqua,
+            HashColorID::Red => Color::Red,
+            HashColorID::Pink => Color::Pink,
+            HashColorID::Yellow => Color::Yellow,
+            HashColorID::White => Color::White,
+            HashColorID::Transparent => Color::Transparent,
+        }
+    }
+    pub(crate) fn from_str(s: &str) -> Option<Color> {
+        if let Some(col_id) = HashColorID::from_hash(crate::utils::compute_hash(s)) {
+            return Some(Self::from_hash_color_id(col_id));
+        }
+        todo!()
+    }
+    pub(crate) fn write_ctor(&self, output: &mut String) {
+        output.push_str("Color::");
+        todo!()
+    }
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone, PartialEq)]
+pub(crate) enum HashColorID {
     Black = 0,
     DarkBlue = 1,
     DarkGreen = 2,
@@ -20,14 +76,14 @@ pub(crate) enum Color {
     Transparent = 16,
 }
 
-static HASH_TO_ALIGNAMENT: [Option<Color>; 127] = [
+static HASH_TO_ALIGNAMENT: [Option<HashColorID>; 127] = [
     None,
-    Some(Color::Silver),
+    Some(HashColorID::Silver),
     None,
-    Some(Color::Magenta),
+    Some(HashColorID::Magenta),
     None,
     None,
-    Some(Color::White),
+    Some(HashColorID::White),
     None,
     None,
     None,
@@ -37,7 +93,7 @@ static HASH_TO_ALIGNAMENT: [Option<Color>; 127] = [
     None,
     None,
     None,
-    Some(Color::Transparent),
+    Some(HashColorID::Transparent),
     None,
     None,
     None,
@@ -46,38 +102,38 @@ static HASH_TO_ALIGNAMENT: [Option<Color>; 127] = [
     None,
     None,
     None,
-    Some(Color::Blue),
+    Some(HashColorID::Blue),
     None,
-    Some(Color::Green),
+    Some(HashColorID::Green),
     None,
     None,
     None,
-    Some(Color::DarkGreen),
-    Some(Color::DarkBlue),
+    Some(HashColorID::DarkGreen),
+    Some(HashColorID::DarkBlue),
     None,
     None,
     None,
-    Some(Color::DarkGreen),
+    Some(HashColorID::DarkGreen),
     None,
     None,
     None,
-    Some(Color::Gray),
+    Some(HashColorID::Gray),
     None,
     None,
     None,
     None,
-    Some(Color::Pink),
-    Some(Color::DarkBlue),
+    Some(HashColorID::Pink),
+    Some(HashColorID::DarkBlue),
     None,
     None,
     None,
-    Some(Color::DarkRed),
+    Some(HashColorID::DarkRed),
     None,
     None,
-    Some(Color::DarkRed),
+    Some(HashColorID::DarkRed),
     None,
-    Some(Color::Red),
-    Some(Color::Green),
+    Some(HashColorID::Red),
+    Some(HashColorID::Green),
     None,
     None,
     None,
@@ -88,18 +144,18 @@ static HASH_TO_ALIGNAMENT: [Option<Color>; 127] = [
     None,
     None,
     None,
-    Some(Color::Red),
+    Some(HashColorID::Red),
     None,
-    Some(Color::Silver),
+    Some(HashColorID::Silver),
     None,
     None,
-    Some(Color::Aqua),
-    Some(Color::Teal),
-    Some(Color::Black),
+    Some(HashColorID::Aqua),
+    Some(HashColorID::Teal),
+    Some(HashColorID::Black),
     None,
-    Some(Color::Blue),
+    Some(HashColorID::Blue),
     None,
-    Some(Color::Gray),
+    Some(HashColorID::Gray),
     None,
     None,
     None,
@@ -109,7 +165,7 @@ static HASH_TO_ALIGNAMENT: [Option<Color>; 127] = [
     None,
     None,
     None,
-    Some(Color::Transparent),
+    Some(HashColorID::Transparent),
     None,
     None,
     None,
@@ -117,16 +173,16 @@ static HASH_TO_ALIGNAMENT: [Option<Color>; 127] = [
     None,
     None,
     None,
-    Some(Color::Transparent),
+    Some(HashColorID::Transparent),
     None,
     None,
     None,
-    Some(Color::Aqua),
+    Some(HashColorID::Aqua),
     None,
-    Some(Color::Olive),
-    Some(Color::Pink),
-    Some(Color::Yellow),
-    Some(Color::Yellow),
+    Some(HashColorID::Olive),
+    Some(HashColorID::Pink),
+    Some(HashColorID::Yellow),
+    Some(HashColorID::Yellow),
     None,
     None,
     None,
@@ -141,7 +197,7 @@ static HASH_TO_ALIGNAMENT: [Option<Color>; 127] = [
     None,
     None,
     None,
-    Some(Color::White),
+    Some(HashColorID::White),
     None,
     None,
     None,
@@ -280,33 +336,33 @@ static HASH_COLISION_VALIDATOR: [u64; 127] = [
     0x0,
 ];
 
-impl Color {
-    pub(super) fn from_hash(hash: u64) -> Option<Color> {
+impl HashColorID {
+    pub(super) fn from_hash(hash: u64) -> Option<HashColorID> {
         let entry_index = (hash % 127) as usize;
         if HASH_COLISION_VALIDATOR[entry_index] != hash {
             return None;
         }
         HASH_TO_ALIGNAMENT[entry_index]
     }
-    pub fn get_name(&self) -> &'static str {
-        match self {
-            Color::Black => "Black",
-            Color::DarkBlue => "DarkBlue",
-            Color::DarkGreen => "DarkGreen",
-            Color::Teal => "Teal",
-            Color::DarkRed => "DarkRed",
-            Color::Magenta => "Magenta",
-            Color::Olive => "Olive",
-            Color::Silver => "Silver",
-            Color::Gray => "Gray",
-            Color::Blue => "Blue",
-            Color::Green => "Green",
-            Color::Aqua => "Aqua",
-            Color::Red => "Red",
-            Color::Pink => "Pink",
-            Color::Yellow => "Yellow",
-            Color::White => "White",
-            Color::Transparent => "Transparent",
-        }
-    }
+    // pub fn get_name(&self) -> &'static str {
+    //     match self {
+    //         HashColorID::Black => "Black",
+    //         HashColorID::DarkBlue => "DarkBlue",
+    //         HashColorID::DarkGreen => "DarkGreen",
+    //         HashColorID::Teal => "Teal",
+    //         HashColorID::DarkRed => "DarkRed",
+    //         HashColorID::Magenta => "Magenta",
+    //         HashColorID::Olive => "Olive",
+    //         HashColorID::Silver => "Silver",
+    //         HashColorID::Gray => "Gray",
+    //         HashColorID::Blue => "Blue",
+    //         HashColorID::Green => "Green",
+    //         HashColorID::Aqua => "Aqua",
+    //         HashColorID::Red => "Red",
+    //         HashColorID::Pink => "Pink",
+    //         HashColorID::Yellow => "Yellow",
+    //         HashColorID::White => "White",
+    //         HashColorID::Transparent => "Transparent",
+    //     }
+    // }
 }

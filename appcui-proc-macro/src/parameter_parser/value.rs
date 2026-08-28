@@ -163,7 +163,7 @@ impl<'a> Value<'a> {
         if let ValueType::Color(value) = &self.data_type {
             return Some(*value);
         }
-        if let Some(value) = Color::from_hash(utils::compute_hash(self.raw_data)) {
+        if let Some(value) = Color::from_str(self.raw_data) {
             self.data_type = ValueType::Color(value);
             return Some(value);
         }

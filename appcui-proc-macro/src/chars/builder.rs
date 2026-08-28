@@ -83,8 +83,7 @@ fn unicode_number_to_value(text: &str) -> u32 {
 }
 fn add_color(output: &mut String, key: &str, dict: &mut NamedParamsMap) {
     let col = get_color(key, dict);
-    output.push_str("Color::");
-    output.push_str(col.get_name());
+    col.write_ctor(output);
 }
 fn get_attr(text: &str) -> Option<&'static str> {
     for value in CHAR_ATTR {
