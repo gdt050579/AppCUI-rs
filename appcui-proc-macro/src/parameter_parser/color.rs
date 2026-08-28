@@ -42,15 +42,45 @@ impl Color {
             HashColorID::Transparent => Color::Transparent,
         }
     }
+    fn from_rgb_repr(s: &str) -> Option<Color> {
+        todo!()
+    }
     pub(crate) fn from_str(s: &str) -> Option<Color> {
         if let Some(col_id) = HashColorID::from_hash(crate::utils::compute_hash(s)) {
             return Some(Self::from_hash_color_id(col_id));
         }
-        todo!()
+        Self::from_rgb_repr(s)
     }
     pub(crate) fn write_ctor(&self, output: &mut String) {
         output.push_str("Color::");
-        todo!()
+        match self {
+            Color::RGB(r, g, b) => {
+                output.push_str("RGB(");
+                output.push_str(&r.to_string());
+                output.push_str(", ");
+                output.push_str(&g.to_string());
+                output.push_str(", ");
+                output.push_str(&b.to_string());
+                output.push(')');
+            }
+            Color::Black => output.push_str("Black"),
+            Color::DarkBlue => output.push_str("DarkBlue"),
+            Color::DarkGreen => output.push_str("DarkGreen"),
+            Color::Teal => output.push_str("Teal"),
+            Color::DarkRed => output.push_str("DarkRed"),
+            Color::Magenta => output.push_str("Magenta"),
+            Color::Olive => output.push_str("Olive"),
+            Color::Silver => output.push_str("Silver"),
+            Color::Gray => output.push_str("Gray"),
+            Color::Blue => output.push_str("Blue"),
+            Color::Green => output.push_str("Green"),
+            Color::Aqua => output.push_str("Aqua"),
+            Color::Red => output.push_str("Red"),
+            Color::Pink => output.push_str("Pink"),
+            Color::Yellow => output.push_str("Yellow"),
+            Color::White => output.push_str("White"),
+            Color::Transparent => output.push_str("Transparent"),
+        }
     }
 }
 
@@ -344,25 +374,4 @@ impl HashColorID {
         }
         HASH_TO_ALIGNAMENT[entry_index]
     }
-    // pub fn get_name(&self) -> &'static str {
-    //     match self {
-    //         HashColorID::Black => "Black",
-    //         HashColorID::DarkBlue => "DarkBlue",
-    //         HashColorID::DarkGreen => "DarkGreen",
-    //         HashColorID::Teal => "Teal",
-    //         HashColorID::DarkRed => "DarkRed",
-    //         HashColorID::Magenta => "Magenta",
-    //         HashColorID::Olive => "Olive",
-    //         HashColorID::Silver => "Silver",
-    //         HashColorID::Gray => "Gray",
-    //         HashColorID::Blue => "Blue",
-    //         HashColorID::Green => "Green",
-    //         HashColorID::Aqua => "Aqua",
-    //         HashColorID::Red => "Red",
-    //         HashColorID::Pink => "Pink",
-    //         HashColorID::Yellow => "Yellow",
-    //         HashColorID::White => "White",
-    //         HashColorID::Transparent => "Transparent",
-    //     }
-    // }
 }
