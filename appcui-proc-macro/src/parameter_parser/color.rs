@@ -1,6 +1,6 @@
 #[derive(Copy, Clone, PartialEq)]
 pub(crate) enum Color {
-    Black ,
+    Black,
     DarkBlue,
     DarkGreen,
     Teal,
@@ -42,8 +42,109 @@ impl Color {
             HashColorID::Transparent => Color::Transparent,
         }
     }
+    fn hex_nibble(b: u8) -> Option<u8> {
+        match b {
+            b'0'..=b'9' => Some(b - b'0'),
+            b'a'..=b'f' => Some(b - b'a' + 10),
+            b'A'..=b'F' => Some(b - b'A' + 10),
+            _ => None,
+        }
+    }
+    fn extract_u8(s: &[u8], start: usize) -> Option<(u8, usize)> {
+        if s.len() == 0 {
+            return None;
+        }
+        let mut idx = start;
+        let mut num = 0u64;
+        while idx < s.len() && s[idx].is_ascii_digit() {
+            num = num * 10 + (s[idx] - b'0') as u64;
+            if num > 255 {
+                return None;
+            }
+            idx += 1;
+        }
+        if idx == start {
+            return None;
+        }
+        Some((num as u8, idx))
+    }
+    fn skip_whitespace(s: &[u8], start: usize) -> usize {
+        let mut idx = start;
+        while idx < s.len() && s[idx].is_ascii_whitespace() {
+            idx += 1;
+        }
+        idx
+    }
+    fn check_comma(s: &[u8], start: usize) -> Option<usize> {
+        let idx = Self::skip_whitespace(s, start);
+        if idx>=s.len() {
+            return None;
+        }
+        if s[idx] != b',' {
+            return None;
+        }
+        let idx = Self::skip_whitespace(s, idx + 1);
+        Some(idx)
+    }
+    fn from_diez_format(s: &str) -> Option<Color> {
+        let s = s.as_bytes();
+        // it is assumed that s[0] == '#'
+        if s.len() == 7 {
+            // #RRGGBB
+            let r = (Self::hex_nibble(s[1])? << 4) | Self::hex_nibble(s[2])?;
+            let g = (Self::hex_nibble(s[3])? << 4) | Self::hex_nibble(s[4])?;
+            let b = (Self::hex_nibble(s[5])? << 4) | Self::hex_nibble(s[6])?;
+            Some(Color::RGB(r, g, b))
+        } else if s.len() == 4 {
+            // #RGB -> each Self::hex_nibble is duplicated (0xF -> 0xFF)
+            let r = Self::hex_nibble(s[1])?;
+            let g = Self::hex_nibble(s[2])?;
+            let b = Self::hex_nibble(s[3])?;
+            Some(Color::RGB((r << 4) | r, (g << 4) | g, (b << 4) | b))
+        } else {
+            None
+        }
+    }
+    fn from_rgb_format(s: &str) -> Option<Color> {
+        // it is assumed that s starts with RGB
+        let s = s.as_bytes();
+        if *(s.last()?) != b')' {
+            return None;
+        }
+        let mut idx = 3;
+        while idx < s.len() && s[idx].is_ascii_whitespace() {
+            idx += 1;
+        }
+        if idx>=s.len() {
+            return None;
+        }
+        if s[idx] != b'(' {
+            return None;
+        }
+        // text to vaildate is between idx+1 and s.len()-1
+        let text_to_validate = &s[idx+1..s.len()-1];
+        // text_to_validate is number, number, number with any number of whitespace characters between numbers
+        let idx = Self::skip_whitespace(text_to_validate, 0);
+        let (r, idx) = Self::extract_u8(text_to_validate, idx)?;
+        let idx = Self::check_comma(text_to_validate, idx)?;
+        let (g, idx) = Self::extract_u8(text_to_validate, idx)?;
+        let idx = Self::check_comma(text_to_validate, idx)?;
+        let (b, idx) = Self::extract_u8(text_to_validate, idx)?;
+        let idx = Self::skip_whitespace(text_to_validate, idx);
+        if idx < text_to_validate.len() {
+            return None;
+        }
+        Some(Color::RGB(r, g, b))
+    }
     fn from_rgb_repr(s: &str) -> Option<Color> {
-        todo!()
+        let s = s.trim();
+        if s.starts_with('#') {
+            Self::from_diez_format(s)
+        } else if (s.len() > 3) && ((s.as_bytes()[0] | 0x20) == b'r') && ((s.as_bytes()[1] | 0x20) == b'g') && ((s.as_bytes()[2] | 0x20) == b'b') {
+            Self::from_rgb_format(s)
+        } else {
+            None
+        }
     }
     pub(crate) fn from_str(s: &str) -> Option<Color> {
         if let Some(col_id) = HashColorID::from_hash(crate::utils::compute_hash(s)) {
