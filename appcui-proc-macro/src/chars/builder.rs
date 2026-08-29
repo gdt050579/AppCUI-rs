@@ -57,7 +57,7 @@ fn get_color(param_name: &str, dict: &mut NamedParamsMap) -> Color {
         return color;
     }
     panic!(
-        "Invalid color value {} for parameter '{}'",
+        "Invalid color value '{}' for parameter '{}'. Expected a color name (Black, DarkBlue, DarkGreen, Teal, DarkRed, Magenta, Olive, Silver, Gray, Blue, Green, Aqua, Red, Pink, Yellow, White, Transparent), a hex color (#RGB or #RRGGBB) or an RGB color (rgb(r, g, b) with values from 0 to 255)",
         dict.get(param_name).unwrap().get_string(),
         param_name
     );
@@ -83,8 +83,7 @@ fn unicode_number_to_value(text: &str) -> u32 {
 }
 fn add_color(output: &mut String, key: &str, dict: &mut NamedParamsMap) {
     let col = get_color(key, dict);
-    output.push_str("Color::");
-    output.push_str(col.get_name());
+    col.write_ctor(output);
 }
 fn get_attr(text: &str) -> Option<&'static str> {
     for value in CHAR_ATTR {

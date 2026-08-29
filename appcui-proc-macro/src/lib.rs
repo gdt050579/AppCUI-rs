@@ -718,8 +718,13 @@ pub fn key(input: TokenStream) -> TokenStream {
 /// 
 /// # Color Values
 /// 
-/// Colors can be specified using their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, 
-/// `db` for DarkBlue). `Transparent` can be specified as `transparent`, `invisible` or `?`.
+/// Colors can be specified using:
+/// * their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, `db` for DarkBlue)
+/// * `Transparent` as `transparent`, `invisible` or `?`
+/// * hex format `#RGB` or `#RRGGBB` (e.g. `#F00` or `#FF0000`) — requires the `TRUE_COLORS` feature
+/// * RGB format `rgb(r, g, b)` with values from 0 to 255 (e.g. `rgb(255, 128, 0)`). Because this format contains commas, it must be quoted: `fore='rgb(255, 128, 0)'`. Requires the `TRUE_COLORS` feature
+/// 
+/// Hex and RGB formats are case-insensitive and generate `Color::RGB(r, g, b)`.
 /// 
 /// # Special Characters
 /// 
@@ -744,6 +749,10 @@ pub fn key(input: TokenStream) -> TokenStream {
 /// // Red left arrow with transparent background
 /// let c = char!("<-,red");
 /// let c = char!("<-,r");
+/// 
+/// // Custom RGB colors (requires the TRUE_COLORS feature)
+/// let c = char!("A,#FF0000,#00FF00");
+/// let c = char!("A,fore='#F80',back='rgb(10, 20, 30)'");
 /// ```
 #[proc_macro]
 pub fn char(input: TokenStream) -> TokenStream {
@@ -779,8 +788,13 @@ pub fn char(input: TokenStream) -> TokenStream {
 /// 
 /// # Color Values
 /// 
-/// Colors can be specified using their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, 
-/// `db` for DarkBlue). `Transparent` can be specified as `transparent`, `invisible` or `?`.
+/// Colors can be specified using:
+/// * their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, `db` for DarkBlue)
+/// * `Transparent` as `transparent`, `invisible` or `?`
+/// * hex format `#RGB` or `#RRGGBB` (e.g. `#F00` or `#FF0000`) — requires the `TRUE_COLORS` feature
+/// * RGB format `rgb(r, g, b)` with values from 0 to 255 (e.g. `rgb(255, 128, 0)`). Because this format contains commas, it must be quoted: `fore='rgb(255, 128, 0)'`. Requires the `TRUE_COLORS` feature
+/// 
+/// Hex and RGB formats are case-insensitive and generate `Color::RGB(r, g, b)`.
 /// 
 /// # Examples
 /// 
@@ -793,6 +807,10 @@ pub fn char(input: TokenStream) -> TokenStream {
 /// // Creating and using a character attribute
 /// let attr = charattr!("red,blue");
 /// let c = Character::with_attr('A', attr);
+/// 
+/// // Custom RGB colors (requires the TRUE_COLORS feature)
+/// let attr = charattr!("#FF0000,#00FF00");
+/// let attr = charattr!("fore='rgb(255, 128, 0)',back=#112233");
 /// ```
 #[proc_macro]
 pub fn charattr(input: TokenStream) -> TokenStream {
