@@ -57,7 +57,7 @@ fn get_color(param_name: &str, dict: &mut NamedParamsMap) -> Color {
         return color;
     }
     panic!(
-        "Invalid color value {} for parameter '{}'",
+        "Invalid color value '{}' for parameter '{}'. Expected a color name (Black, DarkBlue, DarkGreen, Teal, DarkRed, Magenta, Olive, Silver, Gray, Blue, Green, Aqua, Red, Pink, Yellow, White, Transparent), a hex color (#RGB or #RRGGBB) or an RGB color (rgb(r, g, b) with values from 0 to 255)",
         dict.get(param_name).unwrap().get_string(),
         param_name
     );

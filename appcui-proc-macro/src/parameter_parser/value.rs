@@ -390,8 +390,8 @@ impl<'a> Value<'a> {
         Err(Error::new(
             param_list,
             format!(
-                "Expecting an color name (Black,DarkBlue,DarkGreen,Teal,DarkRed,Magenta,Olive,Silver,Gray,Blue,Green,Aqua,Red,Pink,Yellow,White,Transparent) for parameter '{}' but found '{}'",
-                display_param_name, self.raw_data
+                "Invalid color '{}' for parameter '{}'. Expected a color name (Black, DarkBlue, DarkGreen, Teal, DarkRed, Magenta, Olive, Silver, Gray, Blue, Green, Aqua, Red, Pink, Yellow, White, Transparent), a hex color (#RGB or #RRGGBB, e.g. #F00 or #FF0000) or an RGB color (rgb(r, g, b) with values from 0 to 255, e.g. rgb(255, 128, 0))",
+                self.raw_data, display_param_name
             )
             .as_str(),
             self.start,

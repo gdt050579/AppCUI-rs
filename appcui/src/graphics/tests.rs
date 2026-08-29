@@ -904,6 +904,60 @@ fn check_char_macro() {
     assert_eq!(char!("_|"), Character::with_char(SpecialChar::BoxBottomRightCornerSingleLine));
 }
 
+#[cfg(feature = "TRUE_COLORS")]
+#[test]
+fn check_char_macro_true_colors() {
+    assert_eq!(
+        char!("X,#FF0000,#00FF00"),
+        Character::new('X', Color::RGB(255, 0, 0), Color::RGB(0, 255, 0), CharFlags::None)
+    );
+    assert_eq!(
+        char!("X,#F00,#0F0"),
+        Character::new('X', Color::RGB(255, 0, 0), Color::RGB(0, 255, 0), CharFlags::None)
+    );
+    assert_eq!(
+        char!("X,#abc,#ABC"),
+        Character::new('X', Color::RGB(170, 187, 204), Color::RGB(170, 187, 204), CharFlags::None)
+    );
+    assert_eq!(
+        char!("X,fore=#1A2B3C,back=#80FF00"),
+        Character::new('X', Color::RGB(26, 43, 60), Color::RGB(128, 255, 0), CharFlags::None)
+    );
+    assert_eq!(
+        char!("A,'rgb(255,128,0)',black"),
+        Character::new('A', Color::RGB(255, 128, 0), Color::Black, CharFlags::None)
+    );
+    assert_eq!(
+        char!("A,fore='RGB(10, 20, 30)',back='rgb( 1 , 2 , 3 )'"),
+        Character::new('A', Color::RGB(10, 20, 30), Color::RGB(1, 2, 3), CharFlags::None)
+    );
+    assert_eq!(
+        char!("B,#fff,'rgb(0,0,0)'"),
+        Character::new('B', Color::RGB(255, 255, 255), Color::RGB(0, 0, 0), CharFlags::None)
+    );
+}
+
+#[cfg(feature = "TRUE_COLORS")]
+#[test]
+fn check_charattr_macro_true_colors() {
+    assert_eq!(
+        charattr!("#FF8800,#112233"),
+        CharAttribute::new(Color::RGB(255, 136, 0), Color::RGB(17, 34, 51), CharFlags::None)
+    );
+    assert_eq!(
+        charattr!("#abc,#ABC"),
+        CharAttribute::new(Color::RGB(170, 187, 204), Color::RGB(170, 187, 204), CharFlags::None)
+    );
+    assert_eq!(
+        charattr!("'rgb(9,8,7)',#0F0"),
+        CharAttribute::new(Color::RGB(9, 8, 7), Color::RGB(0, 255, 0), CharFlags::None)
+    );
+    assert_eq!(
+        charattr!("fore='rgb(255, 0, 128)',back=#00F"),
+        CharAttribute::new(Color::RGB(255, 0, 128), Color::RGB(0, 0, 255), CharFlags::None)
+    );
+}
+
 #[test]
 fn check_charattr_macro() {
     assert_eq!(charattr!("Red,Green"), CharAttribute::new(Color::Red, Color::Green, CharFlags::None));

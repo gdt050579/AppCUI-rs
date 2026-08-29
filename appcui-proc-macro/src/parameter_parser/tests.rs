@@ -78,3 +78,59 @@ fn check_size() {
     assert_eq!(Size::from_str(" x 2"), None);
     assert_eq!(Size::from_str(" 5 x 2     a"), None);
 }
+
+fn color_ctor(s: &str) -> String {
+    let color = super::color::Color::from_str(s).unwrap_or_else(|| panic!("failed to parse color '{s}'"));
+    let mut output = String::new();
+    color.write_ctor(&mut output);
+    output
+}
+
+#[test]
+fn check_color_named() {
+    assert_eq!(color_ctor("red"), "Color::Red");
+    assert_eq!(color_ctor("r"), "Color::Red");
+    assert_eq!(color_ctor("DarkBlue"), "Color::DarkBlue");
+    assert_eq!(color_ctor("db"), "Color::DarkBlue");
+    assert_eq!(color_ctor("transparent"), "Color::Transparent");
+    assert_eq!(color_ctor("?"), "Color::Transparent");
+}
+
+#[test]
+fn check_color_hex() {
+    assert_eq!(color_ctor("#FF0000"), "Color::RGB(255, 0, 0)");
+    assert_eq!(color_ctor("#00ff00"), "Color::RGB(0, 255, 0)");
+    assert_eq!(color_ctor("#0000FF"), "Color::RGB(0, 0, 255)");
+    assert_eq!(color_ctor("#1A2B3C"), "Color::RGB(26, 43, 60)");
+    assert_eq!(color_ctor("#F00"), "Color::RGB(255, 0, 0)");
+    assert_eq!(color_ctor("#0f0"), "Color::RGB(0, 255, 0)");
+    assert_eq!(color_ctor("#abc"), "Color::RGB(170, 187, 204)");
+    assert_eq!(color_ctor("#ABC"), "Color::RGB(170, 187, 204)");
+    assert_eq!(color_ctor("  #80FF00  "), "Color::RGB(128, 255, 0)");
+}
+
+#[test]
+fn check_color_rgb() {
+    assert_eq!(color_ctor("rgb(255,0,0)"), "Color::RGB(255, 0, 0)");
+    assert_eq!(color_ctor("RGB(0, 128, 255)"), "Color::RGB(0, 128, 255)");
+    assert_eq!(color_ctor("Rgb(1,2,3)"), "Color::RGB(1, 2, 3)");
+    assert_eq!(color_ctor("rgb( 10 , 20 , 30 )"), "Color::RGB(10, 20, 30)");
+    assert_eq!(color_ctor("rgb  (0,0,0)"), "Color::RGB(0, 0, 0)");
+    assert_eq!(color_ctor("rgb(255, 255, 255)"), "Color::RGB(255, 255, 255)");
+}
+
+#[test]
+fn check_color_invalid() {
+    use super::color::Color;
+
+    assert!(Color::from_str("notacolor").is_none());
+    assert!(Color::from_str("#FF").is_none());
+    assert!(Color::from_str("#GGGGGG").is_none());
+    assert!(Color::from_str("#12345").is_none());
+    assert!(Color::from_str("rgb(256,0,0)").is_none());
+    assert!(Color::from_str("rgb(1,300,2)").is_none());
+    assert!(Color::from_str("rgb(1,2)").is_none());
+    assert!(Color::from_str("rgb(1,2,3,4)").is_none());
+    assert!(Color::from_str("rgb(1,2,3").is_none());
+    assert!(Color::from_str("rgb 1,2,3").is_none());
+}
