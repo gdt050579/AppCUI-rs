@@ -21,27 +21,6 @@ pub(crate) enum Color {
 }
 
 impl Color {
-    fn from_hash_color_id(hash_color_id: HashColorID) -> Color {
-        match hash_color_id {
-            HashColorID::Black => Color::Black,
-            HashColorID::DarkBlue => Color::DarkBlue,
-            HashColorID::DarkGreen => Color::DarkGreen,
-            HashColorID::Teal => Color::Teal,
-            HashColorID::DarkRed => Color::DarkRed,
-            HashColorID::Magenta => Color::Magenta,
-            HashColorID::Olive => Color::Olive,
-            HashColorID::Silver => Color::Silver,
-            HashColorID::Gray => Color::Gray,
-            HashColorID::Blue => Color::Blue,
-            HashColorID::Green => Color::Green,
-            HashColorID::Aqua => Color::Aqua,
-            HashColorID::Red => Color::Red,
-            HashColorID::Pink => Color::Pink,
-            HashColorID::Yellow => Color::Yellow,
-            HashColorID::White => Color::White,
-            HashColorID::Transparent => Color::Transparent,
-        }
-    }
     fn hex_nibble(b: u8) -> Option<u8> {
         match b {
             b'0'..=b'9' => Some(b - b'0'),
@@ -77,7 +56,7 @@ impl Color {
     }
     fn check_comma(s: &[u8], start: usize) -> Option<usize> {
         let idx = Self::skip_whitespace(s, start);
-        if idx>=s.len() {
+        if idx >= s.len() {
             return None;
         }
         if s[idx] != b',' {
@@ -115,14 +94,14 @@ impl Color {
         while idx < s.len() && s[idx].is_ascii_whitespace() {
             idx += 1;
         }
-        if idx>=s.len() {
+        if idx >= s.len() {
             return None;
         }
         if s[idx] != b'(' {
             return None;
         }
         // text to vaildate is between idx+1 and s.len()-1
-        let text_to_validate = &s[idx+1..s.len()-1];
+        let text_to_validate = &s[idx + 1..s.len() - 1];
         // text_to_validate is number, number, number with any number of whitespace characters between numbers
         let idx = Self::skip_whitespace(text_to_validate, 0);
         let (r, idx) = Self::extract_u8(text_to_validate, idx)?;
@@ -147,10 +126,40 @@ impl Color {
         }
     }
     pub(crate) fn from_str(s: &str) -> Option<Color> {
-        if let Some(col_id) = HashColorID::from_hash(crate::utils::compute_hash(s)) {
-            return Some(Self::from_hash_color_id(col_id));
+        const MAX_COLOR_NAME_LENGTH: usize = 16;
+        if s.len() > MAX_COLOR_NAME_LENGTH {
+            return Self::from_rgb_repr(s);
         }
-        Self::from_rgb_repr(s)
+        let mut buf: [u8;MAX_COLOR_NAME_LENGTH] = [0;MAX_COLOR_NAME_LENGTH];
+        for (i, b) in s.as_bytes().iter().enumerate() {
+            let ch = (*b).to_ascii_lowercase();
+            if ch > 127 {
+                return None;
+            }
+            buf[i] = ch;
+        }
+        let lower = std::str::from_utf8(&buf[..s.len()]).unwrap();
+        let named = match lower {
+            "black" => Some(Color::Black),
+            "darkblue" | "db" => Some(Color::DarkBlue),
+            "darkgreen" | "dg" => Some(Color::DarkGreen),
+            "teal" => Some(Color::Teal),
+            "darkred" | "dr" => Some(Color::DarkRed),
+            "magenta" => Some(Color::Magenta),
+            "olive" => Some(Color::Olive),
+            "silver" | "gray75" => Some(Color::Silver),
+            "gray" | "gray50" => Some(Color::Gray),
+            "blue" | "b" => Some(Color::Blue),
+            "green" | "g" => Some(Color::Green),
+            "aqua" | "a" => Some(Color::Aqua),
+            "red" | "r" => Some(Color::Red),
+            "pink" => Some(Color::Pink),
+            "yellow" | "y" => Some(Color::Yellow),
+            "white" | "w" => Some(Color::White),
+            "transparent" | "invisible" | "?" => Some(Color::Transparent),
+            _ => None,
+        };
+        named.or_else(|| Self::from_rgb_repr(s))
     }
     pub(crate) fn write_ctor(&self, output: &mut String) {
         output.push_str("Color::");
@@ -182,297 +191,5 @@ impl Color {
             Color::White => output.push_str("White"),
             Color::Transparent => output.push_str("Transparent"),
         }
-    }
-}
-
-#[repr(u8)]
-#[derive(Copy, Clone, PartialEq)]
-pub(crate) enum HashColorID {
-    Black = 0,
-    DarkBlue = 1,
-    DarkGreen = 2,
-    Teal = 3,
-    DarkRed = 4,
-    Magenta = 5,
-    Olive = 6,
-    Silver = 7,
-    Gray = 8,
-    Blue = 9,
-    Green = 10,
-    Aqua = 11,
-    Red = 12,
-    Pink = 13,
-    Yellow = 14,
-    White = 15,
-    Transparent = 16,
-}
-
-static HASH_TO_ALIGNAMENT: [Option<HashColorID>; 127] = [
-    None,
-    Some(HashColorID::Silver),
-    None,
-    Some(HashColorID::Magenta),
-    None,
-    None,
-    Some(HashColorID::White),
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    Some(HashColorID::Transparent),
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    Some(HashColorID::Blue),
-    None,
-    Some(HashColorID::Green),
-    None,
-    None,
-    None,
-    Some(HashColorID::DarkGreen),
-    Some(HashColorID::DarkBlue),
-    None,
-    None,
-    None,
-    Some(HashColorID::DarkGreen),
-    None,
-    None,
-    None,
-    Some(HashColorID::Gray),
-    None,
-    None,
-    None,
-    None,
-    Some(HashColorID::Pink),
-    Some(HashColorID::DarkBlue),
-    None,
-    None,
-    None,
-    Some(HashColorID::DarkRed),
-    None,
-    None,
-    Some(HashColorID::DarkRed),
-    None,
-    Some(HashColorID::Red),
-    Some(HashColorID::Green),
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    Some(HashColorID::Red),
-    None,
-    Some(HashColorID::Silver),
-    None,
-    None,
-    Some(HashColorID::Aqua),
-    Some(HashColorID::Teal),
-    Some(HashColorID::Black),
-    None,
-    Some(HashColorID::Blue),
-    None,
-    Some(HashColorID::Gray),
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    Some(HashColorID::Transparent),
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    Some(HashColorID::Transparent),
-    None,
-    None,
-    None,
-    Some(HashColorID::Aqua),
-    None,
-    Some(HashColorID::Olive),
-    Some(HashColorID::Pink),
-    Some(HashColorID::Yellow),
-    Some(HashColorID::Yellow),
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-    Some(HashColorID::White),
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
-];
-
-static HASH_COLISION_VALIDATOR: [u64; 127] = [
-    0x0,
-    0xDB7D47CB10B772A0,
-    0x0,
-    0x6C90E772EDBC8708,
-    0x0,
-    0x0,
-    0xAF63EA4C86020456,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0xAF63B24C8601A52E,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0xC5CCD29BC2DDA64D,
-    0x0,
-    0xAF63DA4C8601E926,
-    0x0,
-    0x0,
-    0x0,
-    0xDFB890FA554DCD7C,
-    0x8914E07B53BA1E3,
-    0x0,
-    0x0,
-    0x0,
-    0x8915107B53BA6FC,
-    0x0,
-    0x0,
-    0x0,
-    0xFB6FAA7243F4459A,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0xBF30EC0DC5331C0D,
-    0xA1A82D75FD18630D,
-    0x0,
-    0x0,
-    0x0,
-    0x9489A9902E6C5BDC,
-    0x0,
-    0x0,
-    0x8913E07B53B86B3,
-    0x0,
-    0xAF63EF4C86020CD5,
-    0xF40F029637FECBC,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x89E9BE1960F4C21C,
-    0x0,
-    0xC2B3DF77074135A6,
-    0x0,
-    0x0,
-    0xAF63DC4C8601EC8C,
-    0xFA23DAEF19AFC4DF,
-    0x4B5DD0ABBC6FC1E4,
-    0x0,
-    0xAF63DF4C8601F1A5,
-    0x0,
-    0xC2BAF07707477137,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0xEB0A3EBE378076F0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0xBDBDA3148488BB71,
-    0x0,
-    0x0,
-    0x0,
-    0x7E2F198437C28B35,
-    0x0,
-    0x73D4BFA38E3F676C,
-    0xCBF29CE484222325,
-    0xAF63F44C86021554,
-    0x8346A574925E75A9,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0xCED973885856E206,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-    0x0,
-];
-
-impl HashColorID {
-    pub(super) fn from_hash(hash: u64) -> Option<HashColorID> {
-        let entry_index = (hash % 127) as usize;
-        if HASH_COLISION_VALIDATOR[entry_index] != hash {
-            return None;
-        }
-        HASH_TO_ALIGNAMENT[entry_index]
     }
 }
