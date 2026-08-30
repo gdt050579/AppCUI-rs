@@ -156,12 +156,6 @@ macro_rules! impl_internal_builder_methods {
             self
         }
 
-        /// Builds the application using the current settings.
-        #[inline(always)]
-        pub fn build(self) -> Result<crate::system::App, crate::system::Error> {
-            self.builder.build()
-        }
-
         /// Sets the debug script to use.
         /// Creates a builder designed for unit testing.
         /// The provided parameters indicated:

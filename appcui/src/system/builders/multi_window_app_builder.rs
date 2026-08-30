@@ -1,15 +1,23 @@
 use super::impl_internal_builder_methods;
 use super::InternalBuilder;
+use crate::system::RuntimeManager;
+use crate::ui::common::traits::Control;
+use crate::ui::common::traits::NotModalWindow;
+use crate::ui::common::traits::WindowControl;
 
 /// Builder for a multi-window AppCUI application.
+type WindowFactory = Box<dyn FnOnce(&mut RuntimeManager)>;
+
 pub struct MultiWindowAppBuilder {
     builder: InternalBuilder,
+    window_factories: Vec<WindowFactory>,
 }
 
 impl MultiWindowAppBuilder {
     pub(crate) fn new() -> Self {
         Self {
             builder: InternalBuilder::new(),
+            window_factories: Vec::new(),
         }
     }
     /// Enables the Application bar.
@@ -48,6 +56,27 @@ impl MultiWindowAppBuilder {
     {
         self.builder.desktop(desktop);
         self
+    }
+
+    pub fn window<F, T>(mut self, factory: F) -> Self
+    where
+        F: FnOnce() -> T + 'static,
+        T: Control + WindowControl + NotModalWindow + 'static,
+    {
+        self.window_factories.push(Box::new(move |rt: &mut RuntimeManager| {
+            let _handle = rt.add_window(factory()); // T consumed here; handle discarded
+        }));
+        self
+    }
+
+    /// Builds the application using the current settings.
+    #[inline(always)]
+    pub fn build(mut self) -> Result<crate::system::App, crate::system::Error> {
+        let app = self.builder.build()?;
+        for factory in self.window_factories.drain(..) {
+            factory(RuntimeManager::get());
+        }
+        Ok(app)
     }
 
     impl_internal_builder_methods!();
