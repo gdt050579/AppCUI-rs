@@ -2055,7 +2055,7 @@ fn bufferview_decode_utf8_noop_when_unchanged() {
 
 #[test]
 fn bufferview_interval_name_at() {
-    let _a = App::debug(60, 15, "Paint.Enable(false)").build().unwrap();
+    let _a = App::new().size(Size::new(60, 15)).debug_script("Paint.Enable(false)").build().unwrap();
     let bv = make_bufferview_with_intervals(test_buffer_data());
     assert_eq!(bv.interval_name_at(0), Some("Header"));
     assert_eq!(bv.interval_name_at(15), Some("Header"));
@@ -2288,7 +2288,7 @@ fn check_bufferview_set_current_pos() {
         }
     }
 
-    let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -2345,7 +2345,7 @@ fn check_bufferview_take_buffer() {
     }
 
     TAKE_BUFFER_RESULT.set(None);
-    let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 
@@ -2426,7 +2426,7 @@ fn check_bufferview_resize_buffer_with_commands() {
         }
     }
 
-    let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -2497,7 +2497,7 @@ fn check_bufferview_insert_and_overwrite_bytes_with_commands() {
         }
     }
 
-    let mut a = App::debug(60, 15, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -2520,7 +2520,7 @@ fn check_bufferview_bin_edit_with_tab_and_right() {
         Paint('4. Third byte committed with Right')
         CheckHash(0x83EE8CC0DBECCCCF)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_bin(test_buffer_data()));
     a.add_window(w);
@@ -2545,7 +2545,7 @@ fn check_bufferview_oct_edit_with_tab_and_right() {
         Paint('4. Third byte committed with Right')
         CheckHash(0x9303DEA38DA4498D)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_oct(test_buffer_data()));
     a.add_window(w);
@@ -2571,7 +2571,7 @@ fn check_bufferview_uint_edit_with_tab_enter_and_right() {
         Paint('4. Third byte committed with Right')
         CheckHash(0xA05BBB3ABA4EE57B)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_uint_u8(test_buffer_data()));
     a.add_window(w);
@@ -2597,7 +2597,7 @@ fn check_bufferview_int_edit_with_tab_enter_and_right() {
         Paint('4. Third byte committed with Right')
         CheckHash(0x7CAADAA48536E9B8)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_int_edit_i8(test_buffer_data()));
     a.add_window(w);
@@ -2623,7 +2623,7 @@ fn check_bufferview_float_edit_with_tab_enter_and_right() {
         Paint('4. Third byte committed with Right')
         CheckHash(0xEA681B51D283EA4E)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_float_e4m3(test_buffer_data()));
     a.add_window(w);
@@ -2637,7 +2637,7 @@ fn check_bufferview_ascii_codepage() {
         Paint('ASCII codepage')
         CheckHash(0xEB04DE43EB28189B)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = BufferView::with_buffer(
         test_buffer_high_bytes(),
@@ -2658,7 +2658,7 @@ fn check_bufferview_big_endian_uint16() {
         Paint('Big endian u16')
         CheckHash(0x2B8EDFBE0E457FEC)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = BufferView::with_buffer(
         test_buffer_high_bytes(),
@@ -2680,7 +2680,7 @@ fn check_bufferview_custom_address_name() {
         Paint('Custom address title')
         CheckHash(0x212D5CD189C85A12)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = make_bufferview(test_buffer_data());
     bv.set_address_name("Offset");
@@ -2696,7 +2696,7 @@ fn check_bufferview_wide_address_column() {
         Paint('Wide address column')
         CheckHash(0xD78FF8C6527DD441)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = make_bufferview(test_buffer_data());
     bv.set_address_width(14);
@@ -2712,7 +2712,7 @@ fn check_bufferview_address_hidden() {
         Paint('Address column hidden')
         CheckHash(0x7AF587C34BAFFFBA)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = make_bufferview(test_buffer_data());
     bv.set_address_visible(false);
@@ -2728,7 +2728,7 @@ fn check_bufferview_create() {
         Paint('Initial state')
         CheckHash(0x6F386642B4BD3242)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -2742,7 +2742,7 @@ fn check_bufferview_create_with_macro() {
         Paint('Initial state')
         CheckHash(0x6F386642B4BD3242)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = bufferview!("Vec<u8>,d:f,flags:ScrollBars+ShowAddress+SearchBar,columns:8,format:Hex,offset:Hex");
     bv.set_buffer(test_buffer_data());
@@ -2766,7 +2766,7 @@ fn check_bufferview_disabled_ignores_key_and_mouse() {
         Paint('3. Mouse ignored')
         CheckHash(0x7C4CBB97ED2BFF63)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = make_bufferview_for_mouse(test_buffer_data());
     bv.set_enabled(false);
@@ -2806,7 +2806,7 @@ fn check_bufferview_int_i8_large_buffer_navigation_with_keys() {
         Paint('9. Ctrl+Up')
         CheckHash(0xF99606F54DC84450)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_int_i8(test_large_buffer_data()));
     a.add_window(w);
@@ -2838,7 +2838,7 @@ fn check_bufferview_int_i8_large_buffer_selection_with_keys() {
         Paint('7. Shift+PageUp')
         CheckHash(0xF99606F54DC84450)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_int_i8(test_large_buffer_data()));
     a.add_window(w);
@@ -2864,7 +2864,7 @@ fn check_bufferview_navigation_with_keys() {
         Paint('5. End')
         CheckHash(0xDCC14E43416C4B62)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -2887,7 +2887,7 @@ fn check_bufferview_selection_with_keys() {
         Paint('4. Clear selection via navigation')
         CheckHash(0x6F386642B4BD3242)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -2910,7 +2910,7 @@ fn check_bufferview_panel_toggle() {
         Paint('4. Switch back to hex panel')
         CheckHash(0xDCC14E43416C4B62)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -2933,7 +2933,7 @@ fn check_bufferview_tab_switches_active_panel_flag() {
         Paint('4. TabSwitchesActivePanel: Tab switches back to hex panel')
         CheckHash(0xDCC14E43416C4B62)
     ";
-    let mut a = App::debug(60, 15, script_with_flag).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script_with_flag).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = bufferview!(
         "Vec<u8>,d:f,flags:ScrollBars+ShowAddress+SearchBar+TabSwitchesActivePanel,columns:8,format:Hex,offset:Hex"
@@ -2957,7 +2957,7 @@ fn check_bufferview_tab_switches_active_panel_flag() {
         Paint('4. Without flag: Tab still ignored')
         CheckHash(0xDCC14E43416C4B62)
     ";
-    let mut a = App::debug(60, 15, script_without_flag).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script_without_flag).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -2980,7 +2980,7 @@ fn check_bufferview_address_separator_resize() {
         Paint('4. Deselect separator')
         CheckHash(0xF15104EF97AE3D2D)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -3013,7 +3013,7 @@ fn check_bufferview_address_column_widths_1_to_6() {
         Paint('7. Address width 6')
         CheckHash(0x7063C9C2CB8614BE)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -3046,7 +3046,7 @@ fn check_bufferview_large_buffer_address_column_widths_1_to_6() {
         Paint('7. Address width 6')
         CheckHash(0x3FCE180396C01AC8)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_large_buffer_data()));
     a.add_window(w);
@@ -3082,7 +3082,7 @@ fn check_bufferview_large_buffer_end_address_column_widths_1_to_6() {
         Paint('8. Address width 6')
         CheckHash(0x47680DF6BA034F24)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_large_buffer_data()));
     a.add_window(w);
@@ -3102,7 +3102,7 @@ fn check_bufferview_horizontal_scroll() {
         Paint('3. Scroll view back')
         CheckHash(0x6F386642B4BD3242)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -3125,7 +3125,7 @@ fn check_bufferview_mouse_selection_hex_panel() {
         Paint('2. Drag selection across hex panel')
         CheckHash(0x7535A9D8B019620E)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -3145,7 +3145,7 @@ fn check_bufferview_mouse_click_hex_panel() {
         Paint('3. Hex panel via data click')
         CheckHash(0xF9BBE4D7A406E4C7)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_for_mouse(test_buffer_data()));
     a.add_window(w);
@@ -3162,7 +3162,7 @@ fn check_bufferview_mouse_click_char_panel() {
         Paint('2. Click char panel')
         CheckHash(0xCE0B00E3E5EC6514)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_for_mouse(test_buffer_data()));
     a.add_window(w);
@@ -3180,7 +3180,7 @@ fn check_bufferview_mouse_selection_char_panel() {
         Paint('2. Drag selection in char panel')
         CheckHash(0xF9918796DB5FB399)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -3197,7 +3197,7 @@ fn check_bufferview_mouse_resize_address_column() {
         Paint('2. Wider address column')
         CheckHash(0x7D07C76FC76E53E4)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_for_mouse(test_buffer_data()));
     a.add_window(w);
@@ -3217,7 +3217,7 @@ fn check_bufferview_mouse_resize_interval_column() {
         Paint('3. Wider interval column')
         CheckHash(0xD0678206131347B6)
     ";
-    let mut a = App::debug(80, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
     w.add(make_bufferview_with_intervals(test_buffer_data()));
     a.add_window(w);
@@ -3239,7 +3239,7 @@ fn check_bufferview_mouse_header_switch_panel() {
         Paint('3. Hex panel via header')
         CheckHash(0xF9BBE4D7A406E4C7)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_for_mouse(test_buffer_data()));
     a.add_window(w);
@@ -3259,7 +3259,7 @@ fn check_bufferview_mouse_wheel_vertical_scroll() {
         Paint('3. Scrolled back up')
         CheckHash(0x04ED34329C80A874)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_large_buffer_data()));
     a.add_window(w);
@@ -3279,7 +3279,7 @@ fn check_bufferview_mouse_wheel_horizontal_scroll() {
         Paint('3. Scrolled back left')
         CheckHash(0xC8FA57F31BCEBD5A)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:40,h:12,flags: Sizeable");
     w.add(make_bufferview_for_mouse(test_buffer_data()));
     a.add_window(w);
@@ -3303,7 +3303,7 @@ fn check_bufferview_mouse_drag_scrollbars() {
         Paint('3. Horizontal scrollbar dragged')
         CheckHash(0xBFDD15A7C38EAF0D)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:40,h:12,flags: Sizeable");
     w.add(make_bufferview_for_mouse(test_large_buffer_data()));
     a.add_window(w);
@@ -3326,7 +3326,7 @@ fn check_bufferview_search() {
         Paint('4. Clear search')
         CheckHash(0x97CFA8E09EF9879D)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -3350,7 +3350,7 @@ fn check_bufferview_search_bar_mouse_hex() {
         Paint('4. Clear search')
         CheckHash(0x062E51AD63B789E)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_large_buffer_data()));
     a.add_window(w);
@@ -3374,7 +3374,7 @@ fn check_bufferview_search_bar_mouse_text() {
         Paint('4. Clear search')
         CheckHash(0x3116CE71CD75C896)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -3398,7 +3398,7 @@ fn check_bufferview_search_bar_backspace_then_enter() {
         Paint('4. Find next match')
         CheckHash(0x5984B53AE5B978F8)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -3419,7 +3419,7 @@ fn check_bufferview_search_without_search_bar_ignored() {
         Paint('3. Enter ignored without search bar')
         CheckHash(0x32434095719B8557)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_for_mouse(test_buffer_data()));
     a.add_window(w);
@@ -3438,7 +3438,7 @@ fn check_bufferview_oct_auto_columns_resize_window() {
         CheckHash(0xDE4C17B58AD74773)
         Mouse.Release(119,12,left)
     ";
-    let mut a = App::debug(120, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(120, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     w.add(make_bufferview_oct_auto(test_buffer_data()));
     a.add_window(w);
@@ -3457,7 +3457,7 @@ fn check_bufferview_char_auto_columns_resize_window() {
         CheckHash(0x0826A0DB4C1E085D)
         Mouse.Release(119,12,left)
     ";
-    let mut a = App::debug(120, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(120, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     w.add(make_bufferview_char_auto(test_buffer_data()));
     a.add_window(w);
@@ -3476,7 +3476,7 @@ fn check_bufferview_char_auto_columns_resize_window_large_buffer() {
         CheckHash(0x7326734E0EB4959D)
         Mouse.Release(119,12,left)
     ";
-    let mut a = App::debug(120, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(120, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:50,h:12,flags: Sizeable");
     w.add(make_bufferview_char_auto(test_large_buffer_data()));
     a.add_window(w);
@@ -3493,7 +3493,7 @@ fn check_bufferview_resize_window() {
         Paint('2. Smaller window')
         CheckHash(0x4E726C2EA666518F)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview(test_buffer_data()));
     a.add_window(w);
@@ -3517,7 +3517,7 @@ fn check_bufferview_interval_names() {
         Paint('4. Widen interval column')
         CheckHash(0xACAB1828B1E631BB)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
     w.add(make_bufferview_with_intervals(test_buffer_data()));
     a.add_window(w);
@@ -3549,7 +3549,7 @@ fn check_bufferview_separator_switch_with_selector_keys() {
         Paint('7. Ctrl+Alt+Right switches to interval separator')
         CheckHash(0xD8BA9EAE9FC6B286)
     ";
-    let mut a = App::debug(80, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
     w.add(make_bufferview_with_intervals(test_buffer_data()));
     a.add_window(w);
@@ -3578,7 +3578,7 @@ fn check_bufferview_mouse_hover_header_panels() {
         Paint('6. Hover character column header while char active')
         CheckHash(0xCE0B00E3E5EC6514)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_for_mouse(test_buffer_data()));
     a.add_window(w);
@@ -3658,7 +3658,7 @@ fn check_bufferview_mouse_leave_when_moving_to_button() {
         }
     }
 
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -3679,7 +3679,7 @@ fn check_bufferview_hex_dword_edit_backspace_enter() {
         Paint('4. Enter commits DWORD from first two digits')
         CheckHash(0xE8CEE275B66EAE42)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_hex_dword(test_buffer_data()));
     a.add_window(w);
@@ -3699,7 +3699,7 @@ fn check_bufferview_char_mode_navigation() {
         Paint('3. Move down one row')
         CheckHash(0x3AF4D6D579EA196D)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_char_mode(test_buffer_data()));
     a.add_window(w);
@@ -3713,7 +3713,7 @@ fn check_bufferview_interval_name_title() {
         Paint('Custom interval title')
         CheckHash(0xD10E808E690B2C7E)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
     let mut bv = make_bufferview_with_intervals(test_buffer_data());
     bv.set_interval_name_title("Section");
@@ -3729,7 +3729,7 @@ fn check_bufferview_interval_name_width() {
         Paint('Wide interval column')
         CheckHash(0x8330455F2F84A636)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:70,h:12,flags: Sizeable");
     let mut bv = make_bufferview_with_intervals(test_buffer_data());
     bv.set_interval_name_width(12);
@@ -3745,7 +3745,7 @@ fn check_bufferview_ascii_strings_visible() {
         Paint('ASCII strings on')
         CheckHash(0x91B452D970FDCC4A)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = make_bufferview_char_mode(test_buffer_ascii_strings());
     bv.set_ascii_strings_visible(true);
@@ -3761,7 +3761,7 @@ fn check_bufferview_utf16_ascii_strings_visible() {
         Paint('UTF-16 ASCII strings on')
         CheckHash(0x88DDC3F309F563D2)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = make_bufferview_char_mode(test_buffer_utf16_ascii_strings());
     bv.set_utf16_ascii_strings_visible(true);
@@ -3777,7 +3777,7 @@ fn check_bufferview_decode_utf8_enabled() {
         Paint('UTF-8 decode on')
         CheckHash(0x67A496C8F49A9A1)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     let mut bv = make_bufferview_char_mode(test_buffer_utf8_chars());
     bv.set_decode_utf8(true);
@@ -3793,7 +3793,7 @@ fn check_bufferview_decode_utf8_disabled() {
         Paint('UTF-8 decode off')
         CheckHash(0x23D42635D30312EE)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_char_mode(test_buffer_utf8_chars()));
     a.add_window(w);
@@ -3807,7 +3807,7 @@ fn check_bufferview_char_mode_all_decodings() {
         Paint('1. All char decodings enabled')
         CheckHash(0x9EEA6610A78D3C90)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_char_mode_all_decodings(test_buffer_char_mode_mixed()));
     a.add_window(w);
@@ -3824,7 +3824,7 @@ fn check_bufferview_char_mode_all_decodings_utf8_section() {
         Paint('2. UTF-8 section in view')
         CheckHash(0xB81E6F94013F482C)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,a:c,w:60,h:12,flags: Sizeable");
     w.add(make_bufferview_char_mode_all_decodings(test_buffer_char_mode_mixed()));
     a.add_window(w);
@@ -3933,7 +3933,7 @@ fn check_bufferview_char_mode_feature_toggles_with_commands() {
         }
     }
 
-    let mut a = App::debug(80, 18, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 18)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -3997,7 +3997,7 @@ fn check_bufferview_on_current_pos_changed_event() {
         CheckHash(0x45523880CA3B5C89)
     ";
 
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -4065,7 +4065,7 @@ fn check_bufferview_on_selection_changed_event() {
         CheckHash(0xCA238466708B34EB)
     ";
 
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

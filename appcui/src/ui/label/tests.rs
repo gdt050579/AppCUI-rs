@@ -7,7 +7,7 @@ fn check_label_position() {
         Paint('nine labels across al corners and center')   
         CheckHash(0xF7D704CAB062ED5C)   
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(Label::new("TopLeft", layout!("a:tl,w:7,h:1")));
     w.add(Label::new("Top", layout!("a:t,w:3,h:1")));
@@ -29,7 +29,7 @@ fn check_label_multiline() {
         Paint('a multi-line label')   
         CheckHash(0xD4FE75C904BD13F9)   
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(Label::new("This is a multi-line label", layout!("a:tl,w:10,h:3")));
     a.add_window(w);
@@ -42,7 +42,7 @@ fn check_label_with_hotkey() {
         Paint('label with a hot key')   
         CheckHash(0xEC4CCF3D77022900)   
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(Label::new("A &hot key label", layout!("a:tl,w:30,h:100%")));
     a.add_window(w);
@@ -56,7 +56,7 @@ fn check_label_with_nacro() {
         Paint('label with a macro')   
         CheckHash(0x9AC98702D1913E96)   
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:9");
     w.add(label!("Caption='A label build with label! moacro',a:tl,w:30,h:100%"));
     w.add(label!("my_label,x:0,y:1,w:30"));
@@ -71,7 +71,7 @@ fn check_label_caption() {
         Paint('Initial state')   
         CheckHash(0xC4C7983EC13953E2)   
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     let l = Label::new("Some &Text", layout!("a:tl,w:10,h:3"));
     assert_eq!(l.caption(), "Some Text");

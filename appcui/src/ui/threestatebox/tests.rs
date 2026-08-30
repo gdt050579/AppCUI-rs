@@ -7,7 +7,7 @@ fn check_three_state_box_simple() {
         Paint('1. Initial state')   
         CheckHash(0xD52344AB78EF21D2)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(ThreeStateBox::new(
         "Options",
@@ -35,7 +35,7 @@ fn check_three_state_box_macro() {
         Paint('1. Initial state')   
         CheckHash(0xC4D48739A6B596DE)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(threestatebox!("Options,x:1,y:1,w:16,h:4,state=unchecked"));
     w.add(threestatebox!("Options,x:1,y:2,w:16,h:4,state=checked"));
@@ -95,7 +95,7 @@ impl ThreeStateBoxEvents for MyWindow {
         Paint('Should be unknown')  
         CheckHash(0x271B06247758B2FA) 
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
     a.add_window(MyWindow::new());
     a.run();
 }
@@ -107,7 +107,7 @@ fn check_methods() {
         Paint('Initial state')   
         CheckHash(0x3FA2ED544BE2898A)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     let mut t = threestatebox!("Options,x:1,y:1,w:16,h:4,state=unchecked");
     assert_eq!(t.caption(),"Options");
@@ -129,7 +129,7 @@ fn check_threestatebox_plusminus_mode() {
         CheckHash(0xFB01E18C872A6FAC)  
         CheckCursor(7,7)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=PlusMinus,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=PlusMinus,state=Checked"));
@@ -150,7 +150,7 @@ fn check_threestatebox_ascii_mode() {
         CheckHash(0xD0B1AF4745F5E714)  
         CheckCursor(8,7)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Ascii,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=Ascii,state=Checked"));
@@ -170,7 +170,7 @@ fn check_threestatebox_checkbox_mode() {
         CheckHash(0x5E5E498E662812C4)  
         CheckCursor(7,7)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkbox,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkbox,state=Checked"));
@@ -190,7 +190,7 @@ fn check_threestatebox_checkmark_mode() {
         CheckHash(0xE0405A261573BF34)  
         CheckCursor(7,7)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkmark,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkmark,state=Checked"));
@@ -210,7 +210,7 @@ fn check_threestatebox_fill_mode() {
         CheckHash(0x328C09CF38889778)  
         CheckCursor(7,7)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=FilledBox,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=FilledBox,state=Checked"));
@@ -230,7 +230,7 @@ fn check_threestatebox_yes_no_mode() {
         CheckHash(0xB7778A06B2B9C2B4)  
         CheckCursor(8,7)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:10"), window::Flags::None);
     w.add(threestatebox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=YesNo,state=Unchecked"));
     w.add(threestatebox!("'Option 2 (checked)',x:1,y:2,w:40,type=YesNo,state=Checked"));
@@ -249,7 +249,7 @@ fn check_three_state_box_hot_key() {
         Paint('1. Initial state')   
         CheckHash(0xC8C53061F55AA476)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(threestatebox!("&Options,x:1,y:1,w:16,h:4,state=unchecked"));
     w.add(threestatebox!("O&ptions,x:1,y:2,w:16,h:4,state=checked"));
@@ -275,7 +275,7 @@ fn check_mouse_events() {
         Paint('4. Nothing happens - the key is not processed')   
         CheckHash(0xB6BB128869977206)
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(threestatebox!("'&Options with a lot of text',x:1,y:1,w:16,h:4,state=unchecked"));
     a.add_window(w);

@@ -9,7 +9,7 @@ fn check_creation() {
         Paint('initial state')   
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
-    let mut a = App::debug(70, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:68,h:9");
     w.add(NumericSelector::<i32>::new(
         5,
@@ -94,7 +94,7 @@ fn check_create_procmacro() {
         Paint('initial state')   
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
-    let mut a = App::debug(70, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:68,h:9");
 
     w.add(numericselector!("i32,5,1,8,1,x:1,y:1,w:10"));
@@ -119,7 +119,7 @@ fn check_create_procmacro_defaults() {
         Paint('initial state')   
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
-    let mut a = App::debug(70, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:68,h:9");
 
     w.add(numericselector!("i32,5,x:1,y:1,w:10"));
@@ -167,7 +167,7 @@ fn check_min_max_by_mouse() {
         Paint('value: 8, nothing changes')   
         CheckHash(0x3F03BA5FA9F80BAA)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
     w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
     a.add_window(w);
@@ -204,7 +204,7 @@ fn check_min_max_by_keyboard() {
         Paint('value: 8, nothing changes')   
         CheckHash(0x3F03BA5FA9F80BAA)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
     w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
     a.add_window(w);
@@ -224,7 +224,7 @@ fn check_min_max_by_home_end() {
         Paint('value: 8, right button disabled')   
         CheckHash(0x3F03BA5FA9F80BAA)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
     w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
     a.add_window(w);
@@ -258,7 +258,7 @@ fn check_readonly() {
         Paint('nothng changes')   
         CheckHash(0xBE164F0A76471873)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
     w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20,flags:ReadOnly"));
     a.add_window(w);
@@ -288,7 +288,7 @@ fn check_edit_mode() {
         CheckHash(0x534C873C7A674B61)
         CheckCursor(hidden)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
     w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20"));
     a.add_window(w);
@@ -313,7 +313,7 @@ fn check_exit_edit_mode() {
         Paint('window closed')
         CheckHash(0xAB06844D69595285)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,w:38,h:5,x:1,y:1,");
     w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20"));
     a.add_window(w);
@@ -348,7 +348,7 @@ fn check_events() {
         Paint('New-value: 4')   
         CheckHash(0x50AB32FB27060802)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

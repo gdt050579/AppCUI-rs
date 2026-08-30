@@ -10,7 +10,7 @@ fn check_empty_combobox() {
         Paint('Opened')   
         CheckHash(0xB34B803556F629E9)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:40,h:7");
     let c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
     w.add(c);
@@ -28,7 +28,7 @@ fn check_show_description() {
         Paint('Opened')   
         CheckHash(0x9B224EA337A5BDC6)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:60,h:7");
     let mut c = ComboBox::new(layout!("x:1,y:1,w:50"), combobox::Flags::ShowDescription);
     c.add_item(combobox::Item::new("Option 1", "(Description for option 1)"));
@@ -60,7 +60,7 @@ fn check_macro_creation() {
         Paint('1st selected (Item-1)')   
         CheckHash(0x9D5F6C4A639F82FC)
     ";
-    let mut a = App::debug(40, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:60,h:7");
     w.add(combobox!("x:1,y:1,w:30,items=['Item 1','Item 2','Item 3']"));
     w.add(combobox!("x:1,y:3,w:30,items=['Toyota','Dacia','BMW'],index:2"));    
@@ -90,7 +90,7 @@ fn check_open_unselected_combobox() {
         Paint('Second item selected')   
         CheckHash(0x43E2E38DE5C81DC7)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:40,h:7");
     let mut c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
     c.add("option 1");
@@ -114,7 +114,7 @@ fn check_select_item_from_unselected() {
         Paint('Second item selected')   
         CheckHash(0x4A4D0C1E30FE00E4)        
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:40,h:7");
     let mut c = ComboBox::new(layout!("x:1,y:1,w:30"), combobox::Flags::None);
     c.add("option 1");
@@ -168,7 +168,7 @@ fn check_clear_items_when_closed() {
         Paint('Items are clear')   
         CheckHash(0xA48FE4D6600B53E3)
     ";
-    let mut a = App::debug(40, 10, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -225,7 +225,7 @@ fn check_clear_items_when_opened() {
         Paint('Items are clear (opened and smaller)')   
         CheckHash(0x7D591AE22C8A7DFB)
     ";
-    let mut a = App::debug(40, 10, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -425,7 +425,7 @@ fn check_complex_behavior() {
             CheckHash(0x2d11fcbd531710fd)
     ";
 
-    let mut a = App::debug(60, 20, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -530,7 +530,7 @@ fn check_value_and_try_value() {
         }
     }
     
-    let mut a = App::debug(40, 12, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(40, 12)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -659,7 +659,7 @@ fn check_selected_item_and_index() {
         }
     }
     
-    let mut a = App::debug(80, 12, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 12)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

@@ -218,7 +218,7 @@ fn check_sinple_display() {
         Paint('Initial state')   
         CheckHash(0xC976C47E78769FFC) 
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = GraphView::new(Layout::fill(), graphview::Flags::ScrollBars | graphview::Flags::SearchBar);
     let g = graphview::Graph::with_slices(&["A", "B", "C", "D"], &[(0, 1), (0, 2), (1, 3)], true);
@@ -242,7 +242,7 @@ fn check_sinple_display_proc_macro() {
         Paint('Initial state')   
         CheckHash(0xC976C47E78769FFC) 
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, back:{.,gray,black}, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices(&["A", "B", "C", "D"], &[(0, 1), (0, 2), (1, 3)], true);
@@ -300,7 +300,7 @@ fn check_events() {
         Paint('6. New node - title is: New IDX: 0')   
         CheckHash(0xDD4D4629B0731CA6)         
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let g = graphview::Graph::with_slices(&[0, 1, 2, 3], &[(0, 1), (0, 2), (1, 3)], true);
     a.add_window(MyWin::new(g));
     a.run();
@@ -354,7 +354,7 @@ fn check_events_with_mouse() {
         Paint('6. New node - title is: New IDX: 0')   
         CheckHash(0xDD4D4629B0731CA6)         
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let g = graphview::Graph::with_slices(&[0, 1, 2, 3], &[(0, 1), (0, 2), (1, 3)], true);
     a.add_window(MyWin::new(g));
     a.run();
@@ -367,7 +367,7 @@ fn check_graph_with_margins_for_node_single() {
         Paint('Initial state')   
         CheckHash(0x7CDDF286305BF42D) 
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices_and_border(
@@ -389,7 +389,7 @@ fn check_graph_with_margins_for_node_double() {
         Paint('Initial state')   
         CheckHash(0x91DEDEB78C848365) 
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices_and_border(
@@ -420,7 +420,7 @@ fn check_hover_node() {
         Paint('4. hovered outside any node')   
         CheckHash(0xA52D4BE5FE3169FD)             
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices_and_border(
@@ -442,7 +442,7 @@ fn check_tree_view() {
         Paint('1. Initial state')   
         CheckHash(0xBE6D432823B0BC2B)           
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: true, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices(
@@ -462,7 +462,7 @@ fn check_tree_view_packed() {
         Paint('1. Initial state')   
         CheckHash(0x29694D45CF699BF)           
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: HierarchicalPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices(
@@ -483,7 +483,7 @@ fn check_custom_graph() {
         Paint('1. Initial state')   
         CheckHash(0x3A54E82DF4408030)           
     ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_1());
@@ -499,7 +499,7 @@ fn check_arrange_hierarchical() {
         Paint('1. Initial state')   
         CheckHash(0xC6B8B2D87813BCED)           
     ";
-    let mut a = App::debug(130, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(130, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -515,7 +515,7 @@ fn check_arrange_grid() {
         Paint('1. Initial state')   
         CheckHash(0x1F4C38ABDB6BB845)           
     ";
-    let mut a = App::debug(130, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(130, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -533,7 +533,7 @@ fn check_arrange_circular() {
         Paint('1. Initial state')   
         CheckHash(0x710407C8369BB527)           
     ";
-    let mut a = App::debug(60, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 30)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -549,7 +549,7 @@ fn check_arrange_force_directed() {
         Paint('1. Initial state')   
         CheckHash(0xCF8E04F6F85CD000)           
     ";
-    let mut a = App::debug(120, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(120, 30)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: ForceDirected, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -577,7 +577,7 @@ fn check_mouse_wheel() {
         Paint('5. Scroll left 4 times')   
         CheckHash(0x96CF99C818070CCC)
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: ForceDirected, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -617,7 +617,7 @@ fn check_scroll_view_via_keyboard() {
         Paint('9. Goto bottom-right of graph')   
         CheckHash(0xFC5CED13088F95C3)
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: ForceDirected, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -651,7 +651,7 @@ fn check_search_bar() {
         Paint('7. Exit window (Escape is no longer processed)')   
         CheckHash(0x9EE74A86D600A6F5)   
     ";
-    let mut a = App::debug(60, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 30)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -706,7 +706,7 @@ fn check_moving_nodes_with_keyboard() {
         Paint('14. Move node: <1-2-1> right, also so scroll moves to ensure <1-2-1> is visible')   
         CheckHash(0x97B0C6BD53B493DB)        
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: true, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices(
@@ -756,7 +756,7 @@ fn check_scroll_from_scrollbars() {
         CheckHash(0x469A23C3E150C371)        
 
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -781,7 +781,7 @@ fn check_navigate_between_nodes() {
         Paint('4. Focus on N3 (with ensure visible)')   
         CheckHash(0x6888EA4B81E93586)   
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -797,7 +797,7 @@ fn check_graph_disabled() {
         Paint('1. Initial state (current is N1)')   
         CheckHash(0xD7A096B508B654AB) 
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1, enable: false");
     gv.set_graph(build_custom_graph_2());
@@ -816,7 +816,7 @@ fn check_graph_without_focus() {
         Paint('2. Now with focus')   
         CheckHash(0xC4ACEFC3627EC4E9) 
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1,back:{*,white,black}");
     gv.set_graph(build_custom_graph_2());
@@ -836,7 +836,7 @@ fn check_graph_with_u32() {
         Paint('Hovered over node')
         CheckHash(0x4F280346E0D0B000) 
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices(
@@ -860,7 +860,7 @@ fn check_graph_with_i32() {
         Paint('Hovered over node (-1234)')
         CheckHash(0xCD750515028A6FF8) 
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: Single, routing: Direct, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -895,7 +895,7 @@ fn check_scroll_with_mouse_drag() {
         Paint('5. Drag until top-left')   
         CheckHash(0x522B607E2901558)         
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -923,7 +923,7 @@ fn check_mouse_drag_nodes() {
         Paint('5. Drag N11 - and extend on riht')   
         CheckHash(0xD4437D12488EB421)        
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     gv.set_graph(build_custom_graph_2());
@@ -939,7 +939,7 @@ fn check_api() {
         Paint('1. Initial state (current is N1)')   
         CheckHash(0x522B607E2901558) 
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1,back:{x}");
     gv.set_graph(build_custom_graph_2());
@@ -966,7 +966,7 @@ fn check_click_double_click() {
         Paint('3. DoubleClick on N11 (nothing changes)')   
         CheckHash(0x2F11FF95B7641249)         
     ";
-    let mut a = App::debug(40, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1,back:{x}");
     gv.set_graph(build_custom_graph_2());
@@ -995,7 +995,7 @@ fn check_mouse_event_enter_leave() {
         Paint('5. Mouse.Hover over Button')   
         CheckHash(0xED41A043919CE36B)  
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, x:0,y:0,w:30,h:100%, flags:[ScrollBars,SearchBar],lsm:2,tsm:1,back:{x}");
     gv.set_graph(build_custom_graph_2());
@@ -1014,7 +1014,7 @@ fn check_custom_nodes() {
         Paint('1. Initial state (button has the focus)')   
         CheckHash(0x75EDC95A42AF8EB2)    
     ";
-    let mut a = App::debug(120, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(120, 30)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: Single, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: Circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1032,7 +1032,7 @@ fn check_small_graph_grid() {
         Paint('1. Initial state (button has the focus)')   
         CheckHash(0x3F3EA09383A225E1)    
     ";
-    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: true, arrange: grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1050,7 +1050,7 @@ fn check_small_graph_circular() {
         Paint('1. Initial state (button has the focus)')   
         CheckHash(0xC3ACDE8A75F03BB2)    
     ";
-    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: true, arrange: circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices(&["A", "B"], &[(0, 1)], true);
@@ -1067,7 +1067,7 @@ fn check_small_graph_hierarchical() {
         Paint('1. Initial state (button has the focus)')   
         CheckHash(0x3F3EA09383A225E1)    
     ";
-    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!("line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: true, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1");
     let g = graphview::Graph::with_slices(&["A", "B"], &[(0, 1)], true);
@@ -1084,7 +1084,7 @@ fn check_normal_graph_grid() {
         Paint('1. Initial state (button has the focus)')   
         CheckHash(0xA4BD71B231C98680)    
     ";
-    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1116,7 +1116,7 @@ fn check_empty_graph_grid() {
         Paint('3. same state')   
         CheckHash(0x6F340CB050701481)   
     ";
-    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let gv: graphview::graphview::GraphView<u8> = graphview!(
         "line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: false, arrange: Grid, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1138,7 +1138,7 @@ fn check_graph_with_cusom_node_positions() {
         Paint('1. Initial state (button has the focus)')   
         CheckHash(0xB58F2D09300FF889)    
     ";
-    let mut a = App::debug(40, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: false, arrange: None, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1156,7 +1156,7 @@ fn check_multi_graph_hierarchical() {
         Paint('1. Initial state (button has the focus)')
         CheckHash(0xE3FB6F2B982BED13)
     ";
-    let mut a = App::debug(130, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(130, 30)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: false, arrange: Hierarchical, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1174,7 +1174,7 @@ fn check_multi_graph_circular() {
         Paint('1. Initial state (button has the focus)')   
         CheckHash(0x9CEFA8197DC8117)    
     ";
-    let mut a = App::debug(130, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(130, 30)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: false, arrange: circular, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1192,7 +1192,7 @@ fn check_multi_graph_force_directed() {
         Paint('1. Initial state (button has the focus)')   
         CheckHash(0x6B3617673D0B6383)    
     ";
-    let mut a = App::debug(130, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(130, 30)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: Single, routing: Orthogonal, hie: true, hoe: false, arrows: false, arrange: forcedirected, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1261,7 +1261,7 @@ fn check_doc_example() {
         Paint('2. Click on Child 1')   
         CheckHash(0x196ECBEC764AED6A)  
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1284,7 +1284,7 @@ fn modify_graph_set_node_text_color_check_hash() {
         Paint('modify_graph: set_text_attribute (red foreground)')
         CheckHash(0x5814A3858DC8E69)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = modify_graph_test_graphview();
     gv.modify_graph(|g| {
@@ -1305,7 +1305,7 @@ fn modify_graph_set_node_border_check_hash() {
         Paint('modify_graph: set_border (double) - height will chage to support the border')
         CheckHash(0xF48C83C7DCE8EF51)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = modify_graph_test_graphview();
     gv.modify_graph(|g| {
@@ -1326,7 +1326,7 @@ fn modify_graph_set_node_content_check_hash() {
         Paint('modify_graph: set_value (label text)')
         CheckHash(0xD8FD6426B4F7736D)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = modify_graph_test_graphview();
     gv.modify_graph(|g| {
@@ -1347,7 +1347,7 @@ fn modify_graph_set_color_border_and_content_check_hash() {
         Paint('modify_graph: color + border + value in one closure')
         CheckHash(0xD307A82D0CDA1AFB)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = modify_graph_test_graphview();
     gv.modify_graph(|g| {
@@ -1370,7 +1370,7 @@ fn modify_graph_add_two_nodes_and_edge_check_hash() {
         Paint('modify_graph: add_node x2 + add_edge(0 -> 1)')
         CheckHash(0x8F7C724263880506)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1407,7 +1407,7 @@ fn modify_graph_delete_node_with_edges_check_hash() {
         Paint('modify_graph: delete_node(1) removes B (edges 0->1 and 1->3)')
         CheckHash(0xB2685CB981BCDA7)
     ";
-    let mut a = App::debug(60, 15, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: SingleThick, routing: Orthogonal, hie: true, hoe: true, arrows: false, arrange: GridPacked, d:f, flags:[ScrollBars,SearchBar],lsm:2,tsm:1"
@@ -1492,7 +1492,7 @@ fn multiselect_space_three_nodes_then_ctrl_arrow_move_check_hash() {
         Paint('10: Ctrl+Up x2 — group moves up (A, B and C)')
         CheckHash(0x10703C77CBCDC451)
     ";
-    let mut a = App::debug(72, 22, script).build().unwrap();
+    let mut a = App::new().size(Size::new(72, 22)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: None, d:f, flags:[ScrollBars,MultiSelect],lsm:2,tsm:1"
@@ -1544,7 +1544,7 @@ fn multiselect_ctrl_click_three_nodes_then_ctrl_arrow_move_check_hash() {
         Paint('8. Ctrl+Up x2 — group nudge up')
         CheckHash(0x10703C77CBCDC451)
     ";
-    let mut a = App::debug(72, 22, script).build().unwrap();
+    let mut a = App::new().size(Size::new(72, 22)).debug_script(script).build().unwrap();
     let mut w = window!("Test,d:f");
     let mut gv = graphview!(
         "line-type: SingleThick, routing: Orthogonal, hie: false, hoe: false, arrows: false, arrange: None, d:f, flags:[ScrollBars,MultiSelect],lsm:2,tsm:1"
@@ -1637,7 +1637,7 @@ fn ctrl_click_empty_add_three_nodes_then_right_drag_edges_check_hash() {
         CheckHash(0x8A74B28D54C70BF6)
     ";
 
-    let mut a = App::debug(72, 22, script).build().unwrap();
+    let mut a = App::new().size(Size::new(72, 22)).debug_script(script).build().unwrap();
     a.add_window(InteractiveGraphWin::new());
     a.run();
 }
@@ -1728,7 +1728,7 @@ fn ctrl_click_empty_double_border_three_nodes_ctrl_a_right_drag_edges_check_hash
         CheckHash(0xF876C73CD277592B)
     ";
 
-    let mut a = App::debug(72, 22, script).build().unwrap();
+    let mut a = App::new().size(Size::new(72, 22)).debug_script(script).build().unwrap();
     a.add_window(InteractiveDoubleBorderWin::new());
     a.run();
 }

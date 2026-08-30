@@ -101,7 +101,7 @@ fn check_hyperlink_control() {
         Paint('13.hyperlink 3 is clicked')
         CheckHash(0x63626CC4102F4EC1)
     ";
-    let mut a = App::debug(60, 14, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 14)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -214,7 +214,7 @@ fn check_hyperlink_control_2() {
         Paint('7.hyperlink 3 is clicked')
         CheckHash(0x19324713879CF4AC)
     ";
-    let mut a = App::debug(60, 14, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 14)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -236,7 +236,7 @@ fn check_hyperlink_control_with_macro() {
         Paint('4.space is ignored (nothing happens)')
         CheckHash(0x33C839A5D930A167)
         ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = Window::new("Macro Test", layout!("a:c,w:40,h:10"), window::Flags::None);
     w.add(hyperlink!("'Wiki',url:'www.wikipedia.com',x:1,y:1,w:9"));
     a.add_window(w);

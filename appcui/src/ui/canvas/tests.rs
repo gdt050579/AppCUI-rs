@@ -52,7 +52,7 @@ fn check_keyboard() {
         Paint('11')
         CheckHash(0x94C6FF9EDFF78BD0)
 ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     let mut c = Canvas::new(Size::new(20, 10), layout!("x:1,y:1,w:15,h:4"), canvas::Flags::None);
     let s = c.drawing_surface_mut();
@@ -136,7 +136,7 @@ fn check_keyboard_2() {
         Paint('Back Initial state')
         CheckHash(0xECD64DA8EC4ABB22)
 ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     let mut c = Canvas::new(Size::new(20, 10), layout!("x:1,y:1,w:4,h:3"), canvas::Flags::None);
     let s = c.drawing_surface_mut();
@@ -189,7 +189,7 @@ fn check_background_char() {
         Paint('Initial state')
         CheckHash(0x209459BC48B6383C)
 ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     let mut c = Canvas::new(Size::new(2, 2), layout!("x:1,y:1,w:15,h:4"), canvas::Flags::None);
     let s = c.drawing_surface_mut();
@@ -293,7 +293,7 @@ fn check_mouse_on_scrollbars() {
    \===============/
     \ooooooooooooo/ => 1234567
 ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     let mut c = Canvas::new(Size::new(30, 10), layout!("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
     let s = c.drawing_surface_mut();
@@ -368,7 +368,7 @@ fn check_mouse_on_scrollbars_resize() {
    \===============/
     \ooooooooooooo/ => 1234567
 ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     let mut c = Canvas::new(Size::new(30, 10), layout!("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
     c.set_components_toolbar_margins(2, 1);
@@ -401,7 +401,7 @@ fn check_macro_init_1() {
    \===============/
     \ooooooooooooo/ => 1234567
 ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     let mut c = canvas!("'30 x 10',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=2,tsm=1");
     let s = c.drawing_surface_mut();
@@ -422,7 +422,7 @@ fn check_macro_init_2() {
     Paint('With focus')
     CheckHash(0x4709CADE1C0994D3)
 ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     let mut c = canvas!("'4 x 2',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=3,tsm=1,back={X,fore:Green,Back:Yellow}");
     let s = c.drawing_surface_mut();
@@ -472,7 +472,7 @@ Key.Pressed(PageUp)
 Paint('Back to the initial state')
 CheckHash(0xc9196f52d863ff88)
 ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     let mut c = canvas!("'60x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
     let s = c.drawing_surface_mut();
@@ -541,7 +541,7 @@ fn check_resize_surface() {
         }
     }
 
-    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -591,7 +591,7 @@ fn check_mouse_wheel() {
     From: https://en.wikipedia.org/wiki/Rust_(programming_language)
     ";
 
-    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     let mut c = canvas!("'60x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
     c.clear_background();
@@ -610,7 +610,7 @@ fn check_true_colors_rendering() {
         Paint('1. Initial state')
         CheckHash(0xBF4312A1691D7AD8)
     ";
-    let mut a = App::debug(70, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Title,d:f");
     let mut c = canvas!("'68x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
     c.clear_background();
@@ -634,7 +634,7 @@ fn check_char_flags() {
         Paint('1. Initial state')
         CheckHash(0xCF13E28C3D4AADA9)
     ";
-    let mut a = App::debug(70, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 20)).debug_script(script).build().unwrap();
 
     let mut win = window!("Title:'Character Formatting Demo',a:c,w:60,h:20,flags:Sizeable");
     let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
@@ -670,7 +670,7 @@ fn check_colors_schema_false() {
         Paint('1. Initial state')
         CheckHash(0x29C1D764587643BE)
     ";
-    let mut a = App::debug(70, 20, script).color_schema(false).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 20)).debug_script(script).color_schema(false).build().unwrap();
 
     let mut win = window!("Title:'Colors',a:c,w:60,h:20,flags:Sizeable");
     let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
@@ -696,7 +696,7 @@ fn check_colors_schema_true() {
         Paint('1. Initial state')
         CheckHash(0x29C1D764587643BE)
     ";
-    let mut a = App::debug(70, 20, script).color_schema(true).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 20)).debug_script(script).color_schema(true).build().unwrap();
 
     let mut win = window!("Title:'Colors',a:c,w:60,h:20,flags:Sizeable");
     let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");

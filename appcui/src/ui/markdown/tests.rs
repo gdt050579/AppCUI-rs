@@ -245,7 +245,7 @@ fn check_scrollbars_on_arrows_and_click() {
     ', d:f, flags:ScrollBars"
     );
 
-    let mut a = App::debug(60, 20, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     w.add(m);
     a.add_window(w);
@@ -321,7 +321,7 @@ fn check_scrollbars_on_drag_and_weel() {
     ', d:f, flags:ScrollBars"
     );
 
-    let mut a = App::debug(40, 8, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 8)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     w.add(m);
     a.add_window(w);
@@ -381,7 +381,7 @@ fn check_move_to_section_on_link_click() {
     ', d:f, flags:ScrollBars"
     );
 
-    let mut a = App::debug(40, 8, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 8)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     w.add(m);
     a.add_window(w);
@@ -426,7 +426,7 @@ fn check_inactive() {
     ', d:f, flags:ScrollBars"
     );
 
-    let mut a = App::debug(70, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 30)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:70,h:30,flags:Sizeable");
     m.set_enabled(false);
     w.add(m);
@@ -468,7 +468,7 @@ fn check_set_content() {
     ', d:f, flags:ScrollBars"
     );
 
-    let mut a = App::debug(70, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 30)).debug_script(script).build().unwrap();
     let mut w = window!("Title,a:c,w:70,h:30,flags:Sizeable");
     m.set_enabled(false);
     m.set_content("# Empty markdown");

@@ -9,7 +9,7 @@ fn check_creation_all_types() {
         Paint('all five visual types')
         CheckHash(0x7E04695FCF180859)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:58,h:11");
 
     w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:0,w:24"), hslider::Flags::None));
@@ -45,7 +45,7 @@ fn check_creation_all_flags_and_numeric_types() {
         Paint('every flag combination over several numeric types')
         CheckHash(0x9E2DF4B2EE3B3EE5)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:58,h:11");
 
     w.add(HSlider::new(
@@ -143,7 +143,7 @@ fn check_creation_procmacro() {
         Paint('controls built through the hslider! macro')
         CheckHash(0xD6E790A46F62F0CB)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:58,h:11");
 
     w.add(hslider!("i32,0,10,1,x:1,y:0,w:24"));
@@ -177,7 +177,7 @@ fn check_setters_and_getters() {
         Paint('after the setters ran')
         CheckHash(0x4CD4A4E8C2993CC6)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:58,h:9");
 
     let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:0,w:26"), hslider::Flags::None);
@@ -282,7 +282,7 @@ fn check_keyboard_step() {
         Paint('unhandled key is ignored, nothing changes')
         CheckHash(0xB3A3C3AEE8ADEB8C)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:5");
     let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue);
     s.set_value(5);
@@ -317,7 +317,7 @@ fn check_keyboard_ticks() {
         Paint('already on the first tick, nothing changes')
         CheckHash(0xBF3013E8676292DC)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:5");
     let mut s = HSlider::new(
         0,
@@ -356,7 +356,7 @@ fn check_keyboard_ticks_shorter_than_one_unit() {
         Paint('last tick, nothing changes')
         CheckHash(0x7FDAC326A3F25224)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:5");
     let mut s = HSlider::new(
         0,
@@ -404,7 +404,7 @@ fn check_mouse_click_and_drag() {
         Paint('dragged on to the right end')
         CheckHash(0x3E2CEB4F3ECC826A)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:5");
     w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue));
     a.add_window(w);
@@ -437,7 +437,7 @@ fn check_mouse_ticks() {
         Paint('dragged past the right end, clamped onto the last tick')
         CheckHash(0x76B25ED943AC2F62)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:5");
     let mut s = HSlider::new(
         0,
@@ -491,7 +491,7 @@ fn check_mouse_enter_leave_and_wheel() {
         Paint('left the control while holding, pressed state is cleared')
         CheckHash(0xD7202032234A5BF)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:5");
     let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue);
     s.set_value(5);
@@ -526,7 +526,7 @@ fn check_focus_and_disabled() {
         Paint('the third slider moved, the disabled one is still at 5')
         CheckHash(0xF9B3690B8000C592)
     ";
-    let mut a = App::debug(40, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:8");
 
     w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue));
@@ -565,7 +565,7 @@ fn check_resize() {
         Paint('back to a usable width, the value survived the resize')
         CheckHash(0xAEA61BA6D4EDBA06)
     ";
-    let mut a = App::debug(50, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(50, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Test,x:0,y:0,w:100%,h:100%,flags: Sizeable");
 
     let mut s = HSlider::new(
@@ -619,7 +619,7 @@ fn check_degenerate_geometry() {
         Paint('stepping by zero changes nothing')
         CheckHash(0x941C5E48DCFCD47E)
     ";
-    let mut a = App::debug(40, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:9");
 
     w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:3"), hslider::Flags::Ticks));
@@ -667,7 +667,7 @@ fn check_more_ticks_than_columns() {
         Paint('dragged across the whole track')
         CheckHash(0x76B762C8B9ACDEFF)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:1,y:1,w:38,h:5");
     let mut s = HSlider::new(
         0,
@@ -723,7 +723,7 @@ fn check_events_i32() {
         Paint('title reads val = 9')
         CheckHash(0xCB63B3FB3425E861)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -772,7 +772,7 @@ fn check_events_f32_with_ticks() {
         Paint('back to the first tick, title reads val = 0')
         CheckHash(0xB211799884927B01)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

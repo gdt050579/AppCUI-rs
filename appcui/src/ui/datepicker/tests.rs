@@ -8,7 +8,7 @@ fn check_create(){
         CheckHash(0xBE767D638014E39A)
     ";
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
     let mut w = window!("Dates,a:c,w:50,h:11");
     w.add(DatePicker::new("2024-06-13", layout!("x:1,y:1,w:19")));
     w.add(DatePicker::new("2024-06-13", layout!("x:1,y:3,w:16")));
@@ -36,7 +36,7 @@ fn check_on_hover(){
         
     ";
  
-    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
     let mut w = window!("Dates,a:c,w:50,h:11");
     w.add(DatePicker::new("2024-06-13", layout!("x:1,y:1,w:19")));
     w.add(DatePicker::new("2024-06-13", layout!("x:1,y:3,w:16")));
@@ -71,7 +71,7 @@ fn check_expand(){
 
     ";
     
-    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).build().unwrap();
     let mut w = window!("Dates,a:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);
@@ -131,7 +131,7 @@ fn check_hovers(){
         CheckHash(0x1125aa027ca09f95)
     ";
     
-    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).build().unwrap();
     let mut w = window!("Dates,a:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);
@@ -146,7 +146,7 @@ fn check_procmacro(){
         CheckHash(0xBE767D638014E39A)
     ";
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
     let mut w = window!("Dates,a:c,w:50,h:11");
     w.add(datepicker!("2024-06-13, x:1,y:1,w:19"));
     w.add(datepicker!("2024-06-13, x:1,y:3,w:16"));
@@ -218,7 +218,7 @@ fn check_buttons(){
         CheckHash(0x9bd1097ed71b821d)
     ";
     
-    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).build().unwrap();
     let mut w = window!("Dates,a:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);
@@ -422,7 +422,7 @@ fn check_packed_keys(){
     CheckHash(0x4252fa8abad3e54d)
     ";
     
-    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).build().unwrap();
     let mut w = window!("Dates,a:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);
@@ -517,7 +517,7 @@ fn check_expanded_keys(){
     CheckHash(0x4252fa8abad3e54d)
     ";
     
-    let mut a = App::debug(60, 25, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).build().unwrap();
     let mut w = window!("Dates,a:c,w:25,h:6");
     w.add(DatePicker::new("2024-06-13", layout!("a:c,w:19,h:100%")));
     a.add_window(w);

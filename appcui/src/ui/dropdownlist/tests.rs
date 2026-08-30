@@ -32,7 +32,7 @@ fn check_symbol_paint() {
         Paint('Sum selected')   
         CheckHash(0xFE59E5136C4A00BD) 
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:56,h:7");
     let mut db = DropDownList::<MathOp>::with_symbol(1, layout!("x:1,y:1,w:50"), dropdownlist::Flags::ShowDescription);
     db.add(MathOp::Sum);
@@ -59,7 +59,7 @@ fn check_create_with_macro() {
         Paint('Sum selected')   
         CheckHash(0xFE59E5136C4A00BD) 
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:56,h:7");
     let mut db = dropdownlist!("class:MathOp,x:1,y:1,w:50,flags:ShowDescription,symbolsize:1");
     db.add(MathOp::Sum);
@@ -82,7 +82,7 @@ fn check_no_symbols() {
         Paint('Opened')   
         CheckHash(0x1CFE19F59CB0D41A) 
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:56,h:7");
     let mut db = dropdownlist!("class:MathOp,x:1,y:1,w:50,flags:ShowDescription");
     db.add(MathOp::Sum);
@@ -105,7 +105,7 @@ fn check_allow_none() {
         Paint('Opened - None should be selected')   
         CheckHash(0xAA1D368EE131B77B) 
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:56,h:7");
     let mut db = dropdownlist!("class:MathOp,x:1,y:1,w:50,flags:AllowNoneSelection");
     db.add(MathOp::Sum);
@@ -126,7 +126,7 @@ fn check_none_with_different_name() {
         Paint('Opened - Select Something should be selected')   
         CheckHash(0xF30519060AA60813) 
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     let mut w = window!("Title,x:0,y:0,w:56,h:7");
     let mut db = dropdownlist!("class:MathOp,x:1,y:1,w:50,flags:AllowNoneSelection,none:'Select something'");
     db.add(MathOp::Sum);
@@ -182,7 +182,7 @@ fn check_events() {
         Paint('Product selected (on title window)')   
         CheckHash(0x7035C003A73ED604) 
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(MyWindow::new());
     a.run();
 }
@@ -375,7 +375,7 @@ fn check_selected_item_and_index_methods() {
         }
     }
 
-    let mut a = App::debug(80, 16, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 16)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -546,7 +546,7 @@ fn check_has_selection_and_count_with_mouse() {
         }
     }
 
-    let mut a = App::debug(80, 16, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 16)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -833,7 +833,7 @@ fn check_item_and_item_mut_methods() {
         }
     }
     
-    let mut a = App::debug(80, 18, script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 18)).debug_script(script).command_bar().build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
