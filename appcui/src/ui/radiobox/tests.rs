@@ -20,14 +20,13 @@ fn check_radiobox_creation() {
         CheckHash(0x3BA39654D6BE3162)
         CheckCursor(13,4) 
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(RadioBox::new("Selection &One", layout!("x:1,y:1,w:20"), true));
-    w.add(RadioBox::new("Selection &Two", layout!("x:1,y:2,w:40"), false));
-    w.add(RadioBox::new("Selection T&hree", layout!("x:1,y:3,w:40"), false));
-
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(RadioBox::new("Selection &One", layout!("x:1,y:1,w:20"), true));
+        w.add(RadioBox::new("Selection &Two", layout!("x:1,y:2,w:40"), false));
+        w.add(RadioBox::new("Selection T&hree", layout!("x:1,y:3,w:40"), false));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -50,14 +49,13 @@ fn check_radiobox_macro_creation() {
         CheckHash(0x3BA39654D6BE3162)
         CheckCursor(13,4) 
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(radiobox!("'Selection &One',x:1,y:1,w:20,select: true"));
-    w.add(radiobox!("'Selection &Two',x:1,y:2,w:40"));
-    w.add(radiobox!("caption:'Selection T&hree',x:1,y:3,w:40,selected: false"));
-
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(radiobox!("'Selection &One',x:1,y:1,w:20,select: true"));
+        w.add(radiobox!("'Selection &Two',x:1,y:2,w:40"));
+        w.add(radiobox!("caption:'Selection T&hree',x:1,y:3,w:40,selected: false"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -228,9 +226,7 @@ fn check_shortkeys() {
         Paint('State_36')
         CheckHash(0x483ede4555d977a5)    
     ";
-    let mut a = App::new().size(Size::new(80, 20)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(80, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 #[test]
 fn check_radiobox_ascii_mode() {
@@ -240,13 +236,13 @@ fn check_radiobox_ascii_mode() {
         CheckHash(0x7ECA8EE81C4146D5)  
         CheckCursor(8,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
-    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Ascii,select:false"));
-    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Ascii,select:true"));
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Ascii,select:false, enabled:false"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+        w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Ascii,select:false"));
+        w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Ascii,select:true"));
+        w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Ascii,select:false, enabled:false"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -257,13 +253,13 @@ fn check_radiobox_circle_mode() {
         CheckHash(0x176C684A28254301)  
         CheckCursor(7,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
-    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Circle,select:false"));
-    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Circle,select:true"));
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Circle,select:false, enabled:false"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+        w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Circle,select:false"));
+        w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Circle,select:true"));
+        w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Circle,select:false, enabled:false"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -274,13 +270,13 @@ fn check_radiobox_diamond_mode() {
         CheckHash(0xAA65B0D6A6E73527)  
         CheckCursor(7,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
-    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Diamond,select:false"));
-    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Diamond,select:true"));
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+        w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Diamond,select:false"));
+        w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Diamond,select:true"));
+        w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -291,13 +287,13 @@ fn check_radiobox_bullet_mode() {
         CheckHash(0x45256EA616AA01D2)  
         CheckCursor(7,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
-    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Bullet,select:false"));
-    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Bullet,select:true"));
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Bullet,select:false, enabled:false"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+        w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Bullet,select:false"));
+        w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Bullet,select:true"));
+        w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Bullet,select:false, enabled:false"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -308,13 +304,13 @@ fn check_radiobox_target_mode() {
         CheckHash(0xB5D3F04A3579075F)  
         CheckCursor(7,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
-    w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Target,select:false"));
-    w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Target,select:true"));
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Target,select:false, enabled:false"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+        w.add(radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Target,select:false"));
+        w.add(radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Target,select:true"));
+        w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Target,select:false, enabled:false"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -325,17 +321,17 @@ fn check_radiobox_is_selected() {
         CheckHash(0xAA65B0D6A6E73527)  
         CheckCursor(7,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
-    let r1 = radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Diamond,select:false");
-    let r2 = radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Diamond,select:true");
-    assert!(!r1.is_selected());
-    assert!(r2.is_selected());
-    w.add(r1);
-    w.add(r2);
-    w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+        let r1 = radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,type=Diamond,select:false");
+        let r2 = radiobox!("'Option 2 (selected)',x:1,y:2,w:40,type=Diamond,select:true");
+        assert!(!r1.is_selected());
+        assert!(r2.is_selected());
+        w.add(r1);
+        w.add(r2);
+        w.add(radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Diamond,select:false, enabled:false"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -345,14 +341,14 @@ fn check_radiobox_set_caption() {
         Paint('Initial state')   
         CheckHash(0xF4D4B61AB48E7B81)  
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
-    let mut rb = radiobox!("'x',x:1,y:1,w:40,type=Ascii,select:false");
-    rb.set_caption("Test &caption");
-    assert_eq!(rb.caption(), "Test caption");
-    w.add(rb);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+        let mut rb = radiobox!("'x',x:1,y:1,w:40,type=Ascii,select:false");
+        rb.set_caption("Test &caption");
+        assert_eq!(rb.caption(), "Test caption");
+        w.add(rb);
+        w
+    }).run().unwrap();
 }
 
 
@@ -366,9 +362,9 @@ fn check_radiobox_show_tooltip() {
         Paint('Tool tip shown');
         CheckHash(0xE5A899040E15763F)  
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
-    w.add(radiobox!("'A really large text',x:1,y:1,w:10,type=Ascii,select:false"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
+        w.add(radiobox!("'A really large text',x:1,y:1,w:10,type=Ascii,select:false"));
+        w
+    }).run().unwrap();
 }

@@ -9,82 +9,81 @@ fn check_creation() {
         Paint('initial state')   
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
-    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:68,h:9");
-    w.add(NumericSelector::<i32>::new(
-        5,
-        1,
-        8,
-        1,
-        layout!("x:1,y:1,w:10"),
-        numericselector::Flags::None,
-    ));
-    w.add(NumericSelector::<u32>::new(
-        5,
-        1,
-        8,
-        1,
-        layout!("x:1,y:3,w:15"),
-        numericselector::Flags::HideButtons,
-    ));
-    w.add(NumericSelector::<f32>::new(
-        5.5,
-        1.0,
-        8.0,
-        0.5,
-        layout!("x:1,y:5,w:16"),
-        numericselector::Flags::None,
-    ));
+    App::new().size(Size::new(70, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:68,h:9");
+        w.add(NumericSelector::<i32>::new(
+            5,
+            1,
+            8,
+            1,
+            layout!("x:1,y:1,w:10"),
+            numericselector::Flags::None,
+        ));
+        w.add(NumericSelector::<u32>::new(
+            5,
+            1,
+            8,
+            1,
+            layout!("x:1,y:3,w:15"),
+            numericselector::Flags::HideButtons,
+        ));
+        w.add(NumericSelector::<f32>::new(
+            5.5,
+            1.0,
+            8.0,
+            0.5,
+            layout!("x:1,y:5,w:16"),
+            numericselector::Flags::None,
+        ));
 
-    w.add(NumericSelector::<i32>::with_format(
-        1000,
-        1000,
-        8000,
-        100,
-        layout!("x:22,y:1,w:20"),
-        numericselector::Flags::None,
-        numericselector::Format::DigitGrouping,
-    ));
-    w.add(NumericSelector::<u8>::with_format(
-        50,
-        0,
-        100,
-        1,
-        layout!("x:22,y:3,w:20"),
-        numericselector::Flags::None,
-        numericselector::Format::Percentage,
-    ));
-    w.add(NumericSelector::<i8>::with_format(
-        -50,
-        -100,
-        100,
-        1,
-        layout!("x:22,y:5,w:20"),
-        numericselector::Flags::ReadOnly,
-        numericselector::Format::Decimal,
-    ));
+        w.add(NumericSelector::<i32>::with_format(
+            1000,
+            1000,
+            8000,
+            100,
+            layout!("x:22,y:1,w:20"),
+            numericselector::Flags::None,
+            numericselector::Format::DigitGrouping,
+        ));
+        w.add(NumericSelector::<u8>::with_format(
+            50,
+            0,
+            100,
+            1,
+            layout!("x:22,y:3,w:20"),
+            numericselector::Flags::None,
+            numericselector::Format::Percentage,
+        ));
+        w.add(NumericSelector::<i8>::with_format(
+            -50,
+            -100,
+            100,
+            1,
+            layout!("x:22,y:5,w:20"),
+            numericselector::Flags::ReadOnly,
+            numericselector::Format::Decimal,
+        ));
 
-    w.add(NumericSelector::<u128>::with_format(
-        1_000_000,
-        1000,
-        80_000_000,
-        1024,
-        layout!("x:43,y:1,w:20"),
-        numericselector::Flags::None,
-        numericselector::Format::Size,
-    ));
-    w.add(NumericSelector::<u32>::with_format(
-        0xFFEE,
-        0,
-        100000,
-        1,
-        layout!("x:43,y:3,w:20"),
-        numericselector::Flags::None,
-        numericselector::Format::Hex,
-    ));
-
-    a.add_window(w);
-    a.run();
+        w.add(NumericSelector::<u128>::with_format(
+            1_000_000,
+            1000,
+            80_000_000,
+            1024,
+            layout!("x:43,y:1,w:20"),
+            numericselector::Flags::None,
+            numericselector::Format::Size,
+        ));
+        w.add(NumericSelector::<u32>::with_format(
+            0xFFEE,
+            0,
+            100000,
+            1,
+            layout!("x:43,y:3,w:20"),
+            numericselector::Flags::None,
+            numericselector::Format::Hex,
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -94,22 +93,21 @@ fn check_create_procmacro() {
         Paint('initial state')   
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
-    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:68,h:9");
+    App::new().size(Size::new(70, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:68,h:9");
 
-    w.add(numericselector!("i32,5,1,8,1,x:1,y:1,w:10"));
-    w.add(numericselector!("u32,5,1,8,1,x:1,y:3,w:15,flags:HideButtons"));
-    w.add(numericselector!("f32,5.5,1.0,8.0,0.5,x:1,y:5,w:16"));
+        w.add(numericselector!("i32,5,1,8,1,x:1,y:1,w:10"));
+        w.add(numericselector!("u32,5,1,8,1,x:1,y:3,w:15,flags:HideButtons"));
+        w.add(numericselector!("f32,5.5,1.0,8.0,0.5,x:1,y:5,w:16"));
 
-    w.add(numericselector!("i32,1000,1000,8000,100,x:22,y:1,w:20,format:DigitGrouping"));
-    w.add(numericselector!("u8,50,0,100,1,x:22,y:3,w:20,format:Percentage"));
-    w.add(numericselector!("i8,-50,-100,100,1,x:22,y:5,w:20,flags:ReadOnly,format:Decimal"));
+        w.add(numericselector!("i32,1000,1000,8000,100,x:22,y:1,w:20,format:DigitGrouping"));
+        w.add(numericselector!("u8,50,0,100,1,x:22,y:3,w:20,format:Percentage"));
+        w.add(numericselector!("i8,-50,-100,100,1,x:22,y:5,w:20,flags:ReadOnly,format:Decimal"));
 
-    w.add(numericselector!("u128,1000000,1000,80000000,1024,x:43,y:1,w:20,format:Size"));
-    w.add(numericselector!("u32,0xFFEE,0,100000,1,x:43,y:3,w:20,format:Hex"));
-
-    a.add_window(w);
-    a.run();
+        w.add(numericselector!("u128,1000000,1000,80000000,1024,x:43,y:1,w:20,format:Size"));
+        w.add(numericselector!("u32,0xFFEE,0,100000,1,x:43,y:3,w:20,format:Hex"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -119,22 +117,21 @@ fn check_create_procmacro_defaults() {
         Paint('initial state')   
         CheckHash(0x9C2D78D1EAF6A3C)
     ";
-    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:68,h:9");
+    App::new().size(Size::new(70, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:68,h:9");
 
-    w.add(numericselector!("i32,5,x:1,y:1,w:10"));
-    w.add(numericselector!("u32,5,x:1,y:3,w:15,flags:HideButtons"));
-    w.add(numericselector!("f32,5.5,x:1,y:5,w:16"));
+        w.add(numericselector!("i32,5,x:1,y:1,w:10"));
+        w.add(numericselector!("u32,5,x:1,y:3,w:15,flags:HideButtons"));
+        w.add(numericselector!("f32,5.5,x:1,y:5,w:16"));
 
-    w.add(numericselector!("i32,1000,x:22,y:1,w:20,format:DigitGrouping,min:1000"));
-    w.add(numericselector!("u8,50,x:22,y:3,w:20,format:Percentage"));
-    w.add(numericselector!("i8,-50,x:22,y:5,w:20,flags:ReadOnly,format:Decimal"));
+        w.add(numericselector!("i32,1000,x:22,y:1,w:20,format:DigitGrouping,min:1000"));
+        w.add(numericselector!("u8,50,x:22,y:3,w:20,format:Percentage"));
+        w.add(numericselector!("i8,-50,x:22,y:5,w:20,flags:ReadOnly,format:Decimal"));
 
-    w.add(numericselector!("u128,1000000,1024,x:43,y:1,w:20,format:Size"));
-    w.add(numericselector!("u32,0xFFEE,x:43,y:3,w:20,format:Hex"));
-
-    a.add_window(w);
-    a.run();
+        w.add(numericselector!("u128,1000000,1024,x:43,y:1,w:20,format:Size"));
+        w.add(numericselector!("u32,0xFFEE,x:43,y:3,w:20,format:Hex"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -167,11 +164,11 @@ fn check_min_max_by_mouse() {
         Paint('value: 8, nothing changes')   
         CheckHash(0x3F03BA5FA9F80BAA)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,w:38,h:5,x:1,y:1,");
+        w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -204,11 +201,11 @@ fn check_min_max_by_keyboard() {
         Paint('value: 8, nothing changes')   
         CheckHash(0x3F03BA5FA9F80BAA)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,w:38,h:5,x:1,y:1,");
+        w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -224,11 +221,11 @@ fn check_min_max_by_home_end() {
         Paint('value: 8, right button disabled')   
         CheckHash(0x3F03BA5FA9F80BAA)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,w:38,h:5,x:1,y:1,");
+        w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -258,11 +255,11 @@ fn check_readonly() {
         Paint('nothng changes')   
         CheckHash(0xBE164F0A76471873)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20,flags:ReadOnly"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,w:38,h:5,x:1,y:1,");
+        w.add(numericselector!("i32,5,min:3,max:8,step:1,x:1,y:1,w:20,flags:ReadOnly"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -288,11 +285,11 @@ fn check_edit_mode() {
         CheckHash(0x534C873C7A674B61)
         CheckCursor(hidden)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,w:38,h:5,x:1,y:1,");
+        w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -313,11 +310,11 @@ fn check_exit_edit_mode() {
         Paint('window closed')
         CheckHash(0xAB06844D69595285)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,w:38,h:5,x:1,y:1,");
-    w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,w:38,h:5,x:1,y:1,");
+        w.add(numericselector!("i32,5,min:3,max:80,step:1,x:1,y:1,w:20"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -348,9 +345,7 @@ fn check_events() {
         Paint('New-value: 4')   
         CheckHash(0x50AB32FB27060802)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]

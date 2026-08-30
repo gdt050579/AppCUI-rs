@@ -63,8 +63,13 @@ fn check_theme_update() {
         Paint('Theme changed to green')   
         CheckHash(0xFD09CB2F64B6B15) 
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| TestWindow::new()).run().unwrap();
-    a.run();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .command_bar()
+        .window(|| TestWindow::new())
+        .run()
+        .unwrap();
 }
 
 #[derive(ListItem)]
@@ -200,7 +205,6 @@ fn check_default_theme() {
         .window(|| WindowWithTheme::new())
         .run()
         .unwrap()
-        .run();
 }
 
 #[test]
@@ -221,7 +225,6 @@ fn check_darkgray_theme() {
         .window(|| WindowWithTheme::new())
         .run()
         .unwrap()
-        .run();
 }
 
 #[test]
@@ -242,5 +245,4 @@ fn check_light_theme() {
         .window(|| WindowWithTheme::new())
         .run()
         .unwrap()
-        .run();
 }

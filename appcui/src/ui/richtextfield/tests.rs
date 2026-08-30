@@ -61,11 +61,11 @@ fn check_move_left_right() {
         CheckHash(0x52EEFBBE06A52F24)
         CheckCursor(24,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello world',x:1,y:1,w:38,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello world',x:1,y:1,w:38,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -86,11 +86,11 @@ fn check_select_all() {
         CheckHash(0x6CF3F30A185BD123)
         CheckCursor(24,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello world',x:1,y:1,w:38,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello world',x:1,y:1,w:38,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -125,11 +125,11 @@ fn check_select_left_right() {
         CheckHash(0xDCE11FF9FF553196)
         CheckCursor(13,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'123❤╬▶-〓GDT',x:1,y:1,w:38,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'123❤╬▶-〓GDT',x:1,y:1,w:38,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -203,11 +203,11 @@ fn check_move_up_down() {
         CheckHash(0x1F3E1601C2AD9D28)
         CheckCursor(22,5)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:3"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:3"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -256,11 +256,11 @@ fn check_scroll_left_right() {
         CheckHash(0x17543EE2D2FC227)
         CheckCursor(22,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello world ! from a rust text field',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -281,11 +281,11 @@ fn check_home_end() {
         CheckHash(0xB5F2856A17C1B50D)
         CheckCursor(22,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -346,11 +346,11 @@ fn check_delete() {
         CheckHash(0xD37A8CFC9107AD14)
         CheckCursor(15,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -370,11 +370,11 @@ fn check_delete_from_end() {
         CheckHash(0x57F85A60FF685391)
         CheckCursor(21,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -396,11 +396,11 @@ fn check_delete_after_selection() {
         CheckHash(0xE76A8A2CB6353D91)
         CheckCursor(15,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -445,11 +445,11 @@ fn check_backspace() {
         CheckHash(0xB5F2856A17C1B50D)
         CheckCursor(22,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -518,11 +518,11 @@ fn check_backspace_from_end() {
         CheckHash(0xA4EDA87645FBF114)
         CheckCursor(13,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -544,11 +544,11 @@ fn check_backspace_after_selection() {
         CheckHash(0xDA69921E3679D663)
         CheckCursor(13,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello ❤╬▶-〓 world',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -579,11 +579,11 @@ fn check_write_text() {
         CheckHash(0x7C2C49BC32FC4A52)
         CheckCursor(18,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("x:1,y:1,w:8,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("x:1,y:1,w:8,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -614,11 +614,11 @@ fn check_write_unicode_text() {
         CheckHash(0x3CCD819EB95146CD)
         CheckCursor(18,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("x:1,y:1,w:8,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("x:1,y:1,w:8,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -636,13 +636,13 @@ fn check_parser_markdown_like_delimiters() {
         CheckHash(0xECE3F5F6102F267D)
     ";
 
-    let mut a = App::new().size(Size::new(90, 12)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:70,h:10"), window::Flags::None);
-    w.add(richtextfield!(
-        "'A `code` and **bold** plus *italic* demo',x:1,y:1,w:66,h:1,parser:markdown_like_colors_for_tests"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(90, 12)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:70,h:10"), window::Flags::None);
+        w.add(richtextfield!(
+            "'A `code` and **bold** plus *italic* demo',x:1,y:1,w:66,h:1,parser:markdown_like_colors_for_tests"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -661,13 +661,13 @@ fn check_parser_markdown_like_after_edit() {
         CheckHash(0xEACC9FC250C52985)
     ";
 
-    let mut a = App::new().size(Size::new(100, 12)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:78,h:10"), window::Flags::None);
-    w.add(richtextfield!(
-        "'Start with `x` and **y** and *z*',x:1,y:1,w:74,h:1,parser:markdown_like_colors_for_tests"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(100, 12)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:78,h:10"), window::Flags::None);
+        w.add(richtextfield!(
+            "'Start with `x` and **y** and *z*',x:1,y:1,w:74,h:1,parser:markdown_like_colors_for_tests"
+        ));
+        w
+    }).run().unwrap();
 }
 #[test]
 fn check_write_multiline_text() {
@@ -705,11 +705,11 @@ fn check_write_multiline_text() {
         CheckHash(0xE60DAD19F94F1D86)
         CheckCursor(13,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("x:1,y:1,w:8,h:3"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("x:1,y:1,w:8,h:3"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -738,11 +738,11 @@ fn check_insert_text() {
         CheckHash(0x13D74C30632D286D)
         CheckCursor(22,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello world',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello world',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -779,11 +779,11 @@ fn check_insert_text_over_selection() {
         CheckHash(0x3D405AF32EA72405)
         CheckCursor(22,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello world',x:1,y:1,w:12,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello world',x:1,y:1,w:12,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -860,11 +860,11 @@ fn check_move_to_next_word() {
         CheckHash(0x188AC9EB95C89126)
         CheckCursor(45,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -941,11 +941,11 @@ fn check_move_to_previous_word() {
         CheckHash(0xC7E06F2FFB5E0060)
         CheckCursor(13,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'  Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'  Hello   world,〓❤,123,  test.set    uni〓code  twice   ',x:1,y:1,w:35,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -977,11 +977,11 @@ fn check_readonly_flag() {
         CheckHash(0x1CD049E1CD927118)
         CheckCursor(24,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello   world',x:1,y:1,w:20,h:1,flags: ReadOnly"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello   world',x:1,y:1,w:20,h:1,flags: ReadOnly"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1000,13 +1000,13 @@ fn check_autoselect_on_focus() {
         Paint('Text-3 focused (no selection)')   
         CheckHash(0xBD293603FEBD93F4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Text-1',x:1,y:1,w:30,h:1,flags: ReadOnly"));
-    w.add(richtextfield!("'Text-2',x:1,y:3,w:30,h:1"));
-    w.add(richtextfield!("'Text-3',x:1,y:5,w:30,h:1,flags: DisableAutoSelectOnFocus"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Text-1',x:1,y:1,w:30,h:1,flags: ReadOnly"));
+        w.add(richtextfield!("'Text-2',x:1,y:3,w:30,h:1"));
+        w.add(richtextfield!("'Text-3',x:1,y:5,w:30,h:1,flags: DisableAutoSelectOnFocus"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1052,9 +1052,7 @@ fn check_validation_event() {
         Paint('Label contains: Hello world')
         CheckHash(0x5E0D88141ECF26FD) 
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1081,11 +1079,11 @@ fn check_mouse_click() {
         CheckHash(0xCA75D9C93B27BEBE)
         CheckCursor(16,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤rl❤d',x:1,y:1,w:20,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello w❤rl❤d',x:1,y:1,w:20,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1112,11 +1110,11 @@ fn check_mouse_click_multi_line() {
         CheckHash(0x82AAADB5012BC38E)
         CheckCursor(17,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤rl❤d',x:1,y:1,w:10,h:3"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello w❤rl❤d',x:1,y:1,w:10,h:3"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1143,11 +1141,11 @@ fn check_mouse_click_outside_bounds() {
         CheckHash(0x9D7022C6AA5D3FFB)
         CheckCursor(25,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤rl❤d',x:1,y:1,w:20,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello w❤rl❤d',x:1,y:1,w:20,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1167,11 +1165,11 @@ fn check_mouse_selection() {
         CheckHash(0x57E8868A7830C0DE)
         CheckCursor(13,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤rl❤d - I ❤ Rust Language :)',x:1,y:1,w:10,h:3"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello w❤rl❤d - I ❤ Rust Language :)',x:1,y:1,w:10,h:3"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1187,11 +1185,11 @@ fn check_double_click_selection() {
         CheckHash(0xC500029C8BF4A50B)
         CheckCursor(21,5)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello w❤rl❤d - I ❤ Rust Language :)',x:1,y:1,w:14,h:3"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello w❤rl❤d - I ❤ Rust Language :)',x:1,y:1,w:14,h:3"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1212,11 +1210,11 @@ fn check_select_word_for_upper_and_lowercase() {
         CheckHash(0x350A1BC25797ADD6)
         CheckCursor(24,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello wOrLd, I ❤ Rust Language :)',x:1,y:1,w:36,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello wOrLd, I ❤ Rust Language :)',x:1,y:1,w:36,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1241,14 +1239,14 @@ fn check_mouse_hover() {
         Paint('Hover over last textfield')   
         CheckHash(0xAC1C531E6045ADEE)
     ";
-    let mut a = App::new().size(Size::new(60, 13)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
-    w.add(richtextfield!("'Hello world !',x:1,y:1,w:36,h:1"));
-    w.add(richtextfield!("'Read onlye text',x:1,y:3,w:36,h:1, flags: Readonly"));
-    w.add(richtextfield!("Inactive,x:1,y:5,w:36,h:1,enable: false"));
-    w.add(richtextfield!("'No auto selection',x:1,y:7,w:36,h:1, flags: DisableAutoSelectOnFocus"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 13)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
+        w.add(richtextfield!("'Hello world !',x:1,y:1,w:36,h:1"));
+        w.add(richtextfield!("'Read onlye text',x:1,y:3,w:36,h:1, flags: Readonly"));
+        w.add(richtextfield!("Inactive,x:1,y:5,w:36,h:1,enable: false"));
+        w.add(richtextfield!("'No auto selection',x:1,y:7,w:36,h:1, flags: DisableAutoSelectOnFocus"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1270,11 +1268,11 @@ fn check_paste() {
         CheckHash(0xDF568934EEA67B95)
         CheckCursor(34,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello , I ❤ Rust Language :)',x:1,y:1,w:36,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello , I ❤ Rust Language :)',x:1,y:1,w:36,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1300,11 +1298,11 @@ fn check_copy_cut() {
         CheckCursor(13,3)
         CheckClipboardText('Hello')
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello , I ❤ Rust Language :)',x:1,y:1,w:36,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello , I ❤ Rust Language :)',x:1,y:1,w:36,h:1"));
+        w
+    }).run().unwrap();
 }
 
 
@@ -1382,9 +1380,7 @@ fn check_text_changed_event() {
         Paint('10. Empty text (16:) - nothing changes') 
         CheckHash(0x283F94E44E7C1378)             
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1457,9 +1453,7 @@ fn check_text_changed_event_readonly() {
         Paint('9. Nothing changes, text is read-only') 
         CheckHash(0x615B7D42C0680A1E) 
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1503,11 +1497,11 @@ fn check_undo_redo_insert() {
         CheckHash(0x52EEFBBE06A52F24)
         CheckCursor(24,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello',x:1,y:1,w:38,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello',x:1,y:1,w:38,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1541,11 +1535,11 @@ fn check_undo_redo_delete() {
         CheckHash(0x5D5434B3B979A184)
         CheckCursor(13,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'abc',x:1,y:1,w:38,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'abc',x:1,y:1,w:38,h:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1585,9 +1579,9 @@ fn check_undo_redo_type_over_selection() {
         CheckHash(0xED49DB503B10243C)
         CheckCursor(14,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(richtextfield!("'Hello',x:1,y:1,w:38,h:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(richtextfield!("'Hello',x:1,y:1,w:38,h:1"));
+        w
+    }).run().unwrap();
 }

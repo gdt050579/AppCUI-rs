@@ -9,33 +9,32 @@ fn check_creation_all_types() {
         Paint('all five visual types')
         CheckHash(0x7E04695FCF180859)
     ";
-    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:58,h:11");
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:58,h:11");
 
-    w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:0,w:24"), hslider::Flags::None));
-    w.add(HSlider::new(0, 10, 1, Type::ProgressBar, layout!("x:1,y:1,w:24"), hslider::Flags::None));
-    w.add(HSlider::new(0, 10, 1, Type::Inline, layout!("x:1,y:2,w:24"), hslider::Flags::None));
-    w.add(HSlider::new(0, 10, 1, Type::Blocks, layout!("x:1,y:3,w:24"), hslider::Flags::None));
-    w.add(HSlider::new(0, 10, 1, Type::Ruler, layout!("x:1,y:4,w:24"), hslider::Flags::None));
+        w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:0,w:24"), hslider::Flags::None));
+        w.add(HSlider::new(0, 10, 1, Type::ProgressBar, layout!("x:1,y:1,w:24"), hslider::Flags::None));
+        w.add(HSlider::new(0, 10, 1, Type::Inline, layout!("x:1,y:2,w:24"), hslider::Flags::None));
+        w.add(HSlider::new(0, 10, 1, Type::Blocks, layout!("x:1,y:3,w:24"), hslider::Flags::None));
+        w.add(HSlider::new(0, 10, 1, Type::Ruler, layout!("x:1,y:4,w:24"), hslider::Flags::None));
 
-    let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:28,y:0,w:24"), hslider::Flags::None);
-    s.set_value(5);
-    w.add(s);
-    let mut s = HSlider::new(0, 10, 1, Type::ProgressBar, layout!("x:28,y:1,w:24"), hslider::Flags::None);
-    s.set_value(5);
-    w.add(s);
-    let mut s = HSlider::new(0, 10, 1, Type::Inline, layout!("x:28,y:2,w:24"), hslider::Flags::None);
-    s.set_value(5);
-    w.add(s);
-    let mut s = HSlider::new(0, 10, 1, Type::Blocks, layout!("x:28,y:3,w:24"), hslider::Flags::None);
-    s.set_value(5);
-    w.add(s);
-    let mut s = HSlider::new(0, 10, 1, Type::Ruler, layout!("x:28,y:4,w:24"), hslider::Flags::None);
-    s.set_value(10);
-    w.add(s);
-
-    a.add_window(w);
-    a.run();
+        let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:28,y:0,w:24"), hslider::Flags::None);
+        s.set_value(5);
+        w.add(s);
+        let mut s = HSlider::new(0, 10, 1, Type::ProgressBar, layout!("x:28,y:1,w:24"), hslider::Flags::None);
+        s.set_value(5);
+        w.add(s);
+        let mut s = HSlider::new(0, 10, 1, Type::Inline, layout!("x:28,y:2,w:24"), hslider::Flags::None);
+        s.set_value(5);
+        w.add(s);
+        let mut s = HSlider::new(0, 10, 1, Type::Blocks, layout!("x:28,y:3,w:24"), hslider::Flags::None);
+        s.set_value(5);
+        w.add(s);
+        let mut s = HSlider::new(0, 10, 1, Type::Ruler, layout!("x:28,y:4,w:24"), hslider::Flags::None);
+        s.set_value(10);
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -45,95 +44,94 @@ fn check_creation_all_flags_and_numeric_types() {
         Paint('every flag combination over several numeric types')
         CheckHash(0x9E2DF4B2EE3B3EE5)
     ";
-    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:58,h:11");
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:58,h:11");
 
-    w.add(HSlider::new(
-        0,
-        100,
-        5,
-        Type::Standard,
-        layout!("x:1,y:0,w:26"),
-        hslider::Flags::ShowValue,
-    ));
-    w.add(HSlider::new(
-        0,
-        100,
-        5,
-        Type::Standard,
-        layout!("x:1,y:1,w:26"),
-        hslider::Flags::ValueAsMarker,
-    ));
-    w.add(HSlider::new(
-        0,
-        100,
-        5,
-        Type::Standard,
-        layout!("x:1,y:2,w:26"),
-        hslider::Flags::ShowValue | hslider::Flags::ValueAsMarker,
-    ));
-    let mut s = HSlider::new(
-        0,
-        100,
-        5,
-        Type::Inline,
-        layout!("x:1,y:3,w:26"),
-        hslider::Flags::ShowValue | hslider::Flags::Ticks | hslider::Flags::ValueAsMarker,
-    );
-    s.set_ticks(5);
-    w.add(s);
+        w.add(HSlider::new(
+            0,
+            100,
+            5,
+            Type::Standard,
+            layout!("x:1,y:0,w:26"),
+            hslider::Flags::ShowValue,
+        ));
+        w.add(HSlider::new(
+            0,
+            100,
+            5,
+            Type::Standard,
+            layout!("x:1,y:1,w:26"),
+            hslider::Flags::ValueAsMarker,
+        ));
+        w.add(HSlider::new(
+            0,
+            100,
+            5,
+            Type::Standard,
+            layout!("x:1,y:2,w:26"),
+            hslider::Flags::ShowValue | hslider::Flags::ValueAsMarker,
+        ));
+        let mut s = HSlider::new(
+            0,
+            100,
+            5,
+            Type::Inline,
+            layout!("x:1,y:3,w:26"),
+            hslider::Flags::ShowValue | hslider::Flags::Ticks | hslider::Flags::ValueAsMarker,
+        );
+        s.set_ticks(5);
+        w.add(s);
 
-    w.add(HSlider::new(
-        0u8,
-        255u8,
-        5u8,
-        Type::Inline,
-        layout!("x:29,y:0,w:26"),
-        hslider::Flags::ShowValue,
-    ));
-    w.add(HSlider::new(
-        -100i16,
-        100i16,
-        10i16,
-        Type::Ruler,
-        layout!("x:29,y:1,w:26"),
-        hslider::Flags::ShowValue,
-    ));
-    w.add(HSlider::new(
-        0i64,
-        1000i64,
-        50i64,
-        Type::Blocks,
-        layout!("x:29,y:2,w:26"),
-        hslider::Flags::ShowValue,
-    ));
-    w.add(HSlider::new(
-        0.0f32,
-        1.0f32,
-        0.1f32,
-        Type::Inline,
-        layout!("x:29,y:3,w:26"),
-        hslider::Flags::ShowValue,
-    ));
-    w.add(HSlider::new(
-        0.0f64,
-        10.0f64,
-        0.5f64,
-        Type::Ruler,
-        layout!("x:29,y:4,w:26"),
-        hslider::Flags::ShowValue,
-    ));
-    w.add(HSlider::new(
-        0u32,
-        4000u32,
-        100u32,
-        Type::ProgressBar,
-        layout!("x:29,y:5,w:26"),
-        hslider::Flags::ShowValue,
-    ));
-
-    a.add_window(w);
-    a.run();
+        w.add(HSlider::new(
+            0u8,
+            255u8,
+            5u8,
+            Type::Inline,
+            layout!("x:29,y:0,w:26"),
+            hslider::Flags::ShowValue,
+        ));
+        w.add(HSlider::new(
+            -100i16,
+            100i16,
+            10i16,
+            Type::Ruler,
+            layout!("x:29,y:1,w:26"),
+            hslider::Flags::ShowValue,
+        ));
+        w.add(HSlider::new(
+            0i64,
+            1000i64,
+            50i64,
+            Type::Blocks,
+            layout!("x:29,y:2,w:26"),
+            hslider::Flags::ShowValue,
+        ));
+        w.add(HSlider::new(
+            0.0f32,
+            1.0f32,
+            0.1f32,
+            Type::Inline,
+            layout!("x:29,y:3,w:26"),
+            hslider::Flags::ShowValue,
+        ));
+        w.add(HSlider::new(
+            0.0f64,
+            10.0f64,
+            0.5f64,
+            Type::Ruler,
+            layout!("x:29,y:4,w:26"),
+            hslider::Flags::ShowValue,
+        ));
+        w.add(HSlider::new(
+            0u32,
+            4000u32,
+            100u32,
+            Type::ProgressBar,
+            layout!("x:29,y:5,w:26"),
+            hslider::Flags::ShowValue,
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -143,31 +141,30 @@ fn check_creation_procmacro() {
         Paint('controls built through the hslider! macro')
         CheckHash(0xD6E790A46F62F0CB)
     ";
-    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:58,h:11");
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:58,h:11");
 
-    w.add(hslider!("i32,0,10,1,x:1,y:0,w:24"));
-    w.add(hslider!("class:i32,min:0,max:10,step:1,x:1,y:1,w:24,type:ProgressBar"));
-    w.add(hslider!("i32,0,10,1,x:1,y:2,w:24,type:Inline"));
-    w.add(hslider!("i32,0,10,1,x:1,y:3,w:24,type:Blocks"));
-    w.add(hslider!("i32,0,10,1,x:1,y:4,w:24,type:Ruler"));
+        w.add(hslider!("i32,0,10,1,x:1,y:0,w:24"));
+        w.add(hslider!("class:i32,min:0,max:10,step:1,x:1,y:1,w:24,type:ProgressBar"));
+        w.add(hslider!("i32,0,10,1,x:1,y:2,w:24,type:Inline"));
+        w.add(hslider!("i32,0,10,1,x:1,y:3,w:24,type:Blocks"));
+        w.add(hslider!("i32,0,10,1,x:1,y:4,w:24,type:Ruler"));
 
-    w.add(hslider!("i32,0,100,5,x:28,y:0,w:26,flags:ShowValue"));
+        w.add(hslider!("i32,0,100,5,x:28,y:0,w:26,flags:ShowValue"));
 
-    let mut s = hslider!("i32,0,100,5,x:28,y:1,w:26,flags:Ticks,type:Ruler");
-    s.set_ticks(5);
-    w.add(s);
+        let mut s = hslider!("i32,0,100,5,x:28,y:1,w:26,flags:Ticks,type:Ruler");
+        s.set_ticks(5);
+        w.add(s);
 
-    w.add(hslider!("i32,0,100,5,x:28,y:2,w:26,flags:ValueAsMarker"));
+        w.add(hslider!("i32,0,100,5,x:28,y:2,w:26,flags:ValueAsMarker"));
 
-    let mut s = hslider!("i32,0,100,5,x:28,y:3,w:26,flags:ShowValue|Ticks|ValueAsMarker,type:Inline");
-    s.set_ticks(5);
-    w.add(s);
+        let mut s = hslider!("i32,0,100,5,x:28,y:3,w:26,flags:ShowValue|Ticks|ValueAsMarker,type:Inline");
+        s.set_ticks(5);
+        w.add(s);
 
-    w.add(hslider!("f32,0f32,10f32,1.5f32,x:28,y:4,w:26,flags:ShowValue"));
-
-    a.add_window(w);
-    a.run();
+        w.add(hslider!("f32,0f32,10f32,1.5f32,x:28,y:4,w:26,flags:ShowValue"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -177,76 +174,75 @@ fn check_setters_and_getters() {
         Paint('after the setters ran')
         CheckHash(0x4CD4A4E8C2993CC6)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:58,h:9");
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:58,h:9");
 
-    let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:0,w:26"), hslider::Flags::None);
-    assert_eq!(s.min(), 0);
-    assert_eq!(s.max(), 10);
-    assert_eq!(s.step(), 1);
-    assert_eq!(s.value(), 0);
-    assert_eq!(s.ticks(), 0);
+        let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:0,w:26"), hslider::Flags::None);
+        assert_eq!(s.min(), 0);
+        assert_eq!(s.max(), 10);
+        assert_eq!(s.step(), 1);
+        assert_eq!(s.value(), 0);
+        assert_eq!(s.ticks(), 0);
 
-    s.set_value(7);
-    assert_eq!(s.value(), 7);
-    s.set_value(999);
-    assert_eq!(s.value(), 10);
-    s.set_value(-999);
-    assert_eq!(s.value(), 0);
+        s.set_value(7);
+        assert_eq!(s.value(), 7);
+        s.set_value(999);
+        assert_eq!(s.value(), 10);
+        s.set_value(-999);
+        assert_eq!(s.value(), 0);
 
-    s.set_step(3);
-    assert_eq!(s.step(), 3);
+        s.set_step(3);
+        assert_eq!(s.step(), 3);
 
-    s.set_value(5);
-    s.set_min(8);
-    assert_eq!(s.min(), 8);
-    assert_eq!(s.value(), 8);
+        s.set_value(5);
+        s.set_min(8);
+        assert_eq!(s.min(), 8);
+        assert_eq!(s.value(), 8);
 
-    s.set_max(20);
-    assert_eq!(s.max(), 20);
-    s.set_value(20);
-    s.set_max(15);
-    assert_eq!(s.max(), 15);
-    assert_eq!(s.value(), 15);
+        s.set_max(20);
+        assert_eq!(s.max(), 20);
+        s.set_value(20);
+        s.set_max(15);
+        assert_eq!(s.max(), 15);
+        assert_eq!(s.value(), 15);
 
-    s.set_ticks(6);
-    assert_eq!(s.ticks(), 6);
-    w.add(s);
+        s.set_ticks(6);
+        assert_eq!(s.ticks(), 6);
+        w.add(s);
 
-    let mut s = HSlider::new(0, 100, 5, Type::Inline, layout!("x:1,y:2,w:26"), hslider::Flags::Ticks);
-    s.set_ticks(5);
-    s.set_value(37);
-    assert_eq!(s.value(), 25);
-    s.set_value(60);
-    assert_eq!(s.value(), 50);
-    s.set_value(100);
-    assert_eq!(s.value(), 100);
-    w.add(s);
+        let mut s = HSlider::new(0, 100, 5, Type::Inline, layout!("x:1,y:2,w:26"), hslider::Flags::Ticks);
+        s.set_ticks(5);
+        s.set_value(37);
+        assert_eq!(s.value(), 25);
+        s.set_value(60);
+        assert_eq!(s.value(), 50);
+        s.set_value(100);
+        assert_eq!(s.value(), 100);
+        w.add(s);
 
-    let mut s = HSlider::new(0, 100, 5, Type::Inline, layout!("x:1,y:4,w:26"), hslider::Flags::Ticks);
-    s.set_ticks(1);
-    assert_eq!(s.ticks(), 1);
-    s.set_value(37);
-    assert_eq!(s.value(), 37);
-    s.set_ticks(0);
-    assert_eq!(s.ticks(), 0);
-    s.set_value(42);
-    assert_eq!(s.value(), 42);
-    w.add(s);
+        let mut s = HSlider::new(0, 100, 5, Type::Inline, layout!("x:1,y:4,w:26"), hslider::Flags::Ticks);
+        s.set_ticks(1);
+        assert_eq!(s.ticks(), 1);
+        s.set_value(37);
+        assert_eq!(s.value(), 37);
+        s.set_ticks(0);
+        assert_eq!(s.ticks(), 0);
+        s.set_value(42);
+        assert_eq!(s.value(), 42);
+        w.add(s);
 
-    let mut s = HSlider::new(0.0f32, 10.0f32, 0.5f32, Type::Ruler, layout!("x:1,y:6,w:26"), hslider::Flags::ShowValue);
-    s.set_value(2.5);
-    assert_eq!(s.value(), 2.5);
-    s.set_value(100.0);
-    assert_eq!(s.value(), 10.0);
-    s.set_min(-5.0);
-    assert_eq!(s.min(), -5.0);
-    s.set_step(0.25);
-    assert_eq!(s.step(), 0.25);
-    w.add(s);
-
-    a.add_window(w);
-    a.run();
+        let mut s = HSlider::new(0.0f32, 10.0f32, 0.5f32, Type::Ruler, layout!("x:1,y:6,w:26"), hslider::Flags::ShowValue);
+        s.set_value(2.5);
+        assert_eq!(s.value(), 2.5);
+        s.set_value(100.0);
+        assert_eq!(s.value(), 10.0);
+        s.set_min(-5.0);
+        assert_eq!(s.min(), -5.0);
+        s.set_step(0.25);
+        assert_eq!(s.step(), 0.25);
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -282,13 +278,13 @@ fn check_keyboard_step() {
         Paint('unhandled key is ignored, nothing changes')
         CheckHash(0xB3A3C3AEE8ADEB8C)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:1,y:1,w:38,h:5");
-    let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue);
-    s.set_value(5);
-    w.add(s);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:1,y:1,w:38,h:5");
+        let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue);
+        s.set_value(5);
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -317,20 +313,20 @@ fn check_keyboard_ticks() {
         Paint('already on the first tick, nothing changes')
         CheckHash(0xBF3013E8676292DC)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:1,y:1,w:38,h:5");
-    let mut s = HSlider::new(
-        0,
-        100,
-        5,
-        Type::Inline,
-        layout!("x:1,y:1,w:20"),
-        hslider::Flags::Ticks | hslider::Flags::ShowValue,
-    );
-    s.set_ticks(5);
-    w.add(s);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:1,y:1,w:38,h:5");
+        let mut s = HSlider::new(
+            0,
+            100,
+            5,
+            Type::Inline,
+            layout!("x:1,y:1,w:20"),
+            hslider::Flags::Ticks | hslider::Flags::ShowValue,
+        );
+        s.set_ticks(5);
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -356,20 +352,20 @@ fn check_keyboard_ticks_shorter_than_one_unit() {
         Paint('last tick, nothing changes')
         CheckHash(0x7FDAC326A3F25224)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:1,y:1,w:38,h:5");
-    let mut s = HSlider::new(
-        0,
-        3,
-        1,
-        Type::Ruler,
-        layout!("x:1,y:1,w:20"),
-        hslider::Flags::Ticks | hslider::Flags::ShowValue,
-    );
-    s.set_ticks(5);
-    w.add(s);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:1,y:1,w:38,h:5");
+        let mut s = HSlider::new(
+            0,
+            3,
+            1,
+            Type::Ruler,
+            layout!("x:1,y:1,w:20"),
+            hslider::Flags::Ticks | hslider::Flags::ShowValue,
+        );
+        s.set_ticks(5);
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -404,11 +400,11 @@ fn check_mouse_click_and_drag() {
         Paint('dragged on to the right end')
         CheckHash(0x3E2CEB4F3ECC826A)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:1,y:1,w:38,h:5");
-    w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:1,y:1,w:38,h:5");
+        w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -437,20 +433,20 @@ fn check_mouse_ticks() {
         Paint('dragged past the right end, clamped onto the last tick')
         CheckHash(0x76B25ED943AC2F62)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:1,y:1,w:38,h:5");
-    let mut s = HSlider::new(
-        0,
-        100,
-        5,
-        Type::Inline,
-        layout!("x:1,y:1,w:20"),
-        hslider::Flags::Ticks | hslider::Flags::ShowValue,
-    );
-    s.set_ticks(5);
-    w.add(s);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:1,y:1,w:38,h:5");
+        let mut s = HSlider::new(
+            0,
+            100,
+            5,
+            Type::Inline,
+            layout!("x:1,y:1,w:20"),
+            hslider::Flags::Ticks | hslider::Flags::ShowValue,
+        );
+        s.set_ticks(5);
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -491,13 +487,13 @@ fn check_mouse_enter_leave_and_wheel() {
         Paint('left the control while holding, pressed state is cleared')
         CheckHash(0xD7202032234A5BF)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:1,y:1,w:38,h:5");
-    let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue);
-    s.set_value(5);
-    w.add(s);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:1,y:1,w:38,h:5");
+        let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue);
+        s.set_value(5);
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -526,20 +522,19 @@ fn check_focus_and_disabled() {
         Paint('the third slider moved, the disabled one is still at 5')
         CheckHash(0xF9B3690B8000C592)
     ";
-    let mut a = App::new().size(Size::new(40, 12)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:1,y:1,w:38,h:8");
+    App::new().size(Size::new(40, 12)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:1,y:1,w:38,h:8");
 
-    w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue));
+        w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:20"), hslider::Flags::ShowValue));
 
-    let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:2,w:20"), hslider::Flags::ShowValue);
-    s.set_value(5);
-    s.set_enabled(false);
-    w.add(s);
+        let mut s = HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:2,w:20"), hslider::Flags::ShowValue);
+        s.set_value(5);
+        s.set_enabled(false);
+        w.add(s);
 
-    w.add(HSlider::new(0, 10, 1, Type::Inline, layout!("x:1,y:3,w:20"), hslider::Flags::ShowValue));
-
-    a.add_window(w);
-    a.run();
+        w.add(HSlider::new(0, 10, 1, Type::Inline, layout!("x:1,y:3,w:20"), hslider::Flags::ShowValue));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -565,35 +560,34 @@ fn check_resize() {
         Paint('back to a usable width, the value survived the resize')
         CheckHash(0xAEA61BA6D4EDBA06)
     ";
-    let mut a = App::new().size(Size::new(50, 12)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,x:0,y:0,w:100%,h:100%,flags: Sizeable");
+    App::new().size(Size::new(50, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,x:0,y:0,w:100%,h:100%,flags: Sizeable");
 
-    let mut s = HSlider::new(
-        0,
-        100,
-        5,
-        Type::Inline,
-        layout!("x:0,y:0,w:100%"),
-        hslider::Flags::Ticks | hslider::Flags::ShowValue,
-    );
-    s.set_ticks(5);
-    w.add(s);
+        let mut s = HSlider::new(
+            0,
+            100,
+            5,
+            Type::Inline,
+            layout!("x:0,y:0,w:100%"),
+            hslider::Flags::Ticks | hslider::Flags::ShowValue,
+        );
+        s.set_ticks(5);
+        w.add(s);
 
-    let mut s = HSlider::new(
-        0,
-        100,
-        5,
-        Type::Standard,
-        layout!("x:0,y:2,w:100%"),
-        hslider::Flags::Ticks | hslider::Flags::ValueAsMarker,
-    );
-    s.set_ticks(11);
-    w.add(s);
+        let mut s = HSlider::new(
+            0,
+            100,
+            5,
+            Type::Standard,
+            layout!("x:0,y:2,w:100%"),
+            hslider::Flags::Ticks | hslider::Flags::ValueAsMarker,
+        );
+        s.set_ticks(11);
+        w.add(s);
 
-    w.add(HSlider::new(0, 100, 5, Type::Ruler, layout!("x:0,y:4,w:100%"), hslider::Flags::ShowValue));
-
-    a.add_window(w);
-    a.run();
+        w.add(HSlider::new(0, 100, 5, Type::Ruler, layout!("x:0,y:4,w:100%"), hslider::Flags::ShowValue));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -619,29 +613,28 @@ fn check_degenerate_geometry() {
         Paint('stepping by zero changes nothing')
         CheckHash(0x941C5E48DCFCD47E)
     ";
-    let mut a = App::new().size(Size::new(40, 12)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:1,y:1,w:38,h:9");
+    App::new().size(Size::new(40, 12)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:1,y:1,w:38,h:9");
 
-    w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:3"), hslider::Flags::Ticks));
-    w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:5,y:1,w:4"), hslider::Flags::None));
-    w.add(HSlider::new(0, 10, 1, Type::Inline, layout!("x:10,y:1,w:1"), hslider::Flags::None));
-    w.add(HSlider::new(0, 10, 1, Type::Blocks, layout!("x:12,y:1,w:2"), hslider::Flags::None));
+        w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:1,y:1,w:3"), hslider::Flags::Ticks));
+        w.add(HSlider::new(0, 10, 1, Type::Standard, layout!("x:5,y:1,w:4"), hslider::Flags::None));
+        w.add(HSlider::new(0, 10, 1, Type::Inline, layout!("x:10,y:1,w:1"), hslider::Flags::None));
+        w.add(HSlider::new(0, 10, 1, Type::Blocks, layout!("x:12,y:1,w:2"), hslider::Flags::None));
 
-    let mut s = HSlider::new(
-        5,
-        5,
-        1,
-        Type::Standard,
-        layout!("x:1,y:3,w:24"),
-        hslider::Flags::Ticks | hslider::Flags::ShowValue,
-    );
-    s.set_ticks(5);
-    w.add(s);
+        let mut s = HSlider::new(
+            5,
+            5,
+            1,
+            Type::Standard,
+            layout!("x:1,y:3,w:24"),
+            hslider::Flags::Ticks | hslider::Flags::ShowValue,
+        );
+        s.set_ticks(5);
+        w.add(s);
 
-    w.add(HSlider::new(0, 10, 0, Type::Inline, layout!("x:1,y:5,w:24"), hslider::Flags::ShowValue));
-
-    a.add_window(w);
-    a.run();
+        w.add(HSlider::new(0, 10, 0, Type::Inline, layout!("x:1,y:5,w:24"), hslider::Flags::ShowValue));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -667,20 +660,20 @@ fn check_more_ticks_than_columns() {
         Paint('dragged across the whole track')
         CheckHash(0x76B762C8B9ACDEFF)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,x:1,y:1,w:38,h:5");
-    let mut s = HSlider::new(
-        0,
-        200,
-        1,
-        Type::Ruler,
-        layout!("x:1,y:1,w:20"),
-        hslider::Flags::Ticks | hslider::Flags::ShowValue,
-    );
-    s.set_ticks(40);
-    w.add(s);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:1,y:1,w:38,h:5");
+        let mut s = HSlider::new(
+            0,
+            200,
+            1,
+            Type::Ruler,
+            layout!("x:1,y:1,w:20"),
+            hslider::Flags::Ticks | hslider::Flags::ShowValue,
+        );
+        s.set_ticks(40);
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -723,9 +716,7 @@ fn check_events_i32() {
         Paint('title reads val = 9')
         CheckHash(0xCB63B3FB3425E861)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -772,9 +763,7 @@ fn check_events_f32_with_ticks() {
         Paint('back to the first tick, title reads val = 0')
         CheckHash(0xB211799884927B01)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]

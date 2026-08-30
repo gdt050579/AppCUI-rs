@@ -21,8 +21,7 @@ fn check_custom_paint_for_desktop() {
         Paint('desktop with red and green')
         CheckHash(0xD490E8FF2EC89965)
     ";
-    let a = App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
 }
 
 #[test]
@@ -61,8 +60,7 @@ fn check_on_start_for_desktop() {
         Paint('desktop with yellow dots and started written with red background')
         CheckHash(0x7B0B399907719797)
     ";
-    let a = App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
 }
 
 #[test]
@@ -111,8 +109,7 @@ fn check_on_resize_for_desktop() {
         Paint('Old: 30x10, New: 40x5')
         CheckHash(0x6CDE4060C8AB8E26)
     ";
-    let a = App::new().size(Size::new(30, 7)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
-    a.run();
+    App::new().size(Size::new(30, 7)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
 }
 
 #[test]
@@ -160,8 +157,7 @@ fn check_menus() {
         Paint('Menu opem')
         CheckHash(0x610ADBDB875BBED1)
     ";
-    let a = App::new().size(Size::new(40, 12)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap();
-    a.run();
+    App::new().size(Size::new(40, 12)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap();
 }
 
 #[test]
@@ -197,8 +193,7 @@ fn check_on_close() {
         CheckHash(0xD156AD73229C5DB6)
         Key.Pressed(Alt+Y)
     ";
-    let a = App::new().size(Size::new(40, 6)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
-    a.run();
+    App::new().size(Size::new(40, 6)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
 }
 
 #[test]
@@ -226,11 +221,7 @@ fn check_keys() {
         Paint('Win-3 has focus (final)')
         CheckHash(0x4BFB9A7144462371)
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
-    a.add_window(window!("Win-1,x:0,y:0,w:20,h:7"));
-    a.add_window(window!("Win-2,x:20,y:0,w:40,h:7"));
-    a.add_window(window!("Win-3,x:0,y:7,w:60,h:8"));
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(|| window!("Win-1,x:0,y:0,w:20,h:7")).window(|| window!("Win-2,x:20,y:0,w:40,h:7")).window(|| window!("Win-3,x:0,y:7,w:60,h:8")).run().unwrap();
 }
 
 #[test]
@@ -276,13 +267,7 @@ fn check_arrange() {
         Paint('Grid organize')
         CheckHash(0x10C3635607CCDB8A)
     ";
-    let mut a = App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap();
-    a.add_window(window!("Win-1,x:1,y:1,w:20,h:10"));
-    a.add_window(window!("Win-2,x:16,y:1,w:20,h:10"));
-    a.add_window(window!("Win-3,x:31,y:1,w:20,h:10"));
-    a.add_window(window!("Win-4,x:46,y:1,w:20,h:10"));
-    a.add_window(window!("Win-5,x:61,y:1,w:20,h:10"));
-    a.run();
+    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().window(|| window!("Win-1,x:1,y:1,w:20,h:10")).window(|| window!("Win-2,x:16,y:1,w:20,h:10")).window(|| window!("Win-3,x:31,y:1,w:20,h:10")).window(|| window!("Win-4,x:46,y:1,w:20,h:10")).window(|| window!("Win-5,x:61,y:1,w:20,h:10")).run().unwrap();
 }
 
 #[test]
@@ -328,8 +313,7 @@ fn check_arrange_no_windows() {
         Paint('Grid organize (nothing happens)')
         CheckHash(0xF14FFEF9847C30AF)
     ";
-    let a = App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap();
-    a.run();
+    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap();
 }
 
 #[test]
@@ -375,18 +359,7 @@ fn check_arrange_10() {
         Paint('Grid organize')
         CheckHash(0xAE251A2349BDB8C0)
     ";
-    let mut a = App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap();
-    a.add_window(window!("Win-1,x:1,y:1,w:20,h:10"));
-    a.add_window(window!("Win-2,x:16,y:1,w:20,h:10"));
-    a.add_window(window!("Win-3,x:31,y:1,w:20,h:10"));
-    a.add_window(window!("Win-4,x:46,y:1,w:20,h:10"));
-    a.add_window(window!("Win-5,x:61,y:1,w:20,h:10"));
-    a.add_window(window!("Win-6,x:1,y:4,w:20,h:10"));
-    a.add_window(window!("Win-7,x:16,y:4,w:20,h:10"));
-    a.add_window(window!("Win-8,x:31,y:4,w:20,h:10"));
-    a.add_window(window!("Win-9,x:46,y:4,w:20,h:10"));
-    a.add_window(window!("Win-10,x:61,y:4,w:20,h:10"));
-    a.run();
+    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().window(|| window!("Win-1,x:1,y:1,w:20,h:10")).window(|| window!("Win-2,x:16,y:1,w:20,h:10")).window(|| window!("Win-3,x:31,y:1,w:20,h:10")).window(|| window!("Win-4,x:46,y:1,w:20,h:10")).window(|| window!("Win-5,x:61,y:1,w:20,h:10")).window(|| window!("Win-6,x:1,y:4,w:20,h:10")).window(|| window!("Win-7,x:16,y:4,w:20,h:10")).window(|| window!("Win-8,x:31,y:4,w:20,h:10")).window(|| window!("Win-9,x:46,y:4,w:20,h:10")).window(|| window!("Win-10,x:61,y:4,w:20,h:10")).run().unwrap();
 }
 
 #[test]
@@ -460,7 +433,7 @@ fn check_add_window() {
         Paint('Windows: 12')
         CheckHash(0xDC880EC0932210A4)
     ";
-    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap().run();
+    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap();
 }
 
 #[test]
@@ -524,7 +497,7 @@ fn check_update_desktop_windows_count() {
         Paint('Windows: 2,4 and 5, no window has focus')
         CheckHash(0xFECF03BAC60063E7)
     ";
-    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap().run();
+    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap();
 }
 
 #[test]
@@ -543,10 +516,7 @@ fn check_window_activation_from_hotkeys() {
         Paint('second window active (again')
         CheckHash(0xD9C42D40B16A6F46)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    a.add_window(window!("Test,x:0,y:1,w:30,h:8,hotkey:Ctrl+3"));
-    a.add_window(window!("Test,x:30,y:1,w:30,h:8,hotkey:Ctrl+Alt+F10"));
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| window!("Test,x:0,y:1,w:30,h:8,hotkey:Ctrl+3")).window(|| window!("Test,x:30,y:1,w:30,h:8,hotkey:Ctrl+Alt+F10")).run().unwrap();
 }
 
 #[test]
@@ -615,7 +585,7 @@ fn check_auto_hotkey_on_desktop() {
         CheckHash(0x42BE6AB1C9A89F8)
 
     ";
-    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap().run();
+    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap();
 }
 
 #[test]
@@ -640,21 +610,21 @@ fn check_terminal_size() {
         Paint('desktop with red and green')
         CheckHash(0xD490E8FF2EC89965)
     ";
-    let a = App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
 }
 
 #[test]
 #[should_panic(expected = "A desktop object can only be created once (when the application is started) !")]
 fn check_error_second_desktop() {
-    let script = "
-        Paint.Enable(false)
-        Paint('initial state')
-        CheckHash(0x0)
-    ";
-    let a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let _ = EmptyDesktop::new(); // should panic
-    a.run();
+    panic!("Need to be fixed");
+    // let script = "
+    //     Paint.Enable(false)
+    //     Paint('initial state')
+    //     CheckHash(0x0)
+    // ";
+    // let a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
+    // let _ = EmptyDesktop::new(); // should panic
+    // a.run();
 }
 
 #[test]
@@ -682,7 +652,7 @@ fn check_close_method() {
         Key.Pressed(Insert)
         Paint('Should close the app')
     ";
-    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap().run();
+    App::new().size(Size::new(80, 15)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap();
 }
 
 #[test]
@@ -707,8 +677,7 @@ fn check_on_close_allow() {
         Paint('Exit from app')
         CheckHash(0xD156AD73229C5DB6)
     ";
-    let a = App::new().size(Size::new(40, 6)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
-    a.run();
+    App::new().size(Size::new(40, 6)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
 }
 
 #[test]
@@ -733,6 +702,5 @@ fn check_commands_ignored() {
         Paint('Initial state (with menus)')
         CheckHash(0xAB06844D69595285)
     ";
-    let a = App::new().size(Size::new(40, 6)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
-    a.run();
+    App::new().size(Size::new(40, 6)).debug_script(script).desktop(MyDesktop::new()).run().unwrap();
 }

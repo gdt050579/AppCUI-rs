@@ -52,50 +52,50 @@ fn check_keyboard() {
         Paint('11')
         CheckHash(0x94C6FF9EDFF78BD0)
 ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8");
-    let mut c = Canvas::new(Size::new(20, 10), layout!("x:1,y:1,w:15,h:4"), canvas::Flags::None);
-    let s = c.drawing_surface_mut();
-    s.write_string(
-        0,
-        0,
-        "         11111111112",
-        CharAttribute::with_color(Color::White, Color::DarkRed),
-        false,
-    );
-    s.write_string(
-        0,
-        1,
-        "12345678901234567890",
-        CharAttribute::with_color(Color::White, Color::DarkRed),
-        false,
-    );
-    s.fill_horizontal_line(0, 9, 20, Character::new('=', Color::White, Color::DarkRed, CharFlags::None));
-    for i in 2..10 {
-        s.write_char(
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8");
+        let mut c = Canvas::new(Size::new(20, 10), layout!("x:1,y:1,w:15,h:4"), canvas::Flags::None);
+        let s = c.drawing_surface_mut();
+        s.write_string(
             0,
-            i,
-            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            0,
+            "         11111111112",
+            CharAttribute::with_color(Color::White, Color::DarkRed),
+            false,
         );
-        s.write_char(
-            7,
-            i,
-            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        s.write_string(
+            0,
+            1,
+            "12345678901234567890",
+            CharAttribute::with_color(Color::White, Color::DarkRed),
+            false,
         );
-        s.write_char(
-            14,
-            i,
-            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
-        );
-        s.write_char(
-            19,
-            i,
-            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
-        );
-    }
-    w.add(c);
-    a.add_window(w);
-    a.run();
+        s.fill_horizontal_line(0, 9, 20, Character::new('=', Color::White, Color::DarkRed, CharFlags::None));
+        for i in 2..10 {
+            s.write_char(
+                0,
+                i,
+                Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            );
+            s.write_char(
+                7,
+                i,
+                Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            );
+            s.write_char(
+                14,
+                i,
+                Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            );
+            s.write_char(
+                19,
+                i,
+                Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            );
+        }
+        w.add(c);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -136,50 +136,50 @@ fn check_keyboard_2() {
         Paint('Back Initial state')
         CheckHash(0xECD64DA8EC4ABB22)
 ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8");
-    let mut c = Canvas::new(Size::new(20, 10), layout!("x:1,y:1,w:4,h:3"), canvas::Flags::None);
-    let s = c.drawing_surface_mut();
-    s.write_string(
-        0,
-        0,
-        "         11111111112",
-        CharAttribute::with_color(Color::White, Color::DarkRed),
-        false,
-    );
-    s.write_string(
-        0,
-        1,
-        "12345678901234567890",
-        CharAttribute::with_color(Color::White, Color::DarkRed),
-        false,
-    );
-    s.fill_horizontal_line(0, 9, 20, Character::new('=', Color::White, Color::DarkRed, CharFlags::None));
-    for i in 2..10 {
-        s.write_char(
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8");
+        let mut c = Canvas::new(Size::new(20, 10), layout!("x:1,y:1,w:4,h:3"), canvas::Flags::None);
+        let s = c.drawing_surface_mut();
+        s.write_string(
             0,
-            i,
-            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            0,
+            "         11111111112",
+            CharAttribute::with_color(Color::White, Color::DarkRed),
+            false,
         );
-        s.write_char(
-            7,
-            i,
-            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+        s.write_string(
+            0,
+            1,
+            "12345678901234567890",
+            CharAttribute::with_color(Color::White, Color::DarkRed),
+            false,
         );
-        s.write_char(
-            14,
-            i,
-            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
-        );
-        s.write_char(
-            19,
-            i,
-            Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
-        );
-    }
-    w.add(c);
-    a.add_window(w);
-    a.run();
+        s.fill_horizontal_line(0, 9, 20, Character::new('=', Color::White, Color::DarkRed, CharFlags::None));
+        for i in 2..10 {
+            s.write_char(
+                0,
+                i,
+                Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            );
+            s.write_char(
+                7,
+                i,
+                Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            );
+            s.write_char(
+                14,
+                i,
+                Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            );
+            s.write_char(
+                19,
+                i,
+                Character::new(((i + 48) as u8) as char, Color::White, Color::DarkRed, CharFlags::None),
+            );
+        }
+        w.add(c);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -189,15 +189,15 @@ fn check_background_char() {
         Paint('Initial state')
         CheckHash(0x209459BC48B6383C)
 ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8");
-    let mut c = Canvas::new(Size::new(2, 2), layout!("x:1,y:1,w:15,h:4"), canvas::Flags::None);
-    let s = c.drawing_surface_mut();
-    s.clear(Character::new('X', Color::Yellow, Color::DarkRed, CharFlags::None));
-    c.set_background(Character::new('.', Color::White, Color::Black, CharFlags::None));
-    w.add(c);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8");
+        let mut c = Canvas::new(Size::new(2, 2), layout!("x:1,y:1,w:15,h:4"), canvas::Flags::None);
+        let s = c.drawing_surface_mut();
+        s.clear(Character::new('X', Color::Yellow, Color::DarkRed, CharFlags::None));
+        c.set_background(Character::new('.', Color::White, Color::Black, CharFlags::None));
+        w.add(c);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -293,15 +293,15 @@ fn check_mouse_on_scrollbars() {
    \===============/
     \ooooooooooooo/ => 1234567
 ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
-    let mut c = Canvas::new(Size::new(30, 10), layout!("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
-    let s = c.drawing_surface_mut();
-    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
-    w.add(c);
-    w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
+        let mut c = Canvas::new(Size::new(30, 10), layout!("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
+        let s = c.drawing_surface_mut();
+        s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+        w.add(c);
+        w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -368,16 +368,16 @@ fn check_mouse_on_scrollbars_resize() {
    \===============/
     \ooooooooooooo/ => 1234567
 ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
-    let mut c = Canvas::new(Size::new(30, 10), layout!("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
-    c.set_components_toolbar_margins(2, 1);
-    let s = c.drawing_surface_mut();
-    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
-    w.add(c);
-    w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
+        let mut c = Canvas::new(Size::new(30, 10), layout!("l:20,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
+        c.set_components_toolbar_margins(2, 1);
+        let s = c.drawing_surface_mut();
+        s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+        w.add(c);
+        w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -401,15 +401,15 @@ fn check_macro_init_1() {
    \===============/
     \ooooooooooooo/ => 1234567
 ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
-    let mut c = canvas!("'30 x 10',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=2,tsm=1");
-    let s = c.drawing_surface_mut();
-    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
-    w.add(c);
-    w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
+        let mut c = canvas!("'30 x 10',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=2,tsm=1");
+        let s = c.drawing_surface_mut();
+        s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+        w.add(c);
+        w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -422,15 +422,15 @@ fn check_macro_init_2() {
     Paint('With focus')
     CheckHash(0x4709CADE1C0994D3)
 ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
-    let mut c = canvas!("'4 x 2',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=3,tsm=1,back={X,fore:Green,Back:Yellow}");
-    let s = c.drawing_surface_mut();
-    s.clear(char!("<->,r,black"));
-    w.add(c);
-    w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
+        let mut c = canvas!("'4 x 2',l:20,t:0,r:0,b:0,flags=Scrollbars,lsm=3,tsm=1,back={X,fore:Green,Back:Yellow}");
+        let s = c.drawing_surface_mut();
+        s.clear(char!("<->,r,black"));
+        w.add(c);
+        w.add(button!("Test,l:1,t:1,w:10")); // removed a:tl,
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -472,14 +472,14 @@ Key.Pressed(PageUp)
 Paint('Back to the initial state')
 CheckHash(0xc9196f52d863ff88)
 ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
-    let mut c = canvas!("'60x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
-    let s = c.drawing_surface_mut();
-    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
-    w.add(c);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
+        let mut c = canvas!("'60x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
+        let s = c.drawing_surface_mut();
+        s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+        w.add(c);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -541,9 +541,7 @@ fn check_resize_surface() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -591,15 +589,15 @@ fn check_mouse_wheel() {
     From: https://en.wikipedia.org/wiki/Rust_(programming_language)
     ";
 
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8");
-    let mut c = canvas!("'60x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
-    c.clear_background();
-    let s = c.drawing_surface_mut();
-    s.write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
-    w.add(c);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8");
+        let mut c = canvas!("'60x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
+        c.clear_background();
+        let s = c.drawing_surface_mut();
+        s.write_string(0, 0, TEXT, CharAttribute::with_color(Color::White, Color::Black), true);
+        w.add(c);
+        w
+    }).run().unwrap();
 }
 
 #[cfg(feature = "TRUE_COLORS")]
@@ -610,21 +608,21 @@ fn check_true_colors_rendering() {
         Paint('1. Initial state')
         CheckHash(0xBF4312A1691D7AD8)
     ";
-    let mut a = App::new().size(Size::new(70, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,d:f");
-    let mut c = canvas!("'68x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
-    c.clear_background();
-    let s = c.drawing_surface_mut();
-    for i in 0..64 {
-        let v = (i * 4) as u8;
-        s.write_char(1 + i, 1, Character::new(' ', Color::Black, Color::RGB(v, 0, 0), CharFlags::None));
-        s.write_char(1 + i, 3, Character::new(' ', Color::Black, Color::RGB(0, v, 0), CharFlags::None));
-        s.write_char(1 + i, 5, Character::new(' ', Color::Black, Color::RGB(0, 0, v), CharFlags::None));
-        s.write_char(1 + i, 7, Character::new(' ', Color::Black, Color::RGB(v, v, v), CharFlags::None));
-    }
-    w.add(c);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(70, 20)).debug_script(script).window(|| {
+        let mut w = window!("Title,d:f");
+        let mut c = canvas!("'68x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
+        c.clear_background();
+        let s = c.drawing_surface_mut();
+        for i in 0..64 {
+            let v = (i * 4) as u8;
+            s.write_char(1 + i, 1, Character::new(' ', Color::Black, Color::RGB(v, 0, 0), CharFlags::None));
+            s.write_char(1 + i, 3, Character::new(' ', Color::Black, Color::RGB(0, v, 0), CharFlags::None));
+            s.write_char(1 + i, 5, Character::new(' ', Color::Black, Color::RGB(0, 0, v), CharFlags::None));
+            s.write_char(1 + i, 7, Character::new(' ', Color::Black, Color::RGB(v, v, v), CharFlags::None));
+        }
+        w.add(c);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -634,33 +632,32 @@ fn check_char_flags() {
         Paint('1. Initial state')
         CheckHash(0xCF13E28C3D4AADA9)
     ";
-    let mut a = App::new().size(Size::new(70, 20)).debug_script(script).run().unwrap();
+    App::new().size(Size::new(70, 20)).debug_script(script).window(|| {
+        let mut win = window!("Title:'Character Formatting Demo',a:c,w:60,h:20,flags:Sizeable");
+        let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
+        let s = c.drawing_surface_mut();
 
-    let mut win = window!("Title:'Character Formatting Demo',a:c,w:60,h:20,flags:Sizeable");
-    let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
-    let s = c.drawing_surface_mut();
+        let normal_attr = charattr!("white,black");
+        let bold_attr = charattr!("white,black,attr:Bold");
+        let italic_attr = charattr!("white,black,attr:Italic");
+        let underline_attr = charattr!("white,black,attr:Underline");
+        let bold_italic_attr = charattr!("white,black,attr:Bold+Italic");
+        let bold_underline_attr = charattr!("white,black,attr:Bold+Underline");
+        let italic_underline_attr = charattr!("white,black,attr:Italic+Underline");
+        let all_formats_attr = charattr!("white,black,attr:Bold+Italic+Underline");
 
-    let normal_attr = charattr!("white,black");
-    let bold_attr = charattr!("white,black,attr:Bold");
-    let italic_attr = charattr!("white,black,attr:Italic");
-    let underline_attr = charattr!("white,black,attr:Underline");
-    let bold_italic_attr = charattr!("white,black,attr:Bold+Italic");
-    let bold_underline_attr = charattr!("white,black,attr:Bold+Underline");
-    let italic_underline_attr = charattr!("white,black,attr:Italic+Underline");
-    let all_formats_attr = charattr!("white,black,attr:Bold+Italic+Underline");
+        s.write_string(3, 2, "This is normal text", normal_attr, false);
+        s.write_string(3, 4, "This is bold text", bold_attr, false);
+        s.write_string(3, 6, "This is italic text", italic_attr, false);
+        s.write_string(3, 8, "This is underlined text", underline_attr, false);
+        s.write_string(3, 10, "Bold + Italic", bold_italic_attr, false);
+        s.write_string(3, 12, "Bold + Underline", bold_underline_attr, false);
+        s.write_string(3, 14, "Italic + Underline", italic_underline_attr, false);
+        s.write_string(3, 16, "All three formats (Bold + Italic + Underline)", all_formats_attr, false);
 
-    s.write_string(3, 2, "This is normal text", normal_attr, false);
-    s.write_string(3, 4, "This is bold text", bold_attr, false);
-    s.write_string(3, 6, "This is italic text", italic_attr, false);
-    s.write_string(3, 8, "This is underlined text", underline_attr, false);
-    s.write_string(3, 10, "Bold + Italic", bold_italic_attr, false);
-    s.write_string(3, 12, "Bold + Underline", bold_underline_attr, false);
-    s.write_string(3, 14, "Italic + Underline", italic_underline_attr, false);
-    s.write_string(3, 16, "All three formats (Bold + Italic + Underline)", all_formats_attr, false);
-
-    win.add(c);
-    a.add_window(win);
-    a.run();
+        win.add(c);
+        win
+    }).run().unwrap();
 }
 
 #[test]
@@ -670,22 +667,21 @@ fn check_colors_schema_false() {
         Paint('1. Initial state')
         CheckHash(0x29C1D764587643BE)
     ";
-    let mut a = App::new().size(Size::new(70, 20)).debug_script(script).color_schema(false).run().unwrap();
-
-    let mut win = window!("Title:'Colors',a:c,w:60,h:20,flags:Sizeable");
-    let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
-    let s = c.drawing_surface_mut();
-    for b in 0..16 {
-        let back = Color::from_value(b).unwrap();
-        for f in 0..16 {
-            let fore = Color::from_value(f).unwrap();
-            s.write_string(f * 2 + 2, b + 1, "()", CharAttribute::with_color(fore, back), false);
+    App::new().size(Size::new(70, 20)).debug_script(script).color_schema(false).window(|| {
+        let mut win = window!("Title:'Colors',a:c,w:60,h:20,flags:Sizeable");
+        let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
+        let s = c.drawing_surface_mut();
+        for b in 0..16 {
+            let back = Color::from_value(b).unwrap();
+            for f in 0..16 {
+                let fore = Color::from_value(f).unwrap();
+                s.write_string(f * 2 + 2, b + 1, "()", CharAttribute::with_color(fore, back), false);
+            }
         }
-    }
 
-    win.add(c);
-    a.add_window(win);
-    a.run();
+        win.add(c);
+        win
+    }).run().unwrap();
 }
 
 
@@ -696,20 +692,19 @@ fn check_colors_schema_true() {
         Paint('1. Initial state')
         CheckHash(0x29C1D764587643BE)
     ";
-    let mut a = App::new().size(Size::new(70, 20)).debug_script(script).color_schema(true).run().unwrap();
-
-    let mut win = window!("Title:'Colors',a:c,w:60,h:20,flags:Sizeable");
-    let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
-    let s = c.drawing_surface_mut();
-    for b in 0..16 {
-        let back = Color::from_value(b).unwrap();
-        for f in 0..16 {
-            let fore = Color::from_value(f).unwrap();
-            s.write_string(f * 2 + 2, b + 1, "()", CharAttribute::with_color(fore, back), false);
+    App::new().size(Size::new(70, 20)).debug_script(script).color_schema(true).window(|| {
+        let mut win = window!("Title:'Colors',a:c,w:60,h:20,flags:Sizeable");
+        let mut c = canvas!("'60x20',d:f,flags=ScrollBars,lsm:3,tsm:1");
+        let s = c.drawing_surface_mut();
+        for b in 0..16 {
+            let back = Color::from_value(b).unwrap();
+            for f in 0..16 {
+                let fore = Color::from_value(f).unwrap();
+                s.write_string(f * 2 + 2, b + 1, "()", CharAttribute::with_color(fore, back), false);
+            }
         }
-    }
 
-    win.add(c);
-    a.add_window(win);
-    a.run();
+        win.add(c);
+        win
+    }).run().unwrap();
 }

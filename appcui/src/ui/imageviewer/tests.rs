@@ -788,34 +788,34 @@ fn check_create() {
         Paint('Initial state')
         CheckHash(0x63C1CCFA05E9F034)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:8");
-    let img = Image::from_str(
-        r#"
-        |RR.........RR|
-        |B..rr...rr..B|
-        |..rrrr.rrrr..|
-        |.rrrrrrrrrrr.|
-        |.raaaaaaaaar.|
-        |..ryyyyyyyr..|
-        |   rwwwwwr   |
-        |....rwwwr....|
-        |G....rwr....G|
-        |GG....r....GG|
-    "#,
-    )
-    .unwrap();
-    w.add(ImageViewer::new(
-        img,
-        layout!("d:f"),
-        image::RenderOptionsBuilder::new()
-            .character_set(image::CharacterSet::SmallBlocks)
-            .color_schema(ColorSchema::Color16)
-            .build(),
-        imageviewer::Flags::None,
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:8");
+        let img = Image::from_str(
+            r#"
+            |RR.........RR|
+            |B..rr...rr..B|
+            |..rrrr.rrrr..|
+            |.rrrrrrrrrrr.|
+            |.raaaaaaaaar.|
+            |..ryyyyyyyr..|
+            |   rwwwwwr   |
+            |....rwwwr....|
+            |G....rwr....G|
+            |GG....r....GG|
+        "#,
+        )
+        .unwrap();
+        w.add(ImageViewer::new(
+            img,
+            layout!("d:f"),
+            image::RenderOptionsBuilder::new()
+                .character_set(image::CharacterSet::SmallBlocks)
+                .color_schema(ColorSchema::Color16)
+                .build(),
+            imageviewer::Flags::None,
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -825,38 +825,38 @@ fn check_smallbloacks_scaling() {
         Paint('Initial state')
         CheckHash(0x4332083E0CD9C530)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,d:f");
-    let s = r#"
-        |RRRRGGGG|
-        |RRRRGGGG|
-        |GGWWGGWW|
-        |GGWWGGWW|
-        |RRRRGGGG|
-        |RRRRGGGG|
-        |YYWWGGWW|
-        |YYWWGGWW|
-    "#;
-    w.add(ImageViewer::new(
-        Image::from_str(s).unwrap(),
-        layout!("x:0,y:0,w:8,h:4"),
-        image::RenderOptionsBuilder::new()
-            .character_set(image::CharacterSet::SmallBlocks)
-            .color_schema(ColorSchema::Color16)
-            .build(),
-        imageviewer::Flags::None,
-    ));
-    w.add(ImageViewer::new(
-        Image::from_str(s).unwrap(),
-        layout!("x:10,y:0,w:16,h:8"),
-        image::RenderOptionsBuilder::new()
-            .character_set(image::CharacterSet::SmallBlocks)
-            .color_schema(ColorSchema::GrayScale4)
-            .build(),
-        imageviewer::Flags::None,
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,d:f");
+        let s = r#"
+            |RRRRGGGG|
+            |RRRRGGGG|
+            |GGWWGGWW|
+            |GGWWGGWW|
+            |RRRRGGGG|
+            |RRRRGGGG|
+            |YYWWGGWW|
+            |YYWWGGWW|
+        "#;
+        w.add(ImageViewer::new(
+            Image::from_str(s).unwrap(),
+            layout!("x:0,y:0,w:8,h:4"),
+            image::RenderOptionsBuilder::new()
+                .character_set(image::CharacterSet::SmallBlocks)
+                .color_schema(ColorSchema::Color16)
+                .build(),
+            imageviewer::Flags::None,
+        ));
+        w.add(ImageViewer::new(
+            Image::from_str(s).unwrap(),
+            layout!("x:10,y:0,w:16,h:8"),
+            image::RenderOptionsBuilder::new()
+                .character_set(image::CharacterSet::SmallBlocks)
+                .color_schema(ColorSchema::GrayScale4)
+                .build(),
+            imageviewer::Flags::None,
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -866,11 +866,11 @@ fn check_macro_creation() {
         Paint('Initial state')
         CheckHash(0x30560D8DDECA6294)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,d:f");
-    w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f,cs:Color16"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,d:f");
+        w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f,cs:Color16"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -880,13 +880,13 @@ fn check_macro_creation_2() {
         Paint('Initial state')
         CheckHash(0x7BFA1CEEF2BAD91)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,d:f");
-    w.add(imageviewer!(
-        "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,d:f");
+        w.add(imageviewer!(
+            "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -896,13 +896,13 @@ fn check_ferris_ascii_art() {
         Paint('Initial state')
         CheckHash(0x36815E6258204EF7)
     ";
-    let mut a = App::new().size(Size::new(60, 30)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,d:f");
-    let mut i = imageviewer!("d:f,scale:25%,charset:AsciiArt,flags:ScrollBars,cs:Color16");
-    i.set_image(ferris_image());
-    w.add(i);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 30)).debug_script(script).window(|| {
+        let mut w = window!("Title,d:f");
+        let mut i = imageviewer!("d:f,scale:25%,charset:AsciiArt,flags:ScrollBars,cs:Color16");
+        i.set_image(ferris_image());
+        w.add(i);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -957,13 +957,13 @@ fn check_keyboard() {
         Paint('11')
         CheckHash(0x52BF4FAAE6446859)
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,d:f");
-    let mut i = imageviewer!("d:f,scale:50%,flags:ScrollBars,cs:Color16");
-    i.set_image(ferris_image());
-    w.add(i);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(|| {
+        let mut w = window!("Title,d:f");
+        let mut i = imageviewer!("d:f,scale:50%,flags:ScrollBars,cs:Color16");
+        i.set_image(ferris_image());
+        w.add(i);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1015,13 +1015,13 @@ fn check_keyboard_2() {
         Paint('15 (already at initial state)')
         CheckHash(0x60098108CD0E3264)
     ";
-    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,d:f");
-    let mut i = imageviewer!("d:f,flags:ScrollBars,cs:color16");
-    i.set_image(ferris_image());
-    w.add(i);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 15)).debug_script(script).window(|| {
+        let mut w = window!("Title,d:f");
+        let mut i = imageviewer!("d:f,flags:ScrollBars,cs:color16");
+        i.set_image(ferris_image());
+        w.add(i);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1031,13 +1031,13 @@ fn check_clear_background() {
         Paint('Initial state')
         CheckHash(0x30560D8DDECA6294)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,d:f");
-    let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, back: {X,Red}, cs:Color16");
-    i.clear_background();
-    w.add(i);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,d:f");
+        let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, back: {X,Red}, cs:Color16");
+        i.clear_background();
+        w.add(i);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1069,20 +1069,20 @@ fn check_mouse_events() {
         Paint('Double clicked on image - nothing happens')
         CheckHash(0xF13E7EE85932A59C)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,d:f");
-    let i = ImageViewer::new(
-        ferris_image(),
-        layout!("d:f"),
-        image::RenderOptionsBuilder::new()
-            .character_set(image::CharacterSet::SmallBlocks)
-            .color_schema(ColorSchema::Color16)
-            .build(),
-        imageviewer::Flags::ScrollBars,
-    );
-    w.add(i);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,d:f");
+        let i = ImageViewer::new(
+            ferris_image(),
+            layout!("d:f"),
+            image::RenderOptionsBuilder::new()
+                .character_set(image::CharacterSet::SmallBlocks)
+                .color_schema(ColorSchema::Color16)
+                .build(),
+            imageviewer::Flags::ScrollBars,
+        );
+        w.add(i);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1217,7 +1217,5 @@ fn check_resize() {
         CheckHash(0x2B595BD9AB869F26)
     ";
 
-    let mut a = App::new().size(Size::new(90, 20)).debug_script(script).command_bar().run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(90, 20)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
 }

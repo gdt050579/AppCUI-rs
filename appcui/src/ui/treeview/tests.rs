@@ -189,13 +189,13 @@ fn check_init() {
         Paint('3. Cursors on: Literature')
         CheckHash(0xEBF7B023783A3585)  
     ";
-    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 25)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -212,13 +212,13 @@ fn check_init_with_macro() {
         Paint('3. Cursors on: Literature')
         CheckHash(0xEBF7B023783A3585)  
     ";
-    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = treeview!("type:Course,d:f,flags: ScrollBars+SearchBar");
-    Course::populate_with_courses(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 25)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = treeview!("type:Course,d:f,flags: ScrollBars+SearchBar");
+        Course::populate_with_courses(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -243,13 +243,13 @@ fn check_key_movement_left_right() {
         Paint('6. Scroll to initial state')
         CheckHash(0x461AC404AD7793D0) 
     ";
-    let mut a = App::new().size(Size::new(40, 12)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -283,13 +283,13 @@ fn check_key_movement_up_down() {
         Paint('9.Back to initial state')
         CheckHash(0xB43934B962A84918) 
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -326,13 +326,13 @@ fn check_key_movement_pageup_pagedown() {
         Paint('10. Back to initial state')
         CheckHash(0xB43934B962A84918) 
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -366,13 +366,13 @@ fn check_key_movement_scroll_up_down() {
         Paint('9. Scroll starts with John, Selected item is Alice')
         CheckHash(0xA3A7B2F7F66BA9AC) 
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -395,13 +395,13 @@ fn check_column_sort() {
         Paint('5. Sort by relevance (descendent)')
         CheckHash(0xDEBE625515EF7278) 
     ";
-    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 25)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -424,13 +424,13 @@ fn check_column_sort_by_mouse() {
         Paint('5. Sort by relevance (descendent)')
         CheckHash(0xCB769FD963C7F0DD) 
     ";
-    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses_batch(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 25)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses_batch(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -464,13 +464,13 @@ fn check_key_movement_up_down_without_header() {
         Paint('9.Back to initial state')
         CheckHash(0xDF48D35D7AEBD3B6) 
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
-    Course::populate_with_courses(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
+        Course::populate_with_courses(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -489,13 +489,13 @@ fn check_key_mouse_does_not_work_on_columns_on_hide_header_flag() {
         Paint('4. John is selected (NO sort by name happens)')
         CheckHash(0xDF48D35D7AEBD3B6) 
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
-    Course::populate_with_courses(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::HideHeader);
+        Course::populate_with_courses(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -524,13 +524,13 @@ fn check_hover_over_fold_button() {
         Paint('7. Hover over Grammer [-] English')
         CheckHash(0x75A6E85CF8407EAE) 
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses_batch(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses_batch(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -565,13 +565,13 @@ fn check_fold_button_with_mouse() {
         Paint('9. English is collapsed [+]')
         CheckHash(0x2BF6024818A131A7) 
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses_batch(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses_batch(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -596,13 +596,13 @@ fn check_fold_using_space() {
         Paint('5. Englosh is now collapsed [+]')
         CheckHash(0x408F23B73C4E37C6) 
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses_batch(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses_batch(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -613,14 +613,14 @@ fn check_inactive() {
         Paint('1. Initial state (no focus because it is inactive)')
         CheckHash(0x674C02FC96FC3BC9) 
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
-    tv.set_enabled(false);
-    Course::populate_with_courses_batch(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
+        tv.set_enabled(false);
+        Course::populate_with_courses_batch(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -642,13 +642,13 @@ fn check_filter() {
         Paint('5. Click outside the list (nothing happens)')
         CheckHash(0x6D6BDBD3081248C1) 
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses_batch(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses_batch(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -680,13 +680,13 @@ fn check_column_resize() {
         Paint('8. Autoresze column 3')
         CheckHash(0x9BF79D529343665A) 
     ";
-    let mut a = App::new().size(Size::new(60, 25)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses_batch(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 25)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses_batch(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -711,13 +711,13 @@ fn check_mouse_wheel() {
         Paint('6. Scroll is not on Advance Calculus')
         CheckHash(0x5D9406DE9A1F664E) 
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
-    Course::populate_with_courses_batch(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SearchBar);
+        Course::populate_with_courses_batch(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -731,13 +731,13 @@ fn check_small_icons() {
         Paint('2. Advanced is folded [+]')
         CheckHash(0x4CDB8F4C685DFC7C) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SmallIcons);
-    Course::populate_with_icons(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::SmallIcons);
+        Course::populate_with_icons(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -751,13 +751,13 @@ fn check_larger_icons() {
         Paint('2. Advanced is folded [+]')
         CheckHash(0x25A50B0D5E4C7061) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::LargeIcons);
-    Course::populate_with_icons(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::LargeIcons);
+        Course::populate_with_icons(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -804,9 +804,7 @@ fn check_change_item_event() {
         Paint('5. Nothing changes')
         CheckHash(0xEFD5EED5912A30EA) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -860,9 +858,7 @@ fn check_change_item_event_change() {
         Paint('6. Focus on Geometry, new name: Geometry1,8, and [Simple4,] [Calculus5,] [2-0-26,] [1-0-17,]')
         CheckHash(0xFB14BB51038A327A) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -913,9 +909,7 @@ fn check_on_item_action_event() {
         Paint('6. Focus on Calculus, windows title: Advanced')
         CheckHash(0xBA98FC217CA536FE) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -977,9 +971,7 @@ fn check_on_item_colapse_expanded() {
         Paint('5. Expands Calculus')
         CheckHash(0xFFF9FB0BF9B3C7F5)   
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1057,9 +1049,7 @@ fn check_on_item_dynamic_colapse_expanded() {
         Paint('7. Item 2 expanded [13,14,15]')
         CheckHash(0x174C3A2DE2587A19)   
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1128,9 +1118,7 @@ fn check_delete_item() {
         Paint('6. Math deleted, no more items (title remains Math)')
         CheckHash(0xBB7F61AA35475FAC)  
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).command_bar().run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1212,9 +1200,7 @@ fn check_clear() {
         Paint('11. Scroll to the end') 
         CheckHash(0x520D93E7092CDBE9)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1276,9 +1262,7 @@ fn check_collapse_expand_via_methods() {
         Paint('4. Alice is expanded')
         CheckHash(0xD8BC7870BC98F71C)  
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1308,13 +1292,13 @@ fn check_expand_collapese_recursively() {
         Paint('7. Math expanded (Geometry, Calculus and Logic are collapsed)')
         CheckHash(0x98F8001FACD5814A) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
-    Course::populate_with_icons(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
+        Course::populate_with_icons(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1404,9 +1388,7 @@ fn check_on_item_dynamic_colapse_expanded_recursively() {
         Paint('9. Expand all items recursively')
         CheckHash(0xA025143D3B47AB1A)   
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1494,9 +1476,7 @@ fn check_collapse_expand_all() {
         Paint('14. All expanded, focus remains on Bob')
         CheckHash(0xC0124799876E1227) 
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).command_bar().run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1517,14 +1497,14 @@ fn check_empty_list() {
         Paint('2. Nothing changes')
         CheckHash(0x19F65FEDF374B26D) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
-    tv.expand_all();
-    tv.collapse_all();
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
+        tv.expand_all();
+        tv.collapse_all();
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1550,14 +1530,14 @@ fn check_one_frozen_column() {
         Paint('6. Column Relevance is resized')
         CheckHash(0x6BFECFDC37AE5CCD) 
     ";
-    let mut a = App::new().size(Size::new(40, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
-    Course::populate_with_courses_batch(&mut tv);
-    tv.set_frozen_columns(1);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
+        Course::populate_with_courses_batch(&mut tv);
+        tv.set_frozen_columns(1);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1583,14 +1563,14 @@ fn check_two_frozen_column() {
         Paint('6. Column Relevance is resized')
         CheckHash(0xF6E6088E113B29B5) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
-    Course::populate_with_courses_batch(&mut tv);
-    tv.set_frozen_columns(2);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
+        Course::populate_with_courses_batch(&mut tv);
+        tv.set_frozen_columns(2);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1622,14 +1602,14 @@ fn check_select_simple() {
         Paint('7. Deselect some items (focus on neural networks)')
         CheckHash(0xD09A4C4043F4FDAC) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
-    Course::populate_with_courses_batch(&mut tv);
-    tv.set_frozen_columns(2);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
+        Course::populate_with_courses_batch(&mut tv);
+        tv.set_frozen_columns(2);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1663,14 +1643,14 @@ fn check_no_select_flags() {
         Paint('7. Deselect some items (focus on neural networks)')
         CheckHash(0xD09A4C4043F4FDAC) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
-    Course::populate_with_courses_batch(&mut tv);
-    tv.set_frozen_columns(2);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars | treeview::Flags::NoSelection);
+        Course::populate_with_courses_batch(&mut tv);
+        tv.set_frozen_columns(2);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1768,9 +1748,7 @@ fn check_select_and_count_method() {
         Paint('9. All items deleted (title is 0/0)')
         CheckHash(0xB00A3EEB83CDB655)
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).command_bar().run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1783,24 +1761,24 @@ fn check_custom_filter() {
         Paint('2. Filter by capital A')
         CheckHash(0xFB0494D034757861) 
     ";
-    let mut a = App::new().size(Size::new(60, 14)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
-    let h = tv.add(TestData::new("Alice"));
-    tv.add_to_parent(TestData::new("Andra"), h);
-    tv.add_to_parent(TestData::new("Boby"), h);
-    tv.add_to_parent(TestData::new("Charlie"), h);
-    let h = tv.add(TestData::new("Bob"));
-    tv.add_to_parent(TestData::new("Andra"), h);
-    let h2 = tv.add_to_parent(TestData::new("John"), h);
-    tv.add_to_parent(TestData::new("Andrei"), h2);
-    tv.add_to_parent(TestData::new("Dragos"), h2);
-    tv.add_to_parent(TestData::new("Alex"), h2);
-    tv.add_to_parent(TestData::new("Zig"), h);
-    tv.add(TestData::new("Charlie"));
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 14)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
+        let h = tv.add(TestData::new("Alice"));
+        tv.add_to_parent(TestData::new("Andra"), h);
+        tv.add_to_parent(TestData::new("Boby"), h);
+        tv.add_to_parent(TestData::new("Charlie"), h);
+        let h = tv.add(TestData::new("Bob"));
+        tv.add_to_parent(TestData::new("Andra"), h);
+        let h2 = tv.add_to_parent(TestData::new("John"), h);
+        tv.add_to_parent(TestData::new("Andrei"), h2);
+        tv.add_to_parent(TestData::new("Dragos"), h2);
+        tv.add_to_parent(TestData::new("Alex"), h2);
+        tv.add_to_parent(TestData::new("Zig"), h);
+        tv.add(TestData::new("Charlie"));
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1863,9 +1841,7 @@ fn check_select_via_api() {
         Paint('4. Math un-selected, cursor on Geometry')
         CheckHash(0xD0BBAFFE2855880E)  
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1930,9 +1906,7 @@ fn check_current_item_via_api() {
         Paint('4. Math changed, cursor on Geometry')
         CheckHash(0x8F097B0F69B5F894)  
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -1942,38 +1916,38 @@ fn check_root_access_via_api() {
         Paint('1. Initial state ')
         CheckHash(0xD10327941CB68014) 
     ";
-    let mut a = App::new().size(Size::new(60, 14)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
-    assert!(tv.current_item().is_none());
-    let h = tv.add(TestData::new("Alice"));
-    tv.add_to_parent(TestData::new("Andra"), h);
-    tv.add_to_parent(TestData::new("Boby"), h);
-    tv.add_to_parent(TestData::new("Charlie"), h);
-    let h = tv.add(TestData::new("Bob"));
-    tv.add_to_parent(TestData::new("Andra"), h);
-    let h2 = tv.add_to_parent(TestData::new("John"), h);
-    tv.add_to_parent(TestData::new("Andrei"), h2);
-    tv.add_to_parent(TestData::new("Dragos"), h2);
-    tv.add_to_parent(TestData::new("Alex"), h2);
-    tv.add_to_parent(TestData::new("Zig"), h);
-    tv.add(TestData::new("Charlie"));
-    let r = tv.root_items();
-    assert_eq!(r.len(), 3);
-    assert_eq!(tv.item(r[0]).unwrap().value().text, "Alice");
-    assert_eq!(tv.item(r[1]).unwrap().value().text, "Bob");
-    assert_eq!(tv.item(r[2]).unwrap().value().text, "Charlie");
-    assert_eq!(tv.root_item(0).unwrap().value().text, "Alice");
-    assert_eq!(tv.root_item(1).unwrap().value().text, "Bob");
-    assert_eq!(tv.root_item(2).unwrap().value().text, "Charlie");
-    assert!(tv.root_item(3).is_none());
-    tv.root_item_mut(0).unwrap().value_mut().text.push_str("+++");
-    assert_eq!(tv.root_item(0).unwrap().value().text, "Alice+++");
-    assert!(tv.root_item_mut(3).is_none());
+    App::new().size(Size::new(60, 14)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
+        assert!(tv.current_item().is_none());
+        let h = tv.add(TestData::new("Alice"));
+        tv.add_to_parent(TestData::new("Andra"), h);
+        tv.add_to_parent(TestData::new("Boby"), h);
+        tv.add_to_parent(TestData::new("Charlie"), h);
+        let h = tv.add(TestData::new("Bob"));
+        tv.add_to_parent(TestData::new("Andra"), h);
+        let h2 = tv.add_to_parent(TestData::new("John"), h);
+        tv.add_to_parent(TestData::new("Andrei"), h2);
+        tv.add_to_parent(TestData::new("Dragos"), h2);
+        tv.add_to_parent(TestData::new("Alex"), h2);
+        tv.add_to_parent(TestData::new("Zig"), h);
+        tv.add(TestData::new("Charlie"));
+        let r = tv.root_items();
+        assert_eq!(r.len(), 3);
+        assert_eq!(tv.item(r[0]).unwrap().value().text, "Alice");
+        assert_eq!(tv.item(r[1]).unwrap().value().text, "Bob");
+        assert_eq!(tv.item(r[2]).unwrap().value().text, "Charlie");
+        assert_eq!(tv.root_item(0).unwrap().value().text, "Alice");
+        assert_eq!(tv.root_item(1).unwrap().value().text, "Bob");
+        assert_eq!(tv.root_item(2).unwrap().value().text, "Charlie");
+        assert!(tv.root_item(3).is_none());
+        tv.root_item_mut(0).unwrap().value_mut().text.push_str("+++");
+        assert_eq!(tv.root_item(0).unwrap().value().text, "Alice+++");
+        assert!(tv.root_item_mut(3).is_none());
 
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1989,24 +1963,24 @@ fn check_mouse_select() {
         Paint('3. Boby to Bob are unselected')
         CheckHash(0xF2D9830739E10B0F)  
     ";
-    let mut a = App::new().size(Size::new(60, 14)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
-    let h = tv.add(TestData::new("Alice"));
-    tv.add_to_parent(TestData::new("Andra"), h);
-    tv.add_to_parent(TestData::new("Boby"), h);
-    tv.add_to_parent(TestData::new("Charlie"), h);
-    let h = tv.add(TestData::new("Bob"));
-    tv.add_to_parent(TestData::new("Andra"), h);
-    let h2 = tv.add_to_parent(TestData::new("John"), h);
-    tv.add_to_parent(TestData::new("Andrei"), h2);
-    tv.add_to_parent(TestData::new("Dragos"), h2);
-    tv.add_to_parent(TestData::new("Alex"), h2);
-    tv.add_to_parent(TestData::new("Zig"), h);
-    tv.add(TestData::new("Charlie"));
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 14)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv = treeview!("TestData,d:f,flags: [ScrollBars,SearchBar,CustomFilter]");
+        let h = tv.add(TestData::new("Alice"));
+        tv.add_to_parent(TestData::new("Andra"), h);
+        tv.add_to_parent(TestData::new("Boby"), h);
+        tv.add_to_parent(TestData::new("Charlie"), h);
+        let h = tv.add(TestData::new("Bob"));
+        tv.add_to_parent(TestData::new("Andra"), h);
+        let h2 = tv.add_to_parent(TestData::new("John"), h);
+        tv.add_to_parent(TestData::new("Andrei"), h2);
+        tv.add_to_parent(TestData::new("Dragos"), h2);
+        tv.add_to_parent(TestData::new("Alex"), h2);
+        tv.add_to_parent(TestData::new("Zig"), h);
+        tv.add(TestData::new("Charlie"));
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2016,16 +1990,16 @@ fn check_move_cursor_to() {
         Paint('1. Cursor should be at last item')
         CheckHash(0x85BCA6685DCC2EDA) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
-    Course::populate_with_courses_batch(&mut tv);
-    let len = tv.root_items().len();
-    let h = tv.root_items()[len - 1];
-    tv.move_cursor_to(h);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::ScrollBars);
+        Course::populate_with_courses_batch(&mut tv);
+        let len = tv.root_items().len();
+        let h = tv.root_items()[len - 1];
+        tv.move_cursor_to(h);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2035,11 +2009,11 @@ fn check_merge_borders() {
         Paint('1. Cursor should be at last item')
         CheckHash(0x253A476013BABCA9) 
     ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).run().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::MergeBorders);
-    Course::populate_with_courses_batch(&mut tv);
-    w.add(tv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut tv: TreeView<Course> = TreeView::new(layout!("d:f"), treeview::Flags::MergeBorders);
+        Course::populate_with_courses_batch(&mut tv);
+        w.add(tv);
+        w
+    }).run().unwrap();
 }

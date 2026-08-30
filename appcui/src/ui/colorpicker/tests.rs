@@ -18,23 +18,23 @@ fn check_colorpicker_header_size() {
         Paint('Focus on top colorpicker')
         CheckHash(0x292A2027DCD39746)   
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:50,h:11");
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:3,w:16")));
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:5,w:15")));
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:7,w:10")));
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:50,h:11");
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:3,w:16")));
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:5,w:15")));
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:7,w:10")));
 
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:20,y:3,w:9")));
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:20,y:5,w:8")));
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:20,y:7,w:7")));
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:20,y:3,w:9")));
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:20,y:5,w:8")));
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:20,y:7,w:7")));
 
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:35,y:3,w:6")));
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:35,y:5,w:5")));
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:35,y:7,w:4")));
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:35,y:3,w:6")));
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:35,y:5,w:5")));
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:35,y:7,w:4")));
 
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:1,w:20")));
-    a.add_window(w);
-    a.run();
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:1,w:20")));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -71,15 +71,15 @@ fn check_colorpicker_expand() {
         Paint('Bottom-left colorpicker closed')
         CheckHash(0xFF26EBFE96A11715)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:50,h:11");
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:1,w:46")));
-    w.add(colorpicker!("Red,x:1,y:3,w:12"));
-    w.add(colorpicker!("Black,x:1,y:5,w:7"));
-    w.add(colorpicker!("color:pink,x:1,y:7,w:20"));
-    w.add(colorpicker!("transparent,x:37,y:7,w:10"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:50,h:11");
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:1,w:46")));
+        w.add(colorpicker!("Red,x:1,y:3,w:12"));
+        w.add(colorpicker!("Black,x:1,y:5,w:7"));
+        w.add(colorpicker!("color:pink,x:1,y:7,w:20"));
+        w.add(colorpicker!("transparent,x:37,y:7,w:10"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -136,11 +136,11 @@ fn check_colorpicker_keys() {
         Paint('Closed again')
         CheckHash(0xF0CE1F2D9AF9C7A1)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:50,h:11");
-    w.add(colorpicker!("Red,x:1,y:1,w:15"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:50,h:11");
+        w.add(colorpicker!("Red,x:1,y:1,w:15"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -163,11 +163,11 @@ fn check_colorpicker_cursor_on_transparent() {
         CheckHash(0x62D1C24D1EB6AB17)
         CheckCursor(hidden)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:50,h:11");
-    w.add(colorpicker!("Transparent,x:1,y:1,w:15"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:50,h:11");
+        w.add(colorpicker!("Transparent,x:1,y:1,w:15"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -236,13 +236,13 @@ fn check_colorpicker_mouse() {
         Paint('all closed')
         CheckHash(0xDF9C98AEDE4BBC7)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:50,h:11");
-    w.add(colorpicker!("Transparent,x:1,y:1,w:15"));
-    w.add(colorpicker!("Red,x:30,y:1,w:15"));
-    w.add(colorpicker!("Blue,x:1,y:7,w:30"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:50,h:11");
+        w.add(colorpicker!("Transparent,x:1,y:1,w:15"));
+        w.add(colorpicker!("Red,x:30,y:1,w:15"));
+        w.add(colorpicker!("Blue,x:1,y:7,w:30"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -267,11 +267,11 @@ fn check_colorpicker_window_move() {
         Paint('Click on window (colorpicker is closed)')
         CheckHash(0x21C93A3BEEFA875F)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:t,w:50,h:6");
-    w.add(colorpicker!("Transparent,x:1,y:1,w:15"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:t,w:50,h:6");
+        w.add(colorpicker!("Transparent,x:1,y:1,w:15"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -319,9 +319,7 @@ fn check_colorpicker_events() {
         Paint('3:Color=Teal')
         CheckHash(0x59ADD9074A7194C0)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| MyWin::new()).run().unwrap();
 }
 
 #[test]
@@ -346,13 +344,13 @@ fn check_colorpicker_tooltip() {
         Paint('No tooltip')
         CheckHash(0xD2E4C4A915F660B6)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
-    let mut w = window!("Title,a:c,w:50,h:11");
-    w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:1,w:46")));
-    w.add(colorpicker!("Red,x:1,y:3,w:12"));
-    w.add(colorpicker!("Black,x:1,y:5,w:7"));
-    w.add(colorpicker!("color:pink,x:1,y:7,w:20"));
-    w.add(colorpicker!("transparent,x:37,y:7,w:10"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:50,h:11");
+        w.add(ColorPicker::new(Color::DarkGreen, layout!("x:1,y:1,w:46")));
+        w.add(colorpicker!("Red,x:1,y:3,w:12"));
+        w.add(colorpicker!("Black,x:1,y:5,w:7"));
+        w.add(colorpicker!("color:pink,x:1,y:7,w:20"));
+        w.add(colorpicker!("transparent,x:37,y:7,w:10"));
+        w
+    }).run().unwrap();
 }
