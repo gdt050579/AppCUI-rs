@@ -15,7 +15,7 @@ pub struct WindowsVTTerminal {
 }
 
 impl WindowsVTTerminal {
-    pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let console = win32::Console::new(builder, true)?;
         let input_console = console.clone();
         Input::new(input_console).start(sender);
