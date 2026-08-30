@@ -142,8 +142,5 @@ impl AppBarEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(120, 24)).app_bar().color_schema(false).run()?;
-    a.add_window(MyWindow::new());
-    a.run();
-    Ok(())
+    App::new().size(Size::new(120, 24)).app_bar().color_schema(false).window(|| MyWindow::new()).run()
 }

@@ -57,8 +57,5 @@ impl TextFieldEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().run()?;
-    a.add_window(MyWin::new());
-    a.run();
-    Ok(())
+    App::new().window(|| MyWin::new()).run()
 }

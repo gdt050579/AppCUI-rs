@@ -50,16 +50,14 @@ fn all_capitals(t: &mut richtextfield::AttributeText, theme: &Theme) {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().run()?;
-    let mut w = window!("'RichTextField example',a:c,w:80,h:20");
-    w.add(label!("'Use **, * and ` to toggle colors',l:1,t:1,r:1,h:1"));
-    w.add(richtextfield!("'',l:1,t:2,r:1,h:4,parser:markdown_like_colors"));
-    w.add(label!("'Auto capitalize text',l:1,t:6,r:1,h:1"));
-    w.add(richtextfield!("'',l:1,t:7,r:1,h:4,parser:all_capitals"));
-    w.add(label!("'Parser applied after each edit',l:1,t:13,r:1,h:1"));
-    w.add(richtextfield!("'**Plan**: Run `code`',l:1,t:14,r:1,h:1,parser:markdown_like_colors"));
-
-    app.add_window(w);
-    app.run();
-    Ok(())
+    App::new().window(|| {
+        let mut w = window!("'RichTextField example',a:c,w:80,h:20");
+        w.add(label!("'Use **, * and ` to toggle colors',l:1,t:1,r:1,h:1"));
+        w.add(richtextfield!("'',l:1,t:2,r:1,h:4,parser:markdown_like_colors"));
+        w.add(label!("'Auto capitalize text',l:1,t:6,r:1,h:1"));
+        w.add(richtextfield!("'',l:1,t:7,r:1,h:4,parser:all_capitals"));
+        w.add(label!("'Parser applied after each edit',l:1,t:13,r:1,h:1"));
+        w.add(richtextfield!("'**Plan**: Run `code`',l:1,t:14,r:1,h:1,parser:markdown_like_colors"));
+        w
+    }).run()
 }

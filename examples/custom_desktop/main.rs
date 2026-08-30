@@ -111,6 +111,5 @@ impl AppBarEvents for MyDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).command_bar().app_bar().run()?.run();
-    Ok(())
+    App::new().desktop(MyDesktop::new()).command_bar().app_bar().run()
 }

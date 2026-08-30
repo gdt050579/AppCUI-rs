@@ -22,7 +22,5 @@ fn main() -> Result<(), appcui::system::Error> {
             win
         })
         .app_bar()
-        .run()?
-        .run();
-    Ok(())
+        .run()
 }

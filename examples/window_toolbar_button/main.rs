@@ -62,8 +62,5 @@ use appcui::prelude::*;
  }
 
  fn main() -> Result<(), appcui::system::Error> {
-     let mut app = App::new().run()?;
-     app.add_window(CounterWindow::new());
-     app.run();
-     Ok(())
+     App::new().window(|| CounterWindow::new()).run()
  }

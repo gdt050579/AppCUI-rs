@@ -27,8 +27,5 @@ impl ButtonEvents for CounterWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().run()?;
-    a.add_window(CounterWindow::new());
-    a.run();
-    Ok(())
+    App::new().window(|| CounterWindow::new()).run()
 }

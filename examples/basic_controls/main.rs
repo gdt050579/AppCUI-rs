@@ -201,17 +201,16 @@ fn add_containers(tab: &mut Tab, index: u32) {
 
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(120, 30)).single_window().run()?;
-    let mut w = window!("'Basic Controls',dock:fill");
-    let mut t = tab!("d:f, tabs:[Buttons,CheckBoxes,RadioBoxes,Selectors,Text,Containers], type: OnLeft");
-    add_buttons(&mut t, 0);
-    add_checkboxes(&mut t, 1);
-    add_radioboxes(&mut t, 2);
-    add_selectors(&mut t, 3);
-    add_text(&mut t, 4);
-    add_containers(&mut t, 5);
-    w.add(t);
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new().size(Size::new(120, 30)).single_window().window(|| {
+        let mut w = window!("'Basic Controls',dock:fill");
+        let mut t = tab!("d:f, tabs:[Buttons,CheckBoxes,RadioBoxes,Selectors,Text,Containers], type: OnLeft");
+        add_buttons(&mut t, 0);
+        add_checkboxes(&mut t, 1);
+        add_radioboxes(&mut t, 2);
+        add_selectors(&mut t, 3);
+        add_text(&mut t, 4);
+        add_containers(&mut t, 5);
+        w.add(t);
+        w
+    }).run()
 }

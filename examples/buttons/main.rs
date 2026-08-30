@@ -49,8 +49,11 @@ impl ButtonEvents for MyWin {
     
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_os = "windows")]
-    App::new().backend(appcui::backend::Type::WindowsVT).color_schema(false).window(|| MyWin::new()).run()?.run();
+    {
+        App::new().backend(appcui::backend::Type::WindowsVT).color_schema(false).window(|| MyWin::new()).run()
+    }
     #[cfg(not(target_os = "windows"))]
-    App::new().color_schema(false).window(|| MyWin::new()).build()?.run();
-    Ok(())
+    {
+        App::new().color_schema(false).window(|| MyWin::new()).run()
+    }
 }

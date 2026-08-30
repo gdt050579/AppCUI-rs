@@ -125,9 +125,10 @@ fn main() -> Result<(), appcui::system::Error> {
             .desktop(MyDesktop::new())
             .app_bar()
             .color_schema(false)
-            .run()?
-    }   
+            .run()
+    }
     #[cfg(not(target_os = "windows"))]
-    { App::new().desktop(MyDesktop::new()).app_bar().color_schema(false).run() }
-    Ok(())
+    {
+        App::new().desktop(MyDesktop::new()).app_bar().color_schema(false).run()
+    }
 }
