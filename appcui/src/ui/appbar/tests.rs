@@ -37,7 +37,7 @@ fn check_order_parameter() {
         Paint('initial order - Help should be first, then Edit, then File')
         CheckHash(0xF06F449DDF16C472)
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).app_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -173,7 +173,7 @@ fn check_order_parameter_multi_controls() {
         Paint('initial state - Desktop(0), Window(1), Control(2)')
         CheckHash(0x38778794A1D87753)
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap();
     a.add_window(mywindow::MyWindow::new());
     a.run();
 }
@@ -309,7 +309,7 @@ fn check_order_parameter_multi_controls_reversed() {
         Paint('initial state - Control(2), Window(1), Desktop(0)')
         CheckHash(0x47F641E3D761FF9B)
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap();
     a.add_window(mywindow::MyWindow::new());
     a.run();
 }
@@ -495,7 +495,7 @@ fn check_update_multiple_menus() {
             Paint('one menu')
             CheckHash(0x6ec113e98df3ca14)
             ";
-    let mut a = App::new().size(Size::new(60, 24)).debug_script(script).app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 24)).debug_script(script).app_bar().run().unwrap();
     let mut w1 = mywin::MyWindow::new("Win-1", layout!("x:1,y:2,w:18,h:10"));
     w1.add(colorcustomcontrol::ColorCustomControl::new(layout!("x:1,y:1,w:10")));
     w1.add(button!("Button,x:1,y:3,w:10"));
@@ -777,7 +777,7 @@ fn check_with_keys() {
             Paint('State_58 (no menu visible in the app bar)')
             CheckHash(0xD0C81ECF174389FD)
         ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).app_bar().run().unwrap();
     a.add_window(MyWindow::new());
     a.run();
 }
@@ -956,7 +956,7 @@ fn check_recursive_shortcuts() {
             Paint('State_25 (no menu visible in the appbar)')
             CheckHash(0xD0C81ECF174389FD)    
         ";
-    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 20)).debug_script(script).app_bar().run().unwrap();
     a.add_window(MyWindow::new());
     a.run();
 }
@@ -1004,7 +1004,7 @@ fn check_side_parameter() {
         Paint('4. Hover over Edit')
         CheckHash(0x21EDFC4F0D6D293A)
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).app_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1066,7 +1066,7 @@ fn check_enable_disable() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1135,7 +1135,7 @@ fn check_mouse_over_disable() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1205,7 +1205,7 @@ fn check_mouse_click_and_hover_disable() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1259,7 +1259,7 @@ fn check_separator() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1313,7 +1313,7 @@ fn check_label() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1369,7 +1369,7 @@ fn check_label_tooltip() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1460,7 +1460,7 @@ fn check_move_left_right() {
         }
     }
 
-    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1574,7 +1574,7 @@ fn check_button_with_menu_opened() {
 
     ";
 
-    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(Win::new());
     a.run();
 }
@@ -1657,7 +1657,7 @@ fn check_menu_aligned_right_opened() {
         CheckHash(0xEA4995BF7547A2A0)  
     ";
 
-    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(Win::new());
     a.run();
 }
@@ -1740,7 +1740,7 @@ fn check_menu_aligned_right_opened_large_secondary_right_most_menu() {
         CheckHash(0xEA4995BF7547A2A0)  
     ";
 
-    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(Win::new());
     a.run();
 }
@@ -1797,7 +1797,7 @@ fn check_desktop_resize() {
         Paint('4. New width (30) - LM-1,LM-2,RM-1')
         CheckHash(0xE68F2CCD42F41D0C)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap().run();
 }
 
 #[test]
@@ -1837,7 +1837,7 @@ fn check_menu_button_api() {
         Paint('1. Initial state - menu name is <Menu+1>')
         CheckHash(0xADA1CFB8DAF362DC)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap().run();
 }
 
 #[test]
@@ -1877,7 +1877,7 @@ fn check_label_api() {
         Paint('1. Initial state - menu name is <Label+1>')
         CheckHash(0xF0C393E648D75BAD)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap().run();
 }
 
 #[test]
@@ -1923,7 +1923,7 @@ fn check_button_api() {
         Paint('2. Hover - Tooltip is <Enabled: true>')
         CheckHash(0x578201E79429C78D)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap().run();
 }
 
 #[test]
@@ -1978,7 +1978,7 @@ fn check_button_shortcut() {
         Paint('3. Now cnt = 3')
         CheckHash(0xC636FD44BF9F062F)        
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap().run();
 }
 
 #[test]
@@ -2058,7 +2058,7 @@ fn check_toggle_button() {
         CheckHash(0x21A77127D6AE5AEB)  
     ";
 
-    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(Win::new());
     a.run();
 }
@@ -2121,7 +2121,7 @@ fn check_togglebutton_api() {
         Paint('5. Click on inactive (same hash as 3)')
         CheckHash(0x1F97C126CD55C6EC)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap().run();
 }
 
 #[test]
@@ -2188,7 +2188,7 @@ fn check_toggle_button_shortcut() {
         Paint('5. Same hash as 4, nothing hapens')
         CheckHash(0xF8403DC8DDE7F36F)   
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap().run();
 }
 
 #[test]
@@ -2287,7 +2287,7 @@ fn check_switch_button() {
         CheckHash(0xEA70077163C07910)  
     ";
 
-    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(80, 10)).debug_script(script).command_bar().app_bar().run().unwrap();
     a.add_window(Win::new());
     a.run();
 }
@@ -2338,7 +2338,7 @@ fn check_switchbutton_api() {
         Paint('2. Hover - Tooltip is <Enabled: true>')
         CheckHash(0xA29CA62FD88E5797)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap().run();
 }
 
 #[test]
@@ -2380,5 +2380,5 @@ fn check_switchbutton_hotkey() {
         Paint('3. State is now B again (same hash as 1)')
         CheckHash(0x47A646967FF5C3C9)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap().run();
 }

@@ -50,7 +50,7 @@ fn all_capitals(t: &mut richtextfield::AttributeText, theme: &Theme) {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+    let mut app = App::new().run()?;
     let mut w = window!("'RichTextField example',a:c,w:80,h:20");
     w.add(label!("'Use **, * and ` to toggle colors',l:1,t:1,r:1,h:1"));
     w.add(richtextfield!("'',l:1,t:2,r:1,h:4,parser:markdown_like_colors"));

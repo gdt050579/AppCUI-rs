@@ -201,7 +201,7 @@ fn add_containers(tab: &mut Tab, index: u32) {
 
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(120, 30)).single_window().build()?;
+    let mut a = App::new().size(Size::new(120, 30)).single_window().run()?;
     let mut w = window!("'Basic Controls',dock:fill");
     let mut t = tab!("d:f, tabs:[Buttons,CheckBoxes,RadioBoxes,Selectors,Text,Containers], type: OnLeft");
     add_buttons(&mut t, 0);

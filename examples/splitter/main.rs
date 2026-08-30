@@ -4,7 +4,7 @@ mod ferris;
 use crate::ferris::FERRIS_PIXELS;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+    let mut app = App::new().run()?;
     let mut w = window!("'Splitter Example', a:c,w:60,h:20, flags: Sizeable");
     let mut vs = vsplitter!("pos:50%,d:f");
     let mut iv_1 = ImageViewer::new(

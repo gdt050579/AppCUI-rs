@@ -6,7 +6,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let raw_content = fs::read_to_string("examples/surface_serialization/raw.txt")?;
 
     let surface = Surface::from_string(&raw_content, Size::new(240, 128));
-    let mut app = App::new().single_window().build()?;
+    let mut app = App::new().single_window().run()?;
 
     let srf_path = Path::new("examples/surface_serialization/output.srf");
     surface.save(srf_path)?;

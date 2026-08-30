@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+    let mut app = App::new().run()?;
     let mut w = Window::new("Title", layout!("a:c,w:40,h:20"), window::Flags::None);
     
     w.add(vline!("x:1,y:1,h:15,flags:DoubleLine"));

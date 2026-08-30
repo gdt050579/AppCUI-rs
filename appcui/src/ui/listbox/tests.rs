@@ -8,7 +8,7 @@ fn check_create() {
         Paint('Initial state')
         CheckHash(0x6063E984F2B99F35)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
@@ -33,7 +33,7 @@ fn check_create_with_macro_1() {
         Paint('Initial state')
         CheckHash(0x6063E984F2B99F35)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
@@ -54,7 +54,7 @@ fn check_create_with_macro_2() {
         Paint('Initial state')
         CheckHash(0xB00B42A9B1771A31)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let l = listbox!("d:f,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
@@ -71,7 +71,7 @@ fn check_create_with_macro_3() {
         Paint('Initial state (White is selected,Red is the first item)')
         CheckHash(0xE2D9A09340BE3EFD)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
     let l = listbox!("d:f,index:3,flags: ScrollBars, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
@@ -86,7 +86,7 @@ fn check_create_with_macro_4() {
         Paint('Initial state (White is selected,Red is the first item)')
         CheckHash(0xAD52FAF15DEBDF73)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
     let l = listbox!("d:f,index:3,flags: SearchBar, lsm:2, items:[Red,Gree,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
@@ -138,7 +138,7 @@ fn check_movement_keys() {
         Paint('Item 97 selected, scroll starts from item 95')
         CheckHash(0x7D4E807C521DA5D)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
@@ -184,7 +184,7 @@ fn check_horizontal_scroll_keys() {
         Paint('Text: My long 0 textual ...')
         CheckHash(0xF552C5DD89A89A58)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:35,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
@@ -230,7 +230,7 @@ fn check_horizontal_scroll_keys_no_checkboxes() {
         Paint('Text: My long 0 textual ...')
         CheckHash(0xB5EF8D0830462D7F)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:35,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(layout!("d:f"), listbox::Flags::ScrollBars);
@@ -300,7 +300,7 @@ fn check_search() {
         Paint('Window is closed (in non-edit mode Escape is not proccessed)')
         CheckHash(0x3900AF2CBDF4157D)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
@@ -367,7 +367,7 @@ fn check_resize() {
         CheckHash(0x815B0867843C1DE0)
         CheckCursor(hidden)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:1,t:1,b:1,r:1");
     let mut l = ListBox::new(
@@ -411,7 +411,7 @@ fn check_search_ignore_case() {
         CheckHash(0x82A41F9E2DCA2055)
         CheckCursor(14,10)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light GREEn',White,'Special GrEeN',Black,Orange,Yellow,Purple]");
     w.add(l);
@@ -440,7 +440,7 @@ fn check_search_use_space() {
         Paint('Normal mode - light green is checked')
         CheckHash(0x9EC9834D8A0DDBB8)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, items:[Red,Green,'dark green', 'light green',White,'Special Greeb',Black,Orange,Yellow,Purple]");
     w.add(l);
@@ -523,7 +523,7 @@ fn check_events() {
         Paint('three items in log')
         CheckHash(0x6B1BBAB7CC71CFC9)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -573,7 +573,7 @@ fn check_autoscroll() {
         Paint('ListBox is focused and has vscroll enabled and position to last char')
         CheckHash(0x2BA891709571BF8D)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -627,7 +627,7 @@ fn check_clear() {
         Paint('Listbox has inactive vertical scrollbar')
         CheckHash(0xB80B6F0694BA7F8B)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -639,7 +639,7 @@ fn check_autoscroll_on_create() {
         Paint('Initial state (15 should be selected and on the bottom of the window)')
         CheckHash(0x64D5987E9F212984)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let l = listbox!("d:f,flags: ScrollBars+AutoScroll, lsm:2, items:[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]");
     w.add(l);
@@ -659,7 +659,7 @@ fn check_empty_list_message() {
         Paint('Width focus')    
         CheckHash(0x3D264DF35A9248A9)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
     let mut l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
@@ -683,7 +683,7 @@ fn check_empty_list_message_with_macro() {
         Paint('Width focus')    
         CheckHash(0x36162E7E39B5F673)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
     let l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2, em='No items in the list. Insert some items by pressing the <Add> button.'");
@@ -741,7 +741,7 @@ fn check_sort() {
         Paint('Listbox is sorted, Yellow is selected')
         CheckHash(0x14EC25C01F6E20A6)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -793,7 +793,7 @@ fn check_sort_by() {
         Paint('Listbox is sorted, Yellow is selected')
         CheckHash(0x7793BA7F95CF1B06)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -815,7 +815,7 @@ fn check_empty_highlight_selected_when_inactive() {
         Paint('Button has focus (4th item is highlighet)')    
         CheckHash(0x791D611DAE470635)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
     let l = listbox!("d:f,flags: ScrollBars+HighlightSelectedItemWhenInactive, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
@@ -843,7 +843,7 @@ fn check_empty_highlight_selected_when_inactive_2() {
         Paint('Button has focus (4th item is highlighet)')    
         CheckHash(0xABD626D0EDE05CAD)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let mut p = panel!("Test,l:10,t:1,b:1,r:1");
     let l = listbox!("d:f,flags: ScrollBars+HighlightSelectedItemWhenInactive+CheckBoxes, lsm:2, items=[1,2,3,4,5,6,7,8,9,10]");
@@ -923,7 +923,7 @@ fn check_items_checked_with_mouse() {
         Paint('Checked: Green,Yellow, ItemsChecked: 2')
         CheckHash(0x6855A969D5D764BC)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -950,7 +950,7 @@ fn check_scroll_from_scrollbar() {
         Paint('Scroll: Red -> Orange')
         CheckHash(0x9C13452BDE1FBA10)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:20,h:8,flags: Sizeable");
     let l = listbox!("d:f,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
@@ -980,7 +980,7 @@ fn check_scroll_from_mouse_wheel() {
         Paint('Back to initial state')
         CheckHash(0x77D7DB5C1EE81C58)
     ";
-    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:20,h:8,flags: Sizeable");
     let l = listbox!("d:f,flags: ScrollBars, lsm:2, items:[Red,Green,Blue,White,Black,Orange,Yellow,Purple]");
     w.add(l);
@@ -1027,7 +1027,7 @@ fn check_search_enter_on_empty_list_ui() {
         Paint('Enter in search mode on empty list (no overflow)')
         CheckHash(0x1F2C0EA31A130551)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:50,h:11,flags: Sizeable");
     let l = ListBox::new(layout!("d:f"), listbox::Flags::SearchBar);
     w.add(l);

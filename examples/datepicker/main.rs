@@ -25,7 +25,7 @@ impl DatePickerEvents for MyWin{
 }
 
 fn main(){
-    let mut a =  App::new().build().unwrap();
+    let mut a =  App::new().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

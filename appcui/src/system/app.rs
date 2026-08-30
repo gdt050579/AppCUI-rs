@@ -51,7 +51,7 @@ impl App {
     }
 
     /// Runs the current appcui application. This command will display all windows, and allow you to run the cod that perform the event logic for every control.
-    pub fn run(self) {
+    pub(crate) fn start_app(self) -> Result<(), crate::system::Error> {
         #[cfg(target_arch = "wasm32")]
         #[allow(unused_imports)]
         {
@@ -74,11 +74,11 @@ impl App {
         }
         // For WASM, APP_CREATED_MUTEX is reset via drop_app
         // called from RuntimeManager's animation loop when it terminates.
+        Ok(())
     }
 
-    /// Adds a new window to AppCUI framework and returns a Handle towords it.
-    /// Later on you can use that handle to manipulate that window in a safe way.
-    pub fn add_window<T>(&mut self, window: T) -> Handle<T>
+    #[cfg(test)]
+    pub(crate) fn add_window<T>(&mut self, window: T) -> Handle<T>
     where
         T: Control + WindowControl + NotModalWindow + 'static,
     {

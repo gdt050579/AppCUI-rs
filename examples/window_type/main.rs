@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+    let mut app = App::new().run()?;
 
     let mut w = Window::with_type("Type::Panel", layout!("x:1,y:2,w:40,h:10"), window::Flags::Sizeable, window::Type::Panel, window::Background::Normal);
     w.set_tag("win");

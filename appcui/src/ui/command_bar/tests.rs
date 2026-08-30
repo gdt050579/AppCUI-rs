@@ -51,7 +51,7 @@ fn check_commands() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().run().unwrap();
     a.add_window(MyWin1::new());
     a.run();
 }
@@ -113,7 +113,7 @@ fn check_state_commands() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -167,7 +167,7 @@ fn check_mouse_selection() {
         }
     }
 
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).command_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

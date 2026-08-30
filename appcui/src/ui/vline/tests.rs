@@ -8,7 +8,7 @@ fn check_create(){
         Paint('Initial State')
         CheckHash(0xB375CF2B6D717392)
     ";
-    let mut a = App::new().size(Size::new(60, 40)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 40)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:25,flags:Sizeable");
 
     w.add(VLine::new( layout!("x:1,y:1,h:10"), Flags::None));
@@ -24,7 +24,7 @@ fn check_procmacro(){
         Paint('Initial State')
         CheckHash(0xB375CF2B6D717392)
     ";
-    let mut a = App::new().size(Size::new(60, 40)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 40)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:25,flags:Sizeable");
     
     w.add(vline!("x:1,y:1,h:10"));
@@ -40,7 +40,7 @@ fn check_merge_borders(){
         Paint('Initial State')
         CheckHash(0x17B0E89C8C223D61)
     ";
-    let mut a = App::new().size(Size::new(60, 40)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 40)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:25,flags:Sizeable");
 
     w.add(VLine::new( layout!("x:7,y:0,h:100%"), Flags::MergeBorders));

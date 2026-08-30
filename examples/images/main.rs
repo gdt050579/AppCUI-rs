@@ -18,7 +18,7 @@ fn main() -> Result<(), appcui::system::Error> {
         .desktop(MyDesktop::new())
         .command_bar()
         .app_bar()
-        .build()?
+        .run()?
         .run();
 
     #[cfg(not(target_family = "windows"))]

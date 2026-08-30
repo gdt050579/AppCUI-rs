@@ -13,7 +13,7 @@ fn check_create() {
         Paint('3. Back to initial state')   
         CheckHash(0x89DCEE13ABCD4574)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(CharPicker::new(Some('a'),LayoutBuilder::new().x(1).y(1).width(20).build()));
     a.add_window(w);
@@ -33,7 +33,7 @@ fn check_create_with_all() {
         Paint('3. Back to initial state')   
         CheckHash(0x89DCEE13ABCD4574)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:9");
     w.add(charpicker!("a,x:1,y:1,w:20,sets:[*]"));
     a.add_window(w);
@@ -53,7 +53,7 @@ fn check_create_macro() {
         Paint('3. Back to initial state')   
         CheckHash(0x89DCEE13ABCD4574)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:9");
     w.add(charpicker!("a,x:1,y:1,w:20"));
     a.add_window(w);
@@ -73,7 +73,7 @@ fn check_create_macro_with_code() {
         Paint('3. Back to initial state')   
         CheckHash(0x89DCEE13ABCD4574)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:9");
     w.add(charpicker!("x:1,y:1,w:20,code: 97"));
     a.add_window(w);
@@ -92,7 +92,7 @@ fn check_ctor_one_set() {
         CheckHash(0xBA5C4FBD4C2E24E6)  
         Key.Pressed(Down)
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     let set = charpicker::Set::new("Vowals", "AEIOUaeiou").unwrap();
     w.add(CharPicker::with_set(Some('e'), layout!("x:1,y:1,w:20"), set));
@@ -116,7 +116,7 @@ fn check_expand_up_and_down() {
         Paint('4. Expanded down (first control)')   
         CheckHash(0xD9C071575AE05055)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(charpicker!("l:1,t:1,r:1,char: 0"));
     w.add(charpicker!("l:1,b:1,r:1,code: 41"));
@@ -183,7 +183,7 @@ fn check_navigation() {
         Paint('17. Char <~> (last char) selected')   
         CheckHash(0x6FBE8396B77AED3D)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     w.add(charpicker!("x:1,y:1,w:15,sets:[Ascii],char:A"));
     a.add_window(w);
@@ -215,7 +215,7 @@ fn check_navigation_scroll_view() {
         Paint('7. Letter <E> selected, scroll starts from <=>')   
         CheckHash(0xB3208D72921A80DD)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     w.add(charpicker!("x:1,y:1,w:15,sets:[Ascii],char:A"));
     a.add_window(w);
@@ -238,7 +238,7 @@ fn check_navigation_escape() {
         Paint('4. Exit window')   
         CheckHash(0x97CFA8E09EF9879D)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     w.add(charpicker!("x:1,y:1,w:15,sets:[Ascii],char:A"));
     a.add_window(w);
@@ -270,7 +270,7 @@ fn check_navigation_chars() {
         Paint('7. Nothing chagest as ▒ is not in the set')   
         CheckHash(0xD8A1E8478C65CC79)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     w.add(charpicker!("x:1,y:1,w:15,sets:[Ascii],char:A"));
     a.add_window(w);
@@ -305,7 +305,7 @@ fn check_navigation_change_sets() {
         Paint('8. Nothing changes (already at first set)')   
         CheckHash(0x2BD74D5589035BC7)          
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     w.add(charpicker!("x:1,y:1,w:15,sets:[Ascii,Braille,Animals],char:A"));
     a.add_window(w);
@@ -329,7 +329,7 @@ fn check_navigation_paste() {
         Paint('4. Seleced character is <z>')   
         CheckHash(0x2696253A2ED859F5)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     w.add(charpicker!("x:1,y:1,w:15,sets:[Ascii,Braille,Animals],char:A"));
     a.add_window(w);
@@ -353,7 +353,7 @@ fn check_navigation_copy() {
         CheckHash(0xB319CD11C2DD3B65) 
         CheckClipboardText('G') 
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     w.add(charpicker!("x:1,y:1,w:15,sets:[Ascii,Braille,Animals],char:A"));
     a.add_window(w);
@@ -382,7 +382,7 @@ fn check_expand_up_and_down_via_mouse() {
         Paint('6. second charpicker packed')   
         CheckHash(0x79B93797825FB3D4)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(charpicker!("l:1,t:1,r:1,char: 0"));
     w.add(charpicker!("l:1,b:1,r:1,code: 41"));
@@ -424,7 +424,7 @@ fn check_set_none_via_mouse() {
         Paint('10. Release None button (value is now None)')   
         CheckHash(0x371CB57507BC9A19)  
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(charpicker!("l:1,t:1,r:1,char: 0"));
     w.add(charpicker!("l:1,b:1,r:1,code: 41"));
@@ -472,7 +472,7 @@ fn check_change_sets_via_mouse_expand_from_top() {
         Paint('12. Nothing changes ( < button is inactive)')   
         CheckHash(0x102BF166271EC867)  
     ";
-    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(charpicker!("l:1,t:1,r:1,sets: [Ascii, Braille, Animals]"));
     a.add_window(w);
@@ -520,7 +520,7 @@ fn check_change_sets_via_mouse_expand_from_bottom() {
         Paint('12. Nothing changes ( < button is inactive)')   
         CheckHash(0x2D206D16A0C0EF13)  
     ";
-    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(charpicker!("l:1,b:1,r:1,sets: [Ascii, Braille, Animals]"));
     a.add_window(w);
@@ -556,7 +556,7 @@ fn check_change_char_via_mouse_expand_from_top() {
         Paint('8. Control is packed')   
         CheckHash(0xFED46F2CC0D70D8E)  
     ";
-    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(charpicker!("l:1,t:1,r:1,sets: [Ascii, Braille, Animals]"));
     a.add_window(w);
@@ -592,7 +592,7 @@ fn check_change_char_via_mouse_expand_from_bottom() {
         Paint('8. Control is packed')   
         CheckHash(0x821FF576DEC8014E)  
     ";
-    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(charpicker!("l:1,b:1,r:1,sets: [Ascii, Braille, Animals]"));
     a.add_window(w);
@@ -636,7 +636,7 @@ fn check_mouse_wheel() {
         Paint('11. Nothing changes - set remains Ascii')   
         CheckHash(0x102BF166271EC867)         
     ";
-    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(charpicker!("l:1,t:1,r:1,sets: [Ascii, Braille, Animals]"));
     a.add_window(w);
@@ -688,7 +688,7 @@ fn check_events() {
         Paint('6. None selected')   
         CheckHash(0xFE200074A00051E2)
     ";
-    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();    
 }
@@ -712,7 +712,7 @@ fn check_no_set() {
         Paint('3. Nothing changes')   
         CheckHash(0x6EB73C011EEF023B) 
     ";
-    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     let mut c = CharPicker::new(Some('A'), layout!("l:1,t:1,r:1"));
     c.clear_sets();

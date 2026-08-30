@@ -239,7 +239,7 @@ impl NumericSelectorEvents<u16> for LayoutTesterWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().size(Size::new(100, 30)).single_window().build()?;
+    let mut app = App::new().size(Size::new(100, 30)).single_window().run()?;
     app.add_window(LayoutTesterWindow::new());
     app.run();
     Ok(())

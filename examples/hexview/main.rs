@@ -524,7 +524,7 @@ impl CommandBarEvents for HexViewWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().color_schema(false).command_bar().build()?;
+    let mut app = App::new().color_schema(false).command_bar().run()?;
     app.add_window(HexViewWindow::new(MyBuffer::new()));
     app.run();
     Ok(())

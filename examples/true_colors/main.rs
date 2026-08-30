@@ -1,12 +1,7 @@
 use appcui::prelude::*;
 
-fn main() -> Result<(), appcui::system::Error> {
-    #[cfg(target_os = "windows")]
-    let mut app = App::new().backend(appcui::backend::Type::WindowsVT).color_schema(false).build()?;
-    #[cfg(not(target_os = "windows"))]
-    let mut app = App::new().build()?;
 
-
+fn build_window() -> Window {
     let mut w = Window::new("True Colors", layout!("a:c,w:70,h:19"), window::Flags::None);
 
     let mut c = canvas!("'68x17',d:f");
@@ -30,9 +25,12 @@ fn main() -> Result<(), appcui::system::Error> {
     s.write_string(1, 15, "    and white, then your terminal does not support true colors.   ", CharAttribute::with_color(Color::Gray, Color::Black), false);
     s.write_string(38, 13, "TRUE_COLORS", CharAttribute::with_color(Color::Silver, Color::Black), false);
     
-
     w.add(c);
-    app.add_window(w);
-    app.run();
-    Ok(())
+    w    
+}
+fn main() -> Result<(), appcui::system::Error> {
+    #[cfg(target_os = "windows")]
+    { App::new().backend(appcui::backend::Type::WindowsVT).color_schema(false).window(build_window).run()?.run() }
+    #[cfg(not(target_os = "windows"))]
+    { App::new().window(build_window).build()?.run() }
 }

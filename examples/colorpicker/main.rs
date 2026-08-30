@@ -64,7 +64,7 @@ impl ColorPickerEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+    let mut app = App::new().run()?;
     app.add_window(MyWin::new());
     app.run();
     Ok(())

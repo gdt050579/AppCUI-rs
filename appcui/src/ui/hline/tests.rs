@@ -9,7 +9,7 @@ fn check_create() {
         Paint('Initial State')
         CheckHash(0xC5491A50D5507086)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     
     w.add(HLine::new("", layout!("x:1,y:1,w:10"), Flags::None));
@@ -25,7 +25,7 @@ fn check_title_too_large() {
         Paint('Initial State')
         CheckHash(0x50E2B35DE67D69AB)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     
     w.add(HLine::new("ThisIsAVeryLargeTitle", layout!("x:1,y:3,w:20"), Flags::DoubleLine | Flags::HasTitle));
@@ -41,7 +41,7 @@ fn check_title_with_line_too_small() {
         Paint('Initial State')
         CheckHash(0x9E92EA6BBE2344EA)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     
     w.add(HLine::new("ThisIsAVeryLargeTitle", layout!("x:1,y:3,w:4"), Flags::DoubleLine | Flags::HasTitle));
@@ -56,7 +56,7 @@ fn check_create_procmacro() {
         Paint('Initial State')
         CheckHash(0xC5491A50D5507086)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     
     w.add(hline!("x:1,y:1,w:10"));
@@ -72,7 +72,7 @@ fn check_apis() {
         Paint('Initial State')
         CheckHash(0xC5491A50D5507086)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     
     w.add(hline!("x:1,y:1,w:10"));
@@ -91,7 +91,7 @@ fn check_merge_borders() {
         Paint('Initial State')
         CheckHash(0x5E3EBF28EA9681D8)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
     
     w.add(HLine::new("", layout!("x:0,y:1,w:100%"), Flags::MergeBorders));

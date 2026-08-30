@@ -9,7 +9,7 @@ fn check_panel_with_border() {
         Paint('Border panel')   
         CheckHash(0xDE639472091C422)   
     ";
-    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::Border));
     w.add(Panel::with_type("Options", layout!("x:17,y:1,w:12,h:4"), panel::Type::Border));
@@ -31,7 +31,7 @@ fn check_panel_with_macro() {
         Paint('Border panel & Inactive panel')   
         CheckHash(0xAB475871E6A0AD8A)   
     ";
-    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(panel!("Options,x:1,y:1,w:16,h:4"));
     w.add(panel!("caption:'Inactive panel',x:1,y:5,w:74,h:4,type:Border,enabled:false"));
@@ -46,7 +46,7 @@ fn check_panel_with_macro_no_title() {
         Paint('No title panel')   
         CheckHash(0x4718D94609DBF8B4)   
     ";
-    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(panel!("l:1,r:1,t:1,b:1"));
     a.add_window(w);
@@ -60,7 +60,7 @@ fn check_panel_with_page() {
         Paint('Page panel')   
         CheckHash(0xBF28919C860D0024)   
     ";
-    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::Page));
     w.add(Panel::with_type("Options", layout!("x:18,y:1,w:12,h:4"), panel::Type::Page));
@@ -81,7 +81,7 @@ fn check_panel_with_window() {
         Paint('window panel')   
         CheckHash(0x48A952908E22B5CA)   
     ";
-    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::Window));
     w.add(Panel::with_type("Options", layout!("x:17,y:1,w:12,h:4"), panel::Type::Window));
@@ -104,7 +104,7 @@ fn check_panel_with_topbar() {
         Paint('TopBar panel')   
         CheckHash(0x77A2D12C49F335CE)   
     ";
-    let mut a = App::new().size(Size::new(90, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(90, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:88,h:11");
     w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::TopBar));
     w.add(Panel::with_type("Options", layout!("x:18,y:1,w:12,h:4"), panel::Type::TopBar));
@@ -151,7 +151,7 @@ fn check_panel_add_controls() {
         Paint('Back to start')   
         CheckHash(0x6B19FDCD55FD95BA)
     ";
-    let mut a = App::new().size(Size::new(60, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:11");
     let mut p = panel!("Controls,l:1,t:1,r:1,h:6");
     p.add(button!("but-1,x:1,y:1,w:10,type:flat"));
@@ -255,7 +255,7 @@ fn check_panel_navigate() {
         Paint('Backwards -> Focus: button (11) (initial state)')   
         CheckHash(0x250A86FF5B2DE3B5)
     ";
-    let mut a = App::new().size(Size::new(80, 22)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 22)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:70,h:20");
     let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");
     let mut p2 = panel!("Layer-2,l:1,t:0,r:30,b:0");
@@ -330,7 +330,7 @@ fn check_panel_navigate_keys() {
         Paint('Focus: button (10)')   
         CheckHash(0xBE87E6DF332D1125)
     ";
-    let mut a = App::new().size(Size::new(80, 22)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 22)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:70,h:20");
     let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");
     let mut p2 = panel!("Layer-2,l:1,t:0,r:30,b:0");
@@ -372,7 +372,7 @@ fn check_panel_api() {
         Paint('Border panel -> New title')   
         CheckHash(0x226838AC6C4DC67)   
     ";
-    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     let mut p = panel!("Options,x:1,y:1,w:16,h:4");
     assert_eq!(p.panel_type(), panel::Type::Border);
@@ -391,7 +391,7 @@ fn check_panel_raised() {
         Paint('Raised panel with title')   
         CheckHash(0xB83F9EDE2216F153)   
     ";
-    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(panel!("Options,x:1,y:1,w:16,h:4,type: raised"));
     a.add_window(w);
@@ -405,7 +405,7 @@ fn check_panel_sunken() {
         Paint('Raised panel with title')   
         CheckHash(0xCFA5AD06480D095C)   
     ";
-    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 13)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:78,h:11");
     w.add(panel!("Options,x:1,y:1,w:16,h:4,type: sunken"));
     a.add_window(w);

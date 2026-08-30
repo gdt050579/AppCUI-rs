@@ -2,7 +2,7 @@ use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_os = "windows")]
-    let mut app = App::new().backend(appcui::backend::Type::WindowsVT).color_schema(true).build()?;
+    let mut app = App::new().backend(appcui::backend::Type::WindowsVT).color_schema(true).run()?;
     #[cfg(not(target_os = "windows"))]
     let mut app = App::new().build()?;
 

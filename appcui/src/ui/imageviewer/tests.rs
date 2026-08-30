@@ -788,7 +788,7 @@ fn check_create() {
         Paint('Initial state')
         CheckHash(0x63C1CCFA05E9F034)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:8");
     let img = Image::from_str(
         r#"
@@ -825,7 +825,7 @@ fn check_smallbloacks_scaling() {
         Paint('Initial state')
         CheckHash(0x4332083E0CD9C530)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     let s = r#"
         |RRRRGGGG|
@@ -866,7 +866,7 @@ fn check_macro_creation() {
         Paint('Initial state')
         CheckHash(0x30560D8DDECA6294)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f,cs:Color16"));
     a.add_window(w);
@@ -880,7 +880,7 @@ fn check_macro_creation_2() {
         Paint('Initial state')
         CheckHash(0x7BFA1CEEF2BAD91)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     w.add(imageviewer!(
         "image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, flags: Scrollbars, cs:Color16, back: {char: *, fore: Yellow, back: Green}"
@@ -896,7 +896,7 @@ fn check_ferris_ascii_art() {
         Paint('Initial state')
         CheckHash(0x36815E6258204EF7)
     ";
-    let mut a = App::new().size(Size::new(60, 30)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 30)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     let mut i = imageviewer!("d:f,scale:25%,charset:AsciiArt,flags:ScrollBars,cs:Color16");
     i.set_image(ferris_image());
@@ -957,7 +957,7 @@ fn check_keyboard() {
         Paint('11')
         CheckHash(0x52BF4FAAE6446859)
     ";
-    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     let mut i = imageviewer!("d:f,scale:50%,flags:ScrollBars,cs:Color16");
     i.set_image(ferris_image());
@@ -1015,7 +1015,7 @@ fn check_keyboard_2() {
         Paint('15 (already at initial state)')
         CheckHash(0x60098108CD0E3264)
     ";
-    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(40, 15)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     let mut i = imageviewer!("d:f,flags:ScrollBars,cs:color16");
     i.set_image(ferris_image());
@@ -1031,7 +1031,7 @@ fn check_clear_background() {
         Paint('Initial state')
         CheckHash(0x30560D8DDECA6294)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     let mut i = imageviewer!("image:'|RRRR|,|R..R|,|R..R|,|RRRR|',d:f, back: {X,Red}, cs:Color16");
     i.clear_background();
@@ -1069,7 +1069,7 @@ fn check_mouse_events() {
         Paint('Double clicked on image - nothing happens')
         CheckHash(0xF13E7EE85932A59C)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Title,d:f");
     let i = ImageViewer::new(
         ferris_image(),
@@ -1217,7 +1217,7 @@ fn check_resize() {
         CheckHash(0x2B595BD9AB869F26)
     ";
 
-    let mut a = App::new().size(Size::new(90, 20)).debug_script(script).command_bar().build().unwrap();
+    let mut a = App::new().size(Size::new(90, 20)).debug_script(script).command_bar().run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }

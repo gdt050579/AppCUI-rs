@@ -19,7 +19,7 @@ fn check_keyboard_normal() {
         Paint('Back to the button')   
         CheckHash(0x4A798672ABE15E48)
     ";
-    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:40,h:10");
     w.add(togglebutton!("text:AB,desc:'Push Me',x:2,y:2,w:2"));
     w.add(togglebutton!("CD,'Push Me',x:5,y:2,w:2"));
@@ -47,7 +47,7 @@ fn check_keyboard_underlined() {
         Paint('Back to the button')   
         CheckHash(0x84C7AA7D2395DF10)
     ";
-    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:40,h:10");
     w.add(togglebutton!("text:AB,desc:'Push Me',x:2,y:2,w:2,type:Underlined"));
     w.add(togglebutton!("CD,'Push Me',x:5,y:2,w:2,type:Underlined"));
@@ -69,7 +69,7 @@ fn check_mouse_hover_normal() {
         Paint('Hover over CD')
         CheckHash(0xEF3CCBA28E4FB9BD)
     ";
-    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:40,h:10");
     w.add(togglebutton!("text:AB,desc:'Push Me',x:2,y:2,w:2"));
     w.add(togglebutton!("CD,'Push Me',x:5,y:2,w:2"));
@@ -143,7 +143,7 @@ fn check_events() {
         Paint('Button () was pressed -> Button () was pressed -> false')
         CheckHash(0x146C22653FBA0A06)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -170,7 +170,7 @@ fn check_events_single_selection() {
         Paint('5. {} is selected, () & <> are not, Update is still selected')   
         CheckHash(0xBEFCBDB7BF12FF5D)  
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Test,d:f");
     w.add(togglebutton!("<>,'Some button',x:1,y:3,w:2, group: true, type: Underlined"));
     w.add(togglebutton!("(),'Some button 2',x:4,y:3,w:2, group: true, type: Underlined"));

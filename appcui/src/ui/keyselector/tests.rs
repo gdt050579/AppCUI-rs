@@ -7,7 +7,7 @@ fn check_on_paint() {
         Paint('tests')   
         CheckHash(0x7309311AC45F730F)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("test,a:c,w:40,h:10");
     w.add(KeySelector::new(
         Key::new(KeyCode::F1, KeyModifier::Ctrl),
@@ -37,7 +37,7 @@ fn check_macro() {
         Paint('macro tests')   
         CheckHash(0x598A2D33EC5D8CF0)
     ";
-    let mut a = App::new().size(Size::new(60, 14)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 14)).debug_script(script).run().unwrap();
     let mut w = window!("test,a:c,w:40,h:14");
     w.add(keyselector!("F1,x:1,y:1,w:35,h:1"));
     w.add(keyselector!("x:1,y:3,w:35,h:1,key:'Ctrl+Alt+Insert'"));
@@ -78,7 +78,7 @@ fn check_tab_key() {
         Paint('Back to first')  
         CheckHash(0x3F7B3D010FD1DF02)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("test,a:c,w:40,h:10");
     w.add(keyselector!("F1,x:1,y:1,w:35,h:1,flags:AcceptTab+ReadOnly"));
     w.add(keyselector!("x:1,y:3,w:35,h:1"));
@@ -120,7 +120,7 @@ fn check_enter_key() {
         Paint('Nothing changes - 3rd report is readonly (2)')   
         CheckHash(0xE96A44D9FC272DB6)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("test,a:c,w:40,h:10");
     w.add(keyselector!("F1,x:1,y:1,w:35,h:1,flags:AcceptEnter"));
     w.add(keyselector!("x:1,y:3,w:35,h:1"));
@@ -150,7 +150,7 @@ fn check_esc_key() {
         Paint('Window is closed (escape is captured)')   
         CheckHash(0x734FECAF52FDE955)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("test,a:c,w:40,h:10");
     w.add(keyselector!("F1,x:1,y:1,w:35,h:1,flags:AcceptEscape"));
     w.add(keyselector!("x:1,y:3,w:35,h:1"));
@@ -206,7 +206,7 @@ fn check_events() {
         Paint('Now the key is F5')   
         CheckHash(0x8EDEC6861A791691)
    ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -218,7 +218,7 @@ fn check_api() {
         Paint('tests')   
         CheckHash(0xDD6F824143FF6353)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("test,a:c,w:40,h:10");
     let mut ks = KeySelector::new(
         Key::new(KeyCode::F1, KeyModifier::Ctrl),

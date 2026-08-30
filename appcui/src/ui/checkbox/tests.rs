@@ -8,7 +8,7 @@ fn check_checkbox_creation() {
         CheckHash(0x9F68D7DDA0CF6014)  
         CheckCursor(13,5) 
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(CheckBox::new("Single line", layout!("x:1,y:1,w:20"), false));
     w.add(CheckBox::new("Single line (checked initially)", layout!("x:1,y:2,w:40"), true));
@@ -99,7 +99,7 @@ fn check_checkbox_events() {
         CheckHash(0x55B82C4FACD71F83)  
         CheckCursor(14,6) 
     ";
-    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -146,7 +146,7 @@ fn check_checkbox_set_checked() {
         Paint('now un-checked')  
         CheckHash(0x4AAF8B869A8E1A2A) 
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run(); 
 }
@@ -165,7 +165,7 @@ fn check_checkbox_mouse_click() {
         Paint('checkbox-1 un-checked')  
         CheckHash(0x2B9842F2F866679D) 
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
     w.add(CheckBox::new("Single line", layout!("x:1,y:1,w:20"), false));
     a.add_window(w);
@@ -186,7 +186,7 @@ fn check_checkbox_key_pressed() {
         Paint('checkbox-1 checked') 
         CheckHash(0x26DF8C4F9A5A4F70)  
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = window!("Title,a:c,w:40,h:11");
     w.add(checkbox!("'option outside panel',x:1,y:8,w:35,checked:true"));
     a.add_window(w);
@@ -202,7 +202,7 @@ fn check_checkbox_ascii_mode() {
         CheckHash(0x3CF0289824E21CFA)  
         CheckCursor(8,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Ascii,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Ascii,checked:true"));
@@ -220,7 +220,7 @@ fn check_checkbox_checkmark_mode() {
         CheckHash(0xE6E31959367231E6)  
         CheckCursor(7,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkmark,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkmark,checked:true"));
@@ -238,7 +238,7 @@ fn check_checkbox_checkbox_mode() {
         CheckHash(0x408A0B79E00F07F0)  
         CheckCursor(7,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=Checkbox,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=Checkbox,checked:true"));
@@ -256,7 +256,7 @@ fn check_checkbox_fillbox_mode() {
         CheckHash(0xA693D954DF65A44C)  
         CheckCursor(7,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=FilledBox,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=FilledBox,checked:true"));
@@ -274,7 +274,7 @@ fn check_checkbox_yesno_mode() {
         CheckHash(0xE46BB51248D63FCA)  
         CheckCursor(8,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=YesNo,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=YesNo,checked:true"));
@@ -292,7 +292,7 @@ fn check_checkbox_plusminux_mode() {
         CheckHash(0xFA6744A14E4DCA0C)  
         CheckCursor(7,4)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     w.add(checkbox!("'Option 1 (not-checked)',x:1,y:1,w:40,type=PlusMinus,checked:false"));
     w.add(checkbox!("'Option 2 (checked)',x:1,y:2,w:40,type=PlusMinus,checked:true"));
@@ -310,7 +310,7 @@ fn check_checkbox_caption() {
         CheckHash(0x4BA9B547CD3BD93F)  
         CheckCursor(8,3)
     ";
-    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 11)).debug_script(script).run().unwrap();
     let mut w = Window::new("Title", layout!("a:c,w:50,h:9"), window::Flags::None);
     let mut cb = CheckBox::new("Caption test", layout!("x:1,y:1,w:40"), false);
     assert_eq!(cb.caption(), "Caption test");

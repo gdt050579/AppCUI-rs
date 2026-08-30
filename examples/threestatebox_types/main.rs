@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+    let mut app = App::new().run()?;
     let mut w = window!("'ThreeStateBox types',a:c,w:80,h:15, flags:Sizeable");
     let mut a = accordion!("d:f,panels:['&Standard', '&Ascii', 'Check&Box', 'Check&Mark', '&FilledBox', '&Yes/No', '&PlusMinus']");
     

@@ -71,12 +71,12 @@ impl MultiWindowAppBuilder {
 
     /// Builds the application using the current settings.
     #[inline(always)]
-    pub fn build(mut self) -> Result<crate::system::App, crate::system::Error> {
+    pub fn run(mut self) -> Result<(), crate::system::Error> {
         let app = self.builder.build()?;
         for factory in self.window_factories.drain(..) {
             factory(RuntimeManager::get());
         }
-        Ok(app)
+        app.start_app()
     }
 
     impl_internal_builder_methods!();

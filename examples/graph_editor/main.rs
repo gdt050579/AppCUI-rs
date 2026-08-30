@@ -499,8 +499,6 @@ impl AppBarEvents for GraphEditor {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().app_bar().build()?;
-    app.add_window(GraphEditor::new());
-    app.run();
+    App::new().window(|| GraphEditor::new()).app_bar().run()?.run();
     Ok(())
 }

@@ -64,7 +64,7 @@ fn check_button_control() {
         Paint('Second button was pressed')
         CheckHash(0x30D90A1046C4AC48)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -129,7 +129,7 @@ fn check_button_control_2() {
         Paint('After reset: Add (0) and Reset') 
         CheckHash(0xBAE7A3089D249D76) 
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -141,7 +141,7 @@ fn check_button_control_with_macro() {
         Paint('tests')   
         CheckHash(0xC656986DBDA863BA)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = Window::new("Macro Test", layout!("a:c,w:40,h:10"), window::Flags::None);
     w.add(button!("Start,x:2,y:3,w:15"));
     w.add(button!("Disabled,x:20,y:3,w:15,enable:false"));
@@ -229,7 +229,7 @@ fn check_button_control_hotkey() {
         Paint('State 5') 
         CheckHash(0x328373FE7C3CF399)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -276,7 +276,7 @@ fn check_button_methods() {
         Paint('Text is: Pressed 4 times') 
         CheckHash(0x517BE60D35938E34) 
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -291,7 +291,7 @@ fn check_tool_tip() {
         Paint('Tool tip is visible (caption: A realy large text for a button)')   
         CheckHash(0xCB2F5888BC193B75)
     ";
-    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:40,h:10");
     w.add(button!("'A realy large text for a button',x:2,y:3,w:15"));
     a.add_window(w);
@@ -318,7 +318,7 @@ fn check_mouse_drag_test() {
         Paint('Back to initial state')   
         CheckHash(0xB10F054B07F2FF0)
     ";
-    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(70, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Test,a:c,w:40,h:10");
     w.add(button!("'Test',x:2,y:3,w:15"));
     a.add_window(w);
@@ -369,7 +369,7 @@ fn check_visible() {
         Paint('3.Button is visible')   
         CheckHash(0x47599F7DC8243679)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -390,7 +390,7 @@ fn check_raised_button() {
         Paint('4. After releasing the mouse button')
         CheckHash(0x5DE594D5A07A8BDC)
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = Window::new("Macro Test", layout!("a:c,w:40,h:10"), window::Flags::None);
     w.add(button!("&Start,x:2,y:1,w:15,type:raised"));
     w.add(button!("Disabled,x:20,y:1,w:15,enable:false,type:raised"));

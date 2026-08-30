@@ -1,7 +1,7 @@
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().theme(Theme::new(Themes::DarkGray)).color_schema(false).build()?;
+    let mut app = App::new().theme(Theme::new(Themes::DarkGray)).color_schema(false).run()?;
     let mut w = window!("Test,a:c,w:60,h:15,type:Panel");
     let mut p1 = panel!("Options,x:1,y:1,w:25,h:8,type:Sunken");
     let mut p2 = panel!("Cheeckboxes,x:32,y:1,w:25,h:8,type:Sunken");

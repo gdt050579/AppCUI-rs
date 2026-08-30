@@ -213,9 +213,9 @@ fn check_command_bar_click() {
 
 #[test]
 fn check_multiple_apps_started() {
-    let a = App::new().size(Size::new(60, 10)).debug_script("").build().unwrap();
+    let a = App::new().size(Size::new(60, 10)).debug_script("").run().unwrap();
     a.run();
-    let a = App::new().size(Size::new(50, 20)).debug_script("").build().unwrap();
+    let a = App::new().size(Size::new(50, 20)).debug_script("").run().unwrap();
     a.run();
 }
 
@@ -282,7 +282,7 @@ fn check_mouse_keymodifier_mouse() {
         Paint('Simple Drag (with no modifier - value 0)')   
         CheckHash(0x6959C1EA263F8E6E)          
     ";
-    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
     let mut w = window!("Test,d:f");
     w.add(TestControl::new());
     a.add_window(w);
@@ -291,7 +291,7 @@ fn check_mouse_keymodifier_mouse() {
 
 #[test]
 fn check_clipboard_api() {
-    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").build().unwrap();
+    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").run().unwrap();
     Clipboard::set_text("Hello, world!");
     assert_eq!(Clipboard::text(), Some("Hello, world!".to_string()));
     assert!(Clipboard::has_text());
@@ -315,19 +315,19 @@ fn check_clipboard_api_without_app_initialization() {
 
 #[test]
 fn check_app_create_with_title() {
-    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").title("Some title").build().unwrap();
+    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").title("Some title").run().unwrap();
     a.run();
 }
 
 #[test]
 fn check_app_create_with_size() {
-    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").build().unwrap();
+    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").run().unwrap();
     a.run();
 }
 
 #[test]
 fn check_app_create_with_invalid_size() {
-    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").size(Size::new(0, 0)).build();
+    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").size(Size::new(0, 0)).run();
     assert!(a.is_err());
     let err: crate::system::Error = a.err().unwrap();
     assert_eq!(err.kind, crate::system::ErrorKind::InvalidParameter);
@@ -341,19 +341,19 @@ fn check_app_create_with_invalid_size() {
 
 #[test]
 fn check_app_create_with_timers_count() {
-    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").timers_count(10).build().unwrap();
+    let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").timers_count(10).run().unwrap();
     a.run();
 }
 
 #[cfg(target_os = "windows")]
 #[test]
 fn check_create_app_with_default_terminal() {
-    let _ = App::new().build();
+    let _ = App::new().run();
 }
 
 #[cfg(target_os = "windows")]
 #[test]
 fn check_create_app_with_windows_terminal() {
-    let _ = App::new().backend(crate::backend::Type::WindowsConsole).build();
+    let _ = App::new().backend(crate::backend::Type::WindowsConsole).run();
 }
 

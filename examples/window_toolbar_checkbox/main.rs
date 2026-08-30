@@ -54,7 +54,7 @@
  }
 
  fn main() -> Result<(), appcui::system::Error> {
-     let mut app = App::new().build()?;
+     let mut app = App::new().run()?;
      app.add_window(CheckboxWindow::new());
      app.run();
      Ok(())

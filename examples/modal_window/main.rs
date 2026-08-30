@@ -90,7 +90,7 @@ impl CommandBarEvents for MyDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let app = App::new().desktop(MyDesktop::new()).command_bar().build()?;
+    let app = App::new().desktop(MyDesktop::new()).command_bar().run()?;
     app.run();
     Ok(())
 }

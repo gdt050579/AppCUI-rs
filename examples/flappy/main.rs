@@ -4,7 +4,7 @@ use mywin::MyWin;
 mod flappy_game;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(70, 25)).single_window().build()?;
+    let mut a = App::new().size(Size::new(70, 25)).single_window().run()?;
     a.add_window(MyWin::new());
     a.run(); 
     Ok(())

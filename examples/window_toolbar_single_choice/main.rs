@@ -60,7 +60,7 @@ impl ToolBarEvents for SingleChoiceWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+    let mut app = App::new().run()?;
     app.add_window(SingleChoiceWindow::new());
     app.run();
     Ok(())

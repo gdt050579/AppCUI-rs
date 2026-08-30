@@ -25,7 +25,7 @@ impl FileInfo {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+    let mut app = App::new().run()?;
     let mut w = Window::new("Folders", layout!("a:c,w:60,h:20"), window::Flags::None);
     let mut tv = treeview!("FileInfo,d:f,flags:Scrollbars+SearchBar");
     let h = tv.add_item(FileInfo::new("Games", 0, true));
