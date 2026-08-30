@@ -51,13 +51,6 @@ impl App {
     pub fn new() -> crate::system::MultiWindowAppBuilder {
         crate::system::MultiWindowAppBuilder::new()
     }
-    /// Creates a new builder object using a specified terminal from the list of terminals available
-    /// for the current operating system.
-    pub fn with_backend(backend: Type) -> crate::system::Builder {
-        let mut builder = crate::system::Builder::new();
-        builder.backend = Some(backend);
-        builder
-    }
     /// Creates a builder designed for unit testing.
     /// The provided parameters indicated:
     /// * `width` and `height` : the size of the simulated terminal

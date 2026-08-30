@@ -117,7 +117,7 @@ pub enum Type {
     CrossTerm,
 }
 
-pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // check if backend size if valid (if present)
     if let Some(sz) = builder.size.as_ref() {
         if (sz.width == 0) || (sz.height == 0) {
@@ -178,29 +178,29 @@ pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>)
 }
 
 #[cfg(target_arch = "wasm32")]
-fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     let term = WebTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 
 #[cfg(target_os = "windows")]
-fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     let term = WindowsConsoleTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "linux")]
-fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // TermiosTerminal::new(builder)
     // let term = NcursesTerminal::new(builder, sender)?;
     let term = CrossTerm::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "macos")]
-fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     TermiosTerminal::new(builder, sender)
 }
 #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos", target_arch = "wasm32")))]
-fn build_default_backend(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // anything else
     TermiosTerminal::new(builder, sender)
 }

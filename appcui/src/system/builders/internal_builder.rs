@@ -6,7 +6,7 @@ use crate::ui::common::*;
 
 pub struct InternalBuilder {
     pub(crate) size: Option<Size>,
-    pub(crate) backend: Option<backend::Type>,
+    pub(crate) backend: Option<crate::backend::Type>,
     pub(crate) debug_script: Option<String>,
     pub(crate) title: Option<String>,
     pub(crate) desktop_manager: Option<ControlManager>,
@@ -39,37 +39,30 @@ impl InternalBuilder {
             restore_screen: true,
         }
     }
-    /// Builds the application using the current settings.
     #[inline(always)]
     pub(crate) fn build(self) -> Result<App, Error> {
         App::create(self)
     }
-    /// Sets the size of the terminal.
     #[inline(always)]
     pub(crate) fn size(&mut self, terminal_size: Size) {
         self.size = Some(terminal_size);
     }
-    /// Sets the title of the application.
     #[inline(always)]
     pub(crate) fn title(&mut self, title: &str) {
         self.title = Some(String::from(title));
     }
-    /// Enables the Application bar.
     #[inline(always)]
     pub(crate) fn app_bar(&mut self) {
         self.has_app_bar = true;
     }
-    /// Enables the command bar.
     #[inline(always)]
     pub(crate) fn command_bar(&mut self) {
         self.has_command_bar = true;
     }
-    /// Enables the single window mode.
     #[inline(always)]
     pub(crate) fn single_window(&mut self) {
         self.single_window = true;
     }
-    /// Sets the desktop manager.
     #[inline(always)]
     pub(crate) fn desktop<T>(&mut self, desktop: T)
     where
@@ -77,56 +70,35 @@ impl InternalBuilder {
     {
         self.desktop_manager = Some(ControlManager::new(desktop));
     }
-    /// Sets the theme of the application. If not specified, the default theme will be used.
     #[inline(always)]
     pub(crate) fn theme(&mut self, theme: Theme) {
         self.theme = theme;
     }
-    /// Sets the number of timers that can be used in the application.
     #[inline(always)]
     pub(crate) fn timers_count(&mut self, count: u8) {
-        self.max_timer_count = count.max(1); // at least one timer
+        self.max_timer_count = count.max(1);
     }
-    /// Sets the log file where logs will be displayed. This option is used only in debug mode.
     #[inline(always)]
     pub(crate) fn log_file(&mut self, name: &str, append: bool) {
         self.log_file = Some(String::from(name));
         self.log_append = append;
     }
-    /// Enables or disables the use of the terminal color schema.
     #[inline(always)]
     pub(crate) fn color_schema(&mut self, enabled: bool) {
         self.use_color_schema = enabled;
     }
-
-    /// If enabled the backend will attempt to restore the original screen content and cursor position when the application ends.
-    /// If disabled, when the application ends the screen will be cleared.
-    /// By default this option is set.
-    /// 
-    /// **Remarks:** Not all backends have the support to restore the original screen (for those that do not have this support, the screen will always be cleared when application ends).
     #[inline(always)]
     pub(crate) fn restore_screen(&mut self, enable: bool) {
         self.restore_screen = enable;
     }
+    #[inline(always)]
+    pub(crate) fn backend(&mut self, backend: backend::Type) {
+        self.backend = Some(backend);
+    }
 }
 
-/// Forwards all [`InternalBuilder`] methods onto a wrapper that stores
-/// an `InternalBuilder` in a field named `builder`.
-///
-/// # Example
-/// ```ignore
-/// impl MultiWindowAppBuilder {
-///     impl_internal_builder_methods!();
-/// }
-/// ```
 macro_rules! impl_internal_builder_methods {
     () => {
-        /// Builds the application using the current settings.
-        #[inline(always)]
-        pub fn build(self) -> Result<crate::system::App, crate::system::Error> {
-            self.builder.build()
-        }
-
         /// Sets the size of the terminal.
         #[inline(always)]
         pub fn size(mut self, terminal_size: crate::graphics::Size) -> Self {
@@ -138,51 +110,6 @@ macro_rules! impl_internal_builder_methods {
         #[inline(always)]
         pub fn title(mut self, title: &str) -> Self {
             self.builder.title(title);
-            self
-        }
-
-        /// Enables the Application bar.
-        #[inline(always)]
-        pub fn app_bar(mut self) -> Self {
-            self.builder.app_bar();
-            self
-        }
-
-        /// Enables the command bar.
-        #[inline(always)]
-        pub fn command_bar(mut self) -> Self {
-            self.builder.command_bar();
-            self
-        }
-
-        /// Enables the single window mode.
-        #[inline(always)]
-        pub fn single_window(mut self) -> Self {
-            self.builder.single_window();
-            self
-        }
-
-        /// Sets the desktop manager.
-        #[inline(always)]
-        pub fn desktop<T>(mut self, desktop: T) -> Self
-        where
-            T: crate::ui::common::traits::Control + crate::ui::common::traits::DesktopControl + 'static,
-        {
-            self.builder.desktop(desktop);
-            self
-        }
-
-        /// Sets the theme of the application. If not specified, the default theme will be used.
-        #[inline(always)]
-        pub fn theme(mut self, theme: crate::system::Theme) -> Self {
-            self.builder.theme(theme);
-            self
-        }
-
-        /// Sets the number of timers that can be used in the application.
-        #[inline(always)]
-        pub fn timers_count(mut self, count: u8) -> Self {
-            self.builder.timers_count(count);
             self
         }
 
@@ -210,8 +137,27 @@ macro_rules! impl_internal_builder_methods {
             self.builder.restore_screen(enable);
             self
         }
+
+        /// Sets the backend to use.
+        #[inline(always)]
+        pub fn backend(mut self, backend: crate::backend::Type) -> Self {
+            self.builder.backend(backend);
+            self
+        }
+
+        /// Enables the single window mode.
+        #[inline(always)]
+        pub fn single_window(mut self) -> Self {
+            self.builder.single_window();
+            self
+        }
+
+        /// Builds the application using the current settings.
+        #[inline(always)]
+        pub fn build(self) -> Result<crate::system::App, crate::system::Error> {
+            self.builder.build()
+        }
     };
 }
 
 pub(crate) use impl_internal_builder_methods;
-
