@@ -139,8 +139,6 @@ impl ButtonEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    app.add_window(MyWin::new());
-    app.run();
+    App::new().window(|| MyWin::new()).build()?.run();
     Ok(())
 }
