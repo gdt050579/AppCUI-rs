@@ -44,7 +44,7 @@ impl HyperLinkEvents for MyWin {
 
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_os = "windows")]
-    let mut app = App::with_backend(backend::Type::WindowsVT).color_schema(false).build()?;
+    let mut app = App::new().backend(backend::Type::WindowsVT).color_schema(false).build()?;
     #[cfg(not(target_os = "windows"))]
     let mut app = App::new().color_schema(false).build()?;
 

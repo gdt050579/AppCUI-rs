@@ -152,7 +152,8 @@ impl AppBarEvents for MyDesktop {
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_family = "windows")]
-    App::with_backend(appcui::backend::Type::WindowsVT)
+    App::new()
+        .backend(appcui::backend::Type::WindowsVT)
         .desktop(MyDesktop::new())
         .app_bar()
         .command_bar()

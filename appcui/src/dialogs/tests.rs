@@ -182,7 +182,7 @@ fn check_small_error() {
         Paint('Message box');
         CheckHash(0x847C1B71CF1BAB79)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| dialogs::error("Error", "123")));
     a.run();
 }
@@ -197,7 +197,7 @@ fn check_large_error() {
         Paint('Message box');
         CheckHash(0x563DF7AC2DDD7DAE)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| {
         dialogs::error("Error", "An error has occured while running the code.")
     }));
@@ -214,7 +214,7 @@ fn check_very_large_error() {
         Paint('Message box');
         CheckHash(0xF83F2AE0FC4EC4ED)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| {
         dialogs::error(
             "Error",
@@ -238,7 +238,7 @@ fn check_too_large_error() {
         Paint('Message box');
         CheckHash(0xD8F2736351150900)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| dialogs::error("Error", "An error has occured while running the code. Because of this certain operations are no longer possible. All connection to the database have been stop and the file system has been reverted to its original state before this operation has started !")));
     a.run();
 }
@@ -253,7 +253,7 @@ fn check_multi_line_error() {
         Paint('Message box');
         CheckHash(0x3E34FCDDB9B49649)
     ";
-    let mut a = App::debug(60, 16, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 16)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| dialogs::error("Error", "An error has occured during the last operarion. To recover perform the following:\n1. Run the diagnostics\n2. Restart the computer\n3. Reboot")));
     a.run();
 }
@@ -271,7 +271,7 @@ fn check_return_from_error() {
         Paint('Back to initial State')   
         CheckHash(0x90DB478C0FC0C3A9)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| dialogs::error("Error", "123")));
     a.run();
 }
@@ -307,7 +307,7 @@ fn check_retry_error() {
         Paint('Now we need to retry');
         CheckHash(0xC88A5ABECB445F81)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| {
         if dialogs::retry("Error", "An error occured. Retry ?") {
             dialogs::message("Response", "We should retry.")
@@ -328,7 +328,7 @@ fn check_alert() {
         Paint('Message box');
         CheckHash(0xBCA6A406AE5AE98E)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| dialogs::alert("Error", "A problem occured while running the code.")));
     a.run();
 }
@@ -366,7 +366,7 @@ fn check_proceed() {
         Paint('Now we should continue');
         CheckHash(0xF8045E482E522D83)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| {
         if dialogs::proceed("Alert", "An problem occured.\nContinue anyway ?") {
             dialogs::message("Response", "We should continue.")
@@ -387,7 +387,7 @@ fn check_message() {
         Paint('Message box');
         CheckHash(0xE2E128A51D518819)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| dialogs::message("Success", "Operation completed succesifully.")));
     a.run();
 }
@@ -425,7 +425,7 @@ fn check_validate() {
         Paint('Now we should start the action');
         CheckHash(0x893A6F5432DC3312)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| {
         if dialogs::validate("Alert", "Are you sure that you want to start the action ?") {
             dialogs::message("Response", "Start the action.")
@@ -469,7 +469,7 @@ fn check_validate_or_cancel() {
         Paint('Exit without saving')
         CheckHash(0x1E7B8615E4DBEF3F)  
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(60, 12)).debug_script(script).build().unwrap();
     a.add_window(CallbackWin::new(|| {
         let result = dialogs::validate_or_cancel("Exit", "Save all files ?");
         match result {
@@ -508,7 +508,7 @@ fn check_save_dialog_select_existent() {
         Paint('7. readme.txt is chosen');
         CheckHash(0xEB21471DE6FDA1EA)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "blabla.exe",
@@ -545,7 +545,7 @@ fn check_save_dialog_cancelt_existent() {
         Paint('7. readme.txt is chosen');
         CheckHash(0xAD065263787B818A)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "blabla.exe",
@@ -587,7 +587,7 @@ fn check_save_dialog_select_existent_with_validate_overwrite() {
         Paint('8. readme.txt is chosen');
         CheckHash(0xEB21471DE6FDA1EA)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "blabla.exe",
@@ -611,7 +611,7 @@ fn check_open_dialog_hardcoded_relative_path() {
         Paint('3. Selected path: Some(C:\\abc.exe)');
         CheckHash(0x66405B20EE6A5135)            
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::open(
         "Open",
         "../abc.exe",
@@ -635,7 +635,7 @@ fn check_open_dialog_hardcoded_absolute_path() {
         Paint('3. Selected path: Some(E:\\abc.exe)');
         CheckHash(0x1F861B0B7CF0B263)            
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::open(
         "Open",
         "E:/abc.exe",
@@ -665,7 +665,7 @@ fn check_open_dialog_invalid_path_with_validation_flag() {
         Paint('5. No file selected (None)');
         CheckHash(0xAD065263787B818A)    
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::open(
         "Open",
         "E:/abc.exe",
@@ -700,7 +700,7 @@ fn check_open_dialog_last_path() {
         Paint('6. Open the file dialog again (Directory should be C:\\Program Files\\Windows)');
         CheckHash(0xC8E329F1E80B6D04)                    
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::open(
         "Open",
         "myfile.exe",
@@ -728,7 +728,7 @@ fn check_open_dialog_select_drive() {
         Paint('4. Now the folder is D:\');
         CheckHash(0x9C98C24AA885FA47) 
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::open_all(
         "Open",
         "myfile.exe",
@@ -759,7 +759,7 @@ fn check_open_dialog_change_path_manually() {
         Paint('4. Showing files from C:\\Program Files\\Windows\\System32\\drivers');
         CheckHash(0xB593E849F4871BAD) 
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::open_all(
         "Open",
         "myfile.exe",
@@ -794,7 +794,7 @@ fn check_open_dialog_select_drive_with_mouse() {
         CheckHash(0x9C98C24AA885FA47) 
     ";
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::open_all(
         "Open",
         "myfile.exe",
@@ -851,7 +851,7 @@ fn check_save_dialog_navigate() {
         CheckHash(0xEB21471DE6FDA1EA)
     ";
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "myfile.exe",
@@ -881,7 +881,7 @@ fn check_create_folder_select_dialog() {
         Paint('5. `C:\\Program Files\\Windows` returned')   
         CheckHash(0x57FDC0A388354481)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
     a.run();
 }
@@ -922,7 +922,7 @@ fn check_expand_collapse_select_dialog() {
         Paint('9. `C` is collapsed')   
         CheckHash(0x1EF4952E6256D245)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
     a.run();
 }
@@ -939,7 +939,7 @@ fn check_folder_select_dialog_with_icons() {
         Paint('2. Folder Select Dialog shown')   
         CheckHash(0x541A8C33A6975193)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(FolderSelectDialog::new(
         "C:\\Program Files\\Windows\\System32\\drivers",
         SelectFolderDialogFlags::Icons,
@@ -967,7 +967,7 @@ fn check_folder_select_dialog_cancel() {
         Paint('5. Nothing selected')   
         CheckHash(0x4BA44613FC503131)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
     a.run();
 }
@@ -993,7 +993,7 @@ fn check_folder_select_dialog_cancel_via_button() {
         Paint('5. Nothing selected')   
         CheckHash(0x4BA44613FC503131)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
     a.run();
 }
@@ -1019,7 +1019,7 @@ fn check_folder_select_dialog_ok_via_button() {
         Paint('5. C:\\Program Files\\Windows selected')   
         CheckHash(0x57FDC0A388354481)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(FolderSelectDialog::new("C:\\Program Files\\", SelectFolderDialogFlags::None));
     a.run();
 }
@@ -1048,7 +1048,7 @@ fn check_folder_select_dialog_navigator() {
         Paint('5. D:\\ selected')   
         CheckHash(0xE2640A216D7BFEDC)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(FolderSelectDialog::new("", SelectFolderDialogFlags::None));
     a.run();
 }
@@ -1071,7 +1071,7 @@ fn check_folder_select_dialog_mouse_usage() {
         Paint('4. C:\\Program Files\\ expanded')   
         CheckHash(0x6F576C7EE1F145D7)
     ";
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(FolderSelectDialog::new("D:\\Windows", SelectFolderDialogFlags::None));
     a.run();
 }
@@ -1254,7 +1254,7 @@ fn check_input_no_validation() {
         }
     }
 
-    let mut a = App::debug(80, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 12)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1318,7 +1318,7 @@ fn check_input_validation() {
         }
     }
 
-    let mut a = App::debug(80, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 12)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1358,7 +1358,7 @@ fn check_input_with_initial_value() {
         }
     }
 
-    let mut a = App::debug(80, 12, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 12)).debug_script(script).build().unwrap();
     a.add_window(MyWin::new());
     a.run();
 }
@@ -1388,7 +1388,7 @@ fn check_save_select_extension() {
         CheckHash(0x5AEDD66519EB7207)           
     ";
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "myfile.exe",
@@ -1423,7 +1423,7 @@ fn check_save_select_extension_but_quit() {
         CheckHash(0x7F769C57E0A16CE4)           
     ";
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "myfile.exe",
@@ -1459,7 +1459,7 @@ fn check_save_select_extension_different() {
         CheckHash(0xA446E306398B35EF)           
     ";
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "myfile.exe",
@@ -1495,7 +1495,7 @@ fn check_save_select_extension_do_not_change() {
         CheckHash(0x7F769C57E0A16CE4)           
     ";
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "myfile.exe",
@@ -1523,7 +1523,7 @@ fn check_save_select_extension_not_called_due_to_correct_extension() {
         CheckHash(0x5AEDD66519EB7207)           
     ";
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "myfile.exe",
@@ -1557,7 +1557,7 @@ fn check_save_select_extension_not_called_due_one_extension() {
         CheckHash(0x4C351F165DC22042)           
     ";
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "myfile.exe",
@@ -1592,7 +1592,7 @@ fn check_save_select_extension_not_called_due_all_files_mask() {
         CheckHash(0x7F769C57E0A16CE4)           
     ";
 
-    let mut a = App::debug(80, 30, script).build().unwrap();
+    let mut a = App::new().size(Size::new(80, 30)).debug_script(script).build().unwrap();
     a.add_window(OpenSaveTestWindow::save(
         "Save",
         "myfile.exe",

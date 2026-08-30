@@ -13,7 +13,8 @@ use mydesktop::MyDesktop;
 
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_family = "windows")]
-    App::with_backend(backend::Type::WindowsVT)
+    App::new()
+        .backend(backend::Type::WindowsVT)
         .desktop(MyDesktop::new())
         .command_bar()
         .app_bar()
