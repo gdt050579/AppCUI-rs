@@ -3,11 +3,9 @@ use std::sync::Mutex;
 
 use super::Error;
 use super::ErrorKind;
-use super::Handle;
 use super::RuntimeManager;
 use super::Theme;
 use super::ThemeMethods;
-use crate::ui::common::traits::*;
 
 static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 
@@ -75,14 +73,6 @@ impl App {
         // For WASM, APP_CREATED_MUTEX is reset via drop_app
         // called from RuntimeManager's animation loop when it terminates.
         Ok(())
-    }
-
-    #[cfg(test)]
-    pub(crate) fn add_window<T>(&mut self, window: T) -> Handle<T>
-    where
-        T: Control + WindowControl + NotModalWindow + 'static,
-    {
-        RuntimeManager::get().add_window(window)
     }
 
     /// Sets the theme for the current application.
