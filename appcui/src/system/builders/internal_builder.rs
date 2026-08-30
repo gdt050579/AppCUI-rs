@@ -46,67 +46,57 @@ impl InternalBuilder {
     }
     /// Sets the size of the terminal.
     #[inline(always)]
-    pub(crate) fn size(mut self, terminal_size: Size) -> Self {
+    pub(crate) fn size(&mut self, terminal_size: Size) {
         self.size = Some(terminal_size);
-        self
     }
     /// Sets the title of the application.
     #[inline(always)]
-    pub(crate) fn title(mut self, title: &str) -> Self {
+    pub(crate) fn title(&mut self, title: &str) {
         self.title = Some(String::from(title));
-        self
     }
     /// Enables the Application bar.
     #[inline(always)]
-    pub(crate) fn app_bar(mut self) -> Self {
+    pub(crate) fn app_bar(&mut self) {
         self.has_app_bar = true;
-        self
     }
     /// Enables the command bar.
     #[inline(always)]
-    pub(crate) fn command_bar(mut self) -> Self {
+    pub(crate) fn command_bar(&mut self) {
         self.has_command_bar = true;
-        self
     }
     /// Enables the single window mode.
     #[inline(always)]
-    pub(crate) fn single_window(mut self) -> Self {
+    pub(crate) fn single_window(&mut self) {
         self.single_window = true;
-        self
     }
     /// Sets the desktop manager.
     #[inline(always)]
-    pub(crate) fn desktop<T>(mut self, desktop: T) -> Self
+    pub(crate) fn desktop<T>(&mut self, desktop: T)
     where
         T: Control + DesktopControl + 'static,
     {
         self.desktop_manager = Some(ControlManager::new(desktop));
-        self
     }
     /// Sets the theme of the application. If not specified, the default theme will be used.
     #[inline(always)]
-    pub(crate) fn theme(mut self, theme: Theme) -> Self {
+    pub(crate) fn theme(&mut self, theme: Theme) {
         self.theme = theme;
-        self
     }
     /// Sets the number of timers that can be used in the application.
     #[inline(always)]
-    pub(crate) fn timers_count(mut self, count: u8) -> Self {
+    pub(crate) fn timers_count(&mut self, count: u8) {
         self.max_timer_count = count.max(1); // at least one timer
-        self
     }
     /// Sets the log file where logs will be displayed. This option is used only in debug mode.
     #[inline(always)]
-    pub(crate) fn log_file(mut self, name: &str, append: bool) -> Self {
+    pub(crate) fn log_file(&mut self, name: &str, append: bool) {
         self.log_file = Some(String::from(name));
         self.log_append = append;
-        self
     }
     /// Enables or disables the use of the terminal color schema.
     #[inline(always)]
-    pub(crate) fn color_schema(mut self, enabled: bool) -> Self {
+    pub(crate) fn color_schema(&mut self, enabled: bool) {
         self.use_color_schema = enabled;
-        self
     }
 
     /// If enabled the backend will attempt to restore the original screen content and cursor position when the application ends.
@@ -115,9 +105,8 @@ impl InternalBuilder {
     /// 
     /// **Remarks:** Not all backends have the support to restore the original screen (for those that do not have this support, the screen will always be cleared when application ends).
     #[inline(always)]
-    pub(crate) fn restore_screen(mut self, enable: bool) -> Self {
+    pub(crate) fn restore_screen(&mut self, enable: bool) {
         self.restore_screen = enable;
-        self
     }
 }
 
@@ -141,35 +130,35 @@ macro_rules! impl_internal_builder_methods {
         /// Sets the size of the terminal.
         #[inline(always)]
         pub fn size(mut self, terminal_size: crate::graphics::Size) -> Self {
-            self.builder = self.builder.size(terminal_size);
+            self.builder.size(terminal_size);
             self
         }
 
         /// Sets the title of the application.
         #[inline(always)]
         pub fn title(mut self, title: &str) -> Self {
-            self.builder = self.builder.title(title);
+            self.builder.title(title);
             self
         }
 
         /// Enables the Application bar.
         #[inline(always)]
         pub fn app_bar(mut self) -> Self {
-            self.builder = self.builder.app_bar();
+            self.builder.app_bar();
             self
         }
 
         /// Enables the command bar.
         #[inline(always)]
         pub fn command_bar(mut self) -> Self {
-            self.builder = self.builder.command_bar();
+            self.builder.command_bar();
             self
         }
 
         /// Enables the single window mode.
         #[inline(always)]
         pub fn single_window(mut self) -> Self {
-            self.builder = self.builder.single_window();
+            self.builder.single_window();
             self
         }
 
@@ -179,35 +168,35 @@ macro_rules! impl_internal_builder_methods {
         where
             T: crate::ui::common::traits::Control + crate::ui::common::traits::DesktopControl + 'static,
         {
-            self.builder = self.builder.desktop(desktop);
+            self.builder.desktop(desktop);
             self
         }
 
         /// Sets the theme of the application. If not specified, the default theme will be used.
         #[inline(always)]
         pub fn theme(mut self, theme: crate::system::Theme) -> Self {
-            self.builder = self.builder.theme(theme);
+            self.builder.theme(theme);
             self
         }
 
         /// Sets the number of timers that can be used in the application.
         #[inline(always)]
         pub fn timers_count(mut self, count: u8) -> Self {
-            self.builder = self.builder.timers_count(count);
+            self.builder.timers_count(count);
             self
         }
 
         /// Sets the log file where logs will be displayed. This option is used only in debug mode.
         #[inline(always)]
         pub fn log_file(mut self, name: &str, append: bool) -> Self {
-            self.builder = self.builder.log_file(name, append);
+            self.builder.log_file(name, append);
             self
         }
 
         /// Enables or disables the use of the terminal color schema.
         #[inline(always)]
         pub fn color_schema(mut self, enabled: bool) -> Self {
-            self.builder = self.builder.color_schema(enabled);
+            self.builder.color_schema(enabled);
             self
         }
 
@@ -218,7 +207,7 @@ macro_rules! impl_internal_builder_methods {
         /// **Remarks:** Not all backends have the support to restore the original screen (for those that do not have this support, the screen will always be cleared when application ends).
         #[inline(always)]
         pub fn restore_screen(mut self, enable: bool) -> Self {
-            self.builder = self.builder.restore_screen(enable);
+            self.builder.restore_screen(enable);
             self
         }
     };
