@@ -11,11 +11,7 @@ fn hello_world_window() -> Window {
         LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
     ));
     win
-}   
+}
 fn main() -> Result<(), appcui::system::Error> {
-    App::new()
-        .window(hello_world_window)
-        .run()?
-        .run();
-    Ok(())
+    App::new().window(hello_world_window).run()
 }

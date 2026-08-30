@@ -7,7 +7,5 @@ fn main() -> Result<(), appcui::system::Error> {
             win.add(label!("'Hello World !',a:c,w:13,h:1"));
             win
         })
-        .run()?
-        .run();
-    Ok(())
+        .run()
 }

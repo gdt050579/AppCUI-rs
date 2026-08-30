@@ -13,15 +13,14 @@ use mydesktop::MyDesktop;
 
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_family = "windows")]
-    App::new()
+    { App::new()
         .backend(backend::Type::WindowsVT)
         .desktop(MyDesktop::new())
         .command_bar()
         .app_bar()
-        .run()?
-        .run();
+        .run()
+    }
 
     #[cfg(not(target_family = "windows"))]
-    App::new().desktop(MyDesktop::new()).command_bar().app_bar().build()?.run();
-    Ok(())
+    { App::new().desktop(MyDesktop::new()).command_bar().app_bar().run() }
 }

@@ -119,14 +119,15 @@ impl AppBarEvents for MyDesktop {
 
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_os = "windows")]
-    App::new()
-        .backend(appcui::backend::Type::WindowsVT)
-        .desktop(MyDesktop::new())
-        .app_bar()
-        .color_schema(false)
-        .run()?
-        .run();
+    {
+        App::new()
+            .backend(appcui::backend::Type::WindowsVT)
+            .desktop(MyDesktop::new())
+            .app_bar()
+            .color_schema(false)
+            .run()?
+    }   
     #[cfg(not(target_os = "windows"))]
-    App::new().desktop(MyDesktop::new()).app_bar().color_schema(false).build()?.run();
+    { App::new().desktop(MyDesktop::new()).app_bar().color_schema(false).run() }
     Ok(())
 }
