@@ -7,8 +7,6 @@ use super::Handle;
 use super::RuntimeManager;
 use super::Theme;
 use super::ThemeMethods;
-use crate::graphics::Size;
-use crate::backend::Type;
 use crate::ui::common::traits::*;
 
 static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
