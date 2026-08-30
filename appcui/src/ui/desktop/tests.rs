@@ -616,15 +616,14 @@ fn check_terminal_size() {
 #[test]
 #[should_panic(expected = "A desktop object can only be created once (when the application is started) !")]
 fn check_error_second_desktop() {
-    panic!("Need to be fixed");
-    // let script = "
-    //     Paint.Enable(false)
-    //     Paint('initial state')
-    //     CheckHash(0x0)
-    // ";
-    // let a = App::new().size(Size::new(60, 10)).debug_script(script).run().unwrap();
-    // let _ = EmptyDesktop::new(); // should panic
-    // a.run();
+    let script = "
+        Paint.Enable(false)
+        Paint('initial state')
+        CheckHash(0x0)
+    ";
+    App::new().size(Size::new(60, 10)).debug_script(script).runtime_check(|| {
+        let _ = EmptyDesktop::new(); // should panic
+    }).run().unwrap();
 }
 
 #[test]

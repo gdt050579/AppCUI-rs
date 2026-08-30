@@ -19,6 +19,8 @@ pub struct InternalBuilder {
     pub(crate) log_append: bool,
     pub(crate) use_color_schema: bool,
     pub(crate) restore_screen: bool,
+    #[cfg(test)]
+    pub(crate) runtime_check: Option<fn()>,
 }
 impl InternalBuilder {
     pub(crate) fn new() -> Self {
@@ -37,11 +39,25 @@ impl InternalBuilder {
             log_append: false,
             use_color_schema: true,
             restore_screen: true,
+            #[cfg(test)]
+            runtime_check: None,
         }
     }
     #[inline(always)]
     pub(crate) fn build(self) -> Result<App, Error> {
-        App::create(self)
+        #[cfg(test)]
+        {
+            let check = self.runtime_check.clone();
+            let app = App::create(self)?;
+            if let Some(check) = check {
+                check();
+            }
+            return Ok(app);
+        } 
+        #[cfg(not(test))]       
+        {
+            App::create(self)
+        }
     }
     #[inline(always)]
     pub(crate) fn size(&mut self, terminal_size: Size) {
@@ -98,6 +114,11 @@ impl InternalBuilder {
     #[inline(always)]
     pub(crate) fn debug_script(&mut self, script: &str) {
         self.debug_script = Some(String::from(script));
+    }
+    #[inline(always)]
+    #[cfg(test)]
+    pub(crate) fn runtime_check(&mut self, check: fn()) {
+        self.runtime_check = Some(check);
     }
 }
 
@@ -188,6 +209,13 @@ macro_rules! impl_internal_builder_methods {
         #[inline(always)]
         pub fn debug_script(mut self, script: &str) -> Self {
             self.builder.debug_script(script);
+            self
+        }
+
+        #[inline(always)]
+        #[cfg(test)]
+        pub(crate) fn runtime_check(mut self, check: fn()) -> Self {
+            self.builder.runtime_check(check);
             self
         }
     };

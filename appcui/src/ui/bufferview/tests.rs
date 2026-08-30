@@ -2055,15 +2055,15 @@ fn bufferview_decode_utf8_noop_when_unchanged() {
 
 #[test]
 fn bufferview_interval_name_at() {
-    panic!("Need to be fixed");
-    // let _a = App::new().size(Size::new(60, 15)).debug_script("Paint.Enable(false)").run().unwrap();
-    // let bv = make_bufferview_with_intervals(test_buffer_data());
-    // assert_eq!(bv.interval_name_at(0), Some("Header"));
-    // assert_eq!(bv.interval_name_at(15), Some("Header"));
-    // assert_eq!(bv.interval_name_at(16), Some("Body"));
-    // assert_eq!(bv.interval_name_at(31), Some("Body"));
-    // assert_eq!(bv.interval_name_at(32), None);
-    // assert_eq!(bv.interval_name_at(100), None);
+    App::new().size(Size::new(60, 15)).debug_script("Paint.Enable(false)").runtime_check(|| {
+        let bv = make_bufferview_with_intervals(test_buffer_data());
+        assert_eq!(bv.interval_name_at(0), Some("Header"));
+        assert_eq!(bv.interval_name_at(15), Some("Header"));
+        assert_eq!(bv.interval_name_at(16), Some("Body"));
+        assert_eq!(bv.interval_name_at(31), Some("Body"));
+        assert_eq!(bv.interval_name_at(32), None);
+        assert_eq!(bv.interval_name_at(100), None);
+    }).run().unwrap();
 }
 
 fn test_buffer_ascii_strings() -> Vec<u8> {

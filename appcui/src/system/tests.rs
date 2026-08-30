@@ -294,15 +294,19 @@ fn check_mouse_keymodifier_mouse() {
 
 #[test]
 fn check_clipboard_api() {
-    panic!("Need to be fixed");
-    // let a = App::new().size(Size::new(60, 10)).debug_script("Paint.Enable(false)").run().unwrap();
-    // Clipboard::set_text("Hello, world!");
-    // assert_eq!(Clipboard::text(), Some("Hello, world!".to_string()));
-    // assert!(Clipboard::has_text());
-    // Clipboard::clear();
-    // assert_eq!(Clipboard::text(), None);
-    // assert!(!Clipboard::has_text());
-    // a.run();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script("Paint.Enable(false)")
+        .runtime_check(|| {
+            Clipboard::set_text("Hello, world!");
+            assert_eq!(Clipboard::text(), Some("Hello, world!".to_string()));
+            assert!(Clipboard::has_text());
+            Clipboard::clear();
+            assert_eq!(Clipboard::text(), None);
+            assert!(!Clipboard::has_text());
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
