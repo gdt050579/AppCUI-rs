@@ -29,7 +29,7 @@ impl App {
         let app_created = APP_CREATED_MUTEX.lock().unwrap();
         *app_created
     }
-    pub(super) fn create(builder: crate::system::Builder) -> Result<Self, Error> {
+    pub(super) fn create(builder: crate::system::InternalBuilder) -> Result<Self, Error> {
         if APP_CREATED_MUTEX.is_poisoned() {
             APP_CREATED_MUTEX.clear_poison();
         }
@@ -48,8 +48,8 @@ impl App {
     }
     /// Creates a new builder object using the default terminal for the current operating system
     #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> crate::system::Builder {
-        crate::system::Builder::new()
+    pub fn new() -> crate::system::MultiWindowAppBuilder {
+        crate::system::MultiWindowAppBuilder::new()
     }
     /// Creates a new builder object using a specified terminal from the list of terminals available
     /// for the current operating system.
