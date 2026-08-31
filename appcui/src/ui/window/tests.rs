@@ -13,7 +13,12 @@ fn check_window_just_title() {
         Paint('123456 centered')
         CheckHash(0x87AACF295BE859E6)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("123456", layout!("a:c,w:20,h:10"), window::Flags::NoCloseButton)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("123456", layout!("a:c,w:20,h:10"), window::Flags::NoCloseButton))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -23,7 +28,12 @@ fn check_window_pos() {
         Paint('Centered')
         CheckHash(0x361C1A2F695D024B)
     ";
-    App::new().size(Size::new(60, 14)).debug_script(script).window(|| Window::new("Centered", layout!("a:c,w:30,h:8"), window::Flags::NoCloseButton)).run().unwrap();
+    App::new()
+        .size(Size::new(60, 14))
+        .debug_script(script)
+        .window(|| Window::new("Centered", layout!("a:c,w:30,h:8"), window::Flags::NoCloseButton))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -33,11 +43,18 @@ fn check_window_pos_using_layout_builder() {
         Paint('Centered')
         CheckHash(0x361C1A2F695D024B)
     ";
-    App::new().size(Size::new(60, 14)).debug_script(script).window(|| Window::new(
-        "Centered",
-        LayoutBuilder::new().width(30).height(8).alignment(Alignment::Center).build(),
-        window::Flags::NoCloseButton,
-    )).run().unwrap();
+    App::new()
+        .size(Size::new(60, 14))
+        .debug_script(script)
+        .window(|| {
+            Window::new(
+                "Centered",
+                LayoutBuilder::new().width(30).height(8).alignment(Alignment::Center).build(),
+                window::Flags::NoCloseButton,
+            )
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -48,7 +65,12 @@ fn check_window_just_large_title() {
         Paint('0123456789ABCD centered')
         CheckHash(0x21339488E2980718)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("0123456789ABCD", layout!("a:c,w:20,h:10"), window::Flags::NoCloseButton)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("0123456789ABCD", layout!("a:c,w:20,h:10"), window::Flags::NoCloseButton))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_just_oversized_title() {
@@ -58,7 +80,12 @@ fn check_window_just_oversized_title() {
         Paint('012345...BCDEFGH')
         CheckHash(0x8AD5C306676ACF04)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("0123456789ABCDEFGH", layout!("a:c,w:20,h:10"), window::Flags::NoCloseButton)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("0123456789ABCDEFGH", layout!("a:c,w:20,h:10"), window::Flags::NoCloseButton))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_title() {
@@ -68,7 +95,12 @@ fn check_window_title() {
         Paint('title')
         CheckHash(0xA0CFD68A45B1786C)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_full_title_1() {
@@ -78,7 +110,12 @@ fn check_window_full_title_1() {
         Paint('full title')
         CheckHash(0xF410B9650F4ADF18)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("1234567890A", layout!("a:c,w:20,h:10"), window::Flags::None)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("1234567890A", layout!("a:c,w:20,h:10"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_full_title_2() {
@@ -88,7 +125,12 @@ fn check_window_full_title_2() {
         Paint('full title')
         CheckHash(0xA0CFD68A45B1786C)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_full_title_3() {
@@ -98,7 +140,12 @@ fn check_window_full_title_3() {
         Paint('full title')
         CheckHash(0xEEBF652BB26E9C4C)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("ABC", layout!("a:c,w:12,h:8"), window::Flags::None)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("ABC", layout!("a:c,w:12,h:8"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_title_close_button_and_minimize_button() {
@@ -108,7 +155,12 @@ fn check_window_title_close_button_and_minimize_button() {
         Paint('full title')
         CheckHash(0xEF7A5C3AFD21BD32)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("123456", layout!("a:c,w:20,h:8"), window::Flags::Sizeable)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("123456", layout!("a:c,w:20,h:8"), window::Flags::Sizeable))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_minimize_title_1() {
@@ -118,7 +170,12 @@ fn check_window_minimize_title_1() {
         Paint('Title = ABCD...IJKL')
         CheckHash(0x671DB3CA4AD392AE)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("ABCDEFGHIJKL", layout!("a:c,w:20,h:10"), window::Flags::None)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("ABCDEFGHIJKL", layout!("a:c,w:20,h:10"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_minimize_title_2() {
@@ -128,7 +185,12 @@ fn check_window_minimize_title_2() {
         Paint('Title = AB...KL')
         CheckHash(0x7F7F1F564130F50E)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("ABCDEFGHIJKL", layout!("a:c,w:16,h:8"), window::Flags::None)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("ABCDEFGHIJKL", layout!("a:c,w:16,h:8"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_minimize_title_3() {
@@ -138,7 +200,12 @@ fn check_window_minimize_title_3() {
         Paint('Title = A...L')
         CheckHash(0x6CB0EAB5DDA0E087)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("ABCDEFGHIJKL", layout!("a:c,w:14,h:6"), window::Flags::None)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("ABCDEFGHIJKL", layout!("a:c,w:14,h:6"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_minimize_title_4() {
@@ -148,7 +215,12 @@ fn check_window_minimize_title_4() {
         Paint('Short title')
         CheckHash(0x3A1C142AE9968A2F)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| Window::new("ABCDEFGHIJKL", layout!("a:c,w:12,h:6"), window::Flags::None)).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| Window::new("ABCDEFGHIJKL", layout!("a:c,w:12,h:6"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -160,32 +232,37 @@ fn check_multiple_items_top_bar() {
     Paint('Multiple items on top and bottom bar')
     //CheckHash(0x3F0441B8433D629B)
     ";
-    App::new().size(Size::new(80, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:70,h:10"), window::Flags::Sizeable);
-        w.set_tag("ABC");
-        w.set_hotkey(key!("F1"));
-        let g = w.toolbar().create_group(GroupPosition::TopLeft);
-        w.toolbar().add(g, toolbar::Label::new("Lb-1"));
-        w.toolbar().add(g, toolbar::Label::new("Lb-2"));
-        let g = w.toolbar().create_group(GroupPosition::TopLeft);
-        w.toolbar().add(g, toolbar::Label::new("Single"));
-        let g = w.toolbar().create_group(GroupPosition::TopRight);
-        w.toolbar().add(g, toolbar::Label::new("Lb-1"));
-        w.toolbar().add(g, toolbar::Label::new("Lb-2"));
-        let g = w.toolbar().create_group(GroupPosition::TopRight);
-        w.toolbar().add(g, toolbar::Label::new("AB"));
-        let g = w.toolbar().create_group(GroupPosition::BottomLeft);
-        w.toolbar().add(g, toolbar::Label::new("Lb-1"));
-        w.toolbar().add(g, toolbar::Label::new("Lb-2"));
-        let g = w.toolbar().create_group(GroupPosition::BottomLeft);
-        w.toolbar().add(g, toolbar::Label::new("Single"));
-        let g = w.toolbar().create_group(GroupPosition::BottomRight);
-        w.toolbar().add(g, toolbar::Label::new("Lb-1"));
-        w.toolbar().add(g, toolbar::Label::new("Lb-2"));
-        let g = w.toolbar().create_group(GroupPosition::BottomRight);
-        w.toolbar().add(g, toolbar::Label::new("AB"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(80, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:70,h:10"), window::Flags::Sizeable);
+            w.set_tag("ABC");
+            w.set_hotkey(key!("F1"));
+            let g = w.toolbar().create_group(GroupPosition::TopLeft);
+            w.toolbar().add(g, toolbar::Label::new("Lb-1"));
+            w.toolbar().add(g, toolbar::Label::new("Lb-2"));
+            let g = w.toolbar().create_group(GroupPosition::TopLeft);
+            w.toolbar().add(g, toolbar::Label::new("Single"));
+            let g = w.toolbar().create_group(GroupPosition::TopRight);
+            w.toolbar().add(g, toolbar::Label::new("Lb-1"));
+            w.toolbar().add(g, toolbar::Label::new("Lb-2"));
+            let g = w.toolbar().create_group(GroupPosition::TopRight);
+            w.toolbar().add(g, toolbar::Label::new("AB"));
+            let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+            w.toolbar().add(g, toolbar::Label::new("Lb-1"));
+            w.toolbar().add(g, toolbar::Label::new("Lb-2"));
+            let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+            w.toolbar().add(g, toolbar::Label::new("Single"));
+            let g = w.toolbar().create_group(GroupPosition::BottomRight);
+            w.toolbar().add(g, toolbar::Label::new("Lb-1"));
+            w.toolbar().add(g, toolbar::Label::new("Lb-2"));
+            let g = w.toolbar().create_group(GroupPosition::BottomRight);
+            w.toolbar().add(g, toolbar::Label::new("AB"));
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -196,11 +273,16 @@ fn check_window_tag_1() {
         Paint('Tag=AB + Title')
         CheckHash(0x3A2846E4BAE2A1A1)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-        w.set_tag("AB");
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+            w.set_tag("AB");
+            w
+        })
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_tag_2() {
@@ -210,11 +292,16 @@ fn check_window_tag_2() {
         Paint('title should be visible')
         CheckHash(0xE2CB87CCC6FD9E4A)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-        w.set_tag("ABCD");
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+            w.set_tag("ABCD");
+            w
+        })
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_tag_and_split_title_1() {
@@ -224,11 +311,16 @@ fn check_window_tag_and_split_title_1() {
         Paint('title split with 3 special chars')
         CheckHash(0x34902E0B6D58F035)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-        w.set_tag("ABCDE");
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+            w.set_tag("ABCDE");
+            w
+        })
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_tag_and_split_title_2() {
@@ -238,11 +330,16 @@ fn check_window_tag_and_split_title_2() {
         Paint('╔[ABCDEF]═ T…e ═[x]╗')
         CheckHash(0xA52995587B045766)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-        w.set_tag("ABCDEF");
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+            w.set_tag("ABCDEF");
+            w
+        })
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_tag_and_title_first_letter() {
@@ -252,11 +349,16 @@ fn check_window_tag_and_title_first_letter() {
         Paint('title first letter and special char with 3 points')
         CheckHash(0x6F914F802B3B7B5D)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-        w.set_tag("ABCDEFG");
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+            w.set_tag("ABCDEFG");
+            w
+        })
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_tag_and_title_not_visible() {
@@ -266,11 +368,16 @@ fn check_window_tag_and_title_not_visible() {
         Paint('title not visible')
         CheckHash(0xA2C91CB6A1484009)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-        w.set_tag("ABCDEFGH");
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+            w.set_tag("ABCDEFGH");
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -316,7 +423,12 @@ fn check_window_toolbar_title_pos_recompute() {
         Paint('after click on button --> title move to right (MOUSE is OVER)')
         CheckHash(0x2524C7C64CAF6368)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -327,11 +439,16 @@ fn check_window_hotkey_1() {
         Paint('hotkey')
         CheckHash(0x4454159FD9AA73E9)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-        w.set_hotkey(key!("Alt+F1"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+            w.set_hotkey(key!("Alt+F1"));
+            w
+        })
+        .run()
+        .unwrap();
 }
 #[test]
 fn check_window_hotkey_2() {
@@ -341,11 +458,16 @@ fn check_window_hotkey_2() {
         Paint('hotkey')
         CheckHash(0xC9D2F0E450475385)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-        w.set_hotkey(KeyCode::Enter);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+            w.set_hotkey(KeyCode::Enter);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -356,12 +478,17 @@ fn check_window_hotkey_and_tag() {
         Paint('hotkey & tag')
         CheckHash(0x8F6D9DF3500A2D7A)
     ";
-    App::new().size(Size::new(20, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-        w.set_hotkey(key!("Alt+1"));
-        w.set_tag("XYZ");
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(20, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+            w.set_hotkey(key!("Alt+1"));
+            w.set_tag("XYZ");
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -390,10 +517,15 @@ fn check_window_resize() {
         // since mouse is still over the window corner, the window corner should be selected after the left button is released
         CheckHash(0x24D38D8CA6584432)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let w = Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::Sizeable);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let w = Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::Sizeable);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -416,10 +548,15 @@ fn check_window_move() {
         Paint('after release of left mouse button')
         CheckHash(0x22B329EC1888AB5E)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let w = Window::new("Title", layout!("a:c,w:21,h:5"), window::Flags::Sizeable);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let w = Window::new("Title", layout!("a:c,w:21,h:5"), window::Flags::Sizeable);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -432,10 +569,15 @@ fn check_window_move_2() {
         Paint('window was moved')
         CheckHash(0x419533D4BBEFE538)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let w = Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::None);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let w = Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::None);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -499,7 +641,12 @@ fn check_window_on_layout_changed() {
         Paint('Move to 8,1 with 42x8 size')
         CheckHash(0xA79AF7FBE4808C6A)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -545,7 +692,13 @@ fn check_window_on_activate_deactivate() {
         Paint('left=deactivated, right=activated')
         CheckHash(0xBFA2B90246E3753C)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new(layout!("x:1,y:1,w:25,h:6"))).window(|| MyWin::new(layout!("x:30,y:1,w:25,h:6"))).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new(layout!("x:1,y:1,w:25,h:6")))
+        .window(|| MyWin::new(layout!("x:30,y:1,w:25,h:6")))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -556,17 +709,22 @@ fn check_window_toolbar_label() {
         Paint('multiple label')
         CheckHash(0xDF61C8FA80CF037F)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
-        let g = w.toolbar().create_group(GroupPosition::BottomLeft);
-        let l = toolbar::Label::new("Label 1");
-        assert_eq!(l.caption(), "Label 1");
-        w.toolbar().add(g, l);
-        w.toolbar().add(g, toolbar::Label::new("Label 2"));
-        let g = w.toolbar().create_group(GroupPosition::BottomRight);
-        w.toolbar().add(g, toolbar::Label::new("Label 3"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
+            let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+            let l = toolbar::Label::new("Label 1");
+            assert_eq!(l.caption(), "Label 1");
+            w.toolbar().add(g, l);
+            w.toolbar().add(g, toolbar::Label::new("Label 2"));
+            let g = w.toolbar().create_group(GroupPosition::BottomRight);
+            w.toolbar().add(g, toolbar::Label::new("Label 3"));
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -580,16 +738,21 @@ fn check_window_toolbar_label_tooltip() {
         Paint('Tooltip shown for the second label')
         CheckHash(0x1983A71F1BB817BD)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
-        let g = w.toolbar().create_group(GroupPosition::BottomLeft);
-        let mut l = toolbaritem!("first,type:label");
-        l.set_tooltip("A toolbar label");
-        w.toolbar().add(g, l);
-        w.toolbar().add(g, toolbaritem!("second,type:label,tooltip:'second tooltip'"));
-        w.toolbar().add(g, toolbaritem!("caption:hidden,type:label,visible:false"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
+            let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+            let mut l = toolbaritem!("first,type:label");
+            l.set_tooltip("A toolbar label");
+            w.toolbar().add(g, l);
+            w.toolbar().add(g, toolbaritem!("second,type:label,tooltip:'second tooltip'"));
+            w.toolbar().add(g, toolbaritem!("caption:hidden,type:label,visible:false"));
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -609,15 +772,20 @@ fn check_window_toolbar_button() {
         Paint('Mouse press over stop button')
         CheckHash(0x1128DAD41B3E99B9)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
-        let g = w.toolbar().create_group(GroupPosition::BottomLeft);
-        w.toolbar().add(g, toolbar::Button::new("Start"));
-        w.toolbar().add(g, toolbar::Button::new("Stop"));
-        let g = w.toolbar().create_group(GroupPosition::BottomRight);
-        w.toolbar().add(g, toolbar::Button::new("Exit"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
+            let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+            w.toolbar().add(g, toolbar::Button::new("Start"));
+            w.toolbar().add(g, toolbar::Button::new("Stop"));
+            let g = w.toolbar().create_group(GroupPosition::BottomRight);
+            w.toolbar().add(g, toolbar::Button::new("Exit"));
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -679,7 +847,12 @@ fn check_window_toolbar_button_click() {
         Paint('value = 11')
         CheckHash(0xD5FB8878CC6A03E3)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -762,7 +935,12 @@ fn check_window_toolbar_button_events() {
         Paint('Run button pressed (with hotkey) - mouse outside window')
         CheckHash(0xAED6AA2070247D44)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -782,15 +960,20 @@ fn check_window_toolbar_checkbox() {
         Paint('Task 2 checked')
         //CheckHash(0x11C054FAECF9D51F)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
-        let g = w.toolbar().create_group(GroupPosition::BottomLeft);
-        w.toolbar().add(g, toolbar::CheckBox::new("Task &1", true));
-        w.toolbar().add(g, toolbar::CheckBox::new("Task &2", false));
-        let g = w.toolbar().create_group(GroupPosition::BottomRight);
-        w.toolbar().add(g, toolbar::CheckBox::new("Enable &All", false));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
+            let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+            w.toolbar().add(g, toolbar::CheckBox::new("Task &1", true));
+            w.toolbar().add(g, toolbar::CheckBox::new("Task &2", false));
+            let g = w.toolbar().create_group(GroupPosition::BottomRight);
+            w.toolbar().add(g, toolbar::CheckBox::new("Enable &All", false));
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -850,7 +1033,12 @@ fn check_window_toolbar_checkbox_events() {
         Paint('checkbox = Not checked (via Alt+N), NOT hovered')
         CheckHash(0x4BEB73AE53479ABF)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -876,18 +1064,23 @@ fn check_window_toolbar_single_choice() {
         Paint('Opt 1 selected')
         CheckHash(0x55454B312AB9A1A6)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:58,h:8"), window::Flags::None);
-        let g = w.toolbar().create_group(GroupPosition::BottomLeft);
-        w.toolbar().add(g, toolbar::SingleChoice::new("Opt &1"));
-        w.toolbar().add(g, toolbar::SingleChoice::new("Opt &2"));
-        w.toolbar().add(g, toolbar::SingleChoice::new("Opt &3"));
-        let g = w.toolbar().create_group(GroupPosition::BottomRight);
-        w.toolbar().add(g, toolbar::SingleChoice::new("Opt &A"));
-        w.toolbar().add(g, toolbar::SingleChoice::new("Opt &B"));
-        w.toolbar().add(g, toolbar::SingleChoice::new("Opt &C"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:58,h:8"), window::Flags::None);
+            let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+            w.toolbar().add(g, toolbar::SingleChoice::new("Opt &1"));
+            w.toolbar().add(g, toolbar::SingleChoice::new("Opt &2"));
+            w.toolbar().add(g, toolbar::SingleChoice::new("Opt &3"));
+            let g = w.toolbar().create_group(GroupPosition::BottomRight);
+            w.toolbar().add(g, toolbar::SingleChoice::new("Opt &A"));
+            w.toolbar().add(g, toolbar::SingleChoice::new("Opt &B"));
+            w.toolbar().add(g, toolbar::SingleChoice::new("Opt &C"));
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -958,7 +1151,12 @@ fn check_window_toolbar_singlechoice_events() {
         Paint('Opt 2 selected => Opt B selected as a result')
         CheckHash(0xDD22A81F2349BD90)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -981,10 +1179,15 @@ fn check_window_toolbar_maximize_restore() {
         Paint('Now it should be restored')
         CheckHash(0x85955D7DF379551A)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::Sizeable);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::Sizeable);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1110,7 +1313,12 @@ fn check_window_toolbar_item_visibility() {
         Paint('All are visible')
         CheckHash(0x38A45512A58B0DE5)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1135,10 +1343,15 @@ fn check_window_move_and_resize_via_keys() {
         Paint('Exit resize mode')
         CheckHash(0x477535899976906A)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::Sizeable);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::Sizeable);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1275,7 +1488,13 @@ fn check_modal_window() {
     Paint('1rd window closed')
     CheckHash(0x172AA26FB2F2488C)
     ";
-    App::new().size(Size::new(60, 20)).debug_script(script).desktop(MyDesktop::new()).command_bar().run().unwrap();
+    App::new()
+        .size(Size::new(60, 20))
+        .debug_script(script)
+        .desktop(MyDesktop::new())
+        .command_bar()
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1291,7 +1510,13 @@ fn check_window_fixed_pos() {
         Paint('Non-Moveable window not-moved, just focused')
         CheckHash(0x9A7FCF55DCA77E9F)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| Window::new("Moveable", layout!("x:5,y:1,w:20,h:6"), window::Flags::None)).window(|| Window::new("Non-Moveable", layout!("x:30,y:1,w:25,h:6"), window::Flags::FixedPosition)).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| Window::new("Moveable", layout!("x:5,y:1,w:20,h:6"), window::Flags::None))
+        .window(|| Window::new("Non-Moveable", layout!("x:30,y:1,w:25,h:6"), window::Flags::FixedPosition))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1301,7 +1526,13 @@ fn check_window_macro() {
         Paint('two windows')
         CheckHash(0x88E8AE83D20D73A7)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| window!("First,x:5,y:2,w:20,h:6")).window(|| window!("title='Test me',x:30,y:1,w:25,h:6,flags=[Sizeable,FixedPosition]")).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| window!("First,x:5,y:2,w:20,h:6"))
+        .window(|| window!("title='Test me',x:30,y:1,w:25,h:6,flags=[Sizeable,FixedPosition]"))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1339,7 +1570,12 @@ fn check_window_resize_mode_keys() {
         Paint('Exit from resize mode')
         CheckHash(0x1D6AFE13EB1B0934)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| Window::new("Title", layout!("a:c,w:20,h:6"), window::Flags::Sizeable)).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| Window::new("Title", layout!("a:c,w:20,h:6"), window::Flags::Sizeable))
+        .run()
+        .unwrap();
 }
 
 /// A Sizeable window larger than the terminal must not panic in move/resize mode
@@ -1370,7 +1606,12 @@ fn check_window_move_when_larger_than_terminal() {
         Paint('7. Resize mode disabled')
         CheckHash(0x8A08E884EB4DC7F7)
     ";
-    App::new().size(Size::new(80, 24)).debug_script(script).window(|| Window::new("Title", layout!("x:0,y:0,w:200,h:60"), window::Flags::Sizeable)).run().unwrap();
+    App::new()
+        .size(Size::new(80, 24))
+        .debug_script(script)
+        .window(|| Window::new("Title", layout!("x:0,y:0,w:200,h:60"), window::Flags::Sizeable))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1390,7 +1631,15 @@ fn check_window_background() {
         Paint('Warning window enabled')
         CheckHash(0x8786A6E5A142320F)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| window!("Normal,x:0,y:0,w:30,h:5")).window(|| window!("Error,x:30,y:0,w:30,h:5,bg=Error")).window(|| window!("Notify,x:0,y:5,w:30,h:5,bg=Notification")).window(|| window!("Warning,x:30,y:5,w:30,h:5,bg=Warning")).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| window!("Normal,x:0,y:0,w:30,h:5"))
+        .window(|| window!("Error,x:30,y:0,w:30,h:5,bg=Error"))
+        .window(|| window!("Notify,x:0,y:5,w:30,h:5,bg=Notification"))
+        .window(|| window!("Warning,x:30,y:5,w:30,h:5,bg=Warning"))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1444,7 +1693,12 @@ fn check_window_on_cancel_callback() {
         Paint('Windows is closed')
         CheckHash(0x734FECAF52FDE955)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1481,7 +1735,12 @@ fn check_window_enter_resize_mode() {
         Paint('Normal mode again')
         CheckHash(0xC394FEBC8D729121)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1567,7 +1826,12 @@ fn check_window_keybeforechildren() {
         Paint('Key = Left')
         CheckHash(0x8A6D6218FD2656D0)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1586,7 +1850,13 @@ fn check_window_on_close_default() {
         // Paint('Warning window enabled')
         // CheckHash(0x8786A6E5A142320F)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| window!("Win-1,x:0,y:0,w:30,h:5")).window(|| window!("Win-2,x:30,y:0,w:30,h:5")).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| window!("Win-1,x:0,y:0,w:30,h:5"))
+        .window(|| window!("Win-2,x:30,y:0,w:30,h:5"))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1617,7 +1887,12 @@ fn check_window_close() {
         Paint('window is closed - empty desktop')
         CheckHash(0x734FECAF52FDE955)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1690,7 +1965,12 @@ fn check_modal_window_close() {
         Paint('back initial state')
         CheckHash(0xF724A64E6A51AC9E)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1737,7 +2017,14 @@ fn check_window_close_with_commandbar_and_menu() {
         // we should NOT see any menu in the app bar
         CheckHash(0x75E8571FB3005265)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().app_bar().window(|| MyWin::new()).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .command_bar()
+        .app_bar()
+        .window(|| MyWin::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1748,7 +2035,12 @@ fn check_procmacro_tag() {
         Paint('has myWin tag')
         CheckHash(0x68F0A3E0FB3C4F91)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).window(|| window!("Test,a:c,w:30,h:8,tag:'myWin'")).run().unwrap();
+    App::new()
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .window(|| window!("Test,a:c,w:30,h:8,tag:'myWin'"))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1759,7 +2051,13 @@ fn check_procmacro_hotkey() {
         Paint('hot keys')
         CheckHash(0xD9C42D40B16A6F46)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| window!("Test,x:0,y:1,w:30,h:8,hotkey:Ctrl+3")).window(|| window!("Test,x:30,y:1,w:30,h:8,hotkey:Ctrl+Alt+F10")).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| window!("Test,x:0,y:1,w:30,h:8,hotkey:Ctrl+3"))
+        .window(|| window!("Test,x:30,y:1,w:30,h:8,hotkey:Ctrl+Alt+F10"))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1773,7 +2071,15 @@ fn check_procmacro_auto_hotkey() {
         Paint('hot keys (1 to 4) - 2nd window selected')
         CheckHash(0x2FB120200251AD9E)
     ";
-    App::new().size(Size::new(80, 10)).debug_script(script).window(|| window!("Test,x:0,y:1,w:20,h:8,hotkey:auto")).window(|| window!("Test,x:20,y:1,w:20,h:8,hotkey:auto")).window(|| window!("Test,x:40,y:1,w:20,h:8,hotkey:auto")).window(|| window!("Test,x:60,y:1,w:20,h:8,hotkey:auto")).run().unwrap();
+    App::new()
+        .size(Size::new(80, 10))
+        .debug_script(script)
+        .window(|| window!("Test,x:0,y:1,w:20,h:8,hotkey:auto"))
+        .window(|| window!("Test,x:20,y:1,w:20,h:8,hotkey:auto"))
+        .window(|| window!("Test,x:40,y:1,w:20,h:8,hotkey:auto"))
+        .window(|| window!("Test,x:60,y:1,w:20,h:8,hotkey:auto"))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1783,7 +2089,11 @@ fn check_single_window() {
         Paint('initial state (full-screen)')
         CheckHash(0x8B0177987DEEAB59)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).single_window().window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto")).run().unwrap();
+    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1793,7 +2103,12 @@ fn check_single_window_with_commandbar() {
         Paint('initial state (full-screen,command bar visible)')
         CheckHash(0x1250605ADBD5CC99)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).single_window().command_bar().window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto")).run().unwrap();
+    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .command_bar()
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1803,7 +2118,12 @@ fn check_single_window_with_menubar() {
         Paint('initial state (full-screen,app bar visible)')
         CheckHash(0x4E4AA2CCB6734C99)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).single_window().app_bar().window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto")).run().unwrap();
+    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .app_bar()
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1813,22 +2133,15 @@ fn check_single_window_with_menu_and_command_bar() {
         Paint('initial state (full-screen,menu and command bar visible)')
         CheckHash(0xA95AE2CA1B885CD9)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).single_window().app_bar().command_bar().window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto")).run().unwrap();
+    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .app_bar()
+        .command_bar()
+        .run()
+        .unwrap();
 }
 
-#[test]
-#[should_panic(
-    expected = "When `single_window(...)` is being used to initialized an application, you can only use add_window(...) method once (to add the first and single window) !"
-)]
-fn check_single_window_panic_on_multiple_add_window() {
-    let script = "
-        Paint.Enable(false)
-        Paint('initial state (full-screen)')
-        // this code will not be reached
-        CheckHash(0x0)
-    ";
-    App::new().size(Size::new(40, 10)).debug_script(script).single_window().window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto")).window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto")).run().unwrap();
-}
 
 #[test]
 #[should_panic(
@@ -1841,21 +2154,11 @@ fn check_single_window_panic_on_sizeable_flags() {
         // this code will not be reached
         CheckHash(0x0)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).single_window().window(|| window!("Test,x:0,y:1,w:10,h:8,flags:sizeable")).run().unwrap();
-}
-
-#[test]
-#[should_panic(
-    expected = "You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?"
-)]
-fn check_single_window_panic_no_window() {
-    let script = "
-        Paint.Enable(false)
-        Paint('initial state (full-screen)')
-        // this code will not be reached
-        CheckHash(0x0)
-    ";
-    App::new().size(Size::new(40, 10)).debug_script(script).single_window().run().unwrap();
+    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,flags:sizeable"))
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1880,7 +2183,12 @@ fn check_single_window_panic_no_custom_desktop() {
         Paint('desktop with red and green')
         CheckHash(0x0)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).desktop(MyDesktop::new()).single_window().run().unwrap();
+    App::single_window(|| window!("Test,x:0,y:1,w:10,h:8,hotkey:auto"))
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .desktop(MyDesktop::new())
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1899,7 +2207,14 @@ fn check_multiple_windows_focus() {
         Paint('Win3 on top & focus')
         CheckHash(0x97D61849202889DF)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| window!("Win1,x:1,y:1,w:30,h:5")).window(|| window!("Win2,x:11,y:3,w:30,h:5")).window(|| window!("Win3,x:21,y:5,w:30,h:5")).run().unwrap();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| window!("Win1,x:1,y:1,w:30,h:5"))
+        .window(|| window!("Win2,x:11,y:3,w:30,h:5"))
+        .window(|| window!("Win3,x:21,y:5,w:30,h:5"))
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1910,22 +2225,27 @@ fn check_window_toolbar_single_choice_caption() {
         Paint('Initial state - Option 1 selected')
         CheckHash(0x6A43F6EA0169CF5B)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
-        let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::None);
 
-        // Create toolbar with single choice items
-        let g = w.toolbar().create_group(GroupPosition::BottomLeft);
-        // Add items to toolbar
-        let h1 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &1"));
-        let h2 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &2"));
+            // Create toolbar with single choice items
+            let g = w.toolbar().create_group(GroupPosition::BottomLeft);
+            // Add items to toolbar
+            let h1 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &1"));
+            let h2 = w.toolbar().add(g, toolbar::SingleChoice::new("Option &2"));
 
-        // Verify initial state
-        assert_eq!(w.toolbar().get(h1).unwrap().caption(), "Option 1");
-        assert_eq!(w.toolbar().get(h2).unwrap().caption(), "Option 2");
-        assert!(!w.toolbar().get(h1).unwrap().is_selected());
-        assert!(!w.toolbar().get(h2).unwrap().is_selected());
-        w
-    }).run().unwrap();
+            // Verify initial state
+            assert_eq!(w.toolbar().get(h1).unwrap().caption(), "Option 1");
+            assert_eq!(w.toolbar().get(h2).unwrap().caption(), "Option 2");
+            assert!(!w.toolbar().get(h1).unwrap().is_selected());
+            assert!(!w.toolbar().get(h2).unwrap().is_selected());
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1959,13 +2279,18 @@ fn check_resize_mode_keys() {
         Paint('9. Decrease Width')
         CheckHash(0xE0A5BFC25FE43E2E)   
     ";
-    App::new().size(Size::new(60, 15)).debug_script(script).window(|| {
-        let mut w = window!("Title,a:c,w:40,h:8,flags: Sizeable");
-        w.set_tag("XYZ");
-        assert_eq!(w.tag(), Some("XYZ"));
-        assert_eq!(w.title(), "Title");
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,a:c,w:40,h:8,flags: Sizeable");
+            w.set_tag("XYZ");
+            assert_eq!(w.tag(), Some("XYZ"));
+            assert_eq!(w.title(), "Title");
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -1984,17 +2309,23 @@ fn check_window_type_classic() {
         Paint('4. Maximize window')
         CheckHash(0x8F35BA5DC274A881)        
     ";
-    App::new().size(Size::new(90, 15)).debug_script(script).window(|| {
-        let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable");
-        w.set_tag("XYZ");
-        w.set_hotkey(key!("Alt+1"));
-        w
-    }).window(|| {
-        let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable");
-        w.set_tag("Tag");
-        w.set_hotkey(key!("Alt+2"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(90, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable");
+            w.set_tag("XYZ");
+            w.set_hotkey(key!("Alt+1"));
+            w
+        })
+        .window(|| {
+            let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable");
+            w.set_tag("Tag");
+            w.set_hotkey(key!("Alt+2"));
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -2013,17 +2344,23 @@ fn check_window_type_rounded() {
         Paint('4. Maximize window')
         CheckHash(0xAB292A0B70116754)        
     ";
-    App::new().size(Size::new(90, 15)).debug_script(script).window(|| {
-        let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable, type: rounded");
-        w.set_tag("XYZ");
-        w.set_hotkey(key!("Alt+1"));
-        w
-    }).window(|| {
-        let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable, type: rounded");
-        w.set_tag("Tag");
-        w.set_hotkey(key!("Alt+2"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(90, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable, type: rounded");
+            w.set_tag("XYZ");
+            w.set_hotkey(key!("Alt+1"));
+            w
+        })
+        .window(|| {
+            let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable, type: rounded");
+            w.set_tag("Tag");
+            w.set_hotkey(key!("Alt+2"));
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -2042,17 +2379,23 @@ fn check_window_type_panel() {
         Paint('4. Maximize window')
         CheckHash(0xDF6AC55C98FAF6D3)        
     ";
-    App::new().size(Size::new(90, 15)).debug_script(script).window(|| {
-        let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable, type: panel");
-        w.set_tag("XYZ");
-        w.set_hotkey(key!("Alt+1"));
-        w
-    }).window(|| {
-        let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable, type: panel");
-        w.set_tag("Tag");
-        w.set_hotkey(key!("Alt+2"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(90, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable, type: panel");
+            w.set_tag("XYZ");
+            w.set_hotkey(key!("Alt+1"));
+            w
+        })
+        .window(|| {
+            let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable, type: panel");
+            w.set_tag("Tag");
+            w.set_hotkey(key!("Alt+2"));
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -2071,15 +2414,21 @@ fn check_window_type_panel_background_error() {
         Paint('4. Maximize window')
         CheckHash(0xCF070970950091A3)        
     ";
-    App::new().size(Size::new(90, 15)).debug_script(script).window(|| {
-        let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable, type: panel, bg: error");
-        w.set_tag("XYZ");
-        w.set_hotkey(key!("Alt+1"));
-        w
-    }).window(|| {
-        let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable, type: panel, bg: error");
-        w.set_tag("Tag");
-        w.set_hotkey(key!("Alt+2"));
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(90, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Title,x:1,y:1,w:40,h:8,flags: Sizeable, type: panel, bg: error");
+            w.set_tag("XYZ");
+            w.set_hotkey(key!("Alt+1"));
+            w
+        })
+        .window(|| {
+            let mut w = window!("Second,x:44,y:1,w:40,h:8,flags: Sizeable, type: panel, bg: error");
+            w.set_tag("Tag");
+            w.set_hotkey(key!("Alt+2"));
+            w
+        })
+        .run()
+        .unwrap();
 }

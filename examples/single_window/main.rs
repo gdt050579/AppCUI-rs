@@ -44,5 +44,5 @@ impl WindowEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().size(Size::new(40, 10)).single_window().window(|| MyWindow::new()).run()
+    App::single_window(|| MyWindow::new()).size(Size::new(40, 10)).run()
 }

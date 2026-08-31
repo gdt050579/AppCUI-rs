@@ -8,5 +8,5 @@ pub use board::Board;
 
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().size(Size::new(40, 24)).single_window().window(|| MyWin::new()).run()
+    App::single_window(|| MyWin::new()).size(Size::new(40, 24)).run()
 }   

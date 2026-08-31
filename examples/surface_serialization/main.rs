@@ -14,22 +14,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let loaded_surface = Surface::from_file(srf_path).map_err(|e| format!("Failed to load surface: {e}"))?;
     println!("Surface loaded from: {}", srf_path.display());
 
-    App::new()
-        .single_window()
-        .window(move || {
-            let mut win = Window::new(
-                "Surface Serialization Demo",
-                layout!("d:f"),
-                window::Flags::NoCloseButton,
-            );
+    App::single_window(move || {
+        let mut win = Window::new("Surface Serialization Demo", layout!("d:f"), window::Flags::NoCloseButton);
 
-            let mut canvas = Canvas::new(loaded_surface.size(), layout!("l:0,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
-            let drawing_surface = canvas.drawing_surface_mut();
-            drawing_surface.draw_surface(0, 0, &loaded_surface);
+        let mut canvas = Canvas::new(loaded_surface.size(), layout!("l:0,t:0,r:0,b:0"), canvas::Flags::ScrollBars);
+        let drawing_surface = canvas.drawing_surface_mut();
+        drawing_surface.draw_surface(0, 0, &loaded_surface);
 
-            win.add(canvas);
-            win
-        })
-        .run()?;
+        win.add(canvas);
+        win
+    })
+    .run()?;
     Ok(())
 }
