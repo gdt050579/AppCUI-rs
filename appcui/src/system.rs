@@ -100,6 +100,7 @@ pub use self::background_task::BackgroundTask;
 pub use self::background_task::BackgroundTaskConector;
 pub(crate) use self::builders::InternalBuilder;
 pub use self::builders::MultiWindowAppBuilder;
+pub use self::builders::SingleWindowAppBuilder;
 pub use self::clipboard::Clipboard;
 pub use self::error::Error;
 pub use self::error::ErrorKind;

@@ -8,16 +8,24 @@ use crate::ui::common::traits::WindowControl;
 /// Builder for a multi-window AppCUI application.
 type WindowFactory = Box<dyn FnOnce(&mut RuntimeManager)>;
 
-pub struct MultiWindowAppBuilder {
+pub struct SingleWindowAppBuilder {
     builder: InternalBuilder,
-    window_factories: Vec<WindowFactory>,
+    window: WindowFactory,
 }
 
-impl MultiWindowAppBuilder {
-    pub(crate) fn new() -> Self {
+impl SingleWindowAppBuilder {
+    pub fn new<F, T>(factory: F) -> Self
+    where
+        F: FnOnce() -> T + 'static,
+        T: Control + WindowControl + NotModalWindow + 'static,
+    {
+        let mut b = InternalBuilder::new();
+        b.single_window();
         Self {
-            builder: InternalBuilder::new(),
-            window_factories: Vec::new(),
+            builder: b,
+            window: Box::new(move |rt: &mut RuntimeManager| {
+                let _ = rt.add_window(factory()); // T consumed here; handle discarded
+            }),
         }
     }
     /// Enables the Application bar.
@@ -57,25 +65,11 @@ impl MultiWindowAppBuilder {
         self.builder.desktop(desktop);
         self
     }
-
-    pub fn window<F, T>(mut self, factory: F) -> Self
-    where
-        F: FnOnce() -> T + 'static,
-        T: Control + WindowControl + NotModalWindow + 'static,
-    {
-        self.window_factories.push(Box::new(move |rt: &mut RuntimeManager| {
-            let _ = rt.add_window(factory()); // T consumed here; handle discarded
-        }));
-        self
-    }
-
     /// Builds the application using the current settings.
     #[inline(always)]
-    pub fn run(mut self) -> Result<(), crate::system::Error> {
+    pub fn run(self) -> Result<(), crate::system::Error> {
         let app = self.builder.build()?;
-        for factory in self.window_factories.drain(..) {
-            factory(RuntimeManager::get());
-        }
+        (self.window)(RuntimeManager::get());
         app.start_app()
     }
 

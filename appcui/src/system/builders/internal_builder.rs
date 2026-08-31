@@ -170,12 +170,12 @@ macro_rules! impl_internal_builder_methods {
             self
         }
 
-        /// Enables the single window mode.
-        #[inline(always)]
-        pub fn single_window(mut self) -> Self {
-            self.builder.single_window();
-            self
-        }
+        // /// Enables the single window mode.
+        // #[inline(always)]
+        // pub fn single_window(mut self) -> Self {
+        //     self.builder.single_window();
+        //     self
+        // }
 
         /// Sets the debug script to use.
         /// Creates a builder designed for unit testing.

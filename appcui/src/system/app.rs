@@ -1,6 +1,10 @@
 use std::marker::PhantomData;
 use std::sync::Mutex;
 
+use crate::ui::common::traits::Control;
+use crate::ui::common::traits::NotModalWindow;
+use crate::ui::common::traits::WindowControl;
+
 use super::Error;
 use super::ErrorKind;
 use super::RuntimeManager;
@@ -42,10 +46,20 @@ impl App {
             _phantom: Default::default(),
         })
     }
-    /// Creates a new builder object using the default terminal for the current operating system
+    /// Creates a new builder object for a multi window application.
     #[allow(clippy::new_ret_no_self)]
     pub fn new() -> crate::system::MultiWindowAppBuilder {
         crate::system::MultiWindowAppBuilder::new()
+    }
+
+    /// Creates a new builder object for a single window application.
+    #[allow(clippy::new_ret_no_self)]
+    pub fn single_window<F, T>(factory: F) -> crate::system::SingleWindowAppBuilder
+    where
+        F: FnOnce() -> T + 'static,
+        T: Control + WindowControl + NotModalWindow + 'static,
+    {
+        crate::system::SingleWindowAppBuilder::new(factory)
     }
 
     /// Runs the current appcui application. This command will display all windows, and allow you to run the cod that perform the event logic for every control.
