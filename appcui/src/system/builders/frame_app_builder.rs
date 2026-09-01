@@ -35,6 +35,7 @@ impl<T: FrameApp> AppDesktop<T> {
 }
 impl<T: FrameApp> OnPaint for AppDesktop<T> {
     fn on_paint(&self, surface: &mut Surface, _: &Theme) {
+        surface.clear(char!("' ',white,black"));
         self.frame_app.on_paint(surface);
     }
 }
