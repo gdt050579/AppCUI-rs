@@ -103,6 +103,13 @@ impl App {
         RuntimeManager::get().set_theme(theme);
     }
 
+    /// Closes the current application.
+    pub fn close() {
+        if App::is_created() {
+            RuntimeManager::get().close();
+        }        
+    }
+
     pub(crate) fn drop_app() {
         if APP_CREATED_MUTEX.is_poisoned() {
             APP_CREATED_MUTEX.clear_poison();
