@@ -1,15 +1,6 @@
 #[macro_export]
-macro_rules! app_desktop {
+macro_rules! impl_app_desktop_methods {
     ($wrapper:ident, $bound:path) => {
-        #[repr(C)]
-        struct $wrapper<T>
-        where
-            T: $bound,
-        {
-            base: Desktop,
-            frame_app: T,
-        }
-
         impl<T> std::ops::Deref for $wrapper<T>
         where
             T: $bound,
@@ -30,7 +21,7 @@ macro_rules! app_desktop {
                 &mut self.base
             }
         }
-        $crate::app_desktop!(@empty $wrapper, $bound;
+        $crate::impl_app_desktop_methods!(@empty $wrapper, $bound;
             Control,
             DesktopControl,
             OnWindowRegistered,
@@ -61,7 +52,6 @@ macro_rules! app_desktop {
             GenericListViewEvents,
             ToggleButtonEvents,
             PathFinderEvents,
-            TimerEvents,
             GenericTreeViewEvents,
             MarkdownEvents,
             GenericBackgroundTaskEvents,
@@ -84,4 +74,4 @@ macro_rules! app_desktop {
     };
 }
 
-pub(crate) use app_desktop;
+pub(crate) use impl_app_desktop_methods;
