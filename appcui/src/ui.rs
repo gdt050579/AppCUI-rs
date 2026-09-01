@@ -73,7 +73,8 @@
 //!             // return the window
 //!             win
 //!         })
-//!         .run()?;
+//!         // run the application
+//!         .run()
 //! }
 
 pub mod layout;
