@@ -111,10 +111,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 /// }
 ///
 /// fn main() -> Result<(), appcui::system::Error> {
-///     let mut app = App::new().build()?;
-///     app.add_window(NumberFormatsWindow::new());
-///     app.run();
-///     Ok(())
+///     App::new().window(|| NumberFormatsWindow::new()).run()
 /// }
 /// ```
 pub struct Label {

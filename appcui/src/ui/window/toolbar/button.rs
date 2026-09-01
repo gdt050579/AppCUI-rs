@@ -85,10 +85,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 /// }
 ///
 /// fn main() -> Result<(), appcui::system::Error> {
-///     let mut app = App::new().build()?;
-///     app.add_window(CounterWindow::new());
-///     app.run();
-///     Ok(())
+///     App::new().window(|| CounterWindow::new()).run()
 /// }
 /// ```
 pub struct Button {
