@@ -10,14 +10,14 @@ pub trait FrameApp {
     fn on_start(&mut self) { }
 
     // Called when the terminal/surface size changes.
-    fn on_resize(&mut self, new_size: Size) {}
+    fn on_resize(&mut self, _new_size: Size) {}
 
     // Called each tick at the configured rate (default 60/sec), with measured delta.
-    fn on_update(&mut self, ticks: u64);
+    fn on_update(&mut self, _ticks: u64) {}
 
     // Input handlers: mutate state, no return value.
-    fn on_key_event(&mut self, key: Key, ch: char);
-    fn on_mouse_event(&mut self, ev: &MouseEvent);
+    fn on_key_event(&mut self, _key: Key, _ch: char) {}
+    fn on_mouse_event(&mut self, _ev: &MouseEvent) {}
 
     // Draw current state to the surface.
     fn on_paint(&self, surface: &mut Surface);
