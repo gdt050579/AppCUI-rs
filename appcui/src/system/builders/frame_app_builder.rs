@@ -6,7 +6,7 @@ use super::impl_terminal_builder_methods;
 use super::app_desktop;
 use super::InternalBuilder;
 
-trait FrameApp {
+pub trait FrameApp {
     // Called once, after the app is created, before the first paint.
     fn on_start(&mut self) { }
 
@@ -61,7 +61,7 @@ impl<T: FrameApp> DesktopEvents for AppDesktop<T> {
     }
 }
 
-pub(crate) struct FrameAppBuilder<T: FrameApp + 'static> {
+pub struct FrameAppBuilder<T: FrameApp + 'static> {
     builder: InternalBuilder,
     fps: u32,
     frame_app: T,

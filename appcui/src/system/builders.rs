@@ -12,3 +12,4 @@ pub(crate) use internal_builder::InternalBuilder;
 pub use multi_window_app_builder::MultiWindowAppBuilder;
 pub use single_window_app_builder::SingleWindowAppBuilder;
 pub use frame_app_builder::FrameAppBuilder;
+pub use frame_app_builder::FrameApp;
