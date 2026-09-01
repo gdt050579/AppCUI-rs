@@ -3,6 +3,7 @@ use std::time::Duration;
 use crate::prelude::*;
 
 use super::impl_terminal_builder_methods;
+use super::app_desktop;
 use super::InternalBuilder;
 
 trait FrameApp {
@@ -26,15 +27,40 @@ trait FrameApp {
     fn on_end(&mut self) {}
 }
 
-#[Desktop(internal = true)]
-struct DesktopWrapper<T> where T: FrameApp {
-    frame_app: T,
-}
-impl<T: FrameApp> DesktopWrapper<T> {
+app_desktop!(AppDesktop, FrameApp);
+impl<T: FrameApp> AppDesktop<T> {
     fn new(frame_app: T) -> Self {
         Self { base: Desktop::new(), frame_app }
     }
 }
+impl<T: FrameApp> OnPaint for AppDesktop<T> {
+    fn on_paint(&self, surface: &mut Surface, _: &Theme) {
+        self.frame_app.on_paint(surface);
+    }
+}
+impl<T: FrameApp> OnKeyPressed for AppDesktop<T> {
+    fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        self.frame_app.on_key_event(key, character);
+        EventProcessStatus::Ignored
+    }
+}
+impl<T: FrameApp> OnMouseEvent for AppDesktop<T> {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        self.frame_app.on_mouse_event(event);
+        EventProcessStatus::Ignored
+    }
+}
+impl<T: FrameApp> OnResize for AppDesktop<T> {
+    fn on_resize(&mut self, _: Size, new_size: Size) {
+        self.frame_app.on_resize(new_size);
+    }
+}
+impl<T: FrameApp> DesktopEvents for AppDesktop<T> {
+    fn on_start(&mut self) {
+        self.frame_app.on_start();
+    }
+}
+
 pub struct FrameAppBuilder {
     builder: InternalBuilder,
     fps: u32,
