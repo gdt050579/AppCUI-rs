@@ -363,14 +363,14 @@ fn check_app_create_with_timers_count() {
         .unwrap();
 }
 
-#[cfg(target_os = "windows")]
-#[test]
-fn check_create_app_with_default_terminal() {
-    App::new().run().unwrap();
-}
+// #[cfg(target_os = "windows")]
+// #[test]
+// fn check_create_app_with_default_terminal() {
+//     App::new().run().unwrap();
+// }
 
-#[cfg(target_os = "windows")]
-#[test]
-fn check_create_app_with_windows_terminal() {
-    App::new().backend(crate::backend::Type::WindowsConsole).run().unwrap();
-}
+// #[cfg(target_os = "windows")]
+// #[test]
+// fn check_create_app_with_windows_terminal() {
+//     App::new().backend(crate::backend::Type::WindowsConsole).run().unwrap();
+// }

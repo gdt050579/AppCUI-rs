@@ -1,4 +1,5 @@
-use super::impl_internal_builder_methods;
+use super::impl_terminal_builder_methods;
+use super::impl_ui_builder_methods;
 use super::InternalBuilder;
 use crate::system::RuntimeManager;
 use crate::ui::common::traits::Control;
@@ -19,43 +20,6 @@ impl MultiWindowAppBuilder {
             builder: InternalBuilder::new(),
             window_factories: Vec::new(),
         }
-    }
-    /// Enables the Application bar.
-    #[inline(always)]
-    pub fn app_bar(mut self) -> Self {
-        self.builder.app_bar();
-        self
-    }
-
-    /// Enables the command bar.
-    #[inline(always)]
-    pub fn command_bar(mut self) -> Self {
-        self.builder.command_bar();
-        self
-    }
-
-    /// Sets the theme of the application. If not specified, the default theme will be used.
-    #[inline(always)]
-    pub fn theme(mut self, theme: crate::system::Theme) -> Self {
-        self.builder.theme(theme);
-        self
-    }
-
-    /// Sets the number of timers that can be used in the application.
-    #[inline(always)]
-    pub fn timers_count(mut self, count: u8) -> Self {
-        self.builder.timers_count(count);
-        self
-    }
-
-    /// Sets the desktop manager.
-    #[inline(always)]
-    pub fn desktop<T>(mut self, desktop: T) -> Self
-    where
-        T: crate::ui::common::traits::Control + crate::ui::common::traits::DesktopControl + 'static,
-    {
-        self.builder.desktop(desktop);
-        self
     }
 
     pub fn window<F, T>(mut self, factory: F) -> Self
@@ -79,5 +43,6 @@ impl MultiWindowAppBuilder {
         app.start_app()
     }
 
-    impl_internal_builder_methods!();
+    impl_terminal_builder_methods!();
+    impl_ui_builder_methods!();
 }

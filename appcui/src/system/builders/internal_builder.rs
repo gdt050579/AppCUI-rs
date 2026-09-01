@@ -53,8 +53,8 @@ impl InternalBuilder {
                 check();
             }
             return Ok(app);
-        } 
-        #[cfg(not(test))]       
+        }
+        #[cfg(not(test))]
         {
             App::create(self)
         }
@@ -122,7 +122,7 @@ impl InternalBuilder {
     }
 }
 
-macro_rules! impl_internal_builder_methods {
+macro_rules! impl_terminal_builder_methods {
     () => {
         /// Sets the size of the terminal.
         #[inline(always)]
@@ -221,4 +221,47 @@ macro_rules! impl_internal_builder_methods {
     };
 }
 
-pub(crate) use impl_internal_builder_methods;
+macro_rules! impl_ui_builder_methods {
+    () => {
+        /// Enables the Application bar.
+        #[inline(always)]
+        pub fn app_bar(mut self) -> Self {
+            self.builder.app_bar();
+            self
+        }
+
+        /// Enables the command bar.
+        #[inline(always)]
+        pub fn command_bar(mut self) -> Self {
+            self.builder.command_bar();
+            self
+        }
+
+        /// Sets the theme of the application. If not specified, the default theme will be used.
+        #[inline(always)]
+        pub fn theme(mut self, theme: crate::system::Theme) -> Self {
+            self.builder.theme(theme);
+            self
+        }
+
+        /// Sets the number of timers that can be used in the application.
+        #[inline(always)]
+        pub fn timers_count(mut self, count: u8) -> Self {
+            self.builder.timers_count(count);
+            self
+        }
+
+        /// Sets the desktop manager.
+        #[inline(always)]
+        pub fn desktop<T>(mut self, desktop: T) -> Self
+        where
+            T: crate::ui::common::traits::Control + crate::ui::common::traits::DesktopControl + 'static,
+        {
+            self.builder.desktop(desktop);
+            self
+        }
+    };
+}
+
+pub(crate) use impl_terminal_builder_methods;
+pub(crate) use impl_ui_builder_methods;
