@@ -61,16 +61,18 @@ impl<T: FrameApp> DesktopEvents for AppDesktop<T> {
     }
 }
 
-pub struct FrameAppBuilder {
+pub(crate) struct FrameAppBuilder<T: FrameApp + 'static> {
     builder: InternalBuilder,
     fps: u32,
+    frame_app: T,
 }
 
-impl FrameAppBuilder {
-    pub(crate) fn new() -> Self {
+impl<T: FrameApp + 'static> FrameAppBuilder<T> {
+    pub(crate) fn new(frame_app: T) -> Self {
         Self {
             builder: InternalBuilder::new(),
             fps: 30,
+            frame_app,
         }
     }
     /// Sets the frame rate of the application.
@@ -85,7 +87,8 @@ impl FrameAppBuilder {
     }
     /// Runs the application using the current settings.
     #[inline(always)]
-    pub fn run(self) -> Result<(), crate::system::Error> {
+    pub fn run(mut self) -> Result<(), crate::system::Error> {
+        self.builder.desktop(AppDesktop::new(self.frame_app));
         let app = self.builder.build()?;
         app.start_app()
     }
