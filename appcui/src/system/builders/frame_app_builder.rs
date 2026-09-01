@@ -6,23 +6,25 @@ use super::impl_app_desktop_methods;
 use super::InternalBuilder;
 
 pub trait FrameApp {
-    // Called once, after the app is created, before the first paint.
+    /// Called once, after the app is created, before the first paint.
     fn on_start(&mut self) { }
 
-    // Called when the terminal/surface size changes.
+    /// Called when the terminal/surface size changes.
     fn on_resize(&mut self, _new_size: Size) {}
 
-    // Called each tick at the configured rate (default 60/sec), with measured delta.
+    /// Called each tick at the configured rate (default 60/sec), with the number of ticks since the beginning of the application.
     fn on_update(&mut self, _ticks: u64) {}
 
-    // Input handlers: mutate state, no return value.
+    /// Called when a key is pressed.
     fn on_key_event(&mut self, _key: Key, _ch: char) {}
+
+    /// Called when a mouse event occurs.
     fn on_mouse_event(&mut self, _ev: &MouseEvent) {}
 
-    // Draw current state to the surface.
+    /// Draw current state to the surface.
     fn on_paint(&self, surface: &mut Surface);
 
-    // Called once, after the loop exits, before terminal restore.
+    /// Called once, after the loop exits, before terminal restore.
     fn on_end(&mut self) {}
 }
 
