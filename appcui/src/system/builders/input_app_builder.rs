@@ -118,7 +118,7 @@ impl<T: InputApp + 'static> InputAppBuilder<T> {
     }
 
     #[inline(always)]
-    pub fn background_char(mut self, ch: Option<Character>) -> Self {
+    pub fn clear_char(mut self, ch: Option<Character>) -> Self {
         self.clear_screen_char = ch;
         self
     }

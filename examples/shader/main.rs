@@ -179,7 +179,7 @@ fn main() -> Result<(), appcui::system::Error> {
         App::frame_app(Shader::new())
             .fps(FPS)
             .title("Shader")
-            .background_char(None)
+            .clear_char(None)
             .color_schema(false)
             .backend(appcui::backend::Type::WindowsVT)
             .run()
