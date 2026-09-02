@@ -33,21 +33,33 @@ struct AppDesktop<T> where T: FrameApp {
     base: Desktop,
     frame_app: T,
     fps: u32,
+    auto_close: bool,
+    clear_char: Option<Character>
 }
 impl_app_desktop_methods!(AppDesktop, FrameApp);
 impl<T: FrameApp> AppDesktop<T> {
-    fn new(frame_app: T, fps: u32) -> Self {
-        Self { base: Desktop::new(), frame_app, fps }
+    fn new(frame_app: T, fps: u32, auto_close: bool, clear_char: Option<Character>) -> Self {
+        Self { base: Desktop::new(), frame_app, fps,auto_close, clear_char }
     }
 }
 impl<T: FrameApp> OnPaint for AppDesktop<T> {
     fn on_paint(&self, surface: &mut Surface, _: &Theme) {
-        surface.clear(char!("' ',white,black"));
+        if let Some(ch) = self.clear_char {
+            surface.reset(ch);
+        } else {
+            surface.reset_clip_and_origin();
+        }
         self.frame_app.on_paint(surface);
     }
 }
 impl<T: FrameApp> OnKeyPressed for AppDesktop<T> {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
+        if self.auto_close {
+            if key.value() == key!("Escape") {
+                App::close();
+                return EventProcessStatus::Processed;
+            }
+        }
         self.frame_app.on_key_event(key, character);
         EventProcessStatus::Ignored
     }
@@ -80,6 +92,8 @@ impl<T: FrameApp> TimerEvents for AppDesktop<T> {
 pub struct FrameAppBuilder<T: FrameApp + 'static> {
     builder: InternalBuilder,
     fps: u32,
+    auto_close: bool,
+    clear_screen_char: Option<Character>,
     frame_app: T,
 }
 
@@ -88,6 +102,8 @@ impl<T: FrameApp + 'static> FrameAppBuilder<T> {
         Self {
             builder: InternalBuilder::new(),
             fps: 30,
+            auto_close: true,
+            clear_screen_char: Some(char!("' ',white,black")),
             frame_app,
         }
     }
@@ -101,10 +117,23 @@ impl<T: FrameApp + 'static> FrameAppBuilder<T> {
         self.fps = fps.clamp(1, 120);
         self
     }
+
+    #[inline(always)]
+    pub fn auto_close(mut self, value: bool) -> Self {
+        self.auto_close = value;
+        self
+    }
+
+    #[inline(always)]
+    pub fn background_char(mut self, ch: Option<Character>) -> Self {
+        self.clear_screen_char = ch;
+        self
+    }
+
     /// Runs the application using the current settings.
     #[inline(always)]
     pub fn run(mut self) -> Result<(), crate::system::Error> {
-        self.builder.desktop(AppDesktop::new(self.frame_app, self.fps));
+        self.builder.desktop(AppDesktop::new(self.frame_app, self.fps, self.auto_close, self.clear_screen_char));
         let app = self.builder.build()?;
         app.start_app()
     }
