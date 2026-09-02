@@ -67,6 +67,11 @@ impl App {
         crate::system::FrameAppBuilder::new(frame_app)
     }
 
+    /// Creates a new builder object for a input application.
+    #[allow(clippy::new_ret_no_self)]
+    pub fn input_app<T: crate::system::InputApp + 'static>(input_app: T) -> crate::system::InputAppBuilder<T> {
+        crate::system::InputAppBuilder::new(input_app)
+    }
 
     /// Runs the current appcui application. This command will display all windows, and allow you to run the cod that perform the event logic for every control.
     pub(crate) fn start_app(self) -> Result<(), crate::system::Error> {
@@ -107,7 +112,7 @@ impl App {
     pub fn close() {
         if App::is_created() {
             RuntimeManager::get().close();
-        }        
+        }
     }
 
     pub(crate) fn drop_app() {
