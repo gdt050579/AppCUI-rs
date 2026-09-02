@@ -1,13 +1,13 @@
-use std::time::Duration;
 use crate::prelude::*;
+use std::time::Duration;
 
-use super::impl_terminal_builder_methods;
 use super::impl_app_desktop_methods;
+use super::impl_terminal_builder_methods;
 use super::InternalBuilder;
 
 pub trait FrameApp {
     /// Called once, after the app is created, before the first paint.
-    fn on_start(&mut self) { }
+    fn on_start(&mut self) {}
 
     /// Called when the terminal/surface size changes.
     fn on_resize(&mut self, _new_size: Size) {}
@@ -25,21 +25,32 @@ pub trait FrameApp {
     fn on_paint(&self, surface: &mut Surface);
 
     /// Called once, after the loop exits, before terminal restore.
-    fn on_end(&mut self) {}
+    fn on_close(&mut self) -> ActionRequest {
+        ActionRequest::Allow
+    }
 }
 
 #[repr(C)]
-struct AppDesktop<T> where T: FrameApp {
+struct AppDesktop<T>
+where
+    T: FrameApp,
+{
     base: Desktop,
     frame_app: T,
     fps: u32,
     auto_close: bool,
-    clear_char: Option<Character>
+    clear_char: Option<Character>,
 }
 impl_app_desktop_methods!(AppDesktop, FrameApp);
 impl<T: FrameApp> AppDesktop<T> {
     fn new(frame_app: T, fps: u32, auto_close: bool, clear_char: Option<Character>) -> Self {
-        Self { base: Desktop::new(), frame_app, fps,auto_close, clear_char }
+        Self {
+            base: Desktop::new(),
+            frame_app,
+            fps,
+            auto_close,
+            clear_char,
+        }
     }
 }
 impl<T: FrameApp> OnPaint for AppDesktop<T> {
@@ -81,6 +92,17 @@ impl<T: FrameApp> DesktopEvents for AppDesktop<T> {
         self.timer().unwrap().start(Duration::from_millis(milis));
         self.frame_app.on_start();
     }
+
+    fn on_close(&mut self) -> ActionRequest {
+        if self.frame_app.on_close() == ActionRequest::Allow {
+            self.timer().unwrap().stop();
+            ActionRequest::Allow
+        } else {
+            ActionRequest::Deny
+        }
+    }
+
+    fn on_update_window_count(&mut self, _count: usize) {}
 }
 
 impl<T: FrameApp> TimerEvents for AppDesktop<T> {
@@ -133,7 +155,8 @@ impl<T: FrameApp + 'static> FrameAppBuilder<T> {
     /// Runs the application using the current settings.
     #[inline(always)]
     pub fn run(mut self) -> Result<(), crate::system::Error> {
-        self.builder.desktop(AppDesktop::new(self.frame_app, self.fps, self.auto_close, self.clear_screen_char));
+        self.builder
+            .desktop(AppDesktop::new(self.frame_app, self.fps, self.auto_close, self.clear_screen_char));
         let app = self.builder.build()?;
         app.start_app()
     }
