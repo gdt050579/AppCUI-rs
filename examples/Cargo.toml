@@ -113,6 +113,10 @@ name = "mouse_target"
 path = "mouse_target/main.rs"
 
 [[example]]
+name = "memory"
+path = "memory/main.rs"
+
+[[example]]
 name = "shader"
 path = "shader/main.rs"
 
