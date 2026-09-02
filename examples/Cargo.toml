@@ -105,6 +105,10 @@ name = "hello_world_frame_app"
 path = "hello_world_frame_app/main.rs"
 
 [[example]]
+name = "shader"
+path = "shader/main.rs"
+
+[[example]]
 name = "window_toolbar"
 path = "window_toolbar/main.rs"
 
