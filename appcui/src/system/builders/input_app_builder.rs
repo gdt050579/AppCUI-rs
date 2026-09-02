@@ -13,10 +13,10 @@ pub trait InputApp {
     fn on_resize(&mut self, _new_size: Size) {}
 
     /// Called when a key is pressed.
-    fn on_key_event(&mut self, _key: Key, _ch: char) -> EventProcessStatus { EventProcessStatus::Ignore }
+    fn on_key_event(&mut self, _key: Key, _ch: char) -> EventProcessStatus { EventProcessStatus::Ignored }
 
     /// Called when a mouse event occurs.
-    fn on_mouse_event(&mut self, _ev: &MouseEvent) -> EventProcessStatus { EventProcessStatus::Ignore }
+    fn on_mouse_event(&mut self, _ev: &MouseEvent) -> EventProcessStatus { EventProcessStatus::Ignored }
 
     /// Draw current state to the surface.
     fn on_paint(&self, surface: &mut Surface);
@@ -66,7 +66,7 @@ impl<T: InputApp> OnKeyPressed for AppDesktop<T> {
                 return EventProcessStatus::Processed;
             }
         }
-        self.input_app.on_key_event(key, character);
+        self.input_app.on_key_event(key, character)
     }
 }
 impl<T: InputApp> OnMouseEvent for AppDesktop<T> {
@@ -81,8 +81,6 @@ impl<T: InputApp> OnResize for AppDesktop<T> {
 }
 impl<T: InputApp> DesktopEvents for AppDesktop<T> {
     fn on_start(&mut self) {
-        let milis = (1000u32 / self.fps) as u64;
-        self.timer().unwrap().start(Duration::from_millis(milis));
         self.input_app.on_start();
     }
 
@@ -96,11 +94,7 @@ impl<T: InputApp> DesktopEvents for AppDesktop<T> {
     }
 }
 
-impl<T: InputApp> TimerEvents for AppDesktop<T> {
-    fn on_update(&mut self, _: u64) -> EventProcessStatus {
-        EventProcessStatus::Ignore
-    }
-}
+impl<T: InputApp> TimerEvents for AppDesktop<T> {}
 pub struct InputAppBuilder<T: InputApp + 'static> {
     builder: InternalBuilder,
     auto_close: bool,
@@ -134,7 +128,7 @@ impl<T: InputApp + 'static> InputAppBuilder<T> {
     #[inline(always)]
     pub fn run(mut self) -> Result<(), crate::system::Error> {
         self.builder
-            .desktop(AppDesktop::new(self.input_app, self.fps, self.auto_close, self.clear_screen_char));
+            .desktop(AppDesktop::new(self.input_app, self.auto_close, self.clear_screen_char));
         let app = self.builder.build()?;
         app.start_app()
     }

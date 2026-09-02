@@ -103,6 +103,8 @@ pub use self::builders::MultiWindowAppBuilder;
 pub use self::builders::SingleWindowAppBuilder;
 pub use self::builders::FrameAppBuilder;
 pub use self::builders::FrameApp;
+pub use self::builders::InputAppBuilder;
+pub use self::builders::InputApp;
 pub use self::clipboard::Clipboard;
 pub use self::error::Error;
 pub use self::error::ErrorKind;

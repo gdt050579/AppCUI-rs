@@ -3,6 +3,7 @@ mod app_desktop;
 mod multi_window_app_builder;
 mod single_window_app_builder;
 mod frame_app_builder;
+mod input_app_builder;
 
 pub(crate) use internal_builder::impl_terminal_builder_methods;
 pub(crate) use internal_builder::impl_ui_builder_methods;
@@ -13,3 +14,5 @@ pub use multi_window_app_builder::MultiWindowAppBuilder;
 pub use single_window_app_builder::SingleWindowAppBuilder;
 pub use frame_app_builder::FrameAppBuilder;
 pub use frame_app_builder::FrameApp;
+pub use input_app_builder::InputAppBuilder;
+pub use input_app_builder::InputApp;
