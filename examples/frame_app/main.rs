@@ -9,11 +9,6 @@ impl FrameApp for Clock {
         let txt = Local::now().format("%H:%M:%S").to_string();
         surface.write_string((size.width / 2 - 4) as i32, (size.height / 2) as i32, &txt, charattr!("white"), false);
     }
-    fn on_key_event(&mut self, key: Key, _: char) {
-        if key.code == KeyCode::Escape {
-            App::close();
-        }
-    }
 }
 
 fn main() -> Result<(), appcui::system::Error> {
