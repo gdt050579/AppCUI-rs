@@ -139,7 +139,7 @@ Then run the project with `cargo run`. You should see a window with the title `T
 ## 🧪 Examples
 
 AppCUI-rs comes with a set of examples to help you get started. You can find them in the [examples](examples) folder, including:
-- **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/), [Ram it](examples/ramit/), [PacMan](examples/games/), [Chess](examples/games/), [Connect Four](examples/games/), [2048](examples/games/), or [Tetris](examples/games/)
+- **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/), [Ram it](examples/ramit/), [PacMan](examples/games/), [Chess](examples/games/), [Connect Four](examples/games/), [2048](examples/games/), [Memory](examples/memory/), or [Tetris](examples/games/)
 - **Utilities** such as [Calculator](examples/calculator/), [CSV Viewer](examples/csv_viewer/), [Temperature Converter](examples/temperature_convertor/), [HexViewer](examples/hexview/), or a [Timer](examples/timer/)
 - **Animations** such as [Matrix](examples/matrix/), [Fractals](examples/fractals/), or [Spiral](examples/spiral/)
 - **Controls**/**Widgets** such as [Button](examples/buttons/), [CheckBox](examples/checkboxes/), [ComboBox](examples/combobox/), [DatePicker](examples/datepicker/), [ListView](examples/listview/), [TreeView](examples/treeview/) and many more.
