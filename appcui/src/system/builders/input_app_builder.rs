@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::time::Duration;
 
 use super::impl_app_desktop_methods;
 use super::impl_terminal_builder_methods;

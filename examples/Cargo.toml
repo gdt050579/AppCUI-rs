@@ -101,6 +101,10 @@ name = "hello_world_procmacro"
 path = "hello_world_procmacro/main.rs"
 
 [[example]]
+name = "hello_world_frame_app"
+path = "hello_world_frame_app/main.rs"
+
+[[example]]
 name = "window_toolbar"
 path = "window_toolbar/main.rs"
 
