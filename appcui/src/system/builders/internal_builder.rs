@@ -47,12 +47,12 @@ impl InternalBuilder {
     pub(crate) fn build(self) -> Result<App, Error> {
         #[cfg(test)]
         {
-            let check = self.runtime_check.clone();
+            let check = self.runtime_check;
             let app = App::create(self)?;
             if let Some(check) = check {
                 check();
             }
-            return Ok(app);
+            Ok(app)
         }
         #[cfg(not(test))]
         {

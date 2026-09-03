@@ -520,10 +520,7 @@ fn check_window_resize() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| {
-            let w = Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::Sizeable);
-            w
-        })
+        .window(|| { Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::Sizeable) })
         .run()
         .unwrap();
 }
@@ -551,10 +548,7 @@ fn check_window_move() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| {
-            let w = Window::new("Title", layout!("a:c,w:21,h:5"), window::Flags::Sizeable);
-            w
-        })
+        .window(|| Window::new("Title", layout!("a:c,w:21,h:5"), window::Flags::Sizeable))
         .run()
         .unwrap();
 }
@@ -572,10 +566,7 @@ fn check_window_move_2() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| {
-            let w = Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::None);
-            w
-        })
+        .window(|| Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::None))
         .run()
         .unwrap();
 }
@@ -1182,10 +1173,7 @@ fn check_window_toolbar_maximize_restore() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| {
-            let w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::Sizeable);
-            w
-        })
+        .window(|| Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::Sizeable))
         .run()
         .unwrap();
 }
@@ -1346,10 +1334,7 @@ fn check_window_move_and_resize_via_keys() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| {
-            let w = Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::Sizeable);
-            w
-        })
+        .window(|| Window::new("Title", layout!("a:c,w:40,h:8"), window::Flags::Sizeable))
         .run()
         .unwrap();
 }

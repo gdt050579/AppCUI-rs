@@ -17,6 +17,7 @@ pub(crate) enum Color {
     Yellow,
     White,
     Transparent,
+    #[allow(clippy::upper_case_acronyms)]
     RGB(u8, u8, u8),
 }
 
