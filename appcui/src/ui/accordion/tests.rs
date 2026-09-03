@@ -317,7 +317,7 @@ fn check_panel_caption_methods() {
         .size(Size::new(80, 20))
         .debug_script(script)
         .command_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -435,7 +435,7 @@ fn check_events() {
     App::new()
         .size(Size::new(80, 20))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }

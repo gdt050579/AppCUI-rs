@@ -182,7 +182,7 @@ fn check_events() {
         Paint('Product selected (on title window)')   
         CheckHash(0x7035C003A73ED604) 
     ";
-    App::new().size(Size::new(60, 12)).debug_script(script).window(|| MyWindow::new()).run().unwrap();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(MyWindow::new).run().unwrap();
 }
 
 #[test]
@@ -373,7 +373,7 @@ fn check_selected_item_and_index_methods() {
         }
     }
 
-    App::new().size(Size::new(80, 16)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 16)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -542,7 +542,7 @@ fn check_has_selection_and_count_with_mouse() {
         }
     }
 
-    App::new().size(Size::new(80, 16)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 16)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -827,5 +827,5 @@ fn check_item_and_item_mut_methods() {
         }
     }
     
-    App::new().size(Size::new(80, 18)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 18)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }

@@ -235,5 +235,5 @@ impl NumericSelectorEvents<u16> for LayoutTesterWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().size(Size::new(100, 30)).window(|| LayoutTesterWindow::new()).run()
+    App::new().size(Size::new(100, 30)).window(LayoutTesterWindow::new).run()
 }

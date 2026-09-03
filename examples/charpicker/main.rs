@@ -83,5 +83,5 @@ impl CharPickerEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().color_schema(false).window(|| MyWin::new()).run()
+    App::new().color_schema(false).window(MyWin::new).run()
 }

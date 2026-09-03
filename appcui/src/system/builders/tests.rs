@@ -66,7 +66,7 @@ fn check_single_window_app() {
         Paint('2. Command bar action updated the label')
         CheckHash(0x1ECCBC719BBB3D3E)
     ";
-    App::single_window(|| DemoWindow::new())
+    App::single_window(DemoWindow::new)
         .size(Size::new(40, 10))
         .debug_script(script)
         .command_bar()

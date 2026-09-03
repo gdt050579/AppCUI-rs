@@ -67,7 +67,7 @@ fn check_theme_update() {
         .size(Size::new(60, 10))
         .debug_script(script)
         .command_bar()
-        .window(|| TestWindow::new())
+        .window(TestWindow::new)
         .run()
         .unwrap();
 }
@@ -202,7 +202,7 @@ fn check_default_theme() {
         .theme(Theme::new(Themes::Default))
         .command_bar()
         .app_bar()
-        .window(|| WindowWithTheme::new())
+        .window(WindowWithTheme::new)
         .run()
         .unwrap()
 }
@@ -222,7 +222,7 @@ fn check_darkgray_theme() {
         .theme(Theme::new(Themes::DarkGray))
         .command_bar()
         .app_bar()
-        .window(|| WindowWithTheme::new())
+        .window(WindowWithTheme::new)
         .run()
         .unwrap()
 }
@@ -242,7 +242,7 @@ fn check_light_theme() {
         .theme(Theme::new(Themes::Light))
         .command_bar()
         .app_bar()
-        .window(|| WindowWithTheme::new())
+        .window(WindowWithTheme::new)
         .run()
         .unwrap()
 }

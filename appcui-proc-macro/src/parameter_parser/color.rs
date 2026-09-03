@@ -30,7 +30,7 @@ impl Color {
         }
     }
     fn extract_u8(s: &[u8], start: usize) -> Option<(u8, usize)> {
-        if s.len() == 0 {
+        if s.is_empty() {
             return None;
         }
         let mut idx = start;

@@ -226,7 +226,7 @@ fn check_shortkeys() {
         Paint('State_36')
         CheckHash(0x483ede4555d977a5)    
     ";
-    App::new().size(Size::new(80, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 #[test]
 fn check_radiobox_ascii_mode() {

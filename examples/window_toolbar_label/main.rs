@@ -83,5 +83,5 @@ impl CheckBoxEvents for NumberFormatsWindow {
 
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().window(|| NumberFormatsWindow::new()).run()
+    App::new().window(NumberFormatsWindow::new).run()
 }

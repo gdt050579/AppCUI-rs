@@ -325,7 +325,7 @@ macro_rules! impl_terminal_builder_methods {
 
 macro_rules! impl_ui_builder_methods {
     () => {
-        /// Enables the application bar at the top of the desktop.
+        /// Enables the application bar at the top of the desktop. 
         ///
         /// The app bar hosts menus and other application-wide commands. It is
         /// disabled by default.

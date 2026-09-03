@@ -2289,7 +2289,7 @@ fn check_bufferview_set_current_pos() {
         }
     }
 
-    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2344,7 +2344,7 @@ fn check_bufferview_take_buffer() {
     }
 
     TAKE_BUFFER_RESULT.set(None);
-    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 
     let (taken, bytes_count, has_selection) = TAKE_BUFFER_RESULT
         .take()
@@ -2423,7 +2423,7 @@ fn check_bufferview_resize_buffer_with_commands() {
         }
     }
 
-    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2492,7 +2492,7 @@ fn check_bufferview_insert_and_overwrite_bytes_with_commands() {
         }
     }
 
-    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -3651,7 +3651,7 @@ fn check_bufferview_mouse_leave_when_moving_to_button() {
         }
     }
 
-    App::new().size(Size::new(60, 15)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -3924,7 +3924,7 @@ fn check_bufferview_char_mode_feature_toggles_with_commands() {
         }
     }
 
-    App::new().size(Size::new(80, 18)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 18)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -3986,7 +3986,7 @@ fn check_bufferview_on_current_pos_changed_event() {
         CheckHash(0x45523880CA3B5C89)
     ";
 
-    App::new().size(Size::new(60, 15)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -4052,5 +4052,5 @@ fn check_bufferview_on_selection_changed_event() {
         CheckHash(0xCA238466708B34EB)
     ";
 
-    App::new().size(Size::new(60, 15)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
 }

@@ -64,7 +64,7 @@ fn check_button_control() {
         Paint('Second button was pressed')
         CheckHash(0x30D90A1046C4AC48)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -127,7 +127,7 @@ fn check_button_control_2() {
         Paint('After reset: Add (0) and Reset') 
         CheckHash(0xBAE7A3089D249D76) 
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -225,7 +225,7 @@ fn check_button_control_hotkey() {
         Paint('State 5') 
         CheckHash(0x328373FE7C3CF399)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -270,7 +270,7 @@ fn check_button_methods() {
         Paint('Text is: Pressed 4 times') 
         CheckHash(0x517BE60D35938E34) 
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -361,7 +361,7 @@ fn check_visible() {
         Paint('3.Button is visible')   
         CheckHash(0x47599F7DC8243679)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

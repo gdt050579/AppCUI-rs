@@ -1261,7 +1261,7 @@ fn check_doc_example() {
         Paint('2. Click on Child 1')   
         CheckHash(0x196ECBEC764AED6A)  
     ";
-    App::new().size(Size::new(60, 15)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 fn modify_graph_test_graphview() -> GraphView<&'static str> {
@@ -1635,7 +1635,7 @@ fn ctrl_click_empty_add_three_nodes_then_right_drag_edges_check_hash() {
         CheckHash(0x8A74B28D54C70BF6)
     ";
 
-    App::new().size(Size::new(72, 22)).debug_script(script).window(|| InteractiveGraphWin::new()).run().unwrap();
+    App::new().size(Size::new(72, 22)).debug_script(script).window(InteractiveGraphWin::new).run().unwrap();
 }
 
 /// Same flow as [`ctrl_click_empty_add_three_nodes_then_right_drag_edges_check_hash`], but [`NodeBuilder`] uses
@@ -1724,7 +1724,7 @@ fn ctrl_click_empty_double_border_three_nodes_ctrl_a_right_drag_edges_check_hash
         CheckHash(0xF876C73CD277592B)
     ";
 
-    App::new().size(Size::new(72, 22)).debug_script(script).window(|| InteractiveDoubleBorderWin::new()).run().unwrap();
+    App::new().size(Size::new(72, 22)).debug_script(script).window(InteractiveDoubleBorderWin::new).run().unwrap();
 }
 
 /// [`EditableNode`] getters match the geometry and style from [`NodeBuilder`] (including `resize` padding rules).

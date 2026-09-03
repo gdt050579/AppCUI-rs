@@ -345,7 +345,7 @@ fn check_events() {
         Paint('New-value: 4')   
         CheckHash(0x50AB32FB27060802)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

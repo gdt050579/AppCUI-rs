@@ -6,5 +6,5 @@ use my_window::MyWindow;
 use show_tab_modal::ShowTabModal;
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().window(|| MyWindow::new()).run()
+    App::new().window(MyWindow::new).run()
 }

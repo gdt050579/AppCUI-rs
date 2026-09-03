@@ -2535,7 +2535,7 @@ fn pub_fn_insert_text() {
         }
     }
     
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2585,7 +2585,7 @@ fn pub_fn_move_set_cursor_position() {
         }
     }
     
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2635,7 +2635,7 @@ fn pub_fn_move_set_cursor_position_2() {
         }
     }
     
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2681,7 +2681,7 @@ fn pub_fn_remove_text() {
         }
     }
     
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2731,7 +2731,7 @@ fn pub_fn_select_text() {
         }
     }
     
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2781,7 +2781,7 @@ fn pub_fn_delete_selection() {
         }
     }
     
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

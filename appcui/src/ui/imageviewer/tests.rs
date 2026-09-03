@@ -1217,5 +1217,5 @@ fn check_resize() {
         CheckHash(0x2B595BD9AB869F26)
     ";
 
-    App::new().size(Size::new(90, 20)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(90, 20)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }

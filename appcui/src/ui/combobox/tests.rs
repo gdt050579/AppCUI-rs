@@ -168,7 +168,7 @@ fn check_clear_items_when_closed() {
         Paint('Items are clear')   
         CheckHash(0xA48FE4D6600B53E3)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(40, 10)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -223,7 +223,7 @@ fn check_clear_items_when_opened() {
         Paint('Items are clear (opened and smaller)')   
         CheckHash(0x7D591AE22C8A7DFB)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(40, 10)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -421,7 +421,7 @@ fn check_complex_behavior() {
             CheckHash(0x2d11fcbd531710fd)
     ";
 
-    App::new().size(Size::new(60, 20)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -524,7 +524,7 @@ fn check_value_and_try_value() {
         }
     }
     
-    App::new().size(Size::new(40, 12)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(40, 12)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -651,5 +651,5 @@ fn check_selected_item_and_index() {
         }
     }
     
-    App::new().size(Size::new(80, 12)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 12)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }

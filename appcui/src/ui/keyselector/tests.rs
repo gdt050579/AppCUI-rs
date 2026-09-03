@@ -206,7 +206,7 @@ fn check_events() {
         Paint('Now the key is F5')   
         CheckHash(0x8EDEC6861A791691)
    ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

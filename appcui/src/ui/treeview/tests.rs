@@ -804,7 +804,7 @@ fn check_change_item_event() {
         Paint('5. Nothing changes')
         CheckHash(0xEFD5EED5912A30EA) 
     ";
-    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -858,7 +858,7 @@ fn check_change_item_event_change() {
         Paint('6. Focus on Geometry, new name: Geometry1,8, and [Simple4,] [Calculus5,] [2-0-26,] [1-0-17,]')
         CheckHash(0xFB14BB51038A327A) 
     ";
-    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -909,7 +909,7 @@ fn check_on_item_action_event() {
         Paint('6. Focus on Calculus, windows title: Advanced')
         CheckHash(0xBA98FC217CA536FE) 
     ";
-    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -971,7 +971,7 @@ fn check_on_item_colapse_expanded() {
         Paint('5. Expands Calculus')
         CheckHash(0xFFF9FB0BF9B3C7F5)   
     ";
-    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1049,7 +1049,7 @@ fn check_on_item_dynamic_colapse_expanded() {
         Paint('7. Item 2 expanded [13,14,15]')
         CheckHash(0x174C3A2DE2587A19)   
     ";
-    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1118,7 +1118,7 @@ fn check_delete_item() {
         Paint('6. Math deleted, no more items (title remains Math)')
         CheckHash(0xBB7F61AA35475FAC)  
     ";
-    App::new().size(Size::new(60, 20)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1200,7 +1200,7 @@ fn check_clear() {
         Paint('11. Scroll to the end') 
         CheckHash(0x520D93E7092CDBE9)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1262,7 +1262,7 @@ fn check_collapse_expand_via_methods() {
         Paint('4. Alice is expanded')
         CheckHash(0xD8BC7870BC98F71C)  
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1388,7 +1388,7 @@ fn check_on_item_dynamic_colapse_expanded_recursively() {
         Paint('9. Expand all items recursively')
         CheckHash(0xA025143D3B47AB1A)   
     ";
-    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1476,7 +1476,7 @@ fn check_collapse_expand_all() {
         Paint('14. All expanded, focus remains on Bob')
         CheckHash(0xC0124799876E1227) 
     ";
-    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 15)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1748,7 +1748,7 @@ fn check_select_and_count_method() {
         Paint('9. All items deleted (title is 0/0)')
         CheckHash(0xB00A3EEB83CDB655)
     ";
-    App::new().size(Size::new(60, 20)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1841,7 +1841,7 @@ fn check_select_via_api() {
         Paint('4. Math un-selected, cursor on Geometry')
         CheckHash(0xD0BBAFFE2855880E)  
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1906,7 +1906,7 @@ fn check_current_item_via_api() {
         Paint('4. Math changed, cursor on Geometry')
         CheckHash(0x8F097B0F69B5F894)  
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]

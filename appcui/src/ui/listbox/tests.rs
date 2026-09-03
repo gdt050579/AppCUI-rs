@@ -523,7 +523,7 @@ fn check_events() {
         Paint('three items in log')
         CheckHash(0x6B1BBAB7CC71CFC9)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -571,7 +571,7 @@ fn check_autoscroll() {
         Paint('ListBox is focused and has vscroll enabled and position to last char')
         CheckHash(0x2BA891709571BF8D)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -623,7 +623,7 @@ fn check_clear() {
         Paint('Listbox has inactive vertical scrollbar')
         CheckHash(0xB80B6F0694BA7F8B)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -735,7 +735,7 @@ fn check_sort() {
         Paint('Listbox is sorted, Yellow is selected')
         CheckHash(0x14EC25C01F6E20A6)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -785,7 +785,7 @@ fn check_sort_by() {
         Paint('Listbox is sorted, Yellow is selected')
         CheckHash(0x7793BA7F95CF1B06)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -913,7 +913,7 @@ fn check_items_checked_with_mouse() {
         Paint('Checked: Green,Yellow, ItemsChecked: 2')
         CheckHash(0x6855A969D5D764BC)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

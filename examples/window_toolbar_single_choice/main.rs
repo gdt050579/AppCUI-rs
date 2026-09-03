@@ -60,5 +60,5 @@ impl ToolBarEvents for SingleChoiceWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().window(|| SingleChoiceWindow::new()).run()
+    App::new().window(SingleChoiceWindow::new).run()
 }

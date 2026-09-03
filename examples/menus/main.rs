@@ -86,5 +86,5 @@ impl AppBarEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().app_bar().window(|| MyWindow::new()).run()
+    App::new().app_bar().window(MyWindow::new).run()
 }

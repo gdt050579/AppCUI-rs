@@ -126,7 +126,7 @@ fn check_events() {
         CheckHash(0x205EBB9FC7AB10A0)
         CheckCursor(10,5)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

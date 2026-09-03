@@ -41,7 +41,7 @@ fn check_order_parameter() {
         .size(Size::new(60, 15))
         .debug_script(script)
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -182,7 +182,7 @@ fn check_order_parameter_multi_controls() {
         .debug_script(script)
         .desktop(MyDesktop::new())
         .app_bar()
-        .window(|| mywindow::MyWindow::new())
+        .window(mywindow::MyWindow::new)
         .run()
         .unwrap();
 }
@@ -323,7 +323,7 @@ fn check_order_parameter_multi_controls_reversed() {
         .debug_script(script)
         .desktop(MyDesktop::new())
         .app_bar()
-        .window(|| mywindow::MyWindow::new())
+        .window(mywindow::MyWindow::new)
         .run()
         .unwrap();
 }
@@ -803,7 +803,7 @@ fn check_with_keys() {
         .size(Size::new(60, 20))
         .debug_script(script)
         .app_bar()
-        .window(|| MyWindow::new())
+        .window(MyWindow::new)
         .run()
         .unwrap();
 }
@@ -986,7 +986,7 @@ fn check_recursive_shortcuts() {
         .size(Size::new(60, 20))
         .debug_script(script)
         .app_bar()
-        .window(|| MyWindow::new())
+        .window(MyWindow::new)
         .run()
         .unwrap();
 }
@@ -1038,7 +1038,7 @@ fn check_side_parameter() {
         .size(Size::new(60, 15))
         .debug_script(script)
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1105,7 +1105,7 @@ fn check_enable_disable() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1179,7 +1179,7 @@ fn check_mouse_over_disable() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1254,7 +1254,7 @@ fn check_mouse_click_and_hover_disable() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1313,7 +1313,7 @@ fn check_separator() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1372,7 +1372,7 @@ fn check_label() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1433,7 +1433,7 @@ fn check_label_tooltip() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1529,7 +1529,7 @@ fn check_move_left_right() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1648,7 +1648,7 @@ fn check_button_with_menu_opened() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| Win::new())
+        .window(Win::new)
         .run()
         .unwrap();
 }
@@ -1736,7 +1736,7 @@ fn check_menu_aligned_right_opened() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| Win::new())
+        .window(Win::new)
         .run()
         .unwrap();
 }
@@ -1824,7 +1824,7 @@ fn check_menu_aligned_right_opened_large_secondary_right_most_menu() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| Win::new())
+        .window(Win::new)
         .run()
         .unwrap();
 }
@@ -2177,7 +2177,7 @@ fn check_toggle_button() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| Win::new())
+        .window(Win::new)
         .run()
         .unwrap();
 }
@@ -2423,7 +2423,7 @@ fn check_switch_button() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| Win::new())
+        .window(Win::new)
         .run()
         .unwrap();
 }

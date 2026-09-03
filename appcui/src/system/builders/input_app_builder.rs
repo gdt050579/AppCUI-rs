@@ -58,7 +58,9 @@ pub trait InputApp {
     /// # Parameters
     /// * `key` - The pressed key, including modifiers.
     /// * `ch` - The character produced by the key, if any (otherwise `'\0'`).
-    fn on_key_event(&mut self, _key: Key, _ch: char) -> EventProcessStatus { EventProcessStatus::Ignored }
+    fn on_key_event(&mut self, _key: Key, _ch: char) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
 
     /// Called when a mouse event occurs (move, press, release, drag, or wheel).
     ///
@@ -67,7 +69,9 @@ pub trait InputApp {
     ///
     /// # Parameters
     /// * `ev` - The mouse event to handle.
-    fn on_mouse_event(&mut self, _ev: &MouseEvent) -> EventProcessStatus { EventProcessStatus::Ignored }
+    fn on_mouse_event(&mut self, _ev: &MouseEvent) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
 
     /// Draws the current state onto the surface.
     ///
@@ -99,7 +103,7 @@ where
 }
 impl_app_desktop_methods!(AppDesktop, InputApp);
 impl<T: InputApp> AppDesktop<T> {
-    fn new(input_app: T,  auto_close: bool, clear_char: Option<Character>) -> Self {
+    fn new(input_app: T, auto_close: bool, clear_char: Option<Character>) -> Self {
         Self {
             base: Desktop::new(),
             input_app,
@@ -120,11 +124,9 @@ impl<T: InputApp> OnPaint for AppDesktop<T> {
 }
 impl<T: InputApp> OnKeyPressed for AppDesktop<T> {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
-        if self.auto_close {
-            if key.value() == key!("Escape") {
-                App::close();
-                return EventProcessStatus::Processed;
-            }
+        if self.auto_close && key.value() == key!("Escape") {
+            App::close();
+            return EventProcessStatus::Processed;
         }
         self.input_app.on_key_event(key, character)
     }

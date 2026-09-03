@@ -122,11 +122,9 @@ impl<T: FrameApp> OnPaint for AppDesktop<T> {
 }
 impl<T: FrameApp> OnKeyPressed for AppDesktop<T> {
     fn on_key_pressed(&mut self, key: Key, character: char) -> EventProcessStatus {
-        if self.auto_close {
-            if key.value() == key!("Escape") {
-                App::close();
-                return EventProcessStatus::Processed;
-            }
+        if self.auto_close && key.value() == key!("Escape") {
+            App::close();
+            return EventProcessStatus::Processed;
         }
         self.frame_app.on_key_event(key, character);
         EventProcessStatus::Ignored

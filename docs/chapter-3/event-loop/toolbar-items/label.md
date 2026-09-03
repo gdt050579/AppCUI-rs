@@ -121,7 +121,7 @@ impl CheckBoxEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().window(|| MyWin::new()).run()
+    App::new().window(MyWin::new).run()
 }
 ```
 

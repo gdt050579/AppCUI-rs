@@ -969,7 +969,7 @@ fn check_validation_event() {
         Paint('Label contains: Hello world')
         CheckHash(0x5E0D88141ECF26FD) 
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1386,7 +1386,7 @@ fn check_text_changed_event() {
         Paint('10. Empty text (16:) - nothing changes') 
         CheckHash(0x283F94E44E7C1378)             
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1459,5 +1459,5 @@ fn check_text_changed_event_readonly() {
         Paint('9. Nothing changes, text is read-only') 
         CheckHash(0x615B7D42C0680A1E) 
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }

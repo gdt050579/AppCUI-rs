@@ -98,7 +98,7 @@ fn check_checkbox_events() {
         CheckHash(0x55B82C4FACD71F83)  
         CheckCursor(14,6) 
     ";
-    App::new().size(Size::new(60, 12)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 
@@ -143,7 +143,7 @@ fn check_checkbox_set_checked() {
         Paint('now un-checked')  
         CheckHash(0x4AAF8B869A8E1A2A) 
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap(); 
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap(); 
 }
 
 #[test]

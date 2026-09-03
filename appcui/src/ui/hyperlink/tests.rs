@@ -101,7 +101,7 @@ fn check_hyperlink_control() {
         Paint('13.hyperlink 3 is clicked')
         CheckHash(0x63626CC4102F4EC1)
     ";
-    App::new().size(Size::new(60, 14)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 14)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -212,7 +212,7 @@ fn check_hyperlink_control_2() {
         Paint('7.hyperlink 3 is clicked')
         CheckHash(0x19324713879CF4AC)
     ";
-    App::new().size(Size::new(60, 14)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 14)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

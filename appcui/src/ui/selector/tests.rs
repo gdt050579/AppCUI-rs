@@ -453,7 +453,7 @@ fn check_events() {
         Paint('Window title: Dacia')   
         CheckHash(0xD22ED284CAF9BD9)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -790,7 +790,7 @@ fn check_value_set_value_clear_value() {
         }
     }
     
-    App::new().size(Size::new(80, 12)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 12)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 

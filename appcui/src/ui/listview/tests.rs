@@ -1775,7 +1775,7 @@ fn check_sort_no_groups_3_columns_with_commands() {
         Paint('4. Sort by city (ascendent) cursor on Dragos')
         CheckHash(0xE68EB359CA5885EC) 
     ";
-    App::new().size(Size::new(60, 11)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 11)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -3920,7 +3920,7 @@ fn check_on_change_current_item_event() {
         Paint('7. Title is Kai')
         CheckHash(0x1AC178C84EC4FB24)   
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -4129,7 +4129,7 @@ fn check_on_selection_changed_event() {
         Paint('8. Ion un-Selected, (12/19) in title')
         CheckHash(0x5ADEEB27CB2DACE7)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -4189,7 +4189,7 @@ fn check_on_item_action_event() {
         Paint('7. Andrei is checked')
         CheckHash(0x8C0624825955E4B1)          
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -5212,7 +5212,7 @@ fn check_dynamically_change_view() {
         Paint('5. Cursor on Iota, View: Details [Zeta,Eta and Theta are checked]')
         CheckHash(0xF63284DD9388073E)
     ";
-    App::new().size(Size::new(80, 20)).debug_script(script).window(|| Win::new()).run().unwrap();
+    App::new().size(Size::new(80, 20)).debug_script(script).window(Win::new).run().unwrap();
 }
 
 #[test]
@@ -5750,7 +5750,7 @@ fn check_select_item_method() {
         Paint('7. Title: 2/12 -> cursor at: Andrei')
         CheckHash(0x59B04A60BB56A8C)          
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -5796,7 +5796,7 @@ fn check_clear_method() {
         Paint('3. Nothing changes')
         CheckHash(0xFFF6487CAF22C71F)  
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -5836,7 +5836,7 @@ fn check_clear_search_method() {
         Paint('3. Search cleared - all items restored -> cursor on Mike')
         CheckHash(0x6C49F7AAE9F24E9C)  
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

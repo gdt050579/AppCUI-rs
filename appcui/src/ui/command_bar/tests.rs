@@ -51,7 +51,7 @@ fn check_commands() {
         }
     }
 
-    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin1::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(MyWin1::new).run().unwrap();
 }
 
 #[test]
@@ -111,7 +111,7 @@ fn check_state_commands() {
         }
     }
 
-    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -163,5 +163,5 @@ fn check_mouse_selection() {
         }
     }
 
-    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }

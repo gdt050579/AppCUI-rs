@@ -75,6 +75,6 @@ impl CommandBarEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().command_bar().window(|| MyWin::new()).run()
+    App::new().command_bar().window(MyWin::new).run()
 }
 ```

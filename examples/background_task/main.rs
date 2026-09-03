@@ -123,5 +123,5 @@ fn do_something(conector: &BackgroundTaskConector<Status, Response>) {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().window(|| MyWin::new()).run()
+    App::new().window(MyWin::new).run()
 }

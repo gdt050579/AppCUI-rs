@@ -803,5 +803,5 @@ fn check_evnts() {
         Paint('4. [12]:35')
         CheckHash(0xC769305066B41072)
     ";
-    App::new().size(Size::new(60, 11)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(MyWin::new).run().unwrap();
 }

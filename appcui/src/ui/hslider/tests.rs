@@ -716,7 +716,7 @@ fn check_events_i32() {
         Paint('title reads val = 9')
         CheckHash(0xCB63B3FB3425E861)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -763,7 +763,7 @@ fn check_events_f32_with_ticks() {
         Paint('back to the first tick, title reads val = 0')
         CheckHash(0xB211799884927B01)
     ";
-    App::new().size(Size::new(40, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

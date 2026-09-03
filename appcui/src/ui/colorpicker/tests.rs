@@ -319,7 +319,7 @@ fn check_colorpicker_events() {
         Paint('3:Color=Teal')
         CheckHash(0x59ADD9074A7194C0)
     ";
-    App::new().size(Size::new(60, 11)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

@@ -101,6 +101,6 @@ impl MenuEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().app_bar().window(|| MyWin::new()).run()
+    App::new().app_bar().window(MyWin::new).run()
 }
 ```

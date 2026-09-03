@@ -541,7 +541,7 @@ fn check_resize_surface() {
         }
     }
 
-    App::new().size(Size::new(60, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

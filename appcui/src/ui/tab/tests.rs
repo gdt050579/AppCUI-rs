@@ -296,7 +296,7 @@ fn check_page_width() {
         Paint('tab width is 5')   
         CheckHash(0xC837D11F2D6F8AA2)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -468,7 +468,7 @@ fn check_page_width_on_left() {
         Paint('tab width is 5')   
         CheckHash(0xEC90EDD06FC8B9E)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -626,7 +626,7 @@ fn check_hiddentabs_changepage() {
         Paint('3rd page')  
         CheckHash(0x8DB5DEA9AA3BE6F7)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -739,5 +739,5 @@ fn check_events() {
         }
     }
 
-    App::new().size(Size::new(80, 20)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }

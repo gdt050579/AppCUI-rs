@@ -24,5 +24,5 @@ impl TimePickerEvents for MyWin {
 }
 
 fn main() {
-    App::new().window(|| MyWin::new()).run().unwrap();
+    App::new().window(MyWin::new).run().unwrap();
 }

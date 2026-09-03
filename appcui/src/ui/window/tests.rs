@@ -426,7 +426,7 @@ fn check_window_toolbar_title_pos_recompute() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -644,7 +644,7 @@ fn check_window_on_layout_changed() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -850,7 +850,7 @@ fn check_window_toolbar_button_click() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -938,7 +938,7 @@ fn check_window_toolbar_button_events() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1036,7 +1036,7 @@ fn check_window_toolbar_checkbox_events() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1154,7 +1154,7 @@ fn check_window_toolbar_singlechoice_events() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1316,7 +1316,7 @@ fn check_window_toolbar_item_visibility() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1696,7 +1696,7 @@ fn check_window_on_cancel_callback() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1738,7 +1738,7 @@ fn check_window_enter_resize_mode() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1829,7 +1829,7 @@ fn check_window_keybeforechildren() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1890,7 +1890,7 @@ fn check_window_close() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -1968,7 +1968,7 @@ fn check_modal_window_close() {
     App::new()
         .size(Size::new(60, 10))
         .debug_script(script)
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }
@@ -2022,7 +2022,7 @@ fn check_window_close_with_commandbar_and_menu() {
         .debug_script(script)
         .command_bar()
         .app_bar()
-        .window(|| MyWin::new())
+        .window(MyWin::new)
         .run()
         .unwrap();
 }

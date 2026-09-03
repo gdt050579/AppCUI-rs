@@ -688,7 +688,7 @@ fn check_events() {
         Paint('6. None selected')   
         CheckHash(0xFE200074A00051E2)
     ";
-    App::new().size(Size::new(40, 15)).debug_script(script).window(|| MyWin::new()).run().unwrap();    
+    App::new().size(Size::new(40, 15)).debug_script(script).window(MyWin::new).run().unwrap();    
 }
 
 #[test]

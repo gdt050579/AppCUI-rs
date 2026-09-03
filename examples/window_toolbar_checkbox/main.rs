@@ -54,5 +54,5 @@
  }
 
  fn main() -> Result<(), appcui::system::Error> {
-     App::new().window(|| CheckboxWindow::new()).run()
+     App::new().window(CheckboxWindow::new).run()
  }

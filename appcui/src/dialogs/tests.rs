@@ -1197,7 +1197,7 @@ fn check_input_no_validation() {
         }
     }
 
-    App::new().size(Size::new(80, 12)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 12)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1259,7 +1259,7 @@ fn check_input_validation() {
         }
     }
 
-    App::new().size(Size::new(80, 12)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 12)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1297,7 +1297,7 @@ fn check_input_with_initial_value() {
         }
     }
 
-    App::new().size(Size::new(80, 12)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(80, 12)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[cfg(all(target_os = "windows", not(target_arch = "wasm32")))]

@@ -143,7 +143,7 @@ fn check_events() {
         Paint('Button () was pressed -> Button () was pressed -> false')
         CheckHash(0x146C22653FBA0A06)
     ";
-    App::new().size(Size::new(60, 10)).debug_script(script).window(|| MyWin::new()).run().unwrap();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]

@@ -95,7 +95,7 @@ impl ThreeStateBoxEvents for MyWindow {
         Paint('Should be unknown')  
         CheckHash(0x271B06247758B2FA) 
     ";
-    App::new().size(Size::new(80, 13)).debug_script(script).window(|| MyWindow::new()).run().unwrap();
+    App::new().size(Size::new(80, 13)).debug_script(script).window(MyWindow::new).run().unwrap();
 }
 
 #[test]
