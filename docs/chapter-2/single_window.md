@@ -4,15 +4,9 @@ A single-window mode is an AppCUI application that hosts exactly one window, doc
 
 This mode is meant for tools that do not need a window list, a custom desktop, or overlapping frames. The factory is invoked once, after the runtime is created, and must return a non-modal window (`T` implements `Control`, `WindowControl`, and `NotModalWindow`). Closing that window ends the application.
 
-```rs
-fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(|| window!("title:'Demo',d:f"))
-        .size(Size::new(40, 10))
-        .run()
-}
-```
+The factory can be a **closure** or a **function**:
 
-The factory can be a function or a closure. Building children inside the factory is the usual pattern:
+1. A **closure** — use this when you build the window inline, add children, or `new` takes arguments (`|| MyWin::new("Title")`):
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
@@ -21,9 +15,20 @@ fn main() -> Result<(), appcui::system::Error> {
         win.add(label!("'Hello World !',a:c,w:13,h:1"));
         win
     })
+    .size(Size::new(40, 10))
     .run()
 }
 ```
+
+2. A **function** or constructor with no arguments — pass `MyWin::new` (no parentheses). `fn() -> T` implements `FnOnce() -> T`, so the constructor is invoked later, after the runtime exists. Do **not** write `MyWin::new()` here; that would create the window immediately.
+
+```rs
+fn main() -> Result<(), appcui::system::Error> {
+    App::single_window(MyWin::new).size(Size::new(40, 10)).run()
+}
+```
+
+A free function works the same way: `App::single_window(hello_world_window)`.
 
 The layout you pass to the window is ignored. AppCUI replaces it so that the window occupies the entire visible desktop (leaving room for the [application bar](../chapter-4/app_bar.md) and [command bar](../chapter-4/command_bar.md) when they are enabled). Using `d:f` (docked, fill) in the `window!` macro makes that intent explicit.
 
@@ -109,6 +114,6 @@ impl WindowEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::single_window(|| MyWindow::new()).size(Size::new(40, 10)).run()
+    App::single_window(MyWindow::new).size(Size::new(40, 10)).run()
 }
 ```

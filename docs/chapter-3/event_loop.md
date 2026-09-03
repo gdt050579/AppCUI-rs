@@ -49,10 +49,12 @@ impl MyWindow {
 
 The initialization `base: Window::new(title, layout, flags),` is mandatory. As for the `title`, `layout`, and `flags`, you can provide them as parameters in the **new** method, or you can infer or hardcode them in another way. Read more about how a window can be created on the [Window](event-loop/window.md) page.
 
-Once you create such a window, register it with the application using the `.window(...)` builder method.
+Once you create such a window, register it with the application using the `.window(...)` builder method. The factory can be a **closure** (when `new` takes arguments, or you build the window inline) or a **function** / constructor with no arguments (`MyWindow::new`):
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
     App::new().window(|| MyWindow::new(/* parameters */)).run()
+    // or, if `new` takes no arguments:
+    // App::new().window(MyWindow::new).run()
 }
 ```
 

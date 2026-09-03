@@ -5,7 +5,7 @@ An application in `AppCUI` is the **context** that holds all of the framework da
 To create an application, one of the following constructors can be used:
 1. `App::new()`. This creates a builder for a classic desktop with one or more windows and chooses the best-fit terminal available on the current operating system.
 
-2. `App::single_window(factory)`. This creates a builder for an application with exactly one window that fills the desktop. The `factory` closure is invoked once, after the runtime is created, and must return that window.
+2. `App::single_window(factory)`. This creates a builder for an application with exactly one window that fills the desktop. The `factory` is invoked once, after the runtime is created, and must return that window. It can be a closure (`|| window!("Demo,d:f")`) or a function / constructor with no arguments (`MyWin::new`).
 
 3. `App::frame_app(frame_app)`. This creates a builder for games or animations that paint the full surface every frame. The provided type must implement `FrameApp`.
 
@@ -94,7 +94,7 @@ if let Err(error) = result {
 
 Usually, each AppCUI program consists of the following steps:
 1. Create a builder via `App::new()` (or another constructor).
-2. Register one or more windows with the `.window(...)` method (or pass the window factory to `App::single_window(...)`).
+2. Register one or more windows with the `.window(...)` method (or pass the window factory to `App::single_window(...)`). The factory can be a closure (`.window(|| { ... })`) or a function / constructor with no arguments (`.window(MyWin::new)`).
 3. Run the application via the `run` method. This method consumes the builder, so you cannot use it anymore after this method ends.
 
 A typical `main.rs` file that uses `AppCUI` framework looks like this:

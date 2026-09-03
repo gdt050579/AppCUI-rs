@@ -15,6 +15,10 @@ type WindowFactory = Box<dyn FnOnce(&mut RuntimeManager)>;
 /// docked to fill the desktop). Configure the terminal and desktop UI, then call
 /// [`run`](Self::run) to start the event loop.
 ///
+/// The factory passed to [`App::single_window`](crate::system::App::single_window)
+/// can be a closure (`|| window!("title:'Demo',d:f")`) or a function / constructor
+/// with no arguments (`MyWin::new`).
+///
 /// # Examples
 ///
 /// ```rust, no_run

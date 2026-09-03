@@ -14,16 +14,9 @@ fn main() -> Result<(), appcui::system::Error> {
 
 Register every startup window with `.window(factory)`. The factory is a `FnOnce() -> T` that runs after the runtime is created and must return a non-modal window (`T` implements `Control`, `WindowControl`, and `NotModalWindow`). Call `.window(...)` once per window. Windows are created in the order they were registered.
 
-```rs
-fn main() -> Result<(), appcui::system::Error> {
-    App::new()
-        .window(|| window!("'First Window',a:c,w:30,h:9"))
-        .window(|| window!("'Second Window',x:2,y:2,w:24,h:8"))
-        .run()
-}
-```
+The factory can be a **closure** or a **function**:
 
-The factory can be a function or a closure. Building children inside the factory is the usual pattern:
+1. A **closure** — use this when you build the window inline, add children, or `new` takes arguments (`|| MyWin::new("Title")`):
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
@@ -33,9 +26,20 @@ fn main() -> Result<(), appcui::system::Error> {
             win.add(label!("'Hello World !',a:c,w:13,h:1"));
             win
         })
+        .window(|| window!("'Second Window',x:2,y:2,w:24,h:8"))
         .run()
 }
 ```
+
+2. A **function** or constructor with no arguments — pass `MyWin::new` (no parentheses). `fn() -> T` implements `FnOnce() -> T`, so the constructor is invoked later, after the runtime exists. Do **not** write `MyWin::new()` here; that would create the window immediately.
+
+```rs
+fn main() -> Result<(), appcui::system::Error> {
+    App::new().window(MyWin::new).run()
+}
+```
+
+A free function works the same way: `.window(hello_world_window)`.
 
 Read more about creating windows and handling their events in the [Window](../chapter-3/event-loop/window.md) section.
 
@@ -43,7 +47,7 @@ Read more about creating windows and handling their events in the [Window](../ch
 
 Besides the methods described in [Builder](application.md#builder) the following methods are available for a multi-window mode setup:
 * `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one. This method is only available on the multi-window builder. Read more in [Custom desktops](../chapter-4/custom_desktop.md).
-* `.window(factory)` to register a window that will be created when the application starts (multi-window mode; call once per window)
+* `.window(factory)` to register a window that will be created when the application starts (multi-window mode; call once per window). `factory` can be a closure (`.window(|| { ... })`) or a function / constructor with no arguments (`.window(MyWin::new)`)
 * `.app_bar()` to enable the application top app bar. Read more in [Application bar](../chapter-4/app_bar.md).
 * `.command_bar()` to enable the application command bar. Read more in [Command bar](../chapter-4/command_bar.md).
 * `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in the [Themes](../chapter-6/themes.md) section.
@@ -100,7 +104,7 @@ fn main() -> Result<(), appcui::system::Error> {
 }
 ```
 
-A more complete application usually uses a `#[Window(...)]` type so that child-control events are handled on the window. Register that type the same way:
+A more complete application usually uses a `#[Window(...)]` type so that child-control events are handled on the window. If `new` takes arguments, wrap the call in a closure. If `new` takes none, pass `CounterWindow::new` directly:
 
 ```rs
 use appcui::prelude::*;

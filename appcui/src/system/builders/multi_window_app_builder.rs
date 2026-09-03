@@ -70,17 +70,26 @@ impl MultiWindowAppBuilder {
 
     /// Registers a window that will be created when the application starts.
     ///
-    /// Call this method once for each window. The factory closure runs after the
+    /// Call this method once for each window. The factory runs after the
     /// runtime is initialized and must return a non-modal window. Windows are
     /// created in the order they were registered.
     ///
+    /// The factory can be a **closure** or a **function** (`FnOnce() -> T`):
+    /// * `.window(|| { ... })` or `.window(|| MyWin::new("Title"))` — a closure,
+    ///   useful when you build children inline or `new` takes arguments.
+    /// * `.window(MyWin::new)` — a constructor / function with no arguments.
+    ///   Pass `MyWin::new` (no parentheses). Writing `MyWin::new()` would construct
+    ///   the window immediately, before the runtime exists.
+    ///
     /// # Parameters
-    /// * `factory` - A `FnOnce() -> T` that constructs the window.
+    /// * `factory` - A `FnOnce() -> T` that constructs the window (closure or function).
     ///
     /// # Type Constraints
     /// * `T` must implement [`Control`], [`WindowControl`], and [`NotModalWindow`].
     ///
     /// # Examples
+    ///
+    /// Closure:
     ///
     /// ```rust, no_run
     /// use appcui::prelude::*;
@@ -93,6 +102,20 @@ impl MultiWindowAppBuilder {
     ///             win
     ///         })
     ///         .run()
+    /// }
+    /// ```
+    ///
+    /// Function / constructor (`new` takes no arguments):
+    ///
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// fn demo_window() -> Window {
+    ///     window!("'Demo',a:c,w:40,h:10")
+    /// }
+    ///
+    /// fn main() -> Result<(), appcui::system::Error> {
+    ///     App::new().window(demo_window).run()
     /// }
     /// ```
     pub fn window<F, T>(mut self, factory: F) -> Self

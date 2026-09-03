@@ -2,12 +2,15 @@
 
 A single window app is an AppCUI application where you only have one window that ocupies the entire desktop. Usually, when you create a AppCUI app, you can add multiple windows to a desktop object. In this mode you can only add one window, and terminating that window will close the app.
 
-To do this you need to use `App::single_window(...)` as follows:
+To do this you need to use `App::single_window(...)` as follows. The factory can be a **closure** or a **function** / constructor with no arguments (`MyWin::new`):
 ```rs
 App::single_window(|| {
     // construct the one and only window
     window!("Demo,d:f")
 }).run()
+
+// equivalent when `new` takes no arguments:
+App::single_window(MyWin::new).run()
 ```
 
 ## Remarks

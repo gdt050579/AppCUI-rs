@@ -100,17 +100,26 @@ impl App {
 
     /// Creates a builder for a single-window application.
     ///
-    /// The factory closure is invoked once, after the runtime is created, and must
+    /// The factory is invoked once, after the runtime is created, and must
     /// return a non-modal window. In this mode the window typically fills the desktop
     /// and closing it ends the application.
     ///
+    /// The factory can be a **closure** or a **function** (`FnOnce() -> T`):
+    /// * `App::single_window(|| window!("title:'Demo',d:f"))` — a closure, useful when
+    ///   you build the window inline or `new` takes arguments (`|| MyWin::new("Title")`).
+    /// * `App::single_window(MyWin::new)` — a constructor / function with no arguments.
+    ///   Pass `MyWin::new` (no parentheses). Writing `MyWin::new()` would construct the
+    ///   window immediately, before the runtime exists.
+    ///
     /// # Parameters
-    /// * `factory` - A `FnOnce() -> T` that constructs the main window.
+    /// * `factory` - A `FnOnce() -> T` that constructs the main window (closure or function).
     ///
     /// # Type Constraints
     /// * `T` must implement [`Control`], [`WindowControl`], and [`NotModalWindow`].
     ///
     /// # Examples
+    ///
+    /// Closure:
     ///
     /// ```rust, no_run
     /// use appcui::prelude::*;
@@ -119,6 +128,20 @@ impl App {
     ///     App::single_window(|| window!("title:'Demo',d:f"))
     ///         .size(Size::new(40, 10))
     ///         .run()
+    /// }
+    /// ```
+    ///
+    /// Function / constructor (`new` takes no arguments):
+    ///
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// fn demo_window() -> Window {
+    ///     window!("title:'Demo',d:f")
+    /// }
+    ///
+    /// fn main() -> Result<(), appcui::system::Error> {
+    ///     App::single_window(demo_window).size(Size::new(40, 10)).run()
     /// }
     /// ```
     #[allow(clippy::new_ret_no_self)]
