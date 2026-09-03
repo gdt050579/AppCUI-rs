@@ -11,3 +11,5 @@ Besides the methods described in [Builder](application.md#builder) the following
 * `.command_bar()` to enable the application command bar
 * `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in the [Themes](chapter-6/themes.md) section.
 * `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
+
+## Example
