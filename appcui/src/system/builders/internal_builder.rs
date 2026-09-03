@@ -315,6 +315,7 @@ macro_rules! impl_terminal_builder_methods {
 
         #[inline(always)]
         #[cfg(test)]
+        #[allow(dead_code)]
         pub(crate) fn runtime_check(mut self, check: fn()) -> Self {
             self.builder.runtime_check(check);
             self
