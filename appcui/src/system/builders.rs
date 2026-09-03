@@ -1,3 +1,19 @@
+//! Application builders used to configure and start an AppCUI application.
+//!
+//! Obtain a builder from the matching [`App`](crate::system::App) constructor, chain
+//! configuration methods, then call `run` to start the event loop.
+//!
+//! | Constructor | Builder | Typical use |
+//! |-------------|---------|-------------|
+//! | [`App::new`](crate::system::App::new) | [`MultiWindowAppBuilder`] | Desktop with one or more windows |
+//! | [`App::single_window`](crate::system::App::single_window) | [`SingleWindowAppBuilder`] | A single window that fills the desktop |
+//! | [`App::frame_app`](crate::system::App::frame_app) | [`FrameAppBuilder`] | Games or animations that update every frame |
+//! | [`App::input_app`](crate::system::App::input_app) | [`InputAppBuilder`] | Custom paint and input without window chrome |
+//!
+//! Every builder shares terminal settings such as size, title, backend, logging,
+//! color schema, and screen restore. Window-based builders also expose desktop
+//! UI settings (app bar, command bar, theme, timers, and a custom desktop).
+
 mod internal_builder;
 mod app_desktop;
 mod multi_window_app_builder;

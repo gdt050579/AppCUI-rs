@@ -6,9 +6,26 @@ use crate::ui::common::traits::Control;
 use crate::ui::common::traits::NotModalWindow;
 use crate::ui::common::traits::WindowControl;
 
-/// Builder for a multi-window AppCUI application.
 type WindowFactory = Box<dyn FnOnce(&mut RuntimeManager)>;
 
+/// Builder for a single-window AppCUI application.
+///
+/// Obtain this builder with [`App::single_window`](crate::system::App::single_window).
+/// In this mode the application hosts exactly one non-modal window (typically
+/// docked to fill the desktop). Configure the terminal and desktop UI, then call
+/// [`run`](Self::run) to start the event loop.
+///
+/// # Examples
+///
+/// ```rust, no_run
+/// use appcui::prelude::*;
+///
+/// fn main() -> Result<(), appcui::system::Error> {
+///     App::single_window(|| window!("title:'Demo',d:f"))
+///         .size(Size::new(40, 10))
+///         .run()
+/// }
+/// ```
 pub struct SingleWindowAppBuilder {
     builder: InternalBuilder,
     window_factory: WindowFactory,
@@ -29,7 +46,14 @@ impl SingleWindowAppBuilder {
             }),
         }
     }
-    /// Runs the application using the current settings.
+    /// Builds the application from the current settings and starts the event loop.
+    ///
+    /// This method consumes the builder, creates the runtime, instantiates the
+    /// single window, and blocks until the application closes.
+    ///
+    /// # Errors
+    /// Returns [`crate::system::Error`] if the application cannot be initialized
+    /// (for example, if another application is already running).
     #[inline(always)]
     pub fn run(self) -> Result<(), crate::system::Error> {
         let app = self.builder.build()?;

@@ -124,67 +124,153 @@ impl InternalBuilder {
 
 macro_rules! impl_terminal_builder_methods {
     () => {
-        /// Sets the size of the terminal.
+        /// Sets the size of the terminal in character cells.
+        ///
+        /// If not specified, the backend uses the current terminal size (or a
+        /// backend-specific default).
+        ///
+        /// # Parameters
+        /// * `terminal_size` - Width and height of the terminal, in character cells.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().size(Size::new(80, 25));
+        /// ```
         #[inline(always)]
         pub fn size(mut self, terminal_size: crate::graphics::Size) -> Self {
             self.builder.size(terminal_size);
             self
         }
 
-        /// Sets the title of the application.
+        /// Sets the title shown by the terminal window or browser tab.
+        ///
+        /// Support depends on the selected backend. If not specified, a backend
+        /// default title is used.
+        ///
+        /// # Parameters
+        /// * `title` - The application title.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().title("My Application");
+        /// ```
         #[inline(always)]
         pub fn title(mut self, title: &str) -> Self {
             self.builder.title(title);
             self
         }
 
-        /// Sets the log file where logs will be displayed. This option is used only in debug mode.
+        /// Sets the log file used when the crate is compiled in debug mode.
+        ///
+        /// This option has no effect in release builds.
+        ///
+        /// # Parameters
+        /// * `name` - Path of the log file.
+        /// * `append` - If `true`, new logs are appended; if `false`, the file is overwritten.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().log_file("appcui.log", false);
+        /// ```
         #[inline(always)]
         pub fn log_file(mut self, name: &str, append: bool) -> Self {
             self.builder.log_file(name, append);
             self
         }
 
-        /// Enables or disables the use of the terminal color schema.
+        /// Enables or disables the terminal color schema.
+        ///
+        /// When enabled (the default), the backend may map AppCUI colors through
+        /// the terminal's color schema. Disable this to keep the exact colors
+        /// defined by the theme.
+        ///
+        /// # Parameters
+        /// * `enabled` - `true` to use the terminal color schema, `false` to disable it.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().color_schema(false);
+        /// ```
         #[inline(always)]
         pub fn color_schema(mut self, enabled: bool) -> Self {
             self.builder.color_schema(enabled);
             self
         }
 
-        /// If enabled the backend will attempt to restore the original screen content and cursor position when the application ends.
-        /// If disabled, when the application ends the screen will be cleared.
-        /// By default this option is set.
+        /// Controls whether the original screen is restored when the application ends.
         ///
-        /// **Remarks:** Not all backends have the support to restore the original screen (for those that do not have this support, the screen will always be cleared when application ends).
+        /// When enabled (the default), the backend attempts to restore the original
+        /// screen content and cursor position. When disabled, the screen is cleared
+        /// on exit.
+        ///
+        /// # Parameters
+        /// * `enable` - `true` to restore the original screen, `false` to clear it.
+        ///
+        /// # Remarks
+        /// Not all backends can restore the original screen. Backends without this
+        /// support always clear the screen when the application ends.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().restore_screen(false);
+        /// ```
         #[inline(always)]
         pub fn restore_screen(mut self, enable: bool) -> Self {
             self.builder.restore_screen(enable);
             self
         }
 
-        /// Sets the backend to use.
+        /// Selects the terminal backend used to render the application.
+        ///
+        /// If not specified, AppCUI picks a backend appropriate for the current
+        /// platform and enabled crate features.
+        ///
+        /// # Parameters
+        /// * `backend` - The [`crate::backend::Type`] to use.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// #[cfg(target_os = "windows")]
+        /// let _builder = App::new().backend(appcui::backend::Type::WindowsVT);
+        /// #[cfg(not(target_os = "windows"))]
+        /// let _builder = App::new();
+        /// ```
         #[inline(always)]
         pub fn backend(mut self, backend: crate::backend::Type) -> Self {
             self.builder.backend(backend);
             self
         }
 
-        // /// Enables the single window mode.
-        // #[inline(always)]
-        // pub fn single_window(mut self) -> Self {
-        //     self.builder.single_window();
-        //     self
-        // }
-
-        /// Sets the debug script to use.
-        /// Creates a builder designed for unit testing.
-        /// The provided parameters indicated:
-        /// * `width` and `height` : the size of the simulated terminal
-        /// * `script` : a script with multiple commands (one command per line) that will be executed one after another simulating events that could be send to the AppCUI. Once all commands are being executed, the application will end.
+        /// Configures a debug script that simulates input for unit tests.
         ///
-        /// ## Debug commands
-        /// The following list of commands are supported for the script:
+        /// Each line of `script` is a command executed in order against a virtual
+        /// terminal. After the last command the application ends.
+        ///
+        /// Combine this method with [`size`](Self::size) to set the simulated
+        /// terminal dimensions (`width` and `height`).
+        ///
+        /// # Parameters
+        /// * `script` - Commands to execute, one per line.
+        ///
+        /// # Debug commands
         ///
         /// **Mouse related commands**
         /// * `Mouse.Hold(x,y,button)` simulates an event where the mouse button is being pressed while the mouse is located at a specific position on screen. The parameters `x` and `y` are a screen position, while the parameter `button` is one of `left`, `right` or `center`
@@ -206,6 +292,21 @@ macro_rules! impl_terminal_builder_methods {
         ///
         /// **Validation commands**
         /// * `CheckHash(hash)` checks if the hash computer over the current virtual screen is as expected. If not it will panic. This is useful for unit testing.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// let script = "
+        ///     Paint(initial)
+        ///     Key.Pressed(Escape)
+        /// ";
+        /// App::new()
+        ///     .size(Size::new(60, 10))
+        ///     .debug_script(script)
+        ///     .window(|| window!("'Test',a:c,w:20,h:6"));
+        /// ```
         #[inline(always)]
         pub fn debug_script(mut self, script: &str) -> Self {
             self.builder.debug_script(script);
@@ -223,35 +324,102 @@ macro_rules! impl_terminal_builder_methods {
 
 macro_rules! impl_ui_builder_methods {
     () => {
-        /// Enables the Application bar.
+        /// Enables the application bar at the top of the desktop.
+        ///
+        /// The app bar hosts menus and other application-wide commands. It is
+        /// disabled by default.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().app_bar();
+        /// ```
         #[inline(always)]
         pub fn app_bar(mut self) -> Self {
             self.builder.app_bar();
             self
         }
 
-        /// Enables the command bar.
+        /// Enables the command bar at the bottom of the desktop.
+        ///
+        /// The command bar shows keyboard shortcuts associated with the focused
+        /// control. It is disabled by default.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().command_bar();
+        /// ```
         #[inline(always)]
         pub fn command_bar(mut self) -> Self {
             self.builder.command_bar();
             self
         }
 
-        /// Sets the theme of the application. If not specified, the default theme will be used.
+        /// Sets the theme used by the desktop and all controls.
+        ///
+        /// If not specified, the default theme is used. To change the theme after
+        /// the application is running, call [`App::set_theme`](crate::system::App::set_theme).
+        ///
+        /// # Parameters
+        /// * `theme` - The [`crate::system::Theme`] to apply at startup.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().theme(Theme::new(Themes::DarkGray));
+        /// ```
         #[inline(always)]
         pub fn theme(mut self, theme: crate::system::Theme) -> Self {
             self.builder.theme(theme);
             self
         }
 
-        /// Sets the number of timers that can be used in the application.
+        /// Sets the maximum number of timers the application can use.
+        ///
+        /// The value is clamped to at least `1`. The default is `4`.
+        ///
+        /// # Parameters
+        /// * `count` - Maximum number of simultaneous timers.
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().timers_count(8);
+        /// ```
         #[inline(always)]
         pub fn timers_count(mut self, count: u8) -> Self {
             self.builder.timers_count(count);
             self
         }
 
-        /// Sets the desktop manager.
+        /// Replaces the default desktop with a custom desktop control.
+        ///
+        /// Use this to implement your own desktop background, window management,
+        /// or desktop-level event handling.
+        ///
+        /// # Parameters
+        /// * `desktop` - A control that implements [`crate::ui::common::traits::DesktopControl`].
+        ///
+        /// # Type Constraints
+        /// * `T` must implement [`crate::ui::common::traits::Control`] and
+        ///   [`crate::ui::common::traits::DesktopControl`].
+        ///
+        /// # Examples
+        ///
+        /// ```rust, no_run
+        /// use appcui::prelude::*;
+        ///
+        /// App::new().desktop(Desktop::new());
+        /// ```
         #[inline(always)]
         pub fn desktop<T>(mut self, desktop: T) -> Self
         where

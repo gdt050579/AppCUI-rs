@@ -17,9 +17,39 @@ static APP_CREATED_MUTEX: Mutex<bool> = Mutex::new(false);
 #[cfg(target_arch = "wasm32")]
 const WEBTERMINAL_END_MESSAGE_HTML: &str = "<h1>{} has ended</h1><p>To re-start the application, please refresh the page.</p>";
 
-/// Represents the main application object for AppCUI.
+/// The main application object for AppCUI.
 ///
-/// This struct is used to create and manage the main application. It provides methods to add windows, set the theme, and run the application.
+/// `App` is the entry point for creating and managing an AppCUI application. Use one of
+/// the constructor methods to obtain a builder, configure the terminal and UI, then call
+/// `run` on that builder to start the event loop.
+///
+/// Only one application can exist at a time. Creating a second instance while another
+/// is still running returns an error.
+///
+/// # Application types
+///
+/// | Constructor | Builder | Use when |
+/// |-------------|---------|----------|
+/// | [`App::new`] | [`crate::system::MultiWindowAppBuilder`] | Classic desktop with one or more windows |
+/// | [`App::single_window`] | [`crate::system::SingleWindowAppBuilder`] | A single window that fills the desktop |
+/// | [`App::frame_app`] | [`crate::system::FrameAppBuilder`] | Games or animations that update every frame |
+/// | [`App::input_app`] | [`crate::system::InputAppBuilder`] | Custom paint and input without window chrome |
+///
+/// # Examples
+///
+/// ```rust, no_run
+/// use appcui::prelude::*;
+///
+/// fn main() -> Result<(), appcui::system::Error> {
+///     App::new()
+///         .window(|| {
+///             let mut win = window!("'First Window',a:c,w:30,h:9");
+///             win.add(label!("'Hello World !',a:c,w:13,h:1"));
+///             win
+///         })
+///         .run()
+/// }
+/// ```
 pub struct App {
     _phantom: PhantomData<*mut ()>,
 }
@@ -46,13 +76,51 @@ impl App {
             _phantom: Default::default(),
         })
     }
-    /// Creates a new builder object for a multi window application.
+    /// Creates a builder for a multi-window desktop application.
+    ///
+    /// Chain configuration methods on the returned [`crate::system::MultiWindowAppBuilder`],
+    /// register one or more windows with [`window`](crate::system::MultiWindowAppBuilder::window),
+    /// then call [`run`](crate::system::MultiWindowAppBuilder::run) to start the event loop.
+    ///
+    /// # Examples
+    ///
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// fn main() -> Result<(), appcui::system::Error> {
+    ///     App::new()
+    ///         .window(|| window!("'First Window',a:c,w:30,h:9"))
+    ///         .run()
+    /// }
+    /// ```
     #[allow(clippy::new_ret_no_self)]
     pub fn new() -> crate::system::MultiWindowAppBuilder {
         crate::system::MultiWindowAppBuilder::new()
     }
 
-    /// Creates a new builder object for a single window application.
+    /// Creates a builder for a single-window application.
+    ///
+    /// The factory closure is invoked once, after the runtime is created, and must
+    /// return a non-modal window. In this mode the window typically fills the desktop
+    /// and closing it ends the application.
+    ///
+    /// # Parameters
+    /// * `factory` - A `FnOnce() -> T` that constructs the main window.
+    ///
+    /// # Type Constraints
+    /// * `T` must implement [`Control`], [`WindowControl`], and [`NotModalWindow`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// fn main() -> Result<(), appcui::system::Error> {
+    ///     App::single_window(|| window!("title:'Demo',d:f"))
+    ///         .size(Size::new(40, 10))
+    ///         .run()
+    /// }
+    /// ```
     #[allow(clippy::new_ret_no_self)]
     pub fn single_window<F, T>(factory: F) -> crate::system::SingleWindowAppBuilder
     where
@@ -61,13 +129,61 @@ impl App {
     {
         crate::system::SingleWindowAppBuilder::new(factory)
     }
-    /// Creates a new builder object for a frame application.
+    /// Creates a builder for a frame-based application.
+    ///
+    /// Use this when the application paints the full surface every tick (games,
+    /// animations, visualizations). The provided type must implement
+    /// [`crate::system::FrameApp`].
+    ///
+    /// # Parameters
+    /// * `frame_app` - The object that receives start, update, input, paint, and close callbacks.
+    ///
+    /// # Examples
+    ///
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// struct HelloWorld;
+    /// impl FrameApp for HelloWorld {
+    ///     fn on_paint(&self, surface: &mut Surface) {
+    ///         surface.write_string(0, 0, "Hello World !", charattr!("white"), false);
+    ///     }
+    /// }
+    ///
+    /// fn main() -> Result<(), appcui::system::Error> {
+    ///     App::frame_app(HelloWorld {}).fps(1).run()
+    /// }
+    /// ```
     #[allow(clippy::new_ret_no_self)]
     pub fn frame_app<T: crate::system::FrameApp + 'static>(frame_app: T) -> crate::system::FrameAppBuilder<T> {
         crate::system::FrameAppBuilder::new(frame_app)
     }
 
-    /// Creates a new builder object for a input application.
+    /// Creates a builder for an input-driven application.
+    ///
+    /// Use this when you want to paint the surface and handle keyboard or mouse
+    /// events without window chrome. The provided type must implement
+    /// [`crate::system::InputApp`].
+    ///
+    /// # Parameters
+    /// * `input_app` - The object that receives start, resize, input, paint, and close callbacks.
+    ///
+    /// # Examples
+    ///
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// struct HelloWorld;
+    /// impl InputApp for HelloWorld {
+    ///     fn on_paint(&self, surface: &mut Surface) {
+    ///         surface.write_string(0, 0, "Hello World !", charattr!("white"), false);
+    ///     }
+    /// }
+    ///
+    /// fn main() -> Result<(), appcui::system::Error> {
+    ///     App::input_app(HelloWorld {}).run()
+    /// }
+    /// ```
     #[allow(clippy::new_ret_no_self)]
     pub fn input_app<T: crate::system::InputApp + 'static>(input_app: T) -> crate::system::InputAppBuilder<T> {
         crate::system::InputAppBuilder::new(input_app)
@@ -100,7 +216,26 @@ impl App {
         Ok(())
     }
 
-    /// Sets the theme for the current application.
+    /// Replaces the theme of the running application.
+    ///
+    /// Call this from an event handler (or any other code that runs after `run` has
+    /// started) to change colors and styles at runtime. To set the theme before the
+    /// event loop starts, use the builder [`theme`](crate::system::MultiWindowAppBuilder::theme)
+    /// method instead.
+    ///
+    /// # Parameters
+    /// * `theme` - The new [`Theme`] to apply to the desktop and all controls.
+    ///
+    /// # Panics
+    /// Panics if no application has been created yet.
+    ///
+    /// # Examples
+    ///
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// App::set_theme(Theme::new(Themes::DarkGray));
+    /// ```
     pub fn set_theme(theme: Theme) {
         if !App::is_created() {
             panic!("App::set_theme can only be called after the App has been created !");
@@ -108,7 +243,21 @@ impl App {
         RuntimeManager::get().set_theme(theme);
     }
 
-    /// Closes the current application.
+    /// Requests that the current application terminate.
+    ///
+    /// The event loop exits after the current event is processed. If no application
+    /// is running, this method does nothing.
+    ///
+    /// Frame and input applications also close automatically on `Escape` when
+    /// [`auto_close`](crate::system::FrameAppBuilder::auto_close) is enabled (the default).
+    ///
+    /// # Examples
+    ///
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// App::close();
+    /// ```
     pub fn close() {
         if App::is_created() {
             RuntimeManager::get().close();
