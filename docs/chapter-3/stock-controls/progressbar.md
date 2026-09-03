@@ -57,13 +57,14 @@ The following code creates a window with a progress bar that shows the progress 
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("Test,d:f");
-    let mut p = ProgressBar::new(100,layout!("x:1,y:1,w:30,h:2"), progressbar::Flags::None);
-    p.update_text("Copying ...");
-    w.add(p);
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut p = ProgressBar::new(100,layout!("x:1,y:1,w:30,h:2"), progressbar::Flags::None);
+            p.update_text("Copying ...");
+            w.add(p);
+            w
+        })
+        .run()
 }
 ```

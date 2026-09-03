@@ -92,14 +92,16 @@ It is popular for systems programming.
 From: https://en.wikipedia.org/wiki/Rust_(programming_language)
 ";
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(60,20)).build()?;
-    let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
-    let mut c = canvas!("'60x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
-    let s = c.drawing_surface_mut();
-    s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
-    w.add(c);
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .size(Size::new(60,20))
+        .window(|| {
+            let mut w = window!("Title,a:c,w:40,h:8,flags:Sizeable");
+            let mut c = canvas!("'60x15',d:f,flags=ScrollBars,lsm:3,tsm:1");
+            let s = c.drawing_surface_mut();
+            s.write_string(0, 0, text, CharAttribute::with_color(Color::White, Color::Black), true);
+            w.add(c);
+            w
+        })
+        .run()
 }
 ```

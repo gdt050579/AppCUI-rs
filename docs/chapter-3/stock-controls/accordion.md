@@ -83,22 +83,22 @@ use appcui::prelude::*;
 
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut w = window!("Test,d:f");
-    let mut t = accordion!("l:1,t:1,r:1,b:3,panels:['Panel &1','Panel &2','Panel &3']");
-    t.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
-    t.add(0, button!("T1-1-B,a:c,w:10,type:flat"));      
-    t.add(1, button!("T1-2-A,r:1,b:0,w:14,type:flat"));
-    t.add(1, button!("T1-2-B,a:c,w:14,type:flat")); 
-    t.add(2, button!("T1-3-A,r:1,b:0,w:20,type:flat"));
-    t.add(2, button!("T1-3-B,d:l,w:20,type:flat"));  
-    w.add(t); 
+    App::new()
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut t = accordion!("l:1,t:1,r:1,b:3,panels:['Panel &1','Panel &2','Panel &3']");
+            t.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
+            t.add(0, button!("T1-1-B,a:c,w:10,type:flat"));      
+            t.add(1, button!("T1-2-A,r:1,b:0,w:14,type:flat"));
+            t.add(1, button!("T1-2-B,a:c,w:14,type:flat")); 
+            t.add(2, button!("T1-3-A,r:1,b:0,w:20,type:flat"));
+            t.add(2, button!("T1-3-B,d:l,w:20,type:flat"));  
+            w.add(t); 
 
-    w.add(button!("OK,r:0,b:0,w:10, type: flat"));
-    w.add(button!("Cancel,r:12,b:0,w:10, type: flat"));
-
-    a.add_window(w);
-    a.run();
-    Ok(())
+            w.add(button!("OK,r:0,b:0,w:10, type: flat"));
+            w.add(button!("Cancel,r:12,b:0,w:10, type: flat"));
+            w
+        })
+        .run()
 }
 ```

@@ -118,23 +118,24 @@ use appcui::prelude::*;
 
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("Animals,a:c,w:50,h:11,flags: Sizeable");
-    let mut p = panel!("l:1,t:1,b:1,r:1");
-    let mut l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
-    l.add_item(listbox::Item::new("Dog (man best friend)", false));
-    l.add_item(listbox::Item::new("Cat (independent)", true));
-    l.add_item(listbox::Item::new("Elephant (the largest land animal)", false));
-    l.add_item(listbox::Item::new("Giraffe (the tallest animal, can reach 5.5m)", true));
-    l.add_item(listbox::Item::new("Lion (the king of the jungle)", false));
-    l.add_item(listbox::Item::new("Tiger (the largest cat species)", false));
-    l.add_item(listbox::Item::new("Zebra (black and white stripes)", false));
-    l.add_item(listbox::Item::new("Donkey (related to horses)", false));
-    l.add_item(listbox::Item::new("Cow (provides milk)", false));
-    p.add(l);
-    w.add(p);
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = window!("Animals,a:c,w:50,h:11,flags: Sizeable");
+            let mut p = panel!("l:1,t:1,b:1,r:1");
+            let mut l = listbox!("d:f,flags: ScrollBars+CheckBoxes+SearchBar, lsm:2");
+            l.add_item(listbox::Item::new("Dog (man best friend)", false));
+            l.add_item(listbox::Item::new("Cat (independent)", true));
+            l.add_item(listbox::Item::new("Elephant (the largest land animal)", false));
+            l.add_item(listbox::Item::new("Giraffe (the tallest animal, can reach 5.5m)", true));
+            l.add_item(listbox::Item::new("Lion (the king of the jungle)", false));
+            l.add_item(listbox::Item::new("Tiger (the largest cat species)", false));
+            l.add_item(listbox::Item::new("Zebra (black and white stripes)", false));
+            l.add_item(listbox::Item::new("Donkey (related to horses)", false));
+            l.add_item(listbox::Item::new("Cow (provides milk)", false));
+            p.add(l);
+            w.add(p);
+            w
+        })
+        .run()
 }
 ```
