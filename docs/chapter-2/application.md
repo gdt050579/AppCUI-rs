@@ -49,15 +49,7 @@ Regarless of the app type, the following methods are available for each builder:
 * `.restore_screen(enabled)` if set the backend will attempt to restore the original screen status (content, cursor position, etc.) as it was before the application started. This option is **enabled** by default. Keep in mind that not all backends have this kind of support.
 * `.debug_script(script)` to simulate input for unit tests. Combine this with `.size(...)` to set the simulated terminal dimensions.
 
-
 Besides these, each build has aditional methods specific to it.
-
-* `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one (not available in single-window mode)
-* `.window(factory)` to register a window that will be created when the application starts (multi-window mode; call once per window)
-* `.app_bar()` to enable the application top app bar
-* `.command_bar()` to enable the application command bar
-* `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in the [Themes](chapter-6/themes.md) section.
-* `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
 
 After setting up the configuration for an application, call the `run()` method to create the runtime, instantiate every registered window, and start the event loop. This method returns a result of type `Result<(),Error>` that can be obtained via several methods such as:
 * `unwrap()` or `expect(...)` methods
@@ -115,3 +107,9 @@ fn main() -> Result<(), appcui::system::Error> {
         .run()
 }
 ```
+
+## Static methods
+
+After an application is executed, you can use the following static methods:
+* `App::set_theme(theme)` to set up the theme of the application
+* `App::close()` to close the application
