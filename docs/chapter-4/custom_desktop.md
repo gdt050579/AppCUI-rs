@@ -47,7 +47,7 @@ These methods have the following purpose:
 
 ## Using the custom desktop
 
-To use the custom desktop, use the `.desktop(...)` method from the **App** like in the following example:
+To use the custom desktop, use the `.desktop(...)` method on the multi-window builder (`App::new()`). This method is not available in single-window, frame-app, or input-app modes.
 
 ```rs
 #[Desktop(events=..., overwrite=...)]

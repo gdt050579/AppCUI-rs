@@ -42,7 +42,7 @@ Read more about creating windows and handling their events in the [Window](../ch
 ## Additional constructor methods
 
 Besides the methods described in [Builder](application.md#builder) the following methods are available for a multi-window mode setup:
-* `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one (not available in single-window mode). Read more in [Custom desktops](../chapter-4/custom_desktop.md).
+* `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one. This method is only available on the multi-window builder. Read more in [Custom desktops](../chapter-4/custom_desktop.md).
 * `.window(factory)` to register a window that will be created when the application starts (multi-window mode; call once per window)
 * `.app_bar()` to enable the application top app bar. Read more in [Application bar](../chapter-4/app_bar.md).
 * `.command_bar()` to enable the application command bar. Read more in [Command bar](../chapter-4/command_bar.md).

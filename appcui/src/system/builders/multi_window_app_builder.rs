@@ -40,6 +40,34 @@ impl MultiWindowAppBuilder {
         }
     }
 
+    /// Replaces the default desktop with a custom desktop control.
+    ///
+    /// Use this to implement your own desktop background, window management,
+    /// or desktop-level event handling.
+    ///
+    /// # Parameters
+    /// * `desktop` - A control that implements [`crate::ui::common::traits::DesktopControl`].
+    ///
+    /// # Type Constraints
+    /// * `T` must implement [`crate::ui::common::traits::Control`] and
+    ///   [`crate::ui::common::traits::DesktopControl`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// App::new().desktop(Desktop::new());
+    /// ```
+    #[inline(always)]
+    pub fn desktop<T>(mut self, desktop: T) -> Self
+    where
+        T: crate::ui::common::traits::Control + crate::ui::common::traits::DesktopControl + 'static,
+    {
+        self.builder.desktop(desktop);
+        self
+    }
+
     /// Registers a window that will be created when the application starts.
     ///
     /// Call this method once for each window. The factory closure runs after the

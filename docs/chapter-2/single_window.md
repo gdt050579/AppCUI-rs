@@ -37,7 +37,7 @@ Besides the methods described in [Builder](application.md#builder) the following
 * `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in the [Themes](../chapter-6/themes.md) section.
 * `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
 
-There is no `.window(...)` method on this builder. The one window is the factory passed to `App::single_window(...)`.
+There is no `.window(...)` method on this builder. The one window is the factory passed to `App::single_window(...)`. There is also no `.desktop(...)` method; a custom desktop can only be set in [multi-window mode](multi_window.md).
 
 ## Window behavior
 
@@ -50,21 +50,14 @@ Because there is only one window, desktop actions such as `Tab` / `Ctrl+Tab` win
 ## Remarks
 
 * Single-window mode is the opposite of [multi-window mode](multi_window.md). Here you cannot register a second window, use a custom desktop, or allow the window to move or resize.
-* `.desktop(...)` is **not** available. The method exists on the builder, but using it panics:
-    ```rs
-    // the following code will panic
-    App::single_window(|| window!("Demo,d:f"))
-        .desktop(MyDesktop::new())
-        .run()
-    ```
+* `.desktop(...)` is **not** available on this builder. A custom desktop can only be set in multi-window mode, via `App::new().desktop(...)`.
 * The `Sizeable` window flag is **not** allowed. If it is set, the code panics:
     ```rs
     // the following line will panic
     App::single_window(|| window!("Test,a:c,flags: Sizeable")).run()
     ```
-* You cannot add another window later. A second `add_window(...)` call panics.
 * The factory passed to `App::single_window(...)` must return a **non-modal** window. Open modal dialogs later from the running window, not from the factory.
-* There can be only one application per process. A second `App::single_window(...).run()` while another instance is running returns an error.
+
 
 ## Example
 

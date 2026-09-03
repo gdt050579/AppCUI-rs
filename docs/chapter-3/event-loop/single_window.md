@@ -11,13 +11,7 @@ App::single_window(|| {
 ```
 
 ## Remarks
-* in a `Single Window` mode you can not set a custom desktop as there is only one window and it covers the entire visible size of a desktop. Using a `.desktop(...)` method with `App::single_window(...)` will result in a panic:
-    ```rs
-    // the following code wil panic
-    App::single_window(|| window!("Demo,d:f"))
-        .desktop(...)
-        .run()
-    ```
+* in a `Single Window` mode you can not set a custom desktop as there is only one window and it covers the entire visible size of a desktop. `.desktop(...)` is only available on the multi-window builder (`App::new()`).
 * Since in a `Single Window` mode there is only one window, the factory passed to `App::single_window(...)` is invoked once and must return that window. You can not register a second window.
 * Since in a `Single Window` mode the window ocupies the entire visible size of a desktop, you can not resize or move it. As such, window flag attributes like `Sizeable` are not allowed. If used, the code will panic. The layout (regardless on how you set it up) will be changed to make sure that the window ocupies the entire visible desktop space.
     ```rs
