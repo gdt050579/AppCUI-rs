@@ -7,7 +7,7 @@ A command bar is a bar (on the bottom part of a desktop and on top of every wind
 The command bar is unique per application. This means that you need to enable it when a new application is created. A typical way to do this is by using the `.command_bar()` method when building an application, as in the following snippet:
 
 ```rust
-let mut app = App::new().command_bar().build()?;
+App::new().command_bar().run()
 ```
 
 Once you have enabled the command bar, you will need to implement `CommandBarEvents` on your window or custom control, and you will also need to add a list of commands when you create your window and/or custom control. A typical template for this flow looks like this:
@@ -75,9 +75,6 @@ impl CommandBarEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().command_bar().build()?;
-    a.add_window(MyWin::new());
-    a.run();
-    Ok(())
+    App::new().command_bar().window(|| MyWin::new()).run()
 }
 ```

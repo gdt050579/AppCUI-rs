@@ -7,7 +7,7 @@ An application bar is a bar (on the top part of a desktop and on top of every wi
 The application bar is unique per application. This means that you need to enable it when a new application is created. A typical way to do this is by using the `.app_bar()` method when building an application, as in the following snippet:
 
 ```rust
-let mut app = App::new().app_bar().build()?;
+App::new().app_bar().run()
 ```
 
 You cannot directly create an application bar. However, all controls (including windows and desktop) have an `appbar()` method that returns a mutable reference to the application bar.
