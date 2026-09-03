@@ -38,20 +38,26 @@ fn main() -> Result<(), appcui::system::Error> {
 
 ## Builder
 
-Using a constructor such as `App::new` creates a builder object that can further be used to set up how the application will be constructed. For example, you can change the terminal size, colors, font, etc. using this object. Keep in mind that not all settings apply to each terminal, and using the wrong configuration might lead to an initialization error. Currently, the Builder supports the following methods:
+Using a constructor such as `App::new` , `App::single_window`, `App::frame_app` or `App::input_app` creates a different builder object that can further be used to set up how the application will be constructed. For example, you can change the terminal size, colors, font, etc. using this object. Keep in mind that not all settings apply to each terminal, and using the wrong configuration might lead to an initialization error. 
+
+Regarless of the app type, the following methods are available for each builder:
 * `.size(terminal_size)` to set up a terminal size
 * `.title(terminal_title)` to set up a terminal title
 * `.backend(backend_type)` to select a specific terminal backend
+* `.log_file(path,append)` to set up a log file where logs will be displayed. This option will only be valid in **debug mode**. Once the file was specified, any call to [log!](logging.md) macro will be recorded in that file.
+* `.color_schema(enabled)` if set this flag will try to use the terminal color schema, otherwise it will use AppCUI predefined values (e.g. for `Color::DarkBlue` will use `RGB(0,0,128)`). This flag is enabled by default.
+* `.restore_screen(enabled)` if set the backend will attempt to restore the original screen status (content, cursor position, etc.) as it was before the application started. This option is **enabled** by default. Keep in mind that not all backends have this kind of support.
+* `.debug_script(script)` to simulate input for unit tests. Combine this with `.size(...)` to set the simulated terminal dimensions.
+
+
+Besides these, each build has aditional methods specific to it.
+
 * `.desktop(custom_desktop)` if you want to use a custom desktop instead of the default one (not available in single-window mode)
 * `.window(factory)` to register a window that will be created when the application starts (multi-window mode; call once per window)
 * `.app_bar()` to enable the application top app bar
 * `.command_bar()` to enable the application command bar
 * `.theme(custom_theme)` to set up a custom theme or another predefined theme. Read more on themes in the [Themes](chapter-6/themes.md) section.
 * `.timers_count(count)` to set up the number of timers that can be used in the application (if not specified the default value is 4)
-* `.log_file(path,append)` to set up a log file where logs will be displayed. This option will only be valid in **debug mode**. Once the file was specified, any call to [log!](logging.md) macro will be recorded in that file.
-* `.color_schema(enabled)` if set this flag will try to use the terminal color schema, otherwise it will use AppCUI predefined values (e.g. for `Color::DarkBlue` will use `RGB(0,0,128)`). This flag is enabled by default.
-* `.restore_screen(enabled)` if set the backend will attempt to restore the original screen status (content, cursor position, etc.) as it was before the application started. This option is **enabled** by default. Keep in mind that not all backends have this kind of support.
-* `.debug_script(script)` to simulate input for unit tests. Combine this with `.size(...)` to set the simulated terminal dimensions.
 
 After setting up the configuration for an application, call the `run()` method to create the runtime, instantiate every registered window, and start the event loop. This method returns a result of type `Result<(),Error>` that can be obtained via several methods such as:
 * `unwrap()` or `expect(...)` methods
@@ -61,14 +67,16 @@ After setting up the configuration for an application, call the `run()` method t
 A typical example of using these settings is as follows:
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
-    App::new()
+    App::new()                        // multi-window mode
         .size(Size::new(80,40))       // size should be 80x40 chars
         .app_bar()                    // top application bar should be enabled
         .command_bar()                // command bar should be enabled
         .log_file("debug.log", false) // log into debug.log
         .color_schema(false)          // use AppCUI predefined colors
         .restore_screen(true)         // restore original screen when finished
-        .window(|| window!("'Demo',a:c,w:40,h:10"))
+        .window(|| {                  // add the following window
+            window!("'Demo',a:c,w:40,h:10")
+        })
         .run()
 }
 ```
