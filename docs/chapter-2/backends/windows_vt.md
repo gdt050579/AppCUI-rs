@@ -39,9 +39,10 @@ Windows VT is not the default backend on Windows. To use it, you need to specify
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let app = App::with_backend(appcui::backend::Type::WindowsVT).build()?;
-    // build your application here
-    Ok(())
+    App::new()
+        .backend(appcui::backend::Type::WindowsVT)
+        .window(|| window!("'Demo',a:c,w:30,h:9"))
+        .run()
 }
 ```
 

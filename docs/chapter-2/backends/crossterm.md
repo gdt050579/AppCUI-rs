@@ -17,14 +17,15 @@ This backend is not enabled by default. To enable it, you need to compile your a
 appcui = { version = "*", features = ["CROSSTERM"] }
 ```
 
-Then, you can create your application using the `App::with_backend` method, specifying the `Type::CrossTerm` backend:
+Then, you can create your application using the `.backend(...)` method, specifying the `Type::CrossTerm` backend:
 
 ```rust
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let app = App::with_backend(appcui::backend::Type::CrossTerm).build()?;
-    // build your application here
-    Ok(())
+    App::new()
+        .backend(appcui::backend::Type::CrossTerm)
+        .window(|| window!("'Demo',a:c,w:30,h:9"))
+        .run()
 }
 ```

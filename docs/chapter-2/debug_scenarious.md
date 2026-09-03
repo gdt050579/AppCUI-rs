@@ -1,6 +1,6 @@
 # Debug scenarios
 
-When using AppCUI and needing to test the interface, it is recommended to write unit tests using the `App::debug(...)` method. This method allows one to write a succession of system events (mouse clicks, keys being pressed, etc.) and validate whether the output is the expected one. This succession of commands is considered an event script, formed from multiple commands, each command written on a line. A command can have parameters. You can also use `//` to comment out a command.
+When using AppCUI and needing to test the interface, it is recommended to write unit tests using the `.debug_script(...)` builder method. This method allows one to write a succession of system events (mouse clicks, keys being pressed, etc.) and validate whether the output is the expected one. This succession of commands is considered an event script, formed from multiple commands, each command written on a line. A command can have parameters. You can also use `//` to comment out a command.
 
 **General format for a script**
 ```rs,no_compile
@@ -10,7 +10,7 @@ Command-2()
 ```
 
 **Remarks**: 
-* `App::debug(...)` will panic if the script is incorrect (a command is not valid, the number of parameters is incorrect, etc.).
+* `.debug_script(...)` will panic if the script is incorrect (a command is not valid, the number of parameters is incorrect, etc.).
 * `AppCUI` allows only one instance at a time (this is done via a mutex object). If you have multiple unit tests and you try to run them with the `cargo test` command, you might get an error as **cargo** might try to use multiple threads to do this, and it is likely that one thread might try to start an `AppCUI` application while another one is already running on another thread. The solution in this case is to run the tests using a single thread:
 ```no_compile
 cargo test -- --test-threads=1
@@ -102,10 +102,12 @@ fn check_if_window_can_be_moved() {
         Paint('window was moved')
         CheckHash(0x419533D4BBEFE538)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let w = Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::None);
-    a.add_window(w);
-    a.run();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 ```
 
@@ -183,10 +185,12 @@ fn check_if_window_can_be_moved() {
         Paint('window was moved')
         CheckHash(0x419533D4BBEFE538)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let w = Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::None);
-    a.add_window(w);
-    a.run();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .window(|| Window::new("Title", layout!("a:c,w:20,h:5"), window::Flags::None))
+        .run()
+        .unwrap();
 }
 ```
 

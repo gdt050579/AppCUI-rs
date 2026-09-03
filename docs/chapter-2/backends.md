@@ -21,7 +21,7 @@ The following backends are supported:
 **Remarks:** These types are available via `appcui::backend::Type` and can be used to initialize an application.
 
 ```rust
-let mut a = App::with_backend(appcui::backend::/*type*/).build()?;
+App::new().backend(appcui::backend::Type::/*type*/).run()?
 ```
 
 where the `appcui::backend::Type` enum is defined as follows:
