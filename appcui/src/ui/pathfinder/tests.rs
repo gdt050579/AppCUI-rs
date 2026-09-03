@@ -43,17 +43,23 @@ const CSV_DATA_UNICODE: &str = "
 // #[test]
 // fn test_while_developing() {
 //     let nav = NavSimulator::with_csv(CSV_DATA, true, "C:\\");
-//     let mut a = App::new().log_file("debug.log", false).build().unwrap();
-//     let mut w = window!("Test,a:c,w:60,h:15");
-//     let mut p = GenericPathFinder::with_navigator(
-//         r#"C:\Program Files\"#,
-//         layout!("x:1,y:1,w:40"),
-//         pathfinder::Flags::None, fs::Navigator::new());
-//     //p.set_enabled(false);
-//     w.add(p);
-//     w.add(button!("test,x:1,y:3,w:6"));
-//     a.add_window(w);
-//     a.run();
+//     App::new()
+//         .log_file("debug.log", false)
+//         .window(|| {
+//             let mut w = window!("Test,a:c,w:60,h:15");
+//             let p = GenericPathFinder::with_navigator(
+//                 r#"C:\Program Files\"#,
+//                 layout!("x:1,y:1,w:40"),
+//                 pathfinder::Flags::None,
+//                 fs::Navigator::new(),
+//             );
+//             //p.set_enabled(false);
+//             w.add(p);
+//             w.add(button!("test,x:1,y:3,w:6"));
+//             w
+//         })
+//         .run()
+//         .unwrap();
 // }
 
 #[cfg(target_os = "windows")]

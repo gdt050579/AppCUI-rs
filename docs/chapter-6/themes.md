@@ -7,9 +7,11 @@ To create a new theme, you need to create a new instance of the `Theme` structur
 ```rust
 let mut my_theme = Theme::new(Themes::Default);
 // modify my_theme (colors, characters, etc.)
-let mut app = App::new().theme(my_theme).build().expect("Failed to create an AppCUI application");
-// add additional windows
-app.run();
+App::new()
+    .theme(my_theme)
+    .window(|| /* a window */)
+    .run()
+    .expect("Failed to create an AppCUI application");
 ```
 
 Alternatively, you can call the `set_theme` method on `App` later during execution.

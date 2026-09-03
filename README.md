@@ -103,19 +103,20 @@ Then create a new Rust project and add the following code:
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut win = Window::new(
-        "Test",
-        LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(),
-        window::Flags::Sizeable,
-    );
-    win.add(Label::new(
-        "Hello World !",
-        LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
-    ));
-    app.add_window(win);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut win = Window::new(
+                "Test",
+                LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(),
+                window::Flags::Sizeable,
+            );
+            win.add(Label::new(
+                "Hello World !",
+                LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
+            ));
+            win
+        })
+        .run()
 }
 ```
 
@@ -125,12 +126,13 @@ Or a more compact version using proc-macros:
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut win = window!("Test,a:c,w:30,h:9");
-    win.add(label!("'Hello World !',a:c,w:13,h:1"));
-    app.add_window(win);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut win = window!("Test,a:c,w:30,h:9");
+            win.add(label!("'Hello World !',a:c,w:13,h:1"));
+            win
+        })
+        .run()
 }
 ```
 
@@ -193,13 +195,8 @@ impl ButtonEvents for CounterWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    // create a new application
-    let mut a = App::new().build()?;
-    // add a new window (of type CounterWindow) to the application
-    a.add_window(CounterWindow::new());
-    // Run AppCUI framework (this will start the window loop and message passing)
-    a.run();
-    Ok(())
+    // create a new application, add a CounterWindow, and start the event loop
+    App::new().window(|| CounterWindow::new()).run()
 }
 ```
 
