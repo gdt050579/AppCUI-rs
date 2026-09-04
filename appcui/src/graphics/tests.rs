@@ -258,6 +258,22 @@ fn check_colors() {
 }
 
 #[test]
+fn check_write_chars_with_clip() {
+    let mut s = SurfaceTester::new(40, 10);
+    s.clear(Character::with_char('.'));
+    s.set_clip(5, 1, 7, 1);
+    s.clear(Character::with_char('X'));
+    // 3 X-es should be drawn (for column 5,6 and 7)
+    assert_eq!(s.compute_hash(), 0x8A59C7F9CC510193);
+    // 1 - not shown, 2 not shown, - outside the clip
+    // 3 shown (column 5), 4 shown (column 6), 5 shown (column 7), 
+    // the rest a renot shown - outside the clip
+    s.write_chars(3, 1, &chars_from_str("1234567890"));
+    // s.print(false);
+    assert_eq!(s.compute_hash(), 0xB284C0F2A6405F79);
+}
+
+#[test]
 fn check_write_string_single_line() {
     let mut s = SurfaceTester::new(40, 10);
     s.write_string(1, 1, "text", CharAttribute::with_color(Color::White, Color::DarkRed), false);
@@ -293,6 +309,101 @@ fn check_write_string_multi_line() {
     );
     //s.print();
     assert_eq!(s.compute_hash(), 0xFD638AC7F26D347A);
+}
+
+fn chars_from_str(s: &str) -> Vec<Character> {
+    s.chars().map(Character::with_char).collect::<Vec<_>>()
+}
+fn cell_code(surface: &SurfaceTester, x: u32, y: u32) -> char {
+    let w = surface.size().width as usize;
+    surface.chars[(x as usize) + (y as usize) * w].code
+}
+
+#[test]
+fn check_write_chars_clip_not_visible_noop() {
+    let mut s = SurfaceTester::new(10, 3);
+    s.clear(Character::with_char('.'));
+    let before = s.compute_hash();
+    s.set_clip(5, 0, 4, 2); // invisible clip (left > right)
+    s.write_chars(0, 0, &chars_from_str("ABCDE"));
+    assert_eq!(s.compute_hash(), before);
+}
+
+#[test]
+fn check_write_chars_y_outside_clip_noop() {
+    let mut s = SurfaceTester::new(10, 3);
+    s.clear(Character::with_char('.'));
+    let before = s.compute_hash();
+    s.write_chars(0, -1, &chars_from_str("ABCDE"));
+    s.write_chars(0, 3, &chars_from_str("ABCDE"));
+    assert_eq!(s.compute_hash(), before);
+}
+
+#[test]
+fn check_write_chars_left_after_clip_right_noop() {
+    let mut s = SurfaceTester::new(10, 3);
+    s.clear(Character::with_char('.'));
+    let before = s.compute_hash();
+    s.write_chars(10, 1, &chars_from_str("A"));
+    assert_eq!(s.compute_hash(), before);
+}
+
+#[test]
+fn check_write_chars_right_before_clip_left_noop() {
+    let mut s = SurfaceTester::new(10, 3);
+    s.clear(Character::with_char('.'));
+    s.set_clip(3, 0, 9, 2);
+    let before = s.compute_hash();
+    s.write_chars(-5, 1, &chars_from_str("AB"));
+    assert_eq!(s.compute_hash(), before);
+}
+
+#[test]
+fn check_write_chars_partial_left_clipping() {
+    let mut s = SurfaceTester::new(10, 3);
+    s.clear(Character::with_char('.'));
+    s.set_clip(3, 0, 9, 2);
+    s.write_chars(1, 1, &chars_from_str("ABCDE")); // left=1, right=6 -> draws from C at x=3..5
+    assert_eq!(cell_code(&s, 2, 1), '.');
+    assert_eq!(cell_code(&s, 3, 1), 'C');
+    assert_eq!(cell_code(&s, 4, 1), 'D');
+    assert_eq!(cell_code(&s, 5, 1), 'E');
+    assert_eq!(cell_code(&s, 6, 1), '.');
+}
+
+#[test]
+fn check_write_chars_partial_right_clipping() {
+    let mut s = SurfaceTester::new(10, 3);
+    s.clear(Character::with_char('.'));
+    s.set_clip(3, 0, 9, 2);
+    s.write_chars(7, 1, &chars_from_str("ABCDE")); // left=7, right=12 -> draws A,B at x=7..8
+    assert_eq!(cell_code(&s, 6, 1), '.');
+    assert_eq!(cell_code(&s, 7, 1), 'A');
+    assert_eq!(cell_code(&s, 8, 1), 'B');
+    assert_eq!(cell_code(&s, 9, 1), 'C');
+}
+
+#[test]
+fn check_write_chars_with_origin_offset() {
+    let mut s = SurfaceTester::new(10, 3);
+    s.clear(Character::with_char('.'));
+    s.set_origin(2, 1);
+    s.write_chars(0, 0, &chars_from_str("XYZ"));
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 2, 1), 'X');
+    assert_eq!(cell_code(&s, 3, 1), 'Y');
+    assert_eq!(cell_code(&s, 4, 1), 'Z');
+}
+
+#[test]
+fn check_write_chars_at_clip_right_edge_draws_nothing() {
+    // `write_chars` computes `end_x = min(clip.right, right)` where `clip.right` is inclusive in other APIs.
+    // When `left == clip.right` and `len == 1`, this results in `start_x >= end_x` -> no draw.
+    let mut s = SurfaceTester::new(10, 3);
+    s.clear(Character::with_char('.'));
+    let before = s.compute_hash();
+    s.write_chars(9, 1, &chars_from_str("A"));
+    assert_eq!(s.compute_hash(), before);
 }
 
 #[test]
