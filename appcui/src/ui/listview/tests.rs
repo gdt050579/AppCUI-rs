@@ -321,13 +321,13 @@ fn check_create() {
         Paint('Initial state')
         CheckHash(0x668442408FDE500C)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:f,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:9,flags: Sizeable");
+        w.add(listview!(
+            "TestItem,d:f,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -364,13 +364,13 @@ fn check_column_navigate_with_keys() {
         Paint('10. Window is closed')
         CheckHash(0x3900AF2CBDF4157D)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:f,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:9,flags: Sizeable");
+        w.add(listview!(
+            "TestItem,d:f,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -404,13 +404,13 @@ fn check_column_sort_with_keys() {
         Paint('9. Sort by Name, ascending, scroll moved to view Name column')
         CheckHash(0x13077B05CC85E1FB)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:30,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:f,flags: ScrollBars,columns=[{&Name,15,Left},{&Age,10,Right},{&City,10,Center}]"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:30,h:9,flags: Sizeable");
+        w.add(listview!(
+            "TestItem,d:f,flags: ScrollBars,columns=[{&Name,15,Left},{&Age,10,Right},{&City,10,Center}]"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -453,13 +453,13 @@ fn check_column_resize_with_keys() {
         Paint('12. Scrool to first element, horzontal scroll is ACTIVE (identical to step 11')
         CheckHash(0x60E537F7DC6646FD)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:f,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:9,flags: Sizeable");
+        w.add(listview!(
+            "TestItem,d:f,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -502,13 +502,13 @@ fn check_column_ensure_visible_when_changing_columns() {
         Paint('12. C1 remains selected (view is not changed)')
         CheckHash(0xA854AE3EEBECBE79)
    ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:f,flags: ScrollBars,columns=[{C1-10,10},{C2-12,12},{C3-14,14},{C4-16,16},{C5-10,10}]"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        w.add(listview!(
+            "TestItem,d:f,flags: ScrollBars,columns=[{C1-10,10},{C2-12,12},{C3-14,14},{C4-16,16},{C5-10,10}]"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -545,13 +545,13 @@ fn check_column_resize_outside_visible() {
         Paint('10. C2 is visible')
         CheckHash(0x1D6B48ED61CF0D6A)
    ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:f,flags: ScrollBars,columns=[{C1-10,10},{C2-12,12},{C3-14,14},{C4-16,16},{C5-10,10}]"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        w.add(listview!(
+            "TestItem,d:f,flags: ScrollBars,columns=[{C1-10,10},{C2-12,12},{C3-14,14},{C4-16,16},{C5-10,10}]"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -573,13 +573,13 @@ fn check_column_move_scroll_when_enter_column_resize_mode() {
         Paint('5. Fist column selected and scroll moved')
         CheckHash(0xA854AE3EEBECBE79)
    ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:f,flags: ScrollBars,columns=[{C1-10,10},{C2-12,12},{C3-14,14},{C4-16,16},{C5-10,10}]"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        w.add(listview!(
+            "TestItem,d:f,flags: ScrollBars,columns=[{C1-10,10},{C2-12,12},{C3-14,14},{C4-16,16},{C5-10,10}]"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -601,11 +601,11 @@ fn check_column_scroll_update_when_control_is_resized() {
         Paint('5. Scroll bar is not inactive (starts with C1 ...)')
         CheckHash(0x6CA64A075D529384) 
    ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    w.add(listview!("TestItem,d:f,flags: ScrollBars,columns=[{C1,6},{C2,6},{C3,6},{C4,6},{C5,6}]"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        w.add(listview!("TestItem,d:f,flags: ScrollBars,columns=[{C1,6},{C2,6},{C3,6},{C4,6},{C5,6}]"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -639,13 +639,13 @@ fn check_column_click() {
         Paint('9. C4-clicked, sorted down, scroll move to see C3 entirely at the end')
         CheckHash(0x70C7CCCB3A1B805D)   
    ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:f,flags: ScrollBars,columns=[{C1,10,L},{C2,10,C},{C3,10,R},{C4,10},{C5,10}]"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        w.add(listview!(
+            "TestItem,d:f,flags: ScrollBars,columns=[{C1,10,L},{C2,10,C},{C3,10,R},{C4,10},{C5,10}]"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -679,13 +679,13 @@ fn check_column_left_right_scroll() {
         Paint('9. Scroll to left - back to the initial state')
         CheckHash(0xD91C4D1725F901B4)   
    ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    w.add(listview!(
-        "TestItem,d:f,flags: ScrollBars,columns=[{C1,10,L},{C2,10,C},{C3,10,R},{C4,10},{C5,10}]"
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        w.add(listview!(
+            "TestItem,d:f,flags: ScrollBars,columns=[{C1,10,L},{C2,10,C},{C3,10,R},{C4,10},{C5,10}]"
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -734,13 +734,13 @@ fn check_navigate_keys_mode_details() {
         Paint('14. Cursor on Teodor (scroll starts from Mihai)')
         CheckHash(0xF1971EDE81CFFDA9)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags: ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags: ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -789,13 +789,13 @@ fn check_navigate_keys_mode_details_no_checkboxes() {
         Paint('14. Cursor on Teodor (scroll starts from Mihai)')
         CheckHash(0xBE2A1EC6ECF34E3C)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -844,13 +844,13 @@ fn check_navigate_keys_mode_details_no_checkboxes_no_groups() {
         Paint('14. Cursor on Teodor (scroll starts from Mihai)')
         CheckHash(0x2AE34EBB0F458B7C)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -908,14 +908,14 @@ fn check_navigate_keys_mode_columns_2() {
         Paint('17. Cursor back on Teodor [Column:2,last] (scroll starts from Asia)')
         CheckHash(0xA1CCA28B22095A21)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(2),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(2),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -973,13 +973,13 @@ fn check_navigate_keys_mode_columns_2_no_checkboxes() {
         Paint('17. Cursor back on Teodor [Column:2,last] (scroll starts from Asia)')
         CheckHash(0xE43AFA143E2A58CF)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(2),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(2),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1051,14 +1051,14 @@ fn check_navigate_keys_mode_columns_3() {
         Paint('21. Cursor back on Teodor [Column:3,last] (scroll starts from Mike)')
         CheckHash(0x800820C35EA0583)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1130,13 +1130,13 @@ fn check_navigate_keys_mode_columns_3_no_checkboxes() {
         Paint('21. Cursor back on Teodor [Column:3,last] (scroll starts from Mike)')
         CheckHash(0xD65AB689B1378ECA)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1156,12 +1156,12 @@ fn check_empty_list_navigation_view_details() {
         Paint('2. State remains the same')
         CheckHash(0xD23097345BC6E84)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let lv = listview!("Person,d:f,view:Details,flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let lv = listview!("Person,d:f,view:Details,flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1181,12 +1181,12 @@ fn check_empty_list_navigation_view_columns_2() {
         Paint('2. State remains the same')
         CheckHash(0x9F818C330754220D)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let lv = listview!("Person,d:f,view:Columns(2),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let lv = listview!("Person,d:f,view:Columns(2),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1206,12 +1206,12 @@ fn check_empty_list_navigation_view_columns_4() {
         Paint('2. State remains the same')
         CheckHash(0xACF4FE52E73E65AD)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let lv = listview!("Person,d:f,view:Columns(4),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let lv = listview!("Person,d:f,view:Columns(4),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1269,13 +1269,13 @@ fn check_navigate_keys_mode_columns_2_no_checkboxes_no_groups() {
         Paint('17. Cursor back on Teodor [Column:2,last] (scroll starts from Karl)')
         CheckHash(0xEE17AB263D429E21)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(2),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(2),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1309,13 +1309,13 @@ fn check_changing_scroll_with_keys_viewmode_details() {
         Paint('9. Scroll starts with Mihai (cursor not visible)')
         CheckHash(0xF0D100CA0D8572E8)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Details,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Details,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1334,13 +1334,13 @@ fn check_changing_scroll_with_keys_viewmode_columns_3() {
         Paint('4. Nothing happens (all items are visible)')
         CheckHash(0xA79704A84622FE8)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1374,13 +1374,13 @@ fn check_changing_scroll_with_keys_viewmode_columns_2() {
         Paint('8. Scroll starts with on Karl (cursor not visible)')
         CheckHash(0xCED2467A7C73CC1D)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(2),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(2),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1399,13 +1399,13 @@ fn check_item_select_with_mouse_viewmode_details() {
         Paint('4. Selected: Todd')
         CheckHash(0x97CFE2808BE3E483)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Details,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Details,flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1427,13 +1427,13 @@ fn check_item_select_with_mouse_viewmode_colums_3() {
         Paint('5. Selected: Andrei')
         CheckHash(0x4EF079CB13627C50)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1452,13 +1452,13 @@ fn check_item_select_with_mouse_viewmode_details_with_groups() {
         Paint('4. Selected: Mike')
         CheckHash(0x9ED84080FA5D6E8)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Details,flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Details,flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1483,13 +1483,13 @@ fn check_item_select_with_mouse_viewmode_colums_3_with_groups() {
         Paint('6. Selected: Asia group')
         CheckHash(0xE31AD6B686C17620)        
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1514,13 +1514,13 @@ fn check_resize_window_view_columns_3() {
         Paint('6. Height increased & resized')
         CheckHash(0x426BD2A131C85C3)     
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1555,14 +1555,14 @@ fn check_resize_window_view_columns_3_from_end_width_checkboxes() {
         Paint('9. Selection is visible (at Teodor, scroll starts from Jonas)')
         CheckHash(0x94E5EA9F2F544358)    
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1584,14 +1584,14 @@ fn check_hover_on_items_view_details() {
         Paint('5. Hover over Collapse from Europe')
         CheckHash(0xDBB0BE8ACC8F62D4)       
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Details,flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,x:0,y:0,w:40,h:9,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Details,flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1643,14 +1643,14 @@ fn check_hover_on_items_view_columns_3() {
         Paint('15. Hover over CheckBox from Teodor')
         CheckHash(0xBD7FC79FC8422A06)       
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,x:0,y:0,w:100%,h:100%,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,x:0,y:0,w:100%,h:100%,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(3),flags: ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1687,13 +1687,13 @@ fn check_sort_no_groups() {
         Paint('10. Sort by size (descendent) cursor on Dragos')
         CheckHash(0x173E33D8E1484115)  
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
-    Person::populate_for_sort(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
+        Person::populate_for_sort(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1706,13 +1706,13 @@ fn check_sort_no_groups_3_columns() {
         Paint('2. Nothing should happen (as we are on a list view mode)')
         CheckHash(0x3032B710D6D3752)  
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
-    Person::populate_for_sort2(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:8,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
+        Person::populate_for_sort2(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1775,9 +1775,7 @@ fn check_sort_no_groups_3_columns_with_commands() {
         Paint('4. Sort by city (ascendent) cursor on Dragos')
         CheckHash(0xE68EB359CA5885EC) 
     ";
-    let mut a = App::debug(60, 11, script).command_bar().build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -1802,13 +1800,13 @@ fn check_sort_groups_details() {
         Paint('5. Sort by city but withing the grops (descendent) cursor on Etiene')
         CheckHash(0xFE8457732E43FDB6)  
     ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1845,13 +1843,13 @@ fn check_fold_groups_details_with_keys() {
         Paint('10. Asia group unfold (cursor on Asia)')
         CheckHash(0x155538C17E24C351)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1888,14 +1886,14 @@ fn check_fold_groups_details_with_keys_and_checkboxes() {
         Paint('10. Asia group unfold (cursor on Asia)')
         CheckHash(0xEF2D25D25D5E0188)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Details,flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Details,flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1932,13 +1930,13 @@ fn check_fold_groups_details_with_mouse() {
         Paint('10. Asia group unfold (cursor on Asia)')
         CheckHash(0xE43DE23734DA82EA)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1975,14 +1973,14 @@ fn check_fold_groups_3_columns_with_keys_and_checkboxes() {
         Paint('10. Asia group unfold (cursor on Asia)')
         CheckHash(0x33C6D10E6AD0565D)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(3),flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(3),flags:ScrollBars+ShowGroups+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2012,13 +2010,13 @@ fn check_item_check_with_keys_no_groups() {
         Paint('7. All items un-checked, cursor on Alex')
         CheckHash(0x2F99E654D801BEFF)  
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate_for_sort(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate_for_sort(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2048,13 +2046,13 @@ fn check_item_check_with_keys_no_groups_checkboxes() {
         Paint('7. All items un-checked, cursor on Alex')
         CheckHash(0xDF4BEC272C349C3F)  
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate_for_sort(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Details,flags:ScrollBars+CheckBoxes,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate_for_sort(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2085,13 +2083,13 @@ fn check_item_check_with_keys_no_groups_columns_2() {
         Paint('7. All items un-checked, cursor on Teodor')
         CheckHash(0xB4DC008E98FB2E95)  
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(2),flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(2),flags:ScrollBars,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2150,14 +2148,14 @@ fn check_item_check_with_keys_and_groups_details() {
         Paint('15. Cursor on Teodor, Everything from Yu Law until Teodor are checked')
         CheckHash(0x182B8ADA67A9D620)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2216,14 +2214,14 @@ fn check_item_check_with_keys_and_groups_3_columns() {
         Paint('15. Cursor on Teodor, Everything from Yu Law until Teodor are checked')
         CheckHash(0xF244A913EB6F0A26)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(3),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(3),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2265,14 +2263,14 @@ fn check_item_check_with_mouse_and_groups_details() {
         Paint('11. Cursor on Karl, Karl is CHECKED, Europe group is NOT checked')
         CheckHash(0xBA5F5EA77525A1D5)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Details,flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2332,14 +2330,14 @@ fn check_item_check_with_mouse_and_groups_2_columns() {
         Paint('17. Asia group is unfolded, cursor on Asia')
         CheckHash(0xFC94AD7FE5C436EE)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(2),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(2),flags:ScrollBars+CheckBoxes+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2382,32 +2380,32 @@ fn check_datetime_normal() {
         Paint('5. Sort by datetime (descendent) - cursor on John')
         CheckHash(0x4CA258340F6023C4) 
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Student,d:f,flags:ScrollBars,columns=[{&Name,10,Left},{'&Born on',30,Center}]");
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Student,d:f,flags:ScrollBars,columns=[{&Name,10,Left},{'&Born on',30,Center}]");
 
-    let students = vec![
-        Student {
-            name: "John",
-            born: NaiveDate::from_ymd_opt(1990, 1, 1).unwrap().and_hms_opt(12, 34, 56).unwrap(),
-        },
-        Student {
-            name: "Mike",
-            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(),
-        },
-        Student {
-            name: "Alex",
-            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(23, 59, 59).unwrap(),
-        },
-        Student {
-            name: "Zig",
-            born: NaiveDate::from_ymd_opt(2005, 12, 31).unwrap().and_hms_opt(18, 30, 0).unwrap(),
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            Student {
+                name: "John",
+                born: NaiveDate::from_ymd_opt(1990, 1, 1).unwrap().and_hms_opt(12, 34, 56).unwrap(),
+            },
+            Student {
+                name: "Mike",
+                born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(),
+            },
+            Student {
+                name: "Alex",
+                born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(23, 59, 59).unwrap(),
+            },
+            Student {
+                name: "Zig",
+                born: NaiveDate::from_ymd_opt(2005, 12, 31).unwrap().and_hms_opt(18, 30, 0).unwrap(),
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2450,32 +2448,32 @@ fn check_datetime_short() {
         Paint('5. Sort by datetime (descendent) - cursor on John')
         CheckHash(0xC647BD4ABEBDAEF5) 
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Student,d:f,flags:ScrollBars,columns=[{&Name,10,Left},{'&Born on',30,Center}]");
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Student,d:f,flags:ScrollBars,columns=[{&Name,10,Left},{'&Born on',30,Center}]");
 
-    let students = vec![
-        Student {
-            name: "John",
-            born: NaiveDate::from_ymd_opt(1990, 1, 1).unwrap().and_hms_opt(12, 34, 56).unwrap(),
-        },
-        Student {
-            name: "Mike",
-            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(),
-        },
-        Student {
-            name: "Alex",
-            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(23, 59, 59).unwrap(),
-        },
-        Student {
-            name: "Zig",
-            born: NaiveDate::from_ymd_opt(2005, 12, 31).unwrap().and_hms_opt(18, 30, 0).unwrap(),
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            Student {
+                name: "John",
+                born: NaiveDate::from_ymd_opt(1990, 1, 1).unwrap().and_hms_opt(12, 34, 56).unwrap(),
+            },
+            Student {
+                name: "Mike",
+                born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(),
+            },
+            Student {
+                name: "Alex",
+                born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(23, 59, 59).unwrap(),
+            },
+            Student {
+                name: "Zig",
+                born: NaiveDate::from_ymd_opt(2005, 12, 31).unwrap().and_hms_opt(18, 30, 0).unwrap(),
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2518,32 +2516,32 @@ fn check_datetime_full() {
         Paint('5. Sort by datetime (descendent) - cursor on John')
         CheckHash(0x59264D9D3D81C531) 
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Student,d:f,flags:ScrollBars,columns=[{&Name,10,Left},{'&Born on',30,Center}]");
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Student,d:f,flags:ScrollBars,columns=[{&Name,10,Left},{'&Born on',30,Center}]");
 
-    let students = vec![
-        Student {
-            name: "John",
-            born: NaiveDate::from_ymd_opt(1990, 1, 1).unwrap().and_hms_opt(12, 34, 56).unwrap(),
-        },
-        Student {
-            name: "Mike",
-            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(),
-        },
-        Student {
-            name: "Alex",
-            born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(23, 59, 59).unwrap(),
-        },
-        Student {
-            name: "Zig",
-            born: NaiveDate::from_ymd_opt(2005, 12, 31).unwrap().and_hms_opt(18, 30, 0).unwrap(),
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            Student {
+                name: "John",
+                born: NaiveDate::from_ymd_opt(1990, 1, 1).unwrap().and_hms_opt(12, 34, 56).unwrap(),
+            },
+            Student {
+                name: "Mike",
+                born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(1, 2, 3).unwrap(),
+            },
+            Student {
+                name: "Alex",
+                born: NaiveDate::from_ymd_opt(1997, 5, 20).unwrap().and_hms_opt(23, 59, 59).unwrap(),
+            },
+            Student {
+                name: "Zig",
+                born: NaiveDate::from_ymd_opt(2005, 12, 31).unwrap().and_hms_opt(18, 30, 0).unwrap(),
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2568,13 +2566,13 @@ fn check_filter_details_without_groups() {
         CheckHash(0x5C51D19861045FDD)
         CheckCursor(11,11)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2599,14 +2597,14 @@ fn check_filter_details_with_groups() {
         CheckHash(0x4DC512A82409096)
         CheckCursor(11,11)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2622,14 +2620,14 @@ fn check_filter_details_with_groups_no_result_search() {
         Paint('3. All items (curson on John)')
         CheckHash(0x6657F8ED70CD626B)  
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,flags:ScrollBars+CheckBoxes+ShowGroups+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2645,13 +2643,13 @@ fn check_filter_details_without_groups_no_result_search() {
         Paint('3. All items (curson on John)')
         CheckHash(0xCC575D7AD387F6A5)  
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2667,14 +2665,14 @@ fn check_filter_columns_search_age() {
         Paint('3. All items (cursor on John)')
         CheckHash(0x9A8829E6C6794A19)  
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,10,Left},{&Size,10,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2693,14 +2691,14 @@ fn check_columns_autoresize_double_click_with_groups_with_checkboxes() {
         Paint('4. Fourth column auto-resized')
         CheckHash(0x42E317708303853E)  
     ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,10,Left},{&Size,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2719,13 +2717,13 @@ fn check_columns_autoresize_double_click_without_groups_with_checkboxes() {
         Paint('4. Fourth column auto-resized')
         CheckHash(0x996E9331B3B8B186)  
     ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2744,13 +2742,13 @@ fn check_columns_autoresize_double_click_without_groups_without_checkboxes() {
         Paint('4. Fourth column auto-resized')
         CheckHash(0x8606E26D34ED1136)  
     ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2763,14 +2761,14 @@ fn check_columns_autoresize_with_icon_small_details_no_checboxes_no_groups() {
         Paint('2. First column auto-resized')
         CheckHash(0xC6B07B4F773B3674)   
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+SmallIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+SmallIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2783,14 +2781,14 @@ fn check_columns_autoresize_with_icon_small_details_no_checboxes_with_groups() {
         Paint('2. First column auto-resized')
         CheckHash(0x52DB5FE005D711DA)   
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+SmallIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+SmallIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2803,15 +2801,15 @@ fn check_columns_autoresize_with_icon_small_details_with_checboxes_with_groups()
         Paint('2. First column auto-resized')
         CheckHash(0x2BE25D50F47BD397)   
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,flags:ScrollBars+SearchBar+SmallIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,flags:ScrollBars+SearchBar+SmallIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2824,14 +2822,14 @@ fn check_columns_autoresize_with_icon_small_details_with_checboxes_without_group
         Paint('2. First column auto-resized')
         CheckHash(0xE5941496700CD360)   
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+SmallIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+SmallIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2844,14 +2842,14 @@ fn check_columns_autoresize_with_icon_large_details_no_checboxes_no_groups() {
         Paint('2. First column auto-resized')
         CheckHash(0x58141EFF73E68E75)   
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+LargeIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+LargeIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2864,14 +2862,14 @@ fn check_columns_autoresize_with_icon_large_details_no_checboxes_with_groups() {
         Paint('2. First column auto-resized')
         CheckHash(0x75C1F9304674E084)   
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+LargeIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+LargeIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2884,15 +2882,15 @@ fn check_columns_autoresize_with_icon_large_details_with_checboxes_with_groups()
         Paint('2. First column auto-resized')
         CheckHash(0x78039A575E457BE1)   
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2905,14 +2903,14 @@ fn check_columns_autoresize_with_icon_large_details_with_checboxes_without_group
         Paint('2. First column auto-resized')
         CheckHash(0x8FD1D236E8DE1A41)   
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2922,15 +2920,15 @@ fn check_icon_small_3_columns_no_checboxes_no_groups() {
         Paint('1. Initial state')
         CheckHash(0x91E2941BE32F8DAF)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2940,16 +2938,16 @@ fn check_icon_small_3_columns_no_checboxes_with_groups() {
         Paint('1. Initial state')
         CheckHash(0x551ED6316723F225)     
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!(
-        "Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
-    );
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!(
+            "Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+        );
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2959,14 +2957,14 @@ fn check_icon_small_3_columns_with_checboxes_with_groups() {
         Paint('1. Initial state')
         CheckHash(0xD87F10C1D22554B1)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2976,16 +2974,16 @@ fn check_icon_small_3_columns_with_checboxes_without_groups() {
         Paint('1. Initial state')
         CheckHash(0xD5848AD1F98892E3)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!(
-        "Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
-    );
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!(
+            "Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+SmallIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+        );
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2995,15 +2993,15 @@ fn check_icon_large_3_columns_no_checboxes_no_groups() {
         Paint('1. Initial state')
         CheckHash(0x6190A2B1430BD412)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3013,16 +3011,16 @@ fn check_icon_large_3_columns_no_checboxes_with_groups() {
         Paint('1. Initial state')
         CheckHash(0x9B4A6D714FAF88F)     
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!(
-        "Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
-    );
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!(
+            "Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+ShowGroups,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+        );
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3032,14 +3030,14 @@ fn check_icon_large_3_columns_with_checboxes_with_groups() {
         Paint('1. Initial state')
         CheckHash(0x7FA38519D4D7F5C3)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3049,16 +3047,16 @@ fn check_icon_large_3_columns_with_checboxes_without_groups() {
         Paint('1. Initial state')
         CheckHash(0x128B0BA6B5DAA76)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!(
-        "Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
-    );
-    Person::populate_with_icon(&mut lv);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!(
+            "Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]"
+        );
+        Person::populate_with_icon(&mut lv);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3105,20 +3103,20 @@ fn check_custom_filter() {
         Paint('3. John,Alex and Zig are visible')
         CheckHash(0xFC5BE975A3ECC1A5)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Student,d:f,flags:ScrollBars+SearchBar+CustomFilter,columns=[{&Name,10,Left},{&Grade,10,Right}]");
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Student,d:f,flags:ScrollBars+SearchBar+CustomFilter,columns=[{&Name,10,Left},{&Grade,10,Right}]");
 
-    let students = vec![
-        Student { name: "John", grade: 10 },
-        Student { name: "Mike", grade: 5 },
-        Student { name: "Alex", grade: 7 },
-        Student { name: "Zig", grade: 8 },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            Student { name: "John", grade: 10 },
+            Student { name: "Mike", grade: 5 },
+            Student { name: "Alex", grade: 7 },
+            Student { name: "Zig", grade: 8 },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3175,40 +3173,40 @@ fn check_numeric_formater_renderer() {
         Paint('7. Sort by salary (ascendent)')
         CheckHash(0xB6204AF8F9D68E2C)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Employee,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,10,Left},{&Salary,10,Right},{&RGB,12,Center},{&Debt,10,Right}]");
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Employee,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,10,Left},{&Salary,10,Right},{&RGB,12,Center},{&Debt,10,Right}]");
 
-    let students = vec![
-        Employee {
-            name: "John",
-            salary: 150000,
-            rgb: 0xFFAABB,
-            debt: 0,
-        },
-        Employee {
-            name: "Mike",
-            salary: 45000,
-            rgb: 0xAA,
-            debt: -3000,
-        },
-        Employee {
-            name: "Alex",
-            salary: 1000000,
-            rgb: 0xFFFF,
-            debt: -123456,
-        },
-        Employee {
-            name: "Zig",
-            salary: 12500,
-            rgb: 0xFFFF0000,
-            debt: -25,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            Employee {
+                name: "John",
+                salary: 150000,
+                rgb: 0xFFAABB,
+                debt: 0,
+            },
+            Employee {
+                name: "Mike",
+                salary: 45000,
+                rgb: 0xAA,
+                debt: -3000,
+            },
+            Employee {
+                name: "Alex",
+                salary: 1000000,
+                rgb: 0xFFFF,
+                debt: -123456,
+            },
+            Employee {
+                name: "Zig",
+                salary: 12500,
+                rgb: 0xFFFF0000,
+                debt: -25,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3249,40 +3247,40 @@ fn check_numeric_formater_renderer_with_macro() {
         Paint('7. Sort by salary (ascendent)')
         CheckHash(0xB6204AF8F9D68E2C)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Employee,d:f,flags:ScrollBars+SearchBar");
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Employee,d:f,flags:ScrollBars+SearchBar");
 
-    let students = vec![
-        Employee {
-            name: "John",
-            salary: 150000,
-            rgb: 0xFFAABB,
-            debt: 0,
-        },
-        Employee {
-            name: "Mike",
-            salary: 45000,
-            rgb: 0xAA,
-            debt: -3000,
-        },
-        Employee {
-            name: "Alex",
-            salary: 1000000,
-            rgb: 0xFFFF,
-            debt: -123456,
-        },
-        Employee {
-            name: "Zig",
-            salary: 12500,
-            rgb: 0xFFFF0000,
-            debt: -25,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            Employee {
+                name: "John",
+                salary: 150000,
+                rgb: 0xFFAABB,
+                debt: 0,
+            },
+            Employee {
+                name: "Mike",
+                salary: 45000,
+                rgb: 0xAA,
+                debt: -3000,
+            },
+            Employee {
+                name: "Alex",
+                salary: 1000000,
+                rgb: 0xFFFF,
+                debt: -123456,
+            },
+            Employee {
+                name: "Zig",
+                salary: 12500,
+                rgb: 0xFFFF0000,
+                debt: -25,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3342,45 +3340,45 @@ fn check_bool_formater_renderer() {
         Paint('7. Sort by V4 (ascendent)')
         CheckHash(0xD53023C5C3820831)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("Employee,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,10,Left},{V1,10,Right},{V2,12,Center},{V3,10,Right},{V4,10,Right}]");
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("Employee,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,10,Left},{V1,10,Right},{V2,12,Center},{V3,10,Right},{V4,10,Right}]");
 
-    let students = vec![
-        Employee {
-            name: "John",
-            v1: true,
-            v2: false,
-            v3: true,
-            v4: false,
-        },
-        Employee {
-            name: "Mike",
-            v1: false,
-            v2: true,
-            v3: false,
-            v4: true,
-        },
-        Employee {
-            name: "Alex",
-            v1: true,
-            v2: true,
-            v3: false,
-            v4: true,
-        },
-        Employee {
-            name: "Zig",
-            v1: false,
-            v2: false,
-            v3: true,
-            v4: false,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            Employee {
+                name: "John",
+                v1: true,
+                v2: false,
+                v3: true,
+                v4: false,
+            },
+            Employee {
+                name: "Mike",
+                v1: false,
+                v2: true,
+                v3: false,
+                v4: true,
+            },
+            Employee {
+                name: "Alex",
+                v1: true,
+                v2: true,
+                v3: false,
+                v4: true,
+            },
+            Employee {
+                name: "Zig",
+                v1: false,
+                v2: false,
+                v3: true,
+                v4: false,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3425,44 +3423,44 @@ fn check_bool_formater_renderer_with_macro() {
         Paint('7. Sort by V4 (ascendent)')
         CheckHash(0xD53023C5C3820831)
     ";
-    let mut a = App::debug(60, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Employee,d:f,flags:ScrollBars+SearchBar");
+    App::new().size(Size::new(60, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Employee,d:f,flags:ScrollBars+SearchBar");
 
-    let students = vec![
-        Employee {
-            name: "John",
-            v1: true,
-            v2: false,
-            v3: true,
-            v4: false,
-        },
-        Employee {
-            name: "Mike",
-            v1: false,
-            v2: true,
-            v3: false,
-            v4: true,
-        },
-        Employee {
-            name: "Alex",
-            v1: true,
-            v2: true,
-            v3: false,
-            v4: true,
-        },
-        Employee {
-            name: "Zig",
-            v1: false,
-            v2: false,
-            v3: true,
-            v4: false,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            Employee {
+                name: "John",
+                v1: true,
+                v2: false,
+                v3: true,
+                v4: false,
+            },
+            Employee {
+                name: "Mike",
+                v1: false,
+                v2: true,
+                v3: false,
+                v4: true,
+            },
+            Employee {
+                name: "Alex",
+                v1: true,
+                v2: true,
+                v3: false,
+                v4: true,
+            },
+            Employee {
+                name: "Zig",
+                v1: false,
+                v2: false,
+                v3: true,
+                v4: false,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3496,27 +3494,27 @@ fn check_size_formater_renderer_simple() {
         Paint('1. Initial state')
         CheckHash(0x580385D00925B270)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,10,Right},{GB,10,Right}]");
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,10,Right},{GB,10,Right}]");
 
-    let students = vec![
-        FileInfo { name: "NUll", size: 0 },
-        FileInfo { name: "Small", size: 300 },
-        FileInfo {
-            name: "Regular",
-            size: 12345,
-        },
-        FileInfo { name: "Song", size: 3200000 },
-        FileInfo {
-            name: "Movie",
-            size: 7950000000,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            FileInfo { name: "NUll", size: 0 },
+            FileInfo { name: "Small", size: 300 },
+            FileInfo {
+                name: "Regular",
+                size: 12345,
+            },
+            FileInfo { name: "Song", size: 3200000 },
+            FileInfo {
+                name: "Movie",
+                size: 7950000000,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3550,30 +3548,30 @@ fn check_size_formater_renderer_with_decimals() {
         Paint('1. Initial state')
         CheckHash(0xBF3A416D456E4D96)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,12,Right},{GB,10,Right}]");
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{KB,15,Right},{MB,12,Right},{GB,10,Right}]");
 
-    let students = vec![
-        FileInfo { name: "NUll", size: 0 },
-        FileInfo { name: "Small", size: 345 },
-        FileInfo {
-            name: "Regular",
-            size: 12345,
-        },
-        FileInfo {
-            name: "Song",
-            size: 3_123_456,
-        },
-        FileInfo {
-            name: "Movie",
-            size: 7_950_123_456,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            FileInfo { name: "NUll", size: 0 },
+            FileInfo { name: "Small", size: 345 },
+            FileInfo {
+                name: "Regular",
+                size: 12345,
+            },
+            FileInfo {
+                name: "Song",
+                size: 3_123_456,
+            },
+            FileInfo {
+                name: "Movie",
+                size: 7_950_123_456,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3606,30 +3604,30 @@ fn check_size_formater_renderer_with_auto() {
         Paint('1. Initial state')
         CheckHash(0xD59FF1A8E969B065)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{Auto,20,Right},{AutoDec,20,Right}]");
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{B,20,Right},{Auto,20,Right},{AutoDec,20,Right}]");
 
-    let students = vec![
-        FileInfo { name: "NUll", size: 0 },
-        FileInfo { name: "Small", size: 345 },
-        FileInfo {
-            name: "Regular",
-            size: 12_345,
-        },
-        FileInfo {
-            name: "Song",
-            size: 3_123_456,
-        },
-        FileInfo {
-            name: "Movie",
-            size: 7_950_123_456,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            FileInfo { name: "NUll", size: 0 },
+            FileInfo { name: "Small", size: 345 },
+            FileInfo {
+                name: "Regular",
+                size: 12_345,
+            },
+            FileInfo {
+                name: "Song",
+                size: 3_123_456,
+            },
+            FileInfo {
+                name: "Movie",
+                size: 7_950_123_456,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3662,40 +3660,40 @@ fn check_time_formater_renderer() {
         Paint('1. Initial state')
         CheckHash(0x2A167C2A8155CCF)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Short,20,Right},{AM-PM,20,Right},{Normal,20,Right}]");
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Short,20,Right},{AM-PM,20,Right},{Normal,20,Right}]");
 
-    let files = vec![
-        FileInfo {
-            name: "f1",
-            tm: NaiveTime::from_hms_milli_opt(18, 32, 20, 123).unwrap(),
-        },
-        FileInfo {
-            name: "f2",
-            tm: NaiveTime::from_hms_milli_opt(23, 59, 59, 999).unwrap(),
-        },
-        FileInfo {
-            name: "f3",
-            tm: NaiveTime::from_hms_milli_opt(00, 00, 00, 000).unwrap(),
-        },
-        FileInfo {
-            name: "f4",
-            tm: NaiveTime::from_hms_milli_opt(12, 00, 00, 000).unwrap(),
-        },
-        FileInfo {
-            name: "f5",
-            tm: NaiveTime::from_hms_milli_opt(5, 20, 30, 234).unwrap(),
-        },
-        FileInfo {
-            name: "f6",
-            tm: NaiveTime::from_hms_milli_opt(21, 50, 1, 5).unwrap(),
-        },
-    ];
-    lv.add_items(files);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let files = vec![
+            FileInfo {
+                name: "f1",
+                tm: NaiveTime::from_hms_milli_opt(18, 32, 20, 123).unwrap(),
+            },
+            FileInfo {
+                name: "f2",
+                tm: NaiveTime::from_hms_milli_opt(23, 59, 59, 999).unwrap(),
+            },
+            FileInfo {
+                name: "f3",
+                tm: NaiveTime::from_hms_milli_opt(00, 00, 00, 000).unwrap(),
+            },
+            FileInfo {
+                name: "f4",
+                tm: NaiveTime::from_hms_milli_opt(12, 00, 00, 000).unwrap(),
+            },
+            FileInfo {
+                name: "f5",
+                tm: NaiveTime::from_hms_milli_opt(5, 20, 30, 234).unwrap(),
+            },
+            FileInfo {
+                name: "f6",
+                tm: NaiveTime::from_hms_milli_opt(21, 50, 1, 5).unwrap(),
+            },
+        ];
+        lv.add_items(files);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3728,40 +3726,40 @@ fn check_date_formater_renderer() {
         Paint('1. Initial state')
         CheckHash(0xA57A8DA7D0578F54)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Full,20,Right},{YMD,20,Right},{DMY,20,Right}]");
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Full,20,Right},{YMD,20,Right},{DMY,20,Right}]");
 
-    let files = vec![
-        FileInfo {
-            name: "f1",
-            dt: NaiveDate::from_ymd_opt(2024, 12, 30).unwrap(),
-        },
-        FileInfo {
-            name: "f2",
-            dt: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
-        },
-        FileInfo {
-            name: "f3",
-            dt: NaiveDate::from_ymd_opt(2024, 5, 5).unwrap(),
-        },
-        FileInfo {
-            name: "f4",
-            dt: NaiveDate::from_ymd_opt(2024, 3, 4).unwrap(),
-        },
-        FileInfo {
-            name: "f5",
-            dt: NaiveDate::from_ymd_opt(2024, 10, 21).unwrap(),
-        },
-        FileInfo {
-            name: "f6",
-            dt: NaiveDate::from_ymd_opt(2024, 4, 2).unwrap(),
-        },
-    ];
-    lv.add_items(files);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let files = vec![
+            FileInfo {
+                name: "f1",
+                dt: NaiveDate::from_ymd_opt(2024, 12, 30).unwrap(),
+            },
+            FileInfo {
+                name: "f2",
+                dt: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap(),
+            },
+            FileInfo {
+                name: "f3",
+                dt: NaiveDate::from_ymd_opt(2024, 5, 5).unwrap(),
+            },
+            FileInfo {
+                name: "f4",
+                dt: NaiveDate::from_ymd_opt(2024, 3, 4).unwrap(),
+            },
+            FileInfo {
+                name: "f5",
+                dt: NaiveDate::from_ymd_opt(2024, 10, 21).unwrap(),
+            },
+            FileInfo {
+                name: "f6",
+                dt: NaiveDate::from_ymd_opt(2024, 4, 2).unwrap(),
+            },
+        ];
+        lv.add_items(files);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3792,22 +3790,22 @@ fn check_percentage_formater_renderer() {
         Paint('1. Initial state')
         CheckHash(0x3AC07717D31D060F)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Normal,20,Right},{Decimals,20,Right}]");
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Normal,20,Right},{Decimals,20,Right}]");
 
-    let files = vec![
-        FileInfo { name: "f1", proc: 0.99 },
-        FileInfo { name: "f2", proc: 0.0 },
-        FileInfo { name: "f3", proc: 1.0 },
-        FileInfo { name: "f4", proc: 0.125 },
-        FileInfo { name: "f5", proc: 0.0625 },
-        FileInfo { name: "f6", proc: 0.5 },
-    ];
-    lv.add_items(files);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let files = vec![
+            FileInfo { name: "f1", proc: 0.99 },
+            FileInfo { name: "f2", proc: 0.0 },
+            FileInfo { name: "f3", proc: 1.0 },
+            FileInfo { name: "f4", proc: 0.125 },
+            FileInfo { name: "f5", proc: 0.0625 },
+            FileInfo { name: "f6", proc: 0.5 },
+        ];
+        lv.add_items(files);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3840,30 +3838,30 @@ fn check_float_formater_renderer() {
         Paint('1. Initial state')
         CheckHash(0xE9C5BED230AEFA5E)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!(
-        "FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Normal,15,Right},{Two,15,Right},{Three,15,Right},{Four,15,Right}]"
-    );
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!(
+            "FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Normal,15,Right},{Two,15,Right},{Three,15,Right},{Four,15,Right}]"
+        );
 
-    let files = vec![
-        FileInfo { name: "f1", value: 0.123456 },
-        FileInfo { name: "f2", value: 0.0 },
-        FileInfo { name: "f3", value: -1.9876 },
-        FileInfo {
-            name: "f4",
-            value: 12345.125,
-        },
-        FileInfo {
-            name: "f5",
-            value: 123456.0625,
-        },
-        FileInfo { name: "f6", value: 0.5 },
-    ];
-    lv.add_items(files);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let files = vec![
+            FileInfo { name: "f1", value: 0.123456 },
+            FileInfo { name: "f2", value: 0.0 },
+            FileInfo { name: "f3", value: -1.9876 },
+            FileInfo {
+                name: "f4",
+                value: 12345.125,
+            },
+            FileInfo {
+                name: "f5",
+                value: 123456.0625,
+            },
+            FileInfo { name: "f6", value: 0.5 },
+        ];
+        lv.add_items(files);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -3922,9 +3920,7 @@ fn check_on_change_current_item_event() {
         Paint('7. Title is Kai')
         CheckHash(0x1AC178C84EC4FB24)   
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -3957,56 +3953,56 @@ fn check_status_formater_renderer() {
         Paint('1. Initial state')
         CheckHash(0xB6585EA6534B7778)
     ";
-    let mut a = App::debug(100, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Normal,20,Right},{Two,20,Right},{Three,20,Right},{Four,20,Right}]");
+    App::new().size(Size::new(100, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Normal,20,Right},{Two,20,Right},{Three,20,Right},{Four,20,Right}]");
 
-    let files = vec![
-        FileInfo {
-            name: "f1",
-            status: listview::Status::Running(0.5),
-        },
-        FileInfo {
-            name: "f2",
-            status: listview::Status::Running(0.75),
-        },
-        FileInfo {
-            name: "f3",
-            status: listview::Status::Running(0.0),
-        },
-        FileInfo {
-            name: "f4",
-            status: listview::Status::Running(1.0),
-        },
-        FileInfo {
-            name: "f5",
-            status: listview::Status::Completed,
-        },
-        FileInfo {
-            name: "f6",
-            status: listview::Status::Error,
-        },
-        FileInfo {
-            name: "f7",
-            status: listview::Status::Paused(0.33),
-        },
-        FileInfo {
-            name: "f8",
-            status: listview::Status::Paused(0.99),
-        },
-        FileInfo {
-            name: "f9",
-            status: listview::Status::Stopped,
-        },
-        FileInfo {
-            name: "f1-",
-            status: listview::Status::Queued,
-        },
-    ];
-    lv.add_items(files);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let files = vec![
+            FileInfo {
+                name: "f1",
+                status: listview::Status::Running(0.5),
+            },
+            FileInfo {
+                name: "f2",
+                status: listview::Status::Running(0.75),
+            },
+            FileInfo {
+                name: "f3",
+                status: listview::Status::Running(0.0),
+            },
+            FileInfo {
+                name: "f4",
+                status: listview::Status::Running(1.0),
+            },
+            FileInfo {
+                name: "f5",
+                status: listview::Status::Completed,
+            },
+            FileInfo {
+                name: "f6",
+                status: listview::Status::Error,
+            },
+            FileInfo {
+                name: "f7",
+                status: listview::Status::Paused(0.33),
+            },
+            FileInfo {
+                name: "f8",
+                status: listview::Status::Paused(0.99),
+            },
+            FileInfo {
+                name: "f9",
+                status: listview::Status::Stopped,
+            },
+            FileInfo {
+                name: "f1-",
+                status: listview::Status::Queued,
+            },
+        ];
+        lv.add_items(files);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4044,33 +4040,33 @@ fn check_temperature_formater_renderer() {
         Paint('1. Initial state')
         CheckHash(0xD28567B414CAD555)
     ";
-    let mut a = App::debug(80, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Celsius,20,Right},{Fahrenheit,20,Right},{Kelvin,20,Right}]");
+    App::new().size(Size::new(80, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,6,Left},{Celsius,20,Right},{Fahrenheit,20,Right},{Kelvin,20,Right}]");
 
-    let files = vec![
-        FileInfo {
-            name: "f1",
-            temperature: 37.0,
-        },
-        FileInfo {
-            name: "f2",
-            temperature: 100.5,
-        },
-        FileInfo {
-            name: "f3",
-            temperature: -20.4,
-        },
-        FileInfo {
-            name: "f4",
-            temperature: 0.0,
-        },
-    ];
-    lv.add_items(files);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let files = vec![
+            FileInfo {
+                name: "f1",
+                temperature: 37.0,
+            },
+            FileInfo {
+                name: "f2",
+                temperature: 100.5,
+            },
+            FileInfo {
+                name: "f3",
+                temperature: -20.4,
+            },
+            FileInfo {
+                name: "f4",
+                temperature: 0.0,
+            },
+        ];
+        lv.add_items(files);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4133,9 +4129,7 @@ fn check_on_selection_changed_event() {
         Paint('8. Ion un-Selected, (12/19) in title')
         CheckHash(0x5ADEEB27CB2DACE7)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -4195,9 +4189,7 @@ fn check_on_item_action_event() {
         Paint('7. Andrei is checked')
         CheckHash(0x8C0624825955E4B1)          
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -4231,28 +4223,28 @@ fn check_area_formater_renderer_simple() {
         Paint('1. Initial state')
         CheckHash(0x11C90827B8B8029D)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KMP,20,Right},{FTP,15,Right},{CMP,10,Right},{YD,10,Right}]");
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KMP,20,Right},{FTP,15,Right},{CMP,10,Right},{YD,10,Right}]");
 
-    let students = vec![
-        FileInfo { name: "NUll", size: 0 },
-        FileInfo { name: "Small", size: 300 },
-        FileInfo {
-            name: "Regular",
-            size: 12345,
-        },
-        FileInfo { name: "Song", size: 3200000 },
-        FileInfo {
-            name: "Movie",
-            size: 7950000000,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            FileInfo { name: "NUll", size: 0 },
+            FileInfo { name: "Small", size: 300 },
+            FileInfo {
+                name: "Regular",
+                size: 12345,
+            },
+            FileInfo { name: "Song", size: 3200000 },
+            FileInfo {
+                name: "Movie",
+                size: 7950000000,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4286,27 +4278,27 @@ fn check_distance_formater_renderer_simple() {
         Paint('1. Initial state')
         CheckHash(0x5B6BB90EC503446A)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{CM,20,Right},{M,15,Right},{IN,10,Right},{FT,10,Right}]");
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{CM,20,Right},{M,15,Right},{IN,10,Right},{FT,10,Right}]");
 
-    let students = vec![
-        FileInfo { name: "NUll", dist: 0 },
-        FileInfo { name: "Small", dist: 300 },
-        FileInfo {
-            name: "Regular",
-            dist: 12345,
-        },
-        FileInfo { name: "Song", dist: 3200000 },
-        FileInfo {
-            name: "Movie",
-            dist: 7950000000,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            FileInfo { name: "NUll", dist: 0 },
+            FileInfo { name: "Small", dist: 300 },
+            FileInfo {
+                name: "Regular",
+                dist: 12345,
+            },
+            FileInfo { name: "Song", dist: 3200000 },
+            FileInfo {
+                name: "Movie",
+                dist: 7950000000,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4340,26 +4332,26 @@ fn check_volume_formater_renderer_simple() {
         Paint('1. Initial state')
         CheckHash(0x5DE42374940E54E)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!(
-        "FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{CM**3,20,Right},{Liters,15,Right},{Galons,10,Right},{CubicFeets,15,Right}]"
-    );
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!(
+            "FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{CM**3,20,Right},{Liters,15,Right},{Galons,10,Right},{CubicFeets,15,Right}]"
+        );
 
-    let students = vec![
-        FileInfo { name: "NUll", vol: 0 },
-        FileInfo { name: "Small", vol: 300 },
-        FileInfo { name: "Regular", vol: 12345 },
-        FileInfo { name: "Large", vol: 3200000 },
-        FileInfo {
-            name: "Huge",
-            vol: 795000000,
-        },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            FileInfo { name: "NUll", vol: 0 },
+            FileInfo { name: "Small", vol: 300 },
+            FileInfo { name: "Regular", vol: 12345 },
+            FileInfo { name: "Large", vol: 3200000 },
+            FileInfo {
+                name: "Huge",
+                vol: 795000000,
+            },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4393,23 +4385,23 @@ fn check_weight_formater_renderer_simple() {
         Paint('1. Initial state')
         CheckHash(0xF708A8445B8E4B4E)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!(
-        "FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KG,20,Right},{Pounds,15,Right},{Tons,10,Right},{Millgrams,15,Right}]"
-    );
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!(
+            "FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KG,20,Right},{Pounds,15,Right},{Tons,10,Right},{Millgrams,15,Right}]"
+        );
 
-    let students = vec![
-        FileInfo { name: "NUll", w: 0 },
-        FileInfo { name: "Small", w: 300 },
-        FileInfo { name: "Regular", w: 12345 },
-        FileInfo { name: "Large", w: 3200000 },
-        FileInfo { name: "Huge", w: 795000000 },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            FileInfo { name: "NUll", w: 0 },
+            FileInfo { name: "Small", w: 300 },
+            FileInfo { name: "Regular", w: 12345 },
+            FileInfo { name: "Large", w: 3200000 },
+            FileInfo { name: "Huge", w: 795000000 },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4443,25 +4435,25 @@ fn check_speed_formater_renderer_simple() {
         Paint('1. Initial state')
         CheckHash(0xCBF8030B31CD0A41)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KM/H,20,Right},{Mach,15,Right},{MPH,10,Right},{M/S,15,Right}]");
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{KM/H,20,Right},{Mach,15,Right},{MPH,10,Right},{M/S,15,Right}]");
 
-    let students = vec![
-        FileInfo { name: "NUll", speed: 0 },
-        FileInfo { name: "Small", speed: 140 },
-        FileInfo {
-            name: "Regular",
-            speed: 1800,
-        },
-        FileInfo { name: "Large", speed: 32000 },
-        FileInfo { name: "Huge", speed: 79500 },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            FileInfo { name: "NUll", speed: 0 },
+            FileInfo { name: "Small", speed: 140 },
+            FileInfo {
+                name: "Regular",
+                speed: 1800,
+            },
+            FileInfo { name: "Large", speed: 32000 },
+            FileInfo { name: "Huge", speed: 79500 },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4498,28 +4490,28 @@ fn check_rating_formater_renderer_simple() {
         Paint('1. Initial state')
         CheckHash(0xDF3716DCCA6AE2E1)
     ";
-    let mut a = App::debug(80, 8, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!(
-        "FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Stars,10,c},{Circle,10,c},{Asterix,10,c},{Numric,10,c},{Scor,10,r}]"
-    );
+    App::new().size(Size::new(80, 8)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!(
+            "FileInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Stars,10,c},{Circle,10,c},{Asterix,10,c},{Numric,10,c},{Scor,10,r}]"
+        );
 
-    let students = vec![
-        FileInfo { name: "#1", r: 0, scor: 123 },
-        FileInfo { name: "#2", r: 2, scor: 999 },
-        FileInfo { name: "#3", r: 5, scor: 0 },
-        FileInfo {
-            name: "#4",
-            r: 4,
-            scor: 1000,
-        },
-        FileInfo { name: "#5", r: 1, scor: 150 },
-        FileInfo { name: "#6", r: 3, scor: 200 },
-    ];
-    lv.add_items(students);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let students = vec![
+            FileInfo { name: "#1", r: 0, scor: 123 },
+            FileInfo { name: "#2", r: 2, scor: 999 },
+            FileInfo { name: "#3", r: 5, scor: 0 },
+            FileInfo {
+                name: "#4",
+                r: 4,
+                scor: 1000,
+            },
+            FileInfo { name: "#5", r: 1, scor: 150 },
+            FileInfo { name: "#6", r: 3, scor: 200 },
+        ];
+        lv.add_items(students);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4552,52 +4544,52 @@ fn check_duration_formater_renderer() {
         Paint('1. Initial state')
         CheckHash(0x920AA22037535EF1)
     ";
-    let mut a = App::debug(80, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("ItemInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Auto,15,r},{Detailes,20,r},{Seconds,15,r}]");
+    App::new().size(Size::new(80, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("ItemInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{Auto,15,r},{Detailes,20,r},{Seconds,15,r}]");
 
-    let items = vec![
-        ItemInfo {
-            name: "#1",
-            d: Duration::seconds(6),
-        },
-        ItemInfo {
-            name: "#2",
-            d: Duration::seconds(15),
-        },
-        ItemInfo {
-            name: "#3",
-            d: Duration::seconds(123),
-        },
-        ItemInfo {
-            name: "#4",
-            d: Duration::minutes(42) + Duration::seconds(12),
-        },
-        ItemInfo {
-            name: "#5",
-            d: Duration::minutes(2),
-        },
-        ItemInfo {
-            name: "#6",
-            d: Duration::hours(1) + Duration::minutes(42) + Duration::seconds(12),
-        },
-        ItemInfo {
-            name: "#7",
-            d: Duration::hours(19) + Duration::minutes(42) + Duration::seconds(12),
-        },
-        ItemInfo {
-            name: "#8",
-            d: Duration::days(5) + Duration::hours(1) + Duration::minutes(42) + Duration::seconds(12),
-        },
-        ItemInfo {
-            name: "#9",
-            d: Duration::days(123) + Duration::hours(15) + Duration::minutes(42) + Duration::seconds(12),
-        },
-    ];
-    lv.add_items(items);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let items = vec![
+            ItemInfo {
+                name: "#1",
+                d: Duration::seconds(6),
+            },
+            ItemInfo {
+                name: "#2",
+                d: Duration::seconds(15),
+            },
+            ItemInfo {
+                name: "#3",
+                d: Duration::seconds(123),
+            },
+            ItemInfo {
+                name: "#4",
+                d: Duration::minutes(42) + Duration::seconds(12),
+            },
+            ItemInfo {
+                name: "#5",
+                d: Duration::minutes(2),
+            },
+            ItemInfo {
+                name: "#6",
+                d: Duration::hours(1) + Duration::minutes(42) + Duration::seconds(12),
+            },
+            ItemInfo {
+                name: "#7",
+                d: Duration::hours(19) + Duration::minutes(42) + Duration::seconds(12),
+            },
+            ItemInfo {
+                name: "#8",
+                d: Duration::days(5) + Duration::hours(1) + Duration::minutes(42) + Duration::seconds(12),
+            },
+            ItemInfo {
+                name: "#9",
+                d: Duration::days(123) + Duration::hours(15) + Duration::minutes(42) + Duration::seconds(12),
+            },
+        ];
+        lv.add_items(items);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4607,13 +4599,13 @@ fn check_custom_attribute_for_items_3_columns_view() {
         Paint('1. Initial state')
         CheckHash(0xCC70B68242ACB2DD)
     ";
-    let mut a = App::debug(80, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("ColorInfo,d:f,view:Columns(3),flags:ScrollBars+SearchBar+CheckBoxes,columns=[{&Name,15,Left},{Value,15,r},{Bool,7,r}]");
-    ColorInfo::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("ColorInfo,d:f,view:Columns(3),flags:ScrollBars+SearchBar+CheckBoxes,columns=[{&Name,15,Left},{Value,15,r},{Bool,7,r}]");
+        ColorInfo::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4623,13 +4615,13 @@ fn check_custom_attribute_for_items_detail_view() {
         Paint('1. Initial state')
         CheckHash(0xAC7AF095CF9BFFC1)
     ";
-    let mut a = App::debug(80, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("ColorInfo,d:f,flags:ScrollBars+SearchBar+CheckBoxes,columns=[{&Name,30,Left},{Value,15,r},{Bool,7,r}]");
-    ColorInfo::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("ColorInfo,d:f,flags:ScrollBars+SearchBar+CheckBoxes,columns=[{&Name,30,Left},{Value,15,r},{Bool,7,r}]");
+        ColorInfo::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4663,37 +4655,37 @@ fn check_currency_formater_renderer() {
         Paint('1. Initial state')
         CheckHash(0x88CAA81438278221)
     ";
-    let mut a = App::debug(80, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("ItemInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{USD,15,r},{USD,10,r},{EUR,15,r},{EUR,15,r},{BTC,15,r}]");
+    App::new().size(Size::new(80, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("ItemInfo,d:f,flags:ScrollBars+SearchBar,columns=[{&Name,8,Left},{USD,15,r},{USD,10,r},{EUR,15,r},{EUR,15,r},{BTC,15,r}]");
 
-    let items = vec![
-        ItemInfo { name: "#1", sum: 0.0 },
-        ItemInfo { name: "#2", sum: 123.45 },
-        ItemInfo { name: "#3", sum: 12345.67 },
-        ItemInfo { name: "#4", sum: 123456.78 },
-        ItemInfo { name: "#5", sum: 1234567.89 },
-        ItemInfo {
-            name: "#6",
-            sum: 12345678.90,
-        },
-        ItemInfo {
-            name: "#7",
-            sum: 123456789.01,
-        },
-        ItemInfo {
-            name: "#8",
-            sum: 1234567890.12,
-        },
-        ItemInfo {
-            name: "#9",
-            sum: 12345678901.23,
-        },
-    ];
-    lv.add_items(items);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let items = vec![
+            ItemInfo { name: "#1", sum: 0.0 },
+            ItemInfo { name: "#2", sum: 123.45 },
+            ItemInfo { name: "#3", sum: 12345.67 },
+            ItemInfo { name: "#4", sum: 123456.78 },
+            ItemInfo { name: "#5", sum: 1234567.89 },
+            ItemInfo {
+                name: "#6",
+                sum: 12345678.90,
+            },
+            ItemInfo {
+                name: "#7",
+                sum: 123456789.01,
+            },
+            ItemInfo {
+                name: "#8",
+                sum: 1234567890.12,
+            },
+            ItemInfo {
+                name: "#9",
+                sum: 12345678901.23,
+            },
+        ];
+        lv.add_items(items);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4715,14 +4707,14 @@ fn check_one_frozen_columns() {
         Paint('5. Scroll to the right (+16)')
         CheckHash(0xE9B89F0C42BBFEF)
     ";
-    let mut a = App::debug(30, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
-    lv.set_frozen_columns(1);
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(30, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+        lv.set_frozen_columns(1);
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4744,14 +4736,14 @@ fn check_two_frozen_columns() {
         Paint('5. Scroll remains the same')
         CheckHash(0x73704811ECA7AEAD)
     ";
-    let mut a = App::debug(35, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
-    lv.set_frozen_columns(2);
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(35, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+        lv.set_frozen_columns(2);
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4779,14 +4771,14 @@ fn check_folding_and_filtering() {
         Paint('7. USA group not-folded but fully checked (with 2 items - both checked)')
         CheckHash(0x74242E241371D8E1)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
-    lv.set_frozen_columns(2);
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+        lv.set_frozen_columns(2);
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4814,14 +4806,14 @@ fn check_filtering_and_select_while_folded() {
         Paint('7. USA group not-folded but fully checked (with 2 items - both checked)')
         CheckHash(0x74242E241371D8E1)
     ";
-    let mut a = App::debug(60, 12, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
-    lv.set_frozen_columns(2);
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 12)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+        lv.set_frozen_columns(2);
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4849,13 +4841,13 @@ fn check_mouse_wheel_details() {
         Paint('7. MOve scroll left +2')
         CheckHash(0x9B2A2A7535388CE)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -4874,15 +4866,15 @@ fn check_mouse_wheel_columns_3() {
         Paint('4. Move scroll left +2 (on Etiene)')
         CheckHash(0xB2BBCFA0C87610BA)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!(
-        "Person,d:f,view: Columns(3),flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]"
-    );
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!(
+            "Person,d:f,view: Columns(3),flags:ScrollBars+CheckBoxes+SearchBar+ShowGroups,columns=[{&Name,15,Left},{&Size,6,Right},{&City,20,Center}]"
+        );
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -5220,9 +5212,7 @@ fn check_dynamically_change_view() {
         Paint('5. Cursor on Iota, View: Details [Zeta,Eta and Theta are checked]')
         CheckHash(0xF63284DD9388073E)
     ";
-    let mut a = App::debug(80, 20, script).build().unwrap();
-    a.add_window(Win::new());
-    a.run();
+    App::new().size(Size::new(80, 20)).debug_script(script).window(Win::new).run().unwrap();
 }
 
 #[test]
@@ -5268,32 +5258,32 @@ fn check_item_custom_paint() {
         Paint('1. Initial state')
         CheckHash(0x29F74CEB38FFCAF9)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("MyItem,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
-    lv.add(MyItem {
-        name: "John",
-        size: 5,
-        city: "New York",
-    });
-    lv.add(MyItem {
-        name: "Mike",
-        size: 4,
-        city: "Los Angeles",
-    });
-    lv.add(MyItem {
-        name: "Etiene",
-        size: 2,
-        city: "Chicago",
-    });
-    lv.add(MyItem {
-        name: "Andrei",
-        size: 6,
-        city: "San Francisco",
-    });
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("MyItem,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
+        lv.add(MyItem {
+            name: "John",
+            size: 5,
+            city: "New York",
+        });
+        lv.add(MyItem {
+            name: "Mike",
+            size: 4,
+            city: "Los Angeles",
+        });
+        lv.add(MyItem {
+            name: "Etiene",
+            size: 2,
+            city: "Chicago",
+        });
+        lv.add(MyItem {
+            name: "Andrei",
+            size: 6,
+            city: "San Francisco",
+        });
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -5340,32 +5330,32 @@ fn check_item_custom_paint_first_column_details() {
         Paint('1. Initial state')
         CheckHash(0x45E307F308558E86)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("MyItem,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
-    lv.add(MyItem {
-        name: "John",
-        size: 5,
-        city: "New York",
-    });
-    lv.add(MyItem {
-        name: "Mike",
-        size: 7,
-        city: "Los Angeles",
-    });
-    lv.add(MyItem {
-        name: "Etiene",
-        size: 8,
-        city: "Chicago",
-    });
-    lv.add(MyItem {
-        name: "Andrei",
-        size: 6,
-        city: "San Francisco",
-    });
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("MyItem,d:f,flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
+        lv.add(MyItem {
+            name: "John",
+            size: 5,
+            city: "New York",
+        });
+        lv.add(MyItem {
+            name: "Mike",
+            size: 7,
+            city: "Los Angeles",
+        });
+        lv.add(MyItem {
+            name: "Etiene",
+            size: 8,
+            city: "Chicago",
+        });
+        lv.add(MyItem {
+            name: "Andrei",
+            size: 6,
+            city: "San Francisco",
+        });
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -5411,33 +5401,33 @@ fn check_item_custom_paint_first_column_columns_3() {
         Paint('1. Initial state')
         CheckHash(0x99664F10C2C18948)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv =
-        listview!("MyItem,d:f,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
-    lv.add(MyItem {
-        name: "John",
-        size: 5,
-        city: "New York",
-    });
-    lv.add(MyItem {
-        name: "Mike",
-        size: 7,
-        city: "Los Angeles",
-    });
-    lv.add(MyItem {
-        name: "Etiene",
-        size: 8,
-        city: "Chicago",
-    });
-    lv.add(MyItem {
-        name: "Andrei",
-        size: 6,
-        city: "San Francisco",
-    });
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv =
+            listview!("MyItem,d:f,view:Columns(3),flags:ScrollBars+CheckBoxes+SearchBar,columns=[{&Name,15,Left},{Value,10,Right},{&City,20,Center}]");
+        lv.add(MyItem {
+            name: "John",
+            size: 5,
+            city: "New York",
+        });
+        lv.add(MyItem {
+            name: "Mike",
+            size: 7,
+            city: "Los Angeles",
+        });
+        lv.add(MyItem {
+            name: "Etiene",
+            size: 8,
+            city: "Chicago",
+        });
+        lv.add(MyItem {
+            name: "Andrei",
+            size: 6,
+            city: "San Francisco",
+        });
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -5465,39 +5455,39 @@ fn check_proc_macro_listviewitem() {
         Paint('1. Initial state')
         CheckHash(0x3F9D82EE992A190)
     ";
-    let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("DownloadItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(DownloadItem {
-        name: "John.mp3",
-        age: 21,
-        server: "London",
-        stars: 4,
-        download: listview::Status::Running(0.5),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    l.add(DownloadItem {
-        name: "Mihai.png",
-        age: 30,
-        server: "Bucharest",
-        stars: 3,
-        download: listview::Status::Paused(0.25),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: false,
-    });
-    l.add(DownloadItem {
-        name: "Ion.exe",
-        age: 40,
-        server: "Bucharest",
-        stars: 5,
-        download: listitem::Status::Completed,
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(100, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("DownloadItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
+        l.add(DownloadItem {
+            name: "John.mp3",
+            age: 21,
+            server: "London",
+            stars: 4,
+            download: listview::Status::Running(0.5),
+            created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+            enabled: true,
+        });
+        l.add(DownloadItem {
+            name: "Mihai.png",
+            age: 30,
+            server: "Bucharest",
+            stars: 3,
+            download: listview::Status::Paused(0.25),
+            created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+            enabled: false,
+        });
+        l.add(DownloadItem {
+            name: "Ion.exe",
+            age: 40,
+            server: "Bucharest",
+            stars: 5,
+            download: listitem::Status::Completed,
+            created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+            enabled: true,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -5525,39 +5515,39 @@ fn check_proc_macro_listviewitem_order_from_1() {
         Paint('1. Initial state')
         CheckHash(0x232187AB9FA9838)
     ";
-    let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("DownloadItem,d:F,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(DownloadItem {
-        name: "John.mp3",
-        age: 21,
-        server: "London",
-        stars: 4,
-        download: listview::Status::Running(0.5),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    l.add(DownloadItem {
-        name: "Mihai.png",
-        age: 30,
-        server: "Bucharest",
-        stars: 3,
-        download: listview::Status::Paused(0.25),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: false,
-    });
-    l.add(DownloadItem {
-        name: "Ion.exe",
-        age: 40,
-        server: "Bucharest",
-        stars: 5,
-        download: listview::Status::Completed,
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(100, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("DownloadItem,d:F,view:Details,flags: ScrollBars+CheckBoxes");
+        l.add(DownloadItem {
+            name: "John.mp3",
+            age: 21,
+            server: "London",
+            stars: 4,
+            download: listview::Status::Running(0.5),
+            created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+            enabled: true,
+        });
+        l.add(DownloadItem {
+            name: "Mihai.png",
+            age: 30,
+            server: "Bucharest",
+            stars: 3,
+            download: listview::Status::Paused(0.25),
+            created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+            enabled: false,
+        });
+        l.add(DownloadItem {
+            name: "Ion.exe",
+            age: 40,
+            server: "Bucharest",
+            stars: 5,
+            download: listview::Status::Completed,
+            created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+            enabled: true,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -5585,39 +5575,39 @@ fn check_proc_macro_listviewitem_order_from_0() {
         Paint('1. Initial state')
         CheckHash(0x232187AB9FA9838)
     ";
-    let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("DownloadItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(DownloadItem {
-        name: "John.mp3",
-        age: 21,
-        server: "London",
-        stars: 4,
-        download: listview::Status::Running(0.5),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    l.add(DownloadItem {
-        name: "Mihai.png",
-        age: 30,
-        server: "Bucharest",
-        stars: 3,
-        download: listview::Status::Paused(0.25),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: false,
-    });
-    l.add(DownloadItem {
-        name: "Ion.exe",
-        age: 40,
-        server: "Bucharest",
-        stars: 5,
-        download: listview::Status::Completed,
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(100, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("DownloadItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
+        l.add(DownloadItem {
+            name: "John.mp3",
+            age: 21,
+            server: "London",
+            stars: 4,
+            download: listview::Status::Running(0.5),
+            created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+            enabled: true,
+        });
+        l.add(DownloadItem {
+            name: "Mihai.png",
+            age: 30,
+            server: "Bucharest",
+            stars: 3,
+            download: listview::Status::Paused(0.25),
+            created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+            enabled: false,
+        });
+        l.add(DownloadItem {
+            name: "Ion.exe",
+            age: 40,
+            server: "Bucharest",
+            stars: 5,
+            download: listview::Status::Completed,
+            created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+            enabled: true,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -5760,9 +5750,7 @@ fn check_select_item_method() {
         Paint('7. Title: 2/12 -> cursor at: Andrei')
         CheckHash(0x59B04A60BB56A8C)          
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -5808,9 +5796,7 @@ fn check_clear_method() {
         Paint('3. Nothing changes')
         CheckHash(0xFFF6487CAF22C71F)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -5850,9 +5836,7 @@ fn check_clear_search_method() {
         Paint('3. Search cleared - all items restored -> cursor on Mike')
         CheckHash(0x6C49F7AAE9F24E9C)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -5868,13 +5852,13 @@ fn check_no_selection_mode() {
         Paint('3. Nothing select (cursor at ...)')
         CheckHash(0x3AF8F1EBE5EB2013)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Details,flags: ScrollBars+NoSelection,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
-    Person::populate(&mut lv);
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Details,flags: ScrollBars+NoSelection,columns=[{&Name,10,Left},{&Age,10,Right},{&City,10,Center}]");
+        Person::populate(&mut lv);
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -5902,29 +5886,29 @@ fn check_column_methods() {
         Paint('1. Initial state')
         CheckHash(0x6963EDDD254CC945)
     ";
-    let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("DownloadItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
-    assert_eq!(l.column(0).unwrap().name(), "Server");
-    assert_eq!(l.column(1).unwrap().name(), "Name");
-    assert_eq!(l.column(3).unwrap().name(), "Age");
-    assert_eq!(l.column(2).unwrap().name(), "Stars");
-    assert_eq!(l.column(7), None);
-    assert_eq!(l.column(1).unwrap().width(), 12);
-    assert_eq!(l.column(4).unwrap().alignment(), TextAlignment::Center);
-    assert_eq!(l.column(1).unwrap().tooltip(), "");
-    // set a new name for the first column
-    l.column_mut(0).unwrap().set_name("Server2");
-    assert_eq!(l.column(0).unwrap().name(), "Server2");
-    // set a new tooltip for the first column
-    l.column_mut(0).unwrap().set_tooltip("Server2 tooltip");
-    assert_eq!(l.column(0).unwrap().tooltip(), "Server2 tooltip");
-    // set right alignment for column with index 6
-    l.column_mut(6).unwrap().set_alignment(TextAlignment::Right);
-    assert_eq!(l.column(6).unwrap().alignment(), TextAlignment::Right);
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(100, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("DownloadItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
+        assert_eq!(l.column(0).unwrap().name(), "Server");
+        assert_eq!(l.column(1).unwrap().name(), "Name");
+        assert_eq!(l.column(3).unwrap().name(), "Age");
+        assert_eq!(l.column(2).unwrap().name(), "Stars");
+        assert_eq!(l.column(7), None);
+        assert_eq!(l.column(1).unwrap().width(), 12);
+        assert_eq!(l.column(4).unwrap().alignment(), TextAlignment::Center);
+        assert_eq!(l.column(1).unwrap().tooltip(), "");
+        // set a new name for the first column
+        l.column_mut(0).unwrap().set_name("Server2");
+        assert_eq!(l.column(0).unwrap().name(), "Server2");
+        // set a new tooltip for the first column
+        l.column_mut(0).unwrap().set_tooltip("Server2 tooltip");
+        assert_eq!(l.column(0).unwrap().tooltip(), "Server2 tooltip");
+        // set right alignment for column with index 6
+        l.column_mut(6).unwrap().set_alignment(TextAlignment::Right);
+        assert_eq!(l.column(6).unwrap().alignment(), TextAlignment::Right);
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -5953,17 +5937,17 @@ fn check_autoresize_temperature() {
         Paint('4. v1 - auto resized')
         CheckHash(0xCD289EDA906FADFE)
     ";
-    let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(MyItem {
-        v1: -123.75f32,
-        v2: 1234.625f32,
-        v3: 12345.0625f32,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(100, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
+        l.add(MyItem {
+            v1: -123.75f32,
+            v2: 1234.625f32,
+            v3: 12345.0625f32,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6000,21 +5984,21 @@ fn check_autoresize_volume() {
         Paint('2. auto resized')
         CheckHash(0x8115367D61AC3EB1)
     ";
-    let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(MyItem {
-        v1: 1,
-        v2: 11,
-        v3: 123,
-        v4: 1234,
-        v5: 12345,
-        v6: 123456,
-        v7: 1234567,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(100, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
+        l.add(MyItem {
+            v1: 1,
+            v2: 11,
+            v3: 123,
+            v4: 1234,
+            v5: 12345,
+            v6: 123456,
+            v7: 1234567,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6054,22 +6038,22 @@ fn check_autoresize_distance() {
         Paint('2. auto resized')
         CheckHash(0x8692767DFCA14261)
     ";
-    let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(MyItem {
-        v1: 1,
-        v2: 11,
-        v3: 123,
-        v4: 1234,
-        v5: 12345,
-        v6: 123456,
-        v7: 1234567,
-        v8: 12345,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(100, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
+        l.add(MyItem {
+            v1: 1,
+            v2: 11,
+            v3: 123,
+            v4: 1234,
+            v5: 12345,
+            v6: 123456,
+            v7: 1234567,
+            v8: 12345,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6109,22 +6093,22 @@ fn check_autoresize_speed() {
         Paint('2. auto resized')
         CheckHash(0xEC5A10B3D8BBD050)
     ";
-    let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(MyItem {
-        v1: 1,
-        v2: 11,
-        v3: 123,
-        v4: 1234,
-        v5: 12345,
-        v6: 123456,
-        v7: 1234567,
-        v8: 12345,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(100, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars+CheckBoxes");
+        l.add(MyItem {
+            v1: 1,
+            v2: 11,
+            v3: 123,
+            v4: 1234,
+            v5: 12345,
+            v6: 123456,
+            v7: 1234567,
+            v8: 12345,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6173,25 +6157,25 @@ fn check_autoresize_currency() {
         Paint('2. auto resized')
         CheckHash(0xA821AE8CAF4D55D0)
     ";
-    let mut a = App::debug(130, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: 1,
-        v2: 11,
-        v3: 123,
-        v4: 1234,
-        v5: 12345,
-        v6: 234,
-        v7: 2345,
-        v8: 20,
-        v9: 100,
-        v10: 1234,
-        v11: 12,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(130, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: 1,
+            v2: 11,
+            v3: 123,
+            v4: 1234,
+            v5: 12345,
+            v6: 234,
+            v7: 2345,
+            v8: 20,
+            v9: 100,
+            v10: 1234,
+            v11: 12,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6237,24 +6221,24 @@ fn check_autoresize_area() {
         Paint('2. auto resized')
         CheckHash(0xBC47C534F4DDBD65)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: 1,
-        v2: 11,
-        v3: 123,
-        v4: 1234,
-        v5: 12345,
-        v6: 123456,
-        v7: 1234567,
-        v8: 12345,
-        v9: 100,
-        v10: 1000,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: 1,
+            v2: 11,
+            v3: 123,
+            v4: 1234,
+            v5: 12345,
+            v6: 123456,
+            v7: 1234567,
+            v8: 12345,
+            v9: 100,
+            v10: 1000,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6292,20 +6276,20 @@ fn check_autoresize_numeric() {
         Paint('2. auto resized')
         CheckHash(0x469CA9B393AC738B)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: 1234567,
-        v2: 1234567,
-        v3: 0xABC,
-        v4: 0xFF,
-        v5: 0xFFF,
-        v6: 0xFFFF,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: 1234567,
+            v2: 1234567,
+            v3: 0xABC,
+            v4: 0xFF,
+            v5: 0xFFF,
+            v6: 0xFFFF,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6352,24 +6336,24 @@ fn check_autoresize_size() {
         Paint('2. auto resized')
         CheckHash(0x4EF178311769625B)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: 1234567,
-        v2: 1234567,
-        v3: 1234567,
-        v4: 1234567890,
-        v5: 1234567890000000,
-        v6: 999,
-        v7: 9999,
-        v8: 9999999,
-        v9: 99999999999,
-        v10: 99999999999999,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: 1234567,
+            v2: 1234567,
+            v3: 1234567,
+            v4: 1234567890,
+            v5: 1234567890000000,
+            v6: 999,
+            v7: 9999,
+            v8: 9999999,
+            v9: 99999999999,
+            v10: 99999999999999,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6416,24 +6400,24 @@ fn check_autoresize_size_width_decimals() {
         Paint('2. auto resized')
         CheckHash(0xB6B11CBDCD96EE8D)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: 1234567,
-        v2: 1234567,
-        v3: 1234567,
-        v4: 1234567890,
-        v5: 1234567890000000,
-        v6: 999,
-        v7: 9999,
-        v8: 9999999,
-        v9: 99999999999,
-        v10: 99999999999999,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: 1234567,
+            v2: 1234567,
+            v3: 1234567,
+            v4: 1234567890,
+            v5: 1234567890000000,
+            v6: 999,
+            v7: 9999,
+            v8: 9999999,
+            v9: 99999999999,
+            v10: 99999999999999,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6461,38 +6445,38 @@ fn check_status_column_methods() {
         Paint('5. Sort(desc) by S1 (completed, error, stopped, queued, paused, running)')
         CheckHash(0xBD8670A319241807)
     ";
-    let mut a = App::debug(100, 15, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        s1: listitem::Status::Completed,
-    });
-    l.add(MyItem { s1: listitem::Status::Error });
-    l.add(MyItem {
-        s1: listitem::Status::Queued,
-    });
-    l.add(MyItem {
-        s1: listitem::Status::Stopped,
-    });
-    l.add(MyItem {
-        s1: listitem::Status::Paused(0.75f32),
-    });
-    l.add(MyItem {
-        s1: listitem::Status::Paused(0.5f32),
-    });
-    l.add(MyItem {
-        s1: listitem::Status::Running(0.75f32),
-    });
-    l.add(MyItem {
-        s1: listitem::Status::Running(0.25f32),
-    });
-    l.add(MyItem {
-        s1: listitem::Status::Running(0.5f32),
-    });
+    App::new().size(Size::new(100, 15)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            s1: listitem::Status::Completed,
+        });
+        l.add(MyItem { s1: listitem::Status::Error });
+        l.add(MyItem {
+            s1: listitem::Status::Queued,
+        });
+        l.add(MyItem {
+            s1: listitem::Status::Stopped,
+        });
+        l.add(MyItem {
+            s1: listitem::Status::Paused(0.75f32),
+        });
+        l.add(MyItem {
+            s1: listitem::Status::Paused(0.5f32),
+        });
+        l.add(MyItem {
+            s1: listitem::Status::Running(0.75f32),
+        });
+        l.add(MyItem {
+            s1: listitem::Status::Running(0.25f32),
+        });
+        l.add(MyItem {
+            s1: listitem::Status::Running(0.5f32),
+        });
 
-    w.add(l);
-    a.add_window(w);
-    a.run();
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6511,13 +6495,13 @@ fn check_autoresize_ascii() {
         Paint('2. auto resized')
         CheckHash(0xBE9DC3CB75E5EA77)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem { v1: "Asci String" });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem { v1: "Asci String" });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6548,19 +6532,19 @@ fn check_autoresize_weight() {
         Paint('2. auto resized')
         CheckHash(0x815712699193850B)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: 1234567,
-        v2: 1234567,
-        v3: 1234567,
-        v4: 1234567890,
-        v5: 1234567890000000,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: 1234567,
+            v2: 1234567,
+            v3: 1234567,
+            v4: 1234567890,
+            v5: 1234567890000000,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6598,20 +6582,20 @@ fn check_autoresize_numeric_float() {
         Paint('2. auto resized')
         CheckHash(0x381126BE835AA002)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: -5.125,
-        v2: 0.0,
-        v3: 123.625,
-        v4: 123456.123456,
-        v5: -123456.123456,
-        v6: 0.625,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: -5.125,
+            v2: 0.0,
+            v3: 123.625,
+            v4: 123456.123456,
+            v5: -123456.123456,
+            v6: 0.625,
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6649,20 +6633,20 @@ fn check_autoresize_duration() {
         Paint('2. auto resized')
         CheckHash(0xA64E1DDE04DB979D)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: Duration::seconds(5),
-        v2: Duration::seconds(70),
-        v3: Duration::seconds(1000),
-        v4: Duration::seconds(10000),
-        v5: Duration::seconds(1000),
-        v6: Duration::seconds(1000),
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: Duration::seconds(5),
+            v2: Duration::seconds(70),
+            v3: Duration::seconds(1000),
+            v4: Duration::seconds(10000),
+            v5: Duration::seconds(1000),
+            v6: Duration::seconds(1000),
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6696,20 +6680,20 @@ fn check_autoresize_percentage() {
         Paint('2. auto resized')
         CheckHash(0xDD9C30DFEE0A4183)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: 0.125,
-        v2: 1.0,
-        v3: 0.5,
-        v4: 0.9999,
-        v5: 0.625,
-        v6: 0.0625
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: 0.125,
+            v2: 1.0,
+            v3: 0.5,
+            v4: 0.9999,
+            v5: 0.625,
+            v6: 0.0625
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 
@@ -6747,21 +6731,21 @@ fn check_autoresize_date_time() {
         Paint('2. auto resized')
         CheckHash(0x6CAA3AE3A5E4E497)
     ";
-    let mut a = App::debug(120, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
-    l.add(MyItem {
-        v1: NaiveDateTime::new(NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(), NaiveTime::from_hms_opt(14, 23, 59).unwrap()),
-        v2: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
-        v3: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
-        v4: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
-        v5: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(),
-        v6: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(),
-        v7: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap()
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(120, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut l = listview!("MyItem,d:f,view:Details,flags: ScrollBars");
+        l.add(MyItem {
+            v1: NaiveDateTime::new(NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(), NaiveTime::from_hms_opt(14, 23, 59).unwrap()),
+            v2: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
+            v3: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
+            v4: NaiveTime::from_hms_opt(14, 23, 59).unwrap(),
+            v5: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(),
+            v6: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap(),
+            v7: NaiveDate::from_ymd_opt(2025, 6, 7).unwrap()
+        });
+        w.add(l);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6771,21 +6755,21 @@ fn check_current_group() {
         Paint('1. Initial state')
         CheckHash(0x7FA38519D4D7F5C3)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    assert_eq!(lv.current_item_index(),None);
-    assert_eq!(lv.current_item_mut(), None);
-    assert_eq!(lv.current_group(), None);
-    assert_eq!(lv.current_item(), None);
-    let g = Person::populate_with_icon(&mut lv);
-    assert_eq!(lv.current_group(),Some(g));
-    assert_eq!(lv.current_item_mut(), None);
-    assert_eq!(lv.current_item_index(),None);
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+ShowGroups+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        assert_eq!(lv.current_item_index(),None);
+        assert_eq!(lv.current_item_mut(), None);
+        assert_eq!(lv.current_group(), None);
+        assert_eq!(lv.current_item(), None);
+        let g = Person::populate_with_icon(&mut lv);
+        assert_eq!(lv.current_group(),Some(g));
+        assert_eq!(lv.current_item_mut(), None);
+        assert_eq!(lv.current_item_index(),None);
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6795,25 +6779,25 @@ fn check_current_item() {
         Paint('1. Initial state')
         CheckHash(0x128B0BA6B5DAA76)  
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f,flags: Sizeable");
-    let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
-    assert_eq!(lv.current_item_index(),None);
-    assert_eq!(lv.current_item_mut(), None);
-    assert_eq!(lv.current_group(), None);
-    assert_eq!(lv.current_item(), None);
-    assert_eq!(lv.item(0), None);
-    assert_eq!(lv.item_mut(0), None);
-    let g = Person::populate_with_icon(&mut lv);
-    assert_eq!(lv.current_group(),Some(g));
-    assert_eq!(lv.current_item_index(),Some(0));
-    assert_eq!(lv.current_item().unwrap().name,"Popescu");
-    assert_eq!(lv.current_item_mut().unwrap().name,"Popescu");
-    assert_eq!(lv.item_mut(0).unwrap().name,"Popescu");
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f,flags: Sizeable");
+        let mut lv = listview!("Person,d:f,view:Columns(3),flags:ScrollBars+SearchBar+LargeIcons+CheckBoxes,columns=[{&Name,5,Left},{&Size,5,Right},{&City,5,Center}]");
+        assert_eq!(lv.current_item_index(),None);
+        assert_eq!(lv.current_item_mut(), None);
+        assert_eq!(lv.current_group(), None);
+        assert_eq!(lv.current_item(), None);
+        assert_eq!(lv.item(0), None);
+        assert_eq!(lv.item_mut(0), None);
+        let g = Person::populate_with_icon(&mut lv);
+        assert_eq!(lv.current_group(),Some(g));
+        assert_eq!(lv.current_item_index(),Some(0));
+        assert_eq!(lv.current_item().unwrap().name,"Popescu");
+        assert_eq!(lv.current_item_mut().unwrap().name,"Popescu");
+        assert_eq!(lv.item_mut(0).unwrap().name,"Popescu");
 
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6823,15 +6807,15 @@ fn check_merge_border_mode_with_columns_view() {
         Paint('1. Initial state')
         CheckHash(0xD3F7CA6D4CB267DC)
    ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
 
-    let mut lv = ListView::<TestItem>::new(LayoutBuilder::new().dock(Dock::Fill).build(), listview::Flags::MergeBorders);
-    lv.set_view_mode(ViewMode::Columns(8));
-    lv.add_column(Column::new("C1", 4, TextAlignment::Left));
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let mut lv = ListView::<TestItem>::new(LayoutBuilder::new().dock(Dock::Fill).build(), listview::Flags::MergeBorders);
+        lv.set_view_mode(ViewMode::Columns(8));
+        lv.add_column(Column::new("C1", 4, TextAlignment::Left));
+        w.add(lv);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -6841,15 +6825,15 @@ fn check_merge_border_mode_with_details_view() {
         Paint('1. Initial state')
         CheckHash(0x633BD4603C8BF753)
    ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:40,h:9,flags: Sizeable");
 
-    let mut lv = ListView::<TestItem>::new(LayoutBuilder::new().dock(Dock::Fill).build(), listview::Flags::MergeBorders);
-    lv.add_column(Column::new("C1", 4, TextAlignment::Left));
-    lv.add_column(Column::new("C2", 6, TextAlignment::Left));
-    lv.add_column(Column::new("C3", 8, TextAlignment::Left));
-    lv.add_column(Column::new("C4", 10, TextAlignment::Left));
-    w.add(lv);
-    a.add_window(w);
-    a.run();
+        let mut lv = ListView::<TestItem>::new(LayoutBuilder::new().dock(Dock::Fill).build(), listview::Flags::MergeBorders);
+        lv.add_column(Column::new("C1", 4, TextAlignment::Left));
+        lv.add_column(Column::new("C2", 6, TextAlignment::Left));
+        lv.add_column(Column::new("C3", 8, TextAlignment::Left));
+        lv.add_column(Column::new("C4", 10, TextAlignment::Left));
+        w.add(lv);
+        w
+    }).run().unwrap();
 }

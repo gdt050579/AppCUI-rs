@@ -44,8 +44,5 @@ impl WindowEvents for MyWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().size(Size::new(40, 10)).single_window().build()?;
-    a.add_window(MyWindow::new());
-    a.run();
-    Ok(())
+    App::single_window(MyWindow::new).size(Size::new(40, 10)).run()
 }

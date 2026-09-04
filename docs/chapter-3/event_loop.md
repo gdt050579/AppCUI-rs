@@ -49,13 +49,12 @@ impl MyWindow {
 
 The initialization `base: Window::new(title, layout, flags),` is mandatory. As for the `title`, `layout`, and `flags`, you can provide them as parameters in the **new** method, or you can infer or hardcode them in another way. Read more about how a window can be created on the [Window](event-loop/window.md) page.
 
-Once you create such a window, you can add it to your application using the `add_window(...)` method.
+Once you create such a window, register it with the application using the `.window(...)` builder method. The factory can be a **closure** (when `new` takes arguments, or you build the window inline) or a **function** / constructor with no arguments (`MyWindow::new`):
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    app.add_window(MyWindow::new(/* parameters */));
-    app.run();
-    Ok(())
+    App::new().window(|| MyWindow::new(/* parameters */)).run()
+    // or, if `new` takes no arguments:
+    // App::new().window(MyWindow::new).run()
 }
 ```
 
@@ -81,10 +80,7 @@ impl MyWindow {
     }
 }
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    app.add_window(MyWindow::new("Some title"));
-    app.run();
-    Ok(())
+    App::new().window(|| MyWindow::new("Some title")).run()
 }
 ```
 
@@ -116,10 +112,7 @@ impl /*Control event*/ for MyWindow {
     // add logic for event
 }
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    app.add_window(MyWindow::new(/* parameters */));
-    app.run();
-    Ok(())
+    App::new().window(|| MyWindow::new(/* parameters */)).run()
 }
 ```
 

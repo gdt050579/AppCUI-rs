@@ -80,13 +80,14 @@ The following code creates multiple path finders with both unicode and regular t
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
-    w.add(pathfinder!("path: 'C:\\Program Files',x:1,y:1,w:36,h:1"));
-    w.add(pathfinder!("'C:\\Program Files',x:1,y:3,w:36,h:1, flags: ReadOnly"));
-    w.add(pathfinder!("path:'C:\\Program Files\\Țambal.exe',x:1,y:5,w:36,h:1,enable: false"));
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
+            w.add(pathfinder!("path: 'C:\\Program Files',x:1,y:1,w:36,h:1"));
+            w.add(pathfinder!("'C:\\Program Files',x:1,y:3,w:36,h:1, flags: ReadOnly"));
+            w.add(pathfinder!("path:'C:\\Program Files\\Țambal.exe',x:1,y:5,w:36,h:1,enable: false"));
+            w
+        })
+        .run()
 }
 ```

@@ -6,4 +6,4 @@ The desktop is the root control for all controls in an AppCUI application. There
 
 The desktop will always have the same size as the terminal. Resizing the terminal implicitly resizes the desktop as well.
 
-The desktop object is created by default when the AppCUI framework is initialized (via `App::new(...)`). However, if needed, a [custom desktop](custom_desktop.md) can be provided.
+The desktop object is created by default when the AppCUI framework is initialized (via `App::new(...)`). However, if needed, a [custom desktop](custom_desktop.md) can be provided with `.desktop(...)` on the multi-window builder.

@@ -48,7 +48,7 @@ impl DebugTerminal {
         }
         v
     }
-    pub(crate) fn new(builder: &crate::system::Builder) -> Result<Self, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder) -> Result<Self, Error> {
         let mut w = builder.size.map(|s| s.width).unwrap_or(80);
         let mut h = builder.size.map(|s| s.height).unwrap_or(40);
         w = w.clamp(10, 1000);

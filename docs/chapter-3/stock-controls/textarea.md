@@ -85,14 +85,15 @@ The following code creates multiple text areas with both unicode and regular tex
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
-    w.add(TextArea::new("I ❤️ Rust Language", layout!("a:c,h:100%"), textarea::Flags::None));
-    w.add(TextArea::new("Read only text", layout!("a:c,h:100%"), textarea::Flags::ReadOnly));
-    w.add(TextArea::new("Line Numbers tab functional", layout!("a:c,h:100%"), textarea::Flags::ShowLineNumber | textarea::Flags::ReadOnly));
-    w.add(TextArea::new("I also have scrollbars ❤️", layout!("a:c,h:100%"), textarea::Flags::ScrollBars));
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
+            w.add(TextArea::new("I ❤️ Rust Language", layout!("a:c,h:100%"), textarea::Flags::None));
+            w.add(TextArea::new("Read only text", layout!("a:c,h:100%"), textarea::Flags::ReadOnly));
+            w.add(TextArea::new("Line Numbers tab functional", layout!("a:c,h:100%"), textarea::Flags::ShowLineNumber | textarea::Flags::ReadOnly));
+            w.add(TextArea::new("I also have scrollbars ❤️", layout!("a:c,h:100%"), textarea::Flags::ScrollBars));
+            w
+        })
+        .run()
 }
 ```

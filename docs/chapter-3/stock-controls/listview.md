@@ -342,39 +342,40 @@ struct DownloadItem {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("Download,d:f,flags: Sizeable");
-    let mut l = listview!("DownloadItem,a:c,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(DownloadItem {
-        name: "music.mp3",
-        age: 21,
-        server: "London",
-        stars: 4,
-        download: listview::Status::Running(0.5),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    l.add(DownloadItem {
-        name: "picture.png",
-        age: 30,
-        server: "Bucharest",
-        stars: 3,
-        download: listview::Status::Paused(0.25),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: false,
-    });
-    l.add(DownloadItem {
-        name: "game.exe",
-        age: 40,
-        server: "Bucharest",
-        stars: 5,
-        download: listview::Status::Completed,
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = window!("Download,d:f,flags: Sizeable");
+            let mut l = listview!("DownloadItem,a:c,view:Details,flags: ScrollBars+CheckBoxes");
+            l.add(DownloadItem {
+                name: "music.mp3",
+                age: 21,
+                server: "London",
+                stars: 4,
+                download: listview::Status::Running(0.5),
+                created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+                enabled: true,
+            });
+            l.add(DownloadItem {
+                name: "picture.png",
+                age: 30,
+                server: "Bucharest",
+                stars: 3,
+                download: listview::Status::Paused(0.25),
+                created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+                enabled: false,
+            });
+            l.add(DownloadItem {
+                name: "game.exe",
+                age: 40,
+                server: "Bucharest",
+                stars: 5,
+                download: listview::Status::Completed,
+                created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+                enabled: true,
+            });
+            w.add(l);
+            w
+        })
+        .run()
 }
 ```

@@ -61,20 +61,20 @@ fn check_creation() {
         Paint('C si None (focus on first)')   
         CheckHash(0xBC99794D98A96264)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:36,h:7");
-    w.add(Selector::<Options>::new(
-        Some(Options::B),
-        layout!("x:1,y:1,w:10"),
-        selector::Flags::None,
-    ));
-    w.add(Selector::<Options>::new(
-        None,
-        layout!("x:1,y:3,w:10"),
-        selector::Flags::AllowNoneVariant,
-    ));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:36,h:7");
+        w.add(Selector::<Options>::new(
+            Some(Options::B),
+            layout!("x:1,y:1,w:10"),
+            selector::Flags::None,
+        ));
+        w.add(Selector::<Options>::new(
+            None,
+            layout!("x:1,y:3,w:10"),
+            selector::Flags::AllowNoneVariant,
+        ));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -105,12 +105,12 @@ fn check_create_with_macro() {
         Paint('C si None (focus on first)')   
         CheckHash(0xBC99794D98A96264)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:36,h:7");
-    w.add(selector!("Options,value:B,x:1,y:1,w:10"));
-    w.add(selector!("Options,x:1,y:3,w:10,flags: AllowNoneVariant"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:36,h:7");
+        w.add(selector!("Options,value:B,x:1,y:1,w:10"));
+        w.add(selector!("Options,x:1,y:3,w:10,flags: AllowNoneVariant"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -143,12 +143,12 @@ fn check_expand_pack() {
         Paint('Dacia (not-focus), C (focus)')   
         CheckHash(0xE947715F06C97410)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:36,h:7");
-    w.add(selector!("Options,value:B,x:1,y:1,w:20"));
-    w.add(selector!("Cars,value:Ferrari,x:1,y:3,w:20"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:36,h:7");
+        w.add(selector!("Options,value:B,x:1,y:1,w:20"));
+        w.add(selector!("Cars,value:Ferrari,x:1,y:3,w:20"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -204,11 +204,11 @@ fn check_movement_keys_expand() {
         Paint('Ferrari,Lamborghini,Skoda,[Renault]')   
         CheckHash(0x385754AAEE74FE3A)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -265,11 +265,11 @@ fn check_movement_keys_packed() {
         Paint('16.Renault')   
         CheckHash(0x3FC6F7D52AD87990)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -295,11 +295,11 @@ fn check_scroll_view() {
         Paint('Mercedes,Ford,Ferari,[Lamborghini]')   
         CheckHash(0x53D0DC3BE6A4E553)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -335,11 +335,11 @@ fn check_quick_search_expanded() {
         CheckHash(0x668B915504B8FAAC)
 
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -374,11 +374,11 @@ fn check_quick_search_packed() {
         CheckHash(0xF3BF1B9540CD5A5B)
 
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -397,11 +397,11 @@ fn check_escape_key() {
         Paint('Now the window closes (empty desktop)')   
         CheckHash(0xAB06844D69595285)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -453,9 +453,7 @@ fn check_events() {
         Paint('Window title: Dacia')   
         CheckHash(0xD22ED284CAF9BD9)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -483,11 +481,11 @@ fn check_none_value_scenario() {
         Paint('None')
         CheckHash(0xA2FD5F80F94CD11B)        
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -538,11 +536,11 @@ fn check_mouse_up_down_buttons() {
         Paint('DownButton inactive - Lamborghini,Skoda,Renault,[None] - nothing changes')   
         CheckHash(0x3542CEA13D858F82)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -573,11 +571,11 @@ fn check_mouse_click() {
         Paint('Packed -> Mazda,[Mercedes],Ford,Ferrari)')   
         CheckHash(0x139A7D66A92482B3)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+        w
+    }).run().unwrap();
 }
 
 
@@ -610,11 +608,11 @@ fn check_mouse_wheel() {
         Paint('Lamborghini,Skoda,Renault,[None]')   
         CheckHash(0x3542CEA13D858F82)    
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -627,12 +625,12 @@ fn check_description_on_hover() {
         Paint('Tootltip with description for cars')   
         CheckHash(0x58E1F498C9A61D16) 
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
-    w.add(selector!("enum: Options,x:1,y:3,w:20,flags: AllowNoneVariant"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        w.add(selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant"));
+        w.add(selector!("enum: Options,x:1,y:3,w:20,flags: AllowNoneVariant"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -792,9 +790,7 @@ fn check_value_set_value_clear_value() {
         }
     }
     
-    let mut a = App::debug(80, 12, script).command_bar().build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(80, 12)).debug_script(script).command_bar().window(MyWin::new).run().unwrap();
 }
 
 
@@ -806,16 +802,16 @@ fn check_create_with_panic() {
         Paint('initial state')   
         CheckHash(0x0)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:36,h:7");
-    let s = Selector::<Options>::new(
-        None,
-        layout!("x:1,y:1,w:10"),
-        selector::Flags::None,
-    );
-    w.add(s);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:36,h:7");
+        let s = Selector::<Options>::new(
+            None,
+            layout!("x:1,y:1,w:10"),
+            selector::Flags::None,
+        );
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -826,17 +822,17 @@ fn check_clear_value_with_panic() {
         Paint('initial state')   
         CheckHash(0x0)
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:36,h:7");
-    let mut s = Selector::<Options>::new(
-        Some(Options::B),
-        layout!("x:1,y:1,w:10"),
-        selector::Flags::None,
-    );
-    s.clear_value(); // should panic here
-    w.add(s);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:36,h:7");
+        let mut s = Selector::<Options>::new(
+            Some(Options::B),
+            layout!("x:1,y:1,w:10"),
+            selector::Flags::None,
+        );
+        s.clear_value(); // should panic here
+        w.add(s);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -849,12 +845,12 @@ fn check_on_default_action() {
         Paint('2. Selector is opened (default action)')   
         CheckHash(0xEFFDEFE5806F6E75) 
     ";
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = window!("Title,x:0,y:0,w:36,h:7");
-    let mut s = selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant");
-    s.set_hotkey(key!("Alt+S"));
-    w.add(s);
-    w.add(button!("Button,x:1,y:2,w:10"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = window!("Title,x:0,y:0,w:36,h:7");
+        let mut s = selector!("Cars,value:Ferrari,x:1,y:0,w:30,flags:AllowNoneVariant");
+        s.set_hotkey(key!("Alt+S"));
+        w.add(s);
+        w.add(button!("Button,x:1,y:2,w:10"));
+        w
+    }).run().unwrap();
 }

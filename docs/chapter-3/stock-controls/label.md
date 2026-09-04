@@ -47,11 +47,12 @@ The following code creates a window with a label that contains the text `Hello w
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(Label::new("Hello world !", layout!("a:c,w:14,h:1")));
-    app.add_window(w);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+            w.add(Label::new("Hello world !", layout!("a:c,w:14,h:1")));
+            w
+        })
+        .run()
 }
 ```

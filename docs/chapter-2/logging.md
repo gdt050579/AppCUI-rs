@@ -11,7 +11,8 @@ To enable the logging mechanism, you need to specify a log file when creating th
 ```rs
 App::new()
     .log_file("debug.log", false)
-    .build()
+    .window(|| window!("'Demo',a:c,w:30,h:9"))
+    .run()
     .expect("Failed to create an AppCUI application");
 ```
 

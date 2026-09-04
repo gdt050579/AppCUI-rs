@@ -98,33 +98,34 @@ The following code draws a heart with different colors using an ImageViewer:
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("Heart,a:c,w:15,h:7");
-    let heart = Image::from_str(r#"
-        |.............|
-        |...rr...rr...|
-        |..rrrr.rrrr..|
-        |.rrrrrrrrrrr.|
-        |.raaaaaaaaar.|
-        |..ryyyyyyyr..|
-        |   rwwwwwr   |
-        |....rwwwr....|
-        |.....rwr.....|
-        |......r......|
-    "#).unwrap();
-    w.add(ImageViewer::new(
-        heart,
-        layout!("d:f"),
-        image::RenderOptionsBuilder::new()
-            .scale(image::Scale::Scale50)
-            .character_set(image::CharacterSet::AsciiArt)
-            .color_schema(image::ColorSchema::Color16)
-            .build(),
-        imageviewer::Flags::None,
-    ));
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = window!("Heart,a:c,w:15,h:7");
+            let heart = Image::from_str(r#"
+                |.............|
+                |...rr...rr...|
+                |..rrrr.rrrr..|
+                |.rrrrrrrrrrr.|
+                |.raaaaaaaaar.|
+                |..ryyyyyyyr..|
+                |   rwwwwwr   |
+                |....rwwwr....|
+                |.....rwr.....|
+                |......r......|
+            "#).unwrap();
+            w.add(ImageViewer::new(
+                heart,
+                layout!("d:f"),
+                image::RenderOptionsBuilder::new()
+                    .scale(image::Scale::Scale50)
+                    .character_set(image::CharacterSet::AsciiArt)
+                    .color_schema(image::ColorSchema::Color16)
+                    .build(),
+                imageviewer::Flags::None,
+            ));
+            w
+        })
+        .run()
 }
 ```
 

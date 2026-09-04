@@ -98,14 +98,15 @@ The following code creates multiple text fields with both unicode and regular te
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
-    w.add(textfield!("text:'I ❤️ Rust Language',x:1,y:1,w:36,h:1"));
-    w.add(textfield!("'Read only text',x:1,y:3,w:36,h:1, flags: Readonly"));
-    w.add(textfield!("Inactive,x:1,y:5,w:36,h:1,enable: false"));
-    w.add(textfield!("'No auto selection',x:1,y:7,w:36,h:1, flags: DisableAutoSelectOnFocus"));
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:11"), window::Flags::None);
+            w.add(textfield!("text:'I ❤️ Rust Language',x:1,y:1,w:36,h:1"));
+            w.add(textfield!("'Read only text',x:1,y:3,w:36,h:1, flags: Readonly"));
+            w.add(textfield!("Inactive,x:1,y:5,w:36,h:1,enable: false"));
+            w.add(textfield!("'No auto selection',x:1,y:7,w:36,h:1, flags: DisableAutoSelectOnFocus"));
+            w
+        })
+        .run()
 }
 ```

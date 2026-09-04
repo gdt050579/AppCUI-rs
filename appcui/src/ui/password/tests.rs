@@ -30,12 +30,11 @@ fn check_behavior() {
         Paint('Hide password')
         CheckHash(0x4DDE3EBA59D1D595)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(Password::new(layout!("x:1,y:1,w:30")));
-
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(Password::new(layout!("x:1,y:1,w:30")));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -53,13 +52,12 @@ fn check_macro() {
         Paint('pass hidden')
         CheckHash(0xA761B1792C262886)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(password!("x:1,y:1,w:30"));
-    w.add(password!("x:1,y:3,w:30,pass:123"));
-
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(password!("x:1,y:1,w:30"));
+        w.add(password!("x:1,y:3,w:30,pass:123"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -128,9 +126,7 @@ fn check_events() {
         CheckHash(0x205EBB9FC7AB10A0)
         CheckCursor(10,5)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -155,12 +151,11 @@ fn check_enter_leave_control() {
         Paint('6. Mouse drag - nothing happen (same hash as step 5)')   
         CheckHash(0xE7D1F03B892A5765)        
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(password!("x:1,y:3,w:30,pass:123"));
-
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(password!("x:1,y:3,w:30,pass:123"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -173,14 +168,13 @@ fn check_invalid_keys() {
         Paint('2. F10 pressed - nothing happen')   
         CheckHash(0x4EEF18715284B1DF)  
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    // width is 5 so that the control will be resized
-    // the password is 1234567890, so the control will recompute the visible with on paint
-    w.add(password!("x:1,y:3,w:5,pass:1234567890"));
-
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        // width is 5 so that the control will be resized
+        // the password is 1234567890, so the control will recompute the visible with on paint
+        w.add(password!("x:1,y:3,w:5,pass:1234567890"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -208,12 +202,11 @@ fn check_unicode_char_count() {
         Paint('7. hide password')
         CheckCursor(17,3)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(password!("x:1,y:1,w:30,pass:café"));
-
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(password!("x:1,y:1,w:30,pass:café"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -229,10 +222,9 @@ fn check_no_events_implementation() {
         Paint('3. Escape pressed - nothing happen (the on_cancel event is not implemented)')    
         CheckHash(0xE7D1F03B892A5765)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    w.add(password!("x:1,y:3,w:30,pass:123"));
-
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+        w.add(password!("x:1,y:3,w:30,pass:123"));
+        w
+    }).run().unwrap();
 }

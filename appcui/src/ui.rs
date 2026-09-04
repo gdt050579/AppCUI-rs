@@ -58,23 +58,23 @@
 //!
 //! fn main() -> Result<(), appcui::system::Error> {
 //!     // Initialize the application
-//!     let mut app = App::new().build()?;
+//!     App::new()
+//!         .window(|| {
+//!             // Create a window with centered layout and specific size
+//!             let mut win = Window::new(
+//!                 "First Window", 
+//!                 LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(), 
+//!                 window::Flags::Sizeable
+//!             );
 //!     
-//!     // Create a window with centered layout and specific size
-//!     let mut win = Window::new(
-//!         "First Window", 
-//!         LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(), 
-//!         window::Flags::Sizeable
-//!     );
-//!     
-//!     // Add a label to the window
-//!     win.add(Label::new("Hello World !", layout!("a:center,width:13,height:1")));
-//!     
-//!     // Add the window to the application and run
-//!     app.add_window(win);
-//!     app.run();
-//!     
-//!     Ok(())
+//!             // Add a label to the window
+//!             win.add(Label::new("Hello World !", layout!("a:center,width:13,height:1")));
+//!             
+//!             // return the window
+//!             win
+//!         })
+//!         // run the application
+//!         .run()
 //! }
 
 pub mod layout;

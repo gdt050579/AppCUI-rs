@@ -95,20 +95,21 @@ impl OnPaint for TitledContainer {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("caption:'Container Example',a:c,w:50,h:20");
+    App::new()
+        .window(|| {
+            let mut w = window!("caption:'Container Example',a:c,w:50,h:20");
 
-    // Create the custom container
-    let mut container = TitledContainer::new(layout!("l:2,t:2,r:2,b:2"), "My Custom Container");
+            // Create the custom container
+            let mut container = TitledContainer::new(layout!("l:2,t:2,r:2,b:2"), "My Custom Container");
 
-    // Add child controls to the container
-    container.add(label!("'Hello from inside!', x:2, y:2, w:20"));
-    container.add(button!("'Click Me', x:2, y:4, w:12"));
+            // Add child controls to the container
+            container.add(label!("'Hello from inside!', x:2, y:2, w:20"));
+            container.add(button!("'Click Me', x:2, y:4, w:12"));
 
-    w.add(container);
-    a.add_window(w);
-    a.run();
-    Ok(())
+            w.add(container);
+            w
+        })
+        .run()
 }
 ```
 

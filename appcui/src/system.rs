@@ -69,7 +69,7 @@
 
 mod app;
 mod background_task;
-mod builder;
+mod builders;
 mod clipboard;
 mod control_handle_manager;
 mod error;
@@ -98,7 +98,13 @@ pub use self::theme::Themes;
 pub use self::app::App;
 pub use self::background_task::BackgroundTask;
 pub use self::background_task::BackgroundTaskConector;
-pub use self::builder::Builder;
+pub(crate) use self::builders::InternalBuilder;
+pub use self::builders::MultiWindowAppBuilder;
+pub use self::builders::SingleWindowAppBuilder;
+pub use self::builders::FrameAppBuilder;
+pub use self::builders::FrameApp;
+pub use self::builders::InputAppBuilder;
+pub use self::builders::InputApp;
 pub use self::clipboard::Clipboard;
 pub use self::error::Error;
 pub use self::error::ErrorKind;

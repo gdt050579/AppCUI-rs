@@ -1,7 +1,6 @@
 use appcui::prelude::*;
 
-fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+fn hello_world_window() -> Window {
     let mut win = Window::new(
         "First Window",
         LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(),
@@ -11,7 +10,8 @@ fn main() -> Result<(), appcui::system::Error> {
         "Hello World !",
         LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
     ));
-    app.add_window(win);
-    app.run();
-    Ok(())
+    win
+}
+fn main() -> Result<(), appcui::system::Error> {
+    App::new().window(hello_world_window).run()
 }
