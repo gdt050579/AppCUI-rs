@@ -111,6 +111,9 @@ impl RuntimeManager {
         if let Some(fname) = builder.log_file.as_ref() {
             crate::utils::log::init_log_file(fname, builder.log_append);
         }
+        if builder.debug_script.is_some() && builder.backend.is_some() {
+            panic!("When `debug_script(...)` is used to initialize an application, you can not use `.backend(...)` command to provide a custom backend !");
+        }
 
         let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
         let backend_term = backend::new(&builder, sender.clone())?;
