@@ -125,6 +125,10 @@ name = "plasma"
 path = "plasma/main.rs"
 
 [[example]]
+name = "starfield"
+path = "starfield/main.rs"
+
+[[example]]
 name = "window_toolbar"
 path = "window_toolbar/main.rs"
 
