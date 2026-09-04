@@ -47,7 +47,7 @@ These methods have the following purpose:
 
 ## Using the custom desktop
 
-To use the custom desktop, use the `.desktop(...)` method from the **App** like in the following example:
+To use the custom desktop, use the `.desktop(...)` method on the multi-window builder (`App::new()`). This method is not available in single-window, frame-app, or input-app modes.
 
 ```rs
 #[Desktop(events=..., overwrite=...)]
@@ -61,11 +61,10 @@ impl MyDesktop {
 // additional implementation for events and overridden traits
 
 fn main() -> Result<(), appcui::system::Error> {
-    let a = App::new().desktop(MyDesktop::new()).build()?;
-    // do additional setup with the application
-    // such as add some windows into it
-    a.run();
-    Ok(())
+    App::new()
+        .desktop(MyDesktop::new())
+        .window(|| /* a window */)
+        .run()
 }
 ```
 
@@ -73,8 +72,7 @@ It is important to note that it is usually preferable for the entire logic that 
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).build()?.run();
-    Ok(())
+    App::new().desktop(MyDesktop::new()).run()
 }
 ```
 
@@ -156,11 +154,10 @@ impl CommandBarEvents for MyDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().size(Size::new(80,20))
-             .desktop(MyDesktop::new())
-             .command_bar()
-             .build()?
-        .run();
-    Ok(())
+    App::new()
+        .size(Size::new(80, 20))
+        .desktop(MyDesktop::new())
+        .command_bar()
+        .run()
 }
 ```

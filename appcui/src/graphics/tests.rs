@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use appcui_proc_macro::*;
 
+use crate::graphics::BOX_JUNCTION;
 use crate::graphics::text_format::TextFormatBuilder;
 use crate::graphics::Point;
 use crate::graphics::Rect;
@@ -1014,6 +1015,60 @@ fn check_char_macro() {
     assert_eq!(char!("_|"), Character::with_char(SpecialChar::BoxBottomRightCornerSingleLine));
 }
 
+#[cfg(feature = "TRUE_COLORS")]
+#[test]
+fn check_char_macro_true_colors() {
+    assert_eq!(
+        char!("X,#FF0000,#00FF00"),
+        Character::new('X', Color::RGB(255, 0, 0), Color::RGB(0, 255, 0), CharFlags::None)
+    );
+    assert_eq!(
+        char!("X,#F00,#0F0"),
+        Character::new('X', Color::RGB(255, 0, 0), Color::RGB(0, 255, 0), CharFlags::None)
+    );
+    assert_eq!(
+        char!("X,#abc,#ABC"),
+        Character::new('X', Color::RGB(170, 187, 204), Color::RGB(170, 187, 204), CharFlags::None)
+    );
+    assert_eq!(
+        char!("X,fore=#1A2B3C,back=#80FF00"),
+        Character::new('X', Color::RGB(26, 43, 60), Color::RGB(128, 255, 0), CharFlags::None)
+    );
+    assert_eq!(
+        char!("A,'rgb(255,128,0)',black"),
+        Character::new('A', Color::RGB(255, 128, 0), Color::Black, CharFlags::None)
+    );
+    assert_eq!(
+        char!("A,fore='RGB(10, 20, 30)',back='rgb( 1 , 2 , 3 )'"),
+        Character::new('A', Color::RGB(10, 20, 30), Color::RGB(1, 2, 3), CharFlags::None)
+    );
+    assert_eq!(
+        char!("B,#fff,'rgb(0,0,0)'"),
+        Character::new('B', Color::RGB(255, 255, 255), Color::RGB(0, 0, 0), CharFlags::None)
+    );
+}
+
+#[cfg(feature = "TRUE_COLORS")]
+#[test]
+fn check_charattr_macro_true_colors() {
+    assert_eq!(
+        charattr!("#FF8800,#112233"),
+        CharAttribute::new(Color::RGB(255, 136, 0), Color::RGB(17, 34, 51), CharFlags::None)
+    );
+    assert_eq!(
+        charattr!("#abc,#ABC"),
+        CharAttribute::new(Color::RGB(170, 187, 204), Color::RGB(170, 187, 204), CharFlags::None)
+    );
+    assert_eq!(
+        charattr!("'rgb(9,8,7)',#0F0"),
+        CharAttribute::new(Color::RGB(9, 8, 7), Color::RGB(0, 255, 0), CharFlags::None)
+    );
+    assert_eq!(
+        charattr!("fore='rgb(255, 0, 128)',back=#00F"),
+        CharAttribute::new(Color::RGB(255, 0, 128), Color::RGB(0, 0, 255), CharFlags::None)
+    );
+}
+
 #[test]
 fn check_charattr_macro() {
     assert_eq!(charattr!("Red,Green"), CharAttribute::new(Color::Red, Color::Green, CharFlags::None));
@@ -1779,4 +1834,294 @@ fn check_bevel_rect() {
     s.draw_bevel_rect(Rect::new(23,7,38,11), LineType::Single, dark, light, true);
     //s.print(false);
     assert_eq!(s.compute_hash(), 0xEA0A386392D6725A);
+}
+
+#[test]
+fn check_box_junction() {
+    assert_eq!(BOX_JUNCTION.resolve('═','║','═','║'), Some('╬'));
+    assert_eq!(BOX_JUNCTION.resolve('╔','╗','╝','╚'), Some('╬'));
+    assert_eq!(BOX_JUNCTION.resolve('╔','║','╗','║'), Some('╬'));
+    assert_eq!(BOX_JUNCTION.resolve('╔','║','╝','║'), Some('╬'));
+    assert_eq!(BOX_JUNCTION.resolve('╚','║','╗','║'), Some('╬'));
+    assert_eq!(BOX_JUNCTION.resolve('╚','║','╝','║'), Some('╬'));
+
+    assert_eq!(BOX_JUNCTION.resolve('═','║','═',' '), Some('╩'));
+    assert_eq!(BOX_JUNCTION.resolve('╔',' ','╗','╝'), Some('╦'));
+    assert_eq!(BOX_JUNCTION.resolve('╔','║',' ','║'), Some('╣'));
+    assert_eq!(BOX_JUNCTION.resolve(' ','║','╗','╝'), Some('╠'));
+}
+
+fn box_junction(left: char, up: char, right: char, down: char) -> Option<char> {
+    BOX_JUNCTION.resolve(left, up, right, down)
+}
+
+const GAP: char = ' ';
+
+#[test]
+fn check_box_junction_double_line() {
+    // full cross
+    assert_eq!(box_junction('═', '║', '═', '║'), Some('╬'));
+    assert_eq!(box_junction('╔', '╗', '╝', '╚'), Some('╬'));
+    assert_eq!(box_junction('╔', '║', '╗', '║'), Some('╬'));
+    assert_eq!(box_junction('╔', '║', '╝', '║'), Some('╬'));
+    assert_eq!(box_junction('╚', '║', '╗', '║'), Some('╬'));
+    assert_eq!(box_junction('╚', '║', '╝', '║'), Some('╬'));
+    assert_eq!(box_junction('╠', '╦', '╣', '╩'), Some('╬'));
+
+    // tees
+    assert_eq!(box_junction('═', '║', '═', GAP), Some('╩'));
+    assert_eq!(box_junction('╔', GAP, '╗', '╝'), Some('╦'));
+    assert_eq!(box_junction('═', GAP, '═', '║'), Some('╦'));
+    assert_eq!(box_junction('╔', '║', GAP, '║'), Some('╣'));
+    assert_eq!(box_junction('═', '║', GAP, '║'), Some('╣'));
+    assert_eq!(box_junction(GAP, '║', '╗', '║'), Some('╠'));
+    assert_eq!(box_junction(GAP, '║', '╝', '║'), Some('╠'));
+
+    // corners
+    assert_eq!(box_junction(GAP, GAP, '═', '║'), Some('╔'));
+    assert_eq!(box_junction('═', GAP, GAP, '║'), Some('╗'));
+    assert_eq!(box_junction(GAP, '║', '═', GAP), Some('╚'));
+    assert_eq!(box_junction('═', '║', GAP, GAP), Some('╝'));
+
+    // straight runs
+    assert_eq!(box_junction('═', GAP, '═', GAP), Some('═'));
+    assert_eq!(box_junction(GAP, '║', GAP, '║'), Some('║'));
+}
+
+#[test]
+fn check_box_junction_single_line() {
+    assert_eq!(box_junction('─', '│', '─', '│'), Some('┼'));
+    assert_eq!(box_junction('┌', '┐', '┘', '└'), Some('┼'));
+    assert_eq!(box_junction('┌', '│', '┐', '│'), Some('┼'));
+    assert_eq!(box_junction('└', '│', '┘', '│'), Some('┼'));
+
+    assert_eq!(box_junction('─', '│', '─', GAP), Some('┴'));
+    assert_eq!(box_junction('─', GAP, '─', '│'), Some('┬'));
+    assert_eq!(box_junction('─', '│', GAP, '│'), Some('┤'));
+    assert_eq!(box_junction(GAP, '│', '─', '│'), Some('├'));
+
+    assert_eq!(box_junction(GAP, GAP, '─', '│'), Some('┌'));
+    assert_eq!(box_junction('─', GAP, GAP, '│'), Some('┐'));
+    assert_eq!(box_junction(GAP, '│', '─', GAP), Some('└'));
+    assert_eq!(box_junction('─', '│', GAP, GAP), Some('┘'));
+
+    assert_eq!(box_junction('─', GAP, '─', GAP), Some('─'));
+    assert_eq!(box_junction(GAP, '│', GAP, '│'), Some('│'));
+}
+
+#[test]
+fn check_box_junction_heavy_line() {
+    assert_eq!(box_junction('━', '┃', '━', '┃'), Some('╋'));
+    assert_eq!(box_junction('┏', '┓', '┛', '┗'), Some('╋'));
+    assert_eq!(box_junction('┏', '┃', '┓', '┃'), Some('╋'));
+
+    assert_eq!(box_junction('━', '┃', '━', GAP), Some('┻'));
+    assert_eq!(box_junction('━', GAP, '━', '┃'), Some('┳'));
+    assert_eq!(box_junction('━', '┃', GAP, '┃'), Some('┫'));
+    assert_eq!(box_junction(GAP, '┃', '━', '┃'), Some('┣'));
+
+    assert_eq!(box_junction(GAP, GAP, '━', '┃'), Some('┏'));
+    assert_eq!(box_junction('━', GAP, GAP, '┃'), Some('┓'));
+    assert_eq!(box_junction(GAP, '┃', '━', GAP), Some('┗'));
+    assert_eq!(box_junction('━', '┃', GAP, GAP), Some('┛'));
+
+    assert_eq!(box_junction('━', GAP, '━', GAP), Some('━'));
+    assert_eq!(box_junction(GAP, '┃', GAP, '┃'), Some('┃'));
+}
+
+#[test]
+fn check_box_junction_half_lines() {
+    // nu sunt macar doua character din setul de box junctions --> None
+    assert_eq!(box_junction('─', GAP, GAP, GAP), None);
+    assert_eq!(box_junction(GAP, '│', GAP, GAP), None);
+    assert_eq!(box_junction(GAP, GAP, '─', GAP), None);
+    assert_eq!(box_junction(GAP, GAP, GAP, '│'), None);
+
+    assert_eq!(box_junction('━', GAP, GAP, GAP), None);
+    assert_eq!(box_junction(GAP, '┃', GAP, GAP), None);
+    assert_eq!(box_junction(GAP, GAP, '━', GAP), None);
+    assert_eq!(box_junction(GAP, GAP, GAP, '┃'), None);
+}
+
+#[test]
+fn check_box_junction_single_heavy_mix() {
+    // heavy horizontal crossing a single vertical
+    assert_eq!(box_junction('━', '│', '━', '│'), Some('┿'));
+    // single horizontal crossing a heavy vertical
+    assert_eq!(box_junction('─', '┃', '─', '┃'), Some('╂'));
+
+    // one heavy arm on an otherwise single cross
+    assert_eq!(box_junction('━', '│', '─', '│'), Some('┽')); // heavy west
+    assert_eq!(box_junction('─', '│', '━', '│'), Some('┾')); // heavy east
+    assert_eq!(box_junction('─', '┃', '─', '│'), Some('╀')); // heavy north
+    assert_eq!(box_junction('─', '│', '─', '┃'), Some('╁')); // heavy south
+
+    // mixed tees
+    assert_eq!(box_junction('─', '│', '━', GAP), Some('┶'));
+    assert_eq!(box_junction('━', '│', '─', GAP), Some('┵'));
+    assert_eq!(box_junction('─', GAP, '━', '│'), Some('┮'));
+    assert_eq!(box_junction('━', GAP, '─', '│'), Some('┭'));
+    assert_eq!(box_junction('─', '┃', GAP, '│'), Some('┦'));
+    assert_eq!(box_junction('─', '│', GAP, '┃'), Some('┧'));
+    assert_eq!(box_junction(GAP, '┃', '─', '│'), Some('┞'));
+    assert_eq!(box_junction(GAP, '│', '─', '┃'), Some('┟'));
+
+    // mixed corners
+    assert_eq!(box_junction(GAP, GAP, '━', '│'), Some('┍'));
+    assert_eq!(box_junction(GAP, GAP, '─', '┃'), Some('┎'));
+    assert_eq!(box_junction('━', GAP, GAP, '│'), Some('┑'));
+    assert_eq!(box_junction('─', GAP, GAP, '┃'), Some('┒'));
+    assert_eq!(box_junction(GAP, '│', '━', GAP), Some('┕'));
+    assert_eq!(box_junction(GAP, '┃', '─', GAP), Some('┖'));
+    assert_eq!(box_junction('━', '│', GAP, GAP), Some('┙'));
+    assert_eq!(box_junction('─', '┃', GAP, GAP), Some('┚'));
+}
+
+#[test]
+fn check_box_junction_single_double_mix() {
+    // double horizontal, single vertical
+    assert_eq!(box_junction('═', '│', '═', '│'), Some('╪'));
+    // single horizontal, double vertical
+    assert_eq!(box_junction('─', '║', '─', '║'), Some('╫'));
+
+    // tees
+    assert_eq!(box_junction('═', '│', '═', GAP), Some('╧'));
+    assert_eq!(box_junction('─', '║', '─', GAP), Some('╨'));
+    assert_eq!(box_junction('═', GAP, '═', '│'), Some('╤'));
+    assert_eq!(box_junction('─', GAP, '─', '║'), Some('╥'));
+    assert_eq!(box_junction(GAP, '│', '═', '│'), Some('╞'));
+    assert_eq!(box_junction(GAP, '║', '─', '║'), Some('╟'));
+    assert_eq!(box_junction('═', '│', GAP, '│'), Some('╡'));
+    assert_eq!(box_junction('─', '║', GAP, '║'), Some('╢'));
+
+    // corners
+    assert_eq!(box_junction(GAP, GAP, '═', '│'), Some('╒'));
+    assert_eq!(box_junction(GAP, GAP, '─', '║'), Some('╓'));
+    assert_eq!(box_junction('═', GAP, GAP, '│'), Some('╕'));
+    assert_eq!(box_junction('─', GAP, GAP, '║'), Some('╖'));
+    assert_eq!(box_junction(GAP, '│', '═', GAP), Some('╘'));
+    assert_eq!(box_junction(GAP, '║', '─', GAP), Some('╙'));
+    assert_eq!(box_junction('═', '│', GAP, GAP), Some('╛'));
+    assert_eq!(box_junction('─', '║', GAP, GAP), Some('╜'));
+}
+
+#[test]
+fn check_box_junction_facing_sides_only() {
+    // nu sunt macar doua character din setul de box junctions --> None
+    assert_eq!(box_junction('╝', GAP, GAP, GAP), None);
+    assert_eq!(box_junction('╔', GAP, GAP, GAP), None);
+    assert_eq!(box_junction(GAP, '┌', GAP, GAP), None);
+    assert_eq!(box_junction(GAP, GAP, GAP, '┌'), None);
+}
+
+#[test]
+fn check_box_junction_box_junction_isolated() {
+    assert_eq!(box_junction(GAP, GAP, GAP, GAP), None);
+    assert_eq!(box_junction('a', 'b', 'c', 'd'), None);
+    assert_eq!(box_junction('╱', '╲', '╳', '╴'), None);
+}
+
+#[test]
+fn check_box_junction_every_defined_glyph_round_trips() {
+    for &(idx, n, e, s, w) in super::box_junction::BOX_JUNCTION_DEFS {
+        let c = char::from_u32(0x2500 + idx as u32).unwrap();
+        assert_eq!(BOX_JUNCTION.mask_of(c), super::box_junction::mask(n, e, s, w), "mask_of({c})");
+    }
+}
+
+#[test]
+fn check_box_junction_definitions_have_unique_masks() {
+    let mut seen = [false; 256];
+    for &(idx, n, e, s, w) in super::box_junction::BOX_JUNCTION_DEFS {
+        let m = super::box_junction::mask(n, e, s, w) as usize;
+        assert!(!seen[m], "duplicate mask {m:#04x} at {idx:#04x}");
+        seen[m] = true;
+    }
+}
+
+#[test]
+fn check_box_junction_non_box_chars_contribute_nothing() {
+    assert_eq!(BOX_JUNCTION.mask_of('a'), 0);
+    assert_eq!(BOX_JUNCTION.mask_of(' '), 0);
+    assert_eq!(BOX_JUNCTION.mask_of('╱'), 0);
+    assert_eq!(BOX_JUNCTION.mask_of('\u{24FF}'), 0);
+    assert_eq!(BOX_JUNCTION.mask_of('\u{2580}'), 0);
+}
+
+#[test]
+fn check_box_junction_on_surface_rect_simple() {
+    /*
+┌───┬───────────────────╥─────┐         
+│   │                   ║     │         
+│   │                   ║     │         
+│   │                   ║     │         
+├───┼───────────────────╫─────┤         
+│   │                   ║     │         
+│   │                   ║     │         
+╞═══╪═══════════════════╬═════╡         
+│   │                   ║     │         
+└───┴───────────────────╨─────┘       
+     */
+    let mut s = SurfaceTester::new(40, 10);
+    s.draw_line(0, 4, 30, 4, LineType::Single, charattr!("r"));
+    s.draw_line(0, 7, 30, 7, LineType::Double, charattr!("r"));
+    s.draw_line(4, 0, 4, 10, LineType::Single, charattr!("r"));
+    s.draw_line(24, 0, 24, 10, LineType::Double, charattr!("r"));
+    s.draw_rect(Rect::new(0,0,30,9), LineType::Single, charattr!("y"));
+    // junctions
+    s.write_box_junction(4,4);
+    s.write_box_junction(24,4);
+    s.write_box_junction(4,7);
+    s.write_box_junction(24,7);
+
+    s.write_box_junction(0,4);
+    s.write_box_junction(30,4);
+    s.write_box_junction(4,0);
+    s.write_box_junction(24,0);
+    s.write_box_junction(4,9);
+    s.write_box_junction(24,9);
+    s.write_box_junction(0,7);
+    s.write_box_junction(30,7);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x5049C7F2D1D4FB7A);
+}
+
+#[test]
+fn check_box_junction_on_surface_rect_double() {
+    /*
+╔═══╤═══════════════════╦═════╗         
+║   │                   ║     ║         
+║   │                   ║     ║         
+║   │                   ║     ║         
+╟───┼───────────────────╫─────╢         
+║   │                   ║     ║         
+║   │                   ║     ║         
+╠═══╪═══════════════════╬═════╣         
+║   │                   ║     ║         
+╚═══╧═══════════════════╩═════╝    
+     */
+    let mut s = SurfaceTester::new(40, 10);
+    s.draw_line(0, 4, 30, 4, LineType::Single, charattr!("r"));
+    s.draw_line(0, 7, 30, 7, LineType::Double, charattr!("r"));
+    s.draw_line(4, 0, 4, 10, LineType::Single, charattr!("r"));
+    s.draw_line(24, 0, 24, 10, LineType::Double, charattr!("r"));
+    s.draw_rect(Rect::new(0,0,30,9), LineType::Double, charattr!("y"));
+    // junctions
+    s.write_box_junction(4,4);
+    s.write_box_junction(24,4);
+    s.write_box_junction(4,7);
+    s.write_box_junction(24,7);
+
+    s.write_box_junction(0,4);
+    s.write_box_junction(30,4);
+    s.write_box_junction(4,0);
+    s.write_box_junction(24,0);
+    s.write_box_junction(4,9);
+    s.write_box_junction(24,9);
+    s.write_box_junction(0,7);
+    s.write_box_junction(30,7);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xBADCD5976D211FFE);
 }

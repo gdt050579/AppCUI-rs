@@ -57,10 +57,8 @@ impl OnPaint for MyDesktop {
         let attr = CharAttribute::with_color(theme.desktop.character.foreground,theme.desktop.character.background);
         surface.clear(Character::with_attributes(' ', attr));
         let x = (surface.size().width as i32 - 50)/2;
-        let mut y = (surface.size().height as i32  - 12)/2;
-        for line in LOGO {
+        for (y, line) in ((surface.size().height as i32  - 12) / 2..).zip(LOGO) {
             surface.write_string(x, y, line, attr, false);
-            y += 1;
         }
     }
 }
@@ -143,6 +141,5 @@ impl AppBarEvents for MyDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).app_bar().build()?.run();
-    Ok(())
+    App::new().desktop(MyDesktop::new()).app_bar().run()
 }

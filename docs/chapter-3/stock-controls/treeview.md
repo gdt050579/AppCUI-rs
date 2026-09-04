@@ -30,7 +30,7 @@ The field `columns` is a list of columns that are displayed in the TreeView cont
 
 | Parameter name                | Type    | Positional parameter                 | Purpose                                                                                                                                                                                |
 | ----------------------------- | ------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `caption` or `name` or `text` | String  | **Yes**, first positional parameter  | The name of the column. If a character in the name is precedeed by the `&` character, that column will have a hot key associated that will allow clicking on a column via `Ctrl`+<key> |
+| `caption` or `name` or `text` | String  | **Yes**, first positional parameter  | The name of the column. If a character in the name is precedeed by the `&` character, that column will have a hot key associated that will allow clicking on a column via `Ctrl+<key>` |
 | `width` or `w`                | Numeric | **Yes**, second positional parameter | The width of the column in characters.                                                                                                                                                 |
 | `align` or `alignment` or `a` | String  | **Yes**, third positional parameter  | The alignment of the column (`left` or `l`, `right` or `r`, and `center` or `c`).                                                                                                      |
 
@@ -54,6 +54,7 @@ A treeview supports the following initialization flags:
 * `treeview::Flags::CustomFilter` or `CustomFilter` (for macro initialization) - this enables the custom filter that can be used to filter the list of items. The custom filter should be provided by the user in the [ListItem](../object-traits/listitem.md) implementation.
 * `treeview::Flags::NoSelection` or `NoSelection` (for macro initialization) - this disables the selection of items from the tree view. This flag is useful when the tree view is used only for displaying information and the selection is not needed (such as a Save or Open file dialog).
 * `treeview::Flags::HideHeader` or `HideHeader` (for macro initialization) - this hides the header of the tree view. This flag is useful when the tree view is used only for displaying information and the header is not needed.
+* `treeview::Flags::MergeBorders` or `MergeBorders` (for macro initialization) - this will merge the borders of the tree view with the borders of the window (use box junctions to draw the tree view).
 
 ## Events
 
@@ -246,21 +247,22 @@ impl MyItem {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("Tree,d:f");
-    let mut tv = treeview!("MyItem,a:c,flags: ScrollBars+SearchBar+HideHeader");
-    let h1 = tv.add(MyItem::new("Root Item 1"));    
-    let h2 = tv.add(MyItem::new("Root Item 2"));
-    let h1_1 = tv.add_to_parent(MyItem::new("First Child of Root Item 1"), h1);
-    let h1_2 = tv.add_to_parent(MyItem::new("Second Child of Root Item 1"), h1);
-    let h1_3 = tv.add_to_parent(MyItem::new("Third Child of Root Item 1"), h1);
-    let h1_1_1 = tv.add_to_parent(MyItem::new("First Child of First Child of Root Item 1"), h1_1);
-    let h2_1 = tv.add_to_parent(MyItem::new("First Child of Root Item 1"), h2);
-    let h2_2 = tv.add_to_parent(MyItem::new("Second Child of Root Item 1"), h2);
+    App::new()
+        .window(|| {
+            let mut w = window!("Tree,d:f");
+            let mut tv = treeview!("MyItem,a:c,flags: ScrollBars+SearchBar+HideHeader");
+            let h1 = tv.add(MyItem::new("Root Item 1"));    
+            let h2 = tv.add(MyItem::new("Root Item 2"));
+            let h1_1 = tv.add_to_parent(MyItem::new("First Child of Root Item 1"), h1);
+            let h1_2 = tv.add_to_parent(MyItem::new("Second Child of Root Item 1"), h1);
+            let h1_3 = tv.add_to_parent(MyItem::new("Third Child of Root Item 1"), h1);
+            let h1_1_1 = tv.add_to_parent(MyItem::new("First Child of First Child of Root Item 1"), h1_1);
+            let h2_1 = tv.add_to_parent(MyItem::new("First Child of Root Item 1"), h2);
+            let h2_2 = tv.add_to_parent(MyItem::new("Second Child of Root Item 1"), h2);
 
-    w.add(tv);
-    a.add_window(w);
-    a.run();
-    Ok(())
+            w.add(tv);
+            w
+        })
+        .run()
 }
 ```

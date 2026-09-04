@@ -173,8 +173,5 @@ impl ButtonEvents for EmoticonsWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    app.add_window(EmoticonsWindow::new());
-    app.run();
-    Ok(())
+    App::new().window(EmoticonsWindow::new).run()
 }

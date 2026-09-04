@@ -63,9 +63,13 @@ fn check_theme_update() {
         Paint('Theme changed to green')   
         CheckHash(0xFD09CB2F64B6B15) 
     ";
-    let mut a = App::debug(60, 10, script).command_bar().build().unwrap();
-    a.add_window(TestWindow::new());
-    a.run();
+    App::new()
+        .size(Size::new(60, 10))
+        .debug_script(script)
+        .command_bar()
+        .window(TestWindow::new)
+        .run()
+        .unwrap();
 }
 
 #[derive(ListItem)]
@@ -192,14 +196,15 @@ fn check_default_theme() {
         Paint('Initial state')   
         CheckHash(0x1CEEE10D9F754FA4) 
     ";
-    let mut a = App::debug(120, 24, script)
+    App::new()
+        .size(Size::new(120, 24))
+        .debug_script(script)
         .theme(Theme::new(Themes::Default))
         .command_bar()
         .app_bar()
-        .build()
-        .unwrap();
-    a.add_window(WindowWithTheme::new());
-    a.run();
+        .window(WindowWithTheme::new)
+        .run()
+        .unwrap()
 }
 
 #[test]
@@ -211,14 +216,15 @@ fn check_darkgray_theme() {
         Paint('Initial state')   
         CheckHash(0xE2767D86935FBB7F) 
     ";
-    let mut a = App::debug(120, 24, script)
+    App::new()
+        .size(Size::new(120, 24))
+        .debug_script(script)
         .theme(Theme::new(Themes::DarkGray))
         .command_bar()
         .app_bar()
-        .build()
-        .unwrap();
-    a.add_window(WindowWithTheme::new());
-    a.run();
+        .window(WindowWithTheme::new)
+        .run()
+        .unwrap()
 }
 
 #[test]
@@ -230,12 +236,13 @@ fn check_light_theme() {
         Paint('Initial state')   
         CheckHash(0xE906AAA8E7503FBC) 
     ";
-    let mut a = App::debug(120, 24, script)
+    App::new()
+        .size(Size::new(120, 24))
+        .debug_script(script)
         .theme(Theme::new(Themes::Light))
         .command_bar()
         .app_bar()
-        .build()
-        .unwrap();
-    a.add_window(WindowWithTheme::new());
-    a.run();
+        .window(WindowWithTheme::new)
+        .run()
+        .unwrap()
 }

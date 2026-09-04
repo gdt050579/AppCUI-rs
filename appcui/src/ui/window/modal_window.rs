@@ -146,6 +146,7 @@ impl<T> TextFieldEvents for ModalWindow<T> {}
 impl<T> RichTextFieldEvents for ModalWindow<T> {}
 impl<T> EditorEvents for ModalWindow<T> {}
 impl<T> ButtonEvents for ModalWindow<T> {}
+impl<T> HyperLinkEvents for ModalWindow<T> {}
 impl<T> ToggleButtonEvents for ModalWindow<T> {}
 impl<T> ColorPickerEvents for ModalWindow<T> {}
 impl<T> CharPickerEvents for ModalWindow<T> {}
@@ -157,7 +158,9 @@ impl<T> CustomEvents for ModalWindow<T> {}
 impl<T> GenericSelectorEvents for ModalWindow<T> {}
 impl<T> GenericDropDownListEvents for ModalWindow<T> {}
 impl<T> GenericNumericSelectorEvents for ModalWindow<T> {}
+impl<T> GenericHSliderEvents for ModalWindow<T> {}
 impl<T> GenericListViewEvents for ModalWindow<T> {}
+impl<T> GenericBufferViewEvents for ModalWindow<T> {}
 impl<T> GenericTreeViewEvents for ModalWindow<T> {}
 impl<T> GenericBackgroundTaskEvents for ModalWindow<T> {}
 impl<T> GenericGraphViewEvents for ModalWindow<T> {}

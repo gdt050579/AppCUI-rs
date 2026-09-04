@@ -418,8 +418,7 @@ where
     }
 
     fn update_text_at(&mut self, theme: &Theme, text: &str, pos: usize, is_enabled: bool, is_mouse_hover: bool) {
-        let mut x = pos as i32;
-        for ch in text.chars() {
+        for (x, ch) in (pos as i32..).zip(text.chars()) {
             let attr = match () {
                 _ if !is_enabled => theme.editor.inactive,
                 _ if is_mouse_hover => theme.editor.hovered,
@@ -427,7 +426,6 @@ where
                 _ => theme.editor.normal,
             };
             self.out_of_focus_surface.write_char(x, 0, Character::with_attributes(ch, attr));
-            x += 1;
         }
     }
 
@@ -501,11 +499,10 @@ where
             );
         }
 
-        let mut y = self.expanded_panel_y + 1;
         let suggestions = self.navigator_cacher.suggestions();
         let start_index: usize = self.start_suggestions_pos as usize - 1;
         let end_index: usize = (start_index + Self::PATH_FINDER_VISIBLE_RESULTS as usize).min(suggestions.len());
-        for path_entry in &suggestions[start_index..end_index] {
+        for (y, path_entry) in (self.expanded_panel_y + 1..).zip(suggestions[start_index..end_index].iter()) {
             let path = path_entry;
             if y - 1 > Self::PATH_FINDER_VISIBLE_RESULTS as i32 {
                 break;
@@ -529,7 +526,6 @@ where
                 attr
             };
             surface.write_string(Self::PADDING_LEFT as i32, y, &path[..offset], style, false);
-            y += 1;
         }
     }
 

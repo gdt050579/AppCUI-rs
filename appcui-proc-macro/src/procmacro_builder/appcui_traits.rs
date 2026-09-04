@@ -59,6 +59,9 @@ pub(crate) enum AppCUITrait {
     TimePickerEvents = 50,
     RichTextFieldEvents = 51,
     EditorEvents = 52,
+    GenericBufferViewEvents = 53,
+    HyperLinkEvents = 54,
+    GenericHSliderEvents = 55,
 }
 
 #[repr(u8)]
@@ -128,6 +131,9 @@ impl AppCUITrait {
             AppCUITrait::TimePickerEvents => "TimePickerEvents",
             AppCUITrait::RichTextFieldEvents => "RichTextFieldEvents",
             AppCUITrait::EditorEvents => "EditorEvents",
+            AppCUITrait::GenericBufferViewEvents => "BufferViewEvents", // important to be without Generic
+            AppCUITrait::HyperLinkEvents => "HyperLinkEvents",
+            AppCUITrait::GenericHSliderEvents => "HSliderEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -188,6 +194,9 @@ impl AppCUITrait {
             AppCUITrait::TimePickerEvents => TraitType::ControlEvent,
             AppCUITrait::RichTextFieldEvents => TraitType::ControlEvent,
             AppCUITrait::EditorEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericBufferViewEvents => TraitType::ControlEvent,
+            AppCUITrait::HyperLinkEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericHSliderEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -248,6 +257,9 @@ impl AppCUITrait {
             AppCUITrait::TimePickerEvents => "",
             AppCUITrait::RichTextFieldEvents => "",
             AppCUITrait::EditorEvents => "",
+            AppCUITrait::GenericBufferViewEvents => "",
+            AppCUITrait::HyperLinkEvents => "",
+            AppCUITrait::GenericHSliderEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -308,6 +320,10 @@ impl AppCUITrait {
             AppCUITrait::TimePickerEvents => "impl$(TEMPLATE_TYPE) TimePickerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::RichTextFieldEvents => "impl$(TEMPLATE_TYPE) RichTextFieldEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::EditorEvents => "impl$(TEMPLATE_TYPE) EditorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericBufferViewEvents => "impl$(TEMPLATE_TYPE) GenericBufferViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::HyperLinkEvents => "impl$(TEMPLATE_TYPE) HyperLinkEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericHSliderEvents => "impl$(TEMPLATE_TYPE) GenericHSliderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -320,6 +336,8 @@ impl AppCUITrait {
                 | AppCUITrait::GenericTreeViewEvents
                 | AppCUITrait::GenericBackgroundTaskEvents
                 | AppCUITrait::GenericGraphViewEvents
+                | AppCUITrait::GenericBufferViewEvents
+                | AppCUITrait::GenericHSliderEvents
         )
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -371,6 +389,9 @@ impl AppCUITrait {
             "RichTextFieldEvents" | "RichTextField" => Some(AppCUITrait::RichTextFieldEvents),
             "EditorEvents" | "Editor" => Some(AppCUITrait::EditorEvents),
 
+            "BufferViewEvents" | "BufferView" => Some(AppCUITrait::GenericBufferViewEvents),
+            "HyperLinkEvents" | "HyperLink" => Some(AppCUITrait::HyperLinkEvents),
+            "HSliderEvents" | "HSlider" => Some(AppCUITrait::GenericHSliderEvents),
             _ => None,
         }
     }
@@ -432,6 +453,9 @@ impl AppCUITrait {
             50 => Some(AppCUITrait::TimePickerEvents),
             51 => Some(AppCUITrait::RichTextFieldEvents),
             52 => Some(AppCUITrait::EditorEvents),
+            53 => Some(AppCUITrait::GenericBufferViewEvents),
+            54 => Some(AppCUITrait::HyperLinkEvents),
+            55 => Some(AppCUITrait::GenericHSliderEvents),
             _ => None,
         };
         result?;

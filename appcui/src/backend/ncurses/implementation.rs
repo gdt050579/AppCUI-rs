@@ -24,7 +24,7 @@ pub struct NcursesTerminal {
 
 #[cfg(target_family = "unix")]
 impl NcursesTerminal {
-    pub(crate) fn new(_builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
+    pub(crate) fn new(_builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         ncursesapi::lib::ncurses_endwin();
         ncursesapi::lib::setlocale(ncursesapi::structs::LcCategory::all, "").unwrap();
         let win = ncursesapi::lib::ncurses_initscr();

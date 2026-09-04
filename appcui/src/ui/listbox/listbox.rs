@@ -508,7 +508,7 @@ impl OnKeyPressed for ListBox {
             }
             key!("Enter") => {
                 if self.comp.is_in_edit_mode() {
-                    self.find_first_item(self.pos + 1);
+                    self.find_first_item(self.pos.saturating_add(1));
                     return EventProcessStatus::Processed;
                 } else if self.flags.contains(Flags::CheckBoxes) {
                     if let Some(item) = self.items.get_mut(self.pos) {

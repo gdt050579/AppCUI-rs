@@ -83,11 +83,12 @@ impl OnMouseEvent for MyCustomControl {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("Title,a:c,w:40,h:10");
-    w.add(MyCustomControl::new());
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = window!("Title,a:c,w:40,h:10");
+            w.add(MyCustomControl::new());
+            w
+        })
+        .run()
 }
 ```

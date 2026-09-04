@@ -78,6 +78,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
@@ -96,9 +97,11 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericBufferViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MarkdownEvents, TraitImplementation::DefaultNonOverwritable);
@@ -147,6 +150,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
@@ -165,9 +169,11 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericBufferViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MarkdownEvents, TraitImplementation::DefaultNonOverwritable);
@@ -241,6 +247,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
@@ -259,9 +266,11 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericBufferViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MarkdownEvents, TraitImplementation::Default);
@@ -307,6 +316,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::Default);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::Default);
@@ -325,9 +335,11 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericBufferViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::MarkdownEvents, TraitImplementation::Default);
@@ -399,6 +411,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // control events
     config.set(AppCUITrait::ButtonEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::HyperLinkEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::CheckBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RadioBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ToggleButtonEvents, TraitImplementation::DefaultNonOverwritable);
@@ -417,9 +430,11 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericDropDownListEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericNumericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericHSliderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::DatePickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ListBoxEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericListViewEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericBufferViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PathFinderEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericTreeViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::MarkdownEvents, TraitImplementation::DefaultNonOverwritable);
@@ -705,8 +720,13 @@ pub fn key(input: TokenStream) -> TokenStream {
 /// 
 /// # Color Values
 /// 
-/// Colors can be specified using their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, 
-/// `db` for DarkBlue). `Transparent` can be specified as `transparent`, `invisible` or `?`.
+/// Colors can be specified using:
+/// * their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, `db` for DarkBlue)
+/// * `Transparent` as `transparent`, `invisible` or `?`
+/// * hex format `#RGB` or `#RRGGBB` (e.g. `#F00` or `#FF0000`) — requires the `TRUE_COLORS` feature
+/// * RGB format `rgb(r, g, b)` with values from 0 to 255 (e.g. `rgb(255, 128, 0)`). Because this format contains commas, it must be quoted: `fore='rgb(255, 128, 0)'`. Requires the `TRUE_COLORS` feature
+/// 
+/// Hex and RGB formats are case-insensitive and generate `Color::RGB(r, g, b)`.
 /// 
 /// # Special Characters
 /// 
@@ -731,6 +751,10 @@ pub fn key(input: TokenStream) -> TokenStream {
 /// // Red left arrow with transparent background
 /// let c = char!("<-,red");
 /// let c = char!("<-,r");
+/// 
+/// // Custom RGB colors (requires the TRUE_COLORS feature)
+/// let c = char!("A,#FF0000,#00FF00");
+/// let c = char!("A,fore='#F80',back='rgb(10, 20, 30)'");
 /// ```
 #[proc_macro]
 pub fn char(input: TokenStream) -> TokenStream {
@@ -766,8 +790,13 @@ pub fn char(input: TokenStream) -> TokenStream {
 /// 
 /// # Color Values
 /// 
-/// Colors can be specified using their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, 
-/// `db` for DarkBlue). `Transparent` can be specified as `transparent`, `invisible` or `?`.
+/// Colors can be specified using:
+/// * their full name (e.g., `Red`, `DarkBlue`) or short forms (e.g., `r` for Red, `db` for DarkBlue)
+/// * `Transparent` as `transparent`, `invisible` or `?`
+/// * hex format `#RGB` or `#RRGGBB` (e.g. `#F00` or `#FF0000`) — requires the `TRUE_COLORS` feature
+/// * RGB format `rgb(r, g, b)` with values from 0 to 255 (e.g. `rgb(255, 128, 0)`). Because this format contains commas, it must be quoted: `fore='rgb(255, 128, 0)'`. Requires the `TRUE_COLORS` feature
+/// 
+/// Hex and RGB formats are case-insensitive and generate `Color::RGB(r, g, b)`.
 /// 
 /// # Examples
 /// 
@@ -780,6 +809,10 @@ pub fn char(input: TokenStream) -> TokenStream {
 /// // Creating and using a character attribute
 /// let attr = charattr!("red,blue");
 /// let c = Character::with_attr('A', attr);
+/// 
+/// // Custom RGB colors (requires the TRUE_COLORS feature)
+/// let attr = charattr!("#FF0000,#00FF00");
+/// let attr = charattr!("fore='rgb(255, 128, 0)',back=#112233");
 /// ```
 #[proc_macro]
 pub fn charattr(input: TokenStream) -> TokenStream {
@@ -867,6 +900,64 @@ pub fn headercolumn(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn button(input: TokenStream) -> TokenStream {
     crate::controls::button::create(input)
+}
+
+
+/// Creates a new hyperlink control. The format is `hyperlink!("attributes")` where the attributes are pairs of key-value, separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `name` or `text` - the text displayed by the hyperlink. If not specified, the url itself will be displayed.
+/// * `url` or `link` - the url the hyperlink points to (required)
+/// * `tooltip` - the text shown when the mouse hovers over the hyperlink
+/// * position attributes: `x` and `y`,
+/// * size attributes: `width` or `w` (alias)
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignment attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+///
+/// # Example
+///
+/// ```hyperlink!("name='AppCUI-rs', url='https://github.com/gdt050579/AppCUI-rs', tooltip='A cross-platform TUI framework for Rust', x=1, y=1, w=10")```
+///
+/// Alternatively, the first parameter (if the key is not specified) is considered the name:
+///
+/// ```hyperlink!("'AppCUI-rs', url:'https://github.com/gdt050579/AppCUI-rs', x:1, y:1, w:10")```
+#[proc_macro]
+pub fn hyperlink(input: TokenStream) -> TokenStream {
+    crate::controls::hyperlink::create(input)
+}
+
+/// Creates a new horizontal slider control. The format is `hslider!("attributes")` where the attributes are pairs of key-value, separated by comma, in the format `key=value` or `key:value`.
+/// If the `value` is a string, use single quotes to delimit the value.
+/// The following attributes are supported:
+/// * `class` - the numeric type used by the slider (**required**). Must be one of: `i8`, `i16`, `i32`, `i64`, `i128`, `u8`, `u16`, `u32`, `u64`, `u128`, `isize`, `usize`, `f32`, `f64`.
+/// * `min` - the lower bound of the slider (**required**)
+/// * `max` - the upper bound of the slider (**required**)
+/// * `step` - the increment used when the value changes by one step (**required**)
+/// * `type` - the visual style of the slider, one of **Standard**, **ProgressBar**, **Blocks**, **Ruler** or **Inline** (defaults to **Standard**)
+/// * `flags` - one or more of **ShowValue**, **Ticks** or **ValueAsMarker**, separated by `|`
+/// * position attributes: `x` and `y`,
+/// * size attributes: `width` or `w` (alias), `height` or `h` (alias)
+/// * margin attributes: `left` or `l`(alias), `right` or `r`(alias), `top` or `t`(alias), `bottom` or `b`(alias)
+/// * Alignment attributes:
+///   - `align` or `a`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+///   - `dock` or `d`(alias) - one of **Left**, **Right**, **Top**, **Bottom**, **Center**, **TopLeft**, **TopRight**, **BottomLeft**, **BottomRight**
+/// * State attributes: `enabled`, `visible`
+///
+/// The first four positional parameters (if the key is not specified) are considered, in order, `class`, `min`, `max` and `step`.
+///
+/// # Example
+///
+/// ```hslider!("class:f32, min:0f32, max:10f32, step:1.5f32, x:0, y:1, w:20, h:1, flags:ShowValue")```
+///
+/// Alternatively, the first four parameters can be given positionally (class, min, max, step):
+///
+/// ```hslider!("i32, 0, 10, 1, x:0, y:0, w:20, h:1")```
+#[proc_macro]
+pub fn hslider(input: TokenStream) -> TokenStream {
+    crate::controls::hslider::create(input)
 }
 
 /// Creates a new checkbox control. The format is `checkbox!("attributes")` where the attributes are pairs of key-value , separated by comma, in the format `key=value` or `key:value`.
@@ -1764,6 +1855,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// * `flags` - Line initialization flags (optional). Can be:
 ///   - **DoubleLine** - Uses double line characters instead of single
 ///   - **HasTitle** - Shows the text/caption in the middle of the line
+///   - **MergeBorders** - Merges the borders of the line with the borders of the window (use box junctions to draw the line)
 /// * Position and size:
 ///   - `x`, `y` - Position coordinates
 ///   - `width`/`w` - Width of the line (required)
@@ -1794,6 +1886,7 @@ pub fn hline(input: TokenStream) -> TokenStream {
 /// # Parameters
 /// * `flags` - Line initialization flags (optional). Can be:
 ///   - **DoubleLine** - Uses double line characters instead of single
+///   - **MergeBorders** - Merges the borders of the line with the borders of the window (use box junctions to draw the line)
 /// * Position and size:
 ///   - `x`, `y` - Position coordinates
 ///   - `height`/`h` - Height of the line (required)
@@ -1827,6 +1920,8 @@ pub fn vline(input: TokenStream) -> TokenStream {
 ///   - **PreserveAspectRatio** (default) - Maintains relative sizes when parent resizes
 ///   - **PreserveLeftPanelSize** - Keeps left panel size fixed
 ///   - **PreserveRightPanelSize** - Keeps right panel size fixed
+/// * `flags` - Splitter initialization flags (optional). Can be:
+///   - **MergeBorders** - Merges the borders of the splitter with the borders of the window (use box junctions to draw the splitter)
 /// * `min-left-width`, `mintopwidth`, `mlw` - Minimum width for the left panel
 /// * `min-right-width`, `minbottomwidth`, `mrw` - Minimum width for the right panel
 /// * Position and size:
@@ -1849,6 +1944,7 @@ pub fn vline(input: TokenStream) -> TokenStream {
 /// let split = vsplitter!(
 ///     "x=0, y=0, height=20, width=40,
 ///     resize: PreserveLeftPanelSize, 
+///     flags: MergeBorders,
 ///     minleftwidth: 30, 
 ///     minrightwidth: 40"
 /// );
@@ -1867,6 +1963,8 @@ pub fn vsplitter(input: TokenStream) -> TokenStream {
 ///   - **PreserveAspectRatio** (default) - Maintains relative sizes when parent resizes
 ///   - **PreserveTopPanelSize** - Keeps top panel size fixed
 ///   - **PreserveBottomPanelSize** - Keeps bottom panel size fixed
+/// * `flags` - Splitter initialization flags (optional). Can be:
+///   - **MergeBorders** - Merges the borders of the splitter with the borders of the window (use box junctions to draw the splitter)
 /// * `min-top-height`, `mintopheight`, `mth` - Minimum height for the top panel
 /// * `min-bottom-height`, `minbottomheight`, `mbh` - Minimum height for the bottom panel
 /// * Position and size:
@@ -1889,6 +1987,7 @@ pub fn vsplitter(input: TokenStream) -> TokenStream {
 /// let split = hsplitter!(
 ///     "x=0, y=0, width=40, height=20,
 ///     resize: PreserveTopPanelSize, 
+///     flags: MergeBorders,
 ///     mintopheight: 10, 
 ///     minbottomheight: 15"
 /// );
@@ -1941,6 +2040,7 @@ pub fn datepicker(input: TokenStream) -> TokenStream {
 ///   - **LargeIcons** - Uses large icons
 ///   - **CustomFilter** - Enables custom filtering
 ///   - **NoSelection** - Disables item selection
+///   - **MergeBorders** - Merges the borders of the list view with the borders of the window (use box junctions to draw the list view)
 /// * `view` or `viewmode` or `vm` - View mode (optional). Can be:
 ///   - **Details** - Shows items in details view with columns
 ///   - **Columns(N)** - Shows items in N columns (N from 1 to 10)
@@ -2065,6 +2165,7 @@ pub fn pathfinder(input: TokenStream) -> TokenStream {
 ///   - **CustomFilter** - Enables custom filtering
 ///   - **NoSelection** - Disables item selection
 ///   - **HideHeader** - Hides the column header
+///   - **MergeBorders** - Merges the borders of the tree view with the borders of the window (use box junctions to draw the tree view)
 /// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
 /// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
 /// * Position and size:
@@ -2575,4 +2676,95 @@ pub fn timepicker(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn editor(input: TokenStream) -> TokenStream {
     crate::controls::editor::create(input)
+}
+/// Creates a new [`BufferView`] control for displaying and editing a byte buffer.
+/// The format is `bufferview!("attributes")` where the attributes are pairs of key-value, separated by comma.
+///
+/// The control is created with a default-constructed backing buffer. Load data at runtime with
+/// [`bufferview::BufferView::set_buffer`] or [`bufferview::BufferView::take_buffer`].
+///
+/// # Parameters
+/// * `type` or `class` (required, first positional parameter) - The [`bufferview::BufferAccess`] type
+///   used as the backing store (for example `Vec<u8>` or a custom type)
+/// * `flags` - Control flags (optional). Can be:
+///   - **ScrollBars** - Shows scroll bars
+///   - **SearchBar** - Enables the search bar
+///   - **HideHeader** - Hides the column header row
+///   - **ShowAddress** - Shows the address column
+///   - **ShowIntervalNames** - Shows the interval-name column
+///   - **NoPanelDimming** - Disables dimming of inactive panels
+///   - **ShowAsciiStrings** - Shows the ASCII strings panel
+///   - **ShowUtf16AsciiStrings** - Shows the UTF-16 ASCII strings panel
+///   - **DecodeUTF8Characters** - Decodes UTF-8 in the character panel
+///   - **ReadOnly** - Disables in-place editing
+/// * `offset-format` or `offset` or `address-format` - Address column format (optional). Can be:
+///   - **Hex** (default)
+///   - **Dec**
+/// * `endian` - Multi-byte value endianness (optional). Can be:
+///   - **Little**
+///   - **Big**
+/// * `format` or `data-format` or `representation` - Data panel format (optional). Shorthand values include:
+///   - **Hex**, **Hex(Word)**, **Hex(DWord)**, **Hex(QWord)**
+///   - **Oct**, **Bin**, **Char**
+///   - **UInt**, **UInt(U16)**, **UInt(U32)**, **UInt(U64)**
+///   - **Int**, **Int(I16)**, **Int(I32)**, **Int(I64)**
+///   - **Float**, **Float(Scientific64)**, **Float(E4M3)**, **Float(E5M2)**
+/// * `columns` or `columns-count` - Number of data columns (optional). Can be:
+///   - **Auto**
+///   - **Fixed(N)** or an integer from 1 to 255
+/// * `codepage` or `cp` - Character panel code page (optional). Can be:
+///   - **Default**, **ASCII**, **CP437**, **WINDOWS_1252**, or a custom name
+/// * `address-width` or `aw` - Address column width in characters (optional, minimum 1)
+/// * `address-name` or `address` - Address column title (optional)
+/// * `interval-name-width` or `inw` - Interval-name column width in characters (optional, minimum 1)
+/// * `interval-name-title` or `interval-title` - Interval-name column title (optional)
+/// * `intervals` - Initial interval definitions (optional)
+/// * `selection-start` and `selection-end` - Initial byte selection range (optional, both required together)
+/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
+/// * `top-scroll-margin` or `tsm` - Top scroll margin in characters (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+///
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
+/// // Basic hex view with a Vec<u8> backing store
+/// let mut bv = bufferview!("Vec<u8>, x=1, y=1, width=60, height=20");
+/// bv.set_buffer(vec![0x48, 0x65, 0x6C, 0x6C, 0x6F]);
+///
+/// // Hex view with scroll bars, search, and display options
+/// let mut bv = bufferview!(
+///     "Vec<u8>,
+///     flags: ScrollBars+ShowAddress+SearchBar,
+///     columns: 8,
+///     format: Hex,
+///     offset: Hex,
+///     x=2, y=2, width=60, height=25"
+/// );
+/// bv.set_buffer(test_buffer_data());
+///
+/// // Custom BufferAccess type with intervals and initial selection
+/// let mut bv = bufferview!(
+///     "type: MyBuffer,
+///     flags: ShowAddress+ShowIntervalNames,
+///     format: Hex(Word),
+///     endian: Little,
+///     intervals: &[Interval::new(0, 16, CharAttribute::default(), 'header')],
+///     selection-start: 4,
+///     selection-end: 12,
+///     dock: center, width=70, height=30"
+/// );
+/// ```
+///
+/// The type `T` must implement [`bufferview::BufferAccess`] and [`Default`].
+#[proc_macro]
+pub fn bufferview(input: TokenStream) -> TokenStream {
+    crate::controls::bufferview::create(input)
 }

@@ -14,21 +14,21 @@ fn generate_commands(a: &Arguments) -> String {
     // step 1 --> generate the list of enum variants
     temp.clear();
     for (idx, cmd) in a.commands.iter().enumerate() {
-        write!(temp, "{} = {}, ", &cmd, idx).unwrap();
+        write!(temp, "{} = {}, ", cmd, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(COMMANDS_IDS)", &temp);
 
     // step 2 --> generate the conversion code (from u32 to commands)
     temp.clear();
     for (idx, cmd) in a.commands.iter().enumerate() {
-        writeln!(temp, "{} => Ok(Commands::{}),", idx, &cmd).unwrap();
+        writeln!(temp, "{} => Ok(Commands::{}),", idx, cmd).unwrap();
     }
     cmd_code = cmd_code.replace("$(U32_TO_COMMANDS)", &temp);
 
     // step 3 --> generate the conversion code (from commands to u32)
     temp.clear();
     for (idx, cmd) in a.commands.iter().enumerate() {
-        writeln!(temp, "Commands::{} => {},", &cmd, idx).unwrap();
+        writeln!(temp, "Commands::{} => {},", cmd, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(COMMANDS_TO_U32)", &temp);
     cmd_code
@@ -41,21 +41,21 @@ fn generate_emitted_events(a: &Arguments) -> String {
     // step 1 --> generate the list of enum variants
     temp.clear();
     for (idx, event_name) in a.emitted_events.iter().enumerate() {
-        write!(temp, "{} = {}, ", &event_name, idx).unwrap();
+        write!(temp, "{} = {}, ", event_name, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(EVENTS_IDS)", &temp);
 
     // step 2 --> generate the conversion code (from u32 to events)
     temp.clear();
     for (idx, cmd) in a.emitted_events.iter().enumerate() {
-        writeln!(temp, "{} => Ok(Events::{}),", idx, &cmd).unwrap();
+        writeln!(temp, "{} => Ok(Events::{}),", idx, cmd).unwrap();
     }
     cmd_code = cmd_code.replace("$(U32_TO_EVENTS)", &temp);
 
     // step 3 --> generate the conversion code (from events to u32)
     temp.clear();
     for (idx, cmd) in a.emitted_events.iter().enumerate() {
-        writeln!(temp, "Events::{} => {},", &cmd, idx).unwrap();
+        writeln!(temp, "Events::{} => {},", cmd, idx).unwrap();
     }
     cmd_code = cmd_code.replace("$(EVENTS_TO_U32)", &temp);
     cmd_code
@@ -175,6 +175,24 @@ fn generate_listview_events(a: &mut Arguments) -> String {
         .replace("$(TYPE_ID_TRANSLATION_FOR_LISTVIEW_ON_ITEM_ACTION)", &on_item_action_code)
 }
 
+fn generate_bufferview_events(a: &mut Arguments) -> String {
+    if !a.template_events.contains_key(&AppCUITrait::GenericBufferViewEvents) {
+        panic!("Missing generic type for BufferView event (Have you used events=BufferViewEvents<Type> ?)");
+    }
+    let mut on_current_pos_changed_code = String::new();
+    let mut on_selection_changed_code = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericBufferViewEvents].iter() {
+        on_current_pos_changed_code.push_str(templates::BUFFERVIEW_ON_CURRENT_POS_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_selection_changed_code.push_str(templates::BUFFERVIEW_ON_SELECTION_CHANGED_DEF.replace("$(TYPE)", trait_name).as_str());
+    }
+    templates::BUFFERVIEW_TRAIT_DEF
+        .replace(
+            "$(TYPE_ID_TRANSLATION_FOR_BUFFERVIEW_ON_CURRENT_POS_CHANGED)",
+            &on_current_pos_changed_code,
+        )
+        .replace("$(TYPE_ID_TRANSLATION_FOR_BUFFERVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code)
+}
+
 fn generate_treeview_events(a: &mut Arguments) -> String {
     if !a.template_events.contains_key(&AppCUITrait::GenericTreeViewEvents) {
         panic!("Missing generic type for TreeView event (Have you used events=TreeVewEvents<Type> ?)");
@@ -227,6 +245,17 @@ fn generate_graphview_events(a: &mut Arguments) -> String {
         .replace("$(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_REQUEST_NEW_NODE)", &on_request_new_node_code)
         .replace("$(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_REQUEST_NEW_EDGE)", &on_request_new_edge_code)
         .replace("$(TYPE_ID_TRANSLATION_FOR_GRAPHVIEW_ON_SELECTION_CHANGED)", &on_selection_changed_code)
+}
+
+fn generate_hslider_events(a: &mut Arguments) -> String {
+    if !a.template_events.contains_key(&AppCUITrait::GenericHSliderEvents) {
+        panic!("Missing generic type for HSlider event (Have you used events=HSliderEvents<Type> ?)");
+    }
+    let mut s = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericHSliderEvents].iter() {
+        s.push_str(templates::HSLIDER_SELECT_ON_VALUE_CHANGE_DEF.replace("$(TYPE)", trait_name).as_str());
+    }
+    templates::HSLIDER_SELECTOR_TRAIT_DEF.replace("$(TYPE_ID_TRANSLATION_FOR_HSLIDER)", s.as_str())
 }
 
 fn generate_backgroundtask_events(a: &mut Arguments) -> String {
@@ -299,9 +328,11 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericDropDownListEvents => code.push_str(generate_dropdownlist_events(&mut a).as_str()),
                         AppCUITrait::GenericNumericSelectorEvents => code.push_str(generate_numeric_selector_events(&mut a).as_str()),
                         AppCUITrait::GenericListViewEvents => code.push_str(generate_listview_events(&mut a).as_str()),
+                        AppCUITrait::GenericBufferViewEvents => code.push_str(generate_bufferview_events(&mut a).as_str()),
                         AppCUITrait::GenericTreeViewEvents => code.push_str(generate_treeview_events(&mut a).as_str()),
                         AppCUITrait::GenericBackgroundTaskEvents => code.push_str(generate_backgroundtask_events(&mut a).as_str()),
                         AppCUITrait::GenericGraphViewEvents => code.push_str(generate_graphview_events(&mut a).as_str()),
+                        AppCUITrait::GenericHSliderEvents => code.push_str(generate_hslider_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

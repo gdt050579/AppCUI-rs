@@ -18,6 +18,7 @@ mod size;
 mod surface;
 mod text_format;
 mod orthogonal_direction;
+mod box_junction;
 
 #[cfg(test)]
 mod surface_tester;
@@ -44,6 +45,8 @@ pub use self::text_format::TextFormat;
 pub use self::text_format::TextFormatBuilder;
 pub use self::text_format::WrapType;
 pub use self::orthogonal_direction::OrthogonalDirection;
+
+use self::box_junction::BOX_JUNCTION;
 
 
 #[cfg(test)]

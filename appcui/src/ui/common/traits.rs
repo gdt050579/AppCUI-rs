@@ -17,6 +17,7 @@ use crate::{
         graphview::events::GenericGraphViewEvents,
         keyselector::events::KeySelectorEvents,
         listbox::events::ListBoxEvents,
+        bufferview::events::GenericBufferViewEvents,
         listview::events::GenericListViewEvents,
         markdown::events::MarkdownEvents,
         menu::events::GenericMenuEvents,
@@ -34,6 +35,8 @@ use crate::{
         tab::events::TabEvents,
         timepicker::events::TimePickerEvents,
         editor::events::EditorEvents,
+        hyperlink::events::HyperLinkEvents,
+        hslider::events::GenericHSliderEvents,
     },
 };
 
@@ -170,6 +173,7 @@ pub trait Control:
     + DatePickerEvents
     + ListBoxEvents
     + GenericListViewEvents
+    + GenericBufferViewEvents
     + PathFinderEvents
     + TimerEvents
     + GenericTreeViewEvents
@@ -182,6 +186,8 @@ pub trait Control:
     + AppBarEvents
     + TimePickerEvents
     + EditorEvents
+    + HyperLinkEvents
+    + GenericHSliderEvents
 {
 }
 

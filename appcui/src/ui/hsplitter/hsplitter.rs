@@ -2,6 +2,7 @@ use self::layout::Dimension;
 
 use super::ResizeBehavior;
 use super::SplitterPanel;
+use super::Flags;
 use crate::prelude::*;
 use crate::ui::layout::Coordinate;
 
@@ -26,24 +27,32 @@ pub struct HSplitter {
     preserve_pos: i32,
     resize_behavior: ResizeBehavior,
     state: State,
+    flags: Flags,
 }
 impl HSplitter {
-    /// Creates a new Horizontal Splitter control with the specified position, layout and resize behavior
+    /// Creates a new Horizontal Splitter control with the specified position, layout, resize behavior and flags
     /// The position can be a percentage (e.g. a float value) or an absolute value (e.g. an unsigned value)
     /// The resize behavior can be one of the following values:
     /// * `ResizeBehavior::PreserveAspectRatio` - the aspect ratio of the panels is preserved when resizing the control
     /// * `ResizeBehavior::PreserveTopPanelSize` - the size of the top panel is preserved when resizing the control
     /// * `ResizeBehavior::PreserveBottomPanelSize` - the size of the bottom panel is preserved when resizing the control
     /// 
+    /// The flags can be a combination of the following values:
+    /// * `Flags::None` - no flags
+    /// * `Flags::MergeBorders` - merge the borders of the splitter with the borders of the window
+    /// 
     /// # Example
     /// ```rust, no_run
     /// use appcui::prelude::*;
     /// 
-    /// let mut vs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             hsplitter::ResizeBehavior::PreserveTopPanelSize,
+    ///                             hsplitter::Flags::None);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// ```
-    pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior) -> Self
+    pub fn new<T>(pos: T, layout: Layout, resize_behavior: ResizeBehavior, flags: Flags) -> Self
     where
         Coordinate: From<T>,
     {
@@ -57,6 +66,7 @@ impl HSplitter {
             state: State::None,
             resize_behavior,
             preserve_pos: 0,
+            flags,
         };
         obj.set_size_bounds(1, 3, u16::MAX, u16::MAX);
         obj.top = obj.add_child(SplitterPanel::new());
@@ -70,7 +80,10 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             hsplitter::ResizeBehavior::PreserveTopPanelSize,
+    ///                             hsplitter::Flags::None);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));   
     /// ```
@@ -95,7 +108,10 @@ impl HSplitter {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let mut vs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveTopPanelSize);
+    /// let mut vs = HSplitter::new(0.5,
+    ///                             layout!("d:f"),
+    ///                             hsplitter::ResizeBehavior::PreserveTopPanelSize,
+    ///                             hsplitter::Flags::None);
     /// vs.add(hsplitter::Panel::Top,button!("PressMe,x:1,y:1,w:12"));
     /// vs.add(hsplitter::Panel::Bottom,button!("PressMe,x:1,y:1,w:12"));
     /// // minim 2 chars from Top
@@ -227,6 +243,10 @@ impl OnPaint for HSplitter {
         surface.draw_horizontal_line_with_size(0, y, sz.width, LineType::Single, col_line);
         surface.write_char(1, y, Character::with_attributes(SpecialChar::TriangleUp, col_b1));
         surface.write_char(2, y, Character::with_attributes(SpecialChar::TriangleDown, col_b2));
+        if self.flags.contains(Flags::MergeBorders) {
+            surface.write_box_junction(-1, y);
+            surface.write_box_junction(sz.width as i32, y);
+        }
     }
 }
 impl OnKeyPressed for HSplitter {

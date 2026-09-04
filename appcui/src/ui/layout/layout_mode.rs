@@ -51,23 +51,22 @@ impl LayoutMode {
             return PointAndSizeLayout::new_aligned(&layout).map(LayoutMode::PointAndSize);
         }
         // Step 3 ==> check (X,Y) + (W,H) + (optional pivot)
-        if layout.x.is_some() && layout.y.is_some() {
+
+        if let (Some(x), Some(y)) = (layout.x, layout.y) {
             // if all we have is (X,Y) + (W,H) check to see if it is an absolute layout
-            if (layout.width.is_some())
-                && (layout.height.is_some())
-                && (layout.align.is_none())
-                && (layout.pivot.is_none())
-                && (layout.dock.is_none())
-                && (layout.a_top.is_none())
-                && (layout.a_left.is_none())
-                && (layout.a_bottom.is_none())
-                && (layout.a_right.is_none())
-            {
-                let x = layout.x.unwrap();
-                let y = layout.y.unwrap();
-                let w = layout.width.unwrap();
-                let h = layout.height.unwrap();
-                if x.is_absolute() && y.is_absolute() && w.is_absolute() && h.is_absolute() {
+            if let (Some(w), Some(h)) = (layout.width, layout.height) {
+                if layout.align.is_none()
+                    && layout.pivot.is_none()
+                    && layout.dock.is_none()
+                    && layout.a_top.is_none()
+                    && layout.a_left.is_none()
+                    && layout.a_bottom.is_none()
+                    && layout.a_right.is_none()
+                    && x.is_absolute()
+                    && y.is_absolute()
+                    && w.is_absolute()
+                    && h.is_absolute()
+                {
                     let w = w.absolute(0);
                     let h = h.absolute(0);
                     if (w > 0) && (h > 0) {
@@ -77,6 +76,33 @@ impl LayoutMode {
             }
             return PointAndSizeLayout::new_xy(&layout).map(LayoutMode::PointAndSize);
         }
+
+        // if layout.x.is_some() && layout.y.is_some() {
+        //     // if all we have is (X,Y) + (W,H) check to see if it is an absolute layout
+        //     if (layout.width.is_some())
+        //         && (layout.height.is_some())
+        //         && (layout.align.is_none())
+        //         && (layout.pivot.is_none())
+        //         && (layout.dock.is_none())
+        //         && (layout.a_top.is_none())
+        //         && (layout.a_left.is_none())
+        //         && (layout.a_bottom.is_none())
+        //         && (layout.a_right.is_none())
+        //     {
+        //         let x = layout.x.unwrap();
+        //         let y = layout.y.unwrap();
+        //         let w = layout.width.unwrap();
+        //         let h = layout.height.unwrap();
+        //         if x.is_absolute() && y.is_absolute() && w.is_absolute() && h.is_absolute() {
+        //             let w = w.absolute(0);
+        //             let h = h.absolute(0);
+        //             if (w > 0) && (h > 0) {
+        //                 return Ok(LayoutMode::Absolute(AbsoluteLayout::new(x.absolute(0), y.absolute(0), w, h)));
+        //             }
+        //         }
+        //     }
+        //     return PointAndSizeLayout::new_xy(&layout).map(LayoutMode::PointAndSize);
+        // }
 
         // step 4 ==> check anchors
         match anchors {

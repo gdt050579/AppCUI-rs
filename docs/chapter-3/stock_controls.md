@@ -5,6 +5,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | Control                                              | Class                        | Macro              | Image                                                         |
 | ---------------------------------------------------- | ---------------------------- | ------------------ | ------------------------------------------------------------- |
 | [Accordion](stock-controls/accordion.md)             | ui::Accordion                | `accordion!`       | <img src="stock-controls/img/accordion.png" width=300/>       |
+| [BufferView](stock-controls/bufferview.md)           | ui::BufferView               | `bufferview!`      | <img src="stock-controls/img/bufferview.png" width=300/>      |
 | [Button](stock-controls/button.md)                   | ui::Button                   | `button!`          | <img src="stock-controls/img/button.png" width=300/>          |
 | [Canvas](stock-controls/canvas.md)                   | ui::Canvas                   | `canvas!`          | <img src="stock-controls/img/canvas.png" width=300/>          |
 | [CheckBox](stock-controls/checkbox.md)               | ui::CheckBox                 | `checkbox!`        | <img src="stock-controls/img/checkbox.png" width=300/>        |
@@ -15,7 +16,9 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [DropDownList](stock-controls/dropdownlist.md)       | ui::DropDownList&lt;T&gt;    | `dropdownlist!`    | <img src="stock-controls/img/dropdownlist.png" width=300/>    |
 | [GraphView](stock-controls/graphview.md)             | ui::GraphView&lt;T&gt;       | `graphview!`       | <img src="stock-controls/img/graphview.png" width=300/>       |
 | [HLine](stock-controls/hline.md)                     | ui::HLine                    | `hline!`           | <img src="stock-controls/img/hline.png" width=300/>           |
+| [HSlider](stock-controls/hslider.md)                 | ui::HSlider&lt;T&gt;         | `hslider!`         | <img src="stock-controls/img/hslider.png" width=300/>         |
 | [HSplitter](stock-controls/hsplitter.md)             | ui::HSplitter                | `hsplitter!`       | <img src="stock-controls/img/hsplitter.png" width=300/>       |
+| [HyperLink](stock-controls/hyperlink.md)             | ui::HyperLink                | `hyperlink!`       | <img src="stock-controls/img/hyperlink.png" width=300/>       |
 | [ImageViewer](stock-controls/imageviewer.md)         | ui::ImageViewer              | `imageviewer!`     | <img src="stock-controls/img/imageviewer.png" width=300/>     |
 | [KeySelector](stock-controls/keyselector.md)         | ui::KeySelector              | `keyselector!`     | <img src="stock-controls/img/keyselector.png" width=300/>     |
 | [Label](stock-controls/label.md)                     | ui::Label                    | `label!`           | <img src="stock-controls/img/label.png" width=300/>           |

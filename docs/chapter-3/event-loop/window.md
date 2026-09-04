@@ -152,12 +152,13 @@ For example, the following code:
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut win = window!("Title,a:c,w:40,h:9");
-    win.set_tag("TAG");
-    app.add_window(win);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut win = window!("Title,a:c,w:40,h:9");
+            win.set_tag("TAG");
+            win
+        })
+        .run()
 }
 ```
 should generate a window that looks like the following:
@@ -169,12 +170,13 @@ You can also associate a hot key to a window. A hot key allows you to quickly sw
 
 ```rs
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut win = window!("Title,a:c,w:40,h:9");
-    win.set_hotkey(key!("Alt+7"));
-    app.add_window(win);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut win = window!("Title,a:c,w:40,h:9");
+            win.set_hotkey(key!("Alt+7"));
+            win
+        })
+        .run()
 }
 ```
 should generate a window that looks like the following:

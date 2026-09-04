@@ -2,6 +2,10 @@ use super::traits::{Control, CustomEvents, EventProcessStatus};
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::keyselector::events::KeySelectorEvents;
 use crate::prelude::*;
+use crate::prelude::{
+    bufferview, colorpicker, combobox, datepicker, dropdownlist, keyselector, listbox, listview, numericselector, richtextfield, selector, textfield,
+    threestatebox, togglebutton, GenericSelectorEvents, PathFinderEvents, RuntimeManager, ThreeStateBoxEvents,
+};
 use crate::system::Handle;
 
 use crate::ui::{
@@ -15,8 +19,14 @@ use crate::ui::{
     listbox::events::ListBoxEventTypes, listview::events::ListViewEventTypes,
     treeview::events::TreeViewEventTypes, graphview::events::GraphViewEventTypes, textfield::events::TextFieldEventsType,
     richtextfield::events::RichTextFieldEventsType,
+    dropdownlist::events::GenericDropDownListEvents, graphview, graphview::events::GenericGraphViewEvents, listbox::events::ListBoxEvents,
+    bufferview::events::GenericBufferViewEvents, listview::events::GenericListViewEvents, markdown, markdown::events::MarkdownEvents,
+    numericselector::events::GenericNumericSelectorEvents,
+    password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
+    richtextfield::events::RichTextFieldEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
+    timepicker, timepicker::events::TimePickerEvents, hyperlink, hyperlink::events::HyperLinkEvents,
+    hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview,
 };
-use crate::ui::{pathfinder, treeview};
 
 #[derive(Copy, Clone)]
 pub(crate) struct CustomEventData {
@@ -44,6 +54,7 @@ pub(crate) enum ControlEventData {
     DatePicker(datepicker::events::EventData),
     ListBox(listbox::events::EventData),
     ListView(listview::events::EventData),
+    BufferView(bufferview::events::EventData),
     PathFinder(pathfinder::events::EventData),
     TreeView(treeview::events::EventData),
     Markdown(markdown::events::EventData),
@@ -52,6 +63,8 @@ pub(crate) enum ControlEventData {
     TimePicker(timepicker::events::EventData),
     GraphView(graphview::events::EventData),
     Editor(editor::events::EventData),
+    HyperLink(hyperlink::events::EventData),
+    HSliderEvents(hslider::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -125,6 +138,14 @@ impl ControlEvent {
                 ListViewEventTypes::SelectionChanged => GenericListViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id),
                 ListViewEventTypes::ItemAction(index) => GenericListViewEvents::on_item_action(receiver, self.emitter.cast(), data.type_id, index),
             },
+            ControlEventData::BufferView(data) => match data.event_type {
+                bufferview::events::BufferViewEventTypes::CurrentPosChanged => {
+                    GenericBufferViewEvents::on_current_pos_changed(receiver, self.emitter.cast(), data.type_id)
+                }
+                bufferview::events::BufferViewEventTypes::SelectionChanged => {
+                    GenericBufferViewEvents::on_selection_changed(receiver, self.emitter.cast(), data.type_id)
+                }
+            },
             ControlEventData::PathFinder(_) => PathFinderEvents::on_path_updated(receiver, self.emitter.cast()),
             ControlEventData::TreeView(data) => match data.event_type {
                 TreeViewEventTypes::CurrentItemChanged(item_handle) => {
@@ -169,6 +190,8 @@ impl ControlEvent {
                 EditorEventsType::OnCharPressed(ch) => EditorEvents::on_char_pressed(receiver, self.emitter.cast(), ch),
                 EditorEventsType::OnDocumentChanged => EditorEvents::on_document_changed(receiver, self.emitter.cast()),
             },
+            ControlEventData::HyperLink(_) => HyperLinkEvents::on_open(receiver, self.emitter.cast()),
+            ControlEventData::HSliderEvents(data) => GenericHSliderEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id),
         }
     }
 }

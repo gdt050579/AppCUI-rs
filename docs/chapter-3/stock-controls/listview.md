@@ -31,7 +31,7 @@ The field `columns` is a list of columns that are displayed in the ListView cont
 
 | Parameter name                | Type    | Positional parameter                 | Purpose                                                                                                                                                                                |
 | ----------------------------- | ------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `caption` or `name` or `text` | String  | **Yes**, first positional parameter  | The name of the column. If a character in the name is precedeed by the `&` character, that column will have a hot key associated that will allow clicking on a column via `Ctrl`+<key> |
+| `caption` or `name` or `text` | String  | **Yes**, first positional parameter  | The name of the column. If a character in the name is precedeed by the `&` character, that column will have a hot key associated that will allow clicking on a column via `Ctrl+<key>` |
 | `width` or `w`                | Numeric | **Yes**, second positional parameter | The width of the column in characters.                                                                                                                                                 |
 | `align` or `alignment` or `a` | String  | **Yes**, third positional parameter  | The alignment of the column (`left` or `l`, `right` or `r`, and `center` or `c`).                                                                                                      |
 
@@ -56,6 +56,7 @@ A listview supports the following initialization flags:
 * `listview::Flags::LargeIcons` or `LargeIcons` (for macro initialization) - this enables the large icons (two characters or unicode surrogates) view mode for the list view.
 * `listview::Flags::CustomFilter` or `CustomFilter` (for macro initialization) - this enables the custom filter that can be used to filter the list of items. The custom filter should be provided by the user in the [ListItem](../object-traits/listitem.md) implementation.
 * `listview::Flags::NoSelection` or `NoSelection` (for macro initialization) - this disables the selection of items from the list view. This flag is useful when the list view is used only for displaying information and the selection is not needed (such as a Save or Open file dialog). Using this flag together with the `CheckBoxes` flag will result in a panic.
+* `listview::Flags::MergeBorders` or `MergeBorders` (for macro initialization) - this will merge the borders of the list view with the borders of the window (use box junctions to draw the list view).
 
 
 ## Events
@@ -341,39 +342,40 @@ struct DownloadItem {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("Download,d:f,flags: Sizeable");
-    let mut l = listview!("DownloadItem,a:c,view:Details,flags: ScrollBars+CheckBoxes");
-    l.add(DownloadItem {
-        name: "music.mp3",
-        age: 21,
-        server: "London",
-        stars: 4,
-        download: listview::Status::Running(0.5),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    l.add(DownloadItem {
-        name: "picture.png",
-        age: 30,
-        server: "Bucharest",
-        stars: 3,
-        download: listview::Status::Paused(0.25),
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: false,
-    });
-    l.add(DownloadItem {
-        name: "game.exe",
-        age: 40,
-        server: "Bucharest",
-        stars: 5,
-        download: listview::Status::Completed,
-        created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
-        enabled: true,
-    });
-    w.add(l);
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = window!("Download,d:f,flags: Sizeable");
+            let mut l = listview!("DownloadItem,a:c,view:Details,flags: ScrollBars+CheckBoxes");
+            l.add(DownloadItem {
+                name: "music.mp3",
+                age: 21,
+                server: "London",
+                stars: 4,
+                download: listview::Status::Running(0.5),
+                created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+                enabled: true,
+            });
+            l.add(DownloadItem {
+                name: "picture.png",
+                age: 30,
+                server: "Bucharest",
+                stars: 3,
+                download: listview::Status::Paused(0.25),
+                created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+                enabled: false,
+            });
+            l.add(DownloadItem {
+                name: "game.exe",
+                age: 40,
+                server: "Bucharest",
+                stars: 5,
+                download: listview::Status::Completed,
+                created: chrono::NaiveDate::from_ymd_opt(2016, 7, 8).unwrap().and_hms_opt(9, 10, 11).unwrap(),
+                enabled: true,
+            });
+            w.add(l);
+            w
+        })
+        .run()
 }
 ```

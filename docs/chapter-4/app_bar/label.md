@@ -57,9 +57,6 @@ impl AppBarEvents for Win {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().app_bar().build()?;
-    app.add_window(Win::new());
-    app.run();
-    Ok(())
+    App::new().app_bar().window(Win::new).run()
 }
 ```

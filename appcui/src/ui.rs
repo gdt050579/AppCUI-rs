@@ -58,23 +58,23 @@
 //!
 //! fn main() -> Result<(), appcui::system::Error> {
 //!     // Initialize the application
-//!     let mut app = App::new().build()?;
+//!     App::new()
+//!         .window(|| {
+//!             // Create a window with centered layout and specific size
+//!             let mut win = Window::new(
+//!                 "First Window", 
+//!                 LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(), 
+//!                 window::Flags::Sizeable
+//!             );
 //!     
-//!     // Create a window with centered layout and specific size
-//!     let mut win = Window::new(
-//!         "First Window", 
-//!         LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(), 
-//!         window::Flags::Sizeable
-//!     );
-//!     
-//!     // Add a label to the window
-//!     win.add(Label::new("Hello World !", layout!("a:center,width:13,height:1")));
-//!     
-//!     // Add the window to the application and run
-//!     app.add_window(win);
-//!     app.run();
-//!     
-//!     Ok(())
+//!             // Add a label to the window
+//!             win.add(Label::new("Hello World !", layout!("a:center,width:13,height:1")));
+//!             
+//!             // return the window
+//!             win
+//!         })
+//!         // run the application
+//!         .run()
 //! }
 
 pub mod layout;
@@ -111,6 +111,7 @@ pub mod numericselector;
 pub mod vsplitter;
 pub mod hsplitter;
 pub mod hline;
+pub mod hyperlink;
 pub mod vline;
 pub mod datepicker;
 pub mod listbox;
@@ -124,6 +125,8 @@ pub mod textarea;
 pub mod graphview;
 pub mod timepicker;
 pub mod editor;
+pub mod bufferview;
+pub mod hslider;
 
 // re-export
 pub use common::ControlBase;
@@ -160,6 +163,7 @@ pub use numericselector::NumericSelector;
 pub use vsplitter::VSplitter;
 pub use hsplitter::HSplitter;
 pub use hline::HLine;
+pub use hyperlink::HyperLink;
 pub use vline::VLine;
 pub use datepicker::DatePicker;
 pub use listbox::ListBox;
@@ -171,7 +175,10 @@ pub use treeview::TreeView;
 pub use progressbar::ProgressBar;
 pub use textarea::TextArea;
 pub use timepicker::TimePicker;
+pub use bufferview::BufferView;
+pub use bufferview::BufferAccess;
 pub use menu::Menu;
 pub use appbar::AppBar;
 pub use graphview::GraphView;
 pub use editor::Editor;
+pub use hslider::HSlider;

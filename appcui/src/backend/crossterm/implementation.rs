@@ -30,7 +30,7 @@ pub(crate) struct CrossTerm {
 }
 
 impl CrossTerm {
-    pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         // Enable raw mode
         enable_raw_mode().map_err(|e| {
             Error::new(

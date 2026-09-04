@@ -162,6 +162,15 @@ pub struct ProgressBarTheme {
 }
 
 #[derive(Default)]
+pub struct SliderTheme {
+    pub before_line: CharAttribute,
+    pub after_line: CharAttribute,
+    pub marker: ControlCharAttributesState,
+    pub marker_border: ControlCharAttributesState,
+    pub cap: CharAttribute,
+}
+
+#[derive(Default)]
 pub struct Theme {
     pub accordion: AccordionTheme,
     pub desktop: DesktopTheme,
@@ -183,6 +192,8 @@ pub struct Theme {
     pub toggle_button: ToggleButtonTheme,
     pub markdown: MarkdownTheme,
     pub progressbar: ProgressBarTheme,
+    pub hyperlink: ControlCharAttributesState,
+    pub hslider: SliderTheme,
 }
 impl Theme {
     pub fn new(theme: Themes) -> Self {

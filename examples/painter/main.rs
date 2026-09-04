@@ -86,7 +86,5 @@ fn main() -> Result<(), appcui::system::Error> {
     App::new()
         .desktop(PainterDesktop::new())
         .app_bar()
-        .build()?
-        .run();
-    Ok(())
-} 
+        .run()
+}

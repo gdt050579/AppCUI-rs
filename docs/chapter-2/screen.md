@@ -35,6 +35,8 @@ Besides this list, a special enum variant `Color::Transparent` can be used to dr
 Additionally, if the `TRUE_COLORS` feature is enabled, the following variant is supported:
 * `Color::RGB(r, g, b)` - this is a custom color that is defined by the RGB values.
 
+This variant can also be generated from the `char!` and `charattr!` macros using hex (`#RGB` / `#RRGGBB`) or `rgb(r, g, b)` color values (see **Macro builds** below).
+
 
 **REMARKS**: 
 1. Not all terminals support this exact set of colors. Further more, some terminals might allow changing the RGB color for certain colors in the palette.
@@ -196,6 +198,13 @@ The following values can be used as color parameters for `foreground` and `backg
 
 For `Transparent` color you can use the following values: `transparent`, `invisible` or `?`.
 
+Additionally, if the `TRUE_COLORS` feature is enabled, custom colors can be specified using:
+
+* **Hex** format: `#RGB` or `#RRGGBB` (for example `#F00` is the same as `#FF0000` and generates `Color::RGB(255, 0, 0)`). Both uppercase and lowercase hex digits are accepted.
+* **RGB** format: `rgb(r, g, b)` where `r`, `g` and `b` are numbers from **0** to **255**. The function name is case-insensitive (`rgb`, `RGB`, `Rgb` are all valid). Because this format contains commas, it must be quoted when used inside a macro parameter list (for example `fore='rgb(255, 128, 0)'`).
+
+These formats generate the `Color::RGB(r, g, b)` variant.
+
 You can also specify special characters by either using their specific name from the `SpecialCharacter` enum or by using certain annotations as presented in the following table:
 
 | Value                                    | Variant <br>(appcui::graphics::**SpecialCharacter** enum) | Visual Representation                                                                                                  |
@@ -258,8 +267,17 @@ or
 char!("A,r,y")
 ```
 
+**Example 2:** Letter `A` with a custom RGB foreground (`#FF0000`) on a custom RGB background (`rgb(0, 255, 0)`). This requires the `TRUE_COLORS` feature:
+```rs,no_compile
+char!("A,#FF0000,#00FF00")
+```
+or
+```rs,no_compile
+char!("A,fore='#F00',back='rgb(0, 255, 0)'")
+```
 
-**Example 2:** Letter `A` (bold and underlined) with a white foreground on a dark blue background:
+
+**Example 3:** Letter `A` (bold and underlined) with a white foreground on a dark blue background:
 ```rust,no_compile
 Character::new('A',Color::White,Color::DarkBlue,CharFlags::Bold | CharFlags::Underline)
 ```
@@ -273,7 +291,7 @@ char!("A,w,db,attr=Bold+Underline")
 ```
 
 
-**Example 3:** An arrow pointing left in red, while keeping the current background:
+**Example 4:** An arrow pointing left in red, while keeping the current background:
 ```rust,no_compile
 Character::new(SpecialCharacter::ArrowLeft,Color::Red,Color::Transparent,CharFlags::None)
 ```
@@ -291,7 +309,7 @@ char!("<-,r")
 ```
 
 
-**Example 4:** An arrow pointing left in dark green, bold and underlined, while keeping the current background. We will use a `CharAttribute` for this example:
+**Example 5:** An arrow pointing left in dark green, bold and underlined, while keeping the current background. We will use a `CharAttribute` for this example:
 ```rust,no_compile
 let attr = CharAttribute::new(Color::DarkGreen,Color::Transparent,CharFlags::Bold | CharFlags::Underline);  
 let c = Character::with_attr(SpecialCharacter::ArrowLeft,attr);

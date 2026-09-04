@@ -1,14 +1,9 @@
 use appcui::prelude::*;
 
-fn main() -> Result<(), appcui::system::Error> {
-    #[cfg(target_os = "windows")]
-    let mut app = App::with_backend(appcui::backend::Type::WindowsVT).color_schema(false).build()?;
-    #[cfg(not(target_os = "windows"))]
-    let mut app = App::new().color_schema(false).build()?;
-
+fn build_window() -> Window {
     let mut win = window!("'Radiobox types',a:c,w:80,h:15, flags:Sizeable");
     let mut acc = accordion!("d:f,panels:['&Standard', '&Circle', '&Diamond', '&Ascii', '&Bullet', '&Target']");
-    
+
     // Standard
     acc.add(0, radiobox!("'Option 1 (not-selected)',x:1,y:1,w:40,selected:false"));
     acc.add(0, radiobox!("'Option 2 (selected)',x:1,y:2,w:40,selected:true"));
@@ -40,7 +35,20 @@ fn main() -> Result<(), appcui::system::Error> {
     acc.add(5, radiobox!("'Option 3 (disabled and not-selected)',x:1,y:3,w:40,type=Target,selected:false, enabled:false"));
 
     win.add(acc);
-    app.add_window(win);
-    app.run();
-    Ok(())
-} 
+    win
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    #[cfg(target_os = "windows")]
+    {
+        App::new()
+            .backend(appcui::backend::Type::WindowsVT)
+            .color_schema(false)
+            .window(build_window)
+            .run()
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        App::new().color_schema(false).window(build_window).run()
+    }
+}

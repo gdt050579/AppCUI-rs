@@ -133,11 +133,10 @@ impl FormatNumber {
                     panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 39 for base 10)");
                 }
             }
-            16 => {
-                if value > 32 {
+            16
+                if value > 32 => {
                     panic!("Invalid number of representation digits for FormatNumber (maximum number of digits is 32 for base 16)");
                 }
-            }
             _ => {}
         }
         self.representation_digits = value;

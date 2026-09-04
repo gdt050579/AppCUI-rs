@@ -243,17 +243,19 @@ where
             }
             self.update_last_path(&result);
             let fname = result.file_name();
-            if check_extension && fname.is_some() {
-                if let Some(fname) = fname.unwrap().to_os_string().to_str() {
-                    if !self.extension_mask[ext_idx].matches(fname) {
-                        // need to add the proper extension
-                        if self.extension_mask[ext_idx].extensions_count() == 1 {
-                            // one extension - we need to add it
-                            result.set_extension(self.extension_mask[ext_idx].extension(0));
-                        } else {
-                            // multiple extensions - we need to select what we add
-                            if let Some(selected_extension) = ExtensionSelectionDialog::new(&self.extension_mask[ext_idx]).show() {
-                                result.set_extension(&selected_extension);
+            if check_extension {
+                if let Some(fname) = fname {
+                    if let Some(fname) = fname.to_os_string().to_str() {
+                        if !self.extension_mask[ext_idx].matches(fname) {
+                            // need to add the proper extension
+                            if self.extension_mask[ext_idx].extensions_count() == 1 {
+                                // one extension - we need to add it
+                                result.set_extension(self.extension_mask[ext_idx].extension(0));
+                            } else {
+                                // multiple extensions - we need to select what we add
+                                if let Some(selected_extension) = ExtensionSelectionDialog::new(&self.extension_mask[ext_idx]).show() {
+                                    result.set_extension(&selected_extension);
+                                }
                             }
                         }
                     }

@@ -264,11 +264,10 @@ impl OnKeyPressed for RamItGame {
                     self.state = GameState::Playing;
                 }
             }
-            GameState::GameOver => {
-                if key.code == KeyCode::Space {
+            GameState::GameOver
+                if key.code == KeyCode::Space => {
                     self.reset_game();
                 }
-            }
             _ => {}
         }
         EventProcessStatus::Processed

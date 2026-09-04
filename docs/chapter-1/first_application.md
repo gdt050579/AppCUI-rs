@@ -11,12 +11,15 @@ project's `Cargo.toml` file:
 appcui = <version>
 ```
 
-Then, replace your `main.rs` with the following snippet:
+Since AppCUI support multiple modes you can create a `Hello World` app in different ways:
+
+## Using the multi-window system
+
+Replace your `main.rs` with the following snippet:
 ```rs
 use appcui::prelude::*;
 
-fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
+fn hello_world_window() -> Window {
     let mut win = Window::new(
         "First Window",
         LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(),
@@ -26,24 +29,28 @@ fn main() -> Result<(), appcui::system::Error> {
         "Hello World !",
         LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
     ));
-    app.add_window(win);
-    app.run();
-    Ok(())
+    win
+}
+fn main() -> Result<(), appcui::system::Error> {
+    App::new().window(hello_world_window).run()
 }
 ```
 
-Or use macros to make the code more compact:
+## Using the multi-window system with macros
+
+This variant is the equivalent of the previous one - just more compact:
 
 ```rs
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut win = window!("'First Window',a:c,w:30,h:9");
-    win.add(label!("'Hello World !',a:c,w:13,h:1"));
-    app.add_window(win);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut win = window!("'First Window',a:c,w:30,h:9");
+            win.add(label!("'Hello World !',a:c,w:13,h:1"));
+            win
+        })
+        .run()
 }
 ```
 
@@ -52,3 +59,22 @@ After compiling and executing this code you should see something like this:
 <img src="img/hello_world.png" width=300/>
 
 **Note:** Depending on your terminal and other settings, the result may look different from the screenshot.
+
+## Using FrameApp or InputApp modes
+
+These modes allow you to write direcly to the screen - and are simpler but imply that you have to do most of the work:
+
+```rs
+use appcui::prelude::*;
+
+struct HelloWorld;
+impl FrameApp for HelloWorld {
+    fn on_paint(&self, surface: &mut Surface) {
+        surface.write_string(0, 0, "Hello World !", charattr!("white"), false);
+    }
+}
+
+fn main() -> Result<(), appcui::system::Error> {
+    App::frame_app(HelloWorld {}).run()
+}
+```

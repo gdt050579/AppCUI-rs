@@ -53,10 +53,8 @@ impl OnPaint for MyDesktop {
         surface.clear(theme.desktop.character);
         let attr = CharAttribute::with_color(theme.desktop.character.foreground,theme.desktop.character.background);
         let x = ((surface.size().width as i32) / 2 ) - 15;
-        let mut y = ((surface.size().height as i32) / 2 ) - 7;
-        for line in LOGO {
+        for (y, line) in (((surface.size().height as i32) / 2 ) - 7..).zip(LOGO) {
             surface.write_string(x, y, line, attr, false);
-            y += 1;
         }
     }
 }
@@ -154,22 +152,23 @@ impl AppBarEvents for MyDesktop {
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), appcui::system::Error> {
     #[cfg(target_family = "windows")]
-    App::with_backend(appcui::backend::Type::WindowsVT)
-        .desktop(MyDesktop::new())
-        .app_bar()
-        .command_bar()
-        .build()?
-        .run();
-
+    {
+        App::new()
+            .backend(appcui::backend::Type::WindowsVT)
+            .desktop(MyDesktop::new())
+            .app_bar()
+            .command_bar()
+            .run()
+    }
     #[cfg(not(target_family = "windows"))]
-    App::new().desktop(MyDesktop::new()).app_bar().command_bar().build()?.run();
-    Ok(())
+    {
+        App::new().desktop(MyDesktop::new()).app_bar().command_bar().run()
+    }
 }
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen(start)]
-pub fn main() {    
+pub fn main() {
     // Important for WASM: the project must be a lib that should be built with `wasm-pack build --target web`
-    let app = App::new().desktop(MyDesktop::new()).app().command_bar().build().unwrap();
-    app.run();
+    App::new().desktop(MyDesktop::new()).app_bar().command_bar().run().unwrap();
 }

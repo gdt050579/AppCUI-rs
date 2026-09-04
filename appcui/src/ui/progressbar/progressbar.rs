@@ -35,8 +35,8 @@ impl ProgressBar {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
             items_count,
             items_processed: 0,
-            proc_buf: [b' ', b' ', b' ', b' '],
-            eta: [b' ', b' ', b' ', b' ', b' ', b' ', b' ', b' '],
+            proc_buf: *b"    ",
+            eta: *b"        ",
             text: String::new(),
             percentage: 0,
             flags,
@@ -80,12 +80,12 @@ impl ProgressBar {
         }
         self.items_processed = processed_items.min(self.items_count);
         if self.items_count == 0 {
-            self.proc_buf = [b'-', b'-', b'-', b'%'];
-            self.eta = [b'-', b'-', b':', b'-', b'-', b':', b'-', b'-'];
+            self.proc_buf = *b"---%";
+            self.eta = *b"--:--:--";
             self.percentage = 0;
         } else if self.items_processed >= self.items_count {
-            self.proc_buf = [b'1', b'0', b'0', b'%'];
-            self.eta = [b'0', b'0', b':', b'0', b'0', b':', b'0', b'0'];
+            self.proc_buf = *b"100%";
+            self.eta = *b"00:00:00";
             self.percentage = 100;
         } else {
             if self.items_processed > 0xFFFF_FFFF_FFFF_FF00 {
@@ -117,12 +117,12 @@ impl ProgressBar {
         let total_time = (elapsed as u128 * self.items_count as u128 / self.items_processed as u128) as u64;
         let eta = total_time - elapsed;
         if eta >= 604800 {
-            self.eta = [b' ', b'>', b'1', b' ', b'w', b'e', b'e', b'k'];
+            self.eta = *b" >1 week";
         } else {
             let days = eta / 86400;
             if days > 0 {
                 if days == 1 {
-                    self.eta = [b' ', b' ', b'>', b'1', b' ', b'd', b'a', b'y'];
+                    self.eta = *b"  >1 day";
                 } else {
                     self.eta = [b' ', b'>', 48 + days as u8, b' ', b'd', b'a', b'y', b's'];
                 }
@@ -143,7 +143,7 @@ impl ProgressBar {
     }
     fn update_eta(&mut self) {
         if self.items_processed == 0 {
-            self.eta = [b'-', b'-', b':', b'-', b'-', b':', b'-', b'-'];
+            self.eta = *b"--:--:--";
             return;
         }
         let elapsed = (self.start.elapsed() + self.extra_duration).as_secs();

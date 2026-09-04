@@ -5,7 +5,5 @@ use viewer::Viewer;
 mod my_desktop;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let app = App::new().desktop(MyDesktop::new()).command_bar().app_bar().build()?;
-    app.run();
-    Ok(())
+    App::new().desktop(MyDesktop::new()).command_bar().app_bar().run()
 }

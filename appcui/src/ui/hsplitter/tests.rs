@@ -7,14 +7,14 @@ fn check_create() {
         Paint('Initial state')   
         CheckHash(0xEFFB94F1E8AA29ED)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:51,h:11,flags: Sizeable");
-    let mut hs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio);
-    hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
-    hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
-    w.add(hs);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:51,h:11,flags: Sizeable");
+        let mut hs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio, hsplitter::Flags::None);
+        hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
+        hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
+        w.add(hs);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -24,14 +24,14 @@ fn check_create_procmacro() {
         Paint('Initial state')   
         CheckHash(0xEFFB94F1E8AA29ED)
     ";
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:51,h:11,flags: Sizeable");
-    let mut hs = hsplitter!("pos:50%,d:f");
-    hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
-    hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
-    w.add(hs);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:51,h:11,flags: Sizeable");
+        let mut hs = hsplitter!("pos:50%,d:f");
+        hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
+        hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
+        w.add(hs);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -59,16 +59,16 @@ fn check_keyboard_movement() {
         Paint('7. Bottom most (spliter at y:24)')   
         CheckHash(0x2FA69898CA587A1E)
     ";
-    let mut a = App::debug(60, 30, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = HSplitter::new(14,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio);
-    hs.set_min_height(hsplitter::Panel::Top, 5);
-    hs.set_min_height(hsplitter::Panel::Bottom, 4);
-    hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
-    hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
-    w.add(hs);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 30)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
+        let mut hs = HSplitter::new(14,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio, hsplitter::Flags::None);
+        hs.set_min_height(hsplitter::Panel::Top, 5);
+        hs.set_min_height(hsplitter::Panel::Bottom, 4);
+        hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
+        hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
+        w.add(hs);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -96,14 +96,14 @@ fn check_keyboard_movement_with_procmacro() {
         Paint('7. Bottom most (spliter at y:24)')   
         CheckHash(0x2FA69898CA587A1E)
     ";
-    let mut a = App::debug(60, 30, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = hsplitter!("pos:14,d:f,mth:5,mbh:4");
-    hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
-    hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
-    w.add(hs);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 30)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
+        let mut hs = hsplitter!("pos:14,d:f,mth:5,mbh:4");
+        hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
+        hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
+        w.add(hs);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -125,16 +125,16 @@ fn check_mouse_buttons() {
         Paint('5. Bottom most (spliter at y:24)')   
         CheckHash(0x2FA69898CA587A1E)
     ";
-    let mut a = App::debug(60, 30, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = HSplitter::new(14,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio);
-    hs.set_min_height(hsplitter::Panel::Top, 5);
-    hs.set_min_height(hsplitter::Panel::Bottom, 4);
-    hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
-    hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
-    w.add(hs);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 30)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
+        let mut hs = HSplitter::new(14,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio, hsplitter::Flags::None);
+        hs.set_min_height(hsplitter::Panel::Top, 5);
+        hs.set_min_height(hsplitter::Panel::Bottom, 4);
+        hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
+        hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
+        w.add(hs);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -171,16 +171,16 @@ fn check_mouse_drag() {
         Paint('10. Same position (no selection, no highlighed) (spliter at y:17)')   
         CheckHash(0xC1C21089B42AE13E)
     ";
-    let mut a = App::debug(60, 30, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
-    let mut hs = HSplitter::new(14,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio);
-    hs.set_min_height(hsplitter::Panel::Top, 5);
-    hs.set_min_height(hsplitter::Panel::Bottom, 4);
-    hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
-    hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
-    w.add(hs);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 30)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:30,flags: Sizeable");
+        let mut hs = HSplitter::new(14,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio, hsplitter::Flags::None);
+        hs.set_min_height(hsplitter::Panel::Top, 5);
+        hs.set_min_height(hsplitter::Panel::Bottom, 4);
+        hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
+        hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
+        w.add(hs);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -193,11 +193,11 @@ fn check_resize_preserve_aspect_ratio() {
         Paint('Same height (spliter at y:5)')   
         CheckHash(0x4944D9828A81B459)
     ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:20,flags: Sizeable");
-    w.add(hsplitter!("50%,d:f"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:20,flags: Sizeable");
+        w.add(hsplitter!("50%,d:f"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -210,11 +210,11 @@ fn check_resize_preserve_bottom_size() {
         Paint('Same height (spliter at y:2) - bottom height = 5')   
         CheckHash(0x68B1E9E699BB2E9)
     ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:20,flags: Sizeable");
-    w.add(hsplitter!("75%,d:f,rb:PreserveBottomPanelSize"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:20,flags: Sizeable");
+        w.add(hsplitter!("75%,d:f,rb:PreserveBottomPanelSize"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -227,9 +227,26 @@ fn check_resize_preserve_top_size() {
         Paint('Same height (spliter at y:5) - top height = 4')   
         CheckHash(0x8138F6FBC5169A49)
     ";
-    let mut a = App::debug(60, 20, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:20,flags: Sizeable");
-    w.add(hsplitter!("25%,d:f,rb:PreserveTopPanelSize"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:20,flags: Sizeable");
+        w.add(hsplitter!("25%,d:f,rb:PreserveTopPanelSize"));
+        w
+    }).run().unwrap();
+}
+
+#[test]
+fn check_merge_borders() {
+    let script = "
+        Paint.Enable(false)
+        Paint('Initial state')   
+        CheckHash(0xC91D70C78B2CEABC)
+    ";
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:51,h:11,flags: Sizeable");
+        let mut hs = HSplitter::new(0.5,layout!("d:f"),hsplitter::ResizeBehavior::PreserveAspectRatio, hsplitter::Flags::MergeBorders);
+        hs.add(hsplitter::Panel::Top,panel!("Top,l:1,r:1,t:1,b:1"));
+        hs.add(hsplitter::Panel::Bottom,panel!("Bottom,l:1,r:1,t:1,b:1"));
+        w.add(hs);
+        w
+    }).run().unwrap();
 }

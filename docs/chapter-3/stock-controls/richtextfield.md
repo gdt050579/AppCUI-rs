@@ -150,14 +150,15 @@ fn markdown_like_colors(t: &mut richtextfield::AttributeText, _theme: &Theme) {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut w = window!("'RichTextField example',a:c,w:80,h:12");
-    w.add(label!("'Use **, * and ` to toggle styles',l:1,t:1,r:1,h:1"));
-    w.add(richtextfield!(
-        "'A `code` and **bold** plus *italic* demo',l:1,t:3,r:1,h:2,parser:markdown_like_colors"
-    ));
-    app.add_window(w);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = window!("'RichTextField example',a:c,w:80,h:12");
+            w.add(label!("'Use **, * and ` to toggle styles',l:1,t:1,r:1,h:1"));
+            w.add(richtextfield!(
+                "'A `code` and **bold** plus *italic* demo',l:1,t:3,r:1,h:2,parser:markdown_like_colors"
+            ));
+            w
+        })
+        .run()
 }
 ```

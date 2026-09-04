@@ -19,7 +19,7 @@ enum Drag {
     },
     View(Point),
     /// One or more nodes moving together; `anchors` are `(id, top_left_at_press)`.
-    NodeDrag {
+    NodeMoving {
         origin: Point,
         anchors: Vec<(usize, Point)>,
     },
@@ -774,7 +774,7 @@ where
                         } else {
                             vec![(id, self.graph.nodes[id].rect.top_left())]
                         };
-                        self.drag = Drag::NodeDrag { origin: data, anchors };
+                        self.drag = Drag::NodeMoving { origin: data, anchors };
                         self.raise_current_node_changed(nid);
                     }
                     return EventProcessStatus::Processed;
@@ -825,7 +825,7 @@ where
                         }
                         EventProcessStatus::Processed
                     }
-                    Drag::NodeDrag { origin, anchors } => {
+                    Drag::NodeMoving { origin, anchors } => {
                         let resized = self.graph.move_nodes_with_press_delta(&anchors, origin, data, &self.base);
                         if resized {
                             self.update_scroll_bars();
@@ -884,7 +884,7 @@ where
                             vec![(*node_id, self.graph.nodes[*node_id].rect.top_left())]
                         };
                         let o = *origin;
-                        self.drag = Drag::NodeDrag { origin: o, anchors };
+                        self.drag = Drag::NodeMoving { origin: o, anchors };
                     }
                 }
                 match &self.drag {
@@ -899,7 +899,7 @@ where
                         self.drag = Drag::View(Point::new(mouse_data.x, mouse_data.y));
                         EventProcessStatus::Processed
                     }
-                    Drag::NodeDrag { origin, anchors } => {
+                    Drag::NodeMoving { origin, anchors } => {
                         let resized = self.graph.move_nodes_with_press_delta(anchors, *origin, data, &self.base);
                         if resized {
                             self.update_scroll_bars();

@@ -544,7 +544,7 @@ fn build_derive_code(s: &Structure) -> TokenStream {
     if max_index + 1 - min_index != columns.len() as u32 {
         panic!("Invalid column indexes. Make sure that all column indexes are unique and sequential starting from 0 or 1. Total indexes is {}, but the total number of columns is {} !", max_index + 1 - min_index, columns.len());
     }
-    columns.sort_by(|a, b| a.index.cmp(&b.index));
+    columns.sort_by_key(|a| a.index);
     let mut columns_code = String::new();
     let mut compare_code = String::new();
     let mut render_code = String::new();

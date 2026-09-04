@@ -31,7 +31,7 @@ pub struct TermiosTerminal {
 }
 
 impl TermiosTerminal {
-    pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
         let Ok(orig_termios) = Termios::enable_raw_mode() else {
             return Err(Error::new(
                 crate::prelude::ErrorKind::InitializationFailure,

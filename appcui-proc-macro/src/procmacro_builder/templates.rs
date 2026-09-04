@@ -303,6 +303,29 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 ";
 
 
+pub(crate) static HSLIDER_SELECTOR_TRAIT_DEF: &str = "
+trait HSliderEvents<T: Number+'static> {
+    fn on_value_changed(&mut self, handle: Handle<HSlider<T>>, value: T) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericHSliderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_value_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HSLIDER)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+pub(crate) static HSLIDER_SELECT_ON_VALUE_CHANGE_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HSlider<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if let Some(obj) = self.control(h) {
+        let value = obj.value();
+        return HSliderEvents::<$(TYPE)>::on_value_changed(self, h, value);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+
 pub(crate) static LISTVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
@@ -387,7 +410,43 @@ impl$(TEMPLATE_TYPE) GenericListViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 ";
 
 
+pub(crate) static BUFFERVIEW_ON_CURRENT_POS_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<BufferView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return BufferViewEvents::<$(TYPE)>::on_current_pos_changed(self, h);
+}
+";
 
+pub(crate) static BUFFERVIEW_ON_SELECTION_CHANGED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<BufferView<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    return BufferViewEvents::<$(TYPE)>::on_selection_changed(self, h);
+}
+";
+
+pub(crate) static BUFFERVIEW_TRAIT_DEF: &str = "
+trait BufferViewEvents<T: bufferview::BufferAccess+'static> {
+    fn on_current_pos_changed(&mut self, handle: Handle<BufferView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    fn on_selection_changed(&mut self, handle: Handle<BufferView<T>>) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+}
+impl$(TEMPLATE_TYPE) GenericBufferViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+
+    fn on_current_pos_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_BUFFERVIEW_ON_CURRENT_POS_CHANGED)
+        return EventProcessStatus::Ignored;
+    }
+
+    fn on_selection_changed(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_BUFFERVIEW_ON_SELECTION_CHANGED)
+        return EventProcessStatus::Ignored;
+    }
+
+}
+";
 
 
 pub(crate) static GRAPHVIEW_ON_CURRENT_NODE_CHANGED_DEF: &str = "

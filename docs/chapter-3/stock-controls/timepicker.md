@@ -112,9 +112,7 @@ impl TimePickerEvents for MyWin {
     }
 }
 
-fn main() {
-    let mut a = App::new().build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+fn main() -> Result<(), appcui::system::Error> {
+    App::new().window(MyWin::new).run()
 }
 ```

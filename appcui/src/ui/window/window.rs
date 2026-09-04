@@ -281,13 +281,15 @@ impl Window {
     /// a handle for that control wil be returned or `Handle::None` if some
     /// error occured.
     ///
-    /// # Exemple
+    /// # Example
     /// ```rust,no_run
     ///     use appcui::prelude::*;
     ///
-    ///     let mut a = App::new().build().unwrap();
-    ///     let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-    ///     w.add(Button::with_type("Press me",layout!("x:1,y:1,w:10"),button::Type::Normal));
+    ///     App::new().window(|| {
+    ///         let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+    ///         w.add(Button::with_type("Press me",layout!("x:1,y:1,w:10"),button::Type::Normal));
+    ///         w
+    ///     }).run();
     /// ```    
     ///
     /// You can not add a Window as a child to another Window nor can you add a Desktop
@@ -296,9 +298,11 @@ impl Window {
     /// ```rust,compile_fail
     ///     use appcui::prelude::*;
     ///
-    ///     let mut a = App::new().build().unwrap();
-    ///     let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
-    ///     w.add(Window::new("aaa",layout!("a:c,w:20,h:10"),window::Flags::None));
+    ///     App::new().window(|| {
+    ///         let mut w = Window::new("Title", layout!("a:c,w:20,h:10"), window::Flags::None);
+    ///         w.add(Window::new("aaa",layout!("a:c,w:20,h:10"),window::Flags::None));
+    ///         w
+    ///     }).run();
     /// ```    
     pub fn add<T>(&mut self, control: T) -> Handle<T>
     where
@@ -617,8 +621,8 @@ impl Window {
         let screen_size = RuntimeManager::get().terminal_size();
         let mut pos = self.position();
         if keep_in_desktop_bounderies {
-            pos.x = (pos.x + add_x).clamp(0, screen_size.width as i32 - size.width as i32);
-            pos.y = (pos.y + add_y).clamp(0, screen_size.height as i32 - size.height as i32);
+            pos.x = (pos.x + add_x).clamp(0, (screen_size.width as i32 - size.width as i32).max(0));
+            pos.y = (pos.y + add_y).clamp(0, (screen_size.height as i32 - size.height as i32).max(0));
         } else {
             pos.x = (pos.x + add_x).clamp(0, screen_size.width as i32 - 1);
             pos.y = (pos.y + add_y).clamp(0, screen_size.height as i32 - 1);
@@ -959,10 +963,12 @@ impl Window {
     /// # Example
     /// ```rust,no_run
     ///    use appcui::prelude::*;
-    ///    let mut app = App::new().build().unwrap();
-    ///    let mut w = window!("Title,a:c,w:20,h:10");
-    ///    let handle_b = w.add(button!("Button,a:C,w:10"));
-    ///    Window::update_control(handle_b, |button| { button.set_caption("New text"); });
+    ///    App::new().window(|| {
+    ///        let mut w = window!("Title,a:c,w:20,h:10");
+    ///        let handle_b = w.add(button!("Button,a:C,w:10"));
+    ///        Window::update_control(handle_b, |button| { button.set_caption("New text"); });
+    ///        w
+    ///    }).run();
     /// ```
     pub fn update_control<T: Control + 'static>(handle: Handle<T>, run: fn(&mut T)) {
         if let Some(control) = RuntimeManager::get().get_control_mut(handle) {
