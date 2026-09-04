@@ -121,6 +121,10 @@ name = "shader"
 path = "shader/main.rs"
 
 [[example]]
+name = "plasma"
+path = "plasma/main.rs"
+
+[[example]]
 name = "window_toolbar"
 path = "window_toolbar/main.rs"
 
