@@ -94,7 +94,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-appcui = "*"
+appcui = "0.5"
 ```
 
 Then create a new Rust project and add the following code:
