@@ -1218,6 +1218,56 @@ impl Surface {
         }
     }
 
+    /// Writes a slice of characters at the specified position. If the characters are outside the clip area, they will not be drawn.
+    ///
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface, Character, CharFlags, Color};
+    ///
+    /// let mut surface = Surface::new(100, 50);
+    /// let chars = vec![Character::new('H', Color::White, Color::Black, CharFlags::None),
+    ///                  Character::new('e', Color::White, Color::Black, CharFlags::None),
+    ///                  Character::new('l', Color::White, Color::Black, CharFlags::None),
+    ///                  Character::new('l', Color::White, Color::Black, CharFlags::None),
+    ///                  Character::new('o', Color::White, Color::Black, CharFlags::None)];
+    /// surface.write_chars(10, 10, &chars);
+    /// ```
+    pub fn write_chars(&mut self, x: i32, y: i32, chars: &[Character]) {
+        if !self.clip.is_visible() || (chars.is_empty()) {
+            return;
+        }
+        let y = y + self.origin.y;
+        if (y < self.clip.top) || (y > self.clip.bottom) {
+            return; // not visible
+        }
+        let left = x + self.origin.x;
+        if left > self.clip.right {
+            return; // outside - spre dreapte
+        }
+        let right = left + (chars.len() as i32) - 1;
+        if right <= self.clip.left {
+            return; // outide - spre stange
+        }
+        // in punctul asta stiu ca ceva este vizibil - trebuie sa vad exact intersectia
+        let (start_ofs, start_x) = if left < self.clip.left {
+            ((self.clip.left - left) as usize, self.clip.left)
+        } else {
+            (0, left)
+        };
+        let end_x = self.clip.right.min(right);
+        if start_x >= end_x {
+            return; // nothing to draw
+        }
+        let mut pos = (start_x as usize) + (y as usize) * (self.size.width as usize);
+        let end = pos + (end_x + 1 - start_x) as usize;
+        let mut ofs = start_ofs;
+        while pos < end {
+            self.chars[pos].set(chars[ofs]);
+            pos += 1;
+            ofs += 1;
+        }
+    }
+
     fn write_text_single_line(&mut self, text: &str, y: i32, chars_count: u16, ch_index: usize, format: &TextFormat, width: u16) {
         if !self.clip.contains_y(y + self.origin.y) {
             return; // no need to draw
