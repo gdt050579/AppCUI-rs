@@ -6,3 +6,8 @@ AppCUI includes many out-of-the-box controls (such as buttons, checkboxes, radio
 The core of AppCUI is written completely in Rust and is designed to be fast and efficient. It is based on a handle-based system, where each control is represented by a handle. This allows for easy manipulation of controls and their properties. 
 
 <img src="img/appcui-rs-demo.gif" width=500/>
+
+
+`AppCUI` also have multiple modes including a frame-based mode that allows you to create applications that are not based on windows, but use a refresh timer to update the screen. This is in particular useful for game developing / or different kind of applications that require a high-performance screen update.
+
+<img src="../gallery/img/animations/plasma.gif" width = 500>
