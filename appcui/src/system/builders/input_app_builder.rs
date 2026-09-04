@@ -147,12 +147,7 @@ impl<T: InputApp> DesktopEvents for AppDesktop<T> {
     }
 
     fn on_close(&mut self) -> ActionRequest {
-        if self.input_app.on_close() == ActionRequest::Allow {
-            self.timer().unwrap().stop();
-            ActionRequest::Allow
-        } else {
-            ActionRequest::Deny
-        }
+        self.input_app.on_close()
     }
 }
 
