@@ -160,3 +160,86 @@ fn check_input_app() {
     .run()
     .unwrap();
 }
+
+#[test]
+fn check_frame_app_dialog() {
+    struct Demo;
+    impl FrameApp for Demo {
+        fn on_key_event(&mut self, key: Key, _ch: char) {
+            if key.value() == key!("Escape") && dialogs::validate("Quit", "Do you want to quit?") {
+                App::close();
+            }
+        }
+
+        fn on_paint(&self, surface: &mut Surface) {
+            surface.write_string(1, 1, "Hello from AppCUI", charattr!("white,black"), false);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial frame')
+        CheckHash(0xAE9496644F04E6EF)
+        Key.Pressed(Escape)
+        Paint('2. Quit dialog')
+        CheckHash(0x386C2EC1F28985CC)
+        Key.Pressed(Escape)
+        Paint('3. Dialog dismissed')
+        CheckHash(0xAE9496644F04E6EF)
+        Key.Pressed(Escape)
+        Paint('4. Quit dialog again')
+        CheckHash(0x386C2EC1F28985CC)
+        Key.Pressed(Alt+Y)
+    ";
+    App::frame_app(Demo {})
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .title("Frame")
+        .auto_close(false)
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_input_app_dialog() {
+    struct Demo;
+    impl InputApp for Demo {
+        fn on_key_event(&mut self, key: Key, _ch: char) -> EventProcessStatus {
+            if key.value() == key!("Escape") {
+                if dialogs::validate("Quit", "Do you want to quit?") {
+                    App::close();
+                }
+                EventProcessStatus::Processed
+            } else {
+                EventProcessStatus::Ignored
+            }
+        }
+
+        fn on_paint(&self, surface: &mut Surface) {
+            surface.write_string(1, 1, "Hello from AppCUI", charattr!("white,black"), false);
+        }
+    }
+
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial input surface')
+        CheckHash(0xAE9496644F04E6EF)
+        Key.Pressed(Escape)
+        Paint('2. Quit dialog')
+        CheckHash(0x386C2EC1F28985CC)
+        Key.Pressed(Escape)
+        Paint('3. Dialog dismissed')
+        CheckHash(0xAE9496644F04E6EF)
+        Key.Pressed(Escape)
+        Paint('4. Quit dialog again')
+        CheckHash(0x386C2EC1F28985CC)
+        Key.Pressed(Alt+Y)
+    ";
+    App::input_app(Demo {})
+        .size(Size::new(40, 10))
+        .debug_script(script)
+        .title("Input")
+        .auto_close(false)
+        .run()
+        .unwrap();
+}
