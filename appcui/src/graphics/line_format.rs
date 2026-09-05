@@ -1,5 +1,6 @@
 use appcui_proc_macro::EnumSelector;
 use crate::ui::selector::EnumSelector;
+use super::CharAttribute;
 
 pub(super) struct LineTypeChars {
     pub(super) corner_top_left: char,
@@ -147,5 +148,83 @@ pub enum LineType {
 impl LineType {
     pub(super) fn charset(&self) -> &'static LineTypeChars {
         &LINE_TYPE_CHARS[(*self as u8) as usize]
+    }
+}
+
+#[derive(Copy, Clone)]
+pub enum LineCap {
+    None,
+    Arrow,          // direction inferred from the terminal segment at draw time
+    Triangle,
+    Char(char),
+}
+
+#[derive(Copy, Clone)]
+pub struct PolyLineFormat {
+    pub(crate) line_type:  LineType,
+    pub(crate) attr:       CharAttribute,
+
+    pub(crate) start_cap:  LineCap,
+    pub(crate) start_attr: Option<CharAttribute>,   // None => inherit `attr`
+    pub(crate) end_cap:    LineCap,
+    pub(crate) end_attr:   Option<CharAttribute>,   // None => inherit `attr`
+
+    pub(crate) joint:      Option<char>,            // None => auto-resolve corner glyph from directions
+    pub(crate) joint_attr: Option<CharAttribute>,   // None => inherit `attr`
+}
+
+pub struct PolyLineFormatBuilder {
+    format: PolyLineFormat,
+}
+
+impl PolyLineFormatBuilder {
+    pub fn new(line_type: LineType, attr: CharAttribute) -> Self {
+        Self { format: PolyLineFormat {
+            line_type: line_type,
+            attr: attr,
+            start_cap: LineCap::None,
+            start_attr: None,
+            end_cap: LineCap::None,
+            end_attr: None,
+            joint: None,
+            joint_attr: None,
+        } }
+    }
+}
+impl PolyLineFormatBuilder {
+    pub fn line_type(mut self, line_type: LineType) -> Self {
+        self.format.line_type = line_type;
+        self
+    }
+    pub fn attr(mut self, attr: CharAttribute) -> Self {
+        self.format.attr = attr;
+        self
+    }
+    pub fn start_cap(mut self, start_cap: LineCap) -> Self {
+        self.format.start_cap = start_cap;
+        self
+    }
+    pub fn start_attr(mut self, start_attr: CharAttribute) -> Self {
+        self.format.start_attr = Some(start_attr);
+        self
+    }
+    pub fn end_cap(mut self, end_cap: LineCap) -> Self {
+        self.format.end_cap = end_cap;
+        self
+    }
+    pub fn end_attr(mut self, end_attr: CharAttribute) -> Self {
+        self.format.end_attr = Some(end_attr);
+        self
+    }
+    pub fn joint(mut self, joint: char) -> Self {
+        self.format.joint = Some(joint);
+        self
+    }
+    pub fn joint_attr(mut self, joint_attr: CharAttribute) -> Self {
+        self.format.joint_attr = Some(joint_attr);
+        self
+    }
+    pub fn build(self) -> PolyLineFormat {
+        self.format
     }
 }
