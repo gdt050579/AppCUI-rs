@@ -1,6 +1,6 @@
-use appcui_proc_macro::EnumSelector;
-use crate::ui::selector::EnumSelector;
 use super::CharAttribute;
+use crate::ui::selector::EnumSelector;
+use appcui_proc_macro::EnumSelector;
 
 pub(super) struct LineTypeChars {
     pub(super) corner_top_left: char,
@@ -106,7 +106,7 @@ static LINE_TYPE_CHARS: [LineTypeChars; 8] = [
         vertical_on_left: '\u{2502}',
         horizontal: '\u{2500}',
         vertical: '\u{2502}',
-    },    
+    },
     /* Braille double line */
     LineTypeChars {
         corner_top_left: '\u{28F6}',
@@ -120,7 +120,7 @@ static LINE_TYPE_CHARS: [LineTypeChars; 8] = [
         horizontal_on_bottom: '\u{2836}',
         horizontal_on_top: '\u{2836}',
         horizontal: '\u{2836}',
-    },       
+    },
 ];
 
 /// LineType is an enum that represents the type of line to be drawn (single, double, thick, etc)
@@ -131,7 +131,10 @@ pub enum LineType {
     Single,
     #[VariantInfo(name = "Double Lines", description = "Double lines with corners and vertical/horizontal lines")]
     Double,
-    #[VariantInfo(name = "Single Thick Lines", description = "Single thick lines with corners and vertical/horizontal lines")]
+    #[VariantInfo(
+        name = "Single Thick Lines",
+        description = "Single thick lines with corners and vertical/horizontal lines"
+    )]
     SingleThick,
     #[VariantInfo(name = "Border", description = "A border style with thick lines")]
     Border,
@@ -152,25 +155,54 @@ impl LineType {
 }
 
 #[derive(Copy, Clone)]
+pub(super) struct LineCapChars {
+    pub(super) up: char,
+    pub(super) down: char,
+    pub(super) left: char,
+    pub(super) right: char,
+}
+
+static LINE_CAP_CHARS_ARROWS: LineCapChars = LineCapChars {
+    up: '\u{25B2}',
+    down: '\u{25BC}',
+    left: '\u{25C0}',
+    right: '\u{25B6}',
+};
+static LINE_CAP_CHARS_TRIANGLES: LineCapChars = LineCapChars {
+    up: '\u{25B2}',
+    down: '\u{25BC}',
+    left: '\u{25C0}',
+    right: '\u{25B6}',
+};
+
+#[derive(Copy, Clone)]
 pub enum LineCap {
-    None,
-    Arrow,          // direction inferred from the terminal segment at draw time
+    Arrow, // direction inferred from the terminal segment at draw time
     Triangle,
     Char(char),
+}
+impl LineCap {
+    pub(super) fn charset(&self) -> Option<&'static LineCapChars> {
+        match self {
+            LineCap::Arrow => Some(&LINE_CAP_CHARS_ARROWS),
+            LineCap::Triangle => Some(&LINE_CAP_CHARS_TRIANGLES),
+            LineCap::Char(_) => None
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
 pub struct PolyLineFormat {
-    pub(crate) line_type:  LineType,
-    pub(crate) attr:       CharAttribute,
+    pub(crate) line_type: LineType,
+    pub(crate) attr: CharAttribute,
 
-    pub(crate) start_cap:  LineCap,
-    pub(crate) start_attr: Option<CharAttribute>,   // None => inherit `attr`
-    pub(crate) end_cap:    LineCap,
-    pub(crate) end_attr:   Option<CharAttribute>,   // None => inherit `attr`
+    pub(crate) start_cap: Option<LineCap>,
+    pub(crate) start_attr: Option<CharAttribute>, // None => inherit `attr`
+    pub(crate) end_cap: Option<LineCap>,
+    pub(crate) end_attr: Option<CharAttribute>, // None => inherit `attr`
 
-    pub(crate) joint:      Option<char>,            // None => auto-resolve corner glyph from directions
-    pub(crate) joint_attr: Option<CharAttribute>,   // None => inherit `attr`
+    pub(crate) joint: Option<char>,               // None => auto-resolve corner glyph from directions
+    pub(crate) joint_attr: Option<CharAttribute>, // None => inherit `attr`
 }
 
 pub struct PolyLineFormatBuilder {
@@ -179,16 +211,18 @@ pub struct PolyLineFormatBuilder {
 
 impl PolyLineFormatBuilder {
     pub fn new(line_type: LineType, attr: CharAttribute) -> Self {
-        Self { format: PolyLineFormat {
-            line_type: line_type,
-            attr: attr,
-            start_cap: LineCap::None,
-            start_attr: None,
-            end_cap: LineCap::None,
-            end_attr: None,
-            joint: None,
-            joint_attr: None,
-        } }
+        Self {
+            format: PolyLineFormat {
+                line_type: line_type,
+                attr: attr,
+                start_cap: None,
+                start_attr: None,
+                end_cap: None,
+                end_attr: None,
+                joint: None,
+                joint_attr: None,
+            },
+        }
     }
 }
 impl PolyLineFormatBuilder {
@@ -201,7 +235,7 @@ impl PolyLineFormatBuilder {
         self
     }
     pub fn start_cap(mut self, start_cap: LineCap) -> Self {
-        self.format.start_cap = start_cap;
+        self.format.start_cap = Some(start_cap);
         self
     }
     pub fn start_attr(mut self, start_attr: CharAttribute) -> Self {
@@ -209,7 +243,7 @@ impl PolyLineFormatBuilder {
         self
     }
     pub fn end_cap(mut self, end_cap: LineCap) -> Self {
-        self.format.end_cap = end_cap;
+        self.format.end_cap = Some(end_cap);
         self
     }
     pub fn end_attr(mut self, end_attr: CharAttribute) -> Self {
