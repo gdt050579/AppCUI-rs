@@ -19,6 +19,7 @@ mod surface;
 mod text_format;
 mod orthogonal_direction;
 mod box_junction;
+mod direction;
 
 #[cfg(test)]
 mod surface_tester;
@@ -50,6 +51,7 @@ pub use self::text_format::WrapType;
 pub use self::orthogonal_direction::OrthogonalDirection;
 
 use self::box_junction::BOX_JUNCTION;
+use self::direction::Direction;
 
 
 #[cfg(test)]

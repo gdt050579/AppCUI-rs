@@ -1,4 +1,5 @@
 use super::CharAttribute;
+use super::Direction;
 use crate::ui::selector::EnumSelector;
 use appcui_proc_macro::EnumSelector;
 
@@ -182,11 +183,25 @@ pub enum LineCap {
     Char(char),
 }
 impl LineCap {
-    pub(super) fn charset(&self) -> Option<&'static LineCapChars> {
+    pub(super) fn char(&self, direction: Direction) -> char {
         match self {
-            LineCap::Arrow => Some(&LINE_CAP_CHARS_ARROWS),
-            LineCap::Triangle => Some(&LINE_CAP_CHARS_TRIANGLES),
-            LineCap::Char(_) => None
+            LineCap::Arrow => {
+                match direction {
+                    Direction::Up => LINE_CAP_CHARS_ARROWS.up,
+                    Direction::Down => LINE_CAP_CHARS_ARROWS.down,
+                    Direction::Left => LINE_CAP_CHARS_ARROWS.left,
+                    Direction::Right => LINE_CAP_CHARS_ARROWS.right,
+                }
+            }
+            LineCap::Triangle => {
+                match direction {
+                    Direction::Up => LINE_CAP_CHARS_TRIANGLES.up,
+                    Direction::Down => LINE_CAP_CHARS_TRIANGLES.down,
+                    Direction::Left => LINE_CAP_CHARS_TRIANGLES.left,
+                    Direction::Right => LINE_CAP_CHARS_TRIANGLES.right,
+                }
+            }
+            LineCap::Char(c) => *c,
         }
     }
 }

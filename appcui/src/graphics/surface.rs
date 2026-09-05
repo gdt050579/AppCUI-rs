@@ -18,6 +18,7 @@ use super::TextAlignment;
 use super::TextFormat;
 use super::PolyLineFormat;
 use super::LineCap;
+use super::Direction;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
 use super::BOX_JUNCTION;
@@ -437,15 +438,6 @@ impl Surface {
         }
     }
     fn draw_bresenham_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
-        #[derive(Copy, Clone)]
-        enum Direction {
-            Up,
-            Down,
-            Left,
-            Right,
-            None,
-        }
-
         if (x1 == x2) && (y1 == y2) {
             // single point
             self.write_char(x1, y1, Character::with_attributes(' ', attr));
@@ -523,15 +515,7 @@ impl Surface {
             }
 
             // direction from prev → current
-            let dir_in = match (current.x - prev.x, current.y - prev.y) {
-                (1, 0) => Direction::Right,
-                (-1, 0) => Direction::Left,
-                (0, 1) => Direction::Down,
-                (0, -1) => Direction::Up,
-                _ => Direction::None,
-            };
-
-            // lookahead (dir_out)
+            let dir_in = Direction::from_one_unit_step(current.x - prev.x, current.y - prev.y);
 
             let e2 = 2 * err;
             let mut next = current;
@@ -550,26 +534,20 @@ impl Surface {
                     next.x += sx;
                 }
             }
-            let dir_out = match (next.x - current.x, next.y - current.y) {
-                (1, 0) => Direction::Right,
-                (-1, 0) => Direction::Left,
-                (0, 1) => Direction::Down,
-                (0, -1) => Direction::Up,
-                _ => Direction::None,
-            };
+            let dir_out = Direction::from_one_unit_step(next.x - current.x, next.y - current.y);
 
             // decide character
             ch.code = match (dir_in, dir_out) {
-                (Direction::Left, Direction::Left) | (Direction::Right, Direction::Right) => line_chars.horizontal,
-                (Direction::Up, Direction::Up) | (Direction::Down, Direction::Down) => line_chars.vertical,
-                (Direction::Left, Direction::Up) => line_chars.corner_bottom_left,
-                (Direction::Up, Direction::Left) => line_chars.corner_top_right,
-                (Direction::Right, Direction::Up) => line_chars.corner_bottom_right,
-                (Direction::Up, Direction::Right) => line_chars.corner_top_left,
-                (Direction::Left, Direction::Down) => line_chars.corner_top_left,
-                (Direction::Down, Direction::Left) => line_chars.corner_bottom_right,
-                (Direction::Right, Direction::Down) => line_chars.corner_top_right,
-                (Direction::Down, Direction::Right) => line_chars.corner_bottom_left,
+                (Some(Direction::Left), Some(Direction::Left)) | (Some(Direction::Right), Some(Direction::Right)) => line_chars.horizontal,
+                (Some(Direction::Up), Some(Direction::Up)) | (Some(Direction::Down), Some(Direction::Down)) => line_chars.vertical,
+                (Some(Direction::Left), Some(Direction::Up)) => line_chars.corner_bottom_left,
+                (Some(Direction::Up), Some(Direction::Left)) => line_chars.corner_top_right,
+                (Some(Direction::Right), Some(Direction::Up)) => line_chars.corner_bottom_right,
+                (Some(Direction::Up), Some(Direction::Right)) => line_chars.corner_top_left,
+                (Some(Direction::Left), Some(Direction::Down)) => line_chars.corner_top_left,
+                (Some(Direction::Down), Some(Direction::Left)) => line_chars.corner_bottom_right,
+                (Some(Direction::Right), Some(Direction::Down)) => line_chars.corner_top_right,
+                (Some(Direction::Down), Some(Direction::Right)) => line_chars.corner_bottom_left,
                 _ => 'X',
             };
             self.write_char(current.x, current.y, ch);
