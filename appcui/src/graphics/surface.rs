@@ -8,20 +8,20 @@ use super::Character;
 use super::ClipArea;
 use super::Color;
 use super::Cursor;
+use super::Direction;
 use super::Image;
+use super::LineCap;
 use super::LineType;
 use super::OrthogonalDirection;
 use super::Point;
+use super::PolyLineFormat;
 use super::Rect;
 use super::Size;
 use super::TextAlignment;
 use super::TextFormat;
-use super::PolyLineFormat;
-use super::LineCap;
-use super::Direction;
+use super::BOX_JUNCTION;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
-use super::BOX_JUNCTION;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -807,7 +807,40 @@ impl Surface {
     }
 
     pub fn draw_polyline(&mut self, points: &[Point], format: &PolyLineFormat) {
-
+        if points.len() < 2 {
+            return;
+        }
+        for i in 0..points.len() - 1 {
+            let start = points[i];
+            let end = points[i + 1];
+            self.draw_line(start.x, start.y, end.x, end.y, format.line_type, format.attr);
+        }
+        if let Some(start_cap) = format.start_cap {
+            let attr = format.start_attr.unwrap_or(format.attr);
+            let dir = Direction::from_points(points[0], points[1]);
+            if let Some(dir) = dir {
+                let ch = start_cap.char(dir);
+                self.write_char(points[0].x, points[0].y, Character::with_attributes(ch, attr));
+            }
+        }
+        if let Some(end_cap) = format.end_cap {
+            let attr = format.end_attr.unwrap_or(format.attr);
+            let idx = points.len() - 1;
+            let dir = Direction::from_points(points[idx - 1], points[idx]);
+            if let Some(dir) = dir {
+                let ch = end_cap.char(dir);
+                self.write_char(points[idx].x, points[idx].y, Character::with_attributes(ch, attr));
+            }
+        }
+        // at least 3 points
+        if points.len() > 2 {
+            if let Some(joint) = format.joint {
+                let ch = Character::with_attributes(joint, format.joint_attr.unwrap_or(format.attr));
+                for i in  1..points.len() - 1 {
+                    self.write_char(points[i].x, points[i].y, ch);
+                }
+            }
+        }
     }
 
     /// Draws a straight line between two points `(x1, y1)` and `(x2, y2)`
