@@ -1,5 +1,6 @@
 use super::CharAttribute;
 use super::Direction;
+use crate::graphics::SpecialChar;
 use crate::ui::selector::EnumSelector;
 use appcui_proc_macro::EnumSelector;
 
@@ -164,10 +165,10 @@ pub(super) struct LineCapChars {
 }
 
 static LINE_CAP_CHARS_ARROWS: LineCapChars = LineCapChars {
-    up: '\u{25B2}',
-    down: '\u{25BC}',
-    left: '\u{25C0}',
-    right: '\u{25B6}',
+    up: '\u{2191}',
+    down: '\u{2193}',
+    left: '\u{2190}',
+    right: '\u{2192}',
 };
 static LINE_CAP_CHARS_TRIANGLES: LineCapChars = LineCapChars {
     up: '\u{25B2}',

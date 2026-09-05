@@ -14,7 +14,9 @@ use super::CharAttribute;
 use super::CharFlags;
 use super::Character;
 use super::Color;
+use super::LineCap;
 use super::LineType;
+use super::PolyLineFormatBuilder;
 use super::Surface;
 use super::SurfaceTester;
 use super::TextAlignment;
@@ -2124,4 +2126,79 @@ fn check_box_junction_on_surface_rect_double() {
 
     //s.print(false);
     assert_eq!(s.compute_hash(), 0xBADCD5976D211FFE);
+}
+
+fn u_polyline_points(origin_x: i32, origin_y: i32, rotation_degrees: u16) -> [Point; 4] {
+    // Orthogonal U opening upward, then rotated clockwise around its center.
+    let base = [(0, 0), (0, 5), (5, 5), (5, 0)];
+    let rotated = base.map(|(x, y)| match rotation_degrees {
+        90 => (5 - y, x),
+        180 => (5 - x, 5 - y),
+        270 => (y, 5 - x),
+        _ => (x, y),
+    });
+    rotated.map(|(x, y)| Point::new(origin_x + x, origin_y + y))
+}
+
+fn draw_u_polylines(s: &mut SurfaceTester, line_type: LineType) {
+    let attr = charattr!("w,black");
+    // 50 x 90 surface. Each 10-row band uses a different cap configuration.
+    // Columns (left to right): 0°, 90°, 180°, 270°.
+    let bands: [(i32, Option<LineCap>, Option<LineCap>, Option<char>, &str); 9] = [
+        (0, None, None, None, "No cap"),
+        (10, None, Some(LineCap::Arrow), None, "Arrow on end"),
+        (20, Some(LineCap::Arrow), None, None, "Arrow on start"),
+        (30, Some(LineCap::Arrow), Some(LineCap::Arrow), None, "Arrow on start and end"),
+        (40, Some(LineCap::Arrow), Some(LineCap::Arrow), Some('•'), "Arrow on start / end + joint"),
+        (50, None, Some(LineCap::Triangle), None, "Triangle on end"),
+        (60, Some(LineCap::Triangle), None, None, "Triangle on start"),
+        (70, Some(LineCap::Triangle), Some(LineCap::Triangle), None, "Triangle on start and end"),
+        (80, Some(LineCap::Triangle), Some(LineCap::Triangle), Some('•'), "Triangle on start / end + joint"),
+    ];
+    let rotations = [0u16, 90, 180, 270];
+    let x_origins = [1, 13, 25, 37];
+    let label_attr = charattr!("y,black");
+
+    for (band_y, start_cap, end_cap, joint, label) in bands {
+        s.write_string(1, band_y, label, label_attr, false);
+        let mut builder = PolyLineFormatBuilder::new(line_type, attr);
+        if let Some(cap) = start_cap {
+            builder = builder.start_cap(cap);
+        }
+        if let Some(cap) = end_cap {
+            builder = builder.end_cap(cap);
+        }
+        if let Some(joint) = joint {
+            builder = builder.joint(joint);
+        }
+        let format = builder.build();
+        for (rotation, origin_x) in rotations.iter().zip(x_origins.iter()) {
+            let points = u_polyline_points(*origin_x, band_y + 2, *rotation);
+            s.draw_polyline(&points, &format);
+        }
+    }
+}
+
+#[test]
+fn check_draw_polyline_u_single() {
+    let mut s = SurfaceTester::new(50, 90);
+    draw_u_polylines(&mut s, LineType::Single);
+    s.print(false);
+    assert_eq!(s.compute_hash(), 0xFCD99281E8EF935E);
+}
+
+#[test]
+fn check_draw_polyline_u_single_round() {
+    let mut s = SurfaceTester::new(50, 90);
+    draw_u_polylines(&mut s, LineType::SingleRound);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xFCD99281E8EF935E);
+}
+
+#[test]
+fn check_draw_polyline_u_double() {
+    let mut s = SurfaceTester::new(50, 90);
+    draw_u_polylines(&mut s, LineType::Double);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x51CC5F3351F7BFB6);
 }
