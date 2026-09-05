@@ -2183,8 +2183,8 @@ fn draw_u_polylines(s: &mut SurfaceTester, line_type: LineType) {
 fn check_draw_polyline_u_single() {
     let mut s = SurfaceTester::new(50, 90);
     draw_u_polylines(&mut s, LineType::Single);
-    s.print(false);
-    assert_eq!(s.compute_hash(), 0xFCD99281E8EF935E);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x8377E7323DD175AE);
 }
 
 #[test]
@@ -2192,7 +2192,7 @@ fn check_draw_polyline_u_single_round() {
     let mut s = SurfaceTester::new(50, 90);
     draw_u_polylines(&mut s, LineType::SingleRound);
     //s.print(false);
-    assert_eq!(s.compute_hash(), 0xFCD99281E8EF935E);
+    assert_eq!(s.compute_hash(), 0xE33040B95DB97E96);
 }
 
 #[test]
@@ -2200,5 +2200,5 @@ fn check_draw_polyline_u_double() {
     let mut s = SurfaceTester::new(50, 90);
     draw_u_polylines(&mut s, LineType::Double);
     //s.print(false);
-    assert_eq!(s.compute_hash(), 0x51CC5F3351F7BFB6);
+    assert_eq!(s.compute_hash(), 0xE691A938449EA5A6);
 }

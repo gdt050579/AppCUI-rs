@@ -810,10 +810,25 @@ impl Surface {
         if points.len() < 2 {
             return;
         }
+        let chs = format.line_type.charset();
+        let j_attr = format.joint_attr.unwrap_or(format.attr);
+        let mut previous = None;
         for i in 0..points.len() - 1 {
             let start = points[i];
             let end = points[i + 1];
+            let dir = Direction::from_points(start, end);
             self.draw_line(start.x, start.y, end.x, end.y, format.line_type, format.attr);
+            let c = match (previous, dir) {
+                (Some(Direction::Right), Some(Direction::Up)) => Some(chs.corner_bottom_right),
+                (Some(Direction::Up), Some(Direction::Left)) => Some(chs.corner_top_right),
+                (Some(Direction::Left), Some(Direction::Down)) => Some(chs.corner_top_left),
+                (Some(Direction::Down), Some(Direction::Right)) => Some(chs.corner_bottom_left),
+                _ => None
+            };
+            if let Some(c) = c {
+                self.write_char(start.x, start.y, Character::with_attributes(c, j_attr));
+            }
+            previous = dir;
         }
         if let Some(start_cap) = format.start_cap {
             let attr = format.start_attr.unwrap_or(format.attr);
@@ -835,7 +850,7 @@ impl Surface {
         // at least 3 points
         if points.len() > 2 {
             if let Some(joint) = format.joint {
-                let ch = Character::with_attributes(joint, format.joint_attr.unwrap_or(format.attr));
+                let ch = Character::with_attributes(joint, j_attr);
                 for i in  1..points.len() - 1 {
                     self.write_char(points[i].x, points[i].y, ch);
                 }
