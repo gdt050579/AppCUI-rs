@@ -16,6 +16,8 @@ use super::Rect;
 use super::Size;
 use super::TextAlignment;
 use super::TextFormat;
+use super::PolyLineFormat;
+use super::LineCap;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
 use super::BOX_JUNCTION;
@@ -824,6 +826,10 @@ impl Surface {
             }
             OrthogonalDirection::Auto => unreachable!(),
         }
+    }
+
+    pub fn draw_polyline(&mut self, points: &[Point], format: &PolyLineFormat) {
+
     }
 
     /// Draws a straight line between two points `(x1, y1)` and `(x2, y2)`
