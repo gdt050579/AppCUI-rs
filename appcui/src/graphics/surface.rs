@@ -810,6 +810,7 @@ impl Surface {
         if points.len() < 2 {
             return;
         }
+        let is_circular = points[0] == points[points.len() - 1];
         let chs = format.line_type.charset();
         let j_attr = format.joint_attr.unwrap_or(format.attr);
         let mut previous = None;
@@ -823,35 +824,51 @@ impl Surface {
                 (Some(Direction::Up), Some(Direction::Left)) => Some(chs.corner_top_right),
                 (Some(Direction::Left), Some(Direction::Down)) => Some(chs.corner_top_left),
                 (Some(Direction::Down), Some(Direction::Right)) => Some(chs.corner_bottom_left),
-                _ => None
+                _ => None,
             };
             if let Some(c) = c {
                 self.write_char(start.x, start.y, Character::with_attributes(c, j_attr));
             }
             previous = dir;
         }
-        if let Some(start_cap) = format.start_cap {
-            let attr = format.start_attr.unwrap_or(format.attr);
-            let dir = Direction::from_points(points[0], points[1]);
-            if let Some(dir) = dir {
-                let ch = start_cap.char(dir);
-                self.write_char(points[0].x, points[0].y, Character::with_attributes(ch, attr));
+        if !is_circular {
+            if let Some(start_cap) = format.start_cap {
+                let attr = format.start_attr.unwrap_or(format.attr);
+                let dir = Direction::from_points(points[0], points[1]);
+                if let Some(dir) = dir {
+                    let ch = start_cap.char(dir);
+                    self.write_char(points[0].x, points[0].y, Character::with_attributes(ch, attr));
+                }
             }
-        }
-        if let Some(end_cap) = format.end_cap {
-            let attr = format.end_attr.unwrap_or(format.attr);
-            let idx = points.len() - 1;
-            let dir = Direction::from_points(points[idx - 1], points[idx]);
-            if let Some(dir) = dir {
-                let ch = end_cap.char(dir);
-                self.write_char(points[idx].x, points[idx].y, Character::with_attributes(ch, attr));
+            if let Some(end_cap) = format.end_cap {
+                let attr = format.end_attr.unwrap_or(format.attr);
+                let idx = points.len() - 1;
+                let dir = Direction::from_points(points[idx - 1], points[idx]);
+                if let Some(dir) = dir {
+                    let ch = end_cap.char(dir);
+                    self.write_char(points[idx].x, points[idx].y, Character::with_attributes(ch, attr));
+                }
             }
+        } else {
+            // laxt joint
+            let start = points[0];
+            let dir = Direction::from_points(start, points[1]);
+            let c = match (previous, dir) {
+                (Some(Direction::Right), Some(Direction::Up)) => Some(chs.corner_bottom_right),
+                (Some(Direction::Up), Some(Direction::Left)) => Some(chs.corner_top_right),
+                (Some(Direction::Left), Some(Direction::Down)) => Some(chs.corner_top_left),
+                (Some(Direction::Down), Some(Direction::Right)) => Some(chs.corner_bottom_left),
+                _ => None,
+            };
+            if let Some(c) = c {
+                self.write_char(start.x, start.y, Character::with_attributes(c, j_attr));
+            }            
         }
         // at least 3 points
         if points.len() > 2 {
             if let Some(joint) = format.joint {
                 let ch = Character::with_attributes(joint, j_attr);
-                for i in  1..points.len() - 1 {
+                for i in 1..points.len() - 1 {
                     self.write_char(points[i].x, points[i].y, ch);
                 }
             }

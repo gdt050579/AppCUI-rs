@@ -2202,3 +2202,32 @@ fn check_draw_polyline_u_double() {
     //s.print(false);
     assert_eq!(s.compute_hash(), 0xE691A938449EA5A6);
 }
+
+fn polyline_rect_points(left: i32, top: i32, right: i32, bottom: i32) -> [Point; 5] {
+    [
+        Point::new(left, top),
+        Point::new(left, bottom),
+        Point::new(right, bottom),
+        Point::new(right, top),
+        Point::new(left, top),
+    ]
+}
+
+#[test]
+fn check_draw_polyline_rect() {
+    let mut s = SurfaceTester::new(40, 12);
+    let attr = charattr!("w,black");
+    let label_attr = charattr!("y,black");
+    let rects = [
+        (1, 1, 12, 5, LineType::Single, "Single"),
+        (14, 1, 25, 5, LineType::SingleRound, "Round"),
+        (27, 1, 38, 5, LineType::Double, "Double"),
+    ];
+    for (left, top, right, bottom, line_type, label) in rects {
+        s.write_string(left, 0, label, label_attr, false);
+        let format = PolyLineFormatBuilder::new(line_type, attr).build();
+        s.draw_polyline(&polyline_rect_points(left, top, right, bottom), &format);
+    }
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xBC1870AAB9AF6E55);
+}
