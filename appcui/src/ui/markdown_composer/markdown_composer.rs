@@ -156,15 +156,13 @@ impl MarkdownComposer {
     }
 
     fn redraw(&mut self) {
-        let foreground = self.theme().editor.normal.foreground;
-        let background = self.theme().editor.normal.background;
+        let theme = RuntimeManager::get().theme();
+        let background = theme.editor.normal.background;
 
-        self.surface.clear(Character::with_attributes(
-            ' ',
-            CharAttribute::new(foreground, background, CharFlags::None),
-        ));
+        self.surface
+            .clear(Character::with_attributes(' ', Self::span_attr(SpanType::Normal, theme, background)));
 
-        Self::paint_normal(&self.text, self.parser.spans(), &mut self.surface, foreground, background, self.first_row);
+        Self::paint_normal(&self.text, self.parser.spans(), &mut self.surface, theme, background, self.first_row);
     }
 
     fn clamp_first_row(&mut self) {
@@ -326,8 +324,8 @@ impl MarkdownComposer {
 
         if let Some(popup) = self.popup.as_mut() {
             popup.matches = matches;
-            popup.index = popup.index.min(popup.matches.len() as u32 - 1);
-            popup.scroll_to_index();
+            popup.index = 0;
+            popup.first = 0;
             log!(
                 "POPUP",
                 "match: filtru='{}' potriviri={} index={} first={}",
@@ -397,17 +395,66 @@ impl MarkdownComposer {
         trigger_y as i32 - self.first_row as i32
     }
 
+    fn text_width(text: &str) -> u32 {
+        let bytes = text.as_bytes();
+        let mut width = 0;
+        let mut i = 0;
+
+        while i < bytes.len() {
+            let len = Parser::get_char_len(bytes[i]);
+            width += Parser::get_char_width(Parser::get_char(bytes, i, len)) as u32;
+            i += len;
+        }
+
+        width
+    }
+
+    fn write_text_at(surface: &mut Surface, x: i32, y: i32, limit: i32, text: &str, attr: CharAttribute) -> i32 {
+        let bytes = text.as_bytes();
+        let mut pos = x;
+        let mut i = 0;
+
+        while i < bytes.len() && pos < limit {
+            let len = Parser::get_char_len(bytes[i]);
+            let ch = Parser::get_char(bytes, i, len);
+            surface.write_char(pos, y, Character::with_attributes(ch, attr));
+            pos += Parser::get_char_width(ch);
+            i += len;
+        }
+
+        pos
+    }
+
+    fn popup_value_column(list: &List, matches: &[u32]) -> u32 {
+        let mut width = 0;
+        for &item in matches {
+            let (Some(name), Some(value)) = (list.item(item), list.value(item)) else {
+                continue;
+            };
+            if value != name {
+                width = width.max(Self::text_width(value));
+            }
+        }
+
+        if width == 0 {
+            0
+        } else {
+            width + 1
+        }
+    }
+
     fn popup_get_list_size(&self) -> Option<(u32, u32)> {
         let popup = self.popup.as_ref()?;
         let list = self.lists.get(popup.list)?;
 
-        let mut text_width = 0;
+        let mut name_width = 0;
         for &item in &popup.matches {
-            if let Some(value) = list.item(item) {
-                text_width = text_width.max(value.chars().count() as u32);
+            if let Some(name) = list.item(item) {
+                name_width = name_width.max(Self::text_width(name));
             }
         }
 
+        let text_width = Self::popup_value_column(list, &popup.matches) + name_width;
         let width = (text_width + 4).clamp(POPUP_MIN_WIDTH, POPUP_MAX_WIDTH);
         let height = (popup.matches.len() as u32).min(POPUP_ROWS) + 2;
         Some((width, height))
@@ -624,19 +671,15 @@ impl MarkdownComposer {
             visible
         );
 
-        let mut format = TextFormatBuilder::new()
-            .position(x + 2, y + 1)
-            .attribute(normal)
-            .align(TextAlignment::Left)
-            .wrap_type(WrapType::SingleLineWrap((inner - 2) as u16))
-            .build();
+        let limit = x + inner as i32;
+        let column = Self::popup_value_column(list, &popup.matches) as i32;
 
         for row in 0..visible {
             let index = first + row;
             let Some(&item) = popup.matches.get(index as usize) else {
                 continue;
             };
-            let Some(value) = list.item(item) else {
+            let Some(name) = list.item(item) else {
                 continue;
             };
 
@@ -648,46 +691,61 @@ impl MarkdownComposer {
                 normal
             };
 
-            format.set_position(x + 2, line);
-            format.set_attribute(attr);
-            surface.write_text(value, &format);
+            if let Some(value) = list.value(item) {
+                if value != name {
+                    Self::write_text_at(surface, x + 2, line, limit, value, attr);
+                }
+            }
+            Self::write_text_at(surface, x + 2 + column, line, limit, name, attr);
         }
     }
 
-    fn span_attr(span_type: SpanType, foreground: Color, background: Color) -> CharAttribute {
-        let mut foreground = foreground;
-        let mut background = background;
-        let mut flags = CharFlags::None;
+    fn span_attr(span_type: SpanType, theme: &Theme, background: Color) -> CharAttribute {
+        let markdown = &theme.markdown;
+        let mut attr = markdown.text;
 
         if span_type.contains(SpanType::Bold) {
-            flags |= CharFlags::Bold;
+            attr.foreground = markdown.bold.foreground;
+            attr.flags |= markdown.bold.flags;
         }
         if span_type.contains(SpanType::Italic) {
-            flags |= CharFlags::Italic;
+            attr.foreground = markdown.italic.foreground;
+            attr.flags |= markdown.italic.flags;
+        }
+        if span_type.contains(SpanType::Bullet) {
+            attr.foreground = markdown.unordered_list.foreground;
+            attr.flags |= markdown.unordered_list.flags;
         }
         if span_type.contains(SpanType::Quote) {
-            foreground = Color::Gray;
+            attr.foreground = theme.text.inactive.foreground;
+            attr.flags |= theme.text.inactive.flags;
         }
         if span_type.contains_one(SpanType::Link | SpanType::Email) {
-            foreground = Color::Aqua;
-            flags |= CharFlags::Underline;
+            attr.foreground = markdown.link.foreground;
+            attr.flags |= markdown.link.flags;
         }
         if span_type.contains(SpanType::Code) {
-            foreground = Color::Yellow;
-            background = Color::DarkBlue;
+            attr.foreground = markdown.code.foreground;
+            attr.background = markdown.code.background;
+            attr.flags |= markdown.code.flags;
         } else if span_type.contains(SpanType::CodeBlock) {
-            foreground = Color::Silver;
+            attr.foreground = markdown.code_block.foreground;
+            attr.background = markdown.code_block.background;
+            attr.flags |= markdown.code_block.flags;
         }
 
-        CharAttribute::new(foreground, background, flags)
+        if attr.background == Color::Transparent {
+            attr.background = background;
+        }
+        attr
     }
 
-    fn code_block_attr(background: Color) -> CharAttribute {
-        CharAttribute::new(Color::Silver, background, CharFlags::None)
+    fn code_block_attr(theme: &Theme, background: Color) -> CharAttribute {
+        Self::span_attr(SpanType::CodeBlock, theme, background)
     }
 
-    fn quote_bar_attr(background: Color) -> CharAttribute {
-        CharAttribute::new(Color::Gray, background, CharFlags::None)
+    fn quote_bar_attr(theme: &Theme, background: Color) -> CharAttribute {
+        Self::span_attr(SpanType::Quote, theme, background)
     }
 
     fn span_width(bytes: &[u8], span: &Span) -> u32 {
@@ -700,7 +758,7 @@ impl MarkdownComposer {
             let ch = Parser::get_char(bytes, i, len);
 
             if ch != '\n' {
-                width += Parser::get_char_width(len) as u32;
+                width += Parser::get_char_width(ch) as u32;
                 if !ch.is_whitespace() {
                     visible = width;
                 }
@@ -712,9 +770,9 @@ impl MarkdownComposer {
         visible
     }
 
-    fn paint_code_blocks(bytes: &[u8], spans: &[Span], surface: &mut Surface, background: Color, first_row: u32) {
+    fn paint_code_blocks(bytes: &[u8], spans: &[Span], surface: &mut Surface, theme: &Theme, background: Color, first_row: u32) {
         let height = surface.size().height as i32;
-        let attr = Self::code_block_attr(background);
+        let attr = Self::code_block_attr(theme, background);
 
         let mut index = 0;
         while index < spans.len() {
@@ -759,7 +817,7 @@ impl MarkdownComposer {
         }
     }
 
-    fn paint_normal(text: &str, spans: &[Span], surface: &mut Surface, foreground: Color, background: Color, first_row: u32) {
+    fn paint_normal(text: &str, spans: &[Span], surface: &mut Surface, theme: &Theme, background: Color, first_row: u32) {
         let bytes = text.as_bytes();
         let size = surface.size();
         let height = size.height as i32;
@@ -774,7 +832,7 @@ impl MarkdownComposer {
                 continue;
             }
 
-            surface.write_char(0, y, Character::with_attributes(QUOTE_BAR, Self::quote_bar_attr(background)));
+            surface.write_char(0, y, Character::with_attributes(QUOTE_BAR, Self::quote_bar_attr(theme, background)));
         }
 
         for span in spans {
@@ -787,7 +845,7 @@ impl MarkdownComposer {
                 continue;
             }
 
-            let attr = Self::span_attr(span.span_type, foreground, background);
+            let attr = Self::span_attr(span.span_type, theme, background);
             let bullet = span.span_type.contains(SpanType::Bullet);
 
             let mut x = span.x_pos as i32;
@@ -795,16 +853,17 @@ impl MarkdownComposer {
 
             while i < span.end as usize {
                 let len = Parser::get_char_len(bytes[i]);
-                let ch = if bullet { BULLET.into() } else { Parser::get_char(bytes, i, len) };
+                let source = Parser::get_char(bytes, i, len);
+                let ch = if bullet { BULLET.into() } else { source };
 
                 surface.write_char(x, y, Character::with_attributes(ch, attr));
 
-                x += Parser::get_char_width(len);
+                x += Parser::get_char_width(source);
                 i += len;
             }
         }
 
-        Self::paint_code_blocks(bytes, spans, surface, background, first_row);
+        Self::paint_code_blocks(bytes, spans, surface, theme, background, first_row);
     }
 
     fn paint_selection(&self, surface: &mut Surface, theme: &Theme) {
@@ -833,6 +892,7 @@ impl MarkdownComposer {
 
             while i < span.end as usize {
                 let len = Parser::get_char_len(bytes[i]);
+                let source = Parser::get_char(bytes, i, len);
 
                 if i >= start as usize && i < end as usize {
                     let ch = if bullet {
@@ -840,12 +900,12 @@ impl MarkdownComposer {
                     } else if quote_mark {
                         QUOTE_BAR.into()
                     } else {
-                        Parser::get_char(bytes, i, len)
+                        source
                     };
                     surface.write_char(x, y, Character::with_attributes(ch, attr));
                 }
 
-                x += Parser::get_char_width(len);
+                x += Parser::get_char_width(source);
                 i += len;
             }
         }
