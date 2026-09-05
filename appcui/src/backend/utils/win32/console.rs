@@ -36,7 +36,7 @@ pub(crate) struct Console {
 }
 
 impl Console {
-    pub(crate) fn new(builder: &crate::system::Builder, vt: bool) -> Result<Self, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder, vt: bool) -> Result<Self, Error> {
         unsafe {
             let h_stdin = api::GetStdHandle(constants::STD_INPUT_HANDLE);
             if h_stdin == constants::INVALID_HANDLE_VALUE {

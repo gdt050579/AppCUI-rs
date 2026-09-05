@@ -80,9 +80,7 @@ fn check_view() {
     Paint('File::exit menu selected')
     CheckHash(0xbab31a8b40b618a9)    
     ";
-    let mut a = App::debug(60, 15, script).app_bar().build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).app_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -154,9 +152,7 @@ fn check_scroll_button_activation() {
         Paint('top button is disabled')
         CheckHash(0x49de03a8810dbb75)
     ";
-    let mut a = App::debug(60, 15, script).app_bar().build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).app_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -302,9 +298,7 @@ fn check_submenus_open() {
     CheckHash(0x60340250ec2ef1c2)
     
     ";
-    let mut a = App::debug(60, 15, script).app_bar().build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 15)).debug_script(script).app_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -372,9 +366,7 @@ fn check_dynamic_change_menu() {
         Paint('increment (2)')
         CheckHash(0x16c4c2a4544f97f4)
     ";
-    let mut a = App::debug(60, 24, script).app_bar().build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 24)).debug_script(script).app_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -493,9 +485,7 @@ fn check_dynamic_change_menu_2() {
         Paint('State_22 (desktop is empty, no menu in appbar)')
         CheckHash(0xDB84D57C7804761D)
     ";
-    let mut a = App::debug(60, 24, script).app_bar().build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 24)).debug_script(script).app_bar().window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -688,9 +678,7 @@ fn check_popup_menu() {
             Paint('color is light green')
             CheckHash(0x8A597798E864C55C)    
         ";
-    let mut a = App::debug(80, 24, script).app_bar().build().unwrap();
-    a.add_window(MyWindow::new());
-    a.run();
+    App::new().size(Size::new(80, 24)).debug_script(script).app_bar().window(MyWindow::new).run().unwrap();
 }
 
 #[test]
@@ -837,9 +825,7 @@ fn check_popup_menu_with_keys() {
             CheckHash(0xC71AEEECAC9C2C54)
 
         ";
-    let mut a = App::debug(80, 24, script).app_bar().build().unwrap();
-    a.add_window(MyWindow::new());
-    a.run();
+    App::new().size(Size::new(80, 24)).debug_script(script).app_bar().window(MyWindow::new).run().unwrap();
 }
 
 #[test]
@@ -904,7 +890,7 @@ fn check_menu_checkbox_methods() {
         Paint('5.Menu open again (all are checked and B title is <B is checked>, B is disabled, B shortcut is Ctrl+B)')
         CheckHash(0xC5EB204AA2303162)
     ";
-    App::debug(60, 15, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 15)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap();
 }
 
 #[test]
@@ -969,7 +955,7 @@ fn check_menu_singlechoice_methods() {
         Paint('5.Menu open again (B title is <B is selected>, B is disabled, B shortcut is Ctrl+B)')
         CheckHash(0x66D7A77E4F1A6760)
     ";
-    App::debug(60, 15, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 15)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap();
 }
 
 #[test]
@@ -1027,7 +1013,7 @@ fn check_menu_set_status_checkbox_and_singlechoice() {
         CheckHash(0x9078AC513ABAC7F5)
         Mouse.Move(4,3)
     ";
-    App::debug(60, 15, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 15)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap();
 }
 
 #[test]
@@ -1091,5 +1077,45 @@ fn check_menu_command_methods() {
         Paint('5.Menu open again (B title is <B is pressed>, B is disabled, B shortcut is Ctrl+B)')
         CheckHash(0x3906086C97012BD3)
     ";
-    App::debug(60, 15, script).desktop(MyDesktop::new()).app_bar().build().unwrap().run();
+    App::new().size(Size::new(60, 15)).debug_script(script).desktop(MyDesktop::new()).app_bar().run().unwrap();
+}
+
+#[test]
+fn check_more_than_128_selectable_items_keyboard_navigation() {
+    #[Window(events = AppBarEvents, commands=A, internal: true)]
+    struct MyWin {
+        m_file: Handle<MenuButton>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut w = MyWin {
+                base: window!("Test,a:c,w:40,h:8"),
+                m_file: Handle::None,
+            };
+            let mut m = Menu::new();
+            for i in 0..129 {
+                let caption = format!("Item {i}");
+                m.add(menu::Command::new(&caption, Key::None, mywin::Commands::A));
+            }
+            w.m_file = w.appbar().add(MenuButton::new("&Items", m, 0, Side::Left));
+            w
+        }
+    }
+    impl AppBarEvents for MyWin {
+        fn on_update(&self, appbar: &mut AppBar) {
+            appbar.show(self.m_file);
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF8DE3D7F827850B3)
+        Mouse.Click(3,0,left)
+        Paint('2. Menu open')
+        CheckHash(0xD2B4AACCDF294807)
+        Key.Pressed(Down)
+        Paint('3. Move down')
+        CheckHash(0xF3887626D712DA4F)
+    ";
+    App::new().size(Size::new(60, 12)).debug_script(script).app_bar().window(MyWin::new).run().unwrap();
 }

@@ -191,7 +191,5 @@ pub fn wasm_main() {
     theme.border.focused = CharAttribute::with_color(Color::Black, Color::Black);
     theme.text.focused = CharAttribute::with_color(Color::Black, Color::Black);
 
-    let mut app = App::new().single_window().theme(theme).build().unwrap();
-    app.add_window(PresentationWindow::new());
-    app.run();
+    App::new().single_window().theme(theme).window(|| PresentationWindow::new()).run().unwrap();
 }

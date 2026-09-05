@@ -69,8 +69,5 @@ impl ToolBarEvents for MyWin {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    app.add_window(MyWin::new());
-    app.run();
-    Ok(())
+    App::new().window(MyWin::new).run()
 }

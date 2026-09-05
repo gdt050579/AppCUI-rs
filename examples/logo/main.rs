@@ -50,6 +50,5 @@ impl OnPaint for MyDesktop {
     }
 }
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(MyDesktop::new()).build()?.run();
-    Ok(())
+    App::new().desktop(MyDesktop::new()).run()
 }

@@ -106,10 +106,13 @@ thread_local! {
 }
 
 impl RuntimeManager {
-    pub(super) fn create(mut builder: crate::system::Builder) -> Result<(), super::Error> {
+    pub(super) fn create(mut builder: crate::system::InternalBuilder) -> Result<(), super::Error> {
         #[cfg(debug_assertions)]
         if let Some(fname) = builder.log_file.as_ref() {
             crate::utils::log::init_log_file(fname, builder.log_append);
+        }
+        if builder.debug_script.is_some() && builder.backend.is_some() {
+            panic!("When `debug_script(...)` is used to initialize an application, you can not use `.backend(...)` command to provide a custom backend !");
         }
 
         let (sender, receiver) = std::sync::mpsc::channel::<SystemEvent>();
@@ -359,7 +362,7 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if self.single_window && (!controls.desktop_mut().base().children.is_empty()) {
             // check to see how many window were added
-            panic!("When `single_window(...)` is being used to initialized an application, you can only use add_window(...) method once (to add the first and single window) !");
+            panic!("When `App::single_window(...)` is used to initialize an application, only one window can be added !");
         }
         let controls = unsafe { &mut *self.controls };
         let handle = controls.desktop_mut().base_mut().add_child(obj);
@@ -464,7 +467,7 @@ impl RuntimeManager {
         menus.get_mut(handle)
     }
     pub(crate) fn get_appbar(&mut self) -> &mut AppBar {
-        self.appbar.as_mut().expect("AppBar (application bar) was not enabled ! Have you forgot to add '.app_bar()' when you initialized the Application ? (e.g. App::new().app_bar().build())")
+        self.appbar.as_mut().expect("AppBar (application bar) was not enabled ! Have you forgot to add '.app_bar()' when you initialized the Application ? (e.g. App::new().app_bar().run())")
     }
     pub(crate) fn show_menu(
         &mut self,
@@ -642,7 +645,7 @@ impl RuntimeManager {
             self.process_terminal_resize_event(self.backend.size());
             self.process_desktop_on_start();
             if self.single_window && self.get_controls_mut().desktop_mut().base().children.len() != 1 {
-                panic!("You can not run a single window app and not add a window to the app. Have you forget to add an '.add_window(...)' call before the .run() call ?")
+                panic!("You can not run a single window app without a window. Pass a window factory to `App::single_window(...)`.")
             }
         }
 

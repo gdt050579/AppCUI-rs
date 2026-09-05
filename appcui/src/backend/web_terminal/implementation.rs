@@ -190,7 +190,7 @@ impl WebTerminal {
         })
     }
 
-    pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let document = Self::document()?;
         document.set_title(builder.title.as_deref().unwrap_or("AppCUI Web Terminal"));
 

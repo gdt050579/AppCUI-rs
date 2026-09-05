@@ -7,6 +7,10 @@
 
 - [Basic concepts](chapter-2/basic_concepts.md)
     - [Application](chapter-2/application.md)
+        - [Multi-Window Mode](chapter-2/multi_window.md)
+        - [Single Window Mode](chapter-2/single_window.md)
+        - [Frame App Mode](chapter-2/frame_app.md)
+        - [Input App Mode](chapter-2/input_app.md)
         - [Debug scenarios](chapter-2/debug_scenarious.md)
         - [Recording events](chapter-2/event_recording.md)
         - [Logging](chapter-2/logging.md)
@@ -137,4 +141,5 @@
 - [Multi-Threading](chapter-7/multi-threading.md)
     - [Timers](chapter-7/timers.md)
     - [Background tasks](chapter-7/background_tasks.md)
+
 - [Gallery](gallery/screenshots.md)

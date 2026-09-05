@@ -78,10 +78,7 @@ use super::{AddToToolbar, Group, ItemBase, PaintData, SymbolAttrState, ToolBarIt
 /// }
 ///
 /// fn main() -> Result<(), appcui::system::Error> {
-///     let mut app = App::new().build()?;
-///     app.add_window(CheckboxWindow::new());
-///     app.run();
-///     Ok(())
+///     App::new().window(|| CheckboxWindow::new()).run()
 /// }
 /// ```
 pub struct CheckBox {

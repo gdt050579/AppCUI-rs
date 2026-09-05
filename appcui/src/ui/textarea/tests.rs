@@ -19,12 +19,12 @@ fn check_move_left_right_1() {
     let text_print = "Unit Test 1";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test 1", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test 1", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 
 }
 
@@ -48,12 +48,12 @@ fn check_move_left_right_2() {
     let text_print = "Unit Test 2";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test 2", layout!("a:c,w:52,h:10"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test 2", layout!("a:c,w:52,h:10"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -82,12 +82,12 @@ fn check_move_left_right_3() {
     let text_print = "Unit Test 3";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test 3", layout!("a:c,w:52,h:12"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test 3", layout!("a:c,w:52,h:12"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -107,12 +107,12 @@ fn check_newline_parsing_move_right_next_line() {
     let text_print = "Unit Test 4\nNewline test";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test 4", layout!("a:c,w:52,h:12"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test 4", layout!("a:c,w:52,h:12"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -128,12 +128,12 @@ fn check_newline_parsing() {
     let text_print = "Unit Test 4\nNewline test";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test 4", layout!("a:c,w:52,h:12"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test 4", layout!("a:c,w:52,h:12"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -155,12 +155,12 @@ fn check_newline_parsing_move_right_next_line_left_move_back() {
     let text_print = "Unit Test 4\nNewline test";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test 4", layout!("a:c,w:52,h:12"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test 4", layout!("a:c,w:52,h:12"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -179,12 +179,12 @@ fn check_selection_1() {
     let text_print = "Unit Test Selection 1";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 1", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 1", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -206,12 +206,12 @@ fn check_selection_2() {
     let text_print = "Unit Test Selection 3";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 3", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 3", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -233,12 +233,12 @@ fn check_selection_3() {
     let text_print = "Unit Test Selection 3";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 3", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 3", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -257,12 +257,12 @@ fn check_select_all() {
     let text_print = "Unit Test Select All";
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
 
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Select All", layout!("d:f"), window::Flags::None);
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Select All", layout!("d:f"), window::Flags::None);
 
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -287,12 +287,12 @@ fn check_selection_4_copy() {
     let text_print = "Unit Test Selection 4";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 4", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 4", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -314,12 +314,12 @@ fn check_selection_5_delete() {
     let text_print = "Unitzzzzzz Test Selection 5";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 5", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 5", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -341,12 +341,12 @@ fn check_selection_7_mouse_backspace() {
     let text_print = "Unit Test zzzzSelection 7 - Mouse";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 7", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 7", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -365,12 +365,12 @@ fn check_selection_8_mouse() {
     let text_print = "Unit Test zz\nzzSelection 8 - Mouse";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 8", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 8", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -392,12 +392,12 @@ fn check_selection_shift_1() {
     let text_print = "Unit Test Selection 8\nMultiline Selection\nUsing Shift Key";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 8", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 8", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -427,12 +427,12 @@ fn check_selection_shift_2() {
     let text_print = "Unit Test Selection Shift 2\nMultiline Selection\nUsing Shift Key";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection Shift 2", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection Shift 2", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -462,12 +462,12 @@ fn check_selection_shift_3() {
     let text_print = "Unit Test Selection Shift 3\nMultiline Selection\nUsing Shift Key";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection Shift 3", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection Shift 3", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -487,12 +487,12 @@ fn check_selection_multi_line() {
     let text_print = "Unit Test Selection\nMultiline Selection\nUsing Shift Key";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection Multi-Line", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection Multi-Line", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -517,12 +517,12 @@ fn check_paste_1() {
     let text_print = "Unit Test Selection 4";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 4", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 4", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -545,12 +545,12 @@ fn check_paste_2() {
     let text_print = "Unit2";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Paste 2", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Paste 2", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -574,12 +574,12 @@ fn check_paste_3() {
     let text_print = "Unit";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Paste 3", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Paste 3", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 
@@ -599,12 +599,12 @@ fn check_scrolling_1() {
     let text_print = "Unit Test Scrolling, where I try to scroll as much as possible outside the displayed area\nof the text, to see test if the whole display moves";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling 1", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling 1", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -624,12 +624,12 @@ fn check_scrolling_2() {
     let text_print = "Unit Test Scrolling, where I try to scroll as much as possible outside the displayed area\nof the text, to see test if the whole display moves";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling 2", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling 2", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -654,12 +654,12 @@ fn check_scrolling_3() {
     let text_print = "Unit Test Scrolling, where I try to scroll as much as possible outside the displayed area\nof the text, to see test if the whole display moves";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling 3", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling 3", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 
     
 }
@@ -681,12 +681,12 @@ fn check_scrolling_4() {
     let text_print = "Unit Test Scrolling, where I try to scroll as much as possible outside the displayed area\nof the text, to see test if the whole display moves";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling 4", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling 4", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -706,12 +706,12 @@ fn check_scrolling_enter_1() {
     let text_print = "Unit Test Enter Key 1";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Enter Key 1", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Enter Key 1", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -732,12 +732,12 @@ fn check_scrolling_backspace_1() {
     let text_print = "Unit Test\n Enter Key 2";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Enter Key 2", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Enter Key 2", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -758,12 +758,12 @@ fn check_scrolling_backspace_2() {
     let text_print = "Unit Test \n Enter Key 2";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Enter Key 2", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Enter Key 2", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -784,12 +784,12 @@ fn check_scrolling_delete_1() {
     let text_print = "Unit Test \n Delete Key";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Delete", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Delete", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -810,12 +810,12 @@ fn check_scrolling_delete_2() {
     let text_print = "Unit Test \n Delete Key\n\n\n\n\n\n\n\nTest 2";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Delete", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Delete", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 
@@ -833,12 +833,12 @@ fn check_line_number_1() {
     let text_print = "Unit Test 5\nLineNumber test";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::ShowLineNumber);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test 5", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test 5", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -857,12 +857,12 @@ fn check_move_up_down_1() {
     let text_print = "Unit\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\nDown";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -882,12 +882,12 @@ fn check_move_up_down_2() {
     let text_print = "Unit\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\nDown";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -907,12 +907,12 @@ fn check_move_up_down_3() {
     let text_print = "Unit\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\nDown";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -932,12 +932,12 @@ fn check_move_up_down_4() {
     let text_print = "Unit\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\nDown";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -956,12 +956,12 @@ fn check_move_up_down_5() {
     let text_print = "Unit\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\n...\nDown";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -987,12 +987,12 @@ fn check_move_up_down_6() {
     let text_print = "Unit\n...\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\nDown";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1019,12 +1019,12 @@ fn check_move_up_down_7() {
     let text_print = "Unit\n...\n...\n...\n...\nTest\n...\n...\n...\n...\nScrolling\n...\n...\n...\n...\nDown";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Scrolling", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1054,12 +1054,12 @@ fn check_write_1() {
     let text_print = "Unit ";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Paste 2", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Paste 2", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1082,12 +1082,12 @@ fn check_write_2() {
     let text_print = "Unit 2";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Paste 2", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Paste 2", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1117,12 +1117,12 @@ fn check_mouse_drag_1() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 
@@ -1146,12 +1146,12 @@ fn check_mouse_drag_2() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1173,12 +1173,12 @@ fn check_mouse_drag_3() {
     let text_print = " Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 
@@ -1205,12 +1205,12 @@ fn check_selection_down_left_1() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1239,12 +1239,12 @@ fn check_selection_down_left_2() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1270,12 +1270,12 @@ fn check_selection_down_left_3() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1305,12 +1305,12 @@ fn test_scrollbar_1() {
     
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::ScrollBars);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag Scrollbar", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag Scrollbar", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1343,12 +1343,12 @@ fn test_scrollbar_2() {
     
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::ScrollBars);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag Scrollbar", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag Scrollbar", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1387,12 +1387,12 @@ fn test_scrollbar_3() {
     
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::ScrollBars);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag Scrollbar", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag Scrollbar", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1416,12 +1416,12 @@ fn check_mouse_drag_delete() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1453,12 +1453,12 @@ fn check_mouse_drag_4() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1482,12 +1482,12 @@ fn check_selection_copy_unicode() {
     let text_print = "Unit Test Selection.\nI ♡ love ♡ Unicode";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 4", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 4", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1511,12 +1511,12 @@ fn check_selection_7_mouse_backspace_2() {
     let text_print = "Unit Test zzzzSelection 7 - Mouse";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::ShowLineNumber);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Selection 7", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Selection 7", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1543,12 +1543,12 @@ fn show_line_number_increase() {
     let text_print = "Unit Test\n\n\n\n\n\n\n\nShowLineNumber";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::ShowLineNumber);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test 1", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test 1", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1574,12 +1574,12 @@ fn show_line_number_decrease() {
     let text_print = "Unit Test\n\n\n\n\n\n\n\n\nShowLineNumber";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::ShowLineNumber);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test 1", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test 1", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1599,12 +1599,12 @@ fn ctrl_right() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1625,12 +1625,12 @@ fn ctrl_right_left() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1653,12 +1653,12 @@ fn ctrl_shift_right() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1682,12 +1682,12 @@ fn ctrl_shift_right_shift_left() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1711,12 +1711,12 @@ fn ctrl_right_shift_left() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 
@@ -1744,12 +1744,12 @@ fn ctrl_shift_left_shift_right() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1769,12 +1769,12 @@ fn ctrl_delete() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1795,12 +1795,12 @@ fn ctrl_right_ctrl_delete_1() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1821,12 +1821,12 @@ fn ctrl_right_ctrl_delete_2() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1847,12 +1847,12 @@ fn ctrl_backspace() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1875,12 +1875,12 @@ fn ctrl_right_ctrl_backspace_1() {
     let text_print = "Unit Test\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1906,12 +1906,12 @@ fn ctrl_selection_unicode_1() {
     let text_print = "Unit Tȅst\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1937,12 +1937,12 @@ fn ctrl_selection_unicode_2() {
     let text_print = "Unit Tȅst\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1968,12 +1968,12 @@ fn ctrl_selection_unicode_3() {
     let text_print = "Unit Ꭲȅst\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -1999,12 +1999,12 @@ fn ctrl_selection_unicode_4() {
     let text_print = "Unit Ꭲȅst\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2030,12 +2030,12 @@ fn ctrl_selection_unicode_5() {
     let text_print = "Unit Ꭲȅst𓀀\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2061,12 +2061,12 @@ fn ctrl_selection_unicode_6() {
     let text_print = "Unit Ꭲȅst𓀀\nMouse Drag\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2091,12 +2091,12 @@ fn ctrl_right_last_word() {
     let text_print = "Laus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2121,12 +2121,12 @@ fn move_up_first_row() {
     let text_print = "Laus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2151,12 +2151,12 @@ fn move_down_last_row() {
     let text_print = "Laus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2181,12 +2181,12 @@ fn move_right_new_row_1() {
     let text_print = "Laus Cargo et Rust,\nLingua fortis, codi fust,\nMem'riam sacram curat bene,\nNulla bug nec error plene.\n\nFerrum solidum, verbum clarum,\nNulla segfault, nil amarum,\nTypi fortes, vita laeta,\nNulla poena, nulla peta.\n\nConcurrentia sine metu,\nOwnership est sacrum fretu,\nIterum atque iterum scriptum,\nCompile-time servat victum.\n\nSic ad astra, sic ad gloriam,\nRust regnat in memoriam! 🚀🦀";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(20, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(20, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2212,12 +2212,12 @@ fn move_right_new_row_2() {
     let text_print = "Laus Cargo et Rust,\nLingua fortis, codi fust,\nMem'riam sacram curat bene,\nNulla bug nec error plene.\n\nFerrum solidum, verbum clarum,\nNulla segfault, nil amarum,\nTypi fortes, vita laeta,\nNulla poena, nulla peta.\nConcurrentia sine metu,\nOwnership est sacrum fretu,\nIterum atque iterum scriptum,\nCompile-time servat victum.\n\nSic ad astra, sic ad gloriam,\nRust regnat in memoriam! 🚀🦀";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(20, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(20, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2248,12 +2248,12 @@ fn enter_text_longer_line() {
     let text_print = "Laus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2274,12 +2274,12 @@ fn delete_last_char() {
     let text_print = "Laus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2298,12 +2298,12 @@ fn backspace_first_char() {
     let text_print = "Laus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Unit Test Mouse Drag", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 
@@ -2323,12 +2323,12 @@ fn out_ouf_bounds_mouse_click() {
     let text_print = "Laus Cargo et Rust";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Issue #80 Mouse Click", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Issue #80 Mouse Click", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2349,12 +2349,12 @@ fn test_empty_file() {
     let text_print = "";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Empty file", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Empty file", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2375,12 +2375,12 @@ fn test_paste_ascii_art() {
     let text_print = "";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Empty file", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Empty file", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2401,12 +2401,12 @@ fn test_paste_ascii_art_crlf() {
     let text_print = "";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Empty file", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Empty file", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2431,12 +2431,12 @@ fn test_paste_ascii_art_crlf_ctrl_back() {
     let text_print = "";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::None);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Empty file", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Empty file", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2457,12 +2457,12 @@ fn scroll_with_scrollbars_and_linenumbers() {
     let text_print = "Issue #85 TextArea with LineNumber and ScrollBars enabled, causes lines to be shorter\nPlease fix";    
     let textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::ShowLineNumber | textarea::Flags::ScrollBars);
     
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Issue #85 TextArea", layout!("d:f"), window::Flags::None);
-    
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Issue #85 TextArea", layout!("d:f"), window::Flags::None);
+
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2477,14 +2477,14 @@ fn pub_fn_set_text() {
     let text_print = "Old text, new line\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust";    
     let mut textarea = TextArea::new(text_print, layout!("d:f"), textarea::Flags::ShowLineNumber | textarea::Flags::ScrollBars);
     
-    let mut app = App::debug(60, 11, script).build().unwrap();
-    let mut window = Window::new("TextArea public function test", layout!("d:f"), window::Flags::None);
-    
-    textarea.set_text("New text, new line\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust");
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut window = Window::new("TextArea public function test", layout!("d:f"), window::Flags::None);
 
-    window.add(textarea);
-    app.add_window(window);
-    app.run();
+        textarea.set_text("New text, new line\nLorem Ipsum\nLaudate Solem\nLaus Cargo et Rust");
+
+        window.add(textarea);
+        window
+    }).run().unwrap();
 }
 
 #[test]
@@ -2535,9 +2535,7 @@ fn pub_fn_insert_text() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).build().unwrap();
-    app.add_window(MyWin::new());
-    app.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2587,9 +2585,7 @@ fn pub_fn_move_set_cursor_position() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).build().unwrap();
-    app.add_window(MyWin::new());
-    app.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2639,9 +2635,7 @@ fn pub_fn_move_set_cursor_position_2() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).build().unwrap();
-    app.add_window(MyWin::new());
-    app.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2687,9 +2681,7 @@ fn pub_fn_remove_text() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).build().unwrap();
-    app.add_window(MyWin::new());
-    app.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2739,9 +2731,7 @@ fn pub_fn_select_text() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).build().unwrap();
-    app.add_window(MyWin::new());
-    app.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2791,9 +2781,7 @@ fn pub_fn_delete_selection() {
         }
     }
     
-    let mut app = App::debug(60, 10, script).build().unwrap();
-    app.add_window(MyWin::new());
-    app.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -2809,11 +2797,11 @@ fn display_text_with_tabs_script_no_panic() {
     ";
 
     let textarea = TextArea::new("line1\tX\nline2\tY", layout!("d:f"), textarea::Flags::None);
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Tabs display", layout!("a:c,w:52,h:10"), window::Flags::None);
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Tabs display", layout!("a:c,w:52,h:10"), window::Flags::None);
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2899,11 +2887,11 @@ fn crash_fix_mouse_on_minimal_size_textarea() {
         CheckHash(0x5058F7764C72DA17)
     ";
     let textarea = TextArea::new("x\n", layout!("x:0,y:0,w:1,h:1"), textarea::Flags::None);
-    let mut a = App::debug(40, 10, script).build().unwrap();
-    let mut w = Window::new("Minimal", layout!("d:f"), window::Flags::None);
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(40, 10)).debug_script(script).window(|| {
+        let mut w = Window::new("Minimal", layout!("d:f"), window::Flags::None);
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -2922,12 +2910,12 @@ fn check_mouse_click_outside_text() {
     ta.set_text(r#"
     $a = ((1,(((2))),3))
             "#);    
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("Test", layout!("d:f"), window::Flags::None);
-    w.add(ta);
-    w.add(button!("Test,l:1,b:0,w:10"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("Test", layout!("d:f"), window::Flags::None);
+        w.add(ta);
+        w.add(button!("Test,l:1,b:0,w:10"));
+        w
+    }).run().unwrap();
 
 }
 
@@ -2947,11 +2935,11 @@ fn delete_selection_after_multibyte_cursor_column() {
     ";
 
     let textarea = TextArea::new("ééhello", layout!("d:f"), textarea::Flags::None);
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("UTF-8 column", layout!("d:f"), window::Flags::None);
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("UTF-8 column", layout!("d:f"), window::Flags::None);
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 /// Same mix-up with CJK (3-byte) characters, deleted via Delete.
@@ -2968,11 +2956,11 @@ fn delete_selection_after_cjk_cursor_column() {
     ";
 
     let textarea = TextArea::new("你你xx", layout!("d:f"), textarea::Flags::None);
-    let mut a = App::debug(60, 11, script).build().unwrap();
-    let mut w = Window::new("CJK column", layout!("d:f"), window::Flags::None);
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 11)).debug_script(script).window(|| {
+        let mut w = Window::new("CJK column", layout!("d:f"), window::Flags::None);
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }
 
 /// Horizontal scroll past the window must skip by character columns, not byte offsets.
@@ -2989,9 +2977,9 @@ fn paint_horizontal_scroll_multibyte_uses_char_columns() {
 
     let text_print = "你".repeat(40);
     let textarea = TextArea::new(&text_print, layout!("d:f"), textarea::Flags::None);
-    let mut a = App::debug(20, 8, script).build().unwrap();
-    let mut w = Window::new("CJK scroll", layout!("d:f"), window::Flags::None);
-    w.add(textarea);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(20, 8)).debug_script(script).window(|| {
+        let mut w = Window::new("CJK scroll", layout!("d:f"), window::Flags::None);
+        w.add(textarea);
+        w
+    }).run().unwrap();
 }

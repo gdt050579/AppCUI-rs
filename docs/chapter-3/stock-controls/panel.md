@@ -57,11 +57,12 @@ The following code creates a panel with the title `Options`.
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:10"), window::Flags::None);
-    w.add(Panel::new("Options", layout!("l:1,t:1,r:1,b:2")));
-    app.add_window(w);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:10"), window::Flags::None);
+            w.add(Panel::new("Options", layout!("l:1,t:1,r:1,b:2")));
+            w
+        })
+        .run()
 }
 ```

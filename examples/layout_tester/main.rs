@@ -5,11 +5,9 @@ mod child_control;
 mod parent_control;
 mod value;
 
-
 use child_control::ChildControl;
 use parent_control::ParentControl;
 use value::Value;
-
 
 #[Window(events = TextFieldEvents + SelectorEvents<Alignment> + SelectorEvents<Dock> + SelectorEvents<Pivot> + NumericSelectorEvents<u16>)]
 struct LayoutTesterWindow {
@@ -134,10 +132,9 @@ impl LayoutTesterWindow {
         if let Some(c) = self.control_mut(h) {
             c.set_visible(true);
             c.update_layout(layout);
-            c.set_size_bounds(min_w,min_h, max_w, max_h);
+            c.set_size_bounds(min_w, min_h, max_w, max_h);
         }
     }
-
 
     fn update_child_layout(&mut self) {
         let mut layout_builder = LayoutBuilder::new();
@@ -159,7 +156,6 @@ impl LayoutTesterWindow {
                 }
             };
         }
-
 
         parse_value!(self.x_field, "X", false, x);
         parse_value!(self.y_field, "Y", false, y);
@@ -239,8 +235,5 @@ impl NumericSelectorEvents<u16> for LayoutTesterWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().size(Size::new(100, 30)).single_window().build()?;
-    app.add_window(LayoutTesterWindow::new());
-    app.run();
-    Ok(())
+    App::new().size(Size::new(100, 30)).window(LayoutTesterWindow::new).run()
 }

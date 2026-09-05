@@ -19,7 +19,7 @@ impl WindowsConsoleTerminal {
     // if colors are present --> recolor
     // if font is present --> apply font & size
 
-    pub(crate) fn new(builder: &crate::system::Builder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let console = win32::Console::new(builder, false)?;
         let input_console = console.clone();
         let mut term = WindowsConsoleTerminal {

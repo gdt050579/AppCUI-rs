@@ -146,6 +146,5 @@ impl TimerEvents for SpiralDesktop {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    App::new().desktop(SpiralDesktop::new()).app_bar().command_bar().build()?.run();
-    Ok(())
+    App::new().desktop(SpiralDesktop::new()).app_bar().command_bar().run()
 } 

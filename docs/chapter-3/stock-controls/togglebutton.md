@@ -103,32 +103,33 @@ The following code creates a window with three toggle buttons (`Case sensitive`,
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut a = App::new().build()?;
-    let mut w = window!("Test,a:c,w:60,h:10");
-    let tg1 = ToggleButton::new(
-        "Aa", 
-        "Case sensitive", 
-        layout!("x:1,y:1,w:2,h:1"), 
-        true, 
-        togglebutton::Type::Underlined);
-    let tg2 = ToggleButton::new(
-        "..",
-        "Match whole word",
-        layout!("x:4,y:1,w:2,h:1"),
-        false,
-        togglebutton::Type::Underlined,
-    );
-    let tg3 = ToggleButton::new(
-        ".*", 
-        "RegExp search", 
-        layout!("x:7,y:1,w:2,h:1"), 
-        true, 
-        togglebutton::Type::Underlined);
-    w.add(tg1);
-    w.add(tg2);
-    w.add(tg3);
-    a.add_window(w);
-    a.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = window!("Test,a:c,w:60,h:10");
+            let tg1 = ToggleButton::new(
+                "Aa", 
+                "Case sensitive", 
+                layout!("x:1,y:1,w:2,h:1"), 
+                true, 
+                togglebutton::Type::Underlined);
+            let tg2 = ToggleButton::new(
+                "..",
+                "Match whole word",
+                layout!("x:4,y:1,w:2,h:1"),
+                false,
+                togglebutton::Type::Underlined,
+            );
+            let tg3 = ToggleButton::new(
+                ".*", 
+                "RegExp search", 
+                layout!("x:7,y:1,w:2,h:1"), 
+                true, 
+                togglebutton::Type::Underlined);
+            w.add(tg1);
+            w.add(tg2);
+            w.add(tg3);
+            w
+        })
+        .run()
 }
 ```

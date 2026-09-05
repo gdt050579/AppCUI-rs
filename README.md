@@ -94,7 +94,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-appcui = "*"
+appcui = "0.5"
 ```
 
 Then create a new Rust project and add the following code:
@@ -103,19 +103,20 @@ Then create a new Rust project and add the following code:
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut win = Window::new(
-        "Test",
-        LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(),
-        window::Flags::Sizeable,
-    );
-    win.add(Label::new(
-        "Hello World !",
-        LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
-    ));
-    app.add_window(win);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut win = Window::new(
+                "Test",
+                LayoutBuilder::new().alignment(Alignment::Center).width(30).height(9).build(),
+                window::Flags::Sizeable,
+            );
+            win.add(Label::new(
+                "Hello World !",
+                LayoutBuilder::new().alignment(Alignment::Center).width(13).height(1).build(),
+            ));
+            win
+        })
+        .run()
 }
 ```
 
@@ -125,12 +126,29 @@ Or a more compact version using proc-macros:
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut win = window!("Test,a:c,w:30,h:9");
-    win.add(label!("'Hello World !',a:c,w:13,h:1"));
-    app.add_window(win);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut win = window!("Test,a:c,w:30,h:9");
+            win.add(label!("'Hello World !',a:c,w:13,h:1"));
+            win
+        })
+        .run()
+}
+```
+
+Alternatively, you can use the frame-based or input-based mode to create applications that can access the screen directly (without needing the entire UI architecture):
+
+```rs
+use appcui::prelude::*;
+
+struct HelloWorld;
+impl InputApp for HelloWorld {
+    fn on_paint(&self, surface: &mut Surface) {
+        surface.write_string(0, 0, "Hello World !", charattr!("white"), false);
+    }
+}
+fn main() -> Result<(), appcui::system::Error> {
+    App::input_app(HelloWorld {}).run()
 }
 ```
 
@@ -139,9 +157,9 @@ Then run the project with `cargo run`. You should see a window with the title `T
 ## 🧪 Examples
 
 AppCUI-rs comes with a set of examples to help you get started. You can find them in the [examples](examples) folder, including:
-- **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/), [Ram it](examples/ramit/), [PacMan](examples/games/), [Chess](examples/games/), [Connect Four](examples/games/), [2048](examples/games/), or [Tetris](examples/games/)
+- **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/), [Ram it](examples/ramit/), [PacMan](examples/games/), [Chess](examples/games/), [Connect Four](examples/games/), [2048](examples/games/), [Memory](examples/memory/), or [Tetris](examples/games/)
 - **Utilities** such as [Calculator](examples/calculator/), [CSV Viewer](examples/csv_viewer/), [Temperature Converter](examples/temperature_convertor/), [HexViewer](examples/hexview/), or a [Timer](examples/timer/)
-- **Animations** such as [Matrix](examples/matrix/), [Fractals](examples/fractals/), or [Spiral](examples/spiral/)
+- **Animations** such as [Matrix](examples/matrix/), [Fractals](examples/fractals/), [Plasma](examples/plasma/) or [Spiral](examples/spiral/)
 - **Controls**/**Widgets** such as [Button](examples/buttons/), [CheckBox](examples/checkboxes/), [ComboBox](examples/combobox/), [DatePicker](examples/datepicker/), [ListView](examples/listview/), [TreeView](examples/treeview/) and many more.
 - **Dialogs** such as [Notification](examples/notification_dialogs/) or [Input](examples/input_dialog/)
 
@@ -193,13 +211,8 @@ impl ButtonEvents for CounterWindow {
 }
 
 fn main() -> Result<(), appcui::system::Error> {
-    // create a new application
-    let mut a = App::new().build()?;
-    // add a new window (of type CounterWindow) to the application
-    a.add_window(CounterWindow::new());
-    // Run AppCUI framework (this will start the window loop and message passing)
-    a.run();
-    Ok(())
+    // create a new application, add a CounterWindow, and start the event loop
+    App::new().window(|| CounterWindow::new()).run()
 }
 ```
 
@@ -207,6 +220,8 @@ fn main() -> Result<(), appcui::system::Error> {
 
 - [x] Basic set of widgets and support for Windows, Linux, and macOS
 - [x] WebGL / WebAssembly support
+- [x] Frame-based mode support (ideal for game development)
+- [x] Input-based mode support (for applications that require user input)
 - [ ] OpenGL / SDL / Vulkan support
 - [ ] Editor support (syntax highlighting, code folding, etc.)
 - [x] Rich Text support (rich text editing, formatting, etc.)

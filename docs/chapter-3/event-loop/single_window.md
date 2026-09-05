@@ -2,39 +2,22 @@
 
 A single window app is an AppCUI application where you only have one window that ocupies the entire desktop. Usually, when you create a AppCUI app, you can add multiple windows to a desktop object. In this mode you can only add one window, and terminating that window will close the app.
 
-To do this you need to use the `.single_window()` method from the App builder as follows:
+To do this you need to use `App::single_window(...)` as follows. The factory can be a **closure** or a **function** / constructor with no arguments (`MyWin::new`):
 ```rs
-let mut app = App::new().single_window().build()?;
-// add one and only one window
-app.add_window(...);
-// run the application
-app.run()
+App::single_window(|| {
+    // construct the one and only window
+    window!("Demo,d:f")
+}).run()
+
+// equivalent when `new` takes no arguments:
+App::single_window(MyWin::new).run()
 ```
 
 ## Remarks
-* in a `Single Window` mode you can not set a custom desktop as there is only one window and it covers the entire visible size of a desktop. Using a `.desktop(...)` method with a `.single_window()` method will result in a panic:
-    ```rs
-    // the following code wil panic
-    App::new().single_window().desktop(...).build()?
-    ```
-* Since in a `Single Window` mode there is only one window , you can not use the `.add_window(...)` method twice. Using it wll result in a panic.
-    ```rs
-    let mut a = App::new().single_window()..build()?;
-    a.add_window(...);
-    // the following line will panic as there is alreay a window added
-    a.add_window(...); // panic
-    a.run();
-    ```
+* in a `Single Window` mode you can not set a custom desktop as there is only one window and it covers the entire visible size of a desktop. `.desktop(...)` is only available on the multi-window builder (`App::new()`).
+* Since in a `Single Window` mode there is only one window, the factory passed to `App::single_window(...)` is invoked once and must return that window. You can not register a second window.
 * Since in a `Single Window` mode the window ocupies the entire visible size of a desktop, you can not resize or move it. As such, window flag attributes like `Sizeable` are not allowed. If used, the code will panic. The layout (regardless on how you set it up) will be changed to make sure that the window ocupies the entire visible desktop space.
     ```rs
-    let mut a = App::new().single_window()..build()?;
     // the following line will panic as Sizeable flag is not allow on windows in Single Window mode
-    a.add_window(window!("Test,a:c,flags: Sizeable"));
-    a.run();
-    ```
-* In a `Single Window` mode, the event loop will be associated with the single window. As such, not adding a window will result in a panic.
-    ```rs
-    let mut a = App::new().single_window()..build()?;
-    // the following line will panic no window was added
-    a.run();
+    App::single_window(|| window!("Test,a:c,flags: Sizeable")).run()
     ```

@@ -101,6 +101,38 @@ name = "hello_world_procmacro"
 path = "hello_world_procmacro/main.rs"
 
 [[example]]
+name = "hello_world_frame_app"
+path = "hello_world_frame_app/main.rs"
+
+[[example]]
+name = "hello_world_input_app"
+path = "hello_world_input_app/main.rs"
+
+[[example]]
+name = "typewriter"
+path = "typewriter/main.rs"
+
+[[example]]
+name = "mouse_target"
+path = "mouse_target/main.rs"
+
+[[example]]
+name = "memory"
+path = "memory/main.rs"
+
+[[example]]
+name = "shader"
+path = "shader/main.rs"
+
+[[example]]
+name = "plasma"
+path = "plasma/main.rs"
+
+[[example]]
+name = "starfield"
+path = "starfield/main.rs"
+
+[[example]]
 name = "window_toolbar"
 path = "window_toolbar/main.rs"
 
@@ -163,6 +195,10 @@ path = "custom_desktop/main.rs"
 [[example]]
 name = "single_window"
 path = "single_window/main.rs"
+
+[[example]]
+name = "frame_app"
+path = "frame_app/main.rs"
 
 [[example]]
 name = "tic-tac-toe"

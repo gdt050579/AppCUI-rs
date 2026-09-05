@@ -9,20 +9,20 @@ fn check_panel_with_border() {
         Paint('Border panel')   
         CheckHash(0xDE639472091C422)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:78,h:11");
-    w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::Border));
-    w.add(Panel::with_type("Options", layout!("x:17,y:1,w:12,h:4"), panel::Type::Border));
-    w.add(Panel::with_type("Options", layout!("x:29,y:1,w:13,h:4"), panel::Type::Border));
-    w.add(Panel::with_type("Options", layout!("x:42,y:1,w:10,h:4"), panel::Type::Border));
-    w.add(Panel::with_type("Options", layout!("x:52,y:1,w:8,h:4"), panel::Type::Border));
-    w.add(Panel::with_type("Options", layout!("x:60,y:1,w:7,h:4"), panel::Type::Border));
-    w.add(Panel::with_type("", layout!("x:67,y:1,w:8,h:4"), panel::Type::Border));
-    let mut inactive_panel = Panel::with_type("Inactive panel",layout!("x:1,y:5,w:74,h:4"),panel::Type::Border);
-    inactive_panel.set_enabled(false);
-    w.add(inactive_panel);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:78,h:11");
+        w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::Border));
+        w.add(Panel::with_type("Options", layout!("x:17,y:1,w:12,h:4"), panel::Type::Border));
+        w.add(Panel::with_type("Options", layout!("x:29,y:1,w:13,h:4"), panel::Type::Border));
+        w.add(Panel::with_type("Options", layout!("x:42,y:1,w:10,h:4"), panel::Type::Border));
+        w.add(Panel::with_type("Options", layout!("x:52,y:1,w:8,h:4"), panel::Type::Border));
+        w.add(Panel::with_type("Options", layout!("x:60,y:1,w:7,h:4"), panel::Type::Border));
+        w.add(Panel::with_type("", layout!("x:67,y:1,w:8,h:4"), panel::Type::Border));
+        let mut inactive_panel = Panel::with_type("Inactive panel",layout!("x:1,y:5,w:74,h:4"),panel::Type::Border);
+        inactive_panel.set_enabled(false);
+        w.add(inactive_panel);
+        w
+    }).run().unwrap();
 }
 #[test]
 fn check_panel_with_macro() {
@@ -31,12 +31,12 @@ fn check_panel_with_macro() {
         Paint('Border panel & Inactive panel')   
         CheckHash(0xAB475871E6A0AD8A)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:78,h:11");
-    w.add(panel!("Options,x:1,y:1,w:16,h:4"));
-    w.add(panel!("caption:'Inactive panel',x:1,y:5,w:74,h:4,type:Border,enabled:false"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:78,h:11");
+        w.add(panel!("Options,x:1,y:1,w:16,h:4"));
+        w.add(panel!("caption:'Inactive panel',x:1,y:5,w:74,h:4,type:Border,enabled:false"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -46,11 +46,11 @@ fn check_panel_with_macro_no_title() {
         Paint('No title panel')   
         CheckHash(0x4718D94609DBF8B4)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:78,h:11");
-    w.add(panel!("l:1,r:1,t:1,b:1"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:78,h:11");
+        w.add(panel!("l:1,r:1,t:1,b:1"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -60,17 +60,17 @@ fn check_panel_with_page() {
         Paint('Page panel')   
         CheckHash(0xBF28919C860D0024)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:78,h:11");
-    w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::Page));
-    w.add(Panel::with_type("Options", layout!("x:18,y:1,w:12,h:4"), panel::Type::Page));
-    w.add(Panel::with_type("Options", layout!("x:31,y:1,w:13,h:4"), panel::Type::Page));
-    w.add(Panel::with_type("Options", layout!("x:50,y:1,w:10,h:4"), panel::Type::Page));
-    let mut inactive_panel = Panel::with_type("Inactive panel",layout!("x:1,y:5,w:74,h:4"),panel::Type::Page);
-    inactive_panel.set_enabled(false);
-    w.add(inactive_panel);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:78,h:11");
+        w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::Page));
+        w.add(Panel::with_type("Options", layout!("x:18,y:1,w:12,h:4"), panel::Type::Page));
+        w.add(Panel::with_type("Options", layout!("x:31,y:1,w:13,h:4"), panel::Type::Page));
+        w.add(Panel::with_type("Options", layout!("x:50,y:1,w:10,h:4"), panel::Type::Page));
+        let mut inactive_panel = Panel::with_type("Inactive panel",layout!("x:1,y:5,w:74,h:4"),panel::Type::Page);
+        inactive_panel.set_enabled(false);
+        w.add(inactive_panel);
+        w
+    }).run().unwrap();
 }
 #[test]
 fn check_panel_with_window() {
@@ -81,20 +81,20 @@ fn check_panel_with_window() {
         Paint('window panel')   
         CheckHash(0x48A952908E22B5CA)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:78,h:11");
-    w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::Window));
-    w.add(Panel::with_type("Options", layout!("x:17,y:1,w:12,h:4"), panel::Type::Window));
-    w.add(Panel::with_type("Options", layout!("x:29,y:1,w:13,h:4"), panel::Type::Window));
-    w.add(Panel::with_type("Options", layout!("x:42,y:1,w:10,h:4"), panel::Type::Window));
-    w.add(Panel::with_type("Options", layout!("x:52,y:1,w:8,h:4"), panel::Type::Window));
-    w.add(Panel::with_type("Options", layout!("x:60,y:1,w:7,h:4"), panel::Type::Window));
-    w.add(Panel::with_type("", layout!("x:67,y:1,w:8,h:4"), panel::Type::Window));
-    let mut inactive_panel = Panel::with_type("Inactive panel",layout!("x:1,y:5,w:74,h:4"),panel::Type::Window);
-    inactive_panel.set_enabled(false);
-    w.add(inactive_panel);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:78,h:11");
+        w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::Window));
+        w.add(Panel::with_type("Options", layout!("x:17,y:1,w:12,h:4"), panel::Type::Window));
+        w.add(Panel::with_type("Options", layout!("x:29,y:1,w:13,h:4"), panel::Type::Window));
+        w.add(Panel::with_type("Options", layout!("x:42,y:1,w:10,h:4"), panel::Type::Window));
+        w.add(Panel::with_type("Options", layout!("x:52,y:1,w:8,h:4"), panel::Type::Window));
+        w.add(Panel::with_type("Options", layout!("x:60,y:1,w:7,h:4"), panel::Type::Window));
+        w.add(Panel::with_type("", layout!("x:67,y:1,w:8,h:4"), panel::Type::Window));
+        let mut inactive_panel = Panel::with_type("Inactive panel",layout!("x:1,y:5,w:74,h:4"),panel::Type::Window);
+        inactive_panel.set_enabled(false);
+        w.add(inactive_panel);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -104,20 +104,20 @@ fn check_panel_with_topbar() {
         Paint('TopBar panel')   
         CheckHash(0x77A2D12C49F335CE)   
     ";
-    let mut a = App::debug(90, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:88,h:11");
-    w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::TopBar));
-    w.add(Panel::with_type("Options", layout!("x:18,y:1,w:12,h:4"), panel::Type::TopBar));
-    w.add(Panel::with_type("Options", layout!("x:31,y:1,w:13,h:4"), panel::Type::TopBar));
-    w.add(Panel::with_type("Options", layout!("x:45,y:1,w:10,h:4"), panel::Type::TopBar));
-    w.add(Panel::with_type("Options", layout!("x:56,y:1,w:8,h:4"), panel::Type::TopBar));
-    w.add(Panel::with_type("Options", layout!("x:65,y:1,w:7,h:4"), panel::Type::TopBar));
-    w.add(Panel::with_type("", layout!("x:73,y:1,w:8,h:4"), panel::Type::TopBar));
-    let mut inactive_panel = Panel::with_type("Inactive panel",layout!("x:1,y:5,w:84,h:4"),panel::Type::TopBar);
-    inactive_panel.set_enabled(false);
-    w.add(inactive_panel);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(90, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:88,h:11");
+        w.add(Panel::with_type("Options", layout!("x:1,y:1,w:16,h:4"), panel::Type::TopBar));
+        w.add(Panel::with_type("Options", layout!("x:18,y:1,w:12,h:4"), panel::Type::TopBar));
+        w.add(Panel::with_type("Options", layout!("x:31,y:1,w:13,h:4"), panel::Type::TopBar));
+        w.add(Panel::with_type("Options", layout!("x:45,y:1,w:10,h:4"), panel::Type::TopBar));
+        w.add(Panel::with_type("Options", layout!("x:56,y:1,w:8,h:4"), panel::Type::TopBar));
+        w.add(Panel::with_type("Options", layout!("x:65,y:1,w:7,h:4"), panel::Type::TopBar));
+        w.add(Panel::with_type("", layout!("x:73,y:1,w:8,h:4"), panel::Type::TopBar));
+        let mut inactive_panel = Panel::with_type("Inactive panel",layout!("x:1,y:5,w:84,h:4"),panel::Type::TopBar);
+        inactive_panel.set_enabled(false);
+        w.add(inactive_panel);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -151,16 +151,16 @@ fn check_panel_add_controls() {
         Paint('Back to start')   
         CheckHash(0x6B19FDCD55FD95BA)
     ";
-    let mut a = App::debug(60, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:40,h:11");
-    let mut p = panel!("Controls,l:1,t:1,r:1,h:6");
-    p.add(button!("but-1,x:1,y:1,w:10,type:flat"));
-    p.add(checkbox!("'Some option',x:1,y:2,w:15"));
-    p.add(button!("but-2,x:20,y:1,w:10"));
-    w.add(p);
-    w.add(checkbox!("'option outside panel',x:1,y:8,w:35,checked:true"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:40,h:11");
+        let mut p = panel!("Controls,l:1,t:1,r:1,h:6");
+        p.add(button!("but-1,x:1,y:1,w:10,type:flat"));
+        p.add(checkbox!("'Some option',x:1,y:2,w:15"));
+        p.add(button!("but-2,x:20,y:1,w:10"));
+        w.add(p);
+        w.add(checkbox!("'option outside panel',x:1,y:8,w:35,checked:true"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -255,39 +255,39 @@ fn check_panel_navigate() {
         Paint('Backwards -> Focus: button (11) (initial state)')   
         CheckHash(0x250A86FF5B2DE3B5)
     ";
-    let mut a = App::debug(80, 22, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:70,h:20");
-    let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");
-    let mut p2 = panel!("Layer-2,l:1,t:0,r:30,b:0");
-    let mut p3 = panel!("Layer-3,l:46,t:0,r:1,b:0");
-    p2.add(button!("1,x:1,y:1,w:10,type:flat"));
-    p2.add(button!("2,x:1,y:3,w:10,type:flat"));
-    p2.add(button!("3,x:12,y:1,w:10,type:flat"));
-    p2.add(button!("4,x:12,y:3,w:10,type:flat"));
-    p1.add(p2);
-    p1.add(button!("5,x:35,y:1,w:10,type:flat"));
-    p1.add(button!("6,x:35,y:3,w:10,type:flat"));
-    p3.add(button!("7,x:1,y:1,w:10,type:flat"));
-    p3.add(button!("8,x:1,y:3,w:10,type:flat"));
-    p1.add(p3);
-    w.add(p1);
-    w.add(button!("9,x:1,y:10,w:10,type:flat"));
-    w.add(button!("10,x:1,y:12,w:10,type:flat"));
-    w.add(button!("11,x:1,y:14,w:10,type:flat"));
-    let mut p4 = panel!("Layer-4,l:12,t:10,r:1,b:0");
-    let mut p5 = panel!("Layer-5,l:1,t:0,w:14,b:0");
-    p5.add(button!("12,x:1,y:1,w:10,type:flat"));
-    p5.add(button!("13,x:1,y:3,w:10,type:flat,enabled:false"));   
-    p4.add(p5);
-    let mut p6 = panel!("Inactives,l:15,t:0,w:14,b:0");
-    p6.add(button!("14,x:1,y:1,w:10,type:flat,enabled:false"));
-    p6.add(button!("15,x:1,y:3,w:10,type:flat,enabled:false"));   
-    p4.add(p6);
-    p4.add(button!("16,x:32,y:1,w:10,type:flat"));
-    p4.add(button!("17,x:32,y:3,w:10,type:flat"));   
-    w.add(p4);
-    a.add_window(w);
-    a.run();    
+    App::new().size(Size::new(80, 22)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:70,h:20");
+        let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");
+        let mut p2 = panel!("Layer-2,l:1,t:0,r:30,b:0");
+        let mut p3 = panel!("Layer-3,l:46,t:0,r:1,b:0");
+        p2.add(button!("1,x:1,y:1,w:10,type:flat"));
+        p2.add(button!("2,x:1,y:3,w:10,type:flat"));
+        p2.add(button!("3,x:12,y:1,w:10,type:flat"));
+        p2.add(button!("4,x:12,y:3,w:10,type:flat"));
+        p1.add(p2);
+        p1.add(button!("5,x:35,y:1,w:10,type:flat"));
+        p1.add(button!("6,x:35,y:3,w:10,type:flat"));
+        p3.add(button!("7,x:1,y:1,w:10,type:flat"));
+        p3.add(button!("8,x:1,y:3,w:10,type:flat"));
+        p1.add(p3);
+        w.add(p1);
+        w.add(button!("9,x:1,y:10,w:10,type:flat"));
+        w.add(button!("10,x:1,y:12,w:10,type:flat"));
+        w.add(button!("11,x:1,y:14,w:10,type:flat"));
+        let mut p4 = panel!("Layer-4,l:12,t:10,r:1,b:0");
+        let mut p5 = panel!("Layer-5,l:1,t:0,w:14,b:0");
+        p5.add(button!("12,x:1,y:1,w:10,type:flat"));
+        p5.add(button!("13,x:1,y:3,w:10,type:flat,enabled:false"));   
+        p4.add(p5);
+        let mut p6 = panel!("Inactives,l:15,t:0,w:14,b:0");
+        p6.add(button!("14,x:1,y:1,w:10,type:flat,enabled:false"));
+        p6.add(button!("15,x:1,y:3,w:10,type:flat,enabled:false"));   
+        p4.add(p6);
+        p4.add(button!("16,x:32,y:1,w:10,type:flat"));
+        p4.add(button!("17,x:32,y:3,w:10,type:flat"));   
+        w.add(p4);
+        w
+    }).run().unwrap();    
 }
 
 #[test]
@@ -330,39 +330,39 @@ fn check_panel_navigate_keys() {
         Paint('Focus: button (10)')   
         CheckHash(0xBE87E6DF332D1125)
     ";
-    let mut a = App::debug(80, 22, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:70,h:20");
-    let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");
-    let mut p2 = panel!("Layer-2,l:1,t:0,r:30,b:0");
-    let mut p3 = panel!("Layer-3,l:46,t:0,r:1,b:0");
-    p2.add(button!("1,x:1,y:1,w:10,type:flat"));
-    p2.add(button!("2,x:1,y:3,w:10,type:flat"));
-    p2.add(button!("3,x:12,y:1,w:10,type:flat"));
-    p2.add(button!("4,x:12,y:3,w:10,type:flat"));
-    p1.add(p2);
-    p1.add(button!("5,x:35,y:1,w:10,type:flat"));
-    p1.add(button!("6,x:35,y:3,w:10,type:flat"));
-    p3.add(button!("7,x:1,y:1,w:10,type:flat"));
-    p3.add(button!("8,x:1,y:3,w:10,type:flat"));
-    p1.add(p3);
-    w.add(p1);
-    w.add(button!("9,x:1,y:10,w:10,type:flat"));
-    w.add(button!("10,x:1,y:12,w:10,type:flat"));
-    w.add(button!("11,x:1,y:14,w:10,type:flat"));
-    let mut p4 = panel!("Layer-4,l:12,t:10,r:1,b:0");
-    let mut p5 = panel!("Layer-5,l:1,t:0,w:14,b:0");
-    p5.add(button!("12,x:1,y:1,w:10,type:flat"));
-    p5.add(button!("13,x:1,y:3,w:10,type:flat,enabled:false"));   
-    p4.add(p5);
-    let mut p6 = panel!("Inactives,l:15,t:0,w:14,b:0");
-    p6.add(button!("14,x:1,y:1,w:10,type:flat,enabled:false"));
-    p6.add(button!("15,x:1,y:3,w:10,type:flat,enabled:false"));   
-    p4.add(p6);
-    p4.add(button!("16,x:32,y:1,w:10,type:flat"));
-    p4.add(button!("17,x:32,y:3,w:10,type:flat"));   
-    w.add(p4);
-    a.add_window(w);
-    a.run();    
+    App::new().size(Size::new(80, 22)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:70,h:20");
+        let mut p1 = panel!("Controls,l:1,t:1,r:1,h:8");
+        let mut p2 = panel!("Layer-2,l:1,t:0,r:30,b:0");
+        let mut p3 = panel!("Layer-3,l:46,t:0,r:1,b:0");
+        p2.add(button!("1,x:1,y:1,w:10,type:flat"));
+        p2.add(button!("2,x:1,y:3,w:10,type:flat"));
+        p2.add(button!("3,x:12,y:1,w:10,type:flat"));
+        p2.add(button!("4,x:12,y:3,w:10,type:flat"));
+        p1.add(p2);
+        p1.add(button!("5,x:35,y:1,w:10,type:flat"));
+        p1.add(button!("6,x:35,y:3,w:10,type:flat"));
+        p3.add(button!("7,x:1,y:1,w:10,type:flat"));
+        p3.add(button!("8,x:1,y:3,w:10,type:flat"));
+        p1.add(p3);
+        w.add(p1);
+        w.add(button!("9,x:1,y:10,w:10,type:flat"));
+        w.add(button!("10,x:1,y:12,w:10,type:flat"));
+        w.add(button!("11,x:1,y:14,w:10,type:flat"));
+        let mut p4 = panel!("Layer-4,l:12,t:10,r:1,b:0");
+        let mut p5 = panel!("Layer-5,l:1,t:0,w:14,b:0");
+        p5.add(button!("12,x:1,y:1,w:10,type:flat"));
+        p5.add(button!("13,x:1,y:3,w:10,type:flat,enabled:false"));   
+        p4.add(p5);
+        let mut p6 = panel!("Inactives,l:15,t:0,w:14,b:0");
+        p6.add(button!("14,x:1,y:1,w:10,type:flat,enabled:false"));
+        p6.add(button!("15,x:1,y:3,w:10,type:flat,enabled:false"));   
+        p4.add(p6);
+        p4.add(button!("16,x:32,y:1,w:10,type:flat"));
+        p4.add(button!("17,x:32,y:3,w:10,type:flat"));   
+        w.add(p4);
+        w
+    }).run().unwrap();    
 }
 
 #[test]
@@ -372,16 +372,16 @@ fn check_panel_api() {
         Paint('Border panel -> New title')   
         CheckHash(0x226838AC6C4DC67)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:78,h:11");
-    let mut p = panel!("Options,x:1,y:1,w:16,h:4");
-    assert_eq!(p.panel_type(), panel::Type::Border);
-    assert_eq!(p.title(), "Options");
-    p.set_title("New title");
-    assert_eq!(p.title(), "New title");    
-    w.add(p);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:78,h:11");
+        let mut p = panel!("Options,x:1,y:1,w:16,h:4");
+        assert_eq!(p.panel_type(), panel::Type::Border);
+        assert_eq!(p.title(), "Options");
+        p.set_title("New title");
+        assert_eq!(p.title(), "New title");    
+        w.add(p);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -391,11 +391,11 @@ fn check_panel_raised() {
         Paint('Raised panel with title')   
         CheckHash(0xB83F9EDE2216F153)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:78,h:11");
-    w.add(panel!("Options,x:1,y:1,w:16,h:4,type: raised"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:78,h:11");
+        w.add(panel!("Options,x:1,y:1,w:16,h:4,type: raised"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -405,9 +405,9 @@ fn check_panel_sunken() {
         Paint('Raised panel with title')   
         CheckHash(0xCFA5AD06480D095C)   
     ";
-    let mut a = App::debug(80, 13, script).build().unwrap();
-    let mut w = window!("Title,a:c,w:78,h:11");
-    w.add(panel!("Options,x:1,y:1,w:16,h:4,type: sunken"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 13)).debug_script(script).window(|| {
+        let mut w = window!("Title,a:c,w:78,h:11");
+        w.add(panel!("Options,x:1,y:1,w:16,h:4,type: sunken"));
+        w
+    }).run().unwrap();
 }

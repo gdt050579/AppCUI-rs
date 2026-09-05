@@ -52,13 +52,14 @@ The following code creates a window with a horizontal line that contains the tex
 use appcui::prelude::*;
 
 fn main() -> Result<(), appcui::system::Error> {
-    let mut app = App::new().build()?;
-    let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
-    
-    w.add(HLine::new("Hello world !", layout!("x:1,y:3,w:30"), 
-                                      hline::Flags::DoubleLine | hline::Flags::HasTitle));
-    app.add_window(w);
-    app.run();
-    Ok(())
+    App::new()
+        .window(|| {
+            let mut w = Window::new("Title", layout!("a:c,w:40,h:9"), window::Flags::None);
+
+            w.add(HLine::new("Hello world !", layout!("x:1,y:3,w:30"), 
+                                              hline::Flags::DoubleLine | hline::Flags::HasTitle));
+            w
+        })
+        .run()
 }
 ```

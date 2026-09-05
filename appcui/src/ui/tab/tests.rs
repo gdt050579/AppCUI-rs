@@ -25,22 +25,22 @@ fn check_control_reposition() {
         Paint('Maximize again')
         CheckHash(0x8FB38F9341D9899F)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7,flags: Sizeable");
-    let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
-    tab.add_tab("Page &1");
-    tab.add_tab("Page &2");
-    tab.add_tab("Page &3");
-    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
-    tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
-    tab.add(1, button!("Page2-B,a:c,w:14,h:100%"));
-    tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
-    tab.add(2, button!("Page3-B,a:l,w:20,h:100%"));
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7,flags: Sizeable");
+        let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
+        tab.add_tab("Page &1");
+        tab.add_tab("Page &2");
+        tab.add_tab("Page &3");
+        tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+        tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
+        tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
+        tab.add(1, button!("Page2-B,a:c,w:14,h:100%"));
+        tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
+        tab.add(2, button!("Page3-B,a:l,w:20,h:100%"));
 
-    w.add(tab);
-    a.add_window(w);
-    a.run();
+        w.add(tab);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -77,22 +77,22 @@ fn check_key_control() {
         Paint('1st page - hotkey')
         CheckHash(0x52DCC8DF3E55C403)        
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7,flags: Sizeable");
-    let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
-    tab.add_tab("Page &1");
-    tab.add_tab("Page &2");
-    tab.add_tab("Page &3");
-    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
-    tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
-    tab.add(1, button!("Page2-B,a:c,w:14,h:100%"));
-    tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
-    tab.add(2, button!("Page3-B,a:l,w:20,h:100%"));
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7,flags: Sizeable");
+        let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
+        tab.add_tab("Page &1");
+        tab.add_tab("Page &2");
+        tab.add_tab("Page &3");
+        tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+        tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
+        tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
+        tab.add(1, button!("Page2-B,a:c,w:14,h:100%"));
+        tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
+        tab.add(2, button!("Page3-B,a:l,w:20,h:100%"));
 
-    w.add(tab);
-    a.add_window(w);
-    a.run();
+        w.add(tab);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -117,37 +117,36 @@ fn check_switch_between_tabcontrols() {
         Paint('OK button has focus')
         CheckHash(0xFBE8E74E4A5AD143)           
     ";
-    let mut a = App::debug(100, 10, script).build().unwrap();
-    let mut w = window!("Test,d:f");
-    let mut tab1 = Tab::new(layout!("l:0,t:0,r:52,b:2"), tab::Flags::None);
-    tab1.add_tab("Page &1");
-    tab1.add_tab("Page &2");
-    tab1.add_tab("Page &3");
-    tab1.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
-    tab1.add(0, button!("T1-1-B,a:c,w:10,h:100%,type:flat"));
-    tab1.add(1, button!("T1-2-A,r:1,b:0,w:14,h:100%,type:flat"));
-    tab1.add(1, button!("T1-2-B,a:c,w:14,h:100%,type:flat"));
-    tab1.add(2, button!("T1-3-A,r:1,b:0,w:20,type:flat"));
-    tab1.add(2, button!("T1-3-B,a:l,w:20,h:100%,type:flat"));
-    w.add(tab1);
+    App::new().size(Size::new(100, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,d:f");
+        let mut tab1 = Tab::new(layout!("l:0,t:0,r:52,b:2"), tab::Flags::None);
+        tab1.add_tab("Page &1");
+        tab1.add_tab("Page &2");
+        tab1.add_tab("Page &3");
+        tab1.add(0, button!("T1-1-A,r:1,b:0,w:10,type:flat"));
+        tab1.add(0, button!("T1-1-B,a:c,w:10,h:100%,type:flat"));
+        tab1.add(1, button!("T1-2-A,r:1,b:0,w:14,h:100%,type:flat"));
+        tab1.add(1, button!("T1-2-B,a:c,w:14,h:100%,type:flat"));
+        tab1.add(2, button!("T1-3-A,r:1,b:0,w:20,type:flat"));
+        tab1.add(2, button!("T1-3-B,a:l,w:20,h:100%,type:flat"));
+        w.add(tab1);
 
-    let mut tab2 = Tab::new(layout!("l:50,t:0,r:0,b:2"), tab::Flags::None);
-    tab2.add_tab("Page &1");
-    tab2.add_tab("Page &2");
-    tab2.add_tab("Page &3");
-    tab2.add(0, button!("T2-1-A,r:1,b:0,w:10,type:flat"));
-    tab2.add(0, button!("T2-1-B,a:c,w:10,h:100%,type:flat"));
-    tab2.add(1, button!("T2-2-A,r:1,b:0,w:14,type:flat"));
-    tab2.add(1, button!("T2-2-B,a:c,w:14,h:100%,type:flat"));
-    tab2.add(2, button!("T2-3-A,r:1,b:0,w:20,type:flat"));
-    tab2.add(2, button!("T2-3-B,a:l,w:20,h:100%,type:flat"));
-    w.add(tab2);
+        let mut tab2 = Tab::new(layout!("l:50,t:0,r:0,b:2"), tab::Flags::None);
+        tab2.add_tab("Page &1");
+        tab2.add_tab("Page &2");
+        tab2.add_tab("Page &3");
+        tab2.add(0, button!("T2-1-A,r:1,b:0,w:10,type:flat"));
+        tab2.add(0, button!("T2-1-B,a:c,w:10,h:100%,type:flat"));
+        tab2.add(1, button!("T2-2-A,r:1,b:0,w:14,type:flat"));
+        tab2.add(1, button!("T2-2-B,a:c,w:14,h:100%,type:flat"));
+        tab2.add(2, button!("T2-3-A,r:1,b:0,w:20,type:flat"));
+        tab2.add(2, button!("T2-3-B,a:l,w:20,h:100%,type:flat"));
+        w.add(tab2);
 
-    w.add(button!("OK,r:0,b:0,w:10, type: flat"));
-    w.add(button!("Cancel,r:12,b:0,w:10, type: flat"));
-
-    a.add_window(w);
-    a.run();
+        w.add(button!("OK,r:0,b:0,w:10, type: flat"));
+        w.add(button!("Cancel,r:12,b:0,w:10, type: flat"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -157,17 +156,17 @@ fn check_tab_on_top() {
         Paint('Tab on top')   
         CheckHash(0x3C196343BA4C5BCD)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7");
-    let mut tab = Tab::with_type(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::OnTop);
-    tab.add_tab("Page &1");
-    tab.add_tab("Page &2");
-    tab.add_tab("Page &3");
-    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
-    w.add(tab);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7");
+        let mut tab = Tab::with_type(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::OnTop);
+        tab.add_tab("Page &1");
+        tab.add_tab("Page &2");
+        tab.add_tab("Page &3");
+        tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+        tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
+        w.add(tab);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -183,17 +182,17 @@ fn check_tab_on_bottom() {
         Paint('Hover over 3rd tab')
         CheckHash(0xAEC0A0FB2C29E77)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7");
-    let mut tab = Tab::with_type(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::OnBottom);
-    tab.add_tab("Page &1");
-    tab.add_tab("Page &2");
-    tab.add_tab("Page &3");
-    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
-    w.add(tab);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7");
+        let mut tab = Tab::with_type(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::OnBottom);
+        tab.add_tab("Page &1");
+        tab.add_tab("Page &2");
+        tab.add_tab("Page &3");
+        tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+        tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
+        w.add(tab);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -203,14 +202,14 @@ fn check_macro_build() {
         Paint('build with macro')   
         CheckHash(0x453AC0EB4A1EA2E1)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7");
-    let mut t = tab!("l:0,t:0,r:0,b:0,type: OnBottom,tabs=['Page &1','Page &2','Page &3']");
-    t.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    t.add(0, button!("Page1-B,a:c,w:10,h:100%"));
-    w.add(t);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7");
+        let mut t = tab!("l:0,t:0,r:0,b:0,type: OnBottom,tabs=['Page &1','Page &2','Page &3']");
+        t.add(0, button!("Page1-A,r:1,b:0,w:10"));
+        t.add(0, button!("Page1-B,a:c,w:10,h:100%"));
+        w.add(t);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -297,9 +296,7 @@ fn check_page_width() {
         Paint('tab width is 5')   
         CheckHash(0xC837D11F2D6F8AA2)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -309,11 +306,11 @@ fn check_tab_width_macro() {
         Paint('build with macro')   
         CheckHash(0x7B4F15E5D50B4816)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7");
-    w.add(tab!("l:0,t:0,r:0,b:0,type: OnTop,tabs=['A','B','C'],tw:5"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7");
+        w.add(tab!("l:0,t:0,r:0,b:0,type: OnTop,tabs=['A','B','C'],tw:5"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -332,14 +329,14 @@ fn check_tab_on_left() {
         Paint('3rd page selected')
         CheckHash(0x51F4F150FE86E9D2)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7");
-    let mut tab = tab!("l:0,t:0,r:0,b:0,type:OnLeft,tabs:['Page &1','Page &2','Page &2']");
-    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
-    w.add(tab);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7");
+        let mut tab = tab!("l:0,t:0,r:0,b:0,type:OnLeft,tabs:['Page &1','Page &2','Page &2']");
+        tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+        tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
+        w.add(tab);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -349,11 +346,11 @@ fn check_tabsbar_on_top() {
         Paint('TabBar - on top')   
         CheckHash(0x72410B54ADF4591B)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7");
-    w.add(tab!("l:0,t:0,r:0,b:0,type: OnTop,tabs=['Pg &1','Pg &2','Pg &3'],tw:6,flags:TabsBar"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7");
+        w.add(tab!("l:0,t:0,r:0,b:0,type: OnTop,tabs=['Pg &1','Pg &2','Pg &3'],tw:6,flags:TabsBar"));
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -363,11 +360,11 @@ fn check_tabsbar_on_bottom() {
         Paint('TabBar - on bottom')   
         CheckHash(0x1537B92659C4B71B)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7");
-    w.add(tab!("l:0,t:0,r:0,b:0,type: OnBottom,tabs=['Pg &1','Pg &2','Pg &3'],tw:6,flags:TabsBar"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7");
+        w.add(tab!("l:0,t:0,r:0,b:0,type: OnBottom,tabs=['Pg &1','Pg &2','Pg &3'],tw:6,flags:TabsBar"));
+        w
+    }).run().unwrap();
 }
 #[test]
 fn check_tabsbar_on_left() {
@@ -376,11 +373,11 @@ fn check_tabsbar_on_left() {
         Paint('TabBar - on left')   
         CheckHash(0x2AD3E362406BFC73)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7");
-    w.add(tab!("l:0,t:0,r:0,b:0,type: OnLeft,tabs=['Pg &1','Pg &2','Pg &3'],tw:6,flags:TabsBar"));
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7");
+        w.add(tab!("l:0,t:0,r:0,b:0,type: OnLeft,tabs=['Pg &1','Pg &2','Pg &3'],tw:6,flags:TabsBar"));
+        w
+    }).run().unwrap();
 }
 
 
@@ -471,9 +468,7 @@ fn check_page_width_on_left() {
         Paint('tab width is 5')   
         CheckHash(0xEC90EDD06FC8B9E)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -489,50 +484,50 @@ fn check_tab_caption() {
         Paint('3rd page selected')
         CheckHash(0x7BEF7089EBF9BCC2)
     ";
-    let mut a = App::debug(80, 20, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:70,h:17,flags: Sizeable");
-    let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
-    
-    // Add initial tabs
-    tab.add_tab("Page &1");
-    tab.add_tab("Page &2");
-    tab.add_tab("Page &3");
+    App::new().size(Size::new(80, 20)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:70,h:17,flags: Sizeable");
+        let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
 
-    tab.set_tab_width(22);
-    
-    // Verify initial captions
-    assert_eq!(tab.tab_caption(0), Some("Page 1"));
-    assert_eq!(tab.tab_caption(1), Some("Page 2"));
-    assert_eq!(tab.tab_caption(2), Some("Page 3"));
-    
-    // Verify None for invalid indices
-    assert_eq!(tab.tab_caption(3), None);
-    assert_eq!(tab.tab_caption(999), None);
-    
-    // Change captions
-    tab.set_tab_caption(1, "New Page 2");
-    tab.set_tab_caption(2, "Updated Page 3");
-    
-    // Verify changed captions
-    assert_eq!(tab.tab_caption(0), Some("Page 1"));
-    assert_eq!(tab.tab_caption(1), Some("New Page 2"));
-    assert_eq!(tab.tab_caption(2), Some("Updated Page 3"));
-    
-    // Verify None still works after changes
-    assert_eq!(tab.tab_caption(3), None);
-    assert_eq!(tab.tab_caption(999), None);
-    
-    // Add controls to tabs
-    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
-    tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
-    tab.add(1, button!("Page2-B,a:c,w:14,h:100%"));
-    tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
-    tab.add(2, button!("Page3-B,a:l,w:20,h:100%"));
+        // Add initial tabs
+        tab.add_tab("Page &1");
+        tab.add_tab("Page &2");
+        tab.add_tab("Page &3");
 
-    w.add(tab);
-    a.add_window(w);
-    a.run();
+        tab.set_tab_width(22);
+
+        // Verify initial captions
+        assert_eq!(tab.tab_caption(0), Some("Page 1"));
+        assert_eq!(tab.tab_caption(1), Some("Page 2"));
+        assert_eq!(tab.tab_caption(2), Some("Page 3"));
+
+        // Verify None for invalid indices
+        assert_eq!(tab.tab_caption(3), None);
+        assert_eq!(tab.tab_caption(999), None);
+
+        // Change captions
+        tab.set_tab_caption(1, "New Page 2");
+        tab.set_tab_caption(2, "Updated Page 3");
+
+        // Verify changed captions
+        assert_eq!(tab.tab_caption(0), Some("Page 1"));
+        assert_eq!(tab.tab_caption(1), Some("New Page 2"));
+        assert_eq!(tab.tab_caption(2), Some("Updated Page 3"));
+
+        // Verify None still works after changes
+        assert_eq!(tab.tab_caption(3), None);
+        assert_eq!(tab.tab_caption(999), None);
+
+        // Add controls to tabs
+        tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+        tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
+        tab.add(1, button!("Page2-A,r:1,b:0,w:14"));
+        tab.add(1, button!("Page2-B,a:c,w:14,h:100%"));
+        tab.add(2, button!("Page3-A,r:1,b:0,w:20"));
+        tab.add(2, button!("Page3-B,a:l,w:20,h:100%"));
+
+        w.add(tab);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -542,17 +537,17 @@ fn check_hidden_tabs() {
         Paint('Tabs ar hidden')   
         CheckHash(0x434174D1EB8F39A3)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:50,h:7");
-    let mut tab = Tab::with_type(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::HiddenTabs);
-    tab.add_tab("Page &1");
-    tab.add_tab("Page &2");
-    tab.add_tab("Page &3");
-    tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
-    tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
-    w.add(tab);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:50,h:7");
+        let mut tab = Tab::with_type(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None, tab::Type::HiddenTabs);
+        tab.add_tab("Page &1");
+        tab.add_tab("Page &2");
+        tab.add_tab("Page &3");
+        tab.add(0, button!("Page1-A,r:1,b:0,w:10"));
+        tab.add(0, button!("Page1-B,a:c,w:10,h:100%"));
+        w.add(tab);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -631,9 +626,7 @@ fn check_hiddentabs_changepage() {
         Paint('3rd page')  
         CheckHash(0x8DB5DEA9AA3BE6F7)
     ";
-    let mut a = App::debug(60, 10, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(60, 10)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -667,18 +660,18 @@ fn check_tab_mouse_events() {
         Paint('Click on tab bar (but not on a tab - second tab remains selected)')
         CheckHash(0x8809C1E94AAD75C)
     ";
-    let mut a = App::debug(80, 10, script).build().unwrap();
-    let mut w = window!("Test,a:c,w:70,h:7,flags: Sizeable");
-    let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
-    
-    // Add tabs with wider width to make empty space more obvious
-    tab.add_tab("Page 1");
-    tab.add_tab("Page 2");
-    tab.add_tab("Page 3");
-    
-    w.add(tab);
-    a.add_window(w);
-    a.run();
+    App::new().size(Size::new(80, 10)).debug_script(script).window(|| {
+        let mut w = window!("Test,a:c,w:70,h:7,flags: Sizeable");
+        let mut tab = Tab::new(layout!("l:0,t:0,r:0,b:0"), tab::Flags::None);
+
+        // Add tabs with wider width to make empty space more obvious
+        tab.add_tab("Page 1");
+        tab.add_tab("Page 2");
+        tab.add_tab("Page 3");
+
+        w.add(tab);
+        w
+    }).run().unwrap();
 }
 
 #[test]
@@ -746,7 +739,5 @@ fn check_events() {
         }
     }
 
-    let mut a = App::debug(80, 20, script).build().unwrap();
-    a.add_window(MyWin::new());
-    a.run();
+    App::new().size(Size::new(80, 20)).debug_script(script).window(MyWin::new).run().unwrap();
 }
