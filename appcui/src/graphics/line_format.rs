@@ -258,6 +258,72 @@ pub struct PolyLineFormat {
     pub(crate) joint: Option<char>,               // None => auto-resolve corner glyph from directions
     pub(crate) joint_attr: Option<CharAttribute>, // None => inherit `attr`
 }
+impl PolyLineFormat {
+    #[inline(always)]
+    pub fn attr(&self) -> CharAttribute {
+        self.attr
+    }
+    #[inline(always)]
+    pub fn set_attr(&mut self, attr: CharAttribute) {
+        self.attr = attr;
+    }
+    #[inline(always)]
+    pub fn line_type(&self) -> LineType {
+        self.line_type
+    }
+    #[inline(always)]
+    pub fn set_line_type(&mut self, line_type: LineType) {
+        self.line_type = line_type;
+    }
+    #[inline(always)]
+    pub fn start_cap(&self) -> Option<LineCap> {
+        self.start_cap
+    }
+    #[inline(always)]
+    pub fn set_start_cap(&mut self, start_cap: Option<LineCap>) {
+        self.start_cap = start_cap;
+    }
+    #[inline(always)]
+    pub fn start_attr(&self) -> Option<CharAttribute> {
+        self.start_attr
+    }
+    #[inline(always)]
+    pub fn set_start_attr(&mut self, start_attr: Option<CharAttribute>) {
+        self.start_attr = start_attr;
+    }
+    #[inline(always)]
+    pub fn end_cap(&self) -> Option<LineCap> {
+        self.end_cap
+    }
+    #[inline(always)]
+    pub fn set_end_cap(&mut self, end_cap: Option<LineCap>) {
+        self.end_cap = end_cap;
+    }
+    #[inline(always)]
+    pub fn end_attr(&self) -> Option<CharAttribute> {
+        self.end_attr
+    }
+    #[inline(always)]
+    pub fn set_end_attr(&mut self, end_attr: Option<CharAttribute>) {
+        self.end_attr = end_attr;
+    }
+    #[inline(always)]
+    pub fn joint(&self) -> Option<char> {
+        self.joint
+    }
+    #[inline(always)]
+    pub fn set_joint(&mut self, joint: Option<char>) {
+        self.joint = joint;
+    }
+    #[inline(always)]
+    pub fn joint_attr(&self) -> Option<CharAttribute> {
+        self.joint_attr
+    }
+    #[inline(always)]
+    pub fn set_joint_attr(&mut self, joint_attr: Option<CharAttribute>) {
+        self.joint_attr = joint_attr;
+    }
+}
 
 /// A builder for [`PolyLineFormat`].
 ///
