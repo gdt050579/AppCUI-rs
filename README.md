@@ -99,6 +99,7 @@ AppCUI-rs ships with a rich set of controls and widgets for building terminal us
 - **ComboBox** — editable dropdown selection
 - **ListBox** — scrollable list selection
 - **NumericSelector** — pick a number within a range
+- **KeySelector** — capture a keyboard key/shortcut
 - **HSlider** — value slider
 
 ### Pickers - Choose from a built-in domain.
@@ -106,13 +107,12 @@ AppCUI-rs ships with a rich set of controls and widgets for building terminal us
 - **TimePicker** — select a time
 - **ColorPicker** — select a color
 - **CharPicker** — pick a character/glyph
-- **KeySelector** — capture a keyboard key/shortcut
 - **PathFinder** — browse and select a filesystem path
 
 ### Data viewers - Display and navigate structured or large data sets.
 - **ListView** — tabular, multi-column data
 - **TreeView** — hierarchical data
-- **BufferView** — raw binary/byte (hex) inspection
+- **BufferView** — raw binary/byte (hex) inspection (also a HexViewer or BinaryDataViewer)
 - **Markdown** — rendered Markdown content
 - **GraphView** — nodes-and-edges graph rendering
 - **ImageViewer** — display images
