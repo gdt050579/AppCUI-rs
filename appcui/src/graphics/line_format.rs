@@ -124,7 +124,7 @@ static LINE_TYPE_CHARS: [LineTypeChars; 8] = [
     },
 ];
 
-/// LineType is an enum that represents the type of line to be drawn (single, double, thick, etc)
+/// The visual style used when drawing lines, rectangles, and polylines (single, double, thick, ASCII, rounded, or Braille).
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug, EnumSelector)]
 pub enum LineType {
@@ -176,11 +176,29 @@ static LINE_CAP_CHARS_TRIANGLES: LineCapChars = LineCapChars {
     right: '\u{25B6}',
 };
 
+/// The glyph drawn at the start or end of a polyline.
+///
+/// Caps are applied after the segments are drawn. For
+/// [`Arrow`](Self::Arrow) and [`Triangle`](Self::Triangle) the glyph is chosen
+/// from the direction of the first or last segment. [`Auto`](Self::Auto) does
+/// not pick a directional glyph; it merges the endpoint with existing
+/// box-drawing characters (for example when a connector meets a rectangle).
+///
+/// Caps are ignored when the polyline is closed (the first and last points
+/// are the same).
 #[derive(Copy, Clone)]
 pub enum LineCap {
-    Auto, // use box junction
-    Arrow, // direction inferred from the terminal segment at draw time
+    /// Merge the endpoint with neighboring box-drawing characters.
+    ///
+    /// This is intended for connectors that attach to an existing rectangle
+    /// or line. The endpoint is rewritten as a T-junction or similar glyph
+    /// based on the characters already on the surface.
+    Auto,
+    /// A directional arrow (`↑`, `↓`, `←`, `→`) inferred from the terminal segment.
+    Arrow,
+    /// A directional triangle (`▲`, `▼`, `◀`, `▶`) inferred from the terminal segment.
     Triangle,
+    /// The same custom character at the endpoint, regardless of direction.
     Char(char),
 }
 impl LineCap {
@@ -208,6 +226,25 @@ impl LineCap {
     }
 }
 
+/// How a polyline should be rendered: line style, colors, caps, and joints.
+///
+/// Create a format with [`PolyLineFormatBuilder`] and pass it to
+/// [`Surface::draw_polyline`](crate::graphics::Surface::draw_polyline).
+///
+/// By default the format has no start cap, no end cap, and no custom joint
+/// character. Orthogonal corners are then chosen automatically from the
+/// incoming and outgoing segment directions. Cap and joint attributes that
+/// are left unset inherit the line [`CharAttribute`].
+///
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+///
+/// let format = PolyLineFormatBuilder::new(LineType::Single, charattr!("white,black"))
+///     .start_cap(LineCap::Arrow)
+///     .end_cap(LineCap::Triangle)
+///     .build();
+/// ```
 #[derive(Copy, Clone)]
 pub struct PolyLineFormat {
     pub(crate) line_type: LineType,
@@ -222,11 +259,30 @@ pub struct PolyLineFormat {
     pub(crate) joint_attr: Option<CharAttribute>, // None => inherit `attr`
 }
 
+/// A builder for [`PolyLineFormat`].
+///
+/// Start with [`PolyLineFormatBuilder::new`], optionally set caps, colors, and
+/// a custom joint, then call [`build`](Self::build).
+///
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+///
+/// let format = PolyLineFormatBuilder::new(LineType::Double, charattr!("aqua,black"))
+///     .start_cap(LineCap::Auto)
+///     .end_cap(LineCap::Auto)
+///     .joint_attr(charattr!("yellow,black"))
+///     .build();
+/// ```
 pub struct PolyLineFormatBuilder {
     format: PolyLineFormat,
 }
 
 impl PolyLineFormatBuilder {
+    /// Creates a builder with the given line style and attributes.
+    ///
+    /// Caps and a custom joint are unset. Orthogonal corners will be
+    /// resolved automatically when the polyline is drawn.
     pub fn new(line_type: LineType, attr: CharAttribute) -> Self {
         Self {
             format: PolyLineFormat {
@@ -243,38 +299,58 @@ impl PolyLineFormatBuilder {
     }
 }
 impl PolyLineFormatBuilder {
+    /// Sets the line style used for every segment.
     pub fn line_type(mut self, line_type: LineType) -> Self {
         self.format.line_type = line_type;
         self
     }
+    /// Sets the character attributes used for the line segments.
+    ///
+    /// Cap and joint attributes inherit this value unless they are set
+    /// separately.
     pub fn attr(mut self, attr: CharAttribute) -> Self {
         self.format.attr = attr;
         self
     }
+    /// Sets the glyph drawn at the first point of the polyline.
+    ///
+    /// Ignored when the polyline is closed (first and last points are equal).
     pub fn start_cap(mut self, start_cap: LineCap) -> Self {
         self.format.start_cap = Some(start_cap);
         self
     }
+    /// Sets the attributes of the start cap. If omitted, the line attributes
+    /// are used.
     pub fn start_attr(mut self, start_attr: CharAttribute) -> Self {
         self.format.start_attr = Some(start_attr);
         self
     }
+    /// Sets the glyph drawn at the last point of the polyline.
+    ///
+    /// Ignored when the polyline is closed (first and last points are equal).
     pub fn end_cap(mut self, end_cap: LineCap) -> Self {
         self.format.end_cap = Some(end_cap);
         self
     }
+    /// Sets the attributes of the end cap. If omitted, the line attributes
+    /// are used.
     pub fn end_attr(mut self, end_attr: CharAttribute) -> Self {
         self.format.end_attr = Some(end_attr);
         self
     }
+    /// Uses a custom character at every inner vertex instead of an
+    /// automatically chosen corner glyph.
     pub fn joint(mut self, joint: char) -> Self {
         self.format.joint = Some(joint);
         self
     }
+    /// Sets the attributes of the joints (automatic corners or a custom
+    /// joint character). If omitted, the line attributes are used.
     pub fn joint_attr(mut self, joint_attr: CharAttribute) -> Self {
         self.format.joint_attr = Some(joint_attr);
         self
     }
+    /// Builds the [`PolyLineFormat`] value.
     pub fn build(self) -> PolyLineFormat {
         self.format
     }

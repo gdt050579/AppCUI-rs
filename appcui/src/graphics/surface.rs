@@ -806,6 +806,76 @@ impl Surface {
         }
     }
 
+    /// Draws a polyline that connects the given points, using the style
+    /// described by [`PolyLineFormat`].
+    ///
+    /// Consecutive points are joined with [`draw_line`](Self::draw_line).
+    /// Orthogonal turns (all eight incoming-to-outgoing direction pairs) get
+    /// a matching corner glyph from [`LineType`]. If the first and last
+    /// points are the same, the path is treated as closed: start and end
+    /// caps are skipped and the closing corner is written as well.
+    ///
+    /// Caps from [`PolyLineFormat`] are applied only on open paths:
+    /// - [`LineCap::Arrow`] and [`LineCap::Triangle`] pick a directional
+    ///   glyph from the first or last segment
+    /// - [`LineCap::Char`] writes a custom character
+    /// - [`LineCap::Auto`] merges the endpoint with neighboring box-drawing
+    ///   characters (useful when a connector attaches to a rectangle)
+    ///
+    /// A custom joint character, if set, replaces the automatic corners at
+    /// every inner vertex. Cap and joint attributes inherit the line
+    /// attributes when they are not specified.
+    ///
+    /// Nothing is drawn if `points` contains fewer than two elements.
+    ///
+    /// # Parameters
+    /// - `points`: Vertices of the polyline, in draw order.
+    /// - `format`: Line style, attributes, optional caps, and optional joint.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(40, 12);
+    ///
+    /// // Open orthogonal U with arrow and triangle caps
+    /// let format = PolyLineFormatBuilder::new(LineType::Single, charattr!("white,black"))
+    ///     .start_cap(LineCap::Arrow)
+    ///     .end_cap(LineCap::Triangle)
+    ///     .build();
+    /// surface.draw_polyline(
+    ///     &[
+    ///         Point::new(2, 1),
+    ///         Point::new(2, 6),
+    ///         Point::new(10, 6),
+    ///         Point::new(10, 1),
+    ///     ],
+    ///     &format,
+    /// );
+    ///
+    /// // Closed rectangle (first point repeated at the end)
+    /// let rect = PolyLineFormatBuilder::new(LineType::Double, charattr!("aqua,black")).build();
+    /// surface.draw_polyline(
+    ///     &[
+    ///         Point::new(14, 1),
+    ///         Point::new(14, 6),
+    ///         Point::new(24, 6),
+    ///         Point::new(24, 1),
+    ///         Point::new(14, 1),
+    ///     ],
+    ///     &rect,
+    /// );
+    ///
+    /// // Connector that merges into existing boxes at both ends
+    /// let connector = PolyLineFormatBuilder::new(LineType::Single, charattr!("yellow,black"))
+    ///     .start_cap(LineCap::Auto)
+    ///     .end_cap(LineCap::Auto)
+    ///     .build();
+    /// surface.draw_polyline(
+    ///     &[Point::new(10, 4), Point::new(14, 4)],
+    ///     &connector,
+    /// );
+    /// ```
     pub fn draw_polyline(&mut self, points: &[Point], format: &PolyLineFormat) {
         if points.len() < 2 {
             return;
