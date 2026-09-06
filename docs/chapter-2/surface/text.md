@@ -3,7 +3,8 @@
 Writing text on a surface is a common task in GUI programming, that can be achieved using the following methods:
 1. `write_string(...)` - writes a string (`String` or `&str`) on the surface starting from a specific position, color and character attribute.
 2. `write_ascii(...)` - similar to **write_string**, but it writes only ASCII characters.
-3. `write_text(...)` - a more complex method that allows alignment, wrapping and text formatting.
+3. `write_chars(...)` - writes a slice of already-built [characters](../screen.md#character) from left to right (each cell can have its own colors and flags).
+4. `write_text(...)` - a more complex method that allows alignment, wrapping and text formatting.
 
 ## Write a string
 
@@ -57,6 +58,21 @@ surface.write_ascii(10, 10,
                    b"Hello World!",
                    CharAttribute::with_color(Color::White, Color::Black),
                    false);
+```
+
+## Write a slice of characters
+
+The `write_chars(...)` method writes a slice of already-built [characters](../screen.md#character) from left to right. Unlike `write_string`, each cell can have its own code, colors and flags. Cells outside the clip area are skipped.
+
+```rust
+use appcui::graphics::{Surface, Character, CharFlags, Color};
+
+let mut surface = Surface::new(100, 50);
+let chars = [
+    Character::new('H', Color::White, Color::Black, CharFlags::None),
+    Character::new('i', Color::Yellow, Color::Black, CharFlags::Bold),
+];
+surface.write_chars(10, 10, &chars);
 ```
 
 ## Write a formatted text
