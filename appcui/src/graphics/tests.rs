@@ -16,6 +16,7 @@ use super::Character;
 use super::Color;
 use super::LineCap;
 use super::LineType;
+use super::PolyLineFormat;
 use super::PolyLineFormatBuilder;
 use super::Surface;
 use super::SurfaceTester;
@@ -2350,4 +2351,61 @@ fn check_draw_polyline_all_corner_turns() {
     }
     //s.print(false);
     assert_eq!(s.compute_hash(), 0x9DBE6DAB6362ED55);
+}
+
+#[test]
+fn check_polyline_format_getters_setters() {
+    let line_attr = charattr!("w,black");
+    let start_attr = charattr!("r,black");
+    let end_attr = charattr!("g,black");
+    let joint_attr = charattr!("y,black");
+    let aqua = charattr!("aqua,black");
+
+    let mut format: PolyLineFormat = PolyLineFormatBuilder::new(LineType::Single, line_attr).build();
+    assert_eq!(format.line_type(), LineType::Single);
+    assert_eq!(format.attr(), line_attr);
+    assert!(format.start_cap().is_none());
+    assert!(format.start_attr().is_none());
+    assert!(format.end_cap().is_none());
+    assert!(format.end_attr().is_none());
+    assert!(format.joint().is_none());
+    assert!(format.joint_attr().is_none());
+
+    format.set_line_type(LineType::Double);
+    format.set_attr(aqua);
+    format.set_start_cap(Some(LineCap::Arrow));
+    format.set_start_attr(Some(start_attr));
+    format.set_end_cap(Some(LineCap::Triangle));
+    format.set_end_attr(Some(end_attr));
+    format.set_joint(Some('*'));
+    format.set_joint_attr(Some(joint_attr));
+
+    assert_eq!(format.line_type(), LineType::Double);
+    assert_eq!(format.attr(), aqua);
+    assert!(matches!(format.start_cap(), Some(LineCap::Arrow)));
+    assert_eq!(format.start_attr(), Some(start_attr));
+    assert!(matches!(format.end_cap(), Some(LineCap::Triangle)));
+    assert_eq!(format.end_attr(), Some(end_attr));
+    assert_eq!(format.joint(), Some('*'));
+    assert_eq!(format.joint_attr(), Some(joint_attr));
+
+    format.set_start_cap(Some(LineCap::Char('S')));
+    format.set_end_cap(Some(LineCap::Auto));
+    format.set_line_type(LineType::SingleRound);
+    assert!(matches!(format.start_cap(), Some(LineCap::Char('S'))));
+    assert!(matches!(format.end_cap(), Some(LineCap::Auto)));
+    assert_eq!(format.line_type(), LineType::SingleRound);
+
+    format.set_start_cap(None);
+    format.set_start_attr(None);
+    format.set_end_cap(None);
+    format.set_end_attr(None);
+    format.set_joint(None);
+    format.set_joint_attr(None);
+    assert!(format.start_cap().is_none());
+    assert!(format.start_attr().is_none());
+    assert!(format.end_cap().is_none());
+    assert!(format.end_attr().is_none());
+    assert!(format.joint().is_none());
+    assert!(format.joint_attr().is_none());
 }
