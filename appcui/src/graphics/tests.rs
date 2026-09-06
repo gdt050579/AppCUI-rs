@@ -2324,3 +2324,29 @@ fn check_draw_polyline_auto_cap_connector() {
     //s.print(false);
     assert_eq!(s.compute_hash(), 0x1B286569189F515B);
 }
+
+#[test]
+fn check_draw_polyline_all_corner_turns() {
+    let mut s = SurfaceTester::new(50, 22);
+    let attr = charattr!("w,black");
+    let label_attr = charattr!("y,black");
+    let format = PolyLineFormatBuilder::new(LineType::Single, attr).build();
+    // Each entry is one of the 8 (previous, current) direction pairs from draw_polyline.
+    // Points: start -> corner -> end.
+    let cases: [(&str, [Point; 3]); 8] = [
+        ("R->U", [Point::new(2, 5), Point::new(5, 5), Point::new(5, 2)]),
+        ("D->L", [Point::new(17, 2), Point::new(17, 5), Point::new(14, 5)]),
+        ("U->L", [Point::new(29, 8), Point::new(29, 5), Point::new(26, 5)]),
+        ("R->D", [Point::new(38, 5), Point::new(41, 5), Point::new(41, 8)]),
+        ("L->D", [Point::new(8, 15), Point::new(5, 15), Point::new(5, 18)]),
+        ("U->R", [Point::new(17, 18), Point::new(17, 15), Point::new(20, 15)]),
+        ("D->R", [Point::new(29, 12), Point::new(29, 15), Point::new(32, 15)]),
+        ("L->U", [Point::new(44, 15), Point::new(41, 15), Point::new(41, 12)]),
+    ];
+    for (label, points) in cases {
+        s.write_string(points[1].x.saturating_sub(2), points[1].y - 4, label, label_attr, false);
+        s.draw_polyline(&points, &format);
+    }
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x9DBE6DAB6362ED55);
+}
