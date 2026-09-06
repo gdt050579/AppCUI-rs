@@ -11,7 +11,7 @@ The following methods can be used to manipulate the clip area and the origin poi
 | `set_origin(...)`        | Sets the origin point of the surface                                                                                              |
 | `reset_origin()`         | Resets the origin point                                                                                                           |
 | `set_clip(...)`          | Sets the clip area of the surface. This methods take 4 parameters (left, top, right and bottom)                                   |
-| `set_relative_clip(...)` | Sets the clip area of the surface relative to the current clip area. This methods take 4 parameters (left, top, right and bottom) |
+| `set_relative_clip(...)` | Sets the clip area using coordinates relative to the surface **base origin**. The rectangle is then intersected with the current base clip, so it cannot expand beyond that clip. Use this when drawing a nested region that must stay inside an existing clip (for example a control painted inside a parent). |
 | `reduce_clip_by(...)`    | Reduces the clip area of the surface. This methods take 4 parameter (left margin, top margin, right margin and bottom margin)     |
 | `reset_clip()`           | Resets the clip area of the surface                                                                                               |
 
