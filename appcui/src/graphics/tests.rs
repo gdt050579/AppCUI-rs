@@ -2231,3 +2231,96 @@ fn check_draw_polyline_rect() {
     //s.print(false);
     assert_eq!(s.compute_hash(), 0xBC1870AAB9AF6E55);
 }
+
+#[test]
+fn check_draw_polyline_colored_caps() {
+    let mut s = SurfaceTester::new(50, 30);
+    let line_attr = charattr!("w,black");
+    let start_attr = charattr!("r,black");
+    let end_attr = charattr!("g,black");
+    let joint_attr = charattr!("y,black");
+    let label_attr = charattr!("aqua,black");
+    let bands = [
+        (0, LineType::Single, "Single  line=w start=r end=g joint=y"),
+        (10, LineType::SingleRound, "Round  line=w start=r end=g joint=y"),
+        (20, LineType::Double, "Double  line=w start=r end=g joint=y"),
+    ];
+    let rotations = [0u16, 90, 180, 270];
+    let x_origins = [1, 13, 25, 37];
+
+    for (band_y, line_type, label) in bands {
+        s.write_string(1, band_y, label, label_attr, false);
+        let format = PolyLineFormatBuilder::new(line_type, line_attr)
+            .start_cap(LineCap::Arrow)
+            .start_attr(start_attr)
+            .end_cap(LineCap::Triangle)
+            .end_attr(end_attr)
+            .joint('•')
+            .joint_attr(joint_attr)
+            .build();
+        for (rotation, origin_x) in rotations.iter().zip(x_origins.iter()) {
+            let points = u_polyline_points(*origin_x, band_y + 2, *rotation);
+            s.draw_polyline(&points, &format);
+        }
+    }
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xB06ECCD27BF5BC44);
+}
+
+#[test]
+fn check_draw_polyline_custom_chars() {
+    let mut s = SurfaceTester::new(50, 30);
+    let attr = charattr!("w,black");
+    let label_attr = charattr!("y,black");
+    let bands = [
+        (0, LineType::Single, "Single  start=S end=E joint=*"),
+        (10, LineType::SingleRound, "Round  start=S end=E joint=*"),
+        (20, LineType::Double, "Double  start=S end=E joint=*"),
+    ];
+    let rotations = [0u16, 90, 180, 270];
+    let x_origins = [1, 13, 25, 37];
+
+    for (band_y, line_type, label) in bands {
+        s.write_string(1, band_y, label, label_attr, false);
+        let format = PolyLineFormatBuilder::new(line_type, attr)
+            .start_cap(LineCap::Char('S'))
+            .end_cap(LineCap::Char('E'))
+            .joint('*')
+            .build();
+        for (rotation, origin_x) in rotations.iter().zip(x_origins.iter()) {
+            let points = u_polyline_points(*origin_x, band_y + 2, *rotation);
+            s.draw_polyline(&points, &format);
+        }
+    }
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x5A84F6B670B11E90);
+}
+
+#[test]
+fn check_draw_polyline_auto_cap_connector() {
+    let mut s = SurfaceTester::new(50, 18);
+    let attr = charattr!("w,black");
+    let label_attr = charattr!("y,black");
+    s.write_string(1, 0, "Auto caps merge two uneven rectangles", label_attr, false);
+
+    let rect_format = PolyLineFormatBuilder::new(LineType::Single, attr).build();
+    // Smaller rectangle, higher on the left.
+    s.draw_polyline(&polyline_rect_points(2, 2, 14, 7), &rect_format);
+    // Larger rectangle, lower on the right (not aligned, different size).
+    s.draw_polyline(&polyline_rect_points(32, 8, 47, 16), &rect_format);
+
+    let connector = PolyLineFormatBuilder::new(LineType::Single, attr)
+        .start_cap(LineCap::Auto)
+        .end_cap(LineCap::Auto)
+        .build();
+    let connector_points = [
+        Point::new(14, 4),
+        Point::new(23, 4),
+        Point::new(23, 11),
+        Point::new(32, 11),
+    ];
+    s.draw_polyline(&connector_points, &connector);
+
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x1B286569189F515B);
+}

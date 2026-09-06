@@ -820,10 +820,10 @@ impl Surface {
             let dir = Direction::from_points(start, end);
             self.draw_line(start.x, start.y, end.x, end.y, format.line_type, format.attr);
             let c = match (previous, dir) {
-                (Some(Direction::Right), Some(Direction::Up)) => Some(chs.corner_bottom_right),
-                (Some(Direction::Up), Some(Direction::Left)) => Some(chs.corner_top_right),
-                (Some(Direction::Left), Some(Direction::Down)) => Some(chs.corner_top_left),
-                (Some(Direction::Down), Some(Direction::Right)) => Some(chs.corner_bottom_left),
+                (Some(Direction::Right), Some(Direction::Up)) | (Some(Direction::Down), Some(Direction::Left)) => Some(chs.corner_bottom_right),
+                (Some(Direction::Up), Some(Direction::Left)) | (Some(Direction::Right), Some(Direction::Down)) => Some(chs.corner_top_right),
+                (Some(Direction::Left), Some(Direction::Down)) | (Some(Direction::Up), Some(Direction::Right)) => Some(chs.corner_top_left),
+                (Some(Direction::Down), Some(Direction::Right)) | (Some(Direction::Left), Some(Direction::Up)) => Some(chs.corner_bottom_left),
                 _ => None,
             };
             if let Some(c) = c {
@@ -834,19 +834,27 @@ impl Surface {
         if !is_circular {
             if let Some(start_cap) = format.start_cap {
                 let attr = format.start_attr.unwrap_or(format.attr);
-                let dir = Direction::from_points(points[0], points[1]);
-                if let Some(dir) = dir {
-                    let ch = start_cap.char(dir);
-                    self.write_char(points[0].x, points[0].y, Character::with_attributes(ch, attr));
+                if matches!(start_cap, LineCap::Auto) {
+                    self.write_box_junction(points[0].x, points[0].y);
+                } else {
+                    let dir = Direction::from_points(points[0], points[1]);
+                    if let Some(dir) = dir {
+                        let ch = start_cap.char(dir);
+                        self.write_char(points[0].x, points[0].y, Character::with_attributes(ch, attr));
+                    }
                 }
             }
             if let Some(end_cap) = format.end_cap {
                 let attr = format.end_attr.unwrap_or(format.attr);
                 let idx = points.len() - 1;
-                let dir = Direction::from_points(points[idx - 1], points[idx]);
-                if let Some(dir) = dir {
-                    let ch = end_cap.char(dir);
-                    self.write_char(points[idx].x, points[idx].y, Character::with_attributes(ch, attr));
+                if matches!(end_cap, LineCap::Auto) {
+                    self.write_box_junction(points[idx].x, points[idx].y);
+                } else {
+                    let dir = Direction::from_points(points[idx - 1], points[idx]);
+                    if let Some(dir) = dir {
+                        let ch = end_cap.char(dir);
+                        self.write_char(points[idx].x, points[idx].y, Character::with_attributes(ch, attr));
+                    }
                 }
             }
         } else {
@@ -854,15 +862,15 @@ impl Surface {
             let start = points[0];
             let dir = Direction::from_points(start, points[1]);
             let c = match (previous, dir) {
-                (Some(Direction::Right), Some(Direction::Up)) => Some(chs.corner_bottom_right),
-                (Some(Direction::Up), Some(Direction::Left)) => Some(chs.corner_top_right),
-                (Some(Direction::Left), Some(Direction::Down)) => Some(chs.corner_top_left),
-                (Some(Direction::Down), Some(Direction::Right)) => Some(chs.corner_bottom_left),
+                (Some(Direction::Right), Some(Direction::Up)) | (Some(Direction::Down), Some(Direction::Left)) => Some(chs.corner_bottom_right),
+                (Some(Direction::Up), Some(Direction::Left)) | (Some(Direction::Right), Some(Direction::Down)) => Some(chs.corner_top_right),
+                (Some(Direction::Left), Some(Direction::Down)) | (Some(Direction::Up), Some(Direction::Right)) => Some(chs.corner_top_left),
+                (Some(Direction::Down), Some(Direction::Right)) | (Some(Direction::Left), Some(Direction::Up)) => Some(chs.corner_bottom_left),
                 _ => None,
             };
             if let Some(c) = c {
                 self.write_char(start.x, start.y, Character::with_attributes(c, j_attr));
-            }            
+            }
         }
         // at least 3 points
         if points.len() > 2 {

@@ -1,6 +1,5 @@
 use super::CharAttribute;
 use super::Direction;
-use crate::graphics::SpecialChar;
 use crate::ui::selector::EnumSelector;
 use appcui_proc_macro::EnumSelector;
 
@@ -179,6 +178,7 @@ static LINE_CAP_CHARS_TRIANGLES: LineCapChars = LineCapChars {
 
 #[derive(Copy, Clone)]
 pub enum LineCap {
+    Auto, // use box junction
     Arrow, // direction inferred from the terminal segment at draw time
     Triangle,
     Char(char),
@@ -186,6 +186,7 @@ pub enum LineCap {
 impl LineCap {
     pub(super) fn char(&self, direction: Direction) -> char {
         match self {
+            LineCap::Auto => 0 as char,
             LineCap::Arrow => {
                 match direction {
                     Direction::Up => LINE_CAP_CHARS_ARROWS.up,
