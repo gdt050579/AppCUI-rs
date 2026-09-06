@@ -259,66 +259,106 @@ pub struct PolyLineFormat {
     pub(crate) joint_attr: Option<CharAttribute>, // None => inherit `attr`
 }
 impl PolyLineFormat {
+    /// Returns the character attributes used for the line segments.
     #[inline(always)]
     pub fn attr(&self) -> CharAttribute {
         self.attr
     }
+    /// Sets the character attributes used for the line segments.
+    ///
+    /// Cap and joint attributes inherit this value unless they are set
+    /// separately with [`set_start_attr`](Self::set_start_attr),
+    /// [`set_end_attr`](Self::set_end_attr), or
+    /// [`set_joint_attr`](Self::set_joint_attr).
     #[inline(always)]
     pub fn set_attr(&mut self, attr: CharAttribute) {
         self.attr = attr;
     }
+    /// Returns the line style used for every segment.
     #[inline(always)]
     pub fn line_type(&self) -> LineType {
         self.line_type
     }
+    /// Sets the line style used for every segment.
     #[inline(always)]
     pub fn set_line_type(&mut self, line_type: LineType) {
         self.line_type = line_type;
     }
+    /// Returns the start cap, or `None` if the first point has no cap.
     #[inline(always)]
     pub fn start_cap(&self) -> Option<LineCap> {
         self.start_cap
     }
+    /// Sets the glyph drawn at the first point of the polyline.
+    ///
+    /// Pass `None` to leave the start without a cap. Ignored when the
+    /// polyline is closed (first and last points are equal).
     #[inline(always)]
     pub fn set_start_cap(&mut self, start_cap: Option<LineCap>) {
         self.start_cap = start_cap;
     }
+    /// Returns the start-cap attributes, or `None` if they inherit the line
+    /// attributes.
     #[inline(always)]
     pub fn start_attr(&self) -> Option<CharAttribute> {
         self.start_attr
     }
+    /// Sets the attributes of the start cap.
+    ///
+    /// Pass `None` to inherit the line attributes from [`attr`](Self::attr).
     #[inline(always)]
     pub fn set_start_attr(&mut self, start_attr: Option<CharAttribute>) {
         self.start_attr = start_attr;
     }
+    /// Returns the end cap, or `None` if the last point has no cap.
     #[inline(always)]
     pub fn end_cap(&self) -> Option<LineCap> {
         self.end_cap
     }
+    /// Sets the glyph drawn at the last point of the polyline.
+    ///
+    /// Pass `None` to leave the end without a cap. Ignored when the
+    /// polyline is closed (first and last points are equal).
     #[inline(always)]
     pub fn set_end_cap(&mut self, end_cap: Option<LineCap>) {
         self.end_cap = end_cap;
     }
+    /// Returns the end-cap attributes, or `None` if they inherit the line
+    /// attributes.
     #[inline(always)]
     pub fn end_attr(&self) -> Option<CharAttribute> {
         self.end_attr
     }
+    /// Sets the attributes of the end cap.
+    ///
+    /// Pass `None` to inherit the line attributes from [`attr`](Self::attr).
     #[inline(always)]
     pub fn set_end_attr(&mut self, end_attr: Option<CharAttribute>) {
         self.end_attr = end_attr;
     }
+    /// Returns the custom joint character, or `None` if corners are chosen
+    /// automatically from the segment directions.
     #[inline(always)]
     pub fn joint(&self) -> Option<char> {
         self.joint
     }
+    /// Sets a custom character at every inner vertex.
+    ///
+    /// Pass `None` to restore automatic corner glyphs.
     #[inline(always)]
     pub fn set_joint(&mut self, joint: Option<char>) {
         self.joint = joint;
     }
+    /// Returns the joint attributes, or `None` if they inherit the line
+    /// attributes.
     #[inline(always)]
     pub fn joint_attr(&self) -> Option<CharAttribute> {
         self.joint_attr
     }
+    /// Sets the attributes of the joints (automatic corners or a custom
+    /// joint character).
+    ///
+    /// Pass `None` to inherit the line attributes from [`attr`](Self::attr).
     #[inline(always)]
     pub fn set_joint_attr(&mut self, joint_attr: Option<CharAttribute>) {
         self.joint_attr = joint_attr;
