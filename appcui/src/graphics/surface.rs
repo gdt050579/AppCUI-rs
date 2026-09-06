@@ -161,6 +161,20 @@ impl Surface {
         self.base_origin.y = y;
     }
 
+    /// Sets the clip area using coordinates relative to the surface base origin.
+    ///
+    /// The rectangle is translated by the base origin and then intersected
+    /// with the current base clip, so it cannot expand beyond that clip.
+    /// Use this when drawing a nested region that must stay inside an
+    /// existing clip (for example a control painted inside a parent).
+    ///
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.set_clip(10, 10, 40, 30);
+    /// surface.set_relative_clip(2, 2, 20, 15);
+    /// ```
     #[inline(always)]
     pub fn set_relative_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.clip.set(
@@ -605,7 +619,7 @@ impl Surface {
             last = current;
         }
     }
-    pub fn draw_braille_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
+    pub(super) fn draw_braille_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
         // Anchor to the center of each Braille cell: (2x+1, 4y+2)
         let mut px = x1 * 2 + 1;
         let mut py = y1 * 4 + 2;
@@ -698,6 +712,43 @@ impl Surface {
         };
     }
 
+    /// Draws an axis-aligned path between `(x1, y1)` and `(x2, y2)`.
+    ///
+    /// Unlike [`draw_line`](Self::draw_line), this never draws a diagonal
+    /// segment. The two points are connected with horizontal and vertical
+    /// pieces, and corners are taken from [`LineType`]. [`OrthogonalDirection`]
+    /// chooses how the path bends:
+    /// - [`OrthogonalDirection::HorizontalFirst`]: horizontal, then vertical
+    /// - [`OrthogonalDirection::VerticalFirst`]: vertical, then horizontal
+    /// - [`OrthogonalDirection::HorizontalUntilMiddle`]: horizontal to the
+    ///   midpoint, vertical, then horizontal
+    /// - [`OrthogonalDirection::VerticalUntilMiddle`]: vertical to the
+    ///   midpoint, horizontal, then vertical
+    /// - [`OrthogonalDirection::Auto`]: horizontal-first when the run is
+    ///   wider than it is tall, otherwise vertical-first
+    ///
+    /// If the two points share an X or Y coordinate, a single straight
+    /// segment is drawn. If they are the same point, nothing is drawn.
+    ///
+    /// # Parameters
+    /// - `x1`, `y1`: Starting point coordinates.
+    /// - `x2`, `y2`: Ending point coordinates.
+    /// - `line_type`: The [`LineType`] used for segments and corners.
+    /// - `dir`: How the orthogonal path should bend.
+    /// - `attr`: The [`CharAttribute`] applied to the path.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(40, 12);
+    /// surface.draw_orthogonal_line(
+    ///     2, 2, 20, 8,
+    ///     LineType::Single,
+    ///     OrthogonalDirection::HorizontalFirst,
+    ///     charattr!("white,black"),
+    /// );
+    /// ```
     pub fn draw_orthogonal_line(
         &mut self,
         x1: i32,
@@ -1114,6 +1165,32 @@ impl Surface {
         }
     }
 
+    /// Rewrites the character at `(x, y)` as a box-drawing junction based on
+    /// its four neighbors.
+    ///
+    /// The glyphs to the left, above, right, and below are inspected. If they
+    /// form a recognized junction (T-split, cross, corner, and so on), the
+    /// cell is replaced with that junction character. Colors and flags are
+    /// left unchanged. If no junction matches, the cell is not modified.
+    ///
+    /// This is useful after drawing overlapping lines or after attaching a
+    /// polyline with [`LineCap::Auto`]. Coordinates are relative to the
+    /// current origin. The method also accepts a cell one character outside
+    /// the clip rectangle so junctions on a border remain reachable.
+    ///
+    /// # Parameters
+    /// - `x`, `y`: Position of the cell to resolve, relative to the origin.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(20, 8);
+    /// let attr = charattr!("white,black");
+    /// surface.draw_horizontal_line(1, 3, 10, LineType::Single, attr);
+    /// surface.draw_vertical_line(5, 1, 6, LineType::Single, attr);
+    /// surface.write_box_junction(5, 3);
+    /// ```
     pub fn write_box_junction(&mut self, x: i32, y: i32) {
         if !self.clip.is_visible() {
             return;
@@ -1658,6 +1735,33 @@ impl Surface {
         image.paint(self, x, y, render_options);
     }
 
+    /// Draws a [`BitTile`] at `(x, y)` using the selected render method.
+    ///
+    /// Set bits are painted with `set_bit_color` and unset bits with
+    /// `unset_bit_color`. [`BitTileRenderMethod`] chooses the glyph density:
+    /// - [`BitTileRenderMethod::SmallBlocks`]: half-block characters
+    /// - [`BitTileRenderMethod::LargeBlocks`]: full-block characters
+    /// - [`BitTileRenderMethod::Braille`]: Braille dots
+    ///
+    /// # Parameters
+    /// - `x`, `y`: Top-left position of the tile, relative to the origin.
+    /// - `tile`: The bit tile to paint.
+    /// - `set_bit_color`: Color used for bits that are set.
+    /// - `unset_bit_color`: Color used for bits that are unset.
+    /// - `render_method`: How each pixel is mapped to characters.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(20, 8);
+    /// let mut tile = BitTile::<8>::new(4, 4).unwrap();
+    /// tile.set(0, 0, true);
+    /// tile.set(1, 1, true);
+    /// tile.set(2, 2, true);
+    /// tile.set(3, 3, true);
+    /// surface.draw_tile(2, 1, &tile, Color::White, Color::Black, BitTileRenderMethod::LargeBlocks);
+    /// ```
     pub fn draw_tile<const STORAGE_BYTES: usize>(
         &mut self,
         x: i32,
