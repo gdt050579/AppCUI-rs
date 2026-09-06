@@ -2144,7 +2144,8 @@ fn draw_u_polylines(s: &mut SurfaceTester, line_type: LineType) {
     let attr = charattr!("w,black");
     // 50 x 90 surface. Each 10-row band uses a different cap configuration.
     // Columns (left to right): 0°, 90°, 180°, 270°.
-    let bands: [(i32, Option<LineCap>, Option<LineCap>, Option<char>, &str); 9] = [
+    type BandType = (i32, Option<LineCap>, Option<LineCap>, Option<char>, &'static str);
+    let bands: [BandType; 9] = [
         (0, None, None, None, "No cap"),
         (10, None, Some(LineCap::Arrow), None, "Arrow on end"),
         (20, Some(LineCap::Arrow), None, None, "Arrow on start"),

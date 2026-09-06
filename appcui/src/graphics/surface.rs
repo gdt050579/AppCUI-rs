@@ -876,8 +876,9 @@ impl Surface {
         if points.len() > 2 {
             if let Some(joint) = format.joint {
                 let ch = Character::with_attributes(joint, j_attr);
-                for i in 1..points.len() - 1 {
-                    self.write_char(points[i].x, points[i].y, ch);
+                let inner_points = &points[1..points.len() - 1];
+                for p in inner_points {
+                    self.write_char(p.x, p.y, ch);
                 }
             }
         }

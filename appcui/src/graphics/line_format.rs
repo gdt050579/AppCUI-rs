@@ -230,8 +230,8 @@ impl PolyLineFormatBuilder {
     pub fn new(line_type: LineType, attr: CharAttribute) -> Self {
         Self {
             format: PolyLineFormat {
-                line_type: line_type,
-                attr: attr,
+                line_type,
+                attr,
                 start_cap: None,
                 start_attr: None,
                 end_cap: None,
