@@ -110,8 +110,15 @@ static RULER: CharSet = CharSet {
 };
 
 #[EnumBitFlags(bits=16)]
+/// Initialization flags for an [`struct@super::HSlider`].
+///
+/// Combine values with `|`. `Flags::None` draws the track and marker without a
+/// numeric label or tick marks.
 pub enum Flags {
+    /// Show the current value next to the track.
     ShowValue     = 0x0001,
+    /// Draw tick marks along the track.
     Ticks         = 0x0002,
+    /// Replace the marker glyph with the numeric value.
     ValueAsMarker = 0x0004,
 }

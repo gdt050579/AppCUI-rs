@@ -6,13 +6,24 @@ use crate::system::Handle;
 use super::super::Type;
 
 #[EnumBitFlags(bits = 8)]
+/// Runtime status bits for a window toolbar item.
+///
+/// Combine values with `|`. The toolbar layout sets these as items are shown,
+/// grouped, or clipped outside the drawing area.
 enum StatusFlags {
+    /// The item is shown on the toolbar.
     Visible = 0x01,
+    /// The item does not fit in the current toolbar area and is not drawn.
     OutsideDrawingArea = 0x02,
+    /// Draw a separator immediately to the left of the item.
     SeparatorOnLeft = 0x04,
+    /// Draw a separator immediately to the right of the item.
     SeparatorOnRight = 0x08,
+    /// Draw the left marker of a toolbar group (`[`) on this item.
     LeftGroupMarker = 0x10,
+    /// Draw the right marker of a toolbar group (`]`) on this item.
     RightGroupMarker = 0x20,
+    /// Do not draw group markers on this item.
     NoMarker = 0x40,
 }
 pub(crate) struct ItemBase {

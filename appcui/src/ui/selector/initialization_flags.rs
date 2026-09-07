@@ -1,7 +1,11 @@
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits=8)]
+/// Initialization flags for a [`struct@super::Selector`].
+///
+/// Combine values with `|`. `Flags::None` requires a concrete enum variant at all times.
 pub enum Flags {
+    /// Allow clearing the selection so that no variant is chosen.
     AllowNoneVariant = 0x01,
 }
 

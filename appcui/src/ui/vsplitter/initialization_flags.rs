@@ -26,6 +26,11 @@ pub enum ResizeBehavior {
 }
 
 #[EnumBitFlags(bits = 8)]
+/// Initialization flags for a [`struct@super::VSplitter`].
+///
+/// Combine values with `|`. `Flags::None` draws the splitter independently of the
+/// parent window frame.
 pub enum Flags {
+    /// Join the splitter line with neighboring window or panel borders.
     MergeBorders = 0x0001,
 }

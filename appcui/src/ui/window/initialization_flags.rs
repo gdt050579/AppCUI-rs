@@ -1,9 +1,16 @@
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits=16)]
+/// Initialization flags for a [`struct@super::Window`].
+///
+/// Combine values with `|`. `Flags::None` is a moveable window with a close button
+/// and a fixed size.
 pub enum Flags {
+    /// Allow the user to resize the window from its edges and corners.
     Sizeable      = 0x0001,
+    /// Hide the close button in the title bar.
     NoCloseButton = 0x0002,
+    /// Prevent the user from dragging the window to a new position.
     FixedPosition = 0x0004,
 }
 #[repr(u8)]

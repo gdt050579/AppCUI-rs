@@ -1,8 +1,14 @@
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits=8)]
+/// Initialization flags for a [`struct@super::Tab`].
+///
+/// Combine values with `|`. `Flags::None` paints the tab background and does not
+/// draw a filled bar behind the headers.
 pub enum Flags {
+    /// Do not fill the tab background, so the parent control shows through.
     TransparentBackground = 0x01,
+    /// Draw a solid bar behind the tab headers.
     TabsBar = 0x02,
 }
 

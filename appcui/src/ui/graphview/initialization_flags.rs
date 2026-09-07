@@ -2,9 +2,16 @@ use crate::prelude::*;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits: 8)]
+/// Initialization flags for a [`struct@super::GraphView`].
+///
+/// Combine values with `|`. `Flags::None` shows the graph without scroll bars,
+/// search, or multi-select UI.
 pub enum Flags {
+    /// Show scroll bars for navigating a graph larger than the view.
     ScrollBars = 1,
+    /// Show a search bar for finding nodes by name.
     SearchBar = 0x02,
+    /// Enable a multi-select gutter so several nodes can be checked at once.
     MultiSelect = 0x04,
 }
 
