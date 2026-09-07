@@ -1,4 +1,4 @@
-/// Represents am enum with varians that can be used to describe the foreground and background colors of a character in a terminal or console application.
+/// Represents an enum with variants that can be used to describe the foreground and background colors of a character in a terminal or console application.
 #[cfg(not(feature = "TRUE_COLORS"))]
 #[repr(u8)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default)]
@@ -56,6 +56,7 @@ pub enum Color {
     Transparent = 0x10,
 }
 
+/// Represents an enum with variants that can be used to describe the foreground and background colors of a character in a terminal or console application.
 #[cfg(feature = "TRUE_COLORS")]
 #[repr(u32)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default)]
@@ -112,6 +113,7 @@ pub enum Color {
     /// a marker for transparent color
     Transparent = 0x10,
 
+    /// A 24-bit RGB color, for example `(255, 128, 0)`.
     RGB(u8, u8, u8),
 }
 impl Color {

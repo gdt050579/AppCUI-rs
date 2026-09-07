@@ -42,13 +42,20 @@ impl Size {
     }
 }
 
+/// Error returned when parsing a [`Size`] from a string such as `"80 x 25"`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum SizeParseError {
+    /// The input was empty or only whitespace.
     EmptyString,
+    /// Width contained a non-digit character (the `u8` is that character).
     InvalidWidth(u8),
+    /// Height contained a non-digit character (the `u8` is that character).
     InvalidHeight(u8),
+    /// Width was present but height was missing, for example `"80 x"`.
     HeightMissing,
+    /// Expected `x`, `X`, or `,` between width and height.
     MissingSeparator(u8),
+    /// Extra characters after a valid `"width x height"` pair.
     InvalidSize(u8),
 }
 

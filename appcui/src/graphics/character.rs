@@ -18,67 +18,108 @@ static UNICODE_CODES: [char; 48] = [
 #[repr(u8)]
 #[derive(Copy, Clone, Debug)]
 pub enum SpecialChar {
+    /// Double-line top-left corner: `╔`.
     BoxTopLeftCornerDoubleLine = 0,
+    /// Double-line top-right corner: `╗`.
     BoxTopRightCornerDoubleLine,
+    /// Double-line bottom-right corner: `╝`.
     BoxBottomRightCornerDoubleLine,
+    /// Double-line bottom-left corner: `╚`.
     BoxBottomLeftCornerDoubleLine,
+    /// Double-line horizontal: `═`.
     BoxHorizontalDoubleLine,
+    /// Double-line vertical: `║`.
     BoxVerticalDoubleLine,
+    /// Double-line cross: `╬`.
     BoxCrossDoubleLine,
 
+    /// Single-line top-left corner: `┌`.
     BoxTopLeftCornerSingleLine,
+    /// Single-line top-right corner: `┐`.
     BoxTopRightCornerSingleLine,
+    /// Single-line bottom-right corner: `┘`.
     BoxBottomRightCornerSingleLine,
+    /// Single-line bottom-left corner: `└`.
     BoxBottomLeftCornerSingleLine,
+    /// Single-line horizontal: `─`.
     BoxHorizontalSingleLine,
+    /// Single-line vertical: `│`.
     BoxVerticalSingleLine,
+    /// Single-line cross: `┼`.
     BoxCrossSingleLine,
 
-    // arrows
+    /// Up arrow: `↑`.
     ArrowUp,
+    /// Down arrow: `↓`.
     ArrowDown,
+    /// Left arrow: `←`.
     ArrowLeft,
+    /// Right arrow: `→`.
     ArrowRight,
+    /// Vertical double arrow: `↕`.
     ArrowUpDown,
+    /// Horizontal double arrow: `↔`.
     ArrowLeftRight,
 
-    // Blocks
+    /// Empty block (space), 0% fill.
     Block0,
+    /// Light shade: `░` (25%).
     Block25,
+    /// Medium shade: `▒` (50%).
     Block50,
+    /// Dark shade: `▓` (75%).
     Block75,
+    /// Full block: `█` (100%).
     Block100,
+    /// Upper half block: `▀`.
     BlockUpperHalf,
+    /// Lower half block: `▄`.
     BlockLowerHalf,
+    /// Left half block: `▌`.
     BlockLeftHalf,
+    /// Right half block: `▐`.
     BlockRightHalf,
+    /// Centered square: `■`.
     BlockCentered,
 
-    // Trangles
+    /// Up-pointing triangle: `▲`.
     TriangleUp,
+    /// Down-pointing triangle: `▼`.
     TriangleDown,
+    /// Left-pointing triangle: `◄`.
     TriangleLeft,
+    /// Right-pointing triangle: `►`.
     TriangleRight,
 
-    // symbols
+    /// Filled circle: `●`.
     CircleFilled,
+    /// Empty circle: `○`.
     CircleEmpty,
+    /// Check mark: `√`.
     CheckMark,
+    /// Menu/hamburger sign: `≡`.
     MenuSign,
+    /// Four vertical dots: `⁞`.
     FourPoints,
+    /// Horizontal ellipsis: `…`.
     ThreePointsHorizontal,
 
-    // extended ascii codes (195 / 251C, 194 / 252C, 180 / 2524, 193 / 2534) / Graphics Extended Code Page 1252
-    // https://en.wikipedia.org/wiki/Windows-1252
+    /// Single-line T-junction on the left: `├`.
     BoxMidleLeft,
+    /// Single-line T-junction on the top: `┬`.
     BoxMidleTop,
+    /// Single-line T-junction on the right: `┤`.
     BoxMidleRight,
+    /// Single-line T-junction on the bottom: `┴`.
     BoxMidleBottom,
 
-    // boxes
+    /// A line along the top of the cell: `▔`.
     LineOnTop,
+    /// A thick bar on the left of the cell: `▇`.
     LineOnLeft,
+    /// A line along the right of the cell: `▕`.
     LineOnRight,
+    /// A line along the bottom of the cell: `▁`.
     LineOnBottom,
 }
 

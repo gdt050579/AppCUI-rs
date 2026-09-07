@@ -128,23 +128,31 @@ static LINE_TYPE_CHARS: [LineTypeChars; 8] = [
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug, EnumSelector)]
 pub enum LineType {
+    /// Thin box-drawing lines, for example `┌─┐` / `│ │` / `└─┘`.
     #[VariantInfo(name = "Single Lines", description = "Single lines with corners and vertical/horizontal lines")]
     Single,
+    /// Double box-drawing lines, for example `╔═╗` / `║ ║` / `╚═╝`.
     #[VariantInfo(name = "Double Lines", description = "Double lines with corners and vertical/horizontal lines")]
     Double,
+    /// Thick box-drawing lines, for example `┏━┓` / `┃ ┃` / `┗━┛`.
     #[VariantInfo(
         name = "Single Thick Lines",
         description = "Single thick lines with corners and vertical/horizontal lines"
     )]
     SingleThick,
+    /// Solid block border, for example `▄▄▄` / `█ █` / `▀▀▀`.
     #[VariantInfo(name = "Border", description = "A border style with thick lines")]
     Border,
+    /// ASCII lines, for example `+-+` / `| |` / `+-+`.
     #[VariantInfo(name = "Ascii", description = "ASCII characters for lines")]
     Ascii,
+    /// ASCII lines with slash corners, for example `/-\` / `| |` / `\-/`.
     #[VariantInfo(name = "Ascii Round", description = "ASCII characters with rounded corners")]
     AsciiRound,
+    /// Thin lines with rounded corners, for example `╭─╮` / `│ │` / `╰─╯`.
     #[VariantInfo(name = "Single Round", description = "Single lines with rounded corners")]
     SingleRound,
+    /// Braille double line, using dots such as `⣿` and `⠶`.
     #[VariantInfo(name = "Braille", description = "Double line drawn with braille characters")]
     Braille,
 }

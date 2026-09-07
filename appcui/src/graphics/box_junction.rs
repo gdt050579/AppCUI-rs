@@ -178,6 +178,10 @@ const fn connection_count(m: u8) -> u32 {
     folded.count_ones()
 }
 
+/// Lookup tables that merge neighboring box-drawing characters into T-junctions and crosses.
+///
+/// Used when drawing rectangles and polylines so overlapping lines form glyphs such as
+/// `├`, `┬`, and `┼` instead of overwriting each other.
 pub struct BoxJunction {
     to_mask: [u8; 256],
     to_char: [u8; 256],

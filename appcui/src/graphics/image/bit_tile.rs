@@ -5,13 +5,17 @@ use super::super::{CharFlags, Character, Color, Point, Size, Surface};
 use super::{StringFormatError, StringFormatParser};
 use std::str::FromStr;
 
+/// How a [`BitTile`] is drawn onto a [`Surface`](crate::graphics::Surface).
 #[derive(Copy, Clone, Eq, PartialEq, Debug, EnumSelector)]
 #[repr(u8)]
 pub enum BitTileRenderMethod {
+    /// Half-block characters (`▀`), packing two vertical pixels into one cell.
     #[VariantInfo(name = "Small Blocks", description = "Small blocks with half-block characters")]
     SmallBlocks,
+    /// Full-width cells filled with background color (two columns per pixel).
     #[VariantInfo(name = "Large Blocks", description = "Large blocks with full-block characters")]
     LargeBlocks,
+    /// Braille dots (`⣿`), packing a 2×4 pixel grid into one cell.
     #[VariantInfo(name = "Braille", description = "Braille characters")]
     Braille,
 }
