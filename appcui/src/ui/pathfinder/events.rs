@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::PathFinder`].
+//!
+//! Implement [`PathFinderEvents`] on a window (or other parent) to react when
+//! the path text changes.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::PathFinder;
 

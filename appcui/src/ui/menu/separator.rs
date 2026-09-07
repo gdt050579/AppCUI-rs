@@ -1,3 +1,7 @@
+//! A non-interactive horizontal divider in a [`struct@super::Menu`].
+//!
+//! Use separators to group related menu items.
+
 use crate::{
     graphics::{LineType, Surface},
     system::MenuTheme,

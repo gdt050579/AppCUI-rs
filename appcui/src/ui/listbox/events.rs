@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::ListBox`].
+//!
+//! Implement [`ListBoxEvents`] on a window (or other parent) to react when the
+//! current item or a check box changes.
+
 use super::ListBox;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

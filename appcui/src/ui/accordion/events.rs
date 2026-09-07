@@ -1,3 +1,8 @@
+//! Events emitted by an [`struct@super::Accordion`].
+//!
+//! Implement [`AccordionEvents`] on a window (or other parent) to react when the
+//! expanded panel changes.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::Accordion;
 
@@ -12,7 +17,6 @@ pub trait AccordionEvents {
     }
 }
 
-/// Event data for an [`struct@super::Accordion`].
 #[derive(Copy, Clone)]
 pub(crate) struct EventData {
     pub(crate) new_panel_index: u32,

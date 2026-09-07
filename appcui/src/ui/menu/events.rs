@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::Menu`].
+//!
+//! Implement [`GenericMenuEvents`] on a window (or other parent) to react when a
+//! menu opens and when commands, checkboxes, or single-choice items are selected.
+
 use super::{Menu, CheckBox, Command, SingleChoice};
 
 /// A trait that defines the event handlers for menu-related interactions.

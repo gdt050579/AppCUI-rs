@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::ToggleButton`].
+//!
+//! Implement [`ToggleButtonEvents`] on a window (or other parent) to react when
+//! the pressed/selected state changes.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::ToggleButton;
 

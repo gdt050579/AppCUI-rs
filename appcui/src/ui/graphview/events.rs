@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::GraphView`].
+//!
+//! Implement [`GenericGraphViewEvents`] on a window (or other parent) to react to
+//! node highlight, activation, and layout requests.
+
 use std::any::TypeId;
 use crate::{prelude::Point, system::Handle, ui::common::traits::EventProcessStatus};
 

@@ -1,3 +1,7 @@
+//! A command item in a [`struct@super::Menu`].
+//!
+//! Selecting the item sends a command (and optional shortcut) to the menu owner.
+
 use crate::{
     graphics::{Character, Surface, TextFormat},
     input::{Key, KeyCode},

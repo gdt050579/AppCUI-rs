@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::TextField`].
+//!
+//! Implement [`TextFieldEvents`] on a window (or other parent) to react when the
+//! user confirms or edits the text.
+
 use super::TextField;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

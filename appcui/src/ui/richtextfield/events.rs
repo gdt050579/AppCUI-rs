@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::RichTextField`].
+//!
+//! Implement [`RichTextFieldEvents`] on a window (or other parent) to react when
+//! the user confirms or edits the text.
+
 use crate::system::Handle;
 use crate::ui::common::traits::EventProcessStatus;
 

@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::TreeView`].
+//!
+//! Implement [`GenericTreeViewEvents`] on a window (or other parent) to react to
+//! item highlight, expand/collapse, and selection changes.
+
 use std::any::TypeId;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

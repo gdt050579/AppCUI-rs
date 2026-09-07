@@ -1,3 +1,8 @@
+//! Events emitted by an [`struct@super::HSlider`].
+//!
+//! Implement [`GenericHSliderEvents`] on a window (or other parent) to react when
+//! the slider value changes.
+
 use std::any::TypeId;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

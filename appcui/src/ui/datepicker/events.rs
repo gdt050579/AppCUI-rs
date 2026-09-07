@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::DatePicker`].
+//!
+//! Implement [`DatePickerEvents`] on a window (or other parent) to react when
+//! the chosen date changes.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::DatePicker;
 use chrono::NaiveDate;

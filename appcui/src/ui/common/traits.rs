@@ -1,3 +1,10 @@
+//! Shared traits implemented by all UI controls.
+//!
+//! This module defines paint, input, resize, focus, timer, and background-task
+//! hooks, plus marker traits such as [`Control`], [`WindowControl`], and
+//! [`DesktopControl`]. Control-specific events live in each control's `events`
+//! module and are re-exported here for the derive macros.
+
 use crate::{
     graphics::{Size, Surface},
     input::{Key, MouseEvent},

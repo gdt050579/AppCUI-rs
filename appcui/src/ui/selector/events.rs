@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::Selector`].
+//!
+//! Implement [`GenericSelectorEvents`] on a window (or other parent) to react
+//! when the selected enum variant changes.
+
 use std::any::TypeId;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

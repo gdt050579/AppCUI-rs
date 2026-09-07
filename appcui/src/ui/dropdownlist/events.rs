@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::DropDownList`].
+//!
+//! Implement [`GenericDropDownListEvents`] on a window (or other parent) to react
+//! when the selected item changes.
+
 use std::any::TypeId;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

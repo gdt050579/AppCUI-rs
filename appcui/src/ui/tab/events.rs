@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::Tab`].
+//!
+//! Implement [`TabEvents`] on a window (or other parent) to react when the
+//! selected page changes.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::Tab;
 

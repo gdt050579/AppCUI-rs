@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::NumericSelector`].
+//!
+//! Implement [`GenericNumericSelectorEvents`] on a window (or other parent) to
+//! react when the numeric value changes.
+
 use std::any::TypeId;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::CharPicker`].
+//!
+//! Implement [`CharPickerEvents`] on a window (or other parent) to react when
+//! the chosen character changes.
+
 use super::CharPicker;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

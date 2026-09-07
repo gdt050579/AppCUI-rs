@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::ColorPicker`].
+//!
+//! Implement [`ColorPickerEvents`] on a window (or other parent) to react when
+//! the chosen color changes.
+
 use super::ColorPicker;
 use crate::{graphics::Color, system::Handle, ui::common::traits::EventProcessStatus};
 

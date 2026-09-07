@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::RadioBox`].
+//!
+//! Implement [`RadioBoxEvents`] on a window (or other parent) to react when this
+//! radio box becomes selected.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::RadioBox;
 

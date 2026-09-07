@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::ListView`].
+//!
+//! Implement [`GenericListViewEvents`] on a window (or other parent) to react to
+//! item, group, and selection changes.
+
 use std::any::TypeId;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::Group;

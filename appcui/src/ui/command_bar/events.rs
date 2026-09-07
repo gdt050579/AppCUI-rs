@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::CommandBar`].
+//!
+//! Implement [`GenericCommandBarEvents`] on a window or desktop to populate the
+//! command bar and handle activated commands.
+
 use crate::system::Handle;
 use super::CommandBar;
 

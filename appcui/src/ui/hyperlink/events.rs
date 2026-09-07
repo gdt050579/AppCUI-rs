@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::HyperLink`].
+//!
+//! Implement [`HyperLinkEvents`] on a window (or other parent) to react when the
+//! user activates the link.
+
 use super::HyperLink;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

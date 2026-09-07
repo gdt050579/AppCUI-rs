@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::KeySelector`].
+//!
+//! Implement [`KeySelectorEvents`] on a window (or other parent) to react when
+//! the recorded key combination changes.
+
 use super::KeySelector;
 use crate::{input::Key, system::Handle, ui::common::traits::EventProcessStatus};
 

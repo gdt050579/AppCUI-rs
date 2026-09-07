@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::Password`].
+//!
+//! Implement [`PasswordEvents`] on a window (or other parent) to react when the
+//! user confirms or cancels the field.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::Password;
 

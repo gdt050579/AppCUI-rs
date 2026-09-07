@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::ThreeStateBox`].
+//!
+//! Implement [`ThreeStateBoxEvents`] on a window (or other parent) to react when
+//! the tri-state value changes.
+
 use super::{ThreeStateBox, State};
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

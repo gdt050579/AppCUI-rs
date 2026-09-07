@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::Markdown`].
+//!
+//! Implement [`MarkdownEvents`] on a window (or other parent) to react to link
+//! clicks and history navigation.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::Markdown;
 

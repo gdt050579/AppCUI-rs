@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::Button`].
+//!
+//! Implement [`ButtonEvents`] on a window (or other parent) to react when the
+//! button is pressed.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::Button;
 

@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@crate::ui::Desktop`].
+//!
+//! Implement [`DesktopEvents`] on your desktop type to run startup logic,
+//! intercept close, and observe how many windows are open.
+
 use crate::ui::common::traits::*;
 /// Events from a [`struct@crate::ui::Desktop`].
 ///

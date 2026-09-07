@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::CheckBox`].
+//!
+//! Implement [`CheckBoxEvents`] on a window (or other parent) to react when the
+//! checked state changes.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::CheckBox;
 
