@@ -11,6 +11,8 @@ pub trait AccordionEvents {
         EventProcessStatus::Ignored
     }
 }
+
+/// Event data for an [`struct@super::Accordion`].
 #[derive(Copy, Clone)]
 pub(crate) struct EventData {
     pub(crate) new_panel_index: u32,

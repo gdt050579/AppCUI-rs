@@ -2,13 +2,24 @@ use super::Color;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 16)]
+/// Text style bits stored in a [`CharAttribute`].
+///
+/// Combine values with `|`. `CharFlags::None` means no extra styling (plain glyphs).
+/// Support depends on the terminal backend.
 pub enum CharFlags {
+    /// Bold / increased intensity.
     Bold = 0x0001,
+    /// Italic slant.
     Italic = 0x0002,
+    /// Single underline.
     Underline = 0x0004,
+    /// Double underline.
     DoubleUnderline = 0x0008,
+    /// Wavy / curly underline.
     CurlyUnderline = 0x0010,
+    /// Dotted underline.
     DottedUnderline = 0x0020,
+    /// Strike-through (a line through the glyph).
     StrikeThrough = 0x0040, 
 }
 
