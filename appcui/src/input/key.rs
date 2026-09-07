@@ -3,16 +3,16 @@ use std::fmt::Display;
 use super::KeyCode;
 use super::KeyModifier;
 
-/// Represents a keyboard key and its modifier.
-/// 
-/// This struct contains a `KeyCode` and a `KeyModifier`.
-/// 
-/// # Fields
-/// * `code` - The code of the key.
-/// * `modifier` - The modifier of the key.
+/// A keyboard key together with any modifier keys.
+///
+/// `code` is the physical/logical key ([`KeyCode`]). `modifier` is Alt, Ctrl, and/or
+/// Shift ([`KeyModifier`]). Use [`Key::new`](Self::new) or the `key!` macro for shortcuts
+/// such as `Ctrl+S`.
 #[derive(Copy, Clone, PartialEq, Debug, Eq)]
 pub struct Key {
+    /// The key that was pressed, without modifiers.
     pub code: KeyCode,
+    /// Alt, Ctrl, and/or Shift held together with [`Self::code`].
     pub modifier: KeyModifier,
 }
 
