@@ -28,6 +28,11 @@ fn is_variation_selector(c: char) -> bool {
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
+/// A single-line text field with optional per-character styling.
+///
+/// `RichTextField` supports the same editing, selection, and clipboard behavior as
+/// [`TextField`], plus an `on_color` callback that receives an [`AttributeText`] view.
+/// See [`Flags`] for optional behavior.
 pub struct RichTextField {
     chars: Vec<Character>,
     text_cache: String,

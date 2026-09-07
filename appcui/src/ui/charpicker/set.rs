@@ -118,6 +118,10 @@ enum SetData {
     List(Vec<char>),
     MultiIntervals(&'static [UnicodeInterval]),
 }
+/// A named collection of characters that can be shown in a [`super::CharPicker`].
+///
+/// A `Set` is built from a Unicode interval, multiple intervals (including
+/// [`UnicodeSymbols`]), or an explicit list of characters.
 pub struct Set {
     name: FlatString<22>,
     count: u32,

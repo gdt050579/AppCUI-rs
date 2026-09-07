@@ -8,6 +8,11 @@ use crate::{
 
 use super::ControlBase;
 
+/// Shared implementation for controls that host child controls.
+///
+/// `ContainerBase` wraps a [`ControlBase`] and adds helpers for adding children and
+/// managing inner margins. Custom container controls typically embed this type as
+/// their base.
 #[repr(C)]
 #[derive(Default)]
 pub struct ContainerBase {

@@ -31,6 +31,10 @@ enum CharOrSpecialChar {
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnExpand+OnMouseEvent+OnKeyPressed, internal=true)]
+/// A picker for selecting a calendar date.
+///
+/// `DatePicker` shows the current date and expands into a month view with navigation
+/// between months and years. Changing the date raises a date-changed event.
 pub struct DatePicker {
     header_y_ofs: i32,
     expanded_panel_y: i32,

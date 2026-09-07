@@ -29,6 +29,11 @@ where
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
+/// A non-editable dropdown for selecting one typed item from a list.
+///
+/// `DropDownList` displays the current item and expands to show all options. Items
+/// implement [`DropDownListType`] so they can provide a name, optional description, and
+/// optional symbol. See [`Flags`] for optional behavior.
 pub struct DropDownList<T>
 where
     T: DropDownListType + 'static,

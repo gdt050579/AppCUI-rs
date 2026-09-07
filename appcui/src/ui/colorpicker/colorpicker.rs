@@ -32,6 +32,10 @@ static REVERSED_COLORS: [Color; 16] = [
 ];
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
+/// A picker for choosing a color from the standard 16-color palette.
+///
+/// `ColorPicker` shows the current color and expands into a palette (including
+/// transparent). Selecting a color updates the value and raises a color-changed event.
 pub struct ColorPicker {
     color: Color,
     header_y_ofs: i32,

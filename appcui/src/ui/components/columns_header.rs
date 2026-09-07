@@ -32,6 +32,10 @@ impl ColumnsHeaderAction {
         !matches!(self, ColumnsHeaderAction::None | ColumnsHeaderAction::Repaint)
     }
 }
+/// A sortable, resizable header row of [`Column`]s used by list and tree views.
+///
+/// `ColumnsHeader` paints column titles, handles hover and drag-resize, and can
+/// request sort or auto-size actions through [`ColumnsHeaderAction`].
 pub struct ColumnsHeader {
     columns: Vec<Column>,
     hovered: SelectedComponent,

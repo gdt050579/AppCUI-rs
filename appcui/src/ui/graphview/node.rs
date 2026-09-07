@@ -7,6 +7,10 @@ use crate::graphics::*;
 // normal - culoarea data de mine
 // pentru margine si pentru text
 
+/// A positioned node in a [`super::Graph`], wrapping user data that implements [`GraphNode`].
+///
+/// A `Node` stores the value, bounding rectangle, optional border and text style, and
+/// the incident edges used for layout and hit-testing.
 pub struct Node<T: GraphNode> {
     pub(super) obj: T,
     pub(super) rect: Rect,
@@ -139,6 +143,7 @@ where
     }
 }
 
+/// A builder for constructing a [`Node`] with optional size, position, border, and text style.
 pub struct NodeBuilder<T>
 where
     T: GraphNode,
@@ -212,6 +217,10 @@ where
     }
 }
 
+/// A mutable view of a [`Node`] while a [`super::Graph`] is being edited.
+///
+/// Changes are recorded so the owning [`super::GraphView`] can refresh the affected
+/// geometry.
 pub struct EditableNode<'a, T: GraphNode + 'a> {
     node: &'a mut Node<T>,
     changed: &'a mut bool,

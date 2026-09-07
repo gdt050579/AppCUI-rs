@@ -47,6 +47,10 @@ impl TextLine {
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
+/// A multi-column table for displaying and selecting items that implement [`ListItem`].
+///
+/// `ListView` supports sortable columns, optional check marks, grouping, filtering, and
+/// search. Column layout and selection behavior are controlled by [`Flags`].
 pub struct ListView<T>
 where
     T: ListItem + 'static,

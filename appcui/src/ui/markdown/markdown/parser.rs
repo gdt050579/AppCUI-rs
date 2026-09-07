@@ -12,7 +12,10 @@ pub enum MarkdownElement {
     Table(Table)
 }
 
-// Enum representing Markdown  table with rows and cells.
+/// A parsed Markdown table with header cells and body rows.
+///
+/// Each cell is a sequence of inline elements. This type is produced by the Markdown
+/// parser and rendered by [`crate::ui::Markdown`].
 #[derive(Debug)]
 pub struct Table {
     pub headers: Vec<Vec<InlineElement>>,

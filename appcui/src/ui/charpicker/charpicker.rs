@@ -25,6 +25,10 @@ struct Navigation {
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
+/// A picker for selecting a character from one or more Unicode sets.
+///
+/// `CharPicker` shows the current character and expands into a navigable grid of glyphs.
+/// Sets can be built from intervals, explicit lists, or predefined [`Set`] collections.
 pub struct CharPicker {
     character: Option<char>,
     header_y_ofs: i32,

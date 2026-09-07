@@ -34,6 +34,10 @@ where
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
+/// A dropdown for choosing one variant of an enum that implements [`EnumSelector`].
+///
+/// `Selector` lists every variant of `T` and displays the current one. The expanded
+/// list can include descriptions. See [`Flags`] for optional behavior.
 pub struct Selector<T>
 where
     T: EnumSelector + Copy + Eq + 'static,

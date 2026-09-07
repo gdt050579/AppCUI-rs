@@ -6,6 +6,10 @@ use crate::{
 use super::super::Type;
 use super::{AddToToolbar, Group, ItemBase, PaintData, ToolBarItem};
 
+/// A non-interactive toolbar item that shows a short status string on a window.
+///
+/// `Tag` is typically placed in a toolbar group to display transient text such as a
+/// mode name or count. An empty caption hides the tag.
 pub struct Tag {
     pub(super) base: ItemBase,
     text: String,

@@ -43,6 +43,11 @@ pub(crate) struct Margins {
     pub(crate) bottom: u8,
 }
 
+/// Shared state and behavior embedded in every UI control.
+///
+/// `ControlBase` stores layout, visibility, focus, children, and input flags. Custom
+/// controls created with the `CustomControl` macro receive this type as their `base`
+/// field.
 #[repr(C)]
 #[derive(Default)]
 pub struct ControlBase {

@@ -2,6 +2,10 @@ use super::ListItem;
 use super::Group;
 use crate::graphics::CharAttribute;
 
+/// A row in a [`super::ListView`], wrapping a [`ListItem`] value plus display metadata.
+///
+/// `Item` stores the user data, optional check state, icon, character attributes, and
+/// the [`Group`] the row belongs to.
 pub struct Item<T>
 where
     T: ListItem,

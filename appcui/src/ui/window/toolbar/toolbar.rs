@@ -15,11 +15,20 @@ use super::{
 };
 use super::super::Type;
 
+/// An opaque handle to a toolbar item together with the [`Group`] it belongs to.
+///
+/// `ToolbarElementHandle` is used internally by [`ToolBar`] to keep items ordered
+/// within their groups.
 pub struct ToolbarElementHandle {
     group: Group,
     handle: Handle<()>,
 }
 
+/// The collection of toolbar groups and items attached to a [`crate::ui::Window`].
+///
+/// `ToolBar` manages items along the top and bottom margins of a window. Create a
+/// [`Group`] with [`crate::ui::window::Window::toolbar`] and add buttons, labels,
+/// checkboxes, or other toolbar items to it.
 #[derive(Default)]
 pub struct ToolBar {
     pub(super) items: HandleManager<ToolBarItem>,

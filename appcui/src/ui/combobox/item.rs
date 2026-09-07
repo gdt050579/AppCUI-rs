@@ -1,3 +1,7 @@
+/// A named entry in a [`super::ComboBox`], with an optional description.
+///
+/// The value is the text shown in the collapsed control and in the list. The
+/// description can appear beside the item when the combo box flags allow it.
 pub struct Item {
     pub(super) value: String,
     pub(super) description: String,

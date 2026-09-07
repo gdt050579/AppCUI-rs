@@ -1,6 +1,10 @@
 use crate::prelude::*;
 
 #[CustomControl(overwrite=OnPaint, internal=true)]
+/// A non-interactive control that displays static text.
+///
+/// `Label` renders a caption (which may include a hotkey) and does not accept focus or
+/// input. It is used for titles, descriptions, and other read-only text.
 pub struct Label {
     caption: Caption,
 }

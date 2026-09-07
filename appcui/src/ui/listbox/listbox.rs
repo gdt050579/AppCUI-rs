@@ -6,6 +6,10 @@ use listbox::events::ListBoxEventTypes;
 use appcui_proc_macro::*;
 
 #[CustomControl(overwrite = OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal = true)]
+/// A scrollable list of selectable (and optionally checkable) text items.
+///
+/// `ListBox` supports keyboard and mouse navigation, optional search, and single or
+/// multiple selection depending on [`Flags`]. Each entry is a [`Item`].
 pub struct ListBox {
     items: Vec<Item>,
     flags: Flags,

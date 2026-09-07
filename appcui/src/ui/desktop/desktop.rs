@@ -9,6 +9,11 @@ pub enum ArrangeWindowsMethod {
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed, internal=true, desktop=true)]
+/// The root container that hosts application windows and global UI chrome.
+///
+/// `Desktop` is the top-level surface created when the application starts. It manages
+/// windows, dialogs, and desktop-wide keyboard handling, and can arrange open windows
+/// using [`ArrangeWindowsMethod`].
 pub struct Desktop {}
 
 impl Desktop {

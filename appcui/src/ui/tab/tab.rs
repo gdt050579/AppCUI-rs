@@ -3,6 +3,11 @@ use crate::ui::tab::{Flags, Type};
 use super::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed, internal=true)]
+/// A container that organizes child pages behind a row of selectable tabs.
+///
+/// `Tab` shows one page at a time. Selecting a tab header switches the visible page and
+/// raises a tab-changed event. Header style and optional behavior are controlled by
+/// [`Type`] and [`Flags`].
 pub struct Tab {
     tab_type: Type,
     flags: Flags,
