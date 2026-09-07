@@ -7,10 +7,15 @@ use EnumBitFlags::EnumBitFlags;
 /// `Standard` uses a boxed track, `ProgressBar` fills from the left, `Inline` and
 /// `Blocks` use Unicode bar characters, and `Ruler` draws tick marks below the track.
 pub enum Type {
+    /// Boxed track with a marker, for example `[....X....]`.
     Standard,
+    /// Fill from the left like a progress bar, for example `[====>    ]`.
     ProgressBar,
+    /// Thin Unicode bar with a round marker, for example `━━━━●━━━━`.
     Inline,
+    /// Solid/empty blocks, for example `█████░░░░░`.
     Blocks,
+    /// Bar with tick marks underneath, for example `━━━━●━━━━` over `┕━━┷━━┙`.
     Ruler,
 }
 

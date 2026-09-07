@@ -14,13 +14,21 @@ const MI: FormatNumber = FormatNumber::new(10).suffix(" mi").group(3, b',');
 ///
 /// Selects metric or imperial linear units (km, m, in, ft, mi, and similar).
 pub enum DistanceFormat {
+    /// Kilometers, for example `12 km`.
     Kilometers,
+    /// Meters, for example `12 m`.
     Meters,
+    /// Centimeters, for example `12 cm`.
     Centimeters,
+    /// Millimeters, for example `12 mm`.
     Millimeters,
+    /// Inches, for example `12 in`.
     Inches,
+    /// Feet, for example `12 ft`.
     Feet,
+    /// Yards, for example `12 yd`.
     Yards,
+    /// Miles, for example `12 mi`.
     Miles,
 }
 

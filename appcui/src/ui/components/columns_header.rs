@@ -18,12 +18,19 @@ enum SelectedComponent {
 /// Controls that host a header use this to decide whether to repaint, resize a
 /// column, scroll, sort, or treat the event as already handled.
 pub enum ColumnsHeaderAction {
+    /// No header interaction; ignore the event.
     None,
+    /// The header needs to be redrawn.
     Repaint,
+    /// The user is dragging a column separator to change its width.
     ResizeColumn,
+    /// Horizontal scroll should follow the header.
     UpdateScroll,
+    /// The event was handled and should not be processed further.
     Processed,
+    /// Sort by the given column index; the `bool` is `true` for ascending.
     Sort((u16, bool)),
+    /// Auto-size the column at the given index to fit its content.
     AutoResize(u16),
 }
 impl ColumnsHeaderAction {

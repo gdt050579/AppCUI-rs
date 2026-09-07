@@ -5,6 +5,8 @@
 /// `None` renders the document only. `ScrollBars` adds bars when the content is
 /// larger than the control.
 pub enum Flags {
+    /// Render the document only, with no scroll bars.
     None,
+    /// Show scroll bars when the document is larger than the control.
     ScrollBars
 }

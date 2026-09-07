@@ -21,27 +21,49 @@ pub(crate) struct RenderData<'a> {
 /// Each variant pairs raw data (text, numbers, dates, status, and similar) with a
 /// format enum that controls units, precision, or glyphs.
 pub enum RenderMethod<'a> {
+    /// Unicode text, for example `Hello`.
     Text(&'a str),
+    /// ASCII-only text (non-ASCII is replaced).
     Ascii(&'a str),
+    /// A date and time using [`DateTimeFormat`].
     DateTime(NaiveDateTime, DateTimeFormat),
+    /// A time of day using [`TimeFormat`].
     Time(NaiveTime, TimeFormat),
+    /// A calendar date using [`DateFormat`].
     Date(NaiveDate, DateFormat),
+    /// A duration using [`DurationFormat`].
     Duration(Duration, DurationFormat),
+    /// A signed integer using [`NumericFormat`].
     Int64(i64, NumericFormat),
+    /// An unsigned integer using [`NumericFormat`].
     UInt64(u64, NumericFormat),
+    /// A boolean using [`BoolFormat`], for example `True` / `False`.
     Bool(bool, BoolFormat),
+    /// A byte size using [`SizeFormat`], for example `1.50 KB`.
     Size(u64, SizeFormat),
+    /// A percentage using [`PercentageFormat`], for example `75%`.
     Percentage(f64, PercentageFormat),
+    /// A floating-point value using [`FloatFormat`].
     Float(f64, FloatFormat),
+    /// A task [`Status`] painted with [`StatusFormat`].
     Status(Status, StatusFormat),
+    /// A temperature using [`TemperatureFormat`], for example `21.5°C`.
     Temperature(f64, TemperatureFormat),
+    /// An area using [`AreaFormat`], for example `12 m²`.
     Area(u64, AreaFormat),
+    /// A rating using [`RatingFormat`], for example `★★★☆☆`.
     Rating(u32, RatingFormat),
+    /// A monetary value using [`CurrencyFormat`], for example `$ 12.50`.
     Currency(f64, CurrencyFormat),
+    /// A distance using [`DistanceFormat`], for example `12 km`.
     Distance(u64, DistanceFormat),
+    /// A volume using [`VolumeFormat`], for example `12 l`.
     Volume(u64, VolumeFormat),
+    /// A weight using [`WeightFormat`], for example `12 kg`.
     Weight(u64, WeightFormat),
+    /// A speed using [`SpeedFormat`], for example `90 km/h`.
     Speed(u64, SpeedFormat),
+    /// Custom painting supplied by the list item.
     Custom,
 }
 impl<'a> RenderMethod<'a> {

@@ -4,7 +4,9 @@
 /// Absolute values are in cells. Percentage values are typically between `0.0` and
 /// `1.0` of the parent size.
 pub enum Dimension {
+    /// Size in character cells, for example `20`.
     Absolute(u32),
+    /// Fraction of the parent size, typically `0.0`–`1.0` (for example `0.5` is 50%).
     Percentage(f32),
 }
 impl Dimension {

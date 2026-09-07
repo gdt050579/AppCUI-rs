@@ -8,7 +8,9 @@ const MIN_COORDONATE: i32 = -30000;
 /// Absolute values are character cells. Percentage values are stored as parts per
 /// 10,000 (so `0.5` becomes `5000`).
 pub enum Coordinate16 {
+    /// Offset in character cells.
     Absolute(i16),
+    /// Fraction of the parent, stored as parts per 10,000 (for example `5000` is 50%).
     Percentage(i16),
 }
 impl Coordinate16 {

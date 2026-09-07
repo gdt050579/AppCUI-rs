@@ -8,7 +8,9 @@ const MIN_DIMENSION: i32 = 0;
 /// Absolute values are character cells. Percentage values are stored as parts per
 /// 10,000 (so `0.5` becomes `5000`).
 pub enum Dimension16 {
+    /// Size in character cells.
     Absolute(u16),
+    /// Fraction of the parent, stored as parts per 10,000 (for example `5000` is 50%).
     Percentage(u16),
 }
 impl Dimension16 {

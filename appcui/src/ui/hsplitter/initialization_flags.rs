@@ -5,7 +5,9 @@ use EnumBitFlags::EnumBitFlags;
 ///
 /// `Top` is the upper panel, `Bottom` the lower panel.
 pub enum Panel {
+    /// The upper pane.
     Top,
+    /// The lower pane.
     Bottom,
 }
 
@@ -15,8 +17,11 @@ pub enum Panel {
 /// Preserve the relative split, keep the top panel's size, or keep the bottom
 /// panel's size.
 pub enum ResizeBehavior {
+    /// Keep the same relative split (for example 30% / 70%) when the parent grows or shrinks.
     PreserveAspectRatio,
+    /// Keep the top pane's height in character cells; the bottom pane absorbs the change.
     PreserveTopPanelSize,
+    /// Keep the bottom pane's height in character cells; the top pane absorbs the change.
     PreserveBottomPanelSize,
 }
 

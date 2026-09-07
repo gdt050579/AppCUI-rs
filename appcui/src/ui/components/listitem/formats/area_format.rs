@@ -18,15 +18,25 @@ const MIP: FormatNumber = FormatNumber::new(10).suffix(" mi²").group(3, b',');
 ///
 /// Selects metric or imperial squared units (mm², m², ha, ft², and similar).
 pub enum AreaFormat {
+    /// Square millimeters, for example `12 mm²`.
     SquaredMillimeters,
+    /// Square centimeters, for example `12 cm²`.
     SquaredCentimeters,
+    /// Square meters, for example `12 m²`.
     SquaredMeters,
+    /// Square kilometers, for example `12 km²`.
     SquaredKilometers,
+    /// Hectares, for example `12 ha`.
     Hectares,
+    /// Ares, for example `12 a`.
     Ares,
+    /// Square feet, for example `12 ft²`.
     SquareFeet,
+    /// Square inches, for example `12 in²`.
     SquareInches,
+    /// Square yards, for example `12 yd²`.
     SquareYards,
+    /// Square miles, for example `12 mi²`.
     SquareMiles,
 }
 

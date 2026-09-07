@@ -19,16 +19,27 @@ const RON: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2).prefi
 ///
 /// Each variant selects a prefix such as `USD`, `$`, `EUR`, or `₿`.
 pub enum CurrencyFormat {
+    /// US dollars with a `USD` prefix, for example `USD 12.50`.
     USD,
+    /// US dollars with `$`, for example `$ 12.50`.
     USDSymbol,
+    /// Euros with a `EUR` prefix, for example `EUR 12.50`.
     EUR,
+    /// Euros with `€`, for example `€ 12.50`.
     EURSymbol,
+    /// Pounds sterling with a `GBP` prefix, for example `GBP 12.50`.
     GBP,
+    /// Pounds sterling with `£`, for example `£ 12.50`.
     GBPSymbol,
+    /// Yen with a `YEN` prefix, for example `YEN 12.50`.
     YEN,
+    /// Yen with `¥`, for example `¥ 12.50`.
     YENSymbol,
+    /// Bitcoin with a `BTC` prefix, for example `BTC 12.50`.
     Bitcoin,
+    /// Bitcoin with `₿`, for example `₿ 12.50`.
     BitcoinSymbol,
+    /// Romanian lei with a `RON` prefix, for example `RON 12.50`.
     RON,    
 }
 

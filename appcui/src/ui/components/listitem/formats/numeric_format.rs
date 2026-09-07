@@ -14,11 +14,17 @@ const HEX_64_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").represent
 /// Choose plain decimal, thousands separators, or hexadecimal with an optional
 /// fixed width (16, 32, or 64 bits).
 pub enum NumericFormat {
+    /// Plain decimal, for example `1234`.
     Normal,
+    /// Thousands separators, for example `1,234`.
     Separator,
+    /// Hexadecimal with `0x`, for example `0x4D2`.
     Hex,
+    /// Hex padded to 16 bits, for example `0x04D2`.
     Hex16,
+    /// Hex padded to 32 bits, for example `0x000004D2`.
     Hex32,
+    /// Hex padded to 64 bits, for example `0x00000000000004D2`.
     Hex64,
 }
 

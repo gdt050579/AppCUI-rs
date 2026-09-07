@@ -46,7 +46,9 @@ use crate::{
 /// Return `Processed` to stop further handling, or `Ignored` to let the event
 /// bubble to other controls.
 pub enum EventProcessStatus {
+    /// The control handled the event; do not propagate it further.
     Processed,
+    /// The control did not handle the event; parents may still process it.
     Ignored,
 }
 #[repr(u8)]
@@ -55,7 +57,9 @@ pub enum EventProcessStatus {
 ///
 /// Event handlers return `Allow` to proceed or `Deny` to cancel the action.
 pub enum ActionRequest {
+    /// Proceed with the action (for example, close the window).
     Allow,
+    /// Cancel the action.
     Deny,
 }
 #[repr(u8)]
@@ -64,7 +68,9 @@ pub enum ActionRequest {
 ///
 /// `OnTop` expands above the control, `OnBottom` expands below it.
 pub enum ExpandedDirection {
+    /// Open the expanded panel above the control.
     OnTop,
+    /// Open the expanded panel below the control.
     OnBottom,
 }
 

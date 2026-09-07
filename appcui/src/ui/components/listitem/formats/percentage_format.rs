@@ -9,7 +9,9 @@ const PERCENTAGE_FORMAT_DIGITS: FormatNumber = FormatNumber::new(10).decimals(2)
 ///
 /// `Normal` shows a whole-number percent; `Decimals` keeps two fractional digits.
 pub enum PercentageFormat {
+    /// Whole-number percent, for example `75%`.
     Normal,
+    /// Two decimal places, for example `75.50%`.
     Decimals,
 }
 

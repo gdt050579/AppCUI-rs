@@ -13,9 +13,12 @@ pub enum Flags {
 /// `Classic` uses a standard frame, `Rounded` uses rounded corners, and `Panel`
 /// looks like a borderless panel.
 pub enum Type {
+    /// Standard square corners, for example `┌────┐`.
     #[default]
     Classic,
+    /// Rounded corners, for example `╭────╮`.
     Rounded,
+    /// Borderless panel look without window chrome.
     Panel,
 }
 
@@ -27,9 +30,13 @@ pub enum Type {
 /// `Normal` uses the theme default. `Error`, `Warning`, and `Notification` tint the
 /// window to indicate severity.
 pub enum Background {
+    /// Theme default window background.
     #[default]
     Normal,
+    /// Error tint (typically red) for failure dialogs.
     Error,
+    /// Warning tint (typically yellow/olive) for caution dialogs.
     Warning,
+    /// Notification tint for informational dialogs.
     Notification
 }

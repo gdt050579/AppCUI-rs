@@ -12,9 +12,13 @@ const FOUR_DIGITS: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(
 /// `Normal` uses two decimal places without grouping; the other variants add
 /// thousands separators and extra fractional digits.
 pub enum FloatFormat {
+    /// Two decimals without grouping, for example `1234.56`.
     Normal,
+    /// Two decimals with thousands separators, for example `1,234.56`.
     TwoDigits,
+    /// Three decimals with grouping, for example `1,234.560`.
     ThreeDigits,
+    /// Four decimals with grouping, for example `1,234.5600`.
     FourDigits,
 }
 

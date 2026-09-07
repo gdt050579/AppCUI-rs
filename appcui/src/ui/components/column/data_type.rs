@@ -4,10 +4,15 @@
 /// Used by [`Type`] when a column stores booleans, choosing labels such as True/False
 /// or a check-mark glyph.
 pub enum BoolFormat {
+    /// The words `True` / `False`.
     TrueFalse,
+    /// The words `Yes` / `No`.
     YesNo,
+    /// The words `On` / `Off`.
     OnOff,
+    /// A checkbox glyph, for example `☑` / `☐`.
     CheckBox,
+    /// A bare check mark, for example `√` / empty.
     CheckMark
 }
 
@@ -16,6 +21,8 @@ pub enum BoolFormat {
 ///
 /// A column is either a string or a boolean with a display format such as True/False or a check mark.
 pub enum Type {
+    /// A text column.
     String,
+    /// A boolean column using the given display format.
     Bool(BoolFormat),
 }

@@ -11,8 +11,10 @@ pub enum Flags {
 /// How edges are drawn between nodes in a [`super::GraphView`]: straight lines or orthogonal segments.
 #[derive(Clone, Copy, PartialEq, Eq, EnumSelector)]
 pub enum EdgeRouting {
+    /// Straight line between node centers, for example `A────────B`.
     #[VariantInfo(name = "Direct", description = "Draw edges as direct lines between nodes")]
     Direct,
+    /// Horizontal and vertical segments, for example `A──┐` / `   └──B`.
     #[VariantInfo(name = "Orthogonal", description = "Draw edges as orthogonal lines between nodes")]
     Orthogonal,
 }
@@ -23,11 +25,18 @@ pub enum EdgeRouting {
 /// Choose an unchanged layout, grid, circular, hierarchical, or force-directed
 /// arrangement. Packed variants reduce unused space between nodes.
 pub enum ArrangeMethod {
+    /// Leave node positions unchanged.
     None,
+    /// Place nodes on a regular grid.
     Grid,
+    /// Pack nodes on a grid with less unused space.
     GridPacked,
+    /// Arrange nodes around a circle.
     Circular,
+    /// Tree-like layers from a root.
     Hierarchical,
+    /// Hierarchical layout with less unused space.
     HierarchicalPacked,
+    /// Spring/force simulation that spreads connected nodes.
     ForceDirected,
 }

@@ -6,9 +6,13 @@ use crate::prelude::*;
 /// `Cascade` overlaps windows diagonally; `Vertical`, `Horizontal`, and `Grid` split
 /// the desktop into equal tiles.
 pub enum ArrangeWindowsMethod {
+    /// Overlap windows diagonally, each offset from the previous.
     Cascade,
+    /// Stack windows in a vertical column.
     Vertical,
+    /// Place windows in a horizontal row.
     Horizontal,
+    /// Tile windows in a rectangular grid.
     Grid,
 }
 

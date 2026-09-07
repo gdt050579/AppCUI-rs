@@ -7,7 +7,9 @@ use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 /// `OnValidate` is raised when the user confirms the text; `OnTextChanged` after
 /// each edit.
 pub enum TextFieldEventsType {
+    /// The user confirmed the text (Enter or similar).
     OnValidate,
+    /// The text content changed.
     OnTextChanged,
 }
 

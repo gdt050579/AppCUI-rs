@@ -20,16 +20,27 @@ const CUBIC_MI: FormatNumber = FormatNumber::new(10).suffix(" mi³").group(3, b'
 ///
 /// Selects cubic metric or imperial units, plus liters, milliliters, and gallons.
 pub enum VolumeFormat {
+    /// Cubic millimeters, for example `12 mm³`.
     CubicMilimeters,
+    /// Cubic centimeters, for example `12 cm³`.
     CubicCentimeters,
+    /// Cubic meters, for example `12 m³`.
     CubicMeters,
+    /// Cubic kilometers, for example `12 km³`.
     CubicKilometers,
+    /// Liters, for example `12 l`.
     Liters,
+    /// Milliliters, for example `12 ml`.
     Milliliters,
+    /// Gallons, for example `12 gal`.
     Gallons,
+    /// Cubic feet, for example `12 ft³`.
     CubicFeet,
+    /// Cubic inches, for example `12 in³`.
     CubicInches,
+    /// Cubic yards, for example `12 yd³`.
     CubicYards,
+    /// Cubic miles, for example `12 mi³`.
     CubicMiles,
 }
 

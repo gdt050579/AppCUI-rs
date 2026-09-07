@@ -6,28 +6,51 @@ use flat_string::FlatString;
 /// Each variant selects a category of glyphs (arrows, math, emoticons, and so on)
 /// without listing individual code points.
 pub enum UnicodeSymbols {
+    /// Animal pictographs, for example `🐶`.
     Animals,
+    /// Arabic letters and presentation forms, for example `ا`.
     Arabic,
+    /// Arrow glyphs, for example `→` or `➔`.
     Arrows,
+    /// Printable ASCII, for example `A`–`Z` and `0`–`9`.
     Ascii,
+    /// Block elements, for example `█ ▓ ░`.
     Blocks,
+    /// Box-drawing lines, for example `┌─┐`.
     BoxDrawing,
+    /// Braille patterns, for example `⠓`.
     Braille,
+    /// CJK ideographs used for Chinese.
     Chinese,
+    /// Currency signs, for example `$ € ¥`.
     Currency,
+    /// Cyrillic letters, for example `Ж`.
     Cyrillic,
+    /// Emoticon faces, for example `😀`.
     Emoticons,
+    /// Game symbols (cards, dice, chess), for example `♠ ♟`.
     Games,
+    /// Greek letters, for example `Ω`.
     Greek,
+    /// Latin letters including extended forms, for example `A` or `Æ`.
     Latin,
+    /// Mathematical operators, for example `∑ √ ∞`.
     Math,
+    /// Digits and number forms, for example `1 ½ ①`.
     Numbers,
+    /// Miscellaneous pictographs, for example `☀ ★`.
     Pictographs,
+    /// Punctuation, for example `… — ¿`.
     Punctuation,
+    /// Geometric shapes, for example `■ ▲ ●`.
     Shapes,
+    /// Subscript characters, for example `₂`.
     Subscripts,
+    /// Superscript characters, for example `² ³`.
     Superscripts,
+    /// Transport pictographs, for example `🚗 ✈`.
     Transport,
+    /// A broad Unicode sample spanning many scripts.
     Unicode,
 }
 

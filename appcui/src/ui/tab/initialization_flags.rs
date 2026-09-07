@@ -13,8 +13,12 @@ pub enum Flags {
 /// `HiddenTabs` shows only the page. The other variants place the header bar on
 /// the top, bottom, or left edge.
 pub enum Type {
+    /// No header bar; only the selected page is shown.
     HiddenTabs,
+    /// Headers along the top edge, for example `[Page 1] Page 2 Page 3`.
     OnTop,
+    /// Headers along the bottom edge.
     OnBottom,
+    /// Headers stacked on the left side, one caption per row.
     OnLeft,
 }
