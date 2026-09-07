@@ -9,6 +9,10 @@ pub enum Flags {
 
 
 #[derive(Clone, Copy)]
+/// How the value of a [`super::NumericSelector`] is displayed.
+///
+/// Choose plain decimal, a percentage, thousands grouping, hexadecimal, or a
+/// human-readable size. This maps to [`crate::ui::common::NumberFormat`].
 pub enum Format {
     Decimal,
     Percentage,

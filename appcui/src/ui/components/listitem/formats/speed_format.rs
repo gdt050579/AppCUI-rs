@@ -12,6 +12,9 @@ const MACH: FormatNumber            = FormatNumber::new(10).suffix(" mach").grou
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Unit used when rendering a speed list-item value.
+///
+/// Selects km/h, m/s, mph, knots, Mach, and similar units.
 pub enum SpeedFormat {
     KilometersPerHour,
     MetersPerHour,

@@ -2,6 +2,10 @@ use EnumBitFlags::EnumBitFlags;
 
 #[repr(u8)]
 #[derive(Copy,Clone,PartialEq,Eq)]
+/// Visual style of an [`super::HSlider`] track and marker.
+///
+/// `Standard` uses a boxed track, `ProgressBar` fills from the left, `Inline` and
+/// `Blocks` use Unicode bar characters, and `Ruler` draws tick marks below the track.
 pub enum Type {
     Standard,
     ProgressBar,

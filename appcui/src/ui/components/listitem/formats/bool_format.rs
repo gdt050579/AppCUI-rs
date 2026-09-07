@@ -1,4 +1,7 @@
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// How a boolean list-item value is rendered as text.
+///
+/// Choose True/False, Yes/No, or compact glyphs such as `X`/`-` or a check mark.
 pub enum BoolFormat {
     TrueFalse,
     YesNo,

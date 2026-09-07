@@ -1,6 +1,10 @@
 use crate::utils::FormatNumber;
 
 #[derive(Copy, Clone)]
+/// Progress or lifecycle state of a list-item task.
+///
+/// Running and paused states carry a 0.0–1.0 completion fraction. Other variants
+/// are discrete (queued, stopped, error, completed).
 pub enum Status {
     Running(f32),
     Queued,
@@ -88,6 +92,9 @@ impl PartialOrd for Status {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Visual style used when rendering a [`Status`] bar in a list item.
+///
+/// Choose hash marks, a graphical bar, an arrow, or block characters.
 pub enum StatusFormat {
     Hashtag,
     Graphical,

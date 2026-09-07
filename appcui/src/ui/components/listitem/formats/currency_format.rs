@@ -15,6 +15,9 @@ const RON: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2).prefi
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Currency and symbol used when rendering a monetary list-item value.
+///
+/// Each variant selects a prefix such as `USD`, `$`, `EUR`, or `₿`.
 pub enum CurrencyFormat {
     USD,
     USDSymbol,

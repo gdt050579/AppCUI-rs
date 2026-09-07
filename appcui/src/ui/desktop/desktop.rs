@@ -1,6 +1,10 @@
 use crate::prelude::*;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// How open windows are tiled on the [`struct@Desktop`].
+///
+/// `Cascade` overlaps windows diagonally; `Vertical`, `Horizontal`, and `Grid` split
+/// the desktop into equal tiles.
 pub enum ArrangeWindowsMethod {
     Cascade,
     Vertical,

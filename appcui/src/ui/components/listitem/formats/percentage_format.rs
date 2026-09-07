@@ -5,6 +5,9 @@ const PERCENTAGE_FORMAT_DIGITS: FormatNumber = FormatNumber::new(10).decimals(2)
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// How a percentage list-item value is rendered.
+///
+/// `Normal` shows a whole-number percent; `Decimals` keeps two fractional digits.
 pub enum PercentageFormat {
     Normal,
     Decimals,

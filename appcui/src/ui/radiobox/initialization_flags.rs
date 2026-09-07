@@ -1,4 +1,8 @@
     #[derive(Copy, Clone, PartialEq, Eq)]
+    /// Visual style of a [`super::RadioBox`] selection mark.
+    ///
+    /// Variants choose the glyphs used for the selected and unselected states, from a
+    /// classic `(●)` circle to Unicode bullets, diamonds, or a target.
     pub enum Type {
         Standard,
         Circle,

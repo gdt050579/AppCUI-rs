@@ -10,6 +10,9 @@ const YD: FormatNumber = FormatNumber::new(10).suffix(" yd").group(3, b',');
 const MI: FormatNumber = FormatNumber::new(10).suffix(" mi").group(3, b',');
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Unit used when rendering a distance list-item value.
+///
+/// Selects metric or imperial linear units (km, m, in, ft, mi, and similar).
 pub enum DistanceFormat {
     Kilometers,
     Meters,

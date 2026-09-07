@@ -3,6 +3,10 @@ const MAX_DIMENSION: i32 = 30000;
 const MIN_DIMENSION: i32 = 0;
 
 #[derive(Copy, Clone, PartialEq, Debug, Eq)]
+/// Compact 16-bit form of a layout dimension used inside [`super::Layout`].
+///
+/// Absolute values are character cells. Percentage values are stored as parts per
+/// 10,000 (so `0.5` becomes `5000`).
 pub enum Dimension16 {
     Absolute(u16),
     Percentage(u16),

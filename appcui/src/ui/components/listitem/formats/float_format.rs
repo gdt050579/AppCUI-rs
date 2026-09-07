@@ -7,6 +7,10 @@ const FOUR_DIGITS: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Precision and grouping used when rendering a floating-point list-item value.
+///
+/// `Normal` uses two decimal places without grouping; the other variants add
+/// thousands separators and extra fractional digits.
 pub enum FloatFormat {
     Normal,
     TwoDigits,

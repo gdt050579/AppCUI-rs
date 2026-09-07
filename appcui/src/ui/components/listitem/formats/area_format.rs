@@ -14,6 +14,9 @@ const MIP: FormatNumber = FormatNumber::new(10).suffix(" mi²").group(3, b',');
 
 // m2, cm2, km2, ha, a, ft2, in2, yd2, mi2
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Unit used when rendering an area value in a list item.
+///
+/// Selects metric or imperial squared units (mm², m², ha, ft², and similar).
 pub enum AreaFormat {
     SquaredMillimeters,
     SquaredCentimeters,

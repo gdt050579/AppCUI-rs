@@ -16,6 +16,10 @@ pub(crate) struct RenderData<'a> {
     pub(crate) attr: Option<CharAttribute>,
 }
 
+/// How a list-item cell is painted, including the value and its display format.
+///
+/// Each variant pairs raw data (text, numbers, dates, status, and similar) with a
+/// format enum that controls units, precision, or glyphs.
 pub enum RenderMethod<'a> {
     Text(&'a str),
     Ascii(&'a str),

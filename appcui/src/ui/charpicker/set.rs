@@ -1,6 +1,10 @@
 use flat_string::FlatString;
 
 // sorted alphabetically
+/// A predefined Unicode range that can populate a [`Set`] in a [`super::CharPicker`].
+///
+/// Each variant selects a category of glyphs (arrows, math, emoticons, and so on)
+/// without listing individual code points.
 pub enum UnicodeSymbols {
     Animals,
     Arabic,

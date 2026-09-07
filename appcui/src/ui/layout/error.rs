@@ -1,6 +1,10 @@
 use std::fmt::*;
 
 #[derive(Debug,Eq,PartialEq)]
+/// A layout construction error caused by conflicting or incomplete parameters.
+///
+/// [`super::LayoutBuilder::build`] returns this when dock, align, pivot, anchors, and
+/// size cannot be combined. Each variant describes one invalid combination.
 pub enum Error {
     XYParameterUsedWithDock,
     AnchorParameterUsedWithDock,

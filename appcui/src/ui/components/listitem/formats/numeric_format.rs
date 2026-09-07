@@ -9,6 +9,10 @@ const HEX_64_FORMAT: FormatNumber = FormatNumber::new(16).prefix("0x").represent
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// How an integer list-item value is rendered.
+///
+/// Choose plain decimal, thousands separators, or hexadecimal with an optional
+/// fixed width (16, 32, or 64 bits).
 pub enum NumericFormat {
     Normal,
     Separator,

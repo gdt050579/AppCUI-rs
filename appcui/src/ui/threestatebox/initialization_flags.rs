@@ -1,5 +1,8 @@
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+/// The three possible values of a [`super::ThreeStateBox`].
+///
+/// Cycles between checked, unchecked, and an indeterminate (unknown) state.
 pub enum State {
     Checked,
     Unchecked,
@@ -7,6 +10,9 @@ pub enum State {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Visual style of a [`super::ThreeStateBox`] check mark.
+///
+/// Variants choose the glyphs used for checked, unchecked, and unknown states.
 pub enum Type {
     Standard,
     Ascii,

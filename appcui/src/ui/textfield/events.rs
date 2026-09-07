@@ -2,6 +2,10 @@ use super::TextField;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Which [`TextField`] event is being delivered to the host.
+///
+/// `OnValidate` is raised when the user confirms the text; `OnTextChanged` after
+/// each edit.
 pub enum TextFieldEventsType {
     OnValidate,
     OnTextChanged,

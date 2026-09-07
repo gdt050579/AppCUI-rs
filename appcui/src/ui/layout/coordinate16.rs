@@ -3,6 +3,10 @@ const MIN_COORDONATE: i32 = -30000;
 
 
 #[derive(Copy, Clone, PartialEq, Debug, Eq)]
+/// Compact 16-bit form of a layout coordinate used inside [`super::Layout`].
+///
+/// Absolute values are character cells. Percentage values are stored as parts per
+/// 10,000 (so `0.5` becomes `5000`).
 pub enum Coordinate16 {
     Absolute(i16),
     Percentage(i16),

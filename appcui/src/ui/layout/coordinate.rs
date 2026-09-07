@@ -1,4 +1,8 @@
 #[derive(Copy, Clone, PartialEq, Debug)]
+/// A position along one axis, either in character cells or as a fraction of the parent.
+///
+/// Absolute values are in cells. Percentage values are typically between `0.0` and
+/// `1.0` of the parent size.
 pub enum Coordinate {
     Absolute(i32),
     Percentage(f32),

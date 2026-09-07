@@ -13,6 +13,10 @@ const TERA_BYTES_DECIMALS: FormatNumber = FormatNumber::new(10).suffix(" TB").gr
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Unit used when rendering a byte-size list-item value.
+///
+/// Fixed units (B, KB, MB, …) can include decimals. `Auto` and `AutoWithDecimals`
+/// pick the largest unit that keeps the number readable.
 pub enum SizeFormat {
     Bytes,
     KiloBytes,

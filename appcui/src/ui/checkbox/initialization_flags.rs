@@ -1,4 +1,8 @@
 #[derive(Copy,Clone,PartialEq,Eq)]
+/// Visual style of a [`super::CheckBox`] check mark.
+///
+/// Variants choose the glyphs used for the checked and unchecked states, from a
+/// classic `[√]` box to Unicode checkboxes, filled boxes, or Yes/No labels.
 pub enum Type {
     Standard,
     Ascii,

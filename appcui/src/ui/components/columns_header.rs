@@ -13,6 +13,10 @@ enum SelectedComponent {
     Column(u16),
 }
 #[derive(Copy, Clone, PartialEq)]
+/// Result of mouse or keyboard interaction with a [`ColumnsHeader`].
+///
+/// Controls that host a header use this to decide whether to repaint, resize a
+/// column, scroll, sort, or treat the event as already handled.
 pub enum ColumnsHeaderAction {
     None,
     Repaint,

@@ -16,6 +16,9 @@ const CUBIC_MI: FormatNumber = FormatNumber::new(10).suffix(" mi³").group(3, b'
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Unit used when rendering a volume list-item value.
+///
+/// Selects cubic metric or imperial units, plus liters, milliliters, and gallons.
 pub enum VolumeFormat {
     CubicMilimeters,
     CubicCentimeters,

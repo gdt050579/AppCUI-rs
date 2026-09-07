@@ -41,18 +41,28 @@ use crate::{
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
+/// Whether a control consumed an input event or left it for its parent.
+///
+/// Return `Processed` to stop further handling, or `Ignored` to let the event
+/// bubble to other controls.
 pub enum EventProcessStatus {
     Processed,
     Ignored,
 }
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
+/// A request to allow or deny an action such as closing a window.
+///
+/// Event handlers return `Allow` to proceed or `Deny` to cancel the action.
 pub enum ActionRequest {
     Allow,
     Deny,
 }
 #[repr(u8)]
 #[derive(Copy, Clone)]
+/// The direction in which an expandable control (combo box, picker, and similar) opens.
+///
+/// `OnTop` expands above the control, `OnBottom` expands below it.
 pub enum ExpandedDirection {
     OnTop,
     OnBottom,
