@@ -1,7 +1,12 @@
 use std::any::TypeId;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 
+/// Events from a [`struct@super::DropDownList`].
+///
+/// Because the list is generic, the control is identified by a type-erased `handle`
+/// and `type_id`. Default methods return [`EventProcessStatus::Ignored`].
 pub trait GenericDropDownListEvents {
+    /// Called when the selected item changes.
     fn on_selection_changed(&mut self, _handle: Handle<()>, _type_id: TypeId) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }

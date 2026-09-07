@@ -13,10 +13,16 @@ pub enum TextFieldEventsType {
     OnTextChanged,
 }
 
+/// Events from a [`struct@super::TextField`].
+///
+/// Implement this on a window to react when the user confirms or edits the text.
+/// Default methods return [`EventProcessStatus::Ignored`].
 pub trait TextFieldEvents {
+    /// Called when the user confirms the text (Enter, if [`super::Flags::ProcessEnter`] is set).
     fn on_validate(&mut self, _handle: Handle<TextField>, _text: &str) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
+    /// Called after the text content changes.
     fn on_text_changed(&mut self, _handle: Handle<TextField>) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }

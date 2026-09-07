@@ -45,7 +45,13 @@ pub struct ToolBar {
     debug_window_title_top_right_margin: i32,
 }
 
+/// A type that can be added to a window [`ToolBar`] within a [`Group`].
+///
+/// Implemented for toolbar buttons, labels, checkboxes, and similar items. Call
+/// [`add`](Self::add) (or the window's toolbar helper) to insert `self` and receive a
+/// [`Handle`].
 pub trait AddToToolbar<T> {
+    /// Adds this item to `toolbar` in `group` and returns a handle to it.
     fn add(self, toolbar: &mut ToolBar, group: Group) -> Handle<T>;
 }
 macro_rules! add_to_toolbar_impl {
