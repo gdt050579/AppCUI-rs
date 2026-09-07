@@ -15,8 +15,11 @@ pub enum CharFlags {
 /// Represents attributes of a character such as foreground color, background color, and flags.
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct CharAttribute {
+    /// Foreground (text) color.
     pub foreground: Color,
+    /// Background color.
     pub background: Color,
+    /// Style flags such as bold or underline.
     pub flags: CharFlags,
 }
 

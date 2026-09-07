@@ -134,9 +134,13 @@ impl From<SpecialChar> for char {
 /// The `Character` struct is used to define a character that can be displayed on the screen.
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub struct Character {
+    /// The glyph to draw (`'A'`, a [`SpecialChar`], or similar).
     pub code: char,
+    /// Foreground (text) color.
     pub foreground: Color,
+    /// Background color.
     pub background: Color,
+    /// Style flags such as bold or underline.
     pub flags: CharFlags,
 }
 impl Character {

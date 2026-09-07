@@ -3,7 +3,9 @@ use std::{fmt::Display, str::FromStr};
 /// Represents a size (width and height) of a rectangle.
 #[derive(Copy, Clone, PartialEq, Debug, Eq, Default)]
 pub struct Size {
+    /// Width in character cells (or pixels, for images).
     pub width: u32,
+    /// Height in character cells (or pixels, for images).
     pub height: u32,
 }
 
