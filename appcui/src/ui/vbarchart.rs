@@ -5,6 +5,7 @@
 mod vbarchart;
 mod initialization_flags;
 pub mod events;
+mod bar;
 #[cfg(test)]
 mod tests;
 

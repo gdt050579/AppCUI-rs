@@ -2,6 +2,8 @@ use super::Flags;
 use crate::prelude::*;
 use std::marker::PhantomData;
 
+
+
 #[CustomControl(overwrite=OnPaint, internal=true)]
 /// A vertical bar chart for a numeric series of type `T`.
 ///
@@ -19,14 +21,6 @@ impl<T> VBarChart<T>
 where
     T: Number + 'static,
 {
-    /// Creates an empty vertical bar chart with the specified layout and flags.
-    ///
-    /// # Examples
-    /// ```rust,no_run
-    /// use appcui::prelude::*;
-    ///
-    /// let chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:30,h:10"), vbarchart::Flags::None);
-    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
