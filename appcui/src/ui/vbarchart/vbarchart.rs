@@ -114,7 +114,7 @@ where
             let bar = &self.bars[start];
             let h = bar.layout.h;
             let d = bar.layout.digits;
-            bar.bar.paint_vertical(surface, charattr!("white,red"), x, y, h, d);
+            bar.bar.paint_vertical(surface, charattr!("red"), x, y, h, d);
             start += 1;
         }
     }
