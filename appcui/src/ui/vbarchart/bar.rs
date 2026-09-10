@@ -29,11 +29,16 @@ pub struct Bar<T: Number + 'static> {
 }
 
 impl<T: Number + 'static> Bar<T> {
-    pub(super) fn paint(&self, surface: &mut Surface, attr: CharAttribute, rect: Rect) {
+    #[inline(always)]
+    fn paint_vertical_rect(&self, surface: &mut Surface, c: Character, x: i32, y: i32, h: u16) {
+        let r = Rect::with_size(x, y+1-h as i32, self.thickness as u16, h);
+        surface.fill_rect(r, c);
+    }
+    pub(super) fn paint_vertical(&self, surface: &mut Surface, attr: CharAttribute, x: i32, y: i32, h: u16, d: u8) {
         match self.draw_mode {
-            BarDrawMode::Normal => surface.fill_rect(rect, Character::with_attributes(' ', attr)),
+            BarDrawMode::Normal => self.paint_vertical_rect(surface, Character::with_attributes(' ', attr), x, y, h),
             BarDrawMode::Rectangle => todo!(),
-            BarDrawMode::Char(ch) => surface.fill_rect(rect, Character::with_attributes(ch, attr)),
+            BarDrawMode::Char(ch) => self.paint_vertical_rect(surface, Character::with_attributes(ch, attr), x, y, h),
             BarDrawMode::SingleLine => todo!(),
             BarDrawMode::DoubleLine => todo!(),
         }
