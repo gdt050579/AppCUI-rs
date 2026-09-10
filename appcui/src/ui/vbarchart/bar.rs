@@ -95,3 +95,11 @@ where
         BarBuilder::new(value).build()
     }
 }
+impl<T> From<&T> for Bar<T>
+where
+    T: Number + 'static,
+{
+    fn from(value: &T) -> Self {
+        (*value).into()
+    }
+}
