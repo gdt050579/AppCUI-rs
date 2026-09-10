@@ -103,6 +103,7 @@ where
     T: Number + 'static,
 {
     fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+        surface.clear(char!("' ',white,black"));
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
