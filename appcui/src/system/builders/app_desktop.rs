@@ -61,6 +61,7 @@ macro_rules! impl_app_desktop_methods {
             PasswordEvents,
             KeySelectorEvents,
             TextFieldEvents,
+            MarkdownComposerEvents,
             CustomEvents,
             GenericSelectorEvents,
             ComboBoxEvents,

@@ -1,9 +1,6 @@
+use EnumBitFlags::EnumBitFlags;
 
-
-
-#[repr(u8)]
-#[derive(Eq,PartialEq, Copy, Clone)]
+#[EnumBitFlags(bits = 8)]
 pub enum Flags {
-    None,
+    ShowMarkers = 0x01,
 }
-

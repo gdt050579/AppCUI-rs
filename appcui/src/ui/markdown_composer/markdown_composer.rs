@@ -4,6 +4,7 @@ use crate::ui::markdown_composer::emoji::EMOJIS;
 use crate::ui::markdown_composer::parser::{Span, SpanType};
 use crate::ui::markdown_composer::Flags;
 use crate::ui::markdown_composer::Parser;
+use crate::ui::markdown_composer::events::{EventData, MarkdownComposerEventsType};
 use crate::ui::markdown_composer::{List, ListFlags};
 
 const WHEEL_ROWS: u32 = 3;
@@ -48,11 +49,12 @@ pub struct MarkdownComposer {
     expanded: bool,
     expanded_offset: i32,
     packed_origin: i32,
+    packed_visible: i32,
 }
 
 impl MarkdownComposer {
     pub fn new(layout: Layout, flags: Flags) -> Self {
-        let mc = Self {
+        let mut mc = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             text: String::new(),
             parser: Parser::new(),
@@ -68,12 +70,14 @@ impl MarkdownComposer {
             expanded: false,
             expanded_offset: 0,
             packed_origin: 0,
+            packed_visible: 0,
         };
+        mc.parser.set_show_markers(flags.contains(Flags::ShowMarkers));
         mc
     }
 
     pub fn from(text: &str, layout: Layout, flags: Flags) -> Self {
-        let mc = Self {
+        let mut mc = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
             text: Self::normalize_newlines(text),
             parser: Parser::new(),
@@ -89,7 +93,9 @@ impl MarkdownComposer {
             expanded: false,
             expanded_offset: 0,
             packed_origin: 0,
+            packed_visible: 0,
         };
+        mc.parser.set_show_markers(flags.contains(Flags::ShowMarkers));
         mc
     }
 
@@ -163,6 +169,16 @@ impl MarkdownComposer {
             .clear(Character::with_attributes(' ', Self::span_attr(SpanType::Normal, theme, background)));
 
         Self::paint_normal(&self.text, self.parser.spans(), &mut self.surface, theme, background, self.first_row);
+    }
+
+    fn notify_text_changed(&mut self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::MarkdownComposer(EventData {
+                evtype: MarkdownComposerEventsType::OnTextChanged,
+            }),
+        });
     }
 
     fn clamp_first_row(&mut self) {
@@ -385,6 +401,7 @@ impl MarkdownComposer {
         self.cursor_offset = (start + replacement.len()) as u32;
         self.anchor = None;
         self.update_surface();
+        self.notify_text_changed();
     }
 
     fn popup_get_trigger_row(&self) -> i32 {
@@ -515,7 +532,7 @@ impl MarkdownComposer {
         let bottom = if self.expanded {
             self.expanded_size().height as i32
         } else {
-            size.height as i32
+            self.visible_height()
         };
 
         log!(
@@ -534,6 +551,14 @@ impl MarkdownComposer {
         Some(Rect::with_size(x, y, width as u16, height as u16))
     }
 
+    fn visible_height(&self) -> i32 {
+        let height = self.size().height as i32;
+        if self.expanded {
+            return self.packed_visible.clamp(0, height);
+        }
+        (self.screen_clip.bottom - self.screen_origin.y + 1).clamp(0, height)
+    }
+
     fn popup_fits_inside(&self) -> bool {
         let Some((_, height)) = self.popup_get_list_size() else {
             return true;
@@ -543,7 +568,7 @@ impl MarkdownComposer {
         let row = self.popup_get_trigger_row();
         let below = row + 1;
 
-        let fits_below = below >= 0 && below + height as i32 <= size.height as i32;
+        let fits_below = below >= 0 && below + height as i32 <= self.visible_height();
         let fits_above = row - height as i32 >= 0;
 
         fits_below || fits_above
@@ -575,13 +600,15 @@ impl MarkdownComposer {
             return;
         }
 
-        let least = (below + POPUP_MIN_HEIGHT as i32).max(size.height as i32 + 1);
+        let visible = self.visible_height();
+        let least = (below + POPUP_MIN_HEIGHT as i32).max(visible + 1);
         let wanted = POPUP_ROWS as i32 + 2;
-        let full = (below + wanted).max(size.height as i32 + wanted - row).max(least);
+        let full = (below + wanted).max(visible + wanted - row).max(least);
 
         let minimum = Size::new(size.width, least as u32);
         let prefered = Size::new(size.width, full as u32);
         self.packed_origin = self.screen_origin.y;
+        self.packed_visible = visible;
         log!(
             "POPUP-EXPAND",
             "-> expand(min={}x{}, pref={}x{}) focus={} deja_expandat={}",
@@ -1006,6 +1033,7 @@ impl MarkdownComposer {
         self.text.insert(self.cursor_offset as usize, character);
         self.cursor_offset += character.len_utf8() as u32;
         self.update_surface();
+        self.notify_text_changed();
         self.popup_match_items();
     }
 
@@ -1015,11 +1043,13 @@ impl MarkdownComposer {
         self.text.insert_str(self.cursor_offset as usize, added);
         self.cursor_offset += added.len() as u32;
         self.update_surface();
+        self.notify_text_changed();
     }
 
     fn delete_previous(&mut self) {
         if self.remove_selection() {
             self.update_surface();
+            self.notify_text_changed();
             return;
         }
         let previous = Parser::prev_offset(&self.text, self.cursor_offset);
@@ -1029,12 +1059,14 @@ impl MarkdownComposer {
         self.text.replace_range(previous as usize..self.cursor_offset as usize, "");
         self.cursor_offset = previous;
         self.update_surface();
+        self.notify_text_changed();
         self.popup_match_items();
     }
 
     fn delete_current(&mut self) {
         if self.remove_selection() {
             self.update_surface();
+            self.notify_text_changed();
             return;
         }
         let next = Parser::next_offset(&self.text, self.cursor_offset);
@@ -1043,11 +1075,13 @@ impl MarkdownComposer {
         }
         self.text.replace_range(self.cursor_offset as usize..next as usize, "");
         self.update_surface();
+        self.notify_text_changed();
     }
 
     fn delete_previous_word(&mut self) {
         if self.remove_selection() {
             self.update_surface();
+            self.notify_text_changed();
             return;
         }
         let start = self.prev_word(self.cursor_offset);
@@ -1057,12 +1091,14 @@ impl MarkdownComposer {
         self.text.replace_range(start as usize..self.cursor_offset as usize, "");
         self.cursor_offset = start;
         self.update_surface();
+        self.notify_text_changed();
         self.popup_match_items();
     }
 
     fn delete_next_word(&mut self) {
         if self.remove_selection() {
             self.update_surface();
+            self.notify_text_changed();
             return;
         }
         let end = self.next_word(self.cursor_offset);
@@ -1071,6 +1107,7 @@ impl MarkdownComposer {
         }
         self.text.replace_range(self.cursor_offset as usize..end as usize, "");
         self.update_surface();
+        self.notify_text_changed();
     }
 
     fn copy_selection(&self) -> bool {
@@ -1084,6 +1121,7 @@ impl MarkdownComposer {
     fn cut_selection(&mut self) {
         if self.copy_selection() && self.remove_selection() {
             self.update_surface();
+            self.notify_text_changed();
         }
     }
 
@@ -1158,19 +1196,27 @@ impl OnPaint for MarkdownComposer {
                 self.screen_origin.y + self.expanded_offset
             );
         }
+        let text_top = self.screen_origin.y + self.expanded_offset;
+        let text_bottom = text_top + self.packed_visible - 1;
+
         if self.expanded {
-            let bottom = self.screen_origin.y + self.expanded_offset + self.size().height as i32 - 1;
-            surface.set_base_clip(
-                self.screen_clip.left,
-                self.screen_clip.top,
-                self.screen_clip.right,
-                bottom.max(self.screen_clip.bottom),
-            );
+            surface.set_base_clip(self.screen_clip.left, text_top, self.screen_clip.right, text_bottom);
             surface.reset_clip();
         }
 
         surface.draw_surface(0, self.expanded_offset, &self.surface);
         self.paint_selection(surface, theme);
+
+        if self.expanded {
+            surface.set_base_clip(
+                self.screen_clip.left,
+                self.screen_clip.top.min(text_top),
+                self.screen_clip.right,
+                self.screen_clip.bottom.max(text_bottom),
+            );
+            surface.reset_clip();
+        }
+
         self.popup_paint_list(surface, theme);
 
         if self.expanded {
@@ -1440,6 +1486,16 @@ impl OnKeyPressed for MarkdownComposer {
             }
             key!("Enter") => {
                 self.insert('\n');
+                return EventProcessStatus::Processed;
+            }
+            key!("Ctrl+Enter") => {
+                self.raise_event(ControlEvent {
+                    emitter: self.handle,
+                    receiver: self.event_processor,
+                    data: ControlEventData::MarkdownComposer(EventData {
+                        evtype: MarkdownComposerEventsType::OnValidate,
+                    }),
+                });
                 return EventProcessStatus::Processed;
             }
             _ => {}
