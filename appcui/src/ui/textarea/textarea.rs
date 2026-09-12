@@ -27,6 +27,10 @@ impl fmt::Display for SelectionDirection {
     }
 }
 
+/// A location inside a [`TextArea`], expressed as a byte offset and/or line and column.
+///
+/// `TextPosition` is used to move the caret or query a position. Either form can be
+/// provided; when both are set they should refer to the same location.
 pub struct TextPosition {
     pub (crate) line_and_collumn: Option<u64>,
     pub (crate) offset: Option<u32>,
@@ -83,6 +87,10 @@ struct Selection {
 }
 
 #[CustomControl(overwrite: [OnPaint, OnKeyPressed, OnMouseEvent, OnResize, OnFocus], internal=true)]
+/// A multi-line text editor with scrolling, selection, and optional line numbers.
+///
+/// `TextArea` supports wrapping, keyboard navigation, and mouse selection for larger
+/// documents. Optional features such as line numbers are controlled by [`Flags`].
 pub struct TextArea {
     flags: Flags,
     text: String,

@@ -6,6 +6,7 @@ pub (crate) mod format_number;
 pub (crate) mod format_datetime;
 pub (crate) mod format_ratings;
 pub (crate) mod navigator;
+pub (crate) mod char_traits;
 pub (crate) mod log;
 pub (crate) mod fs;
 pub (crate) mod temp_buffer;
@@ -30,6 +31,7 @@ pub (crate) use self::format_ratings::FormatRatings;
 pub (crate) use self::navigator::Navigator;
 pub (crate) use self::navigator::NavigatorEntry;
 pub (crate) use self::navigator::NavigatorRoot;
+pub (crate) use self::char_traits::IsWideChar;
 #[cfg(test)]
 pub (crate) use self::temp_buffer::TempBuffer;
 pub (crate) use self::temp_buffer::TempString;

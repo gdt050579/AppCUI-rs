@@ -14,8 +14,14 @@ struct LinkArea {
 }
 
 #[derive(PartialEq, Debug)]
+/// Target of a Markdown hyperlink: a heading in the document or an external URL.
+///
+/// Header links scroll to a heading. External links are reported to the host
+/// through Markdown events.
 pub enum LinkDestination {
+    /// Scroll to a heading at the given vertical position.
     HeaderPosition(i32),
+    /// An external URL reported through Markdown events.
     ExternalLink(String),
 }
 

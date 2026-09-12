@@ -2,6 +2,10 @@ use super::Flags;
 use appcui_proc_macro::CustomControl;
 
 #[CustomControl(overwrite = OnPaint, internal = true)]
+/// A static horizontal separator line used to visually divide controls.
+///
+/// `HLine` draws a themed horizontal line across its layout. Line style and optional
+/// behavior are controlled by [`Flags`].
 pub struct HLine {
     flags: Flags,
     title: String,

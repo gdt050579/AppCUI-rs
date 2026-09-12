@@ -1,5 +1,9 @@
 use super::{CharacterSet, ColorSchema, Scale};
 
+/// Settings that control how an [`Image`](super::Image) is drawn onto a [`Surface`](crate::graphics::Surface).
+///
+/// Combines a [`Scale`], a [`CharacterSet`], a [`ColorSchema`], and a luminance threshold
+/// used when reducing pixels to black and white.
 #[derive(Clone)]
 pub struct RenderOptions {
     pub(super) scale: Scale,
@@ -52,6 +56,10 @@ impl RenderOptions {
     }
 }
 
+/// Builder for [`RenderOptions`].
+///
+/// Chain setters such as [`character_set`](Self::character_set) and [`scale`](Self::scale), then
+/// call [`build`](Self::build).
 pub struct RenderOptionsBuilder {
     inner: RenderOptions,
 }

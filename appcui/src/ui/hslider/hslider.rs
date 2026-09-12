@@ -5,6 +5,11 @@ use crate::ui::common::NumberFormat;
 const TICK_SCALE: u64 = 1000;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
+/// A horizontal slider for picking a numeric value from a closed range.
+///
+/// `HSlider` displays a bar with a movable marker. The value can be changed with the
+/// mouse or arrow keys and is always clamped between the configured minimum and maximum.
+/// Visual style and ticks are controlled by [`Type`] and [`Flags`].
 pub struct HSlider<T>
 where
     T: Number + 'static,

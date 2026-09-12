@@ -25,6 +25,11 @@ struct Distance {
 
 #[CustomControl(overwrite=OnPaint+OnResize+OnKeyPressed+OnMouseEvent, internal=true, window=true)]
 #[derive(Default)]
+/// A top-level movable and optionally resizable container with a title bar.
+///
+/// `Window` hosts child controls, a [`ToolBar`], and window chrome such as the close
+/// button. It can be moved, resized, or maximized depending on [`Flags`], [`Type`],
+/// and [`Background`].
 pub struct Window {
     title: Title,
     border: Border,

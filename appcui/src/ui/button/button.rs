@@ -2,6 +2,11 @@ use crate::prelude::*;
 use crate::ui::button::{events::EventData, Type};
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
+/// A clickable control that triggers an action when pressed.
+///
+/// `Button` displays a caption and can use a normal or flat visual style. Activating it
+/// with the mouse, keyboard, or its default action raises a press event. The style can
+/// follow the current theme or be set explicitly via [`Type`].
 pub struct Button {
     button_type: Type,
     caption: Caption,

@@ -22,6 +22,11 @@ struct Item {
     size: u16,
     receiver_control: Handle<()>,
 }
+/// The bottom bar that lists context-sensitive commands and their keyboard shortcuts.
+///
+/// `CommandBar` is updated by the focused control. It shows the actions currently
+/// available for the active modifier keys and invokes the selected command when
+/// clicked or activated from the keyboard.
 pub struct CommandBar {
     width: u32,
     y: i32,

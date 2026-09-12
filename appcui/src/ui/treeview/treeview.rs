@@ -34,6 +34,10 @@ enum HoverStatus {
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
+/// A hierarchical, multi-column view of items that implement [`ListItem`].
+///
+/// `TreeView` displays parent-child relationships with fold/expand controls, optional
+/// columns, search, and selection. Tree and column behavior are controlled by [`Flags`].
 pub struct TreeView<T>
 where
     T: ListItem + 'static,

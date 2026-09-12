@@ -5,9 +5,17 @@ use std::ops::{Add, Sub};
 use std::str::FromStr;
 
 
+/// A numeric type that a [`NumericSelector`](crate::ui::numericselector::NumericSelector) or similar control can display.
+///
+/// Implemented for the standard integer and float types. [`write_to_string`](Self::write_to_string)
+/// formats with a [`NumberFormat`], and [`to_f64`](Self::to_f64) / [`from_f64`](Self::from_f64)
+/// convert for sliders and similar.
 pub trait Number: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + PartialOrd + PartialEq + Display + FromStr {
+    /// Writes this value into `writer` using `format` (decimal, hex, size, and similar).
     fn write_to_string(&self, writer: &mut String, format: impl Into<NumberFormat>);
+    /// Converts this value to `f64` for interpolation and progress.
     fn to_f64(&self) -> f64;
+    /// Builds this type from an `f64` (used when a slider or similar produces a float).
     fn from_f64(v: f64) -> Self;
 }
 

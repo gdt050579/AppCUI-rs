@@ -5,6 +5,10 @@ use appcui_proc_macro::*;
 
 use super::scrollbars_components::ProcessEventResult;
 
+/// An inline search field used by list-like controls to filter visible items.
+///
+/// `SearchBar` is typically hosted by [`super::ListScrollBars`]. It edits a query
+/// string and can display a match count when space allows.
 pub struct SearchBar {
     x: i32,
     y: i32,

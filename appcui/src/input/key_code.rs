@@ -1,70 +1,137 @@
-/// Represents the code of a key.
+/// Physical or logical key identity, without modifiers.
+///
+/// Pair with [`KeyModifier`](super::KeyModifier) in a [`Key`](super::Key) to represent shortcuts such as `Ctrl+S`.
+/// [`None`](Self::None) means no key.
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq, Debug, Eq)]
 pub enum KeyCode {
+    /// No key.
     None = 0,
+    /// Function key `F1`.
     F1 = 1,
+    /// Function key `F2`.
     F2,
+    /// Function key `F3`.
     F3,
+    /// Function key `F4`.
     F4,
+    /// Function key `F5`.
     F5,
+    /// Function key `F6`.
     F6,
+    /// Function key `F7`.
     F7,
+    /// Function key `F8`.
     F8,
+    /// Function key `F9`.
     F9,
+    /// Function key `F10`.
     F10,
+    /// Function key `F11`.
     F11,
+    /// Function key `F12`.
     F12,
+    /// Enter / Return.
     Enter,
+    /// Escape.
     Escape,
+    /// Insert.
     Insert,
+    /// Delete.
     Delete,
+    /// Backspace.
     Backspace,
+    /// Tab.
     Tab,
+    /// Left arrow (`←`).
     Left,
+    /// Up arrow (`↑`).
     Up,
+    /// Down arrow (`↓`).
     Down,
+    /// Right arrow (`→`).
     Right,
+    /// Page Up.
     PageUp,
+    /// Page Down.
     PageDown,
+    /// Home.
     Home,
+    /// End.
     End,
+    /// Space bar.
     Space,
+    /// The `A` key.
     A,
+    /// The `B` key.
     B,
+    /// The `C` key.
     C,
+    /// The `D` key.
     D,
+    /// The `E` key.
     E,
+    /// The `F` key.
     F,
+    /// The `G` key.
     G,
+    /// The `H` key.
     H,
+    /// The `I` key.
     I,
+    /// The `J` key.
     J,
+    /// The `K` key.
     K,
+    /// The `L` key.
     L,
+    /// The `M` key.
     M,
+    /// The `N` key.
     N,
+    /// The `O` key.
     O,
+    /// The `P` key.
     P,
+    /// The `Q` key.
     Q,
+    /// The `R` key.
     R,
+    /// The `S` key.
     S,
+    /// The `T` key.
     T,
+    /// The `U` key.
     U,
+    /// The `V` key.
     V,
+    /// The `W` key.
     W,
+    /// The `X` key.
     X,
+    /// The `Y` key.
     Y,
+    /// The `Z` key.
     Z,
+    /// Digit `0` (top-row number key).
     N0,
+    /// Digit `1` (top-row number key).
     N1,
+    /// Digit `2` (top-row number key).
     N2,
+    /// Digit `3` (top-row number key).
     N3,
+    /// Digit `4` (top-row number key).
     N4,
+    /// Digit `5` (top-row number key).
     N5,
+    /// Digit `6` (top-row number key).
     N6,
+    /// Digit `7` (top-row number key).
     N7,
+    /// Digit `8` (top-row number key).
     N8,
+    /// Digit `9` (top-row number key).
     N9,
 }
 

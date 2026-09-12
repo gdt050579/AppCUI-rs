@@ -13,17 +13,32 @@ const TERA_BYTES_DECIMALS: FormatNumber = FormatNumber::new(10).suffix(" TB").gr
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Unit used when rendering a byte-size list-item value.
+///
+/// Fixed units (B, KB, MB, …) can include decimals. `Auto` and `AutoWithDecimals`
+/// pick the largest unit that keeps the number readable.
 pub enum SizeFormat {
+    /// Bytes, for example `512 B`.
     Bytes,
+    /// Kilobytes (integer), for example `12 KB`.
     KiloBytes,
+    /// Megabytes (integer), for example `12 MB`.
     MegaBytes,
+    /// Gigabytes (integer), for example `12 GB`.
     GigaBytes,
+    /// Terabytes (integer), for example `12 TB`.
     TeraBytes,
+    /// Kilobytes with two decimals, for example `1.50 KB`.
     KiloBytesWithDecimals,
+    /// Megabytes with two decimals, for example `1.50 MB`.
     MegaBytesWithDecimals,
+    /// Gigabytes with two decimals, for example `1.50 GB`.
     GigaBytesWithDecimals,
+    /// Terabytes with two decimals, for example `1.50 TB`.
     TeraBytesWithDecimals,
+    /// Automatically pick B/KB/MB/GB/TB as a whole number.
     Auto,
+    /// Automatically pick B/KB/MB/GB/TB with two decimals.
     AutoWithDecimals,
 }
 

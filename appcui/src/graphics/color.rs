@@ -1,4 +1,4 @@
-/// Represents am enum with varians that can be used to describe the foreground and background colors of a character in a terminal or console application.
+/// Represents an enum with variants that can be used to describe the foreground and background colors of a character in a terminal or console application.
 #[cfg(not(feature = "TRUE_COLORS"))]
 #[repr(u8)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default)]
@@ -56,6 +56,7 @@ pub enum Color {
     Transparent = 0x10,
 }
 
+/// Represents an enum with variants that can be used to describe the foreground and background colors of a character in a terminal or console application.
 #[cfg(feature = "TRUE_COLORS")]
 #[repr(u32)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Default)]
@@ -112,9 +113,23 @@ pub enum Color {
     /// a marker for transparent color
     Transparent = 0x10,
 
+    /// A 24-bit RGB color, for example `(255, 128, 0)`.
     RGB(u8, u8, u8),
 }
 impl Color {
+    /// Returns a high-contrast color (`Black` or `White`) for drawing over this color.
+    ///
+    /// Dark palette colors map to [`White`](Self::White), light ones to [`Black`](Self::Black).
+    /// [`Transparent`](Self::Transparent) is unchanged. With the `TRUE_COLORS` feature, RGB values
+    /// use luminance: light colors return black, dark colors return white.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// assert_eq!(Color::Black.contrast_color(), Color::White);
+    /// assert_eq!(Color::Yellow.contrast_color(), Color::Black);
+    /// ```
     #[inline(always)]
     pub fn contrast_color(&self) -> Self {
         match self {
@@ -131,6 +146,20 @@ impl Color {
             }
         }
     }
+    /// Returns the complementary (inverted) color.
+    ///
+    /// Each of the 16 palette colors maps to its opposite (for example [`Black`](Self::Black) ↔
+    /// [`White`](Self::White), [`Red`](Self::Red) ↔ [`Teal`](Self::Teal)).
+    /// [`Transparent`](Self::Transparent) is unchanged. With the `TRUE_COLORS` feature, RGB channels
+    /// are inverted as `255 - channel`.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// assert_eq!(Color::Black.inverse_color(), Color::White);
+    /// assert_eq!(Color::Red.inverse_color(), Color::Teal);
+    /// ```
     #[inline(always)]
     pub fn inverse_color(&self) -> Self {
         match self {
@@ -155,6 +184,19 @@ impl Color {
             Color::RGB(r, g, b) => Color::from_rgb(255 - *r, 255 - *g, 255 - *b),
         }
     }
+    /// Builds a palette color from its numeric index (`0`–`16`).
+    ///
+    /// Indexes match the variant discriminants: `0` is [`Black`](Self::Black), `15` is
+    /// [`White`](Self::White), and `16` is [`Transparent`](Self::Transparent). Any other value
+    /// returns `None`. RGB colors cannot be constructed this way.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// assert_eq!(Color::from_value(12), Some(Color::Red));
+    /// assert_eq!(Color::from_value(99), None);
+    /// ```
     pub fn from_value(value: i32) -> Option<Color> {
         match value {
             0 => Some(Color::Black),
@@ -177,6 +219,16 @@ impl Color {
             _ => None,
         }
     }
+    /// Returns the variant name, such as `"Red"` or `"Transparent"`.
+    ///
+    /// With the `TRUE_COLORS` feature, any 24-bit RGB value returns `"RGB"`.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// assert_eq!(Color::Aqua.name(), "Aqua");
+    /// ```
     pub fn name(&self) -> &str {
         match self {
             Color::Black => "Black",
@@ -265,6 +317,18 @@ impl Color {
         None
     }
 
+    /// Builds a color from 8-bit red, green, and blue components.
+    ///
+    /// With the `TRUE_COLORS` feature this stores a 24-bit RGB color. Without it, the value is
+    /// quantized to the nearest of the 16 palette colors.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let white = Color::from_rgb(255, 255, 255);
+    /// assert_eq!(white.contrast_color(), Color::Black);
+    /// ```
     pub fn from_rgb(r: u8, g: u8, b: u8) -> Color {
         #[cfg(feature = "TRUE_COLORS")]
         return Color::RGB(r, g, b);

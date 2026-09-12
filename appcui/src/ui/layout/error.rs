@@ -1,50 +1,98 @@
 use std::fmt::*;
 
 #[derive(Debug,Eq,PartialEq)]
+/// A layout construction error caused by conflicting or incomplete parameters.
+///
+/// [`super::LayoutBuilder::build`] returns this when dock, align, pivot, anchors, and
+/// size cannot be combined. Each variant describes one invalid combination.
 pub enum Error {
+    /// `x`/`y` cannot be combined with `dock`.
     XYParameterUsedWithDock,
+    /// Anchors cannot be combined with `dock`.
     AnchorParameterUsedWithDock,
+    /// `pivot` cannot be combined with `dock`.
     PivotParameterUsedWithDock,
+    /// `align` cannot be combined with `dock`.
     AlignParameterUsedWithDock,
+    /// `width` is implied by `Dock::Top` / `Dock::Bottom`.
     WidthParameterUsedWithTopOrBottomDock,
+    /// `height` is implied by `Dock::Left` / `Dock::Right`.
     HeightParameterUsedWithLeftOrRightDock,
+    /// `width`/`height` are implied by `Dock::Fill`.
     WidthOrHeightParameterUsedWithDockFill,
+    /// `x`/`y` cannot be combined with `align`.
     XYParameterUsedWithAlign,
+    /// Anchors cannot be combined with `align`.
     AnchorParameterUsedWithAlign,
+    /// `pivot` cannot be combined with `align`.
     PivotParameterUsedWithAlign,
+    /// `dock` cannot be combined with `align`.
     DockParameterUsedWithAlign,
+    /// Anchors cannot be combined with absolute `x`/`y`.
     AnchorParameterUsedWithXY,
+    /// A corner anchor already implies `x`/`y`.
     CornerAnchorParameterUsedWithXY,
+    /// A corner anchor already implies `pivot`.
     CornerAnchorParameterUsedWithPivot,
+    /// All four anchors already imply `x`/`y`.
     AllAnchorsParameterUsedWithXY,
+    /// All four anchors already imply `width`/`height`.
     AllAnchorsParameterUsedWithSize,
+    /// All four anchors already imply `pivot`.
     AllAnchorsParameterUsedWithPivot,
+    /// Left+top+right anchors already imply `x`/`y`.
     LeftTopRightAnchorsUsedWithXY,
+    /// Left+top+right anchors already imply `width`.
     LeftTopRightAnchorsUsedWithWidth,
+    /// Left+top+right anchors already imply `pivot`.
     LeftTopRightAnchorsUsedWithPivot,
+    /// Left+right anchors already imply `x`.
     LeftRightAnchorsUsedWithX,
+    /// Left+right anchors already imply `width`.
     LeftRightAnchorsUsedWithWidth,
+    /// Left+right anchors require a `pivot`.
     LeftRightAnchorsUsedWithoutPivot,
+    /// Left+right anchors require `y`.
     LeftRightAnchorsUsedWithoutY,
+    /// Left+bottom+right anchors already imply `x`/`y`.
     LeftBottomRightAnchorsUsedWithXY,
+    /// Left+bottom+right anchors already imply `width`.
     LeftBottomRightAnchorsUsedWithWidth,
+    /// Left+bottom+right anchors already imply `pivot`.
     LeftBottomRightAnchorsUsedWithPivot,
+    /// Top+bottom anchors already imply `y`.
     TopBottomAnchorsUsedWithY,
+    /// Top+bottom anchors already imply `height`.
     TopBottomAnchorsUsedWithHeight,
+    /// Top+bottom anchors require `x`.
     TopBottomAnchorsUsedWithoutX,
+    /// Top+bottom anchors require a `pivot`.
     TopBottomAnchorsUsedWithoutPivot,
+    /// Top+bottom anchors only allow left/center/right pivots.
     TopBottomAnchorsUsedWithInvalidPivot,
+    /// Top+left+bottom anchors already imply `x`/`y`.
     TopLeftBottomAnchorsUsedWithXY,
+    /// Top+left+bottom anchors already imply `height`.
     TopLeftBottomAnchorsUsedWithHeight,
+    /// Top+left+bottom anchors already imply `pivot`.
     TopLeftBottomAnchorsUsedWithPivot,
+    /// Top+right+bottom anchors already imply `x`/`y`.
     TopRightBottomAnchorsUsedWithXY,
+    /// Top+right+bottom anchors already imply `height`.
     TopRightBottomAnchorsUsedWithHeight,
+    /// Top+right+bottom anchors already imply `pivot`.
     TopRightBottomAnchorsUsedWithPivot,
+    /// A single anchor is equivalent to a pivot; use pivot layout instead.
     SingleAnchor,
+    /// `x` was set without `y`.
     XWithoutY,
+    /// `y` was set without `x`.
     YWithoutX,
+    /// `pivot` requires both `x` and `y`.
     PivotWithoutXorY,
+    /// No layout parameters were provided.
     NoParameters,
+    /// The combination of layout parameters is invalid.
     InvalidLayoutRule
 }
 

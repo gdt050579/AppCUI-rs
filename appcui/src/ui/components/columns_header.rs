@@ -13,13 +13,24 @@ enum SelectedComponent {
     Column(u16),
 }
 #[derive(Copy, Clone, PartialEq)]
+/// Result of mouse or keyboard interaction with a [`ColumnsHeader`].
+///
+/// Controls that host a header use this to decide whether to repaint, resize a
+/// column, scroll, sort, or treat the event as already handled.
 pub enum ColumnsHeaderAction {
+    /// No header interaction; ignore the event.
     None,
+    /// The header needs to be redrawn.
     Repaint,
+    /// The user is dragging a column separator to change its width.
     ResizeColumn,
+    /// Horizontal scroll should follow the header.
     UpdateScroll,
+    /// The event was handled and should not be processed further.
     Processed,
+    /// Sort by the given column index; the `bool` is `true` for ascending.
     Sort((u16, bool)),
+    /// Auto-size the column at the given index to fit its content.
     AutoResize(u16),
 }
 impl ColumnsHeaderAction {
@@ -32,6 +43,10 @@ impl ColumnsHeaderAction {
         !matches!(self, ColumnsHeaderAction::None | ColumnsHeaderAction::Repaint)
     }
 }
+/// A sortable, resizable header row of [`Column`]s used by list and tree views.
+///
+/// `ColumnsHeader` paints column titles, handles hover and drag-resize, and can
+/// request sort or auto-size actions through [`ColumnsHeaderAction`].
 pub struct ColumnsHeader {
     columns: Vec<Column>,
     hovered: SelectedComponent,

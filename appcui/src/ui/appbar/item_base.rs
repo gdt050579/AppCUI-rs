@@ -4,9 +4,16 @@ use super::AppBarItem;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits: 8)]
+/// Runtime flags for an AppBar item.
+///
+/// Combine values with `|`. These bits are set by the AppBar layout, not by
+/// application constructor flags.
 enum Flags {
+    /// The item is enabled and can be activated.
     Enabled = 0x01,
+    /// The item accepts mouse and keyboard input.
     AcceptInput = 0x02,
+    /// The item is aligned to the left side of the AppBar.
     OnLeft = 0x04,
 }
 

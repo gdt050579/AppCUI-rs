@@ -1,7 +1,17 @@
+//! Events emitted by a [`struct@super::CheckBox`].
+//!
+//! Implement [`CheckBoxEvents`] on a window (or other parent) to react when the
+//! checked state changes.
+
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 use super::CheckBox;
 
+/// Events from a [`struct@super::CheckBox`].
+///
+/// Implement this on a window to react when the checked state changes.
+/// The default method returns [`EventProcessStatus::Ignored`].
 pub trait CheckBoxEvents {
+    /// Called when the check box is toggled. `checked` is the new state.
     fn on_status_changed(&mut self, _handle: Handle<CheckBox>, _checked: bool) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }

@@ -1,5 +1,9 @@
 use crate::graphics::*;
 
+/// A connection between two nodes in a [`super::Graph`].
+///
+/// An `Edge` stores the source and target node identifiers, whether it is directed,
+/// and optional line style overrides.
 pub struct Edge {
     pub(super) from_node_id: u32,
     pub(super) to_node_id: u32,
@@ -8,6 +12,7 @@ pub struct Edge {
     pub(super) line_type: Option<LineType>,
 }
 
+/// A builder for constructing an [`Edge`] with optional direction, line type, and attributes.
 pub struct EdgeBuilder {
     edge: Edge,
 }   
@@ -50,6 +55,10 @@ impl EdgeBuilder {
     }
 }
 
+/// A mutable view of an [`Edge`] while a [`super::Graph`] is being edited.
+///
+/// Changes are recorded so the owning [`super::GraphView`] can refresh the affected
+/// geometry.
 pub struct EditableEdge<'a> {
     edge: &'a mut Edge,
     changed: &'a mut bool,

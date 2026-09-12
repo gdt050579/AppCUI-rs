@@ -17,6 +17,11 @@ enum State {
 }
 
 #[CustomControl(overwrite=OnPaint + OnKeyPressed + OnMouseEvent + OnResize, internal = true)]
+/// A vertical divider that splits its area into left and right resizable panels.
+///
+/// `VSplitter` lets the user drag the divider (or use its collapse buttons) to change
+/// how horizontal space is shared between the two sides. Resize behavior is controlled
+/// by [`ResizeBehavior`] and [`Flags`].
 pub struct VSplitter {
     left: Handle<SplitterPanel>,
     right: Handle<SplitterPanel>,

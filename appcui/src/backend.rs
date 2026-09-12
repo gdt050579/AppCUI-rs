@@ -102,17 +102,48 @@ pub(crate) trait Backend {
 
 #[repr(u8)]
 #[derive(Copy, Clone, PartialEq)]
+/// Terminal backend used to render the UI and read input.
+///
+/// Pass a variant to [`crate::system::MultiWindowAppBuilder::backend`]. If omitted,
+/// AppCUI picks a default for the current OS:
+///
+/// | OS | Default |
+/// |----|---------|
+/// | Windows | Windows Console |
+/// | Linux | CrossTerm |
+/// | macOS | Termios |
+/// | WASM | Web Terminal |
+///
+/// Variants are gated by target OS and crate features, so only backends compiled
+/// for the current platform appear in this enum.
+///
+/// # Examples
+///
+/// ```rust, no_run
+/// use appcui::prelude::*;
+///
+/// #[cfg(target_os = "windows")]
+/// let _builder = App::new().backend(appcui::backend::Type::WindowsVT);
+/// #[cfg(not(target_os = "windows"))]
+/// let _builder = App::new();
+/// ```
 pub enum Type {
+    /// Native Windows Console API (default on Windows). Fast; typically 16 colors.
     #[cfg(target_os = "windows")]
     WindowsConsole,
+    /// Windows console driven by VT100 / ANSI sequences. Supports true color; slower than the Console API.
     #[cfg(target_os = "windows")]
     WindowsVT,
+    /// Low-level Unix termios / raw mode (default on macOS). Limited display and input features.
     #[cfg(target_family = "unix")]
     Termios,
+    /// Unix ncurses terminal.
     #[cfg(target_family = "unix")]
     NcursesTerminal,
+    /// Browser canvas terminal (default on WASM).
     #[cfg(target_arch = "wasm32")]
     WebTerminal,
+    /// [`crossterm`](https://docs.rs/crossterm) backend (default on Linux). Always available on Unix; on Windows enable the `CROSSTERM` crate feature.
     #[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
     CrossTerm,
 }

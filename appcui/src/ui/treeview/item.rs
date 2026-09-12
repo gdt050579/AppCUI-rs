@@ -18,6 +18,10 @@ pub(super) enum FoldStatus {
     NonExpandable,
 }
 
+/// A node in a [`super::TreeView`], wrapping a [`ListItem`] value and parent/child links.
+///
+/// `Item` stores the user data, selection, icon, fold state, and the handles of its
+/// parent and children.
 pub struct Item<T>
 where
     T: ListItem,
