@@ -1,11 +1,22 @@
 #[derive(Copy,Clone,PartialEq,Eq)]
+/// Visual style of a [`super::CheckBox`] check mark.
+///
+/// Variants choose the glyphs used for the checked and unchecked states, from a
+/// classic `[√]` box to Unicode checkboxes, filled boxes, or Yes/No labels.
 pub enum Type {
+    /// Boxed check mark: `[√]` when checked, `[ ]` when unchecked.
     Standard,
+    /// ASCII boxed mark: `[X]` when checked, `[ ]` when unchecked.
     Ascii,
+    /// Unicode checkbox: `🗹` when checked, `🞎` when unchecked.
     CheckBox,
+    /// Bare check mark: `√` when checked, `x` when unchecked.
     CheckMark,
+    /// Filled geometric box: `🞕` when checked, `🞏` when unchecked.
     FilledBox,
+    /// Yes/No box: `[Y]` when checked, `[N]` when unchecked.
     YesNo,
+    /// Plus/minus symbols: `➕` when checked, `➖` when unchecked.
     PlusMinus,
 }
 // ✅ 🔲 🗹 🞎 🞏 🞕

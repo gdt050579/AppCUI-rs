@@ -10,6 +10,10 @@ use crate::ui::ControlBase;
 // prefered size of a search bar: 14 characters (1 left, 1 right, 3 for count, 1 space, 8 for text)
 // minim size of a search bar: 5 characters (1 left, 1 right, 1 for text)
 
+/// Horizontal and vertical scroll bars plus an optional search field for list-like controls.
+///
+/// `ListScrollBars` is used by controls such as [`crate::ui::ListView`] and
+/// [`crate::ui::TreeView`] to scroll content and filter visible items.
 pub struct ListScrollBars {
     horizontal: HScrollBar,
     vertical: VScrollBar,

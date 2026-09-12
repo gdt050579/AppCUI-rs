@@ -1,3 +1,7 @@
+//! A checkbox item in a [`struct@super::Menu`].
+//!
+//! Toggle a boolean option. Selection sends a command to the menu owner.
+
 use super::{menu_item::MenuItem, MenuItemWrapper};
 use crate::{
     graphics::{Character, SpecialChar, Surface},

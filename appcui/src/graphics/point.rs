@@ -1,7 +1,9 @@
 /// This module defines a `Point` struct representing a point in 2D space with x and y coordinates.
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct Point {
+    /// Horizontal coordinate in character cells.
     pub x: i32,
+    /// Vertical coordinate in character cells.
     pub y: i32,
 }
 impl Point {

@@ -23,6 +23,35 @@ use appcui::graphics::{Surface};
 let mut surface = Surface::new(100, 50);
 ```
 
+You can also create a surface from a string with `Surface::from_string()`. The string is written from position `(0, 0)` using a `White` foreground and `Black` background. New line characters start a new row. If the string is longer than the surface, it is truncated; if it is shorter, the remaining cells stay filled with spaces.
+
+```rust
+use appcui::graphics::{Surface, Size};
+let surface = Surface::from_string("Hello World!", Size::new(20, 5));
+```
+
+The size of a surface (width and height) can be read with `size()`, which returns a `Size` object.
+
 **Remarks**: Creating a surface is rarely needed, as the library will create the main screen surface automatically when the application starts and will provide a mutable reference to that surface whenever the on_paint event is called for a control.
+
+## Saving and loading
+
+A surface can be serialized to a compact binary format (magic number `SRF`) and later restored. This is useful for snapshots, tests, and offline assets.
+
+| Method                      | Description                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `save(path)`                | Serializes the surface and writes it to a file                                       |
+| `from_file(path)`           | Loads a surface from a file previously written with `save`                           |
+| `serialize_to_buffer(...)`  | Writes the binary representation into a `Vec<u8>`                                    |
+| `from_buffer(...)`          | Reconstructs a surface from a serialized buffer                                      |
+
+```rust
+use appcui::graphics::Surface;
+use std::path::Path;
+
+let surface = Surface::new(40, 12);
+surface.save(Path::new("snapshot.srf")).unwrap();
+let loaded = Surface::from_file(Path::new("snapshot.srf")).unwrap();
+```
 
    

@@ -7,6 +7,11 @@ use super::LayoutMode;
 use super::Pivot;
 use crate::ui::Dock;
 
+/// A fluent builder for constructing a [`Layout`] from position, size, anchors, and alignment.
+///
+/// `LayoutBuilder` is the programmatic counterpart of the `layout!` macro. Call methods
+/// such as [`LayoutBuilder::x`] or [`LayoutBuilder::alignment`] and finish with
+/// [`LayoutBuilder::build`].
 pub struct LayoutBuilder {
     pub(super) inner_layout: Layout,
 }

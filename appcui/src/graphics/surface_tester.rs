@@ -25,7 +25,7 @@ impl SurfaceTester {
     //             tmp.set_char_flags(ch.flags);
     //             tmp.write_char(ch.code);
     //             x += 1;
-    //             if x == self.surface.size.width {
+    //             if x == self.surface.size.width { 
     //                 tmp.reset_color();
     //                 tmp.move_to_next_line();
     //                 x = 0;

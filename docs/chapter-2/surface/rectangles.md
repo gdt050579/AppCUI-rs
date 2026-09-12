@@ -52,10 +52,11 @@ pub enum RectAlignment {
 
 To draw a rectangle on a surface, you can use the following methods:
 
-| Method           | Description                                                                                           |
-| ---------------- | ----------------------------------------------------------------------------------------------------- |
-| `draw_rect(...)` | Draws a rectangle on the surface by providing a `Rect` object, a line type and a character attribute. |
-| `fill_rect(...)` | Fills a rectangle on the surface by providing a `Rect` object and a character attribute.              |
+| Method                 | Description                                                                                                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `draw_rect(...)`       | Draws a rectangle on the surface by providing a `Rect` object, a line type and a character attribute.                                                                |
+| `draw_bevel_rect(...)` | Draws a beveled rectangle using a line type and two attributes (`dark` and `light`). If `raised` is `true` the top and left edges use the light color; otherwise the rectangle looks sunken. |
+| `fill_rect(...)`       | Fills a rectangle on the surface by providing a `Rect` object and a [character](../screen.md#character).                                                             |
 
 Example:
 
@@ -68,6 +69,15 @@ let r = Rect::new(10, 10, 20, 20);
 surface.fill_rect(r, Character::new(' ', Color::White, Color::DarkBlue, CharFlags::None));
 // draw a border around the rectangle (white on black)
 surface.draw_rect(r, LineType::Single, CharAttribute::with_color(Color::White, Color::Black));
+
+// raised 3D-style border (light on top/left, dark on bottom/right)
+surface.draw_bevel_rect(
+    Rect::new(24, 10, 34, 20),
+    LineType::Single,
+    CharAttribute::with_color(Color::Black, Color::Transparent),
+    CharAttribute::with_color(Color::White, Color::Transparent),
+    true,
+);
 ```
 
 ## Methods

@@ -1,3 +1,7 @@
+//! A nested submenu item in a [`struct@super::Menu`].
+//!
+//! Selecting the item opens another menu of additional commands.
+
 use crate::{
     graphics::{Character, SpecialChar, Surface, TextFormat},
     system::{Handle, MenuTheme, RuntimeManager},

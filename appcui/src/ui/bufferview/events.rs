@@ -1,3 +1,8 @@
+//! Events emitted by a [`struct@super::BufferView`].
+//!
+//! Implement [`GenericBufferViewEvents`] on a window (or other parent) to react
+//! when the cursor or selection changes.
+
 use std::any::TypeId;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 

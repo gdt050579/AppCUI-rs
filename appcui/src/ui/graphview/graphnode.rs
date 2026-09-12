@@ -1,5 +1,10 @@
 use crate::graphics::Size;
 
+/// A node displayed in a [`struct@super::GraphView`].
+///
+/// Implement this for your node type (or use the provided [`str`] / [`String`] impls).
+/// [`write_label`](Self::write_label) draws the caption, [`prefered_size`](Self::prefered_size)
+/// supplies a default size, and [`write_description`](Self::write_description) is optional hover text.
 pub trait GraphNode {
     /// Write the label of the node into the provided formatter
     fn write_label(&self, f: &mut dyn std::fmt::Write, size: Size) -> std::fmt::Result;

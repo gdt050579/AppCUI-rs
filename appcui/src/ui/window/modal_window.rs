@@ -4,6 +4,11 @@ use super::{events::ModalWindowMethods, Flags, Window};
 use crate::prelude::*;
 use std::ops::{Deref, DerefMut};
 
+/// A blocking dialog window that returns a typed result when it closes.
+///
+/// `ModalWindow` wraps a [`struct@Window`] and pauses the rest of the UI until
+/// [`ModalWindow::exit`] or [`ModalWindow::exit_with`] is called. It has no implicit
+/// close button; the owner must exit explicitly.
 #[repr(C)]
 pub struct ModalWindow<T: Sized> {
     base: Window,

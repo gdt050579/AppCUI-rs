@@ -7,9 +7,12 @@ use EnumBitFlags::EnumBitFlags;
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq, Default, Eq)]
 pub enum TextAlignment {
+    /// Align to the left edge of the layout box.
     #[default]
     Left,
+    /// Center horizontally in the layout box.
     Center,
+    /// Align to the right edge of the layout box.
     Right,
 }
 
@@ -23,11 +26,16 @@ pub enum TextAlignment {
 #[repr(u8)]
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub enum WrapType {
+    /// Wrap at word boundaries within the given width (in characters).
     WordWrap(u16),
+    /// Wrap at any character within the given width.
     CharacterWrap(u16),
+    /// Honor `\n` as line breaks; do not wrap long lines.
     MultiLine,
+    /// Draw as one line; line breaks are ignored. This is the default.
     #[default]
     SingleLine,
+    /// Draw as one line and clip to the given width.
     SingleLineWrap(u16),
 }
 
