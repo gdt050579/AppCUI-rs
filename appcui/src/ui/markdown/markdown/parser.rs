@@ -157,6 +157,11 @@ impl MarkdownParser {
                     i = end + 2;
                     continue;
                 }
+                else {
+                    elements.push(InlineElement::Text(delimiter.to_string()));
+                    i += delimiter.len();
+                    continue;
+                }
             } else if input[i..].starts_with('_') || input[i..].starts_with('*') {
                 let delimiter = &input[i..i + 1];
                 if let Some(end) = input[i + 1..].find(delimiter).map(|p| p + i + 1) {
@@ -164,11 +169,21 @@ impl MarkdownParser {
                     i = end + 1;
                     continue;
                 }
+                else {
+                    elements.push(InlineElement::Text(delimiter.to_string()));
+                    i += delimiter.len();
+                    continue;
+                }
             } else if input[i..].starts_with('`') {
                 let delimiter = '`';
                 if let Some(end) = input[i + 1..].find(delimiter).map(|p| p + i + 1) {
                     elements.push(InlineElement::Code(input[i + 1..end].to_string()));
                     i = end + 1;
+                    continue;
+                }
+                else {
+                    elements.push(InlineElement::Text(delimiter.to_string()));
+                    i += 1;
                     continue;
                 }
             } else if input[i..].starts_with('[') {
@@ -181,7 +196,22 @@ impl MarkdownParser {
                             i = close_paren + 1;
                             continue;
                         }
+                        else {
+                            elements.push(InlineElement::Text("[".to_string()));
+                            i += 1;
+                            continue;
+                        }
                     }
+                    else {
+                        elements.push(InlineElement::Text("[".to_string()));
+                        i += 1;
+                        continue;
+                    }
+                }
+                else {
+                    elements.push(InlineElement::Text("[".to_string()));
+                    i += 1;
+                    continue;
                 }
             } else {
                 let next_special = input[i..]
