@@ -12,6 +12,15 @@ struct BarWithLayout<T: Number + 'static> {
     bar: Bar<T>,
     layout: BarLayour,
 }
+struct YAxis {
+    width: u8,
+    step: u8,
+    zero: i32,
+    percentage: bool,
+}
+struct XAxis {
+    enabled: bool,
+}
 
 #[CustomControl(overwrite=OnPaint+OnResize, internal=true)]
 /// A vertical bar chart for a numeric series of type `T`.
@@ -28,7 +37,8 @@ where
     bars_width: u32,
     left_scroll: i32,
     first_visible_bar: u32,
-    left_margin: u32,
+    yaxis: YAxis,
+    xaxis: XAxis,
     scale: BarScale<T>,
 }
 
@@ -45,7 +55,13 @@ where
             bars_width: 0,
             left_scroll: 0,
             first_visible_bar: 0,
-            left_margin: 0,
+            yaxis: YAxis {
+                width: 6,
+                step: 0,
+                zero: 0,
+                percentage: false,
+            },
+            xaxis: XAxis { enabled: true },
             scale: BarScale::Auto,
         }
     }
@@ -71,15 +87,16 @@ where
     }
     fn update_bars_height(&mut self, min: f64, max: f64) {
         let height = self.size().height;
-        if v_max > v_min {
-            let dif = v_max - v_min;
+        if max > min {
+            let dif = max - min;
             let visible_space = self.size().height.saturating_sub(2) as f64;
             for bar in self.bars.iter_mut() {
-                let h = (bar.bar.value.to_f64() - v_min) / dif * visible_space;
+                let h = (bar.bar.value.to_f64() - min) / dif * visible_space;
                 bar.layout.digits = (h.fract() * 100.0) as u8;
                 bar.layout.h = h as u16;
             }
-        }        
+        } else {
+        }
     }
     fn update_bars_layout(&mut self) {
         if self.bars.is_empty() {
@@ -89,7 +106,7 @@ where
         let mut x = 0;
         let mut v_max = f64::MIN;
         let mut v_min = f64::MAX;
-        
+
         for bar in self.bars.iter_mut() {
             x += bar.bar.spacing as i32;
             bar.layout.x = x;
@@ -101,20 +118,44 @@ where
         }
         self.bars_width = x as u32 + self.bars[0].bar.spacing as u32;
         match self.scale {
-            BarScale::Auto => todo!(),
-            BarScale::FromZero => todo!(),
-            BarScale::FitData => todo!(),
-            BarScale::Fixed { min, max } => todo!(),
-        }
-        if v_max > v_min {
-            let dif = v_max - v_min;
-            let visible_space = self.size().height.saturating_sub(2) as f64;
-            for bar in self.bars.iter_mut() {
-                let h = (bar.bar.value.to_f64() - v_min) / dif * visible_space;
-                bar.layout.digits = (h.fract() * 100.0) as u8;
-                bar.layout.h = h as u16;
+            BarScale::Auto => {
+                let visible_space = self.size().height.saturating_sub(4) as f64;
+                let dif = v_max - v_min;
+                let car_scale = (dif / visible_space as f64).max(1.0);
+                self.update_bars_height(v_min - car_scale, v_max + car_scale);
             }
+            BarScale::FromZero => self.update_bars_height(v_min.min(0.0), v_max),
+            BarScale::FitData => {
+                let visible_space = self.size().height.saturating_sub(4) as f64;
+                let dif = v_max - v_min;
+                let car_scale = (dif / visible_space as f64).max(1.0);
+                self.update_bars_height(v_min - car_scale, v_max + car_scale);
+            }
+            BarScale::Fixed { min, max } => self.update_bars_height(min.to_f64(), max.to_f64()),
         }
+    }
+    fn paint_yaxis(&self, surface: &mut Surface, attr: CharAttribute) {
+        if self.yaxis.width == 0 {
+            return;
+        }
+        let bottom = self.size().height as i32 - if self.xaxis.enabled { 2 } else { 1 };
+        surface.draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, attr);
+        if self.xaxis.enabled {
+            surface.write_char(
+                self.yaxis.width as i32 + 1,
+                bottom,
+                Character::with_attributes(SpecialChar::BoxBottomLeftCornerSingleLine, attr),
+            );
+        }
+    }
+    fn paint_xaxis(&self, surface: &mut Surface, attr: CharAttribute) {
+        if !self.xaxis.enabled {
+            return;
+        }
+        let left = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
+        let right = self.size().width as i32;
+        let y = self.size().height as i32 - 2;
+        surface.draw_horizontal_line(left, y, right, LineType::Single, attr);
     }
 }
 
@@ -124,13 +165,19 @@ where
 {
     fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
         surface.clear(char!("' ',white,black"));
+        self.paint_yaxis(surface, charattr!("gray,black"));
+        self.paint_xaxis(surface, charattr!("gray,black"));
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
-        let y = self.size().height as i32 - 2;
+        let y = self.size().height as i32 - if self.xaxis.enabled { 3 } else { 1 };
+        let left_margin = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
+        surface.set_relative_clip(left_margin, 0, width, y + 1);
         while start < len {
-            let x = self.bars[start].layout.x - self.left_scroll + self.left_margin as i32;
-            if x >= width { break; }
+            let x = self.bars[start].layout.x - self.left_scroll + left_margin;
+            if x >= width {
+                break;
+            }
             let bar = &self.bars[start];
             let h = bar.layout.h;
             let d = bar.layout.digits;
