@@ -22,6 +22,10 @@ struct XAxis {
     enabled: bool,
 }
 
+const FORMAT_FLOAT: FormatNumber = FormatNumber::new(10).decimals(2);
+const FORMAT_PERCENTAGE: FormatNumber = FormatNumber::new(10).decimals(2).suffix("%");
+const FORMAT_INTEGER: FormatNumber = FormatNumber::new(10).group(3, b',');
+
 #[CustomControl(overwrite=OnPaint+OnResize, internal=true)]
 /// A vertical bar chart for a numeric series of type `T`.
 ///
@@ -150,9 +154,14 @@ where
             let x_poz = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
             let right = self.size().width as i32;
             let ch = Character::with_attributes('┈', attr);
+            let format = &FORMAT_FLOAT;
+            let mut buffer: [u8; 32] = [0u8; 32];
             let mut y = bottom;
             while y >= 0 {
                 surface.fill_horizontal_line(x_poz, y, right, ch);
+                if let Some(value) = format.write_float(y as f64, &mut buffer) {
+                    surface.write_ascii(x_poz - value.len() as i32 - 1, y, value.as_bytes(), attr, false);
+                }
                 y -= self.yaxis.step as i32;
             }
         }
