@@ -57,7 +57,7 @@ where
             first_visible_bar: 0,
             yaxis: YAxis {
                 width: 6,
-                step: 0,
+                step: 3,
                 zero: 0,
                 percentage: false,
             },
@@ -135,17 +135,26 @@ where
         }
     }
     fn paint_yaxis(&self, surface: &mut Surface, attr: CharAttribute) {
-        if self.yaxis.width == 0 {
-            return;
-        }
         let bottom = self.size().height as i32 - if self.xaxis.enabled { 2 } else { 1 };
-        surface.draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, attr);
-        if self.xaxis.enabled {
-            surface.write_char(
-                self.yaxis.width as i32 + 1,
-                bottom,
-                Character::with_attributes(SpecialChar::BoxBottomLeftCornerSingleLine, attr),
-            );
+        if self.yaxis.width > 0 {
+            surface.draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, attr);
+            if self.xaxis.enabled {
+                surface.write_char(
+                    self.yaxis.width as i32 + 1,
+                    bottom,
+                    Character::with_attributes(SpecialChar::BoxBottomLeftCornerSingleLine, attr),
+                );
+            }
+        }
+        if self.yaxis.step > 0 {
+            let x_poz = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
+            let right = self.size().width as i32;
+            let ch = Character::with_attributes('┈', attr);
+            let mut y = bottom;
+            while y >= 0 {
+                surface.fill_horizontal_line(x_poz, y, right, ch);
+                y -= self.yaxis.step as i32;
+            }
         }
     }
     fn paint_xaxis(&self, surface: &mut Surface, attr: CharAttribute) {
@@ -157,6 +166,11 @@ where
         let y = self.size().height as i32 - 2;
         surface.draw_horizontal_line(left, y, right, LineType::Single, attr);
     }
+    fn paint_axis(&self, surface: &mut Surface, attr: CharAttribute) {
+        // mereu in ordinea asta - Y, X (X va suprascrie o parte de la Y)
+        self.paint_yaxis(surface, attr);
+        self.paint_xaxis(surface, attr);
+    }
 }
 
 impl<T> OnPaint for VBarChart<T>
@@ -165,8 +179,7 @@ where
 {
     fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
         surface.clear(char!("' ',white,black"));
-        self.paint_yaxis(surface, charattr!("gray,black"));
-        self.paint_xaxis(surface, charattr!("gray,black"));
+        self.paint_axis(surface, charattr!("gray,black"));
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
