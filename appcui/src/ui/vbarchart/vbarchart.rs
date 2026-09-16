@@ -221,9 +221,10 @@ where
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
-        let y = self.size().height as i32 - if self.xaxis.enabled { 3 } else { 1 } - self.yaxis.zero;
+        let plot_bottom = self.size().height as i32 - if self.xaxis.enabled { 3 } else { 1 };
+        let y = plot_bottom - self.yaxis.zero;
         let left_margin = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
-        surface.set_relative_clip(left_margin, 0, width, y + 1);
+        surface.set_relative_clip(left_margin, 0, width, plot_bottom);
         while start < len {
             let x = self.bars[start].layout.x - self.left_scroll + left_margin;
             if x >= width {
