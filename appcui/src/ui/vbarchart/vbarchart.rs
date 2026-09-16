@@ -106,12 +106,16 @@ where
         } else {
         }
     }
+    #[inline(always)]
+    fn visible_height(&self) -> u32 {        
+        self.size().height.saturating_sub(if self.xaxis.enabled { 3 } else { 1 })
+    }
     fn update_bars_height_from_zero(&mut self, min: f64, max: f64) {
         let lo = min.min(0.0);
         let hi = max.max(0.0);
         let total = hi - lo;
         if total > 0.0 {
-            let height = self.size().height.saturating_sub(3) as f64;
+            let height = self.visible_height() as f64;
             let cells_below = (-lo / total * height).round();
             let cells_above = height - cells_below;
             self.yaxis.zero = cells_below as i32;
@@ -131,6 +135,28 @@ where
             }
         }
     }
+    fn update_bars_height_fit_data(&mut self, min: f64, max: f64) {
+        let height = self.visible_height() as f64;
+        let range = max - min;
+    
+        // FitData has no interior zero line: bars fill from the bottom.
+        self.yaxis.zero = 0;
+    
+        if range > 0.0 {
+            for bar in self.bars.iter_mut() {
+                let v = bar.bar.value.to_f64();
+                let h = (v - min) / range * height;
+                bar.layout.digits = (h.fract() * 100.0) as u8;
+                bar.layout.h = h.trunc() as i16;
+            }
+        } else {
+            let uniform = (height * 0.5).trunc() as i16;
+            for bar in self.bars.iter_mut() {
+                bar.layout.digits = 0;
+                bar.layout.h = uniform;
+            }
+        }
+    }    
     fn update_bars_layout(&mut self) {
         if self.bars.is_empty() {
             self.bars_width = 0;
@@ -158,12 +184,7 @@ where
                 self.update_bars_height(v_min - car_scale, v_max + car_scale);
             }
             BarScale::FromZero => self.update_bars_height_from_zero(v_min, v_max),
-            BarScale::FitData => {
-                let visible_space = self.size().height.saturating_sub(4) as f64;
-                let dif = v_max - v_min;
-                let car_scale = (dif / visible_space as f64).max(1.0);
-                self.update_bars_height(v_min - car_scale, v_max + car_scale);
-            }
+            BarScale::FitData => self.update_bars_height_fit_data(v_min, v_max),
             BarScale::Fixed { min, max } => self.update_bars_height(min.to_f64(), max.to_f64()),
         }
     }
