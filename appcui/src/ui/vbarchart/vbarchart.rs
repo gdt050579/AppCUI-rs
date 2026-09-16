@@ -89,6 +89,10 @@ where
         }));
         self.update_bars_layout();
     }
+    pub fn set_bars_scale(&mut self, scale: BarScale<T>) {
+        self.scale = scale;
+        self.update_bars_layout();
+    }
     fn update_bars_height(&mut self, min: f64, max: f64) {
         let height = self.size().height;
         if max > min {
@@ -107,7 +111,7 @@ where
         let hi = max.max(0.0);
         let total = hi - lo;
         if total > 0.0 {
-            let height = self.size().height.saturating_sub(2) as f64;
+            let height = self.size().height.saturating_sub(3) as f64;
             let cells_below = (-lo / total * height).round();
             let cells_above = height - cells_below;
             self.yaxis.zero = cells_below as i32;
