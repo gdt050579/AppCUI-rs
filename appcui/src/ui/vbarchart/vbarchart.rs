@@ -5,7 +5,7 @@ use std::marker::PhantomData;
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 struct BarLayour {
     x: i32,
-    h: u16,
+    h: i16,
     digits: u8,
 }
 struct BarWithLayout<T: Number + 'static> {
@@ -97,9 +97,34 @@ where
             for bar in self.bars.iter_mut() {
                 let h = (bar.bar.value.to_f64() - min) / dif * visible_space;
                 bar.layout.digits = (h.fract() * 100.0) as u8;
-                bar.layout.h = h as u16;
+                bar.layout.h = h as i16;
             }
         } else {
+        }
+    }
+    fn update_bars_height_from_zero(&mut self, min: f64, max: f64) {
+        let lo = min.min(0.0);
+        let hi = max.max(0.0);
+        let total = hi - lo;
+        if total > 0.0 {
+            let height = self.size().height.saturating_sub(2) as f64;
+            let cells_below = (-lo / total * height).round();
+            let cells_above = height - cells_below;
+            self.yaxis.zero = cells_below as i32;
+            for bar in self.bars.iter_mut() {
+                let v = bar.bar.value.to_f64();
+                let h = if v >= 0.0 {
+                    if hi > 0.0 {
+                        v / hi * cells_above
+                    } else {
+                        0.0
+                    }
+                } else {
+                    -(v / lo * cells_below)
+                };
+                bar.layout.digits = (h.abs().fract() * 100.0) as u8;
+                bar.layout.h = h.round() as i16;
+            }
         }
     }
     fn update_bars_layout(&mut self) {
@@ -128,7 +153,7 @@ where
                 let car_scale = (dif / visible_space as f64).max(1.0);
                 self.update_bars_height(v_min - car_scale, v_max + car_scale);
             }
-            BarScale::FromZero => self.update_bars_height(v_min.min(0.0), v_max),
+            BarScale::FromZero => self.update_bars_height_from_zero(v_min, v_max),
             BarScale::FitData => {
                 let visible_space = self.size().height.saturating_sub(4) as f64;
                 let dif = v_max - v_min;
@@ -192,7 +217,7 @@ where
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
-        let y = self.size().height as i32 - if self.xaxis.enabled { 3 } else { 1 };
+        let y = self.size().height as i32 - if self.xaxis.enabled { 3 } else { 1 } - self.yaxis.zero;
         let left_margin = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
         surface.set_relative_clip(left_margin, 0, width, y + 1);
         while start < len {
