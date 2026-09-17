@@ -16,17 +16,12 @@ struct YAxis {
     width: u8,
     step: u8,
     zero: i32,
-    percentage: bool,
     bottom_value: f64,
     bottom_step: f64,
 }
 struct XAxis {
     enabled: bool,
 }
-
-const FORMAT_FLOAT: FormatNumber = FormatNumber::new(10).decimals(2);
-const FORMAT_PERCENTAGE: FormatNumber = FormatNumber::new(10).decimals(2).suffix("%");
-const FORMAT_INTEGER: FormatNumber = FormatNumber::new(10).group(3, b',');
 
 #[CustomControl(overwrite=OnPaint+OnResize, internal=true)]
 /// A vertical bar chart for a numeric series of type `T`.
@@ -46,6 +41,7 @@ where
     yaxis: YAxis,
     xaxis: XAxis,
     scale: BarScale<T>,
+    number_format: FormatNumber
 }
 
 impl<T> VBarChart<T>
@@ -65,12 +61,12 @@ where
                 width: 6,
                 step: 3,
                 zero: 0,
-                percentage: false,
                 bottom_value: 0.0,
                 bottom_step: 0.0,
             },
             xaxis: XAxis { enabled: true },
             scale: BarScale::FromZero,
+            number_format: if T::is_float() { FormatNumber::new(10).decimals(2) } else { FormatNumber::new(10).group(3, b',') },
         }
     }
     pub fn add_bar<B>(&mut self, bar: B)
@@ -96,6 +92,9 @@ where
     pub fn set_bars_scale(&mut self, scale: BarScale<T>) {
         self.scale = scale;
         self.update_bars_layout();
+    }
+    pub fn set_number_format(&mut self, format: FormatNumber) {
+        self.number_format = format;
     }
     #[inline(always)]
     fn visible_height(&self) -> u32 {        
@@ -226,7 +225,7 @@ where
             let x_poz = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
             let right = self.size().width as i32;
             let ch = Character::with_attributes('┈', attr);
-            let format = &FORMAT_FLOAT;
+            let format = &self.number_format;
             let mut buffer: [u8; 32] = [0u8; 32];
             let mut y = bottom;
             let mut bottom_value = self.yaxis.bottom_value;
