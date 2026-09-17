@@ -1,4 +1,4 @@
-use super::{bar::Bar, BarScale, Flags};
+use super::{bar::{Bar, BarDefaults, BarDrawMode, BarLayout}, BarScale, Flags};
 use crate::prelude::*;
 use std::marker::PhantomData;
 
@@ -41,7 +41,8 @@ where
     yaxis: YAxis,
     xaxis: XAxis,
     scale: BarScale<T>,
-    number_format: FormatNumber
+    number_format: FormatNumber,
+    defaults: BarDefaults,
 }
 
 impl<T> VBarChart<T>
@@ -63,6 +64,12 @@ where
                 zero: 0,
                 bottom_value: 0.0,
                 bottom_step: 0.0,
+            },
+            defaults: BarDefaults {
+                attr: CharAttribute::default(),
+                thickness: 1,
+                spacing: 1,
+                draw_mode: BarDrawMode::Normal,
             },
             xaxis: XAxis { enabled: true },
             scale: BarScale::FromZero,
@@ -193,15 +200,15 @@ where
         let mut v_min = f64::MAX;
 
         for bar in self.bars.iter_mut() {
-            x += bar.bar.spacing as i32;
+            x += bar.bar.spacing.unwrap_or(self.defaults.spacing) as i32;
             bar.layout.x = x;
             bar.layout.h = 0;
-            x += bar.bar.thickness as i32;
+            x += bar.bar.actual_thickness(&self.defaults) as i32;
             let value = bar.bar.value.to_f64();
             v_max = v_max.max(value);
             v_min = v_min.min(value);
         }
-        self.bars_width = x as u32 + self.bars[0].bar.spacing as u32;
+        self.bars_width = x as u32 + self.bars[0].bar.spacing.unwrap_or(self.defaults.spacing) as u32;
         match self.scale {
             BarScale::FromZero => self.update_bars_height_from_zero(v_min, v_max),
             BarScale::FromZeroMinRange { min, max } => self.update_bars_height_from_zero(min.to_f64().min(v_min), max.to_f64().max(v_max)),
@@ -266,18 +273,21 @@ where
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
         let plot_bottom = self.size().height as i32 - if self.xaxis.enabled { 3 } else { 1 };
-        let y = plot_bottom - self.yaxis.zero;
         let left_margin = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
+        let mut layout = BarLayout::default();
+        layout.y = plot_bottom - self.yaxis.zero;
+        let mut defaults = self.defaults;
+        defaults.attr = charattr!("red");
         surface.set_relative_clip(left_margin, 0, width, plot_bottom);
         while start < len {
-            let x = self.bars[start].layout.x - self.left_scroll + left_margin;
-            if x >= width {
+            layout.x = self.bars[start].layout.x - self.left_scroll + left_margin;
+            if layout.x >= width {
                 break;
             }
             let bar = &self.bars[start];
-            let h = bar.layout.h;
-            let d = bar.layout.digits;
-            bar.bar.paint_vertical(surface, charattr!("red"), x, y, h, d);
+            layout.length = bar.layout.h;
+            layout.digits = bar.layout.digits;
+            bar.bar.paint_vertical(surface, &layout, &defaults);
             start += 1;
         }
     }
