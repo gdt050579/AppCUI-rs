@@ -17,6 +17,8 @@ struct YAxis {
     step: u8,
     zero: i32,
     percentage: bool,
+    bottom_value: f64,
+    bottom_step: f64,
 }
 struct XAxis {
     enabled: bool,
@@ -64,6 +66,8 @@ where
                 step: 3,
                 zero: 0,
                 percentage: false,
+                bottom_value: 0.0,
+                bottom_step: 0.0,
             },
             xaxis: XAxis { enabled: true },
             scale: BarScale::FromZero,
@@ -93,27 +97,24 @@ where
         self.scale = scale;
         self.update_bars_layout();
     }
-    fn update_bars_height(&mut self, min: f64, max: f64) {
-        let height = self.size().height;
-        if max > min {
-            let dif = max - min;
-            let visible_space = self.size().height.saturating_sub(2) as f64;
-            for bar in self.bars.iter_mut() {
-                let h = (bar.bar.value.to_f64() - min) / dif * visible_space;
-                bar.layout.digits = (h.fract() * 100.0) as u8;
-                bar.layout.h = h as i16;
-            }
-        } else {
-        }
-    }
     #[inline(always)]
     fn visible_height(&self) -> u32 {        
         self.size().height.saturating_sub(if self.xaxis.enabled { 3 } else { 1 })
+    }
+    fn update_yaxis_scale(&mut self, bottom_value: f64, top_value: f64) {
+        let height = self.visible_height() as f64;
+        self.yaxis.bottom_value = bottom_value;
+        self.yaxis.bottom_step = if height > 0.0 {
+            (bottom_value - top_value) / height * (self.yaxis.step as f64)
+        } else {
+            0.0
+        };
     }
     fn update_bars_height_from_zero(&mut self, min: f64, max: f64) {
         let lo = min.min(0.0);
         let hi = max.max(0.0);
         let total = hi - lo;
+        self.update_yaxis_scale(lo, hi);
         if total > 0.0 {
             let height = self.visible_height() as f64;
             let cells_below = (-lo / total * height).round();
@@ -139,6 +140,7 @@ where
         let height = self.visible_height() as f64;
         let range = max - min;
         self.yaxis.zero = 0;
+        self.update_yaxis_scale(min, max);
     
         if range > 0.0 {
             for bar in self.bars.iter_mut() {
@@ -158,6 +160,7 @@ where
     fn update_bars_height_fixed(&mut self, min: f64, max: f64) {
         let height = self.visible_height() as f64;
         let total = max - min;
+        self.update_yaxis_scale(min, max);
     
         if total <= 0.0 {
             self.yaxis.zero = 0;
@@ -226,12 +229,14 @@ where
             let format = &FORMAT_FLOAT;
             let mut buffer: [u8; 32] = [0u8; 32];
             let mut y = bottom;
+            let mut bottom_value = self.yaxis.bottom_value;
             while y >= 0 {
                 surface.fill_horizontal_line(x_poz, y, right, ch);
-                if let Some(value) = format.write_float(y as f64, &mut buffer) {
+                if let Some(value) = format.write_float(bottom_value, &mut buffer) {
                     surface.write_ascii(x_poz - value.len() as i32 - 1, y, value.as_bytes(), attr, false);
                 }
                 y -= self.yaxis.step as i32;
+                bottom_value -= self.yaxis.bottom_step;
             }
         }
     }
