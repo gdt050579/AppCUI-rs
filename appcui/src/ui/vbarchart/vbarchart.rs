@@ -66,7 +66,7 @@ where
                 percentage: false,
             },
             xaxis: XAxis { enabled: true },
-            scale: BarScale::Auto,
+            scale: BarScale::FromZero,
         }
     }
     pub fn add_bar<B>(&mut self, bar: B)
@@ -138,8 +138,6 @@ where
     fn update_bars_height_fit_data(&mut self, min: f64, max: f64) {
         let height = self.visible_height() as f64;
         let range = max - min;
-    
-        // FitData has no interior zero line: bars fill from the bottom.
         self.yaxis.zero = 0;
     
         if range > 0.0 {
@@ -156,7 +154,33 @@ where
                 bar.layout.h = uniform;
             }
         }
-    }    
+    }  
+    fn update_bars_height_fixed(&mut self, min: f64, max: f64) {
+        let height = self.visible_height() as f64;
+        let total = max - min;
+    
+        if total <= 0.0 {
+            self.yaxis.zero = 0;
+            let uniform = (height * 0.5).trunc() as i16;
+            for bar in self.bars.iter_mut() {
+                bar.layout.h = uniform;
+                bar.layout.digits = 0;
+            }
+            return;
+        }
+    
+        let zero_cell = (0.0 - min) / total * height;
+        let zero_vis = zero_cell.clamp(0.0, height); // visible baseline row
+        self.yaxis.zero = zero_vis.round() as i32;
+    
+        for bar in self.bars.iter_mut() {
+            let v = bar.bar.value.to_f64();
+            let tip = ((v - min) / total * height).clamp(0.0, height);
+            let h = tip - zero_vis;    
+            bar.layout.digits = (h.abs().fract() * 100.0) as u8;
+            bar.layout.h = h.trunc() as i16;
+        }
+    }      
     fn update_bars_layout(&mut self) {
         if self.bars.is_empty() {
             self.bars_width = 0;
@@ -177,15 +201,10 @@ where
         }
         self.bars_width = x as u32 + self.bars[0].bar.spacing as u32;
         match self.scale {
-            BarScale::Auto => {
-                let visible_space = self.size().height.saturating_sub(4) as f64;
-                let dif = v_max - v_min;
-                let car_scale = (dif / visible_space as f64).max(1.0);
-                self.update_bars_height(v_min - car_scale, v_max + car_scale);
-            }
             BarScale::FromZero => self.update_bars_height_from_zero(v_min, v_max),
+            BarScale::FromZeroMinRange { min, max } => self.update_bars_height_from_zero(min.to_f64().min(v_min), max.to_f64().max(v_max)),
             BarScale::FitData => self.update_bars_height_fit_data(v_min, v_max),
-            BarScale::Fixed { min, max } => self.update_bars_height(min.to_f64(), max.to_f64()),
+            BarScale::Fixed { min, max } => self.update_bars_height_fixed(min.to_f64(), max.to_f64()),
         }
     }
     fn paint_yaxis(&self, surface: &mut Surface, attr: CharAttribute) {

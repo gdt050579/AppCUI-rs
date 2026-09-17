@@ -11,8 +11,8 @@ pub enum Flags {}
 
 
 pub enum BarScale<T: Number + 'static> {
-    Auto,
     FromZero,
+    FromZeroMinRange { min: T, max: T },
     FitData,
     Fixed { min: T, max: T },
 }
