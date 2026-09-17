@@ -103,6 +103,19 @@ where
     pub fn set_number_format(&mut self, format: FormatNumber) {
         self.number_format = format;
     }
+    pub fn set_default_bar_width(&mut self, width: u8) {
+        self.defaults.thickness = width.max(1);
+        self.update_bars_layout();
+    }
+    pub fn set_default_bar_spacing(&mut self, spacing: u8) {
+        self.defaults.spacing = spacing;
+        self.update_bars_layout();
+    }
+    pub fn set_default_bar_draw_mode(&mut self, draw_mode: BarDrawMode, attr: CharAttribute) {
+        self.defaults.draw_mode = draw_mode;
+        self.defaults.attr = attr;
+        self.update_bars_layout();
+    }
     #[inline(always)]
     fn visible_height(&self) -> u32 {        
         self.size().height.saturating_sub(if self.xaxis.enabled { 3 } else { 1 })
