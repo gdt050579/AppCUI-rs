@@ -92,6 +92,7 @@ pub use super::ui::window::events::ToolBarEvents;
 pub use super::ui::window::events::WindowEvents;
 pub use super::ui::window::toolbar;
 pub use super::ui::*;
+pub use super::utils::format_number::FormatNumber;
 pub use appcui_proc_macro::*;
 
 #[cfg(debug_assertions)]

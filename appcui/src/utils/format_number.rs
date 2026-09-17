@@ -7,7 +7,7 @@ use std::ops::{Add, Div, DivAssign, Mul, Rem, Sub};
 // representation_digis
 // prefix
 // fill
-pub(crate) struct FormatNumber {
+pub struct FormatNumber {
     base: u8, // 2, 8, 10, 16
     group_size: u8,
     separator_char: u8,
@@ -20,7 +20,7 @@ pub(crate) struct FormatNumber {
 }
 
 impl FormatNumber {
-    pub(crate) fn write_to_buffer(value: u64, buf: &mut [u8]) -> &[u8] {
+    pub fn write_to_buffer(value: u64, buf: &mut [u8]) -> &[u8] {
         let len = buf.len();
         if len == 0 {
             return buf;
@@ -57,7 +57,7 @@ impl FormatNumber {
         }
     }
     #[inline(always)]
-    pub(crate) const fn new(base: u8) -> Self {
+    pub const fn new(base: u8) -> Self {
         match base {
             2 | 8 | 10 | 16 => (),
             _ => panic!("Invalid base value for FormatNumber (expected 2, 8, 10 or 16)"),
@@ -76,7 +76,7 @@ impl FormatNumber {
         }
     }
     #[inline(always)]
-    pub(crate) const fn group(mut self, size: u8, separator: u8) -> Self {
+    pub const fn group(mut self, size: u8, separator: u8) -> Self {
         match size {
             0 | 3 | 4 => (),
             _ => panic!("Invalid group size for FormatNumber (expected 0, 3 or 4)"),
@@ -97,7 +97,7 @@ impl FormatNumber {
         self
     }
     #[inline(always)]
-    pub(crate) const fn fill(mut self, size: u8, fill_char: u8) -> Self {
+    pub const fn fill(mut self, size: u8, fill_char: u8) -> Self {
         match size {
             0 => match fill_char {
                 0 => (),
@@ -113,7 +113,7 @@ impl FormatNumber {
         self
     }
     #[inline(always)]
-    pub(crate) const fn representation_digits(mut self, value: u8) -> Self {
+    pub const fn representation_digits(mut self, value: u8) -> Self {
         if value == 0 {
             panic!("Invalid number of representation digits for FormatNumber (expected a number greater than 0)");
         }
@@ -144,16 +144,16 @@ impl FormatNumber {
     }
 
     #[inline(always)]
-    pub(crate) const fn suffix(mut self, suffix: &'static str) -> Self {
+    pub const fn suffix(mut self, suffix: &'static str) -> Self {
         self.suffix = suffix;
         self
     }
     #[inline(always)]
-    pub(crate) const fn prefix(mut self, prefix: &'static str) -> Self {
+    pub const fn prefix(mut self, prefix: &'static str) -> Self {
         self.prefix = prefix;
         self
     }
-    pub(crate) const fn decimals(mut self, value: u8) -> Self {
+    pub const fn decimals(mut self, value: u8) -> Self {
         if value > 8 {
             panic!("Invalid number of decimals for FormatNumber (maximum number of decimals is 8)");
         }
