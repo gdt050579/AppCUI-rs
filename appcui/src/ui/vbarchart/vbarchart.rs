@@ -1,6 +1,5 @@
 use super::{bar::{Bar, BarDefaults, BarDrawMode, BarLayout}, BarScale, Flags};
 use crate::prelude::*;
-use std::marker::PhantomData;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 struct BarLayour {
@@ -33,7 +32,6 @@ where
     T: Number + 'static,
 {
     flags: Flags,
-    _phantom: PhantomData<T>,
     bars: Vec<BarWithLayout<T>>,
     bars_width: u32,
     left_scroll: i32,
@@ -54,7 +52,6 @@ where
         Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
             flags,
-            _phantom: PhantomData,
             bars: Vec::new(),
             bars_width: 0,
             left_scroll: 0,
