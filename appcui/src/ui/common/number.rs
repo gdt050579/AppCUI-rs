@@ -17,6 +17,9 @@ pub trait Number: Add<Output = Self> + Sub<Output = Self> + Copy + Clone + Parti
     fn to_f64(&self) -> f64;
     /// Builds this type from an `f64` (used when a slider or similar produces a float).
     fn from_f64(v: f64) -> Self;
+
+    /// Returns `true` if the number is a float, `false` otherwise.
+    fn is_float() -> bool;
 }
 
 const DECIMAL_FORMAT: FormatNumber = FormatNumber::new(10);
@@ -118,6 +121,9 @@ impl Number for i8 {
     fn from_f64(v: f64) -> Self {
         v as i8
     }
+    fn is_float() -> bool {
+        false
+    }
 }
 impl Number for i16 {
     fn write_to_string(&self, writer: &mut String, format: impl Into<NumberFormat>) {
@@ -128,6 +134,9 @@ impl Number for i16 {
     }
     fn from_f64(v: f64) -> Self {
         v as i16
+    }
+    fn is_float() -> bool {
+        false
     }
 }
 impl Number for i32 {
@@ -140,6 +149,9 @@ impl Number for i32 {
     fn from_f64(v: f64) -> Self {
         v as i32
     }
+    fn is_float() -> bool {
+        false
+    }
 }
 impl Number for i64 {
     fn write_to_string(&self, writer: &mut String, format: impl Into<NumberFormat>) {
@@ -150,6 +162,9 @@ impl Number for i64 {
     }
     fn from_f64(v: f64) -> Self {
         v as i64
+    }
+    fn is_float() -> bool {
+        false
     }
 }
 impl Number for i128 {
@@ -162,6 +177,9 @@ impl Number for i128 {
     fn from_f64(v: f64) -> Self {
         v as i128
     }
+    fn is_float() -> bool {
+        false
+    }
 }
 impl Number for u8 {
     fn write_to_string(&self, writer: &mut String, format: impl Into<NumberFormat>) {
@@ -172,6 +190,9 @@ impl Number for u8 {
     }
     fn from_f64(v: f64) -> Self {
         v as u8
+    }
+    fn is_float() -> bool {
+        false
     }
 }
 impl Number for u16 {
@@ -184,6 +205,9 @@ impl Number for u16 {
     fn from_f64(v: f64) -> Self {
         v as u16
     }
+    fn is_float() -> bool {
+        false
+    }
 }
 impl Number for u32 {
     fn write_to_string(&self, writer: &mut String, format: impl Into<NumberFormat>) {
@@ -194,6 +218,9 @@ impl Number for u32 {
     }
     fn from_f64(v: f64) -> Self {
         v as u32
+    }
+    fn is_float() -> bool {
+        false
     }
 }
 impl Number for u64 {
@@ -206,6 +233,9 @@ impl Number for u64 {
     fn from_f64(v: f64) -> Self {
         v as u64
     }
+    fn is_float() -> bool {
+        false
+    }
 }
 impl Number for u128 {
     fn write_to_string(&self, writer: &mut String, format: impl Into<NumberFormat>) {
@@ -216,6 +246,9 @@ impl Number for u128 {
     }
     fn from_f64(v: f64) -> Self {
         v as u128
+    }
+    fn is_float() -> bool {
+        false
     }
 }
 impl Number for usize {
@@ -228,6 +261,9 @@ impl Number for usize {
     fn from_f64(v: f64) -> Self {
         v as usize
     }
+    fn is_float() -> bool {
+        false
+    }
 }
 impl Number for isize {
     fn write_to_string(&self, writer: &mut String, format: impl Into<NumberFormat>) {
@@ -238,6 +274,9 @@ impl Number for isize {
     }
     fn from_f64(v: f64) -> Self {
         v as isize
+    }
+    fn is_float() -> bool {
+        false
     }
 }
 impl Number for f32 {
@@ -250,6 +289,9 @@ impl Number for f32 {
     fn from_f64(v: f64) -> Self {
         v as f32
     }
+    fn is_float() -> bool {
+        true
+    }
 }
 impl Number for f64 {
     fn write_to_string(&self, writer: &mut String, format: impl Into<NumberFormat>) {
@@ -260,5 +302,8 @@ impl Number for f64 {
     }
     fn from_f64(v: f64) -> Self {
         v
+    }
+    fn is_float() -> bool {
+        true
     }
 }
