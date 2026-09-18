@@ -1,5 +1,5 @@
-use super::{bar::{Bar, BarDefaults, BarDrawMode, BarLayout}, BarScale, Flags};
-use crate::prelude::*;
+use super::{bar::{Bar, BarDefaults, BarDrawMode, BarLayout}, BarScale, Flags, XAxis};
+use crate::{prelude::*, ui::vbarchart::XAxisLabelMode};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 struct BarLayour {
@@ -18,9 +18,6 @@ struct YAxis {
     bottom_value: f64,
     bottom_step: f64,
 }
-struct XAxis {
-    enabled: bool,
-}
 
 #[CustomControl(overwrite=OnPaint+OnResize, internal=true)]
 /// A vertical bar chart for a numeric series of type `T`.
@@ -37,11 +34,12 @@ where
     left_scroll: i32,
     first_visible_bar: u32,
     yaxis: YAxis,
-    xaxis: XAxis,
     scale: BarScale<T>,
     number_format: FormatNumber,
     defaults: BarDefaults,
     surface: Surface,
+    use_theme_colors_for_bars: bool,
+    xaxis: XAxis,
 }
 
 impl<T> VBarChart<T>
@@ -69,10 +67,11 @@ where
                 spacing: 1,
                 draw_mode: BarDrawMode::Normal,
             },
-            xaxis: XAxis { enabled: true },
+            xaxis: XAxis::None,
             scale: BarScale::FromZero,
             number_format: if T::is_float() { FormatNumber::new(10).decimals(2) } else { FormatNumber::new(10).group(3, b',') },
             surface: Surface::new(1, 1),
+            use_theme_colors_for_bars: true,
         }
     }
     pub fn add_bar<B>(&mut self, bar: B)
@@ -113,11 +112,22 @@ where
     pub fn set_default_bar_drawmode(&mut self, draw_mode: BarDrawMode, attr: CharAttribute) {
         self.defaults.draw_mode = draw_mode;
         self.defaults.attr = attr;
+        self.use_theme_colors_for_bars = false;
+        self.repaint_surface();
+    }
+    pub fn set_xaxis_label_mode(&mut self, xaxis: XAxisLabelMode) {
+        match xaxis {
+            XAxisLabelMode::None => self.xaxis = XAxis::None,
+            XAxisLabelMode::Index { start } => self.xaxis = XAxis::Index { start },
+            XAxisLabelMode::BarLabels => self.xaxis = XAxis::BarLabels,
+            XAxisLabelMode::Custom(spans) => self.xaxis = XAxis::Custom,
+        }
         self.repaint_surface();
     }
     #[inline(always)]
     fn visible_height(&self) -> u32 {        
-        self.size().height.saturating_sub(if self.xaxis.enabled { 3 } else { 1 })
+        // one space from the top and the size of the height
+        self.size().height.saturating_sub(self.xaxis.height() as u32 + 1)
     }
     fn update_yaxis_scale(&mut self, bottom_value: f64, top_value: f64) {
         let height = self.visible_height() as f64;
@@ -238,12 +248,14 @@ where
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
-        let plot_bottom = self.size().height as i32 - if self.xaxis.enabled { 3 } else { 1 };
+        let plot_bottom = self.size().height as i32 - (self.xaxis.height() as i32 + 1);
         let left_margin = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
         let mut layout = BarLayout::default();
         layout.y = plot_bottom - self.yaxis.zero;
         let mut defaults = self.defaults;
-        defaults.attr = charattr!("red");
+        if self.use_theme_colors_for_bars {
+            defaults.attr = charattr!("red");
+        }
         self.surface.set_relative_clip(left_margin, 0, width, plot_bottom);
         while start < len {
             layout.x = self.bars[start].layout.x - self.left_scroll + left_margin;
@@ -258,10 +270,10 @@ where
         }        
     }
     fn paint_yaxis(&mut self, attr: CharAttribute) {
-        let bottom = self.size().height as i32 - if self.xaxis.enabled { 2 } else { 1 };
+        let bottom = self.size().height as i32 - if self.xaxis.is_none() { 1 } else { 2 };
         if self.yaxis.width > 0 {
             self.surface.draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, attr);
-            if self.xaxis.enabled {
+            if !self.xaxis.is_none() {
                 self.surface.write_char(
                     self.yaxis.width as i32 + 1,
                     bottom,
@@ -288,7 +300,7 @@ where
         }
     }
     fn paint_xaxis(&mut self, attr: CharAttribute) {
-        if !self.xaxis.enabled {
+        if self.xaxis.is_none() {
             return;
         }
         let left = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };

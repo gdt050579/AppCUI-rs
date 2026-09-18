@@ -12,6 +12,11 @@ mod tests;
 pub use self::vbarchart::VBarChart;
 pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::BarScale;
+pub use self::initialization_flags::XAxisLabelMode;
 pub use self::bar::BarDrawMode;
 pub use self::bar::BarBuilder;
 pub use self::bar::Bar;
+pub use self::bar::BarSpan;
+
+
+use self::initialization_flags::XAxis;

@@ -1,3 +1,5 @@
+use flat_string::FlatString;
+
 use crate::{
     graphics::{CharAttribute, Character, Rect, SpecialChar, Surface},
     ui::common::Number,
@@ -134,5 +136,20 @@ where
 {
     fn from(value: &T) -> Self {
         (*value).into()
+    }
+}
+
+pub struct BarSpan {
+    pub(crate) start: u32,
+    pub(crate) end: u32,
+    pub(crate) label: FlatString<22>,
+}
+impl BarSpan {
+    pub fn new(start: u32, count: u32, label: &str) -> Self {
+        Self {
+            start,
+            end: start.saturating_add(count.max(1)-1),
+            label: FlatString::from_str(label),
+        }
     }
 }
