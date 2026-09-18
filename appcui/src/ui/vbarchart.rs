@@ -19,4 +19,4 @@ pub use self::bar::Bar;
 pub use self::bar::BarSpan;
 
 
-use self::initialization_flags::XAxis;
+use self::initialization_flags::XAxisLabelFormat;

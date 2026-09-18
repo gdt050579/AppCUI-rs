@@ -139,6 +139,7 @@ where
     }
 }
 
+#[derive(Copy, Clone, Debug)]
 pub struct BarSpan {
     pub(crate) start: u32,
     pub(crate) end: u32,

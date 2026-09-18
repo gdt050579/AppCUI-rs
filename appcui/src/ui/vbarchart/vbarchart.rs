@@ -1,4 +1,4 @@
-use super::{bar::{Bar, BarDefaults, BarDrawMode, BarLayout}, BarScale, Flags, XAxis};
+use super::{bar::{Bar, BarDefaults, BarDrawMode, BarLayout}, BarScale, Flags, XAxisLabelFormat, BarSpan};
 use crate::{prelude::*, ui::vbarchart::XAxisLabelMode};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -17,6 +17,10 @@ struct YAxis {
     zero: i32,
     bottom_value: f64,
     bottom_step: f64,
+}
+struct XAxis {
+    label_format: XAxisLabelFormat,
+    spans: Vec<BarSpan>,
 }
 
 #[CustomControl(overwrite=OnPaint+OnResize, internal=true)]
@@ -67,7 +71,7 @@ where
                 spacing: 1,
                 draw_mode: BarDrawMode::Normal,
             },
-            xaxis: XAxis::None,
+            xaxis: XAxis { label_format: XAxisLabelFormat::None, spans: Vec::new() },
             scale: BarScale::FromZero,
             number_format: if T::is_float() { FormatNumber::new(10).decimals(2) } else { FormatNumber::new(10).group(3, b',') },
             surface: Surface::new(1, 1),
@@ -117,17 +121,34 @@ where
     }
     pub fn set_xaxis_label_mode(&mut self, xaxis: XAxisLabelMode) {
         match xaxis {
-            XAxisLabelMode::None => self.xaxis = XAxis::None,
-            XAxisLabelMode::Index { start } => self.xaxis = XAxis::Index { start },
-            XAxisLabelMode::BarLabels => self.xaxis = XAxis::BarLabels,
-            XAxisLabelMode::Custom(spans) => self.xaxis = XAxis::Custom,
+            XAxisLabelMode::None => self.xaxis.label_format = XAxisLabelFormat::None,
+            XAxisLabelMode::Index { start } => self.xaxis.label_format = XAxisLabelFormat::Index { start },
+            XAxisLabelMode::BarLabels => self.xaxis.label_format = XAxisLabelFormat::BarLabels,
+            XAxisLabelMode::Custom(spans) => {
+                self.xaxis.label_format = XAxisLabelFormat::Custom;
+                self.xaxis.spans.clear();
+                self.xaxis.spans.extend(spans);
+                self.xaxis.spans.sort_by(|a, b| a.start.cmp(&b.start).then(a.end.cmp(&b.end)));
+                let spans = &mut self.xaxis.spans;
+                let mut write = 0usize;
+                for read in 0..spans.len() {
+                    let overlaps = write > 0 && spans[read].start <= spans[write - 1].end;
+                    if !overlaps {
+                        if read != write {
+                            spans.swap(read, write);
+                        }
+                        write += 1;
+                    }
+                }
+                spans.truncate(write);                
+            }
         }
         self.repaint_surface();
     }
     #[inline(always)]
     fn visible_height(&self) -> u32 {        
         // one space from the top and the size of the height
-        self.size().height.saturating_sub(self.xaxis.height() as u32 + 1)
+        self.size().height.saturating_sub(self.xaxis.label_format.height() as u32 + 1)
     }
     fn update_yaxis_scale(&mut self, bottom_value: f64, top_value: f64) {
         let height = self.visible_height() as f64;
@@ -248,7 +269,7 @@ where
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
-        let plot_bottom = self.size().height as i32 - (self.xaxis.height() as i32 + 1);
+        let plot_bottom = self.size().height as i32 - (self.xaxis.label_format.height() as i32 + 1);
         let left_margin = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
         let mut layout = BarLayout::default();
         layout.y = plot_bottom - self.yaxis.zero;
@@ -270,10 +291,10 @@ where
         }        
     }
     fn paint_yaxis(&mut self, attr: CharAttribute) {
-        let bottom = self.size().height as i32 - if self.xaxis.is_none() { 1 } else { 2 };
+        let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
         if self.yaxis.width > 0 {
             self.surface.draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, attr);
-            if !self.xaxis.is_none() {
+            if !self.xaxis.label_format.is_none() {
                 self.surface.write_char(
                     self.yaxis.width as i32 + 1,
                     bottom,
@@ -300,7 +321,7 @@ where
         }
     }
     fn paint_xaxis(&mut self, attr: CharAttribute) {
-        if self.xaxis.is_none() {
+        if self.xaxis.label_format.is_none() {
             return;
         }
         let left = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };

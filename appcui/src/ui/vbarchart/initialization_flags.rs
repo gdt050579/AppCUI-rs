@@ -23,20 +23,20 @@ pub enum XAxisLabelMode<'a> {
 }
 
 #[derive(Copy,Clone)]
-pub(super) enum XAxis {
+pub(super) enum XAxisLabelFormat {
     None,
     Index { start: i32 },
     BarLabels,
     Custom,
 }
-impl XAxis {
+impl XAxisLabelFormat {
     #[inline(always)]
     pub(crate) fn is_none(&self) -> bool {
-        matches!(self, XAxis::None)
+        matches!(self, XAxisLabelFormat::None)
     }
     pub(crate) fn height(&self) -> u8 {
         match self {
-            XAxis::None => 0,
+            XAxisLabelFormat::None => 0,
             _ => 2
         }
     }
