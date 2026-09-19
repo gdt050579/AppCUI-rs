@@ -499,6 +499,15 @@ where
             bar.bar.paint_vertical(&mut self.surface, &layout, &defaults);
             start += 1;
         }
+        self.surface.reset_clip();
+        if left_margin > 0 {
+            self.surface.fill_horizontal_line(
+                0,
+                self.size().height as i32 - 1,
+                left_margin.saturating_sub(1),
+                Character::with_attributes(' ', background),
+            );
+        }
     }
     fn paint_yaxis(&mut self, axis_attr: CharAttribute, grid_attr: CharAttribute, label_attr: CharAttribute) {
         let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
@@ -524,7 +533,8 @@ where
             while y >= 0 {
                 self.surface.fill_horizontal_line(x_poz, y, right, ch);
                 if let Some(value) = format.write_float(bottom_value, &mut buffer) {
-                    self.surface.write_ascii(x_poz - value.len() as i32 - 1, y, value.as_bytes(), label_attr, false);
+                    self.surface
+                        .write_ascii(x_poz - value.len() as i32 - 1, y, value.as_bytes(), label_attr, false);
                 }
                 y -= self.yaxis.step as i32;
                 bottom_value -= self.yaxis.bottom_step;
