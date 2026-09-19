@@ -1,4 +1,7 @@
-use super::{bar::{Bar, BarDefaults, BarDrawMode, BarLayout}, BarScale, Flags, XAxisLabelFormat, BarSpan};
+use super::{
+    bar::{Bar, BarDefaults, BarDrawMode, BarLayout},
+    BarScale, BarSpan, Flags, XAxisLabelFormat,
+};
 use crate::{prelude::*, ui::vbarchart::XAxisLabelMode};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -22,6 +25,8 @@ struct XAxis {
     label_format: XAxisLabelFormat,
     spans: Vec<BarSpan>,
 }
+
+const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 
 #[CustomControl(overwrite=OnPaint+OnResize, internal=true)]
 /// A vertical bar chart for a numeric series of type `T`.
@@ -71,9 +76,16 @@ where
                 spacing: 1,
                 draw_mode: BarDrawMode::Normal,
             },
-            xaxis: XAxis { label_format: XAxisLabelFormat::None, spans: Vec::new() },
+            xaxis: XAxis {
+                label_format: XAxisLabelFormat::None,
+                spans: Vec::new(),
+            },
             scale: BarScale::FromZero,
-            number_format: if T::is_float() { FormatNumber::new(10).decimals(2) } else { FormatNumber::new(10).group(3, b',') },
+            number_format: if T::is_float() {
+                FormatNumber::new(10).decimals(2)
+            } else {
+                FormatNumber::new(10).group(3, b',')
+            },
             surface: Surface::new(1, 1),
             use_theme_colors_for_bars: true,
         }
@@ -140,15 +152,23 @@ where
                         write += 1;
                     }
                 }
-                spans.truncate(write);                
+                spans.truncate(write);
             }
         }
         self.repaint_surface();
     }
     #[inline(always)]
-    fn visible_height(&self) -> u32 {        
+    fn visible_height(&self) -> u32 {
         // one space from the top and the size of the height
         self.size().height.saturating_sub(self.xaxis.label_format.height() as u32 + 1)
+    }
+    #[inline(always)]
+    fn x_axis_left_margin(&self) -> i32 {
+        if self.yaxis.width > 0 {
+            self.yaxis.width as i32 + 2
+        } else {
+            0
+        }
     }
     fn update_yaxis_scale(&mut self, bottom_value: f64, top_value: f64) {
         let height = self.visible_height() as f64;
@@ -190,7 +210,7 @@ where
         let range = max - min;
         self.yaxis.zero = 0;
         self.update_yaxis_scale(min, max);
-    
+
         if range > 0.0 {
             for bar in self.bars.iter_mut() {
                 let v = bar.bar.value.to_f64();
@@ -205,12 +225,12 @@ where
                 bar.layout.h = uniform;
             }
         }
-    }  
+    }
     fn update_bars_height_fixed(&mut self, min: f64, max: f64) {
         let height = self.visible_height() as f64;
         let total = max - min;
         self.update_yaxis_scale(min, max);
-    
+
         if total <= 0.0 {
             self.yaxis.zero = 0;
             let uniform = (height * 0.5).trunc() as i16;
@@ -220,19 +240,19 @@ where
             }
             return;
         }
-    
+
         let zero_cell = (0.0 - min) / total * height;
         let zero_vis = zero_cell.clamp(0.0, height); // visible baseline row
         self.yaxis.zero = zero_vis.round() as i32;
-    
+
         for bar in self.bars.iter_mut() {
             let v = bar.bar.value.to_f64();
             let tip = ((v - min) / total * height).clamp(0.0, height);
-            let h = tip - zero_vis;    
+            let h = tip - zero_vis;
             bar.layout.digits = (h.abs().fract() * 100.0) as u8;
             bar.layout.h = h.trunc() as i16;
         }
-    }      
+    }
     fn update_bars_layout(&mut self) {
         if self.bars.is_empty() {
             self.bars_width = 0;
@@ -257,7 +277,7 @@ where
             BarScale::FromZeroMinRange { min, max } => self.update_bars_height_from_zero(min.to_f64().min(v_min), max.to_f64().max(v_max)),
             BarScale::FitData => self.update_bars_height_fit_data(v_min, v_max),
             BarScale::Fixed { min, max } => self.update_bars_height_fixed(min.to_f64(), max.to_f64()),
-        }        
+        }
     }
     fn repaint_surface(&mut self) {
         self.update_bars_layout();
@@ -265,12 +285,12 @@ where
         self.surface.clear(char!("' ',white,black"));
         // mereu in ordinea asta - Y, X (X va suprascrie o parte de la Y)
         self.paint_yaxis(charattr!("gray,black"));
-        self.paint_xaxis(charattr!("gray,black"));        
+        self.paint_xaxis(charattr!("gray,black"));
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
         let plot_bottom = self.size().height as i32 - (self.xaxis.label_format.height() as i32 + 1);
-        let left_margin = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
+        let left_margin = self.x_axis_left_margin();
         let mut layout = BarLayout::default();
         layout.y = plot_bottom - self.yaxis.zero;
         let mut defaults = self.defaults;
@@ -288,12 +308,13 @@ where
             layout.digits = bar.layout.digits;
             bar.bar.paint_vertical(&mut self.surface, &layout, &defaults);
             start += 1;
-        }        
+        }
     }
     fn paint_yaxis(&mut self, attr: CharAttribute) {
         let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
         if self.yaxis.width > 0 {
-            self.surface.draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, attr);
+            self.surface
+                .draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, attr);
             if !self.xaxis.label_format.is_none() {
                 self.surface.write_char(
                     self.yaxis.width as i32 + 1,
@@ -328,6 +349,84 @@ where
         let right = self.size().width as i32;
         let y = self.size().height as i32 - 2;
         self.surface.draw_horizontal_line(left, y, right, LineType::Single, attr);
+
+        match self.xaxis.label_format {
+            XAxisLabelFormat::None => (),
+            XAxisLabelFormat::Index { start } => self.paint_xaxis_index(start, attr),
+            XAxisLabelFormat::BarLabels => todo!(),
+            XAxisLabelFormat::Custom => todo!(),
+        }
+        match self.xaxis.label_format {
+            XAxisLabelFormat::None => (),
+            XAxisLabelFormat::Index { start } => self.paint_xaxis_index(start, attr),
+            XAxisLabelFormat::BarLabels => todo!(),
+            XAxisLabelFormat::Custom => todo!(),
+        }
+    }
+    fn print_label(&mut self, x: i32, y: i32, start_bar_index: usize, end_bar_index: usize, label: &str, attr: CharAttribute) {
+        let last_bar = &self.bars[end_bar_index];
+        let first_bar = &self.bars[start_bar_index];
+        let width = (last_bar.bar.actual_thickness(&self.defaults) as i32) + last_bar.layout.x - first_bar.layout.x;
+        let left_space = first_bar.bar.spacing.unwrap_or(self.defaults.spacing) as i32;
+        let right_space = if end_bar_index + 1 < self.bars.len() {
+            self.bars[end_bar_index + 1].bar.spacing.unwrap_or(self.defaults.spacing) as i32
+        } else {
+            left_space
+        };
+        // pentru impare - 5 -> 5/2 - (1-5 & 1) = 2 - 0 = 2;
+        // pentru pare - 6 => 6/2 - (1-6 & 1) = 3 - 1 = 2;
+        let left = left_space / 2 - (1 - left_space & 1);
+        let right = right_space / 2 - (1 - right_space & 1);
+        let total_space = left + width + right;
+        if total_space < 1 {
+            return;
+        }
+        let (text, count, truncated) = {
+            let mut count = 0usize;
+            let mut end = label.len();
+            let mut truncated = false;
+            for (byte_idx, _) in label.char_indices() {
+                if count == total_space as usize {
+                    end = byte_idx;
+                    truncated = true;
+                    break;
+                }
+                count += 1;
+            }
+            (&label[..end], count, truncated)
+        };
+        let x = x - left;
+        if truncated {
+            self.surface.write_string(x, y, text, attr, false);
+            self.surface.write_char(
+                x + total_space - 1,
+                y,
+                Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr),
+            );
+        } else {
+            self.surface.write_string(x + (total_space - count as i32) / 2, y, text, attr, false);
+        }
+    }
+    fn paint_xaxis_index(&mut self, start: i32, attr: CharAttribute) {
+        let mut temp: [u8; 16] = [0u8; 16];
+        let mut idx_start = self.first_visible_bar as usize;
+        let mut bar_idx = (start as i64) + self.first_visible_bar as i64;
+        let len = self.bars.len();
+        let width = self.size().width as i32;
+        let left_margin = self.x_axis_left_margin();
+        let y = self.size().height as i32 - 1;
+        while idx_start < len {
+            let bar = &self.bars[idx_start];
+            let x = bar.layout.x - self.left_scroll + left_margin;
+            if x >= width {
+                break;
+            }
+            if let Some(result) = INT_FORMAT.write_number(bar_idx, &mut temp) {
+                self.print_label(x, y, idx_start, idx_start, &result, attr);
+            }
+            idx_start += 1;
+            bar_idx += 1;
+        }
     }
 }
 
