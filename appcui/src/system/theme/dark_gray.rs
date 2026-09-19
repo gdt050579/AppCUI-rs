@@ -151,6 +151,9 @@ pub(crate) fn new() -> Theme {
         },
         chart: ChartTheme {
             background: charattr!("silver,black"),
+            axis: charattr!("white,black"),
+            label: charattr!("silver,black"),
+            grid: charattr!("gray,black"),
             bar: charattr!("white,black"),
             inactive: charattr!("gray,black"),
         },

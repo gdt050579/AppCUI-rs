@@ -291,8 +291,14 @@ pub struct SliderTheme {
 pub struct ChartTheme {
     /// background color
     pub background: CharAttribute,
+    /// axis color
+    pub axis: CharAttribute,
     /// Bar colors
     pub bar: CharAttribute,
+    /// Grid lines color
+    pub grid: CharAttribute,
+    /// label color
+    pub label: CharAttribute,
     /// inactive color
     pub inactive: CharAttribute,
 }

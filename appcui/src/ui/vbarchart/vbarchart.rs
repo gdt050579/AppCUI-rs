@@ -465,14 +465,17 @@ where
     }
     fn repaint_surface(&mut self) {
         let theme = self.theme();
-        let attr = theme.chart.background;
+        let background = theme.chart.background;
         let bar_attr = theme.chart.bar;
+        let grid_attr = theme.chart.grid;
+        let axis_attr = theme.chart.axis;
+        let label_attr = theme.chart.label;
         self.update_bars_layout();
         self.surface.reset_clip();
-        self.surface.clear(Character::with_attributes(' ', attr));
+        self.surface.clear(Character::with_attributes(' ', background));
         // mereu in ordinea asta - Y, X (X va suprascrie o parte de la Y)
-        self.paint_yaxis(attr);
-        self.paint_xaxis(attr);
+        self.paint_yaxis(axis_attr, grid_attr, label_attr);
+        self.paint_xaxis(axis_attr, label_attr);
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
@@ -497,23 +500,23 @@ where
             start += 1;
         }
     }
-    fn paint_yaxis(&mut self, attr: CharAttribute) {
+    fn paint_yaxis(&mut self, axis_attr: CharAttribute, grid_attr: CharAttribute, label_attr: CharAttribute) {
         let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
         if self.yaxis.width > 0 {
             self.surface
-                .draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, attr);
+                .draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, axis_attr);
             if !self.xaxis.label_format.is_none() {
                 self.surface.write_char(
                     self.yaxis.width as i32 + 1,
                     bottom,
-                    Character::with_attributes(SpecialChar::BoxBottomLeftCornerSingleLine, attr),
+                    Character::with_attributes(SpecialChar::BoxBottomLeftCornerSingleLine, axis_attr),
                 );
             }
         }
         if self.yaxis.step > 0 {
             let x_poz = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
             let right = self.size().width as i32;
-            let ch = Character::with_attributes('┈', attr);
+            let ch = Character::with_attributes('┈', grid_attr);
             let format = &self.number_format;
             let mut buffer: [u8; 32] = [0u8; 32];
             let mut y = bottom;
@@ -521,27 +524,27 @@ where
             while y >= 0 {
                 self.surface.fill_horizontal_line(x_poz, y, right, ch);
                 if let Some(value) = format.write_float(bottom_value, &mut buffer) {
-                    self.surface.write_ascii(x_poz - value.len() as i32 - 1, y, value.as_bytes(), attr, false);
+                    self.surface.write_ascii(x_poz - value.len() as i32 - 1, y, value.as_bytes(), label_attr, false);
                 }
                 y -= self.yaxis.step as i32;
                 bottom_value -= self.yaxis.bottom_step;
             }
         }
     }
-    fn paint_xaxis(&mut self, attr: CharAttribute) {
+    fn paint_xaxis(&mut self, axis_attr: CharAttribute, label_attr: CharAttribute) {
         if self.xaxis.label_format.is_none() {
             return;
         }
         let left = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
         let right = self.size().width as i32;
         let y = self.size().height as i32 - 2;
-        self.surface.draw_horizontal_line(left, y, right, LineType::Single, attr);
+        self.surface.draw_horizontal_line(left, y, right, LineType::Single, axis_attr);
 
         match self.xaxis.label_format {
             XAxisLabelFormat::None => (),
-            XAxisLabelFormat::Index { start } => self.paint_xaxis_index(start, attr),
-            XAxisLabelFormat::BarLabels => self.paint_xaxis_bar_labels(attr),
-            XAxisLabelFormat::Custom => self.paint_xaxis_custom(attr),
+            XAxisLabelFormat::Index { start } => self.paint_xaxis_index(start, label_attr),
+            XAxisLabelFormat::BarLabels => self.paint_xaxis_bar_labels(label_attr),
+            XAxisLabelFormat::Custom => self.paint_xaxis_custom(label_attr),
         }
     }
     fn print_label(&mut self, x: i32, y: i32, start_bar_index: usize, end_bar_index: usize, label: &str, attr: CharAttribute) {
