@@ -160,6 +160,7 @@ where
     xaxis: XAxis,
     scrollbars: ScrollBars,
     hovered_bar: Option<u32>,
+    tooltip_text: String,
 }
 
 impl<T> VBarChart<T>
@@ -206,6 +207,7 @@ where
             use_theme_colors_for_bars: true,
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             hovered_bar: None,
+            tooltip_text: String::new(),
         }
     }
     pub fn add_bar<B>(&mut self, bar: B)
@@ -731,7 +733,7 @@ where
             Rect::with_size(x, baseline + 1, thickness, abs_h)
         }
     }
-    fn show_hovered_bar_tooltip(&self, index: u32) {
+    fn show_hovered_bar_tooltip(&mut self, index: u32) {
         let Some(bar) = self.bars.get(index as usize) else {
             return;
         };
@@ -741,8 +743,11 @@ where
         if bar.bar.label.is_empty() {
             self.show_tooltip_on_rect(value, &r);
         } else {
-            let text = format!("{}\n{}", bar.bar.label, value);
-            self.show_tooltip_on_rect(&text, &r);
+            self.tooltip_text.clear();
+            self.tooltip_text.push_str(&bar.bar.label);
+            self.tooltip_text.push('\n');
+            self.tooltip_text.push_str(value);
+            self.show_tooltip_on_rect(&self.tooltip_text, &r);
         }
     }
     fn clear_hovered_bar(&mut self) {
