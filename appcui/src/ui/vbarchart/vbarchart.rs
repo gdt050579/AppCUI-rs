@@ -137,7 +137,7 @@ struct XAxis {
 
 const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 
-#[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal=true)]
 /// A vertical bar chart for a numeric series of type `T`.
 ///
 /// `VBarChart` displays one vertical bar per value. Visual options are controlled
@@ -653,8 +653,34 @@ where
         }
     }
     #[inline(always)]
+    fn max_left_scroll(&self) -> i32 {
+        let content_width = self.bars_width as i32 + self.x_axis_left_margin() + 1;
+        (content_width - self.size().width as i32).max(0)
+    }
+    fn sync_horizontal_scrollbar(&mut self) {
+        let sz = self.size();
+        self.scrollbars.update(
+            self.bars_width as u64 + self.x_axis_left_margin() as u64 + 1,
+            sz.height as u64,
+            sz,
+        );
+        self.scrollbars.set_indexes(self.left_scroll as u64, 0);
+    }
+    #[inline(always)]
     fn update_first_visible_bar(&mut self) {
         self.first_visible_bar = (self.bars.partition_point(|b| b.layout.x < self.left_scroll) as u32).saturating_sub(1);
+    }
+    fn after_horizontal_scroll(&mut self) {
+        self.update_first_visible_bar();
+        self.sync_horizontal_scrollbar();
+        self.repaint_surface();
+    }
+    fn align_scroll_to_first_visible_bar(&mut self) {
+        if let Some(bar) = self.bars.get(self.first_visible_bar as usize) {
+            self.left_scroll = bar.layout.x.max(0);
+        }
+        self.sync_horizontal_scrollbar();
+        self.repaint_surface();
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
         self.left_scroll = self.scrollbars.horizontal_index() as i32;
@@ -702,5 +728,54 @@ where
             return EventProcessStatus::Processed;
         }
         EventProcessStatus::Ignored
+    }
+}
+
+impl<T> OnKeyPressed for VBarChart<T>
+where
+    T: Number + 'static,
+{
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Left") => {
+                if self.left_scroll > 0 {
+                    self.left_scroll -= 1;
+                    self.after_horizontal_scroll();
+                }
+                EventProcessStatus::Processed
+            }
+            key!("Right") => {
+                if self.left_scroll < self.max_left_scroll() {
+                    self.left_scroll += 1;
+                    self.after_horizontal_scroll();
+                }
+                EventProcessStatus::Processed
+            }
+            key!("Home") => {
+                self.left_scroll = 0;
+                self.after_horizontal_scroll();
+                EventProcessStatus::Processed
+            }
+            key!("End") => {
+                self.left_scroll = self.max_left_scroll();
+                self.after_horizontal_scroll();
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Left") => {
+                if self.first_visible_bar > 0 {
+                    self.first_visible_bar -= 1;
+                    self.align_scroll_to_first_visible_bar();
+                }
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Right") => {
+                if !self.bars.is_empty() && (self.first_visible_bar as usize + 1) < self.bars.len() {
+                    self.first_visible_bar += 1;
+                    self.align_scroll_to_first_visible_bar();
+                }
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
