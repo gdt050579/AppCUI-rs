@@ -356,7 +356,7 @@ where
             XAxisLabelFormat::None => (),
             XAxisLabelFormat::Index { start } => self.paint_xaxis_index(start, attr),
             XAxisLabelFormat::BarLabels => self.paint_xaxis_bar_labels(attr),
-            XAxisLabelFormat::Custom => todo!(),
+            XAxisLabelFormat::Custom => self.paint_xaxis_custom(attr),
         }
     }
     fn print_label(&mut self, x: i32, y: i32, start_bar_index: usize, end_bar_index: usize, label: &str, attr: CharAttribute) {
@@ -443,7 +443,36 @@ where
             }
             idx_start += 1;
         }
-    }    
+    }
+    fn paint_xaxis_custom(&mut self, attr: CharAttribute) {
+        let len = self.bars.len();
+        if len == 0 {
+            return;
+        }
+        let left_margin = self.x_axis_left_margin();
+        let width = self.size().width as i32;
+        let y = self.size().height as i32 - 1;
+        let spans_count = self.xaxis.spans.len();
+        for i in 0..spans_count {
+            let span = &self.xaxis.spans[i];
+            let start_index = span.start as usize;
+            if start_index >= len {
+                break;
+            }
+            let bar = &self.bars[start_index];
+            let x = bar.layout.x - self.left_scroll + left_margin;
+            if x >= width {
+                break;
+            }
+            let end_index = (span.end as usize).min(len - 1);
+            let end_x = self.bars[end_index].layout.x - self.left_scroll + self.bars[end_index].bar.actual_thickness(&self.defaults) as i32;
+            if end_x < 0 {
+                continue; // not visible
+            }
+            let span_copy = span.clone(); // doar 32 de octeti - e rapid
+            self.print_label(x, y, start_index, end_index, span_copy.label.as_str(), attr);
+        }
+    }
 }
 
 impl<T> OnPaint for VBarChart<T>
