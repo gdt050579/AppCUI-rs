@@ -290,9 +290,11 @@ pub struct SliderTheme {
 #[derive(Default)]
 pub struct ChartTheme {
     /// background color
-    pub background: ControlCharAttributesState,
+    pub background: CharAttribute,
     /// Bar colors
-    pub bar: ControlCharAttributesState,
+    pub bar: CharAttribute,
+    /// inactive color
+    pub inactive: CharAttribute,
 }
 
 /// Complete color palette used to paint the desktop and all controls.

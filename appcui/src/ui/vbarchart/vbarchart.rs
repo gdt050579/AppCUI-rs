@@ -464,12 +464,15 @@ where
         }
     }
     fn repaint_surface(&mut self) {
+        let theme = self.theme();
+        let attr = theme.chart.background;
+        let bar_attr = theme.chart.bar;
         self.update_bars_layout();
         self.surface.reset_clip();
-        self.surface.clear(char!("' ',white,black"));
+        self.surface.clear(Character::with_attributes(' ', attr));
         // mereu in ordinea asta - Y, X (X va suprascrie o parte de la Y)
-        self.paint_yaxis(charattr!("gray,black"));
-        self.paint_xaxis(charattr!("gray,black"));
+        self.paint_yaxis(attr);
+        self.paint_xaxis(attr);
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         let width = self.size().width as i32;
@@ -479,7 +482,7 @@ where
         layout.y = plot_bottom - self.yaxis.zero;
         let mut defaults = self.defaults;
         if self.use_theme_colors_for_bars {
-            defaults.attr = charattr!("red");
+            defaults.attr = bar_attr;
         }
         self.surface.set_relative_clip(left_margin, 0, width, plot_bottom);
         while start < len {
@@ -766,9 +769,12 @@ where
             self.scrollbars.paint(surface, theme, self);
             surface.reduce_clip_by(0, 0, 1, 1);
         }
-        surface.draw_surface(0, 0, &self.surface);
-        let s = format!("Start: {}", self.first_visible_bar);
-        surface.write_string(0, 0, s.as_str(), charattr!("white,black"), false);
+        if !self.is_enabled() {
+            let attr = theme.chart.inactive;
+            surface.draw_surface_with_transform(0, 0, &self.surface, |ch| Character::with_attributes(ch.code, attr));
+        } else {
+            surface.draw_surface(0, 0, &self.surface);
+        }
     }
 }
 
