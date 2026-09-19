@@ -355,12 +355,6 @@ where
         match self.xaxis.label_format {
             XAxisLabelFormat::None => (),
             XAxisLabelFormat::Index { start } => self.paint_xaxis_index(start, attr),
-            XAxisLabelFormat::BarLabels => todo!(),
-            XAxisLabelFormat::Custom => todo!(),
-        }
-        match self.xaxis.label_format {
-            XAxisLabelFormat::None => (),
-            XAxisLabelFormat::Index { start } => self.paint_xaxis_index(start, attr),
             XAxisLabelFormat::BarLabels => self.paint_xaxis_bar_labels(attr),
             XAxisLabelFormat::Custom => todo!(),
         }
