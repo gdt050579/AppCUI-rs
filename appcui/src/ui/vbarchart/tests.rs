@@ -24,16 +24,14 @@ fn check_get_bar() {
 #[test]
 fn check_modify_bar() {
     let mut chart = chart_with_values(&[1, 2, 3]);
-    let updated = chart.modify_bar(1, |bar| {
+    chart.update_bar(1, |bar| {
         bar.set_value(20);
         bar.set_label("Apr");
         bar.set_thickness(4);
         bar.set_spacing(2);
         bar.set_draw_mode(BarDrawMode::Char('x'));
         bar.set_attr(charattr!("red"));
-        bar.value()
     });
-    assert_eq!(updated, Some(20));
     let bar = chart.get_bar(1).unwrap();
     assert_eq!(bar.value(), 20);
     assert_eq!(bar.label(), "Apr");
@@ -41,18 +39,17 @@ fn check_modify_bar() {
     assert_eq!(bar.spacing(), Some(2));
     assert_eq!(bar.draw_mode(), Some(BarDrawMode::Char('x')));
     assert_eq!(bar.attr(), Some(charattr!("red")));
-    assert!(chart
-        .modify_bar(10, |bar| {
-            bar.set_value(0);
-        })
-        .is_none());
+    chart.update_bar(10, |bar| {
+        bar.set_value(0);
+    });
+    assert_eq!(chart.get_bar(1).map(|b| b.value()), Some(20));
 }
 
 #[test]
 fn check_modify_bar_clear_overrides() {
     let mut chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vbarchart::Flags::None);
     chart.add_bar(BarBuilder::new(1).thickness(5).spacing(3).label("A").build());
-    chart.modify_bar(0, |bar| {
+    chart.update_bar(0, |bar| {
         bar.clear_thickness();
         bar.clear_spacing();
         bar.clear_attr();

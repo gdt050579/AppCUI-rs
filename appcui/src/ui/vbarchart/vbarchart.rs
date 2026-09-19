@@ -236,8 +236,7 @@ where
     }
     /// Mutates the bar at `index`, then relayouts and repaints the chart.
     ///
-    /// Returns `None` if `index` is out of range. Otherwise returns `Some` with the
-    /// closure's return value.
+    /// Does nothing if `index` is out of range.
     ///
     /// # Example
     /// ```rust, no_run
@@ -245,19 +244,20 @@ where
     ///
     /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
     /// chart.add_bar(1);
-    /// chart.modify_bar(0, |bar| {
+    /// chart.update_bar(0, |bar| {
     ///     bar.set_value(10);
     ///     bar.set_label("Jun");
     ///     bar.set_thickness(4);
     /// });
     /// ```
-    pub fn modify_bar<F, R>(&mut self, index: usize, f: F) -> Option<R>
+    pub fn update_bar<F>(&mut self, index: usize, f: F)
     where
-        F: FnOnce(&mut Bar<T>) -> R,
+        F: FnOnce(&mut Bar<T>),
     {
-        let result = f(&mut self.bars.get_mut(index)?.bar);
-        self.repaint_surface();
-        Some(result)
+        if let Some(bar) = self.bars.get_mut(index) {
+            f(&mut bar.bar);
+            self.repaint_surface();
+        }
     }
     /// Mutates the bar series in place, then relayouts and repaints once.
     ///
