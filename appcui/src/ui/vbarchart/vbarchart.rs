@@ -137,7 +137,7 @@ struct XAxis {
 
 const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 
-#[CustomControl(overwrite=OnPaint+OnResize, internal=true)]
+#[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent, internal=true)]
 /// A vertical bar chart for a numeric series of type `T`.
 ///
 /// `VBarChart` displays one vertical bar per value. Visual options are controlled
@@ -158,6 +158,7 @@ where
     surface: Surface,
     use_theme_colors_for_bars: bool,
     xaxis: XAxis,
+    scrollbars: ScrollBars,
 }
 
 impl<T> VBarChart<T>
@@ -165,8 +166,13 @@ where
     T: Number + 'static,
 {
     pub fn new(layout: Layout, flags: Flags) -> Self {
+        let extra = if flags.contains(Flags::ScrollBars) {
+            StatusFlags::IncreaseBottomMarginOnFocus
+        } else {
+            StatusFlags::None
+        };
         Self {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | extra),
             flags,
             bars: Vec::new(),
             bars_width: 0,
@@ -197,6 +203,7 @@ where
             },
             surface: Surface::new(1, 1),
             use_theme_colors_for_bars: true,
+            scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
         }
     }
     pub fn add_bar<B>(&mut self, bar: B)
@@ -645,13 +652,23 @@ where
             self.print_label(x, y, start_index, end_index, span_copy.label.as_str(), attr);
         }
     }
+    fn update_scroll_pos_from_scrollbars(&mut self) {
+        self.left_scroll = self.scrollbars.horizontal_index() as i32;
+        // binary search - cea mai apropiata bara
+        self.first_visible_bar = self.bars.partition_point(|b| b.layout.x < self.left_scroll) as u32;
+        self.repaint_surface();
+    }
 }
 
 impl<T> OnPaint for VBarChart<T>
 where
     T: Number + 'static,
 {
-    fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        if (self.has_focus()) && (self.flags.contains(Flags::ScrollBars)) {
+            self.scrollbars.paint(surface, theme, self);
+            surface.reduce_clip_by(0, 0, 1, 1);
+        }
         surface.draw_surface(0, 0, &self.surface);
     }
 }
@@ -663,5 +680,20 @@ where
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.surface.resize(new_size);
         self.repaint_surface();
+        // neaaparat dupa repaint unde se calculeaza bars_width
+        self.scrollbars.resize(self.bars_width as u64 + self.x_axis_left_margin() as u64 + 1, new_size.height as u64, &self.base);
+    }
+}
+
+impl<T> OnMouseEvent for VBarChart<T>
+where
+    T: Number + 'static,
+{
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if self.scrollbars.process_mouse_event(event) {
+            self.update_scroll_pos_from_scrollbars();
+            return EventProcessStatus::Processed;
+        }
+        EventProcessStatus::Ignored
     }
 }

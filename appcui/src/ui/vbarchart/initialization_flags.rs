@@ -6,7 +6,9 @@ use crate::ui::{common::Number, vbarchart::BarSpan};
 /// Initialization flags for a [`struct@super::VBarChart`].
 ///
 /// Combine values with `|`. `Flags::None` draws the bars without extra decorations.
-pub enum Flags {}
+pub enum Flags {
+    ScrollBars = 1,
+}
 
 pub enum BarScale<T: Number + 'static> {
     FromZero,
