@@ -143,5 +143,9 @@ pub(crate) fn new() -> Theme {
             marker_border: controlattr!("black", "dg", "dg", "gray", "y"),
             cap: charattr!("gray"),
         },
+        chart: ChartTheme {
+            background: controlattr!("black,silver", "black,silver", "y,silver", "gray,silver", "gray,silver"),
+            bar: controlattr!("db,silver", "db,silver", "db,silver", "gray,silver", "gray,silver"),
+        },
     }
 }

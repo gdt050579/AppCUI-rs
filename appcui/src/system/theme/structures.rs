@@ -286,6 +286,15 @@ pub struct SliderTheme {
     pub cap: CharAttribute,
 }
 
+/// Colors for a chart.
+#[derive(Default)]
+pub struct ChartTheme {
+    /// background color
+    pub background: ControlCharAttributesState,
+    /// Bar colors
+    pub bar: ControlCharAttributesState,
+}
+
 /// Complete color palette used to paint the desktop and all controls.
 ///
 /// Create a built-in palette with [`Theme::new`](Self::new), or mutate the public
@@ -336,6 +345,8 @@ pub struct Theme {
     pub hyperlink: ControlCharAttributesState,
     /// Horizontal sliders.
     pub hslider: SliderTheme,
+    /// Charts.
+    pub chart: ChartTheme,
 }
 impl Theme {
     /// Creates a theme from a built-in [`Themes`] variant.
