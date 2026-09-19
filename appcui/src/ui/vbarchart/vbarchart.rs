@@ -1,3 +1,5 @@
+use flat_string::FlatString;
+
 use super::{
     bar::{Bar, BarDefaults, BarDrawMode, BarLayout},
     BarScale, BarSpan, Flags, XAxisLabelFormat,
@@ -359,7 +361,7 @@ where
         match self.xaxis.label_format {
             XAxisLabelFormat::None => (),
             XAxisLabelFormat::Index { start } => self.paint_xaxis_index(start, attr),
-            XAxisLabelFormat::BarLabels => todo!(),
+            XAxisLabelFormat::BarLabels => self.paint_xaxis_bar_labels(attr),
             XAxisLabelFormat::Custom => todo!(),
         }
     }
@@ -428,6 +430,26 @@ where
             bar_idx += 1;
         }
     }
+    fn paint_xaxis_bar_labels(&mut self, attr: CharAttribute) {
+        let mut temp_str: FlatString<254> = FlatString::new();
+        let mut idx_start = self.first_visible_bar as usize;
+        let len = self.bars.len();
+        let width = self.size().width as i32;
+        let left_margin = self.x_axis_left_margin();
+        let y = self.size().height as i32 - 1;
+        while idx_start < len {
+            let bar = &self.bars[idx_start];
+            let x = bar.layout.x - self.left_scroll + left_margin;
+            if x >= width {
+                break;
+            }
+            if !bar.bar.label.is_empty() {
+                temp_str.set(bar.bar.label.as_str());
+                self.print_label(x, y, idx_start, idx_start, temp_str.as_str(), attr);
+            }
+            idx_start += 1;
+        }
+    }    
 }
 
 impl<T> OnPaint for VBarChart<T>
