@@ -652,10 +652,14 @@ where
             self.print_label(x, y, start_index, end_index, span_copy.label.as_str(), attr);
         }
     }
+    #[inline(always)]
+    fn update_first_visible_bar(&mut self) {
+        self.first_visible_bar = (self.bars.partition_point(|b| b.layout.x < self.left_scroll) as u32).saturating_sub(1);
+    }
     fn update_scroll_pos_from_scrollbars(&mut self) {
         self.left_scroll = self.scrollbars.horizontal_index() as i32;
         // binary search - cea mai apropiata bara
-        self.first_visible_bar = self.bars.partition_point(|b| b.layout.x < self.left_scroll) as u32;
+        self.update_first_visible_bar();
         self.repaint_surface();
     }
 }
@@ -670,6 +674,8 @@ where
             surface.reduce_clip_by(0, 0, 1, 1);
         }
         surface.draw_surface(0, 0, &self.surface);
+        let s = format!("Start: {}", self.first_visible_bar);
+        surface.write_string(0, 0, s.as_str(), charattr!("white,black"), false);
     }
 }
 
@@ -679,9 +685,10 @@ where
 {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.surface.resize(new_size);
-        self.repaint_surface();
+        self.update_bars_layout();
         // neaaparat dupa repaint unde se calculeaza bars_width
         self.scrollbars.resize(self.bars_width as u64 + self.x_axis_left_margin() as u64 + 1, new_size.height as u64, &self.base);
+        self.update_scroll_pos_from_scrollbars();
     }
 }
 
