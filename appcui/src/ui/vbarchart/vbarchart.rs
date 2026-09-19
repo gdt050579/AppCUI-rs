@@ -159,6 +159,7 @@ where
     use_theme_colors_for_bars: bool,
     xaxis: XAxis,
     scrollbars: ScrollBars,
+    hovered_bar: Option<u32>,
 }
 
 impl<T> VBarChart<T>
@@ -204,6 +205,7 @@ where
             surface: Surface::new(1, 1),
             use_theme_colors_for_bars: true,
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
+            hovered_bar: None,
         }
     }
     pub fn add_bar<B>(&mut self, bar: B)
@@ -659,11 +661,8 @@ where
     }
     fn sync_horizontal_scrollbar(&mut self) {
         let sz = self.size();
-        self.scrollbars.update(
-            self.bars_width as u64 + self.x_axis_left_margin() as u64 + 1,
-            sz.height as u64,
-            sz,
-        );
+        self.scrollbars
+            .update(self.bars_width as u64 + self.x_axis_left_margin() as u64 + 1, sz.height as u64, sz);
         self.scrollbars.set_indexes(self.left_scroll as u64, 0);
     }
     #[inline(always)]
@@ -687,6 +686,69 @@ where
         // binary search - cea mai apropiata bara
         self.update_first_visible_bar();
         self.repaint_surface();
+    }
+    fn bar_index_at(&self, x: i32, y: i32) -> Option<u32> {
+        let left_margin = self.x_axis_left_margin();
+        let plot_bottom = self.size().height as i32 - (self.xaxis.label_format.height() as i32 + 1);
+        if x < left_margin || y < 0 || y > plot_bottom {
+            return None;
+        }
+        let content_x = x + self.left_scroll - left_margin;
+        let idx = self.bars.partition_point(|b| b.layout.x <= content_x).saturating_sub(1);
+        let bar = self.bars.get(idx)?;
+        let thickness = bar.bar.actual_thickness(&self.defaults) as i32;
+        if content_x < bar.layout.x || content_x >= bar.layout.x + thickness {
+            return None;
+        }
+        let baseline = plot_bottom - self.yaxis.zero;
+        let h = bar.layout.h;
+        let (top, bottom) = if h == 0 {
+            (baseline, baseline)
+        } else if h > 0 {
+            (baseline + 1 - h as i32, baseline)
+        } else {
+            (baseline + 1, baseline + h.unsigned_abs() as i32)
+        };
+        if y < top || y > bottom {
+            return None;
+        }
+        Some(idx as u32)
+    }
+    fn bar_rect(&self, index: usize) -> Rect {
+        let bar = &self.bars[index];
+        let left_margin = self.x_axis_left_margin();
+        let plot_bottom = self.size().height as i32 - (self.xaxis.label_format.height() as i32 + 1);
+        let x = bar.layout.x - self.left_scroll + left_margin;
+        let thickness = bar.bar.actual_thickness(&self.defaults) as u16;
+        let baseline = plot_bottom - self.yaxis.zero;
+        let h = bar.layout.h;
+        if h == 0 {
+            Rect::with_size(x, baseline, thickness, 1)
+        } else if h > 0 {
+            Rect::with_size(x, baseline + 1 - h as i32, thickness, h as u16)
+        } else {
+            let abs_h = h.unsigned_abs();
+            Rect::with_size(x, baseline + 1, thickness, abs_h)
+        }
+    }
+    fn show_hovered_bar_tooltip(&self, index: u32) {
+        let Some(bar) = self.bars.get(index as usize) else {
+            return;
+        };
+        let r = self.bar_rect(index as usize);
+        let mut buf = [0u8; 64];
+        let value = self.number_format.write_float(bar.bar.value.to_f64(), &mut buf).unwrap_or("");
+        if bar.bar.label.is_empty() {
+            self.show_tooltip_on_rect(value, &r);
+        } else {
+            let text = format!("{}\n{}", bar.bar.label, value);
+            self.show_tooltip_on_rect(&text, &r);
+        }
+    }
+    fn clear_hovered_bar(&mut self) {
+        if self.hovered_bar.take().is_some() {
+            self.hide_tooltip();
+        }
     }
 }
 
@@ -713,7 +775,11 @@ where
         self.surface.resize(new_size);
         self.update_bars_layout();
         // neaaparat dupa repaint unde se calculeaza bars_width
-        self.scrollbars.resize(self.bars_width as u64 + self.x_axis_left_margin() as u64 + 1, new_size.height as u64, &self.base);
+        self.scrollbars.resize(
+            self.bars_width as u64 + self.x_axis_left_margin() as u64 + 1,
+            new_size.height as u64,
+            &self.base,
+        );
         self.update_scroll_pos_from_scrollbars();
     }
 }
@@ -724,10 +790,47 @@ where
 {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if self.scrollbars.process_mouse_event(event) {
+            self.clear_hovered_bar();
             self.update_scroll_pos_from_scrollbars();
             return EventProcessStatus::Processed;
         }
-        EventProcessStatus::Ignored
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.clear_hovered_bar();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(pos) => {
+                let idx = self.bar_index_at(pos.x, pos.y);
+                if idx != self.hovered_bar {
+                    self.hovered_bar = idx;
+                    if let Some(index) = idx {
+                        self.show_hovered_bar_tooltip(index);
+                    } else {
+                        self.hide_tooltip();
+                    }
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::Wheel(wheel) => match wheel {
+                MouseWheelDirection::Left | MouseWheelDirection::Up => {
+                    if self.left_scroll > 0 {
+                        self.left_scroll -= 1;
+                        self.after_horizontal_scroll();
+                    }
+                    EventProcessStatus::Processed
+                }
+                MouseWheelDirection::Right | MouseWheelDirection::Down => {
+                    if self.left_scroll < self.max_left_scroll() {
+                        self.left_scroll += 1;
+                        self.after_horizontal_scroll();
+                    }
+                    EventProcessStatus::Processed
+                }
+            },
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
 
