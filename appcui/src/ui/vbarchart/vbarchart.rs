@@ -544,7 +544,8 @@ where
         // pentru pare - 6 => 6/2 - (1-6 & 1) = 3 - 1 = 2;
         let left = left_space / 2 - (1 - left_space & 1);
         let right = right_space / 2 - (1 - right_space & 1);
-        let total_space = left + width + right;
+        let extra_space = left.min(right);
+        let total_space = width + extra_space * 2;
         if total_space < 1 {
             return;
         }
@@ -562,7 +563,7 @@ where
             }
             (&label[..end], count, truncated)
         };
-        let x = x - left;
+        let x = x - extra_space;
         if truncated {
             self.surface.write_string(x, y, text, attr, false);
             self.surface.write_char(
