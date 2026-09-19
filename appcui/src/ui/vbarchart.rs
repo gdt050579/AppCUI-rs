@@ -10,6 +10,7 @@ mod bar;
 mod tests;
 
 pub use self::vbarchart::VBarChart;
+pub use self::vbarchart::Bars;
 pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::BarScale;
 pub use self::initialization_flags::XAxisLabelMode;

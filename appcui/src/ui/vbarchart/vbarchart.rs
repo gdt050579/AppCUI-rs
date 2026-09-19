@@ -16,6 +16,113 @@ struct BarWithLayout<T: Number + 'static> {
     bar: Bar<T>,
     layout: BarLayour,
 }
+impl<T> BarWithLayout<T>
+where
+    T: Number + 'static,
+{
+    #[inline(always)]
+    fn new(bar: Bar<T>) -> Self {
+        Self {
+            bar,
+            layout: BarLayour { x: 0, h: 0, digits: 0 },
+        }
+    }
+}
+
+/// A mutable view of the bars stored in a [`VBarChart`].
+///
+/// `Bars` is passed to [`VBarChart::update_bars`] so several inserts, deletes, and
+/// in-place edits can be applied before the chart relayouts and repaints once.
+///
+/// Custom X-axis spans use bar indices; inserting or deleting bars may require
+/// updating those spans afterwards.
+pub struct Bars<'a, T>
+where
+    T: Number + 'static,
+{
+    inner: &'a mut Vec<BarWithLayout<T>>,
+}
+impl<'a, T> Bars<'a, T>
+where
+    T: Number + 'static,
+{
+    /// Returns the number of bars in the series.
+    #[inline(always)]
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+    /// Returns `true` if the series contains no bars.
+    #[inline(always)]
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
+    }
+    /// Returns an immutable reference to the bar at `index`, or `None` if out of range.
+    #[inline(always)]
+    pub fn get(&self, index: usize) -> Option<&Bar<T>> {
+        self.inner.get(index).map(|b| &b.bar)
+    }
+    /// Returns a mutable reference to the bar at `index`, or `None` if out of range.
+    #[inline(always)]
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut Bar<T>> {
+        self.inner.get_mut(index).map(|b| &mut b.bar)
+    }
+    /// Appends a bar at the end of the series.
+    #[inline(always)]
+    pub fn add<B>(&mut self, bar: B)
+    where
+        B: Into<Bar<T>>,
+    {
+        self.inner.push(BarWithLayout::new(bar.into()));
+    }
+    /// Appends several bars at the end of the series.
+    pub fn add_bars<B>(&mut self, bars: impl IntoIterator<Item = B>)
+    where
+        B: Into<Bar<T>>,
+    {
+        self.inner.extend(bars.into_iter().map(|bar| BarWithLayout::new(bar.into())));
+    }
+    /// Inserts a bar at `index`. Returns `false` if `index` is greater than [`len`](Self::len).
+    pub fn insert<B>(&mut self, index: usize, bar: B) -> bool
+    where
+        B: Into<Bar<T>>,
+    {
+        if index > self.inner.len() {
+            return false;
+        }
+        self.inner.insert(index, BarWithLayout::new(bar.into()));
+        true
+    }
+    /// Removes the bar at `index` and returns it, or `None` if out of range.
+    pub fn delete(&mut self, index: usize) -> Option<Bar<T>> {
+        if index >= self.inner.len() {
+            return None;
+        }
+        Some(self.inner.remove(index).bar)
+    }
+    /// Replaces the bar at `index` and returns the previous bar, or `None` if out of range.
+    pub fn set<B>(&mut self, index: usize, bar: B) -> Option<Bar<T>>
+    where
+        B: Into<Bar<T>>,
+    {
+        let slot = self.inner.get_mut(index)?;
+        Some(std::mem::replace(&mut slot.bar, bar.into()))
+    }
+    /// Removes all bars from the series.
+    #[inline(always)]
+    pub fn clear(&mut self) {
+        self.inner.clear();
+    }
+    /// Iterates over the bars in the series.
+    #[inline(always)]
+    pub fn iter(&self) -> impl Iterator<Item = &Bar<T>> {
+        self.inner.iter().map(|b| &b.bar)
+    }
+    /// Iterates mutably over the bars in the series.
+    #[inline(always)]
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Bar<T>> {
+        self.inner.iter_mut().map(|b| &mut b.bar)
+    }
+}
 struct YAxis {
     width: u8,
     step: u8,
@@ -96,20 +203,84 @@ where
     where
         B: Into<Bar<T>>,
     {
-        self.bars.push(BarWithLayout {
-            bar: bar.into(),
-            layout: BarLayour { x: 0, h: 0, digits: 0 },
-        });
+        self.bars.push(BarWithLayout::new(bar.into()));
         self.repaint_surface();
     }
     pub fn add_bars<B>(&mut self, bars: impl IntoIterator<Item = B>)
     where
         B: Into<Bar<T>>,
     {
-        self.bars.extend(bars.into_iter().map(|bar| BarWithLayout {
-            bar: bar.into(),
-            layout: BarLayour { x: 0, h: 0, digits: 0 },
-        }));
+        self.bars.extend(bars.into_iter().map(|bar| BarWithLayout::new(bar.into())));
+        self.repaint_surface();
+    }
+    /// Returns the number of bars in the chart.
+    #[inline(always)]
+    pub fn bars_count(&self) -> usize {
+        self.bars.len()
+    }
+    /// Returns an immutable reference to the bar at `index`, or `None` if out of range.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.add_bar(3);
+    /// if let Some(bar) = chart.get_bar(0) {
+    ///     assert_eq!(bar.value(), 3);
+    /// }
+    /// ```
+    #[inline(always)]
+    pub fn get_bar(&self, index: usize) -> Option<&Bar<T>> {
+        self.bars.get(index).map(|b| &b.bar)
+    }
+    /// Mutates the bar at `index`, then relayouts and repaints the chart.
+    ///
+    /// Returns `None` if `index` is out of range. Otherwise returns `Some` with the
+    /// closure's return value.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.add_bar(1);
+    /// chart.modify_bar(0, |bar| {
+    ///     bar.set_value(10);
+    ///     bar.set_label("Jun");
+    ///     bar.set_thickness(4);
+    /// });
+    /// ```
+    pub fn modify_bar<F, R>(&mut self, index: usize, f: F) -> Option<R>
+    where
+        F: FnOnce(&mut Bar<T>) -> R,
+    {
+        let result = f(&mut self.bars.get_mut(index)?.bar);
+        self.repaint_surface();
+        Some(result)
+    }
+    /// Mutates the bar series in place, then relayouts and repaints once.
+    ///
+    /// Use this to insert, delete, replace, or edit several bars without repainting
+    /// after each change. The closure receives a [`Bars`] view over the current series.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.add_bars(&[1, 2, 3]);
+    /// chart.update_bars(|bars| {
+    ///     bars.get_mut(1).unwrap().set_value(20);
+    ///     bars.insert(0, 0);
+    ///     bars.delete(3);
+    /// });
+    /// ```
+    pub fn update_bars<F>(&mut self, f: F)
+    where
+        F: FnOnce(&mut Bars<'_, T>),
+    {
+        f(&mut Bars { inner: &mut self.bars });
         self.repaint_surface();
     }
     pub fn set_bars_scale(&mut self, scale: BarScale<T>) {

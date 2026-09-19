@@ -50,6 +50,97 @@ pub(crate) struct BarLayout {
 }
 
 impl<T: Number + 'static> Bar<T> {
+    /// Returns the numeric value of this bar.
+    #[inline(always)]
+    pub fn value(&self) -> T {
+        self.value
+    }
+    /// Sets the numeric value of this bar.
+    #[inline(always)]
+    pub fn set_value(&mut self, value: T) -> &mut Self {
+        self.value = value;
+        self
+    }
+    /// Returns the label displayed for this bar (for example on the X axis).
+    #[inline(always)]
+    pub fn label(&self) -> &str {
+        &self.label
+    }
+    /// Sets the label displayed for this bar.
+    #[inline(always)]
+    pub fn set_label(&mut self, label: &str) -> &mut Self {
+        self.label.clear();
+        self.label.push_str(label);
+        self
+    }
+    /// Returns the character attribute of this bar, or `None` if the chart default is used.
+    #[inline(always)]
+    pub fn attr(&self) -> Option<CharAttribute> {
+        self.attr
+    }
+    /// Sets the character attribute of this bar.
+    #[inline(always)]
+    pub fn set_attr(&mut self, attr: CharAttribute) -> &mut Self {
+        self.attr = Some(attr);
+        self
+    }
+    /// Clears the bar-specific attribute so the chart default is used.
+    #[inline(always)]
+    pub fn clear_attr(&mut self) -> &mut Self {
+        self.attr = None;
+        self
+    }
+    /// Returns the thickness of this bar, or `None` if the chart default is used.
+    #[inline(always)]
+    pub fn thickness(&self) -> Option<u8> {
+        self.thickness
+    }
+    /// Sets the thickness of this bar.
+    #[inline(always)]
+    pub fn set_thickness(&mut self, thickness: u8) -> &mut Self {
+        self.thickness = Some(thickness);
+        self
+    }
+    /// Clears the bar-specific thickness so the chart default is used.
+    #[inline(always)]
+    pub fn clear_thickness(&mut self) -> &mut Self {
+        self.thickness = None;
+        self
+    }
+    /// Returns the spacing before this bar, or `None` if the chart default is used.
+    #[inline(always)]
+    pub fn spacing(&self) -> Option<u8> {
+        self.spacing
+    }
+    /// Sets the spacing before this bar.
+    #[inline(always)]
+    pub fn set_spacing(&mut self, spacing: u8) -> &mut Self {
+        self.spacing = Some(spacing);
+        self
+    }
+    /// Clears the bar-specific spacing so the chart default is used.
+    #[inline(always)]
+    pub fn clear_spacing(&mut self) -> &mut Self {
+        self.spacing = None;
+        self
+    }
+    /// Returns the draw mode of this bar, or `None` if the chart default is used.
+    #[inline(always)]
+    pub fn draw_mode(&self) -> Option<BarDrawMode> {
+        self.draw_mode
+    }
+    /// Sets the draw mode of this bar.
+    #[inline(always)]
+    pub fn set_draw_mode(&mut self, draw_mode: BarDrawMode) -> &mut Self {
+        self.draw_mode = Some(draw_mode);
+        self
+    }
+    /// Clears the bar-specific draw mode so the chart default is used.
+    #[inline(always)]
+    pub fn clear_draw_mode(&mut self) -> &mut Self {
+        self.draw_mode = None;
+        self
+    }
     #[inline(always)]
     fn paint_vertical_rect(&self, surface: &mut Surface, c: Character, layout: &BarLayout, defaults: &BarDefaults) {
         let thickness = self.actual_thickness(&defaults) as u32;
