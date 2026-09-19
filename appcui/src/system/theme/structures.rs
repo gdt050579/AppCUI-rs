@@ -344,7 +344,7 @@ pub struct Theme {
     /// Hyperlinks.
     pub hyperlink: ControlCharAttributesState,
     /// Horizontal sliders.
-    pub hslider: SliderTheme,
+    pub slider: SliderTheme,
     /// Charts.
     pub chart: ChartTheme,
 }

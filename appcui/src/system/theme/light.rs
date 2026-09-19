@@ -136,7 +136,7 @@ pub(crate) fn new() -> Theme {
             text: Color::White,
         },
         hyperlink: controlattr!("db,flags:Underline", "black,flags:Underline", "dr,flags:Underline", "gray", "white,black,flags:Underline"),
-        hslider: SliderTheme {
+        slider: SliderTheme {
             before_line: charattr!("black"),
             after_line: charattr!("silver"),
             marker: controlattr!("black", "dg", "dg", "gray", "y"),

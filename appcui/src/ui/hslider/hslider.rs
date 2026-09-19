@@ -405,7 +405,7 @@ where
     }
 
     fn paint_standard(&self, surface: &mut Surface, theme: &Theme) {
-        let hslider_theme = &theme.hslider;
+        let hslider_theme = &theme.slider;
 
         let left_marker_line_attr = hslider_theme.before_line;
         let right_marker_line_attr = hslider_theme.after_line;
