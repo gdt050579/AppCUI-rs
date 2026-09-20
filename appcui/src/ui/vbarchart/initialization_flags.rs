@@ -24,7 +24,7 @@ pub enum XAxisLabelMode<'a> {
     Custom(&'a [BarSpan]),
 }
 
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone, PartialEq, Eq)]
 pub(super) enum XAxisLabelFormat {
     None,
     Index { start: i32 },

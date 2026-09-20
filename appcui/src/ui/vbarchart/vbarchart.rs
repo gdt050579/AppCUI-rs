@@ -508,8 +508,8 @@ where
             bar.bar.paint_vertical(&mut self.surface, &layout, &defaults);
             start += 1;
         }
-        self.surface.reset_clip();
-        if left_margin > 0 {
+        if (left_margin > 0) && (self.xaxis.label_format != XAxisLabelFormat::None) {
+            self.surface.reset_clip();
             self.surface.fill_horizontal_line(
                 0,
                 self.size().height as i32 - 1,
