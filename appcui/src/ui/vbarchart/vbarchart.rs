@@ -1,7 +1,7 @@
 use flat_string::FlatString;
 
 use super::{
-    events::EventData,
+    events::{EventData, EventType},
     bar::{Bar, BarDefaults, BarDrawMode, BarLayout},
     BarScale, BarSpan, Flags, XAxisLabelFormat,
 };
@@ -161,6 +161,7 @@ where
     xaxis: XAxis,
     scrollbars: ScrollBars,
     hovered_bar: Option<u32>,
+    selected_bar: Option<u32>,
     tooltip_text: String,
 }
 
@@ -208,6 +209,7 @@ where
             use_theme_colors_for_bars: true,
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             hovered_bar: None,
+            selected_bar: None,
             tooltip_text: String::new(),
         }
     }
@@ -229,6 +231,11 @@ where
     #[inline(always)]
     pub fn bars_count(&self) -> usize {
         self.bars.len()
+    }
+    /// Returns the index of the currently selected bar, or `None` if no bar is selected.
+    #[inline(always)]
+    pub fn selected_bar(&self) -> Option<u32> {
+        self.selected_bar
     }
     /// Returns an immutable reference to the bar at `index`, or `None` if out of range.
     ///
@@ -293,6 +300,7 @@ where
         F: FnOnce(&mut Bars<'_, T>),
     {
         f(&mut Bars { inner: &mut self.bars });
+        self.clamp_selected_bar();
         self.repaint_surface();
     }
     pub fn set_bars_scale(&mut self, scale: BarScale<T>) {
@@ -772,12 +780,47 @@ where
             self.hide_tooltip();
         }
     }
+    fn clamp_selected_bar(&mut self) {
+        if let Some(index) = self.selected_bar {
+            if (index as usize) >= self.bars.len() {
+                self.selected_bar = None;
+            }
+        }
+    }
+    fn update_selected_bar_from_click(&mut self, x: i32, y: i32) {
+        match self.bar_index_at(x, y) {
+            Some(index) => {
+                if self.selected_bar != Some(index) {
+                    self.selected_bar = Some(index);
+                    self.raise_bar_selected_event(index);
+                }
+            }
+            None => {
+                if self.selected_bar.is_some() {
+                    self.selected_bar = None;
+                    self.raise_clear_selection_event();
+                }
+            }
+        }
+    }
     fn raise_bar_selected_event(&mut self, index: u32) {
         self.raise_event(ControlEvent {
             emitter: self.handle,
             receiver: self.event_processor,
             data: ControlEventData::VBarChart(EventData {
+                event_type: EventType::BarSelected,
                 bar_index: index,
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
+    }
+    fn raise_clear_selection_event(&mut self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::VBarChart(EventData {
+                event_type: EventType::ClearSelection,
+                bar_index: 0,
                 type_id: std::any::TypeId::of::<T>(),
             }),
         });
@@ -847,6 +890,10 @@ where
                 } else {
                     EventProcessStatus::Ignored
                 }
+            }
+            MouseEvent::Pressed(data) | MouseEvent::DoubleClick(data) => {
+                self.update_selected_bar_from_click(data.x, data.y);
+                EventProcessStatus::Processed
             }
             MouseEvent::Wheel(wheel) => match wheel {
                 MouseWheelDirection::Left | MouseWheelDirection::Up => {

@@ -13,6 +13,12 @@ fn check_creation() {
 }
 
 #[test]
+fn check_selected_bar_default() {
+    let chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vbarchart::Flags::None);
+    assert_eq!(chart.selected_bar(), None);
+}
+
+#[test]
 fn check_get_bar() {
     let chart = chart_with_values(&[1, 2, 3]);
     assert_eq!(chart.bars_count(), 3);

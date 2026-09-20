@@ -345,8 +345,7 @@ impl$(TEMPLATE_TYPE) GenericVBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
 pub(crate) static VBARCHART_ON_BAR_SELECTED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<VBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
-    if let Some(obj) = self.control(h) {
-        let value = obj.value();
+    if self.control(h).is_some() {
         return VBarChartEvents::<$(TYPE)>::on_bar_selected(self, h, index);
     }
     return EventProcessStatus::Ignored;
@@ -356,7 +355,7 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 pub(crate) static VBARCHART_ON_CLEAR_SELECTION_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<VBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
-    if let Some(obj) = self.control(h) {
+    if self.control(h).is_some() {
         return VBarChartEvents::<$(TYPE)>::on_clear_selection(self, h);
     }
     return EventProcessStatus::Ignored;
