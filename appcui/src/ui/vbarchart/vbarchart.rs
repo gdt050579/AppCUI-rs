@@ -1,8 +1,8 @@
 use flat_string::FlatString;
 
 use super::{
-    events::{EventData, EventType},
     bar::{Bar, BarDefaults, BarDrawMode, BarLayout},
+    events::{EventData, EventType},
     BarScale, BarSpan, Flags, XAxisLabelFormat,
 };
 use crate::{prelude::*, ui::vbarchart::XAxisLabelMode};
@@ -839,6 +839,20 @@ where
             surface.draw_surface_with_transform(0, 0, &self.surface, |ch| Character::with_attributes(ch.code, attr));
         } else {
             surface.draw_surface(0, 0, &self.surface);
+            if let Some(index) = self.selected_bar {
+                // clip to the plot area bounded by the X and Y axes (inclusive)
+                let left = if self.yaxis.width > 0 {
+                    self.yaxis.width as i32 + 1
+                } else {
+                    0
+                };
+                let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
+                let right = self.size().width.saturating_sub(1) as i32;
+                surface.set_relative_clip(left, 0, right, bottom);
+                let mut r = self.bar_rect(index as usize);
+                r.inflate_width(1, 1, 1, 1);
+                surface.draw_rect(r, LineType::Single, charattr!("y,black"));
+            }
         }
     }
 }
