@@ -23,7 +23,7 @@ pub trait GenericVBarChartEvents {
 
 #[derive(Copy, Clone)]
 pub(crate) enum EventType {
-    BarSelected,
+    BarSelected(u32),
     ClearSelection,
 }
 
@@ -31,5 +31,4 @@ pub(crate) enum EventType {
 pub(crate) struct EventData {
     pub(crate) type_id: std::any::TypeId,
     pub(crate) event_type: EventType,
-    pub(crate) bar_index: u32,
 }

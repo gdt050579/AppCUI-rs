@@ -205,8 +205,8 @@ impl ControlEvent {
             ControlEventData::HyperLink(_) => HyperLinkEvents::on_open(receiver, self.emitter.cast()),
             ControlEventData::HSliderEvents(data) => GenericHSliderEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id),
             ControlEventData::VBarChart(data) => match data.event_type {
-                vbarchart::events::EventType::BarSelected => {
-                    GenericVBarChartEvents::on_bar_selected(receiver, self.emitter.cast(), data.type_id, data.bar_index)
+                vbarchart::events::EventType::BarSelected(bar_index) => {
+                    GenericVBarChartEvents::on_bar_selected(receiver, self.emitter.cast(), data.type_id, bar_index)
                 }
                 vbarchart::events::EventType::ClearSelection => {
                     GenericVBarChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)

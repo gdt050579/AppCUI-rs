@@ -808,8 +808,7 @@ where
             emitter: self.handle,
             receiver: self.event_processor,
             data: ControlEventData::VBarChart(EventData {
-                event_type: EventType::BarSelected,
-                bar_index: index,
+                event_type: EventType::BarSelected(index),
                 type_id: std::any::TypeId::of::<T>(),
             }),
         });
@@ -820,7 +819,6 @@ where
             receiver: self.event_processor,
             data: ControlEventData::VBarChart(EventData {
                 event_type: EventType::ClearSelection,
-                bar_index: 0,
                 type_id: std::any::TypeId::of::<T>(),
             }),
         });
