@@ -11,8 +11,12 @@ use crate::{system::Handle, ui::common::traits::EventProcessStatus};
 /// Because the chart is generic, the control is identified by a type-erased `handle`
 /// and `type_id`. Default methods return [`EventProcessStatus::Ignored`].
 pub trait GenericVBarChartEvents {
-    /// Called when the highlighted bar changes.
-    fn on_current_bar_changed(&mut self, _handle: Handle<()>, _type_id: TypeId) -> EventProcessStatus {
+    /// Called when a bar is selected (double-clicked).
+    fn on_bar_selected(&mut self, _handle: Handle<()>, _type_id: TypeId, _bar_index: u32) -> EventProcessStatus {
+        EventProcessStatus::Ignored
+    }
+    /// Called when the selection is cleared.
+    fn on_clear_selection(&mut self, _handle: Handle<()>, _type_id: TypeId) -> EventProcessStatus {
         EventProcessStatus::Ignored
     }
 }
@@ -21,4 +25,5 @@ pub trait GenericVBarChartEvents {
 #[allow(dead_code)]
 pub(crate) struct EventData {
     pub(crate) type_id: std::any::TypeId,
+    pub(crate) bar_index: u32,
 }

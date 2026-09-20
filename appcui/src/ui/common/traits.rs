@@ -43,6 +43,7 @@ use crate::{
         timepicker::events::TimePickerEvents,
         hyperlink::events::HyperLinkEvents,
         hslider::events::GenericHSliderEvents,
+        vbarchart::events::GenericVBarChartEvents,
     },
 };
 
@@ -259,6 +260,7 @@ pub trait Control:
     + TimePickerEvents
     + HyperLinkEvents
     + GenericHSliderEvents
+    + GenericVBarChartEvents
 {
 }
 

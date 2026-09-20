@@ -1,6 +1,7 @@
 use flat_string::FlatString;
 
 use super::{
+    events::EventData,
     bar::{Bar, BarDefaults, BarDrawMode, BarLayout},
     BarScale, BarSpan, Flags, XAxisLabelFormat,
 };
@@ -770,6 +771,16 @@ where
         if self.hovered_bar.take().is_some() {
             self.hide_tooltip();
         }
+    }
+    fn raise_bar_selected_event(&mut self, index: u32) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::VBarChart(EventData {
+                bar_index: index,
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
     }
 }
 

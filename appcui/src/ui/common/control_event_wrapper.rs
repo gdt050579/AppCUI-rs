@@ -19,6 +19,8 @@ use crate::ui::{
     richtextfield::events::RichTextFieldEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
     timepicker, timepicker::events::TimePickerEvents, hyperlink, hyperlink::events::HyperLinkEvents,
     hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview,
+    vbarchart, 
+    vbarchart::events::GenericVBarChartEvents,
 };
 
 #[derive(Copy, Clone)]
@@ -57,6 +59,7 @@ pub(crate) enum ControlEventData {
     GraphView(graphview::events::EventData),
     HyperLink(hyperlink::events::EventData),
     HSliderEvents(hslider::events::EventData),
+    VBarChart(vbarchart::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -201,6 +204,13 @@ impl ControlEvent {
             },
             ControlEventData::HyperLink(_) => HyperLinkEvents::on_open(receiver, self.emitter.cast()),
             ControlEventData::HSliderEvents(data) => GenericHSliderEvents::on_value_changed(receiver, self.emitter.cast(), data.type_id),
+            ControlEventData::VBarChart(data) => {
+                if data.bar_index == u32::MAX {
+                    GenericVBarChartEvents::on_bar_selected(receiver, self.emitter.cast(), data.type_id, data.bar_index)
+                } else {
+                    GenericVBarChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)
+                }   
+            }
         }
     }
 }

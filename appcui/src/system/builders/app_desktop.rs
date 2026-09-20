@@ -84,6 +84,7 @@ macro_rules! impl_app_desktop_methods {
             GenericBufferViewEvents,
             HyperLinkEvents,
             GenericHSliderEvents,
+            GenericVBarChartEvents,
         );
     };
     (@empty $wrapper:ident, $bound:path; $($trait_name:path),* $(,)?) => {

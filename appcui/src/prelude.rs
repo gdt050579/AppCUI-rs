@@ -86,6 +86,8 @@ pub use super::ui::togglebutton;
 pub use super::ui::togglebutton::events::ToggleButtonEvents;
 pub use super::ui::treeview;
 pub use super::ui::treeview::events::GenericTreeViewEvents;
+pub use super::ui::vbarchart;
+pub use super::ui::vbarchart::events::GenericVBarChartEvents;
 pub use super::ui::vsplitter;
 pub use super::ui::window::events::ModalWindowMethods;
 pub use super::ui::window::events::ToolBarEvents;
