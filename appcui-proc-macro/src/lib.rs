@@ -2764,3 +2764,8 @@ pub fn timepicker(input: TokenStream) -> TokenStream {
 pub fn bufferview(input: TokenStream) -> TokenStream {
     crate::controls::bufferview::create(input)
 }
+
+#[proc_macro]
+pub fn vbarchart(input: TokenStream) -> TokenStream {
+    crate::controls::vbarchart::create(input)
+}
