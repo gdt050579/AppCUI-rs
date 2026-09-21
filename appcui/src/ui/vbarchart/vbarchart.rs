@@ -836,22 +836,30 @@ where
         }
         if !self.is_enabled() {
             let attr = theme.chart.inactive;
-            surface.draw_surface_with_transform(0, 0, &self.surface, |ch,_| Some(Character::with_attributes(ch.code, attr)));
+            surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
         } else {
             surface.draw_surface(0, 0, &self.surface);
             if let Some(index) = self.selected_bar {
                 // clip to the plot area bounded by the X and Y axes (inclusive)
-                let left = if self.yaxis.width > 0 {
-                    self.yaxis.width as i32 + 1
-                } else {
-                    0
-                };
+                let left = if self.yaxis.width > 0 { self.yaxis.width as i32 + 1 } else { 0 };
                 let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
                 let right = self.size().width.saturating_sub(1) as i32;
                 surface.set_relative_clip(left, 0, right, bottom);
                 let mut r = self.bar_rect(index as usize);
+
+                // option 3
                 r.inflate_width(1, 1, 1, 1);
-                surface.draw_rect(r, LineType::Single, charattr!("y,black"));
+                surface.draw_rect(r, LineType::Single, theme.chart.selection_border);
+                if self.flags.contains(Flags::DimBarsOnSelection) {
+                    let attr = theme.chart.inactive;
+                    surface.transform_rect(Rect::new(left, 0, right, bottom), |ch, p| {
+                        if r.contains(p) {
+                            None
+                        } else {
+                            Some(Character::with_attributes(ch.code, attr))
+                        }
+                    });
+                }
             }
         }
     }

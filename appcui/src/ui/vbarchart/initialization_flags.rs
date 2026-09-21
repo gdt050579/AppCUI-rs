@@ -8,6 +8,7 @@ use crate::ui::{common::Number, vbarchart::BarSpan};
 /// Combine values with `|`. `Flags::None` draws the bars without extra decorations.
 pub enum Flags {
     ScrollBars = 1,
+    DimBarsOnSelection = 2,
 }
 
 pub enum BarScale<T: Number + 'static> {

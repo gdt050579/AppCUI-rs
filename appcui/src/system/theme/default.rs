@@ -153,6 +153,7 @@ pub(crate) fn new() -> Theme {
             grid: charattr!("gray,black"),
             bar: charattr!("teal,black"),
             inactive: charattr!("gray,black"),
+            selection_border: charattr!("yellow,black"),
         },
     }
 }

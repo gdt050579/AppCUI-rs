@@ -150,6 +150,7 @@ pub(crate) fn new() -> Theme {
             grid: charattr!("gray,silver"),
             bar: charattr!("db,silver"),
             inactive: charattr!("gray,silver"),
+            selection_border: charattr!("green,silver"),
         },
     }
 }

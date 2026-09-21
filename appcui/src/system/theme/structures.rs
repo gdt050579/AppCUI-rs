@@ -301,6 +301,8 @@ pub struct ChartTheme {
     pub label: CharAttribute,
     /// inactive color
     pub inactive: CharAttribute,
+    /// selection border color
+    pub selection_border: CharAttribute,
 }
 
 /// Complete color palette used to paint the desktop and all controls.
