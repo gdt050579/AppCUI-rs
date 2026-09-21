@@ -1165,6 +1165,52 @@ impl Surface {
         }
     }
 
+    pub fn fill_rect_with<F>(&mut self, rect: Rect, generate: F)
+    where
+        F: Fn(Point) -> Option<Character>,
+    {
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
+        let mut p = Point::default();
+        for x in left..=right {
+            for y in top..=bottom {
+                p.x = x;
+                p.y = y;
+                if let Some(ch) = generate(p) {
+                    if let Some(pos) = self.coords_to_position(x, y) {
+                        self.chars[pos].set(ch);
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn transform_rect<F>(&mut self, rect: Rect, transform: F)
+    where
+        F: Fn(Character, Point) -> Option<Character>,
+    {
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
+        let mut p = Point::default();
+        for x in left..=right {
+            for y in top..=bottom {
+                if let Some(ch) = self.char(x, y) {
+                    p.x = x;
+                    p.y = y;
+                    if let Some(ch) = transform(*ch, p) {
+                        if let Some(pos) = self.coords_to_position(x, y) {
+                            self.chars[pos].set(ch);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /// Rewrites the character at `(x, y)` as a box-drawing junction based on
     /// its four neighbors.
     ///
@@ -1288,14 +1334,22 @@ impl Surface {
     ///     Character::new(ch.code, Color::Red, ch.background, ch.flags)
     /// });
     /// ```
-    pub fn draw_surface_with_transform<F: Fn(Character) -> Character>(&mut self, x: i32, y: i32, surface: &Surface, transform: F) {
+    pub fn draw_surface_with_transform<F>(&mut self, x: i32, y: i32, surface: &Surface, transform: F)
+    where
+        F: Fn(Character, Point) -> Option<Character>,
+    {
         if !self.clip.is_visible() {
             return;
         }
         let mut index = 0usize;
+        let mut p = Point::default();
         for s_y in 0..=surface.bottom_most {
             for s_x in 0..=surface.right_most {
-                self.write_char(x + s_x, y + s_y, transform(surface.chars[index]));
+                p.x = s_x;
+                p.y = s_y;
+                if let Some(ch) = transform(surface.chars[index], p) {
+                    self.write_char(x + s_x, y + s_y, ch);
+                }
                 index += 1;
             }
         }
