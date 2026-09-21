@@ -60,6 +60,144 @@ fn check_fill_rect() {
     assert_eq!(s.compute_hash(), 0xD897421A927A1A1);
 }
 #[test]
+fn check_fill_rect_with() {
+    let mut s = SurfaceTester::new(20, 5);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    let filled = Character::new('#', Color::Aqua, Color::Red, CharFlags::Bold);
+    let background = Character::new('.', Color::White, Color::Black, CharFlags::None);
+    s.fill_rect_with(Rect::new(2, 1, 5, 3), |p| {
+        if (p.x + p.y) % 2 == 0 {
+            Some(filled)
+        } else {
+            None
+        }
+    });
+    for y in 1..=3 {
+        for x in 2..=5 {
+            let expected = if (x + y) % 2 == 0 { filled } else { background };
+            assert_eq!(*s.char(x, y).unwrap(), expected);
+        }
+    }
+    assert_eq!(s.char(1, 1).unwrap().code, '.');
+    assert_eq!(s.char(6, 1).unwrap().code, '.');
+    assert_eq!(s.char(2, 0).unwrap().code, '.');
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x8EBF2BA63F9B5C21);
+}
+#[test]
+fn check_fill_rect_with_clip_and_origin() {
+    let mut s = SurfaceTester::new(20, 5);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.set_clip(3, 1, 6, 3);
+    s.fill_rect_with(Rect::new(0, 0, 10, 4), |p| {
+        Some(Character::new(
+            if p.x == 4 { 'X' } else { 'O' },
+            Color::Yellow,
+            Color::Blue,
+            CharFlags::None,
+        ))
+    });
+    assert_eq!(cell_code(&s, 2, 1), '.');
+    assert_eq!(cell_code(&s, 3, 1), 'O');
+    assert_eq!(cell_code(&s, 4, 1), 'X');
+    assert_eq!(cell_code(&s, 6, 1), 'O');
+    assert_eq!(cell_code(&s, 7, 1), '.');
+    assert_eq!(cell_code(&s, 4, 0), '.');
+    assert_eq!(cell_code(&s, 4, 4), '.');
+
+    s.reset_clip();
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.set_origin(2, 1);
+    s.fill_rect_with(Rect::new(0, 0, 2, 0), |p| {
+        Some(Character::with_char(char::from_digit(p.x as u32, 10).unwrap()))
+    });
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 2, 1), '0');
+    assert_eq!(cell_code(&s, 3, 1), '1');
+    assert_eq!(cell_code(&s, 4, 1), '2');
+    assert_eq!(cell_code(&s, 2, 0), '.');
+}
+#[test]
+fn check_transform_rect() {
+    let mut s = SurfaceTester::new(20, 5);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.fill_rect(
+        Rect::new(2, 1, 6, 3),
+        Character::new('X', Color::Yellow, Color::Blue, CharFlags::None),
+    );
+    s.transform_rect(Rect::new(2, 1, 6, 3), |ch, p| {
+        if p.x % 2 == 0 {
+            Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+        } else {
+            None
+        }
+    });
+    for y in 1..=3 {
+        for x in 2..=6 {
+            let c = s.char(x, y).unwrap();
+            assert_eq!(c.code, 'X');
+            assert_eq!(c.background, Color::Blue);
+            if x % 2 == 0 {
+                assert_eq!(c.foreground, Color::Red);
+            } else {
+                assert_eq!(c.foreground, Color::Yellow);
+            }
+        }
+    }
+    assert_eq!(s.char(1, 1).unwrap().code, '.');
+    assert_eq!(s.char(1, 1).unwrap().foreground, Color::White);
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0x3FCAC4C5107CF9E3);
+}
+#[test]
+fn check_transform_rect_clip_and_origin() {
+    let mut s = SurfaceTester::new(20, 5);
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.fill_rect(
+        Rect::new(0, 0, 19, 4),
+        Character::new('A', Color::Yellow, Color::Black, CharFlags::None),
+    );
+    s.set_clip(3, 1, 6, 3);
+    s.transform_rect(Rect::new(0, 0, 19, 4), |ch, p| {
+        if p.x == 4 {
+            Some(Character::new('X', Color::Red, ch.background, ch.flags))
+        } else {
+            Some(Character::new('O', Color::Aqua, ch.background, ch.flags))
+        }
+    });
+    assert_eq!(cell_code(&s, 2, 1), 'A');
+    assert_eq!(cell_code(&s, 3, 1), 'O');
+    assert_eq!(cell_code(&s, 4, 1), 'X');
+    assert_eq!(cell_code(&s, 6, 1), 'O');
+    assert_eq!(cell_code(&s, 7, 1), 'A');
+    assert_eq!(cell_code(&s, 4, 0), 'A');
+    assert_eq!(cell_code(&s, 4, 4), 'A');
+    s.reset_clip();
+    assert_eq!(s.char(2, 1).unwrap().foreground, Color::Yellow);
+    assert_eq!(s.char(3, 1).unwrap().foreground, Color::Aqua);
+    assert_eq!(s.char(4, 1).unwrap().foreground, Color::Red);
+
+    s.reset_origin();
+    s.clear(Character::new('.', Color::White, Color::Black, CharFlags::None));
+    s.fill_rect(
+        Rect::new(2, 1, 4, 1),
+        Character::new('A', Color::White, Color::Black, CharFlags::None),
+    );
+    s.set_origin(2, 1);
+    s.transform_rect(Rect::new(0, 0, 2, 0), |ch, p| {
+        Some(Character::new(
+            char::from_digit(p.x as u32, 10).unwrap(),
+            ch.foreground,
+            ch.background,
+            ch.flags,
+        ))
+    });
+    assert_eq!(cell_code(&s, 1, 1), '.');
+    assert_eq!(cell_code(&s, 2, 1), '0');
+    assert_eq!(cell_code(&s, 3, 1), '1');
+    assert_eq!(cell_code(&s, 4, 1), '2');
+}
+#[test]
 fn check_draw_rect() {
     let mut s = SurfaceTester::new(40, 10);
     s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
@@ -236,6 +374,98 @@ fn check_draw_surface() {
     s.draw_surface(-5, -3, &s2);
     //s.print();
     assert_eq!(s.compute_hash(), 0x3E6031703919C392);
+}
+
+#[test]
+fn check_draw_surface_with_transform() {
+    let mut s = SurfaceTester::new(20, 15);
+    let mut s2 = Surface::new(8, 6);
+    s2.clear(Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
+    s2.draw_rect(
+        Rect::new(0, 0, 7, 5),
+        LineType::Double,
+        CharAttribute::with_color(Color::White, Color::DarkRed),
+    );
+    s.draw_surface_with_transform(2, 2, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    let interior = s.char(3, 3).unwrap();
+    assert_eq!(interior.code, 'X');
+    assert_eq!(interior.foreground, Color::Red);
+    let border = s.char(2, 2).unwrap();
+    assert_eq!(border.foreground, Color::Red);
+    assert_eq!(border.background, Color::DarkRed);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x1ABE84AFD5C8F01D);
+    s.draw_surface_with_transform(-2, -2, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    //s.print();
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x2BF1E4AC5E721A90);
+    s.clear(Character::with_char('.'));
+    s.set_clip(3, 3, 5, 5);
+    s.set_origin(3, 3);
+    s.draw_surface_with_transform(0, 0, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    assert_eq!(cell_code(&s, 2, 2), '.');
+    assert_eq!(cell_code(&s, 3, 3), s2.char(0, 0).unwrap().code);
+    assert_eq!(s.char(0, 0).unwrap().foreground, Color::Red);
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x40B1E4E52FF3B910);
+    s.draw_surface_with_transform(-5, -3, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x1EC7D35E07AB3735);
+    s.reset_clip();
+    s.draw_surface_with_transform(-5, -3, &s2, |ch, _| {
+        Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
+    });
+    //s.print();
+    assert_eq!(s.compute_hash(), 0x853D1EBF50CB7A77);
+}
+
+#[test]
+fn check_draw_surface_with_transform_skip_and_source_point() {
+    let mut dest = SurfaceTester::new(10, 5);
+    dest.clear(Character::with_char('.'));
+    let mut src = Surface::new(3, 2);
+    src.clear(Character::new('A', Color::Yellow, Color::Black, CharFlags::None));
+
+    dest.draw_surface_with_transform(5, 2, &src, |_, p| {
+        Some(Character::with_char(char::from_digit((p.x + p.y * 3) as u32, 10).unwrap()))
+    });
+    assert_eq!(cell_code(&dest, 5, 2), '0');
+    assert_eq!(cell_code(&dest, 6, 2), '1');
+    assert_eq!(cell_code(&dest, 7, 2), '2');
+    assert_eq!(cell_code(&dest, 5, 3), '3');
+    assert_eq!(cell_code(&dest, 6, 3), '4');
+    assert_eq!(cell_code(&dest, 7, 3), '5');
+    assert_eq!(cell_code(&dest, 4, 2), '.');
+
+    dest.clear(Character::with_char('.'));
+    dest.draw_surface_with_transform(1, 1, &src, |ch, p| {
+        if p.x == 0 || p.y == 0 {
+            None
+        } else {
+            Some(Character::new('B', ch.foreground, ch.background, ch.flags))
+        }
+    });
+    assert_eq!(cell_code(&dest, 1, 1), '.');
+    assert_eq!(cell_code(&dest, 2, 1), '.');
+    assert_eq!(cell_code(&dest, 3, 1), '.');
+    assert_eq!(cell_code(&dest, 1, 2), '.');
+    assert_eq!(cell_code(&dest, 2, 2), 'B');
+    assert_eq!(cell_code(&dest, 3, 2), 'B');
+    assert_eq!(*dest.char(2, 2).unwrap(), Character::new('B', Color::Yellow, Color::Black, CharFlags::None));
+
+    let before = dest.compute_hash();
+    dest.set_clip(5, 0, 4, 2);
+    dest.draw_surface_with_transform(1, 1, &src, |ch, _| Some(ch));
+    dest.reset_clip();
+    assert_eq!(dest.compute_hash(), before);
 }
 
 #[test]
