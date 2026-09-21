@@ -17,6 +17,22 @@ static FLAGS: FlagsSignature = FlagsSignature::new(&[
 static BARSCALE_MODES: &[(&'static str, &'static str)] =
     &[("FromZero", "fromzero"), ("FitData", "fitdata"), ("FromZero", "zero"), ("FitData", "fit")];
 
+static XLABELS_MODES: &[(&'static str, &'static str)] = &[("None", "none"), ("BarLabels", "barlabels")];
+
+static XLABEL_SPAN_POSITIONAL: &[PositionalParameter] = &[
+    PositionalParameter::new("start", ParamType::Integer),
+    PositionalParameter::new("end", ParamType::Integer),
+    PositionalParameter::new("label", ParamType::String),
+];
+static XLABEL_SPAN_NAMED: &[NamedParameter] = &[
+    NamedParameter::new("start", "start", ParamType::Integer),
+    NamedParameter::new("end", "end", ParamType::Integer),
+    NamedParameter::new("count", "end", ParamType::Integer),
+    NamedParameter::new("label", "label", ParamType::String),
+    NamedParameter::new("text", "label", ParamType::String),
+    NamedParameter::new("caption", "label", ParamType::String),
+];
+
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("type", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
@@ -32,10 +48,9 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("xlabels", "xlabels", ParamType::String),
     NamedParameter::new("x-labels", "xlabels", ParamType::String),
     NamedParameter::new("xl", "xlabels", ParamType::String),
-
+    NamedParameter::new("xaxis", "xlabels", ParamType::String),
+    NamedParameter::new("x-axis", "xlabels", ParamType::String),
     // extra
-    NamedParameter::new("viewmode", "view", ParamType::String),
-    NamedParameter::new("vm", "view", ParamType::String),
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("left-scroll-margin", "lsm", ParamType::Integer),
     NamedParameter::new("lsm", "lsm", ParamType::Integer),
@@ -54,6 +69,20 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         cb.add(&tmp);
         cb.add(");\n");
     }
+    if let Some(v) = cb.get_list("xlabels") {
+        let tmp = parse_xlabels_list(v);
+        cb.add("control.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(");
+        cb.add(&tmp);
+        cb.add("));\n");        
+    } else {
+        if let Some(repr) = cb.get_value("xlabels") {
+            let tmp = parse_xlabels(repr);
+            cb.add("control.set_xaxis_label_mode(vbarchart::XAxisLabelMode::");
+            cb.add(&tmp);
+            cb.add(");\n");
+        }
+    }
+
     if cb.has_parameter("values") {
         let mut s = String::with_capacity(256);
         let mut temp_s = String::with_capacity(64);
@@ -120,6 +149,71 @@ fn parse_barscale(repr: &str) -> String {
         repr,
         crate::utils::join_strings(BARSCALE_MODES)
     );
+}
+
+fn parse_xlabels(repr: &str) -> String {
+    let repr = repr.trim();
+    if let Some(mode) = crate::utils::find_string_in_array(XLABELS_MODES, repr) {
+        return String::from(mode);
+    }
+    // check to see if the repr is Index(start), allowing white spaces (between start)
+    if let Some(params) = crate::utils::parse_function_and_parameters(repr, "Index") {
+        if params.len() != 1 {
+            panic!("Invalid xlabels format - expecting Index(start) !");
+        }
+        let _ = params[0].parse::<i32>().expect(&format!(
+            "Invalid xlabels format - expecting a valid integer (i32) but got {} !",
+            params[0]
+        ));
+        return format!("Index({})", params[0]);
+    }
+
+    panic!(
+        "Invalid xlabels: {} - expected one of: {} or Index(start)",
+        repr,
+        crate::utils::join_strings(XLABELS_MODES)
+    );
+}
+
+fn parse_xlabel_u32(dict: &NamedParamsMap, key: &str) -> u32 {
+    let Some(v) = dict.get(key) else {
+        panic!("Invalid xlabels format - missing '{key}' ! Expected {{start,end,label}}");
+    };
+    let s = v.get_string();
+    match s.parse::<u32>() {
+        Ok(n) => n,
+        Err(_) => panic!("Invalid xlabels format - expecting a valid positive integer (u32) for '{key}' but got {s} !"),
+    }
+}
+
+fn parse_xlabels_list(list: &mut Vec<Value>) -> String {
+    // format should be [{start,end,label},{start,end,label},...]
+    let mut spans = String::from("&[");
+    let mut first = true;
+    let mut temp_s = String::with_capacity(16);
+    for item in list.iter_mut() {
+        temp_s.clear();
+        temp_s.push_str(item.get_string());
+        if let Some(d) = item.get_dict() {
+            d.validate_positional_parameters(&temp_s, XLABEL_SPAN_POSITIONAL).unwrap();
+            d.validate_named_parameters(&temp_s, XLABEL_SPAN_NAMED).unwrap();
+            let start = parse_xlabel_u32(d, "start");
+            let end = parse_xlabel_u32(d, "end");
+            let label = match d.get("label") {
+                Some(v) => v.get_string().to_string(),
+                None => panic!("Invalid xlabels format - missing 'label' ! Expected {{start,end,label}}"),
+            };
+            if !first {
+                spans.push(',');
+            }
+            first = false;
+            spans.push_str(&format!("vbarchart::BarSpan::new({start},{end},\"{label}\")"));
+        } else {
+            panic!("An x-axis label span must be described between brackets: {{ and }}. For example: `{{0,3,'Q1'}}` !");
+        }
+    }
+    spans.push(']');
+    spans
 }
 
 /*
