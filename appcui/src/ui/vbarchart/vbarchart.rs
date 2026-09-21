@@ -836,7 +836,7 @@ where
         }
         if !self.is_enabled() {
             let attr = theme.chart.inactive;
-            surface.draw_surface_with_transform(0, 0, &self.surface, |ch| Character::with_attributes(ch.code, attr));
+            surface.draw_surface_with_transform(0, 0, &self.surface, |ch,_| Some(Character::with_attributes(ch.code, attr)));
         } else {
             surface.draw_surface(0, 0, &self.surface);
             if let Some(index) = self.selected_bar {
