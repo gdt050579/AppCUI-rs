@@ -33,6 +33,25 @@ static XLABEL_SPAN_NAMED: &[NamedParameter] = &[
     NamedParameter::new("caption", "label", ParamType::String),
 ];
 
+static VALUE_BAR_POSITIONAL: &[PositionalParameter] = &[PositionalParameter::new("value", ParamType::String)];
+static VALUE_BAR_NAMED: &[NamedParameter] = &[
+    NamedParameter::new("value", "value", ParamType::String),
+    NamedParameter::new("val", "value", ParamType::String),
+    NamedParameter::new("v", "value", ParamType::String),
+    NamedParameter::new("width", "width", ParamType::Integer),
+    NamedParameter::new("w", "width", ParamType::Integer),
+    NamedParameter::new("thickness", "width", ParamType::Integer),
+    NamedParameter::new("space", "space", ParamType::Integer),
+    NamedParameter::new("spacing", "space", ParamType::Integer),
+    NamedParameter::new("s", "space", ParamType::Integer),
+    NamedParameter::new("attr", "attr", ParamType::String),
+    NamedParameter::new("attribute", "attr", ParamType::String),
+    NamedParameter::new("charattr", "attr", ParamType::String),
+    NamedParameter::new("label", "label", ParamType::String),
+    NamedParameter::new("text", "label", ParamType::String),
+    NamedParameter::new("caption", "label", ParamType::String),
+];
+
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("type", ParamType::String)];
 static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("type", "type", ParamType::String),
@@ -82,28 +101,13 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             cb.add(");\n");
         }
     }
-
-    if cb.has_parameter("values") {
-        let mut s = String::with_capacity(256);
-        let mut temp_s = String::with_capacity(64);
-        if let Some(list) = cb.get_list("values") {
-            for item in list.iter_mut() {
-                temp_s.clear();
-                temp_s.push_str(item.get_string());
-                if let Some(d) = item.get_dict() {
-                    let res = crate::column::builder::create_from_dict(&temp_s, d);
-                    s.push_str("control.add_column(");
-                    s.push_str(&res);
-                    s.push_str(");\n");
-                } else {
-                    panic!("A column must be descipted between brackets: {{ and }}. For example: `{{Name,10,Left}}` !");
-                }
-            }
-        } else {
-            panic!("Parameter `columns` in listview must contains a list a columns: columns=[{{...}},{{...}},{{...}}] !");
-        }
-        cb.add_line(&s);
-    }
+    if let Some(v) = cb.get_list("values") {
+        let tmp = parse_values_list(v);
+        cb.add("let values = ");
+        cb.add(&tmp);
+        cb.add(";\n");
+        cb.add("control.add_bars(values);\n");        
+    }    
     cb.add_basecontrol_operations();
     cb.into()
 }
@@ -216,6 +220,96 @@ fn parse_xlabels_list(list: &mut Vec<Value>) -> String {
     spans
 }
 
+fn validate_bar_number(repr: &str) {
+    if repr.parse::<f64>().is_err() {
+        panic!("Invalid values format - expecting a valid number but got {repr} !");
+    }
+}
+
+fn parse_bar_u8(repr: &str, key: &str) -> u8 {
+    repr.parse::<u8>().unwrap_or_else(|_| {
+        panic!("Invalid values format - expecting a number between 0 and 255 for '{key}' but got {repr} !");
+    })
+}
+
+fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str) -> String {
+    dict.validate_positional_parameters(param_list, VALUE_BAR_POSITIONAL).unwrap();
+    dict.validate_named_parameters(param_list, VALUE_BAR_NAMED).unwrap();
+    let value = match dict.get("value") {
+        Some(v) => {
+            let s = v.get_string();
+            validate_bar_number(s);
+            s.to_string()
+        }
+        None => panic!("Invalid values format - missing 'value' ! Expected {{value,width: 10, space: 4, attr: {{...}}}}"),
+    };
+    let width = dict.get("width").map(|v| parse_bar_u8(v.get_string(), "width"));
+    let space = dict.get("space").map(|v| parse_bar_u8(v.get_string(), "space"));
+    let label = dict.get("label").map(|v| v.get_string().to_string());
+    let attr = if dict.contains("attr") {
+        if let Some(attr_val) = dict.get_mut("attr") {
+            if let Some(attr_dict) = attr_val.get_dict() {
+                Some(crate::chars::builder::create_attr_from_dict(param_list, attr_dict))
+            } else {
+                Some(format!("charattr!(\"{}\")", attr_val.get_string()))
+            }
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+    let mut res = format!("vbarchart::BarBuilder::new({value})");
+    if let Some(w) = width {
+        res.push_str(&format!(".thickness({w})"));
+    }
+    if let Some(s) = space {
+        res.push_str(&format!(".spacing({s})"));
+    }
+    if let Some(l) = label {
+        res.push_str(&format!(".label(\"{l}\")"));
+    }
+    if let Some(a) = attr {
+        res.push_str(".attr(");
+        res.push_str(&a);
+        res.push(')');
+    }
+    res.push_str(".build()");
+    res
+}
+
+fn parse_values_list(list: &mut Vec<Value>) -> String {
+    // format should be either [value,value,value,...] where each value is a valid number
+    // or [{value,width: 10, space: 4, attr: {}},{value,width: 10, space: 4, attr: {}},...]
+    // where attr is a charattr!
+    let mut items = Vec::with_capacity(list.len());
+    let mut has_dict = false;
+    let mut temp_s = String::with_capacity(16);
+    for item in list.iter_mut() {
+        temp_s.clear();
+        temp_s.push_str(item.get_string());
+        if let Some(d) = item.get_dict() {
+            has_dict = true;
+            items.push(parse_bar_from_dict(d, &temp_s));
+        } else if item.is_list() {
+            panic!("Invalid values format - a value must be a number or a dictionary {{value,width: 10, space: 4, attr: {{...}}}} !");
+        } else {
+            let s = item.get_string();
+            validate_bar_number(s);
+            items.push(s.to_string());
+        }
+    }
+    if has_dict {
+        for item in items.iter_mut() {
+            if !item.starts_with("vbarchart::BarBuilder") {
+                *item = format!("vbarchart::BarBuilder::new({item}).build()");
+            }
+        }
+        format!("[{}]", items.join(","))
+    } else {
+        format!("&[{}]", items.join(","))
+    }
+}
 /*
 bar scale
 number format
