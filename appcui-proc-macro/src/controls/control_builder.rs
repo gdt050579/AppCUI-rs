@@ -395,6 +395,23 @@ impl<'a> ControlBuilder<'a> {
         self.content.push_str(content);
         self.content.push('\n');
     }
+
+    pub(super) fn call_method_with_enum_parameter(
+        &mut self,
+        method_name: &str,
+        param_name: &str,
+        enum_name: &str,
+        available_variants: &FlagsSignature,
+    ) {
+        if self.has_parameter(param_name) {
+            self.add("control.");
+            self.add(method_name);
+            self.add("(");
+            self.add_enum_parameter(param_name, enum_name, available_variants, None);
+            self.add_line(");\n");
+        }
+    }
+
     #[inline(always)]
     pub(super) fn get_dict(&mut self, name: &str) -> Option<&mut NamedParamsMap<'a>> {
         self.parser.get_mut(name)?.get_dict()

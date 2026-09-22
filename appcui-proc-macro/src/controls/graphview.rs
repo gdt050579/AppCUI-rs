@@ -77,25 +77,11 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     }
 
     // edge-line-type
-    if cb.has_parameter("elt") {
-        cb.add("control.set_edge_line_type(");
-        cb.add_enum_parameter("elt", "LineType", &LINE_TYPE, None);
-        cb.add_line(");");
-    }
-
+    cb.call_method_with_enum_parameter("set_edge_line_type", "elt", "LineType", &LINE_TYPE);
     // edge routing
-    if cb.has_parameter("routing") {
-        cb.add("control.set_edge_routing(");
-        cb.add_enum_parameter("routing", "graphview::EdgeRouting", &ROUTING, None);
-        cb.add_line(");");
-    }   
-
+    cb.call_method_with_enum_parameter("set_edge_routing", "routing", "graphview::EdgeRouting", &ROUTING);
     // arrange
-    if cb.has_parameter("arrange") {
-        cb.add("control.arrange_nodes(");
-        cb.add_enum_parameter("arrange", "graphview::ArrangeMethod", &ARRANGE, None);
-        cb.add_line(");");
-    }      
+    cb.call_method_with_enum_parameter("arrange_nodes", "arrange", "graphview::ArrangeMethod", &ARRANGE);
     // arrow heads
     if cb.has_parameter("arrow-heads") {
         let v = cb.get_bool("arrow-heads").unwrap_or(false);
