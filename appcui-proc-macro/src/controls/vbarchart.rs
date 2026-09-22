@@ -55,6 +55,10 @@ static VALUE_BAR_NAMED: &[NamedParameter] = &[
     NamedParameter::new("label", "label", ParamType::String),
     NamedParameter::new("text", "label", ParamType::String),
     NamedParameter::new("caption", "label", ParamType::String),
+    NamedParameter::new("draw-mode", "draw-mode", ParamType::String),
+    NamedParameter::new("drawmode", "draw-mode", ParamType::String),
+    NamedParameter::new("dm", "draw-mode", ParamType::String),
+    NamedParameter::new("mode", "draw-mode", ParamType::String),
 ];
 
 static POSILITIONAL_PARAMETERS: &[PositionalParameter] = &[PositionalParameter::new("type", ParamType::String)];
@@ -445,6 +449,7 @@ fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str) -> String {
     let width = dict.get("width").map(|v| parse_bar_u8(v.get_string(), "width"));
     let space = dict.get("space").map(|v| parse_bar_u8(v.get_string(), "space"));
     let label = dict.get("label").map(|v| v.get_string().to_string());
+    let draw_mode = dict.get("draw-mode").map(|v| parse_bar_draw_mode(v.get_string(), "draw-mode"));
     let attr = if dict.contains("attr") {
         if let Some(attr_val) = dict.get_mut("attr") {
             if let Some(attr_dict) = attr_val.get_dict() {
@@ -471,6 +476,11 @@ fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str) -> String {
     if let Some(a) = attr {
         res.push_str(".attr(");
         res.push_str(&a);
+        res.push(')');
+    }
+    if let Some(dm) = draw_mode {
+        res.push_str(".draw_mode(");
+        res.push_str(&dm);
         res.push(')');
     }
     res.push_str(".build()");
