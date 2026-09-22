@@ -324,6 +324,14 @@ where
         self.use_theme_colors_for_bars = false;
         self.repaint_surface();
     }
+    pub fn set_yaxis_width(&mut self, width: u8) {
+        self.yaxis.width = width;
+        self.repaint_surface();
+    }
+    pub fn set_yaxis_step(&mut self, step: u8) {
+        self.yaxis.step = step.max(1);
+        self.repaint_surface();
+    }
     pub fn set_xaxis_label_mode(&mut self, xaxis: XAxisLabelMode) {
         match xaxis {
             XAxisLabelMode::None => self.xaxis.label_format = XAxisLabelFormat::None,

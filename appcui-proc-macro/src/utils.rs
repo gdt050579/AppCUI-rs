@@ -149,8 +149,8 @@ pub(crate) fn validate_name(name: &str, force_one_capilat_letter: bool) -> Resul
     Ok(())
 }
 pub(crate) fn find_string_in_array(array: &[(&'static str, &'static str)], value: &str) -> Option<&'static str> {
-    for (key, value) in array {
-        if equal_ignore_case(value, value) {
+    for (key, v) in array {
+        if equal_ignore_case(value, *v) {
             return Some(key);
         }
     }

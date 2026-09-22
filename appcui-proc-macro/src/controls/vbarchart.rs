@@ -4,14 +4,7 @@ use proc_macro::*;
 
 static FLAGS: FlagsSignature = FlagsSignature::new(&[
     "ScrollBars",
-    "SearchBar",
-    "CheckBoxes",
-    "ShowGroups",
-    "SmallIcons",
-    "LargeIcons",
-    "CustomFilter",
-    "NoSelection",
-    "MergeBorders",
+    "DimBarsOnSelection",
 ]);
 
 static BARSCALE_MODES: &[(&'static str, &'static str)] =
@@ -63,12 +56,35 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("bs", "barscale", ParamType::String),
     NamedParameter::new("bar-scale", "barscale", ParamType::String),
     NamedParameter::new("scale", "barscale", ParamType::String),
+    // default bar width
+    NamedParameter::new("default-bar-width", "default-bar-width", ParamType::Integer),
+    NamedParameter::new("dbw", "default-bar-width", ParamType::Integer),
+    NamedParameter::new("barwidth", "default-bar-width", ParamType::Integer),
+    NamedParameter::new("bar-width", "default-bar-width", ParamType::Integer),
+    NamedParameter::new("bw", "default-bar-width", ParamType::Integer),
+    // default bar spacing
+    NamedParameter::new("default-bar-spacing", "default-bar-spacing", ParamType::Integer),
+    NamedParameter::new("dbs", "default-bar-spacing", ParamType::Integer),
+    NamedParameter::new("bar-spacing", "default-bar-spacing", ParamType::Integer),
+    NamedParameter::new("spacing", "default-bar-spacing", ParamType::Integer),
+    NamedParameter::new("space", "default-bar-spacing", ParamType::Integer),
+    NamedParameter::new("bs", "default-bar-spacing", ParamType::Integer),
+    NamedParameter::new("s", "default-bar-spacing", ParamType::Integer),
     // x-asix labels
     NamedParameter::new("xlabels", "xlabels", ParamType::String),
     NamedParameter::new("x-labels", "xlabels", ParamType::String),
     NamedParameter::new("xl", "xlabels", ParamType::String),
     NamedParameter::new("xaxis", "xlabels", ParamType::String),
     NamedParameter::new("x-axis", "xlabels", ParamType::String),
+    // y-axis width
+    NamedParameter::new("yaxis-width", "yaxis-width", ParamType::Integer),
+    NamedParameter::new("yw", "yaxis-width", ParamType::Integer),
+    NamedParameter::new("y-axis-width", "yaxis-width", ParamType::Integer),
+    // y-axis step
+    NamedParameter::new("yaxis-step", "yaxis-step", ParamType::Integer),
+    NamedParameter::new("ystep", "yaxis-step", ParamType::Integer),
+    NamedParameter::new("y-axis-step", "yaxis-step", ParamType::Integer),
+    NamedParameter::new("step", "yaxis-step", ParamType::Integer),
     // extra
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("left-scroll-margin", "lsm", ParamType::Integer),
@@ -107,7 +123,31 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         cb.add(&tmp);
         cb.add(";\n");
         cb.add("control.add_bars(values);\n");        
-    }    
+    } 
+    if let Some(v) = cb.get_value("default-bar-width") {
+        let tmp = parse_bar_u8(v, "default-bar-width");
+        cb.add("control.set_default_bar_width(");
+        cb.add(format!("{tmp}").as_str());
+        cb.add(");\n");
+    }
+    if let Some(v) = cb.get_value("default-bar-spacing") {
+        let tmp = parse_bar_u8(v, "default-bar-spacing");
+        cb.add("control.set_default_bar_spacing(");
+        cb.add(format!("{tmp}").as_str());
+        cb.add(");\n");
+    }
+    if let Some(v) = cb.get_value("yaxis-width") {
+        let tmp = parse_bar_u8(v, "yaxis-width");
+        cb.add("control.set_yaxis_width(");
+        cb.add(format!("{tmp}").as_str());
+        cb.add(");\n");
+    }
+    if let Some(v) = cb.get_value("yaxis-step") {
+        let tmp = parse_bar_u8(v, "yaxis-step");
+        cb.add("control.set_yaxis_step(");
+        cb.add(format!("{tmp}").as_str());
+        cb.add(");\n");
+    }
     cb.add_basecontrol_operations();
     cb.into()
 }
