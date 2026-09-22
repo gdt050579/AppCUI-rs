@@ -88,6 +88,12 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("bar-draw-mode", "default-bar-draw-mode", ParamType::String),
     NamedParameter::new("draw-mode", "default-bar-draw-mode", ParamType::String),
     NamedParameter::new("dm", "default-bar-draw-mode", ParamType::String),
+    // default bar draw mode attribute
+    NamedParameter::new("default-bar-draw-mode-attr", "default-bar-draw-mode-attr", ParamType::String),
+    NamedParameter::new("bar-attr", "default-bar-draw-mode-attr", ParamType::String),
+    NamedParameter::new("barattr", "default-bar-draw-mode-attr", ParamType::String),
+    NamedParameter::new("bar-color", "default-bar-draw-mode-attr", ParamType::String),
+    NamedParameter::new("barcolor", "default-bar-draw-mode-attr", ParamType::String),
     // x-asix labels
     NamedParameter::new("xlabels", "xlabels", ParamType::String),
     NamedParameter::new("x-labels", "xlabels", ParamType::String),
@@ -135,13 +141,6 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             cb.add(");\n");
         }
     }
-    if let Some(v) = cb.get_list("values") {
-        let tmp = parse_values_list(v);
-        cb.add("let values = ");
-        cb.add(&tmp);
-        cb.add(";\n");
-        cb.add("control.add_bars(values);\n");        
-    } 
     if let Some(v) = cb.get_value("default-bar-width") {
         let tmp = parse_bar_u8(v, "default-bar-width");
         cb.add("control.set_default_bar_width(");
@@ -172,6 +171,27 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         cb.add(&tmp);
         cb.add(");\n");
     }
+    if cb.has_parameter("default-bar-draw-mode-attr") {
+        let str_repr = String::from(cb.get_string_representation());
+        let tmp = if let Some(d) = cb.get_dict("default-bar-draw-mode-attr") {
+            crate::chars::builder::create_attr_from_dict(&str_repr, d)
+        } else if let Some(v) = cb.get_value("default-bar-draw-mode-attr") {
+            parse_bar_attr(v, "default-bar-draw-mode-attr")
+        } else {
+            panic!("Invalid default-bar-draw-mode-attr ! Expected a character attribute (e.g. 'red', 'red,blue' or '{{fore: red, back: blue}}')");
+        };
+        cb.add("control.set_default_bar_attr(");
+        cb.add(&tmp);
+        cb.add(");\n");
+    }
+    // values sunt ultimele ca sa nu se calculeze nimic pana atunci
+    if let Some(v) = cb.get_list("values") {
+        let tmp = parse_values_list(v);
+        cb.add("let values = ");
+        cb.add(&tmp);
+        cb.add(";\n");
+        cb.add("control.add_bars(values);\n");        
+    }     
     cb.add_basecontrol_operations();
     cb.into()
 }
@@ -398,6 +418,19 @@ fn parse_bar_draw_mode(repr: &str, key: &str) -> String {
     );
 }
 
+fn parse_bar_attr(repr: &str, key: &str) -> String {
+    let repr = repr.trim();
+    if repr.is_empty() {
+        panic!(
+            "Invalid {key} - expecting a character attribute (e.g. 'red', 'red,blue' or 'fore: red, back: blue, flags: Bold') !"
+        );
+    }
+    let mut d = crate::parameter_parser::parse(repr).unwrap_or_else(|e| {
+        panic!("Invalid {key}: {repr} !{e:?}");
+    });
+    crate::chars::builder::create_attr_from_dict(repr, &mut d)
+}
+
 fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str) -> String {
     dict.validate_positional_parameters(param_list, VALUE_BAR_POSITIONAL).unwrap();
     dict.validate_named_parameters(param_list, VALUE_BAR_NAMED).unwrap();
@@ -417,7 +450,7 @@ fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str) -> String {
             if let Some(attr_dict) = attr_val.get_dict() {
                 Some(crate::chars::builder::create_attr_from_dict(param_list, attr_dict))
             } else {
-                Some(format!("charattr!(\"{}\")", attr_val.get_string()))
+                Some(parse_bar_attr(attr_val.get_string(), "attr"))
             }
         } else {
             None

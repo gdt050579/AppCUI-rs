@@ -322,7 +322,7 @@ where
         self.defaults.draw_mode = draw_mode;
         self.repaint_surface();
     }
-    pub fn set_default_bar_drawmode_attr(&mut self, attr: CharAttribute) {
+    pub fn set_default_bar_attr(&mut self, attr: CharAttribute) {
         self.defaults.attr = attr;
         self.use_theme_colors_for_bars = false;
         self.repaint_surface();
