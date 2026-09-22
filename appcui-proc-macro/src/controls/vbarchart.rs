@@ -2,10 +2,7 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static FLAGS: FlagsSignature = FlagsSignature::new(&[
-    "ScrollBars",
-    "DimBarsOnSelection",
-]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&["ScrollBars", "DimBarsOnSelection"]);
 
 static BARSCALE_MODES: &[(&'static str, &'static str)] =
     &[("FromZero", "fromzero"), ("FitData", "fitdata"), ("FromZero", "zero"), ("FitData", "fit")];
@@ -136,7 +133,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         let tmp = parse_xlabels_list(v);
         cb.add("control.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(");
         cb.add(&tmp);
-        cb.add("));\n");        
+        cb.add("));\n");
     } else {
         if let Some(repr) = cb.get_value("xlabels") {
             let tmp = parse_xlabels(repr);
@@ -145,30 +142,10 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             cb.add(");\n");
         }
     }
-    if let Some(v) = cb.get_value("default-bar-width") {
-        let tmp = parse_bar_u8(v, "default-bar-width");
-        cb.add("control.set_default_bar_width(");
-        cb.add(format!("{tmp}").as_str());
-        cb.add(");\n");
-    }
-    if let Some(v) = cb.get_value("default-bar-spacing") {
-        let tmp = parse_bar_u8(v, "default-bar-spacing");
-        cb.add("control.set_default_bar_spacing(");
-        cb.add(format!("{tmp}").as_str());
-        cb.add(");\n");
-    }
-    if let Some(v) = cb.get_value("yaxis-width") {
-        let tmp = parse_bar_u8(v, "yaxis-width");
-        cb.add("control.set_yaxis_width(");
-        cb.add(format!("{tmp}").as_str());
-        cb.add(");\n");
-    }
-    if let Some(v) = cb.get_value("yaxis-step") {
-        let tmp = parse_bar_u8(v, "yaxis-step");
-        cb.add("control.set_yaxis_step(");
-        cb.add(format!("{tmp}").as_str());
-        cb.add(");\n");
-    }
+    cb.call_method_with_integer_parameter_and_range("set_default_bar_width", "default-bar-width", 1, 100);
+    cb.call_method_with_integer_parameter_and_range("set_default_bar_spacing", "default-bar-spacing", 1, 100);
+    cb.call_method_with_integer_parameter_and_range("set_yaxis_width", "yaxis-width", 0, 32);
+    cb.call_method_with_integer_parameter_and_range("set_yaxis_step", "yaxis-step", 1, 255);
     if let Some(v) = cb.get_value("default-bar-draw-mode") {
         let tmp = parse_bar_draw_mode(v, "default-bar-draw-mode");
         cb.add("control.set_default_bar_drawmode(");
@@ -194,8 +171,8 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         cb.add("let values = ");
         cb.add(&tmp);
         cb.add(";\n");
-        cb.add("control.add_bars(values);\n");        
-    }     
+        cb.add("control.add_bars(values);\n");
+    }
     cb.add_basecontrol_operations();
     cb.into()
 }
@@ -425,9 +402,7 @@ fn parse_bar_draw_mode(repr: &str, key: &str) -> String {
 fn parse_bar_attr(repr: &str, key: &str) -> String {
     let repr = repr.trim();
     if repr.is_empty() {
-        panic!(
-            "Invalid {key} - expecting a character attribute (e.g. 'red', 'red,blue' or 'fore: red, back: blue, flags: Bold') !"
-        );
+        panic!("Invalid {key} - expecting a character attribute (e.g. 'red', 'red,blue' or 'fore: red, back: blue, flags: Bold') !");
     }
     let mut d = crate::parameter_parser::parse(repr).unwrap_or_else(|e| {
         panic!("Invalid {key}: {repr} !{e:?}");

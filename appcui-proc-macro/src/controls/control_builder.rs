@@ -412,6 +412,38 @@ impl<'a> ControlBuilder<'a> {
         }
     }
 
+    pub(super) fn call_method_with_integer_parameter<F>(&mut self, method_name: &str, param_name: &str, validate: Option<F>)
+    where
+        F: Fn(i32) -> Result<(), String>,
+    {
+        if !self.has_parameter(param_name) {
+            return;
+        }
+        let value = self
+            .get_i32(param_name)
+            .expect(format!("Parameter {param_name} should be an integer !").as_str());
+        if let Some(validate) = validate {
+            match validate(value) {
+                Ok(_) => (),
+                Err(e) => panic!("Value {value} for parameter {param_name} is invalid: {e}"),
+            }
+        }
+        self.add("control.");
+        self.add(method_name);
+        self.add("(");
+        write!(self.content, "{value}").unwrap();
+        self.add_line(");\n");
+    }
+    pub(super) fn call_method_with_integer_parameter_and_range(&mut self, method_name: &str, param_name: &str, min: i32, max: i32) {
+        self.call_method_with_integer_parameter(method_name, param_name, Some(|value| {
+            if (value>=min) && (value<=max) {
+                return Ok(())
+            } else {
+                return Err(format!("Expecting a value between {} and {}", min, max))
+            }
+        }))
+    }
+
     #[inline(always)]
     pub(super) fn get_dict(&mut self, name: &str) -> Option<&mut NamedParamsMap<'a>> {
         self.parser.get_mut(name)?.get_dict()
