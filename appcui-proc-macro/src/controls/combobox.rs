@@ -31,14 +31,8 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         }
         cb.add_line(&s);
     }
-    if cb.has_parameter("index") {
-        let value = cb.get_i32("index").unwrap_or(-1);
-        if value>=0 {
-            cb.add_line(format!("control.set_index({value});").as_str());
-        } else {
-            panic!("Invalid index (should be a positive number) for combo box selection index parameter !");
-        }
-    }
+    cb.call_method_with_integer_parameter_and_range("set_index", "index", 0, i32::MAX);
+    cb.call_method_with_string_parameter("set_empty_message", "em");
     cb.add_basecontrol_operations();
     cb.into()
 }

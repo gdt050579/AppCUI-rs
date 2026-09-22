@@ -435,13 +435,27 @@ impl<'a> ControlBuilder<'a> {
         self.add_line(");\n");
     }
     pub(super) fn call_method_with_integer_parameter_and_range(&mut self, method_name: &str, param_name: &str, min: i32, max: i32) {
-        self.call_method_with_integer_parameter(method_name, param_name, Some(|value| {
-            if (value>=min) && (value<=max) {
-                return Ok(())
-            } else {
-                return Err(format!("Expecting a value between {} and {}", min, max))
-            }
-        }))
+        self.call_method_with_integer_parameter(
+            method_name,
+            param_name,
+            Some(|value| {
+                if (value >= min) && (value <= max) {
+                    return Ok(());
+                } else {
+                    return Err(format!("Expecting a value between {} and {}", min, max));
+                }
+            }),
+        )
+    }
+
+    pub(super) fn call_method_with_string_parameter(&mut self, method_name: &str, param_name: &str) {
+        if self.has_parameter(param_name) {
+            self.add("control.");
+            self.add(method_name);
+            self.add("(");
+            self.add_string_parameter(param_name, None);
+            self.add_line(");\n");
+        }
     }
 
     #[inline(always)]
