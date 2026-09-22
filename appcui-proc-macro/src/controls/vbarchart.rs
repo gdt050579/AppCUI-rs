@@ -494,13 +494,4 @@ fn parse_values_list(list: &mut Vec<Value>) -> String {
         format!("&[{}]", items.join(","))
     }
 }
-/*
-bar scale
-number format
 
-
-class: ,values = [1,2,3,4]
-sau
-class: ,value = [{1,width: 10, space: 4, attr: {}}]
-
-*/
