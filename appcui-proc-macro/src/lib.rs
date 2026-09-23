@@ -1,5 +1,6 @@
 mod token_stream_to_string;
 mod chars;
+mod numericformat;
 mod column;
 mod key;
 mod menu;
@@ -818,6 +819,67 @@ pub fn char(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn charattr(input: TokenStream) -> TokenStream {
     crate::chars::create_attr(input)
+}
+
+/// Creates a FormatNumber value that describes how an integer or float is rendered.
+/// The `numericformat!` macro provides a convenient way to set the base, grouping, padding, decimals, prefix and suffix.
+///
+/// # Syntax
+///
+/// The macro supports both positional and named parameters:
+///
+/// ```no_compile
+/// numericformat!(base)
+/// ```
+///
+/// or
+///
+/// ```no_compile
+/// numericformat!(named_parameters)
+/// ```
+///
+/// # Positional Parameters
+///
+/// 1. **base** - Numeric base: `2`/`bin`/`binary`, `8`/`oct`/`octal`, `10`/`dec`/`decimal` or `16`/`hex`/`hexadecimal`
+///
+/// # Named Parameters
+///
+/// * `base`, `radix` - Numeric base (same values as the positional parameter)
+/// * `group`, `groups`, `group-size`, `gs` - Digit group size. Allowed values: `0`, `3` or `4`. When omitted, digits are not grouped
+/// * `sep`, `separator`, `group-char` - Separator between groups (default: `,`). Must be quoted when it is a comma or a space
+/// * `digits`, `representation`, `representation-digits`, `repr` - Minimum number of digits, padded with `0` on the left
+/// * `decimals`, `precision` - Number of digits after the decimal point (0 to 8)
+/// * `prefix`, `pre` - Text written before the number
+/// * `suffix`, `suf` - Text written after the number
+/// * `fill`, `width`, `w` - Total width. The number is padded on the left (default fill character: space)
+/// * `fillchar`, `fill-char`, `padchar` - Character used by `fill`. Must be a printable ASCII character
+///
+/// # Examples
+///
+/// ```no_compile
+/// use appcui::prelude::*;
+///
+/// // Plain decimal
+/// let f = numericformat!("dec");
+/// let f = numericformat!("10");
+///
+/// // Thousands separator
+/// let f = numericformat!("dec, group: 3");
+/// let f = numericformat!("10, group: 3, sep: '_'");
+///
+/// // Hexadecimal, padded to 8 digits
+/// let f = numericformat!("hex, prefix: 0x, digits: 8");
+/// let f = numericformat!("base: 16, group: 4, sep: '_', prefix: 0x");
+///
+/// // Money, with a prefix and two decimals
+/// let f = numericformat!("dec, group: 3, decimals: 2, prefix: '$ '");
+///
+/// // Fixed width, padded with '#'
+/// let f = numericformat!("dec, fill: 10, fillchar: '#'");
+/// ```
+#[proc_macro]
+pub fn numericformat(input: TokenStream) -> TokenStream {
+    crate::numericformat::create(input)
 }
 
 /// Creates a Column object for use in controls like ListView or similar. This macro provides a convenient way to 

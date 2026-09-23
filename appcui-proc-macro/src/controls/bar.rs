@@ -118,10 +118,10 @@ fn parse_char_token(repr: &str, key: &str) -> String {
     panic!("Invalid {key} - expecting a single character but got {repr} !");
 }
 
-pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str) -> String {
+pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String {
     let repr = repr.trim();
     if let Some(mode) = crate::utils::find_string_in_array(BAR_DRAW_MODES, repr) {
-        return format!("vbarchart::BarDrawMode::{mode}");
+        return format!("{module}::BarDrawMode::{mode}");
     }
     if let Some(params) = crate::utils::parse_function_and_parameters(repr, "Char") {
         if params.len() != 1 {
@@ -141,7 +141,7 @@ pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str) -> String {
         } else {
             parse_char_token(param, key)
         };
-        return format!("vbarchart::BarDrawMode::Char({literal})");
+        return format!("{module}::BarDrawMode::Char({literal})");
     }
     panic!(
         "Invalid {key}: {repr} - expected one of: {} or Char(char) or Char(code: value)",
@@ -160,7 +160,7 @@ pub(crate) fn parse_bar_attr(repr: &str, key: &str) -> String {
     crate::chars::builder::create_attr_from_dict(repr, &mut d)
 }
 
-pub(crate) fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str) -> String {
+pub(crate) fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str, module: &str) -> String {
     dict.validate_positional_parameters(param_list, VALUE_BAR_POSITIONAL).unwrap();
     dict.validate_named_parameters(param_list, VALUE_BAR_NAMED).unwrap();
     let value = match dict.get("value") {
@@ -174,21 +174,16 @@ pub(crate) fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str) -
     let width = dict.get("width").map(|v| parse_bar_u8(v.get_string(), "width"));
     let space = dict.get("space").map(|v| parse_bar_u8(v.get_string(), "space"));
     let label = dict.get("label").map(|v| v.get_string().to_string());
-    let draw_mode = dict.get("draw-mode").map(|v| parse_bar_draw_mode(v.get_string(), "draw-mode"));
-    let attr = if dict.contains("attr") {
-        if let Some(attr_val) = dict.get_mut("attr") {
-            if let Some(attr_dict) = attr_val.get_dict() {
-                Some(crate::chars::builder::create_attr_from_dict(param_list, attr_dict))
-            } else {
-                Some(parse_bar_attr(attr_val.get_string(), "attr"))
-            }
-        } else {
-            None
+    let draw_mode = dict.get("draw-mode").map(|v| parse_bar_draw_mode(v.get_string(), "draw-mode", module));
+    let attr = match dict.get_mut("attr") {
+        Some(v) if v.is_dict() => {
+            let inner = v.get_dict().expect("attr was checked to be a dictionary");
+            Some(crate::chars::builder::create_attr_from_dict(param_list, inner))
         }
-    } else {
-        None
+        Some(v) => Some(parse_bar_attr(v.get_string(), "attr")),
+        None => None,
     };
-    let mut res = format!("vbarchart::BarBuilder::new({value})");
+    let mut res = format!("{module}::BarBuilder::new({value})");
     if let Some(w) = width {
         res.push_str(&format!(".thickness({w})"));
     }
@@ -210,4 +205,37 @@ pub(crate) fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str) -
     }
     res.push_str(".build()");
     res
+}
+pub(crate) fn parse_bar_list(list: &mut Vec<Value>, module: &str) -> String {
+    // format should be either [value,value,value,...] where each value is a valid number
+    // or [{value,width: 10, space: 4, attr: {}},{value,width: 10, space: 4, attr: {}},...]
+    // where attr is a charattr!
+    let mut items = Vec::with_capacity(list.len());
+    let mut has_dict = false;
+    let mut temp_s = String::with_capacity(16);
+    for item in list.iter_mut() {
+        temp_s.clear();
+        temp_s.push_str(item.get_string());
+        if let Some(d) = item.get_dict() {
+            has_dict = true;
+            items.push(parse_bar_from_dict(d, &temp_s, module));
+        } else if item.is_list() {
+            panic!("Invalid values format - a value must be a number or a dictionary {{value,width: 10, space: 4, attr: {{...}}}} !");
+        } else {
+            let s = item.get_string();
+            validate_bar_number(s);
+            items.push(s.to_string());
+        }
+    }
+    if has_dict {
+        let starts_with = format!("{module}::BarBuilder::new"); 
+        for item in items.iter_mut() {
+            if !item.starts_with(&starts_with) {
+                *item = format!("{module}::BarBuilder::new({item}).build()");
+            }
+        }
+        format!("[{}]", items.join(","))
+    } else {
+        format!("&[{}]", items.join(","))
+    }
 }

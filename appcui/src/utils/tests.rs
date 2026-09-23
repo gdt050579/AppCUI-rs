@@ -1,3 +1,5 @@
+use appcui_proc_macro::numericformat;
+
 use super::Caption;
 use super::ExtractHotKeyMethod;
 use super::FormatNumber;
@@ -430,6 +432,46 @@ fn check_format_number_bin() {
     for (value, expect) in data.iter() {
         assert_eq!(F1.write_number(*value as u128, &mut output), Some(*expect));
     }
+}
+
+#[test]
+fn check_numericformat_macro() {
+    let mut output: [u8; 64] = [0; 64];
+    const DECIMAL: FormatNumber = numericformat!("dec");
+    assert_eq!(DECIMAL.write_number(1234u64, &mut output), Some("1234"));
+
+    const GROUPED: FormatNumber = numericformat!("10, group: 3");
+    assert_eq!(GROUPED.write_number(1234u64, &mut output), Some("1,234"));
+
+    const CUSTOM_SEP: FormatNumber = numericformat!("dec, group: 3, sep: '_'");
+    assert_eq!(CUSTOM_SEP.write_number(1234567u64, &mut output), Some("1_234_567"));
+
+    const HEX: FormatNumber = numericformat!("hex, prefix: 0x, digits: 8");
+    assert_eq!(HEX.write_number(0x1234u64, &mut output), Some("0x00001234"));
+
+    const HEX_GROUP: FormatNumber = numericformat!("Hex, group: 4, separator: '_', prefix: '0x'");
+    assert_eq!(HEX_GROUP.write_number(0x123456u64, &mut output), Some("0x12_3456"));
+
+    const BIN: FormatNumber = numericformat!("base: binary, digits: 8, prefix: 0b");
+    assert_eq!(BIN.write_number(0b10u64, &mut output), Some("0b00000010"));
+
+    const MONEY: FormatNumber = numericformat!("dec, group: 3, sep: '_', decimals: 2, prefix: 'USD '");
+    assert_eq!(MONEY.write_float(1234.5, &mut output), Some("USD 1_234.50"));
+
+    const PADDED: FormatNumber = numericformat!("dec, fill: 10, fillchar: '#'");
+    assert_eq!(PADDED.write_number(1234u64, &mut output), Some("######1234"));
+
+    const PERCENT: FormatNumber = numericformat!("base: 10, suffix: '%'");
+    assert_eq!(PERCENT.write_number(42u64, &mut output), Some("42%"));
+
+    const NAMED: FormatNumber = numericformat!("radix: oct, prefix: '0o'");
+    assert_eq!(NAMED.write_number(8u64, &mut output), Some("0o10"));
+
+    const NO_GROUP: FormatNumber = numericformat!("dec, group: 0");
+    assert_eq!(NO_GROUP.write_number(1234u64, &mut output), Some("1234"));
+
+    const NO_FILL: FormatNumber = numericformat!("dec, fill: 0");
+    assert_eq!(NO_FILL.write_number(1234u64, &mut output), Some("1234"));
 }
 
 #[test]

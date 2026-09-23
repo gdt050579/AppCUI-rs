@@ -1,4 +1,4 @@
-use super::bar::{parse_bar_attr, parse_bar_draw_mode, parse_bar_from_dict, validate_bar_number};
+use super::bar::{parse_bar_attr, parse_bar_draw_mode, parse_bar_list};
 use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
@@ -95,7 +95,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.call_method_with_integer_parameter_and_range("set_default_bar_spacing", "default-bar-spacing", 1, 100);
     cb.call_method_with_integer_parameter_and_range("set_yaxis_width", "yaxis-width", 0, 32);
     cb.call_method_with_integer_parameter_and_range("set_yaxis_step", "yaxis-step", 1, 255);
-    cb.call_method_with_string_parameter_parser("set_default_bar_drawmode", "default-bar-draw-mode", |repr| parse_bar_draw_mode(repr, "default-bar-draw-mode"));
+    cb.call_method_with_string_parameter_parser("set_default_bar_drawmode", "default-bar-draw-mode", |repr| parse_bar_draw_mode(repr, "default-bar-draw-mode", "vbarchart"));
     if cb.has_parameter("default-bar-draw-mode-attr") {
         let str_repr = String::from(cb.get_string_representation());
         let tmp = if let Some(d) = cb.get_dict("default-bar-draw-mode-attr") {
@@ -110,7 +110,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         cb.add(");\n");
     }
     // values sunt ultimele ca sa nu se calculeze nimic pana atunci
-    cb.call_method_with_list_parameter_parser("add_bars", "values", parse_values_list);
+    cb.call_method_with_list_parameter_parser("add_bars", "values", |list| parse_bar_list(list, "vbarchart"));
     cb.add_basecontrol_operations();
     cb.into()
 }
@@ -205,36 +205,5 @@ fn parse_xlabels_list(list: &mut Vec<Value>) -> String {
     spans
 }
 
-fn parse_values_list(list: &mut Vec<Value>) -> String {
-    // format should be either [value,value,value,...] where each value is a valid number
-    // or [{value,width: 10, space: 4, attr: {}},{value,width: 10, space: 4, attr: {}},...]
-    // where attr is a charattr!
-    let mut items = Vec::with_capacity(list.len());
-    let mut has_dict = false;
-    let mut temp_s = String::with_capacity(16);
-    for item in list.iter_mut() {
-        temp_s.clear();
-        temp_s.push_str(item.get_string());
-        if let Some(d) = item.get_dict() {
-            has_dict = true;
-            items.push(parse_bar_from_dict(d, &temp_s));
-        } else if item.is_list() {
-            panic!("Invalid values format - a value must be a number or a dictionary {{value,width: 10, space: 4, attr: {{...}}}} !");
-        } else {
-            let s = item.get_string();
-            validate_bar_number(s);
-            items.push(s.to_string());
-        }
-    }
-    if has_dict {
-        for item in items.iter_mut() {
-            if !item.starts_with("vbarchart::BarBuilder") {
-                *item = format!("vbarchart::BarBuilder::new({item}).build()");
-            }
-        }
-        format!("[{}]", items.join(","))
-    } else {
-        format!("&[{}]", items.join(","))
-    }
-}
+
 
