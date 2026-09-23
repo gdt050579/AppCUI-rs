@@ -124,19 +124,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.finish_control_initialization();
     cb.add_scroll_margin_setup("lsm", "tsm");
     cb.call_method_with_string_parameter_parser("set_bars_scale", "barscale", parse_barscale);
-    if let Some(v) = cb.get_list("xlabels") {
-        let tmp = parse_xlabels_list(v);
-        cb.add("control.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(");
-        cb.add(&tmp);
-        cb.add("));\n");
-    } else {
-        if let Some(repr) = cb.get_value("xlabels") {
-            let tmp = parse_xlabels(repr);
-            cb.add("control.set_xaxis_label_mode(vbarchart::XAxisLabelMode::");
-            cb.add(&tmp);
-            cb.add(");\n");
-        }
-    }
+    cb.call_method_with_value_parser("set_xaxis_label_mode", "xlabels", parse_xlabels);
     cb.call_method_with_integer_parameter_and_range("set_default_bar_width", "default-bar-width", 1, 100);
     cb.call_method_with_integer_parameter_and_range("set_default_bar_spacing", "default-bar-spacing", 1, 100);
     cb.call_method_with_integer_parameter_and_range("set_yaxis_width", "yaxis-width", 0, 32);
@@ -187,22 +175,19 @@ fn parse_barscale(repr: &str) -> String {
         crate::utils::join_strings(BARSCALE_MODES)
     );
 }
-
-fn parse_xlabels(repr: &str) -> String {
-    let repr = repr.trim();
+fn parse_xlabels(value: &mut Value) -> String {
+    if let Some(list) = value.get_list() {
+        return parse_xlabels_list(list);
+    }
+    let repr = value.get_string().trim();
     if let Some(mode) = crate::utils::find_string_in_array(XLABELS_MODES, repr) {
-        return String::from(mode);
+        return format!("vbarchart::XAxisLabelMode::{mode}");
     }
     // check to see if the repr is Index(start), allowing white spaces (between start)
     if let Some(params) = crate::utils::parse_function_and_parameters(repr, "Index") {
-        if params.len() != 1 {
-            panic!("Invalid xlabels format - expecting Index(start) !");
-        }
-        let _ = params[0].parse::<i32>().expect(&format!(
-            "Invalid xlabels format - expecting a valid integer (i32) but got {} !",
-            params[0]
-        ));
-        return format!("Index({})", params[0]);
+        assert!(params.len() == 1, "Invalid xlabels format - expecting Index(start) !");
+        assert!(crate::utils::is_integer(&params[0]), "Invalid xlabels format - expecting a valid integer (i32) but got {} !", params[0]);
+        return format!("vbarchart::XAxisLabelMode::Index({})", params[0]);
     }
 
     panic!(
@@ -211,6 +196,7 @@ fn parse_xlabels(repr: &str) -> String {
         crate::utils::join_strings(XLABELS_MODES)
     );
 }
+
 
 fn parse_xlabel_u32(dict: &NamedParamsMap, key: &str) -> u32 {
     let Some(v) = dict.get(key) else {
@@ -225,7 +211,7 @@ fn parse_xlabel_u32(dict: &NamedParamsMap, key: &str) -> u32 {
 
 fn parse_xlabels_list(list: &mut Vec<Value>) -> String {
     // format should be [{start,end,label},{start,end,label},...]
-    let mut spans = String::from("&[");
+    let mut spans = String::from("vbarchart::XAxisLabelMode::Custom(&[");
     let mut first = true;
     let mut temp_s = String::with_capacity(16);
     for item in list.iter_mut() {
@@ -249,7 +235,7 @@ fn parse_xlabels_list(list: &mut Vec<Value>) -> String {
             panic!("An x-axis label span must be described between brackets: {{ and }}. For example: `{{0,3,'Q1'}}` !");
         }
     }
-    spans.push(']');
+    spans.push_str("])");
     spans
 }
 

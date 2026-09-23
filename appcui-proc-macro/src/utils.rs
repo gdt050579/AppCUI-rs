@@ -257,3 +257,9 @@ pub(crate) fn is_number(text: &str) -> bool {
     }
     false
 }
+pub(crate) fn is_integer(text: &str) -> bool {
+    if text.parse::<i64>().is_ok() {
+        return true;
+    }
+    false
+}

@@ -458,9 +458,8 @@ impl<'a> ControlBuilder<'a> {
         }
     }
 
-    pub(super) fn call_method_with_string_parameter_parser(&mut self, method_name: &str, param_name: &str,parser: fn(&str)->String) {
-        if let Some(repr) = self.get_value(param_name)
-        {
+    pub(super) fn call_method_with_string_parameter_parser(&mut self, method_name: &str, param_name: &str, parser: fn(&str) -> String) {
+        if let Some(repr) = self.get_value(param_name) {
             let result = parser(repr);
             self.add("control.");
             self.add(method_name);
@@ -468,10 +467,9 @@ impl<'a> ControlBuilder<'a> {
             self.add(&result);
             self.add_line(");\n");
         }
-    }   
-    pub(super) fn call_method_with_list_parameter_parser(&mut self, method_name: &str, param_name: &str,parser: fn(&mut Vec<Value<'a>>)->String) {
-        if let Some(list) = self.get_list(param_name)
-        {
+    }
+    pub(super) fn call_method_with_list_parameter_parser(&mut self, method_name: &str, param_name: &str, parser: fn(&mut Vec<Value<'a>>) -> String) {
+        if let Some(list) = self.get_list(param_name) {
             let result = parser(list);
             self.add("let list_");
             self.add(method_name);
@@ -484,8 +482,13 @@ impl<'a> ControlBuilder<'a> {
             self.add(method_name);
             self.add_line(");\n");
         }
-    }   
-    pub(super) fn call_method_with_dict_parameter_parser(&mut self, method_name: &str, param_name: &str,parser: fn(&str, &mut NamedParamsMap<'a>)->String) {
+    }
+    pub(super) fn call_method_with_dict_parameter_parser(
+        &mut self,
+        method_name: &str,
+        param_name: &str,
+        parser: fn(&str, &mut NamedParamsMap<'a>) -> String,
+    ) {
         if self.has_parameter(param_name) {
             let repr = self.get_string_representation().to_string();
             if let Some(dict) = self.get_dict(param_name) {
@@ -497,7 +500,24 @@ impl<'a> ControlBuilder<'a> {
                 self.add_line(");\n");
             }
         }
-    }         
+    }
+    pub(super) fn call_method_with_value_parser(&mut self, method_name: &str, param_name: &str, parser: fn(&mut Value<'a>) -> String) {
+        if self.has_parameter(param_name) {
+            let value = self.parser.get_mut(param_name).unwrap();
+            let result = parser(value);
+            self.add("let list_");
+            self.add(method_name);
+            self.add(" = ");
+            self.add(&result);
+            self.add(";\n");
+            self.add("control.");
+            self.add(method_name);
+            self.add("(list_");
+            self.add(method_name);
+            self.add_line(");\n");
+
+        }
+    }
 
     #[inline(always)]
     pub(super) fn get_dict(&mut self, name: &str) -> Option<&mut NamedParamsMap<'a>> {
