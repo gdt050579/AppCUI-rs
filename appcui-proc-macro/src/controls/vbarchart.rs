@@ -61,6 +61,9 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("barattr", "default-bar-draw-mode-attr", ParamType::String),
     NamedParameter::new("bar-color", "default-bar-draw-mode-attr", ParamType::String),
     NamedParameter::new("barcolor", "default-bar-draw-mode-attr", ParamType::String),
+    // numeric format
+    NamedParameter::new("numeric-format", "numeric-format", ParamType::String),
+    NamedParameter::new("nf", "numeric-format", ParamType::String),
     // x-asix labels
     NamedParameter::new("xlabels", "xlabels", ParamType::String),
     NamedParameter::new("x-labels", "xlabels", ParamType::String),
@@ -96,6 +99,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.call_method_with_integer_parameter_and_range("set_yaxis_width", "yaxis-width", 0, 32);
     cb.call_method_with_integer_parameter_and_range("set_yaxis_step", "yaxis-step", 1, 255);
     cb.call_method_with_string_parameter_parser("set_default_bar_drawmode", "default-bar-draw-mode", |repr| parse_bar_draw_mode(repr, "default-bar-draw-mode", "vbarchart"));
+    
     if cb.has_parameter("default-bar-draw-mode-attr") {
         let str_repr = String::from(cb.get_string_representation());
         let tmp = if let Some(d) = cb.get_dict("default-bar-draw-mode-attr") {
@@ -106,6 +110,22 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
             panic!("Invalid default-bar-draw-mode-attr ! Expected a character attribute (e.g. 'red', 'red,blue' or '{{fore: red, back: blue}}')");
         };
         cb.add("control.set_default_bar_attr(");
+        cb.add(&tmp);
+        cb.add(");\n");
+    }
+    if cb.has_parameter("numeric-format") {
+        let str_repr = String::from(cb.get_string_representation());
+        let tmp = if let Some(d) = cb.get_dict("numeric-format") {
+            crate::numericformat::builder::create_from_dict(&str_repr, d)
+        } else if let Some(v) = cb.get_value("numeric-format") {
+            let mut parsed = crate::parameter_parser::parse(v).unwrap_or_else(|e| {
+                panic!("Invalid numeric-format: {v} !{e:?}");
+            });
+            crate::numericformat::builder::create_from_dict(v, &mut parsed)
+        } else {
+            panic!("Invalid numeric-format ! Expected a number format (e.g. 'dec', 'hex, prefix: 0x' or '{{dec, group: 3}}')");
+        };
+        cb.add("control.set_number_format(");
         cb.add(&tmp);
         cb.add(");\n");
     }
