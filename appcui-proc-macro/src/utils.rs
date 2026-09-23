@@ -247,3 +247,13 @@ pub(crate) fn parse_function_and_parameters(repr: &str, name: &str) -> Option<Ve
     }
     Some(params)
 }
+
+pub(crate) fn is_number(text: &str) -> bool {
+    if text.parse::<i64>().is_ok() {
+        return true;
+    }
+    if text.parse::<f64>().is_ok() {
+        return true;
+    }
+    false
+}

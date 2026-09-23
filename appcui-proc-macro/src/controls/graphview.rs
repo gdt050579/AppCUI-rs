@@ -68,14 +68,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_basecontrol_operations();
 
     // background
-    if cb.has_parameter("back") {
-        let str_repr = String::from(cb.get_string_representation());
-        if let Some(d) = cb.get_dict("back") {
-            let s = crate::chars::builder::create_from_dict(&str_repr, d);
-            cb.add_line(format!("control.set_background({s});").as_str());
-        }
-    }
-
+    cb.call_method_with_dict_parameter_parser("set_background", "back", |repr, dict| crate::chars::builder::create_from_dict(&repr, dict));
     // edge-line-type
     cb.call_method_with_enum_parameter("set_edge_line_type", "elt", "LineType", &LINE_TYPE);
     // edge routing

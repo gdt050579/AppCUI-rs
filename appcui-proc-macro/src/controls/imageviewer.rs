@@ -90,15 +90,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_flags_parameter("flags", "imageviewer::Flags", &FLAGS);
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();
-
-    let has_back_param = cb.has_parameter("back");
-    if has_back_param {
-        let str_repr = String::from(cb.get_string_representation());
-        if let Some(d) = cb.get_dict("back") {
-            let s = crate::chars::builder::create_from_dict(&str_repr, d);
-            cb.add_line(format!("control.set_backgound({s});").as_str());
-        }
-    }
+    cb.call_method_with_dict_parameter_parser("set_background", "back", |repr, dict| crate::chars::builder::create_from_dict(&repr, dict));
     cb.add_scroll_margin_setup("lsm","tsm");
     cb.into()
 }
