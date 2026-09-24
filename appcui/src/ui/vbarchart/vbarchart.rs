@@ -192,7 +192,7 @@ where
                 attr: CharAttribute::default(),
                 thickness: 1,
                 spacing: 1,
-                draw_mode: BarDrawMode::Normal,
+                draw_mode: BarDrawMode::default(),
             },
             xaxis: XAxis {
                 label_format: XAxisLabelFormat::None,

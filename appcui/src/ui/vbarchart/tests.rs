@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use crate::ui::vbarchart::{BarBuilder, BarDrawMode};
+use crate::ui::components::{BarBuilder, BarDrawMode, BarFillType};
+use crate::ui::vbarchart::VBarChart;
 
 fn chart_with_values(values: &[i32]) -> VBarChart<i32> {
     let mut chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vbarchart::Flags::None);
@@ -35,7 +36,7 @@ fn check_modify_bar() {
         bar.set_label("Apr");
         bar.set_thickness(4);
         bar.set_spacing(2);
-        bar.set_draw_mode(BarDrawMode::Char('x'));
+        bar.set_draw_mode(BarDrawMode::Fill(BarFillType::Custom('x')));
         bar.set_attr(charattr!("red"));
     });
     let bar = chart.get_bar(1).unwrap();
@@ -43,7 +44,7 @@ fn check_modify_bar() {
     assert_eq!(bar.label(), "Apr");
     assert_eq!(bar.thickness(), Some(4));
     assert_eq!(bar.spacing(), Some(2));
-    assert_eq!(bar.draw_mode(), Some(BarDrawMode::Char('x')));
+    assert_eq!(bar.draw_mode(), Some(BarDrawMode::Fill(BarFillType::Custom('x'))));
     assert_eq!(bar.attr(), Some(charattr!("red")));
     chart.update_bar(10, |bar| {
         bar.set_value(0);

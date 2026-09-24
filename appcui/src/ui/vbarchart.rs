@@ -21,4 +21,6 @@ use super::components::BarDefaults;
 pub use super::components::BarDrawMode;
 pub use super::components::BarBuilder;
 pub use super::components::Bar;
+pub use super::components::BarFillType;
+pub use super::components::BarPointType;
 pub use super::components::BarSpan;

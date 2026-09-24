@@ -35,6 +35,8 @@ pub use self::listitem::ListItem;
 pub use self::columns_header::ColumnsHeader;
 pub use self::columns_header::ColumnsHeaderAction;
 pub use self::bar::BarDrawMode;
+pub use self::bar::BarFillType;
+pub use self::bar::BarPointType;
 pub use self::bar::BarBuilder;
 pub use self::bar::Bar;
 pub use self::bar::BarSpan;

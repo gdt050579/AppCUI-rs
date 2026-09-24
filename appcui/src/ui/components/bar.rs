@@ -1,3 +1,4 @@
+use crate::graphics::LineType;
 use flat_string::FlatString;
 
 use crate::{
@@ -6,29 +7,85 @@ use crate::{
 };
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
-pub enum BarDrawMode {
+pub enum BarFillType {
+    /// U+2588 — full block.
     #[default]
-    Normal, // Full block box
-    Gray50,     // The box that is 50% filles with dots
-    Gray25,     // The box that is 25% filled with dots
-    Gray75,     // The box that is 75% filled with dots
-    Rectangle,  // implies thickness = minimum 2
-    Char(char), // fill with a specific character
-    SingleLine,
-    DoubleLine,
-    Braille, // use the brail 2 x 4 character to fill
-    Smooth,  // similar to Normal but uses digits to differentiate between 3.5 and 3.8 for example
-    Range,   // e tot tingle line, dar are la capete cate un cerc
-    Point,   // e doar un cerc in dreptul valorii
+    Solid,
+    /// U+2593 ▓ — dense shade.
+    Shade75,
+    /// U+2592 ▒ — medium shade.
+    Shade50,
+    /// U+2591 ░ — light shade.
+    Shade25,
+    /// 2x4 braille cells used as a fill.
+    Braille,
+    /// Fill with an arbitrary character.
+    Custom(char),
+}
+impl BarFillType {
+    #[inline(always)]
+    pub(crate) fn character(&self, attr: CharAttribute) -> Character {
+        match self {
+            BarFillType::Solid => Character::with_attributes(SpecialChar::Block100, attr),
+            BarFillType::Shade75 => Character::with_attributes(SpecialChar::Block75, attr),
+            BarFillType::Shade50 => Character::with_attributes(SpecialChar::Block50, attr),
+            BarFillType::Shade25 => Character::with_attributes(SpecialChar::Block25, attr),
+            BarFillType::Braille => Character::with_attributes('\u{28FF}', attr),
+            BarFillType::Custom(ch) => Character::with_attributes(*ch, attr),
+        }
+    }
+}
+
+/// Shape of a point/marker (used by `Point`, `Whisker`, `Lollipop`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum BarPointType {
+    /// ● — default marker.
+    #[default]
+    Circle,
+    /// ◆ — diamond.
+    Diamond,
+    /// ■ — square.
+    Square,
+    /// An arbitrary marker character.
+    Custom(char),
+}
+impl BarPointType {
+    #[inline(always)]
+    pub(crate) fn character(&self, attr: CharAttribute) -> Character {
+        match self {
+            BarPointType::Circle => Character::with_attributes('●', attr),
+            BarPointType::Diamond => Character::with_attributes('◆', attr),
+            BarPointType::Square => Character::with_attributes('■', attr),
+            BarPointType::Custom(ch) => Character::with_attributes(*ch, attr),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum BarDrawMode {
+    Fill(BarFillType),     // arbitrary thickness, no constraint — texture chosen by FillType
+    Line(LineType),        // constrained: thickness = 1
+    Rectangle(LineType),   // constrained: thickness ≥ 2
+    Smooth,                // full-block + sub-cell tip
+    Point(BarPointType),   // marker
+    Whisker(BarPointType), // marker with caps
 }
 
 impl BarDrawMode {
     fn thickness_range(&self) -> (u8, u8) {
         match self {
-            BarDrawMode::Rectangle => (2, u8::MAX),
-            BarDrawMode::SingleLine | BarDrawMode::DoubleLine => (1, 1),
-            _ => (1, u8::MAX),
+            BarDrawMode::Fill(_) => (1, u8::MAX),
+            BarDrawMode::Line(_) => (1, 1),
+            BarDrawMode::Rectangle(_) => (2, u8::MAX),
+            BarDrawMode::Smooth => (1, u8::MAX),
+            BarDrawMode::Point(_) => (1, 1),
+            BarDrawMode::Whisker(_) => (1, 1),
         }
+    }
+}
+impl Default for BarDrawMode {
+    fn default() -> Self {
+        BarDrawMode::Fill(BarFillType::Solid)
     }
 }
 
@@ -150,21 +207,27 @@ impl<T: Number + 'static> Bar<T> {
         self
     }
     #[inline(always)]
-    fn paint_vertical_rect(&self, surface: &mut Surface, c: Character, layout: &BarLayout, defaults: &BarDefaults) {
-        let thickness = self.actual_thickness(&defaults) as u32;
+    fn paint_vertical_fill(&self, surface: &mut Surface, c: Character, layout: &BarLayout, defaults: &BarDefaults) {
         if layout.length == 0 {
             let ch = Character::new('_', c.foreground, c.background, c.flags);
-            surface.fill_horizontal_line_with_size(layout.x, layout.y, thickness, ch);
+            surface.fill_horizontal_line_with_size(layout.x, layout.y, self.actual_thickness(&defaults) as u32, ch);
         } else {
-            let abs_h = layout.length.unsigned_abs();
-            let top = if layout.length > 0 {
-                layout.y + 1 - layout.length as i32
-            } else {
-                layout.y + 1
-            };
-            let r = Rect::with_size(layout.x, top, thickness as u16, abs_h);
-            surface.fill_rect(r, c);
+            surface.fill_rect(self.rect_vertical(layout, defaults), c);
         }
+    }
+    #[inline(always)]
+    fn paint_vertical_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
+        if layout.length > 0 {
+            surface.draw_vertical_line_with_size(layout.x - layout.length as i32 + 1, layout.y, layout.length as u32, line_type, attr);
+        } else if layout.length < 0 {
+            surface.draw_vertical_line_with_size(layout.x, layout.y, layout.length.unsigned_abs() as u32, line_type, attr);
+        } else {
+            surface.write_char(layout.x, layout.y, Character::with_attributes('.', attr));
+        }
+    }
+    #[inline(always)]
+    fn paint_vertical_rect(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
+        surface.draw_rect(self.rect_vertical(layout, defaults), line_type, attr);
     }
     #[inline(always)]
     pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
@@ -172,22 +235,27 @@ impl<T: Number + 'static> Bar<T> {
         let (min, max) = mode.thickness_range();
         self.thickness.unwrap_or(defaults.thickness).clamp(min, max)
     }
+    #[inline(always)]
+    pub(crate) fn rect_vertical(&self, layout: &BarLayout, defaults: &BarDefaults) -> Rect {
+        let thickness = self.actual_thickness(&defaults) as u32;
+        let abs_h = layout.length.unsigned_abs();
+        let top = if layout.length > 0 {
+            layout.y + 1 - layout.length as i32
+        } else {
+            layout.y + 1
+        };
+        Rect::with_size(layout.x, top, thickness as u16, abs_h)
+    }
     pub(crate) fn paint_vertical(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
         let attr = self.attr.unwrap_or(defaults.attr);
         match mode {
-            BarDrawMode::Normal => self.paint_vertical_rect(surface, Character::with_attributes(SpecialChar::Block100, attr), layout, defaults),
-            BarDrawMode::Rectangle => todo!(),
-            BarDrawMode::Char(ch) => self.paint_vertical_rect(surface, Character::with_attributes(ch, attr), layout, defaults),
-            BarDrawMode::SingleLine => todo!(),
-            BarDrawMode::DoubleLine => todo!(),
+            BarDrawMode::Fill(fill_type) => self.paint_vertical_fill(surface, fill_type.character(attr), layout, defaults),
+            BarDrawMode::Line(line_type) => self.paint_vertical_line(surface, line_type, attr, layout),
+            BarDrawMode::Rectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults),
             BarDrawMode::Smooth => todo!(),
-            BarDrawMode::Range => todo!(),
-            BarDrawMode::Point => todo!(),
-            BarDrawMode::Gray50 => todo!(),
-            BarDrawMode::Gray25 => todo!(),
-            BarDrawMode::Gray75 => todo!(),
-            BarDrawMode::Braille => todo!(),
+            BarDrawMode::Point(point_type) => todo!(),
+            BarDrawMode::Whisker(point_type) => todo!(),
         }
     }
 }
