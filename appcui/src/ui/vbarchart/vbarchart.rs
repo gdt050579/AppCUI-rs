@@ -129,6 +129,8 @@ struct YAxis {
     zero: i32,
     bottom_value: f64,
     bottom_step: f64,
+    visible: bool,
+    show_grid: bool,
 }
 struct XAxis {
     label_format: XAxisLabelFormat,
@@ -187,6 +189,8 @@ where
                 zero: 0,
                 bottom_value: 0.0,
                 bottom_step: 0.0,
+                visible: true,
+                show_grid: true,
             },
             defaults: BarDefaults {
                 attr: CharAttribute::default(),
@@ -308,6 +312,7 @@ where
     }
     pub fn set_number_format(&mut self, format: FormatNumber) {
         self.number_format = format;
+        self.repaint_surface();
     }
     pub fn set_default_bar_width(&mut self, width: u8) {
         self.defaults.thickness = width.max(1);
@@ -326,8 +331,16 @@ where
         self.use_theme_colors_for_bars = false;
         self.repaint_surface();
     }
+    pub fn set_yaxis_visible(&mut self, visible: bool) {
+        self.yaxis.visible = visible;
+        self.repaint_surface();
+    }
+    pub fn set_yaxis_show_grid(&mut self, show_grid: bool) {
+        self.yaxis.show_grid = show_grid;
+        self.repaint_surface();
+    }
     pub fn set_yaxis_width(&mut self, width: u8) {
-        self.yaxis.width = width;
+        self.yaxis.width = width.max(1);
         self.repaint_surface();
     }
     pub fn set_yaxis_step(&mut self, step: u8) {
@@ -367,7 +380,7 @@ where
     }
     #[inline(always)]
     fn x_axis_left_margin(&self) -> i32 {
-        if self.yaxis.width > 0 {
+        if self.yaxis.visible && self.yaxis.width > 0 {
             self.yaxis.width as i32 + 2
         } else {
             0
@@ -530,7 +543,7 @@ where
     }
     fn paint_yaxis(&mut self, axis_attr: CharAttribute, grid_attr: CharAttribute, label_attr: CharAttribute) {
         let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
-        if self.yaxis.width > 0 {
+        if self.yaxis.visible && self.yaxis.width > 0 {
             self.surface
                 .draw_vertical_line(self.yaxis.width as i32 + 1, 0, bottom, LineType::Single, axis_attr);
             if !self.xaxis.label_format.is_none() {
@@ -541,8 +554,8 @@ where
                 );
             }
         }
-        if self.yaxis.step > 0 {
-            let x_poz = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
+        if self.yaxis.show_grid && self.yaxis.step > 0 {
+            let x_poz = self.x_axis_left_margin();
             let right = self.size().width as i32;
             let ch = Character::with_attributes('┈', grid_attr);
             let format = &self.number_format;
@@ -564,7 +577,7 @@ where
         if self.xaxis.label_format.is_none() {
             return;
         }
-        let left = if self.yaxis.width > 0 { self.yaxis.width as i32 + 2 } else { 0 };
+        let left = self.x_axis_left_margin();
         let right = self.size().width as i32;
         let y = self.size().height as i32 - 2;
         self.surface.draw_horizontal_line(left, y, right, LineType::Single, axis_attr);
@@ -851,7 +864,7 @@ where
             surface.draw_surface(0, 0, &self.surface);
             if let Some(index) = self.selected_bar {
                 // clip to the plot area bounded by the X and Y axes (inclusive)
-                let left = if self.yaxis.width > 0 { self.yaxis.width as i32 + 1 } else { 0 };
+                let left = if self.yaxis.visible && self.yaxis.width > 0 { self.yaxis.width as i32 + 1 } else { 0 };
                 let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
                 let right = self.size().width.saturating_sub(1) as i32;
                 surface.set_relative_clip(left, 0, right, bottom);
