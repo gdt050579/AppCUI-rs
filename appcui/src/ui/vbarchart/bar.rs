@@ -16,10 +16,10 @@ pub enum BarDrawMode {
 }
 
 impl BarDrawMode {
-    fn min_thickness(&self) -> u8 {
+    fn thickness_range(&self) -> (u8,u8) {
         match self {
-            BarDrawMode::Rectangle => 2,
-            _ => 1,
+            BarDrawMode::Rectangle => (2, u8::MAX),
+            _ => (1, u8::MAX),
         }
     }
 }
@@ -157,7 +157,8 @@ impl<T: Number + 'static> Bar<T> {
     #[inline(always)]
     pub(super) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
-        self.thickness.unwrap_or(defaults.thickness).max(mode.min_thickness())
+        let (min,max) = mode.thickness_range();
+        self.thickness.unwrap_or(defaults.thickness).clamp(min,max)
     }
     pub(super) fn paint_vertical(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
