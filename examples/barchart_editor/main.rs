@@ -221,7 +221,7 @@ fn quarter_spans() -> [vbarchart::BarSpan; 4] {
     ]
 }
 
-#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents, TextFieldEvents])]
+#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents])]
 struct BarChartEditor {
     chart: Handle<VBarChart<i32>>,
     pages: Handle<Accordion>,
@@ -234,8 +234,7 @@ struct BarChartEditor {
     number_base: Handle<ComboBox>,
     number_group: Handle<ComboBox>,
     number_decimals: Handle<HSlider<u8>>,
-    number_prefix: Handle<TextField>,
-    number_suffix: Handle<TextField>,
+    number_style: Handle<ComboBox>,
     empty_panel: Handle<Panel>,
     editor_panel: Handle<Panel>,
     info: Handle<Label>,
@@ -265,8 +264,7 @@ impl BarChartEditor {
             number_base: Handle::None,
             number_group: Handle::None,
             number_decimals: Handle::None,
-            number_prefix: Handle::None,
-            number_suffix: Handle::None,
+            number_style: Handle::None,
             empty_panel: Handle::None,
             editor_panel: Handle::None,
             info: Handle::None,
@@ -317,10 +315,10 @@ impl BarChartEditor {
         let mut decimals = hslider!("u8,0,8,1,l:0,t:9,r:0,flags:ShowValue,type:Ruler");
         decimals.set_value(0);
         win.number_decimals = format.add(decimals);
-        format.add(label!("'Prefix',l:0,t:11,w:12"));
-        win.number_prefix = format.add(textfield!("l:0,t:12,r:0"));
-        format.add(label!("'Suffix',l:0,t:14,w:12"));
-        win.number_suffix = format.add(textfield!("l:0,t:15,r:0"));
+        format.add(label!("'Style',l:0,t:11,w:12"));
+        win.number_style = format.add(combobox!(
+            "l:0,t:12,r:0,items:[None,Percentage,USD,Euro,GBP,Yen],index:0"
+        ));
         win.number_format_panel = pages.add(0, format);
 
         pages.add(1, label!("'Color',l:1,t:1,w:12"));
@@ -480,10 +478,6 @@ impl BarChartEditor {
         self.control(handle).map(|slider| slider.value()).unwrap_or(1)
     }
 
-    fn field_text(&self, handle: Handle<TextField>) -> String {
-        self.control(handle).map(|field| field.text().to_string()).unwrap_or_default()
-    }
-
     fn set_slider_enabled(&mut self, handle: Handle<HSlider<u8>>, enabled: bool) {
         if let Some(slider) = self.control_mut(handle) {
             slider.set_enabled(enabled);
@@ -533,9 +527,14 @@ impl BarChartEditor {
         if decimals > 0 {
             format = format.decimals(decimals);
         }
-        let prefix = self.field_text(self.number_prefix);
-        let suffix = self.field_text(self.number_suffix);
-        format = format.prefix_text(&prefix).suffix_text(&suffix);
+        format = match self.combo_index(self.number_style) {
+            1 => format.suffix("%"),
+            2 => format.prefix("$"),
+            3 => format.prefix("€"),
+            4 => format.prefix("£"),
+            5 => format.prefix("¥"),
+            _ => format,
+        };
         let chart = self.chart;
         if let Some(ctrl) = self.control_mut(chart) {
             ctrl.set_number_format(format);
@@ -762,7 +761,7 @@ impl ColorPickerEvents for BarChartEditor {
 
 impl ComboBoxEvents for BarChartEditor {
     fn on_selection_changed(&mut self, handle: Handle<ComboBox>) -> EventProcessStatus {
-        if handle == self.number_base || handle == self.number_group {
+        if handle == self.number_base || handle == self.number_group || handle == self.number_style {
             self.apply_number_format();
             return EventProcessStatus::Processed;
         }
@@ -774,17 +773,6 @@ impl ComboBoxEvents for BarChartEditor {
             return EventProcessStatus::Processed;
         }
         if self.draw_combo_changed(handle, self.default_draw, true) || self.draw_combo_changed(handle, self.bar_draw, false) {
-            EventProcessStatus::Processed
-        } else {
-            EventProcessStatus::Ignored
-        }
-    }
-}
-
-impl TextFieldEvents for BarChartEditor {
-    fn on_text_changed(&mut self, handle: Handle<TextField>) -> EventProcessStatus {
-        if handle == self.number_prefix || handle == self.number_suffix {
-            self.apply_number_format();
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
