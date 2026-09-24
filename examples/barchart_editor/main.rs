@@ -9,7 +9,7 @@ const DEFAULT_MARK: char = '#';
 struct BarDrawControls {
     mode: Handle<ComboBox>,
     fill: Handle<ComboBox>,
-    line: Handle<ComboBox>,
+    line: Handle<Selector<LineType>>,
     point: Handle<ComboBox>,
     character: Handle<CharPicker>,
     detail: Handle<Label>,
@@ -79,32 +79,6 @@ fn fill_type(index: u32, mark: char) -> BarFillType {
     }
 }
 
-fn line_type(index: u32) -> LineType {
-    match index {
-        1 => LineType::Double,
-        2 => LineType::SingleThick,
-        3 => LineType::Border,
-        4 => LineType::Ascii,
-        5 => LineType::AsciiRound,
-        6 => LineType::SingleRound,
-        7 => LineType::Braille,
-        _ => LineType::Single,
-    }
-}
-
-fn line_index(line: LineType) -> u32 {
-    match line {
-        LineType::Single => 0,
-        LineType::Double => 1,
-        LineType::SingleThick => 2,
-        LineType::Border => 3,
-        LineType::Ascii => 4,
-        LineType::AsciiRound => 5,
-        LineType::SingleRound => 6,
-        LineType::Braille => 7,
-    }
-}
-
 fn point_type(index: u32, mark: char) -> BarPointType {
     match index {
         1 => BarPointType::Diamond,
@@ -134,12 +108,9 @@ fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
         &["Solid", "Shade 75%", "Shade 50%", "Shade 25%", "Braille", "Custom"],
         true,
     );
-    let line = combo_with(
-        host,
-        top + 4,
-        &["Single", "Double", "Thick", "Border", "Ascii", "Ascii Round", "Round", "Braille"],
-        false,
-    );
+    let mut line = Selector::new(Some(LineType::Single), row(top + 4, None), selector::Flags::None);
+    line.set_visible(false);
+    let line = host.add_control(line);
     let point = combo_with(host, top + 4, &["Circle", "Diamond", "Square", "Custom"], false);
     let mut character_label = Label::new("Character", row(top + 6, Some(12)));
     character_label.set_visible(false);
@@ -221,7 +192,7 @@ fn quarter_spans() -> [vbarchart::BarSpan; 4] {
     ]
 }
 
-#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents])]
+#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents, SelectorEvents<LineType>])]
 struct BarChartEditor {
     chart: Handle<VBarChart<i32>>,
     pages: Handle<Accordion>,
@@ -561,6 +532,10 @@ impl BarChartEditor {
         self.control(handle).and_then(|picker| picker.char()).unwrap_or(DEFAULT_MARK)
     }
 
+    fn selected_line(&self, handle: Handle<Selector<LineType>>) -> LineType {
+        self.control(handle).map(|selector| selector.value()).unwrap_or(LineType::Single)
+    }
+
     fn set_combo(&mut self, handle: Handle<ComboBox>, index: u32) {
         if let Some(combo) = self.control_mut(handle) {
             combo.set_index(index);
@@ -571,8 +546,8 @@ impl BarChartEditor {
         let mark = self.mark_char(controls.character);
         match self.combo_index(controls.mode) {
             0 => BarDrawMode::Fill(fill_type(self.combo_index(controls.fill), mark)),
-            1 => BarDrawMode::Line(line_type(self.combo_index(controls.line))),
-            2 => BarDrawMode::Rectangle(line_type(self.combo_index(controls.line))),
+            1 => BarDrawMode::Line(self.selected_line(controls.line)),
+            2 => BarDrawMode::Rectangle(self.selected_line(controls.line)),
             4 => BarDrawMode::Point(point_type(self.combo_index(controls.point), mark)),
             _ => BarDrawMode::Smooth,
         }
@@ -616,7 +591,7 @@ impl BarChartEditor {
     }
 
     fn show_draw_mode(&mut self, controls: BarDrawControls, mode: BarDrawMode) {
-        let (mode_index, fill_index, line_index, point_index, mark) = match mode {
+        let (mode_index, fill_index, line, point_index, mark) = match mode {
             BarDrawMode::Fill(fill) => {
                 let (index, mark) = match fill {
                     BarFillType::Solid => (0, None),
@@ -628,8 +603,8 @@ impl BarChartEditor {
                 };
                 (0, Some(index), None, None, mark)
             }
-            BarDrawMode::Line(line) => (1, None, Some(line_index(line)), None, None),
-            BarDrawMode::Rectangle(line) => (2, None, Some(line_index(line)), None, None),
+            BarDrawMode::Line(line) => (1, None, Some(line), None, None),
+            BarDrawMode::Rectangle(line) => (2, None, Some(line), None, None),
             BarDrawMode::Smooth => (3, None, None, None, None),
             BarDrawMode::Point(point) => {
                 let (index, mark) = match point {
@@ -645,8 +620,11 @@ impl BarChartEditor {
         if let Some(index) = fill_index {
             self.set_combo(controls.fill, index);
         }
-        if let Some(index) = line_index {
-            self.set_combo(controls.line, index);
+        if let Some(line) = line {
+            let line_h = controls.line;
+            if let Some(selector) = self.control_mut(line_h) {
+                selector.set_value(line);
+            }
         }
         if let Some(index) = point_index {
             self.set_combo(controls.point, index);
@@ -677,7 +655,7 @@ impl BarChartEditor {
     }
 
     fn draw_combo_changed(&mut self, handle: Handle<ComboBox>, controls: BarDrawControls, defaults: bool) -> bool {
-        let relevant = handle == controls.mode || handle == controls.fill || handle == controls.line || handle == controls.point;
+        let relevant = handle == controls.mode || handle == controls.fill || handle == controls.point;
         if !relevant {
             return false;
         }
@@ -752,6 +730,20 @@ impl ColorPickerEvents for BarChartEditor {
             EventProcessStatus::Processed
         } else if handle == self.default_color {
             self.set_chart_default_attr(color);
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
+    }
+}
+
+impl SelectorEvents<LineType> for BarChartEditor {
+    fn on_selection_changed(&mut self, handle: Handle<Selector<LineType>>, _value: Option<LineType>) -> EventProcessStatus {
+        if handle == self.default_draw.line {
+            self.apply_default_draw();
+            EventProcessStatus::Processed
+        } else if handle == self.bar_draw.line {
+            self.apply_bar_draw();
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
