@@ -68,7 +68,6 @@ pub enum BarDrawMode {
     Rectangle(LineType),   // constrained: thickness ≥ 2
     Smooth,                // full-block + sub-cell tip
     Point(BarPointType),   // marker
-    Whisker(BarPointType), // marker with caps
 }
 
 impl BarDrawMode {
@@ -79,7 +78,6 @@ impl BarDrawMode {
             BarDrawMode::Rectangle(_) => (2, u8::MAX),
             BarDrawMode::Smooth => (1, u8::MAX),
             BarDrawMode::Point(_) => (1, 1),
-            BarDrawMode::Whisker(_) => (1, 1),
         }
     }
 }
@@ -267,7 +265,6 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Rectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults),
             BarDrawMode::Smooth => todo!(),
             BarDrawMode::Point(point_type) => self.paint_vertical_point(surface, point_type, attr, layout),
-            BarDrawMode::Whisker(point_type) => todo!(),
         }
     }
 }
