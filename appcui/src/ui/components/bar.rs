@@ -8,17 +8,25 @@ use crate::{
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum BarDrawMode {
     #[default]
-    Normal, // spaces
+    Normal, // Full block box
+    Gray50,     // The box that is 50% filles with dots
+    Gray25,     // The box that is 25% filled with dots
+    Gray75,     // The box that is 75% filled with dots
     Rectangle,  // implies thickness = minimum 2
     Char(char), // fill with a specific character
     SingleLine,
     DoubleLine,
+    Braille, // use the brail 2 x 4 character to fill
+    Smooth,  // similar to Normal but uses digits to differentiate between 3.5 and 3.8 for example
+    Range,   // e tot tingle line, dar are la capete cate un cerc
+    Point,   // e doar un cerc in dreptul valorii
 }
 
 impl BarDrawMode {
-    fn thickness_range(&self) -> (u8,u8) {
+    fn thickness_range(&self) -> (u8, u8) {
         match self {
             BarDrawMode::Rectangle => (2, u8::MAX),
+            BarDrawMode::SingleLine | BarDrawMode::DoubleLine => (1, 1),
             _ => (1, u8::MAX),
         }
     }
@@ -149,7 +157,11 @@ impl<T: Number + 'static> Bar<T> {
             surface.fill_horizontal_line_with_size(layout.x, layout.y, thickness, ch);
         } else {
             let abs_h = layout.length.unsigned_abs();
-            let top = if layout.length > 0 { layout.y + 1 - layout.length as i32 } else { layout.y + 1 };
+            let top = if layout.length > 0 {
+                layout.y + 1 - layout.length as i32
+            } else {
+                layout.y + 1
+            };
             let r = Rect::with_size(layout.x, top, thickness as u16, abs_h);
             surface.fill_rect(r, c);
         }
@@ -157,8 +169,8 @@ impl<T: Number + 'static> Bar<T> {
     #[inline(always)]
     pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
-        let (min,max) = mode.thickness_range();
-        self.thickness.unwrap_or(defaults.thickness).clamp(min,max)
+        let (min, max) = mode.thickness_range();
+        self.thickness.unwrap_or(defaults.thickness).clamp(min, max)
     }
     pub(crate) fn paint_vertical(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
@@ -169,6 +181,13 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Char(ch) => self.paint_vertical_rect(surface, Character::with_attributes(ch, attr), layout, defaults),
             BarDrawMode::SingleLine => todo!(),
             BarDrawMode::DoubleLine => todo!(),
+            BarDrawMode::Smooth => todo!(),
+            BarDrawMode::Range => todo!(),
+            BarDrawMode::Point => todo!(),
+            BarDrawMode::Gray50 => todo!(),
+            BarDrawMode::Gray25 => todo!(),
+            BarDrawMode::Gray75 => todo!(),
+            BarDrawMode::Braille => todo!(),
         }
     }
 }
@@ -241,7 +260,7 @@ impl BarSpan {
     pub fn new(start: u32, count: u32, label: &str) -> Self {
         Self {
             start,
-            end: start.saturating_add(count.max(1)-1),
+            end: start.saturating_add(count.max(1) - 1),
             label: FlatString::from_str(label),
         }
     }
