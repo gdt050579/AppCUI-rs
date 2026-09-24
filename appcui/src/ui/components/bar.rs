@@ -1,4 +1,4 @@
-use crate::graphics::LineType;
+use crate::graphics::{LineType, Point};
 use flat_string::FlatString;
 
 use crate::{
@@ -230,6 +230,11 @@ impl<T: Number + 'static> Bar<T> {
         surface.draw_rect(self.rect_vertical(layout, defaults), line_type, attr);
     }
     #[inline(always)]
+    fn paint_vertical_point(&self, surface: &mut Surface,bar_point_type: BarPointType, attr: CharAttribute, layout: &BarLayout) {
+        let point = self.point_vertical(layout);
+        surface.write_char(point.x, point.y, bar_point_type.character(attr));
+    }
+    #[inline(always)]
     pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
         let (min, max) = mode.thickness_range();
@@ -246,6 +251,13 @@ impl<T: Number + 'static> Bar<T> {
         };
         Rect::with_size(layout.x, top, thickness as u16, abs_h)
     }
+    pub(crate) fn point_vertical(&self, layout: &BarLayout) -> Point {
+        if layout.length > 0 {
+            Point::new(layout.x, layout.y - layout.length as i32 + 1)
+        } else {
+            Point::new(layout.x, layout.y + layout.length as i32)
+        }
+    }
     pub(crate) fn paint_vertical(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
         let attr = self.attr.unwrap_or(defaults.attr);
@@ -254,7 +266,7 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Line(line_type) => self.paint_vertical_line(surface, line_type, attr, layout),
             BarDrawMode::Rectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults),
             BarDrawMode::Smooth => todo!(),
-            BarDrawMode::Point(point_type) => todo!(),
+            BarDrawMode::Point(point_type) => self.paint_vertical_point(surface, point_type, attr, layout),
             BarDrawMode::Whisker(point_type) => todo!(),
         }
     }
