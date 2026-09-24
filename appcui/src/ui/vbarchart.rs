@@ -5,7 +5,6 @@
 mod vbarchart;
 mod initialization_flags;
 pub mod events;
-mod bar;
 #[cfg(test)]
 mod tests;
 
@@ -14,10 +13,12 @@ pub use self::vbarchart::Bars;
 pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::BarScale;
 pub use self::initialization_flags::XAxisLabelMode;
-pub use self::bar::BarDrawMode;
-pub use self::bar::BarBuilder;
-pub use self::bar::Bar;
-pub use self::bar::BarSpan;
-
 
 use self::initialization_flags::XAxisLabelFormat;
+use super::components::BarLayout;
+use super::components::BarDefaults;
+
+pub use super::components::BarDrawMode;
+pub use super::components::BarBuilder;
+pub use super::components::Bar;
+pub use super::components::BarSpan;

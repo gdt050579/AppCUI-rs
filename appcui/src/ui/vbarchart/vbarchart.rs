@@ -1,9 +1,8 @@
 use flat_string::FlatString;
 
 use super::{
-    bar::{Bar, BarDefaults, BarDrawMode, BarLayout},
     events::{EventData, EventType},
-    BarScale, BarSpan, Flags, XAxisLabelFormat,
+    Bar, BarDefaults, BarDrawMode, BarLayout, BarScale, BarSpan, Flags, XAxisLabelFormat,
 };
 use crate::{prelude::*, ui::vbarchart::XAxisLabelMode};
 

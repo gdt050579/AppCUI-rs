@@ -155,12 +155,12 @@ impl<T: Number + 'static> Bar<T> {
         }
     }
     #[inline(always)]
-    pub(super) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
+    pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
         let (min,max) = mode.thickness_range();
         self.thickness.unwrap_or(defaults.thickness).clamp(min,max)
     }
-    pub(super) fn paint_vertical(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
+    pub(crate) fn paint_vertical(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
         let attr = self.attr.unwrap_or(defaults.attr);
         match mode {
