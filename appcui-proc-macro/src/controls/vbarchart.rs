@@ -5,8 +5,17 @@ use proc_macro::*;
 
 static FLAGS: FlagsSignature = FlagsSignature::new(&["ScrollBars", "DimBarsOnSelection"]);
 
-static BARSCALE_MODES: &[(&'static str, &'static str)] =
-    &[("FromZero", "fromzero"), ("FitData", "fitdata"), ("FromZero", "zero"), ("FitData", "fit")];
+static BARSCALE_MODES: &[(&'static str, &'static str)] = &[
+    ("FromZero", "fromzero"),
+    ("FromZero", "zero"),
+    ("FitData", "fitdata"),
+    ("FitData", "fit"),
+    ("Fixed", "fixed"),
+    ("Fixed", "fix"),
+    ("FromZeroMinRange", "fromzero-min-range"),
+    ("FromZeroMinRange", "zero-min-range"),
+    ("FromZeroMinRange", "fromzerominrange"),
+];
 
 static XLABELS_MODES: &[(&'static str, &'static str)] = &[("None", "none"), ("BarLabels", "barlabels")];
 
@@ -98,8 +107,10 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.call_method_with_integer_parameter_and_range("set_default_bar_spacing", "default-bar-spacing", 1, 100);
     cb.call_method_with_integer_parameter_and_range("set_yaxis_width", "yaxis-width", 0, 32);
     cb.call_method_with_integer_parameter_and_range("set_yaxis_step", "yaxis-step", 1, 255);
-    cb.call_method_with_string_parameter_parser("set_default_bar_drawmode", "default-bar-draw-mode", |repr| parse_bar_draw_mode(repr, "default-bar-draw-mode", "vbarchart"));
-    
+    cb.call_method_with_string_parameter_parser("set_default_bar_drawmode", "default-bar-draw-mode", |repr| {
+        parse_bar_draw_mode(repr, "default-bar-draw-mode", "vbarchart")
+    });
+
     if cb.has_parameter("default-bar-draw-mode-attr") {
         let str_repr = String::from(cb.get_string_representation());
         let tmp = if let Some(d) = cb.get_dict("default-bar-draw-mode-attr") {
@@ -137,29 +148,33 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
 
 fn parse_barscale(repr: &str) -> String {
     let repr = repr.trim();
-    if let Some(mode) = crate::utils::find_string_in_array(BARSCALE_MODES, repr) {
-        return format!("vbarchart::BarScale::{mode}");
+    if let Some(fncall) = crate::fncall::FnCall::new(repr) {
+        if let Some(name) = fncall.match_name(BARSCALE_MODES) {
+            match name {
+                "Fixed" | "FromZeroMinRange" => {
+                    assert!(fncall.params_count() == 2, "Invalid bar scale format - expecting 2 parameters (min,max) !");
+                    assert!(fncall.is_param_number(0), "Invalid bar scale format - expecting a valid number for min but got {} !", fncall.param(0).unwrap());
+                    assert!(fncall.is_param_number(1), "Invalid bar scale format - expecting a valid number for max but got {} !", fncall.param(1).unwrap());
+                    format!("vbarchart::BarScale::{}({},{})", name,fncall.param(0).unwrap(), fncall.param(1).unwrap())
+                }
+                _ => {
+                    format!("vbarchart::BarScale::{name}")
+                }
+            }
+        } else {
+            panic!(
+                "Invalid bar scale: {} - expected one of: {}",
+                repr,
+                crate::utils::join_strings(BARSCALE_MODES)
+            );
+        }
+    } else {
+        panic!(
+            "Invalid bar scale: {} - expected one of: {}",
+            repr,
+            crate::utils::join_strings(BARSCALE_MODES)
+        );
     }
-    // check to see if the repr is Fixed(min,max), allowing white spaces (between fixed)
-    if let Some(params) = crate::utils::parse_function_and_parameters(repr, "Fixed") {
-        assert!(params.len() == 2, "Invalid bar scale format - expecting Fixed(min,max) !");
-        assert!(crate::utils::is_number(&params[0]), "Invalid bar scale format - expecting a valid number but got {} !", params[0]);
-        assert!(crate::utils::is_number(&params[1]), "Invalid bar scale format - expecting a valid number but got {} !", params[1]);
-        return format!("vbarchart::BarScale::Fixed({},{})", params[0], params[1]);
-    }
-    // check to see if the repr is FromZeroMinRange(min,max), allowing white spaces (between min and max)
-    if let Some(params) = crate::utils::parse_function_and_parameters(repr, "FromZeroMinRange") {
-        assert!(params.len() == 2, "Invalid bar scale format - expecting FromZeroMinRange(min,max) !");
-        assert!(crate::utils::is_number(&params[0]), "Invalid bar scale format - expecting a valid number but got {} !", params[0]);
-        assert!(crate::utils::is_number(&params[1]), "Invalid bar scale format - expecting a valid number but got {} !", params[1]);
-        return format!("vbarchart::BarScale::FromZeroMinRange({},{})", params[0], params[1]);
-    }
-
-    panic!(
-        "Invalid bar scale: {} - expected one of: {} or Fixed(min,max) or FromZeroMinRange(min,max)",
-        repr,
-        crate::utils::join_strings(BARSCALE_MODES)
-    );
 }
 fn parse_xlabels(value: &mut Value) -> String {
     if let Some(list) = value.get_list() {
@@ -170,19 +185,19 @@ fn parse_xlabels(value: &mut Value) -> String {
         return format!("vbarchart::XAxisLabelMode::{mode}");
     }
     // check to see if the repr is Index(start), allowing white spaces (between start)
-    if let Some(params) = crate::utils::parse_function_and_parameters(repr, "Index") {
-        assert!(params.len() == 1, "Invalid xlabels format - expecting Index(start) !");
-        assert!(crate::utils::is_integer(&params[0]), "Invalid xlabels format - expecting a valid integer (i32) but got {} !", params[0]);
-        return format!("vbarchart::XAxisLabelMode::Index({})", params[0]);
+    if let Some(fncall) = crate::fncall::FnCall::new(repr) {
+        if fncall.name().eq_ignore_ascii_case("index") {
+            assert!(fncall.params_count() == 1, "Invalid xlabels format - expecting 1 parameter (start) !");
+            assert!(fncall.is_param_integer(0), "Invalid xlabels format - expecting a valid integer (i32) for start but got {} !", fncall.param(0).unwrap());
+            return format!("vbarchart::XAxisLabelMode::Index({})", fncall.param(0).unwrap());
+        }
     }
-
     panic!(
         "Invalid xlabels: {} - expected one of: {} or Index(start)",
         repr,
         crate::utils::join_strings(XLABELS_MODES)
     );
 }
-
 
 fn parse_xlabel_u32(dict: &NamedParamsMap, key: &str) -> u32 {
     let Some(v) = dict.get(key) else {
@@ -224,6 +239,3 @@ fn parse_xlabels_list(list: &mut Vec<Value>) -> String {
     spans.push_str("])");
     spans
 }
-
-
-

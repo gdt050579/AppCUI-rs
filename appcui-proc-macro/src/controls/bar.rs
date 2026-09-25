@@ -1,15 +1,44 @@
 use crate::parameter_parser::*;
 
-static BAR_DRAW_MODES: &[(&'static str, &'static str)] = &[
-    ("Normal", "normal"),
+static LINE_TYPES: &[(&str, &str)] = &[
+    ("Single", "single"),
+    ("Double", "double"),
+    ("SingleThick", "singlethick"),
+    ("SingleThick", "single-thick"),
+    ("Border", "border"),
+    ("Ascii", "ascii"),
+    ("AsciiRound", "asciiround"),
+    ("AsciiRound", "ascii-round"),
+    ("SingleRound", "singleround"),
+    ("SingleRound", "single-round"),
+    ("Braille", "braille"),
+];
+
+// A bare name uses the variant default (Single, Solid, or Circle).
+static DRAW_MODES: &[(&str, &str)] = &[
+    ("Fill", "fill"),
+    ("Line", "line"),
     ("Rectangle", "rectangle"),
     ("Rectangle", "rect"),
-    ("SingleLine", "singleline"),
-    ("SingleLine", "single-line"),
-    ("SingleLine", "single"),
-    ("DoubleLine", "doubleline"),
-    ("DoubleLine", "double-line"),
-    ("DoubleLine", "double"),
+    ("FilledRectangle", "filledrectangle"),
+    ("FilledRectangle", "filledrect"),
+    ("FilledRectangle", "filled-rectangle"),
+    ("Smooth", "smooth"),
+    ("Point", "point"),
+];
+
+static FILL_TYPES: &[(&str, &str)] = &[
+    ("Solid", "solid"),
+    ("Shade75", "shade75"),
+    ("Shade50", "shade50"),
+    ("Shade25", "shade25"),
+    ("Braille", "braille"),
+];
+
+static POINT_TYPES: &[(&str, &str)] = &[
+    ("Circle", "circle"),
+    ("Diamond", "diamond"),
+    ("Square", "square"),
 ];
 
 static VALUE_BAR_POSITIONAL: &[PositionalParameter] = &[PositionalParameter::new("value", ParamType::String)];
@@ -118,35 +147,90 @@ fn parse_char_token(repr: &str, key: &str) -> String {
     panic!("Invalid {key} - expecting a single character but got {repr} !");
 }
 
+fn parse_line_type(repr: &str, key: &str) -> String {
+    match crate::utils::find_string_in_array(LINE_TYPES, repr.trim()) {
+        Some(line) => format!("LineType::{line}"),
+        None => panic!(
+            "Invalid {key} - expecting a line type ({}) but got {repr} !",
+            crate::utils::join_strings(LINE_TYPES)
+        ),
+    }
+}
+
+fn parse_custom_char(param: &str, key: &str) -> String {
+    let param = param.trim();
+    if let Some((name, value)) = split_named_param(param) {
+        if crate::utils::equal_ignore_case(name, "code") {
+            let code = parse_unicode_code(value, key);
+            let Some(ch) = char::from_u32(code) else {
+                panic!("Invalid {key} - unicode code {code} is not a valid character !");
+            };
+            return char_to_rust_literal(ch);
+        }
+        panic!("Invalid {key} - unknown named parameter '{name}' ! Expected code: value");
+    }
+    parse_char_token(param, key)
+}
+
+fn parse_line_draw_mode(fncall: &crate::fncall::FnCall, key: &str, module: &str, variant: &str) -> String {
+    let line = match fncall.params_count() {
+        0 => String::from("LineType::Single"),
+        1 => parse_line_type(fncall.param(0).unwrap(), key),
+        _ => panic!("Invalid {key} - expecting {variant} or {variant}(line type), for example {variant}(Single) !"),
+    };
+    format!("{module}::BarDrawMode::{variant}({line})")
+}
+
+fn parse_typed_draw_mode(
+    fncall: &crate::fncall::FnCall,
+    key: &str,
+    module: &str,
+    variant: &str,
+    names: &[(&'static str, &'static str)],
+    enum_name: &str,
+    default_variant: &str,
+) -> String {
+    let inner = match fncall.params_count() {
+        0 => format!("{module}::{enum_name}::{default_variant}"),
+        1 => {
+            let param = fncall.param(0).unwrap().trim();
+            if let Some(kind) = crate::utils::find_string_in_array(names, param) {
+                format!("{module}::{enum_name}::{kind}")
+            } else {
+                format!("{module}::{enum_name}::Custom({})", parse_custom_char(param, key))
+            }
+        }
+        _ => panic!("Invalid {key} - expecting {variant} or {variant}({enum_name}), for example {variant}({default_variant}) !"),
+    };
+    format!("{module}::BarDrawMode::{variant}({inner})")
+}
+
 pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String {
     let repr = repr.trim();
-    if let Some(mode) = crate::utils::find_string_in_array(BAR_DRAW_MODES, repr) {
-        return format!("{module}::BarDrawMode::{mode}");
-    }
-    if let Some(params) = crate::utils::parse_function_and_parameters(repr, "Char") {
-        if params.len() != 1 {
-            panic!("Invalid {key} - expecting Char(char) or Char(code: value) !");
-        }
-        let param = params[0].trim();
-        let literal = if let Some((name, value)) = split_named_param(param) {
-            if crate::utils::equal_ignore_case(name, "code") {
-                let code = parse_unicode_code(value, key);
-                let Some(ch) = char::from_u32(code) else {
-                    panic!("Invalid {key} - unicode code {code} is not a valid character !");
-                };
-                char_to_rust_literal(ch)
-            } else {
-                panic!("Invalid {key} - unknown named parameter '{name}' ! Expected Char(code: value)");
+    if let Some(fncall) = crate::fncall::FnCall::new(repr) {
+        if let Some(name) = fncall.match_name(DRAW_MODES) {
+            match name {
+                "Fill" => parse_typed_draw_mode(&fncall, key, module, "Fill", FILL_TYPES, "BarFillType", "Solid"),
+                "Line" => parse_line_draw_mode(&fncall, key, module, "Line"),
+                "Rectangle" => parse_line_draw_mode(&fncall, key, module, "Rectangle"),
+                "FilledRectangle" => parse_line_draw_mode(&fncall, key, module, "FilledRectangle"),
+                "Smooth" => {
+                    if fncall.params_count() != 0 {
+                        panic!("Invalid {key} - Smooth takes no parameters !");
+                    }
+                    format!("{module}::BarDrawMode::Smooth")
+                }
+                "Point" => parse_typed_draw_mode(&fncall, key, module, "Point", POINT_TYPES, "BarPointType", "Circle"),
+                _ => {
+                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point !");
+                }
             }
         } else {
-            parse_char_token(param, key)
-        };
-        return format!("{module}::BarDrawMode::Char({literal})");
+            panic!("Invalid {key} - expecting a draw mode ({}) but got {repr} !", crate::utils::join_strings(DRAW_MODES));
+        }
+    } else {
+        panic!("Invalid {key} - expecting a draw mode ({}) but got {repr} !", crate::utils::join_strings(DRAW_MODES));
     }
-    panic!(
-        "Invalid {key}: {repr} - expected one of: {} or Char(char) or Char(code: value)",
-        crate::utils::join_strings(BAR_DRAW_MODES)
-    );
 }
 
 pub(crate) fn parse_bar_attr(repr: &str, key: &str) -> String {

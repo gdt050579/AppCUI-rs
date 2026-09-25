@@ -164,7 +164,7 @@ pub(crate) fn join_strings(array: &[(&'static str, &'static str)]) -> String {
     m.iter().map(|k| format!("'{}'", k)).collect::<Vec<String>>().join(", ")
 }
 // format: name (param1, param2, ... )
-pub(crate) fn parse_function_and_parameters(repr: &str, name: &str) -> Option<Vec<String>> {
+pub(crate) fn parse_function_and_parameters__(repr: &str, name: &str) -> Option<Vec<String>> {
     let buf = repr.as_bytes();
     let len = buf.len();
     let mut pos = skip_spaces(buf, 0);

@@ -8,6 +8,7 @@ mod procmacro_builder;
 mod parameter_parser;
 mod derives;
 mod controls;
+mod fncall;
 mod utils;
 use proc_macro::*;
 
