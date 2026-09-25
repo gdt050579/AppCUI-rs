@@ -192,10 +192,24 @@ fn quarter_spans() -> [vbarchart::BarSpan; 4] {
     ]
 }
 
-#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents, SelectorEvents<LineType>, NumericSelectorEvents<i32>])]
+fn parse_values(text: &str) -> Option<Vec<i32>> {
+    let mut values = Vec::new();
+    for part in text.split(',') {
+        let part = part.trim();
+        if part.is_empty() {
+            continue;
+        }
+        values.push(part.parse::<i32>().ok()?);
+    }
+    if values.is_empty() { None } else { Some(values) }
+}
+
+#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents, SelectorEvents<LineType>, NumericSelectorEvents<i32>, ButtonEvents])]
 struct BarChartEditor {
     chart: Handle<VBarChart<i32>>,
     pages: Handle<Accordion>,
+    data_values: Handle<TextField>,
+    data_apply: Handle<Button>,
     scale_type: Handle<ComboBox>,
     scale_min_label: Handle<Label>,
     scale_max_label: Handle<Label>,
@@ -231,6 +245,8 @@ impl BarChartEditor {
             base: window!("'Bar chart editor',d:f"),
             chart: Handle::None,
             pages: Handle::None,
+            data_values: Handle::None,
+            data_apply: Handle::None,
             scale_type: Handle::None,
             scale_min_label: Handle::None,
             scale_max_label: Handle::None,
@@ -270,7 +286,7 @@ impl BarChartEditor {
         chart.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(&quarter_spans()));
         win.chart = splitter.add(vsplitter::Panel::Left, chart);
 
-        let mut pages = accordion!("d:f,panels:['&Chart Settings','&Default Bar Settings','C&ustom Bar Settings']");
+        let mut pages = accordion!("d:f,panels:['&Chart Settings','&Default Bar Settings','C&ustom Bar Settings','Da&ta']");
 
         pages.add(0, label!("'Scale type',l:1,t:1,r:1,h:1"));
         win.scale_type = pages.add(
@@ -281,16 +297,16 @@ impl BarChartEditor {
         let mut scale_min_label = label!("'Min',l:0,t:0,w:4");
         scale_min_label.set_enabled(false);
         win.scale_min_label = min_line.add(scale_min_label);
-        let mut scale_min = numericselector!("i32,0,-1000,1000,1,l:4,t:0,r:0,flags:HideButtons");
+        let mut scale_min = numericselector!("i32,0,-1000,1000,1,l:4,t:0,r:0");
         scale_min.set_enabled(false);
         win.scale_min = min_line.add(scale_min);
         pages.add(0, min_line);
 
-        let mut max_line = panel!("'',l:51%,t:4,r:1,h:1,type:Page");
+        let mut max_line = panel!("'',l:55%,t:4,r:1,h:1,type:Page");
         let mut scale_max_label = label!("'Max',l:0,t:0,w:4");
         scale_max_label.set_enabled(false);
         win.scale_max_label = max_line.add(scale_max_label);
-        let mut scale_max = numericselector!("i32,100,-1000,1000,1,l:4,t:0,r:0,flags:HideButtons");
+        let mut scale_max = numericselector!("i32,100,-1000,1000,1,l:4,t:0,r:0");
         scale_max.set_enabled(false);
         win.scale_max = max_line.add(scale_max);
         pages.add(0, max_line);
@@ -310,18 +326,17 @@ impl BarChartEditor {
         win.yaxis_step = pages.add(0, yaxis_step);
 
         let mut format = panel!("'',l:1,t:15,r:1,b:1,type:Page");
-        format.add(label!("'Number format',l:0,t:0,r:1,h:1"));
-        format.add(label!("'Base',l:0,t:2,w:12"));
-        win.number_base = format.add(combobox!("l:0,t:3,r:0,items:[Decimal,Hex,Octal,Binary],index:0"));
-        format.add(label!("'Grouping',l:0,t:5,w:12"));
-        win.number_group = format.add(combobox!("l:0,t:6,r:0,items:[None,'3 digits','4 digits'],index:1"));
-        format.add(label!("'Decimals',l:0,t:8,w:12"));
-        let mut decimals = hslider!("u8,0,8,1,l:0,t:9,r:0,flags:ShowValue,type:Ruler");
+        format.add(label!("'Base',l:0,t:0,w:12"));
+        win.number_base = format.add(combobox!("l:0,t:1,r:0,items:[Decimal,Hex,Octal,Binary],index:0"));
+        format.add(label!("'Grouping',l:0,t:3,w:12"));
+        win.number_group = format.add(combobox!("l:0,t:4,r:0,items:[None,'3 digits','4 digits'],index:1"));
+        format.add(label!("'Decimals',l:0,t:6,w:12"));
+        let mut decimals = hslider!("u8,0,8,1,l:0,t:7,r:0,flags:ShowValue,type:Ruler");
         decimals.set_value(0);
         win.number_decimals = format.add(decimals);
-        format.add(label!("'Style',l:0,t:11,w:12"));
+        format.add(label!("'Style',l:0,t:9,w:12"));
         win.number_style = format.add(combobox!(
-            "l:0,t:12,r:0,items:[None,Percentage,USD,Euro,GBP,Yen],index:0"
+            "l:0,t:10,r:0,items:[None,Percentage,USD,Euro,GBP,Yen],index:0"
         ));
         win.number_format_panel = pages.add(0, format);
 
@@ -356,6 +371,13 @@ impl BarChartEditor {
         win.spacing = editor.add(spacing);
         win.bar_draw = add_draw_controls(&mut editor, 12);
         win.editor_panel = pages.add(2, editor);
+
+        pages.add(3, label!("'Values',l:1,t:1,r:1,h:1"));
+        win.data_values = pages.add(
+            3,
+            textfield!("'12, 28, 19, 35, 22, 41, 33, 18, 27, 31, 15, 45',l:1,t:2,r:1,b:3"),
+        );
+        win.data_apply = pages.add(3, button!("'&Apply',r:1,b:0,w:12"));
 
         win.pages = splitter.add(vsplitter::Panel::Right, pages);
         win.add(splitter);
@@ -428,7 +450,27 @@ impl BarChartEditor {
         }
     }
 
-    fn load_selected_bar(&mut self, index: u32) {
+    fn apply_data(&mut self) {
+        let text = self.control(self.data_values).map(|field| field.text().to_string()).unwrap_or_default();
+        let Some(values) = parse_values(&text) else {
+            dialogs::message("Data", "Enter whole numbers separated by commas.");
+            return;
+        };
+        let chart = self.chart;
+        if let Some(ctrl) = self.control_mut(chart) {
+            ctrl.update_bars(|bars| {
+                bars.clear();
+                bars.add_bars(values);
+            });
+        }
+        if let Some(index) = self.selected_index() {
+            self.load_selected_bar(index, false);
+        } else {
+            self.clear_selection_ui();
+        }
+    }
+
+    fn load_selected_bar(&mut self, index: u32, open_panel: bool) {
         let chart = self.chart;
         let Some((color, thickness, spacing, caption, draw_mode)) = self.control(chart).and_then(|c| {
             let bar = c.get_bar(index as usize)?;
@@ -467,7 +509,9 @@ impl BarChartEditor {
         let mode = draw_mode.unwrap_or(self.default_draw_mode);
         self.show_draw_mode(self.bar_draw, mode);
         self.show_bar_editors(true);
-        self.show_custom_panel();
+        if open_panel {
+            self.show_custom_panel();
+        }
     }
 
     fn show_custom_panel(&mut self) {
@@ -743,7 +787,7 @@ impl BarChartEditor {
 
 impl VBarChartEvents<i32> for BarChartEditor {
     fn on_bar_selected(&mut self, _handle: Handle<VBarChart<i32>>, index: u32) -> EventProcessStatus {
-        self.load_selected_bar(index);
+        self.load_selected_bar(index, true);
         EventProcessStatus::Processed
     }
 
@@ -866,6 +910,17 @@ impl NumericSelectorEvents<i32> for BarChartEditor {
     fn on_value_changed(&mut self, handle: Handle<NumericSelector<i32>>, _value: i32) -> EventProcessStatus {
         if handle == self.scale_min || handle == self.scale_max {
             self.apply_scale();
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
+    }
+}
+
+impl ButtonEvents for BarChartEditor {
+    fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
+        if handle == self.data_apply {
+            self.apply_data();
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
