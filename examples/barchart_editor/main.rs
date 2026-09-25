@@ -100,7 +100,7 @@ fn combo_with(host: &mut impl DrawHost, top: i32, items: &[&str], visible: bool)
 
 fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
     host.add_control(Label::new("Draw mode", row(top, Some(12))));
-    let mode = combo_with(host, top + 1, &["Fill", "Line", "Rectangle", "Smooth", "Point"], true);
+    let mode = combo_with(host, top + 1, &["Fill", "Line", "Rectangle", "Filled rectangle", "Smooth", "Point"], true);
     let detail = host.add_control(Label::new("Fill type", row(top + 3, Some(12))));
     let fill = combo_with(
         host,
@@ -548,7 +548,8 @@ impl BarChartEditor {
             0 => BarDrawMode::Fill(fill_type(self.combo_index(controls.fill), mark)),
             1 => BarDrawMode::Line(self.selected_line(controls.line)),
             2 => BarDrawMode::Rectangle(self.selected_line(controls.line)),
-            4 => BarDrawMode::Point(point_type(self.combo_index(controls.point), mark)),
+            3 => BarDrawMode::FilledRectangle(self.selected_line(controls.line)),
+            5 => BarDrawMode::Point(point_type(self.combo_index(controls.point), mark)),
             _ => BarDrawMode::Smooth,
         }
     }
@@ -557,8 +558,8 @@ impl BarChartEditor {
         let mode = self.combo_index(controls.mode);
         let (caption, fill, line, point, character) = match mode {
             0 => ("Fill type", true, false, false, self.combo_index(controls.fill) == 5),
-            1 | 2 => ("Line type", false, true, false, false),
-            4 => ("Point type", false, false, true, self.combo_index(controls.point) == 3),
+            1 | 2 | 3 => ("Line type", false, true, false, false),
+            5 => ("Point type", false, false, true, self.combo_index(controls.point) == 3),
             _ => ("", false, false, false, false),
         };
         let detail = controls.detail;
@@ -605,7 +606,8 @@ impl BarChartEditor {
             }
             BarDrawMode::Line(line) => (1, None, Some(line), None, None),
             BarDrawMode::Rectangle(line) => (2, None, Some(line), None, None),
-            BarDrawMode::Smooth => (3, None, None, None, None),
+            BarDrawMode::FilledRectangle(line) => (3, None, Some(line), None, None),
+            BarDrawMode::Smooth => (4, None, None, None, None),
             BarDrawMode::Point(point) => {
                 let (index, mark) = match point {
                     BarPointType::Circle => (0, None),
@@ -613,7 +615,7 @@ impl BarChartEditor {
                     BarPointType::Square => (2, None),
                     BarPointType::Custom(ch) => (3, Some(ch)),
                 };
-                (4, None, None, Some(index), mark)
+                (5, None, None, Some(index), mark)
             }
         };
         self.set_combo(controls.mode, mode_index);
