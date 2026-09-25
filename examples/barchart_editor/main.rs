@@ -192,10 +192,15 @@ fn quarter_spans() -> [vbarchart::BarSpan; 4] {
     ]
 }
 
-#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents, SelectorEvents<LineType>])]
+#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents, SelectorEvents<LineType>, NumericSelectorEvents<i32>])]
 struct BarChartEditor {
     chart: Handle<VBarChart<i32>>,
     pages: Handle<Accordion>,
+    scale_type: Handle<ComboBox>,
+    scale_min_label: Handle<Label>,
+    scale_max_label: Handle<Label>,
+    scale_min: Handle<NumericSelector<i32>>,
+    scale_max: Handle<NumericSelector<i32>>,
     xaxis_mode: Handle<ComboBox>,
     yaxis_width_enabled: Handle<CheckBox>,
     yaxis_width: Handle<HSlider<u8>>,
@@ -226,6 +231,11 @@ impl BarChartEditor {
             base: window!("'Bar chart editor',d:f"),
             chart: Handle::None,
             pages: Handle::None,
+            scale_type: Handle::None,
+            scale_min_label: Handle::None,
+            scale_max_label: Handle::None,
+            scale_min: Handle::None,
+            scale_max: Handle::None,
             xaxis_mode: Handle::None,
             yaxis_width_enabled: Handle::None,
             yaxis_width: Handle::None,
@@ -262,21 +272,44 @@ impl BarChartEditor {
 
         let mut pages = accordion!("d:f,panels:['&Chart Settings','&Default Bar Settings','C&ustom Bar Settings']");
 
-        pages.add(0, label!("'X-axis labels',l:1,t:1,r:1,h:1"));
+        pages.add(0, label!("'Scale type',l:1,t:1,r:1,h:1"));
+        win.scale_type = pages.add(
+            0,
+            combobox!("l:1,t:2,r:1,items:['From zero','Fit data','Fixed','From zero min range'],index:0"),
+        );
+        let mut min_line = panel!("'',l:1,t:4,r:50%,h:1,type:Page");
+        let mut scale_min_label = label!("'Min',l:0,t:0,w:4");
+        scale_min_label.set_enabled(false);
+        win.scale_min_label = min_line.add(scale_min_label);
+        let mut scale_min = numericselector!("i32,0,-1000,1000,1,l:4,t:0,r:0,flags:HideButtons");
+        scale_min.set_enabled(false);
+        win.scale_min = min_line.add(scale_min);
+        pages.add(0, min_line);
+
+        let mut max_line = panel!("'',l:51%,t:4,r:1,h:1,type:Page");
+        let mut scale_max_label = label!("'Max',l:0,t:0,w:4");
+        scale_max_label.set_enabled(false);
+        win.scale_max_label = max_line.add(scale_max_label);
+        let mut scale_max = numericselector!("i32,100,-1000,1000,1,l:4,t:0,r:0,flags:HideButtons");
+        scale_max.set_enabled(false);
+        win.scale_max = max_line.add(scale_max);
+        pages.add(0, max_line);
+
+        pages.add(0, label!("'X-axis labels',l:1,t:6,r:1,h:1"));
         win.xaxis_mode = pages.add(
             0,
-            combobox!("l:1,t:2,r:1,items:['None','Index','Bar labels','Groups'],index:3"),
+            combobox!("l:1,t:7,r:1,items:['None','Index','Bar labels','Groups'],index:3"),
         );
-        win.yaxis_width_enabled = pages.add(0, checkbox!("'Y-axis width',l:1,t:4,r:1,checked:true"));
-        let mut yaxis_width = hslider!("u8,1,50,1,l:1,t:5,r:1,flags:ShowValue,type:Ruler");
+        win.yaxis_width_enabled = pages.add(0, checkbox!("'Y-axis width',l:1,t:9,r:1,checked:true"));
+        let mut yaxis_width = hslider!("u8,1,50,1,l:1,t:10,r:1,flags:ShowValue,type:Ruler");
         yaxis_width.set_value(6);
         win.yaxis_width = pages.add(0, yaxis_width);
-        win.yaxis_step_enabled = pages.add(0, checkbox!("'Y-axis step',l:1,t:7,r:1,checked:true"));
-        let mut yaxis_step = hslider!("u8,1,50,1,l:1,t:8,r:1,flags:ShowValue,type:Ruler");
+        win.yaxis_step_enabled = pages.add(0, checkbox!("'Y-axis step',l:1,t:12,r:1,checked:true"));
+        let mut yaxis_step = hslider!("u8,1,50,1,l:1,t:13,r:1,flags:ShowValue,type:Ruler");
         yaxis_step.set_value(3);
         win.yaxis_step = pages.add(0, yaxis_step);
 
-        let mut format = panel!("'',l:1,t:10,r:1,b:1,type:Page");
+        let mut format = panel!("'',l:1,t:15,r:1,b:1,type:Page");
         format.add(label!("'Number format',l:0,t:0,r:1,h:1"));
         format.add(label!("'Base',l:0,t:2,w:12"));
         win.number_base = format.add(combobox!("l:0,t:3,r:0,items:[Decimal,Hex,Octal,Binary],index:0"));
@@ -331,6 +364,43 @@ impl BarChartEditor {
 
     fn selected_index(&self) -> Option<u32> {
         self.control(self.chart).and_then(|chart| chart.selected_bar())
+    }
+
+    fn scale_limit(&self, handle: Handle<NumericSelector<i32>>) -> i32 {
+        self.control(handle).map(|selector| selector.value()).unwrap_or(0)
+    }
+
+    fn set_scale_range_enabled(&mut self, enabled: bool) {
+        for handle in [self.scale_min_label, self.scale_max_label] {
+            if let Some(label) = self.control_mut(handle) {
+                label.set_enabled(enabled);
+            }
+        }
+        for handle in [self.scale_min, self.scale_max] {
+            if let Some(selector) = self.control_mut(handle) {
+                selector.set_enabled(enabled);
+            }
+        }
+    }
+
+    fn apply_scale(&mut self) {
+        let ranged = matches!(self.combo_index(self.scale_type), 2 | 3);
+        self.set_scale_range_enabled(ranged);
+        let mut min = self.scale_limit(self.scale_min);
+        let mut max = self.scale_limit(self.scale_max);
+        if min > max {
+            std::mem::swap(&mut min, &mut max);
+        }
+        let scale = match self.combo_index(self.scale_type) {
+            1 => vbarchart::BarScale::FitData,
+            2 => vbarchart::BarScale::Fixed { min, max },
+            3 => vbarchart::BarScale::FromZeroMinRange { min, max },
+            _ => vbarchart::BarScale::FromZero,
+        };
+        let chart = self.chart;
+        if let Some(ctrl) = self.control_mut(chart) {
+            ctrl.set_bars_scale(scale);
+        }
     }
 
     fn apply_xaxis_mode(&mut self, index: u32) {
@@ -759,6 +829,10 @@ impl ComboBoxEvents for BarChartEditor {
             self.apply_number_format();
             return EventProcessStatus::Processed;
         }
+        if handle == self.scale_type {
+            self.apply_scale();
+            return EventProcessStatus::Processed;
+        }
         if handle == self.xaxis_mode {
             let Some(index) = self.control(handle).and_then(|cb| cb.index()) else {
                 return EventProcessStatus::Ignored;
@@ -781,6 +855,17 @@ impl CheckBoxEvents for BarChartEditor {
             EventProcessStatus::Processed
         } else if handle == self.yaxis_step_enabled {
             self.set_yaxis_step_active(checked);
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
+    }
+}
+
+impl NumericSelectorEvents<i32> for BarChartEditor {
+    fn on_value_changed(&mut self, handle: Handle<NumericSelector<i32>>, _value: i32) -> EventProcessStatus {
+        if handle == self.scale_min || handle == self.scale_max {
+            self.apply_scale();
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
