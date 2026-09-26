@@ -1,10 +1,10 @@
 use crate::graphics::SpecialChar;
 use crate::prelude::*;
-use crate::ui::markdown_composer::emoji::EMOJIS;
+use crate::ui::markdown_composer::emoji::{EMOJIS, EMOTICONS};
+use crate::ui::markdown_composer::events::{EventData, MarkdownComposerEventsType};
 use crate::ui::markdown_composer::parser::{Span, SpanType};
 use crate::ui::markdown_composer::Flags;
-use crate::ui::markdown_composer::Parser;
-use crate::ui::markdown_composer::events::{EventData, MarkdownComposerEventsType};
+use crate::ui::markdown_composer::parser::Parser;
 use crate::ui::markdown_composer::{List, ListFlags};
 
 const WHEEL_ROWS: u32 = 3;
@@ -14,6 +14,8 @@ const POPUP_ROWS: u32 = 4;
 const POPUP_MIN_HEIGHT: u32 = 3;
 const POPUP_MIN_WIDTH: u32 = 12;
 const POPUP_MAX_WIDTH: u32 = 40;
+const INLINE_MARKERS: [&str; 3] = ["**", "_", "`"];
+const FENCE: &str = "```";
 
 struct Popup {
     list: usize,
@@ -34,6 +36,11 @@ impl Popup {
 }
 
 #[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed+OnExpand+OnFocus, internal=true)]
+/// A control for writing and editing a markdown text, with the formatting applied while typing.
+///
+/// The markdown markers are hidden and only their effect is visible, unless
+/// [`Flags::ShowMarkers`] is used. Suggestion lists can be opened by a trigger character (for
+/// example `:` for emoji or `@` for names) and text emoticons can be replaced with emoji.
 pub struct MarkdownComposer {
     text: String,
     surface: Surface,
@@ -50,9 +57,25 @@ pub struct MarkdownComposer {
     expanded_offset: i32,
     packed_origin: i32,
     packed_visible: i32,
+    emoticons: bool,
+    read_only: bool,
+    preferred_x: Option<u32>,
 }
 
 impl MarkdownComposer {
+    /// Creates a new, empty MarkdownComposer control with the specified layout and flags.
+    /// The flags can be a combination of the following values:
+    /// * `Flags::ShowMarkers` - if set, the markdown markers (`**`, `_`, `` ` ``, `-`, `>`) remain visible instead of being hidden
+    /// * `Flags::Emoticons` - if set, text emoticons and emoji names written between colons (for example `:B):` or `:smile:`) are replaced with emoji while typing
+    /// * `Flags::ReadOnly` - if set, the text can be read, selected, copied and scrolled, but not edited
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// use appcui::ui::markdown_composer::{Flags, MarkdownComposer};
+    ///
+    /// let mc = MarkdownComposer::new(layout!("x:1,y:1,w:40,h:10"), Flags::None);
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         let mut mc = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -71,11 +94,30 @@ impl MarkdownComposer {
             expanded_offset: 0,
             packed_origin: 0,
             packed_visible: 0,
+            emoticons: flags.contains(Flags::Emoticons),
+            read_only: flags.contains(Flags::ReadOnly),
+            preferred_x: None,
         };
         mc.parser.set_show_markers(flags.contains(Flags::ShowMarkers));
         mc
     }
 
+    /// Creates a new MarkdownComposer control with the specified text, layout and flags.
+    /// Windows line endings (`\r\n`) and lone `\r` characters in the text are converted to `\n`.
+    /// The flags can be a combination of the following values:
+    /// * `Flags::ShowMarkers` - if set, the markdown markers (`**`, `_`, `` ` ``, `-`, `>`) remain visible instead of being hidden
+    /// * `Flags::Emoticons` - if set, text emoticons and emoji names written between colons (for example `:B):` or `:smile:`) are replaced with emoji while typing
+    /// * `Flags::ReadOnly` - if set, the text can be read, selected, copied and scrolled, but not edited
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// use appcui::ui::markdown_composer::{Flags, MarkdownComposer};
+    ///
+    /// let mc = MarkdownComposer::from("**Hello** _world_",
+    ///                                 layout!("x:1,y:1,w:40,h:10"),
+    ///                                 Flags::Emoticons);
+    /// ```
     pub fn from(text: &str, layout: Layout, flags: Flags) -> Self {
         let mut mc = Self {
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
@@ -94,16 +136,25 @@ impl MarkdownComposer {
             expanded_offset: 0,
             packed_origin: 0,
             packed_visible: 0,
+            emoticons: flags.contains(Flags::Emoticons),
+            read_only: flags.contains(Flags::ReadOnly),
+            preferred_x: None,
         };
         mc.parser.set_show_markers(flags.contains(Flags::ShowMarkers));
         mc
     }
 
+    /// Returns the text of the MarkdownComposer control, including the markdown markers.
     pub fn text(&self) -> &str {
         &self.text
     }
 
+    /// Sets the text of the MarkdownComposer control.
+    ///
+    /// The cursor is moved to the beginning of the text and the selection is cleared.
+    /// Unlike an edit made by the user, this method does not raise the `on_text_changed` event.
     pub fn set_text(&mut self, text: &str) {
+        self.popup_close_list();
         self.text = Self::normalize_newlines(text);
         self.cursor_offset = 0;
         self.anchor = None;
@@ -111,16 +162,114 @@ impl MarkdownComposer {
         self.update_surface();
     }
 
+    /// Returns **true** if the markdown markers are visible, **false** if they are hidden.
     pub fn show_markers(&self) -> bool {
         self.parser.show_markers()
     }
 
+    /// Shows (**true**) or hides (**false**) the markdown markers.
+    ///
+    /// This is the runtime equivalent of the `Flags::ShowMarkers` flag.
     pub fn set_show_markers(&mut self, show_markers: bool) {
         if self.parser.show_markers() == show_markers {
             return;
         }
         self.parser.set_show_markers(show_markers);
         self.update_surface();
+    }
+
+    /// Returns the current flags of the MarkdownComposer control.
+    ///
+    /// The result reflects the changes made at runtime with [`MarkdownComposer::set_show_markers`],
+    /// [`MarkdownComposer::set_emoticons_enabled`] and [`MarkdownComposer::set_read_only`].
+    pub fn flags(&self) -> Flags {
+        let mut flags = Flags::None;
+        if self.parser.show_markers() {
+            flags |= Flags::ShowMarkers;
+        }
+        if self.emoticons {
+            flags |= Flags::Emoticons;
+        }
+        if self.read_only {
+            flags |= Flags::ReadOnly;
+        }
+        flags
+    }
+
+    /// Returns **true** if the MarkdownComposer control is read-only, **false** otherwise.
+    pub fn is_read_only(&self) -> bool {
+        self.read_only
+    }
+
+    /// Makes the MarkdownComposer control read-only (**true**) or editable (**false**).
+    ///
+    /// This is the runtime equivalent of the `Flags::ReadOnly` flag. Making the control
+    /// read-only closes the suggestion list, if one is open.
+    pub fn set_read_only(&mut self, read_only: bool) {
+        self.read_only = read_only;
+        if read_only {
+            self.popup_close_list();
+        }
+    }
+
+    /// Returns **true** if text emoticons and emoji names written between colons (for example `:B):` or `:smile:`)
+    /// are replaced with emoji while typing, **false** otherwise.
+    pub fn emoticons_enabled(&self) -> bool {
+        self.emoticons
+    }
+
+    /// Enables (**true**) or disables (**false**) the replacement of text emoticons with emoji.
+    ///
+    /// This is the runtime equivalent of the `Flags::Emoticons` flag. Emoticons already in
+    /// the text are not changed; only the ones typed afterwards are affected.
+    pub fn set_emoticons_enabled(&mut self, enabled: bool) {
+        self.emoticons = enabled;
+    }
+
+    /// Returns the position of the cursor, as a byte offset in the text returned by
+    /// [`MarkdownComposer::text`].
+    pub fn cursor_offset(&self) -> u32 {
+        self.cursor_offset
+    }
+
+    /// Moves the cursor to the specified byte offset and clears the selection.
+    ///
+    /// An offset past the end of the text moves the cursor to the end. An offset that falls
+    /// inside a multi-byte character moves the cursor to the beginning of that character.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// use appcui::ui::markdown_composer::{Flags, MarkdownComposer};
+    ///
+    /// let mut mc = MarkdownComposer::from("Hello", layout!("x:1,y:1,w:40,h:10"), Flags::None);
+    /// let end = mc.text().len() as u32;
+    /// mc.set_cursor_offset(end);
+    /// ```
+    pub fn set_cursor_offset(&mut self, offset: u32) {
+        let mut offset = (offset as usize).min(self.text.len());
+        while !self.text.is_char_boundary(offset) {
+            offset -= 1;
+        }
+        self.move_to(offset as u32, false);
+    }
+
+    /// Returns the selected text, including the markdown markers, or `None` if nothing is selected.
+    pub fn selected_text(&self) -> Option<&str> {
+        let (start, end) = self.selection()?;
+        Some(&self.text[start as usize..end as usize])
+    }
+
+    /// Selects the whole text, the same as pressing Ctrl+A.
+    pub fn select_all(&mut self) {
+        self.anchor = Some(0);
+        let offset = self.text.len() as u32;
+        self.move_to(offset, true);
+    }
+
+    /// Clears the selection, leaving the cursor where it is.
+    pub fn clear_selection(&mut self) {
+        self.anchor = None;
     }
 
     fn normalize_newlines(text: &str) -> String {
@@ -142,6 +291,7 @@ impl MarkdownComposer {
     }
 
     fn update_surface(&mut self) {
+        self.preferred_x = None;
         let width = self.size().width.max(1);
         let height = self.size().height.max(1);
 
@@ -206,6 +356,24 @@ impl MarkdownComposer {
         }
     }
 
+    /// Adds a suggestion list that opens when `trigger` is typed at the beginning of a word.
+    ///
+    /// While the list is open, the text typed after the trigger filters the items. Choosing
+    /// an item (Enter, Tab, Right or a mouse click) inserts it in the text. If a list with the
+    /// same trigger already exists, it is replaced.
+    ///
+    /// The `flags` parameter can be:
+    /// * `ListFlags::None` - the trigger character is kept (`@Ana`)
+    /// * `ListFlags::RemoveTrigger` - the trigger character is removed on insertion (`Ana`)
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// use appcui::ui::markdown_composer::{Flags, ListFlags, MarkdownComposer};
+    ///
+    /// let mut mc = MarkdownComposer::new(layout!("x:1,y:1,w:40,h:10"), Flags::None);
+    /// mc.add_list('@', &["Ana", "Bogdan", "Cristina"], ListFlags::None);
+    /// ```
     pub fn add_list(&mut self, trigger: char, items: &[&str], flags: ListFlags) {
         self.popup_close_list();
         let list = List::with_items(trigger, items, flags);
@@ -215,6 +383,19 @@ impl MarkdownComposer {
         }
     }
 
+    /// Adds a suggestion list in which every item has a separate value.
+    ///
+    /// The popup shows the value next to each name, and choosing an item inserts its value
+    /// instead of its name. Everything else works as in [`MarkdownComposer::add_list`].
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// use appcui::ui::markdown_composer::{Flags, ListFlags, MarkdownComposer};
+    ///
+    /// let mut mc = MarkdownComposer::new(layout!("x:1,y:1,w:40,h:10"), Flags::None);
+    /// mc.add_list_with_values('#', &[("bug", "🐛"), ("todo", "📝")], ListFlags::RemoveTrigger);
+    /// ```
     pub fn add_list_with_values(&mut self, trigger: char, items: &[(&str, &str)], flags: ListFlags) {
         self.popup_close_list();
         let list = List::with_values(trigger, items, flags);
@@ -224,14 +405,87 @@ impl MarkdownComposer {
         }
     }
 
+    /// Adds the predefined emoji list, opened by `trigger`.
+    ///
+    /// The popup shows each emoji next to its name. Choosing an item replaces the trigger
+    /// and the typed name with the emoji (for example `:pizza` becomes 🍕).
     pub fn add_emoji_list(&mut self, trigger: char) {
         self.add_list_with_values(trigger, EMOJIS, ListFlags::RemoveTrigger);
     }
 
-    pub fn list(&self, trigger: char) -> Option<&[String]> {
-        self.lists.iter().find(|list| list.trigger() == trigger).map(|list| list.items())
+    /// Same as [`MarkdownComposer::add_list`], but takes and returns the control, so that
+    /// lists can be added in the same expression that creates it.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// use appcui::ui::markdown_composer::{Flags, ListFlags, MarkdownComposer};
+    ///
+    /// let mc = MarkdownComposer::new(layout!("x:1,y:1,w:40,h:10"), Flags::None)
+    ///     .with_emoji_list(':')
+    ///     .with_list('@', &["Ana", "Bogdan"], ListFlags::RemoveTrigger)
+    ///     .with_list_values('#', &[("bug", "🐛")], ListFlags::None);
+    /// ```
+    pub fn with_list(mut self, trigger: char, items: &[&str], flags: ListFlags) -> Self {
+        self.add_list(trigger, items, flags);
+        self
     }
 
+    /// Same as [`MarkdownComposer::add_list_with_values`], but takes and returns the control,
+    /// so that it can be chained after the constructor (see [`MarkdownComposer::with_list`]).
+    pub fn with_list_values(mut self, trigger: char, items: &[(&str, &str)], flags: ListFlags) -> Self {
+        self.add_list_with_values(trigger, items, flags);
+        self
+    }
+
+    /// Same as [`MarkdownComposer::add_emoji_list`], but takes and returns the control,
+    /// so that it can be chained after the constructor (see [`MarkdownComposer::with_list`]).
+    pub fn with_emoji_list(mut self, trigger: char) -> Self {
+        self.add_emoji_list(trigger);
+        self
+    }
+
+    /// Returns the suggestion list opened by `trigger`, or `None` if there is no such list.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// use appcui::ui::markdown_composer::{Flags, ListFlags, MarkdownComposer};
+    ///
+    /// let mc = MarkdownComposer::new(layout!("x:1,y:1,w:40,h:10"), Flags::None)
+    ///     .with_list('@', &["Ana", "Bogdan"], ListFlags::None);
+    /// assert_eq!(mc.list('@').unwrap().item(1), Some("Bogdan"));
+    /// ```
+    pub fn list(&self, trigger: char) -> Option<&List> {
+        self.lists.iter().find(|list| list.trigger() == trigger)
+    }
+
+    /// Returns the suggestion list opened by `trigger` so that its items and flags can be
+    /// changed while the application runs, or `None` if there is no such list.
+    ///
+    /// The popup is closed before the list is handed over, so that it is never shown with
+    /// items that have been removed in the meantime.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    /// use appcui::ui::markdown_composer::{Flags, ListFlags, MarkdownComposer};
+    ///
+    /// let mut mc = MarkdownComposer::new(layout!("x:1,y:1,w:40,h:10"), Flags::None);
+    /// mc.add_list('@', &["Ana"], ListFlags::None);
+    /// if let Some(list) = mc.list_mut('@') {
+    ///     list.add("Bogdan");
+    ///     list.add_value("me", "@covita");
+    /// }
+    /// ```
+    pub fn list_mut(&mut self, trigger: char) -> Option<&mut List> {
+        self.popup_close_list();
+        self.lists.iter_mut().find(|list| list.trigger() == trigger)
+    }
+
+    /// Removes the suggestion list opened by `trigger`.
+    ///
+    /// Returns **true** if the list existed and was removed, **false** otherwise.
     pub fn remove_list(&mut self, trigger: char) -> bool {
         self.popup_close_list();
         match self.lists.iter().position(|list| list.trigger() == trigger) {
@@ -262,20 +516,8 @@ impl MarkdownComposer {
 
     fn popup_open_list(&mut self, trigger: char, start: u32) {
         let Some(list) = self.popup_find_list(trigger) else {
-            log!("POPUP", "open: nu exista lista pentru declansatorul '{}'", trigger);
             return;
         };
-
-        log!(
-            "POPUP",
-            "open: trigger='{}' lista={} start={} cursor={} size={}x{}",
-            trigger,
-            list,
-            start,
-            self.cursor_offset,
-            self.size().width,
-            self.size().height
-        );
 
         self.popup = Some(Popup {
             list,
@@ -288,13 +530,6 @@ impl MarkdownComposer {
     }
 
     fn popup_close_list(&mut self) {
-        log!(
-            "POPUP",
-            "close: era_deschis={} expanded={} offset={}",
-            self.popup.is_some(),
-            self.expanded,
-            self.expanded_offset
-        );
         self.popup = None;
         self.pack();
     }
@@ -308,13 +543,6 @@ impl MarkdownComposer {
         let to = self.cursor_offset as usize;
 
         if from > to || to > self.text.len() || self.text[from..to].contains('\n') {
-            log!(
-                "POPUP",
-                "match: filtru invalid -> inchid (from={} to={} len={})",
-                from,
-                to,
-                self.text.len()
-            );
             self.popup_close_list();
             return;
         }
@@ -333,7 +561,6 @@ impl MarkdownComposer {
         }
 
         if matches.is_empty() {
-            log!("POPUP", "match: filtru='{}' -> 0 potriviri, inchid", filter);
             self.popup_close_list();
             return;
         }
@@ -342,14 +569,6 @@ impl MarkdownComposer {
             popup.matches = matches;
             popup.index = 0;
             popup.first = 0;
-            log!(
-                "POPUP",
-                "match: filtru='{}' potriviri={} index={} first={}",
-                filter,
-                popup.matches.len(),
-                popup.index,
-                popup.first
-            );
         }
 
         self.popup_expand_list();
@@ -367,7 +586,6 @@ impl MarkdownComposer {
 
         popup.index = (popup.index as i32).saturating_add(delta).clamp(0, count - 1) as u32;
         popup.scroll_to_index();
-        log!("POPUP", "move: delta={} index={} first={} din {}", delta, popup.index, popup.first, count);
     }
 
     fn popup_insert_item(&mut self) {
@@ -396,7 +614,6 @@ impl MarkdownComposer {
         self.popup_close_list();
 
         let end = (self.cursor_offset as usize).min(self.text.len()).max(start);
-        log!("POPUP", "insert: '{}' peste [{}..{}]", replacement, start, end);
         self.text.replace_range(start..end, &replacement);
         self.cursor_offset = (start + replacement.len()) as u32;
         self.anchor = None;
@@ -482,41 +699,25 @@ impl MarkdownComposer {
         let space_below = if below >= 0 { bottom - below } else { 0 };
         let space_above = row.min(bottom);
 
-        log!(
-            "POPUP-FIT",
-            "row={} bottom={} height={} loc_jos={} loc_sus={}",
-            row,
-            bottom,
-            height,
-            space_below,
-            space_above
-        );
-
         if height as i32 <= space_below {
-            log!("POPUP-FIT", "-> intreaga JOS la y={}", below);
             return Some((below, height));
         }
         if height as i32 <= space_above {
-            log!("POPUP-FIT", "-> intreaga SUS la y={}", row - height as i32);
             return Some((row - height as i32, height));
         }
 
         if space_below >= space_above && space_below >= POPUP_MIN_HEIGHT as i32 {
-            log!("POPUP-FIT", "-> micsorata JOS la y={} h={}", below, space_below);
             return Some((below, space_below as u32));
         }
         if space_above >= POPUP_MIN_HEIGHT as i32 {
-            log!("POPUP-FIT", "-> micsorata SUS la y={} h={}", row - space_above, space_above);
             return Some((row - space_above, space_above as u32));
         }
 
         let height = height.min(bottom.max(0) as u32);
         if height < POPUP_MIN_HEIGHT {
-            log!("POPUP-FIT", "-> NU INCAPE deloc (bottom={})", bottom);
             return None;
         }
         let y = below.clamp(0, bottom - height as i32);
-        log!("POPUP-FIT", "-> ULTIMA SOLUTIE, peste declansator, y={} h={}", y, height);
         Some((y, height))
     }
 
@@ -530,24 +731,12 @@ impl MarkdownComposer {
         let row = self.popup_get_trigger_row() + self.expanded_offset;
 
         let bottom = if self.expanded {
-            self.expanded_size().height as i32
+            (self.expanded_size().height as i32).max(self.expanded_offset + self.packed_visible)
         } else {
             self.visible_height()
         };
 
-        log!(
-            "POPUP-RECT",
-            "trigger_row={} offset={} row_banda={} expanded={} bottom={} h_control={}",
-            self.popup_get_trigger_row(),
-            self.expanded_offset,
-            row,
-            self.expanded,
-            bottom,
-            size.height
-        );
-
         let (y, height) = Self::popup_fit(row, bottom, height)?;
-        log!("POPUP-RECT", "=> x={} y={} w={} h={}", x, y, width, height);
         Some(Rect::with_size(x, y, width as u16, height as u16))
     }
 
@@ -564,7 +753,6 @@ impl MarkdownComposer {
             return true;
         };
 
-        let size = self.size();
         let row = self.popup_get_trigger_row();
         let below = row + 1;
 
@@ -584,41 +772,42 @@ impl MarkdownComposer {
         let row = self.popup_get_trigger_row();
         let below = row + 1;
 
-        log!(
-            "POPUP-EXPAND",
-            "row={} below={} h_lista={} h_control={} incape_in_control={}",
-            row,
-            below,
-            height,
-            size.height,
-            self.popup_fits_inside()
-        );
-
         if self.popup_fits_inside() {
-            log!("POPUP-EXPAND", "-> incape in control, pack()");
             self.pack();
             return;
         }
 
+        if self.expanded {
+            return;
+        }
+
         let visible = self.visible_height();
-        let least = (below + POPUP_MIN_HEIGHT as i32).max(visible + 1);
-        let wanted = POPUP_ROWS as i32 + 2;
-        let full = (below + wanted).max(visible + wanted - row).max(least);
+        let height = height as i32;
+        let smallest = POPUP_MIN_HEIGHT as i32;
+        let origin = self.screen_origin.y;
+        let terminal = RuntimeManager::get().terminal_size().height as i32;
+        let space_below = terminal - (2 + origin);
+        let space_above = origin - 1;
+
+        let least_below = (below + smallest).max(visible);
+        let full_below = (below + height).max(visible);
+        let least_above = (smallest - row + 1).max(space_below + 1).max(1);
+        let full_above = (height - row + 1).max(least_above);
+
+        let (least, full) = if full_below <= space_below {
+            (least_below, full_below)
+        } else if full_above <= space_above {
+            (least_above, full_above)
+        } else if least_below <= space_below {
+            (least_below, full_below)
+        } else {
+            (least_above, full_above)
+        };
 
         let minimum = Size::new(size.width, least as u32);
         let prefered = Size::new(size.width, full as u32);
-        self.packed_origin = self.screen_origin.y;
+        self.packed_origin = origin;
         self.packed_visible = visible;
-        log!(
-            "POPUP-EXPAND",
-            "-> expand(min={}x{}, pref={}x{}) focus={} deja_expandat={}",
-            minimum.width,
-            minimum.height,
-            prefered.width,
-            prefered.height,
-            self.has_focus(),
-            self.expanded
-        );
         self.expand(minimum, prefered);
     }
 
@@ -686,17 +875,6 @@ impl MarkdownComposer {
 
         let first = self.popup_get_first_visible(rows);
         let visible = (popup.matches.len() as u32 - first).min(rows);
-        log!(
-            "POPUP-PAINT",
-            "frame=({}, {}, {}x{}) first={} index={} vizibile={}",
-            frame.left(),
-            frame.top(),
-            frame.width(),
-            frame.height(),
-            first,
-            popup.index,
-            visible
-        );
 
         let limit = x + inner as i32;
         let column = Self::popup_value_column(list, &popup.matches) as i32;
@@ -797,9 +975,26 @@ impl MarkdownComposer {
         visible
     }
 
+    fn fence_offsets(bytes: &[u8]) -> Vec<usize> {
+        let mut offsets = Vec::new();
+        let mut index = 0;
+        while index < bytes.len() {
+            if (index == 0 || bytes[index - 1] == b'\n') && bytes[index..].starts_with(FENCE.as_bytes()) {
+                offsets.push(index);
+            }
+            index += 1;
+        }
+        offsets
+    }
+
+    fn fence_group(fences: &[usize], offset: usize) -> usize {
+        fences.partition_point(|fence| *fence < offset)
+    }
+
     fn paint_code_blocks(bytes: &[u8], spans: &[Span], surface: &mut Surface, theme: &Theme, background: Color, first_row: u32) {
         let height = surface.size().height as i32;
         let attr = Self::code_block_attr(theme, background);
+        let fences = Self::fence_offsets(bytes);
 
         let mut index = 0;
         while index < spans.len() {
@@ -809,7 +1004,11 @@ impl MarkdownComposer {
             }
 
             let start = index;
-            while index < spans.len() && spans[index].span_type.contains(SpanType::CodeBlock) {
+            let group = Self::fence_group(&fences, spans[index].start as usize);
+            while index < spans.len()
+                && spans[index].span_type.contains(SpanType::CodeBlock)
+                && Self::fence_group(&fences, spans[index].start as usize) == group
+            {
                 index += 1;
             }
 
@@ -950,17 +1149,117 @@ impl MarkdownComposer {
     }
 
     fn remove_selection(&mut self) -> bool {
-        let removed = match self.selection() {
-            Some((start, end)) => {
-                self.text.replace_range(start as usize..end as usize, "");
-                self.cursor_offset = start;
-                true
-            }
-            None => false,
+        let selection = self.selection();
+        self.anchor = None;
+        let Some((start, end)) = selection else {
+            return false;
         };
 
-        self.anchor = None;
-        removed
+        if self.parser.show_markers() {
+            self.text.replace_range(start as usize..end as usize, "");
+            self.cursor_offset = start;
+            return true;
+        }
+
+        let (left, right, replacement, cursor) = self.selection_removal(start as usize, end as usize);
+        self.text.replace_range(left..right, &replacement);
+        self.cursor_offset = cursor as u32;
+        true
+    }
+
+    fn is_hidden(&self, offset: usize) -> bool {
+        !self
+            .parser
+            .spans()
+            .iter()
+            .any(|span| span.start as usize <= offset && offset < span.end as usize)
+    }
+
+    fn hidden_marker_before(&self, offset: usize) -> Option<&'static str> {
+        INLINE_MARKERS.into_iter().find(|marker| {
+            offset >= marker.len()
+                && self.text[..offset].ends_with(marker)
+                && (offset - marker.len()..offset).all(|position| self.is_hidden(position))
+        })
+    }
+
+    fn hidden_marker_after(&self, offset: usize) -> Option<&'static str> {
+        INLINE_MARKERS
+            .into_iter()
+            .find(|marker| self.text[offset..].starts_with(marker) && (offset..offset + marker.len()).all(|position| self.is_hidden(position)))
+    }
+
+    fn selection_removal(&self, start: usize, end: usize) -> (usize, usize, String, usize) {
+        let mut left = start;
+        let mut left_markers = Vec::new();
+        while let Some(marker) = self.hidden_marker_before(left) {
+            left -= marker.len();
+            left_markers.push(marker.to_string());
+        }
+        left_markers.reverse();
+
+        let mut middle = Vec::new();
+        let bytes = self.text.as_bytes();
+        let mut index = start;
+        while index < end {
+            if !self.is_hidden(index) || bytes[index] == b'\n' {
+                index = Parser::next_offset(&self.text, index as u32) as usize;
+                continue;
+            }
+            let line_start = index == 0 || bytes[index - 1] == b'\n';
+            let ticks = bytes[index..end].iter().take_while(|byte| **byte == b'`').count();
+            if line_start && ticks >= 3 {
+                let mut fence_end = index + ticks;
+                if fence_end < end && bytes[fence_end] == b'\n' {
+                    fence_end += 1;
+                }
+                middle.push((self.text[index..fence_end].to_string(), FENCE.to_string()));
+                index = fence_end;
+            } else if let Some(marker) = self.hidden_marker_after(index) {
+                middle.push((marker.to_string(), marker.to_string()));
+                index += marker.len();
+            } else {
+                let next = Parser::next_offset(&self.text, index as u32) as usize;
+                middle.push((self.text[index..next].to_string(), String::new()));
+                index = next;
+            }
+        }
+
+        let mut right = end;
+        let mut right_markers = Vec::new();
+        while let Some(marker) = self.hidden_marker_after(right) {
+            right += marker.len();
+            right_markers.push(marker.to_string());
+        }
+
+        let mut kept: Vec<(String, String, bool)> = Vec::new();
+        let tokens = left_markers
+            .into_iter()
+            .map(|marker| (marker.clone(), marker, true))
+            .chain(middle.into_iter().map(|(token, key)| (token, key, false)))
+            .chain(right_markers.into_iter().map(|marker| (marker.clone(), marker, false)));
+        for (token, key, from_left) in tokens {
+            match kept.last() {
+                Some((_, previous, _)) if !key.is_empty() && *previous == key => {
+                    kept.pop();
+                }
+                _ => kept.push((token, key, from_left)),
+            }
+        }
+
+        let mut replacement = String::new();
+        let mut cursor = left;
+        for (token, _, from_left) in kept {
+            let line_start = replacement.ends_with('\n') || (replacement.is_empty() && (left == 0 || bytes[left - 1] == b'\n'));
+            if token.starts_with(FENCE) && !line_start {
+                replacement.push('\n');
+            }
+            replacement.push_str(&token);
+            if from_left {
+                cursor = left + replacement.len();
+            }
+        }
+        (left, right, replacement, cursor)
     }
 
     fn word_at(&self, offset: u32) -> (u32, u32) {
@@ -1026,6 +1325,57 @@ impl MarkdownComposer {
         }
 
         i as u32
+    }
+
+    fn emoticon(code: &str) -> Option<&'static str> {
+        let find = |key: &str| EMOTICONS.iter().find(|(name, _)| *name == key).map(|(_, value)| *value);
+        let named = |key: &str| EMOJIS.iter().find(|(name, _)| name.eq_ignore_ascii_case(key)).map(|(_, value)| *value);
+        find(code).or_else(|| code.strip_prefix(':').and_then(find)).or_else(|| named(code))
+    }
+
+    fn is_inside_code(&self, offset: u32) -> bool {
+        let before = &self.text[..offset as usize];
+        if before.matches("```").count() % 2 == 1 {
+            return true;
+        }
+        let line = &before[before.rfind('\n').map_or(0, |index| index + 1)..];
+        let ticks = line.bytes().filter(|byte| *byte == b'`').count() - 3 * line.matches("```").count();
+        ticks % 2 == 1
+    }
+
+    fn replace_emoticon(&mut self) -> bool {
+        let end = self.cursor_offset as usize;
+        let bytes = self.text.as_bytes();
+        if end < 3 || bytes[end - 1] != b':' {
+            return false;
+        }
+
+        let codes = EMOTICONS.iter().chain(EMOJIS.iter());
+        let longest = codes.map(|(code, _)| code.len()).max().unwrap_or(0) + 1;
+        for len in (1..=longest).rev() {
+            if len + 2 > end {
+                continue;
+            }
+            let start = end - len - 2;
+            if self.text.as_bytes()[start] != b':' {
+                continue;
+            }
+            let Some(value) = Self::emoticon(&self.text[start + 1..end - 1]) else {
+                continue;
+            };
+            if !self.popup_is_list_start(start as u32) || self.is_inside_code(start as u32) {
+                continue;
+            }
+
+            self.popup_close_list();
+            self.text.replace_range(start..end, value);
+            self.cursor_offset = (start + value.len()) as u32;
+            self.anchor = None;
+            self.update_surface();
+            self.notify_text_changed();
+            return true;
+        }
+        false
     }
 
     fn insert(&mut self, character: char) {
@@ -1114,8 +1464,91 @@ impl MarkdownComposer {
         let Some((start, end)) = self.selection() else {
             return false;
         };
-        Clipboard::set_text(&self.text[start as usize..end as usize]);
+        Clipboard::set_text(&self.selection_markdown(start, end));
         true
+    }
+
+    fn inline_markers(span_type: SpanType) -> Vec<&'static str> {
+        if span_type.contains(SpanType::Code) {
+            return vec!["`"];
+        }
+        let mut markers = Vec::new();
+        if span_type.contains(SpanType::Bold) {
+            markers.push("**");
+        }
+        if span_type.contains(SpanType::Italic) {
+            markers.push("_");
+        }
+        markers
+    }
+
+    fn switch_markers(out: &mut String, open: &mut Vec<&'static str>, wanted: &[&'static str]) {
+        let keep = open.iter().zip(wanted).take_while(|(current, next)| current == next).count();
+        while open.len() > keep {
+            if let Some(marker) = open.pop() {
+                out.push_str(marker);
+            }
+        }
+        for marker in &wanted[keep..] {
+            out.push_str(marker);
+            open.push(marker);
+        }
+    }
+
+    fn copy_gap(gap: &str, out: &mut String, open: &mut Vec<&'static str>) -> bool {
+        if gap.contains('\n') {
+            Self::switch_markers(out, open, &[]);
+        }
+        let mut fence = false;
+        for part in gap.split_inclusive('\n') {
+            let body = part.trim_end_matches('\n');
+            if body.len() >= 3 && body.bytes().all(|byte| byte == b'`') {
+                out.push_str(part);
+                fence = true;
+            } else if part.ends_with('\n') {
+                out.push('\n');
+            }
+        }
+        fence
+    }
+
+    fn selection_markdown(&self, start: u32, end: u32) -> String {
+        if self.parser.show_markers() {
+            return self.text[start as usize..end as usize].to_string();
+        }
+
+        let mut out = String::new();
+        let mut open = Vec::new();
+        let mut position = start;
+        let mut fence_seen = false;
+        let mut in_block = false;
+
+        for span in self.parser.spans() {
+            let from = span.start.max(start);
+            let to = span.end.min(end);
+            if from >= to {
+                continue;
+            }
+            if from > position {
+                fence_seen |= Self::copy_gap(&self.text[position as usize..from as usize], &mut out, &mut open);
+            }
+            let block = span.span_type.contains(SpanType::CodeBlock);
+            if block && !in_block && !fence_seen {
+                out.push_str("```\n");
+            }
+            in_block = block;
+            fence_seen = false;
+            Self::switch_markers(&mut out, &mut open, &Self::inline_markers(span.span_type));
+            out.push_str(&self.text[from as usize..to as usize]);
+            position = to;
+        }
+
+        let closing_fence = end > position && Self::copy_gap(&self.text[position as usize..end as usize], &mut out, &mut open);
+        Self::switch_markers(&mut out, &mut open, &[]);
+        if in_block && !closing_fence {
+            out.push_str("\n```");
+        }
+        out
     }
 
     fn cut_selection(&mut self) {
@@ -1140,7 +1573,15 @@ impl MarkdownComposer {
         }
     }
 
+    fn move_vertical(&mut self, row: u32, select: bool) {
+        let column = self.preferred_x.unwrap_or(self.cursor_x);
+        let offset = self.parser.get_offset_from_position(&self.text, column, row);
+        self.move_to(offset, select);
+        self.preferred_x = Some(column);
+    }
+
     fn move_to(&mut self, offset: u32, select: bool) {
+        self.preferred_x = None;
         self.popup_close_list();
         if select {
             if self.anchor.is_none() {
@@ -1187,15 +1628,6 @@ impl MarkdownComposer {
 
 impl OnPaint for MarkdownComposer {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        if self.expanded {
-            log!(
-                "POPUP-ORIGIN",
-                "paint: origin.y={} offset={} => randul 0 al textului pe ecran = {}",
-                self.screen_origin.y,
-                self.expanded_offset,
-                self.screen_origin.y + self.expanded_offset
-            );
-        }
         let text_top = self.screen_origin.y + self.expanded_offset;
         let text_bottom = text_top + self.packed_visible - 1;
 
@@ -1219,6 +1651,12 @@ impl OnPaint for MarkdownComposer {
 
         self.popup_paint_list(surface, theme);
 
+        if self.has_focus() {
+            surface.set_cursor(self.cursor_x as i32, self.cursor_y as i32 - self.first_row as i32 + self.expanded_offset);
+        } else {
+            surface.hide_cursor();
+        }
+
         if self.expanded {
             surface.set_base_clip(
                 self.screen_clip.left,
@@ -1227,12 +1665,6 @@ impl OnPaint for MarkdownComposer {
                 self.screen_clip.bottom,
             );
             surface.reset_clip();
-        }
-
-        if self.has_focus() {
-            surface.set_cursor(self.cursor_x as i32, self.cursor_y as i32 - self.first_row as i32 + self.expanded_offset);
-        } else {
-            surface.hide_cursor();
         }
     }
 }
@@ -1249,7 +1681,6 @@ impl OnMouseEvent for MarkdownComposer {
         match event {
             MouseEvent::Pressed(data) => {
                 if self.popup_contains(data.x, data.y) {
-                    log!("POPUP-MOUSE", "click in lista la ({}, {})", data.x, data.y);
                     if let Some(index) = self.popup_get_item_at(data.x, data.y) {
                         if let Some(popup) = self.popup.as_mut() {
                             popup.index = index;
@@ -1292,7 +1723,6 @@ impl OnMouseEvent for MarkdownComposer {
                 if popup.index == index {
                     return EventProcessStatus::Ignored;
                 }
-                log!("POPUP-MOUSE", "hover ({}, {}) -> index={}", point.x, point.y, index);
                 popup.index = index;
                 EventProcessStatus::Processed
             }
@@ -1350,15 +1780,7 @@ impl OnKeyPressed for MarkdownComposer {
                     self.popup_move_selection(POPUP_ROWS as i32);
                     return EventProcessStatus::Processed;
                 }
-                key!("Home") => {
-                    self.popup_move_selection(i32::MIN);
-                    return EventProcessStatus::Processed;
-                }
-                key!("End") => {
-                    self.popup_move_selection(i32::MAX);
-                    return EventProcessStatus::Processed;
-                }
-                key!("Enter") | key!("Tab") | key!("Right") => {
+                key!("Enter") | key!("Tab") => {
                     self.popup_insert_item();
                     return EventProcessStatus::Processed;
                 }
@@ -1368,37 +1790,37 @@ impl OnKeyPressed for MarkdownComposer {
 
         match key.value() {
             key!("Left") | key!("Shift+Left") => {
-                let offset = self.parser.prev_visible_offset(&self.text, self.cursor_offset);
+                let offset = match self.selection() {
+                    Some((start, _)) if !select => start,
+                    _ => self.parser.prev_visible_offset(&self.text, self.cursor_offset),
+                };
                 self.move_to(offset, select);
                 return EventProcessStatus::Processed;
             }
             key!("Right") | key!("Shift+Right") => {
-                let offset = self.parser.next_visible_offset(&self.text, self.cursor_offset);
+                let offset = match self.selection() {
+                    Some((_, end)) if !select => end,
+                    _ => self.parser.next_visible_offset(&self.text, self.cursor_offset),
+                };
                 self.move_to(offset, select);
                 return EventProcessStatus::Processed;
             }
             key!("Up") | key!("Shift+Up") => {
                 if self.cursor_y > 0 {
-                    let offset = self.parser.get_offset_from_position(&self.text, self.cursor_x, self.cursor_y - 1);
-                    self.move_to(offset, select);
+                    self.move_vertical(self.cursor_y - 1, select);
                 }
                 return EventProcessStatus::Processed;
             }
             key!("Down") | key!("Shift+Down") => {
-                let offset = self.parser.get_offset_from_position(&self.text, self.cursor_x, self.cursor_y + 1);
-                self.move_to(offset, select);
+                self.move_vertical(self.cursor_y + 1, select);
                 return EventProcessStatus::Processed;
             }
             key!("PageUp") | key!("Shift+PageUp") => {
-                let row = self.cursor_y.saturating_sub(height);
-                let offset = self.parser.get_offset_from_position(&self.text, self.cursor_x, row);
-                self.move_to(offset, select);
+                self.move_vertical(self.cursor_y.saturating_sub(height), select);
                 return EventProcessStatus::Processed;
             }
             key!("PageDown") | key!("Shift+PageDown") => {
-                let row = (self.cursor_y + height).min(self.rows.saturating_sub(1));
-                let offset = self.parser.get_offset_from_position(&self.text, self.cursor_x, row);
-                self.move_to(offset, select);
+                self.move_vertical((self.cursor_y + height).min(self.rows.saturating_sub(1)), select);
                 return EventProcessStatus::Processed;
             }
             key!("Home") | key!("Shift+Home") => {
@@ -1451,9 +1873,7 @@ impl OnKeyPressed for MarkdownComposer {
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+A") => {
-                self.anchor = Some(0);
-                let offset = self.text.len() as u32;
-                self.move_to(offset, true);
+                self.select_all();
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+C") | key!("Ctrl+Insert") => {
@@ -1461,34 +1881,49 @@ impl OnKeyPressed for MarkdownComposer {
                 return EventProcessStatus::Processed;
             }
             key!("Ctrl+X") | key!("Shift+Delete") => {
-                self.cut_selection();
-                return EventProcessStatus::Processed;
+                if !self.read_only {
+                    self.cut_selection();
+                    return EventProcessStatus::Processed;
+                }
             }
             key!("Ctrl+V") | key!("Shift+Insert") => {
-                self.paste();
-                return EventProcessStatus::Processed;
+                if !self.read_only {
+                    self.paste();
+                    return EventProcessStatus::Processed;
+                }
             }
             key!("Backspace") => {
-                self.delete_previous();
-                return EventProcessStatus::Processed;
+                if !self.read_only {
+                    self.delete_previous();
+                    return EventProcessStatus::Processed;
+                }
             }
             key!("Delete") => {
-                self.delete_current();
-                return EventProcessStatus::Processed;
+                if !self.read_only {
+                    self.delete_current();
+                    return EventProcessStatus::Processed;
+                }
             }
             key!("Ctrl+Backspace") => {
-                self.delete_previous_word();
-                return EventProcessStatus::Processed;
+                if !self.read_only {
+                    self.delete_previous_word();
+                    return EventProcessStatus::Processed;
+                }
             }
             key!("Ctrl+Delete") => {
-                self.delete_next_word();
-                return EventProcessStatus::Processed;
+                if !self.read_only {
+                    self.delete_next_word();
+                    return EventProcessStatus::Processed;
+                }
             }
             key!("Enter") => {
-                self.insert('\n');
-                return EventProcessStatus::Processed;
+                if !self.read_only {
+                    self.insert('\n');
+                    return EventProcessStatus::Processed;
+                }
             }
             key!("Ctrl+Enter") => {
+                self.popup_close_list();
                 self.raise_event(ControlEvent {
                     emitter: self.handle,
                     receiver: self.event_processor,
@@ -1501,7 +1936,7 @@ impl OnKeyPressed for MarkdownComposer {
             _ => {}
         }
 
-        if (character as u32) > 0 {
+        if (character as u32) > 0 && !self.read_only {
             let trigger = self.popup.is_none() && self.popup_find_list(character).is_some();
             self.insert(character);
 
@@ -1511,6 +1946,9 @@ impl OnKeyPressed for MarkdownComposer {
                     self.popup_open_list(character, start);
                 }
             }
+            if self.emoticons && character == ':' {
+                self.replace_emoticon();
+            }
             return EventProcessStatus::Processed;
         }
 
@@ -1519,33 +1957,9 @@ impl OnKeyPressed for MarkdownComposer {
 }
 
 impl OnExpand for MarkdownComposer {
-    fn on_expand(&mut self, direction: ExpandedDirection) {
+    fn on_expand(&mut self, _direction: ExpandedDirection) {
         self.expanded = true;
         self.expanded_offset = (self.packed_origin - self.screen_origin.y).max(0);
-        let name = match direction {
-            ExpandedDirection::OnBottom => "OnBottom",
-            ExpandedDirection::OnTop => "OnTop",
-        };
-        log!(
-            "POPUP-EXPAND",
-            "on_expand({}): banda={}x{} control={}x{} => offset={}",
-            name,
-            self.expanded_size().width,
-            self.expanded_size().height,
-            self.size().width,
-            self.size().height,
-            self.expanded_offset
-        );
-        log!(
-            "POPUP-ORIGIN",
-            "origin_inainte={} origin.y={} clip=[{}..{}] editorul cade la {}..{}",
-            self.packed_origin,
-            self.screen_origin.y,
-            self.screen_clip.top,
-            self.screen_clip.bottom,
-            self.screen_origin.y + self.expanded_offset,
-            self.screen_origin.y + self.expanded_offset + self.size().height as i32 - 1
-        );
     }
 
     fn on_pack(&mut self) {
@@ -1553,10 +1967,7 @@ impl OnExpand for MarkdownComposer {
         self.expanded_offset = 0;
 
         if self.popup.is_some() && !self.popup_fits_inside() {
-            log!("POPUP-EXPAND", "on_pack(): strans din afara, lista nu mai incape -> inchid");
             self.popup_close_list();
-        } else {
-            log!("POPUP-EXPAND", "on_pack(): offset -> 0, lista ramane");
         }
     }
 }

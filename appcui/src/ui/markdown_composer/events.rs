@@ -1,8 +1,7 @@
 //! Events emitted by a [`struct@super::MarkdownComposer`].
 //!
 //! Implement [`MarkdownComposerEvents`] on a window (or other parent) to react when
-//! the user confirms or edits the mark
-//! down text.
+//! the user confirms or edits the markdown text.
 
 use super::MarkdownComposer;
 use crate::{system::Handle, ui::common::traits::EventProcessStatus};

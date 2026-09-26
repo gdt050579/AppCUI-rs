@@ -80,6 +80,7 @@
         - [ImageViewer](chapter-3/stock-controls/imageviewer.md)
         - [KeySelector](chapter-3/stock-controls/keyselector.md)
         - [Markdown](chapter-3/stock-controls/markdown.md)
+        - [MarkdownComposer](chapter-3/stock-controls/markdown_composer.md)
         - [NumericSelector](chapter-3/stock-controls/numericselector.md)
         - [Panel](chapter-3/stock-controls/panel.md)
         - [Password](chapter-3/stock-controls/password.md)

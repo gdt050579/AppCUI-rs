@@ -22,9 +22,10 @@ pub mod events;
 mod parser;
 mod list;
 mod emoji;
+#[cfg(test)]
+mod tests;
 
 pub use self::markdown_composer::MarkdownComposer;
 pub use self::initialization_flags::Flags;
-pub use self::parser::Parser;
 pub use self::list::List;
 pub use self::list::ListFlags;

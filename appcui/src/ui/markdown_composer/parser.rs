@@ -41,7 +41,7 @@ struct Marker {
     kind: MarkerKind,
 }
 
-pub struct Parser {
+pub(crate) struct Parser {
     spans: Vec<Span>,
     buffer: Vec<Span>,
     markers: Vec<Marker>,
@@ -59,8 +59,8 @@ impl Parser {
             show_markers: false,
         }
     }
-    
-    pub fn spans(&self) -> &[Span] {
+
+    pub(crate) fn spans(&self) -> &[Span] {
         &self.spans
     }
 
@@ -87,7 +87,11 @@ impl Parser {
     }
 
     pub(crate) fn get_char_width(ch: char) -> i32 {
-        if ch.is_wide_char() { 2 } else { 1 }
+        if ch.is_wide_char() {
+            2
+        } else {
+            1
+        }
     }
 
     pub(crate) fn get_char(bytes: &[u8], i: usize, byte_len: usize) -> char {
@@ -114,14 +118,7 @@ impl Parser {
         }
     }
 
-    fn push_span(
-        span_vec: &mut Vec<Span>,
-        start: usize,
-        end: usize,
-        x_pos: u32,
-        y_pos: u32,
-        span_type: SpanType,
-    ) {
+    fn push_span(span_vec: &mut Vec<Span>, start: usize, end: usize, x_pos: u32, y_pos: u32, span_type: SpanType) {
         if start < end {
             span_vec.push(Span {
                 start: start as u32,
@@ -158,7 +155,7 @@ impl Parser {
                 (MarkerKind::Code, 1usize)
             };
 
-            let Some(close) = Self::find_close_backtick(&bytes, i + len, len) else {
+            let Some(close) = Self::find_close_backtick(bytes, i + len, len) else {
                 i += len;
                 continue;
             };
@@ -167,13 +164,19 @@ impl Parser {
                 i += len;
                 continue;
             }
-            
+
+            let kind = if kind == MarkerKind::CodeBlock && !bytes[i..close].contains(&b'\n') {
+                MarkerKind::Code
+            } else {
+                kind
+            };
+
             self.markers.push(Marker {
                 start: i as u32,
                 len: len as u32,
                 kind,
             });
-            
+
             self.markers.push(Marker {
                 start: close as u32,
                 len: len as u32,
@@ -192,8 +195,7 @@ impl Parser {
         let mut num_italic = 0usize;
         let mut index = 0usize;
         while i < bytes.len() {
-            if markers_index < self.markers.len() && self.markers[markers_index].start as usize == i
-            {
+            if markers_index < self.markers.len() && self.markers[markers_index].start as usize == i {
                 let close = self.markers[markers_index + 1];
                 i = (close.start + close.len) as usize;
                 markers_index += 2;
@@ -224,17 +226,9 @@ impl Parser {
             }
         }
 
-        let mut first = if num_bold % 2 == 1 {
-            last_bold_index
-        } else {
-            usize::MAX
-        };
+        let mut first = if num_bold % 2 == 1 { last_bold_index } else { usize::MAX };
 
-        let mut second = if num_italic % 2 == 1 {
-            last_italic_index
-        } else {
-            usize::MAX
-        };
+        let mut second = if num_italic % 2 == 1 { last_italic_index } else { usize::MAX };
 
         if first < second {
             std::mem::swap(&mut first, &mut second);
@@ -313,8 +307,7 @@ impl Parser {
     }
 
     fn word_starts_with(bytes: &[u8], start: usize, end: usize, prefix: &[u8]) -> bool {
-        end - start >= prefix.len()
-            && bytes[start..start + prefix.len()].eq_ignore_ascii_case(prefix)
+        end - start >= prefix.len() && bytes[start..start + prefix.len()].eq_ignore_ascii_case(prefix)
     }
 
     fn word_type(bytes: &[u8], start: usize, end: usize) -> SpanType {
@@ -368,14 +361,7 @@ impl Parser {
                 let word_type = Self::word_type(bytes, word_start, word_end);
                 if !word_type.is_empty() {
                     Self::push_span(&mut self.buffer, seg_start, word_start, 0, 0, base_type);
-                    Self::push_span(
-                        &mut self.buffer,
-                        word_start,
-                        word_end,
-                        0,
-                        0,
-                        base_type | word_type,
-                    );
+                    Self::push_span(&mut self.buffer, word_start, word_end, 0, 0, base_type | word_type);
                     seg_start = word_end;
                 }
 
@@ -569,10 +555,7 @@ impl Parser {
                     continue;
                 }
 
-                if !ch.is_whitespace()
-                    && Self::is_word_start(bytes, span_start, i)
-                    && x > indent
-                    && x + Self::word_width(bytes, i, span_end) > limit
+                if !ch.is_whitespace() && Self::is_word_start(bytes, span_start, i) && x > indent && x + Self::word_width(bytes, i, span_end) > limit
                 {
                     Self::push_span(&mut self.buffer, seg_start, i, seg_x, y, style);
                     y += 1;
@@ -601,20 +584,13 @@ impl Parser {
                 x += w;
                 i += len;
             }
-            Self::push_span(
-                &mut self.buffer,
-                seg_start,
-                span_end,
-                seg_x,
-                y,
-                Self::quoted_type(span.span_type, quote),
-            );
+            Self::push_span(&mut self.buffer, seg_start, span_end, seg_x, y, Self::quoted_type(span.span_type, quote));
         }
 
         std::mem::swap(&mut self.spans, &mut self.buffer);
     }
 
-    pub fn parse(&mut self, text: &str, line_width: u32) -> &[Span] {
+    pub(crate) fn parse(&mut self, text: &str, line_width: u32) -> &[Span] {
         self.parse_spans(text);
         self.parse_links(text);
         self.parse_lists(text);
@@ -729,18 +705,12 @@ impl Parser {
         let span_end = span.end as usize;
 
         if offset <= span_end {
-            return (
-                span.x_pos + Self::width_between(bytes, span_start, offset),
-                span.y_pos,
-            );
+            return (span.x_pos + Self::width_between(bytes, span_start, offset), span.y_pos);
         }
 
         let newlines = Self::count_newlines(bytes, span_end, offset);
         if newlines == 0 {
-            (
-                span.x_pos + Self::width_between(bytes, span_start, span_end),
-                span.y_pos,
-            )
+            (span.x_pos + Self::width_between(bytes, span_start, span_end), span.y_pos)
         } else {
             (0, span.y_pos + newlines)
         }
