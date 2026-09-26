@@ -278,7 +278,7 @@ impl BarChartEditor {
 
         let mut splitter = vsplitter!("pos:70%,d:f,resize:PreserveRightPanelSize,min-left-width:30,min-right-width:26");
 
-        let mut chart = VBarChart::new(layout!("d:f"), vbarchart::Flags::ScrollBars | vbarchart::Flags::DimBarsOnSelection);
+        let mut chart = VBarChart::new(layout!("d:f"), vbarchart::Flags::ScrollBars | vbarchart::Flags::DimBarsOnSelection | vbarchart::Flags::ShowZeroLineOnYAxis);
         chart.set_default_bar_width(DEFAULT_THICKNESS);
         chart.set_default_bar_spacing(DEFAULT_SPACING);
         chart.set_default_bar_attr(CharAttribute::with_fore_color(DEFAULT_COLOR));

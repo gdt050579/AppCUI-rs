@@ -9,6 +9,7 @@ use crate::ui::{common::Number, vbarchart::BarSpan};
 pub enum Flags {
     ScrollBars = 1,
     DimBarsOnSelection = 2,
+    ShowZeroLineOnYAxis = 4,
 }
 
 pub enum BarScale<T: Number + 'static> {

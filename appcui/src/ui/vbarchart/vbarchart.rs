@@ -571,6 +571,17 @@ where
                 y -= self.yaxis.step as i32;
                 bottom_value -= self.yaxis.bottom_step;
             }
+            if self.flags.contains(Flags::ShowZeroLineOnYAxis) && self.yaxis.bottom_step != 0.0 {
+                // value(y) = bottom_value - bottom_step * (bottom - y) / step
+                let y_zero = bottom - ((self.yaxis.bottom_value * self.yaxis.step as f64) / self.yaxis.bottom_step).round() as i32;
+                if (0..=bottom).contains(&y_zero) {
+                    self.surface.draw_horizontal_line(x_poz, y_zero, right, LineType::Single, grid_attr);
+                    if let Some(value) = format.write_float(0f64, &mut buffer) {
+                        self.surface
+                            .write_ascii(x_poz - value.len() as i32 - 1, y_zero, value.as_bytes(), label_attr, false);
+                    }
+                }
+            }
         }
     }
     fn paint_xaxis(&mut self, axis_attr: CharAttribute, label_attr: CharAttribute) {

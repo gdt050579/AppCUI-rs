@@ -3,7 +3,7 @@ use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static FLAGS: FlagsSignature = FlagsSignature::new(&["ScrollBars", "DimBarsOnSelection"]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&["ScrollBars", "DimBarsOnSelection", "ShowZeroLineOnYAxis"]);
 
 static BARSCALE_MODES: &[(&'static str, &'static str)] = &[
     ("FromZero", "fromzero"),
