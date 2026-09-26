@@ -1,4 +1,4 @@
-use crate::graphics::{LineType, Point};
+use crate::graphics::{LineType, Point, Size};
 use flat_string::FlatString;
 
 use crate::{
@@ -112,6 +112,7 @@ pub(crate) struct BarLayout {
     pub(crate) y: i32,
     pub(crate) length: i16,
     pub(crate) digits: u8,
+    pub(crate) surface_size: Size,
 }
 
 impl<T: Number + 'static> Bar<T> {
@@ -226,15 +227,21 @@ impl<T: Number + 'static> Bar<T> {
         }
     }
     #[inline(always)]
-    fn paint_vertical_rect(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
-        surface.draw_rect(self.rect_vertical(layout, defaults), line_type, attr);
+    fn paint_vertical_rect(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults, fill: bool) {
+        let mut r = self.rect_vertical(layout, defaults);
+        if layout.length == 0 {
+            let y = r.top().min(layout.surface_size.height as i32 - 1);
+            surface.draw_horizontal_line(r.left(), y, r.right(), line_type, attr);
+        } else {
+            if (layout.length>0) && (r.bottom() as u32) + 1 < layout.surface_size.height {
+                r.set_bottom(r.bottom() + 1, false);
+            }
+            if fill {
+                surface.fill_rect(r, Character::with_attributes(SpecialChar::Block100, attr));
+            }
+            surface.draw_rect(r, line_type, attr);
+        }
     }
-    #[inline(always)]
-    fn paint_vertical_filled_rect(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
-        let r = self.rect_vertical(layout, defaults);
-        surface.fill_rect(r, Character::with_attributes(SpecialChar::Block100, attr));
-        surface.draw_rect(r, line_type, attr);
-    }    
     #[inline(always)]
     fn paint_vertical_point(&self, surface: &mut Surface, bar_point_type: BarPointType, attr: CharAttribute, layout: &BarLayout) {
         let point = self.point_vertical(layout);
@@ -270,8 +277,8 @@ impl<T: Number + 'static> Bar<T> {
         match mode {
             BarDrawMode::Fill(fill_type) => self.paint_vertical_fill(surface, fill_type.character(attr), layout, defaults),
             BarDrawMode::Line(line_type) => self.paint_vertical_line(surface, line_type, attr, layout),
-            BarDrawMode::FilledRectangle(line_type) => self.paint_vertical_filled_rect(surface, line_type, attr, layout, defaults),
-            BarDrawMode::Rectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults),
+            BarDrawMode::FilledRectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults, true),
+            BarDrawMode::Rectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults, false),
             BarDrawMode::Smooth => todo!(),
             BarDrawMode::Point(point_type) => self.paint_vertical_point(surface, point_type, attr, layout),
         }

@@ -520,6 +520,7 @@ where
             defaults.attr = bar_attr;
         }
         self.surface.set_relative_clip(left_margin, 0, width, plot_bottom);
+        layout.surface_size = Size::new((width + 1 - left_margin) as u32, (plot_bottom+1) as u32);
         while start < len {
             layout.x = self.bars[start].layout.x - self.left_scroll + left_margin;
             if layout.x >= width {
