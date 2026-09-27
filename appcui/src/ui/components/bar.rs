@@ -218,12 +218,24 @@ impl<T: Number + 'static> Bar<T> {
     }
     #[inline(always)]
     fn paint_vertical_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
+        let (upper, bottom, zero) = match line_type {
+            LineType::Single => ('┬','┴','─'),
+            LineType::Double => ('╦','╩','═'),
+            LineType::SingleThick => ('┳','┻','━'),
+            LineType::Border => ('▄','▀','━'),
+            LineType::Ascii => ('-','-','-'),
+            LineType::AsciiRound => ('-','-','-'),
+            LineType::SingleRound => ('┬','┴','─'),
+            LineType::Braille => ('⣶','⠿','⠶'),
+        };
         if layout.length > 0 {
             surface.draw_vertical_line_with_size(layout.x, layout.y - layout.length as i32 + 1, layout.length as u32, line_type, attr);
+            surface.write_char(layout.x, layout.y, Character::with_attributes(bottom, attr));
         } else if layout.length < 0 {
             surface.draw_vertical_line_with_size(layout.x, layout.y, layout.length.unsigned_abs() as u32, line_type, attr);
+            surface.write_char(layout.x, layout.y, Character::with_attributes(upper, attr));
         } else {
-            surface.write_char(layout.x, layout.y, Character::with_attributes('.', attr));
+            surface.write_char(layout.x, layout.y, Character::with_attributes(zero, attr));
         }
     }
     #[inline(always)]
