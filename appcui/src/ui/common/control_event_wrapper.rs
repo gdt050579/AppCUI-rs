@@ -9,6 +9,7 @@ use crate::prelude::{
 };
 use crate::system::Handle;
 
+use crate::ui::{MarkdownComposer, markdown_composer};
 use crate::ui::{
     accordion, accordion::events::AccordionEvents, button, button::events::ButtonEvents, charpicker, charpicker::events::CharPickerEvents, checkbox,
     checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents, datepicker::events::DatePickerEvents,
@@ -18,7 +19,7 @@ use crate::ui::{
     password, password::events::PasswordEvents, radiobox, radiobox::events::RadioBoxEvents, tab, tab::events::TabEvents,
     richtextfield::events::RichTextFieldEvents, textfield::events::TextFieldEvents, treeview::events::GenericTreeViewEvents,
     timepicker, timepicker::events::TimePickerEvents, hyperlink, hyperlink::events::HyperLinkEvents,
-    hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview,
+    hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview, markdown_composer::events::MarkdownComposerEvents,
 };
 
 #[derive(Copy, Clone)]
@@ -39,6 +40,7 @@ pub(crate) enum ControlEventData {
     Password(password::events::EventData),
     KeySelector(keyselector::events::EventData),
     TextField(textfield::events::EventData),
+    MarkdownComposer(markdown_composer::events::EventData),
     RichTextField(textfield::events::EventData),
     Selector(selector::events::EventData),
     ComboBox(combobox::events::EventData),
@@ -95,6 +97,19 @@ impl ControlEvent {
                         }
                     }
                     textfield::events::TextFieldEventsType::OnTextChanged => TextFieldEvents::on_text_changed(receiver, self.emitter.cast()),
+                }
+            }
+            ControlEventData::MarkdownComposer(data) => {
+                let h: Handle<MarkdownComposer> = self.emitter.cast();
+                match data.evtype {
+                    markdown_composer::events::MarkdownComposerEventsType::OnValidate => {
+                        if let Some(tf) = RuntimeManager::get().get_control(h) {
+                            MarkdownComposerEvents::on_validate(receiver, self.emitter.cast(), tf.text())
+                        } else {
+                            EventProcessStatus::Ignored
+                        }
+                    }
+                    markdown_composer::events::MarkdownComposerEventsType::OnTextChanged => MarkdownComposerEvents::on_text_changed(receiver, self.emitter.cast()),
                 }
             }
             ControlEventData::RichTextField(data) => {
