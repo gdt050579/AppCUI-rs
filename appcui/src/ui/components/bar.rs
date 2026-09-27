@@ -19,6 +19,22 @@ pub enum BarFillType {
     Shade25,
     /// 2x4 braille cells used as a fill.
     Braille,
+    /// 2x4 checkerboard pattern.
+    Checkerboard,
+    /// U+253C ┼ — light grid/lattice.
+    Grid,
+    /// U+256C ╬ — bold double-line grid.   (if you want a heavier grid than `Grid`)
+    GridDouble,
+    /// U+2573 ╳ — diagonal cross-hatch.
+    CrossHatch,
+    /// ┇ — dashed line.
+    Dashed,
+    /// U+2571 ╱ — forward diagonal (rising left-to-right).
+    DiagonalUp,
+    /// U+2572 ╲ — backward diagonal (falling left-to-right).
+    DiagonalDown,
+    /// U+2587 ▇ — near-solid block with a thin notch (gap) at the top of each cell.
+    Notched,
     /// Fill with an arbitrary character.
     Custom(char),
 }
@@ -31,6 +47,14 @@ impl BarFillType {
             BarFillType::Shade50 => Character::with_attributes(SpecialChar::Block50, attr),
             BarFillType::Shade25 => Character::with_attributes(SpecialChar::Block25, attr),
             BarFillType::Braille => Character::with_attributes('\u{28FF}', attr),
+            BarFillType::Checkerboard => Character::with_attributes('\u{259A}', attr),
+            BarFillType::Grid => Character::with_attributes('\u{253C}', attr),
+            BarFillType::GridDouble => Character::with_attributes('\u{256C}', attr),
+            BarFillType::CrossHatch => Character::with_attributes('\u{2573}', attr),
+            BarFillType::Dashed => Character::with_attributes('┇', attr),
+            BarFillType::DiagonalUp => Character::with_attributes('\u{2571}', attr),
+            BarFillType::DiagonalDown => Character::with_attributes('\u{2572}', attr),
+            BarFillType::Notched => Character::with_attributes('\u{2587}', attr),
             BarFillType::Custom(ch) => Character::with_attributes(*ch, attr),
         }
     }
@@ -219,14 +243,14 @@ impl<T: Number + 'static> Bar<T> {
     #[inline(always)]
     fn paint_vertical_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
         let (upper, bottom, zero) = match line_type {
-            LineType::Single => ('┬','┴','─'),
-            LineType::Double => ('╦','╩','═'),
-            LineType::SingleThick => ('┳','┻','━'),
-            LineType::Border => ('▄','▀','━'),
-            LineType::Ascii => ('-','-','-'),
-            LineType::AsciiRound => ('-','-','-'),
-            LineType::SingleRound => ('┬','┴','─'),
-            LineType::Braille => ('⣶','⠿','⠶'),
+            LineType::Single => ('┬', '┴', '─'),
+            LineType::Double => ('╦', '╩', '═'),
+            LineType::SingleThick => ('┳', '┻', '━'),
+            LineType::Border => ('▄', '▀', '━'),
+            LineType::Ascii => ('-', '-', '-'),
+            LineType::AsciiRound => ('-', '-', '-'),
+            LineType::SingleRound => ('┬', '┴', '─'),
+            LineType::Braille => ('⣶', '⠿', '⠶'),
         };
         if layout.length > 0 {
             surface.draw_vertical_line_with_size(layout.x, layout.y - layout.length as i32 + 1, layout.length as u32, line_type, attr);
@@ -239,13 +263,21 @@ impl<T: Number + 'static> Bar<T> {
         }
     }
     #[inline(always)]
-    fn paint_vertical_rect(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults, fill: bool) {
+    fn paint_vertical_rect(
+        &self,
+        surface: &mut Surface,
+        line_type: LineType,
+        attr: CharAttribute,
+        layout: &BarLayout,
+        defaults: &BarDefaults,
+        fill: bool,
+    ) {
         let mut r = self.rect_vertical(layout, defaults);
         if layout.length == 0 {
             let y = r.top().min(layout.surface_size.height as i32 - 1);
             surface.draw_horizontal_line(r.left(), y, r.right(), line_type, attr);
         } else {
-            if (layout.length>0) && (r.bottom() as u32) + 1 < layout.surface_size.height {
+            if (layout.length > 0) && (r.bottom() as u32) + 1 < layout.surface_size.height {
                 r.set_bottom(r.bottom() + 1, false);
             }
             if fill {

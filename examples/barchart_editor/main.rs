@@ -68,6 +68,8 @@ fn row(top: i32, width: Option<u16>) -> Layout {
     layout.build()
 }
 
+const FILL_CUSTOM: u32 = 13;
+
 fn fill_type(index: u32, mark: char) -> BarFillType {
     match index {
         0 => BarFillType::Solid,
@@ -75,6 +77,14 @@ fn fill_type(index: u32, mark: char) -> BarFillType {
         2 => BarFillType::Shade50,
         3 => BarFillType::Shade25,
         4 => BarFillType::Braille,
+        5 => BarFillType::Checkerboard,
+        6 => BarFillType::Grid,
+        7 => BarFillType::GridDouble,
+        8 => BarFillType::CrossHatch,
+        9 => BarFillType::Dashed,
+        10 => BarFillType::DiagonalUp,
+        11 => BarFillType::DiagonalDown,
+        12 => BarFillType::Notched,
         _ => BarFillType::Custom(mark),
     }
 }
@@ -105,7 +115,22 @@ fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
     let fill = combo_with(
         host,
         top + 4,
-        &["Solid", "Shade 75%", "Shade 50%", "Shade 25%", "Braille", "Custom"],
+        &[
+            "Solid",
+            "Shade 75%",
+            "Shade 50%",
+            "Shade 25%",
+            "Braille",
+            "Checkerboard",
+            "Grid",
+            "Grid double",
+            "Cross-hatch",
+            "Dashed",
+            "Diagonal up",
+            "Diagonal down",
+            "Notched",
+            "Custom",
+        ],
         true,
     );
     let mut line = Selector::new(Some(LineType::Single), row(top + 4, None), selector::Flags::None);
@@ -671,7 +696,7 @@ impl BarChartEditor {
     fn sync_draw_controls(&mut self, controls: BarDrawControls) {
         let mode = self.combo_index(controls.mode);
         let (caption, fill, line, point, character) = match mode {
-            0 => ("Fill type", true, false, false, self.combo_index(controls.fill) == 5),
+            0 => ("Fill type", true, false, false, self.combo_index(controls.fill) == FILL_CUSTOM),
             1 | 2 | 3 => ("Line type", false, true, false, false),
             5 => ("Point type", false, false, true, self.combo_index(controls.point) == 3),
             _ => ("", false, false, false, false),
@@ -714,7 +739,15 @@ impl BarChartEditor {
                     BarFillType::Shade50 => (2, None),
                     BarFillType::Shade25 => (3, None),
                     BarFillType::Braille => (4, None),
-                    BarFillType::Custom(ch) => (5, Some(ch)),
+                    BarFillType::Checkerboard => (5, None),
+                    BarFillType::Grid => (6, None),
+                    BarFillType::GridDouble => (7, None),
+                    BarFillType::CrossHatch => (8, None),
+                    BarFillType::Dashed => (9, None),
+                    BarFillType::DiagonalUp => (10, None),
+                    BarFillType::DiagonalDown => (11, None),
+                    BarFillType::Notched => (12, None),
+                    BarFillType::Custom(ch) => (FILL_CUSTOM, Some(ch)),
                 };
                 (0, Some(index), None, None, mark)
             }
@@ -939,7 +972,7 @@ impl CharPickerEvents for BarChartEditor {
         } else {
             EventProcessStatus::Ignored
         }
-    }
+    }   
 }
 
 fn main() -> Result<(), appcui::system::Error> {
