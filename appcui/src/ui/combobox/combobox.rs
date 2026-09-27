@@ -26,6 +26,11 @@ impl ComboBoxComponentDataProvider for DataProvider {
 }
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnExpand, internal=true)]
+/// An editable dropdown that combines a text field with a list of predefined items.
+///
+/// `ComboBox` lets the user type a value or pick one from the expanded list. Items can
+/// include an optional description. See [`Flags`] for optional behavior such as showing
+/// descriptions.
 pub struct ComboBox {
     component: ComboBoxComponent<DataProvider>,
     data: DataProvider,

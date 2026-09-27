@@ -13,6 +13,11 @@ enum TimeComponent {
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnFocus, internal=true)]
+/// A control for editing a time of day (hours, minutes, and optionally seconds).
+///
+/// `TimePicker` lets the user change each time component with the keyboard or mouse.
+/// 12-hour versus 24-hour display and other options are controlled by [`Flags`].
+/// Changing the time raises a time-changed event.
 pub struct TimePicker {
     hour: u8,
     minute: u8,

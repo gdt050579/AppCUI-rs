@@ -4128,9 +4128,13 @@ static COLORMAP_4096_QUANTIZATION: [Color; 4096] = [
 /// The pixel is used to represent a single pixel in the image.
 #[derive(Copy, Clone, Debug, PartialEq, Default)]
 pub struct Pixel {
+    /// Red channel (`0`–`255`).
     pub red: u8,
+    /// Green channel (`0`–`255`).
     pub green: u8,
+    /// Blue channel (`0`–`255`).
     pub blue: u8,
+    /// Opacity (`0` is fully transparent, `255` is fully opaque).
     pub alpha: u8,
 }
 impl Pixel {

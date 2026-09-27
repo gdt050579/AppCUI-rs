@@ -1,14 +1,27 @@
 use crate::prelude::*;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// How open windows are tiled on the [`struct@Desktop`].
+///
+/// `Cascade` overlaps windows diagonally; `Vertical`, `Horizontal`, and `Grid` split
+/// the desktop into equal tiles.
 pub enum ArrangeWindowsMethod {
+    /// Overlap windows diagonally, each offset from the previous.
     Cascade,
+    /// Stack windows in a vertical column.
     Vertical,
+    /// Place windows in a horizontal row.
     Horizontal,
+    /// Tile windows in a rectangular grid.
     Grid,
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed, internal=true, desktop=true)]
+/// The root container that hosts application windows and global UI chrome.
+///
+/// `Desktop` is the top-level surface created when the application starts. It manages
+/// windows, dialogs, and desktop-wide keyboard handling, and can arrange open windows
+/// using [`ArrangeWindowsMethod`].
 pub struct Desktop {}
 
 impl Desktop {

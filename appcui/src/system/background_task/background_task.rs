@@ -8,6 +8,11 @@ use super::{
     BackgroundTaskConector,
 };
 
+/// A background thread that exchanges messages with a window.
+///
+/// `T` is data sent from the worker to the UI. `R` is data sent back from the UI
+/// to the worker. Start the worker with [`run`](Self::run); the function receives a
+/// [`BackgroundTaskConector`] to notify, query, or check [`should_stop`](BackgroundTaskConector::should_stop).
 pub struct BackgroundTask<T: Send + 'static, R: Send + 'static> {
     id: u32,
     _phantom: std::marker::PhantomData<(T, R)>,

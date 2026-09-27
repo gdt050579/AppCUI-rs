@@ -5,6 +5,10 @@ use crate::input::*;
 use crate::system::Theme;
 use crate::ui::ControlBase;
 
+/// A pair of horizontal and vertical scroll bars for panning a control's content.
+///
+/// `ScrollBars` is a reusable helper that custom controls can paint and feed mouse
+/// events to. Visibility of each bar is updated from the content and viewport size.
 pub struct ScrollBars {
     horizontal: HScrollBar,
     vertical: VScrollBar,

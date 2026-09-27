@@ -11,7 +11,7 @@ mod clip_area;
 mod color;
 mod cursor;
 pub mod image;
-mod line_type;
+mod line_format;
 mod point;
 mod rect;
 mod size;
@@ -19,6 +19,7 @@ mod surface;
 mod text_format;
 mod orthogonal_direction;
 mod box_junction;
+mod direction;
 
 #[cfg(test)]
 mod surface_tester;
@@ -34,7 +35,10 @@ pub use self::color::Color;
 pub(crate) use self::cursor::Cursor;
 pub use self::image::Image;
 pub use self::image::*;
-pub use self::line_type::LineType;
+pub use self::line_format::LineType;
+pub use self::line_format::PolyLineFormat;
+pub use self::line_format::PolyLineFormatBuilder;
+pub use self::line_format::LineCap;
 pub use self::point::Point;
 pub use self::rect::Rect;
 pub use self::rect::RectAlignment;
@@ -47,6 +51,7 @@ pub use self::text_format::WrapType;
 pub use self::orthogonal_direction::OrthogonalDirection;
 
 use self::box_junction::BOX_JUNCTION;
+use self::direction::Direction;
 
 
 #[cfg(test)]

@@ -5,13 +5,17 @@ use super::super::{CharFlags, Character, Color, Point, Size, Surface};
 use super::{StringFormatError, StringFormatParser};
 use std::str::FromStr;
 
+/// How a [`BitTile`] is drawn onto a [`Surface`](crate::graphics::Surface).
 #[derive(Copy, Clone, Eq, PartialEq, Debug, EnumSelector)]
 #[repr(u8)]
 pub enum BitTileRenderMethod {
+    /// Half-block characters (`▀`), packing two vertical pixels into one cell.
     #[VariantInfo(name = "Small Blocks", description = "Small blocks with half-block characters")]
     SmallBlocks,
+    /// Full-width cells filled with background color (two columns per pixel).
     #[VariantInfo(name = "Large Blocks", description = "Large blocks with full-block characters")]
     LargeBlocks,
+    /// Braille dots (`⣿`), packing a 2×4 pixel grid into one cell.
     #[VariantInfo(name = "Braille", description = "Braille characters")]
     Braille,
 }
@@ -321,9 +325,25 @@ impl<const STORAGE_BYTES: usize> FromStr for BitTile<STORAGE_BYTES> {
 
 macro_rules! unsigned_int_implementation {
     ($name:ident,$int:ty,$bytes:expr,$from_fn:ident,$to_fn:ident) => {
+        #[doc = concat!(
+            "A [`BitTile`] stored in a `", stringify!($int), "` (`", stringify!($bytes),
+            "` bytes, at most `", stringify!($int), "::BITS` pixels)."
+        )]
         pub type $name = BitTile<$bytes>;
 
         impl BitTile<$bytes> {
+            #[doc = concat!(
+                "Creates a [`BitTile`] from a packed `", stringify!($int), "` value.\n\n",
+                "Pixels are stored in native-endian byte order. Returns `None` if `width` or ",
+                "`height` is `0`, or if `width * height` is larger than `", stringify!($int), "::BITS`.\n\n",
+                "# Examples\n\n",
+                "```rust\n",
+                "use appcui::prelude::*;\n\n",
+                "let tile = ", stringify!($name), "::", stringify!($from_fn),
+                "(4, 4, 0b1001_0110_1001_0110).unwrap();\n",
+                "assert_eq!(tile.", stringify!($to_fn), "(), 0b1001_0110_1001_0110);\n",
+                "```"
+            )]
             pub fn $from_fn(width: u8, height: u8, bits: $int) -> Option<Self> {
                 if width == 0 || height == 0 {
                     return None;
@@ -338,10 +358,30 @@ macro_rules! unsigned_int_implementation {
                 })
             }
 
+            #[doc = concat!(
+                "Returns the packed `", stringify!($int), "` stored in this tile (native-endian).\n\n",
+                "# Examples\n\n",
+                "```rust\n",
+                "use appcui::prelude::*;\n\n",
+                "let tile = ", stringify!($name), "::", stringify!($from_fn),
+                "(4, 4, 0b1111_0000_1111_0000).unwrap();\n",
+                "assert_eq!(tile.", stringify!($to_fn), "(), 0b1111_0000_1111_0000);\n",
+                "```"
+            )]
             pub fn $to_fn(&self) -> $int {
                 <$int>::from_ne_bytes(self.data)
             }
 
+            #[doc = concat!(
+                "Replaces the packed `", stringify!($int), "` bits without changing width or height.\n\n",
+                "# Examples\n\n",
+                "```rust\n",
+                "use appcui::prelude::*;\n\n",
+                "let mut tile = ", stringify!($name), "::", stringify!($from_fn), "(4, 4, 0).unwrap();\n",
+                "tile.reset(0b1111_0000_1111_0000);\n",
+                "assert_eq!(tile.", stringify!($to_fn), "(), 0b1111_0000_1111_0000);\n",
+                "```"
+            )]
             pub fn reset(&mut self, bits: $int) {
                 self.data = bits.to_ne_bytes();
             }

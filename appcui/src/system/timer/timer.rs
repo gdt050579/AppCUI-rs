@@ -25,6 +25,11 @@ enum TimerState {
     Terminate,
 }
 
+/// A repeating timer that delivers ticks to a control.
+///
+/// Obtain a timer from a control, then [`start`](Self::start) it with an interval.
+/// Pause, resume, or stop it from the UI thread. Tick callbacks arrive through
+/// [`crate::ui::common::traits::TimerEvents`].
 #[derive(Debug)]
 pub struct Timer {
     synk: Arc<(Mutex<Command>, Condvar)>,

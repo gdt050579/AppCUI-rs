@@ -47,6 +47,11 @@ struct AppBarItemPos {
     width: u8,
     order: u8,
 }
+/// The application menu bar that hosts menus, buttons, labels, and other items.
+///
+/// `AppBar` is the horizontal strip at the top of the desktop. Items are added with
+/// [`AppBar::add`] and shown or hidden per window through app-bar events. Typical items
+/// include menu buttons, buttons, toggle buttons, switch buttons, labels, and separators.
 pub struct AppBar {
     manager: HandleManager<AppBarItem>,
     shown_items: Vec<AppBarItemPos>,

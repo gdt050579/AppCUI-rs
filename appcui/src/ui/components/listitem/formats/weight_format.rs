@@ -8,11 +8,19 @@ const TON: FormatNumber = FormatNumber::new(10).suffix(" t ").group(3, b',');
 
 
 #[derive(Copy, Clone, Eq, PartialEq)]
+/// Unit used when rendering a weight list-item value.
+///
+/// Selects grams, milligrams, kilograms, pounds, or tons.
 pub enum WeightFormat {
+    /// Grams, for example `12 gr`.
     Grams,
+    /// Milligrams, for example `12 mg`.
     Milligrams,
+    /// Kilograms, for example `12 kg`.
     Kilograms,
+    /// Pounds, for example `12 lb`.
     Pounds,
+    /// Metric tons, for example `12 t`.
     Tons,
 }
 

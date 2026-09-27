@@ -1,17 +1,16 @@
-/// Represents the direction of a mouse wheel event.
-/// 
-/// This enum defines the possible directions for a mouse wheel event.
-/// 
-/// # Values
-/// * `Left` - The wheel was rotated to the left.
-/// * `Right` - The wheel was rotated to the right.
-/// * `Up` - The wheel was rotated up.
-/// * `Down` - The wheel was rotated down.  
+/// Direction of a mouse-wheel movement.
+///
+/// Vertical wheels typically report [`Up`](Self::Up) and [`Down`](Self::Down).
+/// Tilt wheels may also report [`Left`](Self::Left) and [`Right`](Self::Right).
 #[derive(Copy,Clone,Debug,PartialEq)]
 #[repr(u8)]
 pub enum MouseWheelDirection {
+    /// Tilt or scroll left (`←`).
     Left,
+    /// Tilt or scroll right (`→`).
     Right,
+    /// Scroll up (`↑`).
     Up,
+    /// Scroll down (`↓`).
     Down
 }

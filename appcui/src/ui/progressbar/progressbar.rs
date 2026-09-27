@@ -7,6 +7,10 @@ use std::time::{Duration, Instant};
 use web_time::{Duration, Instant};
 
 #[CustomControl(overwrite=OnPaint, internal=true)]
+/// A visual indicator of task completion, including percentage and optional ETA.
+///
+/// `ProgressBar` tracks how many items have been processed out of a total and can be
+/// paused or resumed. Text and timing details are controlled by [`Flags`].
 pub struct ProgressBar {
     items_count: u64,
     items_processed: u64,

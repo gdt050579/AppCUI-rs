@@ -43,6 +43,27 @@ pub(crate) fn init_log_file(name: &str, append: bool) {
     web_sys::console::log_1(&format!("📝 wasm log initialized: {}", name).into());
 }
 
+/// Writes a tagged log message in debug builds.
+///
+/// Call [`log_file`](crate::system::MultiWindowAppBuilder::log_file) when building
+/// the application to choose the output file (native) or to initialize logging (WASM).
+/// In **debug** builds the message is formatted and written; in **release** builds this
+/// macro expands to nothing (no formatting, no I/O).
+///
+/// Native targets append a line of the form `[YYYY-MM-DD HH:MM:SS] [tag] message`
+/// to the configured file. WASM targets write the same format to the browser console.
+/// If logging was never enabled, the call is a no-op.
+///
+/// # Examples
+///
+/// ```rust
+/// use appcui::prelude::*;
+/// use appcui::log;
+///
+/// log!("INFO", "Application started");
+/// let x = 10;
+/// log!("INFO", "The value of x is: {}", x);
+/// ```
 #[macro_export]
 macro_rules! log {
     ($tag:literal, $fmt:literal) => {

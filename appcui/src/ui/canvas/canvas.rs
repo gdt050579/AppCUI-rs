@@ -4,6 +4,11 @@ use crate::ui::canvas::initialization_flags::Flags;
 use self::components::ScrollBars;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
+/// A free-form drawing surface for custom character-level rendering.
+///
+/// `Canvas` exposes an inner [`Surface`] that the application can paint directly. It
+/// supports panning, optional scroll bars, and a configurable background. See [`Flags`]
+/// for optional behavior.
 pub struct Canvas {
     surface: Surface,
     x: i32,

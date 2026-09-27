@@ -11,6 +11,11 @@ use std::cell::RefCell;
 use super::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal=true)]
+/// A control that renders formatted Markdown text.
+///
+/// `Markdown` parses headings, lists, links, code blocks, and tables, and can scroll
+/// through content that does not fit. Clickable links raise events. See [`Flags`] for
+/// optional behavior.
 pub struct Markdown {
     w: u32,
     h: u32,

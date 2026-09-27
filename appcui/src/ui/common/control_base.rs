@@ -18,21 +18,40 @@ use crate::utils::VectorIndex;
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 16)]
+/// Runtime status bits stored on every [`ControlBase`].
+///
+/// These are not constructor options. The framework sets them as a control is
+/// shown, focused, or classified (window, desktop, modal). Combine values with `|`.
 pub enum StatusFlags {
+    /// The control is shown and participates in layout.
     Visible = 0x0001,
+    /// The control accepts interaction; when unset it is drawn disabled.
     Enabled = 0x0002,
+    /// The control can receive keyboard and mouse input.
     AcceptInput = 0x0004,
+    /// The control currently has keyboard focus.
     Focused = 0x0008,
+    /// The control is queued to receive focus on the next layout pass.
     MarkedForFocus = 0x0010,
+    /// The mouse cursor is over the control.
     MouseOver = 0x0020,
+    /// The control is a [`struct@crate::ui::Window`] (or a type that behaves as one).
     WindowControl = 0x0040,
+    /// The control is shown as a modal window.
     ModalWindow = 0x0080,
+    /// The control is the desktop (root) surface.
     DesktopControl = 0x0100,
+    /// Process key events on this control before dispatching them to children.
     KeyInputBeforeChildren = 0x0200,
+    /// The control is expanded (used by foldable containers).
     Expanded = 0x0400,
+    /// When focused, reserve an extra column on the right (typically for a scroll bar).
     IncreaseRightMarginOnFocus = 0x0800,
+    /// When focused, reserve an extra row at the bottom (typically for a scroll bar or search bar).
     IncreaseBottomMarginOnFocus = 0x1000,
+    /// Only one window of this kind may be open (used by single-instance windows).
     SingleWindow = 0x2000,
+    /// Derive the window border style from the current theme instead of an explicit type.
     ThemeType = 0x4000,
 }
 #[derive(Copy, Clone, Default)]
@@ -43,6 +62,11 @@ pub(crate) struct Margins {
     pub(crate) bottom: u8,
 }
 
+/// Shared state and behavior embedded in every UI control.
+///
+/// `ControlBase` stores layout, visibility, focus, children, and input flags. Custom
+/// controls created with the `CustomControl` macro receive this type as their `base`
+/// field.
 #[repr(C)]
 #[derive(Default)]
 pub struct ControlBase {

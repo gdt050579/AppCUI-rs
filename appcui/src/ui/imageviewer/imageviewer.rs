@@ -3,6 +3,10 @@ use crate::ui::imageviewer::initialization_flags::Flags;
 use self::components::ScrollBars;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize, internal=true)]
+/// A control that renders an [`Image`] with zoom, pan, and scroll support.
+///
+/// `ImageViewer` converts the image to a character surface using the selected render
+/// options. Optional scroll bars and other behavior are controlled by [`Flags`].
 pub struct ImageViewer {
     surface: Surface,
     image: Image,

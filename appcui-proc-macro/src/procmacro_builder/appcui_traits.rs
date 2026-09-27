@@ -58,10 +58,11 @@ pub(crate) enum AppCUITrait {
     AppBarEvents = 49,
     TimePickerEvents = 50,
     RichTextFieldEvents = 51,
-    EditorEvents = 52,
-    GenericBufferViewEvents = 53,
-    HyperLinkEvents = 54,
-    GenericHSliderEvents = 55,
+    GenericBufferViewEvents = 52,
+    HyperLinkEvents = 53,
+    GenericHSliderEvents = 54,
+    MarkdownComposerEvents = 55,
+    EditorEvents = 56,
 }
 
 #[repr(u8)]
@@ -109,6 +110,7 @@ impl AppCUITrait {
             AppCUITrait::PasswordEvents => "PasswordEvents",
             AppCUITrait::KeySelectorEvents => "KeySelectorEvents",
             AppCUITrait::TextFieldEvents => "TextFieldEvents",
+            AppCUITrait::MarkdownComposerEvents => "MarkdownComposerEvents",
             AppCUITrait::CustomEvents => "CustomEvents",
             AppCUITrait::GenericSelectorEvents => "SelectorEvents", // important to be without Generic
             AppCUITrait::ComboBoxEvents => "ComboBoxEvents",
@@ -172,6 +174,7 @@ impl AppCUITrait {
             AppCUITrait::PasswordEvents => TraitType::ControlEvent,
             AppCUITrait::KeySelectorEvents => TraitType::ControlEvent,
             AppCUITrait::TextFieldEvents => TraitType::ControlEvent,
+            AppCUITrait::MarkdownComposerEvents => TraitType::ControlEvent,
             AppCUITrait::CustomEvents => TraitType::ControlEvent,
             AppCUITrait::GenericSelectorEvents => TraitType::ControlEvent,
             AppCUITrait::ComboBoxEvents => TraitType::ControlEvent,
@@ -235,6 +238,7 @@ impl AppCUITrait {
             AppCUITrait::PasswordEvents => "",
             AppCUITrait::KeySelectorEvents => "",
             AppCUITrait::TextFieldEvents => "",
+            AppCUITrait::MarkdownComposerEvents => "",
             AppCUITrait::CustomEvents => "",
             AppCUITrait::GenericSelectorEvents => "",
             AppCUITrait::ComboBoxEvents => "",
@@ -298,6 +302,7 @@ impl AppCUITrait {
             AppCUITrait::PasswordEvents => "impl$(TEMPLATE_TYPE) PasswordEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::KeySelectorEvents => "impl$(TEMPLATE_TYPE) KeySelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::TextFieldEvents => "impl$(TEMPLATE_TYPE) TextFieldEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::MarkdownComposerEvents => "impl$(TEMPLATE_TYPE) MarkdownComposerEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::CustomEvents => "impl$(TEMPLATE_TYPE) CustomEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericSelectorEvents => "impl$(TEMPLATE_TYPE) GenericSelectorEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::ComboBoxEvents => "impl$(TEMPLATE_TYPE) ComboBoxEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
@@ -367,6 +372,7 @@ impl AppCUITrait {
             "KeySelectorEvents" | "KeySelector" => Some(AppCUITrait::KeySelectorEvents),
             "TextFieldEvents" | "TextField" => Some(AppCUITrait::TextFieldEvents),
             // nothing for the custom events -> they are enabled through a different field
+            "MarkdownComposerEvents" | "MarkdownComposer" => Some(AppCUITrait::MarkdownComposerEvents),
             "SelectorEvents" | "Selector" => Some(AppCUITrait::GenericSelectorEvents),
             "ComboBoxEvents" | "ComboBox" => Some(AppCUITrait::ComboBoxEvents),
             "DropDownListEvents" | "DropDownList" => Some(AppCUITrait::GenericDropDownListEvents),
@@ -452,10 +458,11 @@ impl AppCUITrait {
             49 => Some(AppCUITrait::AppBarEvents),
             50 => Some(AppCUITrait::TimePickerEvents),
             51 => Some(AppCUITrait::RichTextFieldEvents),
-            52 => Some(AppCUITrait::EditorEvents),
-            53 => Some(AppCUITrait::GenericBufferViewEvents),
-            54 => Some(AppCUITrait::HyperLinkEvents),
-            55 => Some(AppCUITrait::GenericHSliderEvents),
+            52 => Some(AppCUITrait::GenericBufferViewEvents),
+            53 => Some(AppCUITrait::HyperLinkEvents),
+            54 => Some(AppCUITrait::GenericHSliderEvents),
+            55 => Some(AppCUITrait::MarkdownComposerEvents),
+            56 => Some(AppCUITrait::EditorEvents),
             _ => None,
         };
         result?;

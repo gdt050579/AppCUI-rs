@@ -127,6 +127,7 @@ pub mod timepicker;
 pub mod editor;
 pub mod bufferview;
 pub mod hslider;
+pub mod markdown_composer;
 
 // re-export
 pub use common::ControlBase;
@@ -182,3 +183,4 @@ pub use appbar::AppBar;
 pub use graphview::GraphView;
 pub use editor::Editor;
 pub use hslider::HSlider;
+pub use markdown_composer::MarkdownComposer;

@@ -3,6 +3,11 @@ use crate::ui::togglebutton::{events::EventData, Type};
 use flat_string::FlatString;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnSiblingSelected, internal=true)]
+/// A button that stays pressed or released and can participate in exclusive groups.
+///
+/// `ToggleButton` shows a caption (and optional tooltip) and raises a selection event
+/// when its state changes. In single-selection mode, activating one button deselects
+/// its siblings. Visual style is controlled by [`Type`].
 pub struct ToggleButton {
     caption: FlatString<22>,
     tooltip: String,

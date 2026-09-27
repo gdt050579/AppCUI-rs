@@ -55,7 +55,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 
 ## ✨ Features
-- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.). A full list of controls can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock_controls.html) 
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
 - [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors, or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
 - [x] menus and toolbars
 - [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, macOS via termios)
@@ -67,6 +67,74 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 - [x] support for Unicode characters
 - [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc.)
 - [x] true-color support (24 bits per pixel) for terminals that support it.
+
+## 📦 Out-of-the-box controls and widgets
+
+AppCUI-rs ships with a rich set of controls and widgets for building terminal user interfaces. The full list of stock controls is documented [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock_controls.html).
+
+### Basic controls
+- **Button** — clickable action trigger
+- **ToggleButton** — button with pressed/unpressed state
+- **Label** — static, non-interactive text
+- **CheckBox** — toggle on/off
+- **RadioBox** — mutually exclusive choice within a group
+- **ThreeStateBox** — tri-state checkbox (checked/unchecked/unknown)
+- **Toolbar** - for window controls (with buttons, checkboxes, radioboxes)
+
+### Containers - Group and organize other controls.
+- **Panel** — simple rectangular grouping container
+- **Tab** — switch between multiple pages of content
+- **Accordion** — collapsible/expandable panels
+- **Window** — top-level movable/resizable frame
+- **Desktop** — root container hosting windows
+- **Modal dialog** — blocking dialog window
+
+### Separators
+- **HSplitter / VSplitter** — resizable dividers between regions (horizontal & vertical)
+- **HLine / VLine** — static visual separator lines (horizontal & vertical)
+
+### Selectors - Choose from a set of values you provide.
+- **Selector** — generic single-value enum selector
+- **DropDownList** — dropdown list of typed items
+- **ComboBox** — editable dropdown selection
+- **ListBox** — scrollable list selection
+- **NumericSelector** — pick a number within a range
+- **KeySelector** — capture a keyboard key/shortcut
+- **HSlider** — value slider
+
+### Pickers - Choose from a built-in domain.
+- **DatePicker** — select a date
+- **TimePicker** — select a time
+- **ColorPicker** — select a color
+- **CharPicker** — pick a character/glyph
+- **PathFinder** — browse and select a filesystem path
+
+### Data viewers - Display and navigate structured or large data sets.
+- **ListView** — tabular, multi-column data
+- **TreeView** — hierarchical data
+- **BufferView** — raw binary/byte (hex) inspection (also a HexViewer or BinaryDataViewer)
+- **Markdown** — rendered Markdown content
+- **GraphView** — nodes-and-edges graph rendering
+- **ImageViewer** — display images
+
+### Text
+- **TextField** — single-line text input
+- **RichTextField** — text with formatting/styling
+- **Password** — masked text input
+- **TextArea** — multi-line text input
+
+### Navigation
+- **Menu** — classic dropdown menus (including buttons, checkboxes, radioboxes, separators, sub-menus)
+- **CommandBar** — key-bound command strip
+- **PopupMenu** — contextual popup menu
+
+### Drawing
+- **Canvas** — free-form drawing surface
+
+### Other
+- **HyperLink** — clickable link
+- **ToolTip** — hover hint text
+- **ProgressBar** — task progress indicator
 
 ## 📸 Screenshots 
 

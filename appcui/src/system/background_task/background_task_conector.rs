@@ -2,6 +2,11 @@ use super::{BackgroundTask, StatusUpdateRequest};
 use crate::system::{Handle, SystemEvent};
 use std::sync::{Arc, Condvar, Mutex};
 
+/// Handle given to a background worker to talk to the main thread.
+///
+/// Use [`notify`](Self::notify) to send `T` asynchronously, [`query`](Self::query) to
+/// send `T` and wait for `R`, and [`should_stop`](Self::should_stop) to honor pause/stop
+/// requests from the UI.
 pub struct BackgroundTaskConector<T: Send + 'static, R: Send + 'static> {
     handle: Handle<BackgroundTask<T, R>>,
     sysevent_sender: std::sync::mpsc::Sender<SystemEvent>,
@@ -70,10 +75,10 @@ where
     ///     T:Send+'static,
     ///     R:Send+'static
     /// {
-    ///     loop {
-    ///        if !conector.should_stop() { break; }
-    ///        // do some tasks
-    ///     }
+///     loop {
+///        if conector.should_stop() { break; }
+///        // do some tasks
+///     }
     /// }
     /// ```
     pub fn should_stop(&self) -> bool {

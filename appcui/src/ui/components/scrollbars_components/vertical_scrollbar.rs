@@ -6,6 +6,10 @@ use crate::graphics::*;
 use crate::prelude::{ControlBase, MouseEvent};
 use crate::system::*;
 
+/// A vertical scroll bar drawn along the right edge of a control.
+///
+/// `VScrollBar` wraps [`super::generic_scrollbar::GenericScrollBar`] and paints an
+/// up/down track with a draggable thumb.
 pub struct VScrollBar {
     base: GenericScrollBar,
 }

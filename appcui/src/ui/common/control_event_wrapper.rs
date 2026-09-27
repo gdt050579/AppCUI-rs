@@ -8,19 +8,34 @@ use crate::prelude::{
 };
 use crate::system::Handle;
 
+use crate::ui::{MarkdownComposer, markdown_composer};
 use crate::ui::{
     accordion, accordion::events::AccordionEvents, button, button::events::ButtonEvents, charpicker, charpicker::events::CharPickerEvents, checkbox,
     checkbox::events::CheckBoxEvents, combobox::events::ComboBoxEvents, datepicker::events::DatePickerEvents,
-    dropdownlist::events::GenericDropDownListEvents, editor::events::EditorEvents, editor::events::EditorEventsType, graphview,
-    graphview::events::GenericGraphViewEvents, listbox::events::ListBoxEvents, listview::events::GenericListViewEvents, markdown,
-    markdown::events::MarkdownEvents, numericselector::events::GenericNumericSelectorEvents, password, password::events::PasswordEvents, radiobox,
-    radiobox::events::RadioBoxEvents, richtextfield::events::RichTextFieldEvents, tab, tab::events::TabEvents, textfield::events::TextFieldEvents,
-    timepicker::events::TimePickerEvents, treeview::events::GenericTreeViewEvents, togglebutton::events::ToggleButtonEvents,
+    dropdownlist::events::GenericDropDownListEvents,
+    editor::events::EditorEvents, editor::events::EditorEventsType,
+    graphview, graphview::events::GenericGraphViewEvents,
+    listbox::events::ListBoxEvents, listview::events::GenericListViewEvents,
+    markdown, markdown::events::MarkdownEvents,
+    numericselector::events::GenericNumericSelectorEvents,
+    password, password::events::PasswordEvents,
+    radiobox, radiobox::events::RadioBoxEvents,
+    richtextfield::events::RichTextFieldEvents,
+    tab, tab::events::TabEvents,
+    textfield::events::TextFieldEvents,
+    timepicker, timepicker::events::TimePickerEvents,
+    treeview::events::GenericTreeViewEvents,
+    togglebutton::events::ToggleButtonEvents,
     listbox::events::ListBoxEventTypes, listview::events::ListViewEventTypes,
-    treeview::events::TreeViewEventTypes, graphview::events::GraphViewEventTypes, textfield::events::TextFieldEventsType,
+    treeview::events::TreeViewEventTypes,
+    graphview::events::GraphViewEventTypes,
+    textfield::events::TextFieldEventsType,
     richtextfield::events::RichTextFieldEventsType,
     bufferview::events::GenericBufferViewEvents, 
-    hyperlink, hyperlink::events::HyperLinkEvents, hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview,
+    hyperlink, hyperlink::events::HyperLinkEvents,
+    hslider, hslider::events::GenericHSliderEvents,
+    pathfinder, treeview,
+    markdown_composer::events::MarkdownComposerEvents,
 };
 
 #[derive(Copy, Clone)]
@@ -42,6 +57,7 @@ pub(crate) enum ControlEventData {
     KeySelector(keyselector::events::EventData),
     TextField(textfield::events::EventData),
     RichTextField(richtextfield::events::EventData),
+    MarkdownComposer(markdown_composer::events::EventData),
     Selector(selector::events::EventData),
     ComboBox(combobox::events::EventData),
     DropDownList(dropdownlist::events::EventData),
@@ -96,6 +112,19 @@ impl ControlEvent {
                         }
                     }
                     TextFieldEventsType::OnTextChanged => TextFieldEvents::on_text_changed(receiver, self.emitter.cast()),
+                }
+            }
+            ControlEventData::MarkdownComposer(data) => {
+                let h: Handle<MarkdownComposer> = self.emitter.cast();
+                match data.evtype {
+                    markdown_composer::events::MarkdownComposerEventsType::OnValidate => {
+                        if let Some(tf) = RuntimeManager::get().get_control(h) {
+                            MarkdownComposerEvents::on_validate(receiver, self.emitter.cast(), tf.text())
+                        } else {
+                            EventProcessStatus::Ignored
+                        }
+                    }
+                    markdown_composer::events::MarkdownComposerEventsType::OnTextChanged => MarkdownComposerEvents::on_text_changed(receiver, self.emitter.cast()),
                 }
             }
             ControlEventData::RichTextField(data) => {

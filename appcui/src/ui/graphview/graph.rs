@@ -224,6 +224,10 @@ fn closest_points(r1: &Rect, r2: &Rect) -> (Point, Point, OrthogonalDirection, O
     }
 }
 
+/// A collection of [`Node`]s and [`Edge`]s displayed by a [`super::GraphView`].
+///
+/// `Graph` owns the node data (`T: GraphNode`), connectivity, and rendering options
+/// used to paint the graph onto an off-screen surface.
 pub struct Graph<T>
 where
     T: GraphNode,
@@ -1096,6 +1100,10 @@ where
     }
 }
 
+/// A mutable view of a [`Graph`] that records which nodes, edges, or focus changed.
+///
+/// `EditableGraph` is used by [`super::GraphView`] callbacks so the control can
+/// rebuild only the parts of the layout that were modified.
 pub struct EditableGraph<'a, T>
 where
     T: GraphNode + 'a,

@@ -83,6 +83,11 @@ macro_rules! IMPLEMENT_METHODS  {
     };
 }
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnExpand+OnFocus+OnResize+OnThemeChanged+OnMouseEvent, internal=true)]
+/// A control for browsing the file system and selecting a path.
+///
+/// `PathFinder` combines a path editor with an expandable directory navigator. The
+/// current path can be typed or chosen from the tree. See [`Flags`] for options such as
+/// read-only mode and case sensitivity.
 pub struct PathFinder {
     inner: InnerPathFinder<fs::Navigator>,
 }

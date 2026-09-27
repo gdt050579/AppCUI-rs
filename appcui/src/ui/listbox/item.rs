@@ -1,3 +1,7 @@
+/// A single entry in a [`super::ListBox`], with text and an optional checked state.
+///
+/// `Item` stores the displayed caption and whether the item is checked when the list
+/// box is in a multi-select or checkable mode.
 pub struct Item {
     pub(super) value: String,
     pub(super) count: u32,

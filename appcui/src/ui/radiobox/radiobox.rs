@@ -3,6 +3,10 @@ use crate::ui::radiobox::events::EventData;
 use super::Type;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent+OnSiblingSelected,internal=true)]
+/// A labeled option that is mutually exclusive with its sibling radio boxes.
+///
+/// `RadioBox` selects one choice from a group: activating it deselects the others and
+/// raises a selection event. Visual style is controlled by [`Type`].
 pub struct RadioBox {
     caption: Caption,
     selected: bool,

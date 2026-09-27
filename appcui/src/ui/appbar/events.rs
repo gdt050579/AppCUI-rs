@@ -1,3 +1,8 @@
+//! Events emitted by an [`super::AppBar`].
+//!
+//! Implement [`AppBarEvents`] on a window or desktop to handle item clicks and
+//! choose which items to show from [`AppBarEvents::on_update`].
+
 use crate::ui::AppBar;
 
 /// A trait that defines the event handlers for AppBar interation

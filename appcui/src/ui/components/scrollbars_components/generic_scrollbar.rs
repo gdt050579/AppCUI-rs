@@ -36,6 +36,10 @@ pub(super) enum MousePosition {
     OutsideScrollBar,
 }
 
+/// Shared state for a single-axis scroll bar (position, range, and mouse interaction).
+///
+/// `GenericScrollBar` is the implementation behind [`super::horizontal_scrollbar::HScrollBar`]
+/// and [`super::vertical_scrollbar::VScrollBar`].
 pub struct GenericScrollBar {
     pub(crate) x: i32,
     pub(crate) y: i32,

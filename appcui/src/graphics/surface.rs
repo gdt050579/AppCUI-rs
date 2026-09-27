@@ -8,17 +8,20 @@ use super::Character;
 use super::ClipArea;
 use super::Color;
 use super::Cursor;
+use super::Direction;
 use super::Image;
+use super::LineCap;
 use super::LineType;
 use super::OrthogonalDirection;
 use super::Point;
+use super::PolyLineFormat;
 use super::Rect;
 use super::Size;
 use super::TextAlignment;
 use super::TextFormat;
+use super::BOX_JUNCTION;
 use crate::prelude::CharFlags;
 use crate::prelude::RenderOptions;
-use super::BOX_JUNCTION;
 
 #[repr(u8)]
 #[derive(PartialEq, Clone, Copy)]
@@ -158,6 +161,20 @@ impl Surface {
         self.base_origin.y = y;
     }
 
+    /// Sets the clip area using coordinates relative to the surface base origin.
+    ///
+    /// The rectangle is translated by the base origin and then intersected
+    /// with the current base clip, so it cannot expand beyond that clip.
+    /// Use this when drawing a nested region that must stay inside an
+    /// existing clip (for example a control painted inside a parent).
+    ///
+    /// Example:
+    /// ```rust
+    /// use appcui::graphics::{Surface};
+    /// let mut surface = Surface::new(100, 50);
+    /// surface.set_clip(10, 10, 40, 30);
+    /// surface.set_relative_clip(2, 2, 20, 15);
+    /// ```
     #[inline(always)]
     pub fn set_relative_clip(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
         self.clip.set(
@@ -435,15 +452,6 @@ impl Surface {
         }
     }
     fn draw_bresenham_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, line_type: LineType, attr: CharAttribute) {
-        #[derive(Copy, Clone)]
-        enum Direction {
-            Up,
-            Down,
-            Left,
-            Right,
-            None,
-        }
-
         if (x1 == x2) && (y1 == y2) {
             // single point
             self.write_char(x1, y1, Character::with_attributes(' ', attr));
@@ -521,15 +529,7 @@ impl Surface {
             }
 
             // direction from prev → current
-            let dir_in = match (current.x - prev.x, current.y - prev.y) {
-                (1, 0) => Direction::Right,
-                (-1, 0) => Direction::Left,
-                (0, 1) => Direction::Down,
-                (0, -1) => Direction::Up,
-                _ => Direction::None,
-            };
-
-            // lookahead (dir_out)
+            let dir_in = Direction::from_one_unit_step(current.x - prev.x, current.y - prev.y);
 
             let e2 = 2 * err;
             let mut next = current;
@@ -548,26 +548,20 @@ impl Surface {
                     next.x += sx;
                 }
             }
-            let dir_out = match (next.x - current.x, next.y - current.y) {
-                (1, 0) => Direction::Right,
-                (-1, 0) => Direction::Left,
-                (0, 1) => Direction::Down,
-                (0, -1) => Direction::Up,
-                _ => Direction::None,
-            };
+            let dir_out = Direction::from_one_unit_step(next.x - current.x, next.y - current.y);
 
             // decide character
             ch.code = match (dir_in, dir_out) {
-                (Direction::Left, Direction::Left) | (Direction::Right, Direction::Right) => line_chars.horizontal,
-                (Direction::Up, Direction::Up) | (Direction::Down, Direction::Down) => line_chars.vertical,
-                (Direction::Left, Direction::Up) => line_chars.corner_bottom_left,
-                (Direction::Up, Direction::Left) => line_chars.corner_top_right,
-                (Direction::Right, Direction::Up) => line_chars.corner_bottom_right,
-                (Direction::Up, Direction::Right) => line_chars.corner_top_left,
-                (Direction::Left, Direction::Down) => line_chars.corner_top_left,
-                (Direction::Down, Direction::Left) => line_chars.corner_bottom_right,
-                (Direction::Right, Direction::Down) => line_chars.corner_top_right,
-                (Direction::Down, Direction::Right) => line_chars.corner_bottom_left,
+                (Some(Direction::Left), Some(Direction::Left)) | (Some(Direction::Right), Some(Direction::Right)) => line_chars.horizontal,
+                (Some(Direction::Up), Some(Direction::Up)) | (Some(Direction::Down), Some(Direction::Down)) => line_chars.vertical,
+                (Some(Direction::Left), Some(Direction::Up)) => line_chars.corner_bottom_left,
+                (Some(Direction::Up), Some(Direction::Left)) => line_chars.corner_top_right,
+                (Some(Direction::Right), Some(Direction::Up)) => line_chars.corner_bottom_right,
+                (Some(Direction::Up), Some(Direction::Right)) => line_chars.corner_top_left,
+                (Some(Direction::Left), Some(Direction::Down)) => line_chars.corner_top_left,
+                (Some(Direction::Down), Some(Direction::Left)) => line_chars.corner_bottom_right,
+                (Some(Direction::Right), Some(Direction::Down)) => line_chars.corner_top_right,
+                (Some(Direction::Down), Some(Direction::Right)) => line_chars.corner_bottom_left,
                 _ => 'X',
             };
             self.write_char(current.x, current.y, ch);
@@ -625,7 +619,7 @@ impl Surface {
             last = current;
         }
     }
-    pub fn draw_braille_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
+    pub(super) fn draw_braille_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, attr: CharAttribute) {
         // Anchor to the center of each Braille cell: (2x+1, 4y+2)
         let mut px = x1 * 2 + 1;
         let mut py = y1 * 4 + 2;
@@ -718,6 +712,43 @@ impl Surface {
         };
     }
 
+    /// Draws an axis-aligned path between `(x1, y1)` and `(x2, y2)`.
+    ///
+    /// Unlike [`draw_line`](Self::draw_line), this never draws a diagonal
+    /// segment. The two points are connected with horizontal and vertical
+    /// pieces, and corners are taken from [`LineType`]. [`OrthogonalDirection`]
+    /// chooses how the path bends:
+    /// - [`OrthogonalDirection::HorizontalFirst`]: horizontal, then vertical
+    /// - [`OrthogonalDirection::VerticalFirst`]: vertical, then horizontal
+    /// - [`OrthogonalDirection::HorizontalUntilMiddle`]: horizontal to the
+    ///   midpoint, vertical, then horizontal
+    /// - [`OrthogonalDirection::VerticalUntilMiddle`]: vertical to the
+    ///   midpoint, horizontal, then vertical
+    /// - [`OrthogonalDirection::Auto`]: horizontal-first when the run is
+    ///   wider than it is tall, otherwise vertical-first
+    ///
+    /// If the two points share an X or Y coordinate, a single straight
+    /// segment is drawn. If they are the same point, nothing is drawn.
+    ///
+    /// # Parameters
+    /// - `x1`, `y1`: Starting point coordinates.
+    /// - `x2`, `y2`: Ending point coordinates.
+    /// - `line_type`: The [`LineType`] used for segments and corners.
+    /// - `dir`: How the orthogonal path should bend.
+    /// - `attr`: The [`CharAttribute`] applied to the path.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(40, 12);
+    /// surface.draw_orthogonal_line(
+    ///     2, 2, 20, 8,
+    ///     LineType::Single,
+    ///     OrthogonalDirection::HorizontalFirst,
+    ///     charattr!("white,black"),
+    /// );
+    /// ```
     pub fn draw_orthogonal_line(
         &mut self,
         x1: i32,
@@ -823,6 +854,154 @@ impl Surface {
                 self.write_char(x2, middle_y, Character::with_char(ch2));
             }
             OrthogonalDirection::Auto => unreachable!(),
+        }
+    }
+
+    /// Draws a polyline that connects the given points, using the style
+    /// described by [`PolyLineFormat`].
+    ///
+    /// Consecutive points are joined with [`draw_line`](Self::draw_line).
+    /// Orthogonal turns (all eight incoming-to-outgoing direction pairs) get
+    /// a matching corner glyph from [`LineType`]. If the first and last
+    /// points are the same, the path is treated as closed: start and end
+    /// caps are skipped and the closing corner is written as well.
+    ///
+    /// Caps from [`PolyLineFormat`] are applied only on open paths:
+    /// - [`LineCap::Arrow`] and [`LineCap::Triangle`] pick a directional
+    ///   glyph from the first or last segment
+    /// - [`LineCap::Char`] writes a custom character
+    /// - [`LineCap::Auto`] merges the endpoint with neighboring box-drawing
+    ///   characters (useful when a connector attaches to a rectangle)
+    ///
+    /// A custom joint character, if set, replaces the automatic corners at
+    /// every inner vertex. Cap and joint attributes inherit the line
+    /// attributes when they are not specified.
+    ///
+    /// Nothing is drawn if `points` contains fewer than two elements.
+    ///
+    /// # Parameters
+    /// - `points`: Vertices of the polyline, in draw order.
+    /// - `format`: Line style, attributes, optional caps, and optional joint.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(40, 12);
+    ///
+    /// // Open orthogonal U with arrow and triangle caps
+    /// let format = PolyLineFormatBuilder::new(LineType::Single, charattr!("white,black"))
+    ///     .start_cap(LineCap::Arrow)
+    ///     .end_cap(LineCap::Triangle)
+    ///     .build();
+    /// surface.draw_polyline(
+    ///     &[
+    ///         Point::new(2, 1),
+    ///         Point::new(2, 6),
+    ///         Point::new(10, 6),
+    ///         Point::new(10, 1),
+    ///     ],
+    ///     &format,
+    /// );
+    ///
+    /// // Closed rectangle (first point repeated at the end)
+    /// let rect = PolyLineFormatBuilder::new(LineType::Double, charattr!("aqua,black")).build();
+    /// surface.draw_polyline(
+    ///     &[
+    ///         Point::new(14, 1),
+    ///         Point::new(14, 6),
+    ///         Point::new(24, 6),
+    ///         Point::new(24, 1),
+    ///         Point::new(14, 1),
+    ///     ],
+    ///     &rect,
+    /// );
+    ///
+    /// // Connector that merges into existing boxes at both ends
+    /// let connector = PolyLineFormatBuilder::new(LineType::Single, charattr!("yellow,black"))
+    ///     .start_cap(LineCap::Auto)
+    ///     .end_cap(LineCap::Auto)
+    ///     .build();
+    /// surface.draw_polyline(
+    ///     &[Point::new(10, 4), Point::new(14, 4)],
+    ///     &connector,
+    /// );
+    /// ```
+    pub fn draw_polyline(&mut self, points: &[Point], format: &PolyLineFormat) {
+        if points.len() < 2 {
+            return;
+        }
+        let is_circular = points[0] == points[points.len() - 1];
+        let chs = format.line_type.charset();
+        let j_attr = format.joint_attr.unwrap_or(format.attr);
+        let mut previous = None;
+        for i in 0..points.len() - 1 {
+            let start = points[i];
+            let end = points[i + 1];
+            let dir = Direction::from_points(start, end);
+            self.draw_line(start.x, start.y, end.x, end.y, format.line_type, format.attr);
+            let c = match (previous, dir) {
+                (Some(Direction::Right), Some(Direction::Up)) | (Some(Direction::Down), Some(Direction::Left)) => Some(chs.corner_bottom_right),
+                (Some(Direction::Up), Some(Direction::Left)) | (Some(Direction::Right), Some(Direction::Down)) => Some(chs.corner_top_right),
+                (Some(Direction::Left), Some(Direction::Down)) | (Some(Direction::Up), Some(Direction::Right)) => Some(chs.corner_top_left),
+                (Some(Direction::Down), Some(Direction::Right)) | (Some(Direction::Left), Some(Direction::Up)) => Some(chs.corner_bottom_left),
+                _ => None,
+            };
+            if let Some(c) = c {
+                self.write_char(start.x, start.y, Character::with_attributes(c, j_attr));
+            }
+            previous = dir;
+        }
+        if !is_circular {
+            if let Some(start_cap) = format.start_cap {
+                let attr = format.start_attr.unwrap_or(format.attr);
+                if matches!(start_cap, LineCap::Auto) {
+                    self.write_box_junction(points[0].x, points[0].y);
+                } else {
+                    let dir = Direction::from_points(points[0], points[1]);
+                    if let Some(dir) = dir {
+                        let ch = start_cap.char(dir);
+                        self.write_char(points[0].x, points[0].y, Character::with_attributes(ch, attr));
+                    }
+                }
+            }
+            if let Some(end_cap) = format.end_cap {
+                let attr = format.end_attr.unwrap_or(format.attr);
+                let idx = points.len() - 1;
+                if matches!(end_cap, LineCap::Auto) {
+                    self.write_box_junction(points[idx].x, points[idx].y);
+                } else {
+                    let dir = Direction::from_points(points[idx - 1], points[idx]);
+                    if let Some(dir) = dir {
+                        let ch = end_cap.char(dir);
+                        self.write_char(points[idx].x, points[idx].y, Character::with_attributes(ch, attr));
+                    }
+                }
+            }
+        } else {
+            // laxt joint
+            let start = points[0];
+            let dir = Direction::from_points(start, points[1]);
+            let c = match (previous, dir) {
+                (Some(Direction::Right), Some(Direction::Up)) | (Some(Direction::Down), Some(Direction::Left)) => Some(chs.corner_bottom_right),
+                (Some(Direction::Up), Some(Direction::Left)) | (Some(Direction::Right), Some(Direction::Down)) => Some(chs.corner_top_right),
+                (Some(Direction::Left), Some(Direction::Down)) | (Some(Direction::Up), Some(Direction::Right)) => Some(chs.corner_top_left),
+                (Some(Direction::Down), Some(Direction::Right)) | (Some(Direction::Left), Some(Direction::Up)) => Some(chs.corner_bottom_left),
+                _ => None,
+            };
+            if let Some(c) = c {
+                self.write_char(start.x, start.y, Character::with_attributes(c, j_attr));
+            }
+        }
+        // at least 3 points
+        if points.len() > 2 {
+            if let Some(joint) = format.joint {
+                let ch = Character::with_attributes(joint, j_attr);
+                let inner_points = &points[1..points.len() - 1];
+                for p in inner_points {
+                    self.write_char(p.x, p.y, ch);
+                }
+            }
         }
     }
 
@@ -986,6 +1165,32 @@ impl Surface {
         }
     }
 
+    /// Rewrites the character at `(x, y)` as a box-drawing junction based on
+    /// its four neighbors.
+    ///
+    /// The glyphs to the left, above, right, and below are inspected. If they
+    /// form a recognized junction (T-split, cross, corner, and so on), the
+    /// cell is replaced with that junction character. Colors and flags are
+    /// left unchanged. If no junction matches, the cell is not modified.
+    ///
+    /// This is useful after drawing overlapping lines or after attaching a
+    /// polyline with [`LineCap::Auto`]. Coordinates are relative to the
+    /// current origin. The method also accepts a cell one character outside
+    /// the clip rectangle so junctions on a border remain reachable.
+    ///
+    /// # Parameters
+    /// - `x`, `y`: Position of the cell to resolve, relative to the origin.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(20, 8);
+    /// let attr = charattr!("white,black");
+    /// surface.draw_horizontal_line(1, 3, 10, LineType::Single, attr);
+    /// surface.draw_vertical_line(5, 1, 6, LineType::Single, attr);
+    /// surface.write_box_junction(5, 3);
+    /// ```
     pub fn write_box_junction(&mut self, x: i32, y: i32) {
         if !self.clip.is_visible() {
             return;
@@ -1530,6 +1735,33 @@ impl Surface {
         image.paint(self, x, y, render_options);
     }
 
+    /// Draws a [`BitTile`] at `(x, y)` using the selected render method.
+    ///
+    /// Set bits are painted with `set_bit_color` and unset bits with
+    /// `unset_bit_color`. [`BitTileRenderMethod`] chooses the glyph density:
+    /// - [`BitTileRenderMethod::SmallBlocks`]: half-block characters
+    /// - [`BitTileRenderMethod::LargeBlocks`]: full-block characters
+    /// - [`BitTileRenderMethod::Braille`]: Braille dots
+    ///
+    /// # Parameters
+    /// - `x`, `y`: Top-left position of the tile, relative to the origin.
+    /// - `tile`: The bit tile to paint.
+    /// - `set_bit_color`: Color used for bits that are set.
+    /// - `unset_bit_color`: Color used for bits that are unset.
+    /// - `render_method`: How each pixel is mapped to characters.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(20, 8);
+    /// let mut tile = BitTile::<8>::new(4, 4).unwrap();
+    /// tile.set(0, 0, true);
+    /// tile.set(1, 1, true);
+    /// tile.set(2, 2, true);
+    /// tile.set(3, 3, true);
+    /// surface.draw_tile(2, 1, &tile, Color::White, Color::Black, BitTileRenderMethod::LargeBlocks);
+    /// ```
     pub fn draw_tile<const STORAGE_BYTES: usize>(
         &mut self,
         x: i32,

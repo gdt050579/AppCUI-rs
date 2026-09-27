@@ -3,6 +3,10 @@ use crate::prelude::*;
 use crate::ui::checkbox::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent,internal=true)]
+/// A labeled control that toggles between checked and unchecked states.
+///
+/// `CheckBox` displays a caption next to a check mark and raises a status-changed event
+/// when activated. Visual style is controlled by [`Type`].
 pub struct CheckBox {
     caption: Caption,
     checked: bool,

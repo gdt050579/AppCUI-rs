@@ -2,6 +2,10 @@ use crate::prelude::*;
 use crate::ui::hyperlink::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent, internal=true)]
+/// A clickable text control that triggers an action, typically for a URL or command.
+///
+/// `HyperLink` displays underlined text when hovered or focused. Activating it with the
+/// mouse or Enter raises a click event with the associated value.
 pub struct HyperLink {
     url: String,
     tooltip: String,

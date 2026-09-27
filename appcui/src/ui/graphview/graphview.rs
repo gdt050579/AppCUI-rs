@@ -31,6 +31,11 @@ enum Drag {
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
+/// An interactive view for displaying and editing a node-and-edge [`Graph`].
+///
+/// `GraphView` renders nodes that implement [`GraphNode`], supports panning, selection,
+/// dragging, and optional edge creation. Layout and routing are controlled through
+/// [`Flags`] and related graph options.
 pub struct GraphView<T>
 where
     T: GraphNode + 'static,

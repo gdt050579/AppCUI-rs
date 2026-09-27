@@ -12,8 +12,13 @@ use crate::{graphics::Rect, prelude::ActionRequest, system::Handle, ui::common::
 
 // Window events always go to the same window that triggers them --> we don't need a handle as
 // we already have &mut self
+/// Events from a [`struct@super::Window`] (and modal windows).
+///
+/// Implement this on a window type to observe layout, focus, Enter, and close.
+/// For a modal window, [`on_accept`](Self::on_accept) and [`on_cancel`](Self::on_cancel)
+/// typically call `exit_with` / `exit`.
 pub trait WindowEvents {
-    // don't need to change anything --> since layout has been change, repaint wil be force automatically
+    /// Called after the window's rectangle changes from `old_layout` to `new_layout`.
     fn on_layout_changed(&mut self, _old_layout: Rect, _new_layout: Rect) {}
     
     /// called whenver the window receives focus

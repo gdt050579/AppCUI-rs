@@ -32,6 +32,10 @@ struct TextSnapshot {
 }
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
+/// A single-line text input with selection, clipboard, and undo support.
+///
+/// `TextField` lets the user type, select, and edit text. Optional validation and other
+/// behavior are controlled by [`Flags`]. Changes can raise text-changed events.
 pub struct TextField {
     cursor: Cursor,
     selection: Selection,

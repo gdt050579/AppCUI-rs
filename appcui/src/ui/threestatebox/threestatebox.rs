@@ -2,6 +2,11 @@ use crate::prelude::*;
 use crate::ui::threestatebox::{events::EventData, State, initialization_flags::Type};
 
 #[CustomControl(overwrite=OnPaint+OnDefaultAction+OnKeyPressed+OnMouseEvent,internal=true)]
+/// A labeled control that cycles through checked, unchecked, and indeterminate states.
+///
+/// `ThreeStateBox` extends a checkbox with a third [`State`]. Activating it advances to
+/// the next state and raises a status-changed event. Visual style is controlled by
+/// [`Type`].
 pub struct ThreeStateBox {
     caption: Caption,
     state: State,

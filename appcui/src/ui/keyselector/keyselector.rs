@@ -2,6 +2,11 @@ use crate::prelude::*;
 use crate::ui::keyselector::{events::EventData, Flags};
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
+/// A control that captures and displays a keyboard shortcut.
+///
+/// `KeySelector` records the next key combination pressed while it has focus and shows it
+/// in a readable form. Changing the key raises a key-changed event. See [`Flags`] for
+/// optional behavior such as accepting modifier-only keys.
 pub struct KeySelector {
     flags: Flags,
     key: Key,

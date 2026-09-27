@@ -1,3 +1,7 @@
+/// A handle identifying a named group of items in a [`super::ListView`].
+///
+/// Groups can be collapsed or expanded. [`Group::None`] means the item is not
+/// assigned to any group.
 #[derive(Copy,Clone,Debug,Eq,PartialEq)]
 pub struct Group {
     index: u16

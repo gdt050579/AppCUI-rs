@@ -9,6 +9,12 @@ use std::str::FromStr;
 
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent+OnResize+OnFocus, internal=true)]
+/// A numeric input with increment and decrement controls and a closed value range.
+///
+/// `NumericSelector` edits a value of type `T` (any [`Number`]) using the keyboard,
+/// mouse, or its buttons. The value is clamped between the configured minimum and
+/// maximum. Display format and optional behavior are controlled by [`Format`] and
+/// [`Flags`].
 pub struct NumericSelector<T>
 where
     T: Number + 'static, 

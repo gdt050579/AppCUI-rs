@@ -1,18 +1,17 @@
-/// Represents the type of mouse button that was pressed.
-/// 
-/// This enum defines the possible types of mouse buttons that can be pressed.
-/// 
-/// # Values
-/// * `None` - No button was pressed.
-/// * `Left` - The left mouse button was pressed.
-/// * `Right` - The right mouse button was pressed.
-/// * `Center` - The center mouse button was pressed.   
+/// Which mouse button was involved in an event.
+///
+/// [`None`](Self::None) means no button (for example a move without a press).
+/// [`Center`](Self::Center) is the middle / wheel button.
 #[derive(Copy,Clone,Debug,PartialEq, Eq)]
 #[repr(u8)]
 pub enum MouseButton {
+    /// No button.
     None = 0,
+    /// The left mouse button.
     Left,
+    /// The right mouse button.
     Right,
+    /// The middle (wheel) button.
     Center
 }
 

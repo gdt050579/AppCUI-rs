@@ -6,6 +6,10 @@ use crate::graphics::*;
 use crate::prelude::{ControlBase, MouseEvent};
 use crate::system::*;
 
+/// A horizontal scroll bar drawn along the bottom edge of a control.
+///
+/// `HScrollBar` wraps [`super::generic_scrollbar::GenericScrollBar`] and paints a
+/// left/right track with a draggable thumb.
 pub struct HScrollBar {
     base: GenericScrollBar,
 }

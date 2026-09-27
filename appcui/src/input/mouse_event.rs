@@ -3,46 +3,42 @@ use super::KeyModifier;
 use super::MouseButton;
 use super::MouseWheelDirection;
 
-/// Represents the data associated with a mouse event.
-/// 
-/// This struct contains information about the position of the mouse,
-/// the button that was pressed, and the modifier keys (e.g., shift, ctrl, alt).
-/// 
-/// # Fields
-/// * `x` - The x-coordinate of the mouse position.
-/// * `y` - The y-coordinate of the mouse position.
-/// * `button` - The button that was pressed.
-/// * `modifier` - The modifier keys (e.g., shift, ctrl, alt).  
+/// A mouse position, button, and modifier snapshot for press, release, drag, and click events.
+///
+/// Coordinates are in character cells relative to the control that receives the event.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct MouseEventData {
+    /// Horizontal position in character cells.
     pub x: i32,
+    /// Vertical position in character cells.
     pub y: i32,
+    /// Button involved in the event.
     pub button: MouseButton,
+    /// Alt, Ctrl, and/or Shift held during the event.
     pub modifier: KeyModifier
 }
 
-/// Represents the type of mouse event.
-/// 
-/// This enum defines the possible types of mouse events that can occur.
-/// 
-/// # Values
-/// * `Enter` - The mouse pointer has entered a control .
-/// * `Leave` - The mouse pointer has left a control.
-/// * `Over` - The mouse pointer is over a control.
-/// * `Pressed` - A mouse button has been pressed.
-/// * `Released` - A mouse button has been released.
-/// * `DoubleClick` - A mouse button has been double-clicked.
-/// * `Drag` - The mouse pointer is being dragged.
-/// * `Wheel` - The mouse wheel has been rotated.   
+/// A mouse action delivered to a control.
+///
+/// Pointer enter/leave/hover carry little or no extra data. Button actions include
+/// [`MouseEventData`]. Wheel motion uses [`MouseWheelDirection`].
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MouseEvent {
+    /// The pointer entered the control.
     Enter,
+    /// The pointer left the control.
     Leave,
+    /// The pointer is over the control at the given cell.
     Over(Point),
+    /// A mouse button was pressed.
     Pressed(MouseEventData),
+    /// A mouse button was released.
     Released(MouseEventData),
+    /// A mouse button was double-clicked.
     DoubleClick(MouseEventData),
+    /// The pointer is dragging with a button held.
     Drag(MouseEventData),
+    /// The mouse wheel moved (`↑` / `↓` / `←` / `→`).
     Wheel(MouseWheelDirection)
 }
 

@@ -1,3 +1,7 @@
+//! A mutually exclusive choice item in a [`struct@super::Menu`].
+//!
+//! Only one item in a group is selected at a time.
+
 use super::{menu_item::MenuItem, MenuItemWrapper};
 use crate::{
     graphics::{Character, SpecialChar, Surface, TextFormat},

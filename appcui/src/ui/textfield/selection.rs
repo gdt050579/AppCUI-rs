@@ -1,3 +1,8 @@
+//! Text selection range used by a [`struct@super::TextField`].
+//!
+//! Tracks the origin, start, and end of the highlighted span while the user
+//! edits or navigates.
+
 #[derive(Copy, Clone)]
 pub(crate) struct Selection {
     pub(crate) start: usize,

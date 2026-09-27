@@ -18,6 +18,11 @@ enum State {
 }
 
 #[CustomControl(overwrite=OnPaint + OnKeyPressed + OnMouseEvent + OnResize, internal = true)]
+/// A horizontal divider that splits its area into top and bottom resizable panels.
+///
+/// `HSplitter` lets the user drag the divider (or use its collapse buttons) to change
+/// how vertical space is shared between the two sides. Resize behavior is controlled
+/// by [`ResizeBehavior`] and [`Flags`].
 pub struct HSplitter {
     top: Handle<SplitterPanel>,
     bottom: Handle<SplitterPanel>,

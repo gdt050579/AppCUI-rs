@@ -2,6 +2,10 @@ use crate::prelude::*;
 use crate::ui::password::events::EventData;
 
 #[CustomControl(overwrite=OnPaint+OnKeyPressed+OnMouseEvent, internal=true)]
+/// A single-line text input that masks entered characters.
+///
+/// `Password` behaves like a text field but displays placeholder characters instead of
+/// the actual input. Completing or changing the value can raise a password event.
 pub struct Password {
     pass: String,
     chars_count: u32,

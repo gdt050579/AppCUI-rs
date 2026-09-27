@@ -1,9 +1,16 @@
 use EnumBitFlags::EnumBitFlags;
 
 #[EnumBitFlags(bits = 8)]
+/// Modifier keys that can be combined with a [`KeyCode`](super::KeyCode) in a [`Key`](super::Key).
+///
+/// Combine values with `|`. `KeyModifier::None` means no Alt, Ctrl, or Shift.
+/// Names are written with a trailing `+`, for example `Ctrl+Alt+`.
 pub enum KeyModifier {
+    /// The Alt key, shown as `Alt+` in key names.
     Alt = 0x01,
+    /// The Control key, shown as `Ctrl+` in key names.
     Ctrl = 0x02,
+    /// The Shift key, shown as `Shift+` in key names.
     Shift = 0x04,
 }
 

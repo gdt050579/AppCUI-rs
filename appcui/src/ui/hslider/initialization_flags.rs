@@ -2,11 +2,20 @@ use EnumBitFlags::EnumBitFlags;
 
 #[repr(u8)]
 #[derive(Copy,Clone,PartialEq,Eq)]
+/// Visual style of an [`super::HSlider`] track and marker.
+///
+/// `Standard` uses a boxed track, `ProgressBar` fills from the left, `Inline` and
+/// `Blocks` use Unicode bar characters, and `Ruler` draws tick marks below the track.
 pub enum Type {
+    /// Boxed track with a marker, for example `[....X....]`.
     Standard,
+    /// Fill from the left like a progress bar, for example `[====>    ]`.
     ProgressBar,
+    /// Thin Unicode bar with a round marker, for example `━━━━●━━━━`.
     Inline,
+    /// Solid/empty blocks, for example `█████░░░░░`.
     Blocks,
+    /// Bar with tick marks underneath, for example `━━━━●━━━━` over `┕━━┷━━┙`.
     Ruler,
 }
 
@@ -101,8 +110,15 @@ static RULER: CharSet = CharSet {
 };
 
 #[EnumBitFlags(bits=16)]
+/// Initialization flags for an [`struct@super::HSlider`].
+///
+/// Combine values with `|`. `Flags::None` draws the track and marker without a
+/// numeric label or tick marks.
 pub enum Flags {
+    /// Show the current value next to the track.
     ShowValue     = 0x0001,
+    /// Draw tick marks along the track.
     Ticks         = 0x0002,
+    /// Replace the marker glyph with the numeric value.
     ValueAsMarker = 0x0004,
 }

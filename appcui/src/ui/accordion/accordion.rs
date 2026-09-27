@@ -3,6 +3,11 @@ use crate::ui::accordion::events::EventData;
 use crate::ui::accordion::Flags;
 
 #[CustomControl(overwrite=OnPaint+OnMouseEvent+OnKeyPressed+OnResize, internal=true)]
+/// A container that stacks collapsible panels, showing one expanded section at a time.
+///
+/// `Accordion` displays a header for every panel and only one content area. Selecting a
+/// header expands that panel and collapses the others, which keeps related controls in a
+/// compact vertical layout. See [`Flags`] for optional behavior.
 pub struct Accordion {
     flags: Flags,
     panels: Vec<Caption>,

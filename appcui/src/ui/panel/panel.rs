@@ -2,6 +2,10 @@ use crate::prelude::*;
 use crate::ui::panel::Type;
 
 #[CustomControl(overwrite=OnPaint, internal=true)]
+/// A rectangular container used to group related child controls.
+///
+/// `Panel` draws a border and optional caption around its children. The visual style
+/// follows the theme or can be set with [`Type`].
 pub struct Panel {
     caption: Caption,
     panel_type: Type,

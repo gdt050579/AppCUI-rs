@@ -80,19 +80,16 @@ use input_dialog::StringImputDialog;
 use open_save_dialog::{FileExplorer, OpenSaveDialogResult};
 use EnumBitFlags::EnumBitFlags;
 
-/// Result of a validation dialog with a cancel option.
+/// Result of a validation dialog with Yes, No, and Cancel buttons.
 ///
-/// This enum represents the possible outcomes when a dialog with "Yes", "No",
-/// and "Cancel" buttons is displayed.
-///
-/// # Values
-/// * `Yes` - The user clicked the "Yes" button.
-/// * `No` - The user clicked the "No" button.
-/// * `Cancel` - The user clicked the "Cancel" button or closed the dialog.
+/// Returned by [`validate_or_cancel`]. Closing the window is treated as [`ValidateOrCancelResult::Cancel`].
 #[derive(Copy, Clone, PartialEq, Eq)]
 pub enum ValidateOrCancelResult {
+    /// The user clicked **Yes**.
     Yes,
+    /// The user clicked **No**.
     No,
+    /// The user clicked **Cancel** or closed the dialog.
     Cancel,
 }
 
@@ -283,53 +280,49 @@ pub fn validate_or_cancel(title: &str, caption: &str) -> ValidateOrCancelResult 
     }
 }
 
-/// Specifies the initial location for file and folder selection dialogs.
+/// Initial directory for file and folder selection dialogs.
 ///
-/// This enum represents different ways to specify where file and folder
-/// selection dialogs should start browsing.
-///
-/// # Variants
-/// * `Current` - Start in the current working directory.
-/// * `Last` - Start in the last location used in a previous dialog. If no previous dialog
-///   has been opened, falls back to the current directory.
-/// * `Path` - Start in the specified path.
-///
-/// # Example
-/// ```rust,no_run
-/// use appcui::dialogs;
-/// use std::path::Path;
-///
-/// // Start in a specific directory
-/// let specific_path = Path::new("C:/Users/Documents");
-/// let location = dialogs::Location::Path(specific_path);
-///
-/// // Start in the current directory
-/// let current_location = dialogs::Location::Current;
-///
-/// // Start in the last used location
-/// let last_location = dialogs::Location::Last;
-/// ```
+/// Use with [`open`], [`save`], and [`select_folder`].
 #[derive(Clone)]
 pub enum Location<'a> {
+    /// The process current working directory.
     Current,
+    /// The last path used by a previous file or folder dialog. Falls back to [`Location::Current`] if none exists.
     Last,
+    /// The given filesystem path.
     Path(&'a Path),
 }
 
 #[EnumBitFlags(bits = 8)]
+/// Options for a [`save`] dialog.
+///
+/// Combine values with `|`. `SaveFileDialogFlags::None` shows the dialog without icons
+/// and does not ask before overwriting an existing file.
 pub enum SaveFileDialogFlags {
+    /// Show file and folder icons in the list.
     Icons = 1,
+    /// Ask for confirmation if the chosen path already exists.
     ValidateOverwrite = 2,
 }
 
 #[EnumBitFlags(bits = 8)]
+/// Options for an [`open`] dialog.
+///
+/// Combine values with `|`. `OpenFileDialogFlags::None` shows the dialog without icons
+/// and does not check that the file exists on disk.
 pub enum OpenFileDialogFlags {
+    /// Show file and folder icons in the list.
     Icons = 1,
+    /// Reject (or warn on) a path that does not exist.
     CheckIfFileExists = 2,
 }
 
 #[EnumBitFlags(bits = 8)]
+/// Options for a [`select_folder`] dialog.
+///
+/// Combine values with `|`. `SelectFolderDialogFlags::None` shows the dialog without icons.
 pub enum SelectFolderDialogFlags {
+    /// Show folder icons in the tree.
     Icons = 1,
 }
 
