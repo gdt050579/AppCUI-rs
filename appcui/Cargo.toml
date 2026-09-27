@@ -19,8 +19,8 @@ EnumBitFlags = "1.0.11"
 flat_string = "1.1.0"
 chrono = {version = "0.4.45", features = ["wasmbind"]}
 ropey = "1.6.1"
-appcui_proc_macro = "0.3.3"
-# appcui_proc_macro = { path = "../appcui-proc-macro" }
+# appcui_proc_macro = "0.3.3"
+appcui_proc_macro = { path = "../appcui-proc-macro" }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
