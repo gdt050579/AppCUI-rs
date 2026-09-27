@@ -34,6 +34,7 @@ use crate::{
         radiobox::events::RadioBoxEvents,
         selector::events::GenericSelectorEvents,
         textfield::events::TextFieldEvents,
+        markdown_composer::events::MarkdownComposerEvents,
         richtextfield::events::RichTextFieldEvents,
         threestatebox::events::ThreeStateBoxEvents,
         togglebutton::events::ToggleButtonEvents,
@@ -232,6 +233,7 @@ pub trait Control:
     + ColorPickerEvents
     + KeySelectorEvents
     + TextFieldEvents
+    + MarkdownComposerEvents
     + RichTextFieldEvents
     + GenericCommandBarEvents
     + WindowEvents

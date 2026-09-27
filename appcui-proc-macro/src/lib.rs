@@ -94,6 +94,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::MarkdownComposerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
@@ -166,6 +167,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::MarkdownComposerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
@@ -263,6 +265,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::MarkdownComposerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
@@ -332,6 +335,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::Default);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::MarkdownComposerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::Default);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::Default);
@@ -427,6 +431,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::PasswordEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::KeySelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TextFieldEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::MarkdownComposerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::RichTextFieldEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericSelectorEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::ComboBoxEvents, TraitImplementation::DefaultNonOverwritable);
@@ -1531,6 +1536,76 @@ pub fn keyselector(input: TokenStream) -> TokenStream {
 pub fn textfield(input: TokenStream) -> TokenStream {
     crate::controls::textfield::create(input)
 }
+
+
+/// Creates a new markdown composer control - an editable multi-line text control
+/// that renders markdown while you type.
+/// The format is `markdown_composer!("attributes")` where the attributes are pairs of key-value, separated by comma.
+///
+/// Recognized markdown: `**bold**`, `_italic_`, `` `code` ``, ```` ```code block``` ````,
+/// `-` or `*` for bullets and `>` for quotes. By default the markers themselves are hidden
+/// and only the formatting is shown.
+///
+/// # Parameters
+/// * `content` or `text` (optional, first positional parameter) - The initial markdown text. Defaults to an empty document.
+/// * `flags` - Control flags (optional). Can be:
+///   - **ShowMarkers** - Keeps the markdown markers visible instead of hiding them
+///   - **Emoticons** - Replaces text emoticons written between colons with emoji as you type (`:B):` becomes 😎, `:<3:` becomes ❤). Not applied inside code
+///   - **ReadOnly** - The text can be read, selected, copied and scrolled, but not edited by the user
+/// * `emoji` (optional) - The character that opens the emoji suggestion list, for example `emoji: ':'`
+/// * `lists` (optional) - Any number of suggestion lists, each one written between `{` and `}`:
+///   - the first value (or `trigger`) is the character that opens the list
+///   - `items: ['...', ...]` - the names shown and inserted
+///   - `values: [{name, value}, ...]` - the names shown, each one inserting its own value
+///   - `flags` (optional) - **RemoveTrigger** removes the trigger character when an item is inserted
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+///
+/// Suggestion lists can also be added later on the instance with
+/// [`MarkdownComposer::add_list`], [`MarkdownComposer::add_list_with_values`] or
+/// [`MarkdownComposer::add_emoji_list`]. To react to edits or to Ctrl+Enter, implement
+/// [`MarkdownComposerEvents`] on the parent window.
+///
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
+/// // Empty editor
+/// let mc = markdown_composer!("x:1, y:1, width:40, height:10");
+///
+/// // Editor with initial content
+/// let mc = markdown_composer!("'# Notes\n\nWrite **here**', x:1, y:1, width:40, height:10");
+///
+/// // Editor that keeps the markdown markers visible while editing
+/// let mc = markdown_composer!(
+///     "content: '# Draft\n\n- first item\n- second item',
+///     flags: ShowMarkers,
+///     x:2, y:2, width:50, height:15"
+/// );
+///
+/// // Editor that turns :B): into 😎 while typing
+/// let mc = markdown_composer!("x:1, y:1, width:40, height:10, flags: Emoticons");
+///
+/// // Editor with emoji list and two suggestion lists
+/// let mc = markdown_composer!(
+///     "l:0, t:0, r:0, b:0, emoji: ':',
+///     lists: [
+///         {'@', items: ['Ana', 'Bogdan', 'Cristina'], flags: RemoveTrigger},
+///         {trigger: '#', values: [{bug, '🐛'}, {todo, '📝'}]}
+///     ]"
+/// );
+/// ```
+#[proc_macro]
+pub fn markdown_composer(input: TokenStream) -> TokenStream {
+    crate::controls::markdown_composer::create(input)
+}
+
 
 /// Creates a new richtextfield control. The format is `richtextfield!("attributes")` where the attributes are pairs of key-value, separated by comma, in the format `key=value` or `key:value`.
 /// If the `value` is a string, use single quotes to delimit the value.
