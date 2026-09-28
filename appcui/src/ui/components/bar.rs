@@ -60,6 +60,45 @@ impl BarFillType {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum BarCapType {
+    /// U+2588 — full block.
+    #[default]
+    Solid,
+    /// U+2593 ▓ — dense shade.
+    Shade75,
+    /// U+2592 ▒ — medium shade.
+    Shade50,
+    /// U+2591 ░ — light shade.
+    Shade25,
+    /// 2x4 braille cells used as a fill.
+    Braille,
+    /// Single line.
+    SingleLine,
+    /// Double line.
+    DoubleLine,
+    /// Single thick line.
+    SingleThickLine,
+    /// Fill with an arbitrary character.
+    Custom(char),
+}
+impl BarCapType {
+    #[inline(always)]
+    pub(crate) fn character(&self, attr: CharAttribute) -> Character {
+        match self {
+            BarCapType::Solid => Character::with_attributes(SpecialChar::Block100, attr),
+            BarCapType::Shade75 => Character::with_attributes(SpecialChar::Block75, attr),
+            BarCapType::Shade50 => Character::with_attributes(SpecialChar::Block50, attr),
+            BarCapType::Shade25 => Character::with_attributes(SpecialChar::Block25, attr),
+            BarCapType::Braille => Character::with_attributes('\u{28FF}', attr),
+            BarCapType::SingleLine => Character::with_attributes(SpecialChar::BoxHorizontalSingleLine, attr),
+            BarCapType::DoubleLine => Character::with_attributes(SpecialChar::BoxHorizontalDoubleLine, attr),
+            BarCapType::SingleThickLine => Character::with_attributes('\u{2501}', attr),
+            BarCapType::Custom(ch) => Character::with_attributes(*ch, attr),
+        }
+    }
+}
+
 /// Shape of a point/marker (used by `Point`, `Whisker`, `Lollipop`).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum BarPointType {
@@ -93,6 +132,7 @@ pub enum BarDrawMode {
     FilledRectangle(LineType), // constrained: thickness ≥ 3
     Smooth,                    // full-block + sub-cell tip
     Point(BarPointType),       // marker
+    Cap(BarCapType),
 }
 
 impl BarDrawMode {
@@ -104,6 +144,7 @@ impl BarDrawMode {
             BarDrawMode::FilledRectangle(_) => (3, u8::MAX),
             BarDrawMode::Smooth => (1, u8::MAX),
             BarDrawMode::Point(_) => (1, 1),
+            BarDrawMode::Cap(_) => (1, u8::MAX),
         }
     }
 }
@@ -292,6 +333,11 @@ impl<T: Number + 'static> Bar<T> {
         surface.write_char(point.x, point.y, bar_point_type.character(attr));
     }
     #[inline(always)]
+    fn paint_vertical_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
+        let point = self.point_vertical(layout);
+        surface.fill_horizontal_line_with_size(point.x, point.y, self.actual_thickness(&defaults) as u32, cap_type.character(attr));
+    }    
+    #[inline(always)]
     pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
         let (min, max) = mode.thickness_range();
@@ -325,6 +371,7 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Rectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults, false),
             BarDrawMode::Smooth => todo!(),
             BarDrawMode::Point(point_type) => self.paint_vertical_point(surface, point_type, attr, layout),
+            BarDrawMode::Cap(cap_type) => self.paint_vertical_cap(surface, cap_type, attr, layout, defaults),
         }
     }
 }
