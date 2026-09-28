@@ -122,6 +122,14 @@ impl BarPointType {
             BarPointType::Custom(ch) => Character::with_attributes(*ch, attr),
         }
     }
+    pub(crate) fn large_characters(&self) -> [char; 4] {
+        match self {
+            BarPointType::Circle => ['╭', '╮', '╰', '╯'],
+            BarPointType::Diamond => ['▞', '▚', '▚', '▞'],
+            BarPointType::Square => ['┌', '┐', '└', '┘'],
+            BarPointType::Custom(ch) => [*ch, *ch, *ch, *ch],
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -132,7 +140,8 @@ pub enum BarDrawMode {
     FilledRectangle(LineType), // constrained: thickness ≥ 3
     Smooth,                    // full-block + sub-cell tip
     Point(BarPointType),       // marker
-    Cap(BarCapType),
+    LargePoint(BarPointType),  // large marker
+    Cap(BarCapType),           // cap at the top of the bar
 }
 
 impl BarDrawMode {
@@ -144,6 +153,7 @@ impl BarDrawMode {
             BarDrawMode::FilledRectangle(_) => (3, u8::MAX),
             BarDrawMode::Smooth => (1, u8::MAX),
             BarDrawMode::Point(_) => (1, 1),
+            BarDrawMode::LargePoint(_) => (2, 2),
             BarDrawMode::Cap(_) => (1, u8::MAX),
         }
     }
@@ -333,10 +343,19 @@ impl<T: Number + 'static> Bar<T> {
         surface.write_char(point.x, point.y, bar_point_type.character(attr));
     }
     #[inline(always)]
+    fn paint_vertical_large_point(&self, surface: &mut Surface, bar_point_type: BarPointType, attr: CharAttribute, layout: &BarLayout) {
+        let point = self.point_vertical(layout);
+        let chars = bar_point_type.large_characters();
+        surface.write_char(point.x, point.y, Character::with_attributes(chars[0], attr));
+        surface.write_char(point.x + 1, point.y, Character::with_attributes(chars[1], attr));
+        surface.write_char(point.x, point.y + 1, Character::with_attributes(chars[3], attr));
+        surface.write_char(point.x + 1, point.y + 1, Character::with_attributes(chars[4], attr));
+    }
+    #[inline(always)]
     fn paint_vertical_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
         let point = self.point_vertical(layout);
         surface.fill_horizontal_line_with_size(point.x, point.y, self.actual_thickness(&defaults) as u32, cap_type.character(attr));
-    }    
+    }
     #[inline(always)]
     pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
@@ -371,6 +390,7 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Rectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults, false),
             BarDrawMode::Smooth => todo!(),
             BarDrawMode::Point(point_type) => self.paint_vertical_point(surface, point_type, attr, layout),
+            BarDrawMode::LargePoint(point_type) => self.paint_vertical_large_point(surface, point_type, attr, layout),
             BarDrawMode::Cap(cap_type) => self.paint_vertical_cap(surface, cap_type, attr, layout, defaults),
         }
     }
