@@ -122,12 +122,12 @@ impl BarPointType {
             BarPointType::Custom(ch) => Character::with_attributes(*ch, attr),
         }
     }
-    pub(crate) fn large_characters(&self) -> [char; 4] {
+    pub(crate) fn large_characters(&self) -> [char; 6] {
         match self {
-            BarPointType::Circle => ['╭', '╮', '╰', '╯'],
-            BarPointType::Diamond => ['▞', '▚', '▚', '▞'],
-            BarPointType::Square => ['┌', '┐', '└', '┘'],
-            BarPointType::Custom(ch) => [*ch, *ch, *ch, *ch],
+            BarPointType::Circle => ['╭', '─', '╮', '╰', '─', '╯'],
+            BarPointType::Diamond => ['▞', '▀', '▚', '▚', '▄', '▞'],
+            BarPointType::Square => ['┌', '─', '┐', '└', '─', '┘'],
+            BarPointType::Custom(ch) => [*ch, *ch, *ch, *ch, *ch, *ch],
         }
     }
 }
@@ -153,7 +153,7 @@ impl BarDrawMode {
             BarDrawMode::FilledRectangle(_) => (3, u8::MAX),
             BarDrawMode::Smooth => (1, u8::MAX),
             BarDrawMode::Point(_) => (1, 1),
-            BarDrawMode::LargePoint(_) => (2, 2),
+            BarDrawMode::LargePoint(_) => (3, 3),
             BarDrawMode::Cap(_) => (1, u8::MAX),
         }
     }
@@ -348,8 +348,10 @@ impl<T: Number + 'static> Bar<T> {
         let chars = bar_point_type.large_characters();
         surface.write_char(point.x, point.y, Character::with_attributes(chars[0], attr));
         surface.write_char(point.x + 1, point.y, Character::with_attributes(chars[1], attr));
+        surface.write_char(point.x + 2, point.y, Character::with_attributes(chars[2], attr));
         surface.write_char(point.x, point.y + 1, Character::with_attributes(chars[3], attr));
         surface.write_char(point.x + 1, point.y + 1, Character::with_attributes(chars[4], attr));
+        surface.write_char(point.x + 2, point.y + 1, Character::with_attributes(chars[5], attr));
     }
     #[inline(always)]
     fn paint_vertical_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
