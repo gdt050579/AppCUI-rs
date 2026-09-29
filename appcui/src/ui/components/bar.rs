@@ -138,7 +138,6 @@ pub enum BarDrawMode {
     Line(LineType),            // constrained: thickness = 1
     Rectangle(LineType),       // constrained: thickness ≥ 2
     FilledRectangle(LineType), // constrained: thickness ≥ 3
-    Smooth,                    // full-block + sub-cell tip
     Point(BarPointType),       // marker
     LargePoint(BarPointType),  // large marker
     Cap(BarCapType),           // cap at the top of the bar
@@ -151,7 +150,6 @@ impl BarDrawMode {
             BarDrawMode::Line(_) => (1, 1),
             BarDrawMode::Rectangle(_) => (2, u8::MAX),
             BarDrawMode::FilledRectangle(_) => (3, u8::MAX),
-            BarDrawMode::Smooth => (1, u8::MAX),
             BarDrawMode::Point(_) => (1, 1),
             BarDrawMode::LargePoint(_) => (3, 3),
             BarDrawMode::Cap(_) => (1, u8::MAX),
@@ -186,7 +184,6 @@ pub(crate) struct BarLayout {
     pub(crate) x: i32,
     pub(crate) y: i32,
     pub(crate) length: i16,
-    pub(crate) digits: u8,
     pub(crate) surface_size: Size,
 }
 
@@ -291,6 +288,7 @@ impl<T: Number + 'static> Bar<T> {
             surface.fill_rect(self.rect_vertical(layout, defaults), c);
         }
     }
+ 
     #[inline(always)]
     fn paint_vertical_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
         let (upper, bottom, zero) = match line_type {
@@ -390,7 +388,6 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Line(line_type) => self.paint_vertical_line(surface, line_type, attr, layout),
             BarDrawMode::FilledRectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults, true),
             BarDrawMode::Rectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults, false),
-            BarDrawMode::Smooth => todo!(),
             BarDrawMode::Point(point_type) => self.paint_vertical_point(surface, point_type, attr, layout),
             BarDrawMode::LargePoint(point_type) => self.paint_vertical_large_point(surface, point_type, attr, layout),
             BarDrawMode::Cap(cap_type) => self.paint_vertical_cap(surface, cap_type, attr, layout, defaults),

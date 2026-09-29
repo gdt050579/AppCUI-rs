@@ -7,14 +7,13 @@ use super::{
 use crate::{prelude::*, ui::vbarchart::XAxisLabelMode};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-struct BarLayour {
+struct BarLayout {
     x: i32,
     h: i16,
-    digits: u8,
 }
 struct BarWithLayout<T: Number + 'static> {
     bar: Bar<T>,
-    layout: BarLayour,
+    layout: BarLayout,
 }
 impl<T> BarWithLayout<T>
 where
@@ -24,7 +23,7 @@ where
     fn new(bar: Bar<T>) -> Self {
         Self {
             bar,
-            layout: BarLayour { x: 0, h: 0, digits: 0 },
+            layout: BarLayout { x: 0, h: 0 },
         }
     }
 }
@@ -416,7 +415,6 @@ where
                 } else {
                     -(v / lo * cells_below)
                 };
-                bar.layout.digits = (h.abs().fract() * 100.0) as u8;
                 bar.layout.h = h.round() as i16;
             }
         }
@@ -431,13 +429,11 @@ where
             for bar in self.bars.iter_mut() {
                 let v = bar.bar.value.to_f64();
                 let h = (v - min) / range * height;
-                bar.layout.digits = (h.fract() * 100.0) as u8;
                 bar.layout.h = h.trunc() as i16;
             }
         } else {
             let uniform = (height * 0.5).trunc() as i16;
             for bar in self.bars.iter_mut() {
-                bar.layout.digits = 0;
                 bar.layout.h = uniform;
             }
         }
@@ -452,7 +448,6 @@ where
             let uniform = (height * 0.5).trunc() as i16;
             for bar in self.bars.iter_mut() {
                 bar.layout.h = uniform;
-                bar.layout.digits = 0;
             }
             return;
         }
@@ -465,7 +460,6 @@ where
             let v = bar.bar.value.to_f64();
             let tip = ((v - min) / total * height).clamp(0.0, height);
             let h = tip - zero_vis;
-            bar.layout.digits = (h.abs().fract() * 100.0) as u8;
             bar.layout.h = h.trunc() as i16;
         }
     }
@@ -528,7 +522,6 @@ where
             }
             let bar = &self.bars[start];
             layout.length = bar.layout.h;
-            layout.digits = bar.layout.digits;
             bar.bar.paint_vertical(&mut self.surface, &layout, &defaults);
             start += 1;
         }
