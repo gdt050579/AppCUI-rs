@@ -6,14 +6,10 @@ use super::{
 };
 use crate::{prelude::*, ui::vbarchart::XAxisLabelMode};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-struct BarLayout {
-    x: i32,
-    h: i16,
-}
 struct BarWithLayout<T: Number + 'static> {
     bar: Bar<T>,
-    layout: BarLayout,
+    x: i32,
+    h: i16,
 }
 impl<T> BarWithLayout<T>
 where
@@ -21,10 +17,7 @@ where
 {
     #[inline(always)]
     fn new(bar: Bar<T>) -> Self {
-        Self {
-            bar,
-            layout: BarLayout { x: 0, h: 0 },
-        }
+        Self { bar, x: 0, h: 0 }
     }
 }
 
@@ -415,7 +408,7 @@ where
                 } else {
                     -(v / lo * cells_below)
                 };
-                bar.layout.h = h.round() as i16;
+                bar.h = h.round() as i16;
             }
         }
     }
@@ -429,12 +422,12 @@ where
             for bar in self.bars.iter_mut() {
                 let v = bar.bar.value.to_f64();
                 let h = (v - min) / range * height;
-                bar.layout.h = h.trunc() as i16;
+                bar.h = h.trunc() as i16;
             }
         } else {
             let uniform = (height * 0.5).trunc() as i16;
             for bar in self.bars.iter_mut() {
-                bar.layout.h = uniform;
+                bar.h = uniform;
             }
         }
     }
@@ -447,7 +440,7 @@ where
             self.yaxis.zero = 0;
             let uniform = (height * 0.5).trunc() as i16;
             for bar in self.bars.iter_mut() {
-                bar.layout.h = uniform;
+                bar.h = uniform;
             }
             return;
         }
@@ -460,7 +453,7 @@ where
             let v = bar.bar.value.to_f64();
             let tip = ((v - min) / total * height).clamp(0.0, height);
             let h = tip - zero_vis;
-            bar.layout.h = h.trunc() as i16;
+            bar.h = h.trunc() as i16;
         }
     }
     fn update_bars_layout(&mut self) {
@@ -474,8 +467,8 @@ where
 
         for bar in self.bars.iter_mut() {
             x += bar.bar.spacing.unwrap_or(self.defaults.spacing) as i32;
-            bar.layout.x = x;
-            bar.layout.h = 0;
+            bar.x = x;
+            bar.h = 0;
             x += bar.bar.actual_thickness(&self.defaults) as i32;
             let value = bar.bar.value.to_f64();
             v_max = v_max.max(value);
@@ -514,14 +507,14 @@ where
             defaults.attr = bar_attr;
         }
         self.surface.set_relative_clip(left_margin, 0, width, plot_bottom);
-        layout.surface_size = Size::new((width + 1 - left_margin) as u32, (plot_bottom+1) as u32);
+        layout.surface_size = Size::new((width + 1 - left_margin) as u32, (plot_bottom + 1) as u32);
         while start < len {
-            layout.x = self.bars[start].layout.x - self.left_scroll + left_margin;
+            layout.x = self.bars[start].x - self.left_scroll + left_margin;
             if layout.x >= width {
                 break;
             }
             let bar = &self.bars[start];
-            layout.length = bar.layout.h;
+            layout.length = bar.h;
             bar.bar.paint_vertical(&mut self.surface, &layout, &defaults);
             start += 1;
         }
@@ -597,7 +590,7 @@ where
     fn print_label(&mut self, x: i32, y: i32, start_bar_index: usize, end_bar_index: usize, label: &str, attr: CharAttribute) {
         let last_bar = &self.bars[end_bar_index];
         let first_bar = &self.bars[start_bar_index];
-        let width = (last_bar.bar.actual_thickness(&self.defaults) as i32) + last_bar.layout.x - first_bar.layout.x;
+        let width = (last_bar.bar.actual_thickness(&self.defaults) as i32) + last_bar.x - first_bar.x;
         let left_space = first_bar.bar.spacing.unwrap_or(self.defaults.spacing) as i32;
         let right_space = if end_bar_index + 1 < self.bars.len() {
             self.bars[end_bar_index + 1].bar.spacing.unwrap_or(self.defaults.spacing) as i32
@@ -649,7 +642,7 @@ where
         let y = self.size().height as i32 - 1;
         while idx_start < len {
             let bar = &self.bars[idx_start];
-            let x = bar.layout.x - self.left_scroll + left_margin;
+            let x = bar.x - self.left_scroll + left_margin;
             if x >= width {
                 break;
             }
@@ -669,7 +662,7 @@ where
         let y = self.size().height as i32 - 1;
         while idx_start < len {
             let bar = &self.bars[idx_start];
-            let x = bar.layout.x - self.left_scroll + left_margin;
+            let x = bar.x - self.left_scroll + left_margin;
             if x >= width {
                 break;
             }
@@ -696,12 +689,12 @@ where
                 break;
             }
             let bar = &self.bars[start_index];
-            let x = bar.layout.x - self.left_scroll + left_margin;
+            let x = bar.x - self.left_scroll + left_margin;
             if x >= width {
                 break;
             }
             let end_index = (span.end as usize).min(len - 1);
-            let end_x = self.bars[end_index].layout.x - self.left_scroll + self.bars[end_index].bar.actual_thickness(&self.defaults) as i32;
+            let end_x = self.bars[end_index].x - self.left_scroll + self.bars[end_index].bar.actual_thickness(&self.defaults) as i32;
             if end_x < 0 {
                 continue; // not visible
             }
@@ -722,7 +715,7 @@ where
     }
     #[inline(always)]
     fn update_first_visible_bar(&mut self) {
-        self.first_visible_bar = (self.bars.partition_point(|b| b.layout.x < self.left_scroll) as u32).saturating_sub(1);
+        self.first_visible_bar = (self.bars.partition_point(|b| b.x < self.left_scroll) as u32).saturating_sub(1);
     }
     fn after_horizontal_scroll(&mut self) {
         self.update_first_visible_bar();
@@ -731,7 +724,7 @@ where
     }
     fn align_scroll_to_first_visible_bar(&mut self) {
         if let Some(bar) = self.bars.get(self.first_visible_bar as usize) {
-            self.left_scroll = bar.layout.x.max(0);
+            self.left_scroll = bar.x.max(0);
         }
         self.sync_horizontal_scrollbar();
         self.repaint_surface();
@@ -749,14 +742,14 @@ where
             return None;
         }
         let content_x = x + self.left_scroll - left_margin;
-        let idx = self.bars.partition_point(|b| b.layout.x <= content_x).saturating_sub(1);
+        let idx = self.bars.partition_point(|b| b.x <= content_x).saturating_sub(1);
         let bar = self.bars.get(idx)?;
         let thickness = bar.bar.actual_thickness(&self.defaults) as i32;
-        if content_x < bar.layout.x || content_x >= bar.layout.x + thickness {
+        if content_x < bar.x || content_x >= bar.x + thickness {
             return None;
         }
         let baseline = plot_bottom - self.yaxis.zero;
-        let h = bar.layout.h;
+        let h = bar.h;
         let (top, bottom) = if h == 0 {
             (baseline, baseline)
         } else if h > 0 {
@@ -773,10 +766,10 @@ where
         let bar = &self.bars[index];
         let left_margin = self.x_axis_left_margin();
         let plot_bottom = self.size().height as i32 - (self.xaxis.label_format.height() as i32 + 1);
-        let x = bar.layout.x - self.left_scroll + left_margin;
+        let x = bar.x - self.left_scroll + left_margin;
         let thickness = bar.bar.actual_thickness(&self.defaults) as u16;
         let baseline = plot_bottom - self.yaxis.zero;
-        let h = bar.layout.h;
+        let h = bar.h;
         if h == 0 {
             Rect::with_size(x, baseline, thickness, 1)
         } else if h > 0 {
@@ -869,7 +862,11 @@ where
             surface.draw_surface(0, 0, &self.surface);
             if let Some(index) = self.selected_bar {
                 // clip to the plot area bounded by the X and Y axes (inclusive)
-                let left = if self.yaxis.visible && self.yaxis.width > 0 { self.yaxis.width as i32 + 1 } else { 0 };
+                let left = if self.yaxis.visible && self.yaxis.width > 0 {
+                    self.yaxis.width as i32 + 1
+                } else {
+                    0
+                };
                 let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
                 let right = self.size().width.saturating_sub(1) as i32;
                 surface.set_relative_clip(left, 0, right, bottom);
