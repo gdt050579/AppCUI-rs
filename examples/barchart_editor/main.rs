@@ -112,7 +112,7 @@ fn point_type(index: u32, mark: char) -> BarPointType {
         1 => BarPointType::Diamond,
         2 => BarPointType::Square,
         3 => BarPointType::Custom(mark),
-        _ => BarPointType::Circle,
+        _ => BarPointType::Bullet,
     }
 }
 
@@ -497,7 +497,7 @@ impl BarChartEditor {
         };
         match index {
             0 => ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::None),
-            1 => ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index { start: 1 }),
+            1 => ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index(1)),
             2 => ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::BarLabels),
             3 => ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(&quarter_spans())),
             _ => {}
@@ -803,7 +803,7 @@ impl BarChartEditor {
             BarDrawMode::FilledRectangle(line) => (3, None, Some(line), None, None, None),
             BarDrawMode::Point(point) => {
                 let (index, mark) = match point {
-                    BarPointType::Circle => (0, None),
+                    BarPointType::Bullet => (0, None),
                     BarPointType::Diamond => (1, None),
                     BarPointType::Square => (2, None),
                     BarPointType::Custom(ch) => (3, Some(ch)),
@@ -812,7 +812,7 @@ impl BarChartEditor {
             }
             BarDrawMode::LargePoint(point) => {
                 let (index, mark) = match point {
-                    BarPointType::Circle => (0, None),
+                    BarPointType::Bullet => (0, None),
                     BarPointType::Diamond => (1, None),
                     BarPointType::Square => (2, None),
                     BarPointType::Custom(ch) => (3, Some(ch)),

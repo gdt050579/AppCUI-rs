@@ -104,7 +104,7 @@ impl BarCapType {
 pub enum BarPointType {
     /// ● — default marker.
     #[default]
-    Circle,
+    Bullet,
     /// ◆ — diamond.
     Diamond,
     /// ■ — square.
@@ -116,7 +116,7 @@ impl BarPointType {
     #[inline(always)]
     pub(crate) fn character(&self, attr: CharAttribute) -> Character {
         match self {
-            BarPointType::Circle => Character::with_attributes('●', attr),
+            BarPointType::Bullet => Character::with_attributes('●', attr),
             BarPointType::Diamond => Character::with_attributes('◆', attr),
             BarPointType::Square => Character::with_attributes('■', attr),
             BarPointType::Custom(ch) => Character::with_attributes(*ch, attr),
@@ -124,7 +124,7 @@ impl BarPointType {
     }
     pub(crate) fn large_characters(&self) -> [char; 6] {
         match self {
-            BarPointType::Circle => ['╭', '─', '╮', '╰', '─', '╯'],
+            BarPointType::Bullet => ['╭', '─', '╮', '╰', '─', '╯'],
             BarPointType::Diamond => ['▞', '▀', '▚', '▚', '▄', '▞'],
             BarPointType::Square => ['┌', '─', '┐', '└', '─', '┘'],
             BarPointType::Custom(ch) => [*ch, *ch, *ch, *ch, *ch, *ch],

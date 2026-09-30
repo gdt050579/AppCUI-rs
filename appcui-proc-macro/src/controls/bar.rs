@@ -5,12 +5,14 @@ static LINE_TYPES: &[(&str, &str)] = &[
     ("Double", "double"),
     ("SingleThick", "singlethick"),
     ("SingleThick", "single-thick"),
+    ("SingleThick", "thick"),
     ("Border", "border"),
     ("Ascii", "ascii"),
     ("AsciiRound", "asciiround"),
     ("AsciiRound", "ascii-round"),
     ("SingleRound", "singleround"),
     ("SingleRound", "single-round"),
+    ("SingleRound", "round"),
     ("Braille", "braille"),
 ];
 
@@ -44,7 +46,7 @@ static FILL_TYPES: &[(&str, &str)] = &[
 ];
 
 static POINT_TYPES: &[(&str, &str)] = &[
-    ("Circle", "circle"),
+    ("Bullet", "bullet"),
     ("Diamond", "diamond"),
     ("Square", "square"),
 ];

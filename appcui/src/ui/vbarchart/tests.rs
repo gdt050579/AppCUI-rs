@@ -429,3 +429,615 @@ fn check_draw_mode_fill_custom() {
         .unwrap();
 }
 
+#[test]
+fn check_draw_mode_line_single() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Line(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_line_double() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Line(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_line_single_thick() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Line(SingleThick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_line_braille() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Line(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_line_ascii() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Line(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+
+
+
+#[test]
+fn check_draw_mode_rectangle_single() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_rectangle_double() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_rectangle_single_thick() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Thick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_rectangle_braille() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_rectangle_ascii() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_rectangle_single_round() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(SingleRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_rectangle_ascii_round() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(AsciiRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+
+
+
+
+
+
+#[test]
+fn check_draw_mode_filled_rectangle_single() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_filled_rectangle_double() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_filled_rectangle_single_thick() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(SingleThick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_filled_rectangle_braille() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_filled_rectangle_ascii() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_filled_rectangle_single_round() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Round), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_filled_rectangle_ascii_round() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(AsciiRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_point_bullet() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Point(Bullet), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_point_diamond() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Point(Diamond), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_point_square() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Point(Square), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_point_custom() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Point('X'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_cap_solid() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Cap(solid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+#[test]
+fn check_draw_mode_cap_shade75() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Cap(Shade75), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+#[test]
+fn check_draw_mode_cap_shade50() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Cap(Shade50), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+#[test]
+fn check_draw_mode_cap_shade25() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Cap(Shade25), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+#[test]
+fn check_draw_mode_cap_braille() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Cap(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_cap_single_line() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Cap(SingleLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_cap_double_line() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Cap(DoubleLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_cap_thick_line() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Cap(ThickLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_cap_custom() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Cap('x'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
