@@ -116,25 +116,50 @@ fn check_scale_sequences() {
         Paint('1. Mixed, positive and negative sequences')
         CheckHash(0xF5BB896CABAD0451)
     ";
-    App::new().size(Size::new(80, 48)).debug_script(script).window(|| {
-        let mut w = window!("Scales,a:c,w:76,h:44");
-        w.add(label!("'-2, -1, 0, 1, 2',x:1,y:1,w:30"));
-        let mut mixed = VBarChart::<i32>::new(layout!("x:1,y:2,w:72,h:12"), vbarchart::Flags::None);
-        mixed.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index { start: 1 });
-        mixed.add_bars([-2, -1, 0, 1, 2]);
-        w.add(mixed);
+    App::new()
+        .size(Size::new(80, 48))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Scales,a:c,w:76,h:44");
+            w.add(label!("'-2, -1, 0, 1, 2',x:1,y:1,w:30"));
+            let mut mixed = VBarChart::<i32>::new(layout!("x:1,y:2,w:72,h:12"), vbarchart::Flags::None);
+            mixed.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index (1));
+            mixed.add_bars([-2, -1, 0, 1, 2]);
+            w.add(mixed);
 
-        w.add(label!("'0, 1, 2',x:1,y:14,w:30"));
-        let mut positive = VBarChart::<i32>::new(layout!("x:1,y:15,w:72,h:12"), vbarchart::Flags::None);
-        positive.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index { start: 1 });
-        positive.add_bars([0, 1, 2]);
-        w.add(positive);
+            w.add(label!("'0, 1, 2',x:1,y:14,w:30"));
+            let mut positive = VBarChart::<i32>::new(layout!("x:1,y:15,w:72,h:12"), vbarchart::Flags::None);
+            positive.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index (1));
+            positive.add_bars([0, 1, 2]);
+            w.add(positive);
 
-        w.add(label!("'-2, -1, 0',x:1,y:27,w:30"));
-        let mut negative = VBarChart::<i32>::new(layout!("x:1,y:28,w:72,h:12"), vbarchart::Flags::None);
-        negative.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index { start: 1 });
+            w.add(label!("'-2, -1, 0',x:1,y:27,w:30"));
+            let mut negative = VBarChart::<i32>::new(layout!("x:1,y:28,w:72,h:12"), vbarchart::Flags::None);
+            negative.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index (1));
             negative.add_bars([-2, -1, 0]);
-        w.add(negative);
-        w
-    }).run().unwrap();
+            w.add(negative);
+            w
+        })
+        .run()
+        .unwrap();
 }
+
+#[test]
+fn check_draw_mode_fill_default() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x85CD48D7CD7F037B)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill, xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+

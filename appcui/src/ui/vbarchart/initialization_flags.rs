@@ -21,7 +21,7 @@ pub enum BarScale<T: Number + 'static> {
 
 pub enum XAxisLabelMode<'a> {
     None,
-    Index { start: i32 },
+    Index (i32),
     BarLabels,
     Custom(&'a [BarSpan]),
 }
@@ -29,7 +29,7 @@ pub enum XAxisLabelMode<'a> {
 #[derive(Copy,Clone, PartialEq, Eq)]
 pub(super) enum XAxisLabelFormat {
     None,
-    Index { start: i32 },
+    Index (i32),
     BarLabels,
     Custom,
 }

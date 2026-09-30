@@ -342,7 +342,7 @@ where
     pub fn set_xaxis_label_mode(&mut self, xaxis: XAxisLabelMode) {
         match xaxis {
             XAxisLabelMode::None => self.xaxis.label_format = XAxisLabelFormat::None,
-            XAxisLabelMode::Index { start } => self.xaxis.label_format = XAxisLabelFormat::Index { start },
+            XAxisLabelMode::Index (start) => self.xaxis.label_format = XAxisLabelFormat::Index (start),
             XAxisLabelMode::BarLabels => self.xaxis.label_format = XAxisLabelFormat::BarLabels,
             XAxisLabelMode::Custom(spans) => {
                 self.xaxis.label_format = XAxisLabelFormat::Custom;
@@ -582,7 +582,7 @@ where
 
         match self.xaxis.label_format {
             XAxisLabelFormat::None => (),
-            XAxisLabelFormat::Index { start } => self.paint_xaxis_index(start, label_attr),
+            XAxisLabelFormat::Index (start) => self.paint_xaxis_index(start, label_attr),
             XAxisLabelFormat::BarLabels => self.paint_xaxis_bar_labels(label_attr),
             XAxisLabelFormat::Custom => self.paint_xaxis_custom(label_attr),
         }
