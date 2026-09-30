@@ -33,6 +33,14 @@ static FILL_TYPES: &[(&str, &str)] = &[
     ("Shade50", "shade50"),
     ("Shade25", "shade25"),
     ("Braille", "braille"),
+    ("Checkerboard", "checkerboard"),
+    ("Grid", "grid"),
+    ("GridDouble", "griddouble"),
+    ("CrossHatch", "crosshatch"),
+    ("Dashed", "dashed"),
+    ("DiagonalUp", "diagonalup"),
+    ("DiagonalDown", "diagonaldown"),
+    ("Notched", "notched"),
 ];
 
 static POINT_TYPES: &[(&str, &str)] = &[

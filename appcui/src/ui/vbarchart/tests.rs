@@ -163,3 +163,269 @@ fn check_draw_mode_fill_default() {
         .unwrap();
 }
 
+#[test]
+fn check_draw_mode_fill_solid() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x85CD48D7CD7F037B)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(Solid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_shade75() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x45CB129DB8DA0560)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(Shade75), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_shade50() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x58497164B9FD02D5)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(Shade50), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_shade25() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x443A53EEA78A57BE)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(Shade25), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_braille() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x75BA1E461E04E54F)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_checkerboard() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xA81B11F8A62395ED)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(Checkerboard), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_grid() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5E9B68A79C148137)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(Grid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_grid_double() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xFB8A6A73B64A5FE7)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(GridDouble), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_cross_hatch() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xE19205C0096ACF00)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(CrossHatch), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_dashed() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x7E20391F083474CC)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(Dashed), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_diagonal_up() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3BC6D4C2B771C65E)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(DiagonalUp), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_diagonal_down() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x92077637429F54B5)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(DiagonalDown), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_notched() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xDC247D8D1E62934C)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill(Notched), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_fill_custom() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xEC8659D167C0151B)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill('#'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
