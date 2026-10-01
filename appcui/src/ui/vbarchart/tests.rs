@@ -1041,3 +1041,79 @@ fn check_draw_mode_cap_custom() {
         .run()
         .unwrap();
 }
+
+#[test]
+fn check_draw_mode_bar_width_3() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x921C3CC2DF3C4B26)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: Fill('x'), space:2, dbw: 3, xlabels:Index(0), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_bars_with_different_thickness_spacing_and_draw_mode() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF69A7D74E1334CF5)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, xlabels:Index(1), values: [{1, w:1, s:1, dm: Line(Single)}, {2, w:2, s:2, dm: Rectangle(Single)}, {3, w:3, s:3, dm: FilledRectangle(Single)}, {4, w:4, s:4, dm: Fill(Shade75)}, {5, w:5, s:5, dm: Cap(Solid)}]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_bars_with_different_thickness_spacing_and_draw_mode_custom_color() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5D09324D414BF45A)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, barcolor: red, xlabels:Index(1), values: [{1, w:1, s:1, dm: Line(Single)}, {2, w:2, s:2, dm: Rectangle(Single)}, {3, w:3, s:3, dm: FilledRectangle(Single)}, {4, w:4, s:4, dm: Fill(Shade75)}, {5, w:5, s:5, dm: Cap(Solid)}]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_bars_with_different_colors_and_default_size() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x14A769DFEE1BC29C)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, space: 2, xlabels:Index(1), values: [{1, attr: red}, {2, attr: green}, {3, attr: aqua}, {4, attr: yellow}, {5, attr: pink}]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
