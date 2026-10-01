@@ -155,7 +155,9 @@ fn parse_barscale(repr: &str) -> String {
                     assert!(fncall.params_count() == 2, "Invalid bar scale format - expecting 2 parameters (min,max) !");
                     assert!(fncall.is_param_number(0), "Invalid bar scale format - expecting a valid number for min but got {} !", fncall.param(0).unwrap());
                     assert!(fncall.is_param_number(1), "Invalid bar scale format - expecting a valid number for max but got {} !", fncall.param(1).unwrap());
-                    format!("vbarchart::BarScale::{}({},{})", name,fncall.param(0).unwrap(), fncall.param(1).unwrap())
+                    let min = fncall.param(0).unwrap();
+                    let max = fncall.param(1).unwrap();
+                    format!("vbarchart::BarScale::{name} {{ min: {min}, max: {max} }}")
                 }
                 _ => {
                     format!("vbarchart::BarScale::{name}")

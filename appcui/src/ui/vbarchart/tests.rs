@@ -1117,3 +1117,79 @@ fn check_bars_with_different_colors_and_default_size() {
         .run()
         .unwrap();
 }
+
+#[test]
+fn check_xlabel_groups_two_quarters() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x8F5193F84D4FE769)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, xlabels: [{0, 3, '1st quarter'}, {3, 3, '2nd quarter'}], values: [1, 2, 3, {4, s: 6}, 5, 6]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_scale_fit_data() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF3DA42C05889012D)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, scale: FitData, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_scale_fixed() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x46DA183510415331)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, scale: Fixed(0, 12), xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_scale_from_zero_min_range() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xDF2E54B23467D7C5)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, scale: FromZeroMinRange(-6, 6), xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
