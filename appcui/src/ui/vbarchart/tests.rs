@@ -880,7 +880,7 @@ fn check_draw_mode_cap_solid() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x0)
+        CheckHash(0xFAA4C28B7B1DF0D8)
     ";
     App::new()
         .size(Size::new(60, 15))
@@ -898,7 +898,7 @@ fn check_draw_mode_cap_shade75() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x0)
+        CheckHash(0xF449BF652D92DFA0)
     ";
     App::new()
         .size(Size::new(60, 15))
@@ -916,7 +916,7 @@ fn check_draw_mode_cap_shade50() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x0)
+        CheckHash(0x7A639FAAAE68E8F8)
     ";
     App::new()
         .size(Size::new(60, 15))
@@ -934,7 +934,7 @@ fn check_draw_mode_cap_shade25() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x0)
+        CheckHash(0x24510693ADE1A910)
     ";
     App::new()
         .size(Size::new(60, 15))
@@ -952,7 +952,7 @@ fn check_draw_mode_cap_braille() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x0)
+        CheckHash(0x6E18F77D48D9BB98)
     ";
     App::new()
         .size(Size::new(60, 15))
@@ -971,7 +971,7 @@ fn check_draw_mode_cap_single_line() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x0)
+        CheckHash(0xCB66D9AC4FFA5298)
     ";
     App::new()
         .size(Size::new(60, 15))
@@ -990,7 +990,7 @@ fn check_draw_mode_cap_double_line() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x0)
+        CheckHash(0xECB76DA72F288798)
     ";
     App::new()
         .size(Size::new(60, 15))
@@ -1009,7 +1009,7 @@ fn check_draw_mode_cap_thick_line() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x0)
+        CheckHash(0xDB71695D840DB030)
     ";
     App::new()
         .size(Size::new(60, 15))
@@ -1028,7 +1028,7 @@ fn check_draw_mode_cap_custom() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x0)
+        CheckHash(0x19DAEF20767A96F0)
     ";
     App::new()
         .size(Size::new(60, 15))

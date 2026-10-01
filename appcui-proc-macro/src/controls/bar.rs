@@ -27,6 +27,7 @@ static DRAW_MODES: &[(&str, &str)] = &[
     ("FilledRectangle", "filled-rectangle"),
     ("Smooth", "smooth"),
     ("Point", "point"),
+    ("Cap", "cap"),
 ];
 
 static FILL_TYPES: &[(&str, &str)] = &[
@@ -49,6 +50,22 @@ static POINT_TYPES: &[(&str, &str)] = &[
     ("Bullet", "bullet"),
     ("Diamond", "diamond"),
     ("Square", "square"),
+];
+
+static CAP_TYPES: &[(&str, &str)] = &[
+    ("Solid", "solid"),
+    ("Shade75", "shade75"),
+    ("Shade50", "shade50"),
+    ("Shade25", "shade25"),
+    ("Braille", "braille"),
+    ("SingleLine", "singleline"),
+    ("SingleLine", "single-line"),
+    ("DoubleLine", "doubleline"),
+    ("DoubleLine", "double-line"),
+    ("SingleThickLine", "singlethickline"),
+    ("SingleThickLine", "single-thick-line"),
+    ("SingleThickLine", "thickline"),
+    ("SingleThickLine", "thick"),
 ];
 
 static VALUE_BAR_POSITIONAL: &[PositionalParameter] = &[PositionalParameter::new("value", ParamType::String)];
@@ -231,8 +248,9 @@ pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String
                     format!("{module}::BarDrawMode::Smooth")
                 }
                 "Point" => parse_typed_draw_mode(&fncall, key, module, "Point", POINT_TYPES, "BarPointType", "Circle"),
+                "Cap" => parse_typed_draw_mode(&fncall, key, module, "Cap", CAP_TYPES, "BarCapType", "Solid"),
                 _ => {
-                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point !");
+                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point, Cap !");
                 }
             }
         } else {
