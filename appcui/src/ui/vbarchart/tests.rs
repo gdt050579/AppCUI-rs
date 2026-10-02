@@ -1442,3 +1442,44 @@ fn check_click_select_and_clear_dim_bars() {
         .run()
         .unwrap();
 }
+
+#[test]
+fn check_numeric_format_prefix_suffix_and_base() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Hex labels with prefix and suffix')
+        CheckHash(0xE74870A80BE1C82F)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, yw: 10, nf: {hex, prefix: '0x', suffix: h}, values: [16, 160, 255]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_chart_without_x_and_y_labels() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. No X or Y labels')
+        CheckHash(0x3E1D4BA8E785AEE1)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut chart = vbarchart!("type: i32, d:f, dbw: 3, xlabels: None, values: [1, 2, 3, 4, 5, 6]");
+            chart.set_yaxis_visible(false);
+            chart.set_yaxis_show_grid(false);
+            w.add(chart);
+            w
+        })
+        .run()
+        .unwrap();
+}
