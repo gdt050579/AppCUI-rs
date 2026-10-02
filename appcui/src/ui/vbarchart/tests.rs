@@ -1483,3 +1483,249 @@ fn check_chart_without_x_and_y_labels() {
         .run()
         .unwrap();
 }
+
+#[test]
+fn check_bar_events_update_label() {
+    #[Window(events = VBarChartEvents<i32>, internal: true)]
+    struct MyWin {
+        info: Handle<Label>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = Self {
+                base: window!("Test,d:f"),
+                info: Handle::None,
+            };
+            win.info = win.add(label!("'No selection',x:0,y:0,w:40"));
+            win.add(vbarchart!("type: i32, x:0, y:1, w:58, h:12, values: [{2, label: A}, {4, label: B}, {6, label: C}]"));
+            win
+        }
+    }
+    impl VBarChartEvents<i32> for MyWin {
+        fn on_bar_selected(&mut self, handle: Handle<VBarChart<i32>>, index: u32) -> EventProcessStatus {
+            let text = if let Some(chart) = self.control(handle) {
+                if let Some(bar) = chart.get_bar(index as usize) {
+                    format!("{} = {}", bar.label(), bar.value())
+                } else {
+                    format!("bar {index}")
+                }
+            } else {
+                String::from("?")
+            };
+            let info = self.info;
+            if let Some(label) = self.control_mut(info) {
+                label.set_caption(&text);
+            }
+            EventProcessStatus::Processed
+        }
+        fn on_clear_selection(&mut self, _: Handle<VBarChart<i32>>) -> EventProcessStatus {
+            let info = self.info;
+            if let Some(label) = self.control_mut(info) {
+                label.set_caption("No selection");
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. No selection')
+        CheckHash(0xE7937465380314C2)
+        Mouse.Click(10,13,left)
+        Paint('2. Selected A = 2')
+        CheckHash(0x22DF43A4418E09C8)
+        Mouse.Click(12,13,left)
+        Paint('3. Selected B = 4')
+        CheckHash(0xFB6F7C1791142471)
+        Mouse.Click(14,13,left)
+        Paint('4. Selected C = 6')
+        CheckHash(0xFF5ED28DABE6DF3A)
+        Mouse.Click(30,6,left)
+        Paint('5. Selection cleared')
+        CheckHash(0xE7937465380314C2)
+    ";
+    App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
+}
+
+#[test]
+fn check_show_zero_line_on_y_axis() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Zero line')
+        CheckHash(0xF194B477BFD54751)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ShowZeroLineOnYAxis, xlabels:Index(1), values: [-4, -2, 2, 4]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_resize_window_adjusts_bars() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial window')
+        CheckHash(0x2CF6307B934FF0AA)
+        Mouse.Drag(37,13,55,22)
+        Paint('2. Window grown')
+        CheckHash(0x80336B48FAF584B6)
+        Mouse.Drag(55,22,30,10)
+        Paint('3. Window shrunk')
+        CheckHash(0x7FE53C6E3285A6E)
+    ";
+    App::new()
+        .size(Size::new(80, 30))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Chart,x:2,y:2,w:36,h:12,flags: Sizeable");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, values: [1, 2, 3, 4, 5]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_long_labels_scroll_to_end() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Start')
+        CheckHash(0x44CEB6A287C691EA)
+        Key.Pressed(End)
+        Paint('2. Scrolled to the end')
+        CheckHash(0xB07456F44A5062E3)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 5, space: 3, flags: ScrollBars, xlabels: BarLabels, values: [{1, label: 'AlphaOne'}, {2, label: 'BravoTwo'}, {3, label: 'CharlieX'}, {4, label: 'DeltaOne'}, {5, label: 'EchoFive'}, {6, label: 'FoxtrotX'}, {7, label: 'GolfNine'}, {8, label: 'HotelTen'}, {9, label: 'IndiaBar'}, {10, label: 'JulietXX'}, {11, label: 'KiloBars'}, {12, label: 'LimaTest'}, {13, label: 'MikeData'}, {14, label: 'November'}, {15, label: 'OscarBar'}, {16, label: 'PapaTest'}, {17, label: 'QuebecXX'}, {18, label: 'RomeoBar'}, {19, label: 'SierraXX'}, {20, label: 'TangoEnd'}]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_update_bar() {
+    #[Window(events = ButtonEvents, internal: true)]
+    struct MyWin {
+        chart: Handle<VBarChart<i32>>,
+        updated: bool,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = Self {
+                base: window!("Test,d:f"),
+                chart: Handle::None,
+                updated: false,
+            };
+            win.add(button!("Update,x:0,y:0,w:10"));
+            win.chart = win.add(vbarchart!("type: i32, x:0, y:1, w:58, h:12, xlabels: BarLabels, values: [{2, label: Low}, {4, label: Mid}, {6, label: High}]"));
+            win
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let chart = self.chart;
+            let already = self.updated;
+            let Some(chart) = self.control_mut(chart) else {
+                return EventProcessStatus::Ignored;
+            };
+            if !already {
+                chart.update_bar(1, |bar| {
+                    bar.set_value(12);
+                    bar.set_label("Updated");
+                    bar.set_thickness(4);
+                    bar.set_spacing(3);
+                    bar.set_draw_mode(BarDrawMode::Fill(BarFillType::Shade50));
+                    bar.set_attr(charattr!("red"));
+                });
+                let bar = chart.get_bar(1).unwrap();
+                assert_eq!(bar.value(), 12);
+                assert_eq!(bar.label(), "Updated");
+                assert_eq!(bar.thickness(), Some(4));
+                assert_eq!(bar.spacing(), Some(3));
+                assert_eq!(bar.draw_mode(), Some(BarDrawMode::Fill(BarFillType::Shade50)));
+                assert_eq!(bar.attr(), Some(charattr!("red")));
+                assert_eq!(chart.get_bar(0).map(|b| b.value()), Some(2));
+                assert_eq!(chart.get_bar(2).map(|b| b.value()), Some(6));
+            } else {
+                chart.update_bar(99, |bar| {
+                    bar.set_value(0);
+                });
+                assert_eq!(chart.bars_count(), 3);
+                assert_eq!(chart.get_bar(1).map(|b| b.value()), Some(12));
+                assert_eq!(chart.get_bar(1).map(|b| b.label()), Some("Updated"));
+            }
+            self.updated = true;
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Before update')
+        CheckHash(0x7DE4ACCC00409F3D)
+        Mouse.Click(5,1,left)
+        Paint('2. Middle bar updated')
+        CheckHash(0x406AA96E445D18DC)
+        Mouse.Click(5,1,left)
+        Paint('3. Out of range leaves the chart unchanged')
+        CheckHash(0x406AA96E445D18DC)
+    ";
+    App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
+}
+
+#[test]
+fn check_set_yaxis_step() {
+    #[Window(events = ButtonEvents, internal: true)]
+    struct MyWin {
+        chart: Handle<VBarChart<i32>>,
+        stage: u8,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = Self {
+                base: window!("Test,d:f"),
+                chart: Handle::None,
+                stage: 0,
+            };
+            win.add(button!("Step,x:0,y:0,w:10"));
+            win.chart = win.add(vbarchart!("type: i32, x:0, y:1, w:58, h:12, dbw: 3, xlabels:Index(1), values: [1, 2, 3, 4, 5]"));
+            win
+        }
+    }
+    impl ButtonEvents for MyWin {
+        fn on_pressed(&mut self, _: Handle<Button>) -> EventProcessStatus {
+            let chart = self.chart;
+            let stage = self.stage;
+            let Some(chart) = self.control_mut(chart) else {
+                return EventProcessStatus::Ignored;
+            };
+            match stage {
+                0 => chart.set_yaxis_step(6),
+                _ => chart.set_yaxis_step(0),
+            }
+            self.stage = stage + 1;
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Default step')
+        CheckHash(0xCBFE97E0C60920C5)
+        Mouse.Click(5,1,left)
+        Paint('2. Step 6')
+        CheckHash(0x6DE2F9CE0E25899)
+        Mouse.Click(5,1,left)
+        Paint('3. Step 0 clamps to 1')
+        CheckHash(0xBE1C28CFCB4404A6)
+    ";
+    App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
+}
