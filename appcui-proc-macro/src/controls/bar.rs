@@ -27,6 +27,10 @@ static DRAW_MODES: &[(&str, &str)] = &[
     ("FilledRectangle", "filled-rectangle"),
     ("Smooth", "smooth"),
     ("Point", "point"),
+    ("LargePoint", "largepoint"),
+    ("LargePoint", "large-point"),
+    ("LargePoint", "largepoints"),
+    ("LargePoint", "large-points"),
     ("Cap", "cap"),
 ];
 
@@ -50,6 +54,18 @@ static POINT_TYPES: &[(&str, &str)] = &[
     ("Bullet", "bullet"),
     ("Diamond", "diamond"),
     ("Square", "square"),
+];
+
+static LARGE_POINT_TYPES: &[(&str, &str)] = &[
+    ("RoundSquare", "roundsquare"),
+    ("RoundSquare", "round-square"),
+    ("Square", "square"),
+    ("DoubleLineSquare", "doublelinesquare"),
+    ("DoubleLineSquare", "double-line-square"),
+    ("ThickSquare", "thicksquare"),
+    ("ThickSquare", "thick-square"),
+    ("Circle", "circle"),
+    ("Diamond", "diamond"),
 ];
 
 static CAP_TYPES: &[(&str, &str)] = &[
@@ -248,9 +264,10 @@ pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String
                     format!("{module}::BarDrawMode::Smooth")
                 }
                 "Point" => parse_typed_draw_mode(&fncall, key, module, "Point", POINT_TYPES, "BarPointType", "Circle"),
+                "LargePoint" => parse_typed_draw_mode(&fncall, key, module, "LargePoint", LARGE_POINT_TYPES, "BarLargePointType", "RoundSquare"),
                 "Cap" => parse_typed_draw_mode(&fncall, key, module, "Cap", CAP_TYPES, "BarCapType", "Solid"),
                 _ => {
-                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point, Cap !");
+                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point, LargePoint, Cap !");
                 }
             }
         } else {

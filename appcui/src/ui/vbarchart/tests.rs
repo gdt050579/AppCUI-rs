@@ -926,6 +926,139 @@ fn check_draw_mode_point_custom() {
 }
 
 #[test]
+fn check_draw_mode_large_point_round_square() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3425ADAD9D2FB557)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(RoundSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_large_point_square() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xEC5972B182D53BE4)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(Square), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_large_point_double_line_square() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xA22A212624C7A65F)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(DoubleLineSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_large_point_thick_square() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xDA9EFDFCAD295A7D)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(ThickSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_large_point_circle() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xAD96F2D374C8B6B0)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(Circle), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_large_point_diamond() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x39C0EF4342D47FC8)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(Diamond), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_large_point_custom() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x9DE76BC8AAB8B4F7)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dm: LargePoint('X'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn check_draw_mode_cap_solid() {
     let script = "
         Paint.Enable(false)
@@ -1728,4 +1861,61 @@ fn check_set_yaxis_step() {
         CheckHash(0xBE1C28CFCB4404A6)
     ";
     App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
+}
+
+#[test]
+fn check_f32_fractional_values() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x597A61F294DAF6AA)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: f32, d:f, dbw: 3, xlabels:Index(1), values: [0.5, 1.25, 2.75, 4.0, -1.5, 3.5]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_f64_fractional_values() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xAA09ED305ED29429)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: f64, d:f, dbw: 3, xlabels:Index(1), values: [0.25, 1.5, 3.125, 6.5, -2.75, 4.25]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_i16_signed_values() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xB86B29C8659DB186)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i16, d:f, dbw: 3, xlabels:Index(1), values: [-20, -5, 0, 8, 15, 30]"));
+            w
+        })
+        .run()
+        .unwrap();
 }
