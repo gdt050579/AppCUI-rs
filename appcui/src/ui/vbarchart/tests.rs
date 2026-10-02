@@ -1380,3 +1380,65 @@ fn check_key_home_end_and_ctrl_arrows() {
         .run()
         .unwrap();
 }
+
+#[test]
+fn check_click_select_and_clear() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xD77819D88E41ACD4)
+        Mouse.Click(10,13,left)
+        Paint('2. Selected first bar')
+        CheckHash(0x6EA5F33C0AC6ED36)
+        Mouse.Click(12,13,left)
+        Paint('3. Selected second bar')
+        CheckHash(0x458A2B65CBC8CBE6)
+        Mouse.Click(14,13,left)
+        Paint('4. Selected third bar')
+        CheckHash(0xD54ADB3C69487562)
+        Mouse.Click(30,6,left)
+        Paint('5. Selection cleared')
+        CheckHash(0xD77819D88E41ACD4)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, values: [1, 2, 3]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_click_select_and_clear_dim_bars() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xD77819D88E41ACD4)
+        Mouse.Click(10,13,left)
+        Paint('2. Selected first bar')
+        CheckHash(0x1F613B4C22330FE9)
+        Mouse.Click(12,13,left)
+        Paint('3. Selected second bar')
+        CheckHash(0x27D71808463260C9)
+        Mouse.Click(14,13,left)
+        Paint('4. Selected third bar')
+        CheckHash(0xF011FE462A387B4A)
+        Mouse.Click(30,6,left)
+        Paint('5. Selection cleared')
+        CheckHash(0xD77819D88E41ACD4)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, flags: DimBarsOnSelection, values: [1, 2, 3]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
