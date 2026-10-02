@@ -1243,3 +1243,140 @@ fn check_scale_from_zero_min_range() {
         .run()
         .unwrap();
 }
+
+#[test]
+fn check_bar_label_tooltips() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xFAA3CD0179B96822)
+        Mouse.Move(10,11)
+        Paint('2. Hover A = 2')
+        CheckHash(0x8D36014F9AE18CB7)
+        Mouse.Move(12,11)
+        Paint('3. Hover B = 4')
+        CheckHash(0xD60F6BD5AA214409)
+        Mouse.Move(14,11)
+        Paint('4. Hover C = 6')
+        CheckHash(0x9F2B5C7F385DEF69)
+        Mouse.Move(16,11)
+        Paint('5. Hover D = 8')
+        CheckHash(0x5B013B2D1404F0E9)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, xlabels: BarLabels, values: [{2, label: A}, {4, label: B}, {6, label: C}, {8, label: D}]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_mouse_wheel_scroll() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF59528ABE265C002)
+        Mouse.Wheel(4,6,right,8)
+        Paint('2. Scrolled right')
+        CheckHash(0x6B97F9D02820A0C2)
+        Mouse.Wheel(4,6,left,4)
+        Paint('3. Scrolled left')
+        CheckHash(0xE9B29B25C670DA91)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_mouse_drag_scrollbar() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF59528ABE265C002)
+        Mouse.Drag(2,14,30,14)
+        Paint('2. Dragged scrollbar to the right')
+        CheckHash(0x9347883BB5DC8C06)
+        Mouse.Drag(30,14,10,14)
+        Paint('3. Dragged scrollbar to the left')
+        CheckHash(0x428C533B4DA0EA5)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_key_scroll() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF59528ABE265C002)
+        Key.Pressed(Right,8)
+        Paint('2. Scrolled right')
+        CheckHash(0x6B97F9D02820A0C2)
+        Key.Pressed(Left,4)
+        Paint('3. Scrolled left')
+        CheckHash(0xE9B29B25C670DA91)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_key_home_end_and_ctrl_arrows() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xF59528ABE265C002)
+        Key.Pressed(End)
+        Paint('2. End')
+        CheckHash(0xB278FD604DBFA4D3)
+        Key.Pressed(Home)
+        Paint('3. Home')
+        CheckHash(0xF59528ABE265C002)
+        Key.Pressed(Ctrl+Right,3)
+        Paint('4. Ctrl+Right three bars')
+        CheckHash(0x38684DB1942FD4B4)
+        Key.Pressed(Ctrl+Left)
+        Paint('5. Ctrl+Left one bar')
+        CheckHash(0x2BAB93E20FEF333F)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w
+        })
+        .run()
+        .unwrap();
+}
