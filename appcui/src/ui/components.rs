@@ -38,6 +38,7 @@ pub use self::bar::BarDrawMode;
 pub use self::bar::BarFillType;
 pub use self::bar::BarCapType;
 pub use self::bar::BarPointType;
+pub use self::bar::BarLargePointType;
 pub use self::bar::BarBuilder;
 pub use self::bar::Bar;
 pub use self::bar::BarSpan;

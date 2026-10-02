@@ -122,25 +122,50 @@ impl BarPointType {
             BarPointType::Custom(ch) => Character::with_attributes(*ch, attr),
         }
     }
-    pub(crate) fn large_characters(&self) -> [char; 6] {
+}
+
+/// Shape of a point/marker (used by `Point`, `Whisker`, `Lollipop`).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum BarLargePointType {
+    /// □ — round square.
+    #[default]
+    RoundSquare,
+    /// □ — square.
+    Square,
+    /// □ — double line square.
+    DoubleLineSquare,
+    /// □ — thick square.
+    ThickSquare,
+    /// ○ — circle.
+    Circle,
+    /// ◆ — diamond.
+    Diamond,
+    /// An arbitrary marker character.
+    Custom(char),
+}
+impl BarLargePointType {
+    pub(crate) fn characters(&self) -> [char; 6] {
         match self {
-            BarPointType::Bullet => ['╭', '─', '╮', '╰', '─', '╯'],
-            BarPointType::Diamond => ['▞', '▀', '▚', '▚', '▄', '▞'],
-            BarPointType::Square => ['┌', '─', '┐', '└', '─', '┘'],
-            BarPointType::Custom(ch) => [*ch, *ch, *ch, *ch, *ch, *ch],
+            BarLargePointType::RoundSquare => ['╭', '─', '╮', '╰', '─', '╯'],
+            BarLargePointType::Square => ['┌', '─', '┐', '└', '─', '┘'],
+            BarLargePointType::DoubleLineSquare => ['╔', '═', '╗', '╚', '═', '╝'],
+            BarLargePointType::ThickSquare => ['┏', '━', '┓', '┗', '━', '┛'],
+            BarLargePointType::Circle => ['▞', '▀', '▚', '▚', '▄', '▞'],
+            BarLargePointType::Diamond => ['╱', '╲', ' ', '╲', '╱', ' '],
+            BarLargePointType::Custom(ch) => [*ch, *ch, *ch, *ch, *ch, *ch],
         }
     }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum BarDrawMode {
-    Fill(BarFillType),         // arbitrary thickness, no constraint — texture chosen by FillType
-    Line(LineType),            // constrained: thickness = 1
-    Rectangle(LineType),       // constrained: thickness ≥ 2
-    FilledRectangle(LineType), // constrained: thickness ≥ 3
-    Point(BarPointType),       // marker
-    LargePoint(BarPointType),  // large marker
-    Cap(BarCapType),           // cap at the top of the bar
+    Fill(BarFillType),             // arbitrary thickness, no constraint — texture chosen by FillType
+    Line(LineType),                // constrained: thickness = 1
+    Rectangle(LineType),           // constrained: thickness ≥ 2
+    FilledRectangle(LineType),     // constrained: thickness ≥ 3
+    Point(BarPointType),           // marker
+    LargePoint(BarLargePointType), // large marker
+    Cap(BarCapType),               // cap at the top of the bar
 }
 
 impl BarDrawMode {
@@ -288,7 +313,7 @@ impl<T: Number + 'static> Bar<T> {
             surface.fill_rect(self.rect_vertical(layout, defaults), c);
         }
     }
- 
+
     #[inline(always)]
     fn paint_vertical_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
         let (upper, bottom, zero) = match line_type {
@@ -341,9 +366,9 @@ impl<T: Number + 'static> Bar<T> {
         surface.write_char(point.x, point.y, bar_point_type.character(attr));
     }
     #[inline(always)]
-    fn paint_vertical_large_point(&self, surface: &mut Surface, bar_point_type: BarPointType, attr: CharAttribute, layout: &BarLayout) {
+    fn paint_vertical_large_point(&self, surface: &mut Surface, bar_point_type: BarLargePointType, attr: CharAttribute, layout: &BarLayout) {
         let point = self.point_vertical(layout);
-        let chars = bar_point_type.large_characters();
+        let chars = bar_point_type.characters();
         surface.write_char(point.x, point.y, Character::with_attributes(chars[0], attr));
         surface.write_char(point.x + 1, point.y, Character::with_attributes(chars[1], attr));
         surface.write_char(point.x + 2, point.y, Character::with_attributes(chars[2], attr));

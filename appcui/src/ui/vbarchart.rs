@@ -24,4 +24,5 @@ pub use super::components::Bar;
 pub use super::components::BarFillType;
 pub use super::components::BarCapType;
 pub use super::components::BarPointType;
+pub use super::components::BarLargePointType;
 pub use super::components::BarSpan;

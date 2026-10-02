@@ -11,6 +11,7 @@ struct BarDrawControls {
     fill: Handle<ComboBox>,
     line: Handle<Selector<LineType>>,
     point: Handle<ComboBox>,
+    large_point: Handle<ComboBox>,
     cap: Handle<ComboBox>,
     character: Handle<CharPicker>,
     detail: Handle<Label>,
@@ -24,6 +25,7 @@ impl BarDrawControls {
             fill: Handle::None,
             line: Handle::None,
             point: Handle::None,
+            large_point: Handle::None,
             cap: Handle::None,
             character: Handle::None,
             detail: Handle::None,
@@ -116,6 +118,20 @@ fn point_type(index: u32, mark: char) -> BarPointType {
     }
 }
 
+const LARGE_POINT_CUSTOM: u32 = 6;
+
+fn large_point_type(index: u32, mark: char) -> BarLargePointType {
+    match index {
+        0 => BarLargePointType::RoundSquare,
+        1 => BarLargePointType::Square,
+        2 => BarLargePointType::DoubleLineSquare,
+        3 => BarLargePointType::ThickSquare,
+        4 => BarLargePointType::Circle,
+        5 => BarLargePointType::Diamond,
+        _ => BarLargePointType::Custom(mark),
+    }
+}
+
 fn combo_with(host: &mut impl DrawHost, top: i32, items: &[&str], visible: bool) -> Handle<ComboBox> {
     let mut combo = ComboBox::new(row(top, None), combobox::Flags::None);
     for item in items {
@@ -160,6 +176,20 @@ fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
     line.set_visible(false);
     let line = host.add_control(line);
     let point = combo_with(host, top + 4, &["Circle", "Diamond", "Square", "Custom"], false);
+    let large_point = combo_with(
+        host,
+        top + 4,
+        &[
+            "Round square",
+            "Square",
+            "Double line square",
+            "Thick square",
+            "Circle",
+            "Diamond",
+            "Custom",
+        ],
+        false,
+    );
     let cap = combo_with(
         host,
         top + 4,
@@ -216,6 +246,7 @@ fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
         fill,
         line,
         point,
+        large_point,
         cap,
         character,
         detail,
@@ -729,7 +760,7 @@ impl BarChartEditor {
             2 => BarDrawMode::Rectangle(self.selected_line(controls.line)),
             3 => BarDrawMode::FilledRectangle(self.selected_line(controls.line)),
             4 => BarDrawMode::Point(point_type(self.combo_index(controls.point), mark)),
-            5 => BarDrawMode::LargePoint(point_type(self.combo_index(controls.point), mark)),
+            5 => BarDrawMode::LargePoint(large_point_type(self.combo_index(controls.large_point), mark)),
             6 => BarDrawMode::Cap(cap_type(self.combo_index(controls.cap), mark)),
             _ => BarDrawMode::Fill(fill_type(self.combo_index(controls.fill), mark)),
         }
@@ -737,12 +768,21 @@ impl BarChartEditor {
 
     fn sync_draw_controls(&mut self, controls: BarDrawControls) {
         let mode = self.combo_index(controls.mode);
-        let (caption, fill, line, point, cap, character) = match mode {
-            0 => ("Fill type", true, false, false, false, self.combo_index(controls.fill) == FILL_CUSTOM),
-            1 | 2 | 3 => ("Line type", false, true, false, false, false),
-            4 | 5 => ("Point type", false, false, true, false, self.combo_index(controls.point) == 3),
-            6 => ("Cap type", false, false, false, true, self.combo_index(controls.cap) == CAP_CUSTOM),
-            _ => ("", false, false, false, false, false),
+        let (caption, fill, line, point, large_point, cap, character) = match mode {
+            0 => ("Fill type", true, false, false, false, false, self.combo_index(controls.fill) == FILL_CUSTOM),
+            1 | 2 | 3 => ("Line type", false, true, false, false, false, false),
+            4 => ("Point type", false, false, true, false, false, self.combo_index(controls.point) == 3),
+            5 => (
+                "Point type",
+                false,
+                false,
+                false,
+                true,
+                false,
+                self.combo_index(controls.large_point) == LARGE_POINT_CUSTOM,
+            ),
+            6 => ("Cap type", false, false, false, false, true, self.combo_index(controls.cap) == CAP_CUSTOM),
+            _ => ("", false, false, false, false, false, false),
         };
         let detail = controls.detail;
         if let Some(label) = self.control_mut(detail) {
@@ -763,6 +803,10 @@ impl BarChartEditor {
         if let Some(combo) = self.control_mut(point_h) {
             combo.set_visible(point);
         }
+        let large_point_h = controls.large_point;
+        if let Some(combo) = self.control_mut(large_point_h) {
+            combo.set_visible(large_point);
+        }
         let cap_h = controls.cap;
         if let Some(combo) = self.control_mut(cap_h) {
             combo.set_visible(cap);
@@ -778,7 +822,7 @@ impl BarChartEditor {
     }
 
     fn show_draw_mode(&mut self, controls: BarDrawControls, mode: BarDrawMode) {
-        let (mode_index, fill_index, line, point_index, cap_index, mark) = match mode {
+        let (mode_index, fill_index, line, point_index, large_point_index, cap_index, mark) = match mode {
             BarDrawMode::Fill(fill) => {
                 let (index, mark) = match fill {
                     BarFillType::Solid => (0, None),
@@ -796,11 +840,11 @@ impl BarChartEditor {
                     BarFillType::Notched => (12, None),
                     BarFillType::Custom(ch) => (FILL_CUSTOM, Some(ch)),
                 };
-                (0, Some(index), None, None, None, mark)
+                (0, Some(index), None, None, None, None, mark)
             }
-            BarDrawMode::Line(line) => (1, None, Some(line), None, None, None),
-            BarDrawMode::Rectangle(line) => (2, None, Some(line), None, None, None),
-            BarDrawMode::FilledRectangle(line) => (3, None, Some(line), None, None, None),
+            BarDrawMode::Line(line) => (1, None, Some(line), None, None, None, None),
+            BarDrawMode::Rectangle(line) => (2, None, Some(line), None, None, None, None),
+            BarDrawMode::FilledRectangle(line) => (3, None, Some(line), None, None, None, None),
             BarDrawMode::Point(point) => {
                 let (index, mark) = match point {
                     BarPointType::Bullet => (0, None),
@@ -808,16 +852,19 @@ impl BarChartEditor {
                     BarPointType::Square => (2, None),
                     BarPointType::Custom(ch) => (3, Some(ch)),
                 };
-                (4, None, None, Some(index), None, mark)
+                (4, None, None, Some(index), None, None, mark)
             }
             BarDrawMode::LargePoint(point) => {
                 let (index, mark) = match point {
-                    BarPointType::Bullet => (0, None),
-                    BarPointType::Diamond => (1, None),
-                    BarPointType::Square => (2, None),
-                    BarPointType::Custom(ch) => (3, Some(ch)),
+                    BarLargePointType::RoundSquare => (0, None),
+                    BarLargePointType::Square => (1, None),
+                    BarLargePointType::DoubleLineSquare => (2, None),
+                    BarLargePointType::ThickSquare => (3, None),
+                    BarLargePointType::Circle => (4, None),
+                    BarLargePointType::Diamond => (5, None),
+                    BarLargePointType::Custom(ch) => (LARGE_POINT_CUSTOM, Some(ch)),
                 };
-                (5, None, None, Some(index), None, mark)
+                (5, None, None, None, Some(index), None, mark)
             }
             BarDrawMode::Cap(cap) => {
                 let (index, mark) = match cap {
@@ -831,7 +878,7 @@ impl BarChartEditor {
                     BarCapType::SingleThickLine => (7, None),
                     BarCapType::Custom(ch) => (CAP_CUSTOM, Some(ch)),
                 };
-                (6, None, None, None, Some(index), mark)
+                (6, None, None, None, None, Some(index), mark)
             }
         };
         self.set_combo(controls.mode, mode_index);
@@ -846,6 +893,9 @@ impl BarChartEditor {
         }
         if let Some(index) = point_index {
             self.set_combo(controls.point, index);
+        }
+        if let Some(index) = large_point_index {
+            self.set_combo(controls.large_point, index);
         }
         if let Some(index) = cap_index {
             self.set_combo(controls.cap, index);
@@ -876,7 +926,11 @@ impl BarChartEditor {
     }
 
     fn draw_combo_changed(&mut self, handle: Handle<ComboBox>, controls: BarDrawControls, defaults: bool) -> bool {
-        let relevant = handle == controls.mode || handle == controls.fill || handle == controls.point || handle == controls.cap;
+        let relevant = handle == controls.mode
+            || handle == controls.fill
+            || handle == controls.point
+            || handle == controls.large_point
+            || handle == controls.cap;
         if !relevant {
             return false;
         }
