@@ -1,3 +1,12 @@
+//! Types that describe one bar in a chart.
+//!
+//! A [`Bar`] stores a numeric value and an optional label, color, thickness,
+//! spacing, and [`BarDrawMode`]. Build one with [`BarBuilder`], or convert a
+//! number through [`From`]. [`BarSpan`] places a label under a run of bars.
+//!
+//! [`BarFillType`], [`BarCapType`], [`BarPointType`], and [`BarLargePointType`]
+//! choose the character or marker used by a draw mode.
+
 use crate::graphics::{LineType, Point, Size};
 use flat_string::FlatString;
 
@@ -7,6 +16,9 @@ use crate::{
 };
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+/// Character repeated to fill a bar drawn with [`BarDrawMode::Fill`].
+///
+/// [`Solid`](Self::Solid) is the default.
 pub enum BarFillType {
     /// U+2588 — full block.
     #[default]
@@ -23,7 +35,7 @@ pub enum BarFillType {
     Checkerboard,
     /// U+253C ┼ — light grid/lattice.
     Grid,
-    /// U+256C ╬ — bold double-line grid.   (if you want a heavier grid than `Grid`)
+    /// U+256C ╬ — double-line grid, heavier than [`Grid`](Self::Grid).
     GridDouble,
     /// U+2573 ╳ — diagonal cross-hatch.
     CrossHatch,
@@ -61,6 +73,9 @@ impl BarFillType {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+/// Character drawn across the tip of a bar that uses [`BarDrawMode::Cap`].
+///
+/// [`Solid`](Self::Solid) is the default.
 pub enum BarCapType {
     /// U+2588 — full block.
     #[default]
@@ -99,7 +114,9 @@ impl BarCapType {
     }
 }
 
-/// Shape of a point/marker (used by `Point`, `Whisker`, `Lollipop`).
+/// One-cell marker drawn by [`BarDrawMode::Point`].
+///
+/// [`Bullet`](Self::Bullet) is the default.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum BarPointType {
     /// ● — default marker.
@@ -124,23 +141,25 @@ impl BarPointType {
     }
 }
 
-/// Shape of a point/marker (used by `Point`, `Whisker`, `Lollipop`).
+/// Marker drawn by [`BarDrawMode::LargePoint`].
+///
+/// The marker occupies a 3-by-2 block of cells. [`RoundSquare`](Self::RoundSquare) is the default.
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum BarLargePointType {
-    /// □ — round square.
+    /// Rounded single-line rectangle (`╭─╮` over `╰─╯`).
     #[default]
     RoundSquare,
-    /// □ — square.
+    /// Single-line rectangle (`┌─┐` over `└─┘`).
     Square,
-    /// □ — double line square.
+    /// Double-line rectangle (`╔═╗` over `╚═╝`).
     DoubleLineSquare,
-    /// □ — thick square.
+    /// Thick-line rectangle (`┏━┓` over `┗━┛`).
     ThickSquare,
-    /// ○ — circle.
+    /// Approximate circle drawn in the 3-by-2 block.
     Circle,
-    /// ◆ — diamond.
+    /// Diamond drawn in the 3-by-2 block.
     Diamond,
-    /// An arbitrary marker character.
+    /// Fills the 3-by-2 block with an arbitrary character.
     Custom(char),
 }
 impl BarLargePointType {
@@ -158,14 +177,26 @@ impl BarLargePointType {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
+/// How a bar is drawn.
+///
+/// Some modes force the thickness into a fixed range. A thickness outside that
+/// range is clamped when the bar is painted. [`Fill`](Self::Fill) with
+/// [`BarFillType::Solid`] is the default.
 pub enum BarDrawMode {
-    Fill(BarFillType),             // arbitrary thickness, no constraint — texture chosen by FillType
-    Line(LineType),                // constrained: thickness = 1
-    Rectangle(LineType),           // constrained: thickness ≥ 2
-    FilledRectangle(LineType),     // constrained: thickness ≥ 3
-    Point(BarPointType),           // marker
-    LargePoint(BarLargePointType), // large marker
-    Cap(BarCapType),               // cap at the top of the bar
+    /// Fills the bar with a repeated character. Thickness is at least 1.
+    Fill(BarFillType),
+    /// Draws a vertical line of the given [`LineType`]. Thickness is always 1.
+    Line(LineType),
+    /// Draws an empty rectangle of the given [`LineType`]. Thickness is at least 2.
+    Rectangle(LineType),
+    /// Draws a rectangle of the given [`LineType`], filled with a solid block. Thickness is at least 3.
+    FilledRectangle(LineType),
+    /// Draws a one-cell marker at the bar's value. Thickness is always 1.
+    Point(BarPointType),
+    /// Draws a 3-by-2 marker at the bar's value. Thickness is always 3.
+    LargePoint(BarLargePointType),
+    /// Draws a one-row cap at the bar's value. Thickness is at least 1.
+    Cap(BarCapType),
 }
 
 impl BarDrawMode {
@@ -188,6 +219,11 @@ impl Default for BarDrawMode {
 }
 
 #[derive(Clone, Debug)]
+/// One value in a vertical bar chart.
+///
+/// A bar stores its value and label. Color, thickness, spacing, and draw mode
+/// are optional: a field left unset uses the chart default. A value of type `T`
+/// converts into a bar through [`From`].
 pub struct Bar<T: Number + 'static> {
     pub(crate) value: T,
     pub(crate) label: String,
@@ -258,7 +294,9 @@ impl<T: Number + 'static> Bar<T> {
     pub fn thickness(&self) -> Option<u8> {
         self.thickness
     }
-    /// Sets the thickness of this bar.
+    /// Sets the thickness of this bar, in cells.
+    ///
+    /// The draw mode may clamp this value when the bar is painted.
     #[inline(always)]
     pub fn set_thickness(&mut self, thickness: u8) -> &mut Self {
         self.thickness = Some(thickness);
@@ -420,10 +458,25 @@ impl<T: Number + 'static> Bar<T> {
     }
 }
 
+/// Builds a [`Bar`] by setting only the properties that should differ from the chart defaults.
+///
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+///
+/// let bar = BarBuilder::new(10)
+///     .label("Jun")
+///     .thickness(4)
+///     .draw_mode(BarDrawMode::Fill(BarFillType::Shade50))
+///     .build();
+/// assert_eq!(bar.value(), 10);
+/// assert_eq!(bar.label(), "Jun");
+/// ```
 pub struct BarBuilder<T: Number + 'static> {
     bar: Bar<T>,
 }
 impl<T: Number + 'static> BarBuilder<T> {
+    /// Starts a bar with `value`. Color, thickness, spacing, label, and draw mode stay unset.
     pub fn new(value: T) -> Self {
         Self {
             bar: Bar {
@@ -436,26 +489,34 @@ impl<T: Number + 'static> BarBuilder<T> {
             },
         }
     }
+    /// Sets the character attribute of the bar.
     pub fn attr(mut self, attr: CharAttribute) -> Self {
         self.bar.attr = Some(attr);
         self
     }
+    /// Sets the label displayed for the bar.
     pub fn label(mut self, label: &str) -> Self {
         self.bar.label = label.to_string();
         self
     }
+    /// Sets the thickness of the bar, in cells.
+    ///
+    /// The draw mode may clamp this value when the bar is painted.
     pub fn thickness(mut self, thickness: u8) -> Self {
         self.bar.thickness = Some(thickness);
         self
     }
+    /// Sets the gap, in cells, before the bar.
     pub fn spacing(mut self, spacing: u8) -> Self {
         self.bar.spacing = Some(spacing);
         self
     }
+    /// Sets the draw mode of the bar.
     pub fn draw_mode(mut self, draw_mode: BarDrawMode) -> Self {
         self.bar.draw_mode = Some(draw_mode);
         self
     }
+    /// Returns the finished bar.
     pub fn build(self) -> Bar<T> {
         self.bar
     }
@@ -479,12 +540,18 @@ where
 }
 
 #[derive(Copy, Clone, Debug)]
+/// A label that covers a run of consecutive bars on a chart's X axis.
+///
+/// The label is stored in a 22-character buffer.
 pub struct BarSpan {
     pub(crate) start: u32,
     pub(crate) end: u32,
     pub(crate) label: FlatString<22>,
 }
 impl BarSpan {
+    /// Creates a span that starts at bar `start` and covers `count` bars.
+    ///
+    /// A `count` below 1 is treated as 1.
     pub fn new(start: u32, count: u32, label: &str) -> Self {
         Self {
             start,
