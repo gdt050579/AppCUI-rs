@@ -1,5 +1,9 @@
 use appcui::prelude::*;
 
+mod group_window;
+
+use group_window::{GroupWindow, XAxisGroup};
+
 const DEFAULT_THICKNESS: u8 = 3;
 const DEFAULT_SPACING: u8 = 2;
 const DEFAULT_COLOR: Color = Color::Aqua;
@@ -279,13 +283,27 @@ fn sample_bars() -> Vec<vbarchart::Bar<i32>> {
     .collect()
 }
 
-fn quarter_spans() -> [vbarchart::BarSpan; 4] {
+fn default_groups() -> Vec<XAxisGroup> {
     [
-        vbarchart::BarSpan::new(0, 3, "First quarter"),
-        vbarchart::BarSpan::new(3, 3, "2nd quarter"),
-        vbarchart::BarSpan::new(6, 3, "3rd quarter"),
-        vbarchart::BarSpan::new(9, 3, "4th quarter"),
+        ("First quarter", 0, 3),
+        ("2nd quarter", 3, 3),
+        ("3rd quarter", 6, 3),
+        ("4th quarter", 9, 3),
     ]
+    .into_iter()
+    .map(|(label, start, count)| XAxisGroup {
+        label: label.to_string(),
+        start,
+        count,
+    })
+    .collect()
+}
+
+fn bar_spans(groups: &[XAxisGroup]) -> Vec<vbarchart::BarSpan> {
+    groups
+        .iter()
+        .map(|group| vbarchart::BarSpan::new(group.start, group.count.max(1), &group.label))
+        .collect()
 }
 
 fn parse_values(text: &str) -> Option<Vec<i32>> {
@@ -300,12 +318,16 @@ fn parse_values(text: &str) -> Option<Vec<i32>> {
     if values.is_empty() { None } else { Some(values) }
 }
 
-#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents, SelectorEvents<LineType>, NumericSelectorEvents<i32>, ButtonEvents])]
+#[Window(events = [VBarChartEvents<i32>, HSliderEvents<u8>, ColorPickerEvents, ComboBoxEvents, CharPickerEvents, CheckBoxEvents, SelectorEvents<LineType>, NumericSelectorEvents<i32>, ButtonEvents, ListViewEvents<XAxisGroup>])]
 struct BarChartEditor {
     chart: Handle<VBarChart<i32>>,
     pages: Handle<Accordion>,
     data_values: Handle<TextField>,
     data_apply: Handle<Button>,
+    groups: Handle<ListView<XAxisGroup>>,
+    groups_add: Handle<Button>,
+    groups_delete: Handle<Button>,
+    groups_clear: Handle<Button>,
     scale_type: Handle<ComboBox>,
     scale_min_label: Handle<Label>,
     scale_max_label: Handle<Label>,
@@ -343,6 +365,10 @@ impl BarChartEditor {
             pages: Handle::None,
             data_values: Handle::None,
             data_apply: Handle::None,
+            groups: Handle::None,
+            groups_add: Handle::None,
+            groups_delete: Handle::None,
+            groups_clear: Handle::None,
             scale_type: Handle::None,
             scale_min_label: Handle::None,
             scale_max_label: Handle::None,
@@ -372,14 +398,14 @@ impl BarChartEditor {
             default_draw_mode: BarDrawMode::Fill(BarFillType::Solid),
         };
 
-        let mut splitter = vsplitter!("pos:70%,d:f,resize:PreserveRightPanelSize,min-left-width:30,min-right-width:26");
+        let mut splitter = vsplitter!("pos:70%,d:f,resize:PreserveRightPanelSize,min-left-width:30,min-right-width:36");
 
         let mut chart = VBarChart::new(layout!("d:f"), vbarchart::Flags::ScrollBars | vbarchart::Flags::DimBarsOnSelection | vbarchart::Flags::ShowZeroLineOnYAxis);
         chart.set_default_bar_width(DEFAULT_THICKNESS);
         chart.set_default_bar_spacing(DEFAULT_SPACING);
         chart.set_default_bar_attr(CharAttribute::with_fore_color(DEFAULT_COLOR));
         chart.add_bars(sample_bars());
-        chart.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(&quarter_spans()));
+        chart.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(&bar_spans(&default_groups())));
         win.chart = splitter.add(vsplitter::Panel::Left, chart);
 
         let mut pages = accordion!("d:f,panels:['&Chart Settings','&Default Bar Settings','C&ustom Bar Settings','Da&ta']");
@@ -469,11 +495,16 @@ impl BarChartEditor {
         win.editor_panel = pages.add(2, editor);
 
         pages.add(3, label!("'Values',l:1,t:1,r:1,h:1"));
-        win.data_values = pages.add(
-            3,
-            textfield!("'12, 28, 19, 35, 22, 41, 33, 18, 27, 31, 15, 45',l:1,t:2,r:1,b:3"),
-        );
-        win.data_apply = pages.add(3, button!("'&Apply',r:1,b:0,w:12"));
+        win.data_values = pages.add(3, textfield!("'12, 28, 19, 35, 22, 41, 33, 18, 27, 31, 15, 45',l:1,t:2,r:1,h:3"));
+        let mut groups_panel = panel!("'X-axis groups',l:1,t:6,r:1,b:3");
+        let mut groups = listview!("class: XAxisGroup,d:f,flags:ScrollBars");
+        groups.add_items(default_groups());
+        win.groups = groups_panel.add(groups);
+        pages.add(3, groups_panel);
+        win.groups_add = pages.add(3, button!("'&Add',l:1,b:0,w:8"));
+        win.groups_delete = pages.add(3, button!("'&Del',l:10,b:0,w:8"));
+        win.groups_clear = pages.add(3, button!("'&Clear',l:19,b:0,w:8"));
+        win.data_apply = pages.add(3, button!("'&Apply',r:1,b:0,w:8"));
 
         win.pages = splitter.add(vsplitter::Panel::Right, pages);
         win.add(splitter);
@@ -522,6 +553,10 @@ impl BarChartEditor {
     }
 
     fn apply_xaxis_mode(&mut self, index: u32) {
+        if index == 3 {
+            self.apply_groups();
+            return;
+        }
         let chart = self.chart;
         let Some(ctrl) = self.control_mut(chart) else {
             return;
@@ -530,9 +565,87 @@ impl BarChartEditor {
             0 => ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::None),
             1 => ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index(1)),
             2 => ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::BarLabels),
-            3 => ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(&quarter_spans())),
             _ => {}
         }
+    }
+
+    fn current_groups(&self) -> Vec<XAxisGroup> {
+        let Some(list) = self.control(self.groups) else {
+            return Vec::new();
+        };
+        (0..list.items_count()).filter_map(|index| list.item(index).cloned()).collect()
+    }
+
+    fn apply_groups(&mut self) {
+        if self.combo_index(self.xaxis_mode) != 3 {
+            return;
+        }
+        let spans = bar_spans(&self.current_groups());
+        let chart = self.chart;
+        if let Some(ctrl) = self.control_mut(chart) {
+            ctrl.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(&spans));
+        }
+    }
+
+    fn next_group_draft(&self) -> XAxisGroup {
+        let groups = self.current_groups();
+        let start = groups.last().map(|group| group.start.saturating_add(group.count)).unwrap_or(0);
+        XAxisGroup {
+            label: format!("Group {}", groups.len() + 1),
+            start,
+            count: 3,
+        }
+    }
+
+    fn add_group(&mut self) {
+        let draft = self.next_group_draft();
+        let Some(group) = GroupWindow::new("Add group", &draft).show() else {
+            return;
+        };
+        let handle = self.groups;
+        if let Some(list) = self.control_mut(handle) {
+            list.add(group);
+        }
+        self.apply_groups();
+    }
+
+    fn delete_selected_group(&mut self) {
+        let handle = self.groups;
+        let Some(index) = self.control(handle).and_then(|list| list.current_item_index()) else {
+            dialogs::message("Groups", "Select a group to delete.");
+            return;
+        };
+        let mut groups = self.current_groups();
+        if index < groups.len() {
+            groups.remove(index);
+        }
+        if let Some(list) = self.control_mut(handle) {
+            list.clear();
+            list.add_items(groups);
+        }
+        self.apply_groups();
+    }
+
+    fn clear_groups(&mut self) {
+        let handle = self.groups;
+        if let Some(list) = self.control_mut(handle) {
+            list.clear();
+        }
+        self.apply_groups();
+    }
+
+    fn edit_group(&mut self, index: usize) {
+        let handle = self.groups;
+        let Some(current) = self.control(handle).and_then(|list| list.item(index).cloned()) else {
+            return;
+        };
+        let Some(updated) = GroupWindow::new("Edit group", &current).show() else {
+            return;
+        };
+        if let Some(item) = self.control_mut(handle).and_then(|list| list.item_mut(index)) {
+            *item = updated;
+        }
+        self.apply_groups();
     }
 
     fn show_bar_editors(&mut self, show: bool) {
@@ -1080,6 +1193,26 @@ impl ButtonEvents for BarChartEditor {
     fn on_pressed(&mut self, handle: Handle<Button>) -> EventProcessStatus {
         if handle == self.data_apply {
             self.apply_data();
+            EventProcessStatus::Processed
+        } else if handle == self.groups_add {
+            self.add_group();
+            EventProcessStatus::Processed
+        } else if handle == self.groups_delete {
+            self.delete_selected_group();
+            EventProcessStatus::Processed
+        } else if handle == self.groups_clear {
+            self.clear_groups();
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
+    }
+}
+
+impl ListViewEvents<XAxisGroup> for BarChartEditor {
+    fn on_item_action(&mut self, handle: Handle<ListView<XAxisGroup>>, index: usize) -> EventProcessStatus {
+        if handle == self.groups {
+            self.edit_group(index);
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
