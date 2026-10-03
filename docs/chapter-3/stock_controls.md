@@ -41,6 +41,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [TimePicker](stock-controls/timepicker.md)              | ui::TimePicker               | `timepicker!`        | <img src="stock-controls/img/timepicker.png" width=300/>        |
 | [ToggleButton](stock-controls/togglebutton.md)          | ui::ToggleButton             | `togglebutton!`      | <img src="stock-controls/img/togglebutton.png" width=300/>      |
 | [TreeView](stock-controls/treeview.md)                  | ui::TreeView&lt;T&gt;        | `treeview!`          | <img src="stock-controls/img/treeview.png" width=300/>          |
+| [VBarChart](stock-controls/vbarchart.md)                | ui::VBarChart&lt;T&gt;       | `vbarchart!`         | <img src="stock-controls/img/vbarchart.png" width=300/>         |
 | [VLine](stock-controls/vline.md)                        | ui::VLine                    | `vline!`             | <img src="stock-controls/img/vline.png" width=300/>             |
 | [VSplitter](stock-controls/vsplitter.md)                | ui::VSplitter                | `vsplitter!`         | <img src="stock-controls/img/vsplitter.png" width=300/>         |
 

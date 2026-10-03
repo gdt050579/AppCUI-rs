@@ -96,6 +96,7 @@
         - [TimePicker](chapter-3/stock-controls/timepicker.md)
         - [ToggleButton](chapter-3/stock-controls/togglebutton.md)
         - [TreeView](chapter-3/stock-controls/treeview.md)
+        - [VBarChart](chapter-3/stock-controls/vbarchart.md)
         - [VLine](chapter-3/stock-controls/vline.md)
         - [VSplitter](chapter-3/stock-controls/vsplitter.md)
     - [Custom controls](chapter-3/custom_controls.md)
