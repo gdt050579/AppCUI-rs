@@ -286,7 +286,13 @@ impl MyWin {
             chart: Handle::None,
         };
         let mut chart = vbarchart!(
-            "i32,d:f,flags:[ScrollBars,ShowZeroLineOnYAxis],xlabels:BarLabels,bar-width:3,spacing:1,draw-mode:Fill(Shade50),bar-color:aqua"
+            "i32,d:f,
+             flags:[ScrollBars,ShowZeroLineOnYAxis],
+             xlabels:BarLabels,
+             bar-width:3,
+             spacing:1,
+             draw-mode:Fill(Shade50),
+             bar-color:aqua"
         );
         chart.add_bars([
             BarBuilder::new(12).label("Jan").build(),
