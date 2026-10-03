@@ -134,8 +134,14 @@ const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 #[CustomControl(overwrite=OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal=true)]
 /// A vertical bar chart for a numeric series of type `T`.
 ///
-/// `VBarChart` displays one vertical bar per value. Visual options are controlled
-/// by [`Flags`].
+/// `VBarChart` displays one vertical bar per value. Scale, axis labels, the default
+/// bar appearance, and number formatting are set through the methods on this type.
+/// Optional behavior, such as scroll bars, a zero line, and dimming unselected bars,
+/// is controlled by [`Flags`].
+///
+/// Clicking a bar selects it and raises a bar-selected event. Clicking outside any
+/// bar clears the selection. Hovering a bar shows its value, and its label when one
+/// is set, in a tooltip. When the chart has focus, the arrow keys scroll it horizontally.
 pub struct VBarChart<T>
 where
     T: Number + 'static,
@@ -143,8 +149,8 @@ where
     flags: Flags,
     bars: Vec<BarWithLayout<T>>,
     bars_width: u32,
-    left_scroll: i32,
-    first_visible_bar: u32,
+    pub(super) left_scroll: i32,
+    pub(super) first_visible_bar: u32,
     yaxis: YAxis,
     scale: BarScale<T>,
     number_format: FormatNumber,
@@ -162,6 +168,24 @@ impl<T> VBarChart<T>
 where
     T: Number + 'static,
 {
+    /// Creates an empty vertical bar chart.
+    ///
+    /// `layout` places the control. `flags` selects optional behavior; see [`Flags`].
+    ///
+    /// A new chart scales bars with [`BarScale::FromZero`], shows the Y axis and its
+    /// grid, and formats labels with two decimals when `T` is a floating-point type
+    /// or with thousands separators when `T` is an integer. Bars use the theme color,
+    /// a thickness of 1, and a spacing of 1 until a default is changed.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let chart = VBarChart::<i32>::new(
+    ///     layout!("d:f"),
+    ///     vbarchart::Flags::ScrollBars | vbarchart::Flags::ShowZeroLineOnYAxis,
+    /// );
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         let extra = if flags.contains(Flags::ScrollBars) {
             StatusFlags::IncreaseBottomMarginOnFocus
@@ -208,6 +232,19 @@ where
             tooltip_text: String::new(),
         }
     }
+    /// Appends one bar and repaints the chart.
+    ///
+    /// `bar` may be a value of type `T` or any type that converts into a [`Bar`],
+    /// such as the result of [`BarBuilder::build`](BarBuilder::build).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.add_bar(10);
+    /// chart.add_bar(BarBuilder::new(20).label("Feb").build());
+    /// ```
     pub fn add_bar<B>(&mut self, bar: B)
     where
         B: Into<Bar<T>>,
@@ -215,6 +252,17 @@ where
         self.bars.push(BarWithLayout::new(bar.into()));
         self.repaint_surface();
     }
+    /// Appends several bars and repaints the chart once.
+    ///
+    /// Each item may be a value of type `T` or any type that converts into a [`Bar`].
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.add_bars(1..=12);
+    /// ```
     pub fn add_bars<B>(&mut self, bars: impl IntoIterator<Item = B>)
     where
         B: Into<Bar<T>>,
@@ -231,6 +279,57 @@ where
     #[inline(always)]
     pub fn selected_bar(&self) -> Option<u32> {
         self.selected_bar
+    }
+    /// Scrolls the chart horizontally so the bar at `index` is visible.
+    ///
+    /// When the bar fits in the plot area, the chart scrolls the minimum amount needed to show
+    /// it entirely. A bar that is already fully visible leaves the scroll position unchanged.
+    /// A bar wider than the plot area is scrolled until part of it is on screen.
+    /// Does nothing if `index` is out of range.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.add_bars(1..=50);
+    /// chart.ensure_visible(49);
+    /// ```
+    pub fn ensure_visible(&mut self, index: usize) {
+        if index >= self.bars.len() {
+            return;
+        }
+        self.update_bars_layout();
+        let plot_width = (self.size().width as i32 - self.x_axis_left_margin()).max(0);
+        if plot_width <= 0 {
+            return;
+        }
+        let bar = &self.bars[index];
+        let bar_left = bar.x;
+        let bar_right = bar_left + bar.bar.actual_thickness(&self.defaults) as i32;
+        let view_left = self.left_scroll;
+        let view_right = view_left + plot_width;
+        let new_scroll = if bar_right - bar_left <= plot_width {
+            if bar_left >= view_left && bar_right <= view_right {
+                return;
+            }
+            if bar_left < view_left {
+                bar_left
+            } else {
+                bar_right - plot_width
+            }
+        } else if bar_right <= view_left {
+            bar_right - plot_width
+        } else if bar_left >= view_right {
+            bar_left
+        } else {
+            return;
+        };
+        let new_scroll = new_scroll.clamp(0, self.max_left_scroll());
+        if new_scroll != self.left_scroll {
+            self.left_scroll = new_scroll;
+            self.after_horizontal_scroll();
+        }
     }
     /// Returns an immutable reference to the bar at `index`, or `None` if out of range.
     ///
@@ -298,47 +397,132 @@ where
         self.clamp_selected_bar();
         self.repaint_surface();
     }
+    /// Sets how bar values are mapped onto the plot height.
+    ///
+    /// * [`BarScale::FromZero`] draws every bar from zero. The visible range includes
+    ///   zero and every bar value.
+    /// * [`BarScale::FromZeroMinRange`] does the same, and also expands the range so
+    ///   that it covers `min` and `max`.
+    /// * [`BarScale::FitData`] stretches the smallest and largest values across the
+    ///   full plot height.
+    /// * [`BarScale::Fixed`] uses the given `min` and `max`. Values outside that
+    ///   range are drawn at the corresponding edge of the plot.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.set_bars_scale(vbarchart::BarScale::Fixed { min: 0, max: 100 });
+    /// ```
     pub fn set_bars_scale(&mut self, scale: BarScale<T>) {
         self.scale = scale;
         self.repaint_surface();
     }
+    /// Sets the format used for Y-axis labels, the zero-line label, and hover tooltips.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<f64>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.set_number_format(FormatNumber::new(10).decimals(1));
+    /// ```
     pub fn set_number_format(&mut self, format: FormatNumber) {
         self.number_format = format;
         self.repaint_surface();
     }
+    /// Sets the thickness, in cells, of bars that do not specify their own.
+    ///
+    /// Values below 1 are treated as 1. A bar can override this with
+    /// [`Bar::set_thickness`](Bar::set_thickness).
     pub fn set_default_bar_width(&mut self, width: u8) {
         self.defaults.thickness = width.max(1);
         self.repaint_surface();
     }
+    /// Sets the gap, in cells, before bars that do not specify their own spacing.
+    ///
+    /// A bar can override this with [`Bar::set_spacing`](Bar::set_spacing).
     pub fn set_default_bar_spacing(&mut self, spacing: u8) {
         self.defaults.spacing = spacing;
         self.repaint_surface();
     }
+    /// Sets the draw mode of bars that do not specify their own.
+    ///
+    /// A bar can override this with [`Bar::set_draw_mode`](Bar::set_draw_mode).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.set_default_bar_drawmode(BarDrawMode::Fill(BarFillType::Shade50));
+    /// ```
     pub fn set_default_bar_drawmode(&mut self, draw_mode: BarDrawMode) {
         self.defaults.draw_mode = draw_mode;
         self.repaint_surface();
     }
+    /// Sets the character attribute of bars that do not specify their own.
+    ///
+    /// After this call, bars no longer use the theme bar color. A bar can still
+    /// override the default with [`Bar::set_attr`](Bar::set_attr).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.set_default_bar_attr(CharAttribute::with_fore_color(Color::Yellow));
+    /// ```
     pub fn set_default_bar_attr(&mut self, attr: CharAttribute) {
         self.defaults.attr = attr;
         self.use_theme_colors_for_bars = false;
         self.repaint_surface();
     }
+    /// Shows or hides the Y axis and the column reserved for its labels.
+    ///
+    /// The horizontal grid is controlled separately by [`Self::set_yaxis_show_grid`].
     pub fn set_yaxis_visible(&mut self, visible: bool) {
         self.yaxis.visible = visible;
         self.repaint_surface();
     }
+    /// Shows or hides the horizontal grid lines and the numeric labels beside them.
     pub fn set_yaxis_show_grid(&mut self, show_grid: bool) {
         self.yaxis.show_grid = show_grid;
         self.repaint_surface();
     }
+    /// Sets how many characters are reserved for Y-axis labels.
+    ///
+    /// Values below 1 are treated as 1. This width is used only while the Y axis
+    /// is visible.
     pub fn set_yaxis_width(&mut self, width: u8) {
         self.yaxis.width = width.max(1);
         self.repaint_surface();
     }
+    /// Sets the distance, in rows, between horizontal grid lines and their labels.
+    ///
+    /// Values below 1 are treated as 1.
     pub fn set_yaxis_step(&mut self, step: u8) {
         self.yaxis.step = step.max(1);
         self.repaint_surface();
     }
+    /// Sets how labels are drawn under the bars.
+    ///
+    /// * [`XAxisLabelMode::None`] draws no X axis.
+    /// * [`XAxisLabelMode::Index`] labels each bar with `start + bar index`.
+    /// * [`XAxisLabelMode::BarLabels`] uses each bar's own label and skips empty ones.
+    /// * [`XAxisLabelMode::Custom`] copies the given spans. Spans are ordered by
+    ///   start index, then by end index. A span that overlaps an earlier one is dropped.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = VBarChart::<i32>::new(layout!("d:f"), vbarchart::Flags::None);
+    /// chart.add_bars(1..=6);
+    /// let spans = [BarSpan::new(0, 3, "Q1"), BarSpan::new(3, 3, "Q2")];
+    /// chart.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Custom(&spans));
+    /// ```
     pub fn set_xaxis_label_mode(&mut self, xaxis: XAxisLabelMode) {
         match xaxis {
             XAxisLabelMode::None => self.xaxis.label_format = XAxisLabelFormat::None,
