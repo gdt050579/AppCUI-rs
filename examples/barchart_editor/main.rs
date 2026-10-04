@@ -883,7 +883,7 @@ impl BarChartEditor {
         let mode = self.combo_index(controls.mode);
         let (caption, fill, line, point, large_point, cap, character) = match mode {
             0 => ("Fill type", true, false, false, false, false, self.combo_index(controls.fill) == FILL_CUSTOM),
-            1 | 2 | 3 => ("Line type", false, true, false, false, false, false),
+            1..=3 => ("Line type", false, true, false, false, false, false),
             4 => ("Point type", false, false, true, false, false, self.combo_index(controls.point) == 3),
             5 => (
                 "Point type",

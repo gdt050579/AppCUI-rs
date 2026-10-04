@@ -421,7 +421,7 @@ impl<'a> ControlBuilder<'a> {
         }
         let value = self
             .get_i32(param_name)
-            .expect(format!("Parameter {param_name} should be an integer !").as_str());
+            .unwrap_or_else(|| panic!("Parameter {param_name} should be an integer !"));
         if let Some(validate) = validate {
             match validate(value) {
                 Ok(_) => (),
@@ -440,9 +440,9 @@ impl<'a> ControlBuilder<'a> {
             param_name,
             Some(|value| {
                 if (value >= min) && (value <= max) {
-                    return Ok(());
+                    Ok(())
                 } else {
-                    return Err(format!("Expecting a value between {} and {}", min, max));
+                    Err(format!("Expecting a value between {} and {}", min, max))
                 }
             }),
         )

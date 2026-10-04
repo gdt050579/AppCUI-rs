@@ -124,7 +124,7 @@ fn from_f64_truncates_fractions_toward_zero() {
     assert_from(1.9, 1i16);
     assert_from(-1.9, -1i16);
     assert_from(1.9, 1i32);
-    assert_from(-3.14159, -3i32);
+    assert_from(-3.25, -3i32);
     assert_from(9.99, 9i64);
     assert_from(-9.99, -9i64);
     assert_from(100.1, 100i128);

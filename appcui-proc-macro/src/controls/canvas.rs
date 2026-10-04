@@ -26,7 +26,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_flags_parameter("flags", "canvas::Flags", &FLAGS);
     cb.finish_control_initialization();
     cb.add_basecontrol_operations();
-    cb.call_method_with_dict_parameter_parser("set_background", "back", |repr, dict| crate::chars::builder::create_from_dict(&repr, dict));
+    cb.call_method_with_dict_parameter_parser("set_background", "back", |repr, dict| crate::chars::builder::create_from_dict(repr, dict));
     cb.add_scroll_margin_setup("lsm","tsm");
     cb.into()
 }

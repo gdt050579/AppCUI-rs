@@ -346,7 +346,7 @@ impl<T: Number + 'static> Bar<T> {
     fn paint_vertical_fill(&self, surface: &mut Surface, c: Character, layout: &BarLayout, defaults: &BarDefaults) {
         if layout.length == 0 {
             let ch = Character::new('_', c.foreground, c.background, c.flags);
-            surface.fill_horizontal_line_with_size(layout.x, layout.y, self.actual_thickness(&defaults) as u32, ch);
+            surface.fill_horizontal_line_with_size(layout.x, layout.y, self.actual_thickness(defaults) as u32, ch);
         } else {
             surface.fill_rect(self.rect_vertical(layout, defaults), c);
         }
@@ -417,7 +417,7 @@ impl<T: Number + 'static> Bar<T> {
     #[inline(always)]
     fn paint_vertical_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
         let point = self.point_vertical(layout);
-        surface.fill_horizontal_line_with_size(point.x, point.y, self.actual_thickness(&defaults) as u32, cap_type.character(attr));
+        surface.fill_horizontal_line_with_size(point.x, point.y, self.actual_thickness(defaults) as u32, cap_type.character(attr));
     }
     #[inline(always)]
     pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
@@ -427,7 +427,7 @@ impl<T: Number + 'static> Bar<T> {
     }
     #[inline(always)]
     pub(crate) fn rect_vertical(&self, layout: &BarLayout, defaults: &BarDefaults) -> Rect {
-        let thickness = self.actual_thickness(&defaults) as u32;
+        let thickness = self.actual_thickness(defaults) as u32;
         let abs_h = layout.length.unsigned_abs();
         let top = if layout.length > 0 {
             layout.y + 1 - layout.length as i32

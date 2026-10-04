@@ -4,17 +4,17 @@ fn is_wide_char(value: u32) -> bool {
 }
 
 pub(crate) trait IsWideChar {
-    fn is_wide_char(self) -> bool;
+    fn is_wide_char(&self) -> bool;
 }
 impl IsWideChar for char {
     #[inline(always)]
-    fn is_wide_char(self) -> bool {
-        is_wide_char(self as u32)
+    fn is_wide_char(&self) -> bool {
+        is_wide_char(*self as u32)
     }
 }
 impl IsWideChar for u32 {
     #[inline(always)]
-    fn is_wide_char(self) -> bool {
-        is_wide_char(self)
+    fn is_wide_char(&self) -> bool {
+        is_wide_char(*self)
     }
 }

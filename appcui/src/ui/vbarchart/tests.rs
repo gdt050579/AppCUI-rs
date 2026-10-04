@@ -142,7 +142,7 @@ fn check_update_bars_set_clear_iter() {
             let old = bars.set(1, BarBuilder::new(8).label("B").build());
             assert_eq!(old.map(|b| b.value()), Some(2));
             bars.add(4);
-            bars.add_bars(&[5, 6]);
+            bars.add_bars([5, 6]);
             let values: Vec<i32> = bars.iter().map(|b| b.value()).collect();
             assert_eq!(values, vec![1, 8, 3, 4, 5, 6]);
             for bar in bars.iter_mut() {

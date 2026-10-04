@@ -5,7 +5,7 @@ use proc_macro::*;
 
 static FLAGS: FlagsSignature = FlagsSignature::new(&["ScrollBars", "DimBarsOnSelection", "ShowZeroLineOnYAxis"]);
 
-static BARSCALE_MODES: &[(&'static str, &'static str)] = &[
+static BARSCALE_MODES: &[(&str, &str)] = &[
     ("FromZero", "fromzero"),
     ("FromZero", "zero"),
     ("FitData", "fitdata"),
@@ -17,7 +17,7 @@ static BARSCALE_MODES: &[(&'static str, &'static str)] = &[
     ("FromZeroMinRange", "fromzerominrange"),
 ];
 
-static XLABELS_MODES: &[(&'static str, &'static str)] = &[("None", "none"), ("BarLabels", "barlabels")];
+static XLABELS_MODES: &[(&str, &str)] = &[("None", "none"), ("BarLabels", "barlabels")];
 
 static XLABEL_SPAN_POSITIONAL: &[PositionalParameter] = &[
     PositionalParameter::new("start", ParamType::Integer),

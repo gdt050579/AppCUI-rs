@@ -150,7 +150,7 @@ pub(crate) fn validate_name(name: &str, force_one_capilat_letter: bool) -> Resul
 }
 pub(crate) fn find_string_in_array(array: &[(&'static str, &'static str)], value: &str) -> Option<&'static str> {
     for (key, v) in array {
-        if equal_ignore_case(value, *v) {
+        if equal_ignore_case(value, v) {
             return Some(key);
         }
     }
@@ -162,90 +162,6 @@ pub(crate) fn join_strings(array: &[(&'static str, &'static str)]) -> String {
         m.insert(k);
     }
     m.iter().map(|k| format!("'{}'", k)).collect::<Vec<String>>().join(", ")
-}
-// format: name (param1, param2, ... )
-pub(crate) fn parse_function_and_parameters__(repr: &str, name: &str) -> Option<Vec<String>> {
-    let buf = repr.as_bytes();
-    let len = buf.len();
-    let mut pos = skip_spaces(buf, 0);
-    if pos >= len {
-        return None;
-    }
-    let name_start = pos;
-    pos = skip_words(buf, pos);
-    if pos == name_start {
-        return None;
-    }
-    if !equal_ignore_case(&repr[name_start..pos], name) {
-        return None;
-    }
-    pos = skip_spaces(buf, pos);
-    if (pos >= len) || (buf[pos] != b'(') {
-        return None;
-    }
-    pos += 1;
-    let mut params = Vec::new();
-    loop {
-        pos = skip_spaces(buf, pos);
-        if pos >= len {
-            return None;
-        }
-        if buf[pos] == b')' {
-            pos += 1;
-            break;
-        }
-        if (buf[pos] == b'"') || (buf[pos] == b'\'') {
-            let quote = buf[pos];
-            pos += 1;
-            let start = pos;
-            while (pos < len) && (buf[pos] != quote) {
-                pos += 1;
-            }
-            if pos >= len {
-                return None;
-            }
-            params.push(repr[start..pos].to_string());
-            pos += 1;
-        } else {
-            let start = pos;
-            while (pos < len) && (buf[pos] != b',') && (buf[pos] != b')') {
-                pos += 1;
-            }
-            if pos >= len {
-                return None;
-            }
-            let mut end = pos;
-            while end > start {
-                let c = buf[end - 1];
-                if (c == b' ') || (c == b'\n') || (c == b'\r') || (c == b'\t') {
-                    end -= 1;
-                } else {
-                    break;
-                }
-            }
-            if end > start {
-                params.push(repr[start..end].to_string());
-            }
-        }
-        pos = skip_spaces(buf, pos);
-        if pos >= len {
-            return None;
-        }
-        if buf[pos] == b',' {
-            pos += 1;
-            continue;
-        }
-        if buf[pos] == b')' {
-            pos += 1;
-            break;
-        }
-        return None;
-    }
-    pos = skip_spaces(buf, pos);
-    if pos != len {
-        return None;
-    }
-    Some(params)
 }
 
 pub(crate) fn is_number(text: &str) -> bool {

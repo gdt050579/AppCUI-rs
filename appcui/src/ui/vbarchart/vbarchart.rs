@@ -684,8 +684,7 @@ where
         let width = self.size().width as i32;
         let plot_bottom = self.size().height as i32 - (self.xaxis.label_format.height() as i32 + 1);
         let left_margin = self.x_axis_left_margin();
-        let mut layout = BarLayout::default();
-        layout.y = plot_bottom - self.yaxis.zero;
+        let mut layout = BarLayout { y: plot_bottom - self.yaxis.zero, ..Default::default() };
         let mut defaults = self.defaults;
         if self.use_theme_colors_for_bars {
             defaults.attr = bar_attr;
@@ -783,8 +782,8 @@ where
         };
         // pentru impare - 5 -> 5/2 - (1-5 & 1) = 2 - 0 = 2;
         // pentru pare - 6 => 6/2 - (1-6 & 1) = 3 - 1 = 2;
-        let left = left_space / 2 - (1 - left_space & 1);
-        let right = right_space / 2 - (1 - right_space & 1);
+        let left = left_space / 2 - (1 - (left_space & 1));
+        let right = right_space / 2 - (1 - (right_space & 1));
         let extra_space = left.min(right);
         let total_space = width + extra_space * 2;
         if total_space < 1 {
@@ -831,7 +830,7 @@ where
                 break;
             }
             if let Some(result) = INT_FORMAT.write_number(bar_idx, &mut temp) {
-                self.print_label(x, y, idx_start, idx_start, &result, attr);
+                self.print_label(x, y, idx_start, idx_start, result, attr);
             }
             idx_start += 1;
             bar_idx += 1;
@@ -882,7 +881,7 @@ where
             if end_x < 0 {
                 continue; // not visible
             }
-            let span_copy = span.clone(); // doar 32 de octeti - e rapid
+            let span_copy = *span; // doar 32 de octeti - e rapid
             self.print_label(x, y, start_index, end_index, span_copy.label.as_str(), attr);
         }
     }
