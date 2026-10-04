@@ -1,5 +1,6 @@
 mod token_stream_to_string;
 mod chars;
+mod bar;
 mod numericformat;
 mod column;
 mod key;

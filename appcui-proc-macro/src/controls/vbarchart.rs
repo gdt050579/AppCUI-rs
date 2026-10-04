@@ -1,4 +1,4 @@
-use super::bar::{parse_bar_attr, parse_bar_draw_mode, parse_bar_list};
+use crate::bar::{parse_bar_attr, parse_bar_draw_mode, parse_bar_list};
 use super::control_builder::ControlBuilder;
 use crate::parameter_parser::*;
 use proc_macro::*;

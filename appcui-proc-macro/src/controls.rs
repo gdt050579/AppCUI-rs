@@ -41,6 +41,5 @@ pub (crate) mod bufferview;
 pub (crate) mod timepicker;
 pub (crate) mod hyperlink;
 pub (crate) mod hslider;
-pub (crate) mod bar;
 pub (crate) mod vbarchart;
 pub (crate) mod markdown_composer;
