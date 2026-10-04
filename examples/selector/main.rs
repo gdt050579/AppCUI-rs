@@ -20,7 +20,7 @@ impl MyWin {
             imageviewer::Flags::None,
         );
         img.set_enabled(false);
-        img.set_backgound(Character::new(' ', Color::Black, Color::Black, CharFlags::None));
+        img.set_background(Character::new(' ', Color::Black, Color::Black, CharFlags::None));
         w.h_img = w.add(img);
         w.add(selector!("enum: Shape,value:Square,x:1,y:1,w:26"));
         w

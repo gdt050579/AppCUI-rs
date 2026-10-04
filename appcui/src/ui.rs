@@ -127,6 +127,7 @@ pub mod timepicker;
 pub mod bufferview;
 pub mod hslider;
 pub mod markdown_composer;
+pub mod vbarchart;
 
 // re-export
 pub use common::ControlBase;
@@ -181,4 +182,5 @@ pub use menu::Menu;
 pub use appbar::AppBar;
 pub use graphview::GraphView;
 pub use hslider::HSlider;
+pub use vbarchart::VBarChart;
 pub use markdown_composer::MarkdownComposer;

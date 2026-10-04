@@ -4,15 +4,15 @@ The most basic operation that can be performed on a surface is drawing a charact
 
 A surface has the following methods that can be used to manipulate characters and how they are drown on the surface:
 
-| Method                              | Description                                                                                                                                                                                                 |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `write_char(...)`                   | Writes a [character](../screen.md#character) at the specified position. If the position is outside the clip area, the character will not be drawn.                                                          |
-| `write_chars(...)`                  | Writes a slice of [characters](../screen.md#character) from left to right starting at a given position. Each character keeps its own code, colors and flags. Cells outside the clip area are skipped.      |
-| `char(...)`                         | Returns the current [character](../screen.md#character) at the specified position or `None` if the position is outside the clip area or invalid.                                                            |
-| `clear(...)`                        | Clears/Fills the entire **clip area** with the specified [character](../screen.md#character). If the clip area is not visible, the surface will not be cleared. Origin and clip are left unchanged.         |
-| `reset(...)`                        | Fills the **entire** surface with the specified [character](../screen.md#character) and restores the origin and clip to the full surface. Use this when preparing an overlay that will be copied later.     |
-| `draw_surface(...)`                 | Copies another surface onto this one at a given position. Transparent foreground or background colors in the source do not overwrite the destination, which allows layered compositing.                     |
-| `draw_surface_with_transform(...)`  | Same as `draw_surface`, but a callback can remap each source character (code, colors or flags) before it is written.                                                                                        |
+| Method                             | Description                                                                                                                                                                                                                                                                      |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `write_char(...)`                  | Writes a [character](../screen.md#character) at the specified position. If the position is outside the clip area, the character will not be drawn.                                                                                                                               |
+| `write_chars(...)`                 | Writes a slice of [characters](../screen.md#character) from left to right starting at a given position. Each character keeps its own code, colors and flags. Cells outside the clip area are skipped.                                                                            |
+| `char(...)`                        | Returns the current [character](../screen.md#character) at the specified position or `None` if the position is outside the clip area or invalid.                                                                                                                                 |
+| `clear(...)`                       | Clears/Fills the entire **clip area** with the specified [character](../screen.md#character). If the clip area is not visible, the surface will not be cleared. Origin and clip are left unchanged.                                                                              |
+| `reset(...)`                       | Fills the **entire** surface with the specified [character](../screen.md#character) and restores the origin and clip to the full surface. Use this when preparing an overlay that will be copied later.                                                                          |
+| `draw_surface(...)`                | Copies another surface onto this one at a given position. Transparent foreground or background colors in the source do not overwrite the destination, which allows layered compositing.                                                                                          |
+| `draw_surface_with_transform(...)` | Same as `draw_surface`, but a callback remaps each source character before it is written. The callback receives the source [character](../screen.md#character) and its `Point` on the **source** surface, and returns `Some(character)` to write it or `None` to skip that cell. |
 
 Example:
 
@@ -45,10 +45,10 @@ surface.clear(Character::new(' ', Color::White, Color::DarkBlue, CharFlags::None
 surface.draw_surface(2, 2, &overlay);
 ```
 
-`draw_surface_with_transform` is the same copy, but you can tint or mask the source:
+`draw_surface_with_transform` is the same copy, but you can tint or mask the source. The `Point` is the coordinate on the source surface (top-left of the source is `(0, 0)`). Return `None` to skip a cell:
 
 ```rust
-surface.draw_surface_with_transform(2, 2, &overlay, |ch| {
-    Character::new(ch.code, Color::Red, ch.background, ch.flags)
+surface.draw_surface_with_transform(2, 2, &overlay, |ch, _| {
+    Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
 });
 ```

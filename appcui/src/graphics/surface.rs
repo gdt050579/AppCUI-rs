@@ -1165,6 +1165,111 @@ impl Surface {
         }
     }
 
+    /// Fills a rectangle by calling `generate` for every cell. If the rectangle is
+    /// outside the clip area, nothing is drawn.
+    ///
+    /// This is similar to [`fill_rect`](Self::fill_rect), but the character at each
+    /// position is produced by the callback instead of being a single constant
+    /// [`Character`]. The [`Point`] passed to `generate` uses the same coordinate
+    /// space as `rect` (relative to the current origin).
+    ///
+    /// If `generate` returns `None`, that cell is left unchanged. This can be used
+    /// to paint a pattern, a gradient, or only a subset of the rectangle.
+    ///
+    /// # Parameters
+    /// - `rect`: The rectangle to fill.
+    /// - `generate`: A function called for each cell; `Some(ch)` writes that
+    ///   character, `None` skips the cell.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::*;
+    ///
+    /// let mut surface = Surface::new(100, 50);
+    /// let r = Rect::new(10, 10, 20, 20);
+    /// surface.fill_rect_with(r, |p| {
+    ///     if (p.x + p.y) % 2 == 0 {
+    ///         Some(Character::new('#', Color::White, Color::Black, CharFlags::None))
+    ///     } else {
+    ///         None
+    ///     }
+    /// });
+    /// ```
+    pub fn fill_rect_with<F>(&mut self, rect: Rect, generate: F)
+    where
+        F: Fn(Point) -> Option<Character>,
+    {
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
+        let mut p = Point::default();
+        for x in left..=right {
+            for y in top..=bottom {
+                p.x = x;
+                p.y = y;
+                if let Some(ch) = generate(p) {
+                    if let Some(pos) = self.coords_to_position(x, y) {
+                        self.chars[pos].set(ch);
+                    }
+                }
+            }
+        }
+    }
+
+    /// Transforms every character inside a rectangle by calling `transform`.
+    /// Cells outside the clip area are skipped.
+    ///
+    /// Unlike [`fill_rect_with`](Self::fill_rect_with), this starts from the
+    /// character already on the surface. The callback receives that [`Character`]
+    /// and its [`Point`] (relative to the current origin). Return `Some(ch)` to
+    /// replace the cell, or `None` to leave it unchanged (for example to dim
+    /// everything except a selected region).
+    ///
+    /// # Parameters
+    /// - `rect`: The rectangle whose cells are transformed.
+    /// - `transform`: A function called for each visible cell; `Some(ch)`
+    ///   overwrites the cell, `None` keeps the original character.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::graphics::*;
+    ///
+    /// let mut surface = Surface::new(100, 50);
+    /// let r = Rect::new(10, 10, 20, 20);
+    /// surface.fill_rect(r, Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
+    /// surface.transform_rect(r, |ch, p| {
+    ///     if p.x % 2 == 0 {
+    ///         Some(Character::new(ch.code, Color::Gray, ch.background, ch.flags))
+    ///     } else {
+    ///         None
+    ///     }
+    /// });
+    /// ```
+    pub fn transform_rect<F>(&mut self, rect: Rect, transform: F)
+    where
+        F: Fn(Character, Point) -> Option<Character>,
+    {
+        let left = rect.left();
+        let right = rect.right();
+        let top = rect.top();
+        let bottom = rect.bottom();
+        let mut p = Point::default();
+        for x in left..=right {
+            for y in top..=bottom {
+                if let Some(ch) = self.char(x, y) {
+                    p.x = x;
+                    p.y = y;
+                    if let Some(ch) = transform(*ch, p) {
+                        if let Some(pos) = self.coords_to_position(x, y) {
+                            self.chars[pos].set(ch);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /// Rewrites the character at `(x, y)` as a box-drawing junction based on
     /// its four neighbors.
     ///
@@ -1268,14 +1373,19 @@ impl Surface {
     /// Copies all characters from another surface onto this one at the specified position,
     /// applying a transformation to each source character before it is written.
     /// This behaves like [`draw_surface`](Self::draw_surface), but the `transform` callback can remap
-    /// character codes, colors, or flags (for example to tint or mask the copied content).
+    /// character codes, colors, or flags, or skip a cell entirely (for example to tint or mask the copied content).
     /// If the clip area is not visible, nothing is drawn.
+    ///
+    /// The [`Point`] passed to `transform` is the coordinate on the **source** surface
+    /// (top-left of the source is `(0, 0)`). Return `Some(ch)` to write that character
+    /// to the destination, or `None` to skip that cell.
     ///
     /// # Parameters
     /// - `x`: The x-coordinate of the top-left corner where the source surface is placed.
     /// - `y`: The y-coordinate of the top-left corner where the source surface is placed.
     /// - `surface`: The source surface to copy.
-    /// - `transform`: A function called for each source character; its return value is written to the destination.
+    /// - `transform`: A function called for each source character and its source-surface
+    ///   position. `Some(ch)` writes the character; `None` skips the cell.
     ///
     /// # Example
     /// ```rust
@@ -1284,18 +1394,26 @@ impl Surface {
     /// let mut destination = Surface::new(20, 10);
     /// let mut source = Surface::new(5, 3);
     /// source.clear(Character::new('X', Color::Yellow, Color::Black, CharFlags::None));
-    /// destination.draw_surface_with_transform(2, 2, &source, |ch| {
-    ///     Character::new(ch.code, Color::Red, ch.background, ch.flags)
+    /// destination.draw_surface_with_transform(2, 2, &source, |ch, _| {
+    ///     Some(Character::new(ch.code, Color::Red, ch.background, ch.flags))
     /// });
     /// ```
-    pub fn draw_surface_with_transform<F: Fn(Character) -> Character>(&mut self, x: i32, y: i32, surface: &Surface, transform: F) {
+    pub fn draw_surface_with_transform<F>(&mut self, x: i32, y: i32, surface: &Surface, transform: F)
+    where
+        F: Fn(Character, Point) -> Option<Character>,
+    {
         if !self.clip.is_visible() {
             return;
         }
         let mut index = 0usize;
+        let mut p = Point::default();
         for s_y in 0..=surface.bottom_most {
             for s_x in 0..=surface.right_most {
-                self.write_char(x + s_x, y + s_y, transform(surface.chars[index]));
+                p.x = s_x;
+                p.y = s_y;
+                if let Some(ch) = transform(surface.chars[index], p) {
+                    self.write_char(x + s_x, y + s_y, ch);
+                }
                 index += 1;
             }
         }

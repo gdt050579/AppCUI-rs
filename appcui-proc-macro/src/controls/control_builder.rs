@@ -395,6 +395,130 @@ impl<'a> ControlBuilder<'a> {
         self.content.push_str(content);
         self.content.push('\n');
     }
+
+    pub(super) fn call_method_with_enum_parameter(
+        &mut self,
+        method_name: &str,
+        param_name: &str,
+        enum_name: &str,
+        available_variants: &FlagsSignature,
+    ) {
+        if self.has_parameter(param_name) {
+            self.add("control.");
+            self.add(method_name);
+            self.add("(");
+            self.add_enum_parameter(param_name, enum_name, available_variants, None);
+            self.add_line(");\n");
+        }
+    }
+
+    pub(super) fn call_method_with_integer_parameter<F>(&mut self, method_name: &str, param_name: &str, validate: Option<F>)
+    where
+        F: Fn(i32) -> Result<(), String>,
+    {
+        if !self.has_parameter(param_name) {
+            return;
+        }
+        let value = self
+            .get_i32(param_name)
+            .unwrap_or_else(|| panic!("Parameter {param_name} should be an integer !"));
+        if let Some(validate) = validate {
+            match validate(value) {
+                Ok(_) => (),
+                Err(e) => panic!("Value {value} for parameter {param_name} is invalid: {e}"),
+            }
+        }
+        self.add("control.");
+        self.add(method_name);
+        self.add("(");
+        write!(self.content, "{value}").unwrap();
+        self.add_line(");\n");
+    }
+    pub(super) fn call_method_with_integer_parameter_and_range(&mut self, method_name: &str, param_name: &str, min: i32, max: i32) {
+        self.call_method_with_integer_parameter(
+            method_name,
+            param_name,
+            Some(|value| {
+                if (value >= min) && (value <= max) {
+                    Ok(())
+                } else {
+                    Err(format!("Expecting a value between {} and {}", min, max))
+                }
+            }),
+        )
+    }
+
+    pub(super) fn call_method_with_string_parameter(&mut self, method_name: &str, param_name: &str) {
+        if self.has_parameter(param_name) {
+            self.add("control.");
+            self.add(method_name);
+            self.add("(");
+            self.add_string_parameter(param_name, None);
+            self.add_line(");\n");
+        }
+    }
+
+    pub(super) fn call_method_with_string_parameter_parser(&mut self, method_name: &str, param_name: &str, parser: fn(&str) -> String) {
+        if let Some(repr) = self.get_value(param_name) {
+            let result = parser(repr);
+            self.add("control.");
+            self.add(method_name);
+            self.add("(");
+            self.add(&result);
+            self.add_line(");\n");
+        }
+    }
+    pub(super) fn call_method_with_list_parameter_parser(&mut self, method_name: &str, param_name: &str, parser: fn(&mut Vec<Value<'a>>) -> String) {
+        if let Some(list) = self.get_list(param_name) {
+            let result = parser(list);
+            self.add("let list_");
+            self.add(method_name);
+            self.add(" = ");
+            self.add(&result);
+            self.add(";\n");
+            self.add("control.");
+            self.add(method_name);
+            self.add("(list_");
+            self.add(method_name);
+            self.add_line(");\n");
+        }
+    }
+    pub(super) fn call_method_with_dict_parameter_parser(
+        &mut self,
+        method_name: &str,
+        param_name: &str,
+        parser: fn(&str, &mut NamedParamsMap<'a>) -> String,
+    ) {
+        if self.has_parameter(param_name) {
+            let repr = self.get_string_representation().to_string();
+            if let Some(dict) = self.get_dict(param_name) {
+                let result = parser(&repr, dict);
+                self.add("control.");
+                self.add(method_name);
+                self.add("(");
+                self.add(&result);
+                self.add_line(");\n");
+            }
+        }
+    }
+    pub(super) fn call_method_with_value_parser(&mut self, method_name: &str, param_name: &str, parser: fn(&mut Value<'a>) -> String) {
+        if self.has_parameter(param_name) {
+            let value = self.parser.get_mut(param_name).unwrap();
+            let result = parser(value);
+            self.add("let list_");
+            self.add(method_name);
+            self.add(" = ");
+            self.add(&result);
+            self.add(";\n");
+            self.add("control.");
+            self.add(method_name);
+            self.add("(list_");
+            self.add(method_name);
+            self.add_line(");\n");
+
+        }
+    }
+
     #[inline(always)]
     pub(super) fn get_dict(&mut self, name: &str) -> Option<&mut NamedParamsMap<'a>> {
         self.parser.get_mut(name)?.get_dict()

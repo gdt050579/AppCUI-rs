@@ -139,12 +139,21 @@ pub(crate) fn new() -> Theme {
         
         hyperlink: controlattr!("aqua,flags:Underline", "w,flags:Underline", "y,flags:Underline", "gray", "black,white,flags:Underline"),
 
-        hslider: SliderTheme {
+        slider: SliderTheme {
             before_line: charattr!("teal"),
             after_line: charattr!("gray"),
             marker: controlattr!("teal", "aqua", "aqua", "gray", "aqua"),
             marker_border: controlattr!("teal", "aqua", "aqua", "gray", "aqua"),
             cap: charattr!("silver"),
+        },
+        chart: ChartTheme {
+            background: charattr!("silver,black"),
+            axis: charattr!("white,black"),
+            label: charattr!("silver,black"),
+            grid: charattr!("gray,black"),
+            bar: charattr!("teal,black"),
+            inactive: charattr!("gray,black"),
+            selection_border: charattr!("yellow,black"),
         },
     }
 }

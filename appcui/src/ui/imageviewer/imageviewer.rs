@@ -123,7 +123,7 @@ impl ImageViewer {
 
     /// Sets the image viewer background character.
     /// The background character is used to fill the empty space in the image viewer (e.g. if the image is smaller than the drawing area).
-    pub fn set_backgound(&mut self, backgroud_char: Character) {
+    pub fn set_background(&mut self, backgroud_char: Character) {
         self.background = Some(backgroud_char);
     }
 

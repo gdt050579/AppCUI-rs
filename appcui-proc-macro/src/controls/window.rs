@@ -38,11 +38,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_enum_parameter("type", "window::Type", &TYPES, Some("Classic"));
     cb.add_enum_parameter("background", "window::Background", &BACKGROUNDS, Some("Normal"));
     cb.finish_control_initialization();
-    if cb.has_parameter("tag") {
-        cb.add("\n\tcontrol.set_tag(");
-        cb.add_string_parameter("tag", None);
-        cb.add_line(");\n");  
-    }
+    cb.call_method_with_string_parameter("set_tag", "tag");
     if cb.has_parameter("hotkey") {
         let s = cb.get_value("hotkey").unwrap();
         if utils::equal_ignore_case(s, "auto") {

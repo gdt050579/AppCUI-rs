@@ -1,5 +1,7 @@
 mod token_stream_to_string;
 mod chars;
+mod bar;
+mod numericformat;
 mod column;
 mod key;
 mod menu;
@@ -7,6 +9,7 @@ mod procmacro_builder;
 mod parameter_parser;
 mod derives;
 mod controls;
+mod fncall;
 mod utils;
 use proc_macro::*;
 
@@ -112,6 +115,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -184,6 +188,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -281,7 +286,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::Default);
-
+    config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::Default);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
 
@@ -351,7 +356,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::Default);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::Default);
-
+    config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -447,6 +452,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::CharPickerEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericGraphViewEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::TimePickerEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -820,6 +826,67 @@ pub fn char(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn charattr(input: TokenStream) -> TokenStream {
     crate::chars::create_attr(input)
+}
+
+/// Creates a FormatNumber value that describes how an integer or float is rendered.
+/// The `numericformat!` macro provides a convenient way to set the base, grouping, padding, decimals, prefix and suffix.
+///
+/// # Syntax
+///
+/// The macro supports both positional and named parameters:
+///
+/// ```no_compile
+/// numericformat!(base)
+/// ```
+///
+/// or
+///
+/// ```no_compile
+/// numericformat!(named_parameters)
+/// ```
+///
+/// # Positional Parameters
+///
+/// 1. **base** - Numeric base: `2`/`bin`/`binary`, `8`/`oct`/`octal`, `10`/`dec`/`decimal` or `16`/`hex`/`hexadecimal`
+///
+/// # Named Parameters
+///
+/// * `base`, `radix` - Numeric base (same values as the positional parameter)
+/// * `group`, `groups`, `group-size`, `gs` - Digit group size. Allowed values: `0`, `3` or `4`. When omitted, digits are not grouped
+/// * `sep`, `separator`, `group-char` - Separator between groups (default: `,`). Must be quoted when it is a comma or a space
+/// * `digits`, `representation`, `representation-digits`, `repr` - Minimum number of digits, padded with `0` on the left
+/// * `decimals`, `precision` - Number of digits after the decimal point (0 to 8)
+/// * `prefix`, `pre` - Text written before the number
+/// * `suffix`, `suf` - Text written after the number
+/// * `fill`, `width`, `w` - Total width. The number is padded on the left (default fill character: space)
+/// * `fillchar`, `fill-char`, `padchar` - Character used by `fill`. Must be a printable ASCII character
+///
+/// # Examples
+///
+/// ```no_compile
+/// use appcui::prelude::*;
+///
+/// // Plain decimal
+/// let f = numericformat!("dec");
+/// let f = numericformat!("10");
+///
+/// // Thousands separator
+/// let f = numericformat!("dec, group: 3");
+/// let f = numericformat!("10, group: 3, sep: '_'");
+///
+/// // Hexadecimal, padded to 8 digits
+/// let f = numericformat!("hex, prefix: 0x, digits: 8");
+/// let f = numericformat!("base: 16, group: 4, sep: '_', prefix: 0x");
+///
+/// // Money, with a prefix and two decimals
+/// let f = numericformat!("dec, group: 3, decimals: 2, prefix: '$ '");
+///
+/// // Fixed width, padded with '#'
+/// let f = numericformat!("dec, fill: 10, fillchar: '#'");
+/// ```
+#[proc_macro]
+pub fn numericformat(input: TokenStream) -> TokenStream {
+    crate::numericformat::create(input)
 }
 
 /// Creates a Column object for use in controls like ListView or similar. This macro provides a convenient way to 
@@ -2835,4 +2902,93 @@ pub fn timepicker(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn bufferview(input: TokenStream) -> TokenStream {
     crate::controls::bufferview::create(input)
+}
+
+/// Creates a new vertical bar chart for a numeric series.
+/// The format is `vbarchart!("attributes")` where the attributes are pairs of key-value, separated by comma.
+///
+/// # Parameters
+/// * `type` or `class` (required, first positional parameter) - Numeric type of the series (for example `i32` or `f64`)
+/// * `values` or `data` - Initial bars (optional). Each entry is a number, or a bar description:
+///   - `{value, width: 2, space: 1, attr: red, label: 'Jan', dm: Fill}`
+///   - `value` / `val` / `v` - Bar value (required; also the first positional value)
+///   - `width` / `w` / `thickness` - Thickness in cells
+///   - `space` / `spacing` / `s` - Gap in cells before the bar
+///   - `attr` / `attribute` / `charattr` - Character attribute, using the same syntax as [`charattr!`]
+///   - `label` / `text` / `caption` - Label used by `xlabels: BarLabels` and by the hover tooltip
+///   - `draw-mode` / `drawmode` / `dm` / `mode` - Draw mode for this bar (same values as `draw-mode` below)
+/// * `flags` - Control flags (optional). Can be:
+///   - **ScrollBars** - Shows a horizontal scroll bar when the bars are wider than the control
+///   - **DimBarsOnSelection** - Draws unselected bars with the inactive chart color
+///   - **ShowZeroLineOnYAxis** - Draws a solid line at value zero while the Y-axis grid is visible
+///   - Combine flags with `+`, `|`, `,`, or as a list: `flags: ScrollBars+ShowZeroLineOnYAxis`
+/// * `scale`, `barscale`, or `bar-scale` - How values map onto the plot height (optional). Can be:
+///   - **FromZero** or **zero** - Bars grow from zero (default)
+///   - **FitData** or **fit** - Stretches the smallest and largest values across the plot
+///   - **Fixed(min, max)** or **fix(min, max)** - Fixed range
+///   - **FromZeroMinRange(min, max)**, **zero-min-range(min, max)**, or **fromzerominrange(min, max)** - From zero, covering at least `min` and `max`
+/// * `default-bar-width`, `dbw`, `barwidth`, `bar-width`, or `bw` - Default bar thickness, from 1 to 100 (optional)
+/// * `default-bar-spacing`, `dbs`, `bar-spacing`, `spacing`, `space`, or `s` - Default gap before a bar, from 1 to 100 (optional)
+/// * `default-bar-draw-mode`, `dbdm`, `bar-draw-mode`, `draw-mode`, or `dm` - Default draw mode (optional). Can be:
+///   - **Fill** or **Fill(kind)** - `Solid` (default), `Shade75`, `Shade50`, `Shade25`, `Braille`, `Checkerboard`, `Grid`, `GridDouble`, `CrossHatch`, `Dashed`, `DiagonalUp`, `DiagonalDown`, `Notched`, or a character such as `'#'`
+///   - **Line** or **Line(kind)** - `Single` (default), `Double`, `SingleThick` (also `Thick`), `Border`, `Ascii`, `AsciiRound`, `SingleRound` (also `Round`), `Braille`
+///   - **Rectangle** or **Rect**, with the same line kinds as **Line**
+///   - **FilledRectangle** or **FilledRect**, with the same line kinds as **Line**
+///   - **Point(kind)** - `Bullet`, `Diamond`, `Square`, or a character
+///   - **LargePoint(kind)** - `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare`, `Circle`, `Diamond`, or a character
+///   - **Cap** or **Cap(kind)** - `Solid` (default), `Shade75`, `Shade50`, `Shade25`, `Braille`, `SingleLine`, `DoubleLine`, `SingleThickLine` (also `Thick`), or a character
+/// * `default-bar-draw-mode-attr`, `bar-attr`, `barattr`, `bar-color`, or `barcolor` - Default bar color (optional), using the same syntax as [`charattr!`] (for example `red` or `{fore: yellow, back: blue}`)
+/// * `numeric-format` or `nf` - Format for Y-axis labels and tooltips (optional), using the same syntax as [`numericformat!`]
+/// * `xlabels`, `x-labels`, `xl`, `xaxis`, or `x-axis` - Labels under the bars (optional). Can be:
+///   - **None** - No X axis
+///   - **Index(start)** - Labels bar `i` with `start + i`
+///   - **BarLabels** - Uses each bar's own label
+///   - A list of spans: `[{0, 3, 'Q1'}, {3, 3, 'Q2'}]`. The first value is the starting bar index and the second is how many bars the label covers. Named keys are `start`, `end` or `count` (both are the bar count), and `label`, `text`, or `caption`. A span that overlaps an earlier one is dropped
+/// * `yaxis-width`, `y-axis-width`, or `yw` - Characters reserved for Y-axis labels, from 0 to 32 (optional). A value of 0 is treated as 1
+/// * `yaxis-step`, `y-axis-step`, `ystep`, or `step` - Rows between horizontal grid lines, from 1 to 255 (optional)
+/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+///
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
+/// // Series of integers that fills its parent
+/// let chart = vbarchart!("i32, d:f, values: [1, 2, 3, 4, 5]");
+///
+/// // Scale, appearance, and indexed X-axis labels
+/// let chart = vbarchart!(
+///     "type: i32,
+///     flags: ScrollBars+ShowZeroLineOnYAxis,
+///     scale: Fixed(0, 100),
+///     dbw: 3,
+///     space: 2,
+///     dm: Fill(Shade50),
+///     barcolor: yellow,
+///     xlabels: Index(1),
+///     yw: 8,
+///     step: 2,
+///     x:1, y:1, width: 50, height: 15,
+///     values: [10, 40, 70]"
+/// );
+///
+/// // Per-bar labels and custom spans
+/// let chart = vbarchart!(
+///     "type: f64,
+///     nf: {dec, decimals: 1},
+///     xlabels: [{0, 3, 'Q1'}, {3, 3, 'Q2'}],
+///     dock: fill,
+///     values: [{1.5, label: Jan, w: 2, attr: green}, {4.0, label: Feb}]"
+/// );
+/// ```
+#[proc_macro]
+pub fn vbarchart(input: TokenStream) -> TokenStream {
+    crate::controls::vbarchart::create(input)
 }

@@ -13,11 +13,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.init_control("Password::new");
     cb.add_layout();
     cb.finish_control_initialization();
-    if cb.has_parameter("pass") {
-        cb.add("\n\tcontrol.set_password(");
-        cb.add_string_parameter("pass", None);
-        cb.add_line(");\n");        
-    }
+    cb.call_method_with_string_parameter("set_password", "pass");
     cb.add_basecontrol_operations();
     cb.into()
 }

@@ -62,6 +62,7 @@ pub(crate) enum AppCUITrait {
     HyperLinkEvents = 53,
     GenericHSliderEvents = 54,
     MarkdownComposerEvents = 55,
+    GenericVBarChartEvents = 56,
 }
 
 #[repr(u8)]
@@ -134,6 +135,7 @@ impl AppCUITrait {
             AppCUITrait::GenericBufferViewEvents => "BufferViewEvents", // important to be without Generic
             AppCUITrait::HyperLinkEvents => "HyperLinkEvents",
             AppCUITrait::GenericHSliderEvents => "HSliderEvents",
+            AppCUITrait::GenericVBarChartEvents => "VBarChartEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -197,6 +199,7 @@ impl AppCUITrait {
             AppCUITrait::GenericBufferViewEvents => TraitType::ControlEvent,
             AppCUITrait::HyperLinkEvents => TraitType::ControlEvent,
             AppCUITrait::GenericHSliderEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericVBarChartEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -260,6 +263,7 @@ impl AppCUITrait {
             AppCUITrait::GenericBufferViewEvents => "",
             AppCUITrait::HyperLinkEvents => "",
             AppCUITrait::GenericHSliderEvents => "",
+            AppCUITrait::GenericVBarChartEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -323,7 +327,7 @@ impl AppCUITrait {
             AppCUITrait::GenericBufferViewEvents => "impl$(TEMPLATE_TYPE) GenericBufferViewEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::HyperLinkEvents => "impl$(TEMPLATE_TYPE) HyperLinkEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericHSliderEvents => "impl$(TEMPLATE_TYPE) GenericHSliderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
-            
+            AppCUITrait::GenericVBarChartEvents => "impl$(TEMPLATE_TYPE) GenericVBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -338,6 +342,7 @@ impl AppCUITrait {
                 | AppCUITrait::GenericGraphViewEvents
                 | AppCUITrait::GenericBufferViewEvents
                 | AppCUITrait::GenericHSliderEvents
+                | AppCUITrait::GenericVBarChartEvents
         )
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -391,6 +396,7 @@ impl AppCUITrait {
             "BufferViewEvents" | "BufferView" => Some(AppCUITrait::GenericBufferViewEvents),
             "HyperLinkEvents" | "HyperLink" => Some(AppCUITrait::HyperLinkEvents),
             "HSliderEvents" | "HSlider" => Some(AppCUITrait::GenericHSliderEvents),
+            "VBarChartEvents" | "VBarChart" => Some(AppCUITrait::GenericVBarChartEvents),
             _ => None,
         }
     }
@@ -455,6 +461,7 @@ impl AppCUITrait {
             53 => Some(AppCUITrait::HyperLinkEvents),
             54 => Some(AppCUITrait::GenericHSliderEvents),
             55 => Some(AppCUITrait::MarkdownComposerEvents),
+            56 => Some(AppCUITrait::GenericVBarChartEvents),
             _ => None,
         };
         result?;

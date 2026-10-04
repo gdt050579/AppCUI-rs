@@ -88,12 +88,15 @@ pub use super::ui::togglebutton;
 pub use super::ui::togglebutton::events::ToggleButtonEvents;
 pub use super::ui::treeview;
 pub use super::ui::treeview::events::GenericTreeViewEvents;
+pub use super::ui::vbarchart;
+pub use super::ui::vbarchart::events::GenericVBarChartEvents;
 pub use super::ui::vsplitter;
 pub use super::ui::window::events::ModalWindowMethods;
 pub use super::ui::window::events::ToolBarEvents;
 pub use super::ui::window::events::WindowEvents;
 pub use super::ui::window::toolbar;
 pub use super::ui::*;
+pub use super::utils::format_number::FormatNumber;
 pub use appcui_proc_macro::*;
 
 #[cfg(debug_assertions)]

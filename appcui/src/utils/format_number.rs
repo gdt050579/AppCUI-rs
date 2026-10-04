@@ -1,3 +1,9 @@
+//! Describes how an integer or floating-point value is rendered as text.
+//!
+//! [`FormatNumber`] selects the numeric base, digit grouping, minimum width,
+//! decimal places, prefix, and suffix. The `numericformat!` macro builds the
+//! same value from a parameter string.
+
 use core::panic;
 use std::ops::{Add, Div, DivAssign, Mul, Rem, Sub};
 
@@ -7,7 +13,23 @@ use std::ops::{Add, Div, DivAssign, Mul, Rem, Sub};
 // representation_digis
 // prefix
 // fill
-pub(crate) struct FormatNumber {
+/// Rendering rules for an integer or floating-point value.
+///
+/// A value is written from right to left as fill padding, an optional minus
+/// sign, the prefix, the digits, the fractional part, and the suffix. For
+/// `-1234.5` with a `$` prefix, two decimals, and a ` USD` suffix, the text
+/// is `-$1234.50 USD`. Digit groups are separated from the right. Hexadecimal
+/// digits above 9 are written as `A` through `F`.
+///
+/// Builders consume `self` and can be chained in a constant.
+///
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+///
+/// const PRICE: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2).prefix("$");
+/// ```
+pub struct FormatNumber {
     base: u8, // 2, 8, 10, 16
     group_size: u8,
     separator_char: u8,
@@ -20,7 +42,22 @@ pub(crate) struct FormatNumber {
 }
 
 impl FormatNumber {
-    pub(crate) fn write_to_buffer(value: u64, buf: &mut [u8]) -> &[u8] {
+    /// Writes `value` as a decimal number into `buf`, starting from the right.
+    ///
+    /// Returns the slice that holds the digits. When `value` has more digits than
+    /// `buf`, the extra high-order digits are dropped. An empty buffer is returned
+    /// unchanged.
+    ///
+    /// This method ignores any format stored in [`FormatNumber`].
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut buf = [0u8; 8];
+    /// assert_eq!(FormatNumber::write_to_buffer(1234, &mut buf), b"1234");
+    /// ```
+    pub fn write_to_buffer(value: u64, buf: &mut [u8]) -> &[u8] {
         let len = buf.len();
         if len == 0 {
             return buf;
@@ -56,8 +93,13 @@ impl FormatNumber {
             }
         }
     }
+    /// Creates a format that writes digits in `base` with no grouping, padding, decimals, prefix, or suffix.
+    ///
+    /// # Panics
+    ///
+    /// Panics when `base` is not 2, 8, 10, or 16.
     #[inline(always)]
-    pub(crate) const fn new(base: u8) -> Self {
+    pub const fn new(base: u8) -> Self {
         match base {
             2 | 8 | 10 | 16 => (),
             _ => panic!("Invalid base value for FormatNumber (expected 2, 8, 10 or 16)"),
@@ -75,8 +117,18 @@ impl FormatNumber {
             suffix: "",
         }
     }
+    /// Groups digits from the right in blocks of `size`, separated by `separator`.
+    ///
+    /// `size` is `3` or `4`. Pass `0` for both arguments to disable grouping.
+    /// `separator` is a printable ASCII byte, such as `b','`.
+    ///
+    /// # Panics
+    ///
+    /// Panics when `size` is not 0, 3, or 4. Panics when grouping is disabled and
+    /// `separator` is not 0, or when grouping is enabled and `separator` is not a
+    /// printable ASCII byte.
     #[inline(always)]
-    pub(crate) const fn group(mut self, size: u8, separator: u8) -> Self {
+    pub const fn group(mut self, size: u8, separator: u8) -> Self {
         match size {
             0 | 3 | 4 => (),
             _ => panic!("Invalid group size for FormatNumber (expected 0, 3 or 4)"),
@@ -96,8 +148,18 @@ impl FormatNumber {
         self.separator_char = separator;
         self
     }
+    /// Pads the result on the left with `fill_char` until it is `size` bytes wide.
+    ///
+    /// Text that is already at least `size` bytes is left unchanged. Pass `0` for
+    /// both arguments to disable padding. `fill_char` is a printable ASCII byte,
+    /// such as `b' '`.
+    ///
+    /// # Panics
+    ///
+    /// Panics when padding is disabled and `fill_char` is not 0, or when padding
+    /// is enabled and `fill_char` is not a printable ASCII byte.
     #[inline(always)]
-    pub(crate) const fn fill(mut self, size: u8, fill_char: u8) -> Self {
+    pub const fn fill(mut self, size: u8, fill_char: u8) -> Self {
         match size {
             0 => match fill_char {
                 0 => (),
@@ -112,8 +174,16 @@ impl FormatNumber {
         self.fill_char = fill_char;
         self
     }
+    /// Writes at least `value` digits, padding with `0` on the left.
+    ///
+    /// Grouping applies to those zeros as well. The maximum depends on the base:
+    /// 128 for base 2, 43 for base 8, 39 for base 10, and 32 for base 16.
+    ///
+    /// # Panics
+    ///
+    /// Panics when `value` is 0 or greater than the maximum for this format's base.
     #[inline(always)]
-    pub(crate) const fn representation_digits(mut self, value: u8) -> Self {
+    pub const fn representation_digits(mut self, value: u8) -> Self {
         if value == 0 {
             panic!("Invalid number of representation digits for FormatNumber (expected a number greater than 0)");
         }
@@ -143,17 +213,26 @@ impl FormatNumber {
         self
     }
 
+    /// Appends `suffix` after the digits.
     #[inline(always)]
-    pub(crate) const fn suffix(mut self, suffix: &'static str) -> Self {
+    pub const fn suffix(mut self, suffix: &'static str) -> Self {
         self.suffix = suffix;
         self
     }
+    /// Inserts `prefix` before the digits and after the minus sign.
     #[inline(always)]
-    pub(crate) const fn prefix(mut self, prefix: &'static str) -> Self {
+    pub const fn prefix(mut self, prefix: &'static str) -> Self {
         self.prefix = prefix;
         self
     }
-    pub(crate) const fn decimals(mut self, value: u8) -> Self {
+    /// Writes `value` digits after a decimal point.
+    ///
+    /// `0` omits the fractional part. The maximum is 8.
+    ///
+    /// # Panics
+    ///
+    /// Panics when `value` is greater than 8.
+    pub const fn decimals(mut self, value: u8) -> Self {
         if value > 8 {
             panic!("Invalid number of decimals for FormatNumber (maximum number of decimals is 8)");
         }

@@ -1,0 +1,370 @@
+use crate::parameter_parser::*;
+
+static LINE_TYPES: &[(&str, &str)] = &[
+    ("Single", "single"),
+    ("Double", "double"),
+    ("SingleThick", "singlethick"),
+    ("SingleThick", "single-thick"),
+    ("SingleThick", "thick"),
+    ("Border", "border"),
+    ("Ascii", "ascii"),
+    ("AsciiRound", "asciiround"),
+    ("AsciiRound", "ascii-round"),
+    ("SingleRound", "singleround"),
+    ("SingleRound", "single-round"),
+    ("SingleRound", "round"),
+    ("Braille", "braille"),
+];
+
+// A bare name uses the variant default (Single, Solid, or Circle).
+static DRAW_MODES: &[(&str, &str)] = &[
+    ("Fill", "fill"),
+    ("Line", "line"),
+    ("Rectangle", "rectangle"),
+    ("Rectangle", "rect"),
+    ("FilledRectangle", "filledrectangle"),
+    ("FilledRectangle", "filledrect"),
+    ("FilledRectangle", "filled-rectangle"),
+    ("Smooth", "smooth"),
+    ("Point", "point"),
+    ("LargePoint", "largepoint"),
+    ("LargePoint", "large-point"),
+    ("LargePoint", "largepoints"),
+    ("LargePoint", "large-points"),
+    ("Cap", "cap"),
+];
+
+static FILL_TYPES: &[(&str, &str)] = &[
+    ("Solid", "solid"),
+    ("Shade75", "shade75"),
+    ("Shade50", "shade50"),
+    ("Shade25", "shade25"),
+    ("Braille", "braille"),
+    ("Checkerboard", "checkerboard"),
+    ("Grid", "grid"),
+    ("GridDouble", "griddouble"),
+    ("CrossHatch", "crosshatch"),
+    ("Dashed", "dashed"),
+    ("DiagonalUp", "diagonalup"),
+    ("DiagonalDown", "diagonaldown"),
+    ("Notched", "notched"),
+];
+
+static POINT_TYPES: &[(&str, &str)] = &[
+    ("Bullet", "bullet"),
+    ("Diamond", "diamond"),
+    ("Square", "square"),
+];
+
+static LARGE_POINT_TYPES: &[(&str, &str)] = &[
+    ("RoundSquare", "roundsquare"),
+    ("RoundSquare", "round-square"),
+    ("Square", "square"),
+    ("DoubleLineSquare", "doublelinesquare"),
+    ("DoubleLineSquare", "double-line-square"),
+    ("ThickSquare", "thicksquare"),
+    ("ThickSquare", "thick-square"),
+    ("Circle", "circle"),
+    ("Diamond", "diamond"),
+];
+
+static CAP_TYPES: &[(&str, &str)] = &[
+    ("Solid", "solid"),
+    ("Shade75", "shade75"),
+    ("Shade50", "shade50"),
+    ("Shade25", "shade25"),
+    ("Braille", "braille"),
+    ("SingleLine", "singleline"),
+    ("SingleLine", "single-line"),
+    ("DoubleLine", "doubleline"),
+    ("DoubleLine", "double-line"),
+    ("SingleThickLine", "singlethickline"),
+    ("SingleThickLine", "single-thick-line"),
+    ("SingleThickLine", "thickline"),
+    ("SingleThickLine", "thick"),
+];
+
+static VALUE_BAR_POSITIONAL: &[PositionalParameter] = &[PositionalParameter::new("value", ParamType::String)];
+static VALUE_BAR_NAMED: &[NamedParameter] = &[
+    NamedParameter::new("value", "value", ParamType::String),
+    NamedParameter::new("val", "value", ParamType::String),
+    NamedParameter::new("v", "value", ParamType::String),
+    NamedParameter::new("width", "width", ParamType::Integer),
+    NamedParameter::new("w", "width", ParamType::Integer),
+    NamedParameter::new("thickness", "width", ParamType::Integer),
+    NamedParameter::new("space", "space", ParamType::Integer),
+    NamedParameter::new("spacing", "space", ParamType::Integer),
+    NamedParameter::new("s", "space", ParamType::Integer),
+    NamedParameter::new("attr", "attr", ParamType::String),
+    NamedParameter::new("attribute", "attr", ParamType::String),
+    NamedParameter::new("charattr", "attr", ParamType::String),
+    NamedParameter::new("label", "label", ParamType::String),
+    NamedParameter::new("text", "label", ParamType::String),
+    NamedParameter::new("caption", "label", ParamType::String),
+    NamedParameter::new("draw-mode", "draw-mode", ParamType::String),
+    NamedParameter::new("drawmode", "draw-mode", ParamType::String),
+    NamedParameter::new("dm", "draw-mode", ParamType::String),
+    NamedParameter::new("mode", "draw-mode", ParamType::String),
+];
+
+pub(crate) fn validate_bar_number(repr: &str) {
+    if repr.parse::<f64>().is_err() {
+        panic!("Invalid values format - expecting a valid number but got {repr} !");
+    }
+}
+
+fn parse_bar_u8(repr: &str, key: &str) -> u8 {
+    repr.parse::<u8>().unwrap_or_else(|_| {
+        panic!("Invalid values format - expecting a number between 0 and 255 for '{key}' but got {repr} !");
+    })
+}
+
+fn char_to_rust_literal(ch: char) -> String {
+    if ch == '\'' {
+        return String::from("'\\''");
+    }
+    if ch == '\\' {
+        return String::from("'\\\\'");
+    }
+    if ch.is_ascii() && !ch.is_control() {
+        return format!("'{ch}'");
+    }
+    format!("'\\u{{{:x}}}'", ch as u32)
+}
+
+fn strip_quotes(repr: &str) -> &str {
+    let b = repr.as_bytes();
+    if (b.len() >= 2) && ((b[0] == b'\'') || (b[0] == b'"')) && (b[0] == b[b.len() - 1]) {
+        &repr[1..repr.len() - 1]
+    } else {
+        repr
+    }
+}
+
+fn split_named_param(param: &str) -> Option<(&str, &str)> {
+    let param = param.trim();
+    let colon = param.find(':')?;
+    let key = param[..colon].trim();
+    let value = param[colon + 1..].trim();
+    if key.is_empty() || value.is_empty() {
+        return None;
+    }
+    Some((key, strip_quotes(value)))
+}
+
+fn parse_unicode_code(repr: &str, key: &str) -> u32 {
+    let s = repr.trim();
+    let parsed = if let Some(hex) = s.strip_prefix("0x").or_else(|| s.strip_prefix("0X")) {
+        u32::from_str_radix(hex, 16)
+    } else if s.chars().all(|c| c.is_ascii_digit()) {
+        s.parse::<u32>()
+    } else {
+        u32::from_str_radix(s, 16)
+    };
+    parsed.unwrap_or_else(|_| {
+        panic!("Invalid {key} - expecting a valid unicode code (decimal or hex) but got {repr} !");
+    })
+}
+
+fn parse_char_token(repr: &str, key: &str) -> String {
+    let mut chars = repr.chars();
+    let Some(ch) = chars.next() else {
+        panic!("Invalid {key} - expecting a single character but got an empty value !");
+    };
+    if chars.next().is_none() {
+        return char_to_rust_literal(ch);
+    }
+    if repr.len() == 2 && repr.starts_with('\\') {
+        let escaped = match repr.as_bytes()[1] {
+            b'n' => '\n',
+            b't' => '\t',
+            b'r' => '\r',
+            b'\\' => '\\',
+            b'\'' => '\'',
+            b'"' => '"',
+            b'0' => '\0',
+            _ => panic!("Invalid {key} - unknown escape sequence '{repr}' !"),
+        };
+        return char_to_rust_literal(escaped);
+    }
+    panic!("Invalid {key} - expecting a single character but got {repr} !");
+}
+
+fn parse_line_type(repr: &str, key: &str) -> String {
+    match crate::utils::find_string_in_array(LINE_TYPES, repr.trim()) {
+        Some(line) => format!("LineType::{line}"),
+        None => panic!(
+            "Invalid {key} - expecting a line type ({}) but got {repr} !",
+            crate::utils::join_strings(LINE_TYPES)
+        ),
+    }
+}
+
+fn parse_custom_char(param: &str, key: &str) -> String {
+    let param = param.trim();
+    if let Some((name, value)) = split_named_param(param) {
+        if crate::utils::equal_ignore_case(name, "code") {
+            let code = parse_unicode_code(value, key);
+            let Some(ch) = char::from_u32(code) else {
+                panic!("Invalid {key} - unicode code {code} is not a valid character !");
+            };
+            return char_to_rust_literal(ch);
+        }
+        panic!("Invalid {key} - unknown named parameter '{name}' ! Expected code: value");
+    }
+    parse_char_token(param, key)
+}
+
+fn parse_line_draw_mode(fncall: &crate::fncall::FnCall, key: &str, module: &str, variant: &str) -> String {
+    let line = match fncall.params_count() {
+        0 => String::from("LineType::Single"),
+        1 => parse_line_type(fncall.param(0).unwrap(), key),
+        _ => panic!("Invalid {key} - expecting {variant} or {variant}(line type), for example {variant}(Single) !"),
+    };
+    format!("{module}::BarDrawMode::{variant}({line})")
+}
+
+fn parse_typed_draw_mode(
+    fncall: &crate::fncall::FnCall,
+    key: &str,
+    module: &str,
+    variant: &str,
+    names: &[(&'static str, &'static str)],
+    enum_name: &str,
+    default_variant: &str,
+) -> String {
+    let inner = match fncall.params_count() {
+        0 => format!("{module}::{enum_name}::{default_variant}"),
+        1 => {
+            let param = fncall.param(0).unwrap().trim();
+            if let Some(kind) = crate::utils::find_string_in_array(names, param) {
+                format!("{module}::{enum_name}::{kind}")
+            } else {
+                format!("{module}::{enum_name}::Custom({})", parse_custom_char(param, key))
+            }
+        }
+        _ => panic!("Invalid {key} - expecting {variant} or {variant}({enum_name}), for example {variant}({default_variant}) !"),
+    };
+    format!("{module}::BarDrawMode::{variant}({inner})")
+}
+
+pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String {
+    let repr = repr.trim();
+    if let Some(fncall) = crate::fncall::FnCall::new(repr) {
+        if let Some(name) = fncall.match_name(DRAW_MODES) {
+            match name {
+                "Fill" => parse_typed_draw_mode(&fncall, key, module, "Fill", FILL_TYPES, "BarFillType", "Solid"),
+                "Line" => parse_line_draw_mode(&fncall, key, module, "Line"),
+                "Rectangle" => parse_line_draw_mode(&fncall, key, module, "Rectangle"),
+                "FilledRectangle" => parse_line_draw_mode(&fncall, key, module, "FilledRectangle"),
+                "Smooth" => {
+                    if fncall.params_count() != 0 {
+                        panic!("Invalid {key} - Smooth takes no parameters !");
+                    }
+                    format!("{module}::BarDrawMode::Smooth")
+                }
+                "Point" => parse_typed_draw_mode(&fncall, key, module, "Point", POINT_TYPES, "BarPointType", "Circle"),
+                "LargePoint" => parse_typed_draw_mode(&fncall, key, module, "LargePoint", LARGE_POINT_TYPES, "BarLargePointType", "RoundSquare"),
+                "Cap" => parse_typed_draw_mode(&fncall, key, module, "Cap", CAP_TYPES, "BarCapType", "Solid"),
+                _ => {
+                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point, LargePoint, Cap !");
+                }
+            }
+        } else {
+            panic!("Invalid {key} - expecting a draw mode ({}) but got {repr} !", crate::utils::join_strings(DRAW_MODES));
+        }
+    } else {
+        panic!("Invalid {key} - expecting a draw mode ({}) but got {repr} !", crate::utils::join_strings(DRAW_MODES));
+    }
+}
+
+pub(crate) fn parse_bar_attr(repr: &str, key: &str) -> String {
+    let repr = repr.trim();
+    if repr.is_empty() {
+        panic!("Invalid {key} - expecting a character attribute (e.g. 'red', 'red,blue' or 'fore: red, back: blue, flags: Bold') !");
+    }
+    let mut d = crate::parameter_parser::parse(repr).unwrap_or_else(|e| {
+        panic!("Invalid {key}: {repr} !{e:?}");
+    });
+    crate::chars::builder::create_attr_from_dict(repr, &mut d)
+}
+
+pub(crate) fn parse_bar_from_dict(dict: &mut NamedParamsMap, param_list: &str, module: &str) -> String {
+    dict.validate_positional_parameters(param_list, VALUE_BAR_POSITIONAL).unwrap();
+    dict.validate_named_parameters(param_list, VALUE_BAR_NAMED).unwrap();
+    let value = match dict.get("value") {
+        Some(v) => {
+            let s = v.get_string();
+            validate_bar_number(s);
+            s.to_string()
+        }
+        None => panic!("Invalid values format - missing 'value' ! Expected {{value,width: 10, space: 4, attr: {{...}}}}"),
+    };
+    let width = dict.get("width").map(|v| parse_bar_u8(v.get_string(), "width"));
+    let space = dict.get("space").map(|v| parse_bar_u8(v.get_string(), "space"));
+    let label = dict.get("label").map(|v| v.get_string().to_string());
+    let draw_mode = dict.get("draw-mode").map(|v| parse_bar_draw_mode(v.get_string(), "draw-mode", module));
+    let attr = match dict.get_mut("attr") {
+        Some(v) if v.is_dict() => {
+            let inner = v.get_dict().expect("attr was checked to be a dictionary");
+            Some(crate::chars::builder::create_attr_from_dict(param_list, inner))
+        }
+        Some(v) => Some(parse_bar_attr(v.get_string(), "attr")),
+        None => None,
+    };
+    let mut res = format!("{module}::BarBuilder::new({value})");
+    if let Some(w) = width {
+        res.push_str(&format!(".thickness({w})"));
+    }
+    if let Some(s) = space {
+        res.push_str(&format!(".spacing({s})"));
+    }
+    if let Some(l) = label {
+        res.push_str(&format!(".label(\"{l}\")"));
+    }
+    if let Some(a) = attr {
+        res.push_str(".attr(");
+        res.push_str(&a);
+        res.push(')');
+    }
+    if let Some(dm) = draw_mode {
+        res.push_str(".draw_mode(");
+        res.push_str(&dm);
+        res.push(')');
+    }
+    res.push_str(".build()");
+    res
+}
+pub(crate) fn parse_bar_list(list: &mut Vec<Value>, module: &str) -> String {
+    // format should be either [value,value,value,...] where each value is a valid number
+    // or [{value,width: 10, space: 4, attr: {}},{value,width: 10, space: 4, attr: {}},...]
+    // where attr is a charattr!
+    let mut items = Vec::with_capacity(list.len());
+    let mut has_dict = false;
+    let mut temp_s = String::with_capacity(16);
+    for item in list.iter_mut() {
+        temp_s.clear();
+        temp_s.push_str(item.get_string());
+        if let Some(d) = item.get_dict() {
+            has_dict = true;
+            items.push(parse_bar_from_dict(d, &temp_s, module));
+        } else if item.is_list() {
+            panic!("Invalid values format - a value must be a number or a dictionary {{value,width: 10, space: 4, attr: {{...}}}} !");
+        } else {
+            let s = item.get_string();
+            validate_bar_number(s);
+            items.push(s.to_string());
+        }
+    }
+    if has_dict {
+        let starts_with = format!("{module}::BarBuilder::new"); 
+        for item in items.iter_mut() {
+            if !item.starts_with(&starts_with) {
+                *item = format!("{module}::BarBuilder::new({item}).build()");
+            }
+        }
+        format!("[{}]", items.join(","))
+    } else {
+        format!("&[{}]", items.join(","))
+    }
+}

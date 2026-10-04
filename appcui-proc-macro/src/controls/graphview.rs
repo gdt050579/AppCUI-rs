@@ -68,34 +68,13 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_basecontrol_operations();
 
     // background
-    if cb.has_parameter("back") {
-        let str_repr = String::from(cb.get_string_representation());
-        if let Some(d) = cb.get_dict("back") {
-            let s = crate::chars::builder::create_from_dict(&str_repr, d);
-            cb.add_line(format!("control.set_background({s});").as_str());
-        }
-    }
-
+    cb.call_method_with_dict_parameter_parser("set_background", "back", |repr, dict| crate::chars::builder::create_from_dict(repr, dict));
     // edge-line-type
-    if cb.has_parameter("elt") {
-        cb.add("control.set_edge_line_type(");
-        cb.add_enum_parameter("elt", "LineType", &LINE_TYPE, None);
-        cb.add_line(");");
-    }
-
+    cb.call_method_with_enum_parameter("set_edge_line_type", "elt", "LineType", &LINE_TYPE);
     // edge routing
-    if cb.has_parameter("routing") {
-        cb.add("control.set_edge_routing(");
-        cb.add_enum_parameter("routing", "graphview::EdgeRouting", &ROUTING, None);
-        cb.add_line(");");
-    }   
-
+    cb.call_method_with_enum_parameter("set_edge_routing", "routing", "graphview::EdgeRouting", &ROUTING);
     // arrange
-    if cb.has_parameter("arrange") {
-        cb.add("control.arrange_nodes(");
-        cb.add_enum_parameter("arrange", "graphview::ArrangeMethod", &ARRANGE, None);
-        cb.add_line(");");
-    }      
+    cb.call_method_with_enum_parameter("arrange_nodes", "arrange", "graphview::ArrangeMethod", &ARRANGE);
     // arrow heads
     if cb.has_parameter("arrow-heads") {
         let v = cb.get_bool("arrow-heads").unwrap_or(false);

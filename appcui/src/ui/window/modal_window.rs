@@ -169,6 +169,7 @@ impl<T> GenericBufferViewEvents for ModalWindow<T> {}
 impl<T> GenericTreeViewEvents for ModalWindow<T> {}
 impl<T> GenericBackgroundTaskEvents for ModalWindow<T> {}
 impl<T> GenericGraphViewEvents for ModalWindow<T> {}
+impl<T> GenericVBarChartEvents for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}
 impl<T> WindowControl for ModalWindow<T> {}
 impl<T> OnExpand for ModalWindow<T> {}

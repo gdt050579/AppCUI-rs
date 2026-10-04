@@ -128,17 +128,8 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_flags_parameter("flags", "bufferview::Flags", &FLAGS);
     cb.finish_control_initialization();
 
-    if cb.has_parameter("offset") {
-        cb.add("control.set_offset_format(");
-        cb.add_enum_parameter("offset", "bufferview::OffsetFormat", &OFFSET_FORMAT, None);
-        cb.add_line(");");
-    }
-
-    if cb.has_parameter("endian") {
-        cb.add("control.set_endian(");
-        cb.add_enum_parameter("endian", "bufferview::Endian", &ENDIAN, None);
-        cb.add_line(");");
-    }
+    cb.call_method_with_enum_parameter("set_offset_format", "offset", "bufferview::OffsetFormat", &OFFSET_FORMAT);
+    cb.call_method_with_enum_parameter("set_endian", "endian", "bufferview::Endian", &ENDIAN);
 
     if cb.has_parameter("format") {
         let format = cb.get_value("format").unwrap().to_string();
@@ -168,32 +159,10 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         cb.add_line(format!("control.set_codepage({});", codepage_code(&codepage)).as_str());
     }
 
-    if let Some(width) = cb.get_i32("address-width") {
-        if width < 1 {
-            panic!("Parameter `address-width` can not be less than 1");
-        }
-        cb.add_line(format!("control.set_address_width({width} as u32);").as_str());
-    }
-
-    if cb.has_parameter("address-name") {
-        cb.add("control.set_address_name(");
-        cb.add_string_parameter("address-name", None);
-        cb.add_line(");");
-    }
-
-    if let Some(width) = cb.get_i32("interval-name-width") {
-        if width < 1 {
-            panic!("Parameter `interval-name-width` can not be less than 1");
-        }
-        cb.add_line(format!("control.set_interval_name_width({width} as u32);").as_str());
-    }
-
-    if cb.has_parameter("interval-name-title") {
-        cb.add("control.set_interval_name_title(");
-        cb.add_string_parameter("interval-name-title", None);
-        cb.add_line(");");
-    }
-
+    cb.call_method_with_integer_parameter_and_range("set_address_width", "address-width", 1, i32::MAX);
+    cb.call_method_with_string_parameter("set_address_name", "address-name");
+    cb.call_method_with_integer_parameter_and_range("set_interval_name_width", "interval-name-width", 1, i32::MAX);
+    cb.call_method_with_string_parameter("set_interval_name_title", "interval-name-title");
     if cb.has_parameter("intervals") {
         let intervals = cb.get_value("intervals").unwrap().to_string();
         cb.add_line(format!("control.set_intervals({intervals});").as_str());

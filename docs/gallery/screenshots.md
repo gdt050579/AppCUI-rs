@@ -6,6 +6,7 @@ A visual tour of AppCUI-rs. Each category shows one quick preview; expand for mo
   - [Animations](#animations)
   - [Basic Controls](#basic-controls)
   - [Lists, Trees and Graphs](#lists-trees-and-graphs)
+  - [Charts](#charts)
   - [Games](#games)
   - [Application Bar, Command Bar and Menus](#application-bar-command-bar-and-menus)
   - [Background Tasks and Timers](#background-tasks-and-timers)
@@ -70,6 +71,15 @@ A visual tour of AppCUI-rs. Each category shows one quick preview; expand for mo
 
 
 </details>
+
+---
+
+## Charts
+
+![charts — preview](img/charts/chart.gif)
+
+* **Code:** [examples/barchart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/barchart_editor)
+* **Elements:** [Bar Chart](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/vbarchart.html)
 
 ---
 
