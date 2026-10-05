@@ -547,7 +547,8 @@ where
     }
     #[inline(always)]
     fn visible_length(&self) -> u32 {
-        self.size().width.saturating_sub(self.y_label_margin() as u32)
+        // one space from the right and the columns reserved for the Y labels
+        self.size().width.saturating_sub(self.y_label_margin() as u32 + 1)
     }
     fn update_xaxis_scale(&mut self, left_value: f64, right_value: f64) {
         let width = self.visible_length() as f64;
