@@ -418,6 +418,10 @@ name = "panels_3d"
 path = "panels_3d/main.rs"
 
 [[example]]
+name = "hbarchart"
+path = "hbarchart/main.rs"
+
+[[example]]
 name = "hexview"
 path = "hexview/main.rs"
 
