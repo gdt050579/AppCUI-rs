@@ -1,4 +1,4 @@
-use super::{Bar, BarDrawMode, BarScale, BarSpan, Flags, XAxisLabelFormat, XAxisLabelMode};
+use super::{Bar, BarDrawMode, BarScale, BarSpan, Flags, YAxisLabelFormat, YAxisLabelMode};
 use crate::prelude::*;
 use crate::ui::components::{BarDefaults, ScrollBars};
 
@@ -97,15 +97,15 @@ where
     }
 }
 
-struct YAxis {
+struct XAxis {
     width: u8,
     step: u8,
     visible: bool,
     show_grid: bool,
 }
 
-struct XAxis {
-    label_format: XAxisLabelFormat,
+struct YAxis {
+    label_format: YAxisLabelFormat,
     spans: Vec<BarSpan>,
 }
 
@@ -122,13 +122,13 @@ where
 {
     flags: Flags,
     bars: Vec<Bar<T>>,
-    yaxis: YAxis,
+    xaxis: XAxis,
     scale: BarScale<T>,
     number_format: FormatNumber,
     defaults: BarDefaults,
     surface: Surface,
     use_theme_colors_for_bars: bool,
-    xaxis: XAxis,
+    yaxis: YAxis,
     scrollbars: ScrollBars,
     selected_bar: Option<u32>,
 }
@@ -141,7 +141,7 @@ where
     ///
     /// `layout` places the control. `flags` selects optional behavior; see [`Flags`].
     ///
-    /// A new chart scales bars with [`BarScale::FromZero`], shows the Y axis and its
+    /// A new chart scales bars with [`BarScale::FromZero`], shows the X axis and its
     /// grid, and formats labels with two decimals when `T` is a floating-point type
     /// or with thousands separators when `T` is an integer. Bars use the theme color,
     /// a thickness of 1, and a spacing of 1 until a default is changed.
@@ -152,7 +152,7 @@ where
     ///
     /// let chart = HBarChart::<i32>::new(
     ///     layout!("d:f"),
-    ///     hbarchart::Flags::ScrollBars | hbarchart::Flags::ShowZeroLineOnYAxis,
+    ///     hbarchart::Flags::ScrollBars | hbarchart::Flags::ShowZeroLineOnXAxis,
     /// );
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
@@ -165,7 +165,7 @@ where
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | extra),
             flags,
             bars: Vec::new(),
-            yaxis: YAxis {
+            xaxis: XAxis {
                 width: 6,
                 step: 3,
                 visible: true,
@@ -177,8 +177,8 @@ where
                 spacing: 1,
                 draw_mode: BarDrawMode::default(),
             },
-            xaxis: XAxis {
-                label_format: XAxisLabelFormat::None,
+            yaxis: YAxis {
+                label_format: YAxisLabelFormat::None,
                 spans: Vec::new(),
             },
             scale: BarScale::FromZero,
@@ -397,39 +397,39 @@ where
         self.use_theme_colors_for_bars = false;
         self.repaint_surface();
     }
-    /// Shows or hides the Y axis and the space reserved for its labels.
+    /// Shows or hides the X axis and the space reserved for its labels.
     ///
-    /// The grid is controlled separately by [`Self::set_yaxis_show_grid`].
-    pub fn set_yaxis_visible(&mut self, visible: bool) {
-        self.yaxis.visible = visible;
+    /// The grid is controlled separately by [`Self::set_xaxis_show_grid`].
+    pub fn set_xaxis_visible(&mut self, visible: bool) {
+        self.xaxis.visible = visible;
         self.repaint_surface();
     }
     /// Shows or hides the grid lines and the numeric labels beside them.
-    pub fn set_yaxis_show_grid(&mut self, show_grid: bool) {
-        self.yaxis.show_grid = show_grid;
+    pub fn set_xaxis_show_grid(&mut self, show_grid: bool) {
+        self.xaxis.show_grid = show_grid;
         self.repaint_surface();
     }
-    /// Sets how many characters are reserved for Y-axis labels.
+    /// Sets how many characters are reserved for X-axis labels.
     ///
-    /// Values below 1 are treated as 1. This width is used only while the Y axis
+    /// Values below 1 are treated as 1. This width is used only while the X axis
     /// is visible.
-    pub fn set_yaxis_width(&mut self, width: u8) {
-        self.yaxis.width = width.max(1);
+    pub fn set_xaxis_width(&mut self, width: u8) {
+        self.xaxis.width = width.max(1);
         self.repaint_surface();
     }
     /// Sets the distance, in cells, between grid lines and their labels.
     ///
     /// Values below 1 are treated as 1.
-    pub fn set_yaxis_step(&mut self, step: u8) {
-        self.yaxis.step = step.max(1);
+    pub fn set_xaxis_step(&mut self, step: u8) {
+        self.xaxis.step = step.max(1);
         self.repaint_surface();
     }
-    /// Sets how labels are drawn for the bars.
+    /// Sets how labels are drawn beside the bars.
     ///
-    /// * [`XAxisLabelMode::None`] draws no category axis.
-    /// * [`XAxisLabelMode::Index`] labels each bar with `start + bar index`.
-    /// * [`XAxisLabelMode::BarLabels`] uses each bar's own label and skips empty ones.
-    /// * [`XAxisLabelMode::Custom`] copies the given spans. Spans are ordered by
+    /// * [`YAxisLabelMode::None`] draws no category axis.
+    /// * [`YAxisLabelMode::Index`] labels each bar with `start + bar index`.
+    /// * [`YAxisLabelMode::BarLabels`] uses each bar's own label and skips empty ones.
+    /// * [`YAxisLabelMode::Custom`] copies the given spans. Spans are ordered by
     ///   start index, then by end index. A span that overlaps an earlier one is dropped.
     ///
     /// # Example
@@ -439,19 +439,19 @@ where
     /// let mut chart = HBarChart::<i32>::new(layout!("d:f"), hbarchart::Flags::None);
     /// chart.add_bars(1..=6);
     /// let spans = [hbarchart::BarSpan::new(0, 3, "Q1"), hbarchart::BarSpan::new(3, 3, "Q2")];
-    /// chart.set_xaxis_label_mode(hbarchart::XAxisLabelMode::Custom(&spans));
+    /// chart.set_yaxis_label_mode(hbarchart::YAxisLabelMode::Custom(&spans));
     /// ```
-    pub fn set_xaxis_label_mode(&mut self, xaxis: XAxisLabelMode) {
-        match xaxis {
-            XAxisLabelMode::None => self.xaxis.label_format = XAxisLabelFormat::None,
-            XAxisLabelMode::Index(start) => self.xaxis.label_format = XAxisLabelFormat::Index(start),
-            XAxisLabelMode::BarLabels => self.xaxis.label_format = XAxisLabelFormat::BarLabels,
-            XAxisLabelMode::Custom(spans) => {
-                self.xaxis.label_format = XAxisLabelFormat::Custom;
-                self.xaxis.spans.clear();
-                self.xaxis.spans.extend(spans);
-                self.xaxis.spans.sort_by(|a, b| a.start.cmp(&b.start).then(a.end.cmp(&b.end)));
-                let spans = &mut self.xaxis.spans;
+    pub fn set_yaxis_label_mode(&mut self, yaxis: YAxisLabelMode) {
+        match yaxis {
+            YAxisLabelMode::None => self.yaxis.label_format = YAxisLabelFormat::None,
+            YAxisLabelMode::Index(start) => self.yaxis.label_format = YAxisLabelFormat::Index(start),
+            YAxisLabelMode::BarLabels => self.yaxis.label_format = YAxisLabelFormat::BarLabels,
+            YAxisLabelMode::Custom(spans) => {
+                self.yaxis.label_format = YAxisLabelFormat::Custom;
+                self.yaxis.spans.clear();
+                self.yaxis.spans.extend(spans);
+                self.yaxis.spans.sort_by(|a, b| a.start.cmp(&b.start).then(a.end.cmp(&b.end)));
+                let spans = &mut self.yaxis.spans;
                 let mut write = 0usize;
                 for read in 0..spans.len() {
                     let overlaps = write > 0 && spans[read].start <= spans[write - 1].end;

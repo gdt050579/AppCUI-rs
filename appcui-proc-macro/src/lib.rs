@@ -3001,7 +3001,7 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 /// Creates a new horizontal bar chart for a numeric series.
 /// The format is `hbarchart!("attributes")` where the attributes are pairs of key-value, separated by comma.
 ///
-/// The parameters are the same as [`vbarchart!`]. Bars grow horizontally.
+/// Bars grow horizontally: the X axis holds the values and the Y axis holds the bar labels.
 ///
 /// # Parameters
 /// * `type` or `class` (required, first positional parameter) - Numeric type of the series (for example `i32` or `f64`)
@@ -3011,13 +3011,13 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 ///   - `width` / `w` / `thickness` - Thickness in cells
 ///   - `space` / `spacing` / `s` - Gap in cells before the bar
 ///   - `attr` / `attribute` / `charattr` - Character attribute, using the same syntax as [`charattr!`]
-///   - `label` / `text` / `caption` - Label used by `xlabels: BarLabels` and by the hover tooltip
+///   - `label` / `text` / `caption` - Label used by `ylabels: BarLabels` and by the hover tooltip
 ///   - `draw-mode` / `drawmode` / `dm` / `mode` - Draw mode for this bar (same values as `draw-mode` below)
 /// * `flags` - Control flags (optional). Can be:
 ///   - **ScrollBars** - Shows a scroll bar when the bars do not fit in the control
 ///   - **DimBarsOnSelection** - Draws unselected bars with the inactive chart color
-///   - **ShowZeroLineOnYAxis** - Draws a solid line at value zero while the Y-axis grid is visible
-///   - Combine flags with `+`, `|`, `,`, or as a list: `flags: ScrollBars+ShowZeroLineOnYAxis`
+///   - **ShowZeroLineOnXAxis** - Draws a solid line at value zero while the X-axis grid is visible
+///   - Combine flags with `+`, `|`, `,`, or as a list: `flags: ScrollBars+ShowZeroLineOnXAxis`
 /// * `scale`, `barscale`, or `bar-scale` - How values map onto the bar length (optional). Can be:
 ///   - **FromZero** or **zero** - Bars grow from zero (default)
 ///   - **FitData** or **fit** - Stretches the smallest and largest values across the plot
@@ -3035,13 +3035,13 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 ///   - **Cap** or **Cap(kind)** - `Solid` (default), `Shade75`, `Shade50`, `Shade25`, `Braille`, `SingleLine`, `DoubleLine`, `SingleThickLine` (also `Thick`), or a character
 /// * `default-bar-draw-mode-attr`, `bar-attr`, `barattr`, `bar-color`, or `barcolor` - Default bar color (optional), using the same syntax as [`charattr!`] (for example `red` or `{fore: yellow, back: blue}`)
 /// * `numeric-format` or `nf` - Format for axis labels and tooltips (optional), using the same syntax as [`numericformat!`]
-/// * `xlabels`, `x-labels`, `xl`, `xaxis`, or `x-axis` - Category labels (optional). Can be:
+/// * `ylabels`, `y-labels`, `yl`, `yaxis`, or `y-axis` - Category labels beside the bars (optional). Can be:
 ///   - **None** - No category axis
 ///   - **Index(start)** - Labels bar `i` with `start + i`
 ///   - **BarLabels** - Uses each bar's own label
 ///   - A list of spans: `[{0, 3, 'Q1'}, {3, 3, 'Q2'}]`. The first value is the starting bar index and the second is how many bars the label covers. Named keys are `start`, `end` or `count` (both are the bar count), and `label`, `text`, or `caption`. A span that overlaps an earlier one is dropped
-/// * `yaxis-width`, `y-axis-width`, or `yw` - Characters reserved for Y-axis labels, from 0 to 32 (optional). A value of 0 is treated as 1
-/// * `yaxis-step`, `y-axis-step`, `ystep`, or `step` - Cells between grid lines, from 1 to 255 (optional)
+/// * `xaxis-width`, `x-axis-width`, or `xw` - Characters reserved for X-axis labels, from 0 to 32 (optional). A value of 0 is treated as 1
+/// * `xaxis-step`, `x-axis-step`, `xstep`, or `step` - Cells between grid lines, from 1 to 255 (optional)
 /// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
 /// * Position and size:
 ///   - `x`, `y` - Position coordinates
@@ -3060,14 +3060,14 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 ///
 /// let chart = hbarchart!(
 ///     "type: i32,
-///     flags: ScrollBars+ShowZeroLineOnYAxis,
+///     flags: ScrollBars+ShowZeroLineOnXAxis,
 ///     scale: Fixed(0, 100),
 ///     dbw: 3,
 ///     space: 2,
 ///     dm: Fill(Shade50),
 ///     barcolor: yellow,
-///     xlabels: Index(1),
-///     yw: 8,
+///     ylabels: Index(1),
+///     xw: 8,
 ///     step: 2,
 ///     x:1, y:1, width: 50, height: 15,
 ///     values: [10, 40, 70]"

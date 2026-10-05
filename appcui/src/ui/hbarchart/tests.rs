@@ -13,7 +13,7 @@ fn check_macro_and_bar_api() {
     let script = "Paint.Enable(false)";
     App::new().size(Size::new(40, 12)).debug_script(script).window(|| {
         let mut chart = hbarchart!(
-            "type: i32, x:1, y:1, w:30, h:10, flags: ScrollBars+ShowZeroLineOnYAxis, scale: Fixed(0, 100), dbw: 2, space: 1, dm: Fill(Shade50), xlabels: Index(1), yw: 6, step: 2, values: [1, {2, label: Mar}]"
+            "type: i32, x:1, y:1, w:30, h:10, flags: ScrollBars+ShowZeroLineOnXAxis, scale: Fixed(0, 100), dbw: 2, space: 1, dm: Fill(Shade50), ylabels: Index(1), xw: 6, step: 2, values: [1, {2, label: Mar}]"
         );
         assert_eq!(chart.bars_count(), 2);
         assert_eq!(chart.get_bar(1).map(|bar| bar.label()), Some("Mar"));
@@ -31,10 +31,10 @@ fn check_macro_and_bar_api() {
         chart.set_bars_scale(hbarchart::BarScale::FromZero);
         chart.set_default_bar_width(3);
         chart.set_default_bar_spacing(2);
-        chart.set_yaxis_width(8);
-        chart.set_yaxis_step(2);
-        chart.set_yaxis_visible(true);
-        chart.set_yaxis_show_grid(true);
+        chart.set_xaxis_width(8);
+        chart.set_xaxis_step(2);
+        chart.set_xaxis_visible(true);
+        chart.set_xaxis_show_grid(true);
         chart.ensure_visible(2);
         chart.ensure_visible(99);
         let mut w = window!("Test,d:f");

@@ -13,8 +13,8 @@ pub enum Flags {
     ScrollBars = 1,
     /// Draws every bar except the selected one with the inactive chart color.
     DimBarsOnSelection = 2,
-    /// Draws a solid line at value zero while the Y-axis grid is visible.
-    ShowZeroLineOnYAxis = 4,
+    /// Draws a solid line at value zero while the X-axis grid is visible.
+    ShowZeroLineOnXAxis = 4,
 }
 
 /// How bar values are mapped onto the length of a bar in an [`struct@super::HBarChart`].
@@ -43,8 +43,8 @@ pub enum BarScale<T: Number + 'static> {
     },
 }
 
-/// Chooses the labels drawn for the bars of an [`struct@super::HBarChart`].
-pub enum XAxisLabelMode<'a> {
+/// Chooses the labels drawn beside the bars of an [`struct@super::HBarChart`].
+pub enum YAxisLabelMode<'a> {
     /// Draws no category axis.
     None,
     /// Labels each bar with `start + bar index`.
@@ -61,21 +61,21 @@ pub enum XAxisLabelMode<'a> {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]
-pub(super) enum XAxisLabelFormat {
+pub(super) enum YAxisLabelFormat {
     None,
     Index(i32),
     BarLabels,
     Custom,
 }
 #[allow(dead_code)]
-impl XAxisLabelFormat {
+impl YAxisLabelFormat {
     #[inline(always)]
     pub(crate) fn is_none(&self) -> bool {
-        matches!(self, XAxisLabelFormat::None)
+        matches!(self, YAxisLabelFormat::None)
     }
-    pub(crate) fn height(&self) -> u8 {
+    pub(crate) fn width(&self) -> u8 {
         match self {
-            XAxisLabelFormat::None => 0,
+            YAxisLabelFormat::None => 0,
             _ => 2,
         }
     }

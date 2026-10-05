@@ -3,7 +3,7 @@ use crate::bar::{parse_bar_attr, parse_bar_draw_mode, parse_bar_list};
 use crate::parameter_parser::*;
 use proc_macro::*;
 
-static FLAGS: FlagsSignature = FlagsSignature::new(&["ScrollBars", "DimBarsOnSelection", "ShowZeroLineOnYAxis"]);
+static FLAGS: FlagsSignature = FlagsSignature::new(&["ScrollBars", "DimBarsOnSelection", "ShowZeroLineOnXAxis"]);
 
 static BARSCALE_MODES: &[(&str, &str)] = &[
     ("FromZero", "fromzero"),
@@ -17,14 +17,14 @@ static BARSCALE_MODES: &[(&str, &str)] = &[
     ("FromZeroMinRange", "fromzerominrange"),
 ];
 
-static XLABELS_MODES: &[(&str, &str)] = &[("None", "none"), ("BarLabels", "barlabels")];
+static YLABELS_MODES: &[(&str, &str)] = &[("None", "none"), ("BarLabels", "barlabels")];
 
-static XLABEL_SPAN_POSITIONAL: &[PositionalParameter] = &[
+static YLABEL_SPAN_POSITIONAL: &[PositionalParameter] = &[
     PositionalParameter::new("start", ParamType::Integer),
     PositionalParameter::new("end", ParamType::Integer),
     PositionalParameter::new("label", ParamType::String),
 ];
-static XLABEL_SPAN_NAMED: &[NamedParameter] = &[
+static YLABEL_SPAN_NAMED: &[NamedParameter] = &[
     NamedParameter::new("start", "start", ParamType::Integer),
     NamedParameter::new("end", "end", ParamType::Integer),
     NamedParameter::new("count", "end", ParamType::Integer),
@@ -73,21 +73,21 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     // numeric format
     NamedParameter::new("numeric-format", "numeric-format", ParamType::String),
     NamedParameter::new("nf", "numeric-format", ParamType::String),
-    // x-asix labels
-    NamedParameter::new("xlabels", "xlabels", ParamType::String),
-    NamedParameter::new("x-labels", "xlabels", ParamType::String),
-    NamedParameter::new("xl", "xlabels", ParamType::String),
-    NamedParameter::new("xaxis", "xlabels", ParamType::String),
-    NamedParameter::new("x-axis", "xlabels", ParamType::String),
-    // y-axis width
-    NamedParameter::new("yaxis-width", "yaxis-width", ParamType::Integer),
-    NamedParameter::new("yw", "yaxis-width", ParamType::Integer),
-    NamedParameter::new("y-axis-width", "yaxis-width", ParamType::Integer),
-    // y-axis step
-    NamedParameter::new("yaxis-step", "yaxis-step", ParamType::Integer),
-    NamedParameter::new("ystep", "yaxis-step", ParamType::Integer),
-    NamedParameter::new("y-axis-step", "yaxis-step", ParamType::Integer),
-    NamedParameter::new("step", "yaxis-step", ParamType::Integer),
+    // y-axis labels
+    NamedParameter::new("ylabels", "ylabels", ParamType::String),
+    NamedParameter::new("y-labels", "ylabels", ParamType::String),
+    NamedParameter::new("yl", "ylabels", ParamType::String),
+    NamedParameter::new("yaxis", "ylabels", ParamType::String),
+    NamedParameter::new("y-axis", "ylabels", ParamType::String),
+    // x-axis width
+    NamedParameter::new("xaxis-width", "xaxis-width", ParamType::Integer),
+    NamedParameter::new("xw", "xaxis-width", ParamType::Integer),
+    NamedParameter::new("x-axis-width", "xaxis-width", ParamType::Integer),
+    // x-axis step
+    NamedParameter::new("xaxis-step", "xaxis-step", ParamType::Integer),
+    NamedParameter::new("xstep", "xaxis-step", ParamType::Integer),
+    NamedParameter::new("x-axis-step", "xaxis-step", ParamType::Integer),
+    NamedParameter::new("step", "xaxis-step", ParamType::Integer),
     // extra
     NamedParameter::new("flags", "flags", ParamType::Flags),
     NamedParameter::new("left-scroll-margin", "lsm", ParamType::Integer),
@@ -102,11 +102,11 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.finish_control_initialization();
     cb.add_scroll_margin_setup("lsm", "tsm");
     cb.call_method_with_string_parameter_parser("set_bars_scale", "barscale", parse_barscale);
-    cb.call_method_with_value_parser("set_xaxis_label_mode", "xlabels", parse_xlabels);
+    cb.call_method_with_value_parser("set_yaxis_label_mode", "ylabels", parse_ylabels);
     cb.call_method_with_integer_parameter_and_range("set_default_bar_width", "default-bar-width", 1, 100);
     cb.call_method_with_integer_parameter_and_range("set_default_bar_spacing", "default-bar-spacing", 1, 100);
-    cb.call_method_with_integer_parameter_and_range("set_yaxis_width", "yaxis-width", 0, 32);
-    cb.call_method_with_integer_parameter_and_range("set_yaxis_step", "yaxis-step", 1, 255);
+    cb.call_method_with_integer_parameter_and_range("set_xaxis_width", "xaxis-width", 0, 32);
+    cb.call_method_with_integer_parameter_and_range("set_xaxis_step", "xaxis-step", 1, 255);
     cb.call_method_with_string_parameter_parser("set_default_bar_drawmode", "default-bar-draw-mode", |repr| {
         parse_bar_draw_mode(repr, "default-bar-draw-mode", "hbarchart")
     });
@@ -189,60 +189,60 @@ fn parse_barscale(repr: &str) -> String {
         );
     }
 }
-fn parse_xlabels(value: &mut Value) -> String {
+fn parse_ylabels(value: &mut Value) -> String {
     if let Some(list) = value.get_list() {
-        return parse_xlabels_list(list);
+        return parse_ylabels_list(list);
     }
     let repr = value.get_string().trim();
-    if let Some(mode) = crate::utils::find_string_in_array(XLABELS_MODES, repr) {
-        return format!("hbarchart::XAxisLabelMode::{mode}");
+    if let Some(mode) = crate::utils::find_string_in_array(YLABELS_MODES, repr) {
+        return format!("hbarchart::YAxisLabelMode::{mode}");
     }
     // check to see if the repr is Index(start), allowing white spaces (between start)
     if let Some(fncall) = crate::fncall::FnCall::new(repr) {
         if fncall.name().eq_ignore_ascii_case("index") {
-            assert!(fncall.params_count() == 1, "Invalid xlabels format - expecting 1 parameter (start) !");
+            assert!(fncall.params_count() == 1, "Invalid ylabels format - expecting 1 parameter (start) !");
             assert!(
                 fncall.is_param_integer(0),
-                "Invalid xlabels format - expecting a valid integer (i32) for start but got {} !",
+                "Invalid ylabels format - expecting a valid integer (i32) for start but got {} !",
                 fncall.param(0).unwrap()
             );
-            return format!("hbarchart::XAxisLabelMode::Index({})", fncall.param(0).unwrap());
+            return format!("hbarchart::YAxisLabelMode::Index({})", fncall.param(0).unwrap());
         }
     }
     panic!(
-        "Invalid xlabels: {} - expected one of: {} or Index(start)",
+        "Invalid ylabels: {} - expected one of: {} or Index(start)",
         repr,
-        crate::utils::join_strings(XLABELS_MODES)
+        crate::utils::join_strings(YLABELS_MODES)
     );
 }
 
-fn parse_xlabel_u32(dict: &NamedParamsMap, key: &str) -> u32 {
+fn parse_ylabel_u32(dict: &NamedParamsMap, key: &str) -> u32 {
     let Some(v) = dict.get(key) else {
-        panic!("Invalid xlabels format - missing '{key}' ! Expected {{start,end,label}}");
+        panic!("Invalid ylabels format - missing '{key}' ! Expected {{start,end,label}}");
     };
     let s = v.get_string();
     match s.parse::<u32>() {
         Ok(n) => n,
-        Err(_) => panic!("Invalid xlabels format - expecting a valid positive integer (u32) for '{key}' but got {s} !"),
+        Err(_) => panic!("Invalid ylabels format - expecting a valid positive integer (u32) for '{key}' but got {s} !"),
     }
 }
 
-fn parse_xlabels_list(list: &mut Vec<Value>) -> String {
+fn parse_ylabels_list(list: &mut Vec<Value>) -> String {
     // format should be [{start,end,label},{start,end,label},...]
-    let mut spans = String::from("hbarchart::XAxisLabelMode::Custom(&[");
+    let mut spans = String::from("hbarchart::YAxisLabelMode::Custom(&[");
     let mut first = true;
     let mut temp_s = String::with_capacity(16);
     for item in list.iter_mut() {
         temp_s.clear();
         temp_s.push_str(item.get_string());
         if let Some(d) = item.get_dict() {
-            d.validate_positional_parameters(&temp_s, XLABEL_SPAN_POSITIONAL).unwrap();
-            d.validate_named_parameters(&temp_s, XLABEL_SPAN_NAMED).unwrap();
-            let start = parse_xlabel_u32(d, "start");
-            let end = parse_xlabel_u32(d, "end");
+            d.validate_positional_parameters(&temp_s, YLABEL_SPAN_POSITIONAL).unwrap();
+            d.validate_named_parameters(&temp_s, YLABEL_SPAN_NAMED).unwrap();
+            let start = parse_ylabel_u32(d, "start");
+            let end = parse_ylabel_u32(d, "end");
             let label = match d.get("label") {
                 Some(v) => v.get_string().to_string(),
-                None => panic!("Invalid xlabels format - missing 'label' ! Expected {{start,end,label}}"),
+                None => panic!("Invalid ylabels format - missing 'label' ! Expected {{start,end,label}}"),
             };
             if !first {
                 spans.push(',');
