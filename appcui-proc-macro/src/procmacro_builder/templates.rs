@@ -362,6 +362,43 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 }
 ";
 
+pub(crate) static HBARCHART_TRAIT_DEF: &str = "
+trait HBarChartEvents<T: Number+'static> {
+    fn on_bar_selected(&mut self, handle: Handle<HBarChart<T>>, index: u32) -> EventProcessStatus;
+    fn on_clear_selection(&mut self, handle: Handle<HBarChart<T>>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericHBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_bar_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, index: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HBARCHART_ON_BAR_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_clear_selection(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HBARCHART_ON_CLEAR_SELECTION)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+
+pub(crate) static HBARCHART_ON_BAR_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return HBarChartEvents::<$(TYPE)>::on_bar_selected(self, h, index);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static HBARCHART_ON_CLEAR_SELECTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HBarChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return HBarChartEvents::<$(TYPE)>::on_clear_selection(self, h);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
 pub(crate) static LISTVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };

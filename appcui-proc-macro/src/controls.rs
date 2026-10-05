@@ -42,4 +42,5 @@ pub (crate) mod timepicker;
 pub (crate) mod hyperlink;
 pub (crate) mod hslider;
 pub (crate) mod vbarchart;
+pub (crate) mod hbarchart;
 pub (crate) mod markdown_composer;

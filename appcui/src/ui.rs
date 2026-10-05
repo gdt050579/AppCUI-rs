@@ -128,6 +128,7 @@ pub mod bufferview;
 pub mod hslider;
 pub mod markdown_composer;
 pub mod vbarchart;
+pub mod hbarchart;
 
 // re-export
 pub use common::ControlBase;
@@ -183,4 +184,5 @@ pub use appbar::AppBar;
 pub use graphview::GraphView;
 pub use hslider::HSlider;
 pub use vbarchart::VBarChart;
+pub use hbarchart::HBarChart;
 pub use markdown_composer::MarkdownComposer;
