@@ -378,6 +378,10 @@ name = "barchart_editor"
 path = "barchart_editor/main.rs"
 
 [[example]]
+name = "hbarchart_editor"
+path = "hbarchart_editor/main.rs"
+
+[[example]]
 name = "layout_tester"
 path = "layout_tester/main.rs"
 
