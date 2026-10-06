@@ -412,11 +412,11 @@ impl<T: Number + 'static> Bar<T> {
             LineType::Single => ('┤', '├', '│'),
             LineType::Double => ('╣', '╠', '║'),
             LineType::SingleThick => ('┫', '┣', '┃'),
-            LineType::Border => ('▐', '▌', '┃'),
+            LineType::Border => ('█', '█', '┃'),
             LineType::Ascii => ('|', '|', '|'),
             LineType::AsciiRound => ('|', '|', '|'),
             LineType::SingleRound => ('┤', '├', '│'),
-            LineType::Braille => ('⠸', '⠇', '⡇'),
+            LineType::Braille => ('⣿', '⣿', '⡇'),
         };
         if layout.length > 0 {
             surface.draw_horizontal_line_with_size(layout.x, layout.y, layout.length as u32, line_type, attr);
