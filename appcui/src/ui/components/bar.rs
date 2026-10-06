@@ -372,6 +372,17 @@ impl<T: Number + 'static> Bar<T> {
             surface.fill_rect(self.rect_vertical(layout, defaults), c);
         }
     }
+    /// `layout.x` is the baseline column and `layout.y` is the top of the bar.
+    /// A positive length grows to the right; a negative length grows to the left.
+    #[inline(always)]
+    fn paint_horizontal_fill(&self, surface: &mut Surface, c: Character, layout: &BarLayout, defaults: &BarDefaults) {
+        if layout.length == 0 {
+            let ch = Character::new('|', c.foreground, c.background, c.flags);
+            surface.fill_vertical_line_with_size(layout.x, layout.y, self.actual_thickness(defaults) as u32, ch);
+        } else {
+            surface.fill_rect(self.rect_horizontal(layout, defaults), c);
+        }
+    }
 
     #[inline(always)]
     fn paint_vertical_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
@@ -391,6 +402,29 @@ impl<T: Number + 'static> Bar<T> {
         } else if layout.length < 0 {
             surface.draw_vertical_line_with_size(layout.x, layout.y, layout.length.unsigned_abs() as u32, line_type, attr);
             surface.write_char(layout.x, layout.y, Character::with_attributes(upper, attr));
+        } else {
+            surface.write_char(layout.x, layout.y, Character::with_attributes(zero, attr));
+        }
+    }
+    #[inline(always)]
+    fn paint_horizontal_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
+        let (right_cap, left_cap, zero) = match line_type {
+            LineType::Single => ('┤', '├', '│'),
+            LineType::Double => ('╣', '╠', '║'),
+            LineType::SingleThick => ('┫', '┣', '┃'),
+            LineType::Border => ('▐', '▌', '┃'),
+            LineType::Ascii => ('|', '|', '|'),
+            LineType::AsciiRound => ('|', '|', '|'),
+            LineType::SingleRound => ('┤', '├', '│'),
+            LineType::Braille => ('⠸', '⠇', '⡇'),
+        };
+        if layout.length > 0 {
+            surface.draw_horizontal_line_with_size(layout.x, layout.y, layout.length as u32, line_type, attr);
+            surface.write_char(layout.x, layout.y, Character::with_attributes(left_cap, attr));
+        } else if layout.length < 0 {
+            let abs = layout.length.unsigned_abs() as u32;
+            surface.draw_horizontal_line_with_size(layout.x - abs as i32 + 1, layout.y, abs, line_type, attr);
+            surface.write_char(layout.x, layout.y, Character::with_attributes(right_cap, attr));
         } else {
             surface.write_char(layout.x, layout.y, Character::with_attributes(zero, attr));
         }
@@ -448,20 +482,34 @@ impl<T: Number + 'static> Bar<T> {
     }
     #[inline(always)]
     pub(crate) fn rect_vertical(&self, layout: &BarLayout, defaults: &BarDefaults) -> Rect {
-        let thickness = self.actual_thickness(defaults) as u32;
+        let thickness = self.actual_thickness(defaults) as u16;
         let abs_h = layout.length.unsigned_abs();
         let top = if layout.length > 0 {
             layout.y + 1 - layout.length as i32
         } else {
             layout.y + 1
         };
-        Rect::with_size(layout.x, top, thickness as u16, abs_h)
+        Rect::with_size(layout.x, top, thickness, abs_h)
+    }
+    #[inline(always)]
+    pub(crate) fn rect_horizontal(&self, layout: &BarLayout, defaults: &BarDefaults) -> Rect {
+        let thickness = self.actual_thickness(defaults) as u16;
+        let abs_w = layout.length.unsigned_abs();
+        let left = if layout.length > 0 { layout.x } else { layout.x - abs_w as i32 };
+        Rect::with_size(left, layout.y, abs_w, thickness)
     }
     pub(crate) fn point_vertical(&self, layout: &BarLayout) -> Point {
         if layout.length > 0 {
             Point::new(layout.x, layout.y - layout.length as i32 + 1)
         } else {
             Point::new(layout.x, layout.y + layout.length as i32)
+        }
+    }
+    pub(crate) fn point_horizontal(&self, layout: &BarLayout) -> Point {
+        if layout.length > 0 {
+            Point::new(layout.x + layout.length as i32 - 1, layout.y)
+        } else {
+            Point::new(layout.x + layout.length as i32, layout.y)
         }
     }
     pub(crate) fn paint_vertical(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
@@ -477,39 +525,17 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Cap(cap_type) => self.paint_vertical_cap(surface, cap_type, attr, layout, defaults),
         }
     }
-
-    /// `layout.x` is the baseline column and `layout.y` is the top of the bar.
-    /// A positive length grows to the right; a negative length grows to the left.
-    #[inline(always)]
-    fn paint_horizontal_fill(&self, surface: &mut Surface, c: Character, layout: &BarLayout, defaults: &BarDefaults) {
-        if layout.length == 0 {
-            let ch = Character::new('|', c.foreground, c.background, c.flags);
-            surface.fill_vertical_line_with_size(layout.x, layout.y, self.actual_thickness(defaults) as u32, ch);
-        } else {
-            surface.fill_rect(self.rect_horizontal(layout, defaults), c);
-        }
-    }
-    #[inline(always)]
-    fn paint_horizontal_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
-        let (right_cap, left_cap, zero) = match line_type {
-            LineType::Single => ('┤', '├', '│'),
-            LineType::Double => ('╣', '╠', '║'),
-            LineType::SingleThick => ('┫', '┣', '┃'),
-            LineType::Border => ('▐', '▌', '┃'),
-            LineType::Ascii => ('|', '|', '|'),
-            LineType::AsciiRound => ('|', '|', '|'),
-            LineType::SingleRound => ('┤', '├', '│'),
-            LineType::Braille => ('⠸', '⠇', '⡇'),
-        };
-        if layout.length > 0 {
-            surface.draw_horizontal_line_with_size(layout.x, layout.y, layout.length as u32, line_type, attr);
-            surface.write_char(layout.x, layout.y, Character::with_attributes(left_cap, attr));
-        } else if layout.length < 0 {
-            let abs = layout.length.unsigned_abs() as u32;
-            surface.draw_horizontal_line_with_size(layout.x - abs as i32 + 1, layout.y, abs, line_type, attr);
-            surface.write_char(layout.x, layout.y, Character::with_attributes(right_cap, attr));
-        } else {
-            surface.write_char(layout.x, layout.y, Character::with_attributes(zero, attr));
+    pub(crate) fn paint_horizontal(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
+        let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
+        let attr = self.attr.unwrap_or(defaults.attr);
+        match mode {
+            BarDrawMode::Fill(fill_type) => self.paint_horizontal_fill(surface, fill_type.character(attr), layout, defaults),
+            BarDrawMode::Line(line_type) => self.paint_horizontal_line(surface, line_type, attr, layout),
+            BarDrawMode::FilledRectangle(line_type) => self.paint_horizontal_rect(surface, line_type, attr, layout, defaults, true),
+            BarDrawMode::Rectangle(line_type) => self.paint_horizontal_rect(surface, line_type, attr, layout, defaults, false),
+            BarDrawMode::Point(point_type) => self.paint_horizontal_point(surface, point_type, attr, layout),
+            BarDrawMode::LargePoint(point_type) => self.paint_horizontal_large_point(surface, point_type, attr, layout),
+            BarDrawMode::Cap(cap_type) => self.paint_horizontal_cap(surface, cap_type, attr, layout, defaults),
         }
     }
     #[inline(always)]
@@ -556,34 +582,12 @@ impl<T: Number + 'static> Bar<T> {
     #[inline(always)]
     fn paint_horizontal_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
         let point = self.point_horizontal(layout);
-        surface.fill_vertical_line_with_size(point.x, point.y, self.actual_thickness(defaults) as u32, cap_type.vertical_character(attr));
-    }
-    #[inline(always)]
-    pub(crate) fn rect_horizontal(&self, layout: &BarLayout, defaults: &BarDefaults) -> Rect {
-        let thickness = self.actual_thickness(defaults) as u16;
-        let abs_w = layout.length.unsigned_abs();
-        let left = if layout.length > 0 { layout.x } else { layout.x - abs_w as i32 };
-        Rect::with_size(left, layout.y, abs_w, thickness)
-    }
-    pub(crate) fn point_horizontal(&self, layout: &BarLayout) -> Point {
-        if layout.length > 0 {
-            Point::new(layout.x + layout.length as i32 - 1, layout.y)
-        } else {
-            Point::new(layout.x + layout.length as i32, layout.y)
-        }
-    }
-    pub(crate) fn paint_horizontal(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
-        let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
-        let attr = self.attr.unwrap_or(defaults.attr);
-        match mode {
-            BarDrawMode::Fill(fill_type) => self.paint_horizontal_fill(surface, fill_type.character(attr), layout, defaults),
-            BarDrawMode::Line(line_type) => self.paint_horizontal_line(surface, line_type, attr, layout),
-            BarDrawMode::FilledRectangle(line_type) => self.paint_horizontal_rect(surface, line_type, attr, layout, defaults, true),
-            BarDrawMode::Rectangle(line_type) => self.paint_horizontal_rect(surface, line_type, attr, layout, defaults, false),
-            BarDrawMode::Point(point_type) => self.paint_horizontal_point(surface, point_type, attr, layout),
-            BarDrawMode::LargePoint(point_type) => self.paint_horizontal_large_point(surface, point_type, attr, layout),
-            BarDrawMode::Cap(cap_type) => self.paint_horizontal_cap(surface, cap_type, attr, layout, defaults),
-        }
+        surface.fill_vertical_line_with_size(
+            point.x,
+            point.y,
+            self.actual_thickness(defaults) as u32,
+            cap_type.vertical_character(attr),
+        );
     }
 }
 
