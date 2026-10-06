@@ -685,7 +685,7 @@ where
             return;
         }
         if self.xaxis.show_grid && self.xaxis.step > 0 && plot_rows > 0 {
-            let ch = Character::with_attributes('┊', grid_attr);
+            let ch = Character::with_attributes('┊', grid_attr); //┊ or ⁞
             let mut buffer: [u8; 32] = [0u8; 32];
             let mut shown: [u8; 32] = [0u8; 32];
             let mut x = left;
