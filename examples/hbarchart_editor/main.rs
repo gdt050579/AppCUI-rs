@@ -4,12 +4,12 @@ mod group_window;
 
 use group_window::{GroupWindow, YAxisGroup};
 
-const DEFAULT_THICKNESS: u8 = 3;
-const DEFAULT_SPACING: u8 = 2;
+const DEFAULT_THICKNESS: u8 = 2;
+const DEFAULT_SPACING: u8 = 1;
 const DEFAULT_COLOR: Color = Color::Aqua;
 const DEFAULT_MARK: char = '#';
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone)]      
 struct BarDrawControls {
     mode: Handle<ComboBox>,
     fill: Handle<ComboBox>,
@@ -258,7 +258,7 @@ fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
     }
 }
 
-fn sample_bars() -> Vec<hbarchart::Bar<i32>> {
+fn sample_bars_1() -> Vec<hbarchart::Bar<i32>> {
     [
         ("Jan", 12, Color::Aqua),
         ("Feb", 28, Color::Green),
@@ -272,6 +272,30 @@ fn sample_bars() -> Vec<hbarchart::Bar<i32>> {
         ("Oct", 31, Color::Silver),
         ("Nov", 15, Color::White),
         ("Dec", 45, Color::DarkRed),
+    ]
+    .into_iter()
+    .map(|(label, value, color)| {
+        hbarchart::BarBuilder::new(value)
+            .label(label)
+            .attr(CharAttribute::with_fore_color(color))
+            .build()
+    })
+    .collect()
+}
+fn sample_bars() -> Vec<hbarchart::Bar<i32>> {
+    [
+        ("Jan", -3, Color::Aqua),
+        ("Feb", -2, Color::Green),
+        ("Mar", -1, Color::Yellow),
+        ("Apr", 0, Color::Red),
+        ("May", 1, Color::Magenta),
+        ("Jun", 2, Color::Blue),
+        ("Jul", 3, Color::Pink),
+        ("Aug", 4, Color::Olive),
+        ("Sep", -4, Color::Teal),
+        ("Oct", 3, Color::Silver),
+        ("Nov", 2, Color::White),
+        ("Dec", 1, Color::DarkRed),
     ]
     .into_iter()
     .map(|(label, value, color)| {
