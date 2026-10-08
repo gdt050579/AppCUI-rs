@@ -4,17 +4,6 @@ use crate::ui::components::{BarDefaults, BarLayout, ScrollBars};
 
 const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 
-fn copy_formatted_float(format: &FormatNumber, value: f64, buffer: &mut [u8], shown: &mut [u8]) -> usize {
-    match format.write_float(value, buffer) {
-        Some(text) => {
-            let len = text.len().min(shown.len());
-            shown[..len].copy_from_slice(&text.as_bytes()[..len]);
-            len
-        }
-        None => 0,
-    }
-}
-
 fn index_width(value: i64) -> i32 {
     let mut n = value.unsigned_abs();
     let mut width = if value < 0 { 2 } else { 1 };
@@ -688,20 +677,17 @@ where
         if self.xaxis.show_grid && self.xaxis.step > 0 && plot_rows > 0 {
             let ch = Character::with_attributes('┊', grid_attr); //┊ or ⁞
             let mut buffer: [u8; 32] = [0u8; 32];
-            let mut shown: [u8; 32] = [0u8; 32];
             let mut x = left;
             let mut value = self.xaxis.left_value;
+            let format = self.number_format;
             let bottom = plot_rows - 1;
             let label_y = plot_rows + 1;
             let label_width = self.xaxis.width as i32;
             while x <= right {
                 self.surface.fill_vertical_line(x, 0, bottom, ch);
                 if self.xaxis.visible {
-                    let shown_len = copy_formatted_float(&self.number_format, value, &mut buffer, &mut shown);
-                    if shown_len > 0 {
-                        if let Ok(text) = std::str::from_utf8(&shown[..shown_len]) {
-                            self.write_axis_value(x, label_y, label_width, text, label_attr);
-                        }
+                    if let Some(text) = format.write_float(value, &mut buffer) {
+                        self.write_axis_value(x, label_y, label_width, text, label_attr);
                     }
                 }
                 x += self.xaxis.step as i32;
@@ -712,11 +698,8 @@ where
                 if (left..=right).contains(&x_zero) {
                     self.surface.draw_vertical_line(x_zero, 0, bottom, LineType::Single, grid_attr);
                     if self.xaxis.visible {
-                        let shown_len = copy_formatted_float(&self.number_format, 0.0, &mut buffer, &mut shown);
-                        if shown_len > 0 {
-                            if let Ok(text) = std::str::from_utf8(&shown[..shown_len]) {
-                                self.write_axis_value(x_zero, label_y, label_width, text, label_attr);
-                            }
+                        if let Some(text) = format.write_float(value, &mut buffer) {
+                            self.write_axis_value(x_zero, label_y, label_width, text, label_attr);
                         }
                     }
                 }
