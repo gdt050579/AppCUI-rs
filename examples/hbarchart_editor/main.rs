@@ -433,6 +433,7 @@ impl HBarChartEditor {
         chart.set_default_bar_attr(CharAttribute::with_fore_color(DEFAULT_COLOR));
         chart.add_bars(sample_bars());
         chart.set_yaxis_label_mode(hbarchart::YAxisLabelMode::Custom(&bar_spans(&default_groups())));
+        chart.set_components_toolbar_margins(0, 3);
         win.chart = splitter.add(vsplitter::Panel::Left, chart);
 
         let mut pages = accordion!("d:f,panels:['&Chart Settings','&Default Bar Settings','C&ustom Bar Settings','Da&ta']");

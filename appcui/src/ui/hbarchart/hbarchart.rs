@@ -1,4 +1,5 @@
 use super::{Bar, BarDrawMode, BarScale, BarSpan, Flags, YAxisLabelFormat, YAxisLabelMode};
+use super::events::{EventData, EventType};
 use crate::prelude::*;
 use crate::ui::components::{BarDefaults, BarLayout, ScrollBars};
 
@@ -163,6 +164,8 @@ where
     yaxis: YAxis,
     scrollbars: ScrollBars,
     selected_bar: Option<u32>,
+    hovered_bar: Option<u32>,
+    tooltip_text: String,
 }
 
 impl<T> HBarChart<T>
@@ -229,6 +232,8 @@ where
             top_scroll: 0,
             first_visible_bar: 0,
             bars_height: 0,
+            hovered_bar: None,
+            tooltip_text: String::new(),
         }
     }
     /// Appends one bar and repaints the chart.
@@ -278,6 +283,10 @@ where
     #[inline(always)]
     pub fn selected_bar(&self) -> Option<u32> {
         self.selected_bar
+    }
+    pub fn set_xaxis_width(&self, value: u8) {
+        // todo
+        // will set the width of the left marging (where the labels are displayed)
     }
     /// Scrolls the chart so the bar at `index` is visible.
     ///
@@ -818,6 +827,24 @@ where
                 .write_char(margin - 2, y, Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr));
         }
     }
+    fn bar_rect(&self, index: usize) -> Rect {
+        let bar = &self.bars[index];
+        // need a proper cod for this
+        let left_margin = self.y_axis_bottom_margin();
+        let plot_bottom = self.size().height as i32 - self.y_axis_bottom_margin();
+        let x = bar.y - self.top_scroll;
+        let thickness = bar.bar.actual_thickness(&self.defaults) as u16;
+        let baseline = plot_bottom - self.xaxis.zero;
+        let h = bar.len;
+        if h == 0 {
+            Rect::with_size(x, baseline, thickness, 1)
+        } else if h > 0 {
+            Rect::with_size(x, baseline + 1 - h as i32, thickness, h as u16)
+        } else {
+            let abs_h = h.unsigned_abs();
+            Rect::with_size(x, baseline + 1, thickness, abs_h)
+        }
+    }    
     fn clamp_selected_bar(&mut self) {
         if let Some(index) = self.selected_bar {
             if (index as usize) >= self.bars.len() {
@@ -830,7 +857,7 @@ where
         self.first_visible_bar = (self.bars.partition_point(|b| b.y < self.top_scroll) as u32).saturating_sub(1);
     }
     #[inline(always)]
-    fn y_axis_top_margin(&self) -> i32 {
+    fn y_axis_bottom_margin(&self) -> i32 {
         if self.xaxis.visible {
             2
         } else {
@@ -840,12 +867,12 @@ where
     fn sync_vertical_scrollbar(&mut self) {
         let sz = self.size();
         self.scrollbars
-            .update(self.bars_height as u64 + self.y_axis_top_margin() as u64 + 1, sz.height as u64, sz);
+            .update(self.bars_height as u64 + self.y_axis_bottom_margin() as u64 + 1, sz.height as u64, sz);
         self.scrollbars.set_indexes(0, self.top_scroll as u64);
     }
     #[inline(always)]
     fn max_top_scroll(&self) -> i32 {
-        let content_height = self.bars_height as i32 + self.y_axis_top_margin() + 1;
+        let content_height = self.bars_height as i32 + self.y_axis_bottom_margin() + 1;
         (content_height - self.size().height as i32).max(0)
     }
     fn after_vertical_scroll(&mut self) {
@@ -853,6 +880,12 @@ where
         self.sync_vertical_scrollbar();
         self.repaint_surface();
     }
+    fn update_scroll_pos_from_scrollbars(&mut self) {
+        self.top_scroll = self.scrollbars.vertical_index() as i32;
+        // binary search - cea mai apropiata bara
+        self.update_first_visible_bar();
+        self.repaint_surface();
+    }    
     fn align_scroll_to_first_visible_bar(&mut self) {
         if let Some(bar) = self.bars.get(self.first_visible_bar as usize) {
             self.top_scroll = bar.y.max(0);
@@ -860,6 +893,68 @@ where
         self.sync_vertical_scrollbar();
         self.repaint_surface();
     }
+    fn show_hovered_bar_tooltip(&mut self, index: u32) {
+        let Some(bar) = self.bars.get(index as usize) else {
+            return;
+        };
+        let r = self.bar_rect(index as usize);
+        let mut buf = [0u8; 64];
+        let value = self.number_format.write_float(bar.bar.value.to_f64(), &mut buf).unwrap_or("");
+        if bar.bar.label.is_empty() {
+            self.show_tooltip_on_rect(value, &r);
+        } else {
+            self.tooltip_text.clear();
+            self.tooltip_text.push_str(&bar.bar.label);
+            self.tooltip_text.push('\n');
+            self.tooltip_text.push_str(value);
+            self.show_tooltip_on_rect(&self.tooltip_text, &r);
+        }
+    }    
+    fn clear_hovered_bar(&mut self) {
+        if self.hovered_bar.take().is_some() {
+            self.hide_tooltip();
+        }
+    }  
+    fn bar_index_at(&self, x: i32, y: i32) -> Option<u32> {
+        // todo - add proper code
+        None
+    }  
+    fn update_selected_bar_from_click(&mut self, x: i32, y: i32) {
+        match self.bar_index_at(x, y) {
+            Some(index) => {
+                if self.selected_bar != Some(index) {
+                    self.selected_bar = Some(index);
+                    self.raise_bar_selected_event(index);
+                }
+            }
+            None => {
+                if self.selected_bar.is_some() {
+                    self.selected_bar = None;
+                    self.raise_clear_selection_event();
+                }
+            }
+        }
+    }  
+    fn raise_bar_selected_event(&mut self, index: u32) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::HBarChart(EventData {
+                event_type: EventType::BarSelected(index),
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
+    }
+    fn raise_clear_selection_event(&mut self) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::HBarChart(EventData {
+                event_type: EventType::ClearSelection,
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
+    }          
 }
 
 impl<T> OnPaint for HBarChart<T>
@@ -883,7 +978,7 @@ where
         self.surface.resize(new_size);
         self.scrollbars.resize(
             new_size.width as u64,
-            self.bars_height as u64 + self.y_axis_top_margin() as u64 + 1,
+            self.bars_height as u64 + self.y_axis_bottom_margin() as u64 + 1,
             &self.base,
         );
         self.repaint_surface();
@@ -894,8 +989,53 @@ impl<T> OnMouseEvent for HBarChart<T>
 where
     T: Number + 'static,
 {
-    fn on_mouse_event(&mut self, _event: &MouseEvent) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if self.scrollbars.process_mouse_event(event) {
+            self.clear_hovered_bar();
+            self.update_scroll_pos_from_scrollbars();
+            return EventProcessStatus::Processed;
+        }
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.clear_hovered_bar();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(pos) => {
+                let idx = self.bar_index_at(pos.x, pos.y);
+                if idx != self.hovered_bar {
+                    self.hovered_bar = idx;
+                    if let Some(index) = idx {
+                        self.show_hovered_bar_tooltip(index);
+                    } else {
+                        self.hide_tooltip();
+                    }
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::Pressed(data) | MouseEvent::DoubleClick(data) => {
+                self.update_selected_bar_from_click(data.x, data.y);
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Wheel(wheel) => match wheel {
+                MouseWheelDirection::Left | MouseWheelDirection::Up => {
+                    if self.top_scroll > 0 {
+                        self.top_scroll -= 1;
+                        self.after_vertical_scroll();
+                    }
+                    EventProcessStatus::Processed
+                }
+                MouseWheelDirection::Right | MouseWheelDirection::Down => {
+                    if self.top_scroll < self.max_top_scroll() {
+                        self.top_scroll += 1;
+                        self.after_vertical_scroll();
+                    }
+                    EventProcessStatus::Processed
+                }
+            },
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
 
@@ -912,7 +1052,7 @@ where
                 }
                 EventProcessStatus::Processed
             }
-            key!("PageDown") => {
+            key!("Down") => {
                 if self.top_scroll < self.max_top_scroll() {
                     self.top_scroll += 1;
                     self.after_vertical_scroll();
