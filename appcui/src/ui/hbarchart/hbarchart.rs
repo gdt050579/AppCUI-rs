@@ -152,6 +152,9 @@ where
 {
     flags: Flags,
     bars: Vec<BarWithLayout<T>>,
+    bars_height: u32,
+    pub(super) top_scroll: i32,
+    pub(super) first_visible_bar: u32,    
     xaxis: XAxis,
     scale: BarScale<T>,
     number_format: FormatNumber,
@@ -225,6 +228,9 @@ where
             use_theme_colors_for_bars: true,
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             selected_bar: None,
+            top_scroll: 0,
+            first_visible_bar: 0,
+            bars_height: 0,
         }
     }
     /// Appends one bar and repaints the chart.
@@ -829,6 +835,41 @@ where
             }
         }
     }
+    #[inline(always)]
+    fn update_first_visible_bar(&mut self) {
+        self.first_visible_bar = (self.bars.partition_point(|b| b.y < self.top_scroll) as u32).saturating_sub(1);
+    }
+    #[inline(always)]
+    fn y_axis_top_margin(&self) -> i32 {
+        if self.xaxis.visible && self.xaxis.width > 0 {
+            self.xaxis.width as i32 + 2
+        } else {
+            0
+        }
+    }       
+    fn sync_vertcal_scrollbar(&mut self) {
+        let sz = self.size();
+        self.scrollbars
+            .update(self.bars_height as u64 + self.y_axis_top_margin() as u64 + 1, sz.height as u64, sz);
+        self.scrollbars.set_indexes(self.top_scroll as u64, 0);
+    }     
+    #[inline(always)]
+    fn max_top_scroll(&self) -> i32 {
+        let content_width = self.bars_height as i32 + self.y_axis_top_margin() + 1;
+        (content_width - self.size().width as i32).max(0)
+    }    
+    fn after_vertical_scroll(&mut self) {
+        self.update_first_visible_bar();
+        self.sync_vertcal_scrollbar();
+        self.repaint_surface();
+    }
+    fn align_scroll_to_first_visible_bar(&mut self) {
+        if let Some(bar) = self.bars.get(self.first_visible_bar as usize) {
+            self.top_scroll = bar.y.max(0);
+        }
+        self.sync_vertcal_scrollbar();
+        self.repaint_surface();
+    }    
 }
 
 impl<T> OnPaint for HBarChart<T>
@@ -868,7 +909,47 @@ impl<T> OnKeyPressed for HBarChart<T>
 where
     T: Number + 'static,
 {
-    fn on_key_pressed(&mut self, _key: Key, _character: char) -> EventProcessStatus {
-        EventProcessStatus::Ignored
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Up") => {
+                if self.top_scroll > 0 {
+                    self.top_scroll -= 1;
+                    self.after_vertical_scroll();
+                }
+                EventProcessStatus::Processed
+            }
+            key!("PageDown") => {
+                if self.top_scroll < self.max_top_scroll() {
+                    self.top_scroll += 1;
+                    self.after_vertical_scroll();
+                }
+                EventProcessStatus::Processed
+            }
+            key!("Home") => {
+                self.top_scroll = 0;
+                self.after_vertical_scroll();
+                EventProcessStatus::Processed
+            }
+            key!("End") => {
+                self.top_scroll = self.max_top_scroll();
+                self.after_vertical_scroll();
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Up") => {
+                if self.first_visible_bar > 0 {
+                    self.first_visible_bar -= 1;
+                    self.align_scroll_to_first_visible_bar();
+                }
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Down") => {
+                if !self.bars.is_empty() && (self.first_visible_bar as usize + 1) < self.bars.len() {
+                    self.first_visible_bar += 1;
+                    self.align_scroll_to_first_visible_bar();
+                }
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }
