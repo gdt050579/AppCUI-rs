@@ -515,6 +515,16 @@ impl<T: Number + 'static> Bar<T> {
         surface.fill_horizontal_line_with_size(point.x, point.y, self.actual_thickness(defaults) as u32, cap_type.character(attr));
     }
     #[inline(always)]
+    fn paint_horizontal_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
+        let point = self.point_horizontal(layout);
+        surface.fill_vertical_line_with_size(
+            point.x,
+            point.y,
+            self.actual_thickness(defaults) as u32,
+            cap_type.vertical_character(attr),
+        );
+    }    
+    #[inline(always)]
     pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
         let (min, max) = mode.thickness_range(defaults.vertical);
@@ -581,16 +591,6 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::LargePoint(point_type) => self.paint_horizontal_large_point(surface, point_type, attr, layout),
             BarDrawMode::Cap(cap_type) => self.paint_horizontal_cap(surface, cap_type, attr, layout, defaults),
         }
-    }
-    #[inline(always)]
-    fn paint_horizontal_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
-        let point = self.point_horizontal(layout);
-        surface.fill_vertical_line_with_size(
-            point.x,
-            point.y,
-            self.actual_thickness(defaults) as u32,
-            cap_type.vertical_character(attr),
-        );
     }
 }
 
