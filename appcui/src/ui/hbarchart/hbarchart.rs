@@ -125,7 +125,6 @@ where
 }
 
 struct XAxis {
-    width: u8,
     step: u8,
     zero: i32,
     left_value: f64,
@@ -154,7 +153,7 @@ where
     bars: Vec<BarWithLayout<T>>,
     bars_height: u32,
     pub(super) top_scroll: i32,
-    pub(super) first_visible_bar: u32,    
+    pub(super) first_visible_bar: u32,
     xaxis: XAxis,
     scale: BarScale<T>,
     number_format: FormatNumber,
@@ -199,7 +198,6 @@ where
             flags,
             bars: Vec::new(),
             xaxis: XAxis {
-                width: 6,
                 step: 3,
                 zero: 0,
                 left_value: 0.0,
@@ -449,14 +447,6 @@ where
         self.xaxis.show_grid = show_grid;
         self.repaint_surface();
     }
-    /// Sets how many characters are reserved for X-axis labels.
-    ///
-    /// Values below 1 are treated as 1. This width is used only while the X axis
-    /// is visible.
-    pub fn set_xaxis_width(&mut self, width: u8) {
-        self.xaxis.width = width.max(1);
-        self.repaint_surface();
-    }
     /// Sets the distance, in cells, between grid lines and their labels.
     ///
     /// Values below 1 are treated as 1.
@@ -510,7 +500,11 @@ where
     #[inline(always)]
     fn plot_rows(&self) -> i32 {
         let height = self.size().height as i32;
-        if self.xaxis.visible { height.saturating_sub(2) } else { height }
+        if self.xaxis.visible {
+            height.saturating_sub(2)
+        } else {
+            height
+        }
     }
     #[inline(always)]
     fn y_label_margin(&self) -> i32 {
@@ -520,12 +514,7 @@ where
                 let last = start as i64 + self.bars.len().saturating_sub(1) as i64;
                 index_width(start as i64).max(index_width(last))
             }
-            YAxisLabelFormat::BarLabels => self
-                .bars
-                .iter()
-                .map(|item| item.bar.label.chars().count() as i32)
-                .max()
-                .unwrap_or(0),
+            YAxisLabelFormat::BarLabels => self.bars.iter().map(|item| item.bar.label.chars().count() as i32).max().unwrap_or(0),
             YAxisLabelFormat::Custom => self
                 .yaxis
                 .spans
@@ -568,7 +557,11 @@ where
             for item in self.bars.iter_mut() {
                 let v = item.bar.value.to_f64();
                 let len = if v >= 0.0 {
-                    if hi > 0.0 { v / hi * cells_right } else { 0.0 }
+                    if hi > 0.0 {
+                        v / hi * cells_right
+                    } else {
+                        0.0
+                    }
                 } else {
                     -(v / lo * cells_left)
                 };
@@ -616,6 +609,7 @@ where
     }
     fn update_bars_layout(&mut self) {
         if self.bars.is_empty() {
+            self.bars_height = 0;
             return;
         }
         let mut y = 0i32;
@@ -630,11 +624,10 @@ where
             v_max = v_max.max(value);
             v_min = v_min.min(value);
         }
+        self.bars_height = y as u32 + self.bars[0].bar.spacing.unwrap_or(self.defaults.spacing) as u32;
         match self.scale {
             BarScale::FromZero => self.update_bars_length_from_zero(v_min, v_max),
-            BarScale::FromZeroMinRange { min, max } => {
-                self.update_bars_length_from_zero(min.to_f64().min(v_min), max.to_f64().max(v_max))
-            }
+            BarScale::FromZeroMinRange { min, max } => self.update_bars_length_from_zero(min.to_f64().min(v_min), max.to_f64().max(v_max)),
             BarScale::FitData => self.update_bars_length_fit_data(v_min, v_max),
             BarScale::Fixed { min, max } => self.update_bars_length_fixed(min.to_f64(), max.to_f64()),
         }
@@ -688,7 +681,7 @@ where
             let format = self.number_format;
             let bottom = plot_rows - 1;
             let label_y = plot_rows + 1;
-            let label_width = self.xaxis.width as i32;
+            let label_width = self.xaxis.step as i32;
             while x <= right {
                 self.surface.fill_vertical_line(x, 0, bottom, ch);
                 if self.xaxis.visible {
@@ -821,11 +814,8 @@ where
         let x = margin - 1 - count as i32;
         self.surface.write_string(x, y, &label[..end], attr, false);
         if truncated {
-            self.surface.write_char(
-                margin - 2,
-                y,
-                Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr),
-            );
+            self.surface
+                .write_char(margin - 2, y, Character::with_attributes(SpecialChar::ThreePointsHorizontal, attr));
         }
     }
     fn clamp_selected_bar(&mut self) {
@@ -841,35 +831,35 @@ where
     }
     #[inline(always)]
     fn y_axis_top_margin(&self) -> i32 {
-        if self.xaxis.visible && self.xaxis.width > 0 {
-            self.xaxis.width as i32 + 2
+        if self.xaxis.visible {
+            2
         } else {
             0
         }
-    }       
-    fn sync_vertcal_scrollbar(&mut self) {
+    }
+    fn sync_vertical_scrollbar(&mut self) {
         let sz = self.size();
         self.scrollbars
             .update(self.bars_height as u64 + self.y_axis_top_margin() as u64 + 1, sz.height as u64, sz);
-        self.scrollbars.set_indexes(self.top_scroll as u64, 0);
-    }     
+        self.scrollbars.set_indexes(0, self.top_scroll as u64);
+    }
     #[inline(always)]
     fn max_top_scroll(&self) -> i32 {
-        let content_width = self.bars_height as i32 + self.y_axis_top_margin() + 1;
-        (content_width - self.size().width as i32).max(0)
-    }    
+        let content_height = self.bars_height as i32 + self.y_axis_top_margin() + 1;
+        (content_height - self.size().height as i32).max(0)
+    }
     fn after_vertical_scroll(&mut self) {
         self.update_first_visible_bar();
-        self.sync_vertcal_scrollbar();
+        self.sync_vertical_scrollbar();
         self.repaint_surface();
     }
     fn align_scroll_to_first_visible_bar(&mut self) {
         if let Some(bar) = self.bars.get(self.first_visible_bar as usize) {
             self.top_scroll = bar.y.max(0);
         }
-        self.sync_vertcal_scrollbar();
+        self.sync_vertical_scrollbar();
         self.repaint_surface();
-    }    
+    }
 }
 
 impl<T> OnPaint for HBarChart<T>
@@ -891,7 +881,11 @@ where
 {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.surface.resize(new_size);
-        self.scrollbars.resize(new_size.width as u64, new_size.height as u64, &self.base);
+        self.scrollbars.resize(
+            new_size.width as u64,
+            self.bars_height as u64 + self.y_axis_top_margin() as u64 + 1,
+            &self.base,
+        );
         self.repaint_surface();
     }
 }
