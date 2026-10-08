@@ -221,14 +221,14 @@ pub enum BarDrawMode {
 }
 
 impl BarDrawMode {
-    fn thickness_range(&self) -> (u8, u8) {
+    fn thickness_range(&self, vertical: bool) -> (u8, u8) {
         match self {
             BarDrawMode::Fill(_) => (1, u8::MAX),
             BarDrawMode::Line(_) => (1, 1),
             BarDrawMode::Rectangle(_) => (2, u8::MAX),
             BarDrawMode::FilledRectangle(_) => (3, u8::MAX),
             BarDrawMode::Point(_) => (1, 1),
-            BarDrawMode::LargePoint(_) => (3, 3),
+            BarDrawMode::LargePoint(_) => if vertical { (3, 3) } else { (2,2) },
             BarDrawMode::Cap(_) => (1, u8::MAX),
         }
     }
@@ -259,6 +259,7 @@ pub(crate) struct BarDefaults {
     pub(crate) attr: CharAttribute,
     pub(crate) thickness: u8,
     pub(crate) spacing: u8,
+    pub(crate) vertical: bool,
     pub(crate) draw_mode: BarDrawMode,
 }
 #[derive(Copy, Clone, Default)]
@@ -482,6 +483,11 @@ impl<T: Number + 'static> Bar<T> {
         surface.write_char(point.x, point.y, bar_point_type.character(attr));
     }
     #[inline(always)]
+    fn paint_horizontal_point(&self, surface: &mut Surface, bar_point_type: BarPointType, attr: CharAttribute, layout: &BarLayout) {
+        let point = self.point_horizontal(layout);
+        surface.write_char(point.x, point.y, bar_point_type.character(attr));
+    }
+    #[inline(always)]
     fn paint_vertical_large_point(&self, surface: &mut Surface, bar_point_type: BarLargePointType, attr: CharAttribute, layout: &BarLayout) {
         let point = self.point_vertical(layout);
         let chars = bar_point_type.characters();
@@ -493,6 +499,17 @@ impl<T: Number + 'static> Bar<T> {
         surface.write_char(point.x + 2, point.y + 1, Character::with_attributes(chars[5], attr));
     }
     #[inline(always)]
+    fn paint_horizontal_large_point(&self, surface: &mut Surface, bar_point_type: BarLargePointType, attr: CharAttribute, layout: &BarLayout) {
+        let point = self.point_horizontal(layout);
+        let chars = bar_point_type.characters();
+        surface.write_char(point.x - 1, point.y, Character::with_attributes(chars[0], attr));
+        surface.write_char(point.x + 0, point.y, Character::with_attributes(chars[1], attr));
+        surface.write_char(point.x + 1, point.y, Character::with_attributes(chars[2], attr));
+        surface.write_char(point.x - 1, point.y + 1, Character::with_attributes(chars[3], attr));
+        surface.write_char(point.x + 0, point.y + 1, Character::with_attributes(chars[4], attr));
+        surface.write_char(point.x + 1, point.y + 1, Character::with_attributes(chars[5], attr));
+    }    
+    #[inline(always)]
     fn paint_vertical_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
         let point = self.point_vertical(layout);
         surface.fill_horizontal_line_with_size(point.x, point.y, self.actual_thickness(defaults) as u32, cap_type.character(attr));
@@ -500,7 +517,7 @@ impl<T: Number + 'static> Bar<T> {
     #[inline(always)]
     pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
-        let (min, max) = mode.thickness_range();
+        let (min, max) = mode.thickness_range(defaults.vertical);
         self.thickness.unwrap_or(defaults.thickness).clamp(min, max)
     }
     #[inline(always)]
@@ -564,24 +581,6 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::LargePoint(point_type) => self.paint_horizontal_large_point(surface, point_type, attr, layout),
             BarDrawMode::Cap(cap_type) => self.paint_horizontal_cap(surface, cap_type, attr, layout, defaults),
         }
-    }
-
-    #[inline(always)]
-    fn paint_horizontal_point(&self, surface: &mut Surface, bar_point_type: BarPointType, attr: CharAttribute, layout: &BarLayout) {
-        let point = self.point_horizontal(layout);
-        surface.write_char(point.x, point.y, bar_point_type.character(attr));
-    }
-    #[inline(always)]
-    fn paint_horizontal_large_point(&self, surface: &mut Surface, bar_point_type: BarLargePointType, attr: CharAttribute, layout: &BarLayout) {
-        let point = self.point_horizontal(layout);
-        let chars = bar_point_type.characters_horizontal();
-        let x = if layout.length > 0 { point.x - 1 } else { point.x };
-        surface.write_char(x, point.y, Character::with_attributes(chars[0], attr));
-        surface.write_char(x + 1, point.y, Character::with_attributes(chars[1], attr));
-        surface.write_char(x, point.y + 1, Character::with_attributes(chars[2], attr));
-        surface.write_char(x + 1, point.y + 1, Character::with_attributes(chars[3], attr));
-        surface.write_char(x, point.y + 2, Character::with_attributes(chars[4], attr));
-        surface.write_char(x + 1, point.y + 2, Character::with_attributes(chars[5], attr));
     }
     #[inline(always)]
     fn paint_horizontal_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {

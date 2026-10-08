@@ -219,6 +219,7 @@ where
                 attr: CharAttribute::default(),
                 thickness: 1,
                 spacing: 1,
+                vertical: false,
                 draw_mode: BarDrawMode::default(),
             },
             yaxis: YAxis {
