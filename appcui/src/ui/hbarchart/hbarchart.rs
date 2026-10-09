@@ -669,10 +669,17 @@ where
             surface_size: self.size(),
             ..Default::default()
         };
-        for item in &self.bars {
-            layout.y = item.y;
-            layout.length = item.len;
-            item.bar.paint_horizontal(&mut self.surface, &layout, &defaults);
+        let len = self.bars.len();
+        let mut start = self.first_visible_bar as usize;
+        while start < len {
+            layout.y = self.bars[start].y - self.top_scroll;
+            if layout.y >= plot_rows {
+                break;
+            }
+            let bar = &self.bars[start];
+            layout.length = bar.len;
+            bar.bar.paint_horizontal(&mut self.surface, &layout, &defaults);
+            start += 1;
         }
     }
     fn paint_value_axis(&mut self, axis_attr: CharAttribute, grid_attr: CharAttribute, label_attr: CharAttribute) {
@@ -757,24 +764,35 @@ where
     fn paint_index_labels(&mut self, start: i32, attr: CharAttribute) {
         let mut temp: [u8; 16] = [0u8; 16];
         let len = self.bars.len();
-        let mut index = start as i64;
-        for i in 0..len {
+        let mut idx = self.first_visible_bar as usize;
+        let mut index = start as i64 + self.first_visible_bar as i64;
+        let plot_rows = self.plot_rows();
+        while idx < len {
+            let y = self.bar_label_row(idx);
+            if y >= plot_rows {
+                break;
+            }
             if let Some(text) = INT_FORMAT.write_number(index, &mut temp) {
-                let y = self.bar_label_row(i);
                 self.write_category_label(y, text, attr);
             }
+            idx += 1;
             index += 1;
         }
     }
     fn paint_bar_labels(&mut self, attr: CharAttribute) {
         let len = self.bars.len();
-        for i in 0..len {
-            let label = self.bars[i].bar.label.clone();
-            if label.is_empty() {
-                continue;
+        let mut idx = self.first_visible_bar as usize;
+        let plot_rows = self.plot_rows();
+        while idx < len {
+            let y = self.bar_label_row(idx);
+            if y >= plot_rows {
+                break;
             }
-            let y = self.bar_label_row(i);
-            self.write_category_label(y, &label, attr);
+            let label = self.bars[idx].bar.label.clone();
+            if !label.is_empty() {
+                self.write_category_label(y, &label, attr);
+            }
+            idx += 1;
         }
     }
     fn paint_span_labels(&mut self, attr: CharAttribute) {
@@ -782,6 +800,7 @@ where
         if len == 0 {
             return;
         }
+        let plot_rows = self.plot_rows();
         let count = self.yaxis.spans.len();
         for i in 0..count {
             let span = self.yaxis.spans[i];
@@ -789,18 +808,28 @@ where
             if start >= len {
                 break;
             }
+            let top = self.bars[start].y - self.top_scroll;
+            if top >= plot_rows {
+                break;
+            }
             let end = (span.end as usize).min(len - 1);
-            let top = self.bars[start].y;
-            let bottom = self.bars[end].y + self.bars[end].bar.actual_thickness(&self.defaults) as i32 - 1;
+            let bottom = self.bars[end].y - self.top_scroll + self.bars[end].bar.actual_thickness(&self.defaults) as i32 - 1;
+            if bottom < 0 {
+                continue;
+            }
             self.write_category_label((top + bottom) / 2, span.label.as_str(), attr);
         }
     }
     fn bar_label_row(&self, index: usize) -> i32 {
         let item = &self.bars[index];
         let thickness = item.bar.actual_thickness(&self.defaults) as i32;
-        item.y + (thickness - 1) / 2
+        item.y - self.top_scroll + (thickness - 1) / 2
     }
     fn write_category_label(&mut self, y: i32, label: &str, attr: CharAttribute) {
+        let plot_rows = self.plot_rows();
+        if y < 0 || y >= plot_rows {
+            return;
+        }
         let margin = self.y_label_margin();
         if margin <= 1 || label.is_empty() {
             return;
@@ -865,7 +894,7 @@ where
     fn sync_vertical_scrollbar(&mut self) {
         let sz = self.size();
         self.scrollbars
-            .update(self.bars_height as u64 + self.y_axis_bottom_margin() as u64 + 1, sz.height as u64, sz);
+            .update(sz.width as u64, self.bars_height as u64 + self.y_axis_bottom_margin() as u64 + 1, sz);
         self.scrollbars.set_indexes(0, self.top_scroll as u64);
     }
     #[inline(always)]
@@ -1023,12 +1052,13 @@ where
 {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.surface.resize(new_size);
+        self.update_bars_layout();
         self.scrollbars.resize(
             new_size.width as u64,
             self.bars_height as u64 + self.y_axis_bottom_margin() as u64 + 1,
             &self.base,
         );
-        self.repaint_surface();
+        self.update_scroll_pos_from_scrollbars();
     }
 }
 
