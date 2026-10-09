@@ -987,7 +987,33 @@ where
             self.scrollbars.paint(surface, theme, self);
             surface.reduce_clip_by(0, 0, 1, 1);
         }
-        surface.draw_surface(0, 0, &self.surface);
+        if !self.is_enabled() {
+            let attr = theme.chart.inactive;
+            surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
+        } else {
+            surface.draw_surface(0, 0, &self.surface);
+            if let Some(index) = self.selected_bar {
+                // clip to the plot area bounded by the category and value axes (inclusive)
+                let margin = self.y_label_margin();
+                let left = if margin > 0 { margin - 1 } else { 0 };
+                let bottom = self.size().height as i32 - if self.xaxis.visible { 2 } else { 1 };
+                let right = self.size().width.saturating_sub(1) as i32;
+                surface.set_relative_clip(left, 0, right, bottom);
+                let mut r = self.bar_rect(index as usize);
+                r.inflate_width(1, 1, 1, 1);
+                surface.draw_rect(r, LineType::Single, theme.chart.selection_border);
+                if self.flags.contains(Flags::DimBarsOnSelection) {
+                    let attr = theme.chart.inactive;
+                    surface.transform_rect(Rect::new(left, 0, right, bottom), |ch, p| {
+                        if r.contains(p) {
+                            None
+                        } else {
+                            Some(Character::with_attributes(ch.code, attr))
+                        }
+                    });
+                }
+            }
+        }
     }
 }
 
