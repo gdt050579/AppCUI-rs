@@ -5,16 +5,6 @@ use crate::ui::components::{BarDefaults, BarLayout, ScrollBars};
 
 const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 
-fn index_width(value: i64) -> i32 {
-    let mut n = value.unsigned_abs();
-    let mut width = if value < 0 { 2 } else { 1 };
-    while n >= 10 {
-        n /= 10;
-        width += 1;
-    }
-    width
-}
-
 struct BarWithLayout<T: Number + 'static> {
     bar: Bar<T>,
     y: i32,
@@ -135,6 +125,7 @@ struct XAxis {
 }
 
 struct YAxis {
+    width: u8,
     label_format: YAxisLabelFormat,
     spans: Vec<BarSpan>,
 }
@@ -216,6 +207,7 @@ where
                 draw_mode: BarDrawMode::default(),
             },
             yaxis: YAxis {
+                width: 6,
                 label_format: YAxisLabelFormat::None,
                 spans: Vec::new(),
             },
@@ -284,9 +276,14 @@ where
     pub fn selected_bar(&self) -> Option<u32> {
         self.selected_bar
     }
-    pub fn set_xaxis_width(&self, value: u8) {
-        // todo
-        // will set the width of the left marging (where the labels are displayed)
+    /// Sets how many characters are reserved for the labels beside the bars.
+    ///
+    /// Values below 1 are treated as 1. One extra column is kept for the axis line.
+    /// This width is used only while a Y-axis label mode is set. A label longer than
+    /// the reserved width is truncated.
+    pub fn set_xaxis_width(&mut self, value: u8) {
+        self.yaxis.width = value.max(1);
+        self.repaint_surface();
     }
     /// Scrolls the chart vertically so the bar at `index` is visible.
     ///
@@ -560,27 +557,10 @@ where
     }
     #[inline(always)]
     fn y_label_margin(&self) -> i32 {
-        let cols = match self.yaxis.label_format {
-            YAxisLabelFormat::None => 0,
-            YAxisLabelFormat::Index(start) => {
-                let last = start as i64 + self.bars.len().saturating_sub(1) as i64;
-                index_width(start as i64).max(index_width(last))
-            }
-            YAxisLabelFormat::BarLabels => self.bars.iter().map(|item| item.bar.label.chars().count() as i32).max().unwrap_or(0),
-            YAxisLabelFormat::Custom => self
-                .yaxis
-                .spans
-                .iter()
-                .map(|span| span.label.as_str().chars().count() as i32)
-                .max()
-                .unwrap_or(0),
-        };
-        if cols <= 0 {
+        if self.yaxis.label_format.is_none() {
             return 0;
         }
-        let margin = cols + 1;
-        let limit = (self.size().width as i32 / 2).max(1);
-        margin.min(limit)
+        self.yaxis.width.max(1) as i32 + 1
     }
     #[inline(always)]
     fn visible_length(&self) -> u32 {
