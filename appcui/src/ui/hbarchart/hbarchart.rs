@@ -829,20 +829,18 @@ where
     }
     fn bar_rect(&self, index: usize) -> Rect {
         let bar = &self.bars[index];
-        // need a proper cod for this
-        let left_margin = self.y_axis_bottom_margin();
-        let plot_bottom = self.size().height as i32 - self.y_axis_bottom_margin();
-        let x = bar.y - self.top_scroll;
+        let left_margin = self.y_label_margin();
+        let y = bar.y - self.top_scroll;
         let thickness = bar.bar.actual_thickness(&self.defaults) as u16;
-        let baseline = plot_bottom - self.xaxis.zero;
-        let h = bar.len;
-        if h == 0 {
-            Rect::with_size(x, baseline, thickness, 1)
-        } else if h > 0 {
-            Rect::with_size(x, baseline + 1 - h as i32, thickness, h as u16)
+        let baseline = left_margin + self.xaxis.zero;
+        let len = bar.len;
+        if len == 0 {
+            Rect::with_size(baseline, y, 1, thickness)
+        } else if len > 0 {
+            Rect::with_size(baseline + 1, y, len as u16, thickness)
         } else {
-            let abs_h = h.unsigned_abs();
-            Rect::with_size(x, baseline + 1, thickness, abs_h)
+            let abs_len = len.unsigned_abs();
+            Rect::with_size(baseline + 1 + len as i32, y, abs_len, thickness)
         }
     }    
     fn clamp_selected_bar(&mut self) {
@@ -916,8 +914,31 @@ where
         }
     }  
     fn bar_index_at(&self, x: i32, y: i32) -> Option<u32> {
-        // todo - add proper code
-        None
+        let left_margin = self.y_label_margin();
+        let plot_bottom = self.plot_rows() - 1;
+        if x < left_margin || y < 0 || y > plot_bottom {
+            return None;
+        }
+        let content_y = y + self.top_scroll;
+        let idx = self.bars.partition_point(|b| b.y <= content_y).saturating_sub(1);
+        let bar = self.bars.get(idx)?;
+        let thickness = bar.bar.actual_thickness(&self.defaults) as i32;
+        if content_y < bar.y || content_y >= bar.y + thickness {
+            return None;
+        }
+        let baseline = left_margin + self.xaxis.zero;
+        let len = bar.len;
+        let (left, right) = if len == 0 {
+            (baseline, baseline)
+        } else if len > 0 {
+            (baseline + 1, baseline + len as i32)
+        } else {
+            (baseline + 1 + len as i32, baseline)
+        };
+        if x < left || x > right {
+            return None;
+        }
+        Some(idx as u32)
     }  
     fn update_selected_bar_from_click(&mut self, x: i32, y: i32) {
         match self.bar_index_at(x, y) {
