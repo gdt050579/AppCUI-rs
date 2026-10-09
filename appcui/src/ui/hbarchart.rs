@@ -1,8 +1,12 @@
 //! A horizontal bar chart UI control for displaying numeric series.
 //!
-//! `HBarChart` stores one bar per value of type `T` (any [`Number`](crate::ui::common::Number)).
-//! The public surface matches [`VBarChart`](crate::ui::vbarchart::VBarChart), with the axes swapped:
-//! the horizontal axis holds the values and the Y axis holds the bar labels.
+//! [`HBarChart`] stores one bar per value of type `T` (any [`Number`](crate::ui::common::Number)).
+//! The horizontal axis holds the values. The Y axis holds the bar labels.
+//!
+//! [`Flags`] selects scroll bars, a zero line, and dimming of unselected bars.
+//! [`BarScale`] maps values onto bar length. [`YAxisLabelMode`] chooses the labels
+//! beside the bars. [`events::GenericHBarChartEvents`] reports selection changes.
+//! [`Bar`], [`BarBuilder`], and [`BarSpan`] describe individual bars and label groups.
 
 pub mod events;
 mod hbarchart;

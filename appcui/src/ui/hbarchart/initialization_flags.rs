@@ -7,13 +7,13 @@ use crate::ui::{common::Number, hbarchart::BarSpan};
 ///
 /// Combine values with `|`. `Flags::None` draws the bars without extra decorations.
 pub enum Flags {
-    /// Shows a scroll bar when the bars do not fit in the control.
+    /// Shows a vertical scroll bar when the bars are taller than the control.
     ///
-    /// The margin grows while the chart has focus so the scroll bar stays visible.
+    /// The right margin grows while the chart has focus so the scroll bar stays visible.
     ScrollBars = 1,
     /// Draws every bar except the selected one with the inactive chart color.
     DimBarsOnSelection = 2,
-    /// Draws a solid line at value zero while the X-axis grid is visible.
+    /// Draws a solid vertical line at value zero, labeled `0`, while the X-axis grid is visible.
     ShowZeroLineOnXAxis = 4,
 }
 

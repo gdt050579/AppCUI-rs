@@ -137,6 +137,11 @@ struct YAxis {
 /// bar appearance, and number formatting are set through the methods on this type.
 /// Optional behavior, such as scroll bars, a zero line, and dimming unselected bars,
 /// is controlled by [`Flags`].
+///
+/// Clicking a bar selects it and raises a bar-selected event. Clicking outside any
+/// bar clears the selection. Hovering a bar shows its value, and its label when one
+/// is set, in a tooltip. When the chart has focus, Up and Down scroll by one row,
+/// Home and End jump to the ends, and Ctrl+Up and Ctrl+Down move by one bar.
 pub struct HBarChart<T>
 where
     T: Number + 'static,
@@ -170,7 +175,10 @@ where
     /// A new chart scales bars with [`BarScale::FromZero`], shows the X axis and its
     /// grid, and formats labels with two decimals when `T` is a floating-point type
     /// or with thousands separators when `T` is an integer. Bars use the theme color,
-    /// a thickness of 1, and a spacing of 1 until a default is changed.
+    /// a thickness of 1, and a spacing of 1 until a default is changed. Category
+    /// labels are hidden until [`Self::set_yaxis_label_mode`] is called. The column
+    /// reserved for those labels is 6 characters wide, and grid lines are 3 columns
+    /// apart.
     ///
     /// # Example
     /// ```rust, no_run
@@ -278,9 +286,10 @@ where
     }
     /// Sets how many characters are reserved for the labels beside the bars.
     ///
-    /// Values below 1 are treated as 1. One extra column is kept for the axis line.
-    /// This width is used only while a Y-axis label mode is set. A label longer than
-    /// the reserved width is truncated.
+    /// The default is 6. Values below 1 are treated as 1. One extra column is kept
+    /// for the axis line. This width is used only while a Y-axis label mode is set.
+    /// A longer label is cut off and its last visible character is replaced with an
+    /// ellipsis.
     pub fn set_xaxis_width(&mut self, value: u8) {
         self.yaxis.width = value.max(1);
         self.repaint_surface();
@@ -484,21 +493,23 @@ where
         self.use_theme_colors_for_bars = false;
         self.repaint_surface();
     }
-    /// Shows or hides the X axis and the space reserved for its labels.
+    /// Shows or hides the X axis and the two rows reserved for its line and numeric labels.
     ///
-    /// The grid is controlled separately by [`Self::set_xaxis_show_grid`].
+    /// The grid is controlled separately by [`Self::set_xaxis_show_grid`]. Hiding the
+    /// axis gives those rows back to the plot.
     pub fn set_xaxis_visible(&mut self, visible: bool) {
         self.xaxis.visible = visible;
         self.repaint_surface();
     }
-    /// Shows or hides the grid lines and the numeric labels beside them.
+    /// Shows or hides the vertical grid lines and the numeric labels under them.
     pub fn set_xaxis_show_grid(&mut self, show_grid: bool) {
         self.xaxis.show_grid = show_grid;
         self.repaint_surface();
     }
-    /// Sets the distance, in cells, between grid lines and their labels.
+    /// Sets the distance, in columns, between vertical grid lines.
     ///
-    /// Values below 1 are treated as 1.
+    /// Values below 1 are treated as 1. Each numeric label under the grid is
+    /// truncated to this many characters. The default is 3.
     pub fn set_xaxis_step(&mut self, step: u8) {
         self.xaxis.step = step.max(1);
         self.repaint_surface();
