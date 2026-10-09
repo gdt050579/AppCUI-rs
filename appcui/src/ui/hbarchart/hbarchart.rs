@@ -1037,7 +1037,7 @@ where
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if self.has_focus() && self.flags.contains(Flags::ScrollBars) {
             self.scrollbars.paint(surface, theme, self);
-            surface.reduce_clip_by(0, 0, 1, 1);
+            surface.reduce_clip_by(0, 0, 1, 0);
         }
         if !self.is_enabled() {
             let attr = theme.chart.inactive;
