@@ -288,12 +288,55 @@ where
         // todo
         // will set the width of the left marging (where the labels are displayed)
     }
-    /// Scrolls the chart so the bar at `index` is visible.
+    /// Scrolls the chart vertically so the bar at `index` is visible.
     ///
+    /// When the bar fits in the plot area, the chart scrolls the minimum amount needed to show
+    /// it entirely. A bar that is already fully visible leaves the scroll position unchanged.
+    /// A bar taller than the plot area is scrolled until part of it is on screen.
     /// Does nothing if `index` is out of range.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = HBarChart::<i32>::new(layout!("d:f"), hbarchart::Flags::None);
+    /// chart.add_bars(1..=50);
+    /// chart.ensure_visible(49);
+    /// ```
     pub fn ensure_visible(&mut self, index: usize) {
         if index >= self.bars.len() {
             return;
+        }
+        self.update_bars_layout();
+        let plot_height = self.plot_rows().max(0);
+        if plot_height <= 0 {
+            return;
+        }
+        let bar = &self.bars[index];
+        let bar_top = bar.y;
+        let bar_bottom = bar_top + bar.bar.actual_thickness(&self.defaults) as i32;
+        let view_top = self.top_scroll;
+        let view_bottom = view_top + plot_height;
+        let new_scroll = if bar_bottom - bar_top <= plot_height {
+            if bar_top >= view_top && bar_bottom <= view_bottom {
+                return;
+            }
+            if bar_top < view_top {
+                bar_top
+            } else {
+                bar_bottom - plot_height
+            }
+        } else if bar_bottom <= view_top {
+            bar_bottom - plot_height
+        } else if bar_top >= view_bottom {
+            bar_top
+        } else {
+            return;
+        };
+        let new_scroll = new_scroll.clamp(0, self.max_top_scroll());
+        if new_scroll != self.top_scroll {
+            self.top_scroll = new_scroll;
+            self.after_vertical_scroll();
         }
     }
     /// Returns an immutable reference to the bar at `index`, or `None` if out of range.
@@ -713,7 +756,7 @@ where
                 if (left..=right).contains(&x_zero) {
                     self.surface.draw_vertical_line(x_zero, 0, bottom, LineType::Single, grid_attr);
                     if self.xaxis.visible {
-                        if let Some(text) = format.write_float(value, &mut buffer) {
+                        if let Some(text) = format.write_float(0f64, &mut buffer) {
                             self.write_axis_value(x_zero, label_y, label_width, text, label_attr);
                         }
                     }
