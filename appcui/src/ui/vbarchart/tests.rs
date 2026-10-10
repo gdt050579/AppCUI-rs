@@ -640,6 +640,27 @@ fn check_draw_mode_line_ascii() {
 }
 
 #[test]
+fn check_draw_mode_line_border_ascii_round_and_single_round() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Border, AsciiRound and SingleRound lines')
+        CheckHash(0x764920A338D89B70)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, flags: ShowZeroLineOnYAxis, xlabels:Index(1), values: [{8, dm: Line(Border)}, {6, dm: Line(AsciiRound)}, {4, dm: Line(SingleRound)}, {-4, dm: Line(Border)}, {-6, dm: Line(AsciiRound)}, {-8, dm: Line(SingleRound)}]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn check_draw_mode_rectangle_single() {
     let script = "
         Paint.Enable(false)
