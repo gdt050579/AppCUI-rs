@@ -31,7 +31,7 @@ impl CharVariant {
             CharVariant::MathItalic => Some(convert_math_italic),
             CharVariant::MathBoldItalic => Some(convert_math_bold_italic),
             CharVariant::Script => Some(convert_script),
-            CharVariant::BoldScript => todo!(),
+            CharVariant::BoldScript => Some(convert_bold_script),
             CharVariant::Fraktur => todo!(),
             CharVariant::BoldFraktur => todo!(),
             CharVariant::DoubleStruck => todo!(),
@@ -119,6 +119,17 @@ fn convert_script(c: char) -> char {
         'g' => 'ℊ',
         'o' => 'ℴ',
         'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D4B6 - 'a' as u32) },
+        _ => c,
+    }
+}
+
+
+#[inline]
+fn convert_bold_script(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D4D0 - 'A' as u32) },
+        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D4EA - 'a' as u32) },
+        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
         _ => c,
     }
 }
