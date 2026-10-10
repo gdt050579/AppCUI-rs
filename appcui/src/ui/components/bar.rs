@@ -1,8 +1,9 @@
-//! Types that describe one bar in a chart.
+//! Types shared by [`VBarChart`](crate::ui::vbarchart::VBarChart) and [`HBarChart`](crate::ui::hbarchart::HBarChart).
 //!
 //! A [`Bar`] stores a numeric value and an optional label, color, thickness,
 //! spacing, and [`BarDrawMode`]. Build one with [`BarBuilder`], or convert a
-//! number through [`From`]. [`BarSpan`] places a label under a run of bars.
+//! number through [`From`]. [`BarSpan`] labels a run of bars: [`VBarChart`](crate::ui::vbarchart::VBarChart)
+//! draws that label under the bars, and [`HBarChart`](crate::ui::hbarchart::HBarChart) draws it beside them.
 //!
 //! [`BarFillType`], [`BarCapType`], [`BarPointType`], and [`BarLargePointType`]
 //! choose the character or marker used by a draw mode.
@@ -75,7 +76,9 @@ impl BarFillType {
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 /// Character drawn across the tip of a bar that uses [`BarDrawMode::Cap`].
 ///
-/// [`Solid`](Self::Solid) is the default.
+/// [`Solid`](Self::Solid) is the default. Line caps follow the bar: a horizontal
+/// stroke on a [`VBarChart`](crate::ui::vbarchart::VBarChart), a vertical stroke
+/// on an [`HBarChart`](crate::ui::hbarchart::HBarChart).
 pub enum BarCapType {
     /// U+2588 — full block.
     #[default]
@@ -152,7 +155,9 @@ impl BarPointType {
 
 /// Marker drawn by [`BarDrawMode::LargePoint`].
 ///
-/// The marker occupies a 3-by-2 block of cells. [`RoundSquare`](Self::RoundSquare) is the default.
+/// [`VBarChart`](crate::ui::vbarchart::VBarChart) and [`HBarChart`](crate::ui::hbarchart::HBarChart)
+/// draw the same 3-by-2 block of cells. [`RoundSquare`](Self::RoundSquare) is the default.
+/// The bar thickness around that marker differs: see [`BarDrawMode::LargePoint`].
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum BarLargePointType {
     /// Rounded single-line rectangle (`╭─╮` over `╰─╯`).
@@ -186,7 +191,7 @@ impl BarLargePointType {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-/// How a bar is drawn.
+/// How a [`VBarChart`](crate::ui::vbarchart::VBarChart) or [`HBarChart`](crate::ui::hbarchart::HBarChart) draws a bar.
 ///
 /// Some modes force the thickness into a fixed range. A thickness outside that
 /// range is clamped when the bar is painted. [`Fill`](Self::Fill) with
@@ -202,7 +207,10 @@ pub enum BarDrawMode {
     FilledRectangle(LineType),
     /// Draws a one-cell marker at the bar's value. Thickness is always 1.
     Point(BarPointType),
-    /// Draws a 3-by-2 marker at the bar's value. Thickness is always 3.
+    /// Draws a 3-by-2 marker at the bar's value.
+    ///
+    /// Thickness is 3 on a [`VBarChart`](crate::ui::vbarchart::VBarChart) and 2 on an
+    /// [`HBarChart`](crate::ui::hbarchart::HBarChart).
     LargePoint(BarLargePointType),
     /// Draws a cap across the tip of the bar. Thickness is at least 1.
     Cap(BarCapType),
@@ -228,7 +236,7 @@ impl Default for BarDrawMode {
 }
 
 #[derive(Clone, Debug)]
-/// One value in a bar chart.
+/// One value in a [`VBarChart`](crate::ui::vbarchart::VBarChart) or [`HBarChart`](crate::ui::hbarchart::HBarChart).
 ///
 /// A bar stores its value and label. Color, thickness, spacing, and draw mode
 /// are optional: a field left unset uses the chart default. A value of type `T`
@@ -270,7 +278,11 @@ impl<T: Number + 'static> Bar<T> {
         self.value = value;
         self
     }
-    /// Returns the label displayed for this bar (for example on the X axis).
+    /// Returns the label displayed for this bar.
+    ///
+    /// A [`VBarChart`](crate::ui::vbarchart::VBarChart) can show it under the bar.
+    /// An [`HBarChart`](crate::ui::hbarchart::HBarChart) can show it beside the bar.
+    /// Both charts include it in the hover tooltip when it is not empty.
     #[inline(always)]
     pub fn label(&self) -> &str {
         &self.label
@@ -664,8 +676,10 @@ where
 }
 
 #[derive(Copy, Clone, Debug)]
-/// A label that covers a run of consecutive bars on a chart's X axis.
+/// A label that covers a run of consecutive bars.
 ///
+/// A [`VBarChart`](crate::ui::vbarchart::VBarChart) draws the label under the bars.
+/// An [`HBarChart`](crate::ui::hbarchart::HBarChart) draws it beside them.
 /// The label is stored in a 22-character buffer.
 pub struct BarSpan {
     pub(crate) start: u32,
@@ -699,11 +713,13 @@ where
     }
 }
 
-/// A mutable view of the bars stored in an [`HBarChart`] or [`VBarChart`].
+/// A mutable view of the bars stored in a [`VBarChart`](crate::ui::vbarchart::VBarChart) or an [`HBarChart`](crate::ui::hbarchart::HBarChart).
 ///
-/// `Bars` is passed to [`HBarChart::update_bars`] or [`VBarChart::update_bars`] so several inserts, deletes, and in-place edits can be applied before the chart relayouts and repaints once.
+/// `Bars` is passed to [`VBarChart::update_bars`](crate::ui::vbarchart::VBarChart::update_bars) or
+/// [`HBarChart::update_bars`](crate::ui::hbarchart::HBarChart::update_bars) so several inserts, deletes,
+/// and in-place edits can be applied before the chart relayouts and repaints once.
 ///
-/// Custom category spans use bar indices; inserting or deleting bars may require updating those spans afterwards.
+/// Custom label spans use bar indices. Inserting or deleting bars may require updating those spans afterwards.
 pub struct Bars<'a, T>
 where
     T: Number + 'static,
@@ -791,7 +807,9 @@ where
         self.inner.iter_mut().map(|item| &mut item.bar)
     }
 }
-/// How bar values are mapped onto the plot height of a [`struct@super::VBarChart`] or [`struct@super::HBarChart`].
+/// How [`VBarChart`](crate::ui::vbarchart::VBarChart) and [`HBarChart`](crate::ui::hbarchart::HBarChart) map bar values onto the plot.
+///
+/// On a vertical chart the plot runs from bottom to top. On a horizontal chart it runs from left to right.
 pub enum BarScale<T: Number + 'static> {
     /// Draws every bar from zero. The visible range includes zero and every bar value.
     FromZero,
@@ -802,17 +820,25 @@ pub enum BarScale<T: Number + 'static> {
         /// Highest value that must remain inside the scale.
         max: T,
     },
-    /// Stretches the smallest and largest bar values across the full plot height.
+    /// Stretches the smallest and largest bar values across the full plot.
     ///
-    /// When every value is equal, each bar is drawn at half the plot height.
+    /// When every value is equal, each bar is drawn at half the plot size: half the height
+    /// on a [`VBarChart`](crate::ui::vbarchart::VBarChart), half the length on an
+    /// [`HBarChart`](crate::ui::hbarchart::HBarChart).
     FitData,
     /// Uses a fixed range. Values outside it are drawn at the corresponding edge of the plot.
     ///
-    /// When `min` is not lower than `max`, every bar is drawn at half the plot height.
+    /// When `min` is not lower than `max`, every bar is drawn at half the plot size.
     Fixed {
-        /// Lowest value represented by the bottom of the plot.
+        /// Lowest value in the range.
+        ///
+        /// This is the bottom of a [`VBarChart`](crate::ui::vbarchart::VBarChart) plot and the
+        /// left end of an [`HBarChart`](crate::ui::hbarchart::HBarChart) plot.
         min: T,
-        /// Highest value represented by the top of the plot.
+        /// Highest value in the range.
+        ///
+        /// This is the top of a [`VBarChart`](crate::ui::vbarchart::VBarChart) plot and the
+        /// right end of an [`HBarChart`](crate::ui::hbarchart::HBarChart) plot.
         max: T,
     },
 }
