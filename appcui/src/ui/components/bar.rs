@@ -503,10 +503,10 @@ impl<T: Number + 'static> Bar<T> {
         let point = self.point_horizontal(layout);
         let chars = bar_point_type.characters();
         surface.write_char(point.x - 1, point.y, Character::with_attributes(chars[0], attr));
-        surface.write_char(point.x + 0, point.y, Character::with_attributes(chars[1], attr));
+        surface.write_char(point.x, point.y, Character::with_attributes(chars[1], attr));
         surface.write_char(point.x + 1, point.y, Character::with_attributes(chars[2], attr));
         surface.write_char(point.x - 1, point.y + 1, Character::with_attributes(chars[3], attr));
-        surface.write_char(point.x + 0, point.y + 1, Character::with_attributes(chars[4], attr));
+        surface.write_char(point.x, point.y + 1, Character::with_attributes(chars[4], attr));
         surface.write_char(point.x + 1, point.y + 1, Character::with_attributes(chars[5], attr));
     }    
     #[inline(always)]
