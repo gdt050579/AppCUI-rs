@@ -28,7 +28,7 @@ fn check_macro_and_bar_api() {
     let script = "Paint.Enable(false)";
     App::new().size(Size::new(40, 12)).debug_script(script).window(|| {
         let mut chart = hbarchart!(
-            "type: i32, x:1, y:1, w:30, h:10, flags: ScrollBars+ShowZeroLineOnXAxis, scale: Fixed(0, 100), dbw: 2, space: 1, dm: Fill(Shade50), ylabels: Index(1), xw: 6, step: 2, values: [1, {2, label: Mar}]"
+            "type: i32, x:1, y:1, w:30, h:10, flags: ScrollBars+ShowZeroLineOnXAxis, scale: Fixed(0, 100), dbh: 2, space: 1, dm: Fill(Shade50), ylabels: Index(1), xw: 6, step: 2, values: [1, {2, label: Mar}]"
         );
         assert_eq!(chart.bars_count(), 2);
         assert_eq!(chart.get_bar(1).map(|bar| bar.label()), Some("Mar"));
@@ -44,7 +44,7 @@ fn check_macro_and_bar_api() {
         assert_eq!(chart.bars_count(), 3);
         assert_eq!(chart.get_bar(0).map(|bar| bar.value()), Some(0));
         chart.set_bars_scale(hbarchart::BarScale::FromZero);
-        chart.set_default_bar_width(3);
+        chart.set_default_bar_height(3);
         chart.set_default_bar_spacing(2);
         chart.set_xaxis_width(8);
         chart.set_xaxis_step(2);
@@ -1468,7 +1468,7 @@ fn check_draw_mode_bar_width_3() {
         .window(|| {
             let mut w = window!("Test,d:f");
             w.add(hbarchart!(
-                "type: i32, d:f, dm: Fill('x'), space:2, dbw: 3, ylabels:Index(0), values: [1, 2, 3,4,5,6,7,8,9,10]"
+                "type: i32, d:f, dm: Fill('x'), space:2, dbh: 3, ylabels:Index(0), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1526,7 +1526,7 @@ fn check_bars_with_different_colors_and_default_size() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(hbarchart!("type: i32, d:f, dbw: 3, space: 2, ylabels:Index(1), values: [{1, attr: red}, {2, attr: green}, {3, attr: aqua}, {4, attr: yellow}, {5, attr: pink}]"));
+            w.add(hbarchart!("type: i32, d:f, dbh: 3, space: 2, ylabels:Index(1), values: [{1, attr: red}, {2, attr: green}, {3, attr: aqua}, {4, attr: yellow}, {5, attr: pink}]"));
             w
         })
         .run()
@@ -1546,7 +1546,7 @@ fn check_ylabel_groups_two_quarters() {
         .window(|| {
             let mut w = window!("Test,d:f");
             w.add(hbarchart!(
-                "type: i32, d:f, dbw: 3, ylabels: [{0, 3, '1st quarter'}, {3, 3, '2nd quarter'}], values: [1, 2, 3, {4, s: 6}, 5, 6]"
+                "type: i32, d:f, dbh: 3, ylabels: [{0, 3, '1st quarter'}, {3, 3, '2nd quarter'}], values: [1, 2, 3, {4, s: 6}, 5, 6]"
             ));
             w
         })
@@ -1567,7 +1567,7 @@ fn check_scale_fit_data() {
         .window(|| {
             let mut w = window!("Test,d:f");
             w.add(hbarchart!(
-                "type: i32, d:f, dbw: 3, scale: FitData, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
+                "type: i32, d:f, dbh: 3, scale: FitData, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
             ));
             w
         })
@@ -1588,7 +1588,7 @@ fn check_scale_fixed() {
         .window(|| {
             let mut w = window!("Test,d:f");
             w.add(hbarchart!(
-                "type: i32, d:f, dbw: 3, scale: Fixed(0, 12), ylabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
+                "type: i32, d:f, dbh: 3, scale: Fixed(0, 12), ylabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
             ));
             w
         })
@@ -1609,7 +1609,7 @@ fn check_scale_from_zero_min_range() {
         .window(|| {
             let mut w = window!("Test,d:f");
             w.add(hbarchart!(
-                "type: i32, d:f, dbw: 3, scale: FromZeroMinRange(-6, 6), ylabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
+                "type: i32, d:f, dbh: 3, scale: FromZeroMinRange(-6, 6), ylabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
             ));
             w
         })
@@ -1668,7 +1668,7 @@ fn check_mouse_wheel_scroll() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(hbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w.add(hbarchart!("type: i32, d:f, dbh: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
             w
         })
         .run()
@@ -1693,7 +1693,7 @@ fn check_mouse_drag_scrollbar() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(hbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w.add(hbarchart!("type: i32, d:f, dbh: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
             w
         })
         .run()
@@ -1718,7 +1718,7 @@ fn check_key_scroll() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(hbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w.add(hbarchart!("type: i32, d:f, dbh: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
             w
         })
         .run()
@@ -1749,7 +1749,7 @@ fn check_key_home_end_and_ctrl_arrows() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(hbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w.add(hbarchart!("type: i32, d:f, dbh: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
             w
         })
         .run()
@@ -1831,7 +1831,7 @@ fn check_numeric_format_prefix_suffix_and_base() {
         .window(|| {
             let mut w = window!("Test,d:f");
             w.add(hbarchart!(
-                "type: i32, d:f, dbw: 3, step: 10, nf: {hex, prefix: '0x', suffix: h}, values: [16, 160, 255]"
+                "type: i32, d:f, dbh: 3, step: 10, nf: {hex, prefix: '0x', suffix: h}, values: [16, 160, 255]"
             ));
             w
         })
@@ -1851,7 +1851,7 @@ fn check_chart_without_x_and_y_labels() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            let mut chart = hbarchart!("type: i32, d:f, dbw: 3, ylabels: None, values: [1, 2, 3, 4, 5, 6]");
+            let mut chart = hbarchart!("type: i32, d:f, dbh: 3, ylabels: None, values: [1, 2, 3, 4, 5, 6]");
             chart.set_xaxis_visible(false);
             chart.set_xaxis_show_grid(false);
             w.add(chart);
@@ -1938,7 +1938,7 @@ fn check_show_zero_line_on_x_axis() {
         .window(|| {
             let mut w = window!("Test,d:f");
             w.add(hbarchart!(
-                "type: i32, d:f, dbw: 3, flags: ShowZeroLineOnXAxis, ylabels:Index(1), values: [-4, -2, 2, 4]"
+                "type: i32, d:f, dbh: 3, flags: ShowZeroLineOnXAxis, ylabels:Index(1), values: [-4, -2, 2, 4]"
             ));
             w
         })
@@ -1964,7 +1964,7 @@ fn check_resize_window_adjusts_bars() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Chart,x:2,y:2,w:36,h:12,flags: Sizeable");
-            w.add(hbarchart!("type: i32, d:f, dbw: 3, values: [1, 2, 3, 4, 5]"));
+            w.add(hbarchart!("type: i32, d:f, dbh: 3, values: [1, 2, 3, 4, 5]"));
             w
         })
         .run()
@@ -1986,7 +1986,7 @@ fn check_long_labels_scroll_to_end() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(hbarchart!("type: i32, d:f, dbw: 5, space: 3, flags: ScrollBars, ylabels: BarLabels, values: [{1, label: 'AlphaOne'}, {2, label: 'BravoTwo'}, {3, label: 'CharlieX'}, {4, label: 'DeltaOne'}, {5, label: 'EchoFive'}, {6, label: 'FoxtrotX'}, {7, label: 'GolfNine'}, {8, label: 'HotelTen'}, {9, label: 'IndiaBar'}, {10, label: 'JulietXX'}, {11, label: 'KiloBars'}, {12, label: 'LimaTest'}, {13, label: 'MikeData'}, {14, label: 'November'}, {15, label: 'OscarBar'}, {16, label: 'PapaTest'}, {17, label: 'QuebecXX'}, {18, label: 'RomeoBar'}, {19, label: 'SierraXX'}, {20, label: 'TangoEnd'}]"));
+            w.add(hbarchart!("type: i32, d:f, dbh: 5, space: 3, flags: ScrollBars, ylabels: BarLabels, values: [{1, label: 'AlphaOne'}, {2, label: 'BravoTwo'}, {3, label: 'CharlieX'}, {4, label: 'DeltaOne'}, {5, label: 'EchoFive'}, {6, label: 'FoxtrotX'}, {7, label: 'GolfNine'}, {8, label: 'HotelTen'}, {9, label: 'IndiaBar'}, {10, label: 'JulietXX'}, {11, label: 'KiloBars'}, {12, label: 'LimaTest'}, {13, label: 'MikeData'}, {14, label: 'November'}, {15, label: 'OscarBar'}, {16, label: 'PapaTest'}, {17, label: 'QuebecXX'}, {18, label: 'RomeoBar'}, {19, label: 'SierraXX'}, {20, label: 'TangoEnd'}]"));
             w
         })
         .run()
@@ -2081,7 +2081,7 @@ fn check_set_xaxis_step() {
             };
             win.add(button!("Step,x:0,y:0,w:10"));
             win.chart = win.add(hbarchart!(
-                "type: i32, x:0, y:1, w:58, h:12, dbw: 3, ylabels:Index(1), values: [1, 2, 3, 4, 5]"
+                "type: i32, x:0, y:1, w:58, h:12, dbh: 3, ylabels:Index(1), values: [1, 2, 3, 4, 5]"
             ));
             win
         }
@@ -2128,7 +2128,7 @@ fn check_f32_fractional_values() {
         .window(|| {
             let mut w = window!("Test,d:f");
             w.add(hbarchart!(
-                "type: f32, d:f, dbw: 3, ylabels:Index(1), values: [0.5, 1.25, 2.75, 4.0, -1.5, 3.5]"
+                "type: f32, d:f, dbh: 3, ylabels:Index(1), values: [0.5, 1.25, 2.75, 4.0, -1.5, 3.5]"
             ));
             w
         })
@@ -2149,7 +2149,7 @@ fn check_f64_fractional_values() {
         .window(|| {
             let mut w = window!("Test,d:f");
             w.add(hbarchart!(
-                "type: f64, d:f, dbw: 3, ylabels:Index(1), values: [0.25, 1.5, 3.125, 6.5, -2.75, 4.25]"
+                "type: f64, d:f, dbh: 3, ylabels:Index(1), values: [0.25, 1.5, 3.125, 6.5, -2.75, 4.25]"
             ));
             w
         })
@@ -2169,7 +2169,7 @@ fn check_i16_signed_values() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(hbarchart!("type: i16, d:f, dbw: 3, ylabels:Index(1), values: [-20, -5, 0, 8, 15, 30]"));
+            w.add(hbarchart!("type: i16, d:f, dbh: 3, ylabels:Index(1), values: [-20, -5, 0, 8, 15, 30]"));
             w
         })
         .run()
@@ -2222,7 +2222,7 @@ fn check_ensure_visible_scrolls_far_bar_into_view_and_leaves_visible_bars() {
 fn check_ensure_visible_reveals_a_partially_clipped_bar() {
     run_ensure_visible(|chart| {
         chart.set_xaxis_visible(false);
-        chart.set_default_bar_width(8);
+        chart.set_default_bar_height(8);
         chart.add_bars(1..=10);
         chart.ensure_visible(4);
         assert_eq!(chart.top_scroll, 35);
@@ -2242,7 +2242,7 @@ fn check_ensure_visible_accounts_for_the_x_axis_margin() {
 fn check_ensure_visible_tall_bar_scrolls_only_until_it_overlaps_the_plot() {
     run_ensure_visible(|chart| {
         chart.set_xaxis_visible(false);
-        chart.set_default_bar_width(50);
+        chart.set_default_bar_height(50);
         chart.add_bar(1);
         chart.ensure_visible(0);
         assert_eq!(chart.top_scroll, 0);

@@ -404,7 +404,7 @@ impl HBarChartEditor {
             layout!("d:f"),
             hbarchart::Flags::ScrollBars | hbarchart::Flags::DimBarsOnSelection | hbarchart::Flags::ShowZeroLineOnXAxis,
         );
-        chart.set_default_bar_width(DEFAULT_THICKNESS);
+        chart.set_default_bar_height(DEFAULT_THICKNESS);
         chart.set_default_bar_spacing(DEFAULT_SPACING);
         chart.set_default_bar_attr(CharAttribute::with_fore_color(DEFAULT_COLOR));
         chart.add_bars(sample_bars());
@@ -761,7 +761,7 @@ impl HBarChartEditor {
     fn set_chart_default_width(&mut self, width: u8) {
         let chart = self.chart;
         if let Some(ctrl) = self.control_mut(chart) {
-            ctrl.set_default_bar_width(width);
+            ctrl.set_default_bar_height(width);
         }
     }
 

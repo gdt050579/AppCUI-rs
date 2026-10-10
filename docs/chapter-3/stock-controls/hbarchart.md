@@ -18,7 +18,7 @@ The macro takes the numeric type as its first parameter:
 ```rs
 let c1 = hbarchart!("i32,d:f");
 let c2 = hbarchart!("class:i32,x:1,y:1,w:60,h:20,flags:[ScrollBars,ShowZeroLineOnXAxis]");
-let c3 = hbarchart!("f64,d:f,scale:Fit,ylabels:BarLabels,bar-width:3,values:[1.5,2.0,0.5,3.25]");
+let c3 = hbarchart!("f64,d:f,scale:Fit,ylabels:BarLabels,bar-height:3,values:[1.5,2.0,0.5,3.25]");
 ```
 
 A new chart starts empty. It scales bars with `BarScale::FromZero`, shows the X axis and its grid (a label every 3 columns), and draws no category axis. The column reserved for labels beside the bars is 6 characters wide, and stays unused until a Y-axis label mode is set. Bars use the theme color, a thickness of 1, a spacing of 1, and a solid fill. Integer values are formatted with thousands separators. Floating-point values are formatted with two decimals.
@@ -32,7 +32,7 @@ An HBarChart supports all common parameters (as they are described in [Instantia
 | `values` or `data`                                                                   | List           | **No**               | Bars to add. Each item is a number or a bar description                                          |
 | `scale` or `barscale` or `bar-scale`                                                 | String         | **No**               | How values map onto the plot width                                                               |
 | `ylabels` or `y-labels` or `yl` or `yaxis` or `y-axis`                               | String or List | **No**               | Labels drawn beside the bars                                                                     |
-| `bar-width` or `barwidth` or `bw` or `default-bar-width` or `dbw`                    | Integer        | **No**               | Default bar thickness, from 1 to 100                                                             |
+| `bar-height` or `barheight` or `bh` or `default-bar-height` or `dbh`                 | Integer        | **No**               | Default bar height, from 1 to 100                                                                |
 | `spacing` or `space` or `s` or `bar-spacing` or `default-bar-spacing` or `dbs`       | Integer        | **No**               | Default gap before a bar, from 1 to 100                                                          |
 | `draw-mode` or `dm` or `bar-draw-mode` or `default-bar-draw-mode` or `dbdm`          | String         | **No**               | Default way to paint a bar                                                                       |
 | `bar-color` or `barcolor` or `bar-attr` or `barattr` or `default-bar-draw-mode-attr` | Dict           | **No**               | Default character attribute for bars                                                             |
@@ -195,7 +195,7 @@ Besides the [Common methods for all Controls](../common_methods.md), an HBarChar
 | `ensure_visible(index)`         | Scrolls vertically so the bar at `index` is visible. Does nothing if `index` is out of range or the bar is already fully visible |
 | `set_bars_scale(...)`           | Sets the `BarScale` used to map values onto the plot width                                                                       |
 | `set_number_format(...)`        | Sets the `FormatNumber` used for axis labels and tooltips                                                                        |
-| `set_default_bar_width(...)`    | Sets the thickness, in cells, of bars that do not specify their own. Values below 1 are treated as 1                             |
+| `set_default_bar_height(...)`   | Sets the height, in cells, of bars that do not specify their own. Values below 1 are treated as 1                                |
 | `set_default_bar_spacing(...)`  | Sets the gap, in cells, before bars that do not specify their own                                                                |
 | `set_default_bar_drawmode(...)` | Sets the draw mode of bars that do not specify their own                                                                         |
 | `set_default_bar_attr(...)`     | Sets the character attribute of bars that do not specify their own. After this call, bars no longer use the theme bar color      |
@@ -289,7 +289,7 @@ impl MyWin {
             "i32,d:f,
              flags:[ScrollBars,ShowZeroLineOnXAxis],
              ylabels:BarLabels,
-             bar-width:1,
+             bar-height:1,
              spacing:1,
              draw-mode:Fill(Shade50),
              bar-color:aqua"

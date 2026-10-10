@@ -337,12 +337,12 @@ where
         self.number_format = format;
         self.repaint_surface();
     }
-    /// Sets the thickness, in cells, of bars that do not specify their own.
+    /// Sets the height, in cells, of bars that do not specify their own.
     ///
     /// Values below 1 are treated as 1. A bar can override this with
     /// [`Bar::set_thickness`](Bar::set_thickness).
-    pub fn set_default_bar_width(&mut self, width: u8) {
-        self.defaults.thickness = width.max(1);
+    pub fn set_default_bar_height(&mut self, height: u8) {
+        self.defaults.thickness = height.max(1);
         self.repaint_surface();
     }
     /// Sets the gap, in cells, before bars that do not specify their own spacing.

@@ -44,12 +44,12 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("bs", "barscale", ParamType::String),
     NamedParameter::new("bar-scale", "barscale", ParamType::String),
     NamedParameter::new("scale", "barscale", ParamType::String),
-    // default bar width
-    NamedParameter::new("default-bar-width", "default-bar-width", ParamType::Integer),
-    NamedParameter::new("dbw", "default-bar-width", ParamType::Integer),
-    NamedParameter::new("barwidth", "default-bar-width", ParamType::Integer),
-    NamedParameter::new("bar-width", "default-bar-width", ParamType::Integer),
-    NamedParameter::new("bw", "default-bar-width", ParamType::Integer),
+    // default bar height
+    NamedParameter::new("default-bar-height", "default-bar-height", ParamType::Integer),
+    NamedParameter::new("dbh", "default-bar-height", ParamType::Integer),
+    NamedParameter::new("barheight", "default-bar-height", ParamType::Integer),
+    NamedParameter::new("bar-height", "default-bar-height", ParamType::Integer),
+    NamedParameter::new("bh", "default-bar-height", ParamType::Integer),
     // default bar spacing
     NamedParameter::new("default-bar-spacing", "default-bar-spacing", ParamType::Integer),
     NamedParameter::new("dbs", "default-bar-spacing", ParamType::Integer),
@@ -103,7 +103,7 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.add_scroll_margin_setup("lsm", "tsm");
     cb.call_method_with_string_parameter_parser("set_bars_scale", "barscale", parse_barscale);
     cb.call_method_with_value_parser("set_yaxis_label_mode", "ylabels", parse_ylabels);
-    cb.call_method_with_integer_parameter_and_range("set_default_bar_width", "default-bar-width", 1, 100);
+    cb.call_method_with_integer_parameter_and_range("set_default_bar_height", "default-bar-height", 1, 100);
     cb.call_method_with_integer_parameter_and_range("set_default_bar_spacing", "default-bar-spacing", 1, 100);
     cb.call_method_with_integer_parameter_and_range("set_xaxis_width", "xaxis-width", 0, 32);
     cb.call_method_with_integer_parameter_and_range("set_xaxis_step", "xaxis-step", 1, 255);

@@ -3023,7 +3023,7 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 ///   - **FitData** or **fit** - Stretches the smallest and largest values across the plot
 ///   - **Fixed(min, max)** or **fix(min, max)** - Fixed range
 ///   - **FromZeroMinRange(min, max)**, **zero-min-range(min, max)**, or **fromzerominrange(min, max)** - From zero, covering at least `min` and `max`
-/// * `default-bar-width`, `dbw`, `barwidth`, `bar-width`, or `bw` - Default bar thickness, from 1 to 100 (optional)
+/// * `default-bar-height`, `dbh`, `barheight`, `bar-height`, or `bh` - Default bar height, from 1 to 100 (optional)
 /// * `default-bar-spacing`, `dbs`, `bar-spacing`, `spacing`, `space`, or `s` - Default gap before a bar, from 1 to 100 (optional)
 /// * `default-bar-draw-mode`, `dbdm`, `bar-draw-mode`, `draw-mode`, or `dm` - Default draw mode (optional). Can be:
 ///   - **Fill** or **Fill(kind)** - `Solid` (default), `Shade75`, `Shade50`, `Shade25`, `Braille`, `Checkerboard`, `Grid`, `GridDouble`, `CrossHatch`, `Dashed`, `DiagonalUp`, `DiagonalDown`, `Notched`, or a character such as `'#'`
@@ -3062,7 +3062,7 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 ///     "type: i32,
 ///     flags: ScrollBars+ShowZeroLineOnXAxis,
 ///     scale: Fixed(0, 100),
-///     dbw: 3,
+///     dbh: 3,
 ///     space: 2,
 ///     dm: Fill(Shade50),
 ///     barcolor: yellow,
