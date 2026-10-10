@@ -29,7 +29,7 @@ impl CharVariant {
             CharVariant::LowerCase => Some(convert_lower_case),
             CharVariant::MathBold => Some(convert_math_bold),
             CharVariant::MathItalic => Some(convert_math_italic),
-            CharVariant::MathBoldItalic => todo!(),
+            CharVariant::MathBoldItalic => Some(convert_math_bold_italic),
             CharVariant::Script => todo!(),
             CharVariant::BoldScript => todo!(),
             CharVariant::Fraktur => todo!(),
@@ -71,6 +71,16 @@ fn convert_math_italic(c: char) -> char {
         'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D434 - 'A' as u32) },
         'h' => '\u{210E}',
         'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D44E - 'a' as u32) },
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_math_bold_italic(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D468 - 'A' as u32) },
+        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D482 - 'a' as u32) },
+        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
         _ => c,
     }
 }

@@ -2661,9 +2661,11 @@ fn compare_strings(s1: &str, s2: &str) {
     assert_eq!(s1.chars().count(), s2.chars().count(), "Expcting string with the same number of characters but got: {} and {}",s1,s2);
     let mut i1 = s1.chars();
     let mut i2 = s2.chars();
+    let mut index = 0;
     while let Some(c1) = i1.next() {
         let c2 = i2.next().unwrap();
-        assert_eq!(c1,c2,"Characters don't match {} with {} for S1={} and S2={}",c1,c2,s1,s2);
+        assert_eq!(c1,c2,"Characters don't match {} with {} (at index {}) for S1={} and S2={}",c1,c2,index,s1,s2);
+        index += 1;
     }
 }
 
@@ -2681,6 +2683,15 @@ fn check_char_variant_math_italic() {
     let callback = CharVariant::MathItalic.conversion_calback().unwrap();
     let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let expected = "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_math_bold_italic() {
+    let callback = CharVariant::MathBoldItalic.conversion_calback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝑨𝑩𝑪𝑫𝑬𝑭𝑮𝑯𝑰𝑱𝑲𝑳𝑴𝑵𝑶𝑷𝑸𝑹𝑺𝑻𝑼𝑽𝑾𝑿𝒀𝒁𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
     let actual = s.chars().map(callback).collect::<String>();
     compare_strings(&actual, expected);
 }
