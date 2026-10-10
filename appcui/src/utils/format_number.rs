@@ -29,6 +29,7 @@ use std::ops::{Add, Div, DivAssign, Mul, Rem, Sub};
 ///
 /// const PRICE: FormatNumber = FormatNumber::new(10).group(3, b',').decimals(2).prefix("$");
 /// ```
+#[derive(Copy, Clone    )]
 pub struct FormatNumber {
     base: u8, // 2, 8, 10, 16
     group_size: u8,

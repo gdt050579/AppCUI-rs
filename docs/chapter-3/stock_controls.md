@@ -15,6 +15,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [DatePicker](stock-controls/datepicker.md)              | ui::DatePicker               | `datepicker!`        | <img src="stock-controls/img/datepicker.png" width=300/>        |
 | [DropDownList](stock-controls/dropdownlist.md)          | ui::DropDownList&lt;T&gt;    | `dropdownlist!`      | <img src="stock-controls/img/dropdownlist.png" width=300/>      |
 | [GraphView](stock-controls/graphview.md)                | ui::GraphView&lt;T&gt;       | `graphview!`         | <img src="stock-controls/img/graphview.png" width=300/>         |
+| [HBarChart](stock-controls/hbarchart.md)                | ui::HBarChart&lt;T&gt;       | `hbarchart!`         | <img src="stock-controls/img/hbarchart.png" width=300/>         |
 | [HLine](stock-controls/hline.md)                        | ui::HLine                    | `hline!`             | <img src="stock-controls/img/hline.png" width=300/>             |
 | [HSlider](stock-controls/hslider.md)                    | ui::HSlider&lt;T&gt;         | `hslider!`           | <img src="stock-controls/img/hslider.png" width=300/>           |
 | [HSplitter](stock-controls/hsplitter.md)                | ui::HSplitter                | `hsplitter!`         | <img src="stock-controls/img/hsplitter.png" width=300/>         |

@@ -1,3 +1,10 @@
+# AppCUI-rs
+
+<img src="https://raw.githubusercontent.com/gdt050579/AppCUI-rs/main/docs/chapter-1/img/logo.png" align="center" />
+
+```                                                              
+⯈ 𝗔𝗽𝗽𝗖𝗨𝗜-𝗿𝘀 🖳
+```
 
 <div align="right">
   <details>
@@ -30,13 +37,7 @@
   </details>
 </div>
 
-# AppCUI-rs
-
-<img src="https://raw.githubusercontent.com/gdt050579/AppCUI-rs/main/docs/chapter-1/img/logo.png" align="center" />
-
-```                                                              
-⯈ 𝗔𝗽𝗽𝗖𝗨𝗜-𝗿𝘀 🖳
-```
+---
 
 ![Windows Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/windows.yml/badge.svg)
 ![Linux Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/linux.yml/badge.svg)
@@ -55,7 +56,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 
 ## ✨ Features
-- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, vertical bar chart, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, bar charts, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
 - [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors, or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
 - [x] menus and toolbars
 - [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, macOS via termios)
@@ -67,6 +68,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 - [x] support for Unicode characters
 - [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc.)
 - [x] true-color support (24 bits per pixel) for terminals that support it.
+- [x] retained mode and immediate mode support (through Frame-based and Input-based modes)
 
 ## 📦 Out-of-the-box controls and widgets
 
@@ -119,6 +121,7 @@ AppCUI-rs ships with a rich set of controls and widgets for building terminal us
 
 ### Charts - Plot numeric series.
 - **VBarChart** — vertical bar chart for a numeric series (scale, axes, and per-bar appearance)
+- **HBarChart** — horizontal bar chart for a numeric series (scale, axes, and per-bar appearance)
 
 ### Text
 - **TextField** — single-line text input
@@ -232,7 +235,7 @@ AppCUI-rs comes with a set of examples to help you get started. You can find the
 - **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/), [Ram it](examples/ramit/), [PacMan](examples/games/), [Chess](examples/games/), [Connect Four](examples/games/), [2048](examples/games/), [Memory](examples/memory/), or [Tetris](examples/games/)
 - **Utilities** such as [Calculator](examples/calculator/), [CSV Viewer](examples/csv_viewer/), [Temperature Converter](examples/temperature_convertor/), [HexViewer](examples/hexview/), or a [Timer](examples/timer/)
 - **Animations** such as [Matrix](examples/matrix/), [Fractals](examples/fractals/), [Plasma](examples/plasma/) or [Spiral](examples/spiral/)
-- **Controls**/**Widgets** such as [Button](examples/buttons/), [CheckBox](examples/checkboxes/), [ComboBox](examples/combobox/), [DatePicker](examples/datepicker/), [ListView](examples/listview/), [TreeView](examples/treeview/), [Bar Chart](examples/barchart_editor/), [Markdown Composer](examples/markdown_composer/) and many more.
+- **Controls**/**Widgets** such as [Button](examples/buttons/), [CheckBox](examples/checkboxes/), [ComboBox](examples/combobox/), [DatePicker](examples/datepicker/), [ListView](examples/listview/), [TreeView](examples/treeview/), [Vertical Bar Chart](examples/vbarchart_editor/), [Markdown Composer](examples/markdown_composer/) and many more.
 - **Dialogs** such as [Notification](examples/notification_dialogs/) or [Input](examples/input_dialog/)
 
 ## 🛠️ A more complex example

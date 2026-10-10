@@ -21,6 +21,8 @@ use crate::ui::{
     timepicker, timepicker::events::TimePickerEvents, hyperlink, hyperlink::events::HyperLinkEvents,
     vbarchart, 
     vbarchart::events::GenericVBarChartEvents,
+    hbarchart,
+    hbarchart::events::GenericHBarChartEvents,
     hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview, markdown_composer::events::MarkdownComposerEvents,
 };
 
@@ -62,6 +64,7 @@ pub(crate) enum ControlEventData {
     HyperLink(hyperlink::events::EventData),
     HSliderEvents(hslider::events::EventData),
     VBarChart(vbarchart::events::EventData),
+    HBarChart(hbarchart::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -225,6 +228,14 @@ impl ControlEvent {
                 }
                 vbarchart::events::EventType::ClearSelection => {
                     GenericVBarChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)
+                }
+            },
+            ControlEventData::HBarChart(data) => match data.event_type {
+                hbarchart::events::EventType::BarSelected(bar_index) => {
+                    GenericHBarChartEvents::on_bar_selected(receiver, self.emitter.cast(), data.type_id, bar_index)
+                }
+                hbarchart::events::EventType::ClearSelection => {
+                    GenericHBarChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)
                 }
             },
         }

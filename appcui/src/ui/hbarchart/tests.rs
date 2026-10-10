@@ -2,23 +2,83 @@ use std::ops::DerefMut;
 
 use crate::prelude::*;
 use crate::ui::components::{BarBuilder, BarDrawMode, BarFillType};
-use crate::ui::vbarchart::VBarChart;
+use crate::ui::hbarchart::HBarChart;
 
-fn chart_with_values(values: &[i32]) -> VBarChart<i32> {
-    let mut chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vbarchart::Flags::None);
+fn chart_with_values(values: &[i32]) -> HBarChart<i32> {
+    let mut chart = HBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), hbarchart::Flags::None);
     chart.add_bars(values);
     chart
 }
 
 #[test]
 fn check_creation() {
-    let _chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vbarchart::Flags::None);
+    let chart = HBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), hbarchart::Flags::None);
+    assert_eq!(chart.bars_count(), 0);
+    assert_eq!(chart.selected_bar(), None);
 }
 
 #[test]
 fn check_selected_bar_default() {
-    let chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vbarchart::Flags::None);
+    let chart = HBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), hbarchart::Flags::None);
     assert_eq!(chart.selected_bar(), None);
+}
+
+#[test]
+fn check_macro_and_bar_api() {
+    let script = "Paint.Enable(false)";
+    App::new().size(Size::new(40, 12)).debug_script(script).window(|| {
+        let mut chart = hbarchart!(
+            "type: i32, x:1, y:1, w:30, h:10, flags: ScrollBars+ShowZeroLineOnXAxis, scale: Fixed(0, 100), dbw: 2, space: 1, dm: Fill(Shade50), ylabels: Index(1), xw: 6, step: 2, values: [1, {2, label: Mar}]"
+        );
+        assert_eq!(chart.bars_count(), 2);
+        assert_eq!(chart.get_bar(1).map(|bar| bar.label()), Some("Mar"));
+        assert_eq!(chart.get_bar(1).map(|bar| bar.value()), Some(2));
+        chart.add_bar(4);
+        chart.update_bar(0, |bar| {
+            bar.set_value(10);
+        });
+        chart.update_bars(|bars| {
+            assert!(bars.insert(0, 0));
+            assert!(bars.delete(1).is_some());
+        });
+        assert_eq!(chart.bars_count(), 3);
+        assert_eq!(chart.get_bar(0).map(|bar| bar.value()), Some(0));
+        chart.set_bars_scale(hbarchart::BarScale::FromZero);
+        chart.set_default_bar_width(3);
+        chart.set_default_bar_spacing(2);
+        chart.set_xaxis_width(8);
+        chart.set_xaxis_step(2);
+        chart.set_xaxis_visible(true);
+        chart.set_xaxis_show_grid(true);
+        chart.ensure_visible(2);
+        chart.ensure_visible(99);
+        let mut w = window!("Test,d:f");
+        w.add(chart);
+        w
+    }).run().unwrap();
+    check_event_trait_is_accepted();
+}
+
+fn check_event_trait_is_accepted() {
+    #[Window(events = HBarChartEvents<i32>, internal: true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = Self { base: window!("Test,d:f") };
+            win.add(hbarchart!("i32,d:f,values:[1,2,3]"));
+            win
+        }
+    }
+    impl HBarChartEvents<i32> for MyWin {
+        fn on_bar_selected(&mut self, _handle: Handle<HBarChart<i32>>, _index: u32) -> EventProcessStatus {
+            EventProcessStatus::Processed
+        }
+        fn on_clear_selection(&mut self, _handle: Handle<HBarChart<i32>>) -> EventProcessStatus {
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "Paint.Enable(false)";
+    App::new().size(Size::new(40, 12)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
@@ -26,7 +86,7 @@ fn check_get_bar() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xC6634698F528F8C1)
+        CheckHash(0x4431FDC5279246D8)
     ";
     App::new()
         .size(Size::new(30, 10))
@@ -50,7 +110,7 @@ fn check_modify_bar() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xEC95F56323529C27)
+        CheckHash(0x53F6E6C54E2ECDC4)
     ";
     App::new()
         .size(Size::new(30, 10))
@@ -89,13 +149,13 @@ fn check_modify_bar_clear_overrides() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x3827B3E29BBF11D0)
+        CheckHash(0xA8581E2847D0C238)
     ";
     App::new()
         .size(Size::new(30, 10))
         .debug_script(script)
         .window(|| {
-            let mut chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vbarchart::Flags::None);
+            let mut chart = HBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), hbarchart::Flags::None);
             chart.add_bar(BarBuilder::new(1).thickness(5).spacing(3).label("A").build());
             chart.update_bar(0, |bar| {
                 bar.clear_thickness();
@@ -123,7 +183,7 @@ fn check_update_bars_edit_insert_delete() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xFF36DED460639C63)
+        CheckHash(0xBD5036AAF0D40D36)
     ";
     App::new()
         .size(Size::new(30, 10))
@@ -154,7 +214,7 @@ fn check_update_bars_set_clear_iter() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xA4F74EB3CD5493CC)
+        CheckHash(0xCF21CB17AD3D2931)
     ";
     App::new()
         .size(Size::new(30, 10))
@@ -191,7 +251,7 @@ fn check_scale_sequences() {
     let script = "
         Paint.Enable(false)
         Paint('1. Mixed, positive and negative sequences')
-        CheckHash(0xF5BB896CABAD0451)
+        CheckHash(0x9C357508FF704640)
     ";
     App::new()
         .size(Size::new(80, 48))
@@ -199,20 +259,20 @@ fn check_scale_sequences() {
         .window(|| {
             let mut w = window!("Scales,a:c,w:76,h:44");
             w.add(label!("'-2, -1, 0, 1, 2',x:1,y:1,w:30"));
-            let mut mixed = VBarChart::<i32>::new(layout!("x:1,y:2,w:72,h:12"), vbarchart::Flags::None);
-            mixed.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index(1));
+            let mut mixed = HBarChart::<i32>::new(layout!("x:1,y:2,w:72,h:12"), hbarchart::Flags::None);
+            mixed.set_yaxis_label_mode(hbarchart::YAxisLabelMode::Index(1));
             mixed.add_bars([-2, -1, 0, 1, 2]);
             w.add(mixed);
 
             w.add(label!("'0, 1, 2',x:1,y:14,w:30"));
-            let mut positive = VBarChart::<i32>::new(layout!("x:1,y:15,w:72,h:12"), vbarchart::Flags::None);
-            positive.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index(1));
+            let mut positive = HBarChart::<i32>::new(layout!("x:1,y:15,w:72,h:12"), hbarchart::Flags::None);
+            positive.set_yaxis_label_mode(hbarchart::YAxisLabelMode::Index(1));
             positive.add_bars([0, 1, 2]);
             w.add(positive);
 
             w.add(label!("'-2, -1, 0',x:1,y:27,w:30"));
-            let mut negative = VBarChart::<i32>::new(layout!("x:1,y:28,w:72,h:12"), vbarchart::Flags::None);
-            negative.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index(1));
+            let mut negative = HBarChart::<i32>::new(layout!("x:1,y:28,w:72,h:12"), hbarchart::Flags::None);
+            negative.set_yaxis_label_mode(hbarchart::YAxisLabelMode::Index(1));
             negative.add_bars([-2, -1, 0]);
             w.add(negative);
             w
@@ -226,14 +286,14 @@ fn check_draw_mode_fill_default() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x85CD48D7CD7F037B)
+        CheckHash(0x67DD844076BF71C5)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill, xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(hbarchart!("type: i32, d:f, dm: Fill, ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
             w
         })
         .run()
@@ -245,15 +305,15 @@ fn check_draw_mode_fill_solid() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x85CD48D7CD7F037B)
+        CheckHash(0x67DD844076BF71C5)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(Solid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(Solid), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -266,15 +326,15 @@ fn check_draw_mode_fill_shade75() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x45CB129DB8DA0560)
+        CheckHash(0xBF272393E61ED5A6)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(Shade75), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(Shade75), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -287,15 +347,15 @@ fn check_draw_mode_fill_shade50() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x58497164B9FD02D5)
+        CheckHash(0x28255EDA71C523CF)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(Shade50), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(Shade50), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -308,15 +368,15 @@ fn check_draw_mode_fill_shade25() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x443A53EEA78A57BE)
+        CheckHash(0x75C4ADD0F5FDBA4C)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(Shade25), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(Shade25), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -329,15 +389,15 @@ fn check_draw_mode_fill_braille() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x75BA1E461E04E54F)
+        CheckHash(0x8D376918D57CF519)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(Braille), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -350,15 +410,15 @@ fn check_draw_mode_fill_checkerboard() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xA81B11F8A62395ED)
+        CheckHash(0x544351EA3D78F0B7)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(Checkerboard), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(Checkerboard), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -371,15 +431,15 @@ fn check_draw_mode_fill_grid() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x5E9B68A79C148137)
+        CheckHash(0xDD7638957E1BC5A1)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(Grid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(Grid), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -392,15 +452,15 @@ fn check_draw_mode_fill_grid_double() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xFB8A6A73B64A5FE7)
+        CheckHash(0x3E558A7E1FE2A91)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(GridDouble), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(GridDouble), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -413,15 +473,15 @@ fn check_draw_mode_fill_cross_hatch() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xE19205C0096ACF00)
+        CheckHash(0x1960778DE361CC86)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(CrossHatch), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(CrossHatch), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -434,15 +494,15 @@ fn check_draw_mode_fill_dashed() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x7E20391F083474CC)
+        CheckHash(0x994EBDE81D6460D2)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(Dashed), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(Dashed), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -455,15 +515,15 @@ fn check_draw_mode_fill_diagonal_up() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x3BC6D4C2B771C65E)
+        CheckHash(0x19D7A87AEA819FEC)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(DiagonalUp), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(DiagonalUp), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -476,15 +536,15 @@ fn check_draw_mode_fill_diagonal_down() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x92077637429F54B5)
+        CheckHash(0xC5AD92FC1C52DF6F)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(DiagonalDown), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(DiagonalDown), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -497,15 +557,15 @@ fn check_draw_mode_fill_notched() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xDC247D8D1E62934C)
+        CheckHash(0xC610288C0A1B8C52)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill(Notched), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill(Notched), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -518,15 +578,15 @@ fn check_draw_mode_fill_custom() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xEC8659D167C0151B)
+        CheckHash(0x75A244F2C19A441D)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill('#'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill('#'), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -539,15 +599,15 @@ fn check_draw_mode_line_single() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x18C0C9F6D4955E99)
+        CheckHash(0xE489B83D0DD86891)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Line(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Line(Single), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -560,15 +620,15 @@ fn check_draw_mode_line_double() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xCE10FD14527A464E)
+        CheckHash(0x14596E0BE8C619C5)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Line(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Line(Double), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -581,15 +641,15 @@ fn check_draw_mode_line_single_thick() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x5F643110C9121870)
+        CheckHash(0xCD818A99A1BF748E)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Line(SingleThick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Line(SingleThick), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -602,15 +662,15 @@ fn check_draw_mode_line_braille() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xD36AF1285FB964F)
+        CheckHash(0xB142E13CAF00CDED)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Line(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Line(Braille), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -623,15 +683,15 @@ fn check_draw_mode_line_ascii() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xBD3F2ADBD9F5C874)
+        CheckHash(0x90538AD5876EDA4E)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Line(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Line(Ascii), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -644,15 +704,15 @@ fn check_draw_mode_line_border_ascii_round_and_single_round() {
     let script = "
         Paint.Enable(false)
         Paint('1. Border, AsciiRound and SingleRound lines')
-        CheckHash(0x764920A338D89B70)
+        CheckHash(0x626577312DB18D1C)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, flags: ShowZeroLineOnYAxis, xlabels:Index(1), values: [{8, dm: Line(Border)}, {6, dm: Line(AsciiRound)}, {4, dm: Line(SingleRound)}, {-4, dm: Line(Border)}, {-6, dm: Line(AsciiRound)}, {-8, dm: Line(SingleRound)}]"
+            w.add(hbarchart!(
+                "type: i32, d:f, flags: ShowZeroLineOnXAxis, ylabels:Index(1), values: [{8, dm: Line(Border)}, {6, dm: Line(AsciiRound)}, {4, dm: Line(SingleRound)}, {-4, dm: Line(Border)}, {-6, dm: Line(AsciiRound)}, {-8, dm: Line(SingleRound)}]"
             ));
             w
         })
@@ -665,15 +725,15 @@ fn check_draw_mode_rectangle_single() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xAC18B26C12CC2757)
+        CheckHash(0xCDF658CDB8538C98)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Rectangle(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Rectangle(Single), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -686,15 +746,15 @@ fn check_draw_mode_rectangle_double() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x873CF06C7335C450)
+        CheckHash(0x8EE78A2CC1AD226B)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Rectangle(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Rectangle(Double), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -707,15 +767,15 @@ fn check_draw_mode_rectangle_single_thick() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xB22FC06EBDAD9FA7)
+        CheckHash(0x9987E0D6C71E4121)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Rectangle(Thick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Rectangle(Thick), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -728,15 +788,15 @@ fn check_draw_mode_rectangle_braille() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x36D2C7553979A8C3)
+        CheckHash(0x8E101117D60341F1)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Rectangle(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Rectangle(Braille), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -749,15 +809,15 @@ fn check_draw_mode_rectangle_ascii() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x205E17DD8FB534D3)
+        CheckHash(0x8D0FAA5AACCBB0DA)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Rectangle(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Rectangle(Ascii), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -770,15 +830,15 @@ fn check_draw_mode_rectangle_single_round() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xB0FECD5D6FB3C93C)
+        CheckHash(0xE45F4AF318349293)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Rectangle(SingleRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Rectangle(SingleRound), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -791,15 +851,15 @@ fn check_draw_mode_rectangle_ascii_round() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xC3621BA36E2847A0)
+        CheckHash(0x274F1A55662608F1)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Rectangle(AsciiRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Rectangle(AsciiRound), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -812,15 +872,15 @@ fn check_draw_mode_filled_rectangle_single() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x772FD5491D6C0338)
+        CheckHash(0x5E9923ED29DE1CBA)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: FilledRectangle(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Single), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -833,15 +893,15 @@ fn check_draw_mode_filled_rectangle_double() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x91E87CB3F9E9EF57)
+        CheckHash(0x6259D2929A2E26F1)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: FilledRectangle(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Double), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -854,15 +914,15 @@ fn check_draw_mode_filled_rectangle_single_thick() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x401E5894612ECF1D)
+        CheckHash(0x92B9747FC5535BBE)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: FilledRectangle(SingleThick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(SingleThick), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -875,15 +935,15 @@ fn check_draw_mode_filled_rectangle_braille() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xE3EF8DDA1E2085E1)
+        CheckHash(0x2DB32175A49ADF8E)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: FilledRectangle(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Braille), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -896,15 +956,15 @@ fn check_draw_mode_filled_rectangle_ascii() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x369465A76E1991DA)
+        CheckHash(0xC3D488829420A3CE)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: FilledRectangle(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Ascii), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -917,15 +977,15 @@ fn check_draw_mode_filled_rectangle_single_round() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xD6183A420EC78B77)
+        CheckHash(0xFB80B4842AB41CDD)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: FilledRectangle(Round), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Round), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -938,15 +998,15 @@ fn check_draw_mode_filled_rectangle_ascii_round() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x70E801F728FD41C1)
+        CheckHash(0xE1626E43038BCD15)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: FilledRectangle(AsciiRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(AsciiRound), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -959,15 +1019,15 @@ fn check_draw_mode_point_bullet() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x30E3E0696C506B08)
+        CheckHash(0x30A37F0571E22898)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Point(Bullet), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Point(Bullet), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -980,15 +1040,15 @@ fn check_draw_mode_point_diamond() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x2E121D27F95BB5C0)
+        CheckHash(0x63C72BA89C484909)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Point(Diamond), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Point(Diamond), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1001,15 +1061,15 @@ fn check_draw_mode_point_square() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x8874B6F46489A98)
+        CheckHash(0x990E83CB5A8F709F)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Point(Square), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Point(Square), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1022,15 +1082,15 @@ fn check_draw_mode_point_custom() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x5BA6BF6A6CEC82B0)
+        CheckHash(0x542C53CB9F0CF85C)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Point('X'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Point('X'), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1043,15 +1103,15 @@ fn check_draw_mode_point_all_negative_values() {
     let script = "
         Paint.Enable(false)
         Paint('1. Points for negative values')
-        CheckHash(0x77D3DB36DEBDC253)
+        CheckHash(0x7EF09AFBD73CEBD2)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Point(Bullet), flags: ShowZeroLineOnYAxis, xlabels:Index(1), values: [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Point(Bullet), flags: ShowZeroLineOnXAxis, ylabels:Index(1), values: [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10]"
             ));
             w
         })
@@ -1064,15 +1124,15 @@ fn check_draw_mode_large_point_round_square() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x3425ADAD9D2FB557)
+        CheckHash(0xD0F05A138BE8B577)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: LargePoint(RoundSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: LargePoint(RoundSquare), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1085,15 +1145,15 @@ fn check_draw_mode_large_point_square() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xEC5972B182D53BE4)
+        CheckHash(0xE45D750C4FFC1D4)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: LargePoint(Square), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: LargePoint(Square), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1106,15 +1166,15 @@ fn check_draw_mode_large_point_double_line_square() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xA22A212624C7A65F)
+        CheckHash(0xFBC55DCF3450AC1F)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: LargePoint(DoubleLineSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: LargePoint(DoubleLineSquare), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1127,15 +1187,15 @@ fn check_draw_mode_large_point_thick_square() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xDA9EFDFCAD295A7D)
+        CheckHash(0x58585E268A5958E5)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: LargePoint(ThickSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: LargePoint(ThickSquare), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1148,15 +1208,15 @@ fn check_draw_mode_large_point_circle() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xAD96F2D374C8B6B0)
+        CheckHash(0x50E621566336EC98)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: LargePoint(Circle), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: LargePoint(Circle), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1169,15 +1229,15 @@ fn check_draw_mode_large_point_diamond() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x39C0EF4342D47FC8)
+        CheckHash(0x9B27A70F5EA3F658)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: LargePoint(Diamond), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: LargePoint(Diamond), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1190,15 +1250,15 @@ fn check_draw_mode_large_point_custom() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x9DE76BC8AAB8B4F7)
+        CheckHash(0xFB28EDBD9BB05DF)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: LargePoint('X'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: LargePoint('X'), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1211,95 +1271,99 @@ fn check_draw_mode_cap_solid() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xFAA4C28B7B1DF0D8)
+        CheckHash(0xF6A10B141349AA67)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Cap(solid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Cap(solid), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
         .run()
         .unwrap();
 }
+
 #[test]
 fn check_draw_mode_cap_shade75() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xF449BF652D92DFA0)
+        CheckHash(0x83978187E97EED9C)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Cap(Shade75), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Cap(Shade75), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
         .run()
         .unwrap();
 }
+
 #[test]
 fn check_draw_mode_cap_shade50() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x7A639FAAAE68E8F8)
+        CheckHash(0x89BAD71A4347A745)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Cap(Shade50), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Cap(Shade50), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
         .run()
         .unwrap();
 }
+
 #[test]
 fn check_draw_mode_cap_shade25() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x24510693ADE1A910)
+        CheckHash(0xD0173431EE859ADE)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Cap(Shade25), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Cap(Shade25), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
         .run()
         .unwrap();
 }
+
 #[test]
 fn check_draw_mode_cap_braille() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x6E18F77D48D9BB98)
+        CheckHash(0x6EEA726329394FBB)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Cap(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Cap(Braille), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1312,15 +1376,15 @@ fn check_draw_mode_cap_single_line() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xCB66D9AC4FFA5298)
+        CheckHash(0xAAECD77C3D776055)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Cap(SingleLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Cap(SingleLine), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1333,15 +1397,15 @@ fn check_draw_mode_cap_double_line() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xECB76DA72F288798)
+        CheckHash(0xA59B601E6C22FA9E)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Cap(DoubleLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Cap(DoubleLine), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1354,15 +1418,15 @@ fn check_draw_mode_cap_thick_line() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xDB71695D840DB030)
+        CheckHash(0xAA3CE9B394D708AC)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Cap(ThickLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Cap(ThickLine), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1375,15 +1439,15 @@ fn check_draw_mode_cap_custom() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x19DAEF20767A96F0)
+        CheckHash(0x85331169D036F23C)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Cap('x'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Cap('x'), ylabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1396,15 +1460,15 @@ fn check_draw_mode_bar_width_3() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x921C3CC2DF3C4B26)
+        CheckHash(0x4BB59C4E6B17B804)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dm: Fill('x'), space:2, dbw: 3, xlabels:Index(0), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Fill('x'), space:2, dbw: 3, ylabels:Index(0), values: [1, 2, 3,4,5,6,7,8,9,10]"
             ));
             w
         })
@@ -1417,14 +1481,14 @@ fn check_bars_with_different_thickness_spacing_and_draw_mode() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xF69A7D74E1334CF5)
+        CheckHash(0xAB1E4E83CA5DA96D)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, xlabels:Index(1), values: [{1, w:1, s:1, dm: Line(Single)}, {2, w:2, s:2, dm: Rectangle(Single)}, {3, w:3, s:3, dm: FilledRectangle(Single)}, {4, w:4, s:4, dm: Fill(Shade75)}, {5, w:5, s:5, dm: Cap(Solid)}]"));
+            w.add(hbarchart!("type: i32, d:f, ylabels:Index(1), values: [{1, w:1, s:1, dm: Line(Single)}, {2, w:2, s:2, dm: Rectangle(Single)}, {3, w:3, s:3, dm: FilledRectangle(Single)}, {4, w:4, s:4, dm: Fill(Shade75)}, {5, w:5, s:5, dm: Cap(Solid)}]"));
             w
         })
         .run()
@@ -1436,14 +1500,14 @@ fn check_bars_with_different_thickness_spacing_and_draw_mode_custom_color() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x5D09324D414BF45A)
+        CheckHash(0xC85A0438E9A5999D)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, barcolor: red, xlabels:Index(1), values: [{1, w:1, s:1, dm: Line(Single)}, {2, w:2, s:2, dm: Rectangle(Single)}, {3, w:3, s:3, dm: FilledRectangle(Single)}, {4, w:4, s:4, dm: Fill(Shade75)}, {5, w:5, s:5, dm: Cap(Solid)}]"));
+            w.add(hbarchart!("type: i32, d:f, barcolor: red, ylabels:Index(1), values: [{1, w:1, s:1, dm: Line(Single)}, {2, w:2, s:2, dm: Rectangle(Single)}, {3, w:3, s:3, dm: FilledRectangle(Single)}, {4, w:4, s:4, dm: Fill(Shade75)}, {5, w:5, s:5, dm: Cap(Solid)}]"));
             w
         })
         .run()
@@ -1455,14 +1519,14 @@ fn check_bars_with_different_colors_and_default_size() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x14A769DFEE1BC29C)
+        CheckHash(0x88B3AF7CDCFD9724)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, space: 2, xlabels:Index(1), values: [{1, attr: red}, {2, attr: green}, {3, attr: aqua}, {4, attr: yellow}, {5, attr: pink}]"));
+            w.add(hbarchart!("type: i32, d:f, dbw: 3, space: 2, ylabels:Index(1), values: [{1, attr: red}, {2, attr: green}, {3, attr: aqua}, {4, attr: yellow}, {5, attr: pink}]"));
             w
         })
         .run()
@@ -1470,19 +1534,19 @@ fn check_bars_with_different_colors_and_default_size() {
 }
 
 #[test]
-fn check_xlabel_groups_two_quarters() {
+fn check_ylabel_groups_two_quarters() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x8F5193F84D4FE769)
+        CheckHash(0x7F5F3B5E0E031617)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dbw: 3, xlabels: [{0, 3, '1st quarter'}, {3, 3, '2nd quarter'}], values: [1, 2, 3, {4, s: 6}, 5, 6]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dbw: 3, ylabels: [{0, 3, '1st quarter'}, {3, 3, '2nd quarter'}], values: [1, 2, 3, {4, s: 6}, 5, 6]"
             ));
             w
         })
@@ -1495,15 +1559,15 @@ fn check_scale_fit_data() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xF3DA42C05889012D)
+        CheckHash(0x42FC26315EDE7A9)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dbw: 3, scale: FitData, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dbw: 3, scale: FitData, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
             ));
             w
         })
@@ -1516,15 +1580,15 @@ fn check_scale_fixed() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x46DA183510415331)
+        CheckHash(0xE43D085601A7380B)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dbw: 3, scale: Fixed(0, 12), xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dbw: 3, scale: Fixed(0, 12), ylabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
             ));
             w
         })
@@ -1537,15 +1601,15 @@ fn check_scale_from_zero_min_range() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xDF2E54B23467D7C5)
+        CheckHash(0xA50BE4217C66D74D)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dbw: 3, scale: FromZeroMinRange(-6, 6), xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dbw: 3, scale: FromZeroMinRange(-6, 6), ylabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
             ));
             w
         })
@@ -1558,27 +1622,27 @@ fn check_bar_label_tooltips() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xFAA3CD0179B96822)
-        Mouse.Move(10,11)
+        CheckHash(0x96E229C058CC96B1)
+        Mouse.Move(12,2)
         Paint('2. Hover A = 2')
-        CheckHash(0x8D36014F9AE18CB7)
-        Mouse.Move(12,11)
+        CheckHash(0x7CEBD6075D324986)
+        Mouse.Move(12,4)
         Paint('3. Hover B = 4')
-        CheckHash(0xD60F6BD5AA214409)
-        Mouse.Move(14,11)
+        CheckHash(0x34538B80C938EF1F)
+        Mouse.Move(12,6)
         Paint('4. Hover C = 6')
-        CheckHash(0x9F2B5C7F385DEF69)
-        Mouse.Move(16,11)
+        CheckHash(0x7C5946CFDDCEBC76)
+        Mouse.Move(12,8)
         Paint('5. Hover D = 8')
-        CheckHash(0x5B013B2D1404F0E9)
+        CheckHash(0x541594CCA3EA847F)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, xlabels: BarLabels, values: [{2, label: A}, {4, label: B}, {6, label: C}, {8, label: D}]"
+            w.add(hbarchart!(
+                "type: i32, d:f, ylabels: BarLabels, values: [{2, label: A}, {4, label: B}, {6, label: C}, {8, label: D}]"
             ));
             w
         })
@@ -1591,20 +1655,20 @@ fn check_mouse_wheel_scroll() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xF59528ABE265C002)
-        Mouse.Wheel(4,6,right,8)
-        Paint('2. Scrolled right')
-        CheckHash(0x6B97F9D02820A0C2)
-        Mouse.Wheel(4,6,left,4)
-        Paint('3. Scrolled left')
-        CheckHash(0xE9B29B25C670DA91)
+        CheckHash(0x5C52049822B6E068)
+        Mouse.Wheel(4,6,down,8)
+        Paint('2. Scrolled down')
+        CheckHash(0xCDC0F384ECCAB732)
+        Mouse.Wheel(4,6,up,4)
+        Paint('3. Scrolled up')
+        CheckHash(0x60AB981015982D62)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w.add(hbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
             w
         })
         .run()
@@ -1616,20 +1680,20 @@ fn check_mouse_drag_scrollbar() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xF59528ABE265C002)
-        Mouse.Drag(2,14,30,14)
-        Paint('2. Dragged scrollbar to the right')
-        CheckHash(0x9347883BB5DC8C06)
-        Mouse.Drag(30,14,10,14)
-        Paint('3. Dragged scrollbar to the left')
-        CheckHash(0x428C533B4DA0EA5)
+        CheckHash(0x5C52049822B6E068)
+        Mouse.Drag(59,2,59,10)
+        Paint('2. Dragged scrollbar down')
+        CheckHash(0x506A7C60F729A250)
+        Mouse.Drag(59,10,59,4)
+        Paint('3. Dragged scrollbar up')
+        CheckHash(0x6E04D7223CB29CF6)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w.add(hbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
             w
         })
         .run()
@@ -1641,20 +1705,20 @@ fn check_key_scroll() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xF59528ABE265C002)
-        Key.Pressed(Right,8)
-        Paint('2. Scrolled right')
-        CheckHash(0x6B97F9D02820A0C2)
-        Key.Pressed(Left,4)
-        Paint('3. Scrolled left')
-        CheckHash(0xE9B29B25C670DA91)
+        CheckHash(0x5C52049822B6E068)
+        Key.Pressed(Down,8)
+        Paint('2. Scrolled down')
+        CheckHash(0xCDC0F384ECCAB732)
+        Key.Pressed(Up,4)
+        Paint('3. Scrolled up')
+        CheckHash(0x60AB981015982D62)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w.add(hbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
             w
         })
         .run()
@@ -1666,26 +1730,26 @@ fn check_key_home_end_and_ctrl_arrows() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xF59528ABE265C002)
+        CheckHash(0x5C52049822B6E068)
         Key.Pressed(End)
         Paint('2. End')
-        CheckHash(0xB278FD604DBFA4D3)
+        CheckHash(0xAE45D5CB2645B665)
         Key.Pressed(Home)
         Paint('3. Home')
-        CheckHash(0xF59528ABE265C002)
-        Key.Pressed(Ctrl+Right,3)
-        Paint('4. Ctrl+Right three bars')
-        CheckHash(0x38684DB1942FD4B4)
-        Key.Pressed(Ctrl+Left)
-        Paint('5. Ctrl+Left one bar')
-        CheckHash(0x2BAB93E20FEF333F)
+        CheckHash(0x5C52049822B6E068)
+        Key.Pressed(Ctrl+Down,3)
+        Paint('4. Ctrl+Down three bars')
+        CheckHash(0xF45A0B6A1CE4919)
+        Key.Pressed(Ctrl+Up)
+        Paint('5. Ctrl+Up one bar')
+        CheckHash(0x6782C9A33645054E)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
+            w.add(hbarchart!("type: i32, d:f, dbw: 3, flags: ScrollBars, ylabels:Index(1), values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"));
             w
         })
         .run()
@@ -1697,26 +1761,26 @@ fn check_click_select_and_clear() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xD77819D88E41ACD4)
-        Mouse.Click(10,13,left)
+        CheckHash(0xAFFE57BD7FF0A2)
+        Mouse.Click(6,2,left)
         Paint('2. Selected first bar')
-        CheckHash(0x6EA5F33C0AC6ED36)
-        Mouse.Click(12,13,left)
+        CheckHash(0x90FED95E18F88EF8)
+        Mouse.Click(6,4,left)
         Paint('3. Selected second bar')
-        CheckHash(0x458A2B65CBC8CBE6)
-        Mouse.Click(14,13,left)
+        CheckHash(0xD9F7488DE04013AC)
+        Mouse.Click(6,6,left)
         Paint('4. Selected third bar')
-        CheckHash(0xD54ADB3C69487562)
-        Mouse.Click(30,6,left)
+        CheckHash(0x3F24A2C29DBB531E)
+        Mouse.Click(20,3,left)
         Paint('5. Selection cleared')
-        CheckHash(0xD77819D88E41ACD4)
+        CheckHash(0xAFFE57BD7FF0A2)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, values: [1, 2, 3]"));
+            w.add(hbarchart!("type: i32, d:f, values: [1, 2, 3]"));
             w
         })
         .run()
@@ -1728,26 +1792,26 @@ fn check_click_select_and_clear_dim_bars() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xD77819D88E41ACD4)
-        Mouse.Click(10,13,left)
+        CheckHash(0xAFFE57BD7FF0A2)
+        Mouse.Click(6,2,left)
         Paint('2. Selected first bar')
-        CheckHash(0x1F613B4C22330FE9)
-        Mouse.Click(12,13,left)
+        CheckHash(0x1E269FD00C73AF0C)
+        Mouse.Click(6,4,left)
         Paint('3. Selected second bar')
-        CheckHash(0x27D71808463260C9)
-        Mouse.Click(14,13,left)
+        CheckHash(0x3EA89B7D7344B6E8)
+        Mouse.Click(6,6,left)
         Paint('4. Selected third bar')
-        CheckHash(0xF011FE462A387B4A)
-        Mouse.Click(30,6,left)
+        CheckHash(0xE010C563951E1E6E)
+        Mouse.Click(20,3,left)
         Paint('5. Selection cleared')
-        CheckHash(0xD77819D88E41ACD4)
+        CheckHash(0xAFFE57BD7FF0A2)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, flags: DimBarsOnSelection, values: [1, 2, 3]"));
+            w.add(hbarchart!("type: i32, d:f, flags: DimBarsOnSelection, values: [1, 2, 3]"));
             w
         })
         .run()
@@ -1759,15 +1823,15 @@ fn check_numeric_format_prefix_suffix_and_base() {
     let script = "
         Paint.Enable(false)
         Paint('1. Hex labels with prefix and suffix')
-        CheckHash(0xE74870A80BE1C82F)
+        CheckHash(0x5777AD6090C5D853)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dbw: 3, yw: 10, nf: {hex, prefix: '0x', suffix: h}, values: [16, 160, 255]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dbw: 3, step: 10, nf: {hex, prefix: '0x', suffix: h}, values: [16, 160, 255]"
             ));
             w
         })
@@ -1780,16 +1844,16 @@ fn check_chart_without_x_and_y_labels() {
     let script = "
         Paint.Enable(false)
         Paint('1. No X or Y labels')
-        CheckHash(0x3E1D4BA8E785AEE1)
+        CheckHash(0x454AE68A7E0F4489)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            let mut chart = vbarchart!("type: i32, d:f, dbw: 3, xlabels: None, values: [1, 2, 3, 4, 5, 6]");
-            chart.set_yaxis_visible(false);
-            chart.set_yaxis_show_grid(false);
+            let mut chart = hbarchart!("type: i32, d:f, dbw: 3, ylabels: None, values: [1, 2, 3, 4, 5, 6]");
+            chart.set_xaxis_visible(false);
+            chart.set_xaxis_show_grid(false);
             w.add(chart);
             w
         })
@@ -1799,7 +1863,7 @@ fn check_chart_without_x_and_y_labels() {
 
 #[test]
 fn check_bar_events_update_label() {
-    #[Window(events = VBarChartEvents<i32>, internal: true)]
+    #[Window(events = HBarChartEvents<i32>, internal: true)]
     struct MyWin {
         info: Handle<Label>,
     }
@@ -1810,14 +1874,14 @@ fn check_bar_events_update_label() {
                 info: Handle::None,
             };
             win.info = win.add(label!("'No selection',x:0,y:0,w:40"));
-            win.add(vbarchart!(
+            win.add(hbarchart!(
                 "type: i32, x:0, y:1, w:58, h:12, values: [{2, label: A}, {4, label: B}, {6, label: C}]"
             ));
             win
         }
     }
-    impl VBarChartEvents<i32> for MyWin {
-        fn on_bar_selected(&mut self, handle: Handle<VBarChart<i32>>, index: u32) -> EventProcessStatus {
+    impl HBarChartEvents<i32> for MyWin {
+        fn on_bar_selected(&mut self, handle: Handle<HBarChart<i32>>, index: u32) -> EventProcessStatus {
             let text = if let Some(chart) = self.control(handle) {
                 if let Some(bar) = chart.get_bar(index as usize) {
                     format!("{} = {}", bar.label(), bar.value())
@@ -1833,7 +1897,7 @@ fn check_bar_events_update_label() {
             }
             EventProcessStatus::Processed
         }
-        fn on_clear_selection(&mut self, _: Handle<VBarChart<i32>>) -> EventProcessStatus {
+        fn on_clear_selection(&mut self, _: Handle<HBarChart<i32>>) -> EventProcessStatus {
             let info = self.info;
             if let Some(label) = self.control_mut(info) {
                 label.set_caption("No selection");
@@ -1844,37 +1908,37 @@ fn check_bar_events_update_label() {
     let script = "
         Paint.Enable(false)
         Paint('1. No selection')
-        CheckHash(0xE7937465380314C2)
-        Mouse.Click(10,13,left)
+        CheckHash(0xF00F293DCC266B7)
+        Mouse.Click(6,3,left)
         Paint('2. Selected A = 2')
-        CheckHash(0x22DF43A4418E09C8)
-        Mouse.Click(12,13,left)
+        CheckHash(0x250654D90C34B7D1)
+        Mouse.Click(6,5,left)
         Paint('3. Selected B = 4')
-        CheckHash(0xFB6F7C1791142471)
-        Mouse.Click(14,13,left)
+        CheckHash(0x143E7DEDB7B65A04)
+        Mouse.Click(6,7,left)
         Paint('4. Selected C = 6')
-        CheckHash(0xFF5ED28DABE6DF3A)
-        Mouse.Click(30,6,left)
+        CheckHash(0x63232452F3116D55)
+        Mouse.Click(11,4,left)
         Paint('5. Selection cleared')
-        CheckHash(0xE7937465380314C2)
+        CheckHash(0xF00F293DCC266B7)
     ";
     App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
-fn check_show_zero_line_on_y_axis() {
+fn check_show_zero_line_on_x_axis() {
     let script = "
         Paint.Enable(false)
         Paint('1. Zero line')
-        CheckHash(0xF194B477BFD54751)
+        CheckHash(0x54AA645C13A994A5)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: i32, d:f, dbw: 3, flags: ShowZeroLineOnYAxis, xlabels:Index(1), values: [-4, -2, 2, 4]"
+            w.add(hbarchart!(
+                "type: i32, d:f, dbw: 3, flags: ShowZeroLineOnXAxis, ylabels:Index(1), values: [-4, -2, 2, 4]"
             ));
             w
         })
@@ -1887,20 +1951,20 @@ fn check_resize_window_adjusts_bars() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial window')
-        CheckHash(0x2CF6307B934FF0AA)
+        CheckHash(0x51EE47CF2BC13CC)
         Mouse.Drag(37,13,55,22)
         Paint('2. Window grown')
-        CheckHash(0x80336B48FAF584B6)
+        CheckHash(0x8B21535BCDECFAE4)
         Mouse.Drag(55,22,30,10)
         Paint('3. Window shrunk')
-        CheckHash(0x7FE53C6E3285A6E)
+        CheckHash(0x8ECC4B29317EF486)
     ";
     App::new()
         .size(Size::new(80, 30))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Chart,x:2,y:2,w:36,h:12,flags: Sizeable");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, values: [1, 2, 3, 4, 5]"));
+            w.add(hbarchart!("type: i32, d:f, dbw: 3, values: [1, 2, 3, 4, 5]"));
             w
         })
         .run()
@@ -1912,17 +1976,17 @@ fn check_long_labels_scroll_to_end() {
     let script = "
         Paint.Enable(false)
         Paint('1. Start')
-        CheckHash(0x44CEB6A287C691EA)
+        CheckHash(0xEA34C914A5E2137F)
         Key.Pressed(End)
         Paint('2. Scrolled to the end')
-        CheckHash(0xB07456F44A5062E3)
+        CheckHash(0x4FF673A239FD87C7)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 5, space: 3, flags: ScrollBars, xlabels: BarLabels, values: [{1, label: 'AlphaOne'}, {2, label: 'BravoTwo'}, {3, label: 'CharlieX'}, {4, label: 'DeltaOne'}, {5, label: 'EchoFive'}, {6, label: 'FoxtrotX'}, {7, label: 'GolfNine'}, {8, label: 'HotelTen'}, {9, label: 'IndiaBar'}, {10, label: 'JulietXX'}, {11, label: 'KiloBars'}, {12, label: 'LimaTest'}, {13, label: 'MikeData'}, {14, label: 'November'}, {15, label: 'OscarBar'}, {16, label: 'PapaTest'}, {17, label: 'QuebecXX'}, {18, label: 'RomeoBar'}, {19, label: 'SierraXX'}, {20, label: 'TangoEnd'}]"));
+            w.add(hbarchart!("type: i32, d:f, dbw: 5, space: 3, flags: ScrollBars, ylabels: BarLabels, values: [{1, label: 'AlphaOne'}, {2, label: 'BravoTwo'}, {3, label: 'CharlieX'}, {4, label: 'DeltaOne'}, {5, label: 'EchoFive'}, {6, label: 'FoxtrotX'}, {7, label: 'GolfNine'}, {8, label: 'HotelTen'}, {9, label: 'IndiaBar'}, {10, label: 'JulietXX'}, {11, label: 'KiloBars'}, {12, label: 'LimaTest'}, {13, label: 'MikeData'}, {14, label: 'November'}, {15, label: 'OscarBar'}, {16, label: 'PapaTest'}, {17, label: 'QuebecXX'}, {18, label: 'RomeoBar'}, {19, label: 'SierraXX'}, {20, label: 'TangoEnd'}]"));
             w
         })
         .run()
@@ -1933,7 +1997,7 @@ fn check_long_labels_scroll_to_end() {
 fn check_update_bar() {
     #[Window(events = ButtonEvents, internal: true)]
     struct MyWin {
-        chart: Handle<VBarChart<i32>>,
+        chart: Handle<HBarChart<i32>>,
         updated: bool,
     }
     impl MyWin {
@@ -1944,8 +2008,8 @@ fn check_update_bar() {
                 updated: false,
             };
             win.add(button!("Update,x:0,y:0,w:10"));
-            win.chart = win.add(vbarchart!(
-                "type: i32, x:0, y:1, w:58, h:12, xlabels: BarLabels, values: [{2, label: Low}, {4, label: Mid}, {6, label: High}]"
+            win.chart = win.add(hbarchart!(
+                "type: i32, x:0, y:1, w:58, h:12, ylabels: BarLabels, values: [{2, label: Low}, {4, label: Mid}, {6, label: High}]"
             ));
             win
         }
@@ -1990,22 +2054,22 @@ fn check_update_bar() {
     let script = "
         Paint.Enable(false)
         Paint('1. Before update')
-        CheckHash(0x7DE4ACCC00409F3D)
+        CheckHash(0x2B6145C504DE0114)
         Mouse.Click(5,1,left)
         Paint('2. Middle bar updated')
-        CheckHash(0x406AA96E445D18DC)
+        CheckHash(0xC81CE898763D2C4B)
         Mouse.Click(5,1,left)
         Paint('3. Out of range leaves the chart unchanged')
-        CheckHash(0x406AA96E445D18DC)
+        CheckHash(0xC81CE898763D2C4B)
     ";
     App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
 }
 
 #[test]
-fn check_set_yaxis_step() {
+fn check_set_xaxis_step() {
     #[Window(events = ButtonEvents, internal: true)]
     struct MyWin {
-        chart: Handle<VBarChart<i32>>,
+        chart: Handle<HBarChart<i32>>,
         stage: u8,
     }
     impl MyWin {
@@ -2016,8 +2080,8 @@ fn check_set_yaxis_step() {
                 stage: 0,
             };
             win.add(button!("Step,x:0,y:0,w:10"));
-            win.chart = win.add(vbarchart!(
-                "type: i32, x:0, y:1, w:58, h:12, dbw: 3, xlabels:Index(1), values: [1, 2, 3, 4, 5]"
+            win.chart = win.add(hbarchart!(
+                "type: i32, x:0, y:1, w:58, h:12, dbw: 3, ylabels:Index(1), values: [1, 2, 3, 4, 5]"
             ));
             win
         }
@@ -2030,8 +2094,8 @@ fn check_set_yaxis_step() {
                 return EventProcessStatus::Ignored;
             };
             match stage {
-                0 => chart.set_yaxis_step(6),
-                _ => chart.set_yaxis_step(0),
+                0 => chart.set_xaxis_step(6),
+                _ => chart.set_xaxis_step(0),
             }
             self.stage = stage + 1;
             EventProcessStatus::Processed
@@ -2040,13 +2104,13 @@ fn check_set_yaxis_step() {
     let script = "
         Paint.Enable(false)
         Paint('1. Default step')
-        CheckHash(0xCBFE97E0C60920C5)
+        CheckHash(0xA4D19A0DE57E1318)
         Mouse.Click(5,1,left)
         Paint('2. Step 6')
-        CheckHash(0x6DE2F9CE0E25899)
+        CheckHash(0xC6FD486FC81AD323)
         Mouse.Click(5,1,left)
         Paint('3. Step 0 clamps to 1')
-        CheckHash(0xBE1C28CFCB4404A6)
+        CheckHash(0x93CD7F50674A9EAA)
     ";
     App::new().size(Size::new(60, 15)).debug_script(script).window(MyWin::new).run().unwrap();
 }
@@ -2056,15 +2120,15 @@ fn check_f32_fractional_values() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0x597A61F294DAF6AA)
+        CheckHash(0xF3D38C480444338D)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: f32, d:f, dbw: 3, xlabels:Index(1), values: [0.5, 1.25, 2.75, 4.0, -1.5, 3.5]"
+            w.add(hbarchart!(
+                "type: f32, d:f, dbw: 3, ylabels:Index(1), values: [0.5, 1.25, 2.75, 4.0, -1.5, 3.5]"
             ));
             w
         })
@@ -2077,15 +2141,15 @@ fn check_f64_fractional_values() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xAA09ED305ED29429)
+        CheckHash(0x6335DAE755E51FF9)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!(
-                "type: f64, d:f, dbw: 3, xlabels:Index(1), values: [0.25, 1.5, 3.125, 6.5, -2.75, 4.25]"
+            w.add(hbarchart!(
+                "type: f64, d:f, dbw: 3, ylabels:Index(1), values: [0.25, 1.5, 3.125, 6.5, -2.75, 4.25]"
             ));
             w
         })
@@ -2098,21 +2162,21 @@ fn check_i16_signed_values() {
     let script = "
         Paint.Enable(false)
         Paint('1. Initial state')
-        CheckHash(0xB86B29C8659DB186)
+        CheckHash(0xEF5DDCC38110474D)
     ";
     App::new()
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i16, d:f, dbw: 3, xlabels:Index(1), values: [-20, -5, 0, 8, 15, 30]"));
+            w.add(hbarchart!("type: i16, d:f, dbw: 3, ylabels:Index(1), values: [-20, -5, 0, 8, 15, 30]"));
             w
         })
         .run()
         .unwrap();
 }
 
-fn run_ensure_visible(check: impl FnOnce(&mut VBarChart<i32>) + Send + 'static) {
+fn run_ensure_visible(check: impl FnOnce(&mut HBarChart<i32>) + Send + 'static) {
     let script = "
         Paint.Enable(false)
         Paint('done')
@@ -2121,7 +2185,7 @@ fn run_ensure_visible(check: impl FnOnce(&mut VBarChart<i32>) + Send + 'static) 
         .size(Size::new(60, 15))
         .debug_script(script)
         .window(move || {
-            let mut chart = VBarChart::<i32>::new(layout!("x:0,y:0,w:40,h:10"), vbarchart::Flags::None);
+            let mut chart = HBarChart::<i32>::new(layout!("x:0,y:0,w:40,h:10"), hbarchart::Flags::None);
             chart.deref_mut().layout.update(80, 30);
             check(&mut chart);
             window!("Test,d:f")
@@ -2133,65 +2197,65 @@ fn run_ensure_visible(check: impl FnOnce(&mut VBarChart<i32>) + Send + 'static) 
 #[test]
 fn check_ensure_visible_scrolls_far_bar_into_view_and_leaves_visible_bars() {
     run_ensure_visible(|chart| {
-        chart.set_yaxis_visible(false);
+        chart.set_xaxis_visible(false);
         chart.add_bars(1..=30);
-        assert_eq!(chart.left_scroll, 0);
+        assert_eq!(chart.top_scroll, 0);
 
         chart.ensure_visible(29);
-        assert_eq!(chart.left_scroll, 20);
-        assert_eq!(chart.first_visible_bar, 9);
+        assert_eq!(chart.top_scroll, 50);
+        assert_eq!(chart.first_visible_bar, 24);
 
-        chart.ensure_visible(10);
-        assert_eq!(chart.left_scroll, 20);
-
-        chart.ensure_visible(0);
-        assert_eq!(chart.left_scroll, 1);
+        chart.ensure_visible(25);
+        assert_eq!(chart.top_scroll, 50);
 
         chart.ensure_visible(0);
-        assert_eq!(chart.left_scroll, 1);
+        assert_eq!(chart.top_scroll, 1);
+
+        chart.ensure_visible(0);
+        assert_eq!(chart.top_scroll, 1);
         chart.ensure_visible(100);
-        assert_eq!(chart.left_scroll, 1);
+        assert_eq!(chart.top_scroll, 1);
     });
 }
 
 #[test]
 fn check_ensure_visible_reveals_a_partially_clipped_bar() {
     run_ensure_visible(|chart| {
-        chart.set_yaxis_visible(false);
+        chart.set_xaxis_visible(false);
         chart.set_default_bar_width(8);
         chart.add_bars(1..=10);
         chart.ensure_visible(4);
-        assert_eq!(chart.left_scroll, 5);
+        assert_eq!(chart.top_scroll, 35);
     });
 }
 
 #[test]
-fn check_ensure_visible_accounts_for_the_y_axis_margin() {
+fn check_ensure_visible_accounts_for_the_x_axis_margin() {
     run_ensure_visible(|chart| {
         chart.add_bars(1..=25);
         chart.ensure_visible(20);
-        assert_eq!(chart.left_scroll, 10);
+        assert_eq!(chart.top_scroll, 34);
     });
 }
 
 #[test]
-fn check_ensure_visible_wide_bar_scrolls_only_until_it_overlaps_the_plot() {
+fn check_ensure_visible_tall_bar_scrolls_only_until_it_overlaps_the_plot() {
     run_ensure_visible(|chart| {
-        chart.set_yaxis_visible(false);
+        chart.set_xaxis_visible(false);
         chart.set_default_bar_width(50);
         chart.add_bar(1);
         chart.ensure_visible(0);
-        assert_eq!(chart.left_scroll, 0);
+        assert_eq!(chart.top_scroll, 0);
 
-        chart.left_scroll = 100;
+        chart.top_scroll = 100;
         chart.ensure_visible(0);
-        assert_eq!(chart.left_scroll, 11);
+        assert_eq!(chart.top_scroll, 41);
 
         chart.set_default_bar_spacing(45);
         chart.update_bar(0, |_| {});
-        chart.left_scroll = 0;
+        chart.top_scroll = 0;
         chart.ensure_visible(0);
-        assert_eq!(chart.left_scroll, 45);
+        assert_eq!(chart.top_scroll, 45);
     });
 }
 
@@ -2199,10 +2263,10 @@ fn check_ensure_visible_wide_bar_scrolls_only_until_it_overlaps_the_plot() {
 fn check_ensure_visible_out_of_range_index_does_nothing() {
     run_ensure_visible(|chart| {
         chart.ensure_visible(0);
-        assert_eq!(chart.left_scroll, 0);
+        assert_eq!(chart.top_scroll, 0);
         chart.add_bar(1);
-        chart.left_scroll = 3;
+        chart.top_scroll = 3;
         chart.ensure_visible(4);
-        assert_eq!(chart.left_scroll, 3);
+        assert_eq!(chart.top_scroll, 3);
     });
 }

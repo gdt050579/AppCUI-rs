@@ -1,30 +1,30 @@
 use EnumBitFlags::EnumBitFlags;
 
-use crate::ui::vbarchart::BarSpan;
+use crate::ui::hbarchart::BarSpan;
 
 #[EnumBitFlags(bits = 8)]
-/// Initialization flags for a [`struct@super::VBarChart`].
+/// Initialization flags for a [`struct@super::HBarChart`].
 ///
 /// Combine values with `|`. `Flags::None` draws the bars without extra decorations.
 pub enum Flags {
-    /// Shows a horizontal scroll bar when the bars are wider than the control.
+    /// Shows a vertical scroll bar when the bars are taller than the control.
     ///
-    /// The bottom margin grows while the chart has focus so the scroll bar stays visible.
+    /// The right margin grows while the chart has focus so the scroll bar stays visible.
     ScrollBars = 1,
     /// Draws every bar except the selected one with the inactive chart color.
     DimBarsOnSelection = 2,
-    /// Draws a solid horizontal line at value zero while the Y-axis grid is visible.
-    ShowZeroLineOnYAxis = 4,
+    /// Draws a solid vertical line at value zero, labeled `0`, while the X-axis grid is visible.
+    ShowZeroLineOnXAxis = 4,
 }
 
-/// Chooses the labels drawn under the bars of a [`struct@super::VBarChart`].
-pub enum XAxisLabelMode<'a> {
-    /// Draws no X axis.
+/// Chooses the labels drawn beside the bars of an [`struct@super::HBarChart`].
+pub enum YAxisLabelMode<'a> {
+    /// Draws no category axis.
     None,
     /// Labels each bar with `start + bar index`.
     ///
     /// The first bar is labeled `start`, the next `start + 1`, and so on.
-    Index (i32),
+    Index(i32),
     /// Uses each bar's own label. Bars with an empty label are skipped.
     BarLabels,
     /// Labels ranges of bars.
@@ -34,22 +34,23 @@ pub enum XAxisLabelMode<'a> {
     Custom(&'a [BarSpan]),
 }
 
-#[derive(Copy,Clone, PartialEq, Eq)]
-pub(super) enum XAxisLabelFormat {
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub(super) enum YAxisLabelFormat {
     None,
-    Index (i32),
+    Index(i32),
     BarLabels,
     Custom,
 }
-impl XAxisLabelFormat {
+#[allow(dead_code)]
+impl YAxisLabelFormat {
     #[inline(always)]
     pub(crate) fn is_none(&self) -> bool {
-        matches!(self, XAxisLabelFormat::None)
+        matches!(self, YAxisLabelFormat::None)
     }
-    pub(crate) fn height(&self) -> u8 {
+    pub(crate) fn width(&self) -> u8 {
         match self {
-            XAxisLabelFormat::None => 0,
-            _ => 2
+            YAxisLabelFormat::None => 0,
+            _ => 2,
         }
     }
 }

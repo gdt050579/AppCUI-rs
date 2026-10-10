@@ -1,8 +1,9 @@
-//! Types that describe one bar in a chart.
+//! Types shared by [`VBarChart`](crate::ui::vbarchart::VBarChart) and [`HBarChart`](crate::ui::hbarchart::HBarChart).
 //!
 //! A [`Bar`] stores a numeric value and an optional label, color, thickness,
 //! spacing, and [`BarDrawMode`]. Build one with [`BarBuilder`], or convert a
-//! number through [`From`]. [`BarSpan`] places a label under a run of bars.
+//! number through [`From`]. [`BarSpan`] labels a run of bars: [`VBarChart`](crate::ui::vbarchart::VBarChart)
+//! draws that label under the bars, and [`HBarChart`](crate::ui::hbarchart::HBarChart) draws it beside them.
 //!
 //! [`BarFillType`], [`BarCapType`], [`BarPointType`], and [`BarLargePointType`]
 //! choose the character or marker used by a draw mode.
@@ -75,7 +76,9 @@ impl BarFillType {
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 /// Character drawn across the tip of a bar that uses [`BarDrawMode::Cap`].
 ///
-/// [`Solid`](Self::Solid) is the default.
+/// [`Solid`](Self::Solid) is the default. Line caps follow the bar: a horizontal
+/// stroke on a [`VBarChart`](crate::ui::vbarchart::VBarChart), a vertical stroke
+/// on an [`HBarChart`](crate::ui::hbarchart::HBarChart).
 pub enum BarCapType {
     /// U+2588 — full block.
     #[default]
@@ -112,6 +115,15 @@ impl BarCapType {
             BarCapType::Custom(ch) => Character::with_attributes(*ch, attr),
         }
     }
+    /// Cap character drawn as a vertical stroke across a horizontal bar.
+    fn vertical_character(&self, attr: CharAttribute) -> Character {
+        match self {
+            BarCapType::SingleLine => Character::with_attributes(SpecialChar::BoxVerticalSingleLine, attr),
+            BarCapType::DoubleLine => Character::with_attributes(SpecialChar::BoxVerticalDoubleLine, attr),
+            BarCapType::SingleThickLine => Character::with_attributes('\u{2503}', attr),
+            _ => self.character(attr),
+        }
+    }
 }
 
 /// One-cell marker drawn by [`BarDrawMode::Point`].
@@ -143,7 +155,9 @@ impl BarPointType {
 
 /// Marker drawn by [`BarDrawMode::LargePoint`].
 ///
-/// The marker occupies a 3-by-2 block of cells. [`RoundSquare`](Self::RoundSquare) is the default.
+/// [`VBarChart`](crate::ui::vbarchart::VBarChart) and [`HBarChart`](crate::ui::hbarchart::HBarChart)
+/// draw the same 3-by-2 block of cells. [`RoundSquare`](Self::RoundSquare) is the default.
+/// The bar thickness around that marker differs: see [`BarDrawMode::LargePoint`].
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum BarLargePointType {
     /// Rounded single-line rectangle (`╭─╮` over `╰─╯`).
@@ -177,7 +191,7 @@ impl BarLargePointType {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-/// How a bar is drawn.
+/// How a [`VBarChart`](crate::ui::vbarchart::VBarChart) or [`HBarChart`](crate::ui::hbarchart::HBarChart) draws a bar.
 ///
 /// Some modes force the thickness into a fixed range. A thickness outside that
 /// range is clamped when the bar is painted. [`Fill`](Self::Fill) with
@@ -185,7 +199,7 @@ impl BarLargePointType {
 pub enum BarDrawMode {
     /// Fills the bar with a repeated character. Thickness is at least 1.
     Fill(BarFillType),
-    /// Draws a vertical line of the given [`LineType`]. Thickness is always 1.
+    /// Draws a line of the given [`LineType`]. Thickness is always 1.
     Line(LineType),
     /// Draws an empty rectangle of the given [`LineType`]. Thickness is at least 2.
     Rectangle(LineType),
@@ -193,21 +207,24 @@ pub enum BarDrawMode {
     FilledRectangle(LineType),
     /// Draws a one-cell marker at the bar's value. Thickness is always 1.
     Point(BarPointType),
-    /// Draws a 3-by-2 marker at the bar's value. Thickness is always 3.
+    /// Draws a 3-by-2 marker at the bar's value.
+    ///
+    /// Thickness is 3 on a [`VBarChart`](crate::ui::vbarchart::VBarChart) and 2 on an
+    /// [`HBarChart`](crate::ui::hbarchart::HBarChart).
     LargePoint(BarLargePointType),
-    /// Draws a one-row cap at the bar's value. Thickness is at least 1.
+    /// Draws a cap across the tip of the bar. Thickness is at least 1.
     Cap(BarCapType),
 }
 
 impl BarDrawMode {
-    fn thickness_range(&self) -> (u8, u8) {
+    fn thickness_range(&self, vertical: bool) -> (u8, u8) {
         match self {
             BarDrawMode::Fill(_) => (1, u8::MAX),
             BarDrawMode::Line(_) => (1, 1),
             BarDrawMode::Rectangle(_) => (2, u8::MAX),
             BarDrawMode::FilledRectangle(_) => (3, u8::MAX),
             BarDrawMode::Point(_) => (1, 1),
-            BarDrawMode::LargePoint(_) => (3, 3),
+            BarDrawMode::LargePoint(_) => if vertical { (3, 3) } else { (2,2) },
             BarDrawMode::Cap(_) => (1, u8::MAX),
         }
     }
@@ -219,7 +236,7 @@ impl Default for BarDrawMode {
 }
 
 #[derive(Clone, Debug)]
-/// One value in a vertical bar chart.
+/// One value in a [`VBarChart`](crate::ui::vbarchart::VBarChart) or [`HBarChart`](crate::ui::hbarchart::HBarChart).
 ///
 /// A bar stores its value and label. Color, thickness, spacing, and draw mode
 /// are optional: a field left unset uses the chart default. A value of type `T`
@@ -238,6 +255,7 @@ pub(crate) struct BarDefaults {
     pub(crate) attr: CharAttribute,
     pub(crate) thickness: u8,
     pub(crate) spacing: u8,
+    pub(crate) vertical: bool,
     pub(crate) draw_mode: BarDrawMode,
 }
 #[derive(Copy, Clone, Default)]
@@ -260,7 +278,11 @@ impl<T: Number + 'static> Bar<T> {
         self.value = value;
         self
     }
-    /// Returns the label displayed for this bar (for example on the X axis).
+    /// Returns the label displayed for this bar.
+    ///
+    /// A [`VBarChart`](crate::ui::vbarchart::VBarChart) can show it under the bar.
+    /// An [`HBarChart`](crate::ui::hbarchart::HBarChart) can show it beside the bar.
+    /// Both charts include it in the hover tooltip when it is not empty.
     #[inline(always)]
     pub fn label(&self) -> &str {
         &self.label
@@ -351,6 +373,17 @@ impl<T: Number + 'static> Bar<T> {
             surface.fill_rect(self.rect_vertical(layout, defaults), c);
         }
     }
+    /// `layout.x` is the baseline column and `layout.y` is the top of the bar.
+    /// A positive length grows to the right; a negative length grows to the left.
+    #[inline(always)]
+    fn paint_horizontal_fill(&self, surface: &mut Surface, c: Character, layout: &BarLayout, defaults: &BarDefaults) {
+        if layout.length == 0 {
+            let ch = Character::new('|', c.foreground, c.background, c.flags);
+            surface.fill_vertical_line_with_size(layout.x, layout.y, self.actual_thickness(defaults) as u32, ch);
+        } else {
+            surface.fill_rect(self.rect_horizontal(layout, defaults), c);
+        }
+    }
 
     #[inline(always)]
     fn paint_vertical_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
@@ -370,6 +403,29 @@ impl<T: Number + 'static> Bar<T> {
         } else if layout.length < 0 {
             surface.draw_vertical_line_with_size(layout.x, layout.y, layout.length.unsigned_abs() as u32, line_type, attr);
             surface.write_char(layout.x, layout.y, Character::with_attributes(upper, attr));
+        } else {
+            surface.write_char(layout.x, layout.y, Character::with_attributes(zero, attr));
+        }
+    }
+    #[inline(always)]
+    fn paint_horizontal_line(&self, surface: &mut Surface, line_type: LineType, attr: CharAttribute, layout: &BarLayout) {
+        let (right_cap, left_cap, zero) = match line_type {
+            LineType::Single => ('┤', '├', '│'),
+            LineType::Double => ('╣', '╠', '║'),
+            LineType::SingleThick => ('┫', '┣', '┃'),
+            LineType::Border => ('█', '█', '┃'),
+            LineType::Ascii => ('|', '|', '|'),
+            LineType::AsciiRound => ('|', '|', '|'),
+            LineType::SingleRound => ('┤', '├', '│'),
+            LineType::Braille => ('⣿', '⣿', '⡇'),
+        };
+        if layout.length > 0 {
+            surface.draw_horizontal_line_with_size(layout.x, layout.y, layout.length as u32, line_type, attr);
+            surface.write_char(layout.x, layout.y, Character::with_attributes(left_cap, attr));
+        } else if layout.length < 0 {
+            let abs = layout.length.unsigned_abs() as u32;
+            surface.draw_horizontal_line_with_size(layout.x - abs as i32 + 1, layout.y, abs, line_type, attr);
+            surface.write_char(layout.x, layout.y, Character::with_attributes(right_cap, attr));
         } else {
             surface.write_char(layout.x, layout.y, Character::with_attributes(zero, attr));
         }
@@ -399,8 +455,36 @@ impl<T: Number + 'static> Bar<T> {
         }
     }
     #[inline(always)]
+    fn paint_horizontal_rect(
+        &self,
+        surface: &mut Surface,
+        line_type: LineType,
+        attr: CharAttribute,
+        layout: &BarLayout,
+        defaults: &BarDefaults,
+        fill: bool,
+    ) {
+        let mut r = self.rect_horizontal(layout, defaults);
+        if layout.length == 0 {
+            surface.draw_vertical_line((r.left() - 1).max(0), r.top(), r.bottom(), line_type, attr);
+        } else {
+            if (layout.length > 0) && r.left() > 0 {
+                r.set_left(r.left() - 1, false);
+            }
+            if fill {
+                surface.fill_rect(r, Character::with_attributes(SpecialChar::Block100, attr));
+            }
+            surface.draw_rect(r, line_type, attr);
+        }
+    }
+    #[inline(always)]
     fn paint_vertical_point(&self, surface: &mut Surface, bar_point_type: BarPointType, attr: CharAttribute, layout: &BarLayout) {
         let point = self.point_vertical(layout);
+        surface.write_char(point.x, point.y, bar_point_type.character(attr));
+    }
+    #[inline(always)]
+    fn paint_horizontal_point(&self, surface: &mut Surface, bar_point_type: BarPointType, attr: CharAttribute, layout: &BarLayout) {
+        let point = self.point_horizontal(layout);
         surface.write_char(point.x, point.y, bar_point_type.character(attr));
     }
     #[inline(always)]
@@ -415,32 +499,71 @@ impl<T: Number + 'static> Bar<T> {
         surface.write_char(point.x + 2, point.y + 1, Character::with_attributes(chars[5], attr));
     }
     #[inline(always)]
+    fn paint_horizontal_large_point(&self, surface: &mut Surface, bar_point_type: BarLargePointType, attr: CharAttribute, layout: &BarLayout) {
+        let point = self.point_horizontal(layout);
+        let chars = bar_point_type.characters();
+        surface.write_char(point.x - 1, point.y, Character::with_attributes(chars[0], attr));
+        surface.write_char(point.x, point.y, Character::with_attributes(chars[1], attr));
+        surface.write_char(point.x + 1, point.y, Character::with_attributes(chars[2], attr));
+        surface.write_char(point.x - 1, point.y + 1, Character::with_attributes(chars[3], attr));
+        surface.write_char(point.x, point.y + 1, Character::with_attributes(chars[4], attr));
+        surface.write_char(point.x + 1, point.y + 1, Character::with_attributes(chars[5], attr));
+    }    
+    #[inline(always)]
     fn paint_vertical_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
         let point = self.point_vertical(layout);
         surface.fill_horizontal_line_with_size(point.x, point.y, self.actual_thickness(defaults) as u32, cap_type.character(attr));
     }
     #[inline(always)]
+    fn paint_horizontal_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
+        let point = self.point_horizontal(layout);
+        surface.fill_vertical_line_with_size(
+            point.x,
+            point.y,
+            self.actual_thickness(defaults) as u32,
+            cap_type.vertical_character(attr),
+        );
+    }    
+    #[inline(always)]
     pub(crate) fn actual_thickness(&self, defaults: &BarDefaults) -> u8 {
         let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
-        let (min, max) = mode.thickness_range();
+        let (min, max) = mode.thickness_range(defaults.vertical);
         self.thickness.unwrap_or(defaults.thickness).clamp(min, max)
     }
     #[inline(always)]
     pub(crate) fn rect_vertical(&self, layout: &BarLayout, defaults: &BarDefaults) -> Rect {
-        let thickness = self.actual_thickness(defaults) as u32;
+        let thickness = self.actual_thickness(defaults) as u16;
         let abs_h = layout.length.unsigned_abs();
         let top = if layout.length > 0 {
             layout.y + 1 - layout.length as i32
         } else {
             layout.y + 1
         };
-        Rect::with_size(layout.x, top, thickness as u16, abs_h)
+        Rect::with_size(layout.x, top, thickness, abs_h)
+    }
+    #[inline(always)]
+    pub(crate) fn rect_horizontal(&self, layout: &BarLayout, defaults: &BarDefaults) -> Rect {
+        let thickness = self.actual_thickness(defaults) as u16;
+        let abs_w = layout.length.unsigned_abs();
+        let left = if layout.length <= 0 {
+            layout.x + 1 + layout.length as i32
+        } else {
+            layout.x + 1
+        };
+        Rect::with_size(left, layout.y, abs_w, thickness)
     }
     pub(crate) fn point_vertical(&self, layout: &BarLayout) -> Point {
         if layout.length > 0 {
             Point::new(layout.x, layout.y - layout.length as i32 + 1)
         } else {
             Point::new(layout.x, layout.y + layout.length as i32)
+        }
+    }
+    pub(crate) fn point_horizontal(&self, layout: &BarLayout) -> Point {
+        if layout.length > 0 {
+            Point::new(layout.x + layout.length as i32 - 1, layout.y)
+        } else {
+            Point::new(layout.x + layout.length as i32, layout.y)
         }
     }
     pub(crate) fn paint_vertical(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
@@ -454,6 +577,19 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Point(point_type) => self.paint_vertical_point(surface, point_type, attr, layout),
             BarDrawMode::LargePoint(point_type) => self.paint_vertical_large_point(surface, point_type, attr, layout),
             BarDrawMode::Cap(cap_type) => self.paint_vertical_cap(surface, cap_type, attr, layout, defaults),
+        }
+    }
+    pub(crate) fn paint_horizontal(&self, surface: &mut Surface, layout: &BarLayout, defaults: &BarDefaults) {
+        let mode = self.draw_mode.unwrap_or(defaults.draw_mode);
+        let attr = self.attr.unwrap_or(defaults.attr);
+        match mode {
+            BarDrawMode::Fill(fill_type) => self.paint_horizontal_fill(surface, fill_type.character(attr), layout, defaults),
+            BarDrawMode::Line(line_type) => self.paint_horizontal_line(surface, line_type, attr, layout),
+            BarDrawMode::FilledRectangle(line_type) => self.paint_horizontal_rect(surface, line_type, attr, layout, defaults, true),
+            BarDrawMode::Rectangle(line_type) => self.paint_horizontal_rect(surface, line_type, attr, layout, defaults, false),
+            BarDrawMode::Point(point_type) => self.paint_horizontal_point(surface, point_type, attr, layout),
+            BarDrawMode::LargePoint(point_type) => self.paint_horizontal_large_point(surface, point_type, attr, layout),
+            BarDrawMode::Cap(cap_type) => self.paint_horizontal_cap(surface, cap_type, attr, layout, defaults),
         }
     }
 }
@@ -540,8 +676,10 @@ where
 }
 
 #[derive(Copy, Clone, Debug)]
-/// A label that covers a run of consecutive bars on a chart's X axis.
+/// A label that covers a run of consecutive bars.
 ///
+/// A [`VBarChart`](crate::ui::vbarchart::VBarChart) draws the label under the bars.
+/// An [`HBarChart`](crate::ui::hbarchart::HBarChart) draws it beside them.
 /// The label is stored in a 22-character buffer.
 pub struct BarSpan {
     pub(crate) start: u32,
@@ -559,4 +697,148 @@ impl BarSpan {
             label: FlatString::from_str(label),
         }
     }
+}
+pub(crate)struct BarWithLayout<T: Number + 'static> {
+    pub(crate) bar: Bar<T>,
+    pub(crate) pos: i32,
+    pub(crate) len: i16,
+}
+impl<T> BarWithLayout<T>
+where
+    T: Number + 'static,
+{
+    #[inline(always)]
+    pub(crate) fn new(bar: Bar<T>) -> Self {
+        Self { bar, pos: 0, len: 0 }
+    }
+}
+
+/// A mutable view of the bars stored in a [`VBarChart`](crate::ui::vbarchart::VBarChart) or an [`HBarChart`](crate::ui::hbarchart::HBarChart).
+///
+/// `Bars` is passed to [`VBarChart::update_bars`](crate::ui::vbarchart::VBarChart::update_bars) or
+/// [`HBarChart::update_bars`](crate::ui::hbarchart::HBarChart::update_bars) so several inserts, deletes,
+/// and in-place edits can be applied before the chart relayouts and repaints once.
+///
+/// Custom label spans use bar indices. Inserting or deleting bars may require updating those spans afterwards.
+pub struct Bars<'a, T>
+where
+    T: Number + 'static,
+{
+    pub(crate) inner: &'a mut Vec<BarWithLayout<T>>,
+}
+impl<'a, T> Bars<'a, T>
+where
+    T: Number + 'static,
+{
+    /// Returns the number of bars in the series.
+    #[inline(always)]
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+    /// Returns `true` if the series contains no bars.
+    #[inline(always)]
+    pub fn is_empty(&self) -> bool {
+        self.inner.is_empty()
+    }
+    /// Returns an immutable reference to the bar at `index`, or `None` if out of range.
+    #[inline(always)]
+    pub fn get(&self, index: usize) -> Option<&Bar<T>> {
+        self.inner.get(index).map(|item| &item.bar)
+    }
+    /// Returns a mutable reference to the bar at `index`, or `None` if out of range.
+    #[inline(always)]
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut Bar<T>> {
+        self.inner.get_mut(index).map(|item| &mut item.bar)
+    }
+    /// Appends a bar at the end of the series.
+    #[inline(always)]
+    pub fn add<B>(&mut self, bar: B)
+    where
+        B: Into<Bar<T>>,
+    {
+        self.inner.push(BarWithLayout::new(bar.into()));
+    }
+    /// Appends several bars at the end of the series.
+    pub fn add_bars<B>(&mut self, bars: impl IntoIterator<Item = B>)
+    where
+        B: Into<Bar<T>>,
+    {
+        self.inner.extend(bars.into_iter().map(|bar| BarWithLayout::new(bar.into())));
+    }
+    /// Inserts a bar at `index`. Returns `false` if `index` is greater than [`len`](Self::len).
+    pub fn insert<B>(&mut self, index: usize, bar: B) -> bool
+    where
+        B: Into<Bar<T>>,
+    {
+        if index > self.inner.len() {
+            return false;
+        }
+        self.inner.insert(index, BarWithLayout::new(bar.into()));
+        true
+    }
+    /// Removes the bar at `index` and returns it, or `None` if out of range.
+    pub fn delete(&mut self, index: usize) -> Option<Bar<T>> {
+        if index >= self.inner.len() {
+            return None;
+        }
+        Some(self.inner.remove(index).bar)
+    }
+    /// Replaces the bar at `index` and returns the previous bar, or `None` if out of range.
+    pub fn set<B>(&mut self, index: usize, bar: B) -> Option<Bar<T>>
+    where
+        B: Into<Bar<T>>,
+    {
+        let slot = self.inner.get_mut(index)?;
+        Some(std::mem::replace(&mut slot.bar, bar.into()))
+    }
+    /// Removes all bars from the series.
+    #[inline(always)]
+    pub fn clear(&mut self) {
+        self.inner.clear();
+    }
+    /// Iterates over the bars in the series.
+    #[inline(always)]
+    pub fn iter(&self) -> impl Iterator<Item = &Bar<T>> {
+        self.inner.iter().map(|item| &item.bar)
+    }
+    /// Iterates mutably over the bars in the series.
+    #[inline(always)]
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Bar<T>> {
+        self.inner.iter_mut().map(|item| &mut item.bar)
+    }
+}
+/// How [`VBarChart`](crate::ui::vbarchart::VBarChart) and [`HBarChart`](crate::ui::hbarchart::HBarChart) map bar values onto the plot.
+///
+/// On a vertical chart the plot runs from bottom to top. On a horizontal chart it runs from left to right.
+pub enum BarScale<T: Number + 'static> {
+    /// Draws every bar from zero. The visible range includes zero and every bar value.
+    FromZero,
+    /// Draws every bar from zero, and expands the range so that it covers `min`, `max`, and every bar value.
+    FromZeroMinRange {
+        /// Lowest value that must remain inside the scale.
+        min: T,
+        /// Highest value that must remain inside the scale.
+        max: T,
+    },
+    /// Stretches the smallest and largest bar values across the full plot.
+    ///
+    /// When every value is equal, each bar is drawn at half the plot size: half the height
+    /// on a [`VBarChart`](crate::ui::vbarchart::VBarChart), half the length on an
+    /// [`HBarChart`](crate::ui::hbarchart::HBarChart).
+    FitData,
+    /// Uses a fixed range. Values outside it are drawn at the corresponding edge of the plot.
+    ///
+    /// When `min` is not lower than `max`, every bar is drawn at half the plot size.
+    Fixed {
+        /// Lowest value in the range.
+        ///
+        /// This is the bottom of a [`VBarChart`](crate::ui::vbarchart::VBarChart) plot and the
+        /// left end of an [`HBarChart`](crate::ui::hbarchart::HBarChart) plot.
+        min: T,
+        /// Highest value in the range.
+        ///
+        /// This is the top of a [`VBarChart`](crate::ui::vbarchart::VBarChart) plot and the
+        /// right end of an [`HBarChart`](crate::ui::hbarchart::HBarChart) plot.
+        max: T,
+    },
 }

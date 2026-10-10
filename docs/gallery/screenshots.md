@@ -78,8 +78,17 @@ A visual tour of AppCUI-rs. Each category shows one quick preview; expand for mo
 
 ![charts — preview](img/charts/chart.gif)
 
-* **Code:** [examples/barchart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/barchart_editor)
+* **Code:** [examples/vbarchart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/vbarchart_editor)
 * **Elements:** [Bar Chart](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/vbarchart.html)
+
+<details>
+  <summary>More Examples</summary>
+
+| Image                                 | Description                                                                                                                                                                                                                                                                 |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="img/charts/hchartbar.gif" > | **Horizontal Bar Chart** <br> * **Code:** [examples/hchartbar](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/hchartbar) <br> * **Description:** A horizontal bar chart with a scale, axes, and per-bar appearance where you can edit the way each bar is drawn. |
+
+</details>
 
 ---
 
