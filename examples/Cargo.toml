@@ -436,3 +436,7 @@ path = "hyperlink/main.rs"
 [[example]]
 name = "hslider"
 path = "hslider/main.rs"
+
+[[example]]
+name = "numericselector"
+path = "numericselector/main.rs"
