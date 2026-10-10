@@ -2657,13 +2657,23 @@ fn check_char_variant_lower_case() {
     }
 }
 
+fn compare_strings(s1: &str, s2: &str) {
+    assert_eq!(s1.chars().count(), s2.chars().count(), "Expcting string with the same number of characters but got: {} and {}",s1,s2);
+    let mut i1 = s1.chars();
+    let mut i2 = s2.chars();
+    while let Some(c1) = i1.next() {
+        let c2 = i2.next().unwrap();
+        assert_eq!(c1,c2,"Characters don't match {} with {} for S1={} and S2={}",c1,c2,s1,s2);
+    }
+}
+
 #[test]
 fn check_char_variant_math_bold() {
     let callback = CharVariant::MathBold.conversion_calback().unwrap();
     let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let expected = "𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
     let actual = s.chars().map(callback).collect::<String>();
-    assert_eq!(actual, expected);
+    compare_strings(&actual, expected);
 }
 
 #[test]
@@ -2672,5 +2682,5 @@ fn check_char_variant_math_italic() {
     let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let expected = "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧0123456789";
     let actual = s.chars().map(callback).collect::<String>();
-    assert_eq!(actual, expected);
+    compare_strings(&actual, expected);
 }

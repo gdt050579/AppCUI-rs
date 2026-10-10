@@ -69,6 +69,7 @@ fn convert_math_bold(c: char) -> char {
 fn convert_math_italic(c: char) -> char {
     match c {
         'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D434 - 'A' as u32) },
+        'h' => '\u{210E}',
         'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D44E - 'a' as u32) },
         _ => c,
     }
