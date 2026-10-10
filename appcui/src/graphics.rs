@@ -7,6 +7,7 @@
 
 mod char_attribute;
 mod character;
+mod char_variant;
 mod clip_area;
 mod color;
 mod cursor;
@@ -30,6 +31,7 @@ pub use self::char_attribute::CharAttribute;
 pub use self::char_attribute::CharFlags;
 pub use self::character::Character;
 pub use self::character::SpecialChar;
+pub use self::char_variant::CharVariant;
 pub(crate) use self::clip_area::ClipArea;
 pub use self::color::Color;
 pub(crate) use self::cursor::Cursor;
