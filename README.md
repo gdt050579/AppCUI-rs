@@ -1,3 +1,10 @@
+# AppCUI-rs
+
+<img src="https://raw.githubusercontent.com/gdt050579/AppCUI-rs/main/docs/chapter-1/img/logo.png" align="center" />
+
+```                                                              
+⯈ 𝗔𝗽𝗽𝗖𝗨𝗜-𝗿𝘀 🖳
+```
 
 <div align="right">
   <details>
@@ -30,13 +37,7 @@
   </details>
 </div>
 
-# AppCUI-rs
-
-<img src="https://raw.githubusercontent.com/gdt050579/AppCUI-rs/main/docs/chapter-1/img/logo.png" align="center" />
-
-```                                                              
-⯈ 𝗔𝗽𝗽𝗖𝗨𝗜-𝗿𝘀 🖳
-```
+---
 
 ![Windows Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/windows.yml/badge.svg)
 ![Linux Build Status](https://github.com/gdt050579/AppCUI-rs/actions/workflows/linux.yml/badge.svg)
@@ -55,7 +56,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 
 ## ✨ Features
-- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, vertical bar chart, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, bar charts, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
 - [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors, or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
 - [x] menus and toolbars
 - [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, macOS via termios)
@@ -67,6 +68,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 - [x] support for Unicode characters
 - [x] predefined dialogs (message box, input box, color picker, save & open dialogs, folder navigator, etc.)
 - [x] true-color support (24 bits per pixel) for terminals that support it.
+- [x] retained mode and immediate mode support (through Frame-based and Input-based modes)
 
 ## 📦 Out-of-the-box controls and widgets
 
@@ -119,6 +121,7 @@ AppCUI-rs ships with a rich set of controls and widgets for building terminal us
 
 ### Charts - Plot numeric series.
 - **VBarChart** — vertical bar chart for a numeric series (scale, axes, and per-bar appearance)
+- **HBarChart** — horizontal bar chart for a numeric series (scale, axes, and per-bar appearance)
 
 ### Text
 - **TextField** — single-line text input
