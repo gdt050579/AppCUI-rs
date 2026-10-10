@@ -14,7 +14,7 @@ mod initialization_flags;
 #[cfg(test)]
 mod tests;
 
-pub use self::hbarchart::Bars;
+pub use super::components::Bars;
 pub use self::hbarchart::HBarChart;
 pub use self::initialization_flags::BarScale;
 pub use self::initialization_flags::Flags;

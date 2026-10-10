@@ -25,6 +25,7 @@ pub(crate) use self::navigator_component::NavigatorComponentControlFunctions;
 pub(crate) use self::symbol::Symbol;
 pub(crate) use self::bar::BarLayout;
 pub(crate) use self::bar::BarDefaults;
+pub(crate) use self::bar::BarWithLayout;
 
 pub use self::listitem::*;
 
@@ -42,3 +43,4 @@ pub use self::bar::BarLargePointType;
 pub use self::bar::BarBuilder;
 pub use self::bar::Bar;
 pub use self::bar::BarSpan;
+pub use self::bar::Bars;

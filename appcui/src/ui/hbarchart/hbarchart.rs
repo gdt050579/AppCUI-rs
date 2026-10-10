@@ -1,119 +1,10 @@
 use super::{Bar, BarDrawMode, BarScale, BarSpan, Flags, YAxisLabelFormat, YAxisLabelMode};
 use super::events::{EventData, EventType};
 use crate::prelude::*;
-use crate::ui::components::{BarDefaults, BarLayout, ScrollBars};
+use crate::ui::components::{BarDefaults, BarLayout, ScrollBars, BarWithLayout, Bars};
 
 const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 
-struct BarWithLayout<T: Number + 'static> {
-    bar: Bar<T>,
-    y: i32,
-    len: i16,
-}
-impl<T> BarWithLayout<T>
-where
-    T: Number + 'static,
-{
-    #[inline(always)]
-    fn new(bar: Bar<T>) -> Self {
-        Self { bar, y: 0, len: 0 }
-    }
-}
-
-/// A mutable view of the bars stored in an [`HBarChart`].
-///
-/// `Bars` is passed to [`HBarChart::update_bars`] so several inserts, deletes, and
-/// in-place edits can be applied before the chart relayouts and repaints once.
-///
-/// Custom category spans use bar indices; inserting or deleting bars may require
-/// updating those spans afterwards.
-pub struct Bars<'a, T>
-where
-    T: Number + 'static,
-{
-    inner: &'a mut Vec<BarWithLayout<T>>,
-}
-impl<'a, T> Bars<'a, T>
-where
-    T: Number + 'static,
-{
-    /// Returns the number of bars in the series.
-    #[inline(always)]
-    pub fn len(&self) -> usize {
-        self.inner.len()
-    }
-    /// Returns `true` if the series contains no bars.
-    #[inline(always)]
-    pub fn is_empty(&self) -> bool {
-        self.inner.is_empty()
-    }
-    /// Returns an immutable reference to the bar at `index`, or `None` if out of range.
-    #[inline(always)]
-    pub fn get(&self, index: usize) -> Option<&Bar<T>> {
-        self.inner.get(index).map(|item| &item.bar)
-    }
-    /// Returns a mutable reference to the bar at `index`, or `None` if out of range.
-    #[inline(always)]
-    pub fn get_mut(&mut self, index: usize) -> Option<&mut Bar<T>> {
-        self.inner.get_mut(index).map(|item| &mut item.bar)
-    }
-    /// Appends a bar at the end of the series.
-    #[inline(always)]
-    pub fn add<B>(&mut self, bar: B)
-    where
-        B: Into<Bar<T>>,
-    {
-        self.inner.push(BarWithLayout::new(bar.into()));
-    }
-    /// Appends several bars at the end of the series.
-    pub fn add_bars<B>(&mut self, bars: impl IntoIterator<Item = B>)
-    where
-        B: Into<Bar<T>>,
-    {
-        self.inner.extend(bars.into_iter().map(|bar| BarWithLayout::new(bar.into())));
-    }
-    /// Inserts a bar at `index`. Returns `false` if `index` is greater than [`len`](Self::len).
-    pub fn insert<B>(&mut self, index: usize, bar: B) -> bool
-    where
-        B: Into<Bar<T>>,
-    {
-        if index > self.inner.len() {
-            return false;
-        }
-        self.inner.insert(index, BarWithLayout::new(bar.into()));
-        true
-    }
-    /// Removes the bar at `index` and returns it, or `None` if out of range.
-    pub fn delete(&mut self, index: usize) -> Option<Bar<T>> {
-        if index >= self.inner.len() {
-            return None;
-        }
-        Some(self.inner.remove(index).bar)
-    }
-    /// Replaces the bar at `index` and returns the previous bar, or `None` if out of range.
-    pub fn set<B>(&mut self, index: usize, bar: B) -> Option<Bar<T>>
-    where
-        B: Into<Bar<T>>,
-    {
-        let slot = self.inner.get_mut(index)?;
-        Some(std::mem::replace(&mut slot.bar, bar.into()))
-    }
-    /// Removes all bars from the series.
-    #[inline(always)]
-    pub fn clear(&mut self) {
-        self.inner.clear();
-    }
-    /// Iterates over the bars in the series.
-    #[inline(always)]
-    pub fn iter(&self) -> impl Iterator<Item = &Bar<T>> {
-        self.inner.iter().map(|item| &item.bar)
-    }
-    /// Iterates mutably over the bars in the series.
-    #[inline(always)]
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Bar<T>> {
-        self.inner.iter_mut().map(|item| &mut item.bar)
-    }
-}
 
 struct XAxis {
     step: u8,
@@ -319,7 +210,7 @@ where
             return;
         }
         let bar = &self.bars[index];
-        let bar_top = bar.y;
+        let bar_top = bar.pos;
         let bar_bottom = bar_top + bar.bar.actual_thickness(&self.defaults) as i32;
         let view_top = self.top_scroll;
         let view_bottom = view_top + plot_height;
@@ -660,7 +551,7 @@ where
         let mut v_min = f64::MAX;
         for item in self.bars.iter_mut() {
             y += item.bar.spacing.unwrap_or(self.defaults.spacing) as i32;
-            item.y = y;
+            item.pos = y;
             item.len = 0;
             y += item.bar.actual_thickness(&self.defaults) as i32;
             let value = item.bar.value.to_f64();
@@ -706,7 +597,7 @@ where
         let len = self.bars.len();
         let mut start = self.first_visible_bar as usize;
         while start < len {
-            layout.y = self.bars[start].y - self.top_scroll;
+            layout.y = self.bars[start].pos - self.top_scroll;
             if layout.y >= plot_rows {
                 break;
             }
@@ -842,12 +733,12 @@ where
             if start >= len {
                 break;
             }
-            let top = self.bars[start].y - self.top_scroll;
+            let top = self.bars[start].pos - self.top_scroll;
             if top >= plot_rows {
                 break;
             }
             let end = (span.end as usize).min(len - 1);
-            let bottom = self.bars[end].y - self.top_scroll + self.bars[end].bar.actual_thickness(&self.defaults) as i32 - 1;
+            let bottom = self.bars[end].pos - self.top_scroll + self.bars[end].bar.actual_thickness(&self.defaults) as i32 - 1;
             if bottom < 0 {
                 continue;
             }
@@ -857,7 +748,7 @@ where
     fn bar_label_row(&self, index: usize) -> i32 {
         let item = &self.bars[index];
         let thickness = item.bar.actual_thickness(&self.defaults) as i32;
-        item.y - self.top_scroll + (thickness - 1) / 2
+        item.pos - self.top_scroll + (thickness - 1) / 2
     }
     fn write_category_label(&mut self, y: i32, label: &str, attr: CharAttribute) {
         let plot_rows = self.plot_rows();
@@ -893,7 +784,7 @@ where
     fn bar_rect(&self, index: usize) -> Rect {
         let bar = &self.bars[index];
         let left_margin = self.y_label_margin();
-        let y = bar.y - self.top_scroll;
+        let y = bar.pos - self.top_scroll;
         let thickness = bar.bar.actual_thickness(&self.defaults) as u16;
         let baseline = left_margin + self.xaxis.zero;
         let len = bar.len;
@@ -915,7 +806,7 @@ where
     }
     #[inline(always)]
     fn update_first_visible_bar(&mut self) {
-        self.first_visible_bar = (self.bars.partition_point(|b| b.y < self.top_scroll) as u32).saturating_sub(1);
+        self.first_visible_bar = (self.bars.partition_point(|b| b.pos < self.top_scroll) as u32).saturating_sub(1);
     }
     #[inline(always)]
     fn y_axis_bottom_margin(&self) -> i32 {
@@ -949,7 +840,7 @@ where
     }    
     fn align_scroll_to_first_visible_bar(&mut self) {
         if let Some(bar) = self.bars.get(self.first_visible_bar as usize) {
-            self.top_scroll = bar.y.max(0);
+            self.top_scroll = bar.pos.max(0);
         }
         self.sync_vertical_scrollbar();
         self.repaint_surface();
@@ -983,10 +874,10 @@ where
             return None;
         }
         let content_y = y + self.top_scroll;
-        let idx = self.bars.partition_point(|b| b.y <= content_y).saturating_sub(1);
+        let idx = self.bars.partition_point(|b| b.pos <= content_y).saturating_sub(1);
         let bar = self.bars.get(idx)?;
         let thickness = bar.bar.actual_thickness(&self.defaults) as i32;
-        if content_y < bar.y || content_y >= bar.y + thickness {
+        if content_y < bar.pos || content_y >= bar.pos + thickness {
             return None;
         }
         let baseline = left_margin + self.xaxis.zero;

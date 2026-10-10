@@ -9,7 +9,6 @@ pub mod events;
 mod tests;
 
 pub use self::vbarchart::VBarChart;
-pub use self::vbarchart::Bars;
 pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::BarScale;
 pub use self::initialization_flags::XAxisLabelMode;
@@ -26,3 +25,4 @@ pub use super::components::BarCapType;
 pub use super::components::BarPointType;
 pub use super::components::BarLargePointType;
 pub use super::components::BarSpan;
+pub use super::components::Bars;
