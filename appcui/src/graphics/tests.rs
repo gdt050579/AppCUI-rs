@@ -3,6 +3,7 @@ use std::str::FromStr;
 use appcui_proc_macro::*;
 
 use crate::graphics::BOX_JUNCTION;
+use crate::graphics::CharVariant;
 use crate::graphics::text_format::TextFormatBuilder;
 use crate::graphics::Point;
 use crate::graphics::Rect;
@@ -2638,4 +2639,20 @@ fn check_polyline_format_getters_setters() {
     assert!(format.end_attr().is_none());
     assert!(format.joint().is_none());
     assert!(format.joint_attr().is_none());
+}
+
+#[test]
+fn check_char_variant_upper_case() {
+    let callback = CharVariant::UpperCase.conversion_calback().unwrap();
+    for i in 'a'..='z' {
+        assert_eq!(callback(i), i.to_uppercase().next().unwrap_or(i));
+    }
+}
+
+#[test]
+fn check_char_variant_lower_case() {
+    let callback = CharVariant::LowerCase.conversion_calback().unwrap();
+    for i in 'A'..='Z' {
+        assert_eq!(callback(i), i.to_lowercase().next().unwrap_or(i));
+    }
 }
