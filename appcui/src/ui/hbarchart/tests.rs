@@ -1078,6 +1078,27 @@ fn check_draw_mode_point_custom() {
 }
 
 #[test]
+fn check_draw_mode_point_all_negative_values() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Points for negative values')
+        CheckHash(0x7EF09AFBD73CEBD2)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(hbarchart!(
+                "type: i32, d:f, dm: Point(Bullet), flags: ShowZeroLineOnXAxis, ylabels:Index(1), values: [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn check_draw_mode_large_point_round_square() {
     let script = "
         Paint.Enable(false)

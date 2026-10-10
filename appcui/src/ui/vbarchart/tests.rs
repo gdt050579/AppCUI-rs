@@ -28,16 +28,21 @@ fn check_get_bar() {
         Paint('1. Initial state')
         CheckHash(0xC6634698F528F8C1)
     ";
-    App::new().size(Size::new(30, 10)).debug_script(script).window(|| {
-        let chart = chart_with_values(&[1, 2, 3]);
-        assert_eq!(chart.bars_count(), 3);
-        assert_eq!(chart.get_bar(0).map(|b| b.value()), Some(1));
-        assert_eq!(chart.get_bar(2).map(|b| b.value()), Some(3));
-        assert!(chart.get_bar(3).is_none());
-        let mut w = window!("Test,d:f");
-        w.add(chart);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(30, 10))
+        .debug_script(script)
+        .window(|| {
+            let chart = chart_with_values(&[1, 2, 3]);
+            assert_eq!(chart.bars_count(), 3);
+            assert_eq!(chart.get_bar(0).map(|b| b.value()), Some(1));
+            assert_eq!(chart.get_bar(2).map(|b| b.value()), Some(3));
+            assert!(chart.get_bar(3).is_none());
+            let mut w = window!("Test,d:f");
+            w.add(chart);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -47,31 +52,36 @@ fn check_modify_bar() {
         Paint('1. Initial state')
         CheckHash(0xEC95F56323529C27)
     ";
-    App::new().size(Size::new(30, 10)).debug_script(script).window(|| {
-        let mut chart = chart_with_values(&[1, 2, 3]);
-        chart.update_bar(1, |bar| {
-            bar.set_value(20);
-            bar.set_label("Apr");
-            bar.set_thickness(4);
-            bar.set_spacing(2);
-            bar.set_draw_mode(BarDrawMode::Fill(BarFillType::Custom('x')));
-            bar.set_attr(charattr!("red"));
-        });
-        let bar = chart.get_bar(1).unwrap();
-        assert_eq!(bar.value(), 20);
-        assert_eq!(bar.label(), "Apr");
-        assert_eq!(bar.thickness(), Some(4));
-        assert_eq!(bar.spacing(), Some(2));
-        assert_eq!(bar.draw_mode(), Some(BarDrawMode::Fill(BarFillType::Custom('x'))));
-        assert_eq!(bar.attr(), Some(charattr!("red")));
-        chart.update_bar(10, |bar| {
-            bar.set_value(0);
-        });
-        assert_eq!(chart.get_bar(1).map(|b| b.value()), Some(20));
-        let mut w = window!("Test,d:f");
-        w.add(chart);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(30, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut chart = chart_with_values(&[1, 2, 3]);
+            chart.update_bar(1, |bar| {
+                bar.set_value(20);
+                bar.set_label("Apr");
+                bar.set_thickness(4);
+                bar.set_spacing(2);
+                bar.set_draw_mode(BarDrawMode::Fill(BarFillType::Custom('x')));
+                bar.set_attr(charattr!("red"));
+            });
+            let bar = chart.get_bar(1).unwrap();
+            assert_eq!(bar.value(), 20);
+            assert_eq!(bar.label(), "Apr");
+            assert_eq!(bar.thickness(), Some(4));
+            assert_eq!(bar.spacing(), Some(2));
+            assert_eq!(bar.draw_mode(), Some(BarDrawMode::Fill(BarFillType::Custom('x'))));
+            assert_eq!(bar.attr(), Some(charattr!("red")));
+            chart.update_bar(10, |bar| {
+                bar.set_value(0);
+            });
+            assert_eq!(chart.get_bar(1).map(|b| b.value()), Some(20));
+            let mut w = window!("Test,d:f");
+            w.add(chart);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -81,26 +91,31 @@ fn check_modify_bar_clear_overrides() {
         Paint('1. Initial state')
         CheckHash(0x3827B3E29BBF11D0)
     ";
-    App::new().size(Size::new(30, 10)).debug_script(script).window(|| {
-        let mut chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vbarchart::Flags::None);
-        chart.add_bar(BarBuilder::new(1).thickness(5).spacing(3).label("A").build());
-        chart.update_bar(0, |bar| {
-            bar.clear_thickness();
-            bar.clear_spacing();
-            bar.clear_attr();
-            bar.clear_draw_mode();
-            bar.set_label("");
-        });
-        let bar = chart.get_bar(0).unwrap();
-        assert!(bar.thickness().is_none());
-        assert!(bar.spacing().is_none());
-        assert!(bar.attr().is_none());
-        assert!(bar.draw_mode().is_none());
-        assert_eq!(bar.label(), "");
-        let mut w = window!("Test,d:f");
-        w.add(chart);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(30, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut chart = VBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vbarchart::Flags::None);
+            chart.add_bar(BarBuilder::new(1).thickness(5).spacing(3).label("A").build());
+            chart.update_bar(0, |bar| {
+                bar.clear_thickness();
+                bar.clear_spacing();
+                bar.clear_attr();
+                bar.clear_draw_mode();
+                bar.set_label("");
+            });
+            let bar = chart.get_bar(0).unwrap();
+            assert!(bar.thickness().is_none());
+            assert!(bar.spacing().is_none());
+            assert!(bar.attr().is_none());
+            assert!(bar.draw_mode().is_none());
+            assert_eq!(bar.label(), "");
+            let mut w = window!("Test,d:f");
+            w.add(chart);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -110,23 +125,28 @@ fn check_update_bars_edit_insert_delete() {
         Paint('1. Initial state')
         CheckHash(0xFF36DED460639C63)
     ";
-    App::new().size(Size::new(30, 10)).debug_script(script).window(|| {
-        let mut chart = chart_with_values(&[1, 2, 3]);
-        chart.update_bars(|bars| {
-            bars.get_mut(0).unwrap().set_value(10);
-            assert!(bars.insert(1, 15));
-            assert_eq!(bars.delete(3).map(|b| b.value()), Some(3));
-            assert!(!bars.insert(10, 99));
-            assert!(bars.delete(10).is_none());
-        });
-        assert_eq!(chart.bars_count(), 3);
-        assert_eq!(chart.get_bar(0).map(|b| b.value()), Some(10));
-        assert_eq!(chart.get_bar(1).map(|b| b.value()), Some(15));
-        assert_eq!(chart.get_bar(2).map(|b| b.value()), Some(2));
-        let mut w = window!("Test,d:f");
-        w.add(chart);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(30, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut chart = chart_with_values(&[1, 2, 3]);
+            chart.update_bars(|bars| {
+                bars.get_mut(0).unwrap().set_value(10);
+                assert!(bars.insert(1, 15));
+                assert_eq!(bars.delete(3).map(|b| b.value()), Some(3));
+                assert!(!bars.insert(10, 99));
+                assert!(bars.delete(10).is_none());
+            });
+            assert_eq!(chart.bars_count(), 3);
+            assert_eq!(chart.get_bar(0).map(|b| b.value()), Some(10));
+            assert_eq!(chart.get_bar(1).map(|b| b.value()), Some(15));
+            assert_eq!(chart.get_bar(2).map(|b| b.value()), Some(2));
+            let mut w = window!("Test,d:f");
+            w.add(chart);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -136,29 +156,34 @@ fn check_update_bars_set_clear_iter() {
         Paint('1. Initial state')
         CheckHash(0xA4F74EB3CD5493CC)
     ";
-    App::new().size(Size::new(30, 10)).debug_script(script).window(|| {
-        let mut chart = chart_with_values(&[1, 2, 3]);
-        chart.update_bars(|bars| {
-            let old = bars.set(1, BarBuilder::new(8).label("B").build());
-            assert_eq!(old.map(|b| b.value()), Some(2));
-            bars.add(4);
-            bars.add_bars([5, 6]);
-            let values: Vec<i32> = bars.iter().map(|b| b.value()).collect();
-            assert_eq!(values, vec![1, 8, 3, 4, 5, 6]);
-            for bar in bars.iter_mut() {
-                bar.set_value(bar.value() * 2);
-            }
-            assert!(!bars.is_empty());
-            bars.clear();
-            assert!(bars.is_empty());
-            assert_eq!(bars.len(), 0);
-        });
-        assert_eq!(chart.bars_count(), 0);
-        assert!(chart.get_bar(0).is_none());
-        let mut w = window!("Test,d:f");
-        w.add(chart);
-        w
-    }).run().unwrap();
+    App::new()
+        .size(Size::new(30, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut chart = chart_with_values(&[1, 2, 3]);
+            chart.update_bars(|bars| {
+                let old = bars.set(1, BarBuilder::new(8).label("B").build());
+                assert_eq!(old.map(|b| b.value()), Some(2));
+                bars.add(4);
+                bars.add_bars([5, 6]);
+                let values: Vec<i32> = bars.iter().map(|b| b.value()).collect();
+                assert_eq!(values, vec![1, 8, 3, 4, 5, 6]);
+                for bar in bars.iter_mut() {
+                    bar.set_value(bar.value() * 2);
+                }
+                assert!(!bars.is_empty());
+                bars.clear();
+                assert!(bars.is_empty());
+                assert_eq!(bars.len(), 0);
+            });
+            assert_eq!(chart.bars_count(), 0);
+            assert!(chart.get_bar(0).is_none());
+            let mut w = window!("Test,d:f");
+            w.add(chart);
+            w
+        })
+        .run()
+        .unwrap();
 }
 
 #[test]
@@ -175,19 +200,19 @@ fn check_scale_sequences() {
             let mut w = window!("Scales,a:c,w:76,h:44");
             w.add(label!("'-2, -1, 0, 1, 2',x:1,y:1,w:30"));
             let mut mixed = VBarChart::<i32>::new(layout!("x:1,y:2,w:72,h:12"), vbarchart::Flags::None);
-            mixed.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index (1));
+            mixed.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index(1));
             mixed.add_bars([-2, -1, 0, 1, 2]);
             w.add(mixed);
 
             w.add(label!("'0, 1, 2',x:1,y:14,w:30"));
             let mut positive = VBarChart::<i32>::new(layout!("x:1,y:15,w:72,h:12"), vbarchart::Flags::None);
-            positive.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index (1));
+            positive.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index(1));
             positive.add_bars([0, 1, 2]);
             w.add(positive);
 
             w.add(label!("'-2, -1, 0',x:1,y:27,w:30"));
             let mut negative = VBarChart::<i32>::new(layout!("x:1,y:28,w:72,h:12"), vbarchart::Flags::None);
-            negative.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index (1));
+            negative.set_xaxis_label_mode(vbarchart::XAxisLabelMode::Index(1));
             negative.add_bars([-2, -1, 0]);
             w.add(negative);
             w
@@ -227,7 +252,9 @@ fn check_draw_mode_fill_solid() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(Solid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(Solid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -246,7 +273,9 @@ fn check_draw_mode_fill_shade75() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(Shade75), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(Shade75), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -265,7 +294,9 @@ fn check_draw_mode_fill_shade50() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(Shade50), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(Shade50), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -284,7 +315,9 @@ fn check_draw_mode_fill_shade25() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(Shade25), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(Shade25), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -303,7 +336,9 @@ fn check_draw_mode_fill_braille() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -322,7 +357,9 @@ fn check_draw_mode_fill_checkerboard() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(Checkerboard), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(Checkerboard), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -341,7 +378,9 @@ fn check_draw_mode_fill_grid() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(Grid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(Grid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -360,7 +399,9 @@ fn check_draw_mode_fill_grid_double() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(GridDouble), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(GridDouble), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -379,7 +420,9 @@ fn check_draw_mode_fill_cross_hatch() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(CrossHatch), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(CrossHatch), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -398,7 +441,9 @@ fn check_draw_mode_fill_dashed() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(Dashed), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(Dashed), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -417,7 +462,9 @@ fn check_draw_mode_fill_diagonal_up() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(DiagonalUp), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(DiagonalUp), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -436,7 +483,9 @@ fn check_draw_mode_fill_diagonal_down() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(DiagonalDown), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(DiagonalDown), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -455,7 +504,9 @@ fn check_draw_mode_fill_notched() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill(Notched), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill(Notched), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -474,7 +525,9 @@ fn check_draw_mode_fill_custom() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill('#'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill('#'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -493,7 +546,9 @@ fn check_draw_mode_line_single() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Line(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Line(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -512,7 +567,9 @@ fn check_draw_mode_line_double() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Line(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Line(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -531,7 +588,9 @@ fn check_draw_mode_line_single_thick() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Line(SingleThick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Line(SingleThick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -550,7 +609,9 @@ fn check_draw_mode_line_braille() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Line(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Line(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -569,15 +630,14 @@ fn check_draw_mode_line_ascii() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Line(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Line(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
         .unwrap();
 }
-
-
-
 
 #[test]
 fn check_draw_mode_rectangle_single() {
@@ -591,7 +651,9 @@ fn check_draw_mode_rectangle_single() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Rectangle(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -610,7 +672,9 @@ fn check_draw_mode_rectangle_double() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Rectangle(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -629,7 +693,9 @@ fn check_draw_mode_rectangle_single_thick() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Thick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Rectangle(Thick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -648,7 +714,9 @@ fn check_draw_mode_rectangle_braille() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Rectangle(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -667,7 +735,9 @@ fn check_draw_mode_rectangle_ascii() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Rectangle(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -686,7 +756,9 @@ fn check_draw_mode_rectangle_single_round() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(SingleRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Rectangle(SingleRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -705,18 +777,14 @@ fn check_draw_mode_rectangle_ascii_round() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Rectangle(AsciiRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Rectangle(AsciiRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
         .unwrap();
 }
-
-
-
-
-
-
 
 #[test]
 fn check_draw_mode_filled_rectangle_single() {
@@ -730,7 +798,9 @@ fn check_draw_mode_filled_rectangle_single() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Single), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -749,7 +819,9 @@ fn check_draw_mode_filled_rectangle_double() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Double), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -768,7 +840,9 @@ fn check_draw_mode_filled_rectangle_single_thick() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(SingleThick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(SingleThick), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -787,7 +861,9 @@ fn check_draw_mode_filled_rectangle_braille() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -806,7 +882,9 @@ fn check_draw_mode_filled_rectangle_ascii() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Ascii), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -825,7 +903,9 @@ fn check_draw_mode_filled_rectangle_single_round() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(Round), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(Round), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -844,7 +924,9 @@ fn check_draw_mode_filled_rectangle_ascii_round() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: FilledRectangle(AsciiRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FilledRectangle(AsciiRound), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -863,7 +945,9 @@ fn check_draw_mode_point_bullet() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Point(Bullet), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Point(Bullet), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -882,7 +966,9 @@ fn check_draw_mode_point_diamond() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Point(Diamond), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Point(Diamond), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -901,7 +987,9 @@ fn check_draw_mode_point_square() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Point(Square), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Point(Square), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -920,7 +1008,30 @@ fn check_draw_mode_point_custom() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Point('X'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Point('X'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_point_all_negative_values() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Points for negative values')
+        CheckHash(0x77D3DB36DEBDC253)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Point(Bullet), flags: ShowZeroLineOnYAxis, xlabels:Index(1), values: [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10]"
+            ));
             w
         })
         .run()
@@ -939,7 +1050,9 @@ fn check_draw_mode_large_point_round_square() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(RoundSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: LargePoint(RoundSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -958,7 +1071,9 @@ fn check_draw_mode_large_point_square() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(Square), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: LargePoint(Square), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -977,7 +1092,9 @@ fn check_draw_mode_large_point_double_line_square() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(DoubleLineSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: LargePoint(DoubleLineSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -996,7 +1113,9 @@ fn check_draw_mode_large_point_thick_square() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(ThickSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: LargePoint(ThickSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1015,7 +1134,9 @@ fn check_draw_mode_large_point_circle() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(Circle), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: LargePoint(Circle), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1034,7 +1155,9 @@ fn check_draw_mode_large_point_diamond() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: LargePoint(Diamond), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: LargePoint(Diamond), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1053,7 +1176,9 @@ fn check_draw_mode_large_point_custom() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: LargePoint('X'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: LargePoint('X'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1072,7 +1197,9 @@ fn check_draw_mode_cap_solid() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Cap(solid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Cap(solid), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1090,7 +1217,9 @@ fn check_draw_mode_cap_shade75() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Cap(Shade75), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Cap(Shade75), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1108,7 +1237,9 @@ fn check_draw_mode_cap_shade50() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Cap(Shade50), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Cap(Shade50), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1126,7 +1257,9 @@ fn check_draw_mode_cap_shade25() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Cap(Shade25), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Cap(Shade25), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1144,7 +1277,9 @@ fn check_draw_mode_cap_braille() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Cap(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Cap(Braille), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1163,7 +1298,9 @@ fn check_draw_mode_cap_single_line() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Cap(SingleLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Cap(SingleLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1182,7 +1319,9 @@ fn check_draw_mode_cap_double_line() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Cap(DoubleLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Cap(DoubleLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1201,7 +1340,9 @@ fn check_draw_mode_cap_thick_line() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Cap(ThickLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Cap(ThickLine), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1220,7 +1361,9 @@ fn check_draw_mode_cap_custom() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Cap('x'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Cap('x'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1239,7 +1382,9 @@ fn check_draw_mode_bar_width_3() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dm: Fill('x'), space:2, dbw: 3, xlabels:Index(0), values: [1, 2, 3,4,5,6,7,8,9,10]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: Fill('x'), space:2, dbw: 3, xlabels:Index(0), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
             w
         })
         .run()
@@ -1315,7 +1460,9 @@ fn check_xlabel_groups_two_quarters() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, xlabels: [{0, 3, '1st quarter'}, {3, 3, '2nd quarter'}], values: [1, 2, 3, {4, s: 6}, 5, 6]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dbw: 3, xlabels: [{0, 3, '1st quarter'}, {3, 3, '2nd quarter'}], values: [1, 2, 3, {4, s: 6}, 5, 6]"
+            ));
             w
         })
         .run()
@@ -1334,7 +1481,9 @@ fn check_scale_fit_data() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, scale: FitData, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dbw: 3, scale: FitData, xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
+            ));
             w
         })
         .run()
@@ -1353,7 +1502,9 @@ fn check_scale_fixed() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, scale: Fixed(0, 12), xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dbw: 3, scale: Fixed(0, 12), xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
+            ));
             w
         })
         .run()
@@ -1372,7 +1523,9 @@ fn check_scale_from_zero_min_range() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, scale: FromZeroMinRange(-6, 6), xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dbw: 3, scale: FromZeroMinRange(-6, 6), xlabels:Index(1), values: [1, 2, 3, 4, 5, 6]"
+            ));
             w
         })
         .run()
@@ -1403,7 +1556,9 @@ fn check_bar_label_tooltips() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, xlabels: BarLabels, values: [{2, label: A}, {4, label: B}, {6, label: C}, {8, label: D}]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, xlabels: BarLabels, values: [{2, label: A}, {4, label: B}, {6, label: C}, {8, label: D}]"
+            ));
             w
         })
         .run()
@@ -1590,7 +1745,9 @@ fn check_numeric_format_prefix_suffix_and_base() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, yw: 10, nf: {hex, prefix: '0x', suffix: h}, values: [16, 160, 255]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dbw: 3, yw: 10, nf: {hex, prefix: '0x', suffix: h}, values: [16, 160, 255]"
+            ));
             w
         })
         .run()
@@ -1632,7 +1789,9 @@ fn check_bar_events_update_label() {
                 info: Handle::None,
             };
             win.info = win.add(label!("'No selection',x:0,y:0,w:40"));
-            win.add(vbarchart!("type: i32, x:0, y:1, w:58, h:12, values: [{2, label: A}, {4, label: B}, {6, label: C}]"));
+            win.add(vbarchart!(
+                "type: i32, x:0, y:1, w:58, h:12, values: [{2, label: A}, {4, label: B}, {6, label: C}]"
+            ));
             win
         }
     }
@@ -1693,7 +1852,9 @@ fn check_show_zero_line_on_y_axis() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: i32, d:f, dbw: 3, flags: ShowZeroLineOnYAxis, xlabels:Index(1), values: [-4, -2, 2, 4]"));
+            w.add(vbarchart!(
+                "type: i32, d:f, dbw: 3, flags: ShowZeroLineOnYAxis, xlabels:Index(1), values: [-4, -2, 2, 4]"
+            ));
             w
         })
         .run()
@@ -1762,7 +1923,9 @@ fn check_update_bar() {
                 updated: false,
             };
             win.add(button!("Update,x:0,y:0,w:10"));
-            win.chart = win.add(vbarchart!("type: i32, x:0, y:1, w:58, h:12, xlabels: BarLabels, values: [{2, label: Low}, {4, label: Mid}, {6, label: High}]"));
+            win.chart = win.add(vbarchart!(
+                "type: i32, x:0, y:1, w:58, h:12, xlabels: BarLabels, values: [{2, label: Low}, {4, label: Mid}, {6, label: High}]"
+            ));
             win
         }
     }
@@ -1832,7 +1995,9 @@ fn check_set_yaxis_step() {
                 stage: 0,
             };
             win.add(button!("Step,x:0,y:0,w:10"));
-            win.chart = win.add(vbarchart!("type: i32, x:0, y:1, w:58, h:12, dbw: 3, xlabels:Index(1), values: [1, 2, 3, 4, 5]"));
+            win.chart = win.add(vbarchart!(
+                "type: i32, x:0, y:1, w:58, h:12, dbw: 3, xlabels:Index(1), values: [1, 2, 3, 4, 5]"
+            ));
             win
         }
     }
@@ -1877,7 +2042,9 @@ fn check_f32_fractional_values() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: f32, d:f, dbw: 3, xlabels:Index(1), values: [0.5, 1.25, 2.75, 4.0, -1.5, 3.5]"));
+            w.add(vbarchart!(
+                "type: f32, d:f, dbw: 3, xlabels:Index(1), values: [0.5, 1.25, 2.75, 4.0, -1.5, 3.5]"
+            ));
             w
         })
         .run()
@@ -1896,7 +2063,9 @@ fn check_f64_fractional_values() {
         .debug_script(script)
         .window(|| {
             let mut w = window!("Test,d:f");
-            w.add(vbarchart!("type: f64, d:f, dbw: 3, xlabels:Index(1), values: [0.25, 1.5, 3.125, 6.5, -2.75, 4.25]"));
+            w.add(vbarchart!(
+                "type: f64, d:f, dbw: 3, xlabels:Index(1), values: [0.25, 1.5, 3.125, 6.5, -2.75, 4.25]"
+            ));
             w
         })
         .run()
