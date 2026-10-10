@@ -27,7 +27,7 @@ impl CharVariant {
             CharVariant::Custom(callback) => Some(*callback),
             CharVariant::UpperCase => Some(convert_upper_case),
             CharVariant::LowerCase => Some(convert_lower_case),
-            CharVariant::MathBold => todo!(),
+            CharVariant::MathBold => Some(convert_math_bold),
             CharVariant::MathItalic => todo!(),
             CharVariant::MathBoldItalic => todo!(),
             CharVariant::Script => todo!(),
@@ -53,4 +53,13 @@ fn convert_upper_case(c: char) -> char {
 #[inline]
 fn convert_lower_case(c: char) -> char {
     c.to_lowercase().next().unwrap_or(c)
+}
+
+fn convert_math_bold(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D400 - 'A' as u32) },
+        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D41A - 'a' as u32) },
+        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
+        _ => c,
+    }
 }
