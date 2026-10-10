@@ -2665,3 +2665,12 @@ fn check_char_variant_math_bold() {
     let actual = s.chars().map(callback).collect::<String>();
     assert_eq!(actual, expected);
 }
+
+#[test]
+fn check_char_variant_math_italic() {
+    let callback = CharVariant::MathItalic.conversion_calback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    assert_eq!(actual, expected);
+}
