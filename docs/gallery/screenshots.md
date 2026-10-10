@@ -78,7 +78,7 @@ A visual tour of AppCUI-rs. Each category shows one quick preview; expand for mo
 
 ![charts — preview](img/charts/chart.gif)
 
-* **Code:** [examples/barchart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/barchart_editor)
+* **Code:** [examples/vbarchart_editor](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/vbarchart_editor)
 * **Elements:** [Bar Chart](https://gdt050579.github.io/AppCUI-rs/chapter-3/stock-controls/vbarchart.html)
 
 ---

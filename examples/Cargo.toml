@@ -374,8 +374,8 @@ name = "graph_editor"
 path = "graph_editor/main.rs"
 
 [[example]]
-name = "barchart_editor"
-path = "barchart_editor/main.rs"
+name = "vbarchart_editor"
+path = "vbarchart_editor/main.rs"
 
 [[example]]
 name = "hbarchart_editor"

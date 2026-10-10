@@ -232,7 +232,7 @@ AppCUI-rs comes with a set of examples to help you get started. You can find the
 - **Games** such as [Tic Tac Toe](examples/tic-tac-toe/), [Snake](examples/snake/), [Flappy Bird](examples/flappy), [Minesweeper](examples/minesweeper/), [Ram it](examples/ramit/), [PacMan](examples/games/), [Chess](examples/games/), [Connect Four](examples/games/), [2048](examples/games/), [Memory](examples/memory/), or [Tetris](examples/games/)
 - **Utilities** such as [Calculator](examples/calculator/), [CSV Viewer](examples/csv_viewer/), [Temperature Converter](examples/temperature_convertor/), [HexViewer](examples/hexview/), or a [Timer](examples/timer/)
 - **Animations** such as [Matrix](examples/matrix/), [Fractals](examples/fractals/), [Plasma](examples/plasma/) or [Spiral](examples/spiral/)
-- **Controls**/**Widgets** such as [Button](examples/buttons/), [CheckBox](examples/checkboxes/), [ComboBox](examples/combobox/), [DatePicker](examples/datepicker/), [ListView](examples/listview/), [TreeView](examples/treeview/), [Bar Chart](examples/barchart_editor/), [Markdown Composer](examples/markdown_composer/) and many more.
+- **Controls**/**Widgets** such as [Button](examples/buttons/), [CheckBox](examples/checkboxes/), [ComboBox](examples/combobox/), [DatePicker](examples/datepicker/), [ListView](examples/listview/), [TreeView](examples/treeview/), [Vertical Bar Chart](examples/vbarchart_editor/), [Markdown Composer](examples/markdown_composer/) and many more.
 - **Dialogs** such as [Notification](examples/notification_dialogs/) or [Input](examples/input_dialog/)
 
 ## 🛠️ A more complex example

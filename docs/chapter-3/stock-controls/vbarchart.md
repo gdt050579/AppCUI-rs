@@ -269,7 +269,7 @@ The following keys are processed by a VBarChart when it has focus. They scroll t
 
 The following window shows four monthly values. Selecting a bar writes that month and its value into the window title. Clearing the selection restores the original title.
 
-A larger editor (per-bar appearance, axes, scale, and X-axis groups) is in `examples/barchart_editor`.
+A larger editor (per-bar appearance, axes, scale, and X-axis groups) is in `examples/vbarchart_editor`.
 
 ```rs
 use appcui::prelude::*;
