@@ -258,30 +258,6 @@ fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
     }
 }
 
-fn sample_bars_1() -> Vec<hbarchart::Bar<i32>> {
-    [
-        ("Jan", 12, Color::Aqua),
-        ("Feb", 28, Color::Green),
-        ("Mar", 19, Color::Yellow),
-        ("Apr", 35, Color::Red),
-        ("May", 22, Color::Magenta),
-        ("Jun", 41, Color::Blue),
-        ("Jul", 33, Color::Pink),
-        ("Aug", 18, Color::Olive),
-        ("Sep", 27, Color::Teal),
-        ("Oct", 31, Color::Silver),
-        ("Nov", 15, Color::White),
-        ("Dec", 45, Color::DarkRed),
-    ]
-    .into_iter()
-    .map(|(label, value, color)| {
-        hbarchart::BarBuilder::new(value)
-            .label(label)
-            .attr(CharAttribute::with_fore_color(color))
-            .build()
-    })
-    .collect()
-}
 fn sample_bars() -> Vec<hbarchart::Bar<i32>> {
     [
         ("Jan", -3, Color::Aqua),

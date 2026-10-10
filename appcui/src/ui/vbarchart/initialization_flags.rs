@@ -1,6 +1,6 @@
 use EnumBitFlags::EnumBitFlags;
 
-use crate::ui::{common::Number, vbarchart::BarSpan};
+use crate::ui::vbarchart::BarSpan;
 
 #[EnumBitFlags(bits = 8)]
 /// Initialization flags for a [`struct@super::VBarChart`].
@@ -15,32 +15,6 @@ pub enum Flags {
     DimBarsOnSelection = 2,
     /// Draws a solid horizontal line at value zero while the Y-axis grid is visible.
     ShowZeroLineOnYAxis = 4,
-}
-
-/// How bar values are mapped onto the plot height of a [`struct@super::VBarChart`].
-pub enum BarScale<T: Number + 'static> {
-    /// Draws every bar from zero. The visible range includes zero and every bar value.
-    FromZero,
-    /// Draws every bar from zero, and expands the range so that it covers `min`, `max`, and every bar value.
-    FromZeroMinRange {
-        /// Lowest value that must remain inside the scale.
-        min: T,
-        /// Highest value that must remain inside the scale.
-        max: T,
-    },
-    /// Stretches the smallest and largest bar values across the full plot height.
-    ///
-    /// When every value is equal, each bar is drawn at half the plot height.
-    FitData,
-    /// Uses a fixed range. Values outside it are drawn at the corresponding edge of the plot.
-    ///
-    /// When `min` is not lower than `max`, every bar is drawn at half the plot height.
-    Fixed {
-        /// Lowest value represented by the bottom of the plot.
-        min: T,
-        /// Highest value represented by the top of the plot.
-        max: T,
-    },
 }
 
 /// Chooses the labels drawn under the bars of a [`struct@super::VBarChart`].

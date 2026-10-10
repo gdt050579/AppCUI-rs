@@ -44,3 +44,4 @@ pub use self::bar::BarBuilder;
 pub use self::bar::Bar;
 pub use self::bar::BarSpan;
 pub use self::bar::Bars;
+pub use self::bar::BarScale;

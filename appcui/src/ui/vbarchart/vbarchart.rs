@@ -2,7 +2,7 @@ use flat_string::FlatString;
 
 use super::{
     events::{EventData, EventType},
-    Bar, BarDefaults, BarDrawMode, BarScale, BarSpan, Flags, XAxisLabelFormat, Bars, BarWithLayout,
+    Bar, BarDefaults, BarDrawMode, BarScale, BarSpan, Flags, XAxisLabelFormat, Bars,
 };
 use crate::{prelude::*, ui::vbarchart::XAxisLabelMode};
 struct YAxis {
