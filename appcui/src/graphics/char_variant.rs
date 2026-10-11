@@ -35,7 +35,7 @@ Braille	a–z → the cells from the table above; digits → a–j cells	Irregul
 FullWidth	'!'..='~' → c + 0xFEE0, space → U+3000	One offset covers all printable ASCII, but each character takes two terminal cells.
 Circled	A–Z → U+24B6, a–z → U+24D0, 1–9 → U+2460, 0 → U+24EA	Zero is out of sequence.
 Squared	A–Z → U+1F130	Uppercase only, so fold lowercase first.
-NegativeCircled	A–Z → U+1F150	Uppercase only.
+NegativeCircled	A–Z → U+1F150, 1–9 → U+2776, 0 → U+24FF	Uppercase only, lower case is converted to upper case first. Zero is out of sequence.
 NegativeSquared	A–Z → U+1F170	Uppercase only; 🅰 🅱 🅾 🅿 render as emoji in many fonts.
 Parenthesized	a–z → U+249C, 1–9 → U+2474	No zero.
 Superscript / Subscript	Lookup table	Digits are complete (⁰–⁹, ₀–₉), but letters are partial: no superscript q, and only about half the subscript letters exist.
@@ -65,7 +65,7 @@ impl CharVariant {
             CharVariant::SansSerifBoldItalic => Some(convert_sans_serif_bold_italic),
             CharVariant::Monospace => Some(convert_monospace),
             CharVariant::Circled => Some(convert_circled),
-            CharVariant::CircledNegative => todo!(),
+            CharVariant::CircledNegative => Some(convert_circled_negative),
             CharVariant::Squared => todo!(),
             CharVariant::SquaredNegative => todo!(),
             CharVariant::Parenthesized => todo!(),
@@ -275,6 +275,18 @@ fn convert_circled(c: char) -> char {
         '1'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x2460 - '1' as u32) },
         // Circled zero is U+24EA, outside the ①–⑨ run.
         '0' => '\u{24EA}',
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_circled_negative(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1F150 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1F150 - 'a' as u32) },
+        '1'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x2776 - '1' as u32) },
+        // Negative circled zero is U+24FF, outside the ❶–❾ run.
+        '0' => '\u{24FF}',
         _ => c,
     }
 }

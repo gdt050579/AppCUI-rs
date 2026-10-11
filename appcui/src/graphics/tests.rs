@@ -2795,3 +2795,12 @@ fn check_char_variant_circled() {
     let actual = s.chars().map(callback).collect::<String>();
     compare_strings(&actual, expected);
 }
+
+#[test]
+fn check_char_variant_circled_negative() {
+    let callback = CharVariant::CircledNegative.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "🅐🅑🅒🅓🅔🅕🅖🅗🅘🅙🅚🅛🅜🅝🅞🅟🅠🅡🅢🅣🅤🅥🅦🅧🅨🅩🅐🅑🅒🅓🅔🅕🅖🅗🅘🅙🅚🅛🅜🅝🅞🅟🅠🅡🅢🅣🅤🅥🅦🅧🅨🅩⓿❶❷❸❹❺❻❼❽❾";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
