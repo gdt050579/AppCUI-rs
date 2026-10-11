@@ -39,7 +39,7 @@ impl CharVariant {
             CharVariant::SansSerifBold => Some(convert_sans_serif_bold),
             CharVariant::SansSerifItalic => Some(convert_sans_serif_italic),
             CharVariant::SansSerifBoldItalic => Some(convert_sans_serif_bold_italic),
-            CharVariant::Monospace => todo!(),
+            CharVariant::Monospace => Some(convert_monospace),
         }
     }
     #[inline(always)]
@@ -219,6 +219,16 @@ fn convert_sans_serif_bold_italic(c: char) -> char {
         'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D63C - 'A' as u32) },
         'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D656 - 'a' as u32) },
         '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7EC - '0' as u32) },
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_monospace(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D670 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D68A - 'a' as u32) },
+        '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7F6 - '0' as u32) },
         _ => c,
     }
 }
