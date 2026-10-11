@@ -17,8 +17,32 @@ pub enum CharVariant {
     SansSerifItalic,
     SansSerifBoldItalic,
     Monospace,
+    Circled,
+    CircledNegative,
+    Squared,
+    SquaredNegative,
+    Parenthesized,
+    Superscript,
+    Subscript,
+    SmallCaps,
+    Fullwidth,
+    Braille,
     Custom(fn(char) -> char),
 }
+/*
+Variant	Mapping	Notes
+Braille	a–z → the cells from the table above; digits → a–j cells	Irregular, needs a 26-entry lookup table. With char → char you can’t emit the ⠼ number sign or a capital sign, so digits and case are lossy.
+FullWidth	'!'..='~' → c + 0xFEE0, space → U+3000	One offset covers all printable ASCII, but each character takes two terminal cells.
+Circled	A–Z → U+24B6, a–z → U+24D0, 1–9 → U+2460, 0 → U+24EA	Zero is out of sequence.
+Squared	A–Z → U+1F130	Uppercase only, so fold lowercase first.
+NegativeCircled	A–Z → U+1F150	Uppercase only.
+NegativeSquared	A–Z → U+1F170	Uppercase only; 🅰 🅱 🅾 🅿 render as emoji in many fonts.
+Parenthesized	a–z → U+249C, 1–9 → U+2474	No zero.
+Superscript / Subscript	Lookup table	Digits are complete (⁰–⁹, ₀–₉), but letters are partial: no superscript q, and only about half the subscript letters exist.
+SmallCaps	a–z → ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡxʏᴢ	Lookup table; x has no small-cap form.
+SegmentedDigits	0–9 → U+1FBF0	Seven-segment digits from Symbols for Legacy Computing; font support is still patchy.
+
+*/
 
 impl CharVariant {
     pub(super) fn conversion_callback(&self) -> Option<fn(char) -> char> {
@@ -40,6 +64,16 @@ impl CharVariant {
             CharVariant::SansSerifItalic => Some(convert_sans_serif_italic),
             CharVariant::SansSerifBoldItalic => Some(convert_sans_serif_bold_italic),
             CharVariant::Monospace => Some(convert_monospace),
+            CharVariant::Circled => Some(convert_circled),
+            CharVariant::CircledNegative => todo!(),
+            CharVariant::Squared => todo!(),
+            CharVariant::SquaredNegative => todo!(),
+            CharVariant::Parenthesized => todo!(),
+            CharVariant::Superscript => todo!(),
+            CharVariant::Subscript => todo!(),
+            CharVariant::SmallCaps => todo!(),
+            CharVariant::Fullwidth => todo!(),
+            CharVariant::Braille => todo!(),
         }
     }
     #[inline(always)]
@@ -229,6 +263,18 @@ fn convert_monospace(c: char) -> char {
         'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D670 - 'A' as u32) },
         'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D68A - 'a' as u32) },
         '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7F6 - '0' as u32) },
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_circled(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x24B6 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x24D0 - 'a' as u32) },
+        '1'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x2460 - '1' as u32) },
+        // Circled zero is U+24EA, outside the ①–⑨ run.
+        '0' => '\u{24EA}',
         _ => c,
     }
 }
