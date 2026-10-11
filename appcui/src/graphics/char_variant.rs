@@ -34,7 +34,7 @@ impl CharVariant {
             CharVariant::BoldScript => Some(convert_bold_script),
             CharVariant::Fraktur => Some(convert_fraktur),
             CharVariant::BoldFraktur => Some(convert_bold_fraktur),
-            CharVariant::DoubleStruck => todo!(),
+            CharVariant::DoubleStruck => Some(convert_double_struck),
             CharVariant::Sans => todo!(),
             CharVariant::SansBold => todo!(),
             CharVariant::SansItalic => todo!(),
@@ -160,9 +160,27 @@ fn convert_fraktur(c: char) -> char {
 #[inline]
 fn convert_bold_fraktur(c: char) -> char {
     match c {
+
         'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D56C - 'A' as u32) },
         'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D586 - 'a' as u32) },
         '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_double_struck(c: char) -> char {
+    match c {
+        'C' => 'ℂ',
+        'H' => 'ℍ',
+        'N' => 'ℕ',
+        'P' => 'ℙ',
+        'Q' => 'ℚ',
+        'R' => 'ℝ',
+        'Z' => 'ℤ',
+        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D538 - 'A' as u32) },
+        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D552 - 'a' as u32) },
+        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7D8 - '0' as u32) },
         _ => c,
     }
 }
