@@ -36,7 +36,7 @@ impl CharVariant {
             CharVariant::BoldFraktur => Some(convert_bold_fraktur),
             CharVariant::DoubleStruck => Some(convert_double_struck),
             CharVariant::SansSerif => Some(convert_sans_serif),
-            CharVariant::SansSerifBold => todo!(),
+            CharVariant::SansSerifBold => Some(convert_sans_serif_bold),
             CharVariant::SansSerifItalic => todo!(),
             CharVariant::SansSerifBoldItalic => todo!(),
             CharVariant::Monospace => todo!(),
@@ -189,6 +189,16 @@ fn convert_sans_serif(c: char) -> char {
         'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D5A0 - 'A' as u32) },
         'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D5BA - 'a' as u32) },
         '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7E2 - '0' as u32) },
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_sans_serif_bold(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D5D4 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D5EE - 'a' as u32) },
+        '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7EC - '0' as u32) },
         _ => c,
     }
 }
