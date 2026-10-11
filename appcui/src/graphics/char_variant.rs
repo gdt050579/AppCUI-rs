@@ -33,7 +33,7 @@ impl CharVariant {
             CharVariant::Script => Some(convert_script),
             CharVariant::BoldScript => Some(convert_bold_script),
             CharVariant::Fraktur => Some(convert_fraktur),
-            CharVariant::BoldFraktur => todo!(),
+            CharVariant::BoldFraktur => Some(convert_bold_fraktur),
             CharVariant::DoubleStruck => todo!(),
             CharVariant::Sans => todo!(),
             CharVariant::SansBold => todo!(),
