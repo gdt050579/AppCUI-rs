@@ -2,15 +2,15 @@
 pub enum CharVariant {
     #[default]
     None,
-    UpperCase,
-    LowerCase,
+    Uppercase,
+    Lowercase,
     MathBold,
     MathItalic,
     MathBoldItalic,
     Script,
-    BoldScript,
+    ScriptBold,
     Fraktur,
-    BoldFraktur,
+    FrakturBold,
     DoubleStruck,
     SansSerif,
     SansSerifBold,
@@ -21,19 +21,19 @@ pub enum CharVariant {
 }
 
 impl CharVariant {
-    pub(super) fn conversion_calback(&self) -> Option<fn(char) -> char> {
+    pub(super) fn conversion_callback(&self) -> Option<fn(char) -> char> {
         match self {
             CharVariant::None => None,
             CharVariant::Custom(callback) => Some(*callback),
-            CharVariant::UpperCase => Some(convert_upper_case),
-            CharVariant::LowerCase => Some(convert_lower_case),
+            CharVariant::Uppercase => Some(convert_upper_case),
+            CharVariant::Lowercase => Some(convert_lower_case),
             CharVariant::MathBold => Some(convert_math_bold),
             CharVariant::MathItalic => Some(convert_math_italic),
             CharVariant::MathBoldItalic => Some(convert_math_bold_italic),
             CharVariant::Script => Some(convert_script),
-            CharVariant::BoldScript => Some(convert_bold_script),
+            CharVariant::ScriptBold => Some(convert_bold_script),
             CharVariant::Fraktur => Some(convert_fraktur),
-            CharVariant::BoldFraktur => Some(convert_bold_fraktur),
+            CharVariant::FrakturBold => Some(convert_bold_fraktur),
             CharVariant::DoubleStruck => Some(convert_double_struck),
             CharVariant::SansSerif => Some(convert_sans_serif),
             CharVariant::SansSerifBold => Some(convert_sans_serif_bold),
@@ -44,7 +44,7 @@ impl CharVariant {
     }
     #[inline(always)]
     pub fn map(&self, ch: char) -> char {
-        if let Some(cbk) = self.conversion_calback() {
+        if let Some(cbk) = self.conversion_callback() {
             cbk(ch)
         } else {
             ch
