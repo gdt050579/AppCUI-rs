@@ -2758,3 +2758,12 @@ fn check_char_variant_sans_serif_bold() {
     let actual = s.chars().map(callback).collect::<String>();
     compare_strings(&actual, expected);
 }
+
+#[test]
+fn check_char_variant_sans_serif_italic() {
+    let callback = CharVariant::SansSerifItalic.conversion_calback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
