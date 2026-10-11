@@ -12,10 +12,10 @@ pub enum CharVariant {
     Fraktur,
     BoldFraktur,
     DoubleStruck,
-    Sans,
-    SansBold,
-    SansItalic,
-    SansBoldItalic,
+    SansSerif,
+    SansSerifBold,
+    SansSerifItalic,
+    SansSerifBoldItalic,
     Monospace,
     Custom(fn(char) -> char),
 }
@@ -35,10 +35,10 @@ impl CharVariant {
             CharVariant::Fraktur => Some(convert_fraktur),
             CharVariant::BoldFraktur => Some(convert_bold_fraktur),
             CharVariant::DoubleStruck => Some(convert_double_struck),
-            CharVariant::Sans => todo!(),
-            CharVariant::SansBold => todo!(),
-            CharVariant::SansItalic => todo!(),
-            CharVariant::SansBoldItalic => todo!(),
+            CharVariant::SansSerif => Some(convert_sans_serif),
+            CharVariant::SansSerifBold => todo!(),
+            CharVariant::SansSerifItalic => todo!(),
+            CharVariant::SansSerifBoldItalic => todo!(),
             CharVariant::Monospace => todo!(),
         }
     }
@@ -66,9 +66,9 @@ fn convert_lower_case(c: char) -> char {
 #[inline]
 fn convert_math_bold(c: char) -> char {
     match c {
-        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D400 - 'A' as u32) },
-        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D41A - 'a' as u32) },
-        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D400 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D41A - 'a' as u32) },
+        '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
         _ => c,
     }
 }
@@ -76,9 +76,9 @@ fn convert_math_bold(c: char) -> char {
 #[inline]
 fn convert_math_italic(c: char) -> char {
     match c {
-        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D434 - 'A' as u32) },
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D434 - 'A' as u32) },
         'h' => '\u{210E}',
-        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D44E - 'a' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D44E - 'a' as u32) },
         _ => c,
     }
 }
@@ -86,9 +86,9 @@ fn convert_math_italic(c: char) -> char {
 #[inline]
 fn convert_math_bold_italic(c: char) -> char {
     match c {
-        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D468 - 'A' as u32) },
-        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D482 - 'a' as u32) },
-        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D468 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D482 - 'a' as u32) },
+        '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
         _ => c,
     }
 }
@@ -126,18 +126,17 @@ fn convert_script(c: char) -> char {
         'e' => 'ℯ',
         'g' => 'ℊ',
         'o' => 'ℴ',
-        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D4B6 - 'a' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D4B6 - 'a' as u32) },
         _ => c,
     }
 }
 
-
 #[inline]
 fn convert_bold_script(c: char) -> char {
     match c {
-        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D4D0 - 'A' as u32) },
-        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D4EA - 'a' as u32) },
-        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D4D0 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D4EA - 'a' as u32) },
+        '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
         _ => c,
     }
 }
@@ -151,8 +150,8 @@ fn convert_fraktur(c: char) -> char {
         'I' => 'ℑ',
         'R' => 'ℜ',
         'Z' => 'ℨ',
-        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D504 - 'A' as u32) },
-        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D51E - 'a' as u32) },
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D504 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D51E - 'a' as u32) },
         _ => c,
     }
 }
@@ -160,10 +159,9 @@ fn convert_fraktur(c: char) -> char {
 #[inline]
 fn convert_bold_fraktur(c: char) -> char {
     match c {
-
-        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D56C - 'A' as u32) },
-        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D586 - 'a' as u32) },
-        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D56C - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D586 - 'a' as u32) },
+        '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
         _ => c,
     }
 }
@@ -178,9 +176,19 @@ fn convert_double_struck(c: char) -> char {
         'Q' => 'ℚ',
         'R' => 'ℝ',
         'Z' => 'ℤ',
-        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D538 - 'A' as u32) },
-        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D552 - 'a' as u32) },
-        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7D8 - '0' as u32) },
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D538 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D552 - 'a' as u32) },
+        '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7D8 - '0' as u32) },
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_sans_serif(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D5A0 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D5BA - 'a' as u32) },
+        '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x1D7E2 - '0' as u32) },
         _ => c,
     }
 }
