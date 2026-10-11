@@ -32,7 +32,7 @@ impl CharVariant {
             CharVariant::MathBoldItalic => Some(convert_math_bold_italic),
             CharVariant::Script => Some(convert_script),
             CharVariant::BoldScript => Some(convert_bold_script),
-            CharVariant::Fraktur => todo!(),
+            CharVariant::Fraktur => Some(convert_fraktur),
             CharVariant::BoldFraktur => todo!(),
             CharVariant::DoubleStruck => todo!(),
             CharVariant::Sans => todo!(),
@@ -40,6 +40,14 @@ impl CharVariant {
             CharVariant::SansItalic => todo!(),
             CharVariant::SansBoldItalic => todo!(),
             CharVariant::Monospace => todo!(),
+        }
+    }
+    #[inline(always)]
+    pub fn map(&self, ch: char) -> char {
+        if let Some(cbk) = self.conversion_calback() {
+            cbk(ch)
+        } else {
+            ch
         }
     }
 }
@@ -129,6 +137,31 @@ fn convert_bold_script(c: char) -> char {
     match c {
         'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D4D0 - 'A' as u32) },
         'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D4EA - 'a' as u32) },
+        '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_fraktur(c: char) -> char {
+    match c {
+        // U+1D506, U+1D50B, U+1D50C, U+1D515 and U+1D51D are unassigned; those letters live in Letterlike Symbols.
+        'C' => 'ℭ',
+        'H' => 'ℌ',
+        'I' => 'ℑ',
+        'R' => 'ℜ',
+        'Z' => 'ℨ',
+        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D504 - 'A' as u32) },
+        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D51E - 'a' as u32) },
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_bold_fraktur(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D56C - 'A' as u32) },
+        'a'..='z' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D586 - 'a' as u32) },
         '0'..='9' => unsafe {char::from_u32_unchecked((c as u32) + 0x1D7CE - '0' as u32) },
         _ => c,
     }
