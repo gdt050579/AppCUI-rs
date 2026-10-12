@@ -36,7 +36,7 @@ FullWidth	'!'..='~' → c + 0xFEE0, space → U+3000	One offset covers all print
 Circled	A–Z → U+24B6, a–z → U+24D0, 1–9 → U+2460, 0 → U+24EA	Zero is out of sequence.
 Squared	A–Z → U+1F130	Uppercase only, lower case is converted to upper case first.
 NegativeCircled	A–Z → U+1F150, 1–9 → U+2776, 0 → U+24FF	Uppercase only, lower case is converted to upper case first. Zero is out of sequence.
-NegativeSquared	A–Z → U+1F170	Uppercase only; 🅰 🅱 🅾 🅿 render as emoji in many fonts.
+NegativeSquared	A–Z → U+1F170	Uppercase only, lower case is converted to upper case first; 🅰 🅱 🅾 🅿 render as emoji in many fonts.
 Parenthesized	a–z → U+249C, 1–9 → U+2474	No zero.
 Superscript / Subscript	Lookup table	Digits are complete (⁰–⁹, ₀–₉), but letters are partial: no superscript q, and only about half the subscript letters exist.
 SmallCaps	a–z → ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡxʏᴢ	Lookup table; x has no small-cap form.
@@ -67,7 +67,7 @@ impl CharVariant {
             CharVariant::Circled => Some(convert_circled),
             CharVariant::CircledNegative => Some(convert_circled_negative),
             CharVariant::Squared => Some(convert_squared),
-            CharVariant::SquaredNegative => todo!(),
+            CharVariant::SquaredNegative => Some(convert_squared_negative),
             CharVariant::Parenthesized => todo!(),
             CharVariant::Superscript => todo!(),
             CharVariant::Subscript => todo!(),
@@ -299,3 +299,13 @@ fn convert_squared(c: char) -> char {
         _ => c,
     }
 }
+
+#[inline]
+fn convert_squared_negative(c: char) -> char {
+    match c {
+        'A'..='Z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1F170 - 'A' as u32) },
+        'a'..='z' => unsafe { char::from_u32_unchecked((c as u32) + 0x1F170 - 'a' as u32) },
+        _ => c,
+    }
+}
+
