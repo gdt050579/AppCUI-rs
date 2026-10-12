@@ -305,6 +305,10 @@ name = "matrix"
 path = "matrix/main.rs"
 
 [[example]]
+name = "game_of_life"
+path = "game_of_life/main.rs"
+
+[[example]]
 name = "fractals"
 path = "fractals/main.rs"
 
@@ -436,3 +440,7 @@ path = "hyperlink/main.rs"
 [[example]]
 name = "hslider"
 path = "hslider/main.rs"
+
+[[example]]
+name = "numericselector"
+path = "numericselector/main.rs"
