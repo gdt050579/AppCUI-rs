@@ -70,7 +70,7 @@ impl CharVariant {
             CharVariant::SquaredNegative => Some(convert_squared_negative),
             CharVariant::Parenthesized => todo!(),
             CharVariant::Superscript => Some(convert_superscript),
-            CharVariant::Subscript => todo!(),
+            CharVariant::Subscript => Some(convert_subscript),
             CharVariant::SmallCaps => todo!(),
             CharVariant::Fullwidth => todo!(),
             CharVariant::Braille => todo!(),
@@ -376,6 +376,38 @@ fn convert_superscript(c: char) -> char {
         '=' => '⁼',
         '(' => '⁽',
         ')' => '⁾',
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_subscript(c: char) -> char {
+    match c {
+        // There are no upper case subscript letters and only some lower case ones exist,
+        // so upper case is converted to lower case first and the missing letters are left unchanged.
+        'A' | 'a' => 'ₐ',
+        'E' | 'e' => 'ₑ',
+        'H' | 'h' => 'ₕ',
+        'I' | 'i' => 'ᵢ',
+        'J' | 'j' => 'ⱼ',
+        'K' | 'k' => 'ₖ',
+        'L' | 'l' => 'ₗ',
+        'M' | 'm' => 'ₘ',
+        'N' | 'n' => 'ₙ',
+        'O' | 'o' => 'ₒ',
+        'P' | 'p' => 'ₚ',
+        'R' | 'r' => 'ᵣ',
+        'S' | 's' => 'ₛ',
+        'T' | 't' => 'ₜ',
+        'U' | 'u' => 'ᵤ',
+        'V' | 'v' => 'ᵥ',
+        'X' | 'x' => 'ₓ',
+        '0'..='9' => unsafe { char::from_u32_unchecked((c as u32) + 0x2080 - '0' as u32) },
+        '+' => '₊',
+        '-' => '₋',
+        '=' => '₌',
+        '(' => '₍',
+        ')' => '₎',
         _ => c,
     }
 }
