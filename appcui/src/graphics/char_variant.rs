@@ -24,23 +24,8 @@ pub enum CharVariant {
     Superscript,
     Subscript,
     SmallCaps,
-    Fullwidth,
     Custom(fn(char) -> char),
 }
-/*
-Variant	Mapping	Notes
-Braille	a–z → the cells from the table above; digits → a–j cells	Irregular, needs a 26-entry lookup table. With char → char you can’t emit the ⠼ number sign or a capital sign, so digits and case are lossy.
-FullWidth	'!'..='~' → c + 0xFEE0, space → U+3000	One offset covers all printable ASCII, but each character takes two terminal cells.
-Circled	A–Z → U+24B6, a–z → U+24D0, 1–9 → U+2460, 0 → U+24EA	Zero is out of sequence.
-Squared	A–Z → U+1F130	Uppercase only, lower case is converted to upper case first.
-NegativeCircled	A–Z → U+1F150, 1–9 → U+2776, 0 → U+24FF	Uppercase only, lower case is converted to upper case first. Zero is out of sequence.
-NegativeSquared	A–Z → U+1F170	Uppercase only, lower case is converted to upper case first; 🅰 🅱 🅾 🅿 render as emoji in many fonts.
-Parenthesized	a–z → U+249C, 1–9 → U+2474	No zero.
-Superscript / Subscript	Lookup table	Digits are complete (⁰–⁹, ₀–₉), but letters are partial: no superscript q, and only about half the subscript letters exist.
-SmallCaps	a–z → ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡxʏᴢ	Lookup table; x has no small-cap form.
-SegmentedDigits	0–9 → U+1FBF0	Seven-segment digits from Symbols for Legacy Computing; font support is still patchy.
-
-*/
 
 impl CharVariant {
     pub(super) fn conversion_callback(&self) -> Option<fn(char) -> char> {
@@ -69,7 +54,6 @@ impl CharVariant {
             CharVariant::Superscript => Some(convert_superscript),
             CharVariant::Subscript => Some(convert_subscript),
             CharVariant::SmallCaps => Some(convert_small_caps),
-            CharVariant::Fullwidth => todo!(),
         }
     }
     #[inline(always)]
