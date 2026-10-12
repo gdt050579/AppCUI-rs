@@ -2849,3 +2849,54 @@ fn check_char_variant_small_caps() {
     let actual = s.chars().map(callback).collect::<String>();
     compare_strings(&actual, expected);
 }
+
+#[test]
+fn check_write_text_with_char_variant() {
+    fn leet(c: char) -> char {
+        match c {
+            'o' | 'O' => '0',
+            'l' | 'L' => '1',
+            'e' | 'E' => '3',
+            _ => c,
+        }
+    }
+    let variants = [
+        ("None", CharVariant::None),
+        ("Uppercase", CharVariant::Uppercase),
+        ("Lowercase", CharVariant::Lowercase),
+        ("MathBold", CharVariant::MathBold),
+        ("MathItalic", CharVariant::MathItalic),
+        ("MathBoldItalic", CharVariant::MathBoldItalic),
+        ("Script", CharVariant::Script),
+        ("ScriptBold", CharVariant::ScriptBold),
+        ("Fraktur", CharVariant::Fraktur),
+        ("FrakturBold", CharVariant::FrakturBold),
+        ("DoubleStruck", CharVariant::DoubleStruck),
+        ("SansSerif", CharVariant::SansSerif),
+        ("SansSerifBold", CharVariant::SansSerifBold),
+        ("SansSerifItalic", CharVariant::SansSerifItalic),
+        ("SansSerifBoldItalic", CharVariant::SansSerifBoldItalic),
+        ("Monospace", CharVariant::Monospace),
+        ("Circled", CharVariant::Circled),
+        ("CircledNegative", CharVariant::CircledNegative),
+        ("Squared", CharVariant::Squared),
+        ("SquaredNegative", CharVariant::SquaredNegative),
+        ("Superscript", CharVariant::Superscript),
+        ("Subscript", CharVariant::Subscript),
+        ("SmallCaps", CharVariant::SmallCaps),
+        ("Custom", CharVariant::Custom(leet)),
+    ];
+    let mut s = SurfaceTester::new(50, variants.len() as u32);
+    for (index, (name, variant)) in variants.iter().enumerate() {
+        s.write_string(0, index as i32, name, CharAttribute::with_fore_color(Color::Gray), false);
+        let format = TextFormatBuilder::new()
+            .position(22, index as i32)
+            .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
+            .align(TextAlignment::Left)
+            .char_variant(*variant)
+            .build();
+        s.write_text("Hello World 2026", &format);
+    }
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xD5D714C0333B5C59);
+}
