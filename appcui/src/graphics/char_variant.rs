@@ -21,12 +21,10 @@ pub enum CharVariant {
     CircledNegative,
     Squared,
     SquaredNegative,
-    Parenthesized,
     Superscript,
     Subscript,
     SmallCaps,
     Fullwidth,
-    Braille,
     Custom(fn(char) -> char),
 }
 /*
@@ -68,12 +66,10 @@ impl CharVariant {
             CharVariant::CircledNegative => Some(convert_circled_negative),
             CharVariant::Squared => Some(convert_squared),
             CharVariant::SquaredNegative => Some(convert_squared_negative),
-            CharVariant::Parenthesized => todo!(),
             CharVariant::Superscript => Some(convert_superscript),
             CharVariant::Subscript => Some(convert_subscript),
-            CharVariant::SmallCaps => todo!(),
+            CharVariant::SmallCaps => Some(convert_small_caps),
             CharVariant::Fullwidth => todo!(),
-            CharVariant::Braille => todo!(),
         }
     }
     #[inline(always)]
@@ -408,6 +404,39 @@ fn convert_subscript(c: char) -> char {
         '=' => '₌',
         '(' => '₍',
         ')' => '₎',
+        _ => c,
+    }
+}
+
+#[inline]
+fn convert_small_caps(c: char) -> char {
+    match c {
+        'A'|'a' => 'ᴀ',
+        'B'|'b' => 'ʙ',
+        'C'|'c' => 'ᴄ',
+        'D'|'d' => 'ᴅ',
+        'E'|'e' => 'ᴇ',
+        'F'|'f' => 'ꜰ',
+        'G'|'g' => 'ɢ',
+        'H'|'h' => 'ʜ',
+        'I'|'i' => 'ɪ',
+        'J'|'j' => 'ᴊ',
+        'K'|'k' => 'ᴋ',
+        'L'|'l' => 'ʟ',
+        'M'|'m' => 'ᴍ',
+        'N'|'n' => 'ɴ',
+        'O'|'o' => 'ᴏ',
+        'P'|'p' => 'ᴘ',
+        'Q'|'q' => 'ꞯ',
+        'R'|'r' => 'ʀ',
+        'S'|'s' => 'ꜱ',
+        't' => 'ᴛ',
+        'U'|'u' => 'ᴜ',
+        'V'|'v' => 'ᴠ',
+        'W'|'w' => 'ᴡ',
+        // no small capital x
+        'Y'|'y' => 'ʏ',
+        'Z'|'z' => 'ᴢ',
         _ => c,
     }
 }
