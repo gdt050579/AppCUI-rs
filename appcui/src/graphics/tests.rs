@@ -2804,3 +2804,12 @@ fn check_char_variant_circled_negative() {
     let actual = s.chars().map(callback).collect::<String>();
     compare_strings(&actual, expected);
 }
+
+#[test]
+fn check_char_variant_squared() {
+    let callback = CharVariant::Squared.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
