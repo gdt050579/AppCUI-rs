@@ -2822,3 +2822,12 @@ fn check_char_variant_squared_negative() {
     let actual = s.chars().map(callback).collect::<String>();
     compare_strings(&actual, expected);
 }
+
+#[test]
+fn check_char_variant_superscript() {
+    let callback = CharVariant::Superscript.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=()";
+    let expected = "ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾQᴿˢᵀᵁⱽᵂˣʸᶻᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖqʳˢᵗᵘᵛʷˣʸᶻ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
