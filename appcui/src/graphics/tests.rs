@@ -2282,6 +2282,75 @@ fn check_box_junction_non_box_chars_contribute_nothing() {
     assert_eq!(BOX_JUNCTION.mask_of('\u{2580}'), 0);
 }
 
+// BOX_JUNCTION is a static built at compile time, so these tests call BoxJunction::new() at runtime.
+#[test]
+fn check_box_junction_new_matches_static_masks() {
+    let bj = super::box_junction::BoxJunction::new();
+    for cp in 0x2500u32..=0x257F {
+        let c = char::from_u32(cp).unwrap();
+        assert_eq!(bj.mask_of(c), BOX_JUNCTION.mask_of(c), "mask_of({c})");
+    }
+    for &(idx, n, e, s, w) in super::box_junction::BOX_JUNCTION_DEFS {
+        let c = char::from_u32(0x2500 + idx as u32).unwrap();
+        assert_eq!(bj.mask_of(c), super::box_junction::mask(n, e, s, w), "mask_of({c})");
+    }
+    // characters outside the box drawing block (and box drawing chars that are not defined) have no mask
+    assert_eq!(bj.mask_of('a'), 0);
+    assert_eq!(bj.mask_of('\u{24FF}'), 0);
+    assert_eq!(bj.mask_of('\u{2580}'), 0);
+    assert_eq!(bj.mask_of('╱'), 0);
+}
+
+#[test]
+fn check_box_junction_new_matches_static_resolve() {
+    let bj = super::box_junction::BoxJunction::new();
+    let chars = [' ', '─', '│', '━', '┃', '═', '║', '┌', '┏', '╔', '┼', '╋', '╬', '╴', '╹'];
+    for &l in &chars {
+        for &u in &chars {
+            for &r in &chars {
+                for &d in &chars {
+                    assert_eq!(bj.resolve(l, u, r, d), BOX_JUNCTION.resolve(l, u, r, d), "resolve({l},{u},{r},{d})");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn check_box_junction_new_exact_glyphs() {
+    let bj = super::box_junction::BoxJunction::new();
+    assert_eq!(bj.resolve('─', '│', '─', '│'), Some('┼'));
+    assert_eq!(bj.resolve('━', '┃', '━', '┃'), Some('╋'));
+    assert_eq!(bj.resolve('═', '║', '═', '║'), Some('╬'));
+    assert_eq!(bj.resolve('═', '│', '═', '│'), Some('╪'));
+    assert_eq!(bj.resolve('━', '│', '─', '│'), Some('┽'));
+    assert_eq!(bj.resolve(' ', ' ', '─', '│'), Some('┌'));
+    assert_eq!(bj.resolve('─', ' ', '─', ' '), Some('─'));
+    // less than two connections
+    assert_eq!(bj.resolve('─', ' ', ' ', ' '), None);
+    assert_eq!(bj.resolve(' ', ' ', ' ', ' '), None);
+}
+
+#[test]
+fn check_box_junction_new_coerces_missing_combinations() {
+    let bj = super::box_junction::BoxJunction::new();
+    // double + heavy have no combined glyphs, so the dominant weight wins
+    // 3 heavy + 1 double -> heavy
+    assert_eq!(bj.resolve('━', '║', '━', '┃'), Some('╋'));
+    // 3 double + 1 heavy -> double
+    assert_eq!(bj.resolve('═', '┃', '═', '║'), Some('╬'));
+    // tie between double and heavy -> double
+    assert_eq!(bj.resolve('━', '║', '━', '║'), Some('╬'));
+    // 3 double + 1 single (no glyph for that mix) -> double
+    assert_eq!(bj.resolve('═', '│', '═', '║'), Some('╬'));
+    // single, double and heavy mixed: single is the most common
+    assert_eq!(bj.resolve('─', '║', '━', '│'), Some('┼'));
+    // corner made of a double and a heavy line -> tie -> double
+    assert_eq!(bj.resolve(' ', ' ', '━', '║'), Some('╔'));
+    // every coerced result must still be identical to the compile-time table
+    assert_eq!(bj.resolve('━', '║', '━', '┃'), BOX_JUNCTION.resolve('━', '║', '━', '┃'));
+}
+
 #[test]
 fn check_box_junction_on_surface_rect_simple() {
     /*
@@ -2848,6 +2917,123 @@ fn check_char_variant_small_caps() {
     let expected = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱTᴜᴠᴡXʏᴢᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡxʏᴢ0123456789";
     let actual = s.chars().map(callback).collect::<String>();
     compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_map_none_returns_same_char() {
+    let v = CharVariant::None;
+    for c in ['a', 'Z', '0', ' ', '!', 'ă', '╬', '😀'] {
+        assert_eq!(v.map(c), c);
+    }
+    assert_eq!(CharVariant::default().map('x'), 'x');
+}
+
+#[test]
+fn check_char_variant_map_custom() {
+    fn swap_ab(c: char) -> char {
+        match c {
+            'a' => 'b',
+            'b' => 'a',
+            _ => c,
+        }
+    }
+    let v = CharVariant::Custom(swap_ab);
+    assert_eq!(v.map('a'), 'b');
+    assert_eq!(v.map('b'), 'a');
+    assert_eq!(v.map('c'), 'c');
+    let s: String = "abba cab".chars().map(|c| v.map(c)).collect();
+    assert_eq!(s, "baab cba");
+}
+
+#[test]
+fn check_char_variant_map_single_chars() {
+    assert_eq!(CharVariant::Uppercase.map('a'), 'A');
+    assert_eq!(CharVariant::Lowercase.map('A'), 'a');
+    assert_eq!(CharVariant::MathBold.map('A'), '𝐀');
+    assert_eq!(CharVariant::MathItalic.map('h'), 'ℎ');
+    assert_eq!(CharVariant::Script.map('B'), 'ℬ');
+    assert_eq!(CharVariant::Fraktur.map('C'), 'ℭ');
+    assert_eq!(CharVariant::DoubleStruck.map('R'), 'ℝ');
+    assert_eq!(CharVariant::Monospace.map('0'), '𝟶');
+    assert_eq!(CharVariant::Circled.map('0'), '⓪');
+    assert_eq!(CharVariant::Circled.map('1'), '①');
+    assert_eq!(CharVariant::CircledNegative.map('0'), '⓿');
+    assert_eq!(CharVariant::Squared.map('a'), '🄰');
+    assert_eq!(CharVariant::SquaredNegative.map('A'), '🅰');
+    assert_eq!(CharVariant::Superscript.map('2'), '²');
+    assert_eq!(CharVariant::Subscript.map('2'), '₂');
+    assert_eq!(CharVariant::SmallCaps.map('a'), 'ᴀ');
+}
+
+#[test]
+fn check_char_variant_map_keeps_unmapped_chars() {
+    let variants = [
+        CharVariant::MathBold,
+        CharVariant::MathItalic,
+        CharVariant::MathBoldItalic,
+        CharVariant::Script,
+        CharVariant::ScriptBold,
+        CharVariant::Fraktur,
+        CharVariant::FrakturBold,
+        CharVariant::DoubleStruck,
+        CharVariant::SansSerif,
+        CharVariant::SansSerifBold,
+        CharVariant::SansSerifItalic,
+        CharVariant::SansSerifBoldItalic,
+        CharVariant::Monospace,
+        CharVariant::Circled,
+        CharVariant::CircledNegative,
+        CharVariant::Squared,
+        CharVariant::SquaredNegative,
+        CharVariant::Superscript,
+        CharVariant::Subscript,
+        CharVariant::SmallCaps,
+    ];
+    for v in variants {
+        for c in [' ', '!', '.', ',', '╬', '😀', 'ă'] {
+            assert_eq!(v.map(c), c, "{v:?} should not change {c:?}");
+        }
+    }
+}
+
+#[test]
+fn check_char_variant_map_matches_conversion_callback() {
+    fn star(_: char) -> char {
+        '*'
+    }
+    let variants = [
+        CharVariant::Uppercase,
+        CharVariant::Lowercase,
+        CharVariant::MathBold,
+        CharVariant::MathItalic,
+        CharVariant::MathBoldItalic,
+        CharVariant::Script,
+        CharVariant::ScriptBold,
+        CharVariant::Fraktur,
+        CharVariant::FrakturBold,
+        CharVariant::DoubleStruck,
+        CharVariant::SansSerif,
+        CharVariant::SansSerifBold,
+        CharVariant::SansSerifItalic,
+        CharVariant::SansSerifBoldItalic,
+        CharVariant::Monospace,
+        CharVariant::Circled,
+        CharVariant::CircledNegative,
+        CharVariant::Squared,
+        CharVariant::SquaredNegative,
+        CharVariant::Superscript,
+        CharVariant::Subscript,
+        CharVariant::SmallCaps,
+        CharVariant::Custom(star),
+    ];
+    for v in variants {
+        let callback = v.conversion_callback().unwrap();
+        for cp in 0x20u32..0x7F {
+            let c = char::from_u32(cp).unwrap();
+            assert_eq!(v.map(c), callback(c), "{v:?} on {c:?}");
+        }
+    }
+    assert!(CharVariant::None.conversion_callback().is_none());
 }
 
 #[test]
