@@ -1,29 +1,83 @@
+/// A stylistic transform applied to characters when text is drawn.
+///
+/// Each variant maps letters and, where a Unicode form exists, digits into a
+/// matching alphabet (mathematical alphanumeric symbols, circled letters, and
+/// similar). A character with no mapping in that variant is returned unchanged.
+/// [`CharVariant::None`] is the default and leaves every character as it is.
+///
+/// Set a variant with [`TextFormatBuilder::char_variant`](super::TextFormatBuilder::char_variant)
+/// so text written with that [`TextFormat`](super::TextFormat) is converted as it
+/// is drawn. [`CharVariant::map`] applies the same conversion to a single character.
+///
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+///
+/// assert_eq!(CharVariant::MathBold.map('A'), '𝐀');
+/// assert_eq!(CharVariant::Superscript.map('2'), '²');
+/// assert_eq!(CharVariant::None.map('A'), 'A');
+/// ```
 #[derive(Copy, Clone, Debug, Default)]
 pub enum CharVariant {
+    /// Leave every character unchanged. This is the default.
     #[default]
     None,
+    /// Unicode uppercase, keeping the first character of a multi-character expansion (`ß` becomes `S`).
     Uppercase,
+    /// Unicode lowercase, keeping the first character of a multi-character expansion.
     Lowercase,
+    /// Mathematical bold letters and digits: `A` → `𝐀`, `a` → `𝐚`, `0` → `𝟎`.
     MathBold,
+    /// Mathematical italic letters: `A` → `𝐴`, `a` → `𝑎`. The letter `h` is `ℎ` (U+210E). Digits stay unchanged.
     MathItalic,
+    /// Mathematical bold-italic letters: `A` → `𝑨`, `a` → `𝒂`. Digits use the mathematical bold forms (`𝟎`–`𝟗`).
     MathBoldItalic,
+    /// Mathematical script letters: `A` → `𝒜`, `B` → `ℬ`, `a` → `𝒶`. Digits stay unchanged.
     Script,
+    /// Mathematical bold-script letters: `A` → `𝓐`, `a` → `𝓪`. Digits use the mathematical bold forms (`𝟎`–`𝟗`).
     ScriptBold,
+    /// Mathematical fraktur letters: `A` → `𝔄`, `C` → `ℭ`, `a` → `𝔞`. Digits stay unchanged.
     Fraktur,
+    /// Mathematical bold-fraktur letters: `A` → `𝕬`, `a` → `𝖆`. Digits use the mathematical bold forms (`𝟎`–`𝟗`).
     FrakturBold,
+    /// Mathematical double-struck letters and digits: `R` → `ℝ`, `a` → `𝕒`, `0` → `𝟘`.
     DoubleStruck,
+    /// Mathematical sans-serif letters and digits: `A` → `𝖠`, `a` → `𝖺`, `0` → `𝟢`.
     SansSerif,
+    /// Mathematical sans-serif bold letters and digits: `A` → `𝗔`, `a` → `𝗮`, `0` → `𝟬`.
     SansSerifBold,
+    /// Mathematical sans-serif italic letters: `A` → `𝘈`, `a` → `𝘢`. Digits use the sans-serif forms (`𝟢`–`𝟫`).
     SansSerifItalic,
+    /// Mathematical sans-serif bold-italic letters: `A` → `𝘼`, `a` → `𝙖`. Digits use the sans-serif bold forms (`𝟬`–`𝟵`).
     SansSerifBoldItalic,
+    /// Mathematical monospace letters and digits: `A` → `𝙰`, `a` → `𝚊`, `0` → `𝟶`.
     Monospace,
+    /// Circled letters and digits: `A` → `Ⓐ`, `a` → `ⓐ`, `0` → `⓪`, `1` → `①`.
     Circled,
+    /// Negative circled capitals and digits: `A` and `a` → `🅐`, `0` → `⓿`, `1` → `❶`.
     CircledNegative,
+    /// Squared capitals: `A` and `a` → `🄰`. Digits stay unchanged.
     Squared,
+    /// Negative squared capitals: `A` and `a` → `🅰`. Digits stay unchanged.
     SquaredNegative,
+    /// Superscript letters, digits, and `+`, `-`, `=`, `(`, `)`.
+    ///
+    /// `C`, `F`, `S`, `X`, `Y`, and `Z` use the lowercase superscript (`C` → `ᶜ`).
+    /// `Q` and `q` stay unchanged.
     Superscript,
+    /// Subscript digits, `+`, `-`, `=`, `(`, `)`, and the letters that have a subscript form.
+    ///
+    /// Both cases share one form (`A` and `a` → `ₐ`). Letters without a subscript
+    /// (`b`, `c`, `d`, `f`, `g`, `q`, `w`, `y`, `z`, and the matching capitals) stay unchanged.
     Subscript,
+    /// Small capitals for both cases: `A` and `a` → `ᴀ`, `t` → `ᴛ`.
+    ///
+    /// Uppercase `T` stays `T`. `X` and `x` stay unchanged. Digits stay unchanged.
     SmallCaps,
+    /// A caller-supplied `fn(char) -> char` applied to each character.
+    ///
+    /// The value is a function pointer, so it cannot capture its environment.
+    /// Return the input character when it should stay unchanged.
     Custom(fn(char) -> char),
 }
 
@@ -56,6 +110,27 @@ impl CharVariant {
             CharVariant::SmallCaps => Some(convert_small_caps),
         }
     }
+    /// Returns `ch` converted by this variant.
+    ///
+    /// [`CharVariant::None`] returns `ch`. Every other variant returns the styled
+    /// character, or `ch` when that character has no mapping.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// assert_eq!(CharVariant::Circled.map('1'), '①');
+    /// assert_eq!(CharVariant::Circled.map('!'), '!');
+    ///
+    /// fn swap_ab(c: char) -> char {
+    ///     match c {
+    ///         'a' => 'b',
+    ///         'b' => 'a',
+    ///         _ => c,
+    ///     }
+    /// }
+    /// assert_eq!(CharVariant::Custom(swap_ab).map('a'), 'b');
+    /// ```
     #[inline(always)]
     pub fn map(&self, ch: char) -> char {
         if let Some(cbk) = self.conversion_callback() {
