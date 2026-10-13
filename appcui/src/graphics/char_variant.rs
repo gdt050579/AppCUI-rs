@@ -229,7 +229,7 @@ fn convert_bold_script(c: char) -> char {
         _ => c,
     }
 }
-
+    
 #[inline]
 fn convert_fraktur(c: char) -> char {
     match c {
