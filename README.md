@@ -54,6 +54,12 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 * [Documentation](https://docs.rs/appcui)
 * [Gallery](https://gdt050579.github.io/AppCUI-rs/gallery/screenshots.html)
 
+## 📸 Screenshots 
+
+<img src="https://github.com/gdt050579/AppCUI-rs/raw/main/docs/chapter-1/img/appcui-rs-demo.gif" align="center" />
+
+👉 **Check out the [Gallery](https://gdt050579.github.io/AppCUI-rs/gallery/screenshots.html) for full demos of all controls!**
+
 
 ## ✨ Features
 - [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, bar charts, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
@@ -143,11 +149,6 @@ AppCUI-rs ships with a rich set of controls and widgets for building terminal us
 - **ToolTip** — hover hint text
 - **ProgressBar** — task progress indicator
 
-## 📸 Screenshots 
-
-<img src="https://github.com/gdt050579/AppCUI-rs/raw/main/docs/chapter-1/img/appcui-rs-demo.gif" align="center" />
-
-👉 **Check out the [Gallery](https://gdt050579.github.io/AppCUI-rs/gallery/screenshots.html) for full demos of all controls!**
 
 ## 🖥️ Backends
 
