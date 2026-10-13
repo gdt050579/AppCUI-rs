@@ -1608,12 +1608,14 @@ impl Surface {
         };
         let right_margin = left_margin + (width as i32);
         let mut c = Character::with_attributes(' ', format.char_attr);
+        let char_map = format.char_variant.conversion_callback();
 
         if format.has_hotkey() {
             let hkpos = format.hotkey_pos as usize;
             for (cpos, ch) in (ch_index..).zip(text.chars()) {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
+                        let ch = char_map.map(|f| f(ch)).unwrap_or(ch);
                         if cpos == hkpos {
                             self.chars[pos].set(Character::with_attributes(ch, format.hotkey_attr));
                         } else {
@@ -1628,7 +1630,7 @@ impl Surface {
             for (_, ch) in (ch_index..).zip(text.chars()) {
                 if (x >= left_margin) && (x < right_margin) {
                     if let Some(pos) = self.coords_to_position(x, y) {
-                        c.code = ch;
+                        c.code = char_map.map(|f| f(ch)).unwrap_or(ch);
                         self.chars[pos].set(c);
                     }
                 }

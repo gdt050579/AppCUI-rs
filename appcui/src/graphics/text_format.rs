@@ -1,4 +1,4 @@
-use crate::utils::Caption;
+use crate::{graphics::CharVariant, utils::Caption};
 
 use super::CharAttribute;
 use EnumBitFlags::EnumBitFlags;
@@ -58,6 +58,7 @@ pub struct TextFormat {
     pub(super) chars_count: u16,
     pub(crate) align: TextAlignment,
     pub(crate) wrap_type: WrapType,
+    pub(crate) char_variant: CharVariant,
 }
 
 impl TextFormat {
@@ -118,6 +119,12 @@ impl TextFormat {
         self.flags.set(TextFormatFlags::CharsCount);
     }
 
+    /// Sets the character variant of the text. It can be None, Uppercase, Lowercase, MathBold, MathItalic, MathBoldItalic, Script, ScriptBold, Fraktur, FrakturBold, DoubleStruck, SansSerif, SansSerifBold, SansSerifItalic, SansSerifBoldItalic, Monospace, Circled, CircledNegative, Squared, SquaredNegative, Superscript, Subscript, SmallCaps.
+    #[inline(always)]
+    pub fn set_char_variant(&mut self, char_variant: CharVariant) {
+        self.char_variant = char_variant;
+    }
+
     // inner methods
     #[inline(always)]
     pub(crate) fn width(&self) -> u16 {
@@ -148,6 +155,7 @@ impl Default for TextFormat {
     /// - `chars_count`: 0
     /// - `align`: TextAlignment::Left
     /// - `wrap_type`: WrapType::SingleLine 
+    /// - `char_variant`: CharVariant::None
     fn default() -> Self {
         Self {
             flags: TextFormatFlags::None,
@@ -159,6 +167,7 @@ impl Default for TextFormat {
             chars_count: 0,
             align: TextAlignment::Left,
             wrap_type: WrapType::SingleLine,
+            char_variant: CharVariant::None,
         }
     }
 }
@@ -229,6 +238,13 @@ impl TextFormatBuilder {
     #[inline(always)]
     pub fn wrap_type(mut self, wrap_type: WrapType) -> Self {
         self.format.set_wrap_type(wrap_type);
+        self
+    }
+
+    /// Sets the character variant of the text. It can be None, Uppercase, Lowercase, MathBold, MathItalic, MathBoldItalic, Script, ScriptBold, Fraktur, FrakturBold, DoubleStruck, SansSerif, SansSerifBold, SansSerifItalic, SansSerifBoldItalic, Monospace, Circled, CircledNegative, Squared, SquaredNegative, Superscript, Subscript, SmallCaps.
+    #[inline(always)]
+    pub fn char_variant(mut self, char_variant: CharVariant) -> Self {
+        self.format.char_variant = char_variant;
         self
     }
 

@@ -3,6 +3,7 @@ use std::str::FromStr;
 use appcui_proc_macro::*;
 
 use crate::graphics::BOX_JUNCTION;
+use crate::graphics::CharVariant;
 use crate::graphics::text_format::TextFormatBuilder;
 use crate::graphics::Point;
 use crate::graphics::Rect;
@@ -2281,6 +2282,75 @@ fn check_box_junction_non_box_chars_contribute_nothing() {
     assert_eq!(BOX_JUNCTION.mask_of('\u{2580}'), 0);
 }
 
+// BOX_JUNCTION is a static built at compile time, so these tests call BoxJunction::new() at runtime.
+#[test]
+fn check_box_junction_new_matches_static_masks() {
+    let bj = super::box_junction::BoxJunction::new();
+    for cp in 0x2500u32..=0x257F {
+        let c = char::from_u32(cp).unwrap();
+        assert_eq!(bj.mask_of(c), BOX_JUNCTION.mask_of(c), "mask_of({c})");
+    }
+    for &(idx, n, e, s, w) in super::box_junction::BOX_JUNCTION_DEFS {
+        let c = char::from_u32(0x2500 + idx as u32).unwrap();
+        assert_eq!(bj.mask_of(c), super::box_junction::mask(n, e, s, w), "mask_of({c})");
+    }
+    // characters outside the box drawing block (and box drawing chars that are not defined) have no mask
+    assert_eq!(bj.mask_of('a'), 0);
+    assert_eq!(bj.mask_of('\u{24FF}'), 0);
+    assert_eq!(bj.mask_of('\u{2580}'), 0);
+    assert_eq!(bj.mask_of('╱'), 0);
+}
+
+#[test]
+fn check_box_junction_new_matches_static_resolve() {
+    let bj = super::box_junction::BoxJunction::new();
+    let chars = [' ', '─', '│', '━', '┃', '═', '║', '┌', '┏', '╔', '┼', '╋', '╬', '╴', '╹'];
+    for &l in &chars {
+        for &u in &chars {
+            for &r in &chars {
+                for &d in &chars {
+                    assert_eq!(bj.resolve(l, u, r, d), BOX_JUNCTION.resolve(l, u, r, d), "resolve({l},{u},{r},{d})");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn check_box_junction_new_exact_glyphs() {
+    let bj = super::box_junction::BoxJunction::new();
+    assert_eq!(bj.resolve('─', '│', '─', '│'), Some('┼'));
+    assert_eq!(bj.resolve('━', '┃', '━', '┃'), Some('╋'));
+    assert_eq!(bj.resolve('═', '║', '═', '║'), Some('╬'));
+    assert_eq!(bj.resolve('═', '│', '═', '│'), Some('╪'));
+    assert_eq!(bj.resolve('━', '│', '─', '│'), Some('┽'));
+    assert_eq!(bj.resolve(' ', ' ', '─', '│'), Some('┌'));
+    assert_eq!(bj.resolve('─', ' ', '─', ' '), Some('─'));
+    // less than two connections
+    assert_eq!(bj.resolve('─', ' ', ' ', ' '), None);
+    assert_eq!(bj.resolve(' ', ' ', ' ', ' '), None);
+}
+
+#[test]
+fn check_box_junction_new_coerces_missing_combinations() {
+    let bj = super::box_junction::BoxJunction::new();
+    // double + heavy have no combined glyphs, so the dominant weight wins
+    // 3 heavy + 1 double -> heavy
+    assert_eq!(bj.resolve('━', '║', '━', '┃'), Some('╋'));
+    // 3 double + 1 heavy -> double
+    assert_eq!(bj.resolve('═', '┃', '═', '║'), Some('╬'));
+    // tie between double and heavy -> double
+    assert_eq!(bj.resolve('━', '║', '━', '║'), Some('╬'));
+    // 3 double + 1 single (no glyph for that mix) -> double
+    assert_eq!(bj.resolve('═', '│', '═', '║'), Some('╬'));
+    // single, double and heavy mixed: single is the most common
+    assert_eq!(bj.resolve('─', '║', '━', '│'), Some('┼'));
+    // corner made of a double and a heavy line -> tie -> double
+    assert_eq!(bj.resolve(' ', ' ', '━', '║'), Some('╔'));
+    // every coerced result must still be identical to the compile-time table
+    assert_eq!(bj.resolve('━', '║', '━', '┃'), BOX_JUNCTION.resolve('━', '║', '━', '┃'));
+}
+
 #[test]
 fn check_box_junction_on_surface_rect_simple() {
     /*
@@ -2638,4 +2708,434 @@ fn check_polyline_format_getters_setters() {
     assert!(format.end_attr().is_none());
     assert!(format.joint().is_none());
     assert!(format.joint_attr().is_none());
+}
+
+#[test]
+fn check_char_variant_upper_case() {
+    let callback = CharVariant::Uppercase.conversion_callback().unwrap();
+    for i in 'a'..='z' {
+        assert_eq!(callback(i), i.to_uppercase().next().unwrap_or(i));
+    }
+}
+
+#[test]
+fn check_char_variant_lower_case() {
+    let callback = CharVariant::Lowercase.conversion_callback().unwrap();
+    for i in 'A'..='Z' {
+        assert_eq!(callback(i), i.to_lowercase().next().unwrap_or(i));
+    }
+}
+
+fn compare_strings(s1: &str, s2: &str) {
+    assert_eq!(s1.chars().count(), s2.chars().count(), "Expcting string with the same number of characters but got: {} and {}",s1,s2);
+    let mut i1 = s1.chars();
+    let mut i2 = s2.chars();
+    let mut index = 0;
+    while let Some(c1) = i1.next() {
+        let c2 = i2.next().unwrap();
+        assert_eq!(c1,c2,"Characters don't match {} with {} (at index {}) for S1={} and S2={}",c1,c2,index,s1,s2);
+        index += 1;
+    }
+}
+
+#[test]
+fn check_char_variant_math_bold() {
+    let callback = CharVariant::MathBold.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝐀𝐁𝐂𝐃𝐄𝐅𝐆𝐇𝐈𝐉𝐊𝐋𝐌𝐍𝐎𝐏𝐐𝐑𝐒𝐓𝐔𝐕𝐖𝐗𝐘𝐙𝐚𝐛𝐜𝐝𝐞𝐟𝐠𝐡𝐢𝐣𝐤𝐥𝐦𝐧𝐨𝐩𝐪𝐫𝐬𝐭𝐮𝐯𝐰𝐱𝐲𝐳𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_math_italic() {
+    let callback = CharVariant::MathItalic.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝐴𝐵𝐶𝐷𝐸𝐹𝐺𝐻𝐼𝐽𝐾𝐿𝑀𝑁𝑂𝑃𝑄𝑅𝑆𝑇𝑈𝑉𝑊𝑋𝑌𝑍𝑎𝑏𝑐𝑑𝑒𝑓𝑔ℎ𝑖𝑗𝑘𝑙𝑚𝑛𝑜𝑝𝑞𝑟𝑠𝑡𝑢𝑣𝑤𝑥𝑦𝑧0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_math_bold_italic() {
+    let callback = CharVariant::MathBoldItalic.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝑨𝑩𝑪𝑫𝑬𝑭𝑮𝑯𝑰𝑱𝑲𝑳𝑴𝑵𝑶𝑷𝑸𝑹𝑺𝑻𝑼𝑽𝑾𝑿𝒀𝒁𝒂𝒃𝒄𝒅𝒆𝒇𝒈𝒉𝒊𝒋𝒌𝒍𝒎𝒏𝒐𝒑𝒒𝒓𝒔𝒕𝒖𝒗𝒘𝒙𝒚𝒛𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_script() {
+    let callback = CharVariant::Script.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵𝒶𝒷𝒸𝒹ℯ𝒻ℊ𝒽𝒾𝒿𝓀𝓁𝓂𝓃ℴ𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_bold_script() {
+    let callback = CharVariant::ScriptBold.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝓐𝓑𝓒𝓓𝓔𝓕𝓖𝓗𝓘𝓙𝓚𝓛𝓜𝓝𝓞𝓟𝓠𝓡𝓢𝓣𝓤𝓥𝓦𝓧𝓨𝓩𝓪𝓫𝓬𝓭𝓮𝓯𝓰𝓱𝓲𝓳𝓴𝓵𝓶𝓷𝓸𝓹𝓺𝓻𝓼𝓽𝓾𝓿𝔀𝔁𝔂𝔃𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_fraktur() {
+    let callback = CharVariant::Fraktur.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_bold_fraktur() {
+    let callback = CharVariant::FrakturBold.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝕬𝕭𝕮𝕯𝕰𝕱𝕲𝕳𝕴𝕵𝕶𝕷𝕸𝕹𝕺𝕻𝕼𝕽𝕾𝕿𝖀𝖁𝖂𝖃𝖄𝖅𝖆𝖇𝖈𝖉𝖊𝖋𝖌𝖍𝖎𝖏𝖐𝖑𝖒𝖓𝖔𝖕𝖖𝖗𝖘𝖙𝖚𝖛𝖜𝖝𝖞𝖟𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_double_struck() {
+    let callback = CharVariant::DoubleStruck.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ𝕒𝕓𝕔𝕕𝕖𝕗𝕘𝕙𝕚𝕛𝕜𝕝𝕞𝕟𝕠𝕡𝕢𝕣𝕤𝕥𝕦𝕧𝕨𝕩𝕪𝕫𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_sans_serif() {
+    let callback = CharVariant::SansSerif.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝖠𝖡𝖢𝖣𝖤𝖥𝖦𝖧𝖨𝖩𝖪𝖫𝖬𝖭𝖮𝖯𝖰𝖱𝖲𝖳𝖴𝖵𝖶𝖷𝖸𝖹𝖺𝖻𝖼𝖽𝖾𝖿𝗀𝗁𝗂𝗃𝗄𝗅𝗆𝗇𝗈𝗉𝗊𝗋𝗌𝗍𝗎𝗏𝗐𝗑𝗒𝗓𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_sans_serif_bold() {
+    let callback = CharVariant::SansSerifBold.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_sans_serif_italic() {
+    let callback = CharVariant::SansSerifItalic.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_sans_serif_bold_italic() {
+    let callback = CharVariant::SansSerifBoldItalic.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝘼𝘽𝘾𝘿𝙀𝙁𝙂𝙃𝙄𝙅𝙆𝙇𝙈𝙉𝙊𝙋𝙌𝙍𝙎𝙏𝙐𝙑𝙒𝙓𝙔𝙕𝙖𝙗𝙘𝙙𝙚𝙛𝙜𝙝𝙞𝙟𝙠𝙡𝙢𝙣𝙤𝙥𝙦𝙧𝙨𝙩𝙪𝙫𝙬𝙭𝙮𝙯𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+
+#[test]
+fn check_char_variant_monospace() {
+    let callback = CharVariant::Monospace.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_circled() {
+    let callback = CharVariant::Circled.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ⓪①②③④⑤⑥⑦⑧⑨";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_circled_negative() {
+    let callback = CharVariant::CircledNegative.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "🅐🅑🅒🅓🅔🅕🅖🅗🅘🅙🅚🅛🅜🅝🅞🅟🅠🅡🅢🅣🅤🅥🅦🅧🅨🅩🅐🅑🅒🅓🅔🅕🅖🅗🅘🅙🅚🅛🅜🅝🅞🅟🅠🅡🅢🅣🅤🅥🅦🅧🅨🅩⓿❶❷❸❹❺❻❼❽❾";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_squared() {
+    let callback = CharVariant::Squared.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉🄰🄱🄲🄳🄴🄵🄶🄷🄸🄹🄺🄻🄼🄽🄾🄿🅀🅁🅂🅃🅄🅅🅆🅇🅈🅉0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_squared_negative() {
+    let callback = CharVariant::SquaredNegative.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉🅰🅱🅲🅳🅴🅵🅶🅷🅸🅹🅺🅻🅼🅽🅾🅿🆀🆁🆂🆃🆄🆅🆆🆇🆈🆉0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_superscript() {
+    let callback = CharVariant::Superscript.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=()";
+    let expected = "ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾQᴿˢᵀᵁⱽᵂˣʸᶻᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖqʳˢᵗᵘᵛʷˣʸᶻ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁼⁽⁾";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_subscript() {
+    let callback = CharVariant::Subscript.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=()";
+    let expected = "ₐBCDₑFGₕᵢⱼₖₗₘₙₒₚQᵣₛₜᵤᵥWₓYZₐbcdₑfgₕᵢⱼₖₗₘₙₒₚqᵣₛₜᵤᵥwₓyz₀₁₂₃₄₅₆₇₈₉₊₋₌₍₎";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_small_caps() {
+    let callback = CharVariant::SmallCaps.conversion_callback().unwrap();
+    let s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let expected = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱTᴜᴠᴡXʏᴢᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘꞯʀꜱᴛᴜᴠᴡxʏᴢ0123456789";
+    let actual = s.chars().map(callback).collect::<String>();
+    compare_strings(&actual, expected);
+}
+
+#[test]
+fn check_char_variant_map_none_returns_same_char() {
+    let v = CharVariant::None;
+    for c in ['a', 'Z', '0', ' ', '!', 'ă', '╬', '😀'] {
+        assert_eq!(v.map(c), c);
+    }
+    assert_eq!(CharVariant::default().map('x'), 'x');
+}
+
+#[test]
+fn check_char_variant_map_custom() {
+    fn swap_ab(c: char) -> char {
+        match c {
+            'a' => 'b',
+            'b' => 'a',
+            _ => c,
+        }
+    }
+    let v = CharVariant::Custom(swap_ab);
+    assert_eq!(v.map('a'), 'b');
+    assert_eq!(v.map('b'), 'a');
+    assert_eq!(v.map('c'), 'c');
+    let s: String = "abba cab".chars().map(|c| v.map(c)).collect();
+    assert_eq!(s, "baab cba");
+}
+
+#[test]
+fn check_char_variant_map_single_chars() {
+    assert_eq!(CharVariant::Uppercase.map('a'), 'A');
+    assert_eq!(CharVariant::Lowercase.map('A'), 'a');
+    assert_eq!(CharVariant::MathBold.map('A'), '𝐀');
+    assert_eq!(CharVariant::MathItalic.map('h'), 'ℎ');
+    assert_eq!(CharVariant::Script.map('B'), 'ℬ');
+    assert_eq!(CharVariant::Fraktur.map('C'), 'ℭ');
+    assert_eq!(CharVariant::DoubleStruck.map('R'), 'ℝ');
+    assert_eq!(CharVariant::Monospace.map('0'), '𝟶');
+    assert_eq!(CharVariant::Circled.map('0'), '⓪');
+    assert_eq!(CharVariant::Circled.map('1'), '①');
+    assert_eq!(CharVariant::CircledNegative.map('0'), '⓿');
+    assert_eq!(CharVariant::Squared.map('a'), '🄰');
+    assert_eq!(CharVariant::SquaredNegative.map('A'), '🅰');
+    assert_eq!(CharVariant::Superscript.map('2'), '²');
+    assert_eq!(CharVariant::Subscript.map('2'), '₂');
+    assert_eq!(CharVariant::SmallCaps.map('a'), 'ᴀ');
+}
+
+#[test]
+fn check_char_variant_map_keeps_unmapped_chars() {
+    let variants = [
+        CharVariant::MathBold,
+        CharVariant::MathItalic,
+        CharVariant::MathBoldItalic,
+        CharVariant::Script,
+        CharVariant::ScriptBold,
+        CharVariant::Fraktur,
+        CharVariant::FrakturBold,
+        CharVariant::DoubleStruck,
+        CharVariant::SansSerif,
+        CharVariant::SansSerifBold,
+        CharVariant::SansSerifItalic,
+        CharVariant::SansSerifBoldItalic,
+        CharVariant::Monospace,
+        CharVariant::Circled,
+        CharVariant::CircledNegative,
+        CharVariant::Squared,
+        CharVariant::SquaredNegative,
+        CharVariant::Superscript,
+        CharVariant::Subscript,
+        CharVariant::SmallCaps,
+    ];
+    for v in variants {
+        for c in [' ', '!', '.', ',', '╬', '😀', 'ă'] {
+            assert_eq!(v.map(c), c, "{v:?} should not change {c:?}");
+        }
+    }
+}
+
+#[test]
+fn check_char_variant_map_matches_conversion_callback() {
+    fn star(_: char) -> char {
+        '*'
+    }
+    let variants = [
+        CharVariant::Uppercase,
+        CharVariant::Lowercase,
+        CharVariant::MathBold,
+        CharVariant::MathItalic,
+        CharVariant::MathBoldItalic,
+        CharVariant::Script,
+        CharVariant::ScriptBold,
+        CharVariant::Fraktur,
+        CharVariant::FrakturBold,
+        CharVariant::DoubleStruck,
+        CharVariant::SansSerif,
+        CharVariant::SansSerifBold,
+        CharVariant::SansSerifItalic,
+        CharVariant::SansSerifBoldItalic,
+        CharVariant::Monospace,
+        CharVariant::Circled,
+        CharVariant::CircledNegative,
+        CharVariant::Squared,
+        CharVariant::SquaredNegative,
+        CharVariant::Superscript,
+        CharVariant::Subscript,
+        CharVariant::SmallCaps,
+        CharVariant::Custom(star),
+    ];
+    for v in variants {
+        let callback = v.conversion_callback().unwrap();
+        for cp in 0x20u32..0x7F {
+            let c = char::from_u32(cp).unwrap();
+            assert_eq!(v.map(c), callback(c), "{v:?} on {c:?}");
+        }
+    }
+    assert!(CharVariant::None.conversion_callback().is_none());
+}
+
+#[test]
+fn check_write_text_with_char_variant() {
+    fn leet(c: char) -> char {
+        match c {
+            'o' | 'O' => '0',
+            'l' | 'L' => '1',
+            'e' | 'E' => '3',
+            _ => c,
+        }
+    }
+    let variants = [
+        ("None", CharVariant::None),
+        ("Uppercase", CharVariant::Uppercase),
+        ("Lowercase", CharVariant::Lowercase),
+        ("MathBold", CharVariant::MathBold),
+        ("MathItalic", CharVariant::MathItalic),
+        ("MathBoldItalic", CharVariant::MathBoldItalic),
+        ("Script", CharVariant::Script),
+        ("ScriptBold", CharVariant::ScriptBold),
+        ("Fraktur", CharVariant::Fraktur),
+        ("FrakturBold", CharVariant::FrakturBold),
+        ("DoubleStruck", CharVariant::DoubleStruck),
+        ("SansSerif", CharVariant::SansSerif),
+        ("SansSerifBold", CharVariant::SansSerifBold),
+        ("SansSerifItalic", CharVariant::SansSerifItalic),
+        ("SansSerifBoldItalic", CharVariant::SansSerifBoldItalic),
+        ("Monospace", CharVariant::Monospace),
+        ("Circled", CharVariant::Circled),
+        ("CircledNegative", CharVariant::CircledNegative),
+        ("Squared", CharVariant::Squared),
+        ("SquaredNegative", CharVariant::SquaredNegative),
+        ("Superscript", CharVariant::Superscript),
+        ("Subscript", CharVariant::Subscript),
+        ("SmallCaps", CharVariant::SmallCaps),
+        ("Custom", CharVariant::Custom(leet)),
+    ];
+    let mut s = SurfaceTester::new(50, variants.len() as u32);
+    for (index, (name, variant)) in variants.iter().enumerate() {
+        s.write_string(0, index as i32, name, CharAttribute::with_fore_color(Color::Gray), false);
+        let format = TextFormatBuilder::new()
+            .position(22, index as i32)
+            .attribute(CharAttribute::with_color(Color::Yellow, Color::DarkBlue))
+            .align(TextAlignment::Left)
+            .char_variant(*variant)
+            .build();
+        s.write_text("Hello World 2026", &format);
+    }
+    //s.print(false);
+    assert_eq!(s.compute_hash(), 0xD5D714C0333B5C59);
+}
+
+#[test]
+fn check_text_format_set_char_variant() {
+    fn star(_: char) -> char {
+        '*'
+    }
+    let variants = [
+        CharVariant::Uppercase,
+        CharVariant::Lowercase,
+        CharVariant::MathBold,
+        CharVariant::MathItalic,
+        CharVariant::MathBoldItalic,
+        CharVariant::Script,
+        CharVariant::ScriptBold,
+        CharVariant::Fraktur,
+        CharVariant::FrakturBold,
+        CharVariant::DoubleStruck,
+        CharVariant::SansSerif,
+        CharVariant::SansSerifBold,
+        CharVariant::SansSerifItalic,
+        CharVariant::SansSerifBoldItalic,
+        CharVariant::Monospace,
+        CharVariant::Circled,
+        CharVariant::CircledNegative,
+        CharVariant::Squared,
+        CharVariant::SquaredNegative,
+        CharVariant::Superscript,
+        CharVariant::Subscript,
+        CharVariant::SmallCaps,
+        CharVariant::Custom(star),
+        CharVariant::None,
+    ];
+    let attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
+    let mut format = TextFormatBuilder::new()
+        .position(4, 9)
+        .attribute(attr)
+        .align(TextAlignment::Center)
+        .wrap_type(WrapType::WordWrap(12))
+        .build();
+    assert!(matches!(format.char_variant, CharVariant::None));
+
+    for variant in variants {
+        format.set_char_variant(variant);
+        assert_eq!(std::mem::discriminant(&format.char_variant), std::mem::discriminant(&variant));
+        assert_eq!(format.char_variant.map('A'), variant.map('A'));
+        assert_eq!(format.char_variant.map('0'), variant.map('0'));
+        assert_eq!(format.x, 4);
+        assert_eq!(format.y, 9);
+        assert_eq!(format.char_attr, attr);
+        assert_eq!(format.align, TextAlignment::Center);
+        assert!(matches!(format.wrap_type, WrapType::WordWrap(12)));
+    }
 }
