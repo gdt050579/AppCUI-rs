@@ -85,16 +85,17 @@ pub fn write_text(&mut self, text: &str, format: &TextFormat)
 
 where the `TextFormat` structure can be created using the `TextFormatBuilder` in the following way:
 
-| Method             | Description                                                                                                                        |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `new()`            | Creates a new `TextFormatBuilder` object                                                                                           |
-| `position(...)`    | Sets the position where the text will be written (X and Y axes)                                                                    |
-| `attribute(...)`   | Sets the character attribute for the text (forecolor, backcolor and other attributes)                                              |
-| `hotkey(...)`      | Sets the hotkey attribute and position for the text (if any)                                                                       |
-| `align(...)`       | Sets the text alignment (left, right, center)                                                                                     |
-| `wrap_type(...)`   | Sets the text wrapping type of the code (`WrapType` enum)                                                                          |
-| `chars_count(...)` | Sets the number of characters in the text (this is useful to optimize several operations especially if this value is aready known) |
-| `build()`          | Builds the `TextFormat` object                                                                                                     |
+| Method              | Description                                                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `new()`             | Creates a new `TextFormatBuilder` object                                                                                           |
+| `position(...)`     | Sets the position where the text will be written (X and Y axes)                                                                    |
+| `attribute(...)`    | Sets the character attribute for the text (forecolor, backcolor and other attributes)                                              |
+| `hotkey(...)`       | Sets the hotkey attribute and position for the text (if any)                                                                       |
+| `align(...)`        | Sets the text alignment (left, right, center)                                                                                      |
+| `wrap_type(...)`    | Sets the text wrapping type of the code (`WrapType` enum)                                                                          |
+| `chars_count(...)`  | Sets the number of characters in the text (this is useful to optimize several operations especially if this value is aready known) |
+| `char_variant(...)` | Sets the character variant of the text (`CharVariant` enum)                                                                        |
+| `build()`           | Builds the `TextFormat` object                                                                                                     |
 
 Example:
 
@@ -117,7 +118,7 @@ Once a `TextFormat` object is created, you can modify it and use it using the fo
 | `set_attribute(...)`   | Sets the character attribute for the text (forecolor, backcolor and other attributes)                                              |
 | `set_hotkey(...)`      | Sets the hotkey attribute and position for the text (if any)                                                                       |
 | `clear_hotkey()`       | Clears the hotkey attribute from the text                                                                                          |
-| `set_align(...)`       | Sets the text alignment (left, right, center)                                                                                     |
+| `set_align(...)`       | Sets the text alignment (left, right, center)                                                                                      |
 | `set_wrap_type(...)`   | Sets the text wrapping type of the code (`WrapType` enum)                                                                          |
 | `set_chars_count(...)` | Sets the number of characters in the text (this is useful to optimize several operations especially if this value is aready known) |
 
