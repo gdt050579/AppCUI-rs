@@ -121,6 +121,7 @@ Once a `TextFormat` object is created, you can modify it and use it using the fo
 | `set_align(...)`       | Sets the text alignment (left, right, center)                                                                                      |
 | `set_wrap_type(...)`   | Sets the text wrapping type of the code (`WrapType` enum)                                                                          |
 | `set_chars_count(...)` | Sets the number of characters in the text (this is useful to optimize several operations especially if this value is aready known) |
+| `set_char_variant(...)` | Sets the character variant of the text (`CharVariant` enum)                                                                          |
 
 The `WrapType` enum is defined as follows:
 

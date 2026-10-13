@@ -3086,3 +3086,56 @@ fn check_write_text_with_char_variant() {
     //s.print(false);
     assert_eq!(s.compute_hash(), 0xD5D714C0333B5C59);
 }
+
+#[test]
+fn check_text_format_set_char_variant() {
+    fn star(_: char) -> char {
+        '*'
+    }
+    let variants = [
+        CharVariant::Uppercase,
+        CharVariant::Lowercase,
+        CharVariant::MathBold,
+        CharVariant::MathItalic,
+        CharVariant::MathBoldItalic,
+        CharVariant::Script,
+        CharVariant::ScriptBold,
+        CharVariant::Fraktur,
+        CharVariant::FrakturBold,
+        CharVariant::DoubleStruck,
+        CharVariant::SansSerif,
+        CharVariant::SansSerifBold,
+        CharVariant::SansSerifItalic,
+        CharVariant::SansSerifBoldItalic,
+        CharVariant::Monospace,
+        CharVariant::Circled,
+        CharVariant::CircledNegative,
+        CharVariant::Squared,
+        CharVariant::SquaredNegative,
+        CharVariant::Superscript,
+        CharVariant::Subscript,
+        CharVariant::SmallCaps,
+        CharVariant::Custom(star),
+        CharVariant::None,
+    ];
+    let attr = CharAttribute::with_color(Color::Yellow, Color::DarkBlue);
+    let mut format = TextFormatBuilder::new()
+        .position(4, 9)
+        .attribute(attr)
+        .align(TextAlignment::Center)
+        .wrap_type(WrapType::WordWrap(12))
+        .build();
+    assert!(matches!(format.char_variant, CharVariant::None));
+
+    for variant in variants {
+        format.set_char_variant(variant);
+        assert_eq!(std::mem::discriminant(&format.char_variant), std::mem::discriminant(&variant));
+        assert_eq!(format.char_variant.map('A'), variant.map('A'));
+        assert_eq!(format.char_variant.map('0'), variant.map('0'));
+        assert_eq!(format.x, 4);
+        assert_eq!(format.y, 9);
+        assert_eq!(format.char_attr, attr);
+        assert_eq!(format.align, TextAlignment::Center);
+        assert!(matches!(format.wrap_type, WrapType::WordWrap(12)));
+    }
+}

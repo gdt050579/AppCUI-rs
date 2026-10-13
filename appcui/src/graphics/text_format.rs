@@ -119,6 +119,12 @@ impl TextFormat {
         self.flags.set(TextFormatFlags::CharsCount);
     }
 
+    /// Sets the character variant of the text. It can be None, Uppercase, Lowercase, MathBold, MathItalic, MathBoldItalic, Script, ScriptBold, Fraktur, FrakturBold, DoubleStruck, SansSerif, SansSerifBold, SansSerifItalic, SansSerifBoldItalic, Monospace, Circled, CircledNegative, Squared, SquaredNegative, Superscript, Subscript, SmallCaps.
+    #[inline(always)]
+    pub fn set_char_variant(&mut self, char_variant: CharVariant) {
+        self.char_variant = char_variant;
+    }
+
     // inner methods
     #[inline(always)]
     pub(crate) fn width(&self) -> u16 {
