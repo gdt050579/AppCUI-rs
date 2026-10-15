@@ -53,6 +53,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 * [Book](https://gdt050579.github.io/AppCUI-rs/)
 * [Documentation](https://docs.rs/appcui)
 * [Gallery](https://gdt050579.github.io/AppCUI-rs/gallery/screenshots.html)
+* [Changelog](CHANGELOG.md)
 
 ## 📸 Screenshots 
 
