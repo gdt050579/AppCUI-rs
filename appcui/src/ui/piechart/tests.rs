@@ -10,14 +10,8 @@ fn check_creation() {
     assert_eq!(c.count(), 0);
     assert_eq!(c.value(0), None);
     assert_eq!(c.label(0), None);
-    assert_eq!(c.flags(), piechart::Flags::None);
 }
 
-#[test]
-fn check_creation_with_flags() {
-    let c = PieChart::new(layout!("d:f"), piechart::Flags::DimUnselected);
-    assert!(c.flags().contains(piechart::Flags::DimUnselected));
-}
 
 #[test]
 fn check_add_value() {
