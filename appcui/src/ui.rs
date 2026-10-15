@@ -129,6 +129,7 @@ pub mod hslider;
 pub mod markdown_composer;
 pub mod vbarchart;
 pub mod hbarchart;
+pub mod piechart;
 
 // re-export
 pub use common::ControlBase;
@@ -185,4 +186,5 @@ pub use graphview::GraphView;
 pub use hslider::HSlider;
 pub use vbarchart::VBarChart;
 pub use hbarchart::HBarChart;
-pub use markdown_composer::MarkdownComposer;
+pub use piechart::PieChart;
+pub use markdown_composer::MarkdownComposer;
