@@ -430,6 +430,10 @@ name = "hbarchart"
 path = "hbarchart/main.rs"
 
 [[example]]
+name = "piechart"
+path = "piechart/main.rs"
+
+[[example]]
 name = "hexview"
 path = "hexview/main.rs"
 
