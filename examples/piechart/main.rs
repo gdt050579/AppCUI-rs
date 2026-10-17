@@ -6,6 +6,7 @@ fn main() -> Result<(), appcui::system::Error> {
             let mut win = window!("'Pie chart',a:c,w:60,h:20,flags:Sizeable");
             let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
             chart.set_renderer(piechart::DrawModeRenderer::Custom('x'));
+            chart.set_shape(piechart::DrawModeShape::Ellipse);
             chart.set_hollow_thickness(piechart::HollowThickness::Percentage(50));
             chart.add_value(45, "Rust", None);
             chart.add_value(25, "C++", None);
