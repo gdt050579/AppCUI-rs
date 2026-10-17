@@ -304,12 +304,24 @@ impl OnMouseEvent for PieChart {
         match event {
             MouseEvent::Enter | MouseEvent::Leave => {
                 self.hovered_slice = None;
+                self.hide_tooltip();
                 EventProcessStatus::Processed
             }
             MouseEvent::Over(pos) => {
                 let index = self.slice_index_at(pos.x, pos.y);
                 if index != self.hovered_slice {
                     self.hovered_slice = index;
+                    if let Some(index) = index {
+                        if let Some(slice) = self.slices.get(index as usize) {
+                            if slice.label.is_empty() {
+                                self.hide_tooltip();
+                            } else {
+                                self.show_tooltip_on_point(slice.label.as_str(), pos.x, pos.y);
+                            }
+                        }
+                    } else {
+                        self.hide_tooltip();
+                    }
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
