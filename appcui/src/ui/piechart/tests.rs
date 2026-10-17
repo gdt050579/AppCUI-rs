@@ -704,7 +704,7 @@ fn paint_on_surface(mode: DrawMode, values: &[u64], w: u32, h: u32) -> Surface {
     update_proportions(&mut slices);
     let mut surface = Surface::new(w, h);
     surface.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
-    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices);
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaintMap::new(Size::new(w, h)));
     surface
 }
 
@@ -802,7 +802,7 @@ fn check_braille_majority_color() {
     let mode = DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::Braille, HollowThickness::None, None);
     let mut surface = Surface::new(12, 7);
     surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
-    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices);
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaintMap::new(Size::new(12, 7)));
     for y in 1..6 {
         for x in 1..11 {
             let ch = surface.char(x, y).unwrap();
@@ -812,4 +812,124 @@ fn check_braille_majority_color() {
             }
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+// paint map: which slice is drawn in each character
+// ---------------------------------------------------------------------------
+use super::paint_map::PaintMap;
+
+const MAP_COLORS: [Color; 4] = [Color::Red, Color::Green, Color::Blue, Color::Yellow];
+
+/// Paints 4 slices with distinct explicit colors and returns the surface and the paint map.
+fn paint_with_map(mode: DrawMode, w: u32, h: u32) -> (Surface, PaintMap) {
+    let mut slices: Vec<Slice> = [40u64, 30, 20, 10]
+        .iter()
+        .zip(MAP_COLORS)
+        .map(|(v, c)| Slice::new(*v, "", Some(CharAttribute::with_fore_color(c))))
+        .collect();
+    update_proportions(&mut slices);
+    update_colors(&mut slices);
+    let mut surface = Surface::new(w, h);
+    surface.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
+    let mut map = PaintMap::new(Size::new(w, h));
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map);
+    (surface, map)
+}
+
+#[test]
+fn check_paint_map() {
+    let holes = [HollowThickness::None, HollowThickness::Percentage(50)];
+    let renderers = [DrawModeRenderer::HalfBlocks, DrawModeRenderer::Braille, DrawModeRenderer::Custom('*')];
+    for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+        for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
+            for (w, h) in [(20, 10), (13, 7), (40, 6)] {
+                let mode = DrawMode::new(shape, renderer, hole, None);
+                let (s, map) = paint_with_map(mode, w, h);
+                let name = format!("{shape:?} {hole:?} {renderer:?} {w}x{h}");
+                let mut mapped = 0;
+                for y in 0..h as i32 {
+                    for x in 0..w as i32 {
+                        let ch = s.char(x, y).unwrap();
+                        let index = map.get(x as usize, y as usize);
+                        // a character is in the map if (and only if) it was drawn
+                        assert_eq!(ch.code != '#', index.is_some(), "{name}: ({x},{y})");
+                        if let Some(index) = index {
+                            mapped += 1;
+                            assert!((index as usize) < MAP_COLORS.len(), "{name}: ({x},{y}) -> {index}");
+                            // the mapped slice is one of the colors drawn in that character
+                            let color = MAP_COLORS[index as usize];
+                            assert!(ch.foreground == color || ch.background == color, "{name}: ({x},{y}) -> {index}");
+                            if renderer != DrawModeRenderer::HalfBlocks {
+                                assert_eq!(ch.foreground, color, "{name}: ({x},{y})");
+                            }
+                        }
+                    }
+                }
+                assert!(mapped > 0, "{name}: nothing mapped");
+            }
+        }
+    }
+}
+
+#[test]
+fn check_paint_map_padding() {
+    // the padding is never mapped, and the map is reset on every paint
+    let (_, mut map) = paint_with_map(DrawMode::default(), 12, 8);
+    for x in 0..12 {
+        assert_eq!(map.get(x, 0), None);
+        assert_eq!(map.get(x, 7), None);
+    }
+    for y in 0..8 {
+        assert_eq!(map.get(0, y), None);
+        assert_eq!(map.get(11, y), None);
+    }
+    assert!(map.get(6, 4).is_some());
+    map.resize(Size::new(12, 8));
+    assert_eq!(map.get(6, 4), None);
+    // outside the map
+    assert_eq!(map.get(12, 0), None);
+    assert_eq!(map.get(0, 8), None);
+}
+
+#[test]
+fn check_hover() {
+    in_app(|| {
+        let mut c = PieChart::new(layout!("x:0,y:0,w:22,h:12"), piechart::Flags::None);
+        c.add_value(1, "A", None);
+        c.add_value(1, "B", None);
+        c.on_resize(Size::new(0, 0), Size::new(22, 12));
+        assert_eq!(c.hovered_slice, None);
+        // circle centered at (11, 6): right half is slice 0, left half is slice 1
+        assert!(matches!(c.on_mouse_event(&MouseEvent::Over(Point::new(14, 6))), EventProcessStatus::Processed));
+        assert_eq!(c.hovered_slice, Some(0));
+        // same slice again: nothing changes
+        assert!(matches!(c.on_mouse_event(&MouseEvent::Over(Point::new(15, 5))), EventProcessStatus::Ignored));
+        assert_eq!(c.hovered_slice, Some(0));
+        c.on_mouse_event(&MouseEvent::Over(Point::new(7, 6)));
+        assert_eq!(c.hovered_slice, Some(1));
+        // the padding and the corners are outside the chart
+        c.on_mouse_event(&MouseEvent::Over(Point::new(0, 0)));
+        assert_eq!(c.hovered_slice, None);
+        c.on_mouse_event(&MouseEvent::Over(Point::new(2, 1)));
+        assert_eq!(c.hovered_slice, None);
+        // outside the control
+        c.on_mouse_event(&MouseEvent::Over(Point::new(-1, 3)));
+        assert_eq!(c.hovered_slice, None);
+        c.on_mouse_event(&MouseEvent::Over(Point::new(30, 3)));
+        assert_eq!(c.hovered_slice, None);
+        // leaving the control clears the hovered slice
+        c.on_mouse_event(&MouseEvent::Over(Point::new(14, 6)));
+        assert_eq!(c.hovered_slice, Some(0));
+        c.on_mouse_event(&MouseEvent::Leave);
+        assert_eq!(c.hovered_slice, None);
+        // a data change clears it too (indices may move)
+        c.on_mouse_event(&MouseEvent::Over(Point::new(7, 6)));
+        assert_eq!(c.hovered_slice, Some(1));
+        c.add_value(2, "C", None);
+        assert_eq!(c.hovered_slice, None);
+        // after the change, the map follows the new layout: slice 2 is now the left half
+        c.on_mouse_event(&MouseEvent::Over(Point::new(7, 6)));
+        assert_eq!(c.hovered_slice, Some(2));
+    });
 }

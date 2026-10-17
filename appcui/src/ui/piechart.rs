@@ -9,6 +9,7 @@ mod initialization_flags;
 mod piechart;
 mod shapes;
 mod slice;
+mod paint_map;
 #[cfg(test)]
 mod tests;
 
@@ -17,3 +18,4 @@ pub use self::initialization_flags::Flags;
 pub use self::piechart::PieChart;
 
 use self::slice::Slice;
+use self::paint_map::PaintMap;

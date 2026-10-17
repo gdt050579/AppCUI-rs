@@ -1,5 +1,5 @@
 use super::draw_mode::DrawMode;
-use super::{DrawModeRenderer, DrawModeShape, Flags, HollowThickness, Slice};
+use super::{DrawModeRenderer, DrawModeShape, Flags, HollowThickness, PaintMap, Slice};
 use crate::prelude::*;
 use crate::system::RuntimeManager;
 
@@ -75,7 +75,7 @@ pub(super) fn largest_remainder(values: impl Iterator<Item = u64>, total: u128, 
     }
 }
 
-#[CustomControl(overwrite = OnPaint + OnResize, internal = true)]
+#[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent, internal = true)]
 /// A chart that shows a single series of values as parts of a whole.
 ///
 /// Each value is a slice whose size is proportional to its share of the total.
@@ -86,6 +86,8 @@ pub struct PieChart {
     pub(super) slices: Vec<Slice>,
     surface: Surface,
     draw_mode: DrawMode,
+    paint_map: PaintMap,
+    pub(super) hovered_slice: Option<usize>,
 }
 
 impl PieChart {
@@ -106,6 +108,8 @@ impl PieChart {
             slices: Vec::new(),
             surface: Surface::new(1, 1),
             draw_mode: DrawMode::default(),
+            paint_map: PaintMap::new(Size::new(1, 1)),
+            hovered_slice: None,
         }
     }
 
@@ -216,7 +220,18 @@ impl PieChart {
         let theme = RuntimeManager::get().theme();
         self.surface.reset_clip();
         self.surface.clear(Character::with_attributes(' ', theme.chart.background));
-        self.draw_mode.paint(&mut self.surface, theme, &self.slices);
+        self.paint_map.resize(self.surface.size());
+        self.draw_mode.paint(&mut self.surface, theme, &self.slices, &mut self.paint_map);
+        // slices may have moved (or no longer exist) under the mouse
+        self.hovered_slice = None;
+    }
+
+    // index of the slice drawn at (x, y), relative to the control
+    pub(super) fn slice_index_at(&self, x: i32, y: i32) -> Option<usize> {
+        if (x < 0) || (y < 0) {
+            return None;
+        }
+        self.paint_map.get(x as usize, y as usize).map(|i| i as usize)
     }
 }
 
@@ -280,6 +295,27 @@ impl OnPaint for PieChart {
                     Some(Character::with_attributes(ch.code, inactive))
                 }
             });
+        }
+    }
+}
+
+impl OnMouseEvent for PieChart {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.hovered_slice = None;
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(pos) => {
+                let index = self.slice_index_at(pos.x, pos.y);
+                if index != self.hovered_slice {
+                    self.hovered_slice = index;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            _ => EventProcessStatus::Ignored,
         }
     }
 }
