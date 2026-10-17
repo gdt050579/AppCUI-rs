@@ -1,6 +1,5 @@
 use super::shapes::Ellipse;
 use super::{Slice, PaintMap};
-use crate::graphics::LineType;
 use crate::graphics::Size;
 use crate::graphics::Surface;
 use crate::system::Theme;
@@ -66,22 +65,20 @@ pub(crate) struct DrawMode {
     pub(crate) shape: DrawModeShape,
     pub(crate) renderer: DrawModeRenderer,
     pub(crate) hollow_thickness: HollowThickness,
-    pub(crate) margins: Option<LineType>,
 }
 
 impl Default for DrawMode {
     fn default() -> Self {
-        Self::new(DrawModeShape::Circle, DrawModeRenderer::HalfBlocks, HollowThickness::None, None)
+        Self::new(DrawModeShape::Circle, DrawModeRenderer::HalfBlocks, HollowThickness::None)
     }
 }
 
 impl DrawMode {
-    pub(crate) fn new(shape: DrawModeShape, renderer: DrawModeRenderer, hollow_thickness: HollowThickness, margins: Option<LineType>) -> Self {
+    pub(crate) fn new(shape: DrawModeShape, renderer: DrawModeRenderer, hollow_thickness: HollowThickness) -> Self {
         Self {
             shape,
             renderer,
             hollow_thickness,
-            margins,
         }
     }
 

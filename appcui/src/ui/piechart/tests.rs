@@ -644,7 +644,7 @@ fn check_hole_radii() {
     // 6 x 2 characters = 6 x 4 physical units
     assert_eq!(Ellipse::hole_radii(HollowThickness::Rectangle(6, 2), 10.0, 5.0), (3.0, 2.0));
     // default: solid circle, half blocks, no margins
-    assert_eq!(DrawMode::default(), DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::HalfBlocks, HollowThickness::None, None));
+    assert_eq!(DrawMode::default(), DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::HalfBlocks, HollowThickness::None));
 }
 
 #[test]
@@ -720,7 +720,7 @@ fn check_padding() {
     for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
         for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
             for (w, h) in [(12, 6), (13, 7), (30, 5), (6, 14), (3, 3)] {
-                let mode = DrawMode::new(shape, renderer, hole, None);
+                let mode = DrawMode::new(shape, renderer, hole);
                 let s = paint_on_surface(mode, &[3, 2, 1], w, h);
                 let (w, h) = (w as i32, h as i32);
                 for x in 0..w {
@@ -799,7 +799,7 @@ fn check_braille_majority_color() {
     let mut slices: Vec<Slice> = [1u64, 1].iter().map(|v| Slice::new(*v, "", None)).collect();
     update_proportions(&mut slices);
     update_colors(&mut slices);
-    let mode = DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::Braille, HollowThickness::None, None);
+    let mode = DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::Braille, HollowThickness::None);
     let mut surface = Surface::new(12, 7);
     surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaintMap::new(Size::new(12, 7)));
@@ -844,7 +844,7 @@ fn check_paint_map() {
     for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
         for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
             for (w, h) in [(20, 10), (13, 7), (40, 6)] {
-                let mode = DrawMode::new(shape, renderer, hole, None);
+                let mode = DrawMode::new(shape, renderer, hole);
                 let (s, map) = paint_with_map(mode, w, h);
                 let name = format!("{shape:?} {hole:?} {renderer:?} {w}x{h}");
                 let mut mapped = 0;
