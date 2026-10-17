@@ -18,6 +18,9 @@ impl PaintMap {
         self.map.fill(Self::INVALID);
         self.size = size;
     }
+    pub(super) fn size(&self) -> Size {
+        self.size
+    }
     pub(super) fn reset(&mut self) {
         self.map.fill(Self::INVALID);
     }
@@ -44,4 +47,4 @@ impl PaintMap {
         }
         self.map[y * self.size.width as usize + x] = Self::INVALID;
     }
-}
+}

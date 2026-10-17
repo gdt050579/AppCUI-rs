@@ -222,6 +222,7 @@ impl PieChart {
         self.surface.clear(Character::with_attributes(' ', theme.chart.background));
         self.paint_map.resize(self.surface.size());
         self.draw_mode.paint(&mut self.surface, theme, &self.slices, &mut self.paint_map);
+        update_centers(&mut self.slices, &self.paint_map);
         // slices may have moved (or no longer exist) under the mouse
         self.hovered_slice = None;
     }
@@ -240,6 +241,60 @@ pub(super) fn slice_at(slices: &[Slice], fraction: f64) -> usize {
     // first slice whose end is past `pos`
     let index = slices.partition_point(|s| s.end <= pos);
     index.min(slices.len() - 1)
+}
+
+// the center of a slice is the average of the cells it is drawn in (from the paint map); if
+// that cell shows another slice or nothing (e.g. a slice wrapping around the hole of a ring),
+// the slice's cell nearest to the average is used instead
+pub(super) fn update_centers(slices: &mut [Slice], map: &PaintMap) {
+    for s in slices.iter_mut() {
+        s.center = None;
+        s.sum_x = 0;
+        s.sum_y = 0;
+        s.cells = 0;
+    }
+    let size = map.size();
+    let (w, h) = (size.width as usize, size.height as usize);
+    for y in 0..h {
+        for x in 0..w {
+            if let Some(s) = map.get(x, y).and_then(|i| slices.get_mut(i as usize)) {
+                s.sum_x += x as u64;
+                s.sum_y += y as u64;
+                s.cells += 1;
+            }
+        }
+    }
+    for (index, s) in slices.iter_mut().enumerate() {
+        if s.cells == 0 {
+            continue;
+        }
+        // rounded average
+        let ax = ((s.sum_x + s.cells / 2) / s.cells) as usize;
+        let ay = ((s.sum_y + s.cells / 2) / s.cells) as usize;
+        if map.get(ax, ay) == Some(index as u16) {
+            s.center = Some(Point::new(ax as i32, ay as i32));
+            continue;
+        }
+        // nearest cell of this slice; a cell is twice as tall as it is wide
+        let mut best: Option<(u64, usize, usize)> = None;
+        for y in 0..h {
+            for x in 0..w {
+                if map.get(x, y) == Some(index as u16) {
+                    let dx = x.abs_diff(ax) as u64;
+                    let dy = 2 * y.abs_diff(ay) as u64;
+                    let d = dx * dx + dy * dy;
+                    let closer = match best {
+                        None => true,
+                        Some((best_d, _, _)) => d < best_d,
+                    };
+                    if closer {
+                        best = Some((d, x, y));
+                    }
+                }
+            }
+        }
+        s.center = best.map(|(_, x, y)| Point::new(x as i32, y as i32));
+    }
 }
 
 pub(super) fn update_colors(slices: &mut [Slice]) {
@@ -312,11 +367,12 @@ impl OnMouseEvent for PieChart {
                 if index != self.hovered_slice {
                     self.hovered_slice = index;
                     if let Some(index) = index {
-                        if let Some(slice) = self.slices.get(index as usize) {
+                        if let Some(slice) = self.slices.get(index) {
                             if slice.label.is_empty() {
                                 self.hide_tooltip();
                             } else {
-                                self.show_tooltip_on_point(slice.label.as_str(), pos.x, pos.y);
+                                let anchor = slice.center.unwrap_or(*pos);
+                                self.show_tooltip_on_point(slice.label.as_str(), anchor.x, anchor.y);
                             }
                         }
                     } else {

@@ -933,3 +933,152 @@ fn check_hover() {
         assert_eq!(c.hovered_slice, Some(2));
     });
 }
+
+// ---------------------------------------------------------------------------
+// slice centers
+// ---------------------------------------------------------------------------
+use super::piechart::update_centers;
+
+/// Builds a paint map from rows of text: a digit is the slice index, anything else is empty.
+fn map_of(rows: &[&str]) -> PaintMap {
+    let mut m = PaintMap::new(Size::new(rows[0].len() as u32, rows.len() as u32));
+    for (y, row) in rows.iter().enumerate() {
+        for (x, ch) in row.chars().enumerate() {
+            if let Some(d) = ch.to_digit(10) {
+                m.set(x, y, d as u16);
+            }
+        }
+    }
+    m
+}
+
+fn slices_n(n: usize) -> Vec<Slice> {
+    (0..n).map(|_| Slice::new(1, "", None)).collect()
+}
+
+#[test]
+fn check_center_is_the_average() {
+    let map = map_of(&[
+        "........", //
+        ".000....", //
+        ".000.11.", //
+        ".000.11.", //
+        "........",
+    ]);
+    let mut slices = slices_n(3);
+    update_centers(&mut slices, &map);
+    assert_eq!(slices[0].center, Some(Point::new(2, 2)));
+    // 4 cells: average (5.5, 2.5) rounds to (6, 3)
+    assert_eq!(slices[1].center, Some(Point::new(6, 3)));
+    // no cells: no center
+    assert_eq!(slices[2].center, None);
+    assert_eq!(slices[0].cells, 9);
+}
+
+#[test]
+fn check_center_falls_back_to_a_cell_of_the_slice() {
+    // slice 0 wraps around an empty middle: its average (4, 2) is not one of its cells
+    let map = map_of(&[
+        "000000000", //
+        "0.......0", //
+        "0.......0", //
+        "0.......0", //
+        "000000000",
+    ]);
+    let mut slices = slices_n(1);
+    update_centers(&mut slices, &map);
+    let c = slices[0].center.unwrap();
+    assert_eq!(map.get(c.x as usize, c.y as usize), Some(0));
+    // nearest cell to (4, 2), a cell being twice as tall as wide: straight up or down (distance 4)
+    // beats straight left or right (distance 4 too, but found later); the first one found wins
+    assert_eq!(c, Point::new(4, 0));
+}
+
+#[test]
+fn check_centers_are_recomputed() {
+    let mut slices = slices_n(2);
+    update_centers(&mut slices, &map_of(&["00.11"]));
+    assert_eq!(slices[0].center, Some(Point::new(1, 0)));
+    assert_eq!(slices[1].center, Some(Point::new(4, 0)));
+    // a later paint where slice 1 is no longer drawn
+    update_centers(&mut slices, &map_of(&["000.."]));
+    assert_eq!(slices[0].center, Some(Point::new(1, 0)));
+    assert_eq!(slices[1].center, None);
+    assert_eq!(slices[1].cells, 0);
+}
+
+#[test]
+fn check_centers_on_real_charts() {
+    // on real drawings, every visible slice has a center, and it is one of its own cells
+    let value_sets: [&[u64]; 5] = [&[50, 25, 15, 10], &[75, 25], &[90, 5, 5], &[1, 1, 1, 1, 1, 1, 1], &[1000, 1, 1000]];
+    let holes = [HollowThickness::None, HollowThickness::Percentage(50), HollowThickness::Percentage(80)];
+    let renderers = [DrawModeRenderer::HalfBlocks, DrawModeRenderer::Braille, DrawModeRenderer::Custom('*')];
+    for values in value_sets {
+        for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+            for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
+                for (w, h) in [(30, 13), (21, 8), (60, 20)] {
+                    let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
+                    update_proportions(&mut slices);
+                    update_colors(&mut slices);
+                    let mut surface = Surface::new(w, h);
+                    let mut map = PaintMap::new(Size::new(w, h));
+                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map);
+                    update_centers(&mut slices, &map);
+                    let name = format!("{values:?} {shape:?} {hole:?} {renderer:?} {w}x{h}");
+                    for (i, s) in slices.iter().enumerate() {
+                        match s.center {
+                            Some(c) => assert_eq!(map.get(c.x as usize, c.y as usize), Some(i as u16), "{name}: slice {i}"),
+                            None => assert_eq!(s.cells, 0, "{name}: slice {i} has cells but no center"),
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn check_center_of_a_big_ring_slice() {
+    // a 75% slice of a ring: its average is in the hole, so the center moves onto the ring
+    in_app(|| {
+        let mut c = PieChart::new(layout!("x:0,y:0,w:32,h:15"), piechart::Flags::None);
+        c.add_value(75, "A", None);
+        c.add_value(25, "B", None);
+        c.set_hollow_thickness(HollowThickness::Percentage(50));
+        c.on_resize(Size::new(0, 0), Size::new(32, 15));
+        for (i, s) in c.slices.iter().enumerate() {
+            let center = s.center.unwrap();
+            assert_eq!(c.slice_index_at(center.x, center.y), Some(i));
+        }
+        // the hole is around the middle of the control; the center of A is not there
+        let a = c.slices[0].center.unwrap();
+        assert!((a.x - 16).abs() > 3 || (a.y - 7).abs() > 2, "{a:?}");
+    });
+}
+
+#[test]
+fn check_tooltip_stays_on_the_slice_center() {
+    // hovering two different cells of the same slice shows the tooltip in the same place
+    let script = "
+        Paint.Enable(false)
+        Mouse.Move(23,5)
+        Paint('tooltip from one cell of slice A')
+        CheckHash(0x7C7CBF4D3F97CC29)
+        Mouse.Move(26,9)
+        Paint('tooltip from another cell of slice A')
+        CheckHash(0x7C7CBF4D3F97CC29)
+    ";
+    App::new()
+        .size(Size::new(44, 18))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("x:1,y:0,w:40,h:15"), piechart::Flags::None);
+            c.add_value(50, "Slice A", None);
+            c.add_value(50, "Slice B", None);
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
+}
