@@ -1,22 +1,27 @@
-use super::{Flags, Slice};
+use super::draw_mode::DrawMode;
+use super::{DrawModeRenderer, DrawModeShape, Flags, HollowThickness, Slice};
 use crate::prelude::*;
+use crate::system::RuntimeManager;
 
-// Proportions
-// -----------
-// Positions along the chart are fixed-point values in `0..=FULL`, where `FULL`
-// stands for the whole chart (360° for a circle, the full perimeter for a hollow
-// rectangle). All sums are done in `u128`, so any number of `u64` values works.
+const AUTO_COLORS: [Color; 12] = [
+    Color::Blue,
+    Color::Red,
+    Color::Green,
+    Color::Yellow,
+    Color::Aqua,
+    Color::Pink,
+    Color::Olive,
+    Color::Teal,
+    Color::Magenta,
+    Color::Silver,
+    Color::DarkGreen,
+    Color::DarkRed,
+];
 
-/// The fixed-point value that represents the whole chart.
 pub(super) const FULL: u64 = 1 << 32;
 
-/// Percents are computed in hundredths of a percent, so they always add up to this value.
 pub(super) const PERCENT_UNITS: u32 = 10_000;
 
-/// Recomputes `start`, `end` and `percent` for every slice.
-///
-/// If the total is `0` (no slices, or all values are `0`), every slice gets
-/// `start == end == 0` and `percent == 0`.
 pub(super) fn update_proportions(slices: &mut [Slice]) {
     let total: u128 = slices.iter().map(|s| s.value as u128).sum();
     if total == 0 {
@@ -45,14 +50,6 @@ pub(super) fn update_proportions(slices: &mut [Slice]) {
     }
 }
 
-/// Splits `units` between `values` proportionally, so that the results add up to
-/// exactly `units` (when `total > 0`).
-///
-/// Every value first gets the floor of its exact share. The units left over are
-/// then given, one each, to the values with the largest remainders; ties go to
-/// the value with the lower index. A value of `0` never receives a unit.
-///
-/// `total` must be the sum of `values`; `output` must have one entry per value.
 pub(super) fn largest_remainder(values: impl Iterator<Item = u64>, total: u128, units: u32, output: &mut [u32]) {
     if total == 0 {
         output.iter_mut().for_each(|o| *o = 0);
@@ -88,6 +85,7 @@ pub struct PieChart {
     flags: Flags,
     pub(super) slices: Vec<Slice>,
     surface: Surface,
+    draw_mode: DrawMode,
 }
 
 impl PieChart {
@@ -107,6 +105,7 @@ impl PieChart {
             flags,
             slices: Vec::new(),
             surface: Surface::new(1, 1),
+            draw_mode: DrawMode::default(),
         }
     }
 
@@ -166,20 +165,101 @@ impl PieChart {
         }
     }
 
-    /// Recomputes the proportions of every slice and repaints the internal surface.
-    fn data_changed(&mut self) {
-        update_proportions(&mut self.slices);
+    /// Sets the outline the chart is drawn in, and repaints the chart.
+    ///
+    /// The default is [`DrawModeShape::Circle`]. Only `Circle` and `Ellipse` can be drawn so far.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
+    /// chart.set_shape(piechart::DrawModeShape::Ellipse);
+    /// ```
+    pub fn set_shape(&mut self, shape: DrawModeShape) {
+        self.draw_mode.shape = shape;
         self.repaint_surface();
     }
 
-    /// Repaints the internal surface from the current data and size.
+    /// Sets how the chart's pixels are turned into characters, and repaints the chart.
     ///
-    /// The surface is drawn by `on_paint`; it is only rebuilt when the data or the
-    /// size of the control changes. Shapes are not drawn yet (step 3).
+    /// The default is [`DrawModeRenderer::HalfBlocks`].
+    pub fn set_renderer(&mut self, renderer: DrawModeRenderer) {
+        self.draw_mode.renderer = renderer;
+        self.repaint_surface();
+    }
+
+    /// Sets the size of the hole in the middle of the chart, and repaints the chart.
+    ///
+    /// The default is [`HollowThickness::None`] (no hole).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
+    /// // a ring: the hole is half the size of the circle
+    /// chart.set_hollow_thickness(piechart::HollowThickness::Percentage(50));
+    /// ```
+    pub fn set_hollow_thickness(&mut self, hollow_thickness: HollowThickness) {
+        self.draw_mode.hollow_thickness = hollow_thickness;
+        self.repaint_surface();
+    }
+
+    fn data_changed(&mut self) {
+        update_proportions(&mut self.slices);
+        update_colors(&mut self.slices);
+        self.repaint_surface();
+    }
+
     fn repaint_surface(&mut self) {
-        let background = self.theme().chart.background;
+        let theme = RuntimeManager::get().theme();
         self.surface.reset_clip();
-        self.surface.clear(Character::with_attributes(' ', background));
+        self.surface.clear(Character::with_attributes(' ', theme.chart.background));
+        self.draw_mode.paint(&mut self.surface, theme, &self.slices);
+    }
+}
+
+pub(super) fn slice_at(slices: &[Slice], fraction: f64) -> usize {
+    let pos = ((fraction * FULL as f64) as u64).min(FULL - 1);
+    // first slice whose end is past `pos`
+    let index = slices.partition_point(|s| s.end <= pos);
+    index.min(slices.len() - 1)
+}
+
+pub(super) fn update_colors(slices: &mut [Slice]) {
+    let last_visible = slices.iter().rposition(|s| s.start != s.end);
+    let mut next_auto = 0usize;
+    let mut first_color: Option<Color> = None;
+    let mut previous_color: Option<Color> = None;
+    for (index, slice) in slices.iter_mut().enumerate() {
+        let visible = slice.start != slice.end;
+        let color = match slice.attr {
+            Some(attr) => attr.foreground,
+            None => {
+                let mut color = AUTO_COLORS[next_auto % AUTO_COLORS.len()];
+                if visible {
+                    for _ in 0..AUTO_COLORS.len() {
+                        let clashes_previous = previous_color == Some(color);
+                        let clashes_first = (Some(index) == last_visible) && (first_color == Some(color));
+                        if !clashes_previous && !clashes_first {
+                            break;
+                        }
+                        next_auto += 1;
+                        color = AUTO_COLORS[next_auto % AUTO_COLORS.len()];
+                    }
+                }
+                next_auto += 1;
+                color
+            }
+        };
+        if visible {
+            if first_color.is_none() {
+                first_color = Some(color);
+            }
+            previous_color = Some(color);
+        }
+        slice.color = color;
     }
 }
 
@@ -188,8 +268,18 @@ impl OnPaint for PieChart {
         if self.is_enabled() {
             surface.draw_surface(0, 0, &self.surface);
         } else {
-            let attr = theme.chart.inactive;
-            surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
+            // keep the outline of the chart visible: chart pixels take the inactive
+            // foreground, everything else the inactive background
+            let inactive = theme.chart.inactive;
+            let background = theme.chart.background.background;
+            let gray = |c: Color| if c == background { inactive.background } else { inactive.foreground };
+            surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| {
+                if ch.code == '▀' {
+                    Some(Character::new(ch.code, gray(ch.foreground), gray(ch.background), CharFlags::None))
+                } else {
+                    Some(Character::with_attributes(ch.code, inactive))
+                }
+            });
         }
     }
 }

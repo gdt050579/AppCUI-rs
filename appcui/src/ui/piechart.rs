@@ -4,12 +4,15 @@
 //! label, and an optional [`CharAttribute`](crate::graphics::CharAttribute); slices
 //! without an attribute get an automatic color. [`Flags`] selects optional behavior.
 
+mod draw_mode;
 mod initialization_flags;
 mod piechart;
+mod shapes;
 mod slice;
 #[cfg(test)]
 mod tests;
 
+pub use self::draw_mode::{DrawModeRenderer, DrawModeShape, HollowThickness};
 pub use self::initialization_flags::Flags;
 pub use self::piechart::PieChart;
 

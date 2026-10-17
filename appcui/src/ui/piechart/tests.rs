@@ -4,8 +4,6 @@ fn chart() -> PieChart {
     PieChart::new(layout!("x:1,y:1,w:20,h:10"), piechart::Flags::None)
 }
 
-/// Runs `test` inside a test application. `PieChart` repaints its internal surface
-/// whenever its data changes, which needs a running application (same as `VBarChart`).
 fn in_app(test: impl FnOnce() + 'static) {
     App::new()
         .size(Size::new(40, 12))
@@ -128,7 +126,6 @@ fn check_in_window() {
 use super::piechart::{largest_remainder, update_proportions, FULL, PERCENT_UNITS};
 use super::Slice;
 
-/// A list of slices with their proportions computed (no `PieChart` needed).
 struct Slices {
     slices: Vec<Slice>,
 }
@@ -162,7 +159,6 @@ fn ranges(c: &Slices) -> Vec<(u64, u64)> {
     c.slices.iter().map(|s| (s.start, s.end)).collect()
 }
 
-/// Checks the invariants every set of slices must satisfy.
 fn check_invariants(c: &Slices) {
     let total: u128 = c.slices.iter().map(|s| s.value as u128).sum();
     let mut pos = 0;
@@ -296,11 +292,11 @@ fn check_largest_remainder() {
 }
 
 #[test]
-fn check_surface_background() {
+fn check_surface_paint() {
     let script = "
         Paint.Enable(false)
-        Paint('chart area is filled with the chart background')
-        CheckHash(0xD2DBF921946B6BC1)
+        Paint('pie with 1/3 and 2/3 drawn on the chart background')
+        CheckHash(0x8B4AAE4AE2735F28)
     ";
     App::new()
         .size(Size::new(40, 12))
@@ -333,4 +329,487 @@ fn check_proportions_in_chart() {
         c.clear();
         assert_eq!(c.count(), 0);
     });
+}
+
+
+// ---------------------------------------------------------------------------
+// step 3: rendering (solid circle, half blocks, automatic colors)
+// ---------------------------------------------------------------------------
+use super::piechart::{slice_at, update_colors};
+
+fn slice_colors(slices: &[Slice]) -> Vec<Color> {
+    let mut slices = slices.to_vec();
+    update_colors(&mut slices);
+    slices.iter().map(|s| s.color).collect()
+}
+use super::shapes::Ellipse;
+
+fn ellipse(cx: f64, cy: f64, rx: f64, ry: f64) -> Ellipse {
+    ellipse_with_hole(cx, cy, rx, ry, super::HollowThickness::None)
+}
+
+fn ellipse_with_hole(cx: f64, cy: f64, rx: f64, ry: f64, hollow: super::HollowThickness) -> Ellipse {
+    Ellipse::new(Size::new(40, 20), cx, cy, rx, ry, hollow, super::DrawModeRenderer::HalfBlocks)
+}
+
+fn check_render(name: &str, values: &'static [u64], w: u32, h: u32, hash: u64) {
+    let script = format!(
+        "
+        Paint.Enable(false)
+        Paint('{name}')
+        CheckHash(0x{hash:X})
+    "
+    );
+    App::new()
+        .size(Size::new(44, 16))
+        .debug_script(&script)
+        .window(move || {
+            let mut win = window!("Test,d:f");
+            let mut c = PieChart::new(LayoutBuilder::new().x(1).y(0).width(w).height(h).build(), piechart::Flags::None);
+            for v in values {
+                c.add_value(*v, "", None);
+            }
+            win.add(c);
+            win
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_circle_fraction() {
+    // circle centered at (10, 10), radius 5
+    let c = ellipse(10.0, 10.0, 5.0, 5.0);
+    let close = |a: Option<f64>, b: f64| (a.unwrap() - b).abs() < 1e-9;
+    assert!(close(c.fraction(10.0, 6.0), 0.0)); // 12 o'clock
+    assert!(close(c.fraction(14.0, 10.0), 0.25)); // 3 o'clock
+    assert!(close(c.fraction(10.0, 14.0), 0.5)); // 6 o'clock
+    assert!(close(c.fraction(6.0, 10.0), 0.75)); // 9 o'clock
+    assert!(close(c.fraction(13.0, 7.0), 0.125)); // half way between 12 and 3
+    assert_eq!(c.fraction(15.1, 10.0), None); // outside
+    assert_eq!(c.fraction(14.0, 14.0), None); // outside (corner of the bounding box)
+    // just left of 12 o'clock is almost 1.0, never 1.0
+    let f = c.fraction(10.0 - 1e-12, 6.0).unwrap();
+    assert!((0.0..1.0).contains(&f));
+}
+
+#[test]
+fn check_slice_at() {
+    let mut slices: Vec<Slice> = [0u64, 1, 0, 2, 1, 0].iter().map(|v| Slice::new(*v, "", None)).collect();
+    update_proportions(&mut slices);
+    // visible slices: 1 -> [0, .25), 3 -> [.25, .75), 4 -> [.75, 1)
+    assert_eq!(slice_at(&slices, 0.0), 1);
+    assert_eq!(slice_at(&slices, 0.2499), 1);
+    assert_eq!(slice_at(&slices, 0.25), 3);
+    assert_eq!(slice_at(&slices, 0.7499), 3);
+    assert_eq!(slice_at(&slices, 0.75), 4);
+    assert_eq!(slice_at(&slices, 0.999999), 4);
+}
+
+#[test]
+fn check_auto_colors() {
+    let make = |values: &[u64]| -> Vec<Slice> {
+        let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
+        update_proportions(&mut slices);
+        slices
+    };
+    // neighbours (and last vs first) never share a color
+    for n in 1..=40 {
+        let slices = make(&vec![1u64; n]);
+        let colors = slice_colors(&slices);
+        assert_eq!(colors.len(), n);
+        for i in 1..n {
+            assert_ne!(colors[i], colors[i - 1], "{n} slices: {i} vs {}", i - 1);
+        }
+        if n > 1 {
+            assert_ne!(colors[n - 1], colors[0], "{n} slices: last vs first");
+        }
+    }
+    // 13 slices: the 13th would repeat the first color, so it is moved on
+    let colors = slice_colors(&make(&[1; 13]));
+    assert_ne!(colors[12], colors[0]);
+    // zero-value slices are not neighbours of anything
+    let colors = slice_colors(&make(&[1, 0, 1]));
+    assert_ne!(colors[0], colors[2]);
+    // explicit attributes are kept, automatic colors avoid them
+    let mut slices = make(&[1, 1, 1]);
+    slices[0].attr = Some(CharAttribute::with_fore_color(Color::Blue));
+    let colors = slice_colors(&slices);
+    assert_eq!(colors[0], Color::Blue);
+    assert_ne!(colors[1], Color::Blue);
+    assert_ne!(colors[2], Color::Blue);
+}
+
+#[test]
+fn check_explicit_color() {
+    let script = "
+        Paint.Enable(false)
+        Paint('red and green halves')
+        CheckHash(0x871F4449BB285669)
+    ";
+    App::new()
+        .size(Size::new(44, 16))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("x:1,y:0,w:20,h:10"), piechart::Flags::None);
+            c.add_value(1, "", Some(CharAttribute::with_fore_color(Color::Red)));
+            c.add_value(1, "", Some(CharAttribute::with_fore_color(Color::Green)));
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_render_even_size() {
+    check_render("4 slices, 40x12", &[50, 25, 15, 10], 40, 12, 0x26FCD624BAD9BDC9);
+}
+
+#[test]
+fn check_render_odd_size() {
+    check_render("4 slices, 21x7", &[50, 25, 15, 10], 21, 7, 0x9229302F5EE848CC);
+}
+
+#[test]
+fn check_render_tall() {
+    // width limits the circle; it is centered vertically
+    check_render("3 slices, 10x12", &[1, 1, 1], 10, 12, 0xAD0CFD04263FE54E);
+}
+
+#[test]
+fn check_render_single_slice() {
+    check_render("one slice fills the circle", &[5], 20, 8, 0x68A1207666DFCB51);
+}
+
+#[test]
+fn check_render_empty() {
+    check_render("no slices: background only", &[], 20, 8, 0x77243921445A6CC9);
+}
+
+#[test]
+fn check_render_all_zero() {
+    check_render("all values 0: background only", &[0, 0], 20, 8, 0x77243921445A6CC9);
+}
+
+#[test]
+fn check_render_tiny_slice() {
+    // a tiny slice may cover no pixel at all; it must not break the drawing
+    check_render("tiny slice", &[1_000_000, 1, 1_000_000], 20, 8, 0x9D29C715E34BA8DD);
+}
+
+#[test]
+fn check_render_many_slices() {
+    check_render("13 slices", &[1; 13], 40, 14, 0x6CADE251877304E5);
+}
+
+#[test]
+fn check_render_disabled() {
+    let script = "
+        Paint.Enable(false)
+        Paint('disabled: gray silhouette')
+        CheckHash(0x5D1121CB4D1B7A09)
+    ";
+    App::new()
+        .size(Size::new(44, 16))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("x:1,y:0,w:20,h:10"), piechart::Flags::None);
+            c.add_value(1, "", None);
+            c.add_value(2, "", None);
+            c.set_enabled(false);
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_render_after_set_value() {
+    let script = "
+        Paint.Enable(false)
+        Paint('after set_value: 1/4 and 3/4')
+        CheckHash(0x7ADA054EF9145925)
+    ";
+    App::new()
+        .size(Size::new(44, 16))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("x:1,y:0,w:20,h:10"), piechart::Flags::None);
+            c.add_value(1, "", None);
+            c.add_value(1, "", None);
+            c.set_value(1, 3);
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+// ---------------------------------------------------------------------------
+// draw modes: ellipse and hollow shapes
+// ---------------------------------------------------------------------------
+use super::draw_mode::DrawMode;
+use super::{DrawModeRenderer, DrawModeShape, HollowThickness};
+
+fn check_render_with(name: &str, values: &'static [u64], w: u32, h: u32, setup: fn(&mut PieChart), hash: u64) {
+    let script = format!(
+        "
+        Paint.Enable(false)
+        Paint('{name}')
+        CheckHash(0x{hash:X})
+    "
+    );
+    App::new()
+        .size(Size::new(44, 16))
+        .debug_script(&script)
+        .window(move || {
+            let mut win = window!("Test,d:f");
+            let mut c = PieChart::new(LayoutBuilder::new().x(1).y(0).width(w).height(h).build(), piechart::Flags::None);
+            for v in values {
+                c.add_value(*v, "", None);
+            }
+            setup(&mut c);
+            win.add(c);
+            win
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_ellipse_fraction() {
+    // ellipse centered at (10, 10), 16 units wide, 8 units tall
+    let e = ellipse(10.0, 10.0, 8.0, 4.0);
+    let close = |a: Option<f64>, b: f64| (a.unwrap() - b).abs() < 1e-9;
+    assert!(close(e.fraction(10.0, 6.5), 0.0)); // 12 o'clock
+    assert!(close(e.fraction(17.5, 10.0), 0.25)); // 3 o'clock
+    assert!(close(e.fraction(10.0, 13.5), 0.5)); // 6 o'clock
+    assert!(close(e.fraction(2.5, 10.0), 0.75)); // 9 o'clock
+    // the diagonal of the bounding box (not 45 degrees) splits the first quadrant in half
+    assert!(close(e.fraction(10.0 + 4.0, 10.0 - 2.0), 0.125));
+    assert_eq!(e.fraction(18.5, 10.0), None);
+    assert_eq!(e.fraction(10.0, 14.5), None);
+}
+
+#[test]
+fn check_ellipse_hole() {
+    let e = ellipse_with_hole(10.0, 10.0, 6.0, 6.0, HollowThickness::Percentage(50)); // hole radius 3
+    assert_eq!(e.fraction(10.0, 10.0), None); // center: in the hole
+    assert_eq!(e.fraction(10.0, 8.0), None); // 2 units from the center: in the hole
+    assert!(e.fraction(10.0, 6.0).is_some()); // 4 units: in the band
+    assert!(e.fraction(10.0, 4.5).is_some()); // 5.5 units: in the band
+    assert_eq!(e.fraction(10.0, 3.5), None); // 6.5 units: outside
+    // a hole larger than the shape is capped: nothing is left
+    let e = ellipse_with_hole(10.0, 10.0, 6.0, 6.0, HollowThickness::Absolute(100));
+    assert_eq!(e.fraction(10.0, 4.5), None);
+}
+
+#[test]
+fn check_ellipse_areas_are_proportional() {
+    // four equal slices on a very stretched ellipse must cover (almost) the same area
+    let mut slices: Vec<Slice> = [1u64, 1, 1, 1].iter().map(|v| Slice::new(*v, "", None)).collect();
+    update_proportions(&mut slices);
+    // 80 x 10 cells = 80 x 20 physical units
+    let shape = Ellipse::fill(Size::new(80, 10), HollowThickness::None, DrawModeRenderer::HalfBlocks);
+    // sample a 1 x 1 physical unit grid (the half block resolution)
+    let mut counts = [0usize; 4];
+    for y in 0..20 {
+        for x in 0..80 {
+            if let Some(id) = shape.slice_at(x as f64 + 0.5, y as f64 + 0.5, &slices) {
+                counts[id] += 1;
+            }
+        }
+    }
+    let total: usize = counts.iter().sum();
+    for c in counts {
+        let share = c as f64 / total as f64;
+        assert!((share - 0.25).abs() < 0.01, "{counts:?}");
+    }
+}
+
+#[test]
+fn check_hole_radii() {
+    // shape radii: 10 x 5 (physical units)
+    assert_eq!(Ellipse::hole_radii(HollowThickness::None, 10.0, 5.0), (0.0, 0.0));
+    assert_eq!(Ellipse::hole_radii(HollowThickness::Percentage(0), 10.0, 5.0), (0.0, 0.0));
+    assert_eq!(Ellipse::hole_radii(HollowThickness::Percentage(50), 10.0, 5.0), (5.0, 2.5));
+    assert_eq!(Ellipse::hole_radii(HollowThickness::Percentage(200), 10.0, 5.0), (10.0, 5.0));
+    // 4 characters wide, same proportions as the shape
+    assert_eq!(Ellipse::hole_radii(HollowThickness::Absolute(4), 10.0, 5.0), (2.0, 1.0));
+    // 6 x 2 characters = 6 x 4 physical units
+    assert_eq!(Ellipse::hole_radii(HollowThickness::Rectangle(6, 2), 10.0, 5.0), (3.0, 2.0));
+    // default: solid circle, half blocks, no margins
+    assert_eq!(DrawMode::default(), DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::HalfBlocks, HollowThickness::None, None));
+}
+
+#[test]
+fn check_render_ellipse() {
+    check_render_with("ellipse, 4 slices, 40x10", &[50, 25, 15, 10], 40, 10, |c| c.set_shape(DrawModeShape::Ellipse), 0x62D328619AA98B15);
+}
+
+#[test]
+fn check_render_ellipse_hollow() {
+    check_render_with(
+        "ellipse with a 60% hole",
+        &[50, 25, 15, 10],
+        40,
+        10,
+        |c| {
+            c.set_shape(DrawModeShape::Ellipse);
+            c.set_hollow_thickness(HollowThickness::Percentage(60));
+        },
+        0xD6E48441BA25E0A5,
+    );
+}
+
+#[test]
+fn check_render_ring_percentage() {
+    check_render_with("ring, 50% hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Percentage(50)), 0x7AAACBA8D289DC0D);
+}
+
+#[test]
+fn check_render_ring_absolute() {
+    check_render_with("ring, hole 8 chars wide", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Absolute(8)), 0x160DE96C8751893D);
+}
+
+#[test]
+fn check_render_ring_rectangle() {
+    check_render_with("circle, 12x3 hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Rectangle(12, 3)), 0xB6947C4A287B1B35);
+}
+
+#[test]
+fn check_render_hole_fills_shape() {
+    // a 100% hole leaves nothing: same screen as an empty chart of the same size
+    check_render_with("100% hole: background only", &[5, 5], 20, 8, |c| c.set_hollow_thickness(HollowThickness::Percentage(100)), 0x77243921445A6CC9);
+}
+
+#[test]
+fn check_render_hole_zero() {
+    // a 0% hole is a solid circle: same screen as `check_render_single_slice`
+    check_render_with("0% hole: solid", &[5], 20, 8, |c| c.set_hollow_thickness(HollowThickness::Percentage(0)), 0x68A1207666DFCB51);
+}
+
+// ---------------------------------------------------------------------------
+// padding: one character is always left empty on every side
+// ---------------------------------------------------------------------------
+use super::draw_mode::PADDING;
+
+fn paint_on_surface(mode: DrawMode, values: &[u64], w: u32, h: u32) -> Surface {
+    let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
+    update_proportions(&mut slices);
+    let mut surface = Surface::new(w, h);
+    surface.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices);
+    surface
+}
+
+fn painted(surface: &Surface, x: i32, y: i32) -> bool {
+    surface.char(x, y).unwrap().code != '#'
+}
+
+#[test]
+fn check_padding() {
+    assert_eq!(PADDING, 1);
+    let holes = [HollowThickness::None, HollowThickness::Percentage(40), HollowThickness::Absolute(2), HollowThickness::Rectangle(3, 1)];
+    let renderers = [DrawModeRenderer::HalfBlocks, DrawModeRenderer::Braille, DrawModeRenderer::Custom('*')];
+    for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+        for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
+            for (w, h) in [(12, 6), (13, 7), (30, 5), (6, 14), (3, 3)] {
+                let mode = DrawMode::new(shape, renderer, hole, None);
+                let s = paint_on_surface(mode, &[3, 2, 1], w, h);
+                let (w, h) = (w as i32, h as i32);
+                for x in 0..w {
+                    assert!(!painted(&s, x, 0), "{shape:?} {hole:?} {renderer:?} {w}x{h}: top row painted at x={x}");
+                    assert!(!painted(&s, x, h - 1), "{shape:?} {hole:?} {w}x{h}: bottom row painted at x={x}");
+                }
+                for y in 0..h {
+                    assert!(!painted(&s, 0, y), "{shape:?} {hole:?} {w}x{h}: left column painted at y={y}");
+                    assert!(!painted(&s, w - 1, y), "{shape:?} {hole:?} {w}x{h}: right column painted at y={y}");
+                }
+                // without a hole, something is drawn inside (a hole may cover a very small shape)
+                if hole == HollowThickness::None {
+                    let inside = (1..w - 1).any(|x| (1..h - 1).any(|y| painted(&s, x, y)));
+                    assert!(inside, "{shape:?} {w}x{h}: nothing drawn");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn check_padding_too_small() {
+    // 2 characters or less in any direction: no room left, nothing is drawn
+    for (w, h) in [(1, 1), (2, 10), (10, 2), (2, 2)] {
+        let s = paint_on_surface(DrawMode::default(), &[1, 1], w, h);
+        for x in 0..w as i32 {
+            for y in 0..h as i32 {
+                assert!(!painted(&s, x, y), "{w}x{h}: painted at ({x},{y})");
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// renderers: braille and custom character
+// ---------------------------------------------------------------------------
+
+#[test]
+fn check_render_braille() {
+    check_render_with("braille, 4 slices, 24x8", &[50, 25, 15, 10], 24, 8, |c| c.set_renderer(DrawModeRenderer::Braille), 0xED4B863043FD6E21);
+}
+
+#[test]
+fn check_render_braille_ring() {
+    check_render_with(
+        "braille ring, 50% hole",
+        &[50, 25, 15, 10],
+        24,
+        8,
+        |c| {
+            c.set_renderer(DrawModeRenderer::Braille);
+            c.set_hollow_thickness(HollowThickness::Percentage(50));
+        },
+        0x10159C4C0A853FCA,
+    );
+}
+
+#[test]
+fn check_render_custom_char() {
+    check_render_with(
+        "custom char, ellipse",
+        &[50, 25, 15, 10],
+        24,
+        8,
+        |c| {
+            c.set_shape(DrawModeShape::Ellipse);
+            c.set_renderer(DrawModeRenderer::Custom('o'));
+        },
+        0xE12C4CA1F0D4060F,
+    );
+}
+
+#[test]
+fn check_braille_majority_color() {
+    // a cell split between two slices takes the color of the slice with most dots
+    let mut slices: Vec<Slice> = [1u64, 1].iter().map(|v| Slice::new(*v, "", None)).collect();
+    update_proportions(&mut slices);
+    update_colors(&mut slices);
+    let mode = DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::Braille, HollowThickness::None, None);
+    let mut surface = Surface::new(12, 7);
+    surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices);
+    for y in 1..6 {
+        for x in 1..11 {
+            let ch = surface.char(x, y).unwrap();
+            if ch.code != ' ' {
+                assert!(('\u{2801}'..='\u{28FF}').contains(&ch.code), "({x},{y}): {:?}", ch.code);
+                assert!(ch.foreground == slices[0].color || ch.foreground == slices[1].color);
+            }
+        }
+    }
 }

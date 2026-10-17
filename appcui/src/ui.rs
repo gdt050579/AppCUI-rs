@@ -187,4 +187,4 @@ pub use hslider::HSlider;
 pub use vbarchart::VBarChart;
 pub use hbarchart::HBarChart;
 pub use piechart::PieChart;
-pub use markdown_composer::MarkdownComposer;
+pub use markdown_composer::MarkdownComposer;
