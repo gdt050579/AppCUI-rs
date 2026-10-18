@@ -75,7 +75,7 @@ pub(super) fn largest_remainder(values: impl Iterator<Item = u64>, total: u128, 
     }
 }
 
-#[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent, internal = true)]
+#[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnFocus, internal = true)]
 /// A chart that shows a single series of values as parts of a whole.
 ///
 /// Each value is a slice whose size is proportional to its share of the total.
@@ -88,6 +88,7 @@ pub struct PieChart {
     draw_mode: DrawMode,
     paint_map: PaintMap,
     pub(super) hovered_slice: Option<usize>,
+    selected_slice: Option<usize>,
 }
 
 impl PieChart {
@@ -110,6 +111,7 @@ impl PieChart {
             draw_mode: DrawMode::default(),
             paint_map: PaintMap::new(Size::new(1, 1)),
             hovered_slice: None,
+            selected_slice: None,
         }
     }
 
@@ -223,7 +225,11 @@ impl PieChart {
         self.paint_map.resize(self.surface.size());
         self.draw_mode.paint(&mut self.surface, theme, &self.slices, &mut self.paint_map);
         update_centers(&mut self.slices, &self.paint_map);
-        // slices may have moved (or no longer exist) under the mouse
+        if let Some(index) = self.selected_slice {
+            if self.flags.contains(Flags::DimSlicesOnSelection) {
+                self.paint_map.dim(index, &mut self.surface, theme.chart.inactive);
+            }
+        }
         self.hovered_slice = None;
     }
 
@@ -383,6 +389,16 @@ impl OnMouseEvent for PieChart {
                     EventProcessStatus::Ignored
                 }
             }
+            MouseEvent::Pressed(dt) => {
+                let index = self.slice_index_at(dt.x, dt.y);
+                if index != self.selected_slice {
+                    self.selected_slice = index;
+                    self.repaint_surface();
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
             _ => EventProcessStatus::Ignored,
         }
     }
@@ -392,5 +408,13 @@ impl OnResize for PieChart {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.surface.resize(new_size);
         self.repaint_surface();
+    }
+}
+impl OnFocus for PieChart {
+    fn on_lose_focus(&mut self) {
+        if self.selected_slice.is_some() {
+            self.selected_slice = None;
+            self.repaint_surface();
+        }
     }
 }

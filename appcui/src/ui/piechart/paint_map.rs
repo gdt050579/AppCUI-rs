@@ -1,4 +1,4 @@
-use crate::graphics::Size;
+use crate::graphics::{CharAttribute, Character, Rect, Size, Surface};
 
 pub(super) struct PaintMap {
     map: Vec<u16>,
@@ -46,5 +46,19 @@ impl PaintMap {
             return;
         }
         self.map[y * self.size.width as usize + x] = Self::INVALID;
+    }
+    pub(super) fn dim(&mut self, index: usize, surface: &mut Surface, attr: CharAttribute) {
+        if index >= Self::INVALID as usize {
+            return;
+        }
+        let idx = Some(index as u16);
+        let r = Rect::with_size(0, 0, self.size.width as u16, self.size.height as u16);
+        surface.transform_rect(r, |ch,p| {
+            if self.get(p.x as usize, p.y as usize) == idx {
+                None
+            } else {
+                Some(Character::with_attributes(ch.code, attr))
+            }
+        });
     }
 }
