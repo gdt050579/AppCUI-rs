@@ -61,4 +61,11 @@ impl PaintMap {
             }
         });
     }
+    pub(super) fn paint_selection(&mut self, index: usize, surface: &mut Surface, attr: CharAttribute) {
+        if index >= Self::INVALID as usize {
+            return;
+        }
+        let idx = index as u16;
+        todo!()
+    }
 }

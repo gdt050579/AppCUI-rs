@@ -229,6 +229,7 @@ impl PieChart {
             if self.flags.contains(Flags::DimSlicesOnSelection) {
                 self.paint_map.dim(index, &mut self.surface, theme.chart.inactive);
             }
+            self.paint_map.paint_selection(index, &mut self.surface, theme.chart.selection_border);
         }
         self.hovered_slice = None;
     }
