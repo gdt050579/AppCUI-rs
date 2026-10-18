@@ -1082,3 +1082,134 @@ fn check_tooltip_stays_on_the_slice_center() {
         .run()
         .unwrap();
 }
+
+// ---------------------------------------------------------------------------
+// selection border
+// ---------------------------------------------------------------------------
+const SELECTION_CHARS: &str = "─│┌┐└┘├┤┬┴┼";
+
+/// Line ends of a selection character: (up, right, down, left).
+fn line_ends(c: char) -> (bool, bool, bool, bool) {
+    match c {
+        '─' => (false, true, false, true),
+        '│' => (true, false, true, false),
+        '┌' => (false, true, true, false),
+        '┐' => (false, false, true, true),
+        '└' => (true, true, false, false),
+        '┘' => (true, false, false, true),
+        '├' => (true, true, true, false),
+        '┤' => (true, false, true, true),
+        '┬' => (false, true, true, true),
+        '┴' => (true, true, false, true),
+        _ => (true, true, true, true),
+    }
+}
+
+#[test]
+fn check_selection_border() {
+    let value_sets: [&[u64]; 5] = [&[50, 25, 15, 10], &[75, 25], &[90, 5, 5], &[1, 1, 1, 1, 1, 1, 1, 1], &[1000, 1, 1000]];
+    let holes = [HollowThickness::None, HollowThickness::Percentage(50)];
+    let renderers = [DrawModeRenderer::HalfBlocks, DrawModeRenderer::Braille];
+    let mut borders = 0;
+    for values in value_sets {
+        for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+            for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
+                for (w, h) in [(34u32, 15u32), (21, 8), (60, 20)] {
+                    let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
+                    update_proportions(&mut slices);
+                    update_colors(&mut slices);
+                    let mut surface = Surface::new(w, h);
+                    let mut map = PaintMap::new(Size::new(w, h));
+                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map);
+                    for sel in 0..values.len() {
+                        let name = format!("{values:?} {shape:?} {hole:?} {renderer:?} {w}x{h} selected {sel}");
+                        let mut s = Surface::new(w, h);
+                        s.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
+                        let before: Vec<Option<u16>> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| map.get(x as usize, y as usize)).collect();
+                        map.paint_selection(sel, &mut s, CharAttribute::with_fore_color(Color::Yellow));
+                        let after: Vec<Option<u16>> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| map.get(x as usize, y as usize)).collect();
+                        assert_eq!(before, after, "{name}: the paint map must not change");
+                        let in_slice = |x: i32, y: i32| x >= 0 && y >= 0 && map.get(x as usize, y as usize) == Some(sel as u16);
+                        // a one cell notch with the slice on 3 or 4 sides counts as part of the slice
+                        let selected = |x: i32, y: i32| in_slice(x, y) || [(0, -1), (1, 0), (0, 1), (-1, 0)].iter().filter(|(dx, dy)| in_slice(x + dx, y + dy)).count() >= 3;
+                        let border = |x: i32, y: i32| s.char(x, y).is_some_and(|c| c.code != '#');
+                        for y in 0..h as i32 {
+                            for x in 0..w as i32 {
+                                let touches = (-1..=1).any(|dy| (-1..=1).any(|dx| (dx, dy) != (0, 0) && selected(x + dx, y + dy)));
+                                let ch = s.char(x, y).unwrap().code;
+                                if selected(x, y) {
+                                    assert_eq!(ch, '#', "{name}: border drawn over the selected slice at ({x},{y})");
+                                } else if touches {
+                                    // every cell touching the slice is part of the border...
+                                    assert!(SELECTION_CHARS.contains(ch), "{name}: ({x},{y}) = {ch:?}");
+                                    borders += 1;
+                                    // ...and the line is continuous: each line end meets a cell of the border
+                                    let (up, right, down, left) = line_ends(ch);
+                                    assert!(!up || border(x, y - 1), "{name}: ({x},{y}) {ch} up");
+                                    assert!(!right || border(x + 1, y), "{name}: ({x},{y}) {ch} right");
+                                    assert!(!down || border(x, y + 1), "{name}: ({x},{y}) {ch} down");
+                                    assert!(!left || border(x - 1, y), "{name}: ({x},{y}) {ch} left");
+                                } else {
+                                    assert_eq!(ch, '#', "{name}: ({x},{y}) is not next to the slice");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    assert!(borders > 10_000);
+}
+
+#[test]
+fn check_selection_border_edge_cases() {
+    // a slice touching the edge of the map: the border stops at the edge, no panic
+    let mut map = PaintMap::new(Size::new(4, 3));
+    map.set(0, 0, 0);
+    map.set(1, 0, 0);
+    let mut s = Surface::new(4, 3);
+    s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    map.paint_selection(0, &mut s, CharAttribute::default());
+    let row = |y: i32| (0..4).map(|x| s.char(x, y).unwrap().code).collect::<String>();
+    assert_eq!(row(0), "  │ ");
+    assert_eq!(row(1), "──┘ ");
+    assert_eq!(row(2), "    ");
+    // a slice that is not drawn, and an invalid index: nothing is painted
+    for index in [3usize, 0xFFFF, 100_000] {
+        let mut s = Surface::new(4, 3);
+        s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+        map.paint_selection(index, &mut s, CharAttribute::default());
+        assert!((0..3).all(|y| row_is_blank(&s, y, 4)), "index {index}");
+    }
+}
+
+fn row_is_blank(s: &Surface, y: i32, w: i32) -> bool {
+    (0..w).all(|x| s.char(x, y).unwrap().code == ' ')
+}
+
+#[test]
+fn check_selection_on_click() {
+    let script = "
+        Paint.Enable(false)
+        Paint('nothing selected')
+        CheckHash(0xAB318EC7B4E320D9)
+        Mouse.Click(23,10,left)
+        Paint('slice A (right half) selected: the other slices are dimmed')
+        CheckHash(0x53A16A17F71496CC)
+    ";
+    App::new()
+        .size(Size::new(44, 18))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("x:1,y:0,w:40,h:15"), piechart::Flags::DimSlicesOnSelection);
+            c.add_value(50, "A", None);
+            c.add_value(25, "B", None);
+            c.add_value(25, "C", None);
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
+}
