@@ -553,7 +553,7 @@ fn check_render_after_set_value() {
 // ---------------------------------------------------------------------------
 // draw modes: ellipse and hollow shapes
 // ---------------------------------------------------------------------------
-use super::draw_mode::DrawMode;
+use super::draw_mode::{plot_area, DrawMode};
 use super::{DrawModeRenderer, DrawModeShape, HollowThickness};
 
 fn check_render_with(name: &str, values: &'static [u64], w: u32, h: u32, setup: fn(&mut PieChart), hash: u64) {
@@ -615,7 +615,7 @@ fn check_ellipse_areas_are_proportional() {
     let mut slices: Vec<Slice> = [1u64, 1, 1, 1].iter().map(|v| Slice::new(*v, "", None)).collect();
     update_proportions(&mut slices);
     // 80 x 10 cells = 80 x 20 physical units
-    let shape = Ellipse::fill(Size::new(80, 10), HollowThickness::None, DrawModeRenderer::HalfBlocks);
+    let shape = Ellipse::fill(Rect::new(0, 0, 79, 9), HollowThickness::None, DrawModeRenderer::HalfBlocks);
     // sample a 1 x 1 physical unit grid (the half block resolution)
     let mut counts = [0usize; 4];
     for y in 0..20 {
@@ -704,7 +704,8 @@ fn paint_on_surface(mode: DrawMode, values: &[u64], w: u32, h: u32) -> Surface {
     update_proportions(&mut slices);
     let mut surface = Surface::new(w, h);
     surface.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
-    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaintMap::new(Size::new(w, h)));
+    let area = plot_area(surface.size());
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaintMap::new(Size::new(w, h)), area);
     surface
 }
 
@@ -802,7 +803,8 @@ fn check_braille_majority_color() {
     let mode = DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::Braille, HollowThickness::None);
     let mut surface = Surface::new(12, 7);
     surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
-    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaintMap::new(Size::new(12, 7)));
+    let area = plot_area(surface.size());
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaintMap::new(Size::new(12, 7)), area);
     for y in 1..6 {
         for x in 1..11 {
             let ch = surface.char(x, y).unwrap();
@@ -833,7 +835,8 @@ fn paint_with_map(mode: DrawMode, w: u32, h: u32) -> (Surface, PaintMap) {
     let mut surface = Surface::new(w, h);
     surface.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
     let mut map = PaintMap::new(Size::new(w, h));
-    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map);
+    let area = plot_area(surface.size());
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
     (surface, map)
 }
 
@@ -1022,7 +1025,8 @@ fn check_centers_on_real_charts() {
                     update_colors(&mut slices);
                     let mut surface = Surface::new(w, h);
                     let mut map = PaintMap::new(Size::new(w, h));
-                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map);
+                    let area = plot_area(surface.size());
+                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
                     update_centers(&mut slices, &map);
                     let name = format!("{values:?} {shape:?} {hole:?} {renderer:?} {w}x{h}");
                     for (i, s) in slices.iter().enumerate() {
@@ -1120,7 +1124,8 @@ fn check_selection_border() {
                     update_colors(&mut slices);
                     let mut surface = Surface::new(w, h);
                     let mut map = PaintMap::new(Size::new(w, h));
-                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map);
+                    let area = plot_area(surface.size());
+                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
                     for sel in 0..values.len() {
                         let name = format!("{values:?} {shape:?} {hole:?} {renderer:?} {w}x{h} selected {sel}");
                         let mut s = Surface::new(w, h);
@@ -1212,4 +1217,246 @@ fn check_selection_on_click() {
         })
         .run()
         .unwrap();
+}
+
+// ---------------------------------------------------------------------------
+// labels
+// ---------------------------------------------------------------------------
+use super::labels::{self, fit, side_of, Place, Side};
+use super::{LabelContent, LabelLayout};
+
+fn labelled(values: &[(u64, &str)], content: LabelContent) -> Vec<Slice> {
+    let mut slices: Vec<Slice> = values.iter().map(|(v, l)| Slice::new(*v, l, None)).collect();
+    update_proportions(&mut slices);
+    update_colors(&mut slices);
+    labels::update_texts(&mut slices, content);
+    slices
+}
+
+#[test]
+fn check_label_texts() {
+    let texts = |content| labelled(&[(45, "Rust"), (7, ""), (1234567, "Big")], content).iter().map(|s| s.text.clone()).collect::<Vec<_>>();
+    assert_eq!(texts(LabelContent::Label), vec!["Rust", "", "Big"]);
+    assert_eq!(texts(LabelContent::Value), vec!["45", "7", "1234567"]);
+    assert_eq!(texts(LabelContent::LabelAndValue), vec!["Rust: 45", "7", "Big: 1234567"]);
+}
+
+#[test]
+fn check_label_sides() {
+    // the middle of each slice decides the side: 12 o'clock is top, 3 is right, 6 is bottom, 9 is left
+    let slices = labelled(&[(1, "a"); 8], LabelContent::Label);
+    let sides: Vec<Side> = slices.iter().map(side_of).collect();
+    // 8 equal slices: middles at 22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5 degrees
+    use Side::*;
+    assert_eq!(sides, vec![Top, Right, Right, Bottom, Bottom, Left, Left, Top]);
+    let slices = labelled(&[(1, "a"), (3, "b")], LabelContent::Label);
+    // 0..90 -> middle 45 -> right; 90..360 -> middle 225 -> left
+    assert_eq!(slices.iter().map(side_of).collect::<Vec<_>>(), vec![Right, Left]);
+}
+
+#[test]
+fn check_outside_area() {
+    let size = Size::new(50, 18);
+    let inner = plot_area(size).unwrap();
+    // labels on all four sides (4 equal slices: middles at 45, 135, 225 and 315 degrees ->
+    // right, bottom, left, top): the same room left and right, and top and bottom
+    let slices = labelled(&[(1, "Right side"), (1, "Bot"), (1, "L"), (1, "Top")], LabelContent::Label);
+    assert_eq!(slices.iter().map(side_of).collect::<Vec<_>>(), vec![Side::Right, Side::Bottom, Side::Left, Side::Top]);
+    let (area, ok) = labels::outside_area(size, &slices);
+    let area = area.unwrap();
+    assert!(ok);
+    assert_eq!(area.left() - inner.left(), inner.right() - area.right());
+    assert_eq!(area.top() - inner.top(), inner.bottom() - area.bottom());
+    assert_eq!(area.left() - inner.left(), "Right side".len() as i32 + 2);
+    assert_eq!(area.top() - inner.top(), 2);
+    // no labels at all: the whole plot area
+    let slices = labelled(&[(1, ""), (1, "")], LabelContent::Label);
+    assert_eq!(labels::outside_area(size, &slices), (Some(inner), true));
+    // no room: the plot area, and no outside labels
+    let slices = labelled(&[(1, "Top"), (1, "Right side"), (1, "Bot"), (1, "Left side")], LabelContent::Label);
+    let (area, ok) = labels::outside_area(Size::new(14, 6), &slices);
+    assert_eq!(area, plot_area(Size::new(14, 6)));
+    assert!(!ok);
+}
+
+#[test]
+fn check_fit() {
+    let slices = labelled(&[(10, "a"), (20, "b"), (30, "c"), (1, "d")], LabelContent::Label);
+    let place = |index, pos, len| Place { index, pos, len, anchor: Point::new(0, 0) };
+    // overlapping items are pushed apart, keeping their order and a gap
+    let mut items = vec![place(0, 5, 3), place(1, 6, 3), place(2, 6, 2)];
+    fit(&mut items, &slices, 0, 20, 1);
+    assert_eq!(items.iter().map(|p| (p.index, p.pos)).collect::<Vec<_>>(), vec![(0, 5), (1, 9), (2, 13)]);
+    // pushed back inside the range when they would end past it
+    let mut items = vec![place(0, 18, 3), place(1, 19, 3)];
+    fit(&mut items, &slices, 0, 20, 1);
+    assert_eq!(items.iter().map(|p| (p.index, p.pos)).collect::<Vec<_>>(), vec![(0, 14), (1, 18)]);
+    // rows (length 1, no gap): 4 items, 3 rows -> the smallest slice (d) is dropped
+    let mut items = vec![place(0, 1, 1), place(1, 1, 1), place(2, 1, 1), place(3, 1, 1)];
+    fit(&mut items, &slices, 0, 2, 0);
+    assert_eq!(items.iter().map(|p| (p.index, p.pos)).collect::<Vec<_>>(), vec![(0, 0), (1, 1), (2, 2)]);
+}
+
+#[test]
+fn check_labels_keep_the_chart_and_padding() {
+    // labels never draw over the chart or the padding
+    let value_sets: [&[(u64, &str)]; 4] = [
+        &[(45, "Rust"), (25, "C++"), (15, "Go"), (10, "Zig"), (5, "Other")],
+        &[(1, "Jan"), (1, "Feb"), (1, "Mar"), (1, "Apr"), (1, "May"), (1, "Jun"), (1, "Jul"), (1, "Aug"), (1, "Sep"), (1, "Oct"), (1, "Nov"), (1, "Dec")],
+        &[(97, "A very long label for a big slice"), (1, "a"), (1, "b"), (1, "c")],
+        &[(1, "only")],
+    ];
+    let mut checked = 0;
+    for values in value_sets {
+        for content in [LabelContent::Label, LabelContent::Value, LabelContent::LabelAndValue] {
+            for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+                for hole in [HollowThickness::None, HollowThickness::Percentage(50)] {
+                    for (w, h) in [(50u32, 18u32), (30, 10), (80, 24), (14, 6)] {
+                        let mut slices = labelled(values, content);
+                        let size = Size::new(w, h);
+                        let mut surface = Surface::new(w, h);
+                        surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+                        let mut map = PaintMap::new(size);
+                        let (area, ok) = labels::outside_area(size, &slices);
+                        DrawMode::new(shape, DrawModeRenderer::HalfBlocks, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
+                        update_centers(&mut slices, &map);
+                        let before: Vec<Character> = (0..h as i32).flat_map(|y| (0..w as i32).map(move |x| (x, y))).map(|(x, y)| *surface.char(x, y).unwrap()).collect();
+                        if let (Some(area), true) = (area, ok) {
+                            labels::paint_outside(&slices, &mut surface, &map, area, &Theme::new(Themes::Default), &mut Vec::new());
+                        }
+                        let name = format!("{values:?} {content:?} {shape:?} {hole:?} {w}x{h}");
+                        for y in 0..h as i32 {
+                            for x in 0..w as i32 {
+                                let ch = *surface.char(x, y).unwrap();
+                                let old = before[(y as u32 * w + x as u32) as usize];
+                                if map.get(x as usize, y as usize).is_some() || x == 0 || y == 0 || x == w as i32 - 1 || y == h as i32 - 1 {
+                                    assert_eq!(ch, old, "{name}: ({x},{y}) changed");
+                                }
+                            }
+                        }
+                        checked += 1;
+                    }
+                }
+            }
+        }
+    }
+    assert_eq!(checked, 4 * 3 * 2 * 2 * 4);
+}
+
+#[test]
+fn check_inside_label_is_centered_on_the_slice() {
+    in_app(|| {
+        let mut c = PieChart::new(layout!("x:0,y:0,w:40,h:16"), piechart::Flags::None);
+        c.add_value(50, "Half", None);
+        c.add_value(50, "Other", None);
+        c.set_label_layout(LabelLayout::Inside);
+        c.on_resize(Size::new(0, 0), Size::new(40, 16));
+        for s in c.slices.iter() {
+            let center = s.center.unwrap();
+            let len = s.text.chars().count() as i32;
+            let x = center.x - len / 2;
+            let row: String = (0..len).map(|i| c.surface.char(x + i, center.y).unwrap().code).collect();
+            assert_eq!(row, s.text);
+        }
+    });
+}
+
+fn check_label_screen(name: &str, values: &'static [(u64, &'static str)], w: u32, h: u32, setup: fn(&mut PieChart), hash: u64) {
+    let script = format!(
+        "
+        Paint.Enable(false)
+        Paint('{name}')
+        CheckHash(0x{hash:X})
+    "
+    );
+    App::new()
+        .size(Size::new(w + 4, h + 2))
+        .debug_script(&script)
+        .window(move || {
+            let mut win = window!("Test,d:f");
+            let mut c = PieChart::new(LayoutBuilder::new().x(1).y(0).width(w).height(h).build(), piechart::Flags::None);
+            for (v, l) in values {
+                c.add_value(*v, l, None);
+            }
+            setup(&mut c);
+            win.add(c);
+            win
+        })
+        .run()
+        .unwrap();
+}
+
+const LANGS: &[(u64, &str)] = &[(45, "Rust"), (25, "C++"), (15, "Go"), (10, "Zig"), (5, "Other")];
+
+#[test]
+fn check_labels_none() {
+    check_label_screen("no labels (default)", LANGS, 44, 16, |_| {}, 0xEF22351CA7C0DEB5);
+}
+
+#[test]
+fn check_labels_inside() {
+    check_label_screen("inside, label", LANGS, 44, 16, |c| c.set_label_layout(LabelLayout::Inside), 0xFAF82849A5753C41);
+}
+
+#[test]
+fn check_labels_inside_label_and_value() {
+    check_label_screen(
+        "inside, label and value",
+        LANGS,
+        44,
+        16,
+        |c| {
+            c.set_label_layout(LabelLayout::Inside);
+            c.set_label_content(LabelContent::LabelAndValue);
+        },
+        0xAC8B2F1E28A5B029,
+    );
+}
+
+#[test]
+fn check_labels_outside() {
+    check_label_screen("outside, label", LANGS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x1CF1C6FD5EEFDFB0);
+}
+
+#[test]
+fn check_labels_outside_many() {
+    const MONTHS: &[(u64, &str)] = &[(1, "Jan"), (1, "Feb"), (1, "Mar"), (1, "Apr"), (1, "May"), (1, "Jun"), (1, "Jul"), (1, "Aug"), (1, "Sep"), (1, "Oct"), (1, "Nov"), (1, "Dec")];
+    check_label_screen("outside, 12 slices", MONTHS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x3EF5A48F1BF9EA80);
+}
+
+#[test]
+fn check_labels_outside_ring_values() {
+    check_label_screen(
+        "outside ring, value",
+        LANGS,
+        50,
+        18,
+        |c| {
+            c.set_label_layout(LabelLayout::Outside);
+            c.set_label_content(LabelContent::Value);
+            c.set_hollow_thickness(HollowThickness::Percentage(50));
+        },
+        0xE19E61679EAF1B8B,
+    );
+}
+
+#[test]
+fn check_labels_outside_ellipse() {
+    check_label_screen(
+        "outside, ellipse",
+        LANGS,
+        56,
+        14,
+        |c| {
+            c.set_label_layout(LabelLayout::Outside);
+            c.set_shape(DrawModeShape::Ellipse);
+        },
+        0xD2F0CD0B4D601DCB,
+    );
+}
+
+#[test]
+fn check_labels_outside_no_room() {
+    // not enough room: the chart is drawn without labels (same as no labels at all)
+    check_label_screen("outside, too small", LANGS, 14, 6, |c| c.set_label_layout(LabelLayout::Outside), 0x9CAC7FFF57DEC1BD);
 }

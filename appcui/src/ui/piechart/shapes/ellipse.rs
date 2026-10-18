@@ -1,12 +1,14 @@
 use super::super::draw_mode::PADDING;
 use super::super::piechart::slice_at;
 use super::super::{DrawModeRenderer, HollowThickness, Slice, PaintMap};
-use crate::graphics::{CharFlags, Character, Color, Size, SpecialChar, Surface};
+use crate::graphics::{CharFlags, Character, Color, Rect, Size, SpecialChar, Surface};
 use crate::system::Theme;
 use std::f64::consts::TAU;
 
 pub(crate) struct Ellipse {
     size: Size,
+    origin_x: usize,
+    origin_y: usize,
     cx: f64,
     cy: f64,
     rx: f64,
@@ -17,25 +19,35 @@ pub(crate) struct Ellipse {
 }
 
 impl Ellipse {
-    pub(crate) fn circle(size: Size, hollow: HollowThickness, renderer: DrawModeRenderer) -> Self {
+    pub(crate) fn circle(area: Rect, hollow: HollowThickness, renderer: DrawModeRenderer) -> Self {
+        let size = area.size();
         // physical units: a cell is 1 unit wide and 2 units tall
         let width = size.width as f64;
         let height = size.height as f64 * 2.0;
         let radius = width.min(height) / 2.0;
-        Self::new(size, width / 2.0, height / 2.0, radius, radius, hollow, renderer)
+        Self::new(size, width / 2.0, height / 2.0, radius, radius, hollow, renderer).at(area)
     }
 
-    pub(crate) fn fill(size: Size, hollow: HollowThickness, renderer: DrawModeRenderer) -> Self {
+    pub(crate) fn fill(area: Rect, hollow: HollowThickness, renderer: DrawModeRenderer) -> Self {
+        let size = area.size();
         // physical units: a cell is 1 unit wide and 2 units tall
         let rx = size.width as f64 / 2.0;
         let ry = size.height as f64;
-        Self::new(size, rx, ry, rx, ry, hollow, renderer)
+        Self::new(size, rx, ry, rx, ry, hollow, renderer).at(area)
+    }
+
+    fn at(mut self, area: Rect) -> Self {
+        self.origin_x = area.left().max(0) as usize;
+        self.origin_y = area.top().max(0) as usize;
+        self
     }
 
     pub(crate) fn new(size: Size, cx: f64, cy: f64, rx: f64, ry: f64, hollow: HollowThickness, renderer: DrawModeRenderer) -> Self {
         let (hole_rx, hole_ry) = Self::hole_radii(hollow, rx, ry);
         Self {
             size,
+            origin_x: PADDING as usize,
+            origin_y: PADDING as usize,
             cx,
             cy,
             rx,
@@ -123,7 +135,7 @@ impl Ellipse {
                 let ch = Character::new(SpecialChar::BlockUpperHalf, color(top), color(bottom), CharFlags::None);
                 surface.write_char(cell_x as i32, cell_y as i32, ch);
                 if let Some(id) = top.or(bottom) {
-                    paint_map.set((cell_x + PADDING) as usize, (cell_y + PADDING) as usize, id as u16);
+                    paint_map.set(cell_x as usize + self.origin_x, cell_y as usize + self.origin_y, id as u16);
                 }
             }
         }
@@ -170,7 +182,7 @@ impl Ellipse {
                 let code = char::from_u32(0x2800 + pattern as u32).unwrap_or(' ');
                 let ch = Character::new(code, slices[ids[best]].color, background, CharFlags::None);
                 surface.write_char(cell_x as i32, cell_y as i32, ch);
-                paint_map.set((cell_x + PADDING) as usize, (cell_y + PADDING) as usize, ids[best] as u16);
+                paint_map.set(cell_x as usize + self.origin_x, cell_y as usize + self.origin_y, ids[best] as u16);
             }
         }
     }
@@ -183,7 +195,7 @@ impl Ellipse {
                 if let Some(id) = self.slice_at(cell_x as f64 + 0.5, y, slices) {
                     let ch = Character::new(code, slices[id].color, background, CharFlags::None);
                     surface.write_char(cell_x as i32, cell_y as i32, ch);
-                    paint_map.set((cell_x + PADDING) as usize, (cell_y + PADDING) as usize, id as u16);
+                    paint_map.set(cell_x as usize + self.origin_x, cell_y as usize + self.origin_y, id as u16);
                 }
             }
         }

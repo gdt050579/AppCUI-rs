@@ -1,5 +1,6 @@
 use super::shapes::Ellipse;
 use super::{Slice, PaintMap};
+use crate::graphics::Rect;
 use crate::graphics::Size;
 use crate::graphics::Surface;
 use crate::system::Theme;
@@ -82,54 +83,57 @@ impl DrawMode {
         }
     }
 
-    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap) {
-        let plot = plot_size(surface);
-        if (plot.width == 0) || (plot.height == 0) {
+    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap, area: Option<Rect>) {
+        paint_map.reset();
+        let Some(area) = area else {
             return;
-        }
-        let p = PADDING as i32;
-        surface.set_relative_clip(p, p, p + plot.width as i32 - 1, p + plot.height as i32 - 1);
-        surface.set_origin(p, p);
-        self.paint_shape(surface, theme, slices, paint_map);
+        };
+        surface.set_relative_clip(area.left(), area.top(), area.right(), area.bottom());
+        surface.set_origin(area.left(), area.top());
+        self.paint_shape(surface, theme, slices, paint_map, area);
         surface.reset_origin();
         surface.reset_clip();
     }
 
-    fn paint_shape(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap) {
-        paint_map.reset();
+    fn paint_shape(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap, area: Rect) {
         match self.shape {
-            DrawModeShape::Circle => self.paint_circle(surface, theme, slices, paint_map),
-            DrawModeShape::Square => self.paint_square(surface, theme, slices, paint_map),
-            DrawModeShape::RoundSquare => self.paint_round_square(surface, theme, slices, paint_map),
-            DrawModeShape::Rectangle => self.paint_rectangle(surface, theme, slices, paint_map),
-            DrawModeShape::RoundRectangle => self.paint_round_rectangle(surface, theme, slices, paint_map),
-            DrawModeShape::Ellipse => self.paint_ellipse(surface, theme, slices, paint_map),
+            DrawModeShape::Circle => self.paint_circle(surface, theme, slices, paint_map, area),
+            DrawModeShape::Square => self.paint_square(surface, theme, slices, paint_map, area),
+            DrawModeShape::RoundSquare => self.paint_round_square(surface, theme, slices, paint_map, area),
+            DrawModeShape::Rectangle => self.paint_rectangle(surface, theme, slices, paint_map, area),
+            DrawModeShape::RoundRectangle => self.paint_round_rectangle(surface, theme, slices, paint_map, area),
+            DrawModeShape::Ellipse => self.paint_ellipse(surface, theme, slices, paint_map, area),
         }
     }
 
-    fn paint_circle(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap) {
-        let shape = Ellipse::circle(plot_size(surface), self.hollow_thickness, self.renderer);
+    fn paint_circle(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap, area: Rect) {
+        let shape = Ellipse::circle(area, self.hollow_thickness, self.renderer);
         shape.paint(surface, theme, slices, paint_map);
     }
-    fn paint_square(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap) {
+    fn paint_square(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap, _area: Rect) {
         todo!()
     }
-    fn paint_round_square(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap) {
+    fn paint_round_square(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap, _area: Rect) {
         todo!()
     }
-    fn paint_rectangle(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap) {
+    fn paint_rectangle(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap, _area: Rect) {
         todo!()
     }
-    fn paint_round_rectangle(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap) {
+    fn paint_round_rectangle(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap, _area: Rect) {
         todo!()
     }
-    fn paint_ellipse(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap) {
-        let shape = Ellipse::fill(plot_size(surface), self.hollow_thickness, self.renderer);
+    fn paint_ellipse(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap, area: Rect) {
+        let shape = Ellipse::fill(area, self.hollow_thickness, self.renderer);
         shape.paint(surface, theme, slices, paint_map);
     }
 }
 
-pub(super) fn plot_size(surface: &Surface) -> Size {
-    let size = surface.size();
-    Size::new(size.width.saturating_sub(2 * PADDING), size.height.saturating_sub(2 * PADDING))
+pub(super) fn plot_area(size: Size) -> Option<Rect> {
+    let p = PADDING as i32;
+    let w = size.width.saturating_sub(2 * PADDING);
+    let h = size.height.saturating_sub(2 * PADDING);
+    if (w == 0) || (h == 0) {
+        return None;
+    }
+    Some(Rect::new(p, p, p + w as i32 - 1, p + h as i32 - 1))
 }

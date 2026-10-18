@@ -6,6 +6,7 @@
 
 mod draw_mode;
 mod initialization_flags;
+mod labels;
 mod piechart;
 mod shapes;
 mod slice;
@@ -15,6 +16,7 @@ mod tests;
 
 pub use self::draw_mode::{DrawModeRenderer, DrawModeShape, HollowThickness};
 pub use self::initialization_flags::Flags;
+pub use self::labels::{LabelContent, LabelLayout};
 pub use self::piechart::PieChart;
 
 use self::slice::Slice;

@@ -1,5 +1,6 @@
-use super::draw_mode::DrawMode;
-use super::{DrawModeRenderer, DrawModeShape, Flags, HollowThickness, PaintMap, Slice};
+use super::draw_mode::{plot_area, DrawMode};
+use super::labels::{self, Place};
+use super::{DrawModeRenderer, DrawModeShape, Flags, HollowThickness, LabelContent, LabelLayout, PaintMap, Slice};
 use crate::prelude::*;
 use crate::system::RuntimeManager;
 
@@ -84,11 +85,14 @@ pub(super) fn largest_remainder(values: impl Iterator<Item = u64>, total: u128, 
 pub struct PieChart {
     flags: Flags,
     pub(super) slices: Vec<Slice>,
-    surface: Surface,
+    pub(super) surface: Surface,
     draw_mode: DrawMode,
     paint_map: PaintMap,
     pub(super) hovered_slice: Option<usize>,
     selected_slice: Option<usize>,
+    label_layout: LabelLayout,
+    label_content: LabelContent,
+    label_places: Vec<Place>,
 }
 
 impl PieChart {
@@ -112,6 +116,9 @@ impl PieChart {
             paint_map: PaintMap::new(Size::new(1, 1)),
             hovered_slice: None,
             selected_slice: None,
+            label_layout: LabelLayout::None,
+            label_content: LabelContent::Label,
+            label_places: Vec::new(),
         }
     }
 
@@ -212,9 +219,48 @@ impl PieChart {
         self.repaint_surface();
     }
 
+    /// Sets where the labels of the slices are drawn, and repaints the chart.
+    ///
+    /// The default is [`LabelLayout::None`] (no labels).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
+    /// chart.add_value(50, "Rust", None);
+    /// chart.add_value(30, "C++", None);
+    /// chart.set_label_layout(piechart::LabelLayout::Outside);
+    /// ```
+    pub fn set_label_layout(&mut self, layout: LabelLayout) {
+        self.label_layout = layout;
+        self.repaint_surface();
+    }
+
+    /// Sets what the label of each slice shows, and repaints the chart.
+    ///
+    /// The default is [`LabelContent::Label`]. Labels are only drawn when the label
+    /// layout is not [`LabelLayout::None`].
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
+    /// chart.add_value(50, "Rust", None);
+    /// chart.set_label_layout(piechart::LabelLayout::Inside);
+    /// chart.set_label_content(piechart::LabelContent::LabelAndValue);
+    /// ```
+    pub fn set_label_content(&mut self, content: LabelContent) {
+        self.label_content = content;
+        labels::update_texts(&mut self.slices, content);
+        self.repaint_surface();
+    }
+
     fn data_changed(&mut self) {
         update_proportions(&mut self.slices);
         update_colors(&mut self.slices);
+        labels::update_texts(&mut self.slices, self.label_content);
         self.repaint_surface();
     }
 
@@ -222,9 +268,21 @@ impl PieChart {
         let theme = RuntimeManager::get().theme();
         self.surface.reset_clip();
         self.surface.clear(Character::with_attributes(' ', theme.chart.background));
-        self.paint_map.resize(self.surface.size());
-        self.draw_mode.paint(&mut self.surface, theme, &self.slices, &mut self.paint_map);
+        let size = self.surface.size();
+        self.paint_map.resize(size);
+        let (area, outside) = match self.label_layout {
+            LabelLayout::Outside => labels::outside_area(size, &self.slices),
+            _ => (plot_area(size), false),
+        };
+        self.draw_mode.paint(&mut self.surface, theme, &self.slices, &mut self.paint_map, area);
         update_centers(&mut self.slices, &self.paint_map);
+        match (self.label_layout, area) {
+            (LabelLayout::Inside, _) => labels::paint_inside(&self.slices, &mut self.surface, size),
+            (LabelLayout::Outside, Some(area)) if outside => {
+                labels::paint_outside(&self.slices, &mut self.surface, &self.paint_map, area, theme, &mut self.label_places)
+            }
+            _ => {}
+        }
         if let Some(index) = self.selected_slice {
             if self.flags.contains(Flags::DimSlicesOnSelection) {
                 self.paint_map.dim(index, &mut self.surface, theme.chart.inactive);
