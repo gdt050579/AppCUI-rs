@@ -93,6 +93,7 @@ pub struct PieChart {
     label_layout: LabelLayout,
     label_content: LabelContent,
     label_places: Vec<Place>,
+    number_format: FormatNumber,
 }
 
 impl PieChart {
@@ -119,6 +120,7 @@ impl PieChart {
             label_layout: LabelLayout::None,
             label_content: LabelContent::Label,
             label_places: Vec::new(),
+            number_format: FormatNumber::new(10).group(3, b','),
         }
     }
 
@@ -253,14 +255,34 @@ impl PieChart {
     /// ```
     pub fn set_label_content(&mut self, content: LabelContent) {
         self.label_content = content;
-        labels::update_texts(&mut self.slices, content);
+        labels::update_texts(&mut self.slices, content, &self.number_format);
+        self.repaint_surface();
+    }
+
+    /// Sets how values are written in labels, and repaints the chart.
+    ///
+    /// The default groups digits by thousands (`1,234,567`).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
+    /// chart.add_value(1500, "Disk", None);
+    /// chart.set_label_layout(piechart::LabelLayout::Outside);
+    /// chart.set_label_content(piechart::LabelContent::LabelAndValue);
+    /// chart.set_number_format(FormatNumber::new(10).group(3, b',').suffix(" MB"));
+    /// ```
+    pub fn set_number_format(&mut self, format: FormatNumber) {
+        self.number_format = format;
+        labels::update_texts(&mut self.slices, self.label_content, &self.number_format);
         self.repaint_surface();
     }
 
     fn data_changed(&mut self) {
         update_proportions(&mut self.slices);
         update_colors(&mut self.slices);
-        labels::update_texts(&mut self.slices, self.label_content);
+        labels::update_texts(&mut self.slices, self.label_content, &self.number_format);
         self.repaint_surface();
     }
 

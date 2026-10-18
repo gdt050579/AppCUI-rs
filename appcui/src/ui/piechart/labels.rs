@@ -3,7 +3,7 @@ use super::piechart::FULL;
 use super::{PaintMap, Slice};
 use crate::graphics::{CharFlags, Character, Color, Point, Rect, Size, Surface};
 use crate::system::Theme;
-use std::fmt::Write;
+use crate::utils::FormatNumber;
 
 /// Where the labels of a [`PieChart`](super::PieChart) are drawn.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
@@ -46,21 +46,22 @@ pub(super) struct Place {
     pub(super) anchor: Point,
 }
 
-pub(super) fn update_texts(slices: &mut [Slice], content: LabelContent) {
+pub(super) fn update_texts(slices: &mut [Slice], content: LabelContent, format: &FormatNumber) {
+    let mut buffer = [0u8; 96];
     for s in slices.iter_mut() {
         let Slice { text, label, value, .. } = s;
         text.clear();
+        // exact for every u64; `decimals(n)` adds n zero decimals
+        let formatted = format.write_fraction(*value, 1u64, &mut buffer).unwrap_or("");
         match content {
             LabelContent::Label => text.push_str(label),
-            LabelContent::Value => {
-                let _ = write!(text, "{value}");
-            }
+            LabelContent::Value => text.push_str(formatted),
             LabelContent::LabelAndValue => {
-                if label.is_empty() {
-                    let _ = write!(text, "{value}");
-                } else {
-                    let _ = write!(text, "{label}: {value}");
+                if !label.is_empty() {
+                    text.push_str(label);
+                    text.push_str(": ");
                 }
+                text.push_str(formatted);
             }
         }
     }

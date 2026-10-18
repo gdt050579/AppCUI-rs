@@ -1229,7 +1229,7 @@ fn labelled(values: &[(u64, &str)], content: LabelContent) -> Vec<Slice> {
     let mut slices: Vec<Slice> = values.iter().map(|(v, l)| Slice::new(*v, l, None)).collect();
     update_proportions(&mut slices);
     update_colors(&mut slices);
-    labels::update_texts(&mut slices, content);
+    labels::update_texts(&mut slices, content, &FormatNumber::new(10).group(3, b','));
     slices
 }
 
@@ -1237,8 +1237,8 @@ fn labelled(values: &[(u64, &str)], content: LabelContent) -> Vec<Slice> {
 fn check_label_texts() {
     let texts = |content| labelled(&[(45, "Rust"), (7, ""), (1234567, "Big")], content).iter().map(|s| s.text.clone()).collect::<Vec<_>>();
     assert_eq!(texts(LabelContent::Label), vec!["Rust", "", "Big"]);
-    assert_eq!(texts(LabelContent::Value), vec!["45", "7", "1234567"]);
-    assert_eq!(texts(LabelContent::LabelAndValue), vec!["Rust: 45", "7", "Big: 1234567"]);
+    assert_eq!(texts(LabelContent::Value), vec!["45", "7", "1,234,567"]);
+    assert_eq!(texts(LabelContent::LabelAndValue), vec!["Rust: 45", "7", "Big: 1,234,567"]);
 }
 
 #[test]
@@ -1459,4 +1459,40 @@ fn check_labels_outside_ellipse() {
 fn check_labels_outside_no_room() {
     // not enough room: the chart is drawn without labels (same as no labels at all)
     check_label_screen("outside, too small", LANGS, 14, 6, |c| c.set_label_layout(LabelLayout::Outside), 0x9CAC7FFF57DEC1BD);
+}
+
+#[test]
+fn check_number_format() {
+    let texts = |values: &[(u64, &str)], format: FormatNumber| {
+        let mut slices: Vec<Slice> = values.iter().map(|(v, l)| Slice::new(*v, l, None)).collect();
+        labels::update_texts(&mut slices, LabelContent::LabelAndValue, &format);
+        slices.iter().map(|s| s.text.clone()).collect::<Vec<_>>()
+    };
+    let values = [(1500u64, "Disk"), (0, "Empty"), (7, "")];
+    assert_eq!(texts(&values, FormatNumber::new(10)), vec!["Disk: 1500", "Empty: 0", "7"]);
+    assert_eq!(texts(&values, FormatNumber::new(10).group(3, b',').suffix(" MB")), vec!["Disk: 1,500 MB", "Empty: 0 MB", "7 MB"]);
+    assert_eq!(texts(&values, FormatNumber::new(10).decimals(2)), vec!["Disk: 1500.00", "Empty: 0.00", "7.00"]);
+    assert_eq!(texts(&values, FormatNumber::new(16).prefix("0x")), vec!["Disk: 0x5DC", "Empty: 0x0", "0x7"]);
+    // exact for the largest values (no rounding through f64)
+    assert_eq!(texts(&[(u64::MAX, "max")], FormatNumber::new(10).group(3, b',')), vec!["max: 18,446,744,073,709,551,615"]);
+}
+
+#[test]
+fn check_set_number_format() {
+    in_app(|| {
+        let mut c = PieChart::new(layout!("x:0,y:0,w:40,h:16"), piechart::Flags::None);
+        c.add_value(1500, "Disk", None);
+        c.add_value(2500, "Free", None);
+        c.set_label_content(LabelContent::Value);
+        // default: digits grouped by thousands
+        assert_eq!(c.slices[0].text, "1,500");
+        c.set_number_format(FormatNumber::new(10).suffix(" MB"));
+        assert_eq!(c.slices[0].text, "1500 MB");
+        assert_eq!(c.slices[1].text, "2500 MB");
+        // the format is kept when data or content changes
+        c.set_value(0, 42);
+        assert_eq!(c.slices[0].text, "42 MB");
+        c.set_label_content(LabelContent::LabelAndValue);
+        assert_eq!(c.slices[1].text, "Free: 2500 MB");
+    });
 }
