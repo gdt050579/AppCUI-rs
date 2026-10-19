@@ -1,7 +1,7 @@
 use super::super::draw_mode::PADDING;
 use super::super::piechart::slice_at;
 use super::super::{DrawModeRenderer, HollowThickness, Slice, PaintMap};
-use crate::graphics::{CharFlags, Character, Color, Rect, Size, SpecialChar, Surface};
+use crate::graphics::{CharFlags, Character, Rect, Size, SpecialChar, Surface};
 use crate::system::Theme;
 use std::f64::consts::TAU;
 
@@ -107,11 +107,10 @@ impl Ellipse {
         if slices.iter().all(|s| s.start == s.end) {
             return;
         }
-        let background = theme.chart.background.background;
         match self.renderer {
-            DrawModeRenderer::HalfBlocks => self.paint_half_blocks(surface, slices, background, paint_map),
-            DrawModeRenderer::Braille => self.paint_braille(surface, slices, background, paint_map),
-            DrawModeRenderer::Custom(ch) => self.paint_custom(surface, slices, ch, background, paint_map),
+            DrawModeRenderer::HalfBlocks => self.paint_half_blocks(surface, slices, theme, paint_map),
+            DrawModeRenderer::Braille => self.paint_braille(surface, slices, theme, paint_map),
+            DrawModeRenderer::Custom(ch) => self.paint_custom(surface, slices, ch, theme, paint_map),
         }
     }
 
@@ -121,8 +120,9 @@ impl Ellipse {
 
     // two pixels per cell (top and bottom), each pixel 1 x 1 physical units; in the
     // paint map, a cell belongs to the slice of its top pixel (or bottom, if the top is empty)
-    fn paint_half_blocks(&self, surface: &mut Surface, slices: &[Slice], background: Color, paint_map: &mut PaintMap) {
-        let color = |id: Option<usize>| id.map_or(background, |i| slices[i].color);
+    fn paint_half_blocks(&self, surface: &mut Surface, slices: &[Slice], theme: &Theme, paint_map: &mut PaintMap) {
+        let background = theme.chart.background.background;
+        let color = |id: Option<usize>| id.map_or(background, |i| slices[i].color(i, theme));
         for cell_y in 0..self.size.height {
             let top_y = cell_y as f64 * 2.0 + 0.5;
             for cell_x in 0..self.size.width {
@@ -143,7 +143,8 @@ impl Ellipse {
 
     // 2 x 4 dots per cell, each dot 0.5 x 0.5 physical units; a cell takes the color
     // of the slice that covers most of its dots
-    fn paint_braille(&self, surface: &mut Surface, slices: &[Slice], background: Color, paint_map: &mut PaintMap) {
+    fn paint_braille(&self, surface: &mut Surface, slices: &[Slice], theme: &Theme, paint_map: &mut PaintMap) {
+        let background = theme.chart.background.background;
         // bit of each dot in a braille character, by (column, row)
         const DOTS: [[u8; 4]; 2] = [[0x01, 0x02, 0x04, 0x40], [0x08, 0x10, 0x20, 0x80]];
         for cell_y in 0..self.size.height {
@@ -180,7 +181,7 @@ impl Ellipse {
                     }
                 }
                 let code = char::from_u32(0x2800 + pattern as u32).unwrap_or(' ');
-                let ch = Character::new(code, slices[ids[best]].color, background, CharFlags::None);
+                let ch = Character::new(code, slices[ids[best]].color(ids[best], theme), background, CharFlags::None);
                 surface.write_char(cell_x as i32, cell_y as i32, ch);
                 paint_map.set(cell_x as usize + self.origin_x, cell_y as usize + self.origin_y, ids[best] as u16);
             }
@@ -188,12 +189,13 @@ impl Ellipse {
     }
 
     // one sample per cell, at its center
-    fn paint_custom(&self, surface: &mut Surface, slices: &[Slice], code: char, background: Color, paint_map: &mut PaintMap) {
+    fn paint_custom(&self, surface: &mut Surface, slices: &[Slice], code: char, theme: &Theme, paint_map: &mut PaintMap) {
+        let background = theme.chart.background.background;
         for cell_y in 0..self.size.height {
             let y = cell_y as f64 * 2.0 + 1.0;
             for cell_x in 0..self.size.width {
                 if let Some(id) = self.slice_at(cell_x as f64 + 0.5, y, slices) {
-                    let ch = Character::new(code, slices[id].color, background, CharFlags::None);
+                    let ch = Character::new(code, slices[id].color(id, theme), background, CharFlags::None);
                     surface.write_char(cell_x as i32, cell_y as i32, ch);
                     paint_map.set(cell_x as usize + self.origin_x, cell_y as usize + self.origin_y, id as u16);
                 }

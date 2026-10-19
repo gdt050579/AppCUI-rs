@@ -194,17 +194,18 @@ fn write_leader(surface: &mut Surface, map: &PaintMap, x: i32, y: i32, ch: char,
     }
 }
 
-pub(super) fn paint_inside(slices: &[Slice], surface: &mut Surface, size: Size) {
+pub(super) fn paint_inside(slices: &[Slice], surface: &mut Surface, size: Size, theme: &Theme) {
     let Some(inner) = plot_area(size) else {
         return;
     };
-    for s in slices.iter().filter(|s| has_label(s)) {
+    for (index, s) in slices.iter().enumerate().filter(|(_, s)| has_label(s)) {
         let Some(center) = s.center else {
             continue;
         };
         let len = (text_len(s).min(inner.width())) as i32;
         let x = (center.x - len / 2).clamp(inner.left(), inner.right() - len + 1);
-        write_text(surface, x, center.y, &s.text, len as usize, s.color.contrast_color(), s.color);
+        let color = s.color(index, theme);
+        write_text(surface, x, center.y, &s.text, len as usize, color.contrast_color(), color);
     }
 }
 
@@ -252,7 +253,7 @@ pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &Paint
         }
         for p in places.iter() {
             let s = &slices[p.index];
-            let fore = s.color;
+            let fore = s.color(p.index, theme);
             // labels are placed next to the drawn chart: one line cell, one space, the text
             match side {
                 Side::Right => {

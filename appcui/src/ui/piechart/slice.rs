@@ -1,4 +1,5 @@
 use crate::graphics::{CharAttribute, Color, Point};
+use crate::system::Theme;
 
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Slice {
@@ -8,7 +9,6 @@ pub(crate) struct Slice {
     pub(crate) start: u64,
     pub(crate) end: u64,
     pub(crate) percent: u16,
-    pub(crate) color: Color,
     // a cell (control coordinates) that shows this slice, at (or near) the average of all its cells
     pub(crate) center: Option<Point>,
     pub(crate) sum_x: u64,
@@ -26,12 +26,18 @@ impl Slice {
             start: 0,
             end: 0,
             percent: 0,
-            color: Color::Black,
             center: None,
             sum_x: 0,
             sum_y: 0,
             cells: 0,
             text: String::new(),
+        }
+    }
+
+    pub(crate) fn color(&self, index: usize, theme: &Theme) -> Color {
+        match self.attr {
+            Some(attr) => attr.foreground,
+            None => theme.chart.bar[index % 4].foreground,
         }
     }
 }

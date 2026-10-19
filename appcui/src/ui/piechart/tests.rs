@@ -296,7 +296,7 @@ fn check_surface_paint() {
     let script = "
         Paint.Enable(false)
         Paint('pie with 1/3 and 2/3 drawn on the chart background')
-        CheckHash(0x8B4AAE4AE2735F28)
+        CheckHash(0xCB79A242C2F00978)
     ";
     App::new()
         .size(Size::new(40, 12))
@@ -335,13 +335,7 @@ fn check_proportions_in_chart() {
 // ---------------------------------------------------------------------------
 // step 3: rendering (solid circle, half blocks, automatic colors)
 // ---------------------------------------------------------------------------
-use super::piechart::{slice_at, update_colors};
-
-fn slice_colors(slices: &[Slice]) -> Vec<Color> {
-    let mut slices = slices.to_vec();
-    update_colors(&mut slices);
-    slices.iter().map(|s| s.color).collect()
-}
+use super::piechart::slice_at;
 use super::shapes::Ellipse;
 
 fn ellipse(cx: f64, cy: f64, rx: f64, ry: f64) -> Ellipse {
@@ -407,37 +401,20 @@ fn check_slice_at() {
 }
 
 #[test]
-fn check_auto_colors() {
-    let make = |values: &[u64]| -> Vec<Slice> {
-        let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
-        update_proportions(&mut slices);
-        slices
-    };
-    // neighbours (and last vs first) never share a color
-    for n in 1..=40 {
-        let slices = make(&vec![1u64; n]);
-        let colors = slice_colors(&slices);
-        assert_eq!(colors.len(), n);
-        for i in 1..n {
-            assert_ne!(colors[i], colors[i - 1], "{n} slices: {i} vs {}", i - 1);
+fn check_slice_colors() {
+    for (name, themes) in [("default", Themes::Default), ("dark gray", Themes::DarkGray), ("light", Themes::Light)] {
+        let theme = Theme::new(themes);
+        let mut slices: Vec<Slice> = (0..10).map(|_| Slice::new(1, "", None)).collect();
+        // an explicit attribute: its foreground
+        slices[2].attr = Some(CharAttribute::with_fore_color(Color::Pink));
+        for (i, s) in slices.iter().enumerate() {
+            let expected = if i == 2 { Color::Pink } else { theme.chart.bar[i % 4].foreground };
+            assert_eq!(s.color(i, &theme), expected, "{name}: slice {i}");
         }
-        if n > 1 {
-            assert_ne!(colors[n - 1], colors[0], "{n} slices: last vs first");
-        }
+        // without an attribute, the colors repeat every 4 slices
+        assert_eq!(slices[0].color(0, &theme), slices[4].color(4, &theme));
+        assert_eq!(slices[1].color(1, &theme), slices[9].color(9, &theme));
     }
-    // 13 slices: the 13th would repeat the first color, so it is moved on
-    let colors = slice_colors(&make(&[1; 13]));
-    assert_ne!(colors[12], colors[0]);
-    // zero-value slices are not neighbours of anything
-    let colors = slice_colors(&make(&[1, 0, 1]));
-    assert_ne!(colors[0], colors[2]);
-    // explicit attributes are kept, automatic colors avoid them
-    let mut slices = make(&[1, 1, 1]);
-    slices[0].attr = Some(CharAttribute::with_fore_color(Color::Blue));
-    let colors = slice_colors(&slices);
-    assert_eq!(colors[0], Color::Blue);
-    assert_ne!(colors[1], Color::Blue);
-    assert_ne!(colors[2], Color::Blue);
 }
 
 #[test]
@@ -464,23 +441,23 @@ fn check_explicit_color() {
 
 #[test]
 fn check_render_even_size() {
-    check_render("4 slices, 40x12", &[50, 25, 15, 10], 40, 12, 0x26FCD624BAD9BDC9);
+    check_render("4 slices, 40x12", &[50, 25, 15, 10], 40, 12, 0x6C0E3BEE64D7CBB);
 }
 
 #[test]
 fn check_render_odd_size() {
-    check_render("4 slices, 21x7", &[50, 25, 15, 10], 21, 7, 0x9229302F5EE848CC);
+    check_render("4 slices, 21x7", &[50, 25, 15, 10], 21, 7, 0x9355F93026525CA3);
 }
 
 #[test]
 fn check_render_tall() {
     // width limits the circle; it is centered vertically
-    check_render("3 slices, 10x12", &[1, 1, 1], 10, 12, 0xAD0CFD04263FE54E);
+    check_render("3 slices, 10x12", &[1, 1, 1], 10, 12, 0x11B27EDD36696125);
 }
 
 #[test]
 fn check_render_single_slice() {
-    check_render("one slice fills the circle", &[5], 20, 8, 0x68A1207666DFCB51);
+    check_render("one slice fills the circle", &[5], 20, 8, 0x1A4F4DAF92977B71);
 }
 
 #[test]
@@ -496,12 +473,12 @@ fn check_render_all_zero() {
 #[test]
 fn check_render_tiny_slice() {
     // a tiny slice may cover no pixel at all; it must not break the drawing
-    check_render("tiny slice", &[1_000_000, 1, 1_000_000], 20, 8, 0x9D29C715E34BA8DD);
+    check_render("tiny slice", &[1_000_000, 1, 1_000_000], 20, 8, 0x7B095B1E9ABE63C1);
 }
 
 #[test]
 fn check_render_many_slices() {
-    check_render("13 slices", &[1; 13], 40, 14, 0x6CADE251877304E5);
+    check_render("13 slices", &[1; 13], 40, 14, 0x9A76F3EA2B22204B);
 }
 
 #[test]
@@ -532,7 +509,7 @@ fn check_render_after_set_value() {
     let script = "
         Paint.Enable(false)
         Paint('after set_value: 1/4 and 3/4')
-        CheckHash(0x7ADA054EF9145925)
+        CheckHash(0xCE6900E588993179)
     ";
     App::new()
         .size(Size::new(44, 16))
@@ -649,7 +626,7 @@ fn check_hole_radii() {
 
 #[test]
 fn check_render_ellipse() {
-    check_render_with("ellipse, 4 slices, 40x10", &[50, 25, 15, 10], 40, 10, |c| c.set_shape(DrawModeShape::Ellipse), 0x62D328619AA98B15);
+    check_render_with("ellipse, 4 slices, 40x10", &[50, 25, 15, 10], 40, 10, |c| c.set_shape(DrawModeShape::Ellipse), 0x9F11085498690365);
 }
 
 #[test]
@@ -663,23 +640,23 @@ fn check_render_ellipse_hollow() {
             c.set_shape(DrawModeShape::Ellipse);
             c.set_hollow_thickness(HollowThickness::Percentage(60));
         },
-        0xD6E48441BA25E0A5,
+        0x5408775DB9434A6D,
     );
 }
 
 #[test]
 fn check_render_ring_percentage() {
-    check_render_with("ring, 50% hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Percentage(50)), 0x7AAACBA8D289DC0D);
+    check_render_with("ring, 50% hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Percentage(50)), 0xF35464416C9E6E05);
 }
 
 #[test]
 fn check_render_ring_absolute() {
-    check_render_with("ring, hole 8 chars wide", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Absolute(8)), 0x160DE96C8751893D);
+    check_render_with("ring, hole 8 chars wide", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Absolute(8)), 0xC6A0CC81E13D237D);
 }
 
 #[test]
 fn check_render_ring_rectangle() {
-    check_render_with("circle, 12x3 hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Rectangle(12, 3)), 0xB6947C4A287B1B35);
+    check_render_with("circle, 12x3 hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Rectangle(12, 3)), 0x9F8BE8D31410F5CA);
 }
 
 #[test]
@@ -691,7 +668,7 @@ fn check_render_hole_fills_shape() {
 #[test]
 fn check_render_hole_zero() {
     // a 0% hole is a solid circle: same screen as `check_render_single_slice`
-    check_render_with("0% hole: solid", &[5], 20, 8, |c| c.set_hollow_thickness(HollowThickness::Percentage(0)), 0x68A1207666DFCB51);
+    check_render_with("0% hole: solid", &[5], 20, 8, |c| c.set_hollow_thickness(HollowThickness::Percentage(0)), 0x1A4F4DAF92977B71);
 }
 
 // ---------------------------------------------------------------------------
@@ -761,7 +738,7 @@ fn check_padding_too_small() {
 
 #[test]
 fn check_render_braille() {
-    check_render_with("braille, 4 slices, 24x8", &[50, 25, 15, 10], 24, 8, |c| c.set_renderer(DrawModeRenderer::Braille), 0xED4B863043FD6E21);
+    check_render_with("braille, 4 slices, 24x8", &[50, 25, 15, 10], 24, 8, |c| c.set_renderer(DrawModeRenderer::Braille), 0xC3BEA35959A46531);
 }
 
 #[test]
@@ -775,7 +752,7 @@ fn check_render_braille_ring() {
             c.set_renderer(DrawModeRenderer::Braille);
             c.set_hollow_thickness(HollowThickness::Percentage(50));
         },
-        0x10159C4C0A853FCA,
+        0x791737C2735DCA99,
     );
 }
 
@@ -790,7 +767,7 @@ fn check_render_custom_char() {
             c.set_shape(DrawModeShape::Ellipse);
             c.set_renderer(DrawModeRenderer::Custom('o'));
         },
-        0xE12C4CA1F0D4060F,
+        0xBD834243E782DE13,
     );
 }
 
@@ -799,7 +776,6 @@ fn check_braille_majority_color() {
     // a cell split between two slices takes the color of the slice with most dots
     let mut slices: Vec<Slice> = [1u64, 1].iter().map(|v| Slice::new(*v, "", None)).collect();
     update_proportions(&mut slices);
-    update_colors(&mut slices);
     let mode = DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::Braille, HollowThickness::None);
     let mut surface = Surface::new(12, 7);
     surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
@@ -810,7 +786,8 @@ fn check_braille_majority_color() {
             let ch = surface.char(x, y).unwrap();
             if ch.code != ' ' {
                 assert!(('\u{2801}'..='\u{28FF}').contains(&ch.code), "({x},{y}): {:?}", ch.code);
-                assert!(ch.foreground == slices[0].color || ch.foreground == slices[1].color);
+                let theme = Theme::new(Themes::Default);
+                assert!(ch.foreground == slices[0].color(0, &theme) || ch.foreground == slices[1].color(1, &theme));
             }
         }
     }
@@ -831,7 +808,6 @@ fn paint_with_map(mode: DrawMode, w: u32, h: u32) -> (Surface, PaintMap) {
         .map(|(v, c)| Slice::new(*v, "", Some(CharAttribute::with_fore_color(c))))
         .collect();
     update_proportions(&mut slices);
-    update_colors(&mut slices);
     let mut surface = Surface::new(w, h);
     surface.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
     let mut map = PaintMap::new(Size::new(w, h));
@@ -1022,8 +998,7 @@ fn check_centers_on_real_charts() {
                 for (w, h) in [(30, 13), (21, 8), (60, 20)] {
                     let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
                     update_proportions(&mut slices);
-                    update_colors(&mut slices);
-                    let mut surface = Surface::new(w, h);
+                                    let mut surface = Surface::new(w, h);
                     let mut map = PaintMap::new(Size::new(w, h));
                     let area = plot_area(surface.size());
                     DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
@@ -1067,10 +1042,10 @@ fn check_tooltip_stays_on_the_slice_center() {
         Paint.Enable(false)
         Mouse.Move(23,5)
         Paint('tooltip from one cell of slice A')
-        CheckHash(0x7C7CBF4D3F97CC29)
+        CheckHash(0x66867D9D233F073D)
         Mouse.Move(26,9)
         Paint('tooltip from another cell of slice A')
-        CheckHash(0x7C7CBF4D3F97CC29)
+        CheckHash(0x66867D9D233F073D)
     ";
     App::new()
         .size(Size::new(44, 18))
@@ -1121,8 +1096,7 @@ fn check_selection_border() {
                 for (w, h) in [(34u32, 15u32), (21, 8), (60, 20)] {
                     let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
                     update_proportions(&mut slices);
-                    update_colors(&mut slices);
-                    let mut surface = Surface::new(w, h);
+                                    let mut surface = Surface::new(w, h);
                     let mut map = PaintMap::new(Size::new(w, h));
                     let area = plot_area(surface.size());
                     DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
@@ -1198,10 +1172,10 @@ fn check_selection_on_click() {
     let script = "
         Paint.Enable(false)
         Paint('nothing selected')
-        CheckHash(0xAB318EC7B4E320D9)
+        CheckHash(0xCECD58E37DF8C4EA)
         Mouse.Click(23,10,left)
         Paint('slice A (right half) selected: the other slices are dimmed')
-        CheckHash(0x53A16A17F71496CC)
+        CheckHash(0x3FD53553AC1A1168)
     ";
     App::new()
         .size(Size::new(44, 18))
@@ -1228,7 +1202,6 @@ use super::{LabelContent, LabelLayout};
 fn labelled(values: &[(u64, &str)], content: LabelContent) -> Vec<Slice> {
     let mut slices: Vec<Slice> = values.iter().map(|(v, l)| Slice::new(*v, l, None)).collect();
     update_proportions(&mut slices);
-    update_colors(&mut slices);
     labels::update_texts(&mut slices, content, &FormatNumber::new(10).group(3, b','));
     slices
 }
@@ -1390,12 +1363,12 @@ const LANGS: &[(u64, &str)] = &[(45, "Rust"), (25, "C++"), (15, "Go"), (10, "Zig
 
 #[test]
 fn check_labels_none() {
-    check_label_screen("no labels (default)", LANGS, 44, 16, |_| {}, 0xEF22351CA7C0DEB5);
+    check_label_screen("no labels (default)", LANGS, 44, 16, |_| {}, 0x21A251364B222B59);
 }
 
 #[test]
 fn check_labels_inside() {
-    check_label_screen("inside, label", LANGS, 44, 16, |c| c.set_label_layout(LabelLayout::Inside), 0xFAF82849A5753C41);
+    check_label_screen("inside, label", LANGS, 44, 16, |c| c.set_label_layout(LabelLayout::Inside), 0x2B4718AD3551527E);
 }
 
 #[test]
@@ -1409,19 +1382,19 @@ fn check_labels_inside_label_and_value() {
             c.set_label_layout(LabelLayout::Inside);
             c.set_label_content(LabelContent::LabelAndValue);
         },
-        0xAC8B2F1E28A5B029,
+        0xF7BA8FC6C5C6B89D,
     );
 }
 
 #[test]
 fn check_labels_outside() {
-    check_label_screen("outside, label", LANGS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x1CF1C6FD5EEFDFB0);
+    check_label_screen("outside, label", LANGS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x2317808176E25321);
 }
 
 #[test]
 fn check_labels_outside_many() {
     const MONTHS: &[(u64, &str)] = &[(1, "Jan"), (1, "Feb"), (1, "Mar"), (1, "Apr"), (1, "May"), (1, "Jun"), (1, "Jul"), (1, "Aug"), (1, "Sep"), (1, "Oct"), (1, "Nov"), (1, "Dec")];
-    check_label_screen("outside, 12 slices", MONTHS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x3EF5A48F1BF9EA80);
+    check_label_screen("outside, 12 slices", MONTHS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x8BEC6ABAF62CEB0C);
 }
 
 #[test]
@@ -1436,7 +1409,7 @@ fn check_labels_outside_ring_values() {
             c.set_label_content(LabelContent::Value);
             c.set_hollow_thickness(HollowThickness::Percentage(50));
         },
-        0xE19E61679EAF1B8B,
+        0x30B6E34B722E7628,
     );
 }
 
@@ -1451,14 +1424,14 @@ fn check_labels_outside_ellipse() {
             c.set_label_layout(LabelLayout::Outside);
             c.set_shape(DrawModeShape::Ellipse);
         },
-        0xD2F0CD0B4D601DCB,
+        0x6440687D52F6C399,
     );
 }
 
 #[test]
 fn check_labels_outside_no_room() {
     // not enough room: the chart is drawn without labels (same as no labels at all)
-    check_label_screen("outside, too small", LANGS, 14, 6, |c| c.set_label_layout(LabelLayout::Outside), 0x9CAC7FFF57DEC1BD);
+    check_label_screen("outside, too small", LANGS, 14, 6, |c| c.set_label_layout(LabelLayout::Outside), 0x8C8E330576A37A90);
 }
 
 #[test]

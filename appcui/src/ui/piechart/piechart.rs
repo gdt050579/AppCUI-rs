@@ -4,21 +4,6 @@ use super::{DrawModeRenderer, DrawModeShape, Flags, HollowThickness, LabelConten
 use crate::prelude::*;
 use crate::system::RuntimeManager;
 
-const AUTO_COLORS: [Color; 12] = [
-    Color::Blue,
-    Color::Red,
-    Color::Green,
-    Color::Yellow,
-    Color::Aqua,
-    Color::Pink,
-    Color::Olive,
-    Color::Teal,
-    Color::Magenta,
-    Color::Silver,
-    Color::DarkGreen,
-    Color::DarkRed,
-];
-
 pub(super) const FULL: u64 = 1 << 32;
 
 pub(super) const PERCENT_UNITS: u32 = 10_000;
@@ -281,7 +266,6 @@ impl PieChart {
 
     fn data_changed(&mut self) {
         update_proportions(&mut self.slices);
-        update_colors(&mut self.slices);
         labels::update_texts(&mut self.slices, self.label_content, &self.number_format);
         self.repaint_surface();
     }
@@ -299,7 +283,7 @@ impl PieChart {
         self.draw_mode.paint(&mut self.surface, theme, &self.slices, &mut self.paint_map, area);
         update_centers(&mut self.slices, &self.paint_map);
         match (self.label_layout, area) {
-            (LabelLayout::Inside, _) => labels::paint_inside(&self.slices, &mut self.surface, size),
+            (LabelLayout::Inside, _) => labels::paint_inside(&self.slices, &mut self.surface, size, theme),
             (LabelLayout::Outside, Some(area)) if outside => {
                 labels::paint_outside(&self.slices, &mut self.surface, &self.paint_map, area, theme, &mut self.label_places)
             }
@@ -381,42 +365,6 @@ pub(super) fn update_centers(slices: &mut [Slice], map: &PaintMap) {
             }
         }
         s.center = best.map(|(_, x, y)| Point::new(x as i32, y as i32));
-    }
-}
-
-pub(super) fn update_colors(slices: &mut [Slice]) {
-    let last_visible = slices.iter().rposition(|s| s.start != s.end);
-    let mut next_auto = 0usize;
-    let mut first_color: Option<Color> = None;
-    let mut previous_color: Option<Color> = None;
-    for (index, slice) in slices.iter_mut().enumerate() {
-        let visible = slice.start != slice.end;
-        let color = match slice.attr {
-            Some(attr) => attr.foreground,
-            None => {
-                let mut color = AUTO_COLORS[next_auto % AUTO_COLORS.len()];
-                if visible {
-                    for _ in 0..AUTO_COLORS.len() {
-                        let clashes_previous = previous_color == Some(color);
-                        let clashes_first = (Some(index) == last_visible) && (first_color == Some(color));
-                        if !clashes_previous && !clashes_first {
-                            break;
-                        }
-                        next_auto += 1;
-                        color = AUTO_COLORS[next_auto % AUTO_COLORS.len()];
-                    }
-                }
-                next_auto += 1;
-                color
-            }
-        };
-        if visible {
-            if first_color.is_none() {
-                first_color = Some(color);
-            }
-            previous_color = Some(color);
-        }
-        slice.color = color;
     }
 }
 
