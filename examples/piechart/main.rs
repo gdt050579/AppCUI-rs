@@ -7,7 +7,7 @@ fn main() -> Result<(), appcui::system::Error> {
             let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
             chart.set_renderer(piechart::DrawModeRenderer::HalfBlocks);
             chart.set_shape(piechart::DrawModeShape::Ellipse);
-            chart.set_label_content(piechart::LabelContent::LabelAndValue);
+            chart.set_label_content(piechart::LabelContent::Value);
             chart.set_label_layout(piechart::LabelLayout::Outside);
             chart.set_hollow_thickness(piechart::HollowThickness::Percentage(50));
             chart.add_value(45, "Rust", None);
