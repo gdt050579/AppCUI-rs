@@ -1,15 +1,44 @@
+//! A 2D grid of palette indexes.
+//!
+//! [`PaletteTile`] stores one index per cell for an external palette, rather than a
+//! color. Cells that have not been written are transparent. Indexes `0` through `254`
+//! stay in 8-bit storage. The first index of `255` or higher copies every cell into
+//! 16-bit storage, which the tile keeps after [`PaletteTile::reset`] and
+//! [`PaletteTile::resize`]. In that mode `u16::MAX` is the transparent sentinel, so
+//! it cannot be stored as a visible index.
+
 use super::super::Size;
+
+/// Pixel storage for a [`PaletteTile`].
+///
+/// A tile starts in [`U8`](PixelsVec::U8). The first index that does not fit in 8 bits
+/// replaces the buffer with [`U16`](PixelsVec::U16), and the tile stays in that mode.
 enum PixelsVec {
     U8(Vec<u8>),
     U16(Vec<u16>),
 }
+
+/// A 2D grid of palette indexes.
+///
+/// Each cell stores an index into an external palette, not a color. Cells that have
+/// not been written are transparent. Indexes `0` through `254` are kept in 8 bits.
+/// The first time an index of `255` or higher is written, every cell is copied into
+/// 16-bit storage, which the tile then keeps even after [`reset`](PaletteTile::reset)
+/// or [`resize`](PaletteTile::resize). In that mode `u16::MAX` is the transparent
+/// sentinel, so it cannot be stored as a visible index.
 pub struct PaletteTile {
     pixels: PixelsVec,
     size: Size,
 }
 impl PaletteTile {
+    /// Transparent cell in 8-bit storage (`255`).
     pub(crate) const TRANSPARENT_U8: u8 = u8::MAX;
+    /// Transparent cell in 16-bit storage (`65535`).
     pub(crate) const TRANSPARENT_U16: u16 = u16::MAX;
+
+    /// Creates a tile of the given size, with every cell transparent.
+    ///
+    /// A width or height of `0` is raised to `1`.
     pub fn new(width: u32, height: u32) -> Self {
         let w = width.max(1);
         let h = height.max(1);
@@ -21,6 +50,12 @@ impl PaletteTile {
             size: Size::new(w, h),
         }
     }
+    /// Writes a palette index at `(x, y)`.
+    ///
+    /// Coordinates outside the tile are ignored. Index `0` is a valid color index.
+    /// An index of `255` or higher promotes the tile to 16-bit storage; indexes already
+    /// stored, and cells that are still transparent, are preserved. Writing `u16::MAX`
+    /// after that promotion clears the cell, because that value is the transparent sentinel.
     pub fn set(&mut self, x: u32, y: u32, palette_index: u16) {
         if x >= self.size.width || y >= self.size.height  {
             return;
@@ -46,6 +81,9 @@ impl PaletteTile {
             PixelsVec::U16(pixels) => pixels[idx] = palette_index,
         }
     }
+    /// Returns the palette index at `(x, y)`.
+    ///
+    /// Returns `None` when the coordinates are outside the tile or the cell is transparent.
     pub fn get(&self, x: u32, y: u32) -> Option<u16> {
         if x >= self.size.width || y >= self.size.height {
             return None;
@@ -70,6 +108,9 @@ impl PaletteTile {
             }
         }
     }
+    /// Makes the cell at `(x, y)` transparent.
+    ///
+    /// Coordinates outside the tile are ignored. Other cells are left unchanged.
     pub fn clear(&mut self, x: u32, y: u32) {
         if x >= self.size.width || y >= self.size.height {
             return;
@@ -80,12 +121,17 @@ impl PaletteTile {
             PixelsVec::U16(pixels) => pixels[idx] = Self::TRANSPARENT_U16,
         }
     }
+    /// Makes every cell transparent. The size is unchanged.
     pub fn reset(&mut self) {
         match &mut self.pixels {
             PixelsVec::U8(pixels) => pixels.fill(Self::TRANSPARENT_U8),
             PixelsVec::U16(pixels) => pixels.fill(Self::TRANSPARENT_U16),
         }
     }
+    /// Changes the tile size and makes every cell transparent.
+    ///
+    /// A width or height of `0` is raised to `1`. A tile that has already been promoted
+    /// to 16-bit storage stays in that mode.
     pub fn resize(&mut self, width: u32, height: u32) {
         let w = width.max(1);
         let h = height.max(1);
@@ -102,6 +148,7 @@ impl PaletteTile {
         }
         self.size = Size::new(w, h);
     }
+    /// Returns the width and height of the tile, in pixels.
     #[inline(always)]
     pub fn size(&self) -> Size {
         self.size
