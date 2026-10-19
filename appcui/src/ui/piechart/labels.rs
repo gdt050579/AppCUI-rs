@@ -1,7 +1,7 @@
 use super::draw_mode::plot_area;
 use super::piechart::FULL;
 use super::{PaintMap, Slice};
-use crate::graphics::{CharFlags, Character, Color, Point, Rect, Size, Surface};
+use crate::graphics::{CharAttribute, Character, Point, Rect, Size, Surface};
 use crate::system::Theme;
 use crate::utils::FormatNumber;
 
@@ -180,17 +180,17 @@ pub(super) fn fit(items: &mut Vec<Place>, slices: &[Slice], lo: i32, hi: i32, ga
     }
 }
 
-fn write_text(surface: &mut Surface, x: i32, y: i32, text: &str, max: usize, fore: Color, back: Color) {
+fn write_text(surface: &mut Surface, x: i32, y: i32, text: &str, max: usize, attr: CharAttribute) {
     let count = text.chars().count();
     for (i, ch) in text.chars().take(max).enumerate() {
         let ch = if (count > max) && (i + 1 == max) { '…' } else { ch };
-        surface.write_char(x + i as i32, y, Character::new(ch, fore, back, CharFlags::None));
+        surface.write_char(x + i as i32, y, Character::with_attributes(ch, attr));
     }
 }
 
-fn write_leader(surface: &mut Surface, map: &PaintMap, x: i32, y: i32, ch: char, fore: Color, back: Color) {
+fn write_leader(surface: &mut Surface, map: &PaintMap, x: i32, y: i32, ch: char, attr: CharAttribute) {
     if (x >= 0) && (y >= 0) && map.get(x as usize, y as usize).is_none() {
-        surface.write_char(x, y, Character::new(ch, fore, back, CharFlags::None));
+        surface.write_char(x, y, Character::with_attributes(ch, attr));
     }
 }
 
@@ -198,14 +198,14 @@ pub(super) fn paint_inside(slices: &[Slice], surface: &mut Surface, size: Size, 
     let Some(inner) = plot_area(size) else {
         return;
     };
-    for (index, s) in slices.iter().enumerate().filter(|(_, s)| has_label(s)) {
+    let attr = theme.chart.label;
+    for s in slices.iter().filter(|s| has_label(s)) {
         let Some(center) = s.center else {
             continue;
         };
         let len = (text_len(s).min(inner.width())) as i32;
         let x = (center.x - len / 2).clamp(inner.left(), inner.right() - len + 1);
-        let color = s.color(index, theme);
-        write_text(surface, x, center.y, &s.text, len as usize, color.contrast_color(), color);
+        write_text(surface, x, center.y, &s.text, len as usize, attr);
     }
 }
 
@@ -233,7 +233,7 @@ pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &Paint
     let Some(drawn) = drawn_bounds(map) else {
         return;
     };
-    let back = theme.chart.background.background;
+    let attr = theme.chart.label;
     let cap = side_width(inner) as i32;
     for side in [Side::Right, Side::Left, Side::Top, Side::Bottom] {
         places.clear();
@@ -253,7 +253,6 @@ pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &Paint
         }
         for p in places.iter() {
             let s = &slices[p.index];
-            let fore = s.color(p.index, theme);
             // labels are placed next to the drawn chart: one line cell, one space, the text
             match side {
                 Side::Right => {
@@ -262,10 +261,10 @@ pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &Paint
                     if len <= 0 {
                         continue;
                     }
-                    write_text(surface, x, p.pos, &s.text, len as usize, fore, back);
+                    write_text(surface, x, p.pos, &s.text, len as usize, attr);
                     if p.pos == p.anchor.y {
                         for lx in p.anchor.x..=x - 2 {
-                            write_leader(surface, map, lx, p.pos, '─', fore, back);
+                            write_leader(surface, map, lx, p.pos, '─', attr);
                         }
                     }
                 }
@@ -275,10 +274,10 @@ pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &Paint
                     if len <= 0 {
                         continue;
                     }
-                    write_text(surface, end - len + 1, p.pos, &s.text, len as usize, fore, back);
+                    write_text(surface, end - len + 1, p.pos, &s.text, len as usize, attr);
                     if p.pos == p.anchor.y {
                         for lx in end + 2..=p.anchor.x {
-                            write_leader(surface, map, lx, p.pos, '─', fore, back);
+                            write_leader(surface, map, lx, p.pos, '─', attr);
                         }
                     }
                 }
@@ -287,11 +286,11 @@ pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &Paint
                     if (y < inner.top()) || (y > inner.bottom()) {
                         continue;
                     }
-                    write_text(surface, p.pos, y, &s.text, p.len as usize, fore, back);
+                    write_text(surface, p.pos, y, &s.text, p.len as usize, attr);
                     if (p.anchor.x >= p.pos) && (p.anchor.x < p.pos + p.len) {
                         let (from, to) = if side == Side::Top { (y + 1, p.anchor.y) } else { (p.anchor.y, y - 1) };
                         for ly in from..=to {
-                            write_leader(surface, map, p.anchor.x, ly, '│', fore, back);
+                            write_leader(surface, map, p.anchor.x, ly, '│', attr);
                         }
                     }
                 }

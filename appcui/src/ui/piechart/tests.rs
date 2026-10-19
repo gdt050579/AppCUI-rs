@@ -1368,7 +1368,7 @@ fn check_labels_none() {
 
 #[test]
 fn check_labels_inside() {
-    check_label_screen("inside, label", LANGS, 44, 16, |c| c.set_label_layout(LabelLayout::Inside), 0x2B4718AD3551527E);
+    check_label_screen("inside, label", LANGS, 44, 16, |c| c.set_label_layout(LabelLayout::Inside), 0x9634AEFFAE0BB742);
 }
 
 #[test]
@@ -1382,19 +1382,19 @@ fn check_labels_inside_label_and_value() {
             c.set_label_layout(LabelLayout::Inside);
             c.set_label_content(LabelContent::LabelAndValue);
         },
-        0xF7BA8FC6C5C6B89D,
+        0x9F49DE84A8A8185C,
     );
 }
 
 #[test]
 fn check_labels_outside() {
-    check_label_screen("outside, label", LANGS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x2317808176E25321);
+    check_label_screen("outside, label", LANGS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0xF3439EC0A5CA22FE);
 }
 
 #[test]
 fn check_labels_outside_many() {
     const MONTHS: &[(u64, &str)] = &[(1, "Jan"), (1, "Feb"), (1, "Mar"), (1, "Apr"), (1, "May"), (1, "Jun"), (1, "Jul"), (1, "Aug"), (1, "Sep"), (1, "Oct"), (1, "Nov"), (1, "Dec")];
-    check_label_screen("outside, 12 slices", MONTHS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x8BEC6ABAF62CEB0C);
+    check_label_screen("outside, 12 slices", MONTHS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x5A267A5E9FF15D53);
 }
 
 #[test]
@@ -1409,7 +1409,7 @@ fn check_labels_outside_ring_values() {
             c.set_label_content(LabelContent::Value);
             c.set_hollow_thickness(HollowThickness::Percentage(50));
         },
-        0x30B6E34B722E7628,
+        0x81748A025B4D5A11,
     );
 }
 
@@ -1424,7 +1424,7 @@ fn check_labels_outside_ellipse() {
             c.set_label_layout(LabelLayout::Outside);
             c.set_shape(DrawModeShape::Ellipse);
         },
-        0x6440687D52F6C399,
+        0x6E011810A3BED1B2,
     );
 }
 
