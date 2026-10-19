@@ -109,8 +109,20 @@ impl Ellipse {
         }
         match self.renderer {
             DrawModeRenderer::HalfBlocks => self.paint_half_blocks(surface, slices, theme, paint_map),
+            DrawModeRenderer::Solid => self.paint_custom(surface, slices, '\u{2588}', theme, paint_map),
+            DrawModeRenderer::Shade75 => self.paint_custom(surface, slices, '\u{2593}', theme, paint_map),
+            DrawModeRenderer::Shade50 => self.paint_custom(surface, slices, '\u{2592}', theme, paint_map),
+            DrawModeRenderer::Shade25 => self.paint_custom(surface, slices, '\u{2591}', theme, paint_map),
+            DrawModeRenderer::Checkerboard => self.paint_custom(surface, slices, '\u{2592}', theme, paint_map),
+            DrawModeRenderer::Grid => self.paint_custom(surface, slices, '\u{253C}', theme, paint_map),
+            DrawModeRenderer::GridDouble => self.paint_custom(surface, slices, '\u{256C}', theme, paint_map),
+            DrawModeRenderer::CrossHatch => self.paint_custom(surface, slices, '\u{2573}', theme, paint_map),
+            DrawModeRenderer::Dashed => self.paint_custom(surface, slices, '\u{2571}', theme, paint_map),
+            DrawModeRenderer::DiagonalUp => self.paint_custom(surface, slices, '\u{2571}', theme, paint_map),
+            DrawModeRenderer::DiagonalDown => self.paint_custom(surface, slices, '\u{2572}', theme, paint_map),
             DrawModeRenderer::Braille => self.paint_braille(surface, slices, theme, paint_map),
             DrawModeRenderer::Custom(ch) => self.paint_custom(surface, slices, ch, theme, paint_map),
+
         }
     }
 

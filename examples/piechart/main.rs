@@ -5,7 +5,7 @@ fn main() -> Result<(), appcui::system::Error> {
         .window(|| {
             let mut win = window!("'Pie chart',a:c,w:60,h:20,flags:Sizeable");
             let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
-            chart.set_renderer(piechart::DrawModeRenderer::HalfBlocks);
+            chart.set_renderer(piechart::DrawModeRenderer::Shade25);
             chart.set_shape(piechart::DrawModeShape::Ellipse);
             chart.set_label_content(piechart::LabelContent::Value);
             chart.set_label_layout(piechart::LabelLayout::Outside);

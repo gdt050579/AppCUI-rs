@@ -34,8 +34,29 @@ pub enum DrawModeRenderer {
     /// Half blocks (`▀`): two pixels per character, each with its own color. This is the default.
     #[default]
     HalfBlocks,
-    /// Braille dots: 2x4 pixels per character. A character takes the color of the
-    /// slice that covers most of its dots.
+    /// U+2588 — full block.
+    Solid,
+    /// U+2593 ▓ — dense shade.
+    Shade75,
+    /// U+2592 ▒ — medium shade.
+    Shade50,
+    /// U+2591 ░ — light shade.
+    Shade25,
+    /// 2x4 checkerboard pattern.
+    Checkerboard,
+    /// U+253C ┼ — light grid/lattice.
+    Grid,
+    /// U+256C ╬ — double-line grid, heavier than [`Grid`](Self::Grid).
+    GridDouble,
+    /// U+2573 ╳ — diagonal cross-hatch.
+    CrossHatch,
+    /// ┇ — dashed line.
+    Dashed,
+    /// U+2571 ╱ — forward diagonal (rising left-to-right).
+    DiagonalUp,
+    /// U+2572 ╲ — backward diagonal (falling left-to-right).
+    DiagonalDown,
+    /// Braille dots: 2x4 pixels per character. A character takes the color of the slice that covers most of its dots.
     Braille,
     /// One pixel per character, drawn with the given character in the slice color.
     Custom(char),
