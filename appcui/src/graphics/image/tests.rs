@@ -1,6 +1,7 @@
 use crate::prelude::{BitTile, BitTileU16, BitTileU32, BitTileU64, StringFormatError, Glyph};
 use crate::prelude::*;
 use super::super::{Character, Color, RenderOptionsBuilder, Size, SurfaceTester};
+use super::palette_tile::PaletteTile;
 use super::BitTileRenderMethod;
 use super::CharacterSet;
 use super::ColorSchema;
@@ -1003,4 +1004,165 @@ fn check_glyph_write_str_outside() {
     // we should se
     // ....
     // ..He
+}
+
+#[test]
+fn check_palette_tile_new() {
+    let tile = PaletteTile::new(4, 3);
+    assert_eq!(tile.size(), Size::new(4, 3));
+    for y in 0..3 {
+        for x in 0..4 {
+            assert_eq!(tile.get(x, y), None);
+        }
+    }
+    assert_eq!(tile.get(4, 0), None);
+    assert_eq!(tile.get(0, 3), None);
+    assert_eq!(tile.get(100, 100), None);
+
+    // zero dimensions are clamped to at least 1
+    assert_eq!(PaletteTile::new(0, 0).size(), Size::new(1, 1));
+    assert_eq!(PaletteTile::new(0, 5).size(), Size::new(1, 5));
+    assert_eq!(PaletteTile::new(7, 0).size(), Size::new(7, 1));
+}
+
+#[test]
+fn check_palette_tile_set_get() {
+    let mut tile = PaletteTile::new(3, 2);
+    tile.set(0, 0, 0);
+    tile.set(2, 0, 10);
+    tile.set(1, 1, 254);
+    assert_eq!(tile.get(0, 0), Some(0));
+    assert_eq!(tile.get(1, 0), None);
+    assert_eq!(tile.get(2, 0), Some(10));
+    assert_eq!(tile.get(0, 1), None);
+    assert_eq!(tile.get(1, 1), Some(254));
+    assert_eq!(tile.get(2, 1), None);
+
+    // out-of-bounds writes are ignored
+    tile.set(3, 0, 1);
+    tile.set(0, 2, 1);
+    tile.set(9, 9, 1);
+    assert_eq!(tile.get(0, 0), Some(0));
+    assert_eq!(tile.get(2, 0), Some(10));
+    assert_eq!(tile.get(1, 1), Some(254));
+    assert_eq!(tile.get(3, 0), None);
+    assert_eq!(tile.get(0, 2), None);
+
+    tile.set(2, 0, 42);
+    assert_eq!(tile.get(2, 0), Some(42));
+    assert_eq!(tile.get(0, 0), Some(0));
+}
+
+#[test]
+fn check_palette_tile_clear_and_reset() {
+    let mut tile = PaletteTile::new(2, 2);
+    tile.set(0, 0, 1);
+    tile.set(1, 0, 2);
+    tile.set(0, 1, 3);
+    tile.clear(1, 0);
+    assert_eq!(tile.get(1, 0), None);
+    assert_eq!(tile.get(0, 0), Some(1));
+    assert_eq!(tile.get(0, 1), Some(3));
+    assert_eq!(tile.get(1, 1), None);
+
+    tile.clear(5, 5);
+    assert_eq!(tile.get(0, 0), Some(1));
+
+    tile.reset();
+    for y in 0..2 {
+        for x in 0..2 {
+            assert_eq!(tile.get(x, y), None);
+        }
+    }
+    assert_eq!(tile.size(), Size::new(2, 2));
+}
+
+#[test]
+fn check_palette_tile_resize() {
+    let mut tile = PaletteTile::new(4, 4);
+    tile.set(1, 1, 7);
+    tile.resize(2, 3);
+    assert_eq!(tile.size(), Size::new(2, 3));
+    for y in 0..3 {
+        for x in 0..2 {
+            assert_eq!(tile.get(x, y), None);
+        }
+    }
+    assert_eq!(tile.get(1, 1), None);
+    assert_eq!(tile.get(3, 3), None);
+
+    tile.set(1, 2, 9);
+    assert_eq!(tile.get(1, 2), Some(9));
+    tile.resize(0, 0);
+    assert_eq!(tile.size(), Size::new(1, 1));
+    assert_eq!(tile.get(0, 0), None);
+    assert_eq!(tile.get(1, 2), None);
+
+    tile.resize(0, 4);
+    assert_eq!(tile.size(), Size::new(1, 4));
+    tile.resize(6, 0);
+    assert_eq!(tile.size(), Size::new(6, 1));
+    assert_eq!(tile.get(5, 0), None);
+    assert_eq!(tile.get(0, 1), None);
+}
+
+#[test]
+fn check_palette_tile_promote_to_u16() {
+    let mut tile = PaletteTile::new(2, 2);
+    tile.set(0, 0, 0);
+    tile.set(1, 0, 254);
+    // index 255 does not fit in the 8-bit store (255 is the transparent sentinel)
+    tile.set(1, 1, 255);
+    assert_eq!(tile.get(0, 0), Some(0));
+    assert_eq!(tile.get(1, 0), Some(254));
+    assert_eq!(tile.get(0, 1), None);
+    assert_eq!(tile.get(1, 1), Some(255));
+
+    tile.set(0, 1, 1000);
+    assert_eq!(tile.get(0, 1), Some(1000));
+    tile.set(0, 0, 12);
+    assert_eq!(tile.get(0, 0), Some(12));
+    assert_eq!(tile.get(1, 1), Some(255));
+
+    // u16::MAX is the transparent sentinel once storage is 16-bit
+    tile.set(1, 0, u16::MAX);
+    assert_eq!(tile.get(1, 0), None);
+    assert_eq!(tile.get(0, 0), Some(12));
+
+    tile.clear(1, 1);
+    assert_eq!(tile.get(1, 1), None);
+    assert_eq!(tile.get(0, 1), Some(1000));
+
+    tile.reset();
+    for y in 0..2 {
+        for x in 0..2 {
+            assert_eq!(tile.get(x, y), None);
+        }
+    }
+
+    tile.set(0, 0, 40000);
+    assert_eq!(tile.get(0, 0), Some(40000));
+    tile.resize(3, 1);
+    assert_eq!(tile.size(), Size::new(3, 1));
+    assert_eq!(tile.get(0, 0), None);
+    assert_eq!(tile.get(2, 0), None);
+    tile.set(2, 0, 3);
+    tile.set(1, 0, 65534);
+    assert_eq!(tile.get(2, 0), Some(3));
+    assert_eq!(tile.get(1, 0), Some(65534));
+    assert_eq!(tile.get(0, 0), None);
+}
+
+#[test]
+fn check_palette_tile_promote_preserves_neighbors() {
+    let mut tile = PaletteTile::new(2, 1);
+    tile.set(0, 0, 8);
+    // writing the 16-bit transparent sentinel still promotes storage
+    tile.set(1, 0, u16::MAX);
+    assert_eq!(tile.get(0, 0), Some(8));
+    assert_eq!(tile.get(1, 0), None);
+
+    tile.set(1, 0, 300);
+    assert_eq!(tile.get(0, 0), Some(8));
+    assert_eq!(tile.get(1, 0), Some(300));
 }
