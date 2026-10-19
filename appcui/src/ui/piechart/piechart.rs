@@ -403,12 +403,8 @@ impl OnMouseEvent for PieChart {
                     self.hovered_slice = index;
                     if let Some(index) = index {
                         if let Some(slice) = self.slices.get(index) {
-                            if slice.label.is_empty() {
-                                self.hide_tooltip();
-                            } else {
-                                let anchor = slice.center.unwrap_or(*pos);
-                                self.show_tooltip_on_point(slice.label.as_str(), anchor.x, anchor.y);
-                            }
+                            let anchor = slice.center.unwrap_or(*pos);
+                            self.show_tooltip_on_point(slice.tooltip.as_str(), anchor.x, anchor.y);
                         }
                     } else {
                         self.hide_tooltip();

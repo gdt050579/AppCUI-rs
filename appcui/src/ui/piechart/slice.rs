@@ -15,6 +15,7 @@ pub(crate) struct Slice {
     pub(crate) sum_y: u64,
     pub(crate) cells: u64,
     pub(crate) text: String,
+    pub(crate) tooltip: String,
 }
 
 impl Slice {
@@ -31,6 +32,7 @@ impl Slice {
             sum_y: 0,
             cells: 0,
             text: String::new(),
+            tooltip: String::new(),
         }
     }
 

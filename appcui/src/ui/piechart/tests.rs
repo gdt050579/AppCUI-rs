@@ -1042,10 +1042,10 @@ fn check_tooltip_stays_on_the_slice_center() {
         Paint.Enable(false)
         Mouse.Move(23,5)
         Paint('tooltip from one cell of slice A')
-        CheckHash(0x66867D9D233F073D)
+        CheckHash(0xB6D4E127EAD1FA8)
         Mouse.Move(26,9)
         Paint('tooltip from another cell of slice A')
-        CheckHash(0x66867D9D233F073D)
+        CheckHash(0xB6D4E127EAD1FA8)
     ";
     App::new()
         .size(Size::new(44, 18))
@@ -1212,6 +1212,15 @@ fn check_label_texts() {
     assert_eq!(texts(LabelContent::Label), vec!["Rust", "", "Big"]);
     assert_eq!(texts(LabelContent::Value), vec!["45", "7", "1,234,567"]);
     assert_eq!(texts(LabelContent::LabelAndValue), vec!["Rust: 45", "7", "Big: 1,234,567"]);
+}
+
+#[test]
+fn check_tooltip_texts() {
+    // the tooltip always shows the value, whatever the label content is
+    for content in [LabelContent::Label, LabelContent::Value, LabelContent::LabelAndValue] {
+        let tooltips = labelled(&[(45, "Rust"), (7, ""), (1234567, "Big")], content).iter().map(|s| s.tooltip.clone()).collect::<Vec<_>>();
+        assert_eq!(tooltips, vec!["Rust: 45", "7", "Big: 1,234,567"]);
+    }
 }
 
 #[test]
