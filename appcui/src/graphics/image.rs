@@ -47,6 +47,7 @@ mod color_schema;
 mod character_set;
 mod render_options;
 mod bit_tile;
+mod palette_tile;
 mod string_format_parser;
 mod glyph;
 #[cfg(test)]
