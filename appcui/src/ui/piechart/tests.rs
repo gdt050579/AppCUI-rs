@@ -1321,6 +1321,52 @@ fn check_label_texts() {
 }
 
 #[test]
+fn check_percentage_texts() {
+    let texts = |values: &[(u64, &str)], content| labelled(values, content).iter().map(|s| s.text.clone()).collect::<Vec<_>>();
+    let values = [(50, "Rust"), (25, ""), (25, "Go"), (0, "Zig")];
+    assert_eq!(texts(&values, LabelContent::Percentage), vec!["50.00%", "25.00%", "25.00%", "0.00%"]);
+    assert_eq!(texts(&values, LabelContent::LabelAndPercentage), vec!["Rust: 50.00%", "25.00%", "Go: 25.00%", "Zig: 0.00%"]);
+    // always two decimals, and the percentages add up to exactly 100.00%
+    assert_eq!(texts(&[(1, "a"), (1, "b"), (1, "c")], LabelContent::Percentage), vec!["33.34%", "33.33%", "33.33%"]);
+    assert_eq!(texts(&[(1, ""), (2, ""), (5, "")], LabelContent::Percentage), vec!["12.50%", "25.00%", "62.50%"]);
+    assert_eq!(texts(&[(1, ""), (99_999, "")], LabelContent::Percentage), vec!["0.00%", "100.00%"]);
+    assert_eq!(texts(&[(3, ""), (99_997, "")], LabelContent::Percentage), vec!["0.00%", "100.00%"]);
+    assert_eq!(texts(&[(6, ""), (99_994, "")], LabelContent::Percentage), vec!["0.01%", "99.99%"]);
+    // the number format of the values is not used for percentages
+    let mut slices: Vec<Slice> = [(1500u64, "Used"), (500, "Free")].iter().map(|(v, l)| Slice::new(*v, l, None)).collect();
+    update_proportions(&mut slices);
+    labels::update_texts(&mut slices, LabelContent::LabelAndPercentage, &FormatNumber::new(10).suffix(" MB"));
+    assert_eq!(slices.iter().map(|s| s.text.as_str()).collect::<Vec<_>>(), vec!["Used: 75.00%", "Free: 25.00%"]);
+    // the tooltip still shows the value
+    assert_eq!(slices[0].tooltip, "Used: 1500 MB");
+}
+
+#[test]
+fn check_labels_outside_percentage() {
+    let script = "
+        Paint.Enable(false)
+        Paint('outside labels with percentages')
+        CheckHash(0xD4540A40CAA2C4D0)
+    ";
+    App::new()
+        .size(Size::new(64, 22))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("x:1,y:0,w:60,h:19"), piechart::Flags::None);
+            for (v, l) in [(45, "Rust"), (25, "C++"), (15, "Go"), (10, "Zig"), (5, "")] {
+                c.add_value(v, l, None);
+            }
+            c.set_label_layout(LabelLayout::Outside);
+            c.set_label_content(LabelContent::LabelAndPercentage);
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn check_tooltip_texts() {
     // the tooltip always shows the value, whatever the label content is
     for content in [LabelContent::Label, LabelContent::Value, LabelContent::LabelAndValue] {

@@ -50,10 +50,14 @@ pub(super) struct Place {
     pub(super) anchor: Point,
 }
 
+// percentages are stored in hundredths of a percent (see `PERCENT_UNITS`)
+const PERCENTAGE_FORMAT: FormatNumber = FormatNumber::new(10).decimals(2).suffix("%");
+
 pub(super) fn update_texts(slices: &mut [Slice], content: LabelContent, format: &FormatNumber) {
     let mut buffer = [0u8; 96];
+    let mut percentage_buffer = [0u8; 32];
     for s in slices.iter_mut() {
-        let Slice { text, tooltip, label, value, .. } = s;
+        let Slice { text, tooltip, label, value, percent, .. } = s;
         text.clear();
         tooltip.clear();
         // exact for every u64; `decimals(n)` adds n zero decimals
@@ -67,6 +71,13 @@ pub(super) fn update_texts(slices: &mut [Slice], content: LabelContent, format: 
             LabelContent::Label => text.push_str(label),
             LabelContent::Value => text.push_str(formatted),
             LabelContent::LabelAndValue => text.push_str(tooltip),
+            LabelContent::Percentage | LabelContent::LabelAndPercentage => {
+                if (content == LabelContent::LabelAndPercentage) && !label.is_empty() {
+                    text.push_str(label);
+                    text.push_str(": ");
+                }
+                text.push_str(PERCENTAGE_FORMAT.write_fraction(*percent as u64, 100u64, &mut percentage_buffer).unwrap_or(""));
+            }
         }
     }
 }
