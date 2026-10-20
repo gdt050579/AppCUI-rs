@@ -1,4 +1,4 @@
-use super::draw_mode::plot_area;
+use super::draw_mode::{plot_area, DrawMode};
 use super::piechart::FULL;
 use super::Slice;
 use crate::graphics::{CharAttribute, Character, PaletteTile, Point, Rect, Size, Surface};
@@ -71,9 +71,9 @@ fn has_label(s: &Slice) -> bool {
     (s.start != s.end) && !s.text.is_empty()
 }
 
-pub(super) fn side_of(s: &Slice) -> Side {
+pub(super) fn side_of(s: &Slice, mode: &DrawMode) -> Side {
     let middle = (s.start / 2 + s.end / 2) as f64 / FULL as f64;
-    let degrees = middle * 360.0;
+    let degrees = mode.angle_of(middle);
     if !(45.0..315.0).contains(&degrees) {
         Side::Top
     } else if degrees < 135.0 {
@@ -94,14 +94,14 @@ fn side_width(inner: Rect) -> u32 {
 }
 
 // the plot area for outside labels and whether there is room for them
-pub(super) fn outside_area(size: Size, slices: &[Slice]) -> (Option<Rect>, bool) {
+pub(super) fn outside_area(size: Size, slices: &[Slice], mode: &DrawMode) -> (Option<Rect>, bool) {
     let Some(inner) = plot_area(size) else {
         return (None, false);
     };
     let cap = side_width(inner);
     let (mut left, mut right, mut top, mut bottom) = (0, 0, false, false);
     for s in slices.iter().filter(|s| has_label(s)) {
-        match side_of(s) {
+        match side_of(s, mode) {
             Side::Left => left = left.max(text_len(s).min(cap)),
             Side::Right => right = right.max(text_len(s).min(cap)),
             Side::Top => top = true,
@@ -226,7 +226,7 @@ fn drawn_bounds(map: &PaletteTile) -> Option<Rect> {
     (l <= r).then(|| Rect::new(l, t, r, b))
 }
 
-pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &PaletteTile, area: Rect, theme: &Theme, places: &mut Vec<Place>) {
+pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &PaletteTile, area: Rect, mode: &DrawMode, theme: &Theme, places: &mut Vec<Place>) {
     let Some(inner) = plot_area(surface.size()) else {
         return;
     };
@@ -238,7 +238,7 @@ pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &Palet
     for side in [Side::Right, Side::Left, Side::Top, Side::Bottom] {
         places.clear();
         for (index, s) in slices.iter().enumerate() {
-            if !has_label(s) || side_of(s) != side {
+            if !has_label(s) || side_of(s, mode) != side {
                 continue;
             }
             let anchor = anchor(s, side, area, map);

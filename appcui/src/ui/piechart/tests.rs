@@ -1333,13 +1333,13 @@ fn check_tooltip_texts() {
 fn check_label_sides() {
     // the middle of each slice decides the side: 12 o'clock is top, 3 is right, 6 is bottom, 9 is left
     let slices = labelled(&[(1, "a"); 8], LabelContent::Label);
-    let sides: Vec<Side> = slices.iter().map(side_of).collect();
+    let sides: Vec<Side> = slices.iter().map(|s| side_of(s, &DrawMode::default())).collect();
     // 8 equal slices: middles at 22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5 degrees
     use Side::*;
     assert_eq!(sides, vec![Top, Right, Right, Bottom, Bottom, Left, Left, Top]);
     let slices = labelled(&[(1, "a"), (3, "b")], LabelContent::Label);
     // 0..90 -> middle 45 -> right; 90..360 -> middle 225 -> left
-    assert_eq!(slices.iter().map(side_of).collect::<Vec<_>>(), vec![Right, Left]);
+    assert_eq!(slices.iter().map(|s| side_of(s, &DrawMode::default())).collect::<Vec<_>>(), vec![Right, Left]);
 }
 
 #[test]
@@ -1349,8 +1349,8 @@ fn check_outside_area() {
     // labels on all four sides (4 equal slices: middles at 45, 135, 225 and 315 degrees ->
     // right, bottom, left, top): the same room left and right, and top and bottom
     let slices = labelled(&[(1, "Right side"), (1, "Bot"), (1, "L"), (1, "Top")], LabelContent::Label);
-    assert_eq!(slices.iter().map(side_of).collect::<Vec<_>>(), vec![Side::Right, Side::Bottom, Side::Left, Side::Top]);
-    let (area, ok) = labels::outside_area(size, &slices);
+    assert_eq!(slices.iter().map(|s| side_of(s, &DrawMode::default())).collect::<Vec<_>>(), vec![Side::Right, Side::Bottom, Side::Left, Side::Top]);
+    let (area, ok) = labels::outside_area(size, &slices, &DrawMode::default());
     let area = area.unwrap();
     assert!(ok);
     assert_eq!(area.left() - inner.left(), inner.right() - area.right());
@@ -1359,10 +1359,10 @@ fn check_outside_area() {
     assert_eq!(area.top() - inner.top(), 2);
     // no labels at all: the whole plot area
     let slices = labelled(&[(1, ""), (1, "")], LabelContent::Label);
-    assert_eq!(labels::outside_area(size, &slices), (Some(inner), true));
+    assert_eq!(labels::outside_area(size, &slices, &DrawMode::default()), (Some(inner), true));
     // no room: the plot area, and no outside labels
     let slices = labelled(&[(1, "Top"), (1, "Right side"), (1, "Bot"), (1, "Left side")], LabelContent::Label);
-    let (area, ok) = labels::outside_area(Size::new(14, 6), &slices);
+    let (area, ok) = labels::outside_area(Size::new(14, 6), &slices, &DrawMode::default());
     assert_eq!(area, plot_area(Size::new(14, 6)));
     assert!(!ok);
 }
@@ -1405,12 +1405,12 @@ fn check_labels_keep_the_chart_and_padding() {
                         let mut surface = Surface::new(w, h);
                         surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
                         let mut map = PaletteTile::new(size.width, size.height);
-                        let (area, ok) = labels::outside_area(size, &slices);
+                        let (area, ok) = labels::outside_area(size, &slices, &DrawMode::default());
                         DrawMode::new(shape, DrawModeRenderer::HalfBlocks, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaletteTile::new(1, 1), &mut map, area);
                         update_centers(&mut slices, &map);
                         let before: Vec<Character> = (0..h as i32).flat_map(|y| (0..w as i32).map(move |x| (x, y))).map(|(x, y)| *surface.char(x, y).unwrap()).collect();
                         if let (Some(area), true) = (area, ok) {
-                            labels::paint_outside(&slices, &mut surface, &map, area, &Theme::new(Themes::Default), &mut Vec::new());
+                            labels::paint_outside(&slices, &mut surface, &map, area, &DrawMode::default(), &Theme::new(Themes::Default), &mut Vec::new());
                         }
                         let name = format!("{values:?} {content:?} {shape:?} {hole:?} {w}x{h}");
                         for y in 0..h as i32 {
@@ -2023,4 +2023,160 @@ fn check_render_round_triangle_custom_char() {
         },
         0x42D836B1F74FB209,
     );
+}
+
+// ---------------------------------------------------------------------------
+// start angle and direction
+// ---------------------------------------------------------------------------
+use super::shapes::Rotation;
+use super::Direction;
+
+fn rotated_map(shape: DrawModeShape, values: &[u64], start_angle: u32, direction: Direction, w: u32, h: u32) -> PaletteTile {
+    let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
+    update_proportions(&mut slices);
+    let mut surface = Surface::new(w, h);
+    let mut map = PaletteTile::new(w, h);
+    let mut mode = DrawMode::new(shape, DrawModeRenderer::HalfBlocks, HollowThickness::None);
+    mode.start_angle = start_angle;
+    mode.direction = direction;
+    let area = plot_area(surface.size());
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaletteTile::new(1, 1), &mut map, area);
+    map
+}
+
+#[test]
+fn check_rotation_apply() {
+    let close = |a: f64, b: f64| (a - b).abs() < 1e-12;
+    let clockwise = Rotation::new(0, Direction::Clockwise);
+    let counter_clockwise = Rotation::new(0, Direction::CounterClockwise);
+    assert!(close(clockwise.apply(0.3, 0.0), 0.3));
+    assert!(close(counter_clockwise.apply(0.25, 0.0), 0.75));
+    assert!(close(counter_clockwise.apply(0.0, 0.0), 0.0));
+    // measured from a start at 0.25
+    assert!(close(clockwise.apply(0.25, 0.25), 0.0));
+    assert!(close(clockwise.apply(0.1, 0.25), 0.85));
+    assert!(close(counter_clockwise.apply(0.1, 0.25), 0.15));
+    // never 1.0
+    assert!(clockwise.apply(0.25 - 1e-17, 0.25) < 1.0);
+    assert!(counter_clockwise.apply(0.25 + 1e-17, 0.25) < 1.0);
+}
+
+#[test]
+fn check_start_angle_and_direction() {
+    // 4 equal slices on shapes that are symmetric left-right and top-bottom: the slice in each quarter
+    // (top-right, bottom-right, bottom-left, top-left)
+    let shapes = [DrawModeShape::Circle, DrawModeShape::Ellipse, DrawModeShape::Square, DrawModeShape::Rectangle, DrawModeShape::RoundSquare, DrawModeShape::RoundRectangle];
+    let cases: [(u32, Direction, [u16; 4]); 7] = [
+        (0, Direction::Clockwise, [0, 1, 2, 3]),
+        (90, Direction::Clockwise, [3, 0, 1, 2]),
+        (180, Direction::Clockwise, [2, 3, 0, 1]),
+        (0, Direction::CounterClockwise, [3, 2, 1, 0]),
+        (180, Direction::CounterClockwise, [1, 0, 3, 2]),
+        // 360 is the same as 0, larger values are treated as 360
+        (360, Direction::Clockwise, [0, 1, 2, 3]),
+        (1000, Direction::CounterClockwise, [3, 2, 1, 0]),
+    ];
+    for shape in shapes {
+        for (angle, direction, expected) in cases {
+            let map = rotated_map(shape, &[1, 1, 1, 1], angle, direction, 42, 22);
+            // the area is 40 x 20 cells, its center is (21, 11); a point in each quarter
+            let quarters = [(25, 8), (25, 14), (16, 14), (16, 8)].map(|(x, y)| map.get(x, y).unwrap());
+            assert_eq!(quarters, expected, "{shape:?} {angle} {direction:?}");
+        }
+    }
+}
+
+#[test]
+fn check_start_angle_is_where_the_first_slice_starts() {
+    // a circle, 2 slices (10% and 90%), starting at 3 o'clock: the small slice is just below the start, the big one just above
+    for (direction, below, above) in [(Direction::Clockwise, 0, 1), (Direction::CounterClockwise, 1, 0)] {
+        let map = rotated_map(DrawModeShape::Circle, &[10, 90], 90, direction, 42, 22);
+        assert_eq!(map.get(30, 12), Some(below), "{direction:?}");
+        assert_eq!(map.get(30, 9), Some(above), "{direction:?}");
+    }
+}
+
+#[test]
+fn check_rotation_keeps_areas_proportional() {
+    // whatever the start and the direction, every slice covers an area proportional to its value
+    let values = [50u64, 25, 15, 10];
+    for shape in SHAPES {
+        for (angle, direction) in [(37, Direction::CounterClockwise), (200, Direction::Clockwise), (300, Direction::CounterClockwise)] {
+            let map = rotated_map(shape, &values, angle, direction, 162, 62);
+            let mut counts = [0usize; 4];
+            for y in 0..62 {
+                for x in 0..162 {
+                    if let Some(id) = map.get(x, y) {
+                        counts[id as usize] += 1;
+                    }
+                }
+            }
+            let covered: usize = counts.iter().sum();
+            for (c, v) in counts.iter().zip(values) {
+                let share = *c as f64 / covered as f64;
+                assert!((share - v as f64 / 100.0).abs() < 0.02, "{shape:?} {angle} {direction:?}: {counts:?}");
+            }
+        }
+    }
+}
+
+#[test]
+fn check_label_sides_with_rotation() {
+    // 4 equal slices: the middle of each slice decides the side of its label
+    let slices = labelled(&[(1, "a"); 4], LabelContent::Label);
+    let mut mode = DrawMode { start_angle: 90, ..Default::default() };
+    // middles at 135, 225, 315 and 45 degrees
+    assert_eq!(slices.iter().map(|s| side_of(s, &mode)).collect::<Vec<_>>(), vec![Side::Bottom, Side::Left, Side::Top, Side::Right]);
+    mode.start_angle = 0;
+    mode.direction = Direction::CounterClockwise;
+    // middles at 315, 225, 135 and 45 degrees
+    assert_eq!(slices.iter().map(|s| side_of(s, &mode)).collect::<Vec<_>>(), vec![Side::Top, Side::Left, Side::Bottom, Side::Right]);
+}
+
+#[test]
+fn check_render_start_angle() {
+    check_render_with("4 slices, starting at 90 degrees", &[50, 25, 15, 10], 40, 12, |c| c.set_start_angle(90), 0x2B8447199D1024A7);
+}
+
+#[test]
+fn check_render_counter_clockwise() {
+    check_render_with(
+        "rectangle, 60% hole, from 45 degrees, counter-clockwise",
+        &[50, 25, 15, 10],
+        40,
+        10,
+        |c| {
+            c.set_shape(DrawModeShape::Rectangle);
+            c.set_hollow_thickness(HollowThickness::Percentage(60));
+            c.set_start_angle(45);
+            c.set_direction(Direction::CounterClockwise);
+        },
+        0x347E4D9339915594,
+    );
+}
+
+#[test]
+fn check_labels_outside_counter_clockwise() {
+    let script = "
+        Paint.Enable(false)
+        Paint('outside labels, from 270 degrees, counter-clockwise')
+        CheckHash(0x1A86168CF262E606)
+    ";
+    App::new()
+        .size(Size::new(64, 22))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("x:1,y:0,w:60,h:19"), piechart::Flags::None);
+            for (v, l) in [(45, "Rust"), (25, "C++"), (15, "Go"), (10, "Zig"), (5, "Other")] {
+                c.add_value(v, l, None);
+            }
+            c.set_label_layout(LabelLayout::Outside);
+            c.set_start_angle(270);
+            c.set_direction(Direction::CounterClockwise);
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
 }

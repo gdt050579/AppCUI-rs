@@ -14,7 +14,7 @@ mod slice;
 #[cfg(test)]
 mod tests;
 
-pub use self::draw_mode::{DrawModeRenderer, DrawModeShape, HollowThickness};
+pub use self::draw_mode::{Direction, DrawModeRenderer, DrawModeShape, HollowThickness};
 pub use self::initialization_flags::Flags;
 pub use self::labels::{LabelContent, LabelLayout};
 pub use self::piechart::PieChart;

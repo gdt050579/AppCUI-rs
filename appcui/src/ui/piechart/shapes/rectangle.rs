@@ -1,6 +1,6 @@
 use super::super::piechart::slice_at;
 use super::super::{HollowThickness, Slice};
-use super::{hole_size, rasterize};
+use super::{hole_size, rasterize, Rotation};
 use crate::graphics::{PaletteTile, Size};
 use std::f64::consts::FRAC_PI_2;
 
@@ -61,21 +61,39 @@ impl Rectangle {
         if !inside(self.rx, self.ry, self.radius, dx, dy) || inside(self.hole_rx, self.hole_ry, self.hole_radius, dx, dy) {
             return None;
         }
-        let total = 4.0 * (quarter_area(self.rx, self.ry, self.radius) - quarter_area(self.hole_rx, self.hole_ry, self.hole_radius));
-        if total <= 0.0 {
+        if self.total() <= 0.0 {
             return None;
+        }
+        Some(self.direction_fraction(dx, dy))
+    }
+
+    fn total(&self) -> f64 {
+        4.0 * (quarter_area(self.rx, self.ry, self.radius) - quarter_area(self.hole_rx, self.hole_ry, self.hole_radius))
+    }
+
+    // the fraction (from 12 o'clock, clockwise) of the direction (dx, dy) from the center
+    pub(crate) fn direction_fraction(&self, dx: f64, dy: f64) -> f64 {
+        let total = self.total();
+        if total <= 0.0 {
+            return 0.0;
         }
         let swept = swept_area(self.rx, self.ry, self.radius, dx, dy) - swept_area(self.hole_rx, self.hole_ry, self.hole_radius, dx, dy);
         let f = swept / total;
         // rounding can push a point just left of 12 o'clock to exactly 1.0
-        Some(if f >= 1.0 { 0.0 } else { f.max(0.0) })
+        if f >= 1.0 {
+            0.0
+        } else {
+            f.max(0.0)
+        }
     }
 
     // fills the tile with slice indexes; a pixel is `scale` x `scale` physical units
-    pub(crate) fn paint(&self, tile: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice]) {
-        rasterize(tile, scale, shift, |x, y| self.slice_at(x, y, slices));
+    pub(crate) fn paint(&self, tile: &mut PaletteTile, scale: f64, shift: f64, rotation: Rotation, slices: &[Slice]) {
+        let start = self.direction_fraction(rotation.start.0, rotation.start.1);
+        rasterize(tile, scale, shift, |x, y| self.fraction(x, y).map(|f| slice_at(slices, rotation.apply(f, start))));
     }
 
+    #[cfg(test)]
     pub(crate) fn slice_at(&self, x: f64, y: f64, slices: &[Slice]) -> Option<usize> {
         self.fraction(x, y).map(|f| slice_at(slices, f))
     }

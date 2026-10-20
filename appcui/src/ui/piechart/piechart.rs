@@ -1,7 +1,7 @@
 use super::draw_mode::{plot_area, DrawMode};
 use super::labels::{self, Place};
 use super::selection;
-use super::{DrawModeRenderer, DrawModeShape, Flags, HollowThickness, LabelContent, LabelLayout, Slice};
+use super::{Direction, DrawModeRenderer, DrawModeShape, Flags, HollowThickness, LabelContent, LabelLayout, Slice};
 use crate::prelude::*;
 use crate::system::RuntimeManager;
 
@@ -212,6 +212,48 @@ impl PieChart {
         }
     }
 
+    /// Sets where the first slice starts and repaints the chart.
+    ///
+    /// `degrees` is an angle from `0` to `360`, measured clockwise from 12 o'clock: `0` (the
+    /// default) starts at the top, `90` on the right, `180` at the bottom and `270` on the left.
+    /// `360` is the same as `0`, and larger values are treated as `360`. The slices follow each
+    /// other from there in the direction set with [`set_direction`](Self::set_direction).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
+    /// // the first slice starts at 3 o'clock
+    /// chart.set_start_angle(90);
+    /// ```
+    pub fn set_start_angle(&mut self, degrees: u32) {
+        let degrees = degrees.min(360);
+        if self.draw_mode.start_angle != degrees {
+            self.draw_mode.start_angle = degrees;
+            self.repaint_surface();
+        }
+    }
+
+    /// Sets the direction in which the slices follow each other, starting from the start angle
+    /// (see [`set_start_angle`](Self::set_start_angle)), and repaints the chart.
+    ///
+    /// The default is [`Direction::Clockwise`].
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
+    /// chart.set_direction(piechart::Direction::CounterClockwise);
+    /// ```
+    pub fn set_direction(&mut self, direction: Direction) {
+        if self.draw_mode.direction != direction {
+            self.draw_mode.direction = direction;
+            self.repaint_surface();
+        }
+    }
+
     /// Sets the outline the chart is drawn in, and repaints the chart.
     ///
     /// The default is [`DrawModeShape::Circle`].
@@ -334,7 +376,7 @@ impl PieChart {
         let size = self.surface.size();
         self.cells.resize(size.width, size.height);
         let (area, outside) = match self.label_layout {
-            LabelLayout::Outside => labels::outside_area(size, &self.slices),
+            LabelLayout::Outside => labels::outside_area(size, &self.slices, &self.draw_mode),
             _ => (plot_area(size), false),
         };
         self.draw_mode.paint(&mut self.surface, theme, &self.slices, &mut self.pixels, &mut self.cells, area);
@@ -342,7 +384,7 @@ impl PieChart {
         match (self.label_layout, area) {
             (LabelLayout::Inside, _) => labels::paint_inside(&self.slices, &mut self.surface, size, theme),
             (LabelLayout::Outside, Some(area)) if outside => {
-                labels::paint_outside(&self.slices, &mut self.surface, &self.cells, area, theme, &mut self.label_places)
+                labels::paint_outside(&self.slices, &mut self.surface, &self.cells, area, &self.draw_mode, theme, &mut self.label_places)
             }
             _ => {}
         }

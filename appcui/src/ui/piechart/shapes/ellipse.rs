@@ -1,6 +1,6 @@
 use super::super::piechart::slice_at;
 use super::super::{HollowThickness, Slice};
-use super::{hole_size, rasterize};
+use super::{hole_size, rasterize, Rotation};
 use crate::graphics::{PaletteTile, Size};
 use std::f64::consts::TAU;
 
@@ -60,17 +60,31 @@ impl Ellipse {
                 return None;
             }
         }
-        // atan2(nx, -ny) is 0 at 12 o'clock and grows clockwise (y grows downwards)
-        let f = (nx.atan2(-ny) / TAU).rem_euclid(1.0);
+        Some(self.direction_fraction(dx, dy))
+    }
+
+    // the fraction (from 12 o'clock, clockwise) of the direction (dx, dy) from the center
+    pub(crate) fn direction_fraction(&self, dx: f64, dy: f64) -> f64 {
+        if (self.rx <= 0.0) || (self.ry <= 0.0) {
+            return 0.0;
+        }
+        // normalized coordinates: atan2(nx, -ny) is 0 at 12 o'clock and grows clockwise (y grows downwards)
+        let f = ((dx / self.rx).atan2(-dy / self.ry) / TAU).rem_euclid(1.0);
         // rem_euclid can round up to exactly 1.0 for tiny negative angles
-        Some(if f >= 1.0 { 0.0 } else { f })
+        if f >= 1.0 {
+            0.0
+        } else {
+            f
+        }
     }
 
     // fills the tile with slice indexes; a pixel is `scale` x `scale` physical units
-    pub(crate) fn paint(&self, tile: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice]) {
-        rasterize(tile, scale, shift, |x, y| self.slice_at(x, y, slices));
+    pub(crate) fn paint(&self, tile: &mut PaletteTile, scale: f64, shift: f64, rotation: Rotation, slices: &[Slice]) {
+        let start = self.direction_fraction(rotation.start.0, rotation.start.1);
+        rasterize(tile, scale, shift, |x, y| self.fraction(x, y).map(|f| slice_at(slices, rotation.apply(f, start))));
     }
 
+    #[cfg(test)]
     pub(crate) fn slice_at(&self, x: f64, y: f64, slices: &[Slice]) -> Option<usize> {
         self.fraction(x, y).map(|f| slice_at(slices, f))
     }

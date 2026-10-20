@@ -1,4 +1,4 @@
-use super::shapes::{Ellipse, Rectangle, Triangle};
+use super::shapes::{Ellipse, Rectangle, Rotation, Triangle};
 use super::Slice;
 use crate::graphics::{CharAttribute, CharFlags, PaletteTile, PaletteTileRenderMethod, Rect, Size, Surface};
 use crate::system::Theme;
@@ -85,11 +85,25 @@ pub enum HollowThickness {
     Rectangle(u8, u8),
 }
 
+/// The direction in which the slices of a [`PieChart`](super::PieChart) follow each other,
+/// starting from the start angle (see [`PieChart::set_start_angle`](super::PieChart::set_start_angle)).
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Default)]
+pub enum Direction {
+    /// The slices follow each other clockwise. This is the default.
+    #[default]
+    Clockwise,
+    /// The slices follow each other counter-clockwise.
+    CounterClockwise,
+}
+
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub(crate) struct DrawMode {
     pub(crate) shape: DrawModeShape,
     pub(crate) renderer: DrawModeRenderer,
     pub(crate) hollow_thickness: HollowThickness,
+    // degrees (0..=360), clockwise from 12 o'clock
+    pub(crate) start_angle: u32,
+    pub(crate) direction: Direction,
 }
 
 impl Default for DrawMode {
@@ -104,7 +118,24 @@ impl DrawMode {
             shape,
             renderer,
             hollow_thickness,
+            start_angle: 0,
+            direction: Direction::Clockwise,
         }
+    }
+
+    #[inline(always)]
+    fn rotation(&self) -> Rotation {
+        Rotation::new(self.start_angle, self.direction)
+    }
+
+    // the angle (degrees, clockwise from 12 o'clock) of a point at `fraction` (0..1) of the way around the chart
+    pub(crate) fn angle_of(&self, fraction: f64) -> f64 {
+        let start = self.start_angle.min(360) as f64;
+        let angle = match self.direction {
+            Direction::Clockwise => start + fraction * 360.0,
+            Direction::CounterClockwise => start - fraction * 360.0,
+        };
+        angle.rem_euclid(360.0)
     }
 
     pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], pixels: &mut PaletteTile, cells: &mut PaletteTile, area: Option<Rect>) {
@@ -170,28 +201,28 @@ impl DrawMode {
     }
 
     fn paint_circle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Ellipse::circle(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
+        Ellipse::circle(size, self.hollow_thickness).paint(pixels, scale, shift, self.rotation(), slices);
     }
     fn paint_square(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Rectangle::square(size, self.hollow_thickness, false).paint(pixels, scale, shift, slices);
+        Rectangle::square(size, self.hollow_thickness, false).paint(pixels, scale, shift, self.rotation(), slices);
     }
     fn paint_round_square(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Rectangle::square(size, self.hollow_thickness, true).paint(pixels, scale, shift, slices);
+        Rectangle::square(size, self.hollow_thickness, true).paint(pixels, scale, shift, self.rotation(), slices);
     }
     fn paint_rectangle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Rectangle::fill(size, self.hollow_thickness, false).paint(pixels, scale, shift, slices);
+        Rectangle::fill(size, self.hollow_thickness, false).paint(pixels, scale, shift, self.rotation(), slices);
     }
     fn paint_round_rectangle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Rectangle::fill(size, self.hollow_thickness, true).paint(pixels, scale, shift, slices);
+        Rectangle::fill(size, self.hollow_thickness, true).paint(pixels, scale, shift, self.rotation(), slices);
     }
     fn paint_ellipse(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Ellipse::fill(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
+        Ellipse::fill(size, self.hollow_thickness).paint(pixels, scale, shift, self.rotation(), slices);
     }
     fn paint_triangle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Triangle::fit(size, self.hollow_thickness, false).paint(pixels, scale, shift, slices);
+        Triangle::fit(size, self.hollow_thickness, false).paint(pixels, scale, shift, self.rotation(), slices);
     }
     fn paint_round_triangle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Triangle::fit(size, self.hollow_thickness, true).paint(pixels, scale, shift, slices);
+        Triangle::fit(size, self.hollow_thickness, true).paint(pixels, scale, shift, self.rotation(), slices);
     }
 }
 
