@@ -6,6 +6,8 @@ fn main() -> Result<(), appcui::system::Error> {
             let mut win = window!("'Pie chart',a:c,w:60,h:20,flags:Sizeable");
             let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
             chart.set_renderer(piechart::DrawModeRenderer::Braille);
+            chart.set_start_angle(90);
+            chart.set_direction(piechart::Direction::CounterClockwise);
             chart.set_shape(piechart::DrawModeShape::RoundTriangle);
             chart.set_label_content(piechart::LabelContent::Value);
             chart.set_label_layout(piechart::LabelLayout::Outside);
