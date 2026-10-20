@@ -26,8 +26,12 @@ pub enum LabelContent {
     /// The label of the slice. This is the default.
     #[default]
     Label,
+    /// The percentage of the slice.
+    Percentage,
     /// The label and the value of the slice, as `label: value` (just the value if the label is empty).
     LabelAndValue,
+    /// The label and the percentage of the slice, as `label: percentage` (just the percentage if the label is empty).
+    LabelAndPercentage,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
