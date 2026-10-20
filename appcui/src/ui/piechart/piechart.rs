@@ -168,6 +168,50 @@ impl PieChart {
         }
     }
 
+    /// Returns the index of the selected slice, or `None` if no slice is selected.
+    ///
+    /// A slice is selected by clicking it, or with [`set_selected_slice`](Self::set_selected_slice).
+    /// The selection is cleared when the chart loses the focus.
+    #[inline(always)]
+    pub fn selected_slice(&self) -> Option<usize> {
+        self.selected_slice
+    }
+
+    /// Selects the slice at `index` and repaints the chart: a border is drawn around it and,
+    /// with [`Flags::DimSlicesOnSelection`], the other slices are dimmed.
+    ///
+    /// Does nothing if `index` is out of range or the slice is not drawn (its value is `0`).
+    /// The selection is cleared when the chart loses the focus, and when the selected slice
+    /// is removed or its value becomes `0`.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::DimSlicesOnSelection);
+    /// chart.add_value(50, "Rust", None);
+    /// chart.add_value(30, "C++", None);
+    /// chart.set_selected_slice(1);
+    /// assert_eq!(chart.selected_slice(), Some(1));
+    /// ```
+    pub fn set_selected_slice(&mut self, index: usize) {
+        let Some(slice) = self.slices.get(index) else {
+            return;
+        };
+        if (slice.start != slice.end) && (self.selected_slice != Some(index)) {
+            self.selected_slice = Some(index);
+            self.repaint_surface();
+        }
+    }
+
+    /// Clears the selection (if a slice is selected) and repaints the chart.
+    pub fn clear_selected_slice(&mut self) {
+        if self.selected_slice.is_some() {
+            self.selected_slice = None;
+            self.repaint_surface();
+        }
+    }
+
     /// Sets the outline the chart is drawn in, and repaints the chart.
     ///
     /// The default is [`DrawModeShape::Circle`].
@@ -269,6 +313,16 @@ impl PieChart {
 
     fn data_changed(&mut self) {
         update_proportions(&mut self.slices);
+        // the selected slice was removed, or takes no space any more
+        if let Some(index) = self.selected_slice {
+            let drawn = match self.slices.get(index) {
+                Some(s) => s.start != s.end,
+                None => false,
+            };
+            if !drawn {
+                self.selected_slice = None;
+            }
+        }
         labels::update_texts(&mut self.slices, self.label_content, &self.number_format);
         self.repaint_surface();
     }

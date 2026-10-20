@@ -1232,6 +1232,73 @@ fn check_selection_on_click() {
         .unwrap();
 }
 
+#[test]
+fn check_selected_slice_api() {
+    in_app(|| {
+        let mut c = PieChart::new(layout!("x:0,y:0,w:30,h:10"), piechart::Flags::None);
+        c.add_value(50, "A", None);
+        c.add_value(25, "B", None);
+        c.add_value(0, "empty", None);
+        c.add_value(25, "C", None);
+        assert_eq!(c.selected_slice(), None);
+        c.set_selected_slice(1);
+        assert_eq!(c.selected_slice(), Some(1));
+        c.set_selected_slice(3);
+        assert_eq!(c.selected_slice(), Some(3));
+        // out of range, or a slice that is not drawn: nothing changes
+        c.set_selected_slice(4);
+        c.set_selected_slice(100);
+        c.set_selected_slice(2);
+        assert_eq!(c.selected_slice(), Some(3));
+        c.clear_selected_slice();
+        assert_eq!(c.selected_slice(), None);
+        c.clear_selected_slice();
+        assert_eq!(c.selected_slice(), None);
+        // a slice whose value becomes 0 is not drawn any more: the selection is cleared
+        c.set_selected_slice(1);
+        c.set_value(0, 70);
+        assert_eq!(c.selected_slice(), Some(1));
+        c.set_value(1, 0);
+        assert_eq!(c.selected_slice(), None);
+        // the empty slice gets a value: it can be selected
+        c.set_value(2, 10);
+        c.set_selected_slice(2);
+        assert_eq!(c.selected_slice(), Some(2));
+        // removing all slices clears the selection; new slices are not selected
+        c.clear();
+        assert_eq!(c.selected_slice(), None);
+        c.add_value(10, "X", None);
+        c.add_value(10, "Y", None);
+        c.add_value(10, "Z", None);
+        assert_eq!(c.selected_slice(), None);
+    });
+}
+
+#[test]
+fn check_set_selected_slice_paints_like_a_click() {
+    // the same chart as in `check_selection_on_click`, with slice A selected from code
+    let script = "
+        Paint.Enable(false)
+        Paint('slice A (right half) selected: the other slices are dimmed')
+        CheckHash(0x9E0559F0415963FC)
+    ";
+    App::new()
+        .size(Size::new(44, 18))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("x:1,y:0,w:40,h:15"), piechart::Flags::DimSlicesOnSelection);
+            c.add_value(50, "A", None);
+            c.add_value(25, "B", None);
+            c.add_value(25, "C", None);
+            c.set_selected_slice(0);
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
+}
+
 // ---------------------------------------------------------------------------
 // labels
 // ---------------------------------------------------------------------------
