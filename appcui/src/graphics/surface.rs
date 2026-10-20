@@ -1900,6 +1900,40 @@ impl Surface {
         }
     }
 
+    /// Draws a [`PaletteTile`] at `(x, y)` using the selected render method.
+    ///
+    /// Every pixel of the tile holds an index; `palette` turns an index into the
+    /// [`CharAttribute`] used to draw it. Transparent pixels are not drawn, so whatever is
+    /// under them stays visible. [`PaletteTileRenderMethod`] chooses the characters:
+    /// - [`PaletteTileRenderMethod::SmallBlocks`]: half blocks (`▀`, `▄`), 1 x 2 pixels per
+    ///   character; only the foreground of each palette entry is used
+    /// - [`PaletteTileRenderMethod::LargeBlocks`]: full blocks, every pixel is 2 characters wide
+    /// - [`PaletteTileRenderMethod::Braille`]: Braille dots, 2 x 4 pixels per character; a
+    ///   character takes the palette entry that covers most of its dots
+    /// - [`PaletteTileRenderMethod::Custom`]: the given character, every pixel is 2 characters wide
+    ///
+    /// Every method draws square pixels, so the same tile gives the same picture with every
+    /// method. [`PaletteTile::render_size`] returns the size of the drawn tile, in characters.
+    ///
+    /// # Parameters
+    /// - `x`, `y`: Top-left position of the tile, relative to the origin.
+    /// - `tile`: The palette tile to paint.
+    /// - `render_method`: How the pixels are mapped to characters.
+    /// - `palette`: The attribute of every palette index.
+    ///
+    /// # Example
+    /// ```rust
+    /// use appcui::prelude::*;
+    ///
+    /// let mut surface = Surface::new(20, 8);
+    /// let mut tile = PaletteTile::new(4, 4);
+    /// for i in 0..4 {
+    ///     tile.set(i, i, 0);
+    ///     tile.set(3 - i, i, 1);
+    /// }
+    /// let palette = [CharAttribute::with_fore_color(Color::Red), CharAttribute::with_fore_color(Color::Green)];
+    /// surface.draw_palette_tile(2, 1, &tile, PaletteTileRenderMethod::LargeBlocks, |index| palette[index as usize]);
+    /// ```
     pub fn draw_palette_tile<P>(&mut self, x: i32, y: i32, tile: &PaletteTile, render_method: PaletteTileRenderMethod, palette: P)
     where
         P: Fn(u16) -> CharAttribute,

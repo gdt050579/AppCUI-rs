@@ -24,6 +24,7 @@
         - [Text](chapter-2/surface/text.md)
         - [Images](chapter-2/surface/images.md)
         - [Bit Tiles](chapter-2/surface/bit_tile.md)
+        - [Palette Tiles](chapter-2/surface/palette_tile.md)
         - [Glyphs](chapter-2/surface/glyph.md)
         - [Char variants](chapter-2/surface/char_variants.md)
     - [Input](chapter-2/input.md)
