@@ -64,12 +64,25 @@ pub(super) fn largest_remainder(values: impl Iterator<Item = u64>, total: u128, 
     }
 }
 
-#[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnFocus, internal = true)]
+#[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnKeyPressed + OnFocus, internal = true)]
 /// A chart that shows a single series of values as parts of a whole.
 ///
 /// Each value is a slice whose size is proportional to its share of the total.
 /// Values are `u64`, so negative values cannot be added. A slice with value `0`
 /// stays in the chart (and keeps its index) but takes no space.
+///
+/// A slice is selected by clicking it or, when the chart has the focus, with the keyboard
+/// (slices with value `0` are skipped, and the selection wraps around):
+///
+/// | Key                | Action                         |
+/// | ------------------ | ------------------------------ |
+/// | `Right` / `Down`   | selects the next slice         |
+/// | `Left` / `Up`      | selects the previous slice     |
+/// | `Home` / `End`     | selects the first / last slice |
+/// | `Escape`           | clears the selection           |
+///
+/// Selecting a slice or clearing the selection this way raises the events of
+/// [`PieChartEvents`](super::events::PieChartEvents).
 pub struct PieChart {
     flags: Flags,
     pub(super) slices: Vec<Slice>,
@@ -399,6 +412,39 @@ impl PieChart {
         self.hovered_slice = None;
     }
 
+    // the next slice that is drawn (value > 0) after `from` (or before it, going backwards), wrapping
+    // around; without `from`, the first (or the last) slice that is drawn
+    fn drawn_slice_after(&self, from: Option<usize>, forward: bool) -> Option<usize> {
+        let count = self.slices.len();
+        if count == 0 {
+            return None;
+        }
+        let mut index = match (from, forward) {
+            (Some(i), true) => (i + 1) % count,
+            (Some(i), false) => (i + count - 1) % count,
+            (None, true) => 0,
+            (None, false) => count - 1,
+        };
+        for _ in 0..count {
+            let s = &self.slices[index];
+            if s.start != s.end {
+                return Some(index);
+            }
+            index = if forward { (index + 1) % count } else { (index + count - 1) % count };
+        }
+        None
+    }
+
+    // selects a slice from the keyboard: repaints and tells the event processor
+    fn select_from_keyboard(&mut self, index: usize) {
+        if self.selected_slice == Some(index) {
+            return;
+        }
+        self.selected_slice = Some(index);
+        self.repaint_surface();
+        self.raise_selection_event(Some(index));
+    }
+
     // tells the event processor that the user changed the selection
     fn raise_selection_event(&mut self, index: Option<usize>) {
         let event_type = match index {
@@ -550,6 +596,36 @@ impl OnResize for PieChart {
         self.repaint_surface();
     }
 }
+impl OnKeyPressed for PieChart {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        let target = match key.value() {
+            key!("Right") | key!("Down") => self.drawn_slice_after(self.selected_slice, true),
+            key!("Left") | key!("Up") => self.drawn_slice_after(self.selected_slice, false),
+            key!("Home") => self.drawn_slice_after(None, true),
+            key!("End") => self.drawn_slice_after(None, false),
+            key!("Escape") => {
+                if self.selected_slice.is_none() {
+                    return EventProcessStatus::Ignored;
+                }
+                self.selected_slice = None;
+                self.repaint_surface();
+                self.hide_tooltip();
+                self.raise_selection_event(None);
+                return EventProcessStatus::Processed;
+            }
+            _ => return EventProcessStatus::Ignored,
+        };
+        match target {
+            Some(index) => {
+                self.select_from_keyboard(index);
+                EventProcessStatus::Processed
+            }
+            // nothing is drawn: nothing to select
+            None => EventProcessStatus::Ignored,
+        }
+    }
+}
+
 impl OnFocus for PieChart {
     fn on_lose_focus(&mut self) {
         if self.selected_slice.is_some() {

@@ -2291,3 +2291,126 @@ fn check_events() {
         ]
     );
 }
+
+#[test]
+fn check_keyboard_selection() {
+    #[Window(events = PieChartEvents, internal: true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = Self { base: window!("Test,d:f") };
+            let mut c = PieChart::new(layout!("x:1,y:0,w:40,h:15"), piechart::Flags::None);
+            c.add_value(40, "A", None);
+            c.add_value(30, "B", None);
+            c.add_value(0, "empty", None);
+            c.add_value(20, "C", None);
+            c.add_value(10, "D", None);
+            win.add(c);
+            win
+        }
+    }
+    impl PieChartEvents for MyWin {
+        fn on_slice_selected(&mut self, handle: Handle<PieChart>, index: usize) -> EventProcessStatus {
+            let label = self.control(handle).and_then(|c| c.label(index).map(String::from)).unwrap_or_default();
+            KEY_EVENTS.lock().unwrap().push(format!("selected {index} ({label})"));
+            EventProcessStatus::Processed
+        }
+        fn on_clear_selection(&mut self, _: Handle<PieChart>) -> EventProcessStatus {
+            KEY_EVENTS.lock().unwrap().push(String::from("cleared"));
+            EventProcessStatus::Processed
+        }
+    }
+    static KEY_EVENTS: Mutex<Vec<String>> = Mutex::new(Vec::new());
+    KEY_EVENTS.lock().unwrap().clear();
+    let script = "
+        Paint.Enable(false)
+        Paint('0. nothing selected')
+        CheckHash(0xD7152921A069E9F5)
+        Key.Pressed(Right)
+        Paint('1. Right: A selected')
+        CheckHash(0x4316EC6A23A1E407)
+        Key.Pressed(Right)
+        Paint('2. Right: B selected')
+        CheckHash(0x69135ED817D1CC83)
+        Key.Pressed(Right)
+        Paint('3. Right: C selected (the empty slice is skipped)')
+        CheckHash(0x241F36AB4F6D9203)
+        Key.Pressed(Right)
+        Paint('4. Right: D selected')
+        CheckHash(0xDF4F4FB740AE25B9)
+        Key.Pressed(Right)
+        Paint('5. Right: A selected (wraps around)')
+        CheckHash(0x4316EC6A23A1E407)
+        Key.Pressed(Left)
+        Paint('6. Left: D selected (wraps around)')
+        CheckHash(0xDF4F4FB740AE25B9)
+        Key.Pressed(Up)
+        Paint('7. Up: C selected')
+        CheckHash(0x241F36AB4F6D9203)
+        Key.Pressed(Down)
+        Paint('8. Down: D selected')
+        CheckHash(0xDF4F4FB740AE25B9)
+        Key.Pressed(Home)
+        Paint('9. Home: A selected')
+        CheckHash(0x4316EC6A23A1E407)
+        Key.Pressed(Home)
+        Paint('10. Home: A still selected')
+        CheckHash(0x4316EC6A23A1E407)
+        Key.Pressed(End)
+        Paint('11. End: D selected')
+        CheckHash(0xDF4F4FB740AE25B9)
+        Key.Pressed(Escape)
+        Paint('12. Escape: nothing selected')
+        CheckHash(0xD7152921A069E9F5)
+    ";
+    App::new().size(Size::new(44, 18)).debug_script(script).window(MyWin::new).run().unwrap();
+    let events = KEY_EVENTS.lock().unwrap().clone();
+    assert_eq!(
+        events,
+        vec![
+            "selected 0 (A)",
+            "selected 1 (B)",
+            // the empty slice is skipped
+            "selected 3 (C)",
+            "selected 4 (D)",
+            // wraps around, both ways
+            "selected 0 (A)",
+            "selected 4 (D)",
+            "selected 3 (C)",
+            "selected 4 (D)",
+            // Home, Home (already selected: no event), End
+            "selected 0 (A)",
+            "selected 4 (D)",
+            "cleared",
+        ]
+    );
+}
+
+#[test]
+fn check_keyboard_selection_paints_like_a_click() {
+    // the same chart as in `check_selection_on_click`, with slice A selected with the keyboard:
+    // the same screens as with a click
+    let script = "
+        Paint.Enable(false)
+        Key.Pressed(Right)
+        Paint('slice A selected with the keyboard: the other slices are dimmed')
+        CheckHash(0x9E0559F0415963FC)
+        Key.Pressed(Escape)
+        Paint('selection cleared: nothing selected')
+        CheckHash(0xDCE4A95EE1BA5A62)
+    ";
+    App::new()
+        .size(Size::new(44, 18))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("x:1,y:0,w:40,h:15"), piechart::Flags::DimSlicesOnSelection);
+            c.add_value(50, "A", None);
+            c.add_value(25, "B", None);
+            c.add_value(25, "C", None);
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
+}
