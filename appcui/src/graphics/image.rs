@@ -65,6 +65,8 @@ pub use self::bit_tile::BitTileU32;
 pub use self::bit_tile::BitTileU64;
 pub use self::bit_tile::BitTileU128;
 pub use self::bit_tile::BitTileRenderMethod;
+pub use self::palette_tile::PaletteTile;
+pub use self::palette_tile::PaletteTileRenderMethod;
 pub use self::glyph::Glyph;
 pub use string_format_parser::StringFormatError;
 use string_format_parser::StringFormatParser;

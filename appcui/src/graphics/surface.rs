@@ -3,6 +3,8 @@ use std::path::Path;
 use super::image::Glyph;
 use super::BitTile;
 use super::BitTileRenderMethod;
+use super::PaletteTile;
+use super::PaletteTileRenderMethod;
 use super::CharAttribute;
 use super::Character;
 use super::ClipArea;
@@ -1895,6 +1897,18 @@ impl Surface {
             BitTileRenderMethod::SmallBlocks => tile.paint_small(self, Point::new(x, y), set_bit_color, unset_bit_color),
             BitTileRenderMethod::LargeBlocks => tile.paint_large(self, Point::new(x, y), set_bit_color, unset_bit_color),
             BitTileRenderMethod::Braille => tile.paint_braille(self, Point::new(x, y), set_bit_color, unset_bit_color),
+        }
+    }
+
+    pub fn draw_palette_tile<P>(&mut self, x: i32, y: i32, tile: &PaletteTile, render_method: PaletteTileRenderMethod, palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        match render_method {
+            PaletteTileRenderMethod::SmallBlocks => tile.paint_small(self, Point::new(x, y), palette),
+            PaletteTileRenderMethod::LargeBlocks => tile.paint_char(self, Point::new(x, y), '\u{2588}', palette),
+            PaletteTileRenderMethod::Braille => tile.paint_braille(self, Point::new(x, y), palette),
+            PaletteTileRenderMethod::Custom(c) => tile.paint_char(self, Point::new(x, y), c, palette),
         }
     }
 

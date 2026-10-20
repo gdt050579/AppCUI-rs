@@ -7,12 +7,17 @@
 //! [`PaletteTile::resize`]. In that mode `u16::MAX` is the transparent sentinel, so
 //! it cannot be stored as a visible index.
 
+use crate::graphics::{CharAttribute, Point, Surface};
+
 use super::super::Size;
 
-/// Pixel storage for a [`PaletteTile`].
-///
-/// A tile starts in [`U8`](PixelsVec::U8). The first index that does not fit in 8 bits
-/// replaces the buffer with [`U16`](PixelsVec::U16), and the tile stays in that mode.
+pub enum PaletteTileRenderMethod {
+    SmallBlocks,
+    LargeBlocks,
+    Braille,
+    Custom(char)
+}
+
 enum PixelsVec {
     U8(Vec<u8>),
     U16(Vec<u16>),
@@ -154,4 +159,74 @@ impl PaletteTile {
         self.size
     }
 
+
+    fn paint_small_u8<P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[u8], palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        todo!()
+    }
+    fn paint_small_u16<P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[u16], palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        todo!()
+    }
+    
+    #[inline(always)]
+    pub(in super::super) fn paint_small<P>(&self, surface: &mut Surface, pos: Point, palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        match &self.pixels {
+            PixelsVec::U8(pixels) => Self::paint_small_u8(surface, pos, self.size, pixels, palette),
+            PixelsVec::U16(pixels) => Self::paint_small_u16(surface, pos, self.size, pixels, palette),
+        }
+    }
+
+    fn paint_braille_u8<P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[u8], palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        todo!()
+    }
+    fn paint_braille_u16<P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[u16], palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        todo!()
+    }
+    #[inline(always)]
+    pub(in super::super) fn paint_braille<P>(&self, surface: &mut Surface, pos: Point, palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        match &self.pixels {
+            PixelsVec::U8(pixels) => Self::paint_braille_u8(surface, pos, self.size, pixels, palette),
+            PixelsVec::U16(pixels) => Self::paint_braille_u16(surface, pos, self.size, pixels, palette),
+        }
+    }
+
+    fn paint_char_u8<P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[u8], ch: char, palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        todo!()
+    }
+    fn paint_char_u16<P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[u16], ch: char, palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        todo!()
+    }
+    #[inline(always)]
+    pub(in super::super) fn paint_char<P>(&self, surface: &mut Surface, pos: Point, ch: char, palette: P)
+    where
+        P: Fn(u16) -> CharAttribute,
+    {
+        match &self.pixels {
+            PixelsVec::U8(pixels) => Self::paint_char_u8(surface, pos, self.size, pixels, ch, palette),
+            PixelsVec::U16(pixels) => Self::paint_char_u16(surface, pos, self.size, pixels, ch, palette),
+        }
+    }
 }
