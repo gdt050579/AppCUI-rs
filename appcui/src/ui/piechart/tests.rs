@@ -678,13 +678,15 @@ fn check_render_hole_zero() {
 use super::draw_mode::PADDING;
 
 // the shapes that can be drawn
-const SHAPES: [DrawModeShape; 6] = [
+const SHAPES: [DrawModeShape; 8] = [
     DrawModeShape::Circle,
     DrawModeShape::Ellipse,
     DrawModeShape::Square,
     DrawModeShape::Rectangle,
     DrawModeShape::RoundSquare,
     DrawModeShape::RoundRectangle,
+    DrawModeShape::Triangle,
+    DrawModeShape::RoundTriangle,
 ];
 
 fn paint_on_surface(mode: DrawMode, values: &[u64], w: u32, h: u32) -> Surface {
@@ -721,9 +723,10 @@ fn check_padding() {
                     assert!(!painted(&s, w - 1, y), "{shape:?} {hole:?} {w}x{h}: right column painted at y={y}");
                 }
                 // without a hole, something is drawn inside (a hole may cover a very small shape,
-                // and a pixel 2 characters wide does not fit in a shape 1 character wide)
-                let wide_pixels = matches!(renderer, DrawModeRenderer::Custom(_)) && (w <= 3);
-                if (hole == HollowThickness::None) && !wide_pixels {
+                // a pixel 2 characters wide does not fit in a shape 1 character wide, and a triangle
+                // in a single character is smaller than a pixel)
+                let too_small = (w <= 3) && (matches!(renderer, DrawModeRenderer::Custom(_)) || matches!(shape, DrawModeShape::Triangle | DrawModeShape::RoundTriangle));
+                if (hole == HollowThickness::None) && !too_small {
                     let inside = (1..w - 1).any(|x| (1..h - 1).any(|y| painted(&s, x, y)));
                     assert!(inside, "{shape:?} {w}x{h}: nothing drawn");
                 }
@@ -1121,9 +1124,9 @@ fn check_selection_border() {
                         selection::paint_selection(&map, sel, &mut s, CharAttribute::with_fore_color(Color::Yellow));
                         let after: Vec<Option<u16>> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| map.get(x, y)).collect();
                         assert_eq!(before, after, "{name}: the paint map must not change");
-                        let in_slice = |x: i32, y: i32| x >= 0 && y >= 0 && map.get(x as u32, y as u32) == Some(sel as u16);
-                        // a one cell notch with the slice on 3 or 4 sides counts as part of the slice
-                        let selected = |x: i32, y: i32| in_slice(x, y) || [(0, -1), (1, 0), (0, 1), (-1, 0)].iter().filter(|(dx, dy)| in_slice(x + dx, y + dy)).count() >= 3;
+                        // the slice and its notches: cells with the slice (or a notch) on 3 or 4 sides, repeated until nothing changes
+                        let mask = selected_mask(&map, sel as u16, w, h);
+                        let selected = |x: i32, y: i32| x >= 0 && y >= 0 && x < w as i32 && y < h as i32 && mask[(y as u32 * w + x as u32) as usize];
                         let border = |x: i32, y: i32| s.char(x, y).is_some_and(|c| c.code != '#');
                         for y in 0..h as i32 {
                             for x in 0..w as i32 {
@@ -1152,6 +1155,29 @@ fn check_selection_border() {
         }
     }
     assert!(borders > 10_000);
+}
+
+// the cells of slice `index`, plus every cell with 3 or 4 of these on its sides, repeated until nothing changes
+fn selected_mask(map: &PaletteTile, index: u16, w: u32, h: u32) -> Vec<bool> {
+    let mut mask: Vec<bool> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| map.get(x, y) == Some(index)).collect();
+    loop {
+        let mut changed = false;
+        for y in 0..h as i32 {
+            for x in 0..w as i32 {
+                let at = |x: i32, y: i32| x >= 0 && y >= 0 && x < w as i32 && y < h as i32 && mask[(y as u32 * w + x as u32) as usize];
+                if at(x, y) {
+                    continue;
+                }
+                if [(0, -1), (1, 0), (0, 1), (-1, 0)].iter().filter(|(dx, dy)| at(x + dx, y + dy)).count() >= 3 {
+                    mask[(y as u32 * w + x as u32) as usize] = true;
+                    changed = true;
+                }
+            }
+        }
+        if !changed {
+            return mask;
+        }
+    }
 }
 
 #[test]
@@ -1762,5 +1788,172 @@ fn check_render_round_rectangle_braille() {
             c.set_hollow_thickness(HollowThickness::Percentage(60));
         },
         0x9D0A407CF5979639,
+    );
+}
+
+// ---------------------------------------------------------------------------
+// triangle and rounded triangle
+// ---------------------------------------------------------------------------
+use super::shapes::Triangle;
+
+// an equilateral triangle with side 20, its centroid at (20, 20)
+fn triangle(hollow: HollowThickness, rounded: bool) -> Triangle {
+    Triangle::new(20.0, 20.0, 10.0, 10.0 * 3f64.sqrt(), hollow, rounded)
+}
+
+#[test]
+fn check_triangle_fraction() {
+    let close = |a: Option<f64>, b: f64| (a.unwrap() - b).abs() < 1e-9;
+    let h = 10.0 * 3f64.sqrt();
+    for rounded in [false, true] {
+        let t = triangle(HollowThickness::None, rounded);
+        // 12 o'clock, straight down, and the directions of the corners (an equilateral
+        // triangle is symmetric: every corner is a third of the area)
+        assert!(close(t.fraction(20.0, 15.0), 0.0), "rounded: {rounded}");
+        assert!(close(t.fraction(20.0, 24.0), 0.5), "rounded: {rounded}");
+        assert!(close(t.fraction(20.0 + 5.0, 20.0 + h / 6.0), 1.0 / 3.0), "rounded: {rounded}");
+        assert!(close(t.fraction(20.0 - 5.0, 20.0 + h / 6.0), 2.0 / 3.0), "rounded: {rounded}");
+        // just left of 12 o'clock is almost 1.0, never 1.0
+        let f = t.fraction(20.0 - 1e-12, 15.0).unwrap();
+        assert!((0.0..1.0).contains(&f), "rounded: {rounded}");
+        // outside: above the apex, below the base, beside the slanted edges
+        assert_eq!(t.fraction(20.0, 20.0 - 2.0 * h / 3.0 - 0.1), None);
+        assert_eq!(t.fraction(20.0, 20.0 + h / 3.0 + 0.1), None);
+        assert_eq!(t.fraction(12.0, 12.0), None);
+        assert_eq!(t.fraction(28.0, 12.0), None);
+    }
+    // the corners of a rounded triangle are cut, its edges are not
+    let plain = triangle(HollowThickness::None, false);
+    let round = triangle(HollowThickness::None, true);
+    let corners = [(20.0, 20.0 - 2.0 * h / 3.0 + 0.3), (29.7, 20.0 + h / 3.0 - 0.1), (10.3, 20.0 + h / 3.0 - 0.1)];
+    for (x, y) in corners {
+        assert!(plain.fraction(x, y).is_some(), "({x},{y})");
+        assert_eq!(round.fraction(x, y), None, "({x},{y})");
+    }
+    assert!(round.fraction(20.0, 20.0 + h / 3.0 - 0.1).is_some());
+    // the hole
+    let t = triangle(HollowThickness::Percentage(50), true);
+    assert_eq!(t.fraction(20.0, 20.0), None);
+    assert!(close(t.fraction(20.0, 20.0 + h / 3.0 - 0.5), 0.5));
+}
+
+#[test]
+fn check_triangle_fraction_grows_continuously() {
+    // going around the shape, the fraction always grows, without jumps (also where an edge meets an arc)
+    for rounded in [false, true] {
+        for hole in [HollowThickness::None, HollowThickness::Percentage(50), HollowThickness::Rectangle(12, 3)] {
+            let t = triangle(hole, rounded);
+            let steps = 5000;
+            let mut last = 0.0;
+            for i in 1..steps {
+                let angle = std::f64::consts::TAU * i as f64 / steps as f64;
+                // the fraction only depends on the direction: take the first point of the ray
+                // (at this angle, y grows downwards) that is inside the shape
+                let (ux, uy) = (angle.sin(), -angle.cos());
+                let f = (1..400).find_map(|k| t.fraction(20.0 + ux * k as f64 * 0.05, 20.0 + uy * k as f64 * 0.05)).unwrap();
+                assert!(f >= last - 1e-12, "{hole:?} rounded: {rounded}: {f} after {last} at step {i}");
+                assert!(f - last < 0.003, "{hole:?} rounded: {rounded}: jump from {last} to {f} at step {i}");
+                last = f;
+            }
+            assert!(last > 0.999, "{hole:?} rounded: {rounded}: {last}");
+        }
+    }
+}
+
+#[test]
+fn check_triangle_areas_are_proportional() {
+    // slices cover areas proportional to their values, with or without a hole
+    for rounded in [false, true] {
+        for values in [&[1u64, 1, 1, 1][..], &[50, 25, 15, 10]] {
+            let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
+            update_proportions(&mut slices);
+            let total: u64 = values.iter().sum();
+            for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(20), HollowThickness::Rectangle(30, 4)] {
+                // 60 x 30 cells = 60 x 60 physical units
+                let shape = Triangle::fit(Size::new(60, 30), hole, rounded);
+                let mut counts = vec![0usize; values.len()];
+                for y in 0..240 {
+                    for x in 0..240 {
+                        if let Some(id) = shape.slice_at((x as f64 + 0.5) / 4.0, (y as f64 + 0.5) / 4.0, &slices) {
+                            counts[id] += 1;
+                        }
+                    }
+                }
+                let covered: usize = counts.iter().sum();
+                for (c, v) in counts.iter().zip(values) {
+                    let share = *c as f64 / covered as f64;
+                    let expected = *v as f64 / total as f64;
+                    assert!((share - expected).abs() < 0.01, "{values:?} {hole:?} rounded: {rounded}: {counts:?}");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn check_triangle_is_equilateral() {
+    // the base is as wide as the sides are long (a character is twice as tall as it is wide),
+    // and the triangle is centered in the plot area
+    for (w, h) in [(42u32, 14u32), (22, 30), (60, 12)] {
+        let (_, map) = paint_with_map(DrawMode::new(DrawModeShape::Triangle, DrawModeRenderer::HalfBlocks, HollowThickness::None), w, h);
+        let cols: Vec<i32> = (0..w as i32).filter(|x| (0..h as i32).any(|y| map.get(*x as u32, y as u32).is_some())).collect();
+        let rows: Vec<i32> = (0..h as i32).filter(|y| (0..w as i32).any(|x| map.get(x as u32, *y as u32).is_some())).collect();
+        let base = cols.len() as f64;
+        let height = rows.len() as f64 * 2.0;
+        assert!((height / base - 3f64.sqrt() / 2.0).abs() < 0.12, "{w}x{h}: {base} x {height}");
+        let (left, right) = (cols[0] - 1, w as i32 - 2 - cols[cols.len() - 1]);
+        let (top, bottom) = (rows[0] - 1, h as i32 - 2 - rows[rows.len() - 1]);
+        assert!((left - right).abs() <= 1 && (top - bottom).abs() <= 1, "{w}x{h}: {left} {right} {top} {bottom}");
+    }
+}
+
+#[test]
+fn check_render_triangle() {
+    check_render_with("triangle, 4 slices, 40x14", &[50, 25, 15, 10], 40, 14, |c| c.set_shape(DrawModeShape::Triangle), 0x61BEE3DCBA0FD1E1);
+}
+
+#[test]
+fn check_render_round_triangle_hollow() {
+    check_render_with(
+        "round triangle with a 40% hole",
+        &[50, 25, 15, 10],
+        40,
+        14,
+        |c| {
+            c.set_shape(DrawModeShape::RoundTriangle);
+            c.set_hollow_thickness(HollowThickness::Percentage(40));
+        },
+        0xADAA77AAC8AAF46E,
+    );
+}
+
+#[test]
+fn check_render_triangle_braille() {
+    check_render_with(
+        "triangle, braille, 50% hole",
+        &[50, 25, 15, 10],
+        40,
+        14,
+        |c| {
+            c.set_shape(DrawModeShape::Triangle);
+            c.set_renderer(DrawModeRenderer::Braille);
+            c.set_hollow_thickness(HollowThickness::Percentage(50));
+        },
+        0xFE86104D5E73045C,
+    );
+}
+
+#[test]
+fn check_render_round_triangle_custom_char() {
+    check_render_with(
+        "round triangle, custom char",
+        &[50, 25, 15, 10],
+        40,
+        14,
+        |c| {
+            c.set_shape(DrawModeShape::RoundTriangle);
+            c.set_renderer(DrawModeRenderer::Custom('o'));
+        },
+        0x42D836B1F74FB209,
     );
 }

@@ -1,4 +1,4 @@
-use super::shapes::{Ellipse, Rectangle};
+use super::shapes::{Ellipse, Rectangle, Triangle};
 use super::Slice;
 use crate::graphics::{CharAttribute, CharFlags, PaletteTile, PaletteTileRenderMethod, Rect, Size, Surface};
 use crate::system::Theme;
@@ -24,6 +24,11 @@ pub enum DrawModeShape {
     RoundRectangle,
     /// An ellipse that fills the plot area.
     Ellipse,
+    /// The largest triangle that fits the plot area, pointing up, with three equal sides,
+    /// centered. The slices go around its centroid (one third of the way up from the base).
+    Triangle,
+    /// Like [`Triangle`](Self::Triangle), with rounded corners.
+    RoundTriangle,
 }
 
 /// How the pixels of a [`PieChart`](super::PieChart) are turned into characters.
@@ -147,6 +152,7 @@ impl DrawMode {
         match self.shape {
             DrawModeShape::Circle | DrawModeShape::Square | DrawModeShape::RoundSquare => (width - width.min(size.height as f64 * 2.0)) / 2.0,
             DrawModeShape::Rectangle | DrawModeShape::RoundRectangle | DrawModeShape::Ellipse => 0.0,
+            DrawModeShape::Triangle | DrawModeShape::RoundTriangle => (width - width.min(size.height as f64 * 4.0 / 3f64.sqrt())) / 2.0,
         }
     }
 
@@ -158,6 +164,8 @@ impl DrawMode {
             DrawModeShape::Rectangle => self.paint_rectangle(pixels, scale, shift, slices, size),
             DrawModeShape::RoundRectangle => self.paint_round_rectangle(pixels, scale, shift, slices, size),
             DrawModeShape::Ellipse => self.paint_ellipse(pixels, scale, shift, slices, size),
+            DrawModeShape::Triangle => self.paint_triangle(pixels, scale, shift, slices, size),
+            DrawModeShape::RoundTriangle => self.paint_round_triangle(pixels, scale, shift, slices, size),
         }
     }
 
@@ -178,6 +186,12 @@ impl DrawMode {
     }
     fn paint_ellipse(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
         Ellipse::fill(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
+    }
+    fn paint_triangle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
+        Triangle::fit(size, self.hollow_thickness, false).paint(pixels, scale, shift, slices);
+    }
+    fn paint_round_triangle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
+        Triangle::fit(size, self.hollow_thickness, true).paint(pixels, scale, shift, slices);
     }
 }
 

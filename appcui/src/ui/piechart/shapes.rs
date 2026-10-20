@@ -1,8 +1,10 @@
 mod ellipse;
 mod rectangle;
+mod triangle;
 
 pub(super) use self::ellipse::Ellipse;
 pub(super) use self::rectangle::Rectangle;
+pub(super) use self::triangle::Triangle;
 
 use super::HollowThickness;
 use crate::graphics::PaletteTile;

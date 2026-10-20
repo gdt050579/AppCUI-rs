@@ -40,12 +40,43 @@ fn is_slice(cells: &PaletteTile, x: isize, y: isize, idx: u16) -> bool {
     (x >= 0) && (y >= 0) && (cells.get(x as u32, y as u32) == Some(idx))
 }
 
+// a cell of the slice, or of a notch in it: a corridor one cell thick, between two parts of
+// the slice, that the slice also closes at one end (any length; a cell with the slice on 3 or 4
+// sides is the shortest one)
 fn is_selected(cells: &PaletteTile, x: isize, y: isize, idx: u16) -> bool {
     if is_slice(cells, x, y, idx) {
         return true;
     }
-    let sides = [(0, -1), (1, 0), (0, 1), (-1, 0)].iter().filter(|(dx, dy)| is_slice(cells, x + dx, y + dy, idx)).count();
-    sides >= 3
+    let up = is_slice(cells, x, y - 1, idx);
+    let down = is_slice(cells, x, y + 1, idx);
+    let left = is_slice(cells, x - 1, y, idx);
+    let right = is_slice(cells, x + 1, y, idx);
+    (up && down && (closed(cells, x, y, 1, 0, idx) || closed(cells, x, y, -1, 0, idx)))
+        || (left && right && (closed(cells, x, y, 0, 1, idx) || closed(cells, x, y, 0, -1, idx)))
+}
+
+// walking from (x, y) in direction (dx, dy) along a corridor between two parts of the slice,
+// the slice closes the corridor
+fn closed(cells: &PaletteTile, x: isize, y: isize, dx: isize, dy: isize, idx: u16) -> bool {
+    let size = cells.size();
+    let (mut x, mut y) = (x + dx, y + dy);
+    while (x >= 0) && (y >= 0) && (x < size.width as isize) && (y < size.height as isize) {
+        if is_slice(cells, x, y, idx) {
+            return true;
+        }
+        // the walls of the corridor
+        let walls = if dx != 0 {
+            is_slice(cells, x, y - 1, idx) && is_slice(cells, x, y + 1, idx)
+        } else {
+            is_slice(cells, x - 1, y, idx) && is_slice(cells, x + 1, y, idx)
+        };
+        if !walls {
+            return false;
+        }
+        x += dx;
+        y += dy;
+    }
+    false
 }
 
 fn neighbours(cells: &PaletteTile, x: isize, y: isize, idx: u16) -> u8 {
