@@ -1342,3 +1342,31 @@ fn check_palette_tile_render_size() {
         }
     }
 }
+
+#[test]
+fn check_palette_tile_cell_index() {
+    // every drawn character shows the palette entry `cell_index` returns; nothing else is drawn
+    let pixels: Vec<(u32, u32, u16)> = (0..9u32).flat_map(|y| (0..11u32).map(move |x| (x, y))).filter(|(x, y)| (x * 3 + y * 5) % 7 > 1).map(|(x, y)| (x, y, ((x + 2 * y) % 4) as u16)).collect();
+    let tile = palette_tile(11, 9, &pixels);
+    let methods = [PaletteTileRenderMethod::SmallBlocks, PaletteTileRenderMethod::LargeBlocks, PaletteTileRenderMethod::Braille, PaletteTileRenderMethod::Custom('*')];
+    for method in methods {
+        let mut s = palette_surface(26, 12);
+        s.draw_palette_tile(0, 0, &tile, method, |id| PALETTE[id as usize]);
+        for y in 0..12 {
+            for x in 0..26 {
+                let ch = s.char(x, y).unwrap();
+                match tile.cell_index(x as u32, y as u32, method) {
+                    None => assert!(untouched(&s, x, y), "{method:?}: ({x},{y})"),
+                    Some(id) => assert_eq!(ch.foreground, PALETTE[id as usize].foreground, "{method:?}: ({x},{y})"),
+                }
+            }
+        }
+    }
+    // small blocks: the bottom pixel when the top one is transparent
+    let tile = palette_tile(1, 2, &[(0, 1, 3)]);
+    assert_eq!(tile.cell_index(0, 0, PaletteTileRenderMethod::SmallBlocks), Some(3));
+    // braille: the majority
+    let tile = palette_tile(2, 4, &[(0, 0, 1), (0, 1, 2), (1, 1, 2), (1, 3, 2)]);
+    assert_eq!(tile.cell_index(0, 0, PaletteTileRenderMethod::Braille), Some(2));
+    assert_eq!(tile.cell_index(1, 0, PaletteTileRenderMethod::Braille), None);
+}

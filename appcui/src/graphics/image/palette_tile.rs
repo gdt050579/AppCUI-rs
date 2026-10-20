@@ -178,6 +178,22 @@ impl PaletteTile {
             PaletteTileRenderMethod::Braille => Size::new(w.div_ceil(2), h.div_ceil(4)),
         }
     }
+    /// Returns the palette index shown by the character at `(x, y)` when the tile is drawn
+    /// with `render_method` (`(0, 0)` is the top-left character of the drawn tile).
+    ///
+    /// This is the index whose attribute the character is drawn with, so it can be used to
+    /// find what is under the mouse:
+    /// - [`SmallBlocks`](PaletteTileRenderMethod::SmallBlocks): the top pixel, or the bottom one if the top is transparent
+    /// - [`LargeBlocks`](PaletteTileRenderMethod::LargeBlocks) and [`Custom`](PaletteTileRenderMethod::Custom): the pixel (2 characters wide)
+    /// - [`Braille`](PaletteTileRenderMethod::Braille): the index that covers most of the dots
+    ///
+    /// Returns `None` if nothing is drawn there (transparent, or outside the tile).
+    pub fn cell_index(&self, x: u32, y: u32, render_method: PaletteTileRenderMethod) -> Option<u16> {
+        match &self.pixels {
+            PixelsVec::U8(pixels) => cell_index_impl(pixels, self.size, x, y, render_method),
+            PixelsVec::U16(pixels) => cell_index_impl(pixels, self.size, x, y, render_method),
+        }
+    }
     /// Returns the width and height of the tile, in pixels.
     #[inline(always)]
     pub fn size(&self) -> Size {
@@ -312,42 +328,58 @@ where
     T: PaletteIndex,
     P: Fn(u16) -> CharAttribute,
 {
-    // bit of each dot in a braille character, by (column, row)
-    const DOTS: [[u8; 4]; 2] = [[0x01, 0x02, 0x04, 0x40], [0x08, 0x10, 0x20, 0x80]];
     for cell_y in 0..size.height.div_ceil(4) {
         for cell_x in 0..size.width.div_ceil(2) {
-            let mut pattern = 0u8;
-            let mut ids = [0u16; 8];
-            let mut counts = [0u8; 8];
-            let mut distinct = 0usize;
-            for (col, bits) in DOTS.iter().enumerate() {
-                for (row, bit) in bits.iter().enumerate() {
-                    let Some(id) = pixel_at(pixels, size, cell_x * 2 + col as u32, cell_y * 4 + row as u32) else {
-                        continue;
-                    };
-                    pattern |= bit;
-                    match ids[..distinct].iter().position(|i| *i == id) {
-                        Some(p) => counts[p] += 1,
-                        None => {
-                            ids[distinct] = id;
-                            counts[distinct] = 1;
-                            distinct += 1;
-                        }
-                    }
-                }
+            if let Some((pattern, id)) = braille_cell(pixels, size, cell_x, cell_y) {
+                let code = char::from_u32(0x2800 + pattern as u32).unwrap_or(' ');
+                surface.write_char(pos.x + cell_x as i32, pos.y + cell_y as i32, Character::with_attributes(code, palette(id)));
             }
-            if pattern == 0 {
-                continue;
-            }
-            let mut best = 0;
-            for p in 1..distinct {
-                if counts[p] > counts[best] {
-                    best = p;
-                }
-            }
-            let code = char::from_u32(0x2800 + pattern as u32).unwrap_or(' ');
-            surface.write_char(pos.x + cell_x as i32, pos.y + cell_y as i32, Character::with_attributes(code, palette(ids[best])));
         }
+    }
+}
+
+// the dots of a braille character and the palette index that covers most of them (on a tie,
+// the first one found, column by column); None if every dot is transparent
+fn braille_cell<T: PaletteIndex>(pixels: &[T], size: Size, cell_x: u32, cell_y: u32) -> Option<(u8, u16)> {
+    // bit of each dot in a braille character, by (column, row)
+    const DOTS: [[u8; 4]; 2] = [[0x01, 0x02, 0x04, 0x40], [0x08, 0x10, 0x20, 0x80]];
+    let mut pattern = 0u8;
+    let mut ids = [0u16; 8];
+    let mut counts = [0u8; 8];
+    let mut distinct = 0usize;
+    for (col, bits) in DOTS.iter().enumerate() {
+        for (row, bit) in bits.iter().enumerate() {
+            let Some(id) = pixel_at(pixels, size, cell_x * 2 + col as u32, cell_y * 4 + row as u32) else {
+                continue;
+            };
+            pattern |= bit;
+            match ids[..distinct].iter().position(|i| *i == id) {
+                Some(p) => counts[p] += 1,
+                None => {
+                    ids[distinct] = id;
+                    counts[distinct] = 1;
+                    distinct += 1;
+                }
+            }
+        }
+    }
+    if pattern == 0 {
+        return None;
+    }
+    let mut best = 0;
+    for p in 1..distinct {
+        if counts[p] > counts[best] {
+            best = p;
+        }
+    }
+    Some((pattern, ids[best]))
+}
+
+fn cell_index_impl<T: PaletteIndex>(pixels: &[T], size: Size, x: u32, y: u32, render_method: PaletteTileRenderMethod) -> Option<u16> {
+    match render_method {
+        PaletteTileRenderMethod::SmallBlocks => pixel_at(pixels, size, x, y * 2).or_else(|| pixel_at(pixels, size, x, y * 2 + 1)),
+        PaletteTileRenderMethod::LargeBlocks | PaletteTileRenderMethod::Custom(_) => pixel_at(pixels, size, x / 2, y),
+        PaletteTileRenderMethod::Braille => braille_cell(pixels, size, x, y).map(|(_, id)| id),
     }
 }
 
