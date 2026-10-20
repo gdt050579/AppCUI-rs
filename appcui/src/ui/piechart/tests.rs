@@ -296,7 +296,7 @@ fn check_surface_paint() {
     let script = "
         Paint.Enable(false)
         Paint('pie with 1/3 and 2/3 drawn on the chart background')
-        CheckHash(0xCB79A242C2F00978)
+        CheckHash(0xD8E8A7FF19EBA5CE)
     ";
     App::new()
         .size(Size::new(40, 12))
@@ -337,13 +337,14 @@ fn check_proportions_in_chart() {
 // ---------------------------------------------------------------------------
 use super::piechart::slice_at;
 use super::shapes::Ellipse;
+use super::shapes::hole_size;
 
 fn ellipse(cx: f64, cy: f64, rx: f64, ry: f64) -> Ellipse {
     ellipse_with_hole(cx, cy, rx, ry, super::HollowThickness::None)
 }
 
 fn ellipse_with_hole(cx: f64, cy: f64, rx: f64, ry: f64, hollow: super::HollowThickness) -> Ellipse {
-    Ellipse::new(Size::new(40, 20), cx, cy, rx, ry, hollow, super::DrawModeRenderer::HalfBlocks)
+    Ellipse::new(cx, cy, rx, ry, hollow)
 }
 
 fn check_render(name: &str, values: &'static [u64], w: u32, h: u32, hash: u64) {
@@ -422,7 +423,7 @@ fn check_explicit_color() {
     let script = "
         Paint.Enable(false)
         Paint('red and green halves')
-        CheckHash(0x871F4449BB285669)
+        CheckHash(0x1FF0F62AA7C23C99)
     ";
     App::new()
         .size(Size::new(44, 16))
@@ -441,23 +442,23 @@ fn check_explicit_color() {
 
 #[test]
 fn check_render_even_size() {
-    check_render("4 slices, 40x12", &[50, 25, 15, 10], 40, 12, 0x6C0E3BEE64D7CBB);
+    check_render("4 slices, 40x12", &[50, 25, 15, 10], 40, 12, 0x9F2DC2BEDBBDE643);
 }
 
 #[test]
 fn check_render_odd_size() {
-    check_render("4 slices, 21x7", &[50, 25, 15, 10], 21, 7, 0x9355F93026525CA3);
+    check_render("4 slices, 21x7", &[50, 25, 15, 10], 21, 7, 0x50636918CC5D083);
 }
 
 #[test]
 fn check_render_tall() {
     // width limits the circle; it is centered vertically
-    check_render("3 slices, 10x12", &[1, 1, 1], 10, 12, 0x11B27EDD36696125);
+    check_render("3 slices, 10x12", &[1, 1, 1], 10, 12, 0xE628A9DBD77270E5);
 }
 
 #[test]
 fn check_render_single_slice() {
-    check_render("one slice fills the circle", &[5], 20, 8, 0x1A4F4DAF92977B71);
+    check_render("one slice fills the circle", &[5], 20, 8, 0x72D4D01D6E181B31);
 }
 
 #[test]
@@ -473,12 +474,12 @@ fn check_render_all_zero() {
 #[test]
 fn check_render_tiny_slice() {
     // a tiny slice may cover no pixel at all; it must not break the drawing
-    check_render("tiny slice", &[1_000_000, 1, 1_000_000], 20, 8, 0x7B095B1E9ABE63C1);
+    check_render("tiny slice", &[1_000_000, 1, 1_000_000], 20, 8, 0xF94C6C8548652881);
 }
 
 #[test]
 fn check_render_many_slices() {
-    check_render("13 slices", &[1; 13], 40, 14, 0x9A76F3EA2B22204B);
+    check_render("13 slices", &[1; 13], 40, 14, 0x6386A76B510EA877);
 }
 
 #[test]
@@ -486,7 +487,7 @@ fn check_render_disabled() {
     let script = "
         Paint.Enable(false)
         Paint('disabled: gray silhouette')
-        CheckHash(0x5D1121CB4D1B7A09)
+        CheckHash(0xC2B786151B233A29)
     ";
     App::new()
         .size(Size::new(44, 16))
@@ -509,7 +510,7 @@ fn check_render_after_set_value() {
     let script = "
         Paint.Enable(false)
         Paint('after set_value: 1/4 and 3/4')
-        CheckHash(0xCE6900E588993179)
+        CheckHash(0x6E8CB6E15B0ECAAD)
     ";
     App::new()
         .size(Size::new(44, 16))
@@ -592,7 +593,7 @@ fn check_ellipse_areas_are_proportional() {
     let mut slices: Vec<Slice> = [1u64, 1, 1, 1].iter().map(|v| Slice::new(*v, "", None)).collect();
     update_proportions(&mut slices);
     // 80 x 10 cells = 80 x 20 physical units
-    let shape = Ellipse::fill(Rect::new(0, 0, 79, 9), HollowThickness::None, DrawModeRenderer::HalfBlocks);
+    let shape = Ellipse::fill(Size::new(80, 10), HollowThickness::None);
     // sample a 1 x 1 physical unit grid (the half block resolution)
     let mut counts = [0usize; 4];
     for y in 0..20 {
@@ -612,21 +613,21 @@ fn check_ellipse_areas_are_proportional() {
 #[test]
 fn check_hole_radii() {
     // shape radii: 10 x 5 (physical units)
-    assert_eq!(Ellipse::hole_radii(HollowThickness::None, 10.0, 5.0), (0.0, 0.0));
-    assert_eq!(Ellipse::hole_radii(HollowThickness::Percentage(0), 10.0, 5.0), (0.0, 0.0));
-    assert_eq!(Ellipse::hole_radii(HollowThickness::Percentage(50), 10.0, 5.0), (5.0, 2.5));
-    assert_eq!(Ellipse::hole_radii(HollowThickness::Percentage(200), 10.0, 5.0), (10.0, 5.0));
+    assert_eq!(hole_size(HollowThickness::None, 10.0, 5.0), (0.0, 0.0));
+    assert_eq!(hole_size(HollowThickness::Percentage(0), 10.0, 5.0), (0.0, 0.0));
+    assert_eq!(hole_size(HollowThickness::Percentage(50), 10.0, 5.0), (5.0, 2.5));
+    assert_eq!(hole_size(HollowThickness::Percentage(200), 10.0, 5.0), (10.0, 5.0));
     // 4 characters wide, same proportions as the shape
-    assert_eq!(Ellipse::hole_radii(HollowThickness::Absolute(4), 10.0, 5.0), (2.0, 1.0));
+    assert_eq!(hole_size(HollowThickness::Absolute(4), 10.0, 5.0), (2.0, 1.0));
     // 6 x 2 characters = 6 x 4 physical units
-    assert_eq!(Ellipse::hole_radii(HollowThickness::Rectangle(6, 2), 10.0, 5.0), (3.0, 2.0));
+    assert_eq!(hole_size(HollowThickness::Rectangle(6, 2), 10.0, 5.0), (3.0, 2.0));
     // default: solid circle, half blocks, no margins
     assert_eq!(DrawMode::default(), DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::HalfBlocks, HollowThickness::None));
 }
 
 #[test]
 fn check_render_ellipse() {
-    check_render_with("ellipse, 4 slices, 40x10", &[50, 25, 15, 10], 40, 10, |c| c.set_shape(DrawModeShape::Ellipse), 0x9F11085498690365);
+    check_render_with("ellipse, 4 slices, 40x10", &[50, 25, 15, 10], 40, 10, |c| c.set_shape(DrawModeShape::Ellipse), 0x814103108B058B2D);
 }
 
 #[test]
@@ -640,23 +641,23 @@ fn check_render_ellipse_hollow() {
             c.set_shape(DrawModeShape::Ellipse);
             c.set_hollow_thickness(HollowThickness::Percentage(60));
         },
-        0x5408775DB9434A6D,
+        0xD03AFE9B7D00AD9,
     );
 }
 
 #[test]
 fn check_render_ring_percentage() {
-    check_render_with("ring, 50% hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Percentage(50)), 0xF35464416C9E6E05);
+    check_render_with("ring, 50% hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Percentage(50)), 0x18AF6D29C9E69A6D);
 }
 
 #[test]
 fn check_render_ring_absolute() {
-    check_render_with("ring, hole 8 chars wide", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Absolute(8)), 0xC6A0CC81E13D237D);
+    check_render_with("ring, hole 8 chars wide", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Absolute(8)), 0x4393BEBA9778CE2B);
 }
 
 #[test]
 fn check_render_ring_rectangle() {
-    check_render_with("circle, 12x3 hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Rectangle(12, 3)), 0x9F8BE8D31410F5CA);
+    check_render_with("circle, 12x3 hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Rectangle(12, 3)), 0xA0E4A3333B896A96);
 }
 
 #[test]
@@ -668,7 +669,7 @@ fn check_render_hole_fills_shape() {
 #[test]
 fn check_render_hole_zero() {
     // a 0% hole is a solid circle: same screen as `check_render_single_slice`
-    check_render_with("0% hole: solid", &[5], 20, 8, |c| c.set_hollow_thickness(HollowThickness::Percentage(0)), 0x1A4F4DAF92977B71);
+    check_render_with("0% hole: solid", &[5], 20, 8, |c| c.set_hollow_thickness(HollowThickness::Percentage(0)), 0x72D4D01D6E181B31);
 }
 
 // ---------------------------------------------------------------------------
@@ -676,13 +677,16 @@ fn check_render_hole_zero() {
 // ---------------------------------------------------------------------------
 use super::draw_mode::PADDING;
 
+// the shapes that can be drawn
+const SHAPES: [DrawModeShape; 4] = [DrawModeShape::Circle, DrawModeShape::Ellipse, DrawModeShape::Square, DrawModeShape::Rectangle];
+
 fn paint_on_surface(mode: DrawMode, values: &[u64], w: u32, h: u32) -> Surface {
     let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
     update_proportions(&mut slices);
     let mut surface = Surface::new(w, h);
     surface.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
     let area = plot_area(surface.size());
-    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaintMap::new(Size::new(w, h)), area);
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaletteTile::new(1, 1), &mut PaletteTile::new(w, h), area);
     surface
 }
 
@@ -695,7 +699,7 @@ fn check_padding() {
     assert_eq!(PADDING, 1);
     let holes = [HollowThickness::None, HollowThickness::Percentage(40), HollowThickness::Absolute(2), HollowThickness::Rectangle(3, 1)];
     let renderers = [DrawModeRenderer::HalfBlocks, DrawModeRenderer::Braille, DrawModeRenderer::Custom('*')];
-    for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+    for shape in SHAPES {
         for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
             for (w, h) in [(12, 6), (13, 7), (30, 5), (6, 14), (3, 3)] {
                 let mode = DrawMode::new(shape, renderer, hole);
@@ -709,8 +713,10 @@ fn check_padding() {
                     assert!(!painted(&s, 0, y), "{shape:?} {hole:?} {w}x{h}: left column painted at y={y}");
                     assert!(!painted(&s, w - 1, y), "{shape:?} {hole:?} {w}x{h}: right column painted at y={y}");
                 }
-                // without a hole, something is drawn inside (a hole may cover a very small shape)
-                if hole == HollowThickness::None {
+                // without a hole, something is drawn inside (a hole may cover a very small shape,
+                // and a pixel 2 characters wide does not fit in a shape 1 character wide)
+                let wide_pixels = matches!(renderer, DrawModeRenderer::Custom(_)) && (w <= 3);
+                if (hole == HollowThickness::None) && !wide_pixels {
                     let inside = (1..w - 1).any(|x| (1..h - 1).any(|y| painted(&s, x, y)));
                     assert!(inside, "{shape:?} {w}x{h}: nothing drawn");
                 }
@@ -767,7 +773,7 @@ fn check_render_custom_char() {
             c.set_shape(DrawModeShape::Ellipse);
             c.set_renderer(DrawModeRenderer::Custom('o'));
         },
-        0xBD834243E782DE13,
+        0xA2DC847F45372289,
     );
 }
 
@@ -780,7 +786,7 @@ fn check_braille_majority_color() {
     let mut surface = Surface::new(12, 7);
     surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
     let area = plot_area(surface.size());
-    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaintMap::new(Size::new(12, 7)), area);
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaletteTile::new(1, 1), &mut PaletteTile::new(12, 7), area);
     for y in 1..6 {
         for x in 1..11 {
             let ch = surface.char(x, y).unwrap();
@@ -796,12 +802,12 @@ fn check_braille_majority_color() {
 // ---------------------------------------------------------------------------
 // paint map: which slice is drawn in each character
 // ---------------------------------------------------------------------------
-use super::paint_map::PaintMap;
+use super::selection;
 
 const MAP_COLORS: [Color; 4] = [Color::Red, Color::Green, Color::Blue, Color::Yellow];
 
 /// Paints 4 slices with distinct explicit colors and returns the surface and the paint map.
-fn paint_with_map(mode: DrawMode, w: u32, h: u32) -> (Surface, PaintMap) {
+fn paint_with_map(mode: DrawMode, w: u32, h: u32) -> (Surface, PaletteTile) {
     let mut slices: Vec<Slice> = [40u64, 30, 20, 10]
         .iter()
         .zip(MAP_COLORS)
@@ -810,9 +816,9 @@ fn paint_with_map(mode: DrawMode, w: u32, h: u32) -> (Surface, PaintMap) {
     update_proportions(&mut slices);
     let mut surface = Surface::new(w, h);
     surface.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
-    let mut map = PaintMap::new(Size::new(w, h));
+    let mut map = PaletteTile::new(w, h);
     let area = plot_area(surface.size());
-    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
+    mode.paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaletteTile::new(1, 1), &mut map, area);
     (surface, map)
 }
 
@@ -820,7 +826,7 @@ fn paint_with_map(mode: DrawMode, w: u32, h: u32) -> (Surface, PaintMap) {
 fn check_paint_map() {
     let holes = [HollowThickness::None, HollowThickness::Percentage(50)];
     let renderers = [DrawModeRenderer::HalfBlocks, DrawModeRenderer::Braille, DrawModeRenderer::Custom('*')];
-    for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+    for shape in SHAPES {
         for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
             for (w, h) in [(20, 10), (13, 7), (40, 6)] {
                 let mode = DrawMode::new(shape, renderer, hole);
@@ -830,7 +836,7 @@ fn check_paint_map() {
                 for y in 0..h as i32 {
                     for x in 0..w as i32 {
                         let ch = s.char(x, y).unwrap();
-                        let index = map.get(x as usize, y as usize);
+                        let index = map.get(x as u32, y as u32);
                         // a character is in the map if (and only if) it was drawn
                         assert_eq!(ch.code != '#', index.is_some(), "{name}: ({x},{y})");
                         if let Some(index) = index {
@@ -864,7 +870,7 @@ fn check_paint_map_padding() {
         assert_eq!(map.get(11, y), None);
     }
     assert!(map.get(6, 4).is_some());
-    map.resize(Size::new(12, 8));
+    map.resize(12, 8);
     assert_eq!(map.get(6, 4), None);
     // outside the map
     assert_eq!(map.get(12, 0), None);
@@ -919,12 +925,12 @@ fn check_hover() {
 use super::piechart::update_centers;
 
 /// Builds a paint map from rows of text: a digit is the slice index, anything else is empty.
-fn map_of(rows: &[&str]) -> PaintMap {
-    let mut m = PaintMap::new(Size::new(rows[0].len() as u32, rows.len() as u32));
+fn map_of(rows: &[&str]) -> PaletteTile {
+    let mut m = PaletteTile::new(rows[0].len() as u32, rows.len() as u32);
     for (y, row) in rows.iter().enumerate() {
         for (x, ch) in row.chars().enumerate() {
             if let Some(d) = ch.to_digit(10) {
-                m.set(x, y, d as u16);
+                m.set(x as u32, y as u32, d as u16);
             }
         }
     }
@@ -967,7 +973,7 @@ fn check_center_falls_back_to_a_cell_of_the_slice() {
     let mut slices = slices_n(1);
     update_centers(&mut slices, &map);
     let c = slices[0].center.unwrap();
-    assert_eq!(map.get(c.x as usize, c.y as usize), Some(0));
+    assert_eq!(map.get(c.x as u32, c.y as u32), Some(0));
     // nearest cell to (4, 2), a cell being twice as tall as wide: straight up or down (distance 4)
     // beats straight left or right (distance 4 too, but found later); the first one found wins
     assert_eq!(c, Point::new(4, 0));
@@ -993,20 +999,20 @@ fn check_centers_on_real_charts() {
     let holes = [HollowThickness::None, HollowThickness::Percentage(50), HollowThickness::Percentage(80)];
     let renderers = [DrawModeRenderer::HalfBlocks, DrawModeRenderer::Braille, DrawModeRenderer::Custom('*')];
     for values in value_sets {
-        for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+        for shape in SHAPES {
             for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
                 for (w, h) in [(30, 13), (21, 8), (60, 20)] {
                     let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
                     update_proportions(&mut slices);
                                     let mut surface = Surface::new(w, h);
-                    let mut map = PaintMap::new(Size::new(w, h));
+                    let mut map = PaletteTile::new(w, h);
                     let area = plot_area(surface.size());
-                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
+                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaletteTile::new(1, 1), &mut map, area);
                     update_centers(&mut slices, &map);
                     let name = format!("{values:?} {shape:?} {hole:?} {renderer:?} {w}x{h}");
                     for (i, s) in slices.iter().enumerate() {
                         match s.center {
-                            Some(c) => assert_eq!(map.get(c.x as usize, c.y as usize), Some(i as u16), "{name}: slice {i}"),
+                            Some(c) => assert_eq!(map.get(c.x as u32, c.y as u32), Some(i as u16), "{name}: slice {i}"),
                             None => assert_eq!(s.cells, 0, "{name}: slice {i} has cells but no center"),
                         }
                     }
@@ -1042,10 +1048,10 @@ fn check_tooltip_stays_on_the_slice_center() {
         Paint.Enable(false)
         Mouse.Move(23,5)
         Paint('tooltip from one cell of slice A')
-        CheckHash(0xB6D4E127EAD1FA8)
+        CheckHash(0x583A561B6F4B4CFC)
         Mouse.Move(26,9)
         Paint('tooltip from another cell of slice A')
-        CheckHash(0xB6D4E127EAD1FA8)
+        CheckHash(0x583A561B6F4B4CFC)
     ";
     App::new()
         .size(Size::new(44, 18))
@@ -1091,24 +1097,24 @@ fn check_selection_border() {
     let renderers = [DrawModeRenderer::HalfBlocks, DrawModeRenderer::Braille];
     let mut borders = 0;
     for values in value_sets {
-        for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+        for shape in SHAPES {
             for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
                 for (w, h) in [(34u32, 15u32), (21, 8), (60, 20)] {
                     let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
                     update_proportions(&mut slices);
                                     let mut surface = Surface::new(w, h);
-                    let mut map = PaintMap::new(Size::new(w, h));
+                    let mut map = PaletteTile::new(w, h);
                     let area = plot_area(surface.size());
-                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
+                    DrawMode::new(shape, renderer, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaletteTile::new(1, 1), &mut map, area);
                     for sel in 0..values.len() {
                         let name = format!("{values:?} {shape:?} {hole:?} {renderer:?} {w}x{h} selected {sel}");
                         let mut s = Surface::new(w, h);
                         s.clear(Character::new('#', Color::White, Color::Black, CharFlags::None));
-                        let before: Vec<Option<u16>> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| map.get(x as usize, y as usize)).collect();
-                        map.paint_selection(sel, &mut s, CharAttribute::with_fore_color(Color::Yellow));
-                        let after: Vec<Option<u16>> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| map.get(x as usize, y as usize)).collect();
+                        let before: Vec<Option<u16>> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| map.get(x, y)).collect();
+                        selection::paint_selection(&map, sel, &mut s, CharAttribute::with_fore_color(Color::Yellow));
+                        let after: Vec<Option<u16>> = (0..h).flat_map(|y| (0..w).map(move |x| (x, y))).map(|(x, y)| map.get(x, y)).collect();
                         assert_eq!(before, after, "{name}: the paint map must not change");
-                        let in_slice = |x: i32, y: i32| x >= 0 && y >= 0 && map.get(x as usize, y as usize) == Some(sel as u16);
+                        let in_slice = |x: i32, y: i32| x >= 0 && y >= 0 && map.get(x as u32, y as u32) == Some(sel as u16);
                         // a one cell notch with the slice on 3 or 4 sides counts as part of the slice
                         let selected = |x: i32, y: i32| in_slice(x, y) || [(0, -1), (1, 0), (0, 1), (-1, 0)].iter().filter(|(dx, dy)| in_slice(x + dx, y + dy)).count() >= 3;
                         let border = |x: i32, y: i32| s.char(x, y).is_some_and(|c| c.code != '#');
@@ -1144,12 +1150,12 @@ fn check_selection_border() {
 #[test]
 fn check_selection_border_edge_cases() {
     // a slice touching the edge of the map: the border stops at the edge, no panic
-    let mut map = PaintMap::new(Size::new(4, 3));
+    let mut map = PaletteTile::new(4, 3);
     map.set(0, 0, 0);
     map.set(1, 0, 0);
     let mut s = Surface::new(4, 3);
     s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
-    map.paint_selection(0, &mut s, CharAttribute::default());
+    selection::paint_selection(&map, 0, &mut s, CharAttribute::default());
     let row = |y: i32| (0..4).map(|x| s.char(x, y).unwrap().code).collect::<String>();
     assert_eq!(row(0), "  │ ");
     assert_eq!(row(1), "──┘ ");
@@ -1158,7 +1164,7 @@ fn check_selection_border_edge_cases() {
     for index in [3usize, 0xFFFF, 100_000] {
         let mut s = Surface::new(4, 3);
         s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
-        map.paint_selection(index, &mut s, CharAttribute::default());
+        selection::paint_selection(&map, index, &mut s, CharAttribute::default());
         assert!((0..3).all(|y| row_is_blank(&s, y, 4)), "index {index}");
     }
 }
@@ -1172,10 +1178,10 @@ fn check_selection_on_click() {
     let script = "
         Paint.Enable(false)
         Paint('nothing selected')
-        CheckHash(0xCECD58E37DF8C4EA)
+        CheckHash(0xDCE4A95EE1BA5A62)
         Mouse.Click(23,10,left)
         Paint('slice A (right half) selected: the other slices are dimmed')
-        CheckHash(0x3FD53553AC1A1168)
+        CheckHash(0x9E0559F0415963FC)
     ";
     App::new()
         .size(Size::new(44, 18))
@@ -1291,16 +1297,16 @@ fn check_labels_keep_the_chart_and_padding() {
     let mut checked = 0;
     for values in value_sets {
         for content in [LabelContent::Label, LabelContent::Value, LabelContent::LabelAndValue] {
-            for shape in [DrawModeShape::Circle, DrawModeShape::Ellipse] {
+            for shape in SHAPES {
                 for hole in [HollowThickness::None, HollowThickness::Percentage(50)] {
                     for (w, h) in [(50u32, 18u32), (30, 10), (80, 24), (14, 6)] {
                         let mut slices = labelled(values, content);
                         let size = Size::new(w, h);
                         let mut surface = Surface::new(w, h);
                         surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
-                        let mut map = PaintMap::new(size);
+                        let mut map = PaletteTile::new(size.width, size.height);
                         let (area, ok) = labels::outside_area(size, &slices);
-                        DrawMode::new(shape, DrawModeRenderer::HalfBlocks, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut map, area);
+                        DrawMode::new(shape, DrawModeRenderer::HalfBlocks, hole).paint(&mut surface, &Theme::new(Themes::Default), &slices, &mut PaletteTile::new(1, 1), &mut map, area);
                         update_centers(&mut slices, &map);
                         let before: Vec<Character> = (0..h as i32).flat_map(|y| (0..w as i32).map(move |x| (x, y))).map(|(x, y)| *surface.char(x, y).unwrap()).collect();
                         if let (Some(area), true) = (area, ok) {
@@ -1311,7 +1317,7 @@ fn check_labels_keep_the_chart_and_padding() {
                             for x in 0..w as i32 {
                                 let ch = *surface.char(x, y).unwrap();
                                 let old = before[(y as u32 * w + x as u32) as usize];
-                                if map.get(x as usize, y as usize).is_some() || x == 0 || y == 0 || x == w as i32 - 1 || y == h as i32 - 1 {
+                                if map.get(x as u32, y as u32).is_some() || x == 0 || y == 0 || x == w as i32 - 1 || y == h as i32 - 1 {
                                     assert_eq!(ch, old, "{name}: ({x},{y}) changed");
                                 }
                             }
@@ -1322,7 +1328,7 @@ fn check_labels_keep_the_chart_and_padding() {
             }
         }
     }
-    assert_eq!(checked, 4 * 3 * 2 * 2 * 4);
+    assert_eq!(checked, 4 * 3 * SHAPES.len() * 2 * 4);
 }
 
 #[test]
@@ -1372,12 +1378,12 @@ const LANGS: &[(u64, &str)] = &[(45, "Rust"), (25, "C++"), (15, "Go"), (10, "Zig
 
 #[test]
 fn check_labels_none() {
-    check_label_screen("no labels (default)", LANGS, 44, 16, |_| {}, 0x21A251364B222B59);
+    check_label_screen("no labels (default)", LANGS, 44, 16, |_| {}, 0xC59F6401E4610271);
 }
 
 #[test]
 fn check_labels_inside() {
-    check_label_screen("inside, label", LANGS, 44, 16, |c| c.set_label_layout(LabelLayout::Inside), 0x9634AEFFAE0BB742);
+    check_label_screen("inside, label", LANGS, 44, 16, |c| c.set_label_layout(LabelLayout::Inside), 0x374C569C9FBC5D46);
 }
 
 #[test]
@@ -1391,19 +1397,19 @@ fn check_labels_inside_label_and_value() {
             c.set_label_layout(LabelLayout::Inside);
             c.set_label_content(LabelContent::LabelAndValue);
         },
-        0x9F49DE84A8A8185C,
+        0x3B79A6AC6BE64240,
     );
 }
 
 #[test]
 fn check_labels_outside() {
-    check_label_screen("outside, label", LANGS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0xF3439EC0A5CA22FE);
+    check_label_screen("outside, label", LANGS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0xEC2F6073F0451F96);
 }
 
 #[test]
 fn check_labels_outside_many() {
     const MONTHS: &[(u64, &str)] = &[(1, "Jan"), (1, "Feb"), (1, "Mar"), (1, "Apr"), (1, "May"), (1, "Jun"), (1, "Jul"), (1, "Aug"), (1, "Sep"), (1, "Oct"), (1, "Nov"), (1, "Dec")];
-    check_label_screen("outside, 12 slices", MONTHS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x5A267A5E9FF15D53);
+    check_label_screen("outside, 12 slices", MONTHS, 50, 18, |c| c.set_label_layout(LabelLayout::Outside), 0x83D17A4DAC29CA0F);
 }
 
 #[test]
@@ -1418,7 +1424,7 @@ fn check_labels_outside_ring_values() {
             c.set_label_content(LabelContent::Value);
             c.set_hollow_thickness(HollowThickness::Percentage(50));
         },
-        0x81748A025B4D5A11,
+        0xD4DE3DF7949730DD,
     );
 }
 
@@ -1433,14 +1439,14 @@ fn check_labels_outside_ellipse() {
             c.set_label_layout(LabelLayout::Outside);
             c.set_shape(DrawModeShape::Ellipse);
         },
-        0x6E011810A3BED1B2,
+        0xAD51D27F536C2FB2,
     );
 }
 
 #[test]
 fn check_labels_outside_no_room() {
     // not enough room: the chart is drawn without labels (same as no labels at all)
-    check_label_screen("outside, too small", LANGS, 14, 6, |c| c.set_label_layout(LabelLayout::Outside), 0x8C8E330576A37A90);
+    check_label_screen("outside, too small", LANGS, 14, 6, |c| c.set_label_layout(LabelLayout::Outside), 0x26488A12E197FB66);
 }
 
 #[test]
@@ -1477,4 +1483,153 @@ fn check_set_number_format() {
         c.set_label_content(LabelContent::LabelAndValue);
         assert_eq!(c.slices[1].text, "Free: 2500 MB");
     });
+}
+
+// ---------------------------------------------------------------------------
+// rectangle and square
+// ---------------------------------------------------------------------------
+use super::shapes::Rectangle;
+
+fn rectangle(cx: f64, cy: f64, rx: f64, ry: f64, hollow: HollowThickness) -> Rectangle {
+    Rectangle::new(cx, cy, rx, ry, hollow)
+}
+
+#[test]
+fn check_rectangle_fraction() {
+    // 20 x 10 physical units, centered at (10, 5)
+    let r = rectangle(10.0, 5.0, 10.0, 5.0, HollowThickness::None);
+    let close = |a: Option<f64>, b: f64| (a.unwrap() - b).abs() < 1e-9;
+    // the fraction only depends on the direction from the center
+    assert!(close(r.fraction(10.0, 0.0), 0.0)); // 12 o'clock
+    assert!(close(r.fraction(15.0, 2.5), 0.125)); // towards the top-right corner
+    assert!(close(r.fraction(19.0, 5.0), 0.25)); // 3 o'clock
+    assert!(close(r.fraction(15.0, 7.5), 0.375)); // towards the bottom-right corner
+    assert!(close(r.fraction(10.0, 9.0), 0.5)); // 6 o'clock
+    assert!(close(r.fraction(5.0, 7.5), 0.625)); // towards the bottom-left corner
+    assert!(close(r.fraction(0.0, 5.0), 0.75)); // 9 o'clock
+    assert!(close(r.fraction(0.0, 0.0), 0.875)); // top-left corner
+    // the area grows linearly along an edge: half way between 12 o'clock and the corner
+    assert!(close(r.fraction(15.0, 0.0), 0.0625));
+    assert!(close(r.fraction(7.5, 2.5), 0.9375));
+    // half open: the left and top edges are inside, the right and bottom ones are not
+    assert!(r.fraction(0.0, 9.9).is_some());
+    assert_eq!(r.fraction(20.0, 5.0), None);
+    assert_eq!(r.fraction(10.0, 10.0), None);
+    assert_eq!(r.fraction(10.0, -0.1), None);
+    // just left of 12 o'clock is almost 1.0, never 1.0
+    let f = r.fraction(10.0 - 1e-12, 0.0).unwrap();
+    assert!((0.0..1.0).contains(&f));
+    // the hole
+    let r = rectangle(10.0, 5.0, 10.0, 5.0, HollowThickness::Percentage(50));
+    assert_eq!(r.fraction(10.0, 5.0), None);
+    assert_eq!(r.fraction(14.0, 7.0), None);
+    assert!(close(r.fraction(19.0, 5.0), 0.25));
+    assert!(close(r.fraction(15.0, 5.0), 0.25));
+    // a hole as large as the shape leaves nothing
+    let r = rectangle(10.0, 5.0, 10.0, 5.0, HollowThickness::Percentage(100));
+    assert_eq!(r.fraction(10.0, 0.0), None);
+    assert_eq!(r.fraction(19.0, 5.0), None);
+}
+
+#[test]
+fn check_rectangle_areas_are_proportional() {
+    // four equal slices must cover the same area on a very stretched rectangle,
+    // with or without a hole, even if the hole does not have the shape's proportions
+    let mut slices: Vec<Slice> = [1u64, 1, 1, 1].iter().map(|v| Slice::new(*v, "", None)).collect();
+    update_proportions(&mut slices);
+    for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(30), HollowThickness::Rectangle(70, 2)] {
+        // 80 x 10 cells = 80 x 20 physical units
+        let shape = Rectangle::fill(Size::new(80, 10), hole);
+        let mut counts = [0usize; 4];
+        for y in 0..80 {
+            for x in 0..320 {
+                if let Some(id) = shape.slice_at((x as f64 + 0.5) / 4.0, (y as f64 + 0.5) / 4.0, &slices) {
+                    counts[id] += 1;
+                }
+            }
+        }
+        let total: usize = counts.iter().sum();
+        for c in counts {
+            let share = c as f64 / total as f64;
+            assert!((share - 0.25).abs() < 0.01, "{hole:?}: {counts:?}");
+        }
+    }
+}
+
+#[test]
+fn check_square_is_square() {
+    // a square looks square: twice as many columns as rows
+    // (13 x 9: the square is 11 characters wide, the closest with pixels 2 characters wide is 10)
+    for (w, h, side_w, side_h) in [(40u32, 12u32, 20, 10), (12, 20, 10, 5), (13, 9, 10, 5)] {
+        let (s, map) = paint_with_map(DrawMode::new(DrawModeShape::Square, DrawModeRenderer::Custom('*'), HollowThickness::None), w, h);
+        let cols: Vec<i32> = (0..w as i32).filter(|x| (0..h as i32).any(|y| map.get(*x as u32, y as u32).is_some())).collect();
+        let rows: Vec<i32> = (0..h as i32).filter(|y| (0..w as i32).any(|x| map.get(x as u32, *y as u32).is_some())).collect();
+        assert_eq!((cols.len(), rows.len()), (side_w, side_h), "{w}x{h}");
+        // centered in the plot area
+        let (left, right) = (cols[0] - 1, w as i32 - 2 - cols[cols.len() - 1]);
+        let (top, bottom) = (rows[0] - 1, h as i32 - 2 - rows[rows.len() - 1]);
+        assert!((left - right).abs() <= 1 && (top - bottom).abs() <= 1, "{w}x{h}: {left} {right} {top} {bottom}");
+        // and filled completely
+        for y in rows.iter() {
+            for x in cols.iter() {
+                assert!(s.char(*x, *y).unwrap().code == '*', "{w}x{h}: ({x},{y})");
+            }
+        }
+    }
+}
+
+#[test]
+fn check_render_square() {
+    check_render_with("square, 4 slices, 40x12", &[50, 25, 15, 10], 40, 12, |c| c.set_shape(DrawModeShape::Square), 0x677A69C539DCD3F9);
+}
+
+#[test]
+fn check_render_square_hollow() {
+    check_render_with(
+        "square with a 50% hole",
+        &[50, 25, 15, 10],
+        40,
+        12,
+        |c| {
+            c.set_shape(DrawModeShape::Square);
+            c.set_hollow_thickness(HollowThickness::Percentage(50));
+        },
+        0xDB0056F9D9D6563A,
+    );
+}
+
+#[test]
+fn check_render_rectangle() {
+    check_render_with("rectangle, 4 slices, 40x10", &[50, 25, 15, 10], 40, 10, |c| c.set_shape(DrawModeShape::Rectangle), 0x9C870269CFE08CF0);
+}
+
+#[test]
+fn check_render_rectangle_hollow() {
+    check_render_with(
+        "rectangle with a 30x4 hole",
+        &[50, 25, 15, 10],
+        40,
+        10,
+        |c| {
+            c.set_shape(DrawModeShape::Rectangle);
+            c.set_hollow_thickness(HollowThickness::Rectangle(30, 4));
+        },
+        0x5B2019D5BA78F3C8,
+    );
+}
+
+#[test]
+fn check_render_rectangle_braille() {
+    check_render_with(
+        "rectangle, braille, 60% hole",
+        &[50, 25, 15, 10],
+        40,
+        10,
+        |c| {
+            c.set_shape(DrawModeShape::Rectangle);
+            c.set_renderer(DrawModeRenderer::Braille);
+            c.set_hollow_thickness(HollowThickness::Percentage(60));
+        },
+        0x2D57F93E3F47B551,
+    );
 }

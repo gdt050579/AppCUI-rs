@@ -1,8 +1,6 @@
-use super::shapes::Ellipse;
-use super::{Slice, PaintMap};
-use crate::graphics::Rect;
-use crate::graphics::Size;
-use crate::graphics::Surface;
+use super::shapes::{Ellipse, Rectangle};
+use super::Slice;
+use crate::graphics::{CharAttribute, CharFlags, PaletteTile, PaletteTileRenderMethod, Rect, Size, Surface};
 use crate::system::Theme;
 
 pub(crate) const PADDING: u32 = 1;
@@ -58,7 +56,7 @@ pub enum DrawModeRenderer {
     DiagonalDown,
     /// Braille dots: 2x4 pixels per character. A character takes the color of the slice that covers most of its dots.
     Braille,
-    /// One pixel per character, drawn with the given character in the slice color.
+    /// The given character in the slice color: every pixel is 2 characters wide.
     Custom(char),
 }
 
@@ -104,48 +102,103 @@ impl DrawMode {
         }
     }
 
-    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap, area: Option<Rect>) {
-        paint_map.reset();
+    pub(crate) fn paint(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], pixels: &mut PaletteTile, cells: &mut PaletteTile, area: Option<Rect>) {
+        cells.reset();
         let Some(area) = area else {
             return;
         };
+        if slices.iter().all(|s| s.start == s.end) {
+            return;
+        }
+        let method = self.renderer.render_method();
+        // pixels needed to cover the area, and the size of a pixel in physical units
+        // (a character is 1 unit wide and 2 units tall)
+        let size = area.size();
+        // with pixels 2 characters wide, the tile starts one character to the left if that puts
+        // the left edge of the shape on the edge between two pixels (so the shape stays centered)
+        let (width, height, scale, shift) = match method {
+            PaletteTileRenderMethod::SmallBlocks => (size.width, size.height * 2, 1.0, 0),
+            PaletteTileRenderMethod::Braille => (size.width * 2, size.height * 4, 0.5, 0),
+            PaletteTileRenderMethod::LargeBlocks | PaletteTileRenderMethod::Custom(_) => {
+                let shift = (self.left_edge(size).round() as u32) % 2;
+                ((size.width + shift).div_ceil(2), size.height, 2.0, shift)
+            }
+        };
+        pixels.resize(width, height);
+        self.paint_shape(pixels, scale, shift as f64, slices, size);
+        let background = theme.chart.background.background;
         surface.set_relative_clip(area.left(), area.top(), area.right(), area.bottom());
-        surface.set_origin(area.left(), area.top());
-        self.paint_shape(surface, theme, slices, paint_map, area);
-        surface.reset_origin();
+        surface.draw_palette_tile(area.left() - shift as i32, area.top(), pixels, method, |id| {
+            CharAttribute::new(slices[id as usize].color(id as usize, theme), background, CharFlags::None)
+        });
         surface.reset_clip();
-    }
-
-    fn paint_shape(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap, area: Rect) {
-        match self.shape {
-            DrawModeShape::Circle => self.paint_circle(surface, theme, slices, paint_map, area),
-            DrawModeShape::Square => self.paint_square(surface, theme, slices, paint_map, area),
-            DrawModeShape::RoundSquare => self.paint_round_square(surface, theme, slices, paint_map, area),
-            DrawModeShape::Rectangle => self.paint_rectangle(surface, theme, slices, paint_map, area),
-            DrawModeShape::RoundRectangle => self.paint_round_rectangle(surface, theme, slices, paint_map, area),
-            DrawModeShape::Ellipse => self.paint_ellipse(surface, theme, slices, paint_map, area),
+        for y in 0..size.height {
+            for x in 0..size.width {
+                if let Some(id) = pixels.cell_index(x + shift, y, method) {
+                    cells.set(area.left() as u32 + x, area.top() as u32 + y, id);
+                }
+            }
         }
     }
 
-    fn paint_circle(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap, area: Rect) {
-        let shape = Ellipse::circle(area, self.hollow_thickness, self.renderer);
-        shape.paint(surface, theme, slices, paint_map);
+    // left edge of the shape, in characters from the left of the area
+    fn left_edge(&self, size: Size) -> f64 {
+        let width = size.width as f64;
+        match self.shape {
+            DrawModeShape::Circle | DrawModeShape::Square | DrawModeShape::RoundSquare => (width - width.min(size.height as f64 * 2.0)) / 2.0,
+            DrawModeShape::Rectangle | DrawModeShape::RoundRectangle | DrawModeShape::Ellipse => 0.0,
+        }
     }
-    fn paint_square(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap, _area: Rect) {
+
+    fn paint_shape(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
+        match self.shape {
+            DrawModeShape::Circle => self.paint_circle(pixels, scale, shift, slices, size),
+            DrawModeShape::Square => self.paint_square(pixels, scale, shift, slices, size),
+            DrawModeShape::RoundSquare => self.paint_round_square(pixels, scale, shift, slices, size),
+            DrawModeShape::Rectangle => self.paint_rectangle(pixels, scale, shift, slices, size),
+            DrawModeShape::RoundRectangle => self.paint_round_rectangle(pixels, scale, shift, slices, size),
+            DrawModeShape::Ellipse => self.paint_ellipse(pixels, scale, shift, slices, size),
+        }
+    }
+
+    fn paint_circle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
+        Ellipse::circle(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
+    }
+    fn paint_square(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
+        Rectangle::square(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
+    }
+    fn paint_round_square(&self, _pixels: &mut PaletteTile, _scale: f64, _shift: f64, _slices: &[Slice], _size: Size) {
         todo!()
     }
-    fn paint_round_square(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap, _area: Rect) {
+    fn paint_rectangle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
+        Rectangle::fill(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
+    }
+    fn paint_round_rectangle(&self, _pixels: &mut PaletteTile, _scale: f64, _shift: f64, _slices: &[Slice], _size: Size) {
         todo!()
     }
-    fn paint_rectangle(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap, _area: Rect) {
-        todo!()
+    fn paint_ellipse(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
+        Ellipse::fill(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
     }
-    fn paint_round_rectangle(&self, _surface: &mut Surface, _theme: &Theme, _slices: &[Slice], _paint_map: &mut PaintMap, _area: Rect) {
-        todo!()
-    }
-    fn paint_ellipse(&self, surface: &mut Surface, theme: &Theme, slices: &[Slice], paint_map: &mut PaintMap, area: Rect) {
-        let shape = Ellipse::fill(area, self.hollow_thickness, self.renderer);
-        shape.paint(surface, theme, slices, paint_map);
+}
+
+impl DrawModeRenderer {
+    pub(crate) fn render_method(self) -> PaletteTileRenderMethod {
+        match self {
+            DrawModeRenderer::HalfBlocks => PaletteTileRenderMethod::SmallBlocks,
+            DrawModeRenderer::Solid => PaletteTileRenderMethod::LargeBlocks,
+            DrawModeRenderer::Shade75 => PaletteTileRenderMethod::Custom('\u{2593}'),
+            DrawModeRenderer::Shade50 => PaletteTileRenderMethod::Custom('\u{2592}'),
+            DrawModeRenderer::Shade25 => PaletteTileRenderMethod::Custom('\u{2591}'),
+            DrawModeRenderer::Checkerboard => PaletteTileRenderMethod::Custom('\u{2592}'),
+            DrawModeRenderer::Grid => PaletteTileRenderMethod::Custom('\u{253C}'),
+            DrawModeRenderer::GridDouble => PaletteTileRenderMethod::Custom('\u{256C}'),
+            DrawModeRenderer::CrossHatch => PaletteTileRenderMethod::Custom('\u{2573}'),
+            DrawModeRenderer::Dashed => PaletteTileRenderMethod::Custom('\u{2571}'),
+            DrawModeRenderer::DiagonalUp => PaletteTileRenderMethod::Custom('\u{2571}'),
+            DrawModeRenderer::DiagonalDown => PaletteTileRenderMethod::Custom('\u{2572}'),
+            DrawModeRenderer::Braille => PaletteTileRenderMethod::Braille,
+            DrawModeRenderer::Custom(ch) => PaletteTileRenderMethod::Custom(ch),
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 use super::draw_mode::plot_area;
 use super::piechart::FULL;
-use super::{PaintMap, Slice};
-use crate::graphics::{CharAttribute, Character, Point, Rect, Size, Surface};
+use super::Slice;
+use crate::graphics::{CharAttribute, Character, PaletteTile, Point, Rect, Size, Surface};
 use crate::system::Theme;
 use crate::utils::FormatNumber;
 
@@ -123,7 +123,7 @@ pub(super) fn outside_area(size: Size, slices: &[Slice]) -> (Option<Rect>, bool)
 }
 
 // first cell outside the chart, going from the center of the slice away from the center of the plot area
-fn anchor(s: &Slice, side: Side, area: Rect, map: &PaintMap) -> Point {
+fn anchor(s: &Slice, side: Side, area: Rect, map: &PaletteTile) -> Point {
     let center = s.center.unwrap_or(Point::new(area.center_x(), area.center_y()));
     let sx = center.x as f64 + 0.5;
     let sy = center.y as f64 + 0.5;
@@ -150,7 +150,7 @@ fn anchor(s: &Slice, side: Side, area: Rect, map: &PaintMap) -> Point {
             return last;
         }
         last = Point::new(x, y);
-        if map.get(x as usize, y as usize).is_none() {
+        if map.get(x as u32, y as u32).is_none() {
             return last;
         }
     }
@@ -188,8 +188,8 @@ fn write_text(surface: &mut Surface, x: i32, y: i32, text: &str, max: usize, att
     }
 }
 
-fn write_leader(surface: &mut Surface, map: &PaintMap, x: i32, y: i32, ch: char, attr: CharAttribute) {
-    if (x >= 0) && (y >= 0) && map.get(x as usize, y as usize).is_none() {
+fn write_leader(surface: &mut Surface, map: &PaletteTile, x: i32, y: i32, ch: char, attr: CharAttribute) {
+    if (x >= 0) && (y >= 0) && map.get(x as u32, y as u32).is_none() {
         surface.write_char(x, y, Character::with_attributes(ch, attr));
     }
 }
@@ -209,12 +209,12 @@ pub(super) fn paint_inside(slices: &[Slice], surface: &mut Surface, size: Size, 
     }
 }
 
-// bounds of the drawn chart, from the paint map
-fn drawn_bounds(map: &PaintMap) -> Option<Rect> {
+// bounds of the drawn chart, from the cell map
+fn drawn_bounds(map: &PaletteTile) -> Option<Rect> {
     let size = map.size();
     let (mut l, mut t, mut r, mut b) = (i32::MAX, i32::MAX, i32::MIN, i32::MIN);
-    for y in 0..size.height as usize {
-        for x in 0..size.width as usize {
+    for y in 0..size.height {
+        for x in 0..size.width {
             if map.get(x, y).is_some() {
                 l = l.min(x as i32);
                 r = r.max(x as i32);
@@ -226,7 +226,7 @@ fn drawn_bounds(map: &PaintMap) -> Option<Rect> {
     (l <= r).then(|| Rect::new(l, t, r, b))
 }
 
-pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &PaintMap, area: Rect, theme: &Theme, places: &mut Vec<Place>) {
+pub(super) fn paint_outside(slices: &[Slice], surface: &mut Surface, map: &PaletteTile, area: Rect, theme: &Theme, places: &mut Vec<Place>) {
     let Some(inner) = plot_area(surface.size()) else {
         return;
     };

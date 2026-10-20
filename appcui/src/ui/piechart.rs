@@ -9,8 +9,8 @@ mod initialization_flags;
 mod labels;
 mod piechart;
 mod shapes;
+mod selection;
 mod slice;
-mod paint_map;
 #[cfg(test)]
 mod tests;
 
@@ -20,4 +20,3 @@ pub use self::labels::{LabelContent, LabelLayout};
 pub use self::piechart::PieChart;
 
 use self::slice::Slice;
-use self::paint_map::PaintMap;

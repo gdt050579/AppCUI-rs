@@ -1,6 +1,7 @@
 use super::draw_mode::{plot_area, DrawMode};
 use super::labels::{self, Place};
-use super::{DrawModeRenderer, DrawModeShape, Flags, HollowThickness, LabelContent, LabelLayout, PaintMap, Slice};
+use super::selection;
+use super::{DrawModeRenderer, DrawModeShape, Flags, HollowThickness, LabelContent, LabelLayout, Slice};
 use crate::prelude::*;
 use crate::system::RuntimeManager;
 
@@ -72,7 +73,8 @@ pub struct PieChart {
     pub(super) slices: Vec<Slice>,
     pub(super) surface: Surface,
     draw_mode: DrawMode,
-    paint_map: PaintMap,
+    pixels: PaletteTile,
+    cells: PaletteTile,
     pub(super) hovered_slice: Option<usize>,
     selected_slice: Option<usize>,
     label_layout: LabelLayout,
@@ -99,7 +101,8 @@ impl PieChart {
             slices: Vec::new(),
             surface: Surface::new(1, 1),
             draw_mode: DrawMode::default(),
-            paint_map: PaintMap::new(Size::new(1, 1)),
+            pixels: PaletteTile::new(1, 1),
+            cells: PaletteTile::new(1, 1),
             hovered_slice: None,
             selected_slice: None,
             label_layout: LabelLayout::None,
@@ -167,7 +170,7 @@ impl PieChart {
 
     /// Sets the outline the chart is drawn in, and repaints the chart.
     ///
-    /// The default is [`DrawModeShape::Circle`]. Only `Circle` and `Ellipse` can be drawn so far.
+    /// The default is [`DrawModeShape::Circle`]. `RoundSquare` and `RoundRectangle` can not be drawn yet.
     ///
     /// # Example
     /// ```rust, no_run
@@ -275,25 +278,25 @@ impl PieChart {
         self.surface.reset_clip();
         self.surface.clear(Character::with_attributes(' ', theme.chart.background));
         let size = self.surface.size();
-        self.paint_map.resize(size);
+        self.cells.resize(size.width, size.height);
         let (area, outside) = match self.label_layout {
             LabelLayout::Outside => labels::outside_area(size, &self.slices),
             _ => (plot_area(size), false),
         };
-        self.draw_mode.paint(&mut self.surface, theme, &self.slices, &mut self.paint_map, area);
-        update_centers(&mut self.slices, &self.paint_map);
+        self.draw_mode.paint(&mut self.surface, theme, &self.slices, &mut self.pixels, &mut self.cells, area);
+        update_centers(&mut self.slices, &self.cells);
         match (self.label_layout, area) {
             (LabelLayout::Inside, _) => labels::paint_inside(&self.slices, &mut self.surface, size, theme),
             (LabelLayout::Outside, Some(area)) if outside => {
-                labels::paint_outside(&self.slices, &mut self.surface, &self.paint_map, area, theme, &mut self.label_places)
+                labels::paint_outside(&self.slices, &mut self.surface, &self.cells, area, theme, &mut self.label_places)
             }
             _ => {}
         }
         if let Some(index) = self.selected_slice {
             if self.flags.contains(Flags::DimSlicesOnSelection) {
-                self.paint_map.dim(index, &mut self.surface, theme.chart.inactive);
+                selection::dim(&self.cells, index, &mut self.surface, theme.chart.inactive);
             }
-            self.paint_map.paint_selection(index, &mut self.surface, theme.chart.selection_border);
+            selection::paint_selection(&self.cells, index, &mut self.surface, theme.chart.selection_border);
         }
         self.hovered_slice = None;
     }
@@ -303,7 +306,7 @@ impl PieChart {
         if (x < 0) || (y < 0) {
             return None;
         }
-        self.paint_map.get(x as usize, y as usize).map(|i| i as usize)
+        self.cells.get(x as u32, y as u32).map(|i| i as usize)
     }
 }
 
@@ -314,10 +317,10 @@ pub(super) fn slice_at(slices: &[Slice], fraction: f64) -> usize {
     index.min(slices.len() - 1)
 }
 
-// the center of a slice is the average of the cells it is drawn in (from the paint map); if
+// the center of a slice is the average of the cells it is drawn in (from the cell map); if
 // that cell shows another slice or nothing (e.g. a slice wrapping around the hole of a ring),
 // the slice's cell nearest to the average is used instead
-pub(super) fn update_centers(slices: &mut [Slice], map: &PaintMap) {
+pub(super) fn update_centers(slices: &mut [Slice], map: &PaletteTile) {
     for s in slices.iter_mut() {
         s.center = None;
         s.sum_x = 0;
@@ -325,7 +328,7 @@ pub(super) fn update_centers(slices: &mut [Slice], map: &PaintMap) {
         s.cells = 0;
     }
     let size = map.size();
-    let (w, h) = (size.width as usize, size.height as usize);
+    let (w, h) = (size.width, size.height);
     for y in 0..h {
         for x in 0..w {
             if let Some(s) = map.get(x, y).and_then(|i| slices.get_mut(i as usize)) {
@@ -340,14 +343,14 @@ pub(super) fn update_centers(slices: &mut [Slice], map: &PaintMap) {
             continue;
         }
         // rounded average
-        let ax = ((s.sum_x + s.cells / 2) / s.cells) as usize;
-        let ay = ((s.sum_y + s.cells / 2) / s.cells) as usize;
+        let ax = ((s.sum_x + s.cells / 2) / s.cells) as u32;
+        let ay = ((s.sum_y + s.cells / 2) / s.cells) as u32;
         if map.get(ax, ay) == Some(index as u16) {
             s.center = Some(Point::new(ax as i32, ay as i32));
             continue;
         }
         // nearest cell of this slice; a cell is twice as tall as it is wide
-        let mut best: Option<(u64, usize, usize)> = None;
+        let mut best: Option<(u64, u32, u32)> = None;
         for y in 0..h {
             for x in 0..w {
                 if map.get(x, y) == Some(index as u16) {
