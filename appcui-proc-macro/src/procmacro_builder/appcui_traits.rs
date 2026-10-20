@@ -64,6 +64,7 @@ pub(crate) enum AppCUITrait {
     MarkdownComposerEvents = 55,
     GenericVBarChartEvents = 56,
     GenericHBarChartEvents = 57,
+    PieChartEvents = 58,
 }
 
 #[repr(u8)]
@@ -138,6 +139,7 @@ impl AppCUITrait {
             AppCUITrait::GenericHSliderEvents => "HSliderEvents",
             AppCUITrait::GenericVBarChartEvents => "VBarChartEvents",
             AppCUITrait::GenericHBarChartEvents => "HBarChartEvents",
+            AppCUITrait::PieChartEvents => "PieChartEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -203,6 +205,7 @@ impl AppCUITrait {
             AppCUITrait::GenericHSliderEvents => TraitType::ControlEvent,
             AppCUITrait::GenericVBarChartEvents => TraitType::ControlEvent,
             AppCUITrait::GenericHBarChartEvents => TraitType::ControlEvent,
+            AppCUITrait::PieChartEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -268,6 +271,7 @@ impl AppCUITrait {
             AppCUITrait::GenericHSliderEvents => "",
             AppCUITrait::GenericVBarChartEvents => "",
             AppCUITrait::GenericHBarChartEvents => "",
+            AppCUITrait::PieChartEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -333,6 +337,7 @@ impl AppCUITrait {
             AppCUITrait::GenericHSliderEvents => "impl$(TEMPLATE_TYPE) GenericHSliderEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericVBarChartEvents => "impl$(TEMPLATE_TYPE) GenericVBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericHBarChartEvents => "impl$(TEMPLATE_TYPE) GenericHBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::PieChartEvents => "impl$(TEMPLATE_TYPE) PieChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -404,6 +409,7 @@ impl AppCUITrait {
             "HSliderEvents" | "HSlider" => Some(AppCUITrait::GenericHSliderEvents),
             "VBarChartEvents" | "VBarChart" => Some(AppCUITrait::GenericVBarChartEvents),
             "HBarChartEvents" | "HBarChart" => Some(AppCUITrait::GenericHBarChartEvents),
+            "PieChartEvents" | "PieChart" => Some(AppCUITrait::PieChartEvents),
             _ => None,
         }
     }
@@ -470,6 +476,7 @@ impl AppCUITrait {
             55 => Some(AppCUITrait::MarkdownComposerEvents),
             56 => Some(AppCUITrait::GenericVBarChartEvents),
             57 => Some(AppCUITrait::GenericHBarChartEvents),
+            58 => Some(AppCUITrait::PieChartEvents),
             _ => None,
         };
         result?;

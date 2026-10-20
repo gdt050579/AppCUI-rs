@@ -2226,3 +2226,68 @@ fn check_labels_outside_counter_clockwise() {
         .run()
         .unwrap();
 }
+
+// ---------------------------------------------------------------------------
+// events
+// ---------------------------------------------------------------------------
+use std::sync::Mutex;
+
+static EVENTS: Mutex<Vec<String>> = Mutex::new(Vec::new());
+
+#[test]
+fn check_events() {
+    #[Window(events = PieChartEvents, internal: true)]
+    struct MyWin {}
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = Self { base: window!("Test,d:f") };
+            let mut c = PieChart::new(layout!("x:1,y:0,w:40,h:15"), piechart::Flags::None);
+            c.add_value(50, "A", None);
+            c.add_value(25, "B", None);
+            c.add_value(25, "C", None);
+            // selecting from code does not raise an event
+            c.set_selected_slice(2);
+            c.clear_selected_slice();
+            win.add(c);
+            win.add(button!("Other,x:1,y:15,w:10"));
+            win
+        }
+    }
+    impl PieChartEvents for MyWin {
+        fn on_slice_selected(&mut self, handle: Handle<PieChart>, index: usize) -> EventProcessStatus {
+            let label = self.control(handle).and_then(|c| c.label(index).map(String::from)).unwrap_or_default();
+            EVENTS.lock().unwrap().push(format!("selected {index} ({label})"));
+            EventProcessStatus::Processed
+        }
+        fn on_clear_selection(&mut self, handle: Handle<PieChart>) -> EventProcessStatus {
+            let selected = self.control(handle).map(|c| c.selected_slice());
+            EVENTS.lock().unwrap().push(format!("cleared ({selected:?})"));
+            EventProcessStatus::Processed
+        }
+    }
+    EVENTS.lock().unwrap().clear();
+    // slice A is the right half, B the bottom-left quarter, C the top-left quarter
+    let script = "
+        Paint.Enable(false)
+        Mouse.Click(23,10,left)
+        Mouse.Click(14,12,left)
+        Mouse.Click(14,12,left)
+        Mouse.Click(14,5,left)
+        Mouse.Click(3,1,left)
+        Mouse.Click(23,10,left)
+        Mouse.Click(4,16,left)
+    ";
+    App::new().size(Size::new(44, 19)).debug_script(script).window(MyWin::new).run().unwrap();
+    let events = EVENTS.lock().unwrap().clone();
+    assert_eq!(
+        events,
+        vec![
+            "selected 0 (A)",
+            "selected 1 (B)",
+            "selected 2 (C)",
+            "cleared (Some(None))",
+            "selected 0 (A)",
+            "cleared (Some(None))",
+        ]
+    );
+}

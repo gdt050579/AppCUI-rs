@@ -5,6 +5,7 @@
 //! without an attribute get an automatic color. [`Flags`] selects optional behavior.
 
 mod draw_mode;
+pub mod events;
 mod initialization_flags;
 mod labels;
 mod piechart;

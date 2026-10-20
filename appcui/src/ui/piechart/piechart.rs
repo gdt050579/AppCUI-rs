@@ -1,9 +1,11 @@
 use super::draw_mode::{plot_area, DrawMode};
+use super::events::{EventData, EventType};
 use super::labels::{self, Place};
 use super::selection;
 use super::{Direction, DrawModeRenderer, DrawModeShape, Flags, HollowThickness, LabelContent, LabelLayout, Slice};
 use crate::prelude::*;
 use crate::system::RuntimeManager;
+use crate::ui::common::control_event_wrapper::ControlEventData;
 
 pub(super) const FULL: u64 = 1 << 32;
 
@@ -397,6 +399,19 @@ impl PieChart {
         self.hovered_slice = None;
     }
 
+    // tells the event processor that the user changed the selection
+    fn raise_selection_event(&mut self, index: Option<usize>) {
+        let event_type = match index {
+            Some(index) => EventType::SliceSelected(index),
+            None => EventType::ClearSelection,
+        };
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::PieChart(EventData { event_type }),
+        });
+    }
+
     // index of the slice drawn at (x, y), relative to the control
     pub(super) fn slice_index_at(&self, x: i32, y: i32) -> Option<usize> {
         if (x < 0) || (y < 0) {
@@ -518,6 +533,7 @@ impl OnMouseEvent for PieChart {
                 if index != self.selected_slice {
                     self.selected_slice = index;
                     self.repaint_surface();
+                    self.raise_selection_event(index);
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
@@ -539,6 +555,7 @@ impl OnFocus for PieChart {
         if self.selected_slice.is_some() {
             self.selected_slice = None;
             self.repaint_surface();
+            self.raise_selection_event(None);
         }
     }
 }
