@@ -7,15 +7,27 @@
 //! [`PaletteTile::resize`]. In that mode `u16::MAX` is the transparent sentinel, so
 //! it cannot be stored as a visible index.
 
-use crate::graphics::{CharAttribute, Point, Surface};
+use crate::graphics::{CharAttribute, CharFlags, Character, Color, Point, SpecialChar, Surface};
 
 use super::super::Size;
 
+/// How a [`PaletteTile`] is drawn onto a [`Surface`].
+///
+/// Every method draws square pixels (a terminal character is about twice as tall as it
+/// is wide), like the methods used for [`Image`](super::Image) and [`BitTile`](super::BitTile):
+/// the same tile gives the same picture with every method, only the resolution changes.
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum PaletteTileRenderMethod {
+    /// Half blocks (`▀`, `▄`): 1 x 2 pixels per character. Only the foreground of each
+    /// palette entry is used, because the two halves can belong to different entries.
     SmallBlocks,
+    /// Full blocks (`█`): every pixel is 2 characters wide.
     LargeBlocks,
+    /// Braille dots: 2 x 4 pixels per character. A character takes the palette entry that
+    /// covers most of its dots.
     Braille,
-    Custom(char)
+    /// The given character: every pixel is 2 characters wide.
+    Custom(char),
 }
 
 enum PixelsVec {
@@ -153,6 +165,19 @@ impl PaletteTile {
         }
         self.size = Size::new(w, h);
     }
+    /// Returns the size, in characters, of the tile when it is drawn with `render_method`.
+    ///
+    /// - [`SmallBlocks`](PaletteTileRenderMethod::SmallBlocks): `width` x `height / 2` (rounded up)
+    /// - [`LargeBlocks`](PaletteTileRenderMethod::LargeBlocks) and [`Custom`](PaletteTileRenderMethod::Custom): `width * 2` x `height`
+    /// - [`Braille`](PaletteTileRenderMethod::Braille): `width / 2` x `height / 4` (both rounded up)
+    pub fn render_size(&self, render_method: PaletteTileRenderMethod) -> Size {
+        let (w, h) = (self.size.width, self.size.height);
+        match render_method {
+            PaletteTileRenderMethod::SmallBlocks => Size::new(w, h.div_ceil(2)),
+            PaletteTileRenderMethod::LargeBlocks | PaletteTileRenderMethod::Custom(_) => Size::new(w * 2, h),
+            PaletteTileRenderMethod::Braille => Size::new(w.div_ceil(2), h.div_ceil(4)),
+        }
+    }
     /// Returns the width and height of the tile, in pixels.
     #[inline(always)]
     pub fn size(&self) -> Size {
@@ -164,13 +189,13 @@ impl PaletteTile {
     where
         P: Fn(u16) -> CharAttribute,
     {
-        todo!()
+        paint_small_impl(surface, pos, size, pixels, palette);
     }
     fn paint_small_u16<P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[u16], palette: P)
     where
         P: Fn(u16) -> CharAttribute,
     {
-        todo!()
+        paint_small_impl(surface, pos, size, pixels, palette);
     }
     
     #[inline(always)]
@@ -188,13 +213,13 @@ impl PaletteTile {
     where
         P: Fn(u16) -> CharAttribute,
     {
-        todo!()
+        paint_braille_impl(surface, pos, size, pixels, palette);
     }
     fn paint_braille_u16<P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[u16], palette: P)
     where
         P: Fn(u16) -> CharAttribute,
     {
-        todo!()
+        paint_braille_impl(surface, pos, size, pixels, palette);
     }
     #[inline(always)]
     pub(in super::super) fn paint_braille<P>(&self, surface: &mut Surface, pos: Point, palette: P)
@@ -211,13 +236,13 @@ impl PaletteTile {
     where
         P: Fn(u16) -> CharAttribute,
     {
-        todo!()
+        paint_char_impl(surface, pos, size, pixels, ch, palette);
     }
     fn paint_char_u16<P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[u16], ch: char, palette: P)
     where
         P: Fn(u16) -> CharAttribute,
     {
-        todo!()
+        paint_char_impl(surface, pos, size, pixels, ch, palette);
     }
     #[inline(always)]
     pub(in super::super) fn paint_char<P>(&self, surface: &mut Surface, pos: Point, ch: char, palette: P)
@@ -227,6 +252,119 @@ impl PaletteTile {
         match &self.pixels {
             PixelsVec::U8(pixels) => Self::paint_char_u8(surface, pos, self.size, pixels, ch, palette),
             PixelsVec::U16(pixels) => Self::paint_char_u16(surface, pos, self.size, pixels, ch, palette),
+        }
+    }
+}
+
+// a stored pixel: its palette index, or None if it is transparent
+trait PaletteIndex: Copy {
+    fn index(self) -> Option<u16>;
+}
+impl PaletteIndex for u8 {
+    #[inline(always)]
+    fn index(self) -> Option<u16> {
+        (self != PaletteTile::TRANSPARENT_U8).then_some(self as u16)
+    }
+}
+impl PaletteIndex for u16 {
+    #[inline(always)]
+    fn index(self) -> Option<u16> {
+        (self != PaletteTile::TRANSPARENT_U16).then_some(self)
+    }
+}
+
+#[inline(always)]
+fn pixel_at<T: PaletteIndex>(pixels: &[T], size: Size, x: u32, y: u32) -> Option<u16> {
+    if (x < size.width) && (y < size.height) {
+        pixels[x as usize + y as usize * size.width as usize].index()
+    } else {
+        None
+    }
+}
+
+// 1 x 2 pixels per character. Only the foreground of each palette entry is used, because the
+// two halves of a character can belong to different entries. A transparent half keeps
+// whatever is under it.
+fn paint_small_impl<T, P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[T], palette: P)
+where
+    T: PaletteIndex,
+    P: Fn(u16) -> CharAttribute,
+{
+    for cell_y in 0..size.height.div_ceil(2) {
+        for x in 0..size.width {
+            let top = pixel_at(pixels, size, x, cell_y * 2);
+            let bottom = pixel_at(pixels, size, x, cell_y * 2 + 1);
+            let ch = match (top, bottom) {
+                (Some(t), Some(b)) => Character::new(SpecialChar::BlockUpperHalf, palette(t).foreground, palette(b).foreground, CharFlags::None),
+                (Some(t), None) => Character::new(SpecialChar::BlockUpperHalf, palette(t).foreground, Color::Transparent, CharFlags::None),
+                (None, Some(b)) => Character::new(SpecialChar::BlockLowerHalf, palette(b).foreground, Color::Transparent, CharFlags::None),
+                (None, None) => continue,
+            };
+            surface.write_char(pos.x + x as i32, pos.y + cell_y as i32, ch);
+        }
+    }
+}
+
+// 2 x 4 pixels per character. A character takes the palette entry that covers most of
+// its dots (on a tie, the first one found, column by column), with all its attributes.
+fn paint_braille_impl<T, P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[T], palette: P)
+where
+    T: PaletteIndex,
+    P: Fn(u16) -> CharAttribute,
+{
+    // bit of each dot in a braille character, by (column, row)
+    const DOTS: [[u8; 4]; 2] = [[0x01, 0x02, 0x04, 0x40], [0x08, 0x10, 0x20, 0x80]];
+    for cell_y in 0..size.height.div_ceil(4) {
+        for cell_x in 0..size.width.div_ceil(2) {
+            let mut pattern = 0u8;
+            let mut ids = [0u16; 8];
+            let mut counts = [0u8; 8];
+            let mut distinct = 0usize;
+            for (col, bits) in DOTS.iter().enumerate() {
+                for (row, bit) in bits.iter().enumerate() {
+                    let Some(id) = pixel_at(pixels, size, cell_x * 2 + col as u32, cell_y * 4 + row as u32) else {
+                        continue;
+                    };
+                    pattern |= bit;
+                    match ids[..distinct].iter().position(|i| *i == id) {
+                        Some(p) => counts[p] += 1,
+                        None => {
+                            ids[distinct] = id;
+                            counts[distinct] = 1;
+                            distinct += 1;
+                        }
+                    }
+                }
+            }
+            if pattern == 0 {
+                continue;
+            }
+            let mut best = 0;
+            for p in 1..distinct {
+                if counts[p] > counts[best] {
+                    best = p;
+                }
+            }
+            let code = char::from_u32(0x2800 + pattern as u32).unwrap_or(' ');
+            surface.write_char(pos.x + cell_x as i32, pos.y + cell_y as i32, Character::with_attributes(code, palette(ids[best])));
+        }
+    }
+}
+
+// every pixel is 2 characters wide, drawn with `ch` and all the attributes of its palette entry
+fn paint_char_impl<T, P>(surface: &mut Surface, pos: Point, size: Size, pixels: &[T], ch: char, palette: P)
+where
+    T: PaletteIndex,
+    P: Fn(u16) -> CharAttribute,
+{
+    for y in 0..size.height {
+        for x in 0..size.width {
+            if let Some(id) = pixel_at(pixels, size, x, y) {
+                let c = Character::with_attributes(ch, palette(id));
+                let left = pos.x + x as i32 * 2;
+                surface.write_char(left, pos.y + y as i32, c);
+                surface.write_char(left + 1, pos.y + y as i32, c);
+            }
         }
     }
 }
