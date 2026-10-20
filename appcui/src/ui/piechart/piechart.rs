@@ -170,7 +170,7 @@ impl PieChart {
 
     /// Sets the outline the chart is drawn in, and repaints the chart.
     ///
-    /// The default is [`DrawModeShape::Circle`]. `RoundSquare` and `RoundRectangle` can not be drawn yet.
+    /// The default is [`DrawModeShape::Circle`].
     ///
     /// # Example
     /// ```rust, no_run

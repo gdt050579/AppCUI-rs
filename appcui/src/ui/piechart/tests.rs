@@ -678,7 +678,14 @@ fn check_render_hole_zero() {
 use super::draw_mode::PADDING;
 
 // the shapes that can be drawn
-const SHAPES: [DrawModeShape; 4] = [DrawModeShape::Circle, DrawModeShape::Ellipse, DrawModeShape::Square, DrawModeShape::Rectangle];
+const SHAPES: [DrawModeShape; 6] = [
+    DrawModeShape::Circle,
+    DrawModeShape::Ellipse,
+    DrawModeShape::Square,
+    DrawModeShape::Rectangle,
+    DrawModeShape::RoundSquare,
+    DrawModeShape::RoundRectangle,
+];
 
 fn paint_on_surface(mode: DrawMode, values: &[u64], w: u32, h: u32) -> Surface {
     let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
@@ -1491,7 +1498,7 @@ fn check_set_number_format() {
 use super::shapes::Rectangle;
 
 fn rectangle(cx: f64, cy: f64, rx: f64, ry: f64, hollow: HollowThickness) -> Rectangle {
-    Rectangle::new(cx, cy, rx, ry, hollow)
+    Rectangle::new(cx, cy, rx, ry, hollow, false)
 }
 
 #[test]
@@ -1539,7 +1546,7 @@ fn check_rectangle_areas_are_proportional() {
     update_proportions(&mut slices);
     for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(30), HollowThickness::Rectangle(70, 2)] {
         // 80 x 10 cells = 80 x 20 physical units
-        let shape = Rectangle::fill(Size::new(80, 10), hole);
+        let shape = Rectangle::fill(Size::new(80, 10), hole, false);
         let mut counts = [0usize; 4];
         for y in 0..80 {
             for x in 0..320 {
@@ -1631,5 +1638,129 @@ fn check_render_rectangle_braille() {
             c.set_hollow_thickness(HollowThickness::Percentage(60));
         },
         0x2D57F93E3F47B551,
+    );
+}
+
+// ---------------------------------------------------------------------------
+// rounded rectangle and square
+// ---------------------------------------------------------------------------
+fn round_rectangle(cx: f64, cy: f64, rx: f64, ry: f64, hollow: HollowThickness) -> Rectangle {
+    Rectangle::new(cx, cy, rx, ry, hollow, true)
+}
+
+#[test]
+fn check_round_rectangle_fraction() {
+    // 20 x 10 physical units, centered at (10, 5); corner radius 2.5
+    let r = round_rectangle(10.0, 5.0, 10.0, 5.0, HollowThickness::None);
+    let close = |a: Option<f64>, b: f64| (a.unwrap() - b).abs() < 1e-9;
+    assert!(close(r.fraction(10.0, 0.0), 0.0)); // 12 o'clock
+    assert!(close(r.fraction(19.0, 5.0), 0.25)); // 3 o'clock
+    assert!(close(r.fraction(10.0, 9.0), 0.5)); // 6 o'clock
+    assert!(close(r.fraction(0.0, 5.0), 0.75)); // 9 o'clock
+    // the corners are cut
+    let plain = rectangle(10.0, 5.0, 10.0, 5.0, HollowThickness::None);
+    for (x, y) in [(0.2, 0.2), (19.7, 0.2), (19.7, 9.7), (0.2, 9.7)] {
+        assert!(plain.fraction(x, y).is_some(), "({x},{y})");
+        assert_eq!(r.fraction(x, y), None, "({x},{y})");
+    }
+    // ... but not the edges
+    assert!(r.fraction(10.0, 0.1).is_some());
+    assert!(r.fraction(0.1, 5.0).is_some());
+    // a square is symmetric: the diagonal is 1/8 of the area
+    let s = round_rectangle(10.0, 10.0, 10.0, 10.0, HollowThickness::None);
+    assert!(close(s.fraction(14.0, 6.0), 0.125));
+    assert!(close(s.fraction(6.0, 14.0), 0.625));
+    // just left of 12 o'clock is almost 1.0, never 1.0
+    let f = r.fraction(10.0 - 1e-12, 0.0).unwrap();
+    assert!((0.0..1.0).contains(&f));
+}
+
+#[test]
+fn check_round_rectangle_fraction_grows_continuously() {
+    // going around the shape, the fraction always grows, without jumps (also where an edge meets an arc)
+    for hole in [HollowThickness::None, HollowThickness::Percentage(50), HollowThickness::Rectangle(12, 2)] {
+        let r = round_rectangle(20.0, 8.0, 20.0, 8.0, hole);
+        let steps = 5000;
+        let mut last = 0.0;
+        for i in 1..steps {
+            let angle = std::f64::consts::TAU * i as f64 / steps as f64;
+            // the fraction only depends on the direction: take the first point of the ray
+            // (at this angle, y grows downwards) that is inside the shape
+            let (ux, uy) = (angle.sin(), -angle.cos());
+            let f = (1..400).find_map(|k| r.fraction(20.0 + ux * k as f64 * 0.05, 8.0 + uy * k as f64 * 0.05)).unwrap();
+            assert!(f >= last - 1e-12, "{hole:?}: {f} after {last} at step {i}");
+            assert!(f - last < 0.003, "{hole:?}: jump from {last} to {f} at step {i}");
+            last = f;
+        }
+        assert!(last > 0.999, "{hole:?}: {last}");
+    }
+}
+
+#[test]
+fn check_round_rectangle_areas_are_proportional() {
+    // slices cover areas proportional to their values, with or without a hole
+    for values in [&[1u64, 1, 1, 1][..], &[50, 25, 15, 10]] {
+        let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
+        update_proportions(&mut slices);
+        let total: u64 = values.iter().sum();
+        for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(30), HollowThickness::Rectangle(70, 2)] {
+            // 80 x 10 cells = 80 x 20 physical units
+            let shape = Rectangle::fill(Size::new(80, 10), hole, true);
+            let mut counts = vec![0usize; values.len()];
+            for y in 0..80 {
+                for x in 0..320 {
+                    if let Some(id) = shape.slice_at((x as f64 + 0.5) / 4.0, (y as f64 + 0.5) / 4.0, &slices) {
+                        counts[id] += 1;
+                    }
+                }
+            }
+            let covered: usize = counts.iter().sum();
+            for (c, v) in counts.iter().zip(values) {
+                let share = *c as f64 / covered as f64;
+                let expected = *v as f64 / total as f64;
+                assert!((share - expected).abs() < 0.01, "{values:?} {hole:?}: {counts:?}");
+            }
+        }
+    }
+}
+
+#[test]
+fn check_render_round_square() {
+    check_render_with("round square, 4 slices, 40x12", &[50, 25, 15, 10], 40, 12, |c| c.set_shape(DrawModeShape::RoundSquare), 0x51639EC34B0A5CBE);
+}
+
+#[test]
+fn check_render_round_square_hollow() {
+    check_render_with(
+        "round square with a 50% hole",
+        &[50, 25, 15, 10],
+        40,
+        12,
+        |c| {
+            c.set_shape(DrawModeShape::RoundSquare);
+            c.set_hollow_thickness(HollowThickness::Percentage(50));
+        },
+        0x9219681F5C2ECE1F,
+    );
+}
+
+#[test]
+fn check_render_round_rectangle() {
+    check_render_with("round rectangle, 4 slices, 40x10", &[50, 25, 15, 10], 40, 10, |c| c.set_shape(DrawModeShape::RoundRectangle), 0x9D3842B92D80570B);
+}
+
+#[test]
+fn check_render_round_rectangle_braille() {
+    check_render_with(
+        "round rectangle, braille, 60% hole",
+        &[50, 25, 15, 10],
+        40,
+        10,
+        |c| {
+            c.set_shape(DrawModeShape::RoundRectangle);
+            c.set_renderer(DrawModeRenderer::Braille);
+            c.set_hollow_thickness(HollowThickness::Percentage(60));
+        },
+        0x9D0A407CF5979639,
     );
 }

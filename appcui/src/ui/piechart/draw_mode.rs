@@ -165,16 +165,16 @@ impl DrawMode {
         Ellipse::circle(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
     }
     fn paint_square(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Rectangle::square(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
+        Rectangle::square(size, self.hollow_thickness, false).paint(pixels, scale, shift, slices);
     }
-    fn paint_round_square(&self, _pixels: &mut PaletteTile, _scale: f64, _shift: f64, _slices: &[Slice], _size: Size) {
-        todo!()
+    fn paint_round_square(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
+        Rectangle::square(size, self.hollow_thickness, true).paint(pixels, scale, shift, slices);
     }
     fn paint_rectangle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
-        Rectangle::fill(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
+        Rectangle::fill(size, self.hollow_thickness, false).paint(pixels, scale, shift, slices);
     }
-    fn paint_round_rectangle(&self, _pixels: &mut PaletteTile, _scale: f64, _shift: f64, _slices: &[Slice], _size: Size) {
-        todo!()
+    fn paint_round_rectangle(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
+        Rectangle::fill(size, self.hollow_thickness, true).paint(pixels, scale, shift, slices);
     }
     fn paint_ellipse(&self, pixels: &mut PaletteTile, scale: f64, shift: f64, slices: &[Slice], size: Size) {
         Ellipse::fill(size, self.hollow_thickness).paint(pixels, scale, shift, slices);
