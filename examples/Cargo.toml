@@ -434,6 +434,10 @@ name = "piechart"
 path = "piechart/main.rs"
 
 [[example]]
+name = "piechart_editor"
+path = "piechart_editor/main.rs"
+
+[[example]]
 name = "hexview"
 path = "hexview/main.rs"
 
@@ -448,3 +452,4 @@ path = "hslider/main.rs"
 [[example]]
 name = "numericselector"
 path = "numericselector/main.rs"
+
