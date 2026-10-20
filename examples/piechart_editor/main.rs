@@ -21,23 +21,21 @@ const SHAPES: [(&str, DrawModeShape); 8] = [
     ("Round triangle", DrawModeShape::RoundTriangle),
 ];
 
-const RENDERERS: [&str; 14] = [
+const RENDERERS: [&str; 12] = [
     "Half blocks",
     "Braille",
     "Solid",
     "Shade 75%",
     "Shade 50%",
     "Shade 25%",
-    "Checkerboard",
     "Grid",
     "Grid double",
     "Cross-hatch",
-    "Dashed",
     "Diagonal up",
     "Diagonal down",
     "Custom",
 ];
-const RENDERER_CUSTOM: u32 = 13;
+const RENDERER_CUSTOM: u32 = 11;
 
 fn renderer(index: u32, mark: char) -> DrawModeRenderer {
     match index {
@@ -46,13 +44,11 @@ fn renderer(index: u32, mark: char) -> DrawModeRenderer {
         3 => DrawModeRenderer::Shade75,
         4 => DrawModeRenderer::Shade50,
         5 => DrawModeRenderer::Shade25,
-        6 => DrawModeRenderer::Checkerboard,
-        7 => DrawModeRenderer::Grid,
-        8 => DrawModeRenderer::GridDouble,
-        9 => DrawModeRenderer::CrossHatch,
-        10 => DrawModeRenderer::Dashed,
-        11 => DrawModeRenderer::DiagonalUp,
-        12 => DrawModeRenderer::DiagonalDown,
+        6 => DrawModeRenderer::Grid,
+        7 => DrawModeRenderer::GridDouble,
+        8 => DrawModeRenderer::CrossHatch,
+        9 => DrawModeRenderer::DiagonalUp,
+        10 => DrawModeRenderer::DiagonalDown,
         RENDERER_CUSTOM => DrawModeRenderer::Custom(mark),
         _ => DrawModeRenderer::HalfBlocks,
     }

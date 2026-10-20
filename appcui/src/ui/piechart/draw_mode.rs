@@ -45,16 +45,12 @@ pub enum DrawModeRenderer {
     Shade50,
     /// U+2591 ░ — light shade.
     Shade25,
-    /// 2x4 checkerboard pattern.
-    Checkerboard,
     /// U+253C ┼ — light grid/lattice.
     Grid,
     /// U+256C ╬ — double-line grid, heavier than [`Grid`](Self::Grid).
     GridDouble,
     /// U+2573 ╳ — diagonal cross-hatch.
     CrossHatch,
-    /// ┇ — dashed line.
-    Dashed,
     /// U+2571 ╱ — forward diagonal (rising left-to-right).
     DiagonalUp,
     /// U+2572 ╲ — backward diagonal (falling left-to-right).
@@ -234,11 +230,9 @@ impl DrawModeRenderer {
             DrawModeRenderer::Shade75 => PaletteTileRenderMethod::Custom('\u{2593}'),
             DrawModeRenderer::Shade50 => PaletteTileRenderMethod::Custom('\u{2592}'),
             DrawModeRenderer::Shade25 => PaletteTileRenderMethod::Custom('\u{2591}'),
-            DrawModeRenderer::Checkerboard => PaletteTileRenderMethod::Custom('\u{2592}'),
             DrawModeRenderer::Grid => PaletteTileRenderMethod::Custom('\u{253C}'),
             DrawModeRenderer::GridDouble => PaletteTileRenderMethod::Custom('\u{256C}'),
             DrawModeRenderer::CrossHatch => PaletteTileRenderMethod::Custom('\u{2573}'),
-            DrawModeRenderer::Dashed => PaletteTileRenderMethod::Custom('\u{2571}'),
             DrawModeRenderer::DiagonalUp => PaletteTileRenderMethod::Custom('\u{2571}'),
             DrawModeRenderer::DiagonalDown => PaletteTileRenderMethod::Custom('\u{2572}'),
             DrawModeRenderer::Braille => PaletteTileRenderMethod::Braille,
