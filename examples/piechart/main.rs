@@ -9,7 +9,7 @@ fn main() -> Result<(), appcui::system::Error> {
             chart.set_start_angle(90);
             chart.set_direction(piechart::Direction::CounterClockwise);
             chart.set_shape(piechart::DrawModeShape::RoundTriangle);
-            chart.set_label_content(piechart::LabelContent::Value);
+            chart.set_label_content(piechart::LabelContent::LabelAndPercentage);
             chart.set_label_layout(piechart::LabelLayout::Outside);
             chart.set_hollow_thickness(piechart::HollowThickness::Percentage(50));
             chart.add_value(45, "Rust", None);
