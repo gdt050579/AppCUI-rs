@@ -6,14 +6,18 @@ fn main() -> Result<(), appcui::system::Error> {
             let mut win = window!("'Pie chart',a:c,w:60,h:20,flags:Sizeable");
             win.add(piechart!(
                 "d:f,
-                renderer: Braille,
-                angle: 90,
+                renderer: HalfBlocks,
+                angle: 30,
                 dir: ccw,
-                shape: RoundTriangle,
+                shape: Circle,
                 content: LabelAndPercentage,
                 labels: Outside,
                 hollow: 50%,
-                values: [{45, Rust}, {25, 'C++'}, {15, Go}, {10, Zig}, {5, Other, attr: gray}]"
+                values: [{45, Rust, color: Green}, 
+                         {25, 'C++', color: Red}, 
+                         {15, Go, color: Aqua}, 
+                         {10, Zig, color: yellow}, 
+                         {5, Other, attr: magenta}]"
             ));
             win
         })
