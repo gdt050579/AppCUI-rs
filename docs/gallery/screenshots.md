@@ -87,6 +87,7 @@ A visual tour of AppCUI-rs. Each category shows one quick preview; expand for mo
 | Image                                 | Description                                                                                                                                                                                                                                                                 |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | <img src="img/charts/hchartbar.gif" > | **Horizontal Bar Chart** <br> * **Code:** [examples/hchartbar](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/hchartbar) <br> * **Description:** A horizontal bar chart with a scale, axes, and per-bar appearance where you can edit the way each bar is drawn. |
+| <img src="img/charts/piechart.gif" >  | **Pie Chart** <br> * **Code:** [examples/piechart](https://github.com/gdt050579/AppCUI-rs/tree/main/examples/piechart) <br> * **Description:** A pie chart with a scale, axes, and per-slice appearance where you can edit the way each slice is drawn.                     |
 
 </details>
 
