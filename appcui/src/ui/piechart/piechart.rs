@@ -183,6 +183,51 @@ impl PieChart {
         }
     }
 
+    /// Changes the label of the slice at `index` and repaints the chart.
+    /// Does nothing if `index` is out of range.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
+    /// chart.add_value(50, "Rust", None);
+    /// chart.set_label(0, "Rust 2024");
+    /// ```
+    pub fn set_label(&mut self, index: usize, label: &str) {
+        if let Some(slice) = self.slices.get_mut(index) {
+            if slice.label != label {
+                slice.label.clear();
+                slice.label.push_str(label);
+                labels::update_texts(&mut self.slices, self.label_content, &self.number_format);
+                self.repaint_surface();
+            }
+        }
+    }
+
+    /// Changes the attribute of the slice at `index` and repaints the chart.
+    /// Does nothing if `index` is out of range.
+    ///
+    /// With `None`, the slice is drawn with the theme's chart colors (the same as a slice
+    /// added with `None` in [`add_value`](Self::add_value)).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
+    /// chart.add_value(50, "Rust", None);
+    /// chart.set_attr(0, Some(CharAttribute::with_fore_color(Color::Red)));
+    /// ```
+    pub fn set_attr(&mut self, index: usize, attr: Option<CharAttribute>) {
+        if let Some(slice) = self.slices.get_mut(index) {
+            if slice.attr != attr {
+                slice.attr = attr;
+                self.repaint_surface();
+            }
+        }
+    }
+
     /// Returns the index of the selected slice, or `None` if no slice is selected.
     ///
     /// A slice is selected by clicking it, or with [`set_selected_slice`](Self::set_selected_slice).

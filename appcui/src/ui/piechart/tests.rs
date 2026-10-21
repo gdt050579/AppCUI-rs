@@ -86,6 +86,93 @@ fn check_set_value() {
 }
 
 #[test]
+fn check_set_label() {
+    in_app(|| {
+        let mut c = chart();
+        c.add_value(10, "A", None);
+        c.add_value(20, "B", None);
+        c.set_label_content(piechart::LabelContent::LabelAndValue);
+        c.set_label(1, "Beta");
+        assert_eq!(c.label(0), Some("A"));
+        assert_eq!(c.label(1), Some("Beta"));
+        assert_eq!(c.value(1), Some(20));
+        assert_eq!(c.slices[1].text, "Beta: 20");
+        assert_eq!(c.slices[1].tooltip, "Beta: 20");
+        c.set_label(1, "");
+        assert_eq!(c.label(1), Some(""));
+        assert_eq!(c.slices[1].text, "20");
+        assert_eq!(c.slices[1].tooltip, "20");
+        // out of range: no panic, nothing changes
+        c.set_label(5, "X");
+        assert_eq!(c.count(), 2);
+    });
+}
+
+#[test]
+fn check_set_attr() {
+    in_app(|| {
+        let mut c = chart();
+        let red = CharAttribute::with_fore_color(Color::Red);
+        c.add_value(10, "A", None);
+        c.add_value(20, "B", Some(red));
+        c.set_attr(0, Some(red));
+        c.set_attr(1, None);
+        assert_eq!(c.slices[0].attr, Some(red));
+        assert_eq!(c.slices[1].attr, None);
+        // out of range: no panic, nothing changes
+        c.set_attr(5, Some(red));
+        assert_eq!(c.count(), 2);
+    });
+}
+
+fn run_set_label_and_attr(hash: &str, changed: bool) {
+    let script = format!(
+        "
+        Paint.Enable(false)
+        Paint('labels and colors')
+        CheckHash({hash})
+    "
+    );
+    App::new()
+        .size(Size::new(60, 20))
+        .debug_script(&script)
+        .window(move || {
+            let mut w = window!("Test,d:f");
+            let mut c = PieChart::new(layout!("d:f"), piechart::Flags::None);
+            c.set_label_layout(piechart::LabelLayout::Outside);
+            let red = Some(CharAttribute::with_fore_color(Color::Red));
+            let green = Some(CharAttribute::with_fore_color(Color::Green));
+            if changed {
+                c.add_value(30, "A", None);
+                c.add_value(50, "B", Some(CharAttribute::with_fore_color(Color::Blue)));
+                c.add_value(20, "C", None);
+                c.set_label(0, "Red");
+                c.set_label(1, "Auto");
+                c.set_label(2, "Green");
+                c.set_attr(0, red);
+                c.set_attr(1, None);
+                c.set_attr(2, green);
+            } else {
+                c.add_value(30, "Red", red);
+                c.add_value(50, "Auto", None);
+                c.add_value(20, "Green", green);
+            }
+            w.add(c);
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_set_label_and_attr_paint() {
+    // a chart built with the final labels and colors, and one that gets them through
+    // set_label / set_attr, must paint the same
+    run_set_label_and_attr("0x884606ACDB43B894", false);
+    run_set_label_and_attr("0x884606ACDB43B894", true);
+}
+
+#[test]
 fn check_clear() {
     in_app(|| {
         let mut c = chart();
