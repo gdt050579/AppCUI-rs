@@ -5,6 +5,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
+## [0.5.5] - 2026-10-XX
+
+### Added
+- **PieChart** control (#255): shows a series of values as parts of a whole. Supports circle,
+  ellipse, square, rectangle and triangle shapes (each with an optional rounded version for the
+  last three), a hole in the middle (donut) sized as a percentage or in characters, and several
+  renderers (half blocks, Braille, solid, shades, grids, diagonals or a custom character). Labels
+  can be drawn inside the slices or around the chart, and show the label, value, percentage, or
+  label with value or percentage. Also supports a configurable start angle and direction,
+  selection by mouse or keyboard, hover tooltips, `DimSlicesOnSelection`, and the `on_slice_selected`
+  / `on_clear_selection` events. Created with `PieChart::new` or `piechart!`.
+- **PaletteTile**: an image of palette indexes (`u8` storage, switching to `u16` automatically
+  when more colors are needed) that can be drawn with small blocks, large blocks, Braille or a
+  custom character, using `Surface::draw_palette_tile`.
+- `examples/piechart` and `examples/piechart_editor`.
+- NumericSelector example by @AnushreeKasturi in #272
+- Conway's Game of Life example by @AnushreeKasturi in #276
+- Charvariant by @gdt050579 in #280
+
+### New Contributors
+- @AnushreeKasturi made their first contribution in #272
+
 ## [0.5.4] - 2026-10-10
 
 ### Added
