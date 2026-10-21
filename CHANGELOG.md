@@ -5,7 +5,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
-## [0.5.5] - 2026-10-XX
+## [0.5.5] - 2026-10-21
 
 ### Added
 - **PieChart** control (#255): shows a series of values as parts of a whole. Supports circle,
@@ -233,7 +233,7 @@ background tasks, dialogs, themes, the layout builder and the gallery. The
 [0.4.0 release notes](https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.4.0) list every pull
 request and its author.
 
-[Unreleased]: https://github.com/gdt050579/AppCUI-rs/compare/v0.5.4...HEAD
+[0.5.5]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.5
 [0.5.4]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.4
 [0.5.3]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.3
 [0.5.2]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.2
