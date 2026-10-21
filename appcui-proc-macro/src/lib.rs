@@ -3081,4 +3081,79 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn hbarchart(input: TokenStream) -> TokenStream {
     crate::controls::hbarchart::create(input)
+}
+
+/// Creates a new pie chart.
+/// The format is `piechart!("attributes")` where the attributes are pairs of key-value, separated by comma.
+///
+/// # Parameters
+/// * `values`, `data`, or `slices` - Initial slices (optional). Each entry is a positive integer (`u64`), or a slice description:
+///   - `{value, label, attr: red}` (for example `{30, 'Rust', attr: green}`)
+///   - `value` / `val` / `v` - Slice value (required; also the first positional value)
+///   - `label` / `text` / `caption` - Slice label (also the second positional value)
+///   - `attr` / `attribute` / `charattr` / `color` - Character attribute, using the same syntax as [`charattr!`]. Without it, the slice uses the theme's chart colors
+/// * `flags` - Control flags (optional). Can be:
+///   - **DimSlicesOnSelection** - Draws every slice except the selected one with the inactive chart color
+/// * `shape` - The shape of the chart (optional). Can be **Circle** (default), **Square**, **RoundSquare** (or **round-square**),
+///   **Rectangle** (or **rect**), **RoundRectangle** (or **round-rectangle**, **roundrect**, **round-rect**), **Ellipse**,
+///   **Triangle**, or **RoundTriangle** (or **round-triangle**)
+/// * `renderer`, `render`, `draw-mode`, or `dm` - How the slices are drawn (optional). Can be **HalfBlocks** (default, also **half-blocks**),
+///   **Braille**, **Solid**, **Shade75**, **Shade50**, **Shade25**, **Grid**, **GridDouble** (or **grid-double**), **CrossHatch** (or **cross-hatch**),
+///   **DiagonalUp** (or **diagonal-up**), **DiagonalDown** (or **diagonal-down**), **Custom(char)** (for example `Custom('#')` or `Custom(code: 0x2588)`),
+///   or a single character such as `'#'`
+/// * `hollow`, `hole`, or `hollow-thickness` - The hole in the middle of the chart (optional). Can be:
+///   - **None** - No hole (default)
+///   - **Percentage(n)** or **n%** - The hole is `n` percent (0 to 100) of the shape's size
+///   - **Absolute(n)** - The hole is `n` characters wide (0 to 100)
+///   - **Rectangle(width, height)** - The hole is `width` x `height` characters
+/// * `labels`, `label-layout`, or `ll` - Where the labels are drawn (optional). Can be **None** (default), **Inside**, or **Outside**
+/// * `content`, `label-content`, or `lc` - What the labels show (optional). Can be **Label** (default), **Value**, **Percentage** (or **percent**),
+///   **LabelAndValue** (or **label-and-value**, **label+value**), or **LabelAndPercentage** (or **label-and-percentage**, **label+percentage**)
+/// * `numeric-format` or `nf` - Format for the values in labels and tooltips (optional), using the same syntax as [`numericformat!`]
+/// * `start-angle` or `angle` - Where the first slice starts, in degrees from 0 to 360, measured clockwise from 12 o'clock (optional)
+/// * `direction` or `dir` - The direction of the slices (optional). Can be **Clockwise** (default, also **cw**) or
+///   **CounterClockwise** (also **counter-clockwise**, **ccw**)
+/// * `selected`, `select`, or `selected-slice` - The index of the slice that is selected (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+///
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
+/// // Three slices with automatic colors that fill the parent
+/// let chart = piechart!("d:f, values: [10, 20, 30]");
+///
+/// // A donut with labels and percentages outside the chart
+/// let chart = piechart!(
+///     "d:f,
+///     shape: Ellipse,
+///     hollow: 50%,
+///     labels: Outside,
+///     content: LabelAndPercentage,
+///     values: [{50, 'Rust', attr: red}, {30, 'C++'}, {20, label: 'Go', color: green}]"
+/// );
+///
+/// // Rotated, counter-clockwise, custom character, with the second slice selected
+/// let chart = piechart!(
+///     "x:1, y:1, w:40, h:15,
+///     shape: RoundSquare,
+///     renderer: Custom('#'),
+///     angle: 90,
+///     dir: ccw,
+///     flags: DimSlicesOnSelection,
+///     nf: {dec, group: 3},
+///     selected: 1,
+///     values: [1500, 2500, 1000]"
+/// );
+/// ```
+#[proc_macro]
+pub fn piechart(input: TokenStream) -> TokenStream {
+    crate::controls::piechart::create(input)
 }

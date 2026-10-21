@@ -2501,3 +2501,175 @@ fn check_keyboard_selection_paints_like_a_click() {
         .run()
         .unwrap();
 }
+
+// ---------------------------------------------------------------------------
+// piechart! macro
+// ---------------------------------------------------------------------------
+
+#[test]
+fn check_macro_defaults() {
+    in_app(|| {
+        let c = piechart!("d:f");
+        assert_eq!(c.count(), 0);
+        assert_eq!(c.flags, piechart::Flags::None);
+        assert_eq!(c.draw_mode.shape, DrawModeShape::Circle);
+        assert_eq!(c.draw_mode.renderer, DrawModeRenderer::HalfBlocks);
+        assert_eq!(c.draw_mode.hollow_thickness, HollowThickness::None);
+        assert_eq!(c.draw_mode.start_angle, 0);
+        assert_eq!(c.draw_mode.direction, Direction::Clockwise);
+        assert_eq!(c.label_layout, LabelLayout::None);
+        assert_eq!(c.label_content, LabelContent::Label);
+        assert_eq!(c.selected_slice(), None);
+    });
+}
+
+#[test]
+fn check_macro_values() {
+    in_app(|| {
+        let red = CharAttribute::with_fore_color(Color::Red);
+        let c = piechart!("d:f, values: [10, {20, 'Rust'}, {v: 30, label: 'C++', attr: red}, {value: 40, text: Go, color: {fore: green, back: black}}]");
+        assert_eq!(c.count(), 4);
+        assert_eq!((c.value(0), c.label(0), c.slices[0].attr), (Some(10), Some(""), None));
+        assert_eq!((c.value(1), c.label(1), c.slices[1].attr), (Some(20), Some("Rust"), None));
+        assert_eq!((c.value(2), c.label(2), c.slices[2].attr), (Some(30), Some("C++"), Some(red)));
+        assert_eq!((c.value(3), c.label(3)), (Some(40), Some("Go")));
+        assert_eq!(c.slices[3].attr, Some(CharAttribute::with_color(Color::Green, Color::Black)));
+        let c = piechart!("d:f, data: [{18446744073709551615, 'max'}]");
+        assert_eq!(c.value(0), Some(u64::MAX));
+        let c = piechart!("d:f, slices: [1, 2]");
+        assert_eq!(c.count(), 2);
+    });
+}
+
+#[test]
+fn check_macro_shapes() {
+    in_app(|| {
+        assert_eq!(piechart!("d:f, shape: circle").draw_mode.shape, DrawModeShape::Circle);
+        assert_eq!(piechart!("d:f, shape: Square").draw_mode.shape, DrawModeShape::Square);
+        assert_eq!(piechart!("d:f, shape: round-square").draw_mode.shape, DrawModeShape::RoundSquare);
+        assert_eq!(piechart!("d:f, shape: rect").draw_mode.shape, DrawModeShape::Rectangle);
+        assert_eq!(piechart!("d:f, shape: RoundRectangle").draw_mode.shape, DrawModeShape::RoundRectangle);
+        assert_eq!(piechart!("d:f, shape: round-rect").draw_mode.shape, DrawModeShape::RoundRectangle);
+        assert_eq!(piechart!("d:f, shape: ellipse").draw_mode.shape, DrawModeShape::Ellipse);
+        assert_eq!(piechart!("d:f, shape: Triangle").draw_mode.shape, DrawModeShape::Triangle);
+        assert_eq!(piechart!("d:f, shape: round-triangle").draw_mode.shape, DrawModeShape::RoundTriangle);
+    });
+}
+
+#[test]
+fn check_macro_renderers() {
+    in_app(|| {
+        assert_eq!(piechart!("d:f, renderer: half-blocks").draw_mode.renderer, DrawModeRenderer::HalfBlocks);
+        assert_eq!(piechart!("d:f, render: Braille").draw_mode.renderer, DrawModeRenderer::Braille);
+        assert_eq!(piechart!("d:f, dm: solid").draw_mode.renderer, DrawModeRenderer::Solid);
+        assert_eq!(piechart!("d:f, dm: Shade75").draw_mode.renderer, DrawModeRenderer::Shade75);
+        assert_eq!(piechart!("d:f, dm: Shade50").draw_mode.renderer, DrawModeRenderer::Shade50);
+        assert_eq!(piechart!("d:f, dm: Shade25").draw_mode.renderer, DrawModeRenderer::Shade25);
+        assert_eq!(piechart!("d:f, dm: grid").draw_mode.renderer, DrawModeRenderer::Grid);
+        assert_eq!(piechart!("d:f, dm: grid-double").draw_mode.renderer, DrawModeRenderer::GridDouble);
+        assert_eq!(piechart!("d:f, dm: cross-hatch").draw_mode.renderer, DrawModeRenderer::CrossHatch);
+        assert_eq!(piechart!("d:f, dm: DiagonalUp").draw_mode.renderer, DrawModeRenderer::DiagonalUp);
+        assert_eq!(piechart!("d:f, draw-mode: diagonal-down").draw_mode.renderer, DrawModeRenderer::DiagonalDown);
+        assert_eq!(piechart!("d:f, dm: Custom('#')").draw_mode.renderer, DrawModeRenderer::Custom('#'));
+        assert_eq!(piechart!("d:f, dm: Custom(code: 0x2588)").draw_mode.renderer, DrawModeRenderer::Custom('█'));
+        assert_eq!(piechart!("d:f, dm: '*'").draw_mode.renderer, DrawModeRenderer::Custom('*'));
+        assert_eq!(piechart!("d:f, dm: x").draw_mode.renderer, DrawModeRenderer::Custom('x'));
+    });
+}
+
+#[test]
+fn check_macro_hollow() {
+    in_app(|| {
+        assert_eq!(piechart!("d:f, hollow: None").draw_mode.hollow_thickness, HollowThickness::None);
+        assert_eq!(piechart!("d:f, hollow: 50%").draw_mode.hollow_thickness, HollowThickness::Percentage(50));
+        assert_eq!(piechart!("d:f, hole: Percentage(30)").draw_mode.hollow_thickness, HollowThickness::Percentage(30));
+        assert_eq!(piechart!("d:f, hole: percent(100)").draw_mode.hollow_thickness, HollowThickness::Percentage(100));
+        assert_eq!(piechart!("d:f, hollow-thickness: Absolute(4)").draw_mode.hollow_thickness, HollowThickness::Absolute(4));
+        assert_eq!(piechart!("d:f, hollow: Rectangle(6, 2)").draw_mode.hollow_thickness, HollowThickness::Rectangle(6, 2));
+        assert_eq!(piechart!("d:f, hollow: rect(10,3)").draw_mode.hollow_thickness, HollowThickness::Rectangle(10, 3));
+    });
+}
+
+#[test]
+fn check_macro_labels() {
+    in_app(|| {
+        let c = piechart!("d:f, labels: Inside, content: Value");
+        assert_eq!((c.label_layout, c.label_content), (LabelLayout::Inside, LabelContent::Value));
+        let c = piechart!("d:f, label-layout: outside, label-content: label-and-value");
+        assert_eq!((c.label_layout, c.label_content), (LabelLayout::Outside, LabelContent::LabelAndValue));
+        let c = piechart!("d:f, ll: none, lc: percent");
+        assert_eq!((c.label_layout, c.label_content), (LabelLayout::None, LabelContent::Percentage));
+        assert_eq!(piechart!("d:f, lc: label").label_content, LabelContent::Label);
+        assert_eq!(piechart!("d:f, lc: 'label+percentage'").label_content, LabelContent::LabelAndPercentage);
+        assert_eq!(piechart!("d:f, lc: LabelAndPercentage").label_content, LabelContent::LabelAndPercentage);
+    });
+}
+
+#[test]
+fn check_macro_number_format() {
+    in_app(|| {
+        let c = piechart!("d:f, lc: LabelAndValue, nf: {dec, group: 3}, values: [{1234567, 'A'}]");
+        assert_eq!(c.slices[0].text, "A: 1,234,567");
+        let c = piechart!("d:f, lc: Value, numeric-format: 'hex, prefix: 0x', values: [255]");
+        assert_eq!(c.slices[0].text, "0xFF");
+    });
+}
+
+#[test]
+fn check_macro_rotation() {
+    in_app(|| {
+        let c = piechart!("d:f, angle: 90, dir: ccw");
+        assert_eq!((c.draw_mode.start_angle, c.draw_mode.direction), (90, Direction::CounterClockwise));
+        let c = piechart!("d:f, start-angle: 360, direction: counter-clockwise");
+        assert_eq!((c.draw_mode.start_angle, c.draw_mode.direction), (360, Direction::CounterClockwise));
+        let c = piechart!("d:f, direction: Clockwise");
+        assert_eq!(c.draw_mode.direction, Direction::Clockwise);
+        assert_eq!(piechart!("d:f, dir: cw").draw_mode.direction, Direction::Clockwise);
+    });
+}
+
+#[test]
+fn check_macro_flags_and_selection() {
+    in_app(|| {
+        let c = piechart!("d:f, flags: DimSlicesOnSelection, selected: 1, values: [10, 20, 30]");
+        assert_eq!(c.flags, piechart::Flags::DimSlicesOnSelection);
+        assert_eq!(c.selected_slice(), Some(1));
+        assert_eq!(piechart!("d:f, select: 2, values: [1, 2, 3]").selected_slice(), Some(2));
+        assert_eq!(piechart!("d:f, selected-slice: 0, values: [1]").selected_slice(), Some(0));
+        // out of range, or a slice that takes no space: nothing is selected
+        assert_eq!(piechart!("d:f, selected: 5, values: [1, 2]").selected_slice(), None);
+        assert_eq!(piechart!("d:f, selected: 1, values: [1, 0]").selected_slice(), None);
+    });
+}
+
+#[test]
+fn check_macro_layout_and_state() {
+    in_app(|| {
+        let c = piechart!("x:2, y:3, w:30, h:10, enabled: false, visible: false, values: [1]");
+        assert!(!c.is_enabled());
+        assert!(!c.is_visible());
+    });
+}
+
+#[test]
+fn check_macro_paint() {
+    let script = "
+        Paint.Enable(false)
+        Paint('macro chart')
+        CheckHash(0x8C751E486EB42E43)
+    ";
+    App::new()
+        .size(Size::new(60, 20))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(piechart!(
+                "d:f, shape: Ellipse, hollow: 40%, labels: Outside, content: LabelAndPercentage,
+                angle: 90, dir: ccw, flags: DimSlicesOnSelection, selected: 0,
+                values: [{50, 'Rust', attr: red}, {30, 'C++'}, {20, label: 'Go', color: green}]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}

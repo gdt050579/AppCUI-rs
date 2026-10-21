@@ -84,16 +84,16 @@ pub(super) fn largest_remainder(values: impl Iterator<Item = u64>, total: u128, 
 /// Selecting a slice or clearing the selection this way raises the events of
 /// [`PieChartEvents`](super::events::PieChartEvents).
 pub struct PieChart {
-    flags: Flags,
+    pub(super) flags: Flags,
     pub(super) slices: Vec<Slice>,
     pub(super) surface: Surface,
-    draw_mode: DrawMode,
+    pub(super) draw_mode: DrawMode,
     pixels: PaletteTile,
     cells: PaletteTile,
     pub(super) hovered_slice: Option<usize>,
-    selected_slice: Option<usize>,
-    label_layout: LabelLayout,
-    label_content: LabelContent,
+    pub(super) selected_slice: Option<usize>,
+    pub(super) label_layout: LabelLayout,
+    pub(super) label_content: LabelContent,
     label_places: Vec<Place>,
     number_format: FormatNumber,
 }

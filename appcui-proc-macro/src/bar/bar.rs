@@ -200,7 +200,7 @@ fn parse_line_type(repr: &str, key: &str) -> String {
     }
 }
 
-fn parse_custom_char(param: &str, key: &str) -> String {
+pub(crate) fn parse_custom_char(param: &str, key: &str) -> String {
     let param = param.trim();
     if let Some((name, value)) = split_named_param(param) {
         if crate::utils::equal_ignore_case(name, "code") {
@@ -367,4 +367,4 @@ pub(crate) fn parse_bar_list(list: &mut Vec<Value>, module: &str) -> String {
     } else {
         format!("&[{}]", items.join(","))
     }
-}
+}
