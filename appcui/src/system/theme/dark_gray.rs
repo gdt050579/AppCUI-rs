@@ -154,7 +154,7 @@ pub(crate) fn new() -> Theme {
             axis: charattr!("white,black"),
             label: charattr!("silver,black"),
             grid: charattr!("gray,black"),
-            bar: charattr!("white,black"),
+            bar: [charattr!("white,black"), charattr!("yellow,black"), charattr!("gray,black"), charattr!("silver,black")],
             inactive: charattr!("gray,black"),
             selection_border: charattr!("yellow,black"),
         },

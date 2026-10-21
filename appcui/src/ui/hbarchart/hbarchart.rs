@@ -569,7 +569,7 @@ where
     fn repaint_surface(&mut self) {
         let theme = self.theme();
         let background = theme.chart.background;
-        let bar_attr = theme.chart.bar;
+        let bar_attr = theme.chart.bar[0];
         let grid_attr = theme.chart.grid;
         let axis_attr = theme.chart.axis;
         let label_attr = theme.chart.label;

@@ -1,6 +1,7 @@
 use crate::prelude::{BitTile, BitTileU16, BitTileU32, BitTileU64, StringFormatError, Glyph};
 use crate::prelude::*;
 use super::super::{Character, Color, RenderOptionsBuilder, Size, SurfaceTester};
+use super::palette_tile::PaletteTile;
 use super::BitTileRenderMethod;
 use super::CharacterSet;
 use super::ColorSchema;
@@ -1003,4 +1004,369 @@ fn check_glyph_write_str_outside() {
     // we should se
     // ....
     // ..He
+}
+
+#[test]
+fn check_palette_tile_new() {
+    let tile = PaletteTile::new(4, 3);
+    assert_eq!(tile.size(), Size::new(4, 3));
+    for y in 0..3 {
+        for x in 0..4 {
+            assert_eq!(tile.get(x, y), None);
+        }
+    }
+    assert_eq!(tile.get(4, 0), None);
+    assert_eq!(tile.get(0, 3), None);
+    assert_eq!(tile.get(100, 100), None);
+
+    // zero dimensions are clamped to at least 1
+    assert_eq!(PaletteTile::new(0, 0).size(), Size::new(1, 1));
+    assert_eq!(PaletteTile::new(0, 5).size(), Size::new(1, 5));
+    assert_eq!(PaletteTile::new(7, 0).size(), Size::new(7, 1));
+}
+
+#[test]
+fn check_palette_tile_set_get() {
+    let mut tile = PaletteTile::new(3, 2);
+    tile.set(0, 0, 0);
+    tile.set(2, 0, 10);
+    tile.set(1, 1, 254);
+    assert_eq!(tile.get(0, 0), Some(0));
+    assert_eq!(tile.get(1, 0), None);
+    assert_eq!(tile.get(2, 0), Some(10));
+    assert_eq!(tile.get(0, 1), None);
+    assert_eq!(tile.get(1, 1), Some(254));
+    assert_eq!(tile.get(2, 1), None);
+
+    // out-of-bounds writes are ignored
+    tile.set(3, 0, 1);
+    tile.set(0, 2, 1);
+    tile.set(9, 9, 1);
+    assert_eq!(tile.get(0, 0), Some(0));
+    assert_eq!(tile.get(2, 0), Some(10));
+    assert_eq!(tile.get(1, 1), Some(254));
+    assert_eq!(tile.get(3, 0), None);
+    assert_eq!(tile.get(0, 2), None);
+
+    tile.set(2, 0, 42);
+    assert_eq!(tile.get(2, 0), Some(42));
+    assert_eq!(tile.get(0, 0), Some(0));
+}
+
+#[test]
+fn check_palette_tile_clear_and_reset() {
+    let mut tile = PaletteTile::new(2, 2);
+    tile.set(0, 0, 1);
+    tile.set(1, 0, 2);
+    tile.set(0, 1, 3);
+    tile.clear(1, 0);
+    assert_eq!(tile.get(1, 0), None);
+    assert_eq!(tile.get(0, 0), Some(1));
+    assert_eq!(tile.get(0, 1), Some(3));
+    assert_eq!(tile.get(1, 1), None);
+
+    tile.clear(5, 5);
+    assert_eq!(tile.get(0, 0), Some(1));
+
+    tile.reset();
+    for y in 0..2 {
+        for x in 0..2 {
+            assert_eq!(tile.get(x, y), None);
+        }
+    }
+    assert_eq!(tile.size(), Size::new(2, 2));
+}
+
+#[test]
+fn check_palette_tile_resize() {
+    let mut tile = PaletteTile::new(4, 4);
+    tile.set(1, 1, 7);
+    tile.resize(2, 3);
+    assert_eq!(tile.size(), Size::new(2, 3));
+    for y in 0..3 {
+        for x in 0..2 {
+            assert_eq!(tile.get(x, y), None);
+        }
+    }
+    assert_eq!(tile.get(1, 1), None);
+    assert_eq!(tile.get(3, 3), None);
+
+    tile.set(1, 2, 9);
+    assert_eq!(tile.get(1, 2), Some(9));
+    tile.resize(0, 0);
+    assert_eq!(tile.size(), Size::new(1, 1));
+    assert_eq!(tile.get(0, 0), None);
+    assert_eq!(tile.get(1, 2), None);
+
+    tile.resize(0, 4);
+    assert_eq!(tile.size(), Size::new(1, 4));
+    tile.resize(6, 0);
+    assert_eq!(tile.size(), Size::new(6, 1));
+    assert_eq!(tile.get(5, 0), None);
+    assert_eq!(tile.get(0, 1), None);
+}
+
+#[test]
+fn check_palette_tile_promote_to_u16() {
+    let mut tile = PaletteTile::new(2, 2);
+    tile.set(0, 0, 0);
+    tile.set(1, 0, 254);
+    // index 255 does not fit in the 8-bit store (255 is the transparent sentinel)
+    tile.set(1, 1, 255);
+    assert_eq!(tile.get(0, 0), Some(0));
+    assert_eq!(tile.get(1, 0), Some(254));
+    assert_eq!(tile.get(0, 1), None);
+    assert_eq!(tile.get(1, 1), Some(255));
+
+    tile.set(0, 1, 1000);
+    assert_eq!(tile.get(0, 1), Some(1000));
+    tile.set(0, 0, 12);
+    assert_eq!(tile.get(0, 0), Some(12));
+    assert_eq!(tile.get(1, 1), Some(255));
+
+    // u16::MAX is the transparent sentinel once storage is 16-bit
+    tile.set(1, 0, u16::MAX);
+    assert_eq!(tile.get(1, 0), None);
+    assert_eq!(tile.get(0, 0), Some(12));
+
+    tile.clear(1, 1);
+    assert_eq!(tile.get(1, 1), None);
+    assert_eq!(tile.get(0, 1), Some(1000));
+
+    tile.reset();
+    for y in 0..2 {
+        for x in 0..2 {
+            assert_eq!(tile.get(x, y), None);
+        }
+    }
+
+    tile.set(0, 0, 40000);
+    assert_eq!(tile.get(0, 0), Some(40000));
+    tile.resize(3, 1);
+    assert_eq!(tile.size(), Size::new(3, 1));
+    assert_eq!(tile.get(0, 0), None);
+    assert_eq!(tile.get(2, 0), None);
+    tile.set(2, 0, 3);
+    tile.set(1, 0, 65534);
+    assert_eq!(tile.get(2, 0), Some(3));
+    assert_eq!(tile.get(1, 0), Some(65534));
+    assert_eq!(tile.get(0, 0), None);
+}
+
+#[test]
+fn check_palette_tile_promote_preserves_neighbors() {
+    let mut tile = PaletteTile::new(2, 1);
+    tile.set(0, 0, 8);
+    // writing the 16-bit transparent sentinel still promotes storage
+    tile.set(1, 0, u16::MAX);
+    assert_eq!(tile.get(0, 0), Some(8));
+    assert_eq!(tile.get(1, 0), None);
+
+    tile.set(1, 0, 300);
+    assert_eq!(tile.get(0, 0), Some(8));
+    assert_eq!(tile.get(1, 0), Some(300));
+}
+// ---------------------------------------------------------------------------
+// PaletteTile painting
+// ---------------------------------------------------------------------------
+const PALETTE: [CharAttribute; 4] = [
+    CharAttribute { foreground: Color::Red, background: Color::DarkRed, flags: CharFlags::Bold },
+    CharAttribute { foreground: Color::Green, background: Color::DarkGreen, flags: CharFlags::None },
+    CharAttribute { foreground: Color::Blue, background: Color::DarkBlue, flags: CharFlags::Underline },
+    CharAttribute { foreground: Color::Yellow, background: Color::Olive, flags: CharFlags::None },
+];
+
+fn palette_surface(w: u32, h: u32) -> SurfaceTester {
+    let mut s = SurfaceTester::new(w, h);
+    s.clear(Character::new('#', Color::White, Color::Gray, CharFlags::None));
+    s
+}
+
+fn palette_tile(w: u32, h: u32, pixels: &[(u32, u32, u16)]) -> PaletteTile {
+    let mut tile = PaletteTile::new(w, h);
+    for (x, y, id) in pixels {
+        tile.set(*x, *y, *id);
+    }
+    tile
+}
+
+fn untouched(s: &SurfaceTester, x: i32, y: i32) -> bool {
+    *s.char(x, y).unwrap() == Character::new('#', Color::White, Color::Gray, CharFlags::None)
+}
+
+#[test]
+fn check_palette_tile_paint_small_blocks() {
+    // 3 x 3 pixels -> 3 x 2 characters (the last row has only a top half)
+    let tile = palette_tile(3, 3, &[(0, 0, 0), (0, 1, 1), (1, 0, 2), (2, 1, 3), (0, 2, 1), (2, 2, 2)]);
+    let mut s = palette_surface(5, 4);
+    s.draw_palette_tile(0, 0, &tile, PaletteTileRenderMethod::SmallBlocks, |id| PALETTE[id as usize]);
+    let upper = char::from(SpecialChar::BlockUpperHalf);
+    let lower = char::from(SpecialChar::BlockLowerHalf);
+    // both halves: only the foreground of each entry is used
+    assert_eq!(*s.char(0, 0).unwrap(), Character::new(upper, Color::Red, Color::Green, CharFlags::None));
+    // top half only: the background is left as it was
+    assert_eq!(*s.char(1, 0).unwrap(), Character::new(upper, Color::Blue, Color::Gray, CharFlags::None));
+    // bottom half only: a lower half block, the background is left as it was
+    assert_eq!(*s.char(2, 0).unwrap(), Character::new(lower, Color::Yellow, Color::Gray, CharFlags::None));
+    // last row: the bottom halves are outside the tile
+    assert_eq!(*s.char(0, 1).unwrap(), Character::new(upper, Color::Green, Color::Gray, CharFlags::None));
+    assert!(untouched(&s, 1, 1));
+    assert_eq!(*s.char(2, 1).unwrap(), Character::new(upper, Color::Blue, Color::Gray, CharFlags::None));
+    // nothing is drawn outside the tile
+    for y in 0..4 {
+        for x in 0..5 {
+            if (x >= 3) || (y >= 2) {
+                assert!(untouched(&s, x, y), "({x},{y})");
+            }
+        }
+    }
+}
+
+#[test]
+fn check_palette_tile_paint_char() {
+    // every pixel is 2 characters wide, with all the attributes of the palette entry
+    let tile = palette_tile(3, 2, &[(0, 0, 0), (2, 0, 2), (1, 1, 1)]);
+    let mut s = palette_surface(8, 3);
+    s.draw_palette_tile(1, 1, &tile, PaletteTileRenderMethod::Custom('▒'), |id| PALETTE[id as usize]);
+    for (x, y, id) in [(1, 1, 0), (2, 1, 0), (5, 1, 2), (6, 1, 2), (3, 2, 1), (4, 2, 1)] {
+        assert_eq!(*s.char(x, y).unwrap(), Character::with_attributes('▒', PALETTE[id]), "({x},{y})");
+    }
+    // transparent pixels and everything outside the tile are left as they were
+    for (x, y) in [(3, 1), (4, 1), (1, 2), (2, 2), (5, 2), (6, 2), (0, 1), (7, 1), (0, 0), (3, 0)] {
+        assert!(untouched(&s, x, y), "({x},{y})");
+    }
+    // large blocks: the same, with a full block
+    let mut s = palette_surface(8, 3);
+    s.draw_palette_tile(0, 0, &tile, PaletteTileRenderMethod::LargeBlocks, |id| PALETTE[id as usize]);
+    assert_eq!(*s.char(0, 0).unwrap(), Character::with_attributes('█', PALETTE[0]));
+    assert_eq!(*s.char(1, 0).unwrap(), Character::with_attributes('█', PALETTE[0]));
+    assert!(untouched(&s, 2, 0));
+}
+
+#[test]
+fn check_palette_tile_paint_braille() {
+    // 3 x 5 pixels -> 2 x 2 characters (2 x 4 dots each)
+    // character (0, 0): 3 dots of entry 1, 2 dots of entry 0 -> entry 1 wins
+    // character (1, 0): 1 dot of entry 2, 1 dot of entry 3 -> tie, the first one found (column by column)
+    // character (0, 1): only the first row of dots exists
+    let tile = palette_tile(3, 5, &[(0, 0, 0), (0, 1, 0), (1, 0, 1), (1, 2, 1), (1, 3, 1), (2, 3, 3), (2, 1, 2), (1, 4, 2)]);
+    let mut s = palette_surface(4, 3);
+    s.draw_palette_tile(0, 0, &tile, PaletteTileRenderMethod::Braille, |id| PALETTE[id as usize]);
+    // dots: left column 0x01 0x02 0x04 0x40, right column 0x08 0x10 0x20 0x80
+    let braille = |bits: u32| char::from_u32(0x2800 + bits).unwrap();
+    assert_eq!(*s.char(0, 0).unwrap(), Character::with_attributes(braille(0x01 | 0x02 | 0x08 | 0x20 | 0x80), PALETTE[1]));
+    assert_eq!(*s.char(1, 0).unwrap(), Character::with_attributes(braille(0x02 | 0x40), PALETTE[2]));
+    assert_eq!(*s.char(0, 1).unwrap(), Character::with_attributes(braille(0x08), PALETTE[2]));
+    assert!(untouched(&s, 1, 1));
+    for (x, y) in [(2, 0), (3, 0), (2, 1), (0, 2), (3, 2)] {
+        assert!(untouched(&s, x, y), "({x},{y})");
+    }
+}
+
+#[test]
+fn check_palette_tile_paint_same_in_u8_and_u16() {
+    // the same indexes, stored in 8 and in 16 bits, are drawn the same way
+    let pixels: Vec<(u32, u32, u16)> = (0..7u32).flat_map(|y| (0..9u32).map(move |x| (x, y))).filter(|(x, y)| (x + y) % 3 != 0).map(|(x, y)| (x, y, ((x * 7 + y) % 4) as u16)).collect();
+    let small = palette_tile(9, 7, &pixels);
+    let mut wide = palette_tile(9, 7, &pixels);
+    // promote to 16 bits, then restore the pixel
+    wide.set(0, 0, 1000);
+    wide.clear(0, 0);
+    let methods = [
+        PaletteTileRenderMethod::SmallBlocks,
+        PaletteTileRenderMethod::LargeBlocks,
+        PaletteTileRenderMethod::Braille,
+        PaletteTileRenderMethod::Custom('*'),
+    ];
+    for method in methods {
+        let mut a = palette_surface(20, 9);
+        let mut b = palette_surface(20, 9);
+        a.draw_palette_tile(1, 1, &small, method, |id| PALETTE[id as usize]);
+        b.draw_palette_tile(1, 1, &wide, method, |id| PALETTE[id as usize]);
+        assert_eq!(a.compute_hash(), b.compute_hash());
+    }
+}
+
+#[test]
+fn check_palette_tile_paint_clipped() {
+    // drawing partly outside the surface does not panic and keeps the visible part
+    let tile = palette_tile(4, 4, &[(0, 0, 0), (3, 3, 1), (1, 1, 2)]);
+    let mut s = palette_surface(3, 3);
+    s.draw_palette_tile(-2, -1, &tile, PaletteTileRenderMethod::Custom('x'), |id| PALETTE[id as usize]);
+    assert_eq!(*s.char(0, 0).unwrap(), Character::with_attributes('x', PALETTE[2]));
+    assert_eq!(*s.char(1, 0).unwrap(), Character::with_attributes('x', PALETTE[2]));
+    assert!(untouched(&s, 2, 0));
+    // a pixel 2 characters wide, cut in half by the left edge
+    let mut s = palette_surface(3, 3);
+    s.draw_palette_tile(-3, -1, &tile, PaletteTileRenderMethod::Custom('x'), |id| PALETTE[id as usize]);
+    assert_eq!(*s.char(0, 0).unwrap(), Character::with_attributes('x', PALETTE[2]));
+    assert!(untouched(&s, 1, 0));
+    for method in [PaletteTileRenderMethod::SmallBlocks, PaletteTileRenderMethod::Braille, PaletteTileRenderMethod::Custom('x'), PaletteTileRenderMethod::LargeBlocks] {
+        let mut s = palette_surface(3, 3);
+        s.draw_palette_tile(-5, -5, &tile, method, |id| PALETTE[id as usize]);
+        s.draw_palette_tile(2, 2, &tile, method, |id| PALETTE[id as usize]);
+    }
+}
+
+#[test]
+fn check_palette_tile_render_size() {
+    let methods = [PaletteTileRenderMethod::SmallBlocks, PaletteTileRenderMethod::LargeBlocks, PaletteTileRenderMethod::Braille, PaletteTileRenderMethod::Custom('*')];
+    let tile = PaletteTile::new(9, 7);
+    assert_eq!(tile.render_size(PaletteTileRenderMethod::SmallBlocks), Size::new(9, 4));
+    assert_eq!(tile.render_size(PaletteTileRenderMethod::LargeBlocks), Size::new(18, 7));
+    assert_eq!(tile.render_size(PaletteTileRenderMethod::Custom('*')), Size::new(18, 7));
+    assert_eq!(tile.render_size(PaletteTileRenderMethod::Braille), Size::new(5, 2));
+    let tile = PaletteTile::new(1, 1);
+    for method in methods {
+        let expected = if matches!(method, PaletteTileRenderMethod::LargeBlocks | PaletteTileRenderMethod::Custom(_)) { Size::new(2, 1) } else { Size::new(1, 1) };
+        assert_eq!(tile.render_size(method), expected, "{method:?}");
+    }
+    // a tile with every pixel set covers exactly its render size
+    for (w, h) in [(9u32, 7u32), (8, 8), (1, 1), (3, 5), (4, 4)] {
+        let mut tile = PaletteTile::new(w, h);
+        for y in 0..h {
+            for x in 0..w {
+                tile.set(x, y, ((x + y) % 4) as u16);
+            }
+        }
+        for method in methods {
+            let mut s = palette_surface(24, 12);
+            s.draw_palette_tile(1, 1, &tile, method, |id| PALETTE[id as usize]);
+            let size = tile.render_size(method);
+            for y in 0..12 {
+                for x in 0..24 {
+                    let inside = (x >= 1) && (y >= 1) && (x < 1 + size.width as i32) && (y < 1 + size.height as i32);
+                    assert_eq!(!untouched(&s, x, y), inside, "{w}x{h} {method:?}: ({x},{y})");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn check_palette_tile_cell_index() {
+    // every drawn character shows the palette entry `cell_index` returns; nothing else is drawn
+    let pixels: Vec<(u32, u32, u16)> = (0..9u32).flat_map(|y| (0..11u32).map(move |x| (x, y))).filter(|(x, y)| (x * 3 + y * 5) % 7 > 1).map(|(x, y)| (x, y, ((x + 2 * y) % 4) as u16)).collect();
+    let tile = palette_tile(11, 9, &pixels);
+    let methods = [PaletteTileRenderMethod::SmallBlocks, PaletteTileRenderMethod::LargeBlocks, PaletteTileRenderMethod::Braille, PaletteTileRenderMethod::Custom('*')];
+    for method in methods {
+        let mut s = palette_surface(26, 12);
+        s.draw_palette_tile(0, 0, &tile, method, |id| PALETTE[id as usize]);
+        for y in 0..12 {
+            for x in 0..26 {
+                let ch = s.char(x, y).unwrap();
+                match tile.cell_index(x as u32, y as u32, method) {
+                    None => assert!(untouched(&s, x, y), "{method:?}: ({x},{y})"),
+                    Some(id) => assert_eq!(ch.foreground, PALETTE[id as usize].foreground, "{method:?}: ({x},{y})"),
+                }
+            }
+        }
+    }
+    // small blocks: the bottom pixel when the top one is transparent
+    let tile = palette_tile(1, 2, &[(0, 1, 3)]);
+    assert_eq!(tile.cell_index(0, 0, PaletteTileRenderMethod::SmallBlocks), Some(3));
+    // braille: the majority
+    let tile = palette_tile(2, 4, &[(0, 0, 1), (0, 1, 2), (1, 1, 2), (1, 3, 2)]);
+    assert_eq!(tile.cell_index(0, 0, PaletteTileRenderMethod::Braille), Some(2));
+    assert_eq!(tile.cell_index(1, 0, PaletteTileRenderMethod::Braille), None);
 }

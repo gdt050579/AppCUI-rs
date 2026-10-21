@@ -46,6 +46,7 @@ use crate::{
         hslider::events::GenericHSliderEvents,
         vbarchart::events::GenericVBarChartEvents,
         hbarchart::events::GenericHBarChartEvents,
+        piechart::events::PieChartEvents,
     },
 };
 
@@ -265,6 +266,7 @@ pub trait Control:
     + GenericHSliderEvents
     + GenericVBarChartEvents
     + GenericHBarChartEvents
+    + PieChartEvents
 {
 }
 

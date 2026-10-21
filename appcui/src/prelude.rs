@@ -92,6 +92,8 @@ pub use super::ui::vbarchart;
 pub use super::ui::vbarchart::events::GenericVBarChartEvents;
 pub use super::ui::hbarchart;
 pub use super::ui::hbarchart::events::GenericHBarChartEvents;
+pub use super::ui::piechart::events::PieChartEvents;
+pub use super::ui::piechart;
 pub use super::ui::vsplitter;
 pub use super::ui::window::events::ModalWindowMethods;
 pub use super::ui::window::events::ToolBarEvents;

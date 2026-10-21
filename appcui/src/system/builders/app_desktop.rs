@@ -87,6 +87,7 @@ macro_rules! impl_app_desktop_methods {
             GenericHSliderEvents,
             GenericVBarChartEvents,
             GenericHBarChartEvents,
+            PieChartEvents,
         );
     };
     (@empty $wrapper:ident, $bound:path; $($trait_name:path),* $(,)?) => {
@@ -96,4 +97,4 @@ macro_rules! impl_app_desktop_methods {
     };
 }
 
-pub(crate) use impl_app_desktop_methods;
+pub(crate) use impl_app_desktop_methods;

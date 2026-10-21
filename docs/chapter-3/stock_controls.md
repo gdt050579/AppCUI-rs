@@ -31,6 +31,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [Panel](stock-controls/panel.md)                        | ui::Panel                    | `panel!`             | <img src="stock-controls/img/panel.png" width=300/>             |
 | [Password](stock-controls/password.md)                  | ui::Password                 | `password!`          | <img src="stock-controls/img/password.png" width=300/>          |
 | [PathFinder](stock-controls/pathfinder.md)              | ui::PathFinder               | `pathfinder!`        | <img src="stock-controls/img/pathfinder.png" width=300/>        |
+| [PieChart](stock-controls/piechart.md)                  | ui::PieChart                 | `piechart!`          | <img src="stock-controls/img/piechart.png" width=300/>          |
 | [ProgressBar](stock-controls/progressbar.md)            | ui::ProgressBar              | `progressbar!`       | <img src="stock-controls/img/progressbar.png" width=300/>       |
 | [RadioBox](stock-controls/radiobox.md)                  | ui::RadioBox                 | `radiobox!`          | <img src="stock-controls/img/radiobox.png" width=300/>          |
 | [RichTextField](stock-controls/richtextfield.md)        | ui::RichTextField            | `richtextfield!`     | <img src="stock-controls/img/richtextfield.png" width=300/>     |

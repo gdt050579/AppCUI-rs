@@ -23,6 +23,8 @@ use crate::ui::{
     vbarchart::events::GenericVBarChartEvents,
     hbarchart,
     hbarchart::events::GenericHBarChartEvents,
+    piechart,
+    piechart::events::PieChartEvents,
     hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview, markdown_composer::events::MarkdownComposerEvents,
 };
 
@@ -65,6 +67,7 @@ pub(crate) enum ControlEventData {
     HSliderEvents(hslider::events::EventData),
     VBarChart(vbarchart::events::EventData),
     HBarChart(hbarchart::events::EventData),
+    PieChart(piechart::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -237,6 +240,10 @@ impl ControlEvent {
                 hbarchart::events::EventType::ClearSelection => {
                     GenericHBarChartEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id)
                 }
+            },
+            ControlEventData::PieChart(data) => match data.event_type {
+                piechart::events::EventType::SliceSelected(index) => PieChartEvents::on_slice_selected(receiver, self.emitter.cast(), index),
+                piechart::events::EventType::ClearSelection => PieChartEvents::on_clear_selection(receiver, self.emitter.cast()),
             },
         }
     }

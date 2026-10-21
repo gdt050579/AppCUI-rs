@@ -294,7 +294,7 @@ pub struct ChartTheme {
     /// axis color
     pub axis: CharAttribute,
     /// Bar colors
-    pub bar: CharAttribute,
+    pub bar: [CharAttribute; 4],
     /// Grid lines color
     pub grid: CharAttribute,
     /// label color
