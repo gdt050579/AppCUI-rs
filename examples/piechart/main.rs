@@ -4,20 +4,17 @@ fn main() -> Result<(), appcui::system::Error> {
     App::new()
         .window(|| {
             let mut win = window!("'Pie chart',a:c,w:60,h:20,flags:Sizeable");
-            let mut chart = PieChart::new(layout!("d:f"), piechart::Flags::None);
-            chart.set_renderer(piechart::DrawModeRenderer::Braille);
-            chart.set_start_angle(90);
-            chart.set_direction(piechart::Direction::CounterClockwise);
-            chart.set_shape(piechart::DrawModeShape::RoundTriangle);
-            chart.set_label_content(piechart::LabelContent::LabelAndPercentage);
-            chart.set_label_layout(piechart::LabelLayout::Outside);
-            chart.set_hollow_thickness(piechart::HollowThickness::Percentage(50));
-            chart.add_value(45, "Rust", None);
-            chart.add_value(25, "C++", None);
-            chart.add_value(15, "Go", None);
-            chart.add_value(10, "Zig", None);
-            chart.add_value(5, "Other", Some(CharAttribute::with_fore_color(Color::Gray)));
-            win.add(chart);
+            win.add(piechart!(
+                "d:f,
+                renderer: Braille,
+                angle: 90,
+                dir: ccw,
+                shape: RoundTriangle,
+                content: LabelAndPercentage,
+                labels: Outside,
+                hollow: 50%,
+                values: [{45, Rust}, {25, 'C++'}, {15, Go}, {10, Zig}, {5, Other, attr: gray}]"
+            ));
             win
         })
         .run()
