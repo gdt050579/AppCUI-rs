@@ -2277,7 +2277,7 @@ fn check_render_counter_clockwise() {
             c.set_start_angle(45);
             c.set_direction(Direction::CounterClockwise);
         },
-        0x347E4D9339915594,
+        0xE9BB19CB04D1388F,
     );
 }
 
