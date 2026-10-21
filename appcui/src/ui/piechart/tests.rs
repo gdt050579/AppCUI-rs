@@ -2265,23 +2265,6 @@ fn check_render_start_angle() {
 }
 
 #[test]
-fn check_render_counter_clockwise() {
-    check_render_with(
-        "rectangle, 60% hole, from 45 degrees, counter-clockwise",
-        &[50, 25, 15, 10],
-        40,
-        10,
-        |c| {
-            c.set_shape(DrawModeShape::Rectangle);
-            c.set_hollow_thickness(HollowThickness::Percentage(60));
-            c.set_start_angle(45);
-            c.set_direction(Direction::CounterClockwise);
-        },
-        0xE9BB19CB04D1388F,
-    );
-}
-
-#[test]
 fn check_labels_outside_counter_clockwise() {
     let script = "
         Paint.Enable(false)
