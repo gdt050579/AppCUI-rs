@@ -48,8 +48,6 @@ static HOLLOW_KINDS: &[(&str, &str)] = &[
     ("Percentage", "percent"),
     ("Absolute", "absolute"),
     ("Absolute", "abs"),
-    ("Rectangle", "rectangle"),
-    ("Rectangle", "rect"),
 ];
 
 static LABEL_LAYOUTS: &[(&str, &str)] = &[("None", "none"), ("Inside", "inside"), ("Outside", "outside")];
@@ -239,27 +237,18 @@ fn parse_hollow(repr: &str) -> String {
         return format!("piechart::HollowThickness::Percentage({})", parse_u8(percent, "hollow", 100));
     }
     let Some(fncall) = crate::fncall::FnCall::new(repr) else {
-        panic!("Invalid hollow: {repr} - expected None, Percentage(n), Absolute(n), Rectangle(width, height) or n% !");
+        panic!("Invalid hollow: {repr} - expected None, Percentage(n), Absolute(n) or n% !");
     };
     let name = find("hollow", HOLLOW_KINDS, fncall.name());
-    let expected = match name {
-        "None" => 0,
-        "Rectangle" => 2,
-        _ => 1,
-    };
+    let expected = if name == "None" { 0 } else { 1 };
     assert!(
         fncall.params_count() == expected,
-        "Invalid hollow: {repr} - expected None, Percentage(n), Absolute(n), Rectangle(width, height) or n% !"
+        "Invalid hollow: {repr} - expected None, Percentage(n), Absolute(n) or n% !"
     );
     match name {
         "None" => String::from("piechart::HollowThickness::None"),
         "Percentage" => format!("piechart::HollowThickness::Percentage({})", parse_u8(fncall.param(0).unwrap(), "hollow", 100)),
-        "Absolute" => format!("piechart::HollowThickness::Absolute({})", parse_u8(fncall.param(0).unwrap(), "hollow", 100)),
-        _ => format!(
-            "piechart::HollowThickness::Rectangle({}, {})",
-            parse_u8(fncall.param(0).unwrap(), "hollow", u8::MAX),
-            parse_u8(fncall.param(1).unwrap(), "hollow", u8::MAX)
-        ),
+        _ => format!("piechart::HollowThickness::Absolute({})", parse_u8(fncall.param(0).unwrap(), "hollow", 100)),
     }
 }
 

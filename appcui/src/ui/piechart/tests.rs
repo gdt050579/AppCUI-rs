@@ -706,8 +706,6 @@ fn check_hole_radii() {
     assert_eq!(hole_size(HollowThickness::Percentage(200), 10.0, 5.0), (10.0, 5.0));
     // 4 characters wide, same proportions as the shape
     assert_eq!(hole_size(HollowThickness::Absolute(4), 10.0, 5.0), (2.0, 1.0));
-    // 6 x 2 characters = 6 x 4 physical units
-    assert_eq!(hole_size(HollowThickness::Rectangle(6, 2), 10.0, 5.0), (3.0, 2.0));
     // default: solid circle, half blocks, no margins
     assert_eq!(DrawMode::default(), DrawMode::new(DrawModeShape::Circle, DrawModeRenderer::HalfBlocks, HollowThickness::None));
 }
@@ -740,11 +738,6 @@ fn check_render_ring_percentage() {
 #[test]
 fn check_render_ring_absolute() {
     check_render_with("ring, hole 8 chars wide", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Absolute(8)), 0x4393BEBA9778CE2B);
-}
-
-#[test]
-fn check_render_ring_rectangle() {
-    check_render_with("circle, 12x3 hole", &[50, 25, 15, 10], 40, 12, |c| c.set_hollow_thickness(HollowThickness::Rectangle(12, 3)), 0xA0E4A3333B896A96);
 }
 
 #[test]
@@ -793,7 +786,7 @@ fn painted(surface: &Surface, x: i32, y: i32) -> bool {
 #[test]
 fn check_padding() {
     assert_eq!(PADDING, 1);
-    let holes = [HollowThickness::None, HollowThickness::Percentage(40), HollowThickness::Absolute(2), HollowThickness::Rectangle(3, 1)];
+    let holes = [HollowThickness::None, HollowThickness::Percentage(40), HollowThickness::Absolute(2)];
     let renderers = [DrawModeRenderer::HalfBlocks, DrawModeRenderer::Braille, DrawModeRenderer::Custom('*')];
     for shape in SHAPES {
         for (hole, renderer) in holes.iter().flat_map(|h| renderers.iter().map(|r| (*h, *r))) {
@@ -1770,7 +1763,7 @@ fn check_rectangle_areas_are_proportional() {
     // with or without a hole, even if the hole does not have the shape's proportions
     let mut slices: Vec<Slice> = [1u64, 1, 1, 1].iter().map(|v| Slice::new(*v, "", None)).collect();
     update_proportions(&mut slices);
-    for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(30), HollowThickness::Rectangle(70, 2)] {
+    for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(30)] {
         // 80 x 10 cells = 80 x 20 physical units
         let shape = Rectangle::fill(Size::new(80, 10), hole, false);
         let mut counts = [0usize; 4];
@@ -1839,15 +1832,15 @@ fn check_render_rectangle() {
 #[test]
 fn check_render_rectangle_hollow() {
     check_render_with(
-        "rectangle with a 30x4 hole",
+        "rectangle with a 30 chars wide hole",
         &[50, 25, 15, 10],
         40,
         10,
         |c| {
             c.set_shape(DrawModeShape::Rectangle);
-            c.set_hollow_thickness(HollowThickness::Rectangle(30, 4));
+            c.set_hollow_thickness(HollowThickness::Absolute(30));
         },
-        0x5B2019D5BA78F3C8,
+        0x79A942B89E270953,
     );
 }
 
@@ -1904,7 +1897,7 @@ fn check_round_rectangle_fraction() {
 #[test]
 fn check_round_rectangle_fraction_grows_continuously() {
     // going around the shape, the fraction always grows, without jumps (also where an edge meets an arc)
-    for hole in [HollowThickness::None, HollowThickness::Percentage(50), HollowThickness::Rectangle(12, 2)] {
+    for hole in [HollowThickness::None, HollowThickness::Percentage(50)] {
         let r = round_rectangle(20.0, 8.0, 20.0, 8.0, hole);
         let steps = 5000;
         let mut last = 0.0;
@@ -1929,7 +1922,7 @@ fn check_round_rectangle_areas_are_proportional() {
         let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
         update_proportions(&mut slices);
         let total: u64 = values.iter().sum();
-        for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(30), HollowThickness::Rectangle(70, 2)] {
+        for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(30)] {
             // 80 x 10 cells = 80 x 20 physical units
             let shape = Rectangle::fill(Size::new(80, 10), hole, true);
             let mut counts = vec![0usize; values.len()];
@@ -2041,7 +2034,7 @@ fn check_triangle_fraction() {
 fn check_triangle_fraction_grows_continuously() {
     // going around the shape, the fraction always grows, without jumps (also where an edge meets an arc)
     for rounded in [false, true] {
-        for hole in [HollowThickness::None, HollowThickness::Percentage(50), HollowThickness::Rectangle(12, 3)] {
+        for hole in [HollowThickness::None, HollowThickness::Percentage(50)] {
             let t = triangle(hole, rounded);
             let steps = 5000;
             let mut last = 0.0;
@@ -2068,7 +2061,7 @@ fn check_triangle_areas_are_proportional() {
             let mut slices: Vec<Slice> = values.iter().map(|v| Slice::new(*v, "", None)).collect();
             update_proportions(&mut slices);
             let total: u64 = values.iter().sum();
-            for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(20), HollowThickness::Rectangle(30, 4)] {
+            for hole in [HollowThickness::None, HollowThickness::Percentage(60), HollowThickness::Absolute(20)] {
                 // 60 x 30 cells = 60 x 60 physical units
                 let shape = Triangle::fit(Size::new(60, 30), hole, rounded);
                 let mut counts = vec![0usize; values.len()];
@@ -2585,8 +2578,7 @@ fn check_macro_hollow() {
         assert_eq!(piechart!("d:f, hole: Percentage(30)").draw_mode.hollow_thickness, HollowThickness::Percentage(30));
         assert_eq!(piechart!("d:f, hole: percent(100)").draw_mode.hollow_thickness, HollowThickness::Percentage(100));
         assert_eq!(piechart!("d:f, hollow-thickness: Absolute(4)").draw_mode.hollow_thickness, HollowThickness::Absolute(4));
-        assert_eq!(piechart!("d:f, hollow: Rectangle(6, 2)").draw_mode.hollow_thickness, HollowThickness::Rectangle(6, 2));
-        assert_eq!(piechart!("d:f, hollow: rect(10,3)").draw_mode.hollow_thickness, HollowThickness::Rectangle(10, 3));
+        assert_eq!(piechart!("d:f, hollow: abs(100)").draw_mode.hollow_thickness, HollowThickness::Absolute(100));
     });
 }
 

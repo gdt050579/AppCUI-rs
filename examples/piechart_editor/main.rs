@@ -104,8 +104,6 @@ struct PieChartEditor {
     hole_type: Handle<ComboBox>,
     hole_size_label: Handle<Label>,
     hole_size: Handle<HSlider<u16>>,
-    hole_height_label: Handle<Label>,
-    hole_height: Handle<HSlider<u16>>,
     start_angle: Handle<HSlider<u16>>,
     direction: Handle<ComboBox>,
     // labels
@@ -150,8 +148,6 @@ impl PieChartEditor {
             hole_type: Handle::None,
             hole_size_label: Handle::None,
             hole_size: Handle::None,
-            hole_height_label: Handle::None,
-            hole_height: Handle::None,
             start_angle: Handle::None,
             direction: Handle::None,
             label_layout: Handle::None,
@@ -213,7 +209,7 @@ impl PieChartEditor {
         pages.add(0, label!("'Hole',l:1,t:10,r:1,h:1"));
         win.hole_type = pages.add(
             0,
-            combobox!("l:1,t:11,r:1,items:['None','Percentage','Absolute (characters)','Rectangle (characters)'],index:0"),
+            combobox!("l:1,t:11,r:1,items:['None','Percentage','Absolute (characters)'],index:0"),
         );
         let mut hole_size_label = label!("'Size',l:1,t:13,r:1,h:1");
         hole_size_label.set_enabled(false);
@@ -222,17 +218,10 @@ impl PieChartEditor {
         hole_size.set_value(50);
         hole_size.set_enabled(false);
         win.hole_size = pages.add(0, hole_size);
-        let mut hole_height_label = label!("'Height (characters)',l:1,t:16,r:1,h:1");
-        hole_height_label.set_visible(false);
-        win.hole_height_label = pages.add(0, hole_height_label);
-        let mut hole_height = hslider!("u16,0,50,1,l:1,t:17,r:1,flags:ShowValue,type:Ruler");
-        hole_height.set_value(3);
-        hole_height.set_visible(false);
-        win.hole_height = pages.add(0, hole_height);
-        pages.add(0, label!("'Start angle (degrees)',l:1,t:19,r:1,h:1"));
-        win.start_angle = pages.add(0, hslider!("u16,0,360,15,l:1,t:20,r:1,flags:ShowValue,type:Ruler"));
-        pages.add(0, label!("'Direction',l:1,t:22,r:1,h:1"));
-        win.direction = pages.add(0, combobox!("l:1,t:23,r:1,items:['Clockwise','Counter-clockwise'],index:0"));
+        pages.add(0, label!("'Start angle (degrees)',l:1,t:16,r:1,h:1"));
+        win.start_angle = pages.add(0, hslider!("u16,0,360,15,l:1,t:17,r:1,flags:ShowValue,type:Ruler"));
+        pages.add(0, label!("'Direction',l:1,t:19,r:1,h:1"));
+        win.direction = pages.add(0, combobox!("l:1,t:20,r:1,items:['Clockwise','Counter-clockwise'],index:0"));
 
         // labels
         pages.add(1, label!("'Layout',l:1,t:1,r:1,h:1"));
@@ -341,24 +330,19 @@ impl PieChartEditor {
     fn apply_hole(&mut self) {
         let kind = self.combo_index(self.hole_type);
         let size = self.slider_value(self.hole_size).min(255) as u8;
-        let height = self.slider_value(self.hole_height).min(255) as u8;
         self.set_enabled(self.hole_size_label, kind != 0);
         self.set_enabled(self.hole_size, kind != 0);
-        self.set_visible(self.hole_height_label, kind == 3);
-        self.set_visible(self.hole_height, kind == 3);
         let hole_size_label = self.hole_size_label;
         if let Some(label) = self.control_mut(hole_size_label) {
             label.set_caption(match kind {
                 1 => "Size (percentage)",
                 2 => "Width (characters)",
-                3 => "Width (characters)",
                 _ => "Size",
             });
         }
         let hole = match kind {
             1 => HollowThickness::Percentage(size.min(100)),
             2 => HollowThickness::Absolute(size),
-            3 => HollowThickness::Rectangle(size, height),
             _ => HollowThickness::None,
         };
         self.update_chart(|chart| chart.set_hollow_thickness(hole));
@@ -633,7 +617,7 @@ impl ComboBoxEvents for PieChartEditor {
 impl HSliderEvents<u16> for PieChartEditor {
     fn on_value_changed(&mut self, handle: Handle<HSlider<u16>>, value: u16) -> EventProcessStatus {
         match () {
-            _ if handle == self.hole_size || handle == self.hole_height => self.apply_hole(),
+            _ if handle == self.hole_size => self.apply_hole(),
             _ if handle == self.start_angle => self.update_chart(|chart| chart.set_start_angle(value as u32)),
             _ if handle == self.number_decimals => self.apply_number_format(),
             _ => return EventProcessStatus::Ignored,

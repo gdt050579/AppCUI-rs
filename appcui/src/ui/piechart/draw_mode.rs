@@ -77,8 +77,6 @@ pub enum HollowThickness {
     /// The hole is this many characters wide (`0`..=`100`), with the same
     /// proportions as the shape.
     Absolute(u8),
-    /// The hole is `width` x `height` characters.
-    Rectangle(u8, u8),
 }
 
 /// The direction in which the slices of a [`PieChart`](super::PieChart) follow each other,

@@ -3105,7 +3105,6 @@ pub fn hbarchart(input: TokenStream) -> TokenStream {
 ///   - **None** - No hole (default)
 ///   - **Percentage(n)** or **n%** - The hole is `n` percent (0 to 100) of the shape's size
 ///   - **Absolute(n)** - The hole is `n` characters wide (0 to 100)
-///   - **Rectangle(width, height)** - The hole is `width` x `height` characters
 /// * `labels`, `label-layout`, or `ll` - Where the labels are drawn (optional). Can be **None** (default), **Inside**, or **Outside**
 /// * `content`, `label-content`, or `lc` - What the labels show (optional). Can be **Label** (default), **Value**, **Percentage** (or **percent**),
 ///   **LabelAndValue** (or **label-and-value**, **label+value**), or **LabelAndPercentage** (or **label-and-percentage**, **label+percentage**)

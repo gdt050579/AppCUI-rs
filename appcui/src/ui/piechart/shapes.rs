@@ -24,10 +24,6 @@ pub(crate) fn hole_size(hollow: HollowThickness, rx: f64, ry: f64) -> (f64, f64)
             let hole_ry = if rx > 0.0 { hole_rx * ry / rx } else { 0.0 };
             (hole_rx, hole_ry)
         }
-        HollowThickness::Rectangle(w, h) => {
-            // a character is 1 unit wide and 2 units tall
-            (w as f64 / 2.0, h as f64)
-        }
     }
 }
 

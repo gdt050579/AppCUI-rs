@@ -116,12 +116,11 @@ chart.set_renderer(piechart::DrawModeRenderer::Shade50);
 
 `hollow` (or `set_hollow_thickness`) adds a hole in the middle of the chart, so the slices are drawn in the band between the hole and the outline. The values are available from code as `piechart::HollowThickness`. A hole larger than the shape is capped at the shape's size (and nothing is drawn).
 
-| Value                      | Macro form                              | Description                                                                          |
-| -------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
-| `None`                     | `None`                                  | No hole. This is the default                                                         |
-| `Percentage(n)`            | `Percentage(n)` or `percent(n)` or `n%` | The hole is `n` percent (0 to 100) of the shape's size, with the shape's proportions |
-| `Absolute(n)`              | `Absolute(n)` or `abs(n)`               | The hole is `n` characters wide (0 to 100), with the shape's proportions             |
-| `Rectangle(width, height)` | `Rectangle(w, h)` or `rect(w, h)`       | The hole is `width` x `height` characters                                            |
+| Value           | Macro form                              | Description                                                                          |
+| --------------- | --------------------------------------- | ------------------------------------------------------------------------------------ |
+| `None`          | `None`                                  | No hole. This is the default                                                         |
+| `Percentage(n)` | `Percentage(n)` or `percent(n)` or `n%` | The hole is `n` percent (0 to 100) of the shape's size, with the shape's proportions |
+| `Absolute(n)`   | `Absolute(n)` or `abs(n)`               | The hole is `n` characters wide (0 to 100), with the shape's proportions             |
 
 ```rs
 let donut = piechart!("d:f,hollow:50%");
