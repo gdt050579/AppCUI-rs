@@ -47,7 +47,7 @@ struct MarkerControls {
     kind: Handle<ComboBox>,
     detail_label: Handle<Label>,
     point: Handle<ComboBox>,
-    large_point: Handle<ComboBox>,
+    framed_point: Handle<ComboBox>,
     character_label: Handle<Label>,
     character: Handle<CharPicker>,
     has_default: bool,
@@ -59,7 +59,7 @@ impl MarkerControls {
             kind: Handle::None,
             detail_label: Handle::None,
             point: Handle::None,
-            large_point: Handle::None,
+            framed_point: Handle::None,
             character_label: Handle::None,
             character: Handle::None,
             has_default: false,
@@ -160,7 +160,21 @@ fn add_line_controls(host: &mut impl ControlHost, top: i32, has_default: bool) -
 }
 
 const POINT_CUSTOM: u32 = 3;
-const LARGE_POINT_CUSTOM: u32 = 6;
+const FRAMED_POINT_TYPES: [BarFramedPointType; 12] = [
+    BarFramedPointType::RoundSquare,
+    BarFramedPointType::Square,
+    BarFramedPointType::DoubleLineSquare,
+    BarFramedPointType::ThickSquare,
+    BarFramedPointType::RoundSquareBullet,
+    BarFramedPointType::SquareBullet,
+    BarFramedPointType::DoubleLineSquareBullet,
+    BarFramedPointType::ThickSquareBullet,
+    BarFramedPointType::BrailleCircle,
+    BarFramedPointType::BrailleCircleBullet,
+    BarFramedPointType::BrailleFilledCircle,
+    BarFramedPointType::Filled,
+];
+const FRAMED_POINT_CUSTOM: u32 = FRAMED_POINT_TYPES.len() as u32;
 
 fn point_type(index: u32, mark: char) -> BarPointType {
     match index {
@@ -171,33 +185,39 @@ fn point_type(index: u32, mark: char) -> BarPointType {
     }
 }
 
-fn large_point_type(index: u32, mark: char) -> BarLargePointType {
-    match index {
-        1 => BarLargePointType::Square,
-        2 => BarLargePointType::DoubleLineSquare,
-        3 => BarLargePointType::ThickSquare,
-        4 => BarLargePointType::Circle,
-        5 => BarLargePointType::Diamond,
-        LARGE_POINT_CUSTOM => BarLargePointType::Custom(mark),
-        _ => BarLargePointType::RoundSquare,
-    }
+fn framed_point_type(index: u32, mark: char) -> BarFramedPointType {
+    FRAMED_POINT_TYPES.get(index as usize).copied().unwrap_or(BarFramedPointType::Custom(mark))
 }
 
 /// Adds the marker controls (6 rows starting at `top`).
 fn add_marker_controls(host: &mut impl ControlHost, top: i32, has_default: bool) -> MarkerControls {
     host.add_control(Label::new("Marker", row(top, Some(12))));
     let kinds: &[&str] = if has_default {
-        &["Use chart default", "Small", "Large"]
+        &["Use chart default", "Small", "Framed"]
     } else {
-        &["None (line only)", "Small", "Large"]
+        &["None (line only)", "Small", "Framed"]
     };
     let kind = combo_with(host, top + 1, kinds, true);
     let detail_label = label_with(host, top + 2, "Marker type", false);
     let point = combo_with(host, top + 3, &["Bullet", "Diamond", "Square", "Custom"], false);
-    let large_point = combo_with(
+    let framed_point = combo_with(
         host,
         top + 3,
-        &["Round square", "Square", "Double line square", "Thick square", "Circle", "Diamond", "Custom"],
+        &[
+            "Round square",
+            "Square",
+            "Double line square",
+            "Thick square",
+            "Round square + bullet",
+            "Square + bullet",
+            "Double line square + bullet",
+            "Thick square + bullet",
+            "Braille circle",
+            "Braille circle + bullet",
+            "Braille filled circle",
+            "Filled",
+            "Custom",
+        ],
         false,
     );
     let character_label = label_with(host, top + 4, "Character", false);
@@ -209,7 +229,7 @@ fn add_marker_controls(host: &mut impl ControlHost, top: i32, has_default: bool)
         kind,
         detail_label,
         point,
-        large_point,
+        framed_point,
         character_label,
         character,
         has_default,
@@ -605,23 +625,23 @@ impl LineChartEditor {
             0 if controls.has_default => None,
             0 => Some(linechart::Marker::None),
             1 => Some(linechart::Marker::Small(point_type(self.combo_index(controls.point), mark))),
-            _ => Some(linechart::Marker::Large(large_point_type(self.combo_index(controls.large_point), mark))),
+            _ => Some(linechart::Marker::Framed(framed_point_type(self.combo_index(controls.framed_point), mark))),
         }
     }
     fn sync_marker_controls(&mut self, controls: MarkerControls) {
         let kind = self.combo_index(controls.kind);
         let small = kind == 1;
-        let large = kind == 2;
+        let framed = kind == 2;
         let custom = (small && self.combo_index(controls.point) == POINT_CUSTOM)
-            || (large && self.combo_index(controls.large_point) == LARGE_POINT_CUSTOM);
-        self.set_visible(controls.detail_label, small || large);
+            || (framed && self.combo_index(controls.framed_point) == FRAMED_POINT_CUSTOM);
+        self.set_visible(controls.detail_label, small || framed);
         self.set_visible(controls.point, small);
-        self.set_visible(controls.large_point, large);
+        self.set_visible(controls.framed_point, framed);
         self.set_visible(controls.character_label, custom);
         self.set_visible(controls.character, custom);
     }
     fn show_marker(&mut self, controls: MarkerControls, marker: Option<linechart::Marker>) {
-        let (kind, point, large, mark) = match marker {
+        let (kind, point, framed, mark) = match marker {
             None | Some(linechart::Marker::None) => (0, None, None, None),
             Some(linechart::Marker::Small(p)) => {
                 let (i, m) = match p {
@@ -632,15 +652,10 @@ impl LineChartEditor {
                 };
                 (1, Some(i), None, m)
             }
-            Some(linechart::Marker::Large(p)) => {
+            Some(linechart::Marker::Framed(p)) => {
                 let (i, m) = match p {
-                    BarLargePointType::RoundSquare => (0, None),
-                    BarLargePointType::Square => (1, None),
-                    BarLargePointType::DoubleLineSquare => (2, None),
-                    BarLargePointType::ThickSquare => (3, None),
-                    BarLargePointType::Circle => (4, None),
-                    BarLargePointType::Diamond => (5, None),
-                    BarLargePointType::Custom(ch) => (LARGE_POINT_CUSTOM, Some(ch)),
+                    BarFramedPointType::Custom(ch) => (FRAMED_POINT_CUSTOM, Some(ch)),
+                    p => (FRAMED_POINT_TYPES.iter().position(|x| *x == p).unwrap_or(0) as u32, None),
                 };
                 (2, None, Some(i), m)
             }
@@ -649,8 +664,8 @@ impl LineChartEditor {
         if let Some(i) = point {
             self.set_combo(controls.point, i);
         }
-        if let Some(i) = large {
-            self.set_combo(controls.large_point, i);
+        if let Some(i) = framed {
+            self.set_combo(controls.framed_point, i);
         }
         if let Some(ch) = mark {
             let h = controls.character;
@@ -661,7 +676,7 @@ impl LineChartEditor {
         self.sync_marker_controls(controls);
     }
     fn is_marker_control(controls: MarkerControls, handle: Handle<ComboBox>) -> bool {
-        handle == controls.kind || handle == controls.point || handle == controls.large_point
+        handle == controls.kind || handle == controls.point || handle == controls.framed_point
     }
 
     // ------------------------------------------------------------------ chart settings
@@ -850,7 +865,7 @@ impl LineChartEditor {
             let x = c.xaxis_label(point_index as usize).map(|l| l.to_string()).unwrap_or_else(|| format!("#{}", point_index + 1));
             let marker = bar.draw_mode().and_then(|m| match m {
                 BarDrawMode::Point(p) => Some(linechart::Marker::Small(p)),
-                BarDrawMode::LargePoint(p) => Some(linechart::Marker::Large(p)),
+                BarDrawMode::FramedPoint(p) => Some(linechart::Marker::Framed(p)),
                 _ => None,
             });
             Some((format!("{name} - {x}"), bar.value(), bar.attr(), marker, bar.label().to_string()))
@@ -917,7 +932,7 @@ impl LineChartEditor {
         self.update_selected_point(|bar| {
             match marker {
                 Some(linechart::Marker::Small(p)) => bar.set_draw_mode(BarDrawMode::Point(p)),
-                Some(linechart::Marker::Large(p)) => bar.set_draw_mode(BarDrawMode::LargePoint(p)),
+                Some(linechart::Marker::Framed(p)) => bar.set_draw_mode(BarDrawMode::FramedPoint(p)),
                 _ => bar.clear_draw_mode(),
             };
         });

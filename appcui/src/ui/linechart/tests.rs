@@ -146,23 +146,25 @@ fn check_marker_default_and_width() {
     assert_eq!(Marker::default(), Marker::Small(BarPointType::Bullet));
     assert_eq!(Marker::None.width(), 1);
     assert_eq!(Marker::Small(BarPointType::Diamond).width(), 1);
-    assert_eq!(Marker::Large(BarLargePointType::RoundSquare).width(), 3);
+    assert_eq!(Marker::Framed(BarFramedPointType::RoundSquare).width(), 5);
 }
 
 #[test]
 fn check_marker_height() {
     assert_eq!(Marker::None.height(), 1);
     assert_eq!(Marker::Small(BarPointType::Bullet).height(), 1);
-    assert_eq!(Marker::Large(BarLargePointType::Square).height(), 2);
+    assert_eq!(Marker::Framed(BarFramedPointType::Square).height(), 3);
 }
 
 #[test]
 fn check_marker_from_draw_mode() {
     assert_eq!(Marker::from_draw_mode(BarDrawMode::Point(BarPointType::Bullet)), Some(Marker::Small(BarPointType::Bullet)));
     assert_eq!(
-        Marker::from_draw_mode(BarDrawMode::LargePoint(BarLargePointType::Diamond)),
-        Some(Marker::Large(BarLargePointType::Diamond))
+        Marker::from_draw_mode(BarDrawMode::FramedPoint(BarFramedPointType::BrailleCircle)),
+        Some(Marker::Framed(BarFramedPointType::BrailleCircle))
     );
+    // the 3x2 large point has no middle row for the value: it falls back to the default marker
+    assert_eq!(Marker::from_draw_mode(BarDrawMode::LargePoint(BarLargePointType::Diamond)), None);
     assert_eq!(Marker::from_draw_mode(BarDrawMode::Fill(BarFillType::Solid)), None);
     assert_eq!(Marker::from_draw_mode(BarDrawMode::Line(LineType::Single)), None);
     assert_eq!(Marker::from_draw_mode(BarDrawMode::Cap(BarCapType::Solid)), None);
@@ -203,10 +205,10 @@ fn check_chart_set_defaults() {
     in_app(|| {
         let mut chart = empty_chart();
         chart.set_default_line(LineMode::Braille);
-        chart.set_default_marker(Marker::Large(BarLargePointType::Circle));
+        chart.set_default_marker(Marker::Framed(BarFramedPointType::BrailleCircle));
         chart.set_default_spacing(0);
         assert_eq!(chart.default_line(), LineMode::Braille);
-        assert_eq!(chart.default_marker(), Marker::Large(BarLargePointType::Circle));
+        assert_eq!(chart.default_marker(), Marker::Framed(BarFramedPointType::BrailleCircle));
         assert_eq!(chart.default_spacing(), 0);
     });
 }
@@ -481,14 +483,14 @@ fn check_paint_multiple_series_xaxis_labels() {
 }
 
 #[test]
-fn check_paint_large_markers_fixed_scale() {
+fn check_paint_framed_markers_fixed_scale() {
     let script = "
-        Paint('1. Large markers, one point overridden with a small red marker, Fixed 0..50 (100 clamped to the top)')
-        CheckHash(0xCFF5CA694635AB32)
+        Paint('1. Framed markers, one point overridden with a small red marker, Fixed 0..50 (100 clamped to the top)')
+        CheckHash(0x93E62659C7158CE4)
     ";
     run_paint_test(script, Size::new(44, 14), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
-        c.set_default_marker(Marker::Large(BarLargePointType::RoundSquare));
+        c.set_default_marker(Marker::Framed(BarFramedPointType::RoundSquare));
         c.add_series(Series::with_values("A", [0, 10, 20, 30, 100]));
         c.update_series(0, |s| {
             s.get_mut(2)
@@ -699,14 +701,14 @@ fn check_paint_mixed_series_lines() {
 }
 
 #[test]
-fn check_paint_lines_large_markers() {
+fn check_paint_lines_framed_markers() {
     let script = "
-        Paint('1. Lines between large markers start from the marker centers')
-        CheckHash(0x22C452CF385EAC92)
+        Paint('1. Lines are attached to the middle of the sides of framed markers, with junctions')
+        CheckHash(0xBD2E31174AAC19E1)
     ";
     run_paint_test(script, Size::new(50, 16), || {
         let mut c = chart_with_line(LineMode::Line(LineType::Single));
-        c.set_default_marker(Marker::Large(BarLargePointType::Circle));
+        c.set_default_marker(Marker::Framed(BarFramedPointType::RoundSquareBullet));
         c.set_default_spacing(3);
         c
     });
@@ -999,17 +1001,20 @@ fn check_point_at() {
 }
 
 #[test]
-fn check_point_at_large_markers() {
+fn check_point_at_framed_markers() {
     run_with_size(|chart| {
-        // large markers: 2 rows, 8 levels; value 0 -> rows 8..9, value 10 -> rows 1..2; column 0 at x = 10..12
-        chart.set_default_marker(Marker::Large(BarLargePointType::Square));
+        // framed markers (5x3): 7 levels; value 0 -> middle row 8 (rows 7..9), value 10 -> middle row 2 (rows 1..3)
+        // columns are 5 wide, one every 7 cells: column 0 at x = 10..14, column 1 at x = 17..21
+        chart.set_default_marker(Marker::Framed(BarFramedPointType::Square));
         chart.add_series(Series::with_values("A", [0, 10]));
         assert_eq!(chart.point_at(10, 9), Some(PointPos::new(0, 0)));
-        assert_eq!(chart.point_at(12, 8), Some(PointPos::new(0, 0)));
-        assert_eq!(chart.point_at(11, 7), Some(PointPos::new(0, 0)));
-        assert_eq!(chart.point_at(11, 6), None);
-        assert_eq!(chart.point_at(16, 3), Some(PointPos::new(0, 1)));
-        assert_eq!(chart.point_at(16, 4), None);
+        assert_eq!(chart.point_at(14, 7), Some(PointPos::new(0, 0)));
+        assert_eq!(chart.point_at(12, 6), Some(PointPos::new(0, 0))); // one row above the frame
+        assert_eq!(chart.point_at(12, 5), None);
+        assert_eq!(chart.point_at(19, 3), Some(PointPos::new(0, 1)));
+        assert_eq!(chart.point_at(19, 4), Some(PointPos::new(0, 1)));
+        assert_eq!(chart.point_at(19, 5), None);
+        assert_eq!(chart.point_at(19, 0), Some(PointPos::new(0, 1))); // the empty row above the plot
     });
 }
 
@@ -1113,7 +1118,7 @@ fn check_selection_follows_data_changes() {
         chart.select_point(2, 7);
         // editing a point keeps the selection
         chart.update_series(2, |s| {
-            s.get_mut(7).unwrap().set_draw_mode(BarDrawMode::LargePoint(BarLargePointType::Circle));
+            s.get_mut(7).unwrap().set_draw_mode(BarDrawMode::FramedPoint(BarFramedPointType::Filled));
         });
         assert_eq!(chart.selected_point(), Some((2, 7)));
         // removing an earlier series shifts the selected series index
@@ -1221,7 +1226,7 @@ fn selection_chart(flags: linechart::Flags) -> LineChart<i32> {
     c.add_series(SeriesBuilder::new("CPU").line(LineMode::Braille).values([10, 35, 20, 60, 40, 55]));
     c.add_series(SeriesBuilder::new("RAM").values([40, 42, 44, 41, 43, 45]));
     c.update_series(1, |s| {
-        s.get_mut(4).unwrap().set_draw_mode(BarDrawMode::LargePoint(BarLargePointType::RoundSquare));
+        s.get_mut(4).unwrap().set_draw_mode(BarDrawMode::FramedPoint(BarFramedPointType::RoundSquareBullet));
     });
     c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(1));
     c
@@ -1231,30 +1236,30 @@ fn selection_chart(flags: linechart::Flags) -> LineChart<i32> {
 fn check_selection_frame() {
     let script = "
         Paint('1. No selection')
-        CheckHash(0xC6108EF88E753176)
-        Mouse.Click(28,4,left)
+        CheckHash(0x8E2C4525A477BAB)
+        Mouse.Click(24,5,left)
         Paint('2. RAM point 2 selected - only its marker is framed')
-        CheckHash(0x8596F0AD9970670E)
-        Mouse.Click(42,5,left)
-        Paint('3. The large RAM point 5 selected')
-        CheckHash(0xA29D0D2DA982E306)
+        CheckHash(0xBDD46EDAED66D1E)
+        Mouse.Click(51,5,left)
+        Paint('3. The framed RAM point 5 selected')
+        CheckHash(0xF181A28BDB2C5B03)
     ";
-    run_paint_test(script, Size::new(52, 14), || selection_chart(linechart::Flags::None));
+    run_paint_test(script, Size::new(70, 14), || selection_chart(linechart::Flags::None));
 }
 
 #[test]
 fn check_selection_dim_points() {
     let script = "
         Paint('1. No selection - nothing is dimmed')
-        CheckHash(0xC6108EF88E753176)
-        Mouse.Click(35,2,left)
+        CheckHash(0x8E2C4525A477BAB)
+        Mouse.Click(42,3,left)
         Paint('2. CPU point 4 selected - everything else (RAM included) is dimmed')
-        CheckHash(0xFB81C5388C09ACBE)
+        CheckHash(0x9008D1B8A60746CF)
         Key.Pressed(Escape)
         Paint('3. Escape - back to normal')
-        CheckHash(0xC6108EF88E753176)
+        CheckHash(0x8E2C4525A477BAB)
     ";
-    run_paint_test(script, Size::new(52, 14), || selection_chart(linechart::Flags::DimPointsOnSelection));
+    run_paint_test(script, Size::new(70, 14), || selection_chart(linechart::Flags::DimPointsOnSelection));
 }
 
 #[test]

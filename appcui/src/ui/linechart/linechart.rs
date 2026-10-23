@@ -45,7 +45,7 @@ struct XAxis {
 struct PlotLayout {
     /// width of every column (the widest marker used), in cells
     column_width: u8,
-    /// height of the tallest marker used (1 or 2 rows)
+    /// height of the tallest marker used (1 or 3 rows); its middle row is on the value
     marker_height: u8,
     /// number of distinct rows a marker (its top row) can be drawn on
     levels: i32,
@@ -117,6 +117,9 @@ where
     tooltip_text: String,
     /// selected point, if any
     pub(super) selected_point: Option<PointPos>,
+    /// junctions to draw on the sides of framed markers: (series index, position, character),
+    /// computed while drawing the lines and applied right after the markers of that series
+    junctions: Vec<(usize, Point, Character)>,
 }
 
 impl<T> LineChart<T>
@@ -176,6 +179,7 @@ where
             hovered: None,
             tooltip_text: String::new(),
             selected_point: None,
+            junctions: Vec::new(),
         }
     }
 
@@ -687,7 +691,7 @@ where
         }
         self.plot.low + (self.plot.high - self.plot.low) * level as f64 / (self.plot.levels - 1) as f64
     }
-    /// Marker used by a point: its own Point/LargePoint draw mode, or the chart default.
+    /// Marker used by a point: its own Point/FramedPoint draw mode, or the chart default.
     #[inline(always)]
     fn marker_for(&self, bar: &Bar<T>) -> Marker {
         bar.draw_mode.and_then(Marker::from_draw_mode).unwrap_or(self.default_marker)
@@ -705,10 +709,10 @@ where
     fn plot_bottom(&self) -> i32 {
         self.size().height as i32 - (self.xaxis.label_format.height() as i32 + 1)
     }
-    /// Row of the top of a marker drawn on level 0.
+    /// Row of the value of a point on level 0 (the middle row of the tallest marker, which must fit in the plot).
     #[inline(always)]
     fn level0_row(&self) -> i32 {
-        self.plot_bottom() - (self.plot.marker_height as i32 - 1)
+        self.plot_bottom() - (self.plot.marker_height as i32 - 1) / 2
     }
     /// Distance, in cells, between the starts of two consecutive columns.
     #[inline(always)]
@@ -811,7 +815,7 @@ where
         let x = self.screen_x(point.index as usize);
         let y = self.level0_row() - p.len as i32;
         match self.marker_for(&p.bar) {
-            Marker::Large(_) => Rect::with_size(x, y, 3, 2),
+            Marker::Framed(_) => Rect::with_size(x, y - 1, 5, 3),
             _ => Rect::with_size(x + (self.plot.column_width as i32 - 1) / 2, y, 1, 1),
         }
     }
@@ -823,8 +827,9 @@ where
         for series in self.series.iter() {
             if let Some(point) = series.data.get(index) {
                 let y = level0_row - point.len as i32;
-                top = top.min(y);
-                bottom = bottom.max(y + self.plot.marker_height as i32 - 1);
+                let half = (self.marker_for(&point.bar).height() as i32 - 1) / 2;
+                top = top.min(y - half);
+                bottom = bottom.max(y + half);
             }
         }
         if top > bottom {
@@ -1243,16 +1248,32 @@ where
     fn series_attr(series: &Series<T>, series_index: usize, series_colors: &[CharAttribute]) -> CharAttribute {
         series.attr().unwrap_or(series_colors[series_index % series_colors.len()])
     }
-    /// Center of the marker of point `index` with level `level`, in surface coordinates.
+    /// Where a line leaves (`outgoing = true`, towards the next point) or reaches point `index`
+    /// of a series, in surface coordinates.
     ///
-    /// The center is the middle column of the column and the top row of the marker
-    /// (the row that corresponds to the value).
+    /// For a framed marker this is the cell just outside the middle of its right (outgoing) or
+    /// left side; for every other marker it is the center of the marker (the line is drawn under it).
     #[inline(always)]
-    fn point_center(&self, index: usize, level: i16, level0_row: i32) -> Point {
-        Point::new(
-            self.screen_x(index) + (self.plot.column_width as i32 - 1) / 2,
-            level0_row - level as i32,
-        )
+    fn line_anchor(&self, index: usize, point: &BarWithLayout<T>, outgoing: bool, level0_row: i32) -> Point {
+        let y = level0_row - point.len as i32;
+        let x = self.screen_x(index);
+        match self.marker_for(&point.bar) {
+            Marker::Framed(_) => Point::new(if outgoing { x + 5 } else { x - 1 }, y),
+            _ => Point::new(x + (self.plot.column_width as i32 - 1) / 2, y),
+        }
+    }
+    /// If the border of a framed marker at `border` touches a box-drawing line at `neighbour`,
+    /// returns the junction to draw on the border (`left_side`: the line comes from the left).
+    fn junction_for(&self, point: &BarWithLayout<T>, neighbour: Point, left_side: bool) -> Option<char> {
+        let Marker::Framed(frame) = self.marker_for(&point.bar) else {
+            return None;
+        };
+        let junctions = super::marker::frame_junctions(frame)?;
+        let ch = self.surface.char(neighbour.x, neighbour.y)?.code;
+        // a line on the left of the marker must have an arm towards the right (and vice versa)
+        let weight = super::marker::horizontal_arm(ch, !left_side)?;
+        let (left, right) = junctions[weight];
+        Some(if left_side { left } else { right })
     }
     fn paint_lines(&mut self, series_colors: &[CharAttribute]) {
         if self.plot.levels == 0 {
@@ -1261,6 +1282,7 @@ where
         let left_margin = self.x_axis_left_margin();
         let width = self.size().width as i32;
         let level0_row = self.level0_row();
+        self.junctions.clear();
         self.surface.set_relative_clip(left_margin, 0, width, self.plot_bottom());
         for series_index in 0..self.series.len() {
             let series = &self.series[series_index];
@@ -1274,23 +1296,63 @@ where
             if first + 1 >= series.data.len() {
                 continue;
             }
-            let mut previous = self.point_center(first, series.data[first].len, level0_row);
-            for index in first + 1..series.data.len() {
-                if previous.x >= width {
+            for index in first + 1..self.series[series_index].data.len() {
+                let series = &self.series[series_index];
+                let start = self.line_anchor(index - 1, &series.data[index - 1], true, level0_row);
+                if start.x >= width {
                     // the rest of the series is outside the visible area
                     break;
                 }
-                let current = self.point_center(index, self.series[series_index].data[index].len, level0_row);
+                let end = self.line_anchor(index, &series.data[index], false, level0_row);
+                if start.x > end.x {
+                    // the markers touch each other: there is no room for a line
+                    continue;
+                }
+                // a line attached to the side of a framed marker must leave / enter it horizontally
+                let framed_end = matches!(self.marker_for(&series.data[index - 1].bar), Marker::Framed(_))
+                    || matches!(self.marker_for(&series.data[index].bar), Marker::Framed(_));
+                let steep = start.y != end.y && (end.y - start.y).abs() >= (end.x - start.x).abs();
                 match line {
                     LineMode::None => {}
-                    LineMode::Braille => self.surface.draw_line(previous.x, previous.y, current.x, current.y, LineType::Braille, attr),
-                    LineMode::Line(line_type) => self.surface.draw_line(previous.x, previous.y, current.x, current.y, line_type, attr),
+                    LineMode::Braille => self.surface.draw_line(start.x, start.y, end.x, end.y, LineType::Braille, attr),
+                    LineMode::Line(line_type) | LineMode::Orthogonal(line_type, _) if start == end => {
+                        // a single cell between two framed markers
+                        self.surface.draw_horizontal_line(start.x, start.y, start.x, line_type, attr)
+                    }
+                    LineMode::Line(line_type) if framed_end && steep => {
+                        // a steep box-drawing line would start vertically (along the side of the frame)
+                        self.surface.draw_orthogonal_line(
+                            start.x,
+                            start.y,
+                            end.x,
+                            end.y,
+                            line_type,
+                            OrthogonalDirection::HorizontalUntilMiddle,
+                            attr,
+                        )
+                    }
+                    LineMode::Line(line_type) => self.surface.draw_line(start.x, start.y, end.x, end.y, line_type, attr),
                     LineMode::Orthogonal(line_type, direction) => {
-                        self.surface
-                            .draw_orthogonal_line(previous.x, previous.y, current.x, current.y, line_type, direction, attr)
+                        let direction = if framed_end && direction == OrthogonalDirection::Auto {
+                            OrthogonalDirection::HorizontalUntilMiddle
+                        } else {
+                            direction
+                        };
+                        self.surface.draw_orthogonal_line(start.x, start.y, end.x, end.y, line_type, direction, attr)
                     }
                 }
-                previous = current;
+                // junctions on the sides of framed markers (applied after the markers are drawn)
+                let series = &self.series[series_index];
+                if let Some(ch) = self.junction_for(&series.data[index - 1], start, false) {
+                    let point = &series.data[index - 1].bar;
+                    let a = point.attr.unwrap_or(attr);
+                    self.junctions.push((series_index, Point::new(start.x - 1, start.y), Character::with_attributes(ch, a)));
+                }
+                if let Some(ch) = self.junction_for(&series.data[index], end, true) {
+                    let point = &series.data[index].bar;
+                    let a = point.attr.unwrap_or(attr);
+                    self.junctions.push((series_index, Point::new(end.x + 1, end.y), Character::with_attributes(ch, a)));
+                }
             }
         }
         self.surface.reset_clip();
@@ -1319,15 +1381,19 @@ where
                         // centered in the column (columns are wider when large markers are used)
                         self.surface.write_char(x + (column_width - 1) / 2, y, point_type.character(attr));
                     }
-                    Marker::Large(point_type) => {
-                        let chars = point_type.characters();
-                        for (i, ch) in chars.iter().enumerate() {
-                            let dx = (i % 3) as i32;
-                            let dy = (i / 3) as i32;
-                            self.surface.write_char(x + dx, y + dy, Character::with_attributes(*ch, attr));
+                    Marker::Framed(point_type) => {
+                        // the middle row is on the value
+                        for (dy, row) in point_type.cells().iter().enumerate() {
+                            for (dx, ch) in row.iter().enumerate() {
+                                self.surface.write_char(x + dx as i32, y - 1 + dy as i32, Character::with_attributes(*ch, attr));
+                            }
                         }
                     }
                 }
+            }
+            // the junctions of this series (a later series is drawn on top of them)
+            for (_, pos, ch) in self.junctions.iter().filter(|(s, _, _)| *s == series_index) {
+                self.surface.write_char(pos.x, pos.y, *ch);
             }
         }
         self.surface.reset_clip();

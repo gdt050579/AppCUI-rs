@@ -8,7 +8,7 @@ use crate::ui::components::{Bar, BarWithLayout};
 ///
 /// Every point is a [`Bar`], so it can carry its own color and marker
 /// ([`BarDrawMode::Point`](crate::ui::components::BarDrawMode::Point) or
-/// [`BarDrawMode::LargePoint`](crate::ui::components::BarDrawMode::LargePoint)).
+/// [`BarDrawMode::FramedPoint`](crate::ui::components::BarDrawMode::FramedPoint)).
 /// The label of a point is a note about that value only (for example `"peak"`): it is shown in
 /// the tooltip of the point. The names of the X positions are set on the chart instead, with
 /// [`LineChart::set_xaxis_labels`](super::LineChart::set_xaxis_labels).
