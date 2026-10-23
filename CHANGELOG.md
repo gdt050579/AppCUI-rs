@@ -5,6 +5,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
+## [Unreleased]
+
+### Added
+- **LineChart** control: plots one or more numeric series (any integer or floating-point type)
+  over a shared X axis. Each series has its own label, color and line mode (`Braille`, a direct
+  box-drawing line, or an orthogonal line with a routing direction), and every point can override
+  its color and marker (small, or a 5x3 framed marker that lines attach to). Supports scale modes,
+  chart-level names for the X positions (with an index, names or span X axis), per-point notes in
+  tooltips, Y axis with grid, value formatting, horizontal scrolling, per-point selection by mouse
+  or keyboard, `GroupHover`, `DimPointsOnSelection`, `ShowZeroLineOnYAxis`, and the
+  `on_point_selected` / `on_clear_selection` events. Created with `LineChart::new` or `linechart!`.
+- `BarDrawMode::FramedPoint`: a 5x3 marker (empty frames, frames with a bullet, braille circles,
+  filled, or a custom character), available in `VBarChart`, `HBarChart` and `LineChart`.
+- `chart.hover` theme color, used by `LineChart` with `GroupHover`.
+- `examples/linechart` and `examples/linechart_editor`.
+
+### Fixed
+- `Point` without a marker kind in `vbarchart!` / `hbarchart!` (for example `dm: Point`) now uses
+  `Bullet`; before, it generated code that did not compile.
+
 ## [0.5.5] - 2026-10-21
 
 ### Added
