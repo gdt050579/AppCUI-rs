@@ -438,6 +438,10 @@ name = "piechart_editor"
 path = "piechart_editor/main.rs"
 
 [[example]]
+name = "linechart"
+path = "linechart/main.rs"
+
+[[example]]
 name = "hexview"
 path = "hexview/main.rs"
 
