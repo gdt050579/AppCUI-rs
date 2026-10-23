@@ -465,7 +465,7 @@ fn check_paint_multiple_series_xaxis_labels() {
 fn check_paint_framed_markers_fixed_scale() {
     let script = "
         Paint('1. Framed markers, one point overridden with a small red marker, Fixed 0..50 (100 clamped to the top)')
-        CheckHash(0x93E62659C7158CE4)
+        CheckHash(0x23841D1A4896ADA)
     ";
     run_paint_test(script, Size::new(44, 14), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
@@ -1263,4 +1263,136 @@ fn check_selection_keyboard_scrolls_into_view() {
         c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(0));
         c
     });
+}
+
+// ---------------------------------------------------------------- linechart! macro
+
+#[test]
+fn check_macro_data() {
+    in_app(|| {
+        let c = linechart!(
+            "type: i32, d:f, flags: ScrollBars+GroupHover,
+            line: Braille, marker: Framed(RoundSquareBullet), spacing: 3,
+            labels: [Jan, Feb, 'Mar 2026'],
+            series: [
+                {CPU, values: [10, 20, {30, label: peak, dm: Point(Diamond)}], attr: green},
+                {name: RAM, values: [5, 6], line: Orthogonal(Double, VerticalFirst)},
+                {}
+            ]"
+        );
+        assert!(c.flags().contains(linechart::Flags::ScrollBars | linechart::Flags::GroupHover));
+        assert_eq!(c.default_line(), LineMode::Braille);
+        assert_eq!(c.default_marker(), Marker::Framed(BarFramedPointType::RoundSquareBullet));
+        assert_eq!(c.default_spacing(), 3);
+        assert_eq!(c.series_count(), 3);
+        assert_eq!(c.points_count(), 3);
+        assert_eq!(c.xaxis_labels_count(), 3);
+        assert_eq!(c.xaxis_label(2), Some("Mar 2026"));
+        let cpu = c.get_series(0).unwrap();
+        assert_eq!(cpu.label(), "CPU");
+        assert_eq!(cpu.line(), None);
+        assert_eq!(cpu.attr(), Some(CharAttribute::with_fore_color(Color::Green)));
+        assert_eq!(cpu.iter().map(|b| b.value()).collect::<Vec<_>>(), vec![10, 20, 30]);
+        assert_eq!(cpu.get(2).unwrap().label(), "peak");
+        assert_eq!(cpu.get(2).unwrap().draw_mode(), Some(BarDrawMode::Point(BarPointType::Diamond)));
+        let ram = c.get_series(1).unwrap();
+        assert_eq!(ram.label(), "RAM");
+        assert_eq!(ram.line(), Some(LineMode::Orthogonal(LineType::Double, OrthogonalDirection::VerticalFirst)));
+        assert_eq!(ram.attr(), None);
+        let empty = c.get_series(2).unwrap();
+        assert_eq!(empty.label(), "");
+        assert!(empty.is_empty());
+    });
+}
+
+#[test]
+fn check_macro_line_and_marker_forms() {
+    in_app(|| {
+        let c = linechart!("i32, d:f, line: Line, marker: Point");
+        assert_eq!(c.default_line(), LineMode::Line(LineType::Single));
+        assert_eq!(c.default_marker(), Marker::Small(BarPointType::Bullet));
+        let c = linechart!("i32, d:f, line: Line(Thick), marker: Small('x')");
+        assert_eq!(c.default_line(), LineMode::Line(LineType::SingleThick));
+        assert_eq!(c.default_marker(), Marker::Small(BarPointType::Custom('x')));
+        let c = linechart!("i32, d:f, line: Orthogonal, marker: FramedPoint");
+        assert_eq!(c.default_line(), LineMode::Orthogonal(LineType::Single, OrthogonalDirection::Auto));
+        assert_eq!(c.default_marker(), Marker::Framed(BarFramedPointType::RoundSquare));
+        let c = linechart!("i32, d:f, line: ortho(round), marker: framed('#')");
+        assert_eq!(c.default_line(), LineMode::Orthogonal(LineType::SingleRound, OrthogonalDirection::Auto));
+        assert_eq!(c.default_marker(), Marker::Framed(BarFramedPointType::Custom('#')));
+        let c = linechart!("i32, d:f, line: None, marker: None");
+        assert_eq!(c.default_line(), LineMode::None);
+        assert_eq!(c.default_marker(), Marker::None);
+    });
+}
+
+#[test]
+fn check_macro_paint_labels() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Two series, month labels')
+        CheckHash(0x1184D4D5A640B8CC)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(linechart!(
+                "type: i32, d:f, scale: Fixed(0, 50), spacing: 4,
+                labels: [Jan, Feb, Mar, Apr, May],
+                series: [
+                    {A, values: [10, 30, 20, 45, 25]},
+                    {B, values: [5, 10, 15, 20, 25], line: Braille}
+                ]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_macro_paint_framed_index_axis() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Framed markers, index axis, no grid')
+        CheckHash(0xADC73CE38F58DD75)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(linechart!(
+                "type: i32, d:f, scale: Fixed(0, 40), marker: Framed, spacing: 4, xlabels: Index(1), grid: false, yw: 4,
+                series: [{A, values: [10, 30, 20, 35]}]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_macro_paint_spans_no_yaxis() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Span labels, no Y axis')
+        CheckHash(0xE63F6C2E899700F9)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(linechart!(
+                "type: i32, d:f, scale: fit, yaxis: false, labels: [a, b, c, d],
+                xlabels: [{0, 2, H1}, {2, 2, H2}],
+                series: [{A, values: [1, 4, 2, 5], line: Orthogonal(Single, HorizontalUntilMiddle)}]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
 }

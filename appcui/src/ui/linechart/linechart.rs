@@ -1282,7 +1282,6 @@ where
                 // a line attached to the side of a framed marker must leave / enter it horizontally
                 let framed_end = matches!(self.marker_for(&series.data[index - 1].bar), Marker::Framed(_))
                     || matches!(self.marker_for(&series.data[index].bar), Marker::Framed(_));
-                let steep = start.y != end.y && (end.y - start.y).abs() >= (end.x - start.x).abs();
                 match line {
                     LineMode::None => {}
                     LineMode::Braille => self.surface.draw_line(start.x, start.y, end.x, end.y, LineType::Braille, attr),
@@ -1290,8 +1289,9 @@ where
                         // a single cell between two framed markers
                         self.surface.draw_horizontal_line(start.x, start.y, start.x, line_type, attr)
                     }
-                    LineMode::Line(line_type) if framed_end && steep => {
-                        // a steep box-drawing line would start vertically (along the side of the frame)
+                    LineMode::Line(line_type) if framed_end && start.y != end.y => {
+                        // a box-drawing staircase can start or end with a vertical step, which would run along
+                        // the side of the frame instead of entering it: route it horizontally at both ends
                         self.surface.draw_orthogonal_line(
                             start.x,
                             start.y,

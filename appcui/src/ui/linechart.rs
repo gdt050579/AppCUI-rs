@@ -21,4 +21,12 @@ pub use self::linechart::LineChart;
 pub use self::marker::Marker;
 pub use self::series::{Series, SeriesBuilder};
 
+pub use super::components::Bar;
+pub use super::components::BarBuilder;
+pub use super::components::BarDrawMode;
+pub use super::components::BarFramedPointType;
+pub use super::components::BarPointType;
+pub use super::components::BarScale;
+pub use super::components::BarSpan;
+
 use self::initialization_flags::XAxisLabelFormat;

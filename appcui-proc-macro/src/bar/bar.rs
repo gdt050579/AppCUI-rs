@@ -277,6 +277,31 @@ fn parse_typed_draw_mode(
     format!("{module}::BarDrawMode::{variant}({inner})")
 }
 
+/// Parses the inner kind of a point marker (`None` → the default kind).
+/// `framed = false` gives a `BarPointType`, `framed = true` a `BarFramedPointType`.
+pub(crate) fn parse_point_kind(param: Option<&str>, key: &str, module: &str, framed: bool) -> String {
+    let (names, enum_name, default_variant) = if framed {
+        (FRAMED_POINT_TYPES, "BarFramedPointType", "RoundSquare")
+    } else {
+        (POINT_TYPES, "BarPointType", "Bullet")
+    };
+    match param.map(str::trim) {
+        None => format!("{module}::{enum_name}::{default_variant}"),
+        Some(param) => {
+            if let Some(kind) = crate::utils::find_string_in_array(names, param) {
+                format!("{module}::{enum_name}::{kind}")
+            } else {
+                format!("{module}::{enum_name}::Custom({})", parse_custom_char(param, key))
+            }
+        }
+    }
+}
+
+/// Parses a line type name (`Single`, `Double`, `Thick`, ...) into `LineType::...`.
+pub(crate) fn parse_line_type_name(repr: &str, key: &str) -> String {
+    parse_line_type(repr, key)
+}
+
 pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String {
     let repr = repr.trim();
     if let Some(fncall) = crate::fncall::FnCall::new(repr) {
@@ -292,7 +317,7 @@ pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String
                     }
                     format!("{module}::BarDrawMode::Smooth")
                 }
-                "Point" => parse_typed_draw_mode(&fncall, key, module, "Point", POINT_TYPES, "BarPointType", "Circle"),
+                "Point" => parse_typed_draw_mode(&fncall, key, module, "Point", POINT_TYPES, "BarPointType", "Bullet"),
                 "LargePoint" => parse_typed_draw_mode(&fncall, key, module, "LargePoint", LARGE_POINT_TYPES, "BarLargePointType", "RoundSquare"),
                 "FramedPoint" => parse_typed_draw_mode(&fncall, key, module, "FramedPoint", FRAMED_POINT_TYPES, "BarFramedPointType", "RoundSquare"),
                 "Cap" => parse_typed_draw_mode(&fncall, key, module, "Cap", CAP_TYPES, "BarCapType", "Solid"),
