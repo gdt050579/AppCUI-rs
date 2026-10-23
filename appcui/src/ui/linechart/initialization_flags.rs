@@ -6,8 +6,12 @@ use EnumBitFlags::EnumBitFlags;
 ///
 /// Combine values with `|`. `Flags::None` draws the chart without extra decorations.
 pub enum Flags {
+    /// Shows a horizontal scroll bar when the points are wider than the control.
+    ///
+    /// The bottom margin grows while the chart has focus so the scroll bar stays visible.
+    ScrollBars = 1,
     /// Draws a solid horizontal line at value zero while the Y-axis grid is visible.
-    ShowZeroLineOnYAxis = 1,
+    ShowZeroLineOnYAxis = 2,
 }
 
 /// Chooses the labels drawn under the points of a [`struct@super::LineChart`].

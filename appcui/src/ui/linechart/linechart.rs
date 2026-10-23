@@ -32,7 +32,7 @@ struct PlotLayout {
 
 const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 
-#[CustomControl(overwrite = OnPaint + OnResize, internal = true)]
+#[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnKeyPressed, internal = true)]
 /// A line chart for one or more numeric series of type `T`.
 ///
 /// Each [`Series`] is a list of points that share the same X axis, so several lines
@@ -46,6 +46,11 @@ const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 /// in the chart, and columns are separated by the default spacing. The vertical position
 /// of a point is computed from its value and the chart scale ([`BarScale`]), using the
 /// minimum and maximum over all series.
+///
+/// When the points are wider than the control, the chart scrolls horizontally with the
+/// arrow keys (`Left`/`Right` by one cell, `Ctrl+Left`/`Ctrl+Right` by one point,
+/// `Home`/`End`) and the mouse wheel. With [`Flags::ScrollBars`], a horizontal scroll bar
+/// is shown while the chart has focus.
 pub struct LineChart<T>
 where
     T: Number + 'static,
@@ -61,6 +66,11 @@ where
     xaxis: XAxis,
     plot: PlotLayout,
     surface: Surface,
+    scrollbars: ScrollBars,
+    /// horizontal scroll, in cells (0 = the first column is at the left edge of the plot)
+    pub(super) left_scroll: i32,
+    /// index of the first column that is (at least partially) visible
+    pub(super) first_visible_point: usize,
 }
 
 impl<T> LineChart<T>
@@ -83,8 +93,13 @@ where
     /// let chart = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
     /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
+        let extra = if flags.contains(Flags::ScrollBars) {
+            StatusFlags::IncreaseBottomMarginOnFocus
+        } else {
+            StatusFlags::None
+        };
         Self {
-            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | extra),
             flags,
             series: Vec::new(),
             default_line: LineMode::default(),
@@ -108,6 +123,9 @@ where
             },
             plot: PlotLayout::default(),
             surface: Surface::new(1, 1),
+            scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
+            left_scroll: 0,
+            first_visible_point: 0,
         }
     }
 
@@ -150,6 +168,56 @@ where
     /// Returns the number of points on the X axis: the length of the longest series.
     pub fn points_count(&self) -> usize {
         self.series.iter().map(|s| s.len()).max().unwrap_or(0)
+    }
+
+    /// Scrolls the chart horizontally so the point at `index` (on the X axis) is visible.
+    ///
+    /// The chart scrolls the minimum amount needed to show the whole column of that point.
+    /// A point that is already fully visible leaves the scroll position unchanged.
+    /// Does nothing if `index` is not lower than [`points_count`](Self::points_count).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::ScrollBars);
+    /// chart.add_series(linechart::Series::with_values("CPU", 1..=100));
+    /// chart.ensure_visible(99);
+    /// ```
+    pub fn ensure_visible(&mut self, index: usize) {
+        if index >= self.points_count() {
+            return;
+        }
+        self.update_layout();
+        let plot_width = (self.size().width as i32 - self.x_axis_left_margin()).max(0);
+        if plot_width <= 0 {
+            return;
+        }
+        let left = self.column_x(index);
+        let right = left + self.plot.column_width as i32;
+        let view_left = self.left_scroll;
+        let view_right = view_left + plot_width;
+        let new_scroll = if right - left <= plot_width {
+            if left >= view_left && right <= view_right {
+                return;
+            }
+            if left < view_left {
+                left
+            } else {
+                right - plot_width
+            }
+        } else if right <= view_left {
+            right - plot_width
+        } else if left >= view_right {
+            left
+        } else {
+            return;
+        };
+        let new_scroll = new_scroll.clamp(0, self.max_left_scroll());
+        if new_scroll != self.left_scroll {
+            self.left_scroll = new_scroll;
+            self.after_horizontal_scroll();
+        }
     }
 
     /// Returns the series at `series_index`, or `None` if out of range.
@@ -468,6 +536,61 @@ where
     fn column_x(&self, index: usize) -> i32 {
         self.default_spacing as i32 + index as i32 * self.column_step()
     }
+    /// X coordinate on the internal surface of column `index` (after scrolling, with the left margin).
+    #[inline(always)]
+    fn screen_x(&self, index: usize) -> i32 {
+        self.column_x(index) - self.left_scroll + self.x_axis_left_margin()
+    }
+
+    // ------------------------------------------------------------------ scrolling
+
+    #[inline(always)]
+    fn content_width(&self) -> u64 {
+        self.plot.content_width as u64 + self.x_axis_left_margin() as u64 + 1
+    }
+    #[inline(always)]
+    fn max_left_scroll(&self) -> i32 {
+        (self.content_width() as i32 - self.size().width as i32).max(0)
+    }
+    fn sync_horizontal_scrollbar(&mut self) {
+        let sz = self.size();
+        self.scrollbars.update(self.content_width(), sz.height as u64, sz);
+        self.scrollbars.set_indexes(self.left_scroll as u64, 0);
+    }
+    /// Index of the first column that is at least partially visible (its right edge is after `left_scroll`).
+    fn update_first_visible_point(&mut self) {
+        let step = self.column_step().max(1);
+        // column j is visible when spacing + j * step + column_width > left_scroll
+        let start = self.left_scroll - self.default_spacing as i32 - self.plot.column_width as i32;
+        self.first_visible_point = if start < 0 { 0 } else { (start / step + 1) as usize };
+    }
+    fn after_horizontal_scroll(&mut self) {
+        self.update_first_visible_point();
+        self.sync_horizontal_scrollbar();
+        self.repaint_surface();
+    }
+    /// Scrolls so that `first_visible_point` starts at the left edge of the plot
+    /// (including the spacing in front of it).
+    fn align_scroll_to_first_visible_point(&mut self) {
+        let x = self.column_x(self.first_visible_point) - self.default_spacing as i32;
+        self.left_scroll = x.clamp(0, self.max_left_scroll());
+        self.update_first_visible_point();
+        self.sync_horizontal_scrollbar();
+        self.repaint_surface();
+    }
+    fn update_scroll_pos_from_scrollbars(&mut self) {
+        self.left_scroll = (self.scrollbars.horizontal_index() as i32).clamp(0, self.max_left_scroll());
+        self.update_first_visible_point();
+        self.repaint_surface();
+    }
+    fn scroll_by(&mut self, delta: i32) {
+        let new_scroll = (self.left_scroll + delta).clamp(0, self.max_left_scroll());
+        if new_scroll != self.left_scroll {
+            self.left_scroll = new_scroll;
+            self.after_horizontal_scroll();
+        }
+    }
+
     fn update_layout(&mut self) {
         let points = self.points_count();
         // column width & marker height: the largest marker used anywhere
@@ -514,6 +637,10 @@ where
                 point.len = Self::value_to_level(point.bar.value.to_f64(), low, high, levels);
             }
         }
+        // the content may have shrunk (fewer points, smaller spacing or markers) or the control may have grown
+        self.left_scroll = self.left_scroll.clamp(0, self.max_left_scroll());
+        self.update_first_visible_point();
+        self.sync_horizontal_scrollbar();
     }
 
     // ------------------------------------------------------------------ painting
@@ -600,7 +727,7 @@ where
     }
     /// Writes `label` centered under the columns `start..=end` (truncated with `…` if it does not fit).
     fn print_label(&mut self, start: usize, end: usize, label: &str, attr: CharAttribute) {
-        let x = self.column_x(start) + self.x_axis_left_margin();
+        let x = self.screen_x(start);
         let y = self.size().height as i32 - 1;
         let width = (end - start) as i32 * self.column_step() + self.plot.column_width as i32;
         let space = self.default_spacing as i32;
@@ -639,9 +766,8 @@ where
     fn paint_xaxis_index(&mut self, start: i32, attr: CharAttribute) {
         let mut temp: [u8; 16] = [0u8; 16];
         let width = self.size().width as i32;
-        let left_margin = self.x_axis_left_margin();
-        for index in 0..self.points_count() {
-            if self.column_x(index) + left_margin >= width {
+        for index in self.first_visible_point..self.points_count() {
+            if self.screen_x(index) >= width {
                 break;
             }
             if let Some(result) = INT_FORMAT.write_number(start as i64 + index as i64, &mut temp) {
@@ -652,9 +778,8 @@ where
     fn paint_xaxis_point_labels(&mut self, attr: CharAttribute) {
         let mut temp_str: FlatString<254> = FlatString::new();
         let width = self.size().width as i32;
-        let left_margin = self.x_axis_left_margin();
-        for index in 0..self.points_count() {
-            if self.column_x(index) + left_margin >= width {
+        for index in self.first_visible_point..self.points_count() {
+            if self.screen_x(index) >= width {
                 break;
             }
             let label = self
@@ -679,10 +804,13 @@ where
         for i in 0..self.xaxis.spans.len() {
             let span = self.xaxis.spans[i]; // only 32 bytes - cheap to copy
             let start_index = span.start as usize;
-            if start_index >= len || self.column_x(start_index) + left_margin >= width {
+            if start_index >= len || self.screen_x(start_index) >= width {
                 break;
             }
             let end_index = (span.end as usize).min(len - 1);
+            if self.screen_x(end_index) + self.plot.column_width as i32 <= left_margin {
+                continue; // scrolled out on the left
+            }
             self.print_label(start_index, end_index, span.label.as_str(), attr);
         }
     }
@@ -696,9 +824,9 @@ where
     /// The center is the middle column of the column and the top row of the marker
     /// (the row that corresponds to the value).
     #[inline(always)]
-    fn point_center(&self, index: usize, level: i16, left_margin: i32, level0_row: i32) -> Point {
+    fn point_center(&self, index: usize, level: i16, level0_row: i32) -> Point {
         Point::new(
-            self.column_x(index) + left_margin + (self.plot.column_width as i32 - 1) / 2,
+            self.screen_x(index) + (self.plot.column_width as i32 - 1) / 2,
             level0_row - level as i32,
         )
     }
@@ -717,13 +845,18 @@ where
                 continue;
             }
             let attr = Self::series_attr(series, series_index, series_colors);
-            let mut previous = self.point_center(0, series.data[0].len, left_margin, level0_row);
-            for index in 1..series.data.len() {
+            // start one point earlier: the segment that ends at the first visible point may still show
+            let first = self.first_visible_point.saturating_sub(1);
+            if first + 1 >= series.data.len() {
+                continue;
+            }
+            let mut previous = self.point_center(first, series.data[first].len, level0_row);
+            for index in first + 1..series.data.len() {
                 if previous.x >= width {
                     // the rest of the series is outside the visible area
                     break;
                 }
-                let current = self.point_center(index, self.series[series_index].data[index].len, left_margin, level0_row);
+                let current = self.point_center(index, self.series[series_index].data[index].len, level0_row);
                 match line {
                     LineMode::None => {}
                     LineMode::Braille => self.surface.draw_line(previous.x, previous.y, current.x, current.y, LineType::Braille, attr),
@@ -749,8 +882,8 @@ where
         self.surface.set_relative_clip(left_margin, 0, width, self.plot_bottom());
         for (series_index, series) in self.series.iter().enumerate() {
             let series_attr = Self::series_attr(series, series_index, series_colors);
-            for (index, point) in series.data.iter().enumerate() {
-                let x = self.column_x(index) + left_margin;
+            for (index, point) in series.data.iter().enumerate().skip(self.first_visible_point) {
+                let x = self.screen_x(index);
                 if x >= width {
                     break;
                 }
@@ -782,6 +915,10 @@ where
     T: Number + 'static,
 {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        if self.has_focus() && self.flags.contains(Flags::ScrollBars) {
+            self.scrollbars.paint(surface, theme, self);
+            surface.reduce_clip_by(0, 0, 1, 1);
+        }
         if !self.is_enabled() {
             let attr = theme.chart.inactive;
             surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
@@ -797,6 +934,73 @@ where
 {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.surface.resize(new_size);
-        self.repaint_surface();
+        self.update_layout();
+        self.scrollbars.resize(self.content_width(), new_size.height as u64, &self.base);
+        self.update_scroll_pos_from_scrollbars();
+    }
+}
+
+impl<T> OnMouseEvent for LineChart<T>
+where
+    T: Number + 'static,
+{
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if self.scrollbars.process_mouse_event(event) {
+            self.update_scroll_pos_from_scrollbars();
+            return EventProcessStatus::Processed;
+        }
+        match event {
+            MouseEvent::Wheel(wheel) => {
+                match wheel {
+                    MouseWheelDirection::Left | MouseWheelDirection::Up => self.scroll_by(-1),
+                    MouseWheelDirection::Right | MouseWheelDirection::Down => self.scroll_by(1),
+                }
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
+    }
+}
+
+impl<T> OnKeyPressed for LineChart<T>
+where
+    T: Number + 'static,
+{
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Left") => {
+                self.scroll_by(-1);
+                EventProcessStatus::Processed
+            }
+            key!("Right") => {
+                self.scroll_by(1);
+                EventProcessStatus::Processed
+            }
+            key!("Home") => {
+                self.scroll_by(-self.left_scroll);
+                EventProcessStatus::Processed
+            }
+            key!("End") => {
+                self.scroll_by(self.max_left_scroll() - self.left_scroll);
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Left") => {
+                // go to the previous point; if the current one is cut on the left, align it first
+                let aligned = self.column_x(self.first_visible_point) - self.default_spacing as i32 == self.left_scroll;
+                if aligned && self.first_visible_point > 0 {
+                    self.first_visible_point -= 1;
+                }
+                self.align_scroll_to_first_visible_point();
+                EventProcessStatus::Processed
+            }
+            key!("Ctrl+Right") => {
+                if self.first_visible_point + 1 < self.points_count() && self.left_scroll < self.max_left_scroll() {
+                    self.first_visible_point += 1;
+                    self.align_scroll_to_first_visible_point();
+                }
+                EventProcessStatus::Processed
+            }
+            _ => EventProcessStatus::Ignored,
+        }
     }
 }

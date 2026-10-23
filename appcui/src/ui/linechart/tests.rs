@@ -1,3 +1,5 @@
+use std::ops::DerefMut;
+
 use crate::prelude::*;
 use crate::ui::linechart::LineChart;
 
@@ -680,6 +682,195 @@ fn check_paint_lines_clipped_and_resize() {
         c.set_default_spacing(3);
         c.add_series(Series::with_values("A", (0..15).map(|i| (i * 13) % 31)));
         c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(0));
+        c
+    });
+}
+
+// ---------------------------------------------------------------- scrolling
+
+fn run_with_size(check: impl FnOnce(&mut LineChart<i32>) + 'static) {
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script("Paint.Enable(false)")
+        .window(move || {
+            let mut chart = LineChart::<i32>::new(layout!("x:0,y:0,w:40,h:10"), linechart::Flags::None);
+            chart.deref_mut().layout.update(80, 30);
+            check(&mut chart);
+            window!("Test,d:f")
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_ensure_visible() {
+    run_with_size(|chart| {
+        chart.set_yaxis_visible(false);
+        chart.add_series(Series::with_values("A", 1..=30));
+        assert_eq!(chart.left_scroll, 0);
+        assert_eq!(chart.first_visible_point, 0);
+        // column 29 is at x = 2 + 29 * 3 = 89 -> scroll so that it ends at the right edge
+        chart.ensure_visible(29);
+        assert_eq!(chart.left_scroll, 50);
+        assert_eq!(chart.first_visible_point, 16);
+        // already visible -> no change
+        chart.ensure_visible(20);
+        assert_eq!(chart.left_scroll, 50);
+        // back to the first point
+        chart.ensure_visible(0);
+        assert_eq!(chart.left_scroll, 2);
+        assert_eq!(chart.first_visible_point, 0);
+        // out of range -> no change
+        chart.ensure_visible(100);
+        assert_eq!(chart.left_scroll, 2);
+    });
+}
+
+#[test]
+fn check_ensure_visible_with_yaxis_margin() {
+    run_with_size(|chart| {
+        chart.add_series(Series::with_values("A", 1..=30));
+        // plot width is 40 - 8 = 32
+        chart.ensure_visible(20);
+        assert_eq!(chart.left_scroll, 31);
+    });
+}
+
+#[test]
+fn check_scroll_is_clamped_when_data_shrinks() {
+    run_with_size(|chart| {
+        chart.set_yaxis_visible(false);
+        chart.add_series(Series::with_values("A", 1..=30));
+        chart.ensure_visible(29);
+        assert_eq!(chart.left_scroll, 50);
+        chart.update_all_series(|_, s| s.remove_first(20));
+        // 10 points: 2 + 10 * 3 + 1 = 33 cells -> fits in 40, no scroll
+        assert_eq!(chart.left_scroll, 0);
+        assert_eq!(chart.first_visible_point, 0);
+        chart.add_values(0, 1..=20);
+        assert_eq!(chart.left_scroll, 0);
+    });
+}
+
+fn scroll_chart() -> LineChart<i32> {
+    let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::ScrollBars);
+    c.set_default_spacing(3);
+    c.add_series(Series::with_values("A", (0..30).map(|i| (i * 13) % 31)));
+    c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(0));
+    c
+}
+
+#[test]
+fn check_scroll_keys() {
+    let script = "
+        Paint('1. Initial state - focused, the scroll bar is visible')
+        CheckHash(0x7CC8E40FC08C4D3)
+        Key.Pressed(Right,5)
+        Paint('2. Scrolled 5 cells to the right')
+        CheckHash(0x94D52E9D5E262DB)
+        Key.Pressed(Left,2)
+        Paint('3. Back 2 cells')
+        CheckHash(0x9E83D75CB1963E2F)
+        Key.Pressed(End)
+        Paint('4. End - last point is visible')
+        CheckHash(0x2DA20FD275F9A994)
+        Key.Pressed(Right)
+        Paint('5. Right at the end does nothing')
+        CheckHash(0x2DA20FD275F9A994)
+        Key.Pressed(Home)
+        Paint('6. Home - back to the first point')
+        CheckHash(0x7CC8E40FC08C4D3)
+    ";
+    run_paint_test(script, Size::new(40, 12), scroll_chart);
+}
+
+#[test]
+fn check_scroll_ctrl_arrows() {
+    let script = "
+        Paint('1. Initial state')
+        CheckHash(0x7CC8E40FC08C4D3)
+        Key.Pressed(Ctrl+Right,3)
+        Paint('2. Three points to the right (point 3 is the first one)')
+        CheckHash(0xFD3E5C68A8170FF6)
+        Key.Pressed(Right)
+        Paint('3. One more cell - no longer aligned to point 3')
+        CheckHash(0x518617DB521B53F5)
+        Key.Pressed(Ctrl+Left)
+        Paint('4. Ctrl+Left aligns point 3 again')
+        CheckHash(0xFD3E5C68A8170FF6)
+        Key.Pressed(Ctrl+Left)
+        Paint('5. Ctrl+Left goes to point 2')
+        CheckHash(0x62DD95D0C1F4C38A)
+    ";
+    run_paint_test(script, Size::new(40, 12), scroll_chart);
+}
+
+#[test]
+fn check_scroll_mouse_wheel() {
+    let script = "
+        Paint('1. Initial state')
+        CheckHash(0x7CC8E40FC08C4D3)
+        Mouse.Wheel(20,5,down,6)
+        Paint('2. Wheel down/right - 6 cells')
+        CheckHash(0x75A2840F1EF3E2AB)
+        Mouse.Wheel(20,5,up,2)
+        Paint('3. Wheel up/left - 2 cells')
+        CheckHash(0xCB1C915A35F0EBD4)
+    ";
+    run_paint_test(script, Size::new(40, 12), scroll_chart);
+}
+
+#[test]
+fn check_scroll_mouse_drag_scrollbar() {
+    let script = "
+        Paint('1. Initial state')
+        CheckHash(0x7CC8E40FC08C4D3)
+        Mouse.Drag(2,11,25,11)
+        Paint('2. Scroll bar dragged to the right')
+        CheckHash(0x1CE91EBF0688A664)
+        Mouse.Drag(25,11,10,11)
+        Paint('3. Scroll bar dragged back')
+        CheckHash(0xC5196E89CEBDBD59)
+    ";
+    run_paint_test(script, Size::new(40, 12), scroll_chart);
+}
+
+#[test]
+fn check_scroll_without_scrollbars_flag() {
+    let script = "
+        Paint('1. No ScrollBars flag - no scroll bar, the bottom margin is not used')
+        CheckHash(0x83B104EC8A2615D)
+        Key.Pressed(Right,4)
+        Paint('2. Still scrolls with the keyboard')
+        CheckHash(0x293017EDA399A92E)
+    ";
+    run_paint_test(script, Size::new(40, 12), || {
+        let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
+        c.set_default_spacing(3);
+        c.add_series(Series::with_values("A", (0..30).map(|i| (i * 13) % 31)));
+        c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(0));
+        c
+    });
+}
+
+#[test]
+fn check_scroll_custom_spans_and_resize() {
+    let script = "
+        Paint('1. Custom spans')
+        CheckHash(0x19BD1F64CC06CB53)
+        Key.Pressed(Right,10)
+        Paint('2. Scrolled - the first span is partially hidden')
+        CheckHash(0x70678DB95B5289D9)
+        Resize(80,12)
+        Paint('3. Everything fits after resize - scroll goes back to 0')
+        CheckHash(0x37E915FBA8C5DF76)
+    ";
+    run_paint_test(script, Size::new(40, 12), || {
+        let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::ScrollBars);
+        c.add_series(Series::with_values("A", (0..18).map(|i| (i * 7) % 11)));
+        c.set_default_spacing(2);
+        let spans = [BarSpan::new(0, 6, "First"), BarSpan::new(6, 6, "Second"), BarSpan::new(12, 6, "Third")];
+        c.set_xaxis_label_mode(linechart::XAxisLabelMode::Custom(&spans));
         c
     });
 }

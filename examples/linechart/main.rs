@@ -4,7 +4,7 @@ fn main() -> Result<(), appcui::system::Error> {
     App::new()
         .window(|| {
             let mut win = window!("'Line chart',a:c,w:70,h:20,flags:Sizeable");
-            let mut chart = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
+            let mut chart = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::ScrollBars);
             chart.set_default_spacing(3);
             chart.set_xaxis_label_mode(linechart::XAxisLabelMode::PointLabels);
 
