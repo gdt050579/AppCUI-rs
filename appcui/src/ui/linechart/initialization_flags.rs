@@ -6,10 +6,8 @@ use EnumBitFlags::EnumBitFlags;
 ///
 /// Combine values with `|`. `Flags::None` draws the chart without extra decorations.
 pub enum Flags {
-    /// Shows a legend that maps each series color to its label.
-    ShowLegend = 1,
     /// Draws a solid horizontal line at value zero while the Y-axis grid is visible.
-    ShowZeroLineOnYAxis = 2,
+    ShowZeroLineOnYAxis = 1,
 }
 
 /// Chooses the labels drawn under the points of a [`struct@super::LineChart`].

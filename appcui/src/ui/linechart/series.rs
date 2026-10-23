@@ -61,7 +61,7 @@ where
         s
     }
 
-    /// Returns the label of the series (shown in the legend and in tooltips).
+    /// Returns the label of the series (shown in tooltips).
     #[inline(always)]
     pub fn label(&self) -> &str {
         &self.label

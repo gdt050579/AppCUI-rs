@@ -8,8 +8,8 @@ fn check_creation() {
 
 #[test]
 fn check_creation_with_flags() {
-    let chart = LineChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), linechart::Flags::ShowLegend);
-    assert!(chart.flags().contains(linechart::Flags::ShowLegend));
+    let chart = LineChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), linechart::Flags::ShowZeroLineOnYAxis);
+    assert!(chart.flags().contains(linechart::Flags::ShowZeroLineOnYAxis));
 }
 
 #[test]
@@ -352,7 +352,7 @@ fn check_value_to_level() {
     assert_eq!(LineChart::<i32>::value_to_level(3.0, 0.0, 10.0, 0), 0);
 }
 
-// ---------------------------------------------------------------- painting (markers only)
+// ---------------------------------------------------------------- painting (axes and markers)
 
 fn run_paint_test<F>(script: &str, size: Size, build: F)
 where
@@ -383,7 +383,7 @@ fn check_paint_empty_chart() {
 fn check_paint_single_series_from_zero() {
     let script = "
         Paint('1. One series, FromZero scale, no X axis')
-        CheckHash(0x2EC9397FC7C491FC)
+        CheckHash(0xAB9FDCFB45E9FD26)
     ";
     run_paint_test(script, Size::new(40, 12), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
@@ -396,7 +396,7 @@ fn check_paint_single_series_from_zero() {
 fn check_paint_fit_data_with_index_labels() {
     let script = "
         Paint('1. FitData scale with negative values and index labels')
-        CheckHash(0xF4FCD608C7B1E4CD)
+        CheckHash(0xC32CA9F078C4F11F)
     ";
     run_paint_test(script, Size::new(40, 12), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
@@ -411,7 +411,7 @@ fn check_paint_fit_data_with_index_labels() {
 fn check_paint_multiple_series_point_labels() {
     let script = "
         Paint('1. Three series of different lengths, PointLabels taken from the second series')
-        CheckHash(0xE854811C40290348)
+        CheckHash(0x9099A52F3E2A7F75)
     ";
     run_paint_test(script, Size::new(44, 14), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
@@ -438,7 +438,7 @@ fn check_paint_multiple_series_point_labels() {
 fn check_paint_large_markers_fixed_scale() {
     let script = "
         Paint('1. Large markers, one point overridden with a small red marker, Fixed 0..50 (100 clamped to the top)')
-        CheckHash(0x8B367C7309ABB281)
+        CheckHash(0xCFF5CA694635AB32)
     ";
     run_paint_test(script, Size::new(44, 14), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
@@ -460,7 +460,7 @@ fn check_paint_large_markers_fixed_scale() {
 fn check_paint_custom_spans_and_zero_line() {
     let script = "
         Paint('1. Custom spans (Q1, Q2) and the zero line')
-        CheckHash(0xB5E5C79A8001308C)
+        CheckHash(0x5357B05D6C46B0A3)
     ";
     run_paint_test(script, Size::new(44, 14), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::ShowZeroLineOnYAxis);
@@ -476,7 +476,7 @@ fn check_paint_custom_spans_and_zero_line() {
 fn check_paint_no_yaxis_no_grid_spacing_marker_fallback() {
     let script = "
         Paint('1. Y axis and grid hidden, spacing 4, a Fill draw mode falls back to the default marker')
-        CheckHash(0x19CD1BEFC23596B8)
+        CheckHash(0x712B05D6CB525D50)
     ";
     run_paint_test(script, Size::new(40, 10), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
@@ -494,7 +494,7 @@ fn check_paint_no_yaxis_no_grid_spacing_marker_fallback() {
 fn check_paint_equal_values_fit_data() {
     let script = "
         Paint('1. All values equal with FitData -> drawn in the middle')
-        CheckHash(0xEB2E4D2517C09DAA)
+        CheckHash(0x6D3A63551C6F553A)
     ";
     run_paint_test(script, Size::new(40, 12), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
@@ -508,7 +508,7 @@ fn check_paint_equal_values_fit_data() {
 fn check_paint_disabled() {
     let script = "
         Paint('1. Disabled chart is drawn with the inactive color')
-        CheckHash(0xC14155CDD36BD90F)
+        CheckHash(0x1B891A0C20F4C2)
     ";
     run_paint_test(script, Size::new(40, 12), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
@@ -522,14 +522,163 @@ fn check_paint_disabled() {
 fn check_paint_overflow_and_resize() {
     let script = "
         Paint('1. More points than fit - drawing stops at the right edge')
-        CheckHash(0xF8DFCAA35041A1E7)
+        CheckHash(0x9C11B031F492D8CF)
         Resize(60,12)
         Paint('2. After resize more points are visible')
-        CheckHash(0x72C9F39CECCD763)
+        CheckHash(0x584A99CE4DB48950)
     ";
     run_paint_test(script, Size::new(30, 12), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
         c.add_series(Series::with_values("A", (0..20).map(|i| (i * 7) % 23)));
+        c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(0));
+        c
+    });
+}
+
+// ---------------------------------------------------------------- painting (lines)
+
+fn chart_with_line(line: LineMode) -> LineChart<i32> {
+    let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
+    c.set_default_spacing(4);
+    c.set_default_line(line);
+    c.add_series(Series::with_values("A", [10, 50, 30, 30, 0, 45, 20]));
+    c
+}
+
+#[test]
+fn check_paint_line_single() {
+    let script = "
+        Paint('1. LineMode::Line(Single)')
+        CheckHash(0x9C0A0F72DC093657)
+    ";
+    run_paint_test(script, Size::new(50, 14), || chart_with_line(LineMode::Line(LineType::Single)));
+}
+
+#[test]
+fn check_paint_line_double() {
+    let script = "
+        Paint('1. LineMode::Line(Double)')
+        CheckHash(0xBE5B7C7C634F9B1D)
+    ";
+    run_paint_test(script, Size::new(50, 14), || chart_with_line(LineMode::Line(LineType::Double)));
+}
+
+#[test]
+fn check_paint_line_ascii() {
+    let script = "
+        Paint('1. LineMode::Line(Ascii)')
+        CheckHash(0xBEE31A7DA29C3BB6)
+    ";
+    run_paint_test(script, Size::new(50, 14), || chart_with_line(LineMode::Line(LineType::Ascii)));
+}
+
+#[test]
+fn check_paint_line_braille() {
+    let script = "
+        Paint('1. LineMode::Braille')
+        CheckHash(0xA9393F6C0FDC9AEF)
+    ";
+    run_paint_test(script, Size::new(50, 14), || chart_with_line(LineMode::Braille));
+}
+
+#[test]
+fn check_paint_line_orthogonal() {
+    let script = "
+        Paint('1. LineMode::Orthogonal(Single, HorizontalUntilMiddle) - step chart')
+        CheckHash(0xD7D08BF25DCAAD65)
+    ";
+    run_paint_test(script, Size::new(50, 14), || {
+        chart_with_line(LineMode::Orthogonal(LineType::Single, OrthogonalDirection::HorizontalUntilMiddle))
+    });
+}
+
+#[test]
+fn check_paint_line_orthogonal_rounded_horizontal_first() {
+    let script = "
+        Paint('1. LineMode::Orthogonal(SingleRound, HorizontalFirst)')
+        CheckHash(0xC73A5114BD664963)
+    ";
+    run_paint_test(script, Size::new(50, 14), || {
+        chart_with_line(LineMode::Orthogonal(LineType::SingleRound, OrthogonalDirection::HorizontalFirst))
+    });
+}
+
+#[test]
+fn check_paint_line_none_scatter() {
+    let script = "
+        Paint('1. LineMode::None - markers only (scatter)')
+        CheckHash(0xD21052872FB2C4CB)
+    ";
+    run_paint_test(script, Size::new(50, 14), || chart_with_line(LineMode::None));
+}
+
+#[test]
+fn check_paint_lines_without_markers() {
+    let script = "
+        Paint('1. Marker::None - only the Braille line is visible')
+        CheckHash(0x9D6407092B2B6EA4)
+    ";
+    run_paint_test(script, Size::new(50, 14), || {
+        let mut c = chart_with_line(LineMode::Braille);
+        c.set_default_marker(Marker::None);
+        c
+    });
+}
+
+#[test]
+fn check_paint_mixed_series_lines() {
+    let script = "
+        Paint('1. Per-series line modes and colors, lines below every marker')
+        CheckHash(0xFFBABC08B763249B)
+    ";
+    run_paint_test(script, Size::new(56, 16), || {
+        let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
+        c.set_default_spacing(4);
+        c.add_series(SeriesBuilder::new("CPU").line(LineMode::Braille).attr(charattr!("green")).values([10, 35, 20, 60, 40, 55, 30, 45]));
+        c.add_series(
+            SeriesBuilder::new("RAM")
+                .line(LineMode::Line(LineType::Double))
+                .attr(charattr!("yellow"))
+                .values([40, 42, 44, 41, 43, 45]),
+        );
+        c.add_series(
+            SeriesBuilder::new("Disk")
+                .line(LineMode::Orthogonal(LineType::Single, OrthogonalDirection::HorizontalFirst))
+                .attr(charattr!("aqua"))
+                .values([5, 5, 15, 15, 25, 10, 10, 20]),
+        );
+        c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(1));
+        c
+    });
+}
+
+#[test]
+fn check_paint_lines_large_markers() {
+    let script = "
+        Paint('1. Lines between large markers start from the marker centers')
+        CheckHash(0x22C452CF385EAC92)
+    ";
+    run_paint_test(script, Size::new(50, 16), || {
+        let mut c = chart_with_line(LineMode::Line(LineType::Single));
+        c.set_default_marker(Marker::Large(BarLargePointType::Circle));
+        c.set_default_spacing(3);
+        c
+    });
+}
+
+#[test]
+fn check_paint_lines_clipped_and_resize() {
+    let script = "
+        Paint('1. The last visible segment goes out of the plot area and is clipped')
+        CheckHash(0x145A693FDE4E9F18)
+        Resize(60,14)
+        Paint('2. Wider - more segments are visible')
+        CheckHash(0x5068AD751B88EAB5)
+    ";
+    run_paint_test(script, Size::new(32, 14), || {
+        let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
+        c.set_default_spacing(3);
+        c.add_series(Series::with_values("A", (0..15).map(|i| (i * 13) % 31)));
         c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(0));
         c
     });

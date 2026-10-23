@@ -532,6 +532,8 @@ where
         // always Y first, then X (the X axis overwrites the bottom of the Y axis)
         self.paint_yaxis(axis_attr, grid_attr, label_attr);
         self.paint_xaxis(axis_attr, label_attr);
+        // lines first, markers on top (a line always runs from one marker center to the next)
+        self.paint_lines(&series_colors);
         self.paint_markers(&series_colors);
         let left_margin = self.x_axis_left_margin();
         if (left_margin > 0) && !self.xaxis.label_format.is_none() {
@@ -684,6 +686,58 @@ where
             self.print_label(start_index, end_index, span.label.as_str(), attr);
         }
     }
+    /// Color of a series: its own color, or a theme color chosen from the series index.
+    #[inline(always)]
+    fn series_attr(series: &Series<T>, series_index: usize, series_colors: &[CharAttribute]) -> CharAttribute {
+        series.attr().unwrap_or(series_colors[series_index % series_colors.len()])
+    }
+    /// Center of the marker of point `index` with level `level`, in surface coordinates.
+    ///
+    /// The center is the middle column of the column and the top row of the marker
+    /// (the row that corresponds to the value).
+    #[inline(always)]
+    fn point_center(&self, index: usize, level: i16, left_margin: i32, level0_row: i32) -> Point {
+        Point::new(
+            self.column_x(index) + left_margin + (self.plot.column_width as i32 - 1) / 2,
+            level0_row - level as i32,
+        )
+    }
+    fn paint_lines(&mut self, series_colors: &[CharAttribute]) {
+        if self.plot.levels == 0 {
+            return;
+        }
+        let left_margin = self.x_axis_left_margin();
+        let width = self.size().width as i32;
+        let level0_row = self.level0_row();
+        self.surface.set_relative_clip(left_margin, 0, width, self.plot_bottom());
+        for series_index in 0..self.series.len() {
+            let series = &self.series[series_index];
+            let line = series.line().unwrap_or(self.default_line);
+            if line == LineMode::None || series.len() < 2 {
+                continue;
+            }
+            let attr = Self::series_attr(series, series_index, series_colors);
+            let mut previous = self.point_center(0, series.data[0].len, left_margin, level0_row);
+            for index in 1..series.data.len() {
+                if previous.x >= width {
+                    // the rest of the series is outside the visible area
+                    break;
+                }
+                let current = self.point_center(index, self.series[series_index].data[index].len, left_margin, level0_row);
+                match line {
+                    LineMode::None => {}
+                    LineMode::Braille => self.surface.draw_line(previous.x, previous.y, current.x, current.y, LineType::Braille, attr),
+                    LineMode::Line(line_type) => self.surface.draw_line(previous.x, previous.y, current.x, current.y, line_type, attr),
+                    LineMode::Orthogonal(line_type, direction) => {
+                        self.surface
+                            .draw_orthogonal_line(previous.x, previous.y, current.x, current.y, line_type, direction, attr)
+                    }
+                }
+                previous = current;
+            }
+        }
+        self.surface.reset_clip();
+    }
     fn paint_markers(&mut self, series_colors: &[CharAttribute]) {
         let left_margin = self.x_axis_left_margin();
         let width = self.size().width as i32;
@@ -694,7 +748,7 @@ where
         }
         self.surface.set_relative_clip(left_margin, 0, width, self.plot_bottom());
         for (series_index, series) in self.series.iter().enumerate() {
-            let series_attr = series.attr().unwrap_or(series_colors[series_index % series_colors.len()]);
+            let series_attr = Self::series_attr(series, series_index, series_colors);
             for (index, point) in series.data.iter().enumerate() {
                 let x = self.column_x(index) + left_margin;
                 if x >= width {
