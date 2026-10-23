@@ -447,35 +447,6 @@ where
         }
     }
 
-    /// Removes the first `count` points of every series and the first `count` X-axis labels,
-    /// then repaints once.
-    ///
-    /// Use this to keep a rolling window over live data: add the new values (and their X labels)
-    /// at the end and drop the oldest ones here, so labels and values stay aligned.
-    ///
-    /// # Example
-    /// ```rust, no_run
-    /// use appcui::prelude::*;
-    ///
-    /// let mut chart = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
-    /// chart.add_series(linechart::Series::new("CPU"));
-    /// for (i, v) in [10, 14, 9, 22, 17].iter().enumerate() {
-    ///     chart.add_value(0, *v);
-    ///     chart.add_xaxis_label(&format!("t{i}"));
-    /// }
-    /// chart.remove_first_points(2);
-    /// assert_eq!(chart.points_count(), 3);
-    /// assert_eq!(chart.xaxis_label(0), Some("t2"));
-    /// ```
-    pub fn remove_first_points(&mut self, count: usize) {
-        for series in self.series.iter_mut() {
-            series.remove_first(count);
-        }
-        let count = count.min(self.xaxis.labels.len());
-        self.xaxis.labels.drain(..count);
-        self.repaint_surface();
-    }
-
     // ------------------------------------------------------------------ X-axis labels
 
     /// Replaces the names of the X positions. Label `i` names the points at index `i` of every series.

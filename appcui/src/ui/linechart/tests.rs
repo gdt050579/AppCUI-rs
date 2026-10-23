@@ -363,27 +363,6 @@ fn check_xaxis_labels_api() {
     });
 }
 
-#[test]
-fn check_remove_first_points() {
-    in_app(|| {
-        let mut c = empty_chart();
-        c.add_series(Series::with_values("A", [1, 2, 3, 4, 5]));
-        c.add_series(Series::with_values("B", [10, 20]));
-        c.set_xaxis_labels(["t0", "t1", "t2", "t3", "t4"]);
-        c.remove_first_points(2);
-        assert_eq!(c.points_count(), 3);
-        assert_eq!(c.get_series(0).unwrap().iter().map(|b| b.value()).collect::<Vec<_>>(), vec![3, 4, 5]);
-        assert_eq!(c.get_series(1).unwrap().len(), 0);
-        assert_eq!(c.xaxis_label(0), Some("t2"));
-        assert_eq!(c.xaxis_labels_count(), 3);
-        // more than available: everything goes
-        c.remove_first_points(10);
-        assert_eq!(c.points_count(), 0);
-        assert_eq!(c.xaxis_labels_count(), 0);
-        assert_eq!(c.series_count(), 2); // the series themselves stay
-    });
-}
-
 // ---------------------------------------------------------------- scale mapping
 
 #[test]
