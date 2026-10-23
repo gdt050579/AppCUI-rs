@@ -37,6 +37,8 @@ struct YAxis {
 struct XAxis {
     label_format: XAxisLabelFormat,
     spans: Vec<BarSpan>,
+    /// names of the X positions (used by `XAxisLabelMode::Labels` and in tooltips)
+    labels: Vec<String>,
 }
 /// Geometry computed by `update_layout` and used while painting.
 #[derive(Default)]
@@ -77,7 +79,11 @@ const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 /// `Home`/`End`) and the mouse wheel. With [`Flags::ScrollBars`], a horizontal scroll bar
 /// is shown while the chart has focus.
 ///
-/// Hovering a point with the mouse shows a tooltip with its series, label, and value.
+/// The names of the X positions (for example months) belong to the chart, not to the points:
+/// set them with [`set_xaxis_labels`](Self::set_xaxis_labels) and show them under the points with
+/// [`XAxisLabelMode::Labels`]. The label of an individual point is a note shown only in its tooltip.
+///
+/// Hovering a point with the mouse shows a tooltip with its series, X label, value, and note.
 /// With [`Flags::GroupHover`], hovering acts on a whole X position instead: the column is
 /// highlighted and the tooltip shows the value of every series at that position.
 ///
@@ -160,6 +166,7 @@ where
             xaxis: XAxis {
                 label_format: XAxisLabelFormat::None,
                 spans: Vec::new(),
+                labels: Vec::new(),
             },
             plot: PlotLayout::default(),
             surface: Surface::new(1, 1),
@@ -401,7 +408,7 @@ where
     /// let mut chart = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
     /// chart.add_series(linechart::Series::new("CPU"));
     /// chart.add_value(0, 10);
-    /// chart.add_value(0, BarBuilder::new(20).label("Feb").build());
+    /// chart.add_value(0, BarBuilder::new(20).label("peak").build());
     /// ```
     pub fn add_value<B>(&mut self, series_index: usize, value: B)
     where
@@ -434,6 +441,92 @@ where
             series.add_values(values);
             self.repaint_surface();
         }
+    }
+
+    /// Removes the first `count` points of every series and the first `count` X-axis labels,
+    /// then repaints once.
+    ///
+    /// Use this to keep a rolling window over live data: add the new values (and their X labels)
+    /// at the end and drop the oldest ones here, so labels and values stay aligned.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
+    /// chart.add_series(linechart::Series::new("CPU"));
+    /// for (i, v) in [10, 14, 9, 22, 17].iter().enumerate() {
+    ///     chart.add_value(0, *v);
+    ///     chart.add_xaxis_label(&format!("t{i}"));
+    /// }
+    /// chart.remove_first_points(2);
+    /// assert_eq!(chart.points_count(), 3);
+    /// assert_eq!(chart.xaxis_label(0), Some("t2"));
+    /// ```
+    pub fn remove_first_points(&mut self, count: usize) {
+        for series in self.series.iter_mut() {
+            series.remove_first(count);
+        }
+        let count = count.min(self.xaxis.labels.len());
+        self.xaxis.labels.drain(..count);
+        self.repaint_surface();
+    }
+
+    // ------------------------------------------------------------------ X-axis labels
+
+    /// Replaces the names of the X positions. Label `i` names the points at index `i` of every series.
+    ///
+    /// The labels are drawn under the points with [`XAxisLabelMode::Labels`] and shown in tooltips.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
+    /// chart.add_series(linechart::Series::with_values("CPU", [35, 42, 38]));
+    /// chart.set_xaxis_labels(["Jan", "Feb", "Mar"]);
+    /// chart.set_xaxis_label_mode(linechart::XAxisLabelMode::Labels);
+    /// ```
+    pub fn set_xaxis_labels<S>(&mut self, labels: impl IntoIterator<Item = S>)
+    where
+        S: AsRef<str>,
+    {
+        self.xaxis.labels.clear();
+        self.xaxis.labels.extend(labels.into_iter().map(|l| l.as_ref().to_string()));
+        self.repaint_surface();
+    }
+    /// Appends the name of the next X position.
+    pub fn add_xaxis_label(&mut self, label: &str) {
+        self.xaxis.labels.push(label.to_string());
+        self.repaint_surface();
+    }
+    /// Appends the names of the next X positions.
+    pub fn add_xaxis_labels<S>(&mut self, labels: impl IntoIterator<Item = S>)
+    where
+        S: AsRef<str>,
+    {
+        self.xaxis.labels.extend(labels.into_iter().map(|l| l.as_ref().to_string()));
+        self.repaint_surface();
+    }
+    /// Returns the name of the X position `index`, or `None` if it has no (or an empty) label.
+    pub fn xaxis_label(&self, index: usize) -> Option<&str> {
+        self.xaxis.labels.get(index).map(|l| l.as_str()).filter(|l| !l.is_empty())
+    }
+    /// Returns the number of X-axis labels.
+    #[inline(always)]
+    pub fn xaxis_labels_count(&self) -> usize {
+        self.xaxis.labels.len()
+    }
+    /// Removes the first `count` X-axis labels (or all of them if `count` is larger).
+    pub fn remove_first_xaxis_labels(&mut self, count: usize) {
+        let count = count.min(self.xaxis.labels.len());
+        self.xaxis.labels.drain(..count);
+        self.repaint_surface();
+    }
+    /// Removes all X-axis labels.
+    pub fn clear_xaxis_labels(&mut self) {
+        self.xaxis.labels.clear();
+        self.repaint_surface();
     }
 
     // ------------------------------------------------------------------ defaults
@@ -532,7 +625,7 @@ where
     ///
     /// * [`XAxisLabelMode::None`] draws no X axis.
     /// * [`XAxisLabelMode::Index`] labels each point with `start + point index`.
-    /// * [`XAxisLabelMode::PointLabels`] uses the first non-empty label found among the series at each index.
+    /// * [`XAxisLabelMode::Labels`] uses the labels set with [`set_xaxis_labels`](Self::set_xaxis_labels).
     /// * [`XAxisLabelMode::Custom`] copies the given spans. Spans are ordered by
     ///   start index, then by end index. A span that overlaps an earlier one is dropped.
     ///
@@ -549,7 +642,7 @@ where
         match mode {
             XAxisLabelMode::None => self.xaxis.label_format = XAxisLabelFormat::None,
             XAxisLabelMode::Index(start) => self.xaxis.label_format = XAxisLabelFormat::Index(start),
-            XAxisLabelMode::PointLabels => self.xaxis.label_format = XAxisLabelFormat::PointLabels,
+            XAxisLabelMode::Labels => self.xaxis.label_format = XAxisLabelFormat::Labels,
             XAxisLabelMode::Custom(spans) => {
                 self.xaxis.label_format = XAxisLabelFormat::Custom;
                 self.xaxis.spans.clear();
@@ -778,10 +871,11 @@ where
         let mut text = std::mem::take(&mut self.tooltip_text);
         text.clear();
         let mut buffer = [0u8; 64];
-        // header: the label of the point (first non-empty one among the series)
-        if let Some(label) = self.series.iter().filter_map(|s| s.get(index)).map(|b| b.label()).find(|l| !l.is_empty()) {
+        // header: the name of the X position
+        if let Some(label) = self.xaxis_label(index) {
             text.push_str(label);
         }
+        // one line per series: "series: value (note)"
         for series in self.series.iter() {
             let Some(point) = series.get(index) else {
                 continue;
@@ -794,6 +888,11 @@ where
                 text.push_str(": ");
             }
             text.push_str(self.number_format.write_float(point.value.to_f64(), &mut buffer).unwrap_or(""));
+            if !point.label().is_empty() {
+                text.push_str(" (");
+                text.push_str(point.label());
+                text.push(')');
+            }
         }
         self.tooltip_text = text;
         let r = self.group_rect(index);
@@ -809,16 +908,20 @@ where
         let mut text = std::mem::take(&mut self.tooltip_text);
         text.clear();
         let mut buffer = [0u8; 64];
-        // series name on the first line, then "label: value" (or just the value)
+        // series name, then "X label: value" (or just the value), then the note of the point
         if !series.label().is_empty() {
             text.push_str(series.label());
             text.push('\n');
         }
-        if !bar.label().is_empty() {
-            text.push_str(bar.label());
+        if let Some(label) = self.xaxis_label(point.index as usize) {
+            text.push_str(label);
             text.push_str(": ");
         }
         text.push_str(self.number_format.write_float(bar.value.to_f64(), &mut buffer).unwrap_or(""));
+        if !bar.label().is_empty() {
+            text.push('\n');
+            text.push_str(bar.label());
+        }
         self.tooltip_text = text;
         let r = self.marker_rect(point);
         self.show_tooltip_on_rect(&self.tooltip_text, &r);
@@ -1047,7 +1150,7 @@ where
         match self.xaxis.label_format {
             XAxisLabelFormat::None => (),
             XAxisLabelFormat::Index(start) => self.paint_xaxis_index(start, label_attr),
-            XAxisLabelFormat::PointLabels => self.paint_xaxis_point_labels(label_attr),
+            XAxisLabelFormat::Labels => self.paint_xaxis_labels(label_attr),
             XAxisLabelFormat::Custom => self.paint_xaxis_custom(label_attr),
         }
     }
@@ -1101,21 +1204,16 @@ where
             }
         }
     }
-    fn paint_xaxis_point_labels(&mut self, attr: CharAttribute) {
+    fn paint_xaxis_labels(&mut self, attr: CharAttribute) {
         let mut temp_str: FlatString<254> = FlatString::new();
         let width = self.size().width as i32;
-        for index in self.first_visible_point..self.points_count() {
+        let end = self.points_count().min(self.xaxis.labels.len());
+        for index in self.first_visible_point..end {
             if self.screen_x(index) >= width {
                 break;
             }
-            let label = self
-                .series
-                .iter()
-                .filter_map(|s| s.get(index))
-                .map(|b| b.label.as_str())
-                .find(|l| !l.is_empty());
-            if let Some(label) = label {
-                temp_str.set(label);
+            if !self.xaxis.labels[index].is_empty() {
+                temp_str.set(self.xaxis.labels[index].as_str());
                 self.print_label(index, index, temp_str.as_str(), attr);
             }
         }

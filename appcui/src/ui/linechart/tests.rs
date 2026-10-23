@@ -331,6 +331,57 @@ fn check_chart_remove_series() {
     });
 }
 
+// ---------------------------------------------------------------- X-axis labels
+
+#[test]
+fn check_xaxis_labels_api() {
+    in_app(|| {
+        let mut c = empty_chart();
+        assert_eq!(c.xaxis_labels_count(), 0);
+        assert_eq!(c.xaxis_label(0), None);
+        c.set_xaxis_labels(["Jan", "Feb", "", "Apr"]);
+        assert_eq!(c.xaxis_labels_count(), 4);
+        assert_eq!(c.xaxis_label(0), Some("Jan"));
+        assert_eq!(c.xaxis_label(2), None); // empty label
+        assert_eq!(c.xaxis_label(4), None);
+        c.add_xaxis_label("May");
+        c.add_xaxis_labels(vec![String::from("Jun"), String::from("Jul")]);
+        assert_eq!(c.xaxis_labels_count(), 7);
+        assert_eq!(c.xaxis_label(6), Some("Jul"));
+        c.remove_first_xaxis_labels(2);
+        assert_eq!(c.xaxis_label(0), None); // the former index 2 (empty)
+        assert_eq!(c.xaxis_label(1), Some("Apr"));
+        c.remove_first_xaxis_labels(100);
+        assert_eq!(c.xaxis_labels_count(), 0);
+        c.set_xaxis_labels(["a", "b"]);
+        c.set_xaxis_labels(["x"]);
+        assert_eq!(c.xaxis_labels_count(), 1);
+        c.clear_xaxis_labels();
+        assert_eq!(c.xaxis_labels_count(), 0);
+    });
+}
+
+#[test]
+fn check_remove_first_points() {
+    in_app(|| {
+        let mut c = empty_chart();
+        c.add_series(Series::with_values("A", [1, 2, 3, 4, 5]));
+        c.add_series(Series::with_values("B", [10, 20]));
+        c.set_xaxis_labels(["t0", "t1", "t2", "t3", "t4"]);
+        c.remove_first_points(2);
+        assert_eq!(c.points_count(), 3);
+        assert_eq!(c.get_series(0).unwrap().iter().map(|b| b.value()).collect::<Vec<_>>(), vec![3, 4, 5]);
+        assert_eq!(c.get_series(1).unwrap().len(), 0);
+        assert_eq!(c.xaxis_label(0), Some("t2"));
+        assert_eq!(c.xaxis_labels_count(), 3);
+        // more than available: everything goes
+        c.remove_first_points(10);
+        assert_eq!(c.points_count(), 0);
+        assert_eq!(c.xaxis_labels_count(), 0);
+        assert_eq!(c.series_count(), 2); // the series themselves stay
+    });
+}
+
 // ---------------------------------------------------------------- scale mapping
 
 #[test]
@@ -411,28 +462,20 @@ fn check_paint_fit_data_with_index_labels() {
 }
 
 #[test]
-fn check_paint_multiple_series_point_labels() {
+fn check_paint_multiple_series_xaxis_labels() {
     let script = "
-        Paint('1. Three series of different lengths, PointLabels taken from the second series')
+        Paint('1. Three series of different lengths, X-axis labels set on the chart')
         CheckHash(0x9099A52F3E2A7F75)
     ";
     run_paint_test(script, Size::new(44, 14), || {
         let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
         c.add_series(Series::with_values("A", [10, 20, 30]));
-        c.add_series(
-            SeriesBuilder::new("B")
-                .attr(charattr!("yellow"))
-                .values([
-                    BarBuilder::new(50).label("Jan").build(),
-                    BarBuilder::new(45).label("Feb").build(),
-                    BarBuilder::new(35).label("Mar").build(),
-                    BarBuilder::new(40).label("Apr").build(),
-                    BarBuilder::new(55).label("May").build(),
-                ]),
-        );
+        c.add_series(SeriesBuilder::new("B").attr(charattr!("yellow")).values([50, 45, 35, 40, 55]));
+        // only 5 names for 7 positions: the last two have no label
+        c.set_xaxis_labels(["Jan", "Feb", "Mar", "Apr", "May"]);
         c.add_series(Series::with_values("C", [0, 5, 0, 5, 0, 5, 0]));
         c.set_default_spacing(4);
-        c.set_xaxis_label_mode(linechart::XAxisLabelMode::PointLabels);
+        c.set_xaxis_label_mode(linechart::XAxisLabelMode::Labels);
         c
     });
 }
@@ -924,18 +967,12 @@ fn check_point_index_at_empty_chart() {
 fn hover_chart(flags: linechart::Flags) -> LineChart<i32> {
     let mut c = LineChart::<i32>::new(layout!("d:f"), flags);
     c.set_default_spacing(4);
-    c.add_series(Series::with_values(
-        "CPU",
-        [
-            BarBuilder::new(35).label("Jan").build(),
-            BarBuilder::new(42).label("Feb").build(),
-            BarBuilder::new(38).label("Mar").build(),
-            BarBuilder::new(55).label("Apr").build(),
-        ],
-    ));
+    // the Apr point of CPU has a note
+    c.add_series(Series::with_values("CPU", [BarBuilder::new(35).build(), 42.into(), 38.into(), BarBuilder::new(55).label("peak").build()]));
     c.add_series(Series::with_values("RAM", [20, 22, 25, 24, 30, 33, 31, 36, 40]));
     c.add_series(Series::with_values("", [5, 5, 10]));
-    c.set_xaxis_label_mode(linechart::XAxisLabelMode::PointLabels);
+    c.set_xaxis_labels(["Jan", "Feb", "Mar", "Apr"]);
+    c.set_xaxis_label_mode(linechart::XAxisLabelMode::Labels);
     c
 }
 
@@ -991,11 +1028,14 @@ fn check_hover_point_tooltip() {
         Paint('4. Two rows away from every marker - no tooltip')
         CheckHash(0xAE1B20625165EBED)
         Mouse.Move(13,11)
-        Paint('5. On RAM/Jan - RAM, 20 (RAM points have no label)')
-        CheckHash(0xA231E12AE2B899E0)
+        Paint('5. On RAM/Jan - RAM, Jan: 20')
+        CheckHash(0xB3FA0029AAB18A3B)
         Mouse.Move(13,15)
-        Paint('6. Unnamed series - Jan point only shows 5')
-        CheckHash(0x740793633BA35A13)
+        Paint('6. Unnamed series - only Jan: 5')
+        CheckHash(0xD66C0031112C86A6)
+        Mouse.Move(28,2)
+        Paint('7. On CPU/Apr - CPU, Apr: 55 and its note (peak)')
+        CheckHash(0x1F32DA6A770ADF7C)
     ";
     run_paint_test(script, Size::new(46, 20), || hover_chart(linechart::Flags::ScrollBars));
 }
@@ -1012,8 +1052,8 @@ fn check_hover_group_tooltip_and_highlight() {
         Paint('3. Between two points - the nearest one (Feb)')
         CheckHash(0x9F04CE742CF22598)
         Mouse.Move(28,2)
-        Paint('4. Apr - the third series has no point here')
-        CheckHash(0x3E64D1BC13B09BF5)
+        Paint('4. Apr - CPU shows its note (peak), the third series has no point here')
+        CheckHash(0x3C5C5E419771706D)
         Mouse.Move(38,9)
         Paint('5. Point 6 - only RAM, no label')
         CheckHash(0x7545196A4034462)
@@ -1106,14 +1146,7 @@ fn check_selection_events() {
             win.info = win.add(label!("'No selection',x:0,y:0,w:40"));
             let mut chart = LineChart::<i32>::new(layout!("x:0,y:1,w:44,h:12"), linechart::Flags::None);
             chart.set_default_spacing(4);
-            chart.add_series(Series::with_values(
-                "CPU",
-                [
-                    BarBuilder::new(35).label("Jan").build(),
-                    BarBuilder::new(42).label("Feb").build(),
-                    BarBuilder::new(38).label("Mar").build(),
-                ],
-            ));
+            chart.add_series(Series::with_values("CPU", [35, 42, 38]));
             chart.add_series(Series::with_values("RAM", [20, 22, 25, 24]));
             win.add(chart);
             win

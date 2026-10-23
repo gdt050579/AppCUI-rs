@@ -6,9 +6,12 @@ use crate::ui::components::{Bar, BarWithLayout};
 /// One series of a [`struct@super::LineChart`]: a label, an optional line style and color,
 /// and a list of points.
 ///
-/// Every point is a [`Bar`], so it can carry its own label, color, and marker
+/// Every point is a [`Bar`], so it can carry its own color and marker
 /// ([`BarDrawMode::Point`](crate::ui::components::BarDrawMode::Point) or
 /// [`BarDrawMode::LargePoint`](crate::ui::components::BarDrawMode::LargePoint)).
+/// The label of a point is a note about that value only (for example `"peak"`): it is shown in
+/// the tooltip of the point. The names of the X positions are set on the chart instead, with
+/// [`LineChart::set_xaxis_labels`](super::LineChart::set_xaxis_labels).
 /// A point's thickness and spacing are ignored: all series share the same columns,
 /// so the column width comes from the markers and the spacing from the chart default.
 ///

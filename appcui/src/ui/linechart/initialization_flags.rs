@@ -27,11 +27,11 @@ pub enum XAxisLabelMode<'a> {
     None,
     /// Labels each point with `start + point index`.
     Index(i32),
-    /// Labels each point with its own label.
-    ///
-    /// Because all series share the X axis, the label at an index is the first
-    /// non-empty label found among the series at that index. Indexes with no label are skipped.
-    PointLabels,
+    /// Uses the labels set on the chart with
+    /// [`set_xaxis_labels`](super::LineChart::set_xaxis_labels) /
+    /// [`add_xaxis_label`](super::LineChart::add_xaxis_label): label `i` is drawn under the points at index `i`.
+    /// Positions without a label (or with an empty one) are skipped.
+    Labels,
     /// Labels ranges of points.
     ///
     /// Each [`BarSpan`] covers a run of points. The spans are copied into the chart,
@@ -43,7 +43,7 @@ pub enum XAxisLabelMode<'a> {
 pub(super) enum XAxisLabelFormat {
     None,
     Index(i32),
-    PointLabels,
+    Labels,
     Custom,
 }
 impl XAxisLabelFormat {
