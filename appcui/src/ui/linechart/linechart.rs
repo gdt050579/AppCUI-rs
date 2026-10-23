@@ -51,6 +51,9 @@ const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 /// arrow keys (`Left`/`Right` by one cell, `Ctrl+Left`/`Ctrl+Right` by one point,
 /// `Home`/`End`) and the mouse wheel. With [`Flags::ScrollBars`], a horizontal scroll bar
 /// is shown while the chart has focus.
+///
+/// Hovering the plot area with the mouse shows a tooltip for the nearest point on the X axis:
+/// its label (if any) followed by the value of every series that has a point there.
 pub struct LineChart<T>
 where
     T: Number + 'static,
@@ -71,6 +74,9 @@ where
     pub(super) left_scroll: i32,
     /// index of the first column that is (at least partially) visible
     pub(super) first_visible_point: usize,
+    /// point (X index) under the mouse, if any
+    pub(super) hovered_point: Option<usize>,
+    tooltip_text: String,
 }
 
 impl<T> LineChart<T>
@@ -126,6 +132,8 @@ where
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             left_scroll: 0,
             first_visible_point: 0,
+            hovered_point: None,
+            tooltip_text: String::new(),
         }
     }
 
@@ -565,6 +573,8 @@ where
         self.first_visible_point = if start < 0 { 0 } else { (start / step + 1) as usize };
     }
     fn after_horizontal_scroll(&mut self) {
+        // the point under the mouse is no longer the same one
+        self.clear_hovered_point();
         self.update_first_visible_point();
         self.sync_horizontal_scrollbar();
         self.repaint_surface();
@@ -579,6 +589,7 @@ where
         self.repaint_surface();
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
+        self.clear_hovered_point();
         self.left_scroll = (self.scrollbars.horizontal_index() as i32).clamp(0, self.max_left_scroll());
         self.update_first_visible_point();
         self.repaint_surface();
@@ -588,6 +599,75 @@ where
         if new_scroll != self.left_scroll {
             self.left_scroll = new_scroll;
             self.after_horizontal_scroll();
+        }
+    }
+
+    // ------------------------------------------------------------------ hovering
+
+    /// Index (on the X axis) of the point nearest to `(x, y)`, or `None` if the position is outside the plot area.
+    ///
+    /// Every column owns its own cells and half of the spacing on each side, so the whole plot width is covered.
+    pub(super) fn point_index_at(&self, x: i32, y: i32) -> Option<usize> {
+        let left_margin = self.x_axis_left_margin();
+        let points = self.points_count();
+        if points == 0 || x < left_margin || x >= self.size().width as i32 || y < 0 || y > self.plot_bottom() {
+            return None;
+        }
+        let step = self.column_step().max(1);
+        let first_center = self.default_spacing as i32 + (self.plot.column_width as i32 - 1) / 2;
+        let distance = x + self.left_scroll - left_margin - first_center;
+        let index = (distance + step / 2).div_euclid(step);
+        if index < 0 || index as usize >= points {
+            return None;
+        }
+        Some(index as usize)
+    }
+    /// Rectangle (on the control) that covers the markers of every series at `index`.
+    fn point_rect(&self, index: usize) -> Rect {
+        let level0_row = self.level0_row();
+        let mut top = i32::MAX;
+        let mut bottom = i32::MIN;
+        for series in self.series.iter() {
+            if let Some(point) = series.data.get(index) {
+                let y = level0_row - point.len as i32;
+                top = top.min(y);
+                bottom = bottom.max(y + self.plot.marker_height as i32 - 1);
+            }
+        }
+        if top > bottom {
+            top = level0_row;
+            bottom = level0_row;
+        }
+        Rect::with_size(self.screen_x(index), top, self.plot.column_width as u16, (bottom - top + 1) as u16)
+    }
+    fn show_hovered_point_tooltip(&mut self, index: usize) {
+        let mut text = std::mem::take(&mut self.tooltip_text);
+        text.clear();
+        let mut buffer = [0u8; 64];
+        // header: the label of the point (first non-empty one among the series)
+        if let Some(label) = self.series.iter().filter_map(|s| s.get(index)).map(|b| b.label()).find(|l| !l.is_empty()) {
+            text.push_str(label);
+        }
+        for series in self.series.iter() {
+            let Some(point) = series.get(index) else {
+                continue;
+            };
+            if !text.is_empty() {
+                text.push('\n');
+            }
+            if !series.label().is_empty() {
+                text.push_str(series.label());
+                text.push_str(": ");
+            }
+            text.push_str(self.number_format.write_float(point.value.to_f64(), &mut buffer).unwrap_or(""));
+        }
+        self.tooltip_text = text;
+        let r = self.point_rect(index);
+        self.show_tooltip_on_rect(&self.tooltip_text, &r);
+    }
+    fn clear_hovered_point(&mut self) {
+        if self.hovered_point.take().is_some() {
+            self.hide_tooltip();
         }
     }
 
@@ -647,6 +727,17 @@ where
 
     /// Recomputes the layout and repaints the internal surface.
     fn repaint_surface(&mut self) {
+        self.paint_surface();
+        // the data under the mouse may have changed (or disappeared)
+        if let Some(index) = self.hovered_point {
+            if index < self.points_count() {
+                self.show_hovered_point_tooltip(index);
+            } else {
+                self.clear_hovered_point();
+            }
+        }
+    }
+    fn paint_surface(&mut self) {
         let theme = self.theme();
         let background = theme.chart.background;
         let axis_attr = theme.chart.axis;
@@ -950,6 +1041,22 @@ where
             return EventProcessStatus::Processed;
         }
         match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.clear_hovered_point();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(pos) => {
+                let index = self.point_index_at(pos.x, pos.y);
+                if index == self.hovered_point {
+                    return EventProcessStatus::Ignored;
+                }
+                self.hovered_point = index;
+                match index {
+                    Some(index) => self.show_hovered_point_tooltip(index),
+                    None => self.hide_tooltip(),
+                }
+                EventProcessStatus::Processed
+            }
             MouseEvent::Wheel(wheel) => {
                 match wheel {
                     MouseWheelDirection::Left | MouseWheelDirection::Up => self.scroll_by(-1),

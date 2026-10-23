@@ -874,3 +874,107 @@ fn check_scroll_custom_spans_and_resize() {
         c
     });
 }
+
+// ---------------------------------------------------------------- hovering
+
+#[test]
+fn check_point_index_at() {
+    run_with_size(|chart| {
+        // 40x10 control, Y axis visible (left margin 8), spacing 2, column width 1 -> one point every 3 cells
+        chart.add_series(Series::with_values("A", 1..=30));
+        assert_eq!(chart.point_index_at(7, 5), None); // on the Y axis
+        assert_eq!(chart.point_index_at(8, 5), None); // first spacing cell, closer to nothing
+        assert_eq!(chart.point_index_at(9, 5), Some(0));
+        assert_eq!(chart.point_index_at(10, 5), Some(0)); // the marker of point 0
+        assert_eq!(chart.point_index_at(11, 5), Some(0));
+        assert_eq!(chart.point_index_at(12, 5), Some(1));
+        assert_eq!(chart.point_index_at(39, 0), Some(10));
+        assert_eq!(chart.point_index_at(40, 5), None); // outside the control
+        assert_eq!(chart.point_index_at(10, 9), Some(0)); // last plot row (no X axis)
+        assert_eq!(chart.point_index_at(10, 10), None); // below the plot
+        assert_eq!(chart.point_index_at(10, -1), None);
+        // scrolled
+        chart.ensure_visible(29);
+        let scroll = chart.left_scroll;
+        assert_eq!(chart.point_index_at(10 - scroll + 3 * 20, 5), Some(20));
+    });
+}
+
+#[test]
+fn check_point_index_at_beyond_last_point() {
+    run_with_size(|chart| {
+        chart.add_series(Series::with_values("A", [1, 2, 3]));
+        assert_eq!(chart.point_index_at(17, 5), Some(2));
+        assert_eq!(chart.point_index_at(18, 5), None);
+        assert_eq!(chart.point_index_at(30, 5), None);
+    });
+}
+
+#[test]
+fn check_point_index_at_empty_chart() {
+    run_with_size(|chart| {
+        assert_eq!(chart.point_index_at(10, 5), None);
+        chart.add_series(Series::new("A"));
+        assert_eq!(chart.point_index_at(10, 5), None);
+    });
+}
+
+fn hover_chart() -> LineChart<i32> {
+    let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::ScrollBars);
+    c.set_default_spacing(4);
+    c.add_series(Series::with_values(
+        "CPU",
+        [
+            BarBuilder::new(35).label("Jan").build(),
+            BarBuilder::new(42).label("Feb").build(),
+            BarBuilder::new(38).label("Mar").build(),
+            BarBuilder::new(55).label("Apr").build(),
+        ],
+    ));
+    c.add_series(Series::with_values("RAM", [20, 22, 25, 24, 30, 33, 31, 36, 40]));
+    c.add_series(Series::with_values("", [5, 5, 10]));
+    c.set_xaxis_label_mode(linechart::XAxisLabelMode::PointLabels);
+    c
+}
+
+#[test]
+fn check_hover_tooltip() {
+    let script = "
+        Paint('1. Initial state')
+        CheckHash(0xAE1B20625165EBED)
+        Mouse.Move(13,6)
+        Paint('2. Hover Jan: label, CPU, RAM and the unnamed series')
+        CheckHash(0xAF8F750423BFEEA4)
+        Mouse.Move(16,6)
+        Paint('3. Between two points - the nearest one (Feb)')
+        CheckHash(0xB9693B97718F64F4)
+        Mouse.Move(28,2)
+        Paint('4. Apr - the third series has no point here')
+        CheckHash(0x972110CBDEC6455D)
+        Mouse.Move(38,9)
+        Paint('5. Point 6 - only RAM, no label')
+        CheckHash(0x1DD6AF8F3DA4C0BE)
+        Mouse.Move(5,6)
+        Paint('6. Over the Y axis labels - no tooltip')
+        CheckHash(0xAE1B20625165EBED)
+    ";
+    run_paint_test(script, Size::new(46, 20), hover_chart);
+}
+
+#[test]
+fn check_hover_tooltip_hidden_on_scroll() {
+    let script = "
+        Paint('1. Initial state')
+        CheckHash(0xE6D3D1C59FD0CC8D)
+        Mouse.Move(18,6)
+        Paint('2. Hover Feb')
+        CheckHash(0xEA44FC5409BBC0C0)
+        Key.Pressed(Right,2)
+        Paint('3. Scrolling hides the tooltip')
+        CheckHash(0x4B72229E48E5B586)
+        Mouse.Move(19,6)
+        Paint('4. Moving the mouse shows it again')
+        CheckHash(0x61A9BF4A426C2EF)
+    ";
+    run_paint_test(script, Size::new(40, 20), hover_chart);
+}
