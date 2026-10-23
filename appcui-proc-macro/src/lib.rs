@@ -2951,6 +2951,7 @@ pub fn bufferview(input: TokenStream) -> TokenStream {
 ///   - **FilledRectangle** or **FilledRect**, with the same line kinds as **Line**
 ///   - **Point(kind)** - `Bullet`, `Diamond`, `Square`, or a character
 ///   - **LargePoint(kind)** - `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare`, `Circle`, `Diamond`, or a character
+///   - **FramedPoint(kind)** - a 5x3 marker: `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare` (empty frames), `RoundSquareBullet`, `SquareBullet`, `DoubleLineSquareBullet`, `ThickSquareBullet` (frames with a bullet), `BrailleCircle`, `BrailleCircleBullet`, `BrailleFilledCircle`, `Filled`, or a character (fills the whole marker)
 ///   - **Cap** or **Cap(kind)** - `Solid` (default), `Shade75`, `Shade50`, `Shade25`, `Braille`, `SingleLine`, `DoubleLine`, `SingleThickLine` (also `Thick`), or a character
 /// * `default-bar-draw-mode-attr`, `bar-attr`, `barattr`, `bar-color`, or `barcolor` - Default bar color (optional), using the same syntax as [`charattr!`] (for example `red` or `{fore: yellow, back: blue}`)
 /// * `numeric-format` or `nf` - Format for Y-axis labels and tooltips (optional), using the same syntax as [`numericformat!`]
@@ -3042,6 +3043,7 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 ///   - **FilledRectangle** or **FilledRect**, with the same line kinds as **Line**
 ///   - **Point(kind)** - `Bullet`, `Diamond`, `Square`, or a character
 ///   - **LargePoint(kind)** - `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare`, `Circle`, `Diamond`, or a character
+///   - **FramedPoint(kind)** - a 5x3 marker: `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare` (empty frames), `RoundSquareBullet`, `SquareBullet`, `DoubleLineSquareBullet`, `ThickSquareBullet` (frames with a bullet), `BrailleCircle`, `BrailleCircleBullet`, `BrailleFilledCircle`, `Filled`, or a character (fills the whole marker)
 ///   - **Cap** or **Cap(kind)** - `Solid` (default), `Shade75`, `Shade50`, `Shade25`, `Braille`, `SingleLine`, `DoubleLine`, `SingleThickLine` (also `Thick`), or a character
 /// * `default-bar-draw-mode-attr`, `bar-attr`, `barattr`, `bar-color`, or `barcolor` - Default bar color (optional), using the same syntax as [`charattr!`] (for example `red` or `{fore: yellow, back: blue}`)
 /// * `numeric-format` or `nf` - Format for axis labels and tooltips (optional), using the same syntax as [`numericformat!`]

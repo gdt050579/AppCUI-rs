@@ -31,6 +31,10 @@ static DRAW_MODES: &[(&str, &str)] = &[
     ("LargePoint", "large-point"),
     ("LargePoint", "largepoints"),
     ("LargePoint", "large-points"),
+    ("FramedPoint", "framedpoint"),
+    ("FramedPoint", "framed-point"),
+    ("FramedPoint", "framedpoints"),
+    ("FramedPoint", "framed-points"),
     ("Cap", "cap"),
 ];
 
@@ -66,6 +70,31 @@ static LARGE_POINT_TYPES: &[(&str, &str)] = &[
     ("ThickSquare", "thick-square"),
     ("Circle", "circle"),
     ("Diamond", "diamond"),
+];
+
+static FRAMED_POINT_TYPES: &[(&str, &str)] = &[
+    ("RoundSquare", "roundsquare"),
+    ("RoundSquare", "round-square"),
+    ("Square", "square"),
+    ("DoubleLineSquare", "doublelinesquare"),
+    ("DoubleLineSquare", "double-line-square"),
+    ("ThickSquare", "thicksquare"),
+    ("ThickSquare", "thick-square"),
+    ("RoundSquareBullet", "roundsquarebullet"),
+    ("RoundSquareBullet", "round-square-bullet"),
+    ("SquareBullet", "squarebullet"),
+    ("SquareBullet", "square-bullet"),
+    ("DoubleLineSquareBullet", "doublelinesquarebullet"),
+    ("DoubleLineSquareBullet", "double-line-square-bullet"),
+    ("ThickSquareBullet", "thicksquarebullet"),
+    ("ThickSquareBullet", "thick-square-bullet"),
+    ("BrailleCircle", "braillecircle"),
+    ("BrailleCircle", "braille-circle"),
+    ("BrailleCircleBullet", "braillecirclebullet"),
+    ("BrailleCircleBullet", "braille-circle-bullet"),
+    ("BrailleFilledCircle", "braillefilledcircle"),
+    ("BrailleFilledCircle", "braille-filled-circle"),
+    ("Filled", "filled"),
 ];
 
 static CAP_TYPES: &[(&str, &str)] = &[
@@ -265,9 +294,10 @@ pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String
                 }
                 "Point" => parse_typed_draw_mode(&fncall, key, module, "Point", POINT_TYPES, "BarPointType", "Circle"),
                 "LargePoint" => parse_typed_draw_mode(&fncall, key, module, "LargePoint", LARGE_POINT_TYPES, "BarLargePointType", "RoundSquare"),
+                "FramedPoint" => parse_typed_draw_mode(&fncall, key, module, "FramedPoint", FRAMED_POINT_TYPES, "BarFramedPointType", "RoundSquare"),
                 "Cap" => parse_typed_draw_mode(&fncall, key, module, "Cap", CAP_TYPES, "BarCapType", "Solid"),
                 _ => {
-                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point, LargePoint, Cap !");
+                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point, LargePoint, FramedPoint, Cap !");
                 }
             }
         } else {

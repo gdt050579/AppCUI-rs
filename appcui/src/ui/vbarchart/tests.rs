@@ -2206,3 +2206,291 @@ fn check_ensure_visible_out_of_range_index_does_nothing() {
         assert_eq!(chart.left_scroll, 3);
     });
 }
+
+#[test]
+fn check_draw_mode_framed_point_round_square() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x47AA0CE73A7C6577)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(RoundSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_square() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x1046C90215090851)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(Square), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_double_line_square() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xCD6B8630829F8C9F)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(DoubleLineSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_thick_square() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x56F6BE1A2B4346DD)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(ThickSquare), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_filled() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x65CAD059D4FF2188)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(Filled), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_custom() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3457AD6DD34222AF)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint('X'), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_framed_point_thickness_is_fixed() {
+    use crate::ui::components::{BarDefaults, BarDrawMode, BarFramedPointType};
+    let bar = BarBuilder::new(1).thickness(9).draw_mode(BarDrawMode::FramedPoint(BarFramedPointType::Filled)).build();
+    let mut defaults = BarDefaults {
+        thickness: 1,
+        spacing: 1,
+        vertical: true,
+        ..Default::default()
+    };
+    assert_eq!(bar.actual_thickness(&defaults), 5);
+    defaults.vertical = false;
+    assert_eq!(bar.actual_thickness(&defaults), 3);
+}
+
+#[test]
+fn check_draw_mode_framed_point_round_square_bullet() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x5AB31FDC8DC91087)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(RoundSquareBullet), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_square_bullet() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xC74ACE8AFA1DD521)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(SquareBullet), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_double_line_square_bullet() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x9FDBC05E5B7C45B)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(DoubleLineSquareBullet), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_thick_square_bullet() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x31D1B5603A546C0D)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(ThickSquareBullet), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_braille_circle() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x91343739A880BAB5)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(BrailleCircle), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_braille_circle_bullet() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0x3E565DBACE6CBBBD)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(BrailleCircleBullet), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_draw_mode_framed_point_braille_filled_circle() {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+        CheckHash(0xBFEF0D7B832A2B08)
+    ";
+    App::new()
+        .size(Size::new(60, 15))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("Test,d:f");
+            w.add(vbarchart!(
+                "type: i32, d:f, dm: FramedPoint(braille-filled-circle), xlabels:Index(1), values: [1, 2, 3,4,5,6,7,8,9,10]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
