@@ -5,6 +5,7 @@
 //! internally for rendering. Each point is drawn with a [`Marker`], and consecutive points
 //! of a series are connected according to its [`LineMode`].
 
+pub mod events;
 mod initialization_flags;
 mod line_mode;
 mod linechart;

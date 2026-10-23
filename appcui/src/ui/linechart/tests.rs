@@ -35,6 +35,7 @@ fn check_creation_in_window() {
 // ---------------------------------------------------------------- Series / SeriesBuilder
 
 use crate::ui::linechart::{LineMode, Marker, Series, SeriesBuilder};
+use crate::ui::linechart::linechart::PointPos;
 
 #[test]
 fn check_series_new() {
@@ -709,13 +710,14 @@ fn check_ensure_visible() {
         chart.add_series(Series::with_values("A", 1..=30));
         assert_eq!(chart.left_scroll, 0);
         assert_eq!(chart.first_visible_point, 0);
-        // column 29 is at x = 2 + 29 * 3 = 89 -> scroll so that it ends at the right edge
+        // column 29 is at x = 2 + 29 * 3 = 89 -> scroll so that it ends one cell before the right edge
+        // (the last column is kept free for the scroll bar)
         chart.ensure_visible(29);
-        assert_eq!(chart.left_scroll, 50);
-        assert_eq!(chart.first_visible_point, 16);
+        assert_eq!(chart.left_scroll, 51);
+        assert_eq!(chart.first_visible_point, 17);
         // already visible -> no change
         chart.ensure_visible(20);
-        assert_eq!(chart.left_scroll, 50);
+        assert_eq!(chart.left_scroll, 51);
         // back to the first point
         chart.ensure_visible(0);
         assert_eq!(chart.left_scroll, 2);
@@ -730,9 +732,9 @@ fn check_ensure_visible() {
 fn check_ensure_visible_with_yaxis_margin() {
     run_with_size(|chart| {
         chart.add_series(Series::with_values("A", 1..=30));
-        // plot width is 40 - 8 = 32
+        // plot width is 40 - 8 - 1 = 31
         chart.ensure_visible(20);
-        assert_eq!(chart.left_scroll, 31);
+        assert_eq!(chart.left_scroll, 32);
     });
 }
 
@@ -742,7 +744,7 @@ fn check_scroll_is_clamped_when_data_shrinks() {
         chart.set_yaxis_visible(false);
         chart.add_series(Series::with_values("A", 1..=30));
         chart.ensure_visible(29);
-        assert_eq!(chart.left_scroll, 50);
+        assert_eq!(chart.left_scroll, 51);
         chart.update_all_series(|_, s| s.remove_first(20));
         // 10 points: 2 + 10 * 3 + 1 = 33 cells -> fits in 40, no scroll
         assert_eq!(chart.left_scroll, 0);
@@ -919,8 +921,8 @@ fn check_point_index_at_empty_chart() {
     });
 }
 
-fn hover_chart() -> LineChart<i32> {
-    let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::ScrollBars);
+fn hover_chart(flags: linechart::Flags) -> LineChart<i32> {
+    let mut c = LineChart::<i32>::new(layout!("d:f"), flags);
     c.set_default_spacing(4);
     c.add_series(Series::with_values(
         "CPU",
@@ -938,43 +940,310 @@ fn hover_chart() -> LineChart<i32> {
 }
 
 #[test]
-fn check_hover_tooltip() {
+fn check_point_at() {
+    run_with_size(|chart| {
+        // 40x10, no X axis: 9 levels, value 0 -> row 9, value 10 -> row 1; columns at x = 10, 13, ...
+        chart.add_series(Series::with_values("A", [0, 10]));
+        chart.add_series(Series::with_values("B", [10, 0]));
+        assert_eq!(chart.point_at(10, 9), Some(PointPos::new(0, 0)));
+        assert_eq!(chart.point_at(10, 8), Some(PointPos::new(0, 0))); // one row away
+        assert_eq!(chart.point_at(11, 8), Some(PointPos::new(0, 0))); // and inside the column
+        assert_eq!(chart.point_at(10, 7), None); // two rows away from every marker
+        assert_eq!(chart.point_at(10, 1), Some(PointPos::new(1, 0)));
+        assert_eq!(chart.point_at(10, 0), Some(PointPos::new(1, 0)));
+        assert_eq!(chart.point_at(13, 1), Some(PointPos::new(0, 1)));
+        assert_eq!(chart.point_at(13, 9), Some(PointPos::new(1, 1)));
+        assert_eq!(chart.point_at(4, 9), None); // Y axis
+        // overlapping markers: the series drawn last wins
+        chart.add_series(Series::with_values("C", [0]));
+        assert_eq!(chart.point_at(10, 9), Some(PointPos::new(2, 0)));
+        assert_eq!(chart.point_at(13, 9), Some(PointPos::new(1, 1)));
+    });
+}
+
+#[test]
+fn check_point_at_large_markers() {
+    run_with_size(|chart| {
+        // large markers: 2 rows, 8 levels; value 0 -> rows 8..9, value 10 -> rows 1..2; column 0 at x = 10..12
+        chart.set_default_marker(Marker::Large(BarLargePointType::Square));
+        chart.add_series(Series::with_values("A", [0, 10]));
+        assert_eq!(chart.point_at(10, 9), Some(PointPos::new(0, 0)));
+        assert_eq!(chart.point_at(12, 8), Some(PointPos::new(0, 0)));
+        assert_eq!(chart.point_at(11, 7), Some(PointPos::new(0, 0)));
+        assert_eq!(chart.point_at(11, 6), None);
+        assert_eq!(chart.point_at(16, 3), Some(PointPos::new(0, 1)));
+        assert_eq!(chart.point_at(16, 4), None);
+    });
+}
+
+#[test]
+fn check_hover_point_tooltip() {
+    let script = "
+        Paint('1. Initial state')
+        CheckHash(0xAE1B20625165EBED)
+        Mouse.Move(13,7)
+        Paint('2. On CPU/Jan: CPU, Jan: 35')
+        CheckHash(0xE103AA87C014F15B)
+        Mouse.Move(13,8)
+        Paint('3. One row below - still CPU/Jan')
+        CheckHash(0xE103AA87C014F15B)
+        Mouse.Move(13,9)
+        Paint('4. Two rows away from every marker - no tooltip')
+        CheckHash(0xAE1B20625165EBED)
+        Mouse.Move(13,11)
+        Paint('5. On RAM/Jan - RAM, 20 (RAM points have no label)')
+        CheckHash(0xA231E12AE2B899E0)
+        Mouse.Move(13,15)
+        Paint('6. Unnamed series - Jan point only shows 5')
+        CheckHash(0x740793633BA35A13)
+    ";
+    run_paint_test(script, Size::new(46, 20), || hover_chart(linechart::Flags::ScrollBars));
+}
+
+#[test]
+fn check_hover_group_tooltip_and_highlight() {
     let script = "
         Paint('1. Initial state')
         CheckHash(0xAE1B20625165EBED)
         Mouse.Move(13,6)
-        Paint('2. Hover Jan: label, CPU, RAM and the unnamed series')
-        CheckHash(0xAF8F750423BFEEA4)
+        Paint('2. Group hover on Jan: highlighted column, label, CPU, RAM and the unnamed series')
+        CheckHash(0x6606A7E72310CEDB)
         Mouse.Move(16,6)
         Paint('3. Between two points - the nearest one (Feb)')
-        CheckHash(0xB9693B97718F64F4)
+        CheckHash(0xD5273F2F82A139F4)
         Mouse.Move(28,2)
         Paint('4. Apr - the third series has no point here')
-        CheckHash(0x972110CBDEC6455D)
+        CheckHash(0xBA72B243AF664B4D)
         Mouse.Move(38,9)
         Paint('5. Point 6 - only RAM, no label')
-        CheckHash(0x1DD6AF8F3DA4C0BE)
+        CheckHash(0xA8D0C4A5FABAE592)
         Mouse.Move(5,6)
-        Paint('6. Over the Y axis labels - no tooltip')
+        Paint('6. Over the Y axis labels - no tooltip, no highlight')
         CheckHash(0xAE1B20625165EBED)
     ";
-    run_paint_test(script, Size::new(46, 20), hover_chart);
+    run_paint_test(script, Size::new(46, 20), || hover_chart(linechart::Flags::ScrollBars | linechart::Flags::GroupHover));
 }
 
 #[test]
-fn check_hover_tooltip_hidden_on_scroll() {
+fn check_hover_hidden_on_scroll() {
     let script = "
         Paint('1. Initial state')
         CheckHash(0xE6D3D1C59FD0CC8D)
         Mouse.Move(18,6)
-        Paint('2. Hover Feb')
-        CheckHash(0xEA44FC5409BBC0C0)
+        Paint('2. Group hover on Feb')
+        CheckHash(0xECDF3D3AAB036EB0)
         Key.Pressed(Right,2)
-        Paint('3. Scrolling hides the tooltip')
+        Paint('3. Scrolling hides the tooltip and the highlight')
         CheckHash(0x4B72229E48E5B586)
         Mouse.Move(19,6)
         Paint('4. Moving the mouse shows it again')
-        CheckHash(0x61A9BF4A426C2EF)
+        CheckHash(0x69BD61002139DEBC)
     ";
-    run_paint_test(script, Size::new(40, 20), hover_chart);
+    run_paint_test(script, Size::new(40, 20), || hover_chart(linechart::Flags::ScrollBars | linechart::Flags::GroupHover));
+}
+
+// ---------------------------------------------------------------- selection
+
+#[test]
+fn check_select_point_api() {
+    run_with_size(|chart| {
+        chart.add_series(Series::with_values("A", 1..=10));
+        chart.add_series(Series::with_values("B", 1..=3));
+        assert_eq!(chart.selected_point(), None);
+        chart.select_point(1, 2);
+        assert_eq!(chart.selected_point(), Some((1, 2)));
+        // points that do not exist clear the selection
+        chart.select_point(1, 3);
+        assert_eq!(chart.selected_point(), None);
+        chart.select_point(5, 0);
+        assert_eq!(chart.selected_point(), None);
+        chart.select_point(0, 9);
+        assert_eq!(chart.selected_point(), Some((0, 9)));
+        chart.clear_selection();
+        assert_eq!(chart.selected_point(), None);
+    });
+}
+
+#[test]
+fn check_selection_follows_data_changes() {
+    run_with_size(|chart| {
+        chart.add_series(Series::with_values("A", 1..=10));
+        chart.add_series(Series::with_values("B", 1..=10));
+        chart.add_series(Series::with_values("C", 1..=10));
+        chart.select_point(2, 7);
+        // editing a point keeps the selection
+        chart.update_series(2, |s| {
+            s.get_mut(7).unwrap().set_draw_mode(BarDrawMode::LargePoint(BarLargePointType::Circle));
+        });
+        assert_eq!(chart.selected_point(), Some((2, 7)));
+        // removing an earlier series shifts the selected series index
+        chart.remove_series(0);
+        assert_eq!(chart.selected_point(), Some((1, 7)));
+        // removing the selected series clears the selection
+        chart.remove_series(1);
+        assert_eq!(chart.selected_point(), None);
+        // shrinking the series below the selected index clears it too
+        chart.select_point(0, 7);
+        chart.update_series(0, |s| s.remove_first(2));
+        assert_eq!(chart.selected_point(), Some((0, 7)));
+        chart.update_series(0, |s| s.remove_first(1));
+        assert_eq!(chart.selected_point(), None);
+    });
+}
+
+#[test]
+fn check_selection_events() {
+    #[Window(events = LineChartEvents<i32>, internal: true)]
+    struct MyWin {
+        info: Handle<Label>,
+    }
+    impl MyWin {
+        fn new() -> Self {
+            let mut win = Self {
+                base: window!("Test,d:f"),
+                info: Handle::None,
+            };
+            win.info = win.add(label!("'No selection',x:0,y:0,w:40"));
+            let mut chart = LineChart::<i32>::new(layout!("x:0,y:1,w:44,h:12"), linechart::Flags::None);
+            chart.set_default_spacing(4);
+            chart.add_series(Series::with_values(
+                "CPU",
+                [
+                    BarBuilder::new(35).label("Jan").build(),
+                    BarBuilder::new(42).label("Feb").build(),
+                    BarBuilder::new(38).label("Mar").build(),
+                ],
+            ));
+            chart.add_series(Series::with_values("RAM", [20, 22, 25, 24]));
+            win.add(chart);
+            win
+        }
+    }
+    impl LineChartEvents<i32> for MyWin {
+        fn on_point_selected(&mut self, handle: Handle<LineChart<i32>>, series_index: u32, point_index: u32) -> EventProcessStatus {
+            let text = if let Some(chart) = self.control(handle) {
+                let series = chart.get_series(series_index as usize).unwrap();
+                let value = series.get(point_index as usize).unwrap().value();
+                format!("{} #{} = {}", series.label(), point_index, value)
+            } else {
+                String::from("?")
+            };
+            let info = self.info;
+            if let Some(label) = self.control_mut(info) {
+                label.set_caption(&text);
+            }
+            EventProcessStatus::Processed
+        }
+        fn on_clear_selection(&mut self, _: Handle<LineChart<i32>>) -> EventProcessStatus {
+            let info = self.info;
+            if let Some(label) = self.control_mut(info) {
+                label.set_caption("No selection");
+            }
+            EventProcessStatus::Processed
+        }
+    }
+    let script = "
+        Paint('1. No selection')
+        CheckHash(0x216EB2B84EB445E9)
+        Mouse.Click(13,5,left)
+        Paint('2. Click on CPU/Jan -> CPU #0 = 35')
+        CheckHash(0x770DCC419FCDB2D5)
+        Key.Pressed(Right)
+        Paint('3. Right -> CPU #1 = 42')
+        CheckHash(0xC49F7666A9EC8FA8)
+        Key.Pressed(Down)
+        Paint('4. Down -> RAM #1 = 22')
+        CheckHash(0x1C4EA3F8654265C6)
+        Key.Pressed(Right,2)
+        Paint('5. Right x2 -> RAM #3 = 24')
+        CheckHash(0x47B0B11A9FD570E4)
+        Key.Pressed(Up)
+        Paint('6. Up - CPU has no point #3 - nothing changes')
+        CheckHash(0x47B0B11A9FD570E4)
+        Key.Pressed(Right)
+        Paint('7. Right on the last RAM point - nothing changes')
+        CheckHash(0x47B0B11A9FD570E4)
+        Key.Pressed(Left)
+        Paint('8. Left -> RAM #2 = 25')
+        CheckHash(0xB5940221BAEB0A2)
+        Key.Pressed(Up)
+        Paint('9. Up -> CPU #2 = 38')
+        CheckHash(0xCE2E3E9874C330C1)
+        Key.Pressed(Escape)
+        Paint('10. Escape clears the selection')
+        CheckHash(0x216EB2B84EB445E9)
+        Mouse.Click(13,8,left)
+        Paint('11. Click on RAM/Jan -> RAM #0 = 20')
+        CheckHash(0x2791C9864E3A534F)
+        Mouse.Click(13,11,left)
+        Paint('12. Click far from every marker clears the selection')
+        CheckHash(0x216EB2B84EB445E9)
+    ";
+    App::new().size(Size::new(46, 16)).debug_script(script).window(MyWin::new).run().unwrap();
+}
+
+fn selection_chart(flags: linechart::Flags) -> LineChart<i32> {
+    let mut c = LineChart::<i32>::new(layout!("d:f"), flags);
+    c.set_default_spacing(4);
+    c.add_series(SeriesBuilder::new("CPU").line(LineMode::Braille).values([10, 35, 20, 60, 40, 55]));
+    c.add_series(SeriesBuilder::new("RAM").values([40, 42, 44, 41, 43, 45]));
+    c.update_series(1, |s| {
+        s.get_mut(4).unwrap().set_draw_mode(BarDrawMode::LargePoint(BarLargePointType::RoundSquare));
+    });
+    c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(1));
+    c
+}
+
+#[test]
+fn check_selection_frame() {
+    let script = "
+        Paint('1. No selection')
+        CheckHash(0xC6108EF88E753176)
+        Mouse.Click(28,4,left)
+        Paint('2. RAM point 2 selected - only its marker is framed')
+        CheckHash(0x8596F0AD9970670E)
+        Mouse.Click(42,5,left)
+        Paint('3. The large RAM point 5 selected')
+        CheckHash(0xA29D0D2DA982E306)
+    ";
+    run_paint_test(script, Size::new(52, 14), || selection_chart(linechart::Flags::None));
+}
+
+#[test]
+fn check_selection_dim_points() {
+    let script = "
+        Paint('1. No selection - nothing is dimmed')
+        CheckHash(0xC6108EF88E753176)
+        Mouse.Click(35,2,left)
+        Paint('2. CPU point 4 selected - everything else (RAM included) is dimmed')
+        CheckHash(0xFB81C5388C09ACBE)
+        Key.Pressed(Escape)
+        Paint('3. Escape - back to normal')
+        CheckHash(0xC6108EF88E753176)
+    ";
+    run_paint_test(script, Size::new(52, 14), || selection_chart(linechart::Flags::DimPointsOnSelection));
+}
+
+#[test]
+fn check_selection_keyboard_scrolls_into_view() {
+    let script = "
+        Paint('1. Initial state')
+        CheckHash(0x8204DE6F8A55998D)
+        Mouse.Click(13,10,left)
+        Paint('2. Point 0 selected')
+        CheckHash(0x70050F4378B5B036)
+        Key.Pressed(Right,8)
+        Paint('3. Point 8 selected - the chart scrolled to show it')
+        CheckHash(0x204DB2CCF00F9C9)
+        Key.Pressed(Home)
+        Paint('4. Home still scrolls (the selection stays on point 8, out of view)')
+        CheckHash(0x570FBB86E248BC12)
+    ";
+    run_paint_test(script, Size::new(40, 14), || {
+        let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::ScrollBars | linechart::Flags::DimPointsOnSelection);
+        c.set_default_spacing(4);
+        c.add_series(Series::with_values("A", (0..20).map(|i| (i * 7) % 13)));
+        c.set_xaxis_label_mode(linechart::XAxisLabelMode::Index(0));
+        c
+    });
 }

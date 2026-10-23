@@ -12,6 +12,13 @@ pub enum Flags {
     ScrollBars = 1,
     /// Draws a solid horizontal line at value zero while the Y-axis grid is visible.
     ShowZeroLineOnYAxis = 2,
+    /// Draws everything except the selected point with the inactive chart color.
+    DimPointsOnSelection = 4,
+    /// Hovering acts on a whole X position: the column under the mouse is highlighted
+    /// and the tooltip shows the value of every series at that position.
+    ///
+    /// Without this flag, hovering acts on the single point under the mouse.
+    GroupHover = 8,
 }
 
 /// Chooses the labels drawn under the points of a [`struct@super::LineChart`].

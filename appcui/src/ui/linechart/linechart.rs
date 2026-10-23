@@ -1,6 +1,31 @@
 use flat_string::FlatString;
 
-use super::{Flags, LineMode, Marker, Series, XAxisLabelFormat, XAxisLabelMode};
+use super::{
+    events::{EventData, EventType},
+    Flags, LineMode, Marker, Series, XAxisLabelFormat, XAxisLabelMode,
+};
+
+/// A point of the chart: a series and the index of the point inside it.
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub(super) struct PointPos {
+    pub(super) series: u32,
+    pub(super) index: u32,
+}
+impl PointPos {
+    #[inline(always)]
+    pub(super) const fn new(series: u32, index: u32) -> Self {
+        Self { series, index }
+    }
+}
+
+/// What is under the mouse.
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+pub(super) enum Hover {
+    /// a whole X position (with [`Flags::GroupHover`])
+    Group(usize),
+    /// a single point
+    Point(PointPos),
+}
 use crate::prelude::*;
 
 struct YAxis {
@@ -52,8 +77,15 @@ const INT_FORMAT: FormatNumber = FormatNumber::new(10).group(3, b',');
 /// `Home`/`End`) and the mouse wheel. With [`Flags::ScrollBars`], a horizontal scroll bar
 /// is shown while the chart has focus.
 ///
-/// Hovering the plot area with the mouse shows a tooltip for the nearest point on the X axis:
-/// its label (if any) followed by the value of every series that has a point there.
+/// Hovering a point with the mouse shows a tooltip with its series, label, and value.
+/// With [`Flags::GroupHover`], hovering acts on a whole X position instead: the column is
+/// highlighted and the tooltip shows the value of every series at that position.
+///
+/// Clicking a point selects it (one series, one index) and raises a point-selected event;
+/// clicking away from every point clears the selection. While a point is selected,
+/// `Left`/`Right` move along its series, `Up`/`Down` move to the point above or below at
+/// the same X position, and `Escape` clears the selection. With [`Flags::DimPointsOnSelection`],
+/// everything except the selected point is drawn with the inactive chart color.
 pub struct LineChart<T>
 where
     T: Number + 'static,
@@ -74,9 +106,11 @@ where
     pub(super) left_scroll: i32,
     /// index of the first column that is (at least partially) visible
     pub(super) first_visible_point: usize,
-    /// point (X index) under the mouse, if any
-    pub(super) hovered_point: Option<usize>,
+    /// what is under the mouse, if anything
+    pub(super) hovered: Option<Hover>,
     tooltip_text: String,
+    /// selected point, if any
+    pub(super) selected_point: Option<PointPos>,
 }
 
 impl<T> LineChart<T>
@@ -132,8 +166,9 @@ where
             scrollbars: ScrollBars::new(flags.contains(Flags::ScrollBars)),
             left_scroll: 0,
             first_visible_point: 0,
-            hovered_point: None,
+            hovered: None,
             tooltip_text: String::new(),
+            selected_point: None,
         }
     }
 
@@ -178,6 +213,42 @@ where
         self.series.iter().map(|s| s.len()).max().unwrap_or(0)
     }
 
+    /// Returns the selected point as `(series_index, point_index)`, or `None` if nothing is selected.
+    #[inline(always)]
+    pub fn selected_point(&self) -> Option<(u32, u32)> {
+        self.selected_point.map(|p| (p.series, p.index))
+    }
+
+    /// Selects point `point_index` of series `series_index` and scrolls it into view.
+    ///
+    /// No event is raised: this is meant for code that keeps another view (for example a
+    /// property panel) in sync with the chart. If the point does not exist, the selection is cleared.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::None);
+    /// chart.add_series(linechart::Series::with_values("CPU", [10, 14, 9]));
+    /// chart.select_point(0, 2);
+    /// assert_eq!(chart.selected_point(), Some((0, 2)));
+    /// ```
+    pub fn select_point(&mut self, series_index: u32, point_index: u32) {
+        let point = PointPos::new(series_index, point_index);
+        if self.point_exists(point) {
+            self.selected_point = Some(point);
+            self.ensure_visible(point_index as usize);
+        } else {
+            self.selected_point = None;
+        }
+    }
+
+    /// Clears the selection. No event is raised.
+    #[inline(always)]
+    pub fn clear_selection(&mut self) {
+        self.selected_point = None;
+    }
+
     /// Scrolls the chart horizontally so the point at `index` (on the X axis) is visible.
     ///
     /// The chart scrolls the minimum amount needed to show the whole column of that point.
@@ -197,7 +268,9 @@ where
             return;
         }
         self.update_layout();
-        let plot_width = (self.size().width as i32 - self.x_axis_left_margin()).max(0);
+        // keep one free column on the right (same as the content width used by End / the scroll bar):
+        // the scroll bar takes the last column while the chart has focus
+        let plot_width = (self.size().width as i32 - self.x_axis_left_margin() - 1).max(0);
         if plot_width <= 0 {
             return;
         }
@@ -300,6 +373,16 @@ where
             return None;
         }
         let series = self.series.remove(series_index);
+        // keep the selection on the same point (series after the removed one move down by one)
+        if let Some(p) = self.selected_point {
+            let removed = series_index as u32;
+            self.selected_point = match p.series.cmp(&removed) {
+                std::cmp::Ordering::Less => Some(p),
+                std::cmp::Ordering::Equal => None,
+                std::cmp::Ordering::Greater => Some(PointPos::new(p.series - 1, p.index)),
+            };
+        }
+        self.clear_hover();
         self.repaint_surface();
         Some(series)
     }
@@ -574,7 +657,7 @@ where
     }
     fn after_horizontal_scroll(&mut self) {
         // the point under the mouse is no longer the same one
-        self.clear_hovered_point();
+        self.clear_hover();
         self.update_first_visible_point();
         self.sync_horizontal_scrollbar();
         self.repaint_surface();
@@ -589,7 +672,7 @@ where
         self.repaint_surface();
     }
     fn update_scroll_pos_from_scrollbars(&mut self) {
-        self.clear_hovered_point();
+        self.clear_hover();
         self.left_scroll = (self.scrollbars.horizontal_index() as i32).clamp(0, self.max_left_scroll());
         self.update_first_visible_point();
         self.repaint_surface();
@@ -622,8 +705,25 @@ where
         }
         Some(index as usize)
     }
+    /// Returns `true` if `point` refers to an existing point.
+    #[inline(always)]
+    fn point_exists(&self, point: PointPos) -> bool {
+        self.series.get(point.series as usize).is_some_and(|s| (point.index as usize) < s.len())
+    }
+    /// Rectangle (on the control) of the marker of `point` (the cell of the line for [`Marker::None`]).
+    fn marker_rect(&self, point: PointPos) -> Rect {
+        let Some(p) = self.series.get(point.series as usize).and_then(|s| s.data.get(point.index as usize)) else {
+            return Rect::with_size(0, 0, 0, 0);
+        };
+        let x = self.screen_x(point.index as usize);
+        let y = self.level0_row() - p.len as i32;
+        match self.marker_for(&p.bar) {
+            Marker::Large(_) => Rect::with_size(x, y, 3, 2),
+            _ => Rect::with_size(x + (self.plot.column_width as i32 - 1) / 2, y, 1, 1),
+        }
+    }
     /// Rectangle (on the control) that covers the markers of every series at `index`.
-    fn point_rect(&self, index: usize) -> Rect {
+    fn group_rect(&self, index: usize) -> Rect {
         let level0_row = self.level0_row();
         let mut top = i32::MAX;
         let mut bottom = i32::MIN;
@@ -640,7 +740,41 @@ where
         }
         Rect::with_size(self.screen_x(index), top, self.plot.column_width as u16, (bottom - top + 1) as u16)
     }
-    fn show_hovered_point_tooltip(&mut self, index: usize) {
+    /// The point whose marker is closest (vertically) to `(x, y)` in the column under the mouse.
+    ///
+    /// The mouse must be at most one row away from the marker. When markers overlap,
+    /// the one drawn on top (the last series) wins.
+    pub(super) fn point_at(&self, x: i32, y: i32) -> Option<PointPos> {
+        let index = self.point_index_at(x, y)?;
+        let mut best: Option<(i32, PointPos)> = None;
+        for series_index in 0..self.series.len() {
+            let point = PointPos::new(series_index as u32, index as u32);
+            if !self.point_exists(point) {
+                continue;
+            }
+            let r = self.marker_rect(point);
+            let distance = if y < r.top() {
+                r.top() - y
+            } else if y > r.bottom() {
+                y - r.bottom()
+            } else {
+                0
+            };
+            if distance <= 1 && best.is_none_or(|(d, _)| distance <= d) {
+                best = Some((distance, point));
+            }
+        }
+        best.map(|(_, point)| point)
+    }
+    /// What the mouse at `(x, y)` is over (depends on [`Flags::GroupHover`]).
+    fn hover_at(&self, x: i32, y: i32) -> Option<Hover> {
+        if self.flags.contains(Flags::GroupHover) {
+            self.point_index_at(x, y).map(Hover::Group)
+        } else {
+            self.point_at(x, y).map(Hover::Point)
+        }
+    }
+    fn show_group_tooltip(&mut self, index: usize) {
         let mut text = std::mem::take(&mut self.tooltip_text);
         text.clear();
         let mut buffer = [0u8; 64];
@@ -662,13 +796,109 @@ where
             text.push_str(self.number_format.write_float(point.value.to_f64(), &mut buffer).unwrap_or(""));
         }
         self.tooltip_text = text;
-        let r = self.point_rect(index);
+        let r = self.group_rect(index);
         self.show_tooltip_on_rect(&self.tooltip_text, &r);
     }
-    fn clear_hovered_point(&mut self) {
-        if self.hovered_point.take().is_some() {
+    fn show_point_tooltip(&mut self, point: PointPos) {
+        let Some(series) = self.series.get(point.series as usize) else {
+            return;
+        };
+        let Some(bar) = series.get(point.index as usize) else {
+            return;
+        };
+        let mut text = std::mem::take(&mut self.tooltip_text);
+        text.clear();
+        let mut buffer = [0u8; 64];
+        // series name on the first line, then "label: value" (or just the value)
+        if !series.label().is_empty() {
+            text.push_str(series.label());
+            text.push('\n');
+        }
+        if !bar.label().is_empty() {
+            text.push_str(bar.label());
+            text.push_str(": ");
+        }
+        text.push_str(self.number_format.write_float(bar.value.to_f64(), &mut buffer).unwrap_or(""));
+        self.tooltip_text = text;
+        let r = self.marker_rect(point);
+        self.show_tooltip_on_rect(&self.tooltip_text, &r);
+    }
+    fn show_hover_tooltip(&mut self, hover: Hover) {
+        match hover {
+            Hover::Group(index) => self.show_group_tooltip(index),
+            Hover::Point(point) => self.show_point_tooltip(point),
+        }
+    }
+    fn hover_is_valid(&self, hover: Hover) -> bool {
+        match hover {
+            Hover::Group(index) => index < self.points_count(),
+            Hover::Point(point) => self.point_exists(point),
+        }
+    }
+    fn clear_hover(&mut self) {
+        if self.hovered.take().is_some() {
             self.hide_tooltip();
         }
+    }
+
+    // ------------------------------------------------------------------ selection
+
+    /// Selects `point` (or clears the selection) after a user action and raises the matching event.
+    fn select_point_by_user(&mut self, point: Option<PointPos>) {
+        if point == self.selected_point {
+            return;
+        }
+        self.selected_point = point;
+        let event_type = match point {
+            Some(p) => {
+                self.ensure_visible(p.index as usize);
+                EventType::PointSelected {
+                    series_index: p.series,
+                    point_index: p.index,
+                }
+            }
+            None => EventType::ClearSelection,
+        };
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::LineChart(EventData {
+                event_type,
+                type_id: std::any::TypeId::of::<T>(),
+            }),
+        });
+    }
+    /// The point drawn just above (`up = true`) or below the selected one, at the same X position.
+    ///
+    /// Points are ordered by row (top to bottom) and then by series index, so overlapping markers
+    /// are still reachable.
+    fn vertical_neighbour(&self, current: PointPos, up: bool) -> Option<PointPos> {
+        let key = |p: PointPos| (self.marker_rect(p).top(), p.series);
+        let current_key = key(current);
+        (0..self.series.len() as u32)
+            .map(|s| PointPos::new(s, current.index))
+            .filter(|p| *p != current && self.point_exists(*p))
+            .filter(|p| if up { key(*p) < current_key } else { key(*p) > current_key })
+            .reduce(|a, b| {
+                let better = if up { key(b) > key(a) } else { key(b) < key(a) };
+                if better {
+                    b
+                } else {
+                    a
+                }
+            })
+    }
+    /// Area (on the control) where the selection frame and the dimming are drawn:
+    /// the plot, including the Y axis line and the X axis line.
+    fn selection_clip(&self) -> Rect {
+        let left = if self.yaxis.visible && self.yaxis.width > 0 {
+            self.yaxis.width as i32 + 1
+        } else {
+            0
+        };
+        let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
+        let right = self.size().width.saturating_sub(1) as i32;
+        Rect::new(left, 0, right, bottom)
     }
 
     fn update_layout(&mut self) {
@@ -717,6 +947,11 @@ where
                 point.len = Self::value_to_level(point.bar.value.to_f64(), low, high, levels);
             }
         }
+        if let Some(point) = self.selected_point {
+            if !self.point_exists(point) {
+                self.selected_point = None;
+            }
+        }
         // the content may have shrunk (fewer points, smaller spacing or markers) or the control may have grown
         self.left_scroll = self.left_scroll.clamp(0, self.max_left_scroll());
         self.update_first_visible_point();
@@ -729,11 +964,11 @@ where
     fn repaint_surface(&mut self) {
         self.paint_surface();
         // the data under the mouse may have changed (or disappeared)
-        if let Some(index) = self.hovered_point {
-            if index < self.points_count() {
-                self.show_hovered_point_tooltip(index);
+        if let Some(hover) = self.hovered {
+            if self.hover_is_valid(hover) {
+                self.show_hover_tooltip(hover);
             } else {
-                self.clear_hovered_point();
+                self.clear_hover();
             }
         }
     }
@@ -1013,8 +1248,39 @@ where
         if !self.is_enabled() {
             let attr = theme.chart.inactive;
             surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
-        } else {
-            surface.draw_surface(0, 0, &self.surface);
+            return;
+        }
+        surface.draw_surface(0, 0, &self.surface);
+        if self.plot.levels == 0 {
+            return;
+        }
+        let clip = self.selection_clip();
+        if let Some(Hover::Group(index)) = self.hovered {
+            if index < self.points_count() {
+                // highlight the whole column (plot area only) by changing its background
+                surface.set_relative_clip(clip.left(), clip.top(), clip.right(), self.plot_bottom());
+                let column = Rect::with_size(self.screen_x(index), 0, self.plot.column_width as u16, (self.plot_bottom() + 1) as u16);
+                let back = theme.chart.hover.background;
+                surface.transform_rect(column, |ch, _| Some(Character::new(ch.code, ch.foreground, back, ch.flags)));
+            }
+        }
+        if let Some(point) = self.selected_point {
+            if self.point_exists(point) {
+                surface.set_relative_clip(clip.left(), clip.top(), clip.right(), clip.bottom());
+                let mut r = self.marker_rect(point);
+                r.inflate_width(1, 1, 1, 1);
+                if self.flags.contains(Flags::DimPointsOnSelection) {
+                    let attr = theme.chart.inactive;
+                    surface.transform_rect(clip, |ch, p| {
+                        if r.contains(p) {
+                            None
+                        } else {
+                            Some(Character::with_attributes(ch.code, attr))
+                        }
+                    });
+                }
+                surface.draw_rect(r, LineType::Single, theme.chart.selection_border);
+            }
         }
     }
 }
@@ -1042,19 +1308,24 @@ where
         }
         match event {
             MouseEvent::Enter | MouseEvent::Leave => {
-                self.clear_hovered_point();
+                self.clear_hover();
                 EventProcessStatus::Processed
             }
             MouseEvent::Over(pos) => {
-                let index = self.point_index_at(pos.x, pos.y);
-                if index == self.hovered_point {
+                let hover = self.hover_at(pos.x, pos.y);
+                if hover == self.hovered {
                     return EventProcessStatus::Ignored;
                 }
-                self.hovered_point = index;
-                match index {
-                    Some(index) => self.show_hovered_point_tooltip(index),
+                self.hovered = hover;
+                match hover {
+                    Some(hover) => self.show_hover_tooltip(hover),
                     None => self.hide_tooltip(),
                 }
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Pressed(data) | MouseEvent::DoubleClick(data) => {
+                let point = self.point_at(data.x, data.y);
+                self.select_point_by_user(point);
                 EventProcessStatus::Processed
             }
             MouseEvent::Wheel(wheel) => {
@@ -1076,11 +1347,42 @@ where
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         match key.value() {
             key!("Left") => {
-                self.scroll_by(-1);
+                match self.selected_point {
+                    Some(p) => {
+                        if p.index > 0 {
+                            self.select_point_by_user(Some(PointPos::new(p.series, p.index - 1)));
+                        }
+                    }
+                    None => self.scroll_by(-1),
+                }
                 EventProcessStatus::Processed
             }
             key!("Right") => {
-                self.scroll_by(1);
+                match self.selected_point {
+                    Some(p) => {
+                        let next = PointPos::new(p.series, p.index + 1);
+                        if self.point_exists(next) {
+                            self.select_point_by_user(Some(next));
+                        }
+                    }
+                    None => self.scroll_by(1),
+                }
+                EventProcessStatus::Processed
+            }
+            key!("Up") | key!("Down") => {
+                let Some(current) = self.selected_point else {
+                    return EventProcessStatus::Ignored;
+                };
+                if let Some(next) = self.vertical_neighbour(current, key.value() == key!("Up")) {
+                    self.select_point_by_user(Some(next));
+                }
+                EventProcessStatus::Processed
+            }
+            key!("Escape") => {
+                if self.selected_point.is_none() {
+                    return EventProcessStatus::Ignored;
+                }
+                self.select_point_by_user(None);
                 EventProcessStatus::Processed
             }
             key!("Home") => {
