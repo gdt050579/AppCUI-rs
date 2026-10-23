@@ -401,11 +401,11 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 
 pub(crate) static LINECHART_TRAIT_DEF: &str = "
 trait LineChartEvents<T: Number+'static> {
-    fn on_point_selected(&mut self, handle: Handle<LineChart<T>>, point: linechart::PointRef) -> EventProcessStatus;
+    fn on_point_selected(&mut self, handle: Handle<LineChart<T>>, series_index: u32, point_index: u32) -> EventProcessStatus;
     fn on_clear_selection(&mut self, handle: Handle<LineChart<T>>) -> EventProcessStatus;
 }
 impl$(TEMPLATE_TYPE) GenericLineChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
-    fn on_point_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, point: linechart::PointRef) -> EventProcessStatus {
+    fn on_point_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, series_index: u32, point_index: u32) -> EventProcessStatus {
         $(TYPE_ID_TRANSLATION_FOR_LINECHART_ON_POINT_SELECTED)
         return EventProcessStatus::Ignored;
     }
@@ -420,7 +420,7 @@ pub(crate) static LINECHART_ON_POINT_SELECTED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<LineChart<$(TYPE)>> = unsafe { handle.unsafe_cast() };
     if self.control(h).is_some() {
-        return LineChartEvents::<$(TYPE)>::on_point_selected(self, h, point);
+        return LineChartEvents::<$(TYPE)>::on_point_selected(self, h, series_index, point_index);
     }
     return EventProcessStatus::Ignored;
 }
