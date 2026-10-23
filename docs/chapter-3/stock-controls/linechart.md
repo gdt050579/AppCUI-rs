@@ -2,6 +2,8 @@
 
 A `LineChart` plots one or more numeric series over a shared X axis. Every series is a list of points, drawn with a marker and connected by a line. The value type `T` is any numeric type that implements `Number`: `i8`, `i16`, `i32`, `i64`, `i128`, `u8`, `u16`, `u32`, `u64`, `u128`, `usize`, `isize`, `f32`, or `f64`.
 
+<img src="img/linechart.png" width=300/>
+
 All series share the same columns: point `i` of every series is drawn at X position `i`, so a chart with several series compares their values at each position. The X range is as long as the longest series; shorter series simply end earlier. The vertical scale is computed from the smallest and largest values across all series.
 
 Create one with `LineChart::new` (a layout and initialization flags) or with the `linechart!` macro. With `LineChart::new`, name the numeric type on the variable or with a turbofish:
