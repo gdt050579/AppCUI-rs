@@ -34,14 +34,12 @@ impl Marker {
         }
     }
 
-    /// Returns the bar draw mode used to paint this marker, or `None` for [`Marker::None`].
-    #[allow(dead_code)] // used by the painting code (step 3)
+    /// Returns the height of the marker, in rows (2 for [`Marker::Large`], 1 otherwise).
     #[inline(always)]
-    pub(crate) fn draw_mode(&self) -> Option<BarDrawMode> {
+    pub(crate) fn height(&self) -> u8 {
         match self {
-            Marker::None => None,
-            Marker::Small(point_type) => Some(BarDrawMode::Point(*point_type)),
-            Marker::Large(point_type) => Some(BarDrawMode::LargePoint(*point_type)),
+            Marker::None | Marker::Small(_) => 1,
+            Marker::Large(_) => 2,
         }
     }
 
@@ -49,7 +47,6 @@ impl Marker {
     ///
     /// Only [`BarDrawMode::Point`] and [`BarDrawMode::LargePoint`] have a marker equivalent;
     /// every other draw mode returns `None` and the chart default marker is used instead.
-    #[allow(dead_code)] // used by the painting code (step 3)
     #[inline(always)]
     pub(crate) fn from_draw_mode(draw_mode: BarDrawMode) -> Option<Marker> {
         match draw_mode {

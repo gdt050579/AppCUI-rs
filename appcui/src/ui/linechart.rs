@@ -14,7 +14,10 @@ mod series;
 mod tests;
 
 pub use self::initialization_flags::Flags;
+pub use self::initialization_flags::XAxisLabelMode;
 pub use self::line_mode::LineMode;
 pub use self::linechart::LineChart;
 pub use self::marker::Marker;
 pub use self::series::{Series, SeriesBuilder};
+
+use self::initialization_flags::XAxisLabelFormat;
