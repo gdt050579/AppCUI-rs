@@ -136,9 +136,10 @@ let chart = vbarchart!("i32,d:f,values:[10,{25,label:'Mar',width:4,attr:yellow},
 | `FilledRectangle(line)` | `FilledRectangle` or `FilledRect`                   | at least 3                 |
 | `Point(marker)`         | `Point(Bullet)`, `Point(Diamond)`, `Point('*')`     | always 1                   |
 | `LargePoint(marker)`    | `LargePoint`, `LargePoint(Circle)`                  | always 3 (a 3-by-2 marker) |
+| `FramedPoint(marker)`   | `FramedPoint`, `FramedPoint(SquareBullet)`          | always 5 (a 5-by-3 marker) |
 | `Cap(cap)`              | `Cap`, `Cap(SingleLine)`, `Cap('=')`                | at least 1                 |
 
-A mode written without parentheses uses its default inner value: `Fill` is solid, `Line` / `Rectangle` / `FilledRectangle` use a single line, `LargePoint` is a rounded square, and `Cap` is solid. Write the point marker explicitly, for example `Point(Bullet)`.
+A mode written without parentheses uses its default inner value: `Fill` is solid, `Line` / `Rectangle` / `FilledRectangle` use a single line, `Point` is a bullet, `LargePoint` and `FramedPoint` are rounded squares, and `Cap` is solid.
 
 `Fill` accepts `Solid` (█), `Shade75` (▓), `Shade50` (▒), `Shade25` (░), `Braille`, `Checkerboard`, `Grid`, `GridDouble`, `CrossHatch`, `Dashed`, `DiagonalUp`, `DiagonalDown`, `Notched`, or `Custom(char)`. In the macro, a custom glyph is a character (`Fill('#')`) or a code (`Fill(code: 0x2591)`).
 
@@ -147,6 +148,8 @@ A mode written without parentheses uses its default inner value: `Fill` is solid
 `Point` accepts `Bullet` (●), `Diamond` (◆), `Square` (■), or a custom character.
 
 `LargePoint` accepts `RoundSquare`, `Square`, `DoubleLineSquare`, `ThickSquare`, `Circle`, `Diamond`, or a custom character that fills the 3-by-2 block.
+
+`FramedPoint` accepts `RoundSquare` (the default), `Square`, `DoubleLineSquare`, `ThickSquare` (empty frames), `RoundSquareBullet`, `SquareBullet`, `DoubleLineSquareBullet`, `ThickSquareBullet` (the same frames with a bullet in the middle), `BrailleCircle`, `BrailleCircleBullet`, `BrailleFilledCircle`, `Filled`, or a custom character that fills the 5-by-3 block. The middle row of the marker is drawn at the bar's value.
 
 `Cap` accepts `Solid`, `Shade75`, `Shade50`, `Shade25`, `Braille`, `SingleLine`, `DoubleLine`, `SingleThickLine` (`thick`), or a custom character. The cap is a single row drawn at the bar's value.
 
