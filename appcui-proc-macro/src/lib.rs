@@ -118,6 +118,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -193,6 +194,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -293,6 +295,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::Default);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
 
@@ -365,6 +368,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -463,6 +467,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
