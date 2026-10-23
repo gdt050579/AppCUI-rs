@@ -277,8 +277,6 @@ fn parse_typed_draw_mode(
     format!("{module}::BarDrawMode::{variant}({inner})")
 }
 
-/// Parses the inner kind of a point marker (`None` → the default kind).
-/// `framed = false` gives a `BarPointType`, `framed = true` a `BarFramedPointType`.
 pub(crate) fn parse_point_kind(param: Option<&str>, key: &str, module: &str, framed: bool) -> String {
     let (names, enum_name, default_variant) = if framed {
         (FRAMED_POINT_TYPES, "BarFramedPointType", "RoundSquare")
@@ -297,7 +295,6 @@ pub(crate) fn parse_point_kind(param: Option<&str>, key: &str, module: &str, fra
     }
 }
 
-/// Parses a line type name (`Single`, `Double`, `Thick`, ...) into `LineType::...`.
 pub(crate) fn parse_line_type_name(repr: &str, key: &str) -> String {
     parse_line_type(repr, key)
 }

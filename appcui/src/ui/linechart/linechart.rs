@@ -642,8 +642,6 @@ where
 
     // ------------------------------------------------------------------ layout
 
-    /// Maps `value` to a level in `0..levels` for the range `low..=high` (clamped).
-    /// An empty range (or a single level) puts every value in the middle.
     pub(super) fn value_to_level(value: f64, low: f64, high: f64, levels: i32) -> i16 {
         if levels <= 1 {
             return 0;
@@ -655,14 +653,12 @@ where
         let level = ((value - low) / range * (levels - 1) as f64).round();
         level.clamp(0.0, (levels - 1) as f64) as i16
     }
-    /// Value drawn on `level` (inverse of `value_to_level`).
     fn level_to_value(&self, level: i32) -> f64 {
         if self.plot.levels <= 1 {
             return self.plot.low;
         }
         self.plot.low + (self.plot.high - self.plot.low) * level as f64 / (self.plot.levels - 1) as f64
     }
-    /// Marker used by a point: its own Point/FramedPoint draw mode, or the chart default.
     #[inline(always)]
     fn marker_for(&self, bar: &Bar<T>) -> Marker {
         bar.draw_mode.and_then(Marker::from_draw_mode).unwrap_or(self.default_marker)
@@ -675,27 +671,22 @@ where
             0
         }
     }
-    /// Last row of the plot area (just above the X axis).
     #[inline(always)]
     fn plot_bottom(&self) -> i32 {
         self.size().height as i32 - (self.xaxis.label_format.height() as i32 + 1)
     }
-    /// Row of the value of a point on level 0 (the middle row of the tallest marker, which must fit in the plot).
     #[inline(always)]
     fn level0_row(&self) -> i32 {
         self.plot_bottom() - (self.plot.marker_height as i32 - 1) / 2
     }
-    /// Distance, in cells, between the starts of two consecutive columns.
     #[inline(always)]
     fn column_step(&self) -> i32 {
         self.plot.column_width as i32 + self.default_spacing as i32
     }
-    /// X coordinate (in the content, before scrolling and the left margin) of column `index`.
     #[inline(always)]
     fn column_x(&self, index: usize) -> i32 {
         self.default_spacing as i32 + index as i32 * self.column_step()
     }
-    /// X coordinate on the internal surface of column `index` (after scrolling, with the left margin).
     #[inline(always)]
     fn screen_x(&self, index: usize) -> i32 {
         self.column_x(index) - self.left_scroll + self.x_axis_left_margin()
@@ -716,7 +707,6 @@ where
         self.scrollbars.update(self.content_width(), sz.height as u64, sz);
         self.scrollbars.set_indexes(self.left_scroll as u64, 0);
     }
-    /// Index of the first column that is at least partially visible (its right edge is after `left_scroll`).
     fn update_first_visible_point(&mut self) {
         let step = self.column_step().max(1);
         // column j is visible when spacing + j * step + column_width > left_scroll
@@ -730,8 +720,6 @@ where
         self.sync_horizontal_scrollbar();
         self.repaint_surface();
     }
-    /// Scrolls so that `first_visible_point` starts at the left edge of the plot
-    /// (including the spacing in front of it).
     fn align_scroll_to_first_visible_point(&mut self) {
         let x = self.column_x(self.first_visible_point) - self.default_spacing as i32;
         self.left_scroll = x.clamp(0, self.max_left_scroll());
@@ -755,9 +743,6 @@ where
 
     // ------------------------------------------------------------------ hovering
 
-    /// Index (on the X axis) of the point nearest to `(x, y)`, or `None` if the position is outside the plot area.
-    ///
-    /// Every column owns its own cells and half of the spacing on each side, so the whole plot width is covered.
     pub(super) fn point_index_at(&self, x: i32, y: i32) -> Option<usize> {
         let left_margin = self.x_axis_left_margin();
         let points = self.points_count();
@@ -773,12 +758,10 @@ where
         }
         Some(index as usize)
     }
-    /// Returns `true` if `point` refers to an existing point.
     #[inline(always)]
     fn point_exists(&self, point: PointPos) -> bool {
         self.series.get(point.series as usize).is_some_and(|s| (point.index as usize) < s.len())
     }
-    /// Rectangle (on the control) of the marker of `point` (the cell of the line for [`Marker::None`]).
     fn marker_rect(&self, point: PointPos) -> Rect {
         let Some(p) = self.series.get(point.series as usize).and_then(|s| s.data.get(point.index as usize)) else {
             return Rect::with_size(0, 0, 0, 0);
@@ -790,7 +773,6 @@ where
             _ => Rect::with_size(x + (self.plot.column_width as i32 - 1) / 2, y, 1, 1),
         }
     }
-    /// Rectangle (on the control) that covers the markers of every series at `index`.
     fn group_rect(&self, index: usize) -> Rect {
         let level0_row = self.level0_row();
         let mut top = i32::MAX;
@@ -809,10 +791,6 @@ where
         }
         Rect::with_size(self.screen_x(index), top, self.plot.column_width as u16, (bottom - top + 1) as u16)
     }
-    /// The point whose marker is closest (vertically) to `(x, y)` in the column under the mouse.
-    ///
-    /// The mouse must be at most one row away from the marker. When markers overlap,
-    /// the one drawn on top (the last series) wins.
     pub(super) fn point_at(&self, x: i32, y: i32) -> Option<PointPos> {
         let index = self.point_index_at(x, y)?;
         let mut best: Option<(i32, PointPos)> = None;
@@ -835,7 +813,6 @@ where
         }
         best.map(|(_, point)| point)
     }
-    /// What the mouse at `(x, y)` is over (depends on [`Flags::GroupHover`]).
     fn hover_at(&self, x: i32, y: i32) -> Option<Hover> {
         if self.flags.contains(Flags::GroupHover) {
             self.point_index_at(x, y).map(Hover::Group)
@@ -922,7 +899,6 @@ where
 
     // ------------------------------------------------------------------ selection
 
-    /// Selects `point` (or clears the selection) after a user action and raises the matching event.
     fn select_point_by_user(&mut self, point: Option<PointPos>) {
         if point == self.selected_point {
             return;
@@ -947,10 +923,6 @@ where
             }),
         });
     }
-    /// The point drawn just above (`up = true`) or below the selected one, at the same X position.
-    ///
-    /// Points are ordered by row (top to bottom) and then by series index, so overlapping markers
-    /// are still reachable.
     fn vertical_neighbour(&self, current: PointPos, up: bool) -> Option<PointPos> {
         let key = |p: PointPos| (self.marker_rect(p).top(), p.series);
         let current_key = key(current);
@@ -967,8 +939,6 @@ where
                 }
             })
     }
-    /// Area (on the control) where the selection frame and the dimming are drawn:
-    /// the plot, including the Y axis line and the X axis line.
     fn selection_clip(&self) -> Rect {
         let left = if self.yaxis.visible && self.yaxis.width > 0 {
             self.yaxis.width as i32 + 1
@@ -1039,7 +1009,6 @@ where
 
     // ------------------------------------------------------------------ painting
 
-    /// Recomputes the layout and repaints the internal surface.
     fn repaint_surface(&mut self) {
         self.paint_surface();
         // the data under the mouse may have changed (or disappeared)
@@ -1130,7 +1099,6 @@ where
             XAxisLabelFormat::Custom => self.paint_xaxis_custom(label_attr),
         }
     }
-    /// Writes `label` centered under the columns `start..=end` (truncated with `…` if it does not fit).
     fn print_label(&mut self, start: usize, end: usize, label: &str, attr: CharAttribute) {
         let x = self.screen_x(start);
         let y = self.size().height as i32 - 1;
@@ -1214,16 +1182,10 @@ where
             self.print_label(start_index, end_index, span.label.as_str(), attr);
         }
     }
-    /// Color of a series: its own color, or a theme color chosen from the series index.
     #[inline(always)]
     fn series_attr(series: &Series<T>, series_index: usize, series_colors: &[CharAttribute]) -> CharAttribute {
         series.attr().unwrap_or(series_colors[series_index % series_colors.len()])
     }
-    /// Where a line leaves (`outgoing = true`, towards the next point) or reaches point `index`
-    /// of a series, in surface coordinates.
-    ///
-    /// For a framed marker this is the cell just outside the middle of its right (outgoing) or
-    /// left side; for every other marker it is the center of the marker (the line is drawn under it).
     #[inline(always)]
     fn line_anchor(&self, index: usize, point: &BarWithLayout<T>, outgoing: bool, level0_row: i32) -> Point {
         let y = level0_row - point.len as i32;
@@ -1233,8 +1195,6 @@ where
             _ => Point::new(x + (self.plot.column_width as i32 - 1) / 2, y),
         }
     }
-    /// If the border of a framed marker at `border` touches a box-drawing line at `neighbour`,
-    /// returns the junction to draw on the border (`left_side`: the line comes from the left).
     fn junction_for(&self, point: &BarWithLayout<T>, neighbour: Point, left_side: bool) -> Option<char> {
         let Marker::Framed(frame) = self.marker_for(&point.bar) else {
             return None;

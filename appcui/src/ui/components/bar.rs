@@ -227,7 +227,6 @@ pub enum BarFramedPointType {
     Custom(char),
 }
 impl BarFramedPointType {
-    /// The 3 rows of 5 characters of the marker.
     pub(crate) fn cells(&self) -> [[char; 5]; 3] {
         let frame = |c: [char; 6], center: char| -> [[char; 5]; 3] {
             // c = [top-left, horizontal, top-right, vertical, bottom-left, bottom-right]
@@ -599,7 +598,6 @@ impl<T: Number + 'static> Bar<T> {
         surface.write_char(point.x, point.y + 1, Character::with_attributes(chars[4], attr));
         surface.write_char(point.x + 1, point.y + 1, Character::with_attributes(chars[5], attr));
     }    
-    /// The middle row of the 5-by-3 marker is on the tip of the bar (its value).
     #[inline(always)]
     fn paint_vertical_framed_point(&self, surface: &mut Surface, point_type: BarFramedPointType, attr: CharAttribute, layout: &BarLayout) {
         let point = self.point_vertical(layout);
@@ -609,7 +607,6 @@ impl<T: Number + 'static> Bar<T> {
             }
         }
     }
-    /// The middle column of the 5-by-3 marker is on the tip of the bar (its value); the marker covers the 3 rows of the bar.
     #[inline(always)]
     fn paint_horizontal_framed_point(&self, surface: &mut Surface, point_type: BarFramedPointType, attr: CharAttribute, layout: &BarLayout) {
         let point = self.point_horizontal(layout);

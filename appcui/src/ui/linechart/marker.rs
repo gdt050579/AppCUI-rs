@@ -37,7 +37,6 @@ impl Marker {
         }
     }
 
-    /// Returns the height of the marker, in rows (3 for [`Marker::Framed`], 1 otherwise).
     #[inline(always)]
     pub(crate) fn height(&self) -> u8 {
         match self {
@@ -46,11 +45,6 @@ impl Marker {
         }
     }
 
-    /// Translates a per-point [`BarDrawMode`] into a marker.
-    ///
-    /// Only [`BarDrawMode::Point`] and [`BarDrawMode::FramedPoint`] have a marker equivalent;
-    /// every other draw mode (including [`BarDrawMode::LargePoint`], whose even height has no
-    /// middle row for the value) returns `None` and the chart default marker is used instead.
     #[inline(always)]
     pub(crate) fn from_draw_mode(draw_mode: BarDrawMode) -> Option<Marker> {
         match draw_mode {
@@ -61,9 +55,6 @@ impl Marker {
     }
 }
 
-/// The vertical border character and the junctions used when a line is attached to the
-/// left / right side of a framed marker: `(border, junctions for thin, thick, double lines)`,
-/// each junction pair being `(left side, right side)`. `None` for frames without box-drawing sides.
 pub(crate) fn frame_junctions(frame: BarFramedPointType) -> Option<[(char, char); 3]> {
     match frame {
         BarFramedPointType::RoundSquare
@@ -78,8 +69,6 @@ pub(crate) fn frame_junctions(frame: BarFramedPointType) -> Option<[(char, char)
     }
 }
 
-/// Weight of the arm that `ch` has toward the left (`toward_left = true`) or the right:
-/// 0 = thin, 1 = thick, 2 = double, `None` = no such arm.
 pub(crate) fn horizontal_arm(ch: char, toward_left: bool) -> Option<usize> {
     let (thin, thick, double): (&str, &str, &str) = if toward_left {
         ("─┐┘┤┬┴┼╮╯-", "━┓┛┫┳┻╋", "═╗╝╣╦╩╬")
