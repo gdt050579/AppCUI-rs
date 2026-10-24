@@ -114,7 +114,7 @@ where
     pub(super) first_visible_point: usize,
     /// what is under the mouse, if anything
     pub(super) hovered: Option<Hover>,
-    tooltip_text: String,
+    pub(super) tooltip_text: String,
     /// selected point, if any
     pub(super) selected_point: Option<PointPos>,
     /// junctions to draw on the sides of framed markers: (series index, position, character),
@@ -851,7 +851,7 @@ where
         let r = self.group_rect(index);
         self.show_tooltip_on_rect(&self.tooltip_text, &r);
     }
-    fn show_point_tooltip(&mut self, point: PointPos) {
+    pub(super) fn show_point_tooltip(&mut self, point: PointPos) {
         let Some(series) = self.series.get(point.series as usize) else {
             return;
         };

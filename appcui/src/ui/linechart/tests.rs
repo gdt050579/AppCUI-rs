@@ -847,6 +847,70 @@ fn check_ensure_visible_with_yaxis_margin() {
 }
 
 #[test]
+fn check_ensure_visible_branches() {
+    run_with_size(|chart| {
+        chart.set_yaxis_visible(false);
+        // index is past the end (the chart has no points): return before touching the scroll
+        chart.left_scroll = 4;
+        chart.ensure_visible(0);
+        assert_eq!(chart.left_scroll, 4);
+
+        chart.add_series(Series::with_values("A", [1, 2, 3]));
+        // index == points_count is also out of range. update_layout would clamp 4 down to 0,
+        // so an unchanged scroll shows that return happens first
+        chart.left_scroll = 4;
+        chart.ensure_visible(3);
+        assert_eq!(chart.left_scroll, 4);
+
+        // width 1 and no Y axis: the plot width is 0, so a valid index still does not scroll
+        chart.set_size(1, 10);
+        chart.deref_mut().layout.update(80, 30);
+        assert_eq!(chart.size().width, 1);
+        chart.left_scroll = 7;
+        chart.ensure_visible(1);
+        assert_eq!(chart.left_scroll, 7);
+
+        // a column that fits: already visible, then off the right, then off the left
+        chart.set_size(40, 10);
+        chart.deref_mut().layout.update(80, 30);
+        chart.set_default_spacing(2);
+        chart.add_values(0, 4..=30);
+        assert_eq!(chart.points_count(), 30);
+        chart.left_scroll = 0;
+        chart.ensure_visible(0);
+        assert_eq!(chart.left_scroll, 0);
+        chart.ensure_visible(29);
+        assert_eq!(chart.left_scroll, 51);
+        assert_eq!(chart.first_visible_point, 17);
+        chart.ensure_visible(20);
+        assert_eq!(chart.left_scroll, 51);
+        chart.ensure_visible(0);
+        assert_eq!(chart.left_scroll, 2);
+        assert_eq!(chart.first_visible_point, 0);
+
+        // framed markers are 5 cells wide, the plot is 3: the column does not fit
+        chart.set_size(4, 10);
+        chart.deref_mut().layout.update(80, 30);
+        chart.set_default_spacing(0);
+        chart.set_default_marker(Marker::Framed(BarFramedPointType::Square));
+        assert_eq!(chart.size().width, 4);
+        // the column ends exactly on the left edge of the view -> scroll to its right edge
+        chart.left_scroll = 5;
+        chart.ensure_visible(0);
+        assert_eq!(chart.left_scroll, 2);
+        assert_eq!(chart.first_visible_point, 0);
+        // the same column now overlaps the view -> leave the scroll alone
+        chart.ensure_visible(0);
+        assert_eq!(chart.left_scroll, 2);
+        assert_eq!(chart.first_visible_point, 0);
+        // the next column starts exactly on the right edge of the view
+        chart.ensure_visible(1);
+        assert_eq!(chart.left_scroll, 5);
+        assert_eq!(chart.first_visible_point, 1);
+    });
+}
+
+#[test]
 fn check_scroll_is_clamped_when_data_shrinks() {
     run_with_size(|chart| {
         chart.set_yaxis_visible(false);
@@ -1026,6 +1090,62 @@ fn check_point_index_at_empty_chart() {
         assert_eq!(chart.point_index_at(10, 5), None);
         chart.add_series(Series::new("A"));
         assert_eq!(chart.point_index_at(10, 5), None);
+    });
+}
+
+#[test]
+fn check_show_point_tooltip_branches() {
+    run_with_size(|chart| {
+        // no series, and a series index past the end: the previous text stays
+        chart.tooltip_text = String::from("kept");
+        chart.show_point_tooltip(PointPos::new(0, 0));
+        chart.show_point_tooltip(PointPos::new(u32::MAX, 0));
+        assert_eq!(chart.tooltip_text, "kept");
+
+        chart.add_series(Series::with_values("", [BarBuilder::new(1000).build()]));
+        chart.add_series(Series::with_values("RAM", [20, 22]));
+        chart.add_series(Series::with_values("CPU", [BarBuilder::new(55).label("peak").build()]));
+        // the point index is past the end of that series
+        chart.show_point_tooltip(PointPos::new(0, 1));
+        chart.show_point_tooltip(PointPos::new(2, 1));
+        assert_eq!(chart.tooltip_text, "kept");
+
+        // value only: no series name, no X label, no note
+        chart.show_point_tooltip(PointPos::new(0, 0));
+        assert_eq!(chart.tooltip_text, "1,000");
+        // series name, still no X label and no note
+        chart.show_point_tooltip(PointPos::new(1, 0));
+        assert_eq!(chart.tooltip_text, "RAM\n20");
+
+        // an empty label counts as no label; the next position has a name
+        chart.set_xaxis_labels(["", "Feb"]);
+        chart.show_point_tooltip(PointPos::new(0, 0));
+        assert_eq!(chart.tooltip_text, "1,000");
+        chart.show_point_tooltip(PointPos::new(1, 1));
+        assert_eq!(chart.tooltip_text, "RAM\nFeb: 22");
+
+        chart.set_xaxis_labels(["Jan"]);
+        // name, X label and note
+        chart.show_point_tooltip(PointPos::new(2, 0));
+        assert_eq!(chart.tooltip_text, "CPU\nJan: 55\npeak");
+        // note without a series name
+        chart.update_series(0, |s| {
+            s.set_label("");
+            s.get_mut(0).unwrap().set_label("note");
+        });
+        chart.clear_xaxis_labels();
+        chart.show_point_tooltip(PointPos::new(0, 0));
+        assert_eq!(chart.tooltip_text, "1,000\nnote");
+
+        // the formatted number does not fit in the buffer, so that part is empty
+        let suffix = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        assert!(suffix.len() > 64);
+        chart.set_number_format(FormatNumber::new(10).suffix(suffix));
+        chart.show_point_tooltip(PointPos::new(1, 0));
+        assert_eq!(chart.tooltip_text, "RAM\n");
+        chart.set_xaxis_labels(["Jan"]);
+        chart.show_point_tooltip(PointPos::new(2, 0));
+        assert_eq!(chart.tooltip_text, "CPU\nJan: \npeak");
     });
 }
 
