@@ -62,9 +62,7 @@ pub(crate) fn frame_junctions(frame: BarFramedPointType) -> Option<[(char, char)
         | BarFramedPointType::RoundSquareBullet
         | BarFramedPointType::SquareBullet => Some([('┤', '├'), ('┥', '┝'), ('╡', '╞')]),
         BarFramedPointType::ThickSquare | BarFramedPointType::ThickSquareBullet => Some([('┨', '┠'), ('┫', '┣'), ('┨', '┠')]),
-        BarFramedPointType::DoubleLineSquare | BarFramedPointType::DoubleLineSquareBullet => {
-            Some([('╢', '╟'), ('╢', '╟'), ('╣', '╠')])
-        }
+        BarFramedPointType::DoubleLineSquare | BarFramedPointType::DoubleLineSquareBullet => Some([('╢', '╟'), ('╢', '╟'), ('╣', '╠')]),
         _ => None,
     }
 }

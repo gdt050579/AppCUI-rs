@@ -170,6 +170,17 @@ fn check_marker_from_draw_mode() {
     assert_eq!(Marker::from_draw_mode(BarDrawMode::Cap(BarCapType::Solid)), None);
 }
 
+#[test]
+fn check_frame_junctions_thick_and_double() {
+    let thick = Some([('┨', '┠'), ('┫', '┣'), ('┨', '┠')]);
+    assert_eq!(super::marker::frame_junctions(BarFramedPointType::ThickSquare), thick);
+    assert_eq!(super::marker::frame_junctions(BarFramedPointType::ThickSquareBullet), thick);
+
+    let double = Some([('╢', '╟'), ('╢', '╟'), ('╣', '╠')]);
+    assert_eq!(super::marker::frame_junctions(BarFramedPointType::DoubleLineSquare), double);
+    assert_eq!(super::marker::frame_junctions(BarFramedPointType::DoubleLineSquareBullet), double);
+}
+
 // ---------------------------------------------------------------- LineChart data API
 
 /// Runs `f` while an application (and its theme) exists: changing the data of a chart repaints it.
