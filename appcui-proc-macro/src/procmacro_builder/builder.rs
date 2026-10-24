@@ -288,6 +288,21 @@ fn generate_hbarchart_events(a: &mut Arguments) -> String {
         .replace("$(TYPE_ID_TRANSLATION_FOR_HBARCHART_ON_CLEAR_SELECTION)", &on_clear_selection_code)
 }
 
+fn generate_linechart_events(a: &mut Arguments) -> String {
+    if !a.template_events.contains_key(&AppCUITrait::GenericLineChartEvents) {
+        panic!("Missing generic type for LineChart event (Have you used events=LineChartEvents<Type> ?)");
+    }
+    let mut on_point_selected_code = String::new();
+    let mut on_clear_selection_code = String::new();
+    for trait_name in a.template_events[&AppCUITrait::GenericLineChartEvents].iter() {
+        on_point_selected_code.push_str(templates::LINECHART_ON_POINT_SELECTED_DEF.replace("$(TYPE)", trait_name).as_str());
+        on_clear_selection_code.push_str(templates::LINECHART_ON_CLEAR_SELECTION_DEF.replace("$(TYPE)", trait_name).as_str());
+    }
+    templates::LINECHART_TRAIT_DEF
+        .replace("$(TYPE_ID_TRANSLATION_FOR_LINECHART_ON_POINT_SELECTED)", &on_point_selected_code)
+        .replace("$(TYPE_ID_TRANSLATION_FOR_LINECHART_ON_CLEAR_SELECTION)", &on_clear_selection_code)
+}
+
 fn generate_backgroundtask_events(a: &mut Arguments) -> String {
     if !a.template_events.contains_key(&AppCUITrait::GenericBackgroundTaskEvents) {
         panic!("Missing generic type for BackgroundTask event (Have you used events=BackgroundTask<Type-1,Type-2> ?)");
@@ -365,6 +380,7 @@ pub(crate) fn build(args: TokenStream, input: TokenStream, base_control: BaseCon
                         AppCUITrait::GenericHSliderEvents => code.push_str(generate_hslider_events(&mut a).as_str()),
                         AppCUITrait::GenericVBarChartEvents => code.push_str(generate_vbarchart_events(&mut a).as_str()),
                         AppCUITrait::GenericHBarChartEvents => code.push_str(generate_hbarchart_events(&mut a).as_str()),
+                        AppCUITrait::GenericLineChartEvents => code.push_str(generate_linechart_events(&mut a).as_str()),
                         _ => {}
                     }
                 }

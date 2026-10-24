@@ -303,6 +303,8 @@ pub struct ChartTheme {
     pub inactive: CharAttribute,
     /// selection border color
     pub selection_border: CharAttribute,
+    /// highlight of the hovered column (only the background color is used)
+    pub hover: CharAttribute,
 }
 
 /// Complete color palette used to paint the desktop and all controls.

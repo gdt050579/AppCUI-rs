@@ -31,6 +31,10 @@ static DRAW_MODES: &[(&str, &str)] = &[
     ("LargePoint", "large-point"),
     ("LargePoint", "largepoints"),
     ("LargePoint", "large-points"),
+    ("FramedPoint", "framedpoint"),
+    ("FramedPoint", "framed-point"),
+    ("FramedPoint", "framedpoints"),
+    ("FramedPoint", "framed-points"),
     ("Cap", "cap"),
 ];
 
@@ -66,6 +70,31 @@ static LARGE_POINT_TYPES: &[(&str, &str)] = &[
     ("ThickSquare", "thick-square"),
     ("Circle", "circle"),
     ("Diamond", "diamond"),
+];
+
+static FRAMED_POINT_TYPES: &[(&str, &str)] = &[
+    ("RoundSquare", "roundsquare"),
+    ("RoundSquare", "round-square"),
+    ("Square", "square"),
+    ("DoubleLineSquare", "doublelinesquare"),
+    ("DoubleLineSquare", "double-line-square"),
+    ("ThickSquare", "thicksquare"),
+    ("ThickSquare", "thick-square"),
+    ("RoundSquareBullet", "roundsquarebullet"),
+    ("RoundSquareBullet", "round-square-bullet"),
+    ("SquareBullet", "squarebullet"),
+    ("SquareBullet", "square-bullet"),
+    ("DoubleLineSquareBullet", "doublelinesquarebullet"),
+    ("DoubleLineSquareBullet", "double-line-square-bullet"),
+    ("ThickSquareBullet", "thicksquarebullet"),
+    ("ThickSquareBullet", "thick-square-bullet"),
+    ("BrailleCircle", "braillecircle"),
+    ("BrailleCircle", "braille-circle"),
+    ("BrailleCircleBullet", "braillecirclebullet"),
+    ("BrailleCircleBullet", "braille-circle-bullet"),
+    ("BrailleFilledCircle", "braillefilledcircle"),
+    ("BrailleFilledCircle", "braille-filled-circle"),
+    ("Filled", "filled"),
 ];
 
 static CAP_TYPES: &[(&str, &str)] = &[
@@ -248,6 +277,28 @@ fn parse_typed_draw_mode(
     format!("{module}::BarDrawMode::{variant}({inner})")
 }
 
+pub(crate) fn parse_point_kind(param: Option<&str>, key: &str, module: &str, framed: bool) -> String {
+    let (names, enum_name, default_variant) = if framed {
+        (FRAMED_POINT_TYPES, "BarFramedPointType", "RoundSquare")
+    } else {
+        (POINT_TYPES, "BarPointType", "Bullet")
+    };
+    match param.map(str::trim) {
+        None => format!("{module}::{enum_name}::{default_variant}"),
+        Some(param) => {
+            if let Some(kind) = crate::utils::find_string_in_array(names, param) {
+                format!("{module}::{enum_name}::{kind}")
+            } else {
+                format!("{module}::{enum_name}::Custom({})", parse_custom_char(param, key))
+            }
+        }
+    }
+}
+
+pub(crate) fn parse_line_type_name(repr: &str, key: &str) -> String {
+    parse_line_type(repr, key)
+}
+
 pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String {
     let repr = repr.trim();
     if let Some(fncall) = crate::fncall::FnCall::new(repr) {
@@ -263,11 +314,12 @@ pub(crate) fn parse_bar_draw_mode(repr: &str, key: &str, module: &str) -> String
                     }
                     format!("{module}::BarDrawMode::Smooth")
                 }
-                "Point" => parse_typed_draw_mode(&fncall, key, module, "Point", POINT_TYPES, "BarPointType", "Circle"),
+                "Point" => parse_typed_draw_mode(&fncall, key, module, "Point", POINT_TYPES, "BarPointType", "Bullet"),
                 "LargePoint" => parse_typed_draw_mode(&fncall, key, module, "LargePoint", LARGE_POINT_TYPES, "BarLargePointType", "RoundSquare"),
+                "FramedPoint" => parse_typed_draw_mode(&fncall, key, module, "FramedPoint", FRAMED_POINT_TYPES, "BarFramedPointType", "RoundSquare"),
                 "Cap" => parse_typed_draw_mode(&fncall, key, module, "Cap", CAP_TYPES, "BarCapType", "Solid"),
                 _ => {
-                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point, LargePoint, Cap !");
+                    panic!("Invalid {key} - unknown draw mode '{name}' ! Expected Fill, Line, Rectangle, FilledRectangle, Smooth, Point, LargePoint, FramedPoint, Cap !");
                 }
             }
         } else {

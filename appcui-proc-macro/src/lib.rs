@@ -118,6 +118,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -193,6 +194,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -293,6 +295,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::Default);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
 
@@ -365,6 +368,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -463,6 +467,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericVBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -2946,6 +2951,7 @@ pub fn bufferview(input: TokenStream) -> TokenStream {
 ///   - **FilledRectangle** or **FilledRect**, with the same line kinds as **Line**
 ///   - **Point(kind)** - `Bullet`, `Diamond`, `Square`, or a character
 ///   - **LargePoint(kind)** - `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare`, `Circle`, `Diamond`, or a character
+///   - **FramedPoint(kind)** - a 5x3 marker: `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare` (empty frames), `RoundSquareBullet`, `SquareBullet`, `DoubleLineSquareBullet`, `ThickSquareBullet` (frames with a bullet), `BrailleCircle`, `BrailleCircleBullet`, `BrailleFilledCircle`, `Filled`, or a character (fills the whole marker)
 ///   - **Cap** or **Cap(kind)** - `Solid` (default), `Shade75`, `Shade50`, `Shade25`, `Braille`, `SingleLine`, `DoubleLine`, `SingleThickLine` (also `Thick`), or a character
 /// * `default-bar-draw-mode-attr`, `bar-attr`, `barattr`, `bar-color`, or `barcolor` - Default bar color (optional), using the same syntax as [`charattr!`] (for example `red` or `{fore: yellow, back: blue}`)
 /// * `numeric-format` or `nf` - Format for Y-axis labels and tooltips (optional), using the same syntax as [`numericformat!`]
@@ -3037,6 +3043,7 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 ///   - **FilledRectangle** or **FilledRect**, with the same line kinds as **Line**
 ///   - **Point(kind)** - `Bullet`, `Diamond`, `Square`, or a character
 ///   - **LargePoint(kind)** - `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare`, `Circle`, `Diamond`, or a character
+///   - **FramedPoint(kind)** - a 5x3 marker: `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare` (empty frames), `RoundSquareBullet`, `SquareBullet`, `DoubleLineSquareBullet`, `ThickSquareBullet` (frames with a bullet), `BrailleCircle`, `BrailleCircleBullet`, `BrailleFilledCircle`, `Filled`, or a character (fills the whole marker)
 ///   - **Cap** or **Cap(kind)** - `Solid` (default), `Shade75`, `Shade50`, `Shade25`, `Braille`, `SingleLine`, `DoubleLine`, `SingleThickLine` (also `Thick`), or a character
 /// * `default-bar-draw-mode-attr`, `bar-attr`, `barattr`, `bar-color`, or `barcolor` - Default bar color (optional), using the same syntax as [`charattr!`] (for example `red` or `{fore: yellow, back: blue}`)
 /// * `numeric-format` or `nf` - Format for axis labels and tooltips (optional), using the same syntax as [`numericformat!`]
@@ -3081,6 +3088,94 @@ pub fn vbarchart(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn hbarchart(input: TokenStream) -> TokenStream {
     crate::controls::hbarchart::create(input)
+}
+
+/// Creates a new line chart that plots one or more numeric series over a shared X axis.
+/// The format is `linechart!("attributes")` where the attributes are pairs of key-value, separated by comma.
+///
+/// # Parameters
+/// * `type` or `class` (required, first positional parameter) - Numeric type of the values (for example `i32` or `f64`)
+/// * `series` - Initial series (optional). A list where every series is described between brackets:
+///   - `{CPU, values: [10, 20, 15], line: Braille, attr: red}`
+///   - `label` / `name` / `caption` / `text` - Name of the series (also the first positional value)
+///   - `values` / `data` / `points` - Points of the series. Each entry is a number, or a point description
+///     with the same keys as a [`vbarchart!`] bar, for example `{15, label: peak, dm: FramedPoint}`.
+///     The label of a point is a note shown in its tooltip; the draw mode `Point(kind)` or `FramedPoint(kind)` sets its marker
+///   - `line` / `line-mode` / `linemode` / `lm` - How the points of this series are connected (same values as `line` below)
+///   - `attr` / `attribute` / `charattr` / `color` - Color of the series, using the same syntax as [`charattr!`]
+/// * `labels`, `categories`, or `xaxis-labels` - Names of the X positions (optional), for example `labels: [Jan, Feb, Mar]`.
+///   Label `i` names the points at index `i` of every series. If `xlabels` is not given, the labels are also drawn under the X axis
+/// * `flags` - Control flags (optional). Can be:
+///   - **ScrollBars** - Shows a horizontal scroll bar when the points do not fit in the control
+///   - **ShowZeroLineOnYAxis** - Draws a solid line at value zero while the Y-axis grid is visible
+///   - **DimPointsOnSelection** - Draws everything except the selected point with the inactive chart color
+///   - **GroupHover** - Hovering highlights every point at the same X position, instead of a single point
+///   - Combine flags with `+`, `|`, `,`, or as a list: `flags: ScrollBars+GroupHover`
+/// * `scale` or `barscale` - How values map onto the plot height (optional). Can be:
+///   - **FromZero** or **zero** - The plot starts at zero (default)
+///   - **FitData** or **fit** - Stretches the smallest and largest values across the plot
+///   - **Fixed(min, max)** or **fix(min, max)** - Fixed range
+///   - **FromZeroMinRange(min, max)**, **zero-min-range(min, max)**, or **fromzerominrange(min, max)** - From zero, covering at least `min` and `max`
+/// * `line`, `default-line`, `line-mode`, or `lm` - Default way of connecting points (optional). Can be:
+///   - **None** - Points only
+///   - **Braille** - A thin braille line
+///   - **Line** or **Line(kind)** - A direct line: `Single` (default), `Double`, `SingleThick` (also `Thick`), `Border`, `Ascii`, `AsciiRound`, `SingleRound` (also `Round`), `Braille`
+///   - **Orthogonal**, **Orthogonal(kind)**, or **Orthogonal(kind, direction)** - Horizontal and vertical segments, with the same line kinds as **Line**.
+///     The direction is `Auto` (default), `HorizontalFirst`, `VerticalFirst`, `HorizontalUntilMiddle`, or `VerticalUntilMiddle`
+/// * `marker`, `default-marker`, or `dmk` - Default point marker (optional). Can be:
+///   - **None** - No marker
+///   - **Small(kind)** or **Point(kind)** - A one-cell marker: `Bullet` (default), `Diamond`, `Square`, or a character
+///   - **Framed(kind)** or **FramedPoint(kind)** - A 5x3 marker: `RoundSquare` (default), `Square`, `DoubleLineSquare`, `ThickSquare`,
+///     `RoundSquareBullet`, `SquareBullet`, `DoubleLineSquareBullet`, `ThickSquareBullet`, `BrailleCircle`, `BrailleCircleBullet`,
+///     `BrailleFilledCircle`, `Filled`, or a character (fills the whole marker)
+/// * `spacing`, `default-spacing`, `space`, or `s` - Empty cells between two consecutive points, from 0 to 100 (optional)
+/// * `numeric-format` or `nf` - Format for Y-axis labels and tooltips (optional), using the same syntax as [`numericformat!`]
+/// * `xlabels`, `x-labels`, `xl`, `xaxis`, or `x-axis` - What is drawn under the X axis (optional). Can be:
+///   - **None** - No X axis
+///   - **Index(start)** - Labels position `i` with `start + i`
+///   - **Labels** - Uses the names set with `labels`
+///   - A list of spans: `[{0, 3, 'Q1'}, {3, 3, 'Q2'}]`. The first value is the starting position and the second is how many positions the label covers.
+///     Named keys are `start`, `end` or `count` (both are the count), and `label`, `text`, or `caption`
+/// * `yaxis`, `y-axis`, or `yaxis-visible` - Shows or hides the Y axis (optional, `true` or `false`)
+/// * `grid`, `ygrid`, or `yaxis-grid` - Shows or hides the horizontal grid lines (optional, `true` or `false`)
+/// * `yaxis-width`, `y-axis-width`, or `yw` - Characters reserved for Y-axis labels, from 0 to 32 (optional)
+/// * `yaxis-step`, `y-axis-step`, `ystep`, or `step` - Rows between horizontal grid lines, from 1 to 255 (optional)
+/// * `left-scroll-margin` or `lsm` - Left scroll margin in characters (optional)
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+///
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
+/// // One series that fills its parent
+/// let chart = linechart!("i32, d:f, series: [{CPU, values: [10, 40, 25, 60]}]");
+///
+/// // Two series with named X positions, braille lines and framed markers
+/// let chart = linechart!(
+///     "type: i32,
+///     flags: ScrollBars+GroupHover,
+///     scale: Fixed(0, 100),
+///     line: Braille,
+///     marker: Framed(RoundSquareBullet),
+///     spacing: 3,
+///     labels: [Jan, Feb, Mar, Apr],
+///     dock: fill,
+///     series: [
+///         {CPU, values: [35, 42, {80, label: peak}, 38], attr: green},
+///         {RAM, values: [20, 25, 30, 28], line: Orthogonal(Double, Auto), attr: yellow}
+///     ]"
+/// );
+/// ```
+#[proc_macro]
+pub fn linechart(input: TokenStream) -> TokenStream {
+    crate::controls::linechart::create(input)
 }
 
 /// Creates a new pie chart.

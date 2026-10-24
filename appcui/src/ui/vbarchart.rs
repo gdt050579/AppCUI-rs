@@ -22,6 +22,7 @@ pub use super::components::BarCapType;
 pub use super::components::BarDrawMode;
 pub use super::components::BarFillType;
 pub use super::components::BarLargePointType;
+pub use super::components::BarFramedPointType;
 pub use super::components::BarPointType;
 pub use super::components::BarSpan;
 pub use super::components::BarScale;

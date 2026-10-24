@@ -5,8 +5,8 @@
 //! number through [`From`]. [`BarSpan`] labels a run of bars: [`VBarChart`](crate::ui::vbarchart::VBarChart)
 //! draws that label under the bars, and [`HBarChart`](crate::ui::hbarchart::HBarChart) draws it beside them.
 //!
-//! [`BarFillType`], [`BarCapType`], [`BarPointType`], and [`BarLargePointType`]
-//! choose the character or marker used by a draw mode.
+//! [`BarFillType`], [`BarCapType`], [`BarPointType`], [`BarLargePointType`], and
+//! [`BarFramedPointType`] choose the character or marker used by a draw mode.
 
 use crate::graphics::{LineType, Point, Size};
 use flat_string::FlatString;
@@ -190,6 +190,89 @@ impl BarLargePointType {
     }
 }
 
+/// Marker drawn by [`BarDrawMode::FramedPoint`]: a 5-by-3 block, usually a frame.
+///
+/// Five columns by three rows look roughly square in a terminal (cells are about twice as tall
+/// as they are wide), and the marker has a true center cell. The center of the marker is placed
+/// on the value of the bar. Every frame comes in two versions: empty, and with a bullet (`●`) in
+/// the center. [`RoundSquare`](Self::RoundSquare) is the default.
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum BarFramedPointType {
+    /// Empty rounded single-line frame (`╭───╮` / `│   │` / `╰───╯`).
+    #[default]
+    RoundSquare,
+    /// Empty single-line frame (`┌───┐` / `│   │` / `└───┘`).
+    Square,
+    /// Empty double-line frame (`╔═══╗` / `║   ║` / `╚═══╝`).
+    DoubleLineSquare,
+    /// Empty thick-line frame (`┏━━━┓` / `┃   ┃` / `┗━━━┛`).
+    ThickSquare,
+    /// Rounded single-line frame around a bullet (`╭───╮` / `│ ● │` / `╰───╯`).
+    RoundSquareBullet,
+    /// Single-line frame around a bullet (`┌───┐` / `│ ● │` / `└───┘`).
+    SquareBullet,
+    /// Double-line frame around a bullet (`╔═══╗` / `║ ● ║` / `╚═══╝`).
+    DoubleLineSquareBullet,
+    /// Thick-line frame around a bullet (`┏━━━┓` / `┃ ● ┃` / `┗━━━┛`).
+    ThickSquareBullet,
+    /// Empty circle drawn with Braille dots (`⣠⠖⠒⠲⣄` / `⡇   ⢸` / `⠙⠦⠤⠴⠋`).
+    BrailleCircle,
+    /// Circle drawn with Braille dots around a bullet (`⣠⠖⠒⠲⣄` / `⡇ ● ⢸` / `⠙⠦⠤⠴⠋`).
+    BrailleCircleBullet,
+    /// A disk filled with Braille dots (`⢠⣴⣶⣦⡄` / `⣿⣿⣿⣿⣿` / `⠘⠻⠿⠟⠃`).
+    BrailleFilledCircle,
+    /// A solid block with rounded corners (`▗▄▄▄▖` / `▐███▌` / `▝▀▀▀▘`).
+    Filled,
+    /// Fills the whole 5-by-3 block with an arbitrary character.
+    Custom(char),
+}
+impl BarFramedPointType {
+    pub(crate) fn cells(&self) -> [[char; 5]; 3] {
+        let frame = |c: [char; 6], center: char| -> [[char; 5]; 3] {
+            // c = [top-left, horizontal, top-right, vertical, bottom-left, bottom-right]
+            [
+                [c[0], c[1], c[1], c[1], c[2]],
+                [c[3], ' ', center, ' ', c[3]],
+                [c[4], c[1], c[1], c[1], c[5]],
+            ]
+        };
+        let braille_circle = |center: char| -> [[char; 5]; 3] {
+            [
+                ['⣠', '⠖', '⠒', '⠲', '⣄'],
+                ['⡇', ' ', center, ' ', '⢸'],
+                ['⠙', '⠦', '⠤', '⠴', '⠋'],
+            ]
+        };
+        const ROUND: [char; 6] = ['╭', '─', '╮', '│', '╰', '╯'];
+        const SQUARE: [char; 6] = ['┌', '─', '┐', '│', '└', '┘'];
+        const DOUBLE: [char; 6] = ['╔', '═', '╗', '║', '╚', '╝'];
+        const THICK: [char; 6] = ['┏', '━', '┓', '┃', '┗', '┛'];
+        match self {
+            BarFramedPointType::RoundSquare => frame(ROUND, ' '),
+            BarFramedPointType::Square => frame(SQUARE, ' '),
+            BarFramedPointType::DoubleLineSquare => frame(DOUBLE, ' '),
+            BarFramedPointType::ThickSquare => frame(THICK, ' '),
+            BarFramedPointType::RoundSquareBullet => frame(ROUND, '●'),
+            BarFramedPointType::SquareBullet => frame(SQUARE, '●'),
+            BarFramedPointType::DoubleLineSquareBullet => frame(DOUBLE, '●'),
+            BarFramedPointType::ThickSquareBullet => frame(THICK, '●'),
+            BarFramedPointType::BrailleCircle => braille_circle(' '),
+            BarFramedPointType::BrailleCircleBullet => braille_circle('●'),
+            BarFramedPointType::BrailleFilledCircle => [
+                ['⢠', '⣴', '⣶', '⣦', '⡄'],
+                ['⣿', '⣿', '⣿', '⣿', '⣿'],
+                ['⠘', '⠻', '⠿', '⠟', '⠃'],
+            ],
+            BarFramedPointType::Filled => [
+                ['▗', '▄', '▄', '▄', '▖'],
+                ['▐', '█', '█', '█', '▌'],
+                ['▝', '▀', '▀', '▀', '▘'],
+            ],
+            BarFramedPointType::Custom(ch) => [[*ch; 5]; 3],
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 /// How a [`VBarChart`](crate::ui::vbarchart::VBarChart) or [`HBarChart`](crate::ui::hbarchart::HBarChart) draws a bar.
 ///
@@ -212,6 +295,11 @@ pub enum BarDrawMode {
     /// Thickness is 3 on a [`VBarChart`](crate::ui::vbarchart::VBarChart) and 2 on an
     /// [`HBarChart`](crate::ui::hbarchart::HBarChart).
     LargePoint(BarLargePointType),
+    /// Draws a 5-by-3 framed marker at the bar's value.
+    ///
+    /// Thickness is 5 on a [`VBarChart`](crate::ui::vbarchart::VBarChart) and 3 on an
+    /// [`HBarChart`](crate::ui::hbarchart::HBarChart).
+    FramedPoint(BarFramedPointType),
     /// Draws a cap across the tip of the bar. Thickness is at least 1.
     Cap(BarCapType),
 }
@@ -225,6 +313,7 @@ impl BarDrawMode {
             BarDrawMode::FilledRectangle(_) => (3, u8::MAX),
             BarDrawMode::Point(_) => (1, 1),
             BarDrawMode::LargePoint(_) => if vertical { (3, 3) } else { (2,2) },
+            BarDrawMode::FramedPoint(_) => if vertical { (5, 5) } else { (3, 3) },
             BarDrawMode::Cap(_) => (1, u8::MAX),
         }
     }
@@ -510,6 +599,24 @@ impl<T: Number + 'static> Bar<T> {
         surface.write_char(point.x + 1, point.y + 1, Character::with_attributes(chars[5], attr));
     }    
     #[inline(always)]
+    fn paint_vertical_framed_point(&self, surface: &mut Surface, point_type: BarFramedPointType, attr: CharAttribute, layout: &BarLayout) {
+        let point = self.point_vertical(layout);
+        for (dy, row) in point_type.cells().iter().enumerate() {
+            for (dx, ch) in row.iter().enumerate() {
+                surface.write_char(point.x + dx as i32, point.y - 1 + dy as i32, Character::with_attributes(*ch, attr));
+            }
+        }
+    }
+    #[inline(always)]
+    fn paint_horizontal_framed_point(&self, surface: &mut Surface, point_type: BarFramedPointType, attr: CharAttribute, layout: &BarLayout) {
+        let point = self.point_horizontal(layout);
+        for (dy, row) in point_type.cells().iter().enumerate() {
+            for (dx, ch) in row.iter().enumerate() {
+                surface.write_char(point.x - 2 + dx as i32, point.y + dy as i32, Character::with_attributes(*ch, attr));
+            }
+        }
+    }
+    #[inline(always)]
     fn paint_vertical_cap(&self, surface: &mut Surface, cap_type: BarCapType, attr: CharAttribute, layout: &BarLayout, defaults: &BarDefaults) {
         let point = self.point_vertical(layout);
         surface.fill_horizontal_line_with_size(point.x, point.y, self.actual_thickness(defaults) as u32, cap_type.character(attr));
@@ -576,6 +683,7 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Rectangle(line_type) => self.paint_vertical_rect(surface, line_type, attr, layout, defaults, false),
             BarDrawMode::Point(point_type) => self.paint_vertical_point(surface, point_type, attr, layout),
             BarDrawMode::LargePoint(point_type) => self.paint_vertical_large_point(surface, point_type, attr, layout),
+            BarDrawMode::FramedPoint(point_type) => self.paint_vertical_framed_point(surface, point_type, attr, layout),
             BarDrawMode::Cap(cap_type) => self.paint_vertical_cap(surface, cap_type, attr, layout, defaults),
         }
     }
@@ -589,6 +697,7 @@ impl<T: Number + 'static> Bar<T> {
             BarDrawMode::Rectangle(line_type) => self.paint_horizontal_rect(surface, line_type, attr, layout, defaults, false),
             BarDrawMode::Point(point_type) => self.paint_horizontal_point(surface, point_type, attr, layout),
             BarDrawMode::LargePoint(point_type) => self.paint_horizontal_large_point(surface, point_type, attr, layout),
+            BarDrawMode::FramedPoint(point_type) => self.paint_horizontal_framed_point(surface, point_type, attr, layout),
             BarDrawMode::Cap(cap_type) => self.paint_horizontal_cap(surface, cap_type, attr, layout, defaults),
         }
     }

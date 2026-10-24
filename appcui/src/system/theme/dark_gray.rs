@@ -157,6 +157,7 @@ pub(crate) fn new() -> Theme {
             bar: [charattr!("white,black"), charattr!("yellow,black"), charattr!("gray,black"), charattr!("silver,black")],
             inactive: charattr!("gray,black"),
             selection_border: charattr!("yellow,black"),
+            hover: charattr!("black,white"),
         },
     }
 }

@@ -24,6 +24,7 @@ AppCUI comes with a set of out-of-the-box controls that can be used:
 | [KeySelector](stock-controls/keyselector.md)            | ui::KeySelector              | `keyselector!`       | <img src="stock-controls/img/keyselector.png" width=300/>       |
 | [Label](stock-controls/label.md)                        | ui::Label                    | `label!`             | <img src="stock-controls/img/label.png" width=300/>             |
 | [ListBox](stock-controls/listbox.md)                    | ui::ListBox                  | `listbox!`           | <img src="stock-controls/img/listbox.png" width=300/>           |
+| [LineChart](stock-controls/linechart.md)                | ui::LineChart&lt;T&gt;       | `linechart!`         | <img src="stock-controls/img/linechart.png" width=300/>         |
 | [ListView](stock-controls/listview.md)                  | ui::ListView&lt;T&gt;        | `listview!`          | <img src="stock-controls/img/listview.png" width=300/>          |
 | [Markdown](stock-controls/markdown.md)                  | ui::Markdown                 | `markdown!`          | <img src="stock-controls/img/markdown.png" width=300/>          |
 | [MarkdownComposer](stock-controls/markdown_composer.md) | ui::MarkdownComposer         | `markdown_composer!` | <img src="stock-controls/img/markdown_composer.png" width=300/> |

@@ -16,6 +16,7 @@ struct BarDrawControls {
     line: Handle<Selector<LineType>>,
     point: Handle<ComboBox>,
     large_point: Handle<ComboBox>,
+    framed_point: Handle<ComboBox>,
     cap: Handle<ComboBox>,
     character: Handle<CharPicker>,
     detail: Handle<Label>,
@@ -30,6 +31,7 @@ impl BarDrawControls {
             line: Handle::None,
             point: Handle::None,
             large_point: Handle::None,
+            framed_point: Handle::None,
             cap: Handle::None,
             character: Handle::None,
             detail: Handle::None,
@@ -97,6 +99,26 @@ fn fill_type(index: u32, mark: char) -> BarFillType {
     }
 }
 
+const FRAMED_POINT_TYPES: [BarFramedPointType; 12] = [
+    BarFramedPointType::RoundSquare,
+    BarFramedPointType::Square,
+    BarFramedPointType::DoubleLineSquare,
+    BarFramedPointType::ThickSquare,
+    BarFramedPointType::RoundSquareBullet,
+    BarFramedPointType::SquareBullet,
+    BarFramedPointType::DoubleLineSquareBullet,
+    BarFramedPointType::ThickSquareBullet,
+    BarFramedPointType::BrailleCircle,
+    BarFramedPointType::BrailleCircleBullet,
+    BarFramedPointType::BrailleFilledCircle,
+    BarFramedPointType::Filled,
+];
+const FRAMED_POINT_CUSTOM: u32 = FRAMED_POINT_TYPES.len() as u32;
+
+fn framed_point_type(index: u32, mark: char) -> BarFramedPointType {
+    FRAMED_POINT_TYPES.get(index as usize).copied().unwrap_or(BarFramedPointType::Custom(mark))
+}
+
 const CAP_CUSTOM: u32 = 8;
 
 fn cap_type(index: u32, mark: char) -> BarCapType {
@@ -151,7 +173,7 @@ fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
     let mode = combo_with(
         host,
         top + 1,
-        &["Fill", "Line", "Rectangle", "Filled rectangle", "Point", "Large point", "Cap"],
+        &["Fill", "Line", "Rectangle", "Filled rectangle", "Point", "Large point", "Cap", "Framed point"],
         true,
     );
     let detail = host.add_control(Label::new("Fill type", row(top + 3, Some(12))));
@@ -190,6 +212,26 @@ fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
             "Thick square",
             "Circle",
             "Diamond",
+            "Custom",
+        ],
+        false,
+    );
+    let framed_point = combo_with(
+        host,
+        top + 4,
+        &[
+            "Round square",
+            "Square",
+            "Double line square",
+            "Thick square",
+            "Round square + bullet",
+            "Square + bullet",
+            "Double line square + bullet",
+            "Thick square + bullet",
+            "Braille circle",
+            "Braille circle + bullet",
+            "Braille filled circle",
+            "Filled",
             "Custom",
         ],
         false,
@@ -251,6 +293,7 @@ fn add_draw_controls(host: &mut impl DrawHost, top: i32) -> BarDrawControls {
         line,
         point,
         large_point,
+        framed_point,
         cap,
         character,
         detail,
@@ -879,6 +922,7 @@ impl HBarChartEditor {
             4 => BarDrawMode::Point(point_type(self.combo_index(controls.point), mark)),
             5 => BarDrawMode::LargePoint(large_point_type(self.combo_index(controls.large_point), mark)),
             6 => BarDrawMode::Cap(cap_type(self.combo_index(controls.cap), mark)),
+            7 => BarDrawMode::FramedPoint(framed_point_type(self.combo_index(controls.framed_point), mark)),
             _ => BarDrawMode::Fill(fill_type(self.combo_index(controls.fill), mark)),
         }
     }
@@ -899,6 +943,15 @@ impl HBarChartEditor {
                 self.combo_index(controls.large_point) == LARGE_POINT_CUSTOM,
             ),
             6 => ("Cap type", false, false, false, false, true, self.combo_index(controls.cap) == CAP_CUSTOM),
+            7 => (
+                "Point type",
+                false,
+                false,
+                false,
+                false,
+                false,
+                self.combo_index(controls.framed_point) == FRAMED_POINT_CUSTOM,
+            ),
             _ => ("", false, false, false, false, false, false),
         };
         let detail = controls.detail;
@@ -928,6 +981,10 @@ impl HBarChartEditor {
         if let Some(combo) = self.control_mut(cap_h) {
             combo.set_visible(cap);
         }
+        let framed_point_h = controls.framed_point;
+        if let Some(combo) = self.control_mut(framed_point_h) {
+            combo.set_visible(mode == 7);
+        }
         let character_label = controls.character_label;
         if let Some(label) = self.control_mut(character_label) {
             label.set_visible(character);
@@ -939,6 +996,16 @@ impl HBarChartEditor {
     }
 
     fn show_draw_mode(&mut self, controls: BarDrawControls, mode: BarDrawMode) {
+        let framed_point_index = match mode {
+            BarDrawMode::FramedPoint(point) => Some(
+                FRAMED_POINT_TYPES
+                    .iter()
+                    .position(|p| *p == point)
+                    .map(|i| i as u32)
+                    .unwrap_or(FRAMED_POINT_CUSTOM),
+            ),
+            _ => None,
+        };
         let (mode_index, fill_index, line, point_index, large_point_index, cap_index, mark) = match mode {
             BarDrawMode::Fill(fill) => {
                 let (index, mark) = match fill {
@@ -997,6 +1064,13 @@ impl HBarChartEditor {
                 };
                 (6, None, None, None, None, Some(index), mark)
             }
+            BarDrawMode::FramedPoint(point) => {
+                let mark = match point {
+                    BarFramedPointType::Custom(ch) => Some(ch),
+                    _ => None,
+                };
+                (7, None, None, None, None, None, mark)
+            }
         };
         self.set_combo(controls.mode, mode_index);
         if let Some(index) = fill_index {
@@ -1016,6 +1090,9 @@ impl HBarChartEditor {
         }
         if let Some(index) = cap_index {
             self.set_combo(controls.cap, index);
+        }
+        if let Some(index) = framed_point_index {
+            self.set_combo(controls.framed_point, index);
         }
         if let Some(ch) = mark {
             let picker = controls.character;
@@ -1047,6 +1124,7 @@ impl HBarChartEditor {
             || handle == controls.fill
             || handle == controls.point
             || handle == controls.large_point
+            || handle == controls.framed_point
             || handle == controls.cap;
         if !relevant {
             return false;

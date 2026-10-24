@@ -80,6 +80,7 @@
         - [ImageViewer](chapter-3/stock-controls/imageviewer.md)
         - [KeySelector](chapter-3/stock-controls/keyselector.md)
         - [Label](chapter-3/stock-controls/label.md)
+        - [LineChart](chapter-3/stock-controls/linechart.md)
         - [ListBox](chapter-3/stock-controls/listbox.md)
         - [ListView](chapter-3/stock-controls/listview.md)
         - [Markdown](chapter-3/stock-controls/markdown.md)

@@ -65,6 +65,7 @@ pub(crate) enum AppCUITrait {
     GenericVBarChartEvents = 56,
     GenericHBarChartEvents = 57,
     PieChartEvents = 58,
+    GenericLineChartEvents = 59,
 }
 
 #[repr(u8)]
@@ -140,6 +141,7 @@ impl AppCUITrait {
             AppCUITrait::GenericVBarChartEvents => "VBarChartEvents",
             AppCUITrait::GenericHBarChartEvents => "HBarChartEvents",
             AppCUITrait::PieChartEvents => "PieChartEvents",
+            AppCUITrait::GenericLineChartEvents => "LineChartEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -206,6 +208,7 @@ impl AppCUITrait {
             AppCUITrait::GenericVBarChartEvents => TraitType::ControlEvent,
             AppCUITrait::GenericHBarChartEvents => TraitType::ControlEvent,
             AppCUITrait::PieChartEvents => TraitType::ControlEvent,
+            AppCUITrait::GenericLineChartEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -272,6 +275,7 @@ impl AppCUITrait {
             AppCUITrait::GenericVBarChartEvents => "",
             AppCUITrait::GenericHBarChartEvents => "",
             AppCUITrait::PieChartEvents => "",
+            AppCUITrait::GenericLineChartEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -338,6 +342,7 @@ impl AppCUITrait {
             AppCUITrait::GenericVBarChartEvents => "impl$(TEMPLATE_TYPE) GenericVBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericHBarChartEvents => "impl$(TEMPLATE_TYPE) GenericHBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::PieChartEvents => "impl$(TEMPLATE_TYPE) PieChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::GenericLineChartEvents => "impl$(TEMPLATE_TYPE) GenericLineChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -354,6 +359,7 @@ impl AppCUITrait {
                 | AppCUITrait::GenericHSliderEvents
                 | AppCUITrait::GenericVBarChartEvents
                 | AppCUITrait::GenericHBarChartEvents
+                | AppCUITrait::GenericLineChartEvents
         )
     }
     pub(crate) fn new(name: &str) -> Option<AppCUITrait> {
@@ -410,6 +416,7 @@ impl AppCUITrait {
             "VBarChartEvents" | "VBarChart" => Some(AppCUITrait::GenericVBarChartEvents),
             "HBarChartEvents" | "HBarChart" => Some(AppCUITrait::GenericHBarChartEvents),
             "PieChartEvents" | "PieChart" => Some(AppCUITrait::PieChartEvents),
+            "LineChartEvents" | "LineChart" => Some(AppCUITrait::GenericLineChartEvents),
             _ => None,
         }
     }
@@ -477,6 +484,7 @@ impl AppCUITrait {
             56 => Some(AppCUITrait::GenericVBarChartEvents),
             57 => Some(AppCUITrait::GenericHBarChartEvents),
             58 => Some(AppCUITrait::PieChartEvents),
+            59 => Some(AppCUITrait::GenericLineChartEvents),
             _ => None,
         };
         result?;
