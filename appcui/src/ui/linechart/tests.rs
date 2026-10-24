@@ -281,6 +281,37 @@ fn check_chart_points_count_uneven() {
 }
 
 #[test]
+fn check_chart_add_value() {
+    in_app(|| {
+        let mut chart = empty_chart();
+        // no series: the index is out of range and the chart stays empty
+        chart.add_value(0, 1);
+        assert_eq!(chart.series_count(), 0);
+        assert_eq!(chart.points_count(), 0);
+
+        chart.add_series(Series::new("A"));
+        chart.add_series(Series::with_values("B", [7]));
+        chart.add_value(0, 10);
+        chart.add_value(0, BarBuilder::new(20).label("Feb").build());
+        assert_eq!(chart.get_series(0).unwrap().iter().map(|b| b.value()).collect::<Vec<_>>(), vec![10, 20]);
+        assert_eq!(chart.get_series(0).unwrap().get(1).map(|b| b.label()), Some("Feb"));
+        // writing series 0 leaves series 1 unchanged
+        assert_eq!(chart.get_series(1).unwrap().iter().map(|b| b.value()).collect::<Vec<_>>(), vec![7]);
+
+        chart.add_value(1, 8);
+        assert_eq!(chart.get_series(1).unwrap().iter().map(|b| b.value()).collect::<Vec<_>>(), vec![7, 8]);
+        assert_eq!(chart.points_count(), 2);
+
+        // past the last series: neither series grows
+        chart.add_value(2, 99);
+        chart.add_value(usize::MAX, 99);
+        assert_eq!(chart.get_series(0).unwrap().len(), 2);
+        assert_eq!(chart.get_series(1).unwrap().len(), 2);
+        assert_eq!(chart.points_count(), 2);
+    });
+}
+
+#[test]
 fn check_chart_add_values() {
     in_app(|| {
         let mut chart = empty_chart();
@@ -442,6 +473,20 @@ where
         })
         .run()
         .unwrap();
+}
+
+#[test]
+fn check_paint_number_format() {
+    let script = "
+        Paint('1. Y-axis labels and the zero line use one decimal place')
+        CheckHash(0x86694B47E9B6E2AD)
+    ";
+    run_paint_test(script, Size::new(40, 12), || {
+        let mut c = LineChart::<i32>::new(layout!("d:f"), linechart::Flags::ShowZeroLineOnYAxis);
+        c.add_series(Series::with_values("T", [-50, 50]));
+        c.set_number_format(FormatNumber::new(10).decimals(1));
+        c
+    });
 }
 
 #[test]
