@@ -5,7 +5,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
-## [Unreleased]
+## [0.5.6] - 2026-10-24
 
 ### Added
 - **LineChart** control: plots one or more numeric series (any integer or floating-point type)
