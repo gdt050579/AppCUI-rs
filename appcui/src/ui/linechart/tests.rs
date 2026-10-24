@@ -181,6 +181,34 @@ fn check_frame_junctions_thick_and_double() {
     assert_eq!(super::marker::frame_junctions(BarFramedPointType::DoubleLineSquareBullet), double);
 }
 
+#[test]
+fn check_horizontal_arm() {
+    // (toward the left, toward the right): thin, thick, double
+    let arms = [
+        (true, "─┐┘┤┬┴┼╮╯-", "━┓┛┫┳┻╋", "═╗╝╣╦╩╬"),
+        (false, "─┌└├┬┴┼╭╰-", "━┏┗┣┳┻╋", "═╔╚╠╦╩╬"),
+    ];
+    for (toward_left, thin, thick, double) in arms {
+        for ch in thin.chars() {
+            assert_eq!(super::marker::horizontal_arm(ch, toward_left), Some(0), "{ch} toward_left={toward_left}");
+        }
+        for ch in thick.chars() {
+            assert_eq!(super::marker::horizontal_arm(ch, toward_left), Some(1), "{ch} toward_left={toward_left}");
+        }
+        for ch in double.chars() {
+            assert_eq!(super::marker::horizontal_arm(ch, toward_left), Some(2), "{ch} toward_left={toward_left}");
+        }
+    }
+    // a corner that opens the other way is not an arm in this direction
+    for (ch, toward_left) in [('┐', false), ('┌', true), ('┓', false), ('┏', true), ('╗', false), ('╔', true)] {
+        assert_eq!(super::marker::horizontal_arm(ch, toward_left), None, "{ch} toward_left={toward_left}");
+    }
+    assert_eq!(super::marker::horizontal_arm('│', true), None);
+    assert_eq!(super::marker::horizontal_arm('│', false), None);
+    assert_eq!(super::marker::horizontal_arm('x', true), None);
+    assert_eq!(super::marker::horizontal_arm('x', false), None);
+}
+
 // ---------------------------------------------------------------- LineChart data API
 
 /// Runs `f` while an application (and its theme) exists: changing the data of a chart repaints it.
