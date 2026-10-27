@@ -5,4 +5,6 @@ mod initialization_flags;
 mod tests;
 
 pub use self::initialization_flags::Flags;
+pub use self::initialization_flags::SegmentFillType;
+pub use self::initialization_flags::SortType;
 pub use self::usagechart::UsageChart;
