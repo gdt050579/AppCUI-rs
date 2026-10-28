@@ -3,7 +3,7 @@ use appcui_proc_macro::CustomControl;
 
 struct Segment {
     order: u16,
-    x: i32,
+    poz: i32,
     value: u64,
     len: u16,
     label: String,
@@ -61,14 +61,43 @@ impl UsageChart {
             SortType::ReverseAlphabetical => self.segments.sort_by(|a, b| b.label.cmp(&a.label)),
         }
         // compute the x position
-        let mut x = 0;
+        let mut poz = 0;
         for segment in &mut self.segments {
-            segment.x = x;
-            x += segment.len as i32;
+            segment.poz = poz;
+            poz += segment.len as i32;
         }
     }
     fn update_surface_content(&mut self) {
         self.recompite_positions();
+        self.surface.clear(Character::with_attributes(' ', self.theme().chart.background));
+        let h = self.surface.size().height as u16;
+        let attr_list = self.theme().chart.bar;
+        let mut attr_index = 0;
+        for segment in &self.segments {
+            if segment.len == 0 {
+                continue;
+            }
+            let r = Rect::with_size(segment.poz, 0, segment.len, h);
+            let ch = match segment.char {
+                SegmentFillType::Solid => '█',
+                SegmentFillType::Shade75 => '▓',
+                SegmentFillType::Shade50 => '▒',
+                SegmentFillType::Shade25 => '░',
+                SegmentFillType::Braille => '⣿',
+                SegmentFillType::Checkerboard => '⣿',
+                SegmentFillType::Grid => '⣿',
+                SegmentFillType::GridDouble => '⣿',
+                SegmentFillType::CrossHatch => '⣿',
+                SegmentFillType::Dashed => '⣿',
+                SegmentFillType::DiagonalUp => '⣿',
+                SegmentFillType::DiagonalDown => '⣿',
+                SegmentFillType::Notched => '⣿',
+                SegmentFillType::Custom(ch) => ch,
+            };
+            let attr = segment.attr.unwrap_or(attr_list[attr_index]);
+            attr_index = (attr_index + 1) % attr_list.len();
+            self.surface.fill_rect(r, Character::with_attributes(ch, attr));
+        }
     }
 }
 impl OnPaint for UsageChart {
