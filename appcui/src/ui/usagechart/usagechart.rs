@@ -87,10 +87,10 @@ impl UsageChart {
                 SegmentFillType::Checkerboard => '⣿',
                 SegmentFillType::Grid => '⣿',
                 SegmentFillType::GridDouble => '⣿',
-                SegmentFillType::CrossHatch => '⣿',
+                SegmentFillType::CrossHatch => '╳',
                 SegmentFillType::Dashed => '⣿',
-                SegmentFillType::DiagonalUp => '⣿',
-                SegmentFillType::DiagonalDown => '⣿',
+                SegmentFillType::DiagonalUp => '╱',
+                SegmentFillType::DiagonalDown => '╲',
                 SegmentFillType::Notched => '⣿',
                 SegmentFillType::Custom(ch) => ch,
             };
