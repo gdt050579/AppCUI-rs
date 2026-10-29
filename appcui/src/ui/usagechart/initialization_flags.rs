@@ -43,3 +43,8 @@ pub enum SegmentFillType {
     /// Fill with an arbitrary character.
     Custom(char),
 }
+
+pub enum TotalUsage {
+    Auto,
+    Fixed(u64)
+}

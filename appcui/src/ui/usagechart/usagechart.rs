@@ -1,4 +1,4 @@
-use super::{Flags, SegmentFillType, SortType};
+use super::{Flags, SegmentFillType, SortType, TotalUsage};
 use appcui_proc_macro::CustomControl;
 
 struct Segment {
@@ -17,6 +17,7 @@ pub struct UsageChart {
     segments: Vec<Segment>,
     surface: Surface,
     sort: SortType,
+    total_usage: TotalUsage
 }
 impl UsageChart {
     pub fn new(layout: Layout, flags: Flags) -> Self {
@@ -26,17 +27,29 @@ impl UsageChart {
             surface: Surface::new(1,1),
             sort: SortType::None,
             flags,
+            total_usage: TotalUsage::Auto,
         }
+    }
+    pub fn set_total_usage(&mut self, total_usage: TotalUsage) {
+        self.total_usage = total_usage;
+        self.update_surface_content();
     }
     fn recompite_positions(&mut self) {
         let width = self.surface.size().width as u128;
         if width == 0 {
             return;
         }
-        let mut total_value = 0u128;
-        for segment in &self.segments {
-            total_value += segment.value as u128;
-        }
+        let total_value = match self.total_usage {
+            TotalUsage::Auto => {
+                let mut v = 0u128;
+                for segment in &self.segments {
+                    v += segment.value as u128;
+                }
+                v
+            },
+            TotalUsage::Fixed(value) => value as u128,
+        };
+
         // sort from biggest to smallest
         self.segments.sort_by_key(|segment| u64::MAX - segment.value);
         let mut sz = 0;
@@ -102,7 +115,7 @@ impl UsageChart {
 }
 impl OnPaint for UsageChart {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        
+        surface.draw_surface(0, 0, &self.surface);
     }
 }
 impl OnResize for UsageChart {
