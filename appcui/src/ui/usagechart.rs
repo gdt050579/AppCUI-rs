@@ -10,4 +10,5 @@ pub use self::initialization_flags::SortType;
 pub use self::initialization_flags::TotalUsage;
 pub use self::usagechart::UsageChart;
 pub use self::segment::SegmentFillType;
+pub use self::segment::SegmentBuilder;
 pub use self::segment::Segment;

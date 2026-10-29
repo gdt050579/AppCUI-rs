@@ -53,6 +53,33 @@ impl Segment {
         }
     }
 }
+pub struct SegmentBuilder {
+    segment: Segment,
+}
+impl SegmentBuilder {
+    pub fn new() -> Self {
+        Self { segment: Segment::with_value(0) }
+    }
+    pub fn value(mut self, value: u64) -> Self {
+        self.segment.value = value;
+        self
+    }
+    pub fn label(mut self, label: &str) -> Self {
+        self.segment.label = label.to_string();
+        self
+    }
+    pub fn fill(mut self, fill: SegmentFillType) -> Self {
+        self.segment.char = fill;
+        self
+    }
+    pub fn attr(mut self, attr: CharAttribute) -> Self {
+        self.segment.attr = Some(attr);
+        self
+    }
+    pub fn build(self) -> Segment {
+        self.segment
+    }
+}
 impl From<u8> for Segment {
     fn from(value: u8) -> Self {
         Segment::with_value(value as u64)
