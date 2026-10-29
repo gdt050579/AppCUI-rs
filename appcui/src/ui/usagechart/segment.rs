@@ -40,3 +40,36 @@ pub struct Segment {
     pub(crate) char: SegmentFillType,
     pub(crate) attr: Option<CharAttribute>,
 }
+impl Segment {
+    fn with_value(value: u64) -> Self {
+        Self {
+            order: 0,
+            poz: 0,
+            value,
+            len: 0,
+            label: String::new(),
+            char: SegmentFillType::Solid,
+            attr: None,
+        }
+    }
+}
+impl From<u8> for Segment {
+    fn from(value: u8) -> Self {
+        Segment::with_value(value as u64)
+    }
+}
+impl From<u16> for Segment {
+    fn from(value: u16) -> Self {
+        Segment::with_value(value as u64)
+    }
+}
+impl From<u32> for Segment {
+    fn from(value: u32) -> Self {
+        Segment::with_value(value as u64)
+    }
+}
+impl From<u64> for Segment {
+    fn from(value: u64) -> Self {
+        Segment::with_value(value)
+    }
+}
