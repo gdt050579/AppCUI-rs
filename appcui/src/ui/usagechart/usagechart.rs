@@ -1,15 +1,5 @@
-use super::{Flags, SegmentFillType, SortType, TotalUsage};
+use super::{Flags, SegmentFillType, SortType, TotalUsage, Segment};
 use appcui_proc_macro::CustomControl;
-
-struct Segment {
-    order: u16,
-    poz: i32,
-    value: u64,
-    len: u16,
-    label: String,
-    char: SegmentFillType,
-    attr: Option<CharAttribute>,
-}
 
 #[CustomControl(overwrite = OnPaint + OnResize, internal = true)]
 pub struct UsageChart {
