@@ -20,6 +20,10 @@ impl UsageChart {
             total_usage: TotalUsage::Auto,
         }
     }
+    pub fn add_segment<T: Into<Segment>>(&mut self, segment: T) {
+        self.segments.push(segment.into());
+        self.update_surface_content();
+    }
     pub fn set_total_usage(&mut self, total_usage: TotalUsage) {
         self.total_usage = total_usage;
         self.update_surface_content();
@@ -88,10 +92,10 @@ impl UsageChart {
                 SegmentFillType::Shade25 => '░',
                 SegmentFillType::Braille => '⣿',
                 SegmentFillType::Checkerboard => '⣿',
-                SegmentFillType::Grid => '⣿',
-                SegmentFillType::GridDouble => '⣿',
+                SegmentFillType::Grid => '┼',
+                SegmentFillType::GridDouble => '╬',
                 SegmentFillType::CrossHatch => '╳',
-                SegmentFillType::Dashed => '⣿',
+                SegmentFillType::Dashed => '┇',
                 SegmentFillType::DiagonalUp => '╱',
                 SegmentFillType::DiagonalDown => '╲',
                 SegmentFillType::Notched => '⣿',
