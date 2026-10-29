@@ -1,4 +1,4 @@
-use super::{Flags, SegmentFillType, SortType, TotalUsage, Segment};
+use super::{Flags, Segment, SegmentFillType, SortType, TotalUsage};
 use appcui_proc_macro::CustomControl;
 
 #[CustomControl(overwrite = OnPaint + OnResize, internal = true)]
@@ -7,18 +7,25 @@ pub struct UsageChart {
     segments: Vec<Segment>,
     surface: Surface,
     sort: SortType,
-    total_usage: TotalUsage
+    total_usage: TotalUsage,
 }
 impl UsageChart {
     pub fn new(layout: Layout, flags: Flags) -> Self {
-        Self {
+        let mut me = Self {
             base: ControlBase::new(layout, false),
             segments: Vec::new(),
-            surface: Surface::new(1,1),
+            surface: Surface::new(1, 1),
             sort: SortType::None,
             flags,
             total_usage: TotalUsage::Auto,
-        }
+        };
+        if flags.contains(Flags::Margins) {
+            me.set_size_bounds(3, 3, u16::MAX, u16::MAX);
+        } else {
+            me.set_size_bounds(3, 1, u16::MAX, u16::MAX);
+        };
+        me.update_surface_content();
+        me
     }
     pub fn add_segment<T: Into<Segment>>(&mut self, segment: T) {
         self.segments.push(segment.into());
@@ -29,7 +36,7 @@ impl UsageChart {
         self.update_surface_content();
     }
     fn recompite_positions(&mut self) {
-        let width = self.surface.size().width as u128;
+        let width = (self.surface.size().width as u128).saturating_sub(if self.flags.contains(Flags::Margins) { 2 } else { 0 });
         if width == 0 {
             return;
         }
@@ -40,7 +47,7 @@ impl UsageChart {
                     v += segment.value as u128;
                 }
                 v
-            },
+            }
             TotalUsage::Fixed(value) => value as u128,
         };
 
@@ -68,7 +75,7 @@ impl UsageChart {
             SortType::ReverseAlphabetical => self.segments.sort_by(|a, b| b.label.cmp(&a.label)),
         }
         // compute the x position
-        let mut poz = 0;
+        let mut poz = if self.flags.contains(Flags::Margins) { 1 } else { 0 };
         for segment in &mut self.segments {
             segment.poz = poz;
             poz += segment.len as i32;
@@ -77,14 +84,15 @@ impl UsageChart {
     fn update_surface_content(&mut self) {
         self.recompite_positions();
         self.surface.clear(Character::with_attributes(' ', self.theme().chart.background));
-        let h = self.surface.size().height as u16;
+        let h = (self.surface.size().height as u16).saturating_sub(if self.flags.contains(Flags::Margins) { 2 } else { 0 });
         let attr_list = self.theme().chart.bar;
+        let y = if self.flags.contains(Flags::Margins) { 1 } else { 0 };
         let mut attr_index = 0;
         for segment in &self.segments {
             if segment.len == 0 {
                 continue;
             }
-            let r = Rect::with_size(segment.poz, 0, segment.len, h);
+            let r = Rect::with_size(segment.poz, y, segment.len, h);
             let ch = match segment.char {
                 SegmentFillType::Solid => '█',
                 SegmentFillType::Shade75 => '▓',
