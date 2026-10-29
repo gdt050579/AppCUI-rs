@@ -446,6 +446,10 @@ name = "linechart_editor"
 path = "linechart_editor/main.rs"
 
 [[example]]
+name = "usagechart"
+path = "usagechart/main.rs"
+
+[[example]]
 name = "hexview"
 path = "hexview/main.rs"
 
