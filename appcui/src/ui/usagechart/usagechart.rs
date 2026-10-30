@@ -1,23 +1,25 @@
 use super::{Flags, Segment, SegmentFillType, SortType, TotalUsage};
 use appcui_proc_macro::CustomControl;
 
-#[CustomControl(overwrite = OnPaint + OnResize, internal = true)]
+#[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent, internal = true)]
 pub struct UsageChart {
     flags: Flags,
     segments: Vec<Segment>,
     surface: Surface,
     sort: SortType,
     total_usage: TotalUsage,
+    hovered_segment: Option<usize>,
 }
 impl UsageChart {
     pub fn new(layout: Layout, flags: Flags) -> Self {
         let mut me = Self {
-            base: ControlBase::new(layout, false),
+            base: ControlBase::new(layout, true),
             segments: Vec::new(),
             surface: Surface::new(1, 1),
             sort: SortType::None,
             flags,
             total_usage: TotalUsage::Auto,
+            hovered_segment: None,
         };
         if flags.contains(Flags::Margins) {
             me.set_size_bounds(3, 3, u16::MAX, u16::MAX);
@@ -35,7 +37,7 @@ impl UsageChart {
         self.total_usage = total_usage;
         self.update_surface_content();
     }
-    fn recompite_positions(&mut self) {
+    fn recompute_positions(&mut self) {
         let width = (self.surface.size().width as u128).saturating_sub(if self.flags.contains(Flags::Margins) { 2 } else { 0 });
         if width == 0 {
             return;
@@ -82,7 +84,8 @@ impl UsageChart {
         }
     }
     fn update_surface_content(&mut self) {
-        self.recompite_positions();
+        self.hovered_segment = None;
+        self.recompute_positions();
         self.surface.clear(Character::with_attributes(' ', self.theme().chart.background));
         let h = (self.surface.size().height as u16).saturating_sub(if self.flags.contains(Flags::Margins) { 2 } else { 0 });
         let attr_list = self.theme().chart.bar;
@@ -106,12 +109,38 @@ impl UsageChart {
                 SegmentFillType::Dashed => '┇',
                 SegmentFillType::DiagonalUp => '╱',
                 SegmentFillType::DiagonalDown => '╲',
-                SegmentFillType::Notched => '⣿',
+                SegmentFillType::Notched => '■',
                 SegmentFillType::Custom(ch) => ch,
             };
             let attr = segment.attr.unwrap_or(attr_list[attr_index]);
             attr_index = (attr_index + 1) % attr_list.len();
             self.surface.fill_rect(r, Character::with_attributes(ch, attr));
+        }
+    }
+    fn pos_to_segment_index(&self, x: i32) -> Option<usize> {
+        if let Some(idx) = self.hovered_segment {
+            let seg = &self.segments[idx];
+            let r = seg.poz + seg.len as i32;
+            if (x >= seg.poz) && (x < r) {
+                return Some(idx);
+            }
+        }
+        for (idx, seg) in self.segments.iter().enumerate() {
+            if x < seg.poz { break; }
+            let r = seg.poz + seg.len as i32;
+            if (x >= seg.poz) && (x < r) {
+                return Some(idx);
+            }
+        }
+        None
+    }
+    fn update_tooltip(&self) {
+        if let Some(idx) = self.hovered_segment {
+            let seg = &self.segments[idx];
+            let tooltip = format!("{}: {}", seg.label, seg.value);
+            self.show_tooltip_on_point(&tooltip, seg.poz + seg.len as i32 / 2, self.surface.size().height as i32 / 2);
+        } else {
+            self.hide_tooltip();
         }
     }
 }
@@ -124,5 +153,31 @@ impl OnResize for UsageChart {
     fn on_resize(&mut self, _: Size, new_size: Size) {
         self.surface.resize(new_size);
         self.update_surface_content();
+    }
+}
+impl OnMouseEvent for UsageChart {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.hovered_segment = None;
+                self.hide_tooltip();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(point) => {
+                let idx = self.pos_to_segment_index(point.x);
+                if idx != self.hovered_segment {
+                    self.hovered_segment = idx;
+                    self.update_tooltip();
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            MouseEvent::Pressed(mouse_event_data) => todo!(),
+            MouseEvent::Released(mouse_event_data) => todo!(),
+            MouseEvent::DoubleClick(mouse_event_data) => todo!(),
+            MouseEvent::Drag(mouse_event_data) => todo!(),
+            MouseEvent::Wheel(mouse_wheel_direction) => todo!(),
+        }
     }
 }
