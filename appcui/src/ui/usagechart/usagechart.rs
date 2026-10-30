@@ -146,7 +146,20 @@ impl OnPaint for UsageChart {
             if let Some(idx) = self.selected_segment {
                 let seg = &self.segments[idx];
                 let (start, end) = seg.range();
-                
+                let r = Rect::new(start.saturating_sub(1), 0, end, (self.size().height as i32).saturating_sub(1));
+                if self.flags.contains(Flags::DimSegmentsOnSelection) {
+                    let attr = theme.chart.inactive;
+                    surface.draw_surface_with_transform(0, 0, &self.surface, |ch, p| {
+                        if (p.x < start) || (p.x >= end) {
+                            Some(Character::with_attributes(ch.code, attr))
+                        } else {
+                            Some(ch)
+                        }
+                    });
+                } else {
+                    surface.draw_surface(0, 0, &self.surface);
+                }
+                surface.draw_rect(r, LineType::Single, theme.chart.selection_border);
             } else {
                 surface.draw_surface(0, 0, &self.surface);
             }
@@ -188,7 +201,7 @@ impl OnMouseEvent for UsageChart {
                     EventProcessStatus::Ignored
                 }
             }
-            _ => EventProcessStatus::Ignored
+            _ => EventProcessStatus::Ignored,
         }
     }
 }
