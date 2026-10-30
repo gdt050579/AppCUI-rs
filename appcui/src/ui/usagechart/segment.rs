@@ -31,13 +31,34 @@ pub enum SegmentFillType {
     Custom(char),
 }
 
+impl SegmentFillType {
+    pub(super) fn as_char(&self) -> char {
+        match self {
+            SegmentFillType::Solid => '█',
+            SegmentFillType::Shade75 => '▓',
+            SegmentFillType::Shade50 => '▒',
+            SegmentFillType::Shade25 => '░',
+            SegmentFillType::Braille => '⣿',
+            SegmentFillType::Checkerboard => '⣿',
+            SegmentFillType::Grid => '┼',
+            SegmentFillType::GridDouble => '╬',
+            SegmentFillType::CrossHatch => '╳',
+            SegmentFillType::Dashed => '┇',
+            SegmentFillType::DiagonalUp => '╱',
+            SegmentFillType::DiagonalDown => '╲',
+            SegmentFillType::Notched => '■',
+            SegmentFillType::Custom(ch) => *ch,
+        }
+    }
+}
+
 pub struct Segment {
     pub(crate) order: u16,
     pub(crate) poz: i32,
     pub(crate) value: u64,
     pub(crate) len: u16,
     pub(crate) label: String,
-    pub(crate) char: SegmentFillType,
+    pub(crate) fill_type: SegmentFillType,
     pub(crate) attr: Option<CharAttribute>,
 }
 impl Segment {
@@ -48,9 +69,12 @@ impl Segment {
             value,
             len: 0,
             label: String::new(),
-            char: SegmentFillType::Solid,
+            fill_type: SegmentFillType::Solid,
             attr: None,
         }
+    }
+    pub(super) fn range(&self) -> (i32, i32) {
+        (self.poz, self.poz + self.len as i32)
     }
 }
 pub struct SegmentBuilder {
@@ -69,7 +93,7 @@ impl SegmentBuilder {
         self
     }
     pub fn fill(mut self, fill: SegmentFillType) -> Self {
-        self.segment.char = fill;
+        self.segment.fill_type = fill;
         self
     }
     pub fn attr(mut self, attr: CharAttribute) -> Self {

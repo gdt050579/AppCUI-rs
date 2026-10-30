@@ -9,6 +9,7 @@ pub struct UsageChart {
     sort: SortType,
     total_usage: TotalUsage,
     hovered_segment: Option<usize>,
+    selected_segment: Option<usize>,
 }
 impl UsageChart {
     pub fn new(layout: Layout, flags: Flags) -> Self {
@@ -20,6 +21,7 @@ impl UsageChart {
             flags,
             total_usage: TotalUsage::Auto,
             hovered_segment: None,
+            selected_segment: None,
         };
         if flags.contains(Flags::Margins) {
             me.set_size_bounds(3, 3, u16::MAX, u16::MAX);
@@ -96,32 +98,17 @@ impl UsageChart {
                 continue;
             }
             let r = Rect::with_size(segment.poz, y, segment.len, h);
-            let ch = match segment.char {
-                SegmentFillType::Solid => '█',
-                SegmentFillType::Shade75 => '▓',
-                SegmentFillType::Shade50 => '▒',
-                SegmentFillType::Shade25 => '░',
-                SegmentFillType::Braille => '⣿',
-                SegmentFillType::Checkerboard => '⣿',
-                SegmentFillType::Grid => '┼',
-                SegmentFillType::GridDouble => '╬',
-                SegmentFillType::CrossHatch => '╳',
-                SegmentFillType::Dashed => '┇',
-                SegmentFillType::DiagonalUp => '╱',
-                SegmentFillType::DiagonalDown => '╲',
-                SegmentFillType::Notched => '■',
-                SegmentFillType::Custom(ch) => ch,
-            };
+            let ch = segment.fill_type.as_char();
             let attr = segment.attr.unwrap_or(attr_list[attr_index]);
             attr_index = (attr_index + 1) % attr_list.len();
             self.surface.fill_rect(r, Character::with_attributes(ch, attr));
         }
     }
-    fn pos_to_segment_index(&self, x: i32) -> Option<usize> {
-        if let Some(idx) = self.hovered_segment {
+    fn pos_to_segment_index(&self, x: i32, cached_idx: Option<usize>) -> Option<usize> {
+        if let Some(idx) = cached_idx {
             let seg = &self.segments[idx];
-            let r = seg.poz + seg.len as i32;
-            if (x >= seg.poz) && (x < r) {
+            let (start, end) = seg.range();
+            if (x >= start) && (x < end) {
                 return Some(idx);
             }
         }
@@ -129,8 +116,8 @@ impl UsageChart {
             if x < seg.poz {
                 break;
             }
-            let r = seg.poz + seg.len as i32;
-            if (x >= seg.poz) && (x < r) {
+            let (start, end) = seg.range();
+            if (x >= start) && (x < end) {
                 return Some(idx);
             }
         }
@@ -155,6 +142,14 @@ impl OnPaint for UsageChart {
         if !self.is_enabled() {
             let attr = theme.chart.inactive;
             surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
+        } else if self.has_focus() {
+            if let Some(idx) = self.selected_segment {
+                let seg = &self.segments[idx];
+                let (start, end) = seg.range();
+                
+            } else {
+                surface.draw_surface(0, 0, &self.surface);
+            }
         } else {
             surface.draw_surface(0, 0, &self.surface);
         }
@@ -175,7 +170,7 @@ impl OnMouseEvent for UsageChart {
                 EventProcessStatus::Processed
             }
             MouseEvent::Over(point) => {
-                let idx = self.pos_to_segment_index(point.x);
+                let idx = self.pos_to_segment_index(point.x, self.hovered_segment);
                 if idx != self.hovered_segment {
                     self.hovered_segment = idx;
                     self.update_tooltip();
@@ -184,11 +179,16 @@ impl OnMouseEvent for UsageChart {
                     EventProcessStatus::Ignored
                 }
             }
-            MouseEvent::Pressed(mouse_event_data) => todo!(),
-            MouseEvent::Released(mouse_event_data) => todo!(),
-            MouseEvent::DoubleClick(mouse_event_data) => todo!(),
-            MouseEvent::Drag(mouse_event_data) => todo!(),
-            MouseEvent::Wheel(mouse_wheel_direction) => todo!(),
+            MouseEvent::Pressed(ed) => {
+                let idx = self.pos_to_segment_index(ed.x, self.selected_segment);
+                if idx != self.selected_segment {
+                    self.selected_segment = idx;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            _ => EventProcessStatus::Ignored
         }
     }
 }
