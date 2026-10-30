@@ -126,7 +126,9 @@ impl UsageChart {
             }
         }
         for (idx, seg) in self.segments.iter().enumerate() {
-            if x < seg.poz { break; }
+            if x < seg.poz {
+                break;
+            }
             let r = seg.poz + seg.len as i32;
             if (x >= seg.poz) && (x < r) {
                 return Some(idx);
@@ -137,7 +139,11 @@ impl UsageChart {
     fn update_tooltip(&self) {
         if let Some(idx) = self.hovered_segment {
             let seg = &self.segments[idx];
-            let tooltip = format!("{}: {}", seg.label, seg.value);
+            let tooltip = if seg.label.is_empty() {
+                format!("{}", seg.value)
+            } else {
+                format!("{}: {}", seg.label, seg.value)
+            };
             self.show_tooltip_on_point(&tooltip, seg.poz + seg.len as i32 / 2, self.surface.size().height as i32 / 2);
         } else {
             self.hide_tooltip();
@@ -146,7 +152,12 @@ impl UsageChart {
 }
 impl OnPaint for UsageChart {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
-        surface.draw_surface(0, 0, &self.surface);
+        if !self.is_enabled() {
+            let attr = theme.chart.inactive;
+            surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
+        } else {
+            surface.draw_surface(0, 0, &self.surface);
+        }
     }
 }
 impl OnResize for UsageChart {
