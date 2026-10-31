@@ -1,7 +1,7 @@
 use super::{Flags, Segment, SegmentFillType, SortType, TotalUsage};
 use appcui_proc_macro::CustomControl;
 
-#[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent, internal = true)]
+#[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnKeyPressed, internal = true)]
 pub struct UsageChart {
     flags: Flags,
     segments: Vec<Segment>,
@@ -136,6 +136,47 @@ impl UsageChart {
             self.hide_tooltip();
         }
     }
+    fn goto_segment_by(&mut self, forward: bool) {
+        if self.segments.is_empty() {
+            self.selected_segment = None;
+            return;
+        }
+        let mut pos = if let Some(idx) = self.selected_segment {
+            idx
+        } else {
+            if forward {
+                // so that next will be 0
+                self.segments.len().saturating_sub(1)
+            } else {
+                // so the previous will be the last
+                0
+            }
+        };
+        let mut count = 0;
+        loop {
+            if forward {
+                pos += 1;
+                if pos >= self.segments.len() {
+                    pos = 0;
+                }
+            } else {
+                if pos == 0 {
+                    pos = self.segments.len().saturating_sub(1);
+                } else {
+                    pos -= 1;
+                }
+            };
+            if self.segments[pos].len > 0 {
+                break;
+            }
+            count += 1;
+            if count >= self.segments.len() {
+                self.selected_segment = None;
+                return;
+            }
+        }
+        self.selected_segment = Some(pos);
+    }
 }
 impl OnPaint for UsageChart {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
@@ -196,6 +237,29 @@ impl OnMouseEvent for UsageChart {
                 let idx = self.pos_to_segment_index(ed.x, self.selected_segment);
                 if idx != self.selected_segment {
                     self.selected_segment = idx;
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
+            }
+            _ => EventProcessStatus::Ignored,
+        }
+    }
+}
+impl OnKeyPressed for UsageChart {
+    fn on_key_pressed(&mut self, key: Key, _: char) -> EventProcessStatus {
+        match key.code {
+            KeyCode::Left => {
+                self.goto_segment_by(false);
+                EventProcessStatus::Processed
+            }
+            KeyCode::Right => {
+                self.goto_segment_by(true);
+                EventProcessStatus::Processed
+            }
+            KeyCode::Escape => {
+                if self.selected_segment.is_some() {
+                    self.selected_segment = None;
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
