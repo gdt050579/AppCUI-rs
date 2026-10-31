@@ -333,47 +333,46 @@ impl OnPaint for UsageChart {
         if !self.is_enabled() {
             let attr = theme.chart.inactive;
             surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
-        } else if self.has_focus() {
-            if let Some(idx) = self.selected_segment {
-                let seg = &self.segments[idx];
-                let (start, end) = seg.range();
-                let sz = self.size();
-                let right_most = ((sz.width as i32) - 1).max(0);
-                let bottom_most = ((sz.height as i32) - 1).max(0);
-                let r = Rect::new((start - 1).max(0), 0, end.min(right_most), bottom_most);
-                if self.flags.contains(Flags::DimSegmentsOnSelection) {
-                    let attr = theme.chart.inactive;
-                    surface.draw_surface_with_transform(0, 0, &self.surface, |ch, p| {
-                        if (p.x < start) || (p.x >= end) {
-                            Some(Character::with_attributes(ch.code, attr))
-                        } else {
-                            Some(ch)
-                        }
-                    });
+            return;
+        }
+        // the selection stays visible after the chart loses the focus, as in the bar and line charts
+        let Some(idx) = self.selected_segment else {
+            surface.draw_surface(0, 0, &self.surface);
+            return;
+        };
+        let seg = &self.segments[idx];
+        let (start, end) = seg.range();
+        let sz = self.size();
+        let right_most = ((sz.width as i32) - 1).max(0);
+        let bottom_most = ((sz.height as i32) - 1).max(0);
+        let r = Rect::new((start - 1).max(0), 0, end.min(right_most), bottom_most);
+        if self.flags.contains(Flags::DimSegmentsOnSelection) {
+            let attr = theme.chart.inactive;
+            surface.draw_surface_with_transform(0, 0, &self.surface, |ch, p| {
+                if (p.x < start) || (p.x >= end) {
+                    Some(Character::with_attributes(ch.code, attr))
                 } else {
-                    surface.draw_surface(0, 0, &self.surface);
+                    Some(ch)
                 }
-                match r.height() {
-                    0 => {}
-                    1 => {
-                        surface.write_char(r.left(), 0, Character::with_attributes('[', theme.chart.selection_border));
-                        surface.write_char(r.right(), 0, Character::with_attributes(']', theme.chart.selection_border));
-                    }
-                    2 => {
-                        surface.write_char(r.left(), 0, Character::with_attributes('┌', theme.chart.selection_border));
-                        surface.write_char(r.left(), 1, Character::with_attributes('└', theme.chart.selection_border));
-                        surface.write_char(r.right(), 0, Character::with_attributes('┐', theme.chart.selection_border));
-                        surface.write_char(r.right(), 1, Character::with_attributes('┘', theme.chart.selection_border));
-                    }
-                    _ => {
-                        surface.draw_rect(r, LineType::Single, theme.chart.selection_border);
-                    }
-                }
-            } else {
-                surface.draw_surface(0, 0, &self.surface);
-            }
+            });
         } else {
             surface.draw_surface(0, 0, &self.surface);
+        }
+        match r.height() {
+            0 => {}
+            1 => {
+                surface.write_char(r.left(), 0, Character::with_attributes('[', theme.chart.selection_border));
+                surface.write_char(r.right(), 0, Character::with_attributes(']', theme.chart.selection_border));
+            }
+            2 => {
+                surface.write_char(r.left(), 0, Character::with_attributes('┌', theme.chart.selection_border));
+                surface.write_char(r.left(), 1, Character::with_attributes('└', theme.chart.selection_border));
+                surface.write_char(r.right(), 0, Character::with_attributes('┐', theme.chart.selection_border));
+                surface.write_char(r.right(), 1, Character::with_attributes('┘', theme.chart.selection_border));
+            }
+            _ => {
+                surface.draw_rect(r, LineType::Single, theme.chart.selection_border);
+            }
         }
     }
 }
