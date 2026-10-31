@@ -13,6 +13,18 @@ fn in_app(test: impl FnOnce() + 'static) {
 }
 
 #[test]
+fn check_add_segments() {
+    in_app(|| {
+        let mut c = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+        c.add_segments([10u64, 30, 20]);
+        c.add_segments([usagechart::SegmentBuilder::new().value(5).label("cache").build()]);
+        assert_eq!(c.segments.iter().map(|s| s.value).collect::<Vec<_>>(), vec![10, 30, 20, 5]);
+        assert_eq!(c.segments[3].label.as_str(), "cache");
+        assert_eq!(c.segments.iter().map(|s| s.order).collect::<Vec<_>>(), vec![0, 1, 2, 3]);
+    });
+}
+
+#[test]
 fn check_macro_defaults() {
     in_app(|| {
         let c = usagechart!("d:f");

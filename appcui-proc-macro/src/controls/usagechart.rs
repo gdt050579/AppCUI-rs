@@ -94,17 +94,19 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
         let Some(list) = cb.get_list("segments") else {
             panic!("Parameter 'segments' in usagechart must be a list of segments: segments: [10, {{20, 'Label', fill: Grid}}, ...] !");
         };
-        let mut code = String::with_capacity(96 * list.len());
+        let mut items = Vec::with_capacity(list.len());
         for item in list.iter_mut() {
             if let Some(d) = item.get_dict() {
-                code.push_str(&parse_segment_from_dict(d, &param_list));
+                items.push(parse_segment_from_dict(d, &param_list));
             } else if item.is_list() {
                 panic!("Invalid segments format - a segment must be a number or a dictionary {{value, label: 'text', fill: Solid, attr: red}} !");
             } else {
-                code.push_str(&format!("control.add_segment({});\n", parse_u64(item.get_string(), "segments")));
+                items.push(format!("usagechart::Segment::from({})", parse_u64(item.get_string(), "segments")));
             }
         }
-        cb.add_line(&code);
+        if !items.is_empty() {
+            cb.add_line(&format!("control.add_segments([{}]);", items.join(", ")));
+        }
     }
     if cb.has_parameter("selected") {
         let value = cb
@@ -197,7 +199,7 @@ fn parse_segment_from_dict(dict: &mut NamedParamsMap, param_list: &str) -> Strin
         Some(v) => parse_u64(v.get_string(), "value"),
         None => panic!("Invalid segments format - missing 'value' ! Expected {{value, label: 'text', fill: Solid, attr: red}}"),
     };
-    let mut code = format!("control.add_segment(usagechart::SegmentBuilder::new().value({value})");
+    let mut code = format!("usagechart::SegmentBuilder::new().value({value})");
     if let Some(v) = dict.get("label") {
         let label = v.get_string();
         code.push_str(&format!(".label({label:?})"));
@@ -217,6 +219,6 @@ fn parse_segment_from_dict(dict: &mut NamedParamsMap, param_list: &str) -> Strin
     if let Some(attr) = attr {
         code.push_str(&format!(".attr({attr})"));
     }
-    code.push_str(".build());\n");
+    code.push_str(".build()");
     code
 }

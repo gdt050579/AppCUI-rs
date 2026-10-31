@@ -32,11 +32,35 @@ impl UsageChart {
         me.update_surface_content();
         me
     }
+    /// Appends a segment and repaints the chart.
+    ///
+    /// The segment may be a `u64` (also `u8`, `u16` or `u32`) or a [`Segment`].
     pub fn add_segment<T: Into<Segment>>(&mut self, segment: T) {
-        let mut segment = segment.into();
-        // `SortType::None` sorts by this, so it stays the order segments were added in
-        segment.order = self.segments.len() as u16;
-        self.segments.push(segment);
+        self.add_segments([segment]);
+    }
+    /// Appends several segments and repaints the chart once.
+    ///
+    /// Each item may be a `u64` (also `u8`, `u16` or `u32`) or a [`Segment`].
+    /// [`SortType::None`](super::SortType::None) keeps the order of this list.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+    /// chart.add_segments([10u64, 20, 30]);
+    /// ```
+    pub fn add_segments<T, I>(&mut self, segments: I)
+    where
+        T: Into<Segment>,
+        I: IntoIterator<Item = T>,
+    {
+        let start = self.segments.len();
+        self.segments.extend(segments.into_iter().enumerate().map(|(index, segment)| {
+            let mut segment = segment.into();
+            segment.order = (start + index) as u16;
+            segment
+        }));
         self.update_surface_content();
     }
     pub fn set_total_usage(&mut self, total_usage: TotalUsage) {
