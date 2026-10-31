@@ -173,6 +173,7 @@ impl<T> GenericVBarChartEvents for ModalWindow<T> {}
 impl<T> GenericHBarChartEvents for ModalWindow<T> {}
 impl<T> PieChartEvents for ModalWindow<T> {}
 impl<T> GenericLineChartEvents for ModalWindow<T> {}
+impl<T> UsageChartEvents for ModalWindow<T> {}
 impl<T> OnDefaultAction for ModalWindow<T> {}
 impl<T> WindowControl for ModalWindow<T> {}
 impl<T> OnExpand for ModalWindow<T> {}

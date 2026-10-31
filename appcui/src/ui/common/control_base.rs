@@ -4,6 +4,7 @@ use crate::graphics::*;
 use crate::input::*;
 use crate::prelude::colorpicker::events::ColorPickerEvents;
 use crate::prelude::piechart::events::PieChartEvents;
+use crate::prelude::usagechart::events::UsageChartEvents;
 use crate::system::Theme;
 use crate::system::ThemeMethods;
 use crate::system::Timer;
@@ -708,6 +709,7 @@ impl GenericMenuEvents for ControlBase {}
 impl ButtonEvents for ControlBase {}
 impl ColorPickerEvents for ControlBase {}
 impl PieChartEvents for ControlBase {}
+impl UsageChartEvents for ControlBase {}
 impl CheckBoxEvents for ControlBase {}
 impl WindowEvents for ControlBase {}
 impl ToolBarEvents for ControlBase {}

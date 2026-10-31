@@ -48,6 +48,7 @@ use crate::{
         hbarchart::events::GenericHBarChartEvents,
         piechart::events::PieChartEvents,
         linechart::events::GenericLineChartEvents,
+        usagechart::events::UsageChartEvents,
     },
 };
 
@@ -269,6 +270,7 @@ pub trait Control:
     + GenericHBarChartEvents
     + PieChartEvents
     + GenericLineChartEvents
+    + UsageChartEvents
 {
 }
 

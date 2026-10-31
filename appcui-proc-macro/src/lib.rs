@@ -119,6 +119,7 @@ pub fn CustomControl(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::UsageChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -195,6 +196,7 @@ pub fn CustomContainer(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::UsageChartEvents, TraitImplementation::DefaultNonOverwritable);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
 
@@ -296,6 +298,7 @@ pub fn Window(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::UsageChartEvents, TraitImplementation::Default);
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::Default);
 
@@ -369,6 +372,7 @@ pub fn ModalWindow(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::Default);
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::Default);
+    config.set(AppCUITrait::UsageChartEvents, TraitImplementation::Default);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -468,6 +472,7 @@ pub fn Desktop(args: TokenStream, input: TokenStream) -> TokenStream {
     config.set(AppCUITrait::GenericHBarChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::PieChartEvents, TraitImplementation::DefaultNonOverwritable);
     config.set(AppCUITrait::GenericLineChartEvents, TraitImplementation::DefaultNonOverwritable);
+    config.set(AppCUITrait::UsageChartEvents, TraitImplementation::DefaultNonOverwritable);
 
     // custom events
     config.set(AppCUITrait::CustomEvents, TraitImplementation::DefaultNonOverwritable);
@@ -3250,4 +3255,83 @@ pub fn linechart(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn piechart(input: TokenStream) -> TokenStream {
     crate::controls::piechart::create(input)
+}
+
+/// Creates a new usage chart.
+/// The format is `usagechart!("attributes")` where the attributes are pairs of key-value, separated by comma.
+///
+/// # Parameters
+/// * `segments`, `values`, or `data` - Initial segments (optional). Each entry is a positive integer (`u64`), or a segment description:
+///   - `{value, label, fill: Solid, attr: red}` (for example `{48, 'OS', fill: CrossHatch, attr: green}`)
+///   - `value` / `val` / `v` - Segment value (required; also the first positional value)
+///   - `label` / `text` / `caption` / `name` - Segment label, shown in the tooltip (also the second positional value)
+///   - `fill` / `fill-type` / `filltype` / `ft` - How the segment is drawn (optional, **Solid** by default). Can be:
+///     **Solid**, **Shade75**, **Shade50**, **Shade25**, **Braille**, **Checkerboard**, **Grid**, **GridDouble** (or **grid-double**),
+///     **CrossHatch** (or **cross-hatch**), **Dashed**, **DiagonalUp** (or **diagonal-up**), **DiagonalDown** (or **diagonal-down**),
+///     **Notched**, **Custom(char)** (for example `Custom('#')` or `Custom(code: 0x2588)`), or a single character such as `'#'`
+///   - `attr` / `attribute` / `charattr` / `color` - Character attribute, using the same syntax as [`charattr!`]. Without it, the segment uses the theme's chart colors
+/// * `flags` - Control flags (optional). Can be:
+///   - **Margins** - Leaves one empty character around the bar
+///   - **DimSegmentsOnSelection** - Draws every segment except the selected one with the inactive chart color
+///   - Combine flags with `+`, `|`, `,`, or as a list: `flags: Margins+DimSegmentsOnSelection`
+/// * `sort`, `sort-type`, `sorttype`, or `order` - How the segments are ordered (optional). Can be:
+///   - **None** - Keeps the order the segments were added in (default)
+///   - **HighestToLowest** or **highest-to-lowest** - Largest value first
+///   - **LowestToHighest** or **lowest-to-highest** - Smallest value first
+///   - **Alphabetical** or **alpha** - By label, A to Z
+///   - **ReverseAlphabetical** or **reverse-alphabetical** - By label, Z to A
+/// * `total`, `total-usage`, or `totalusage` - What the segments are a part of (optional). Can be:
+///   - **Auto** - The total is the sum of the segments (default). The bar is always full
+///   - **Fixed(n)**, **fix(n)**, or a positive integer - The total is `n`. Space not covered by a segment stays empty
+/// * `numeric-format` or `nf` - Format for the values in tooltips (optional), using the same syntax as [`numericformat!`]
+/// * `content`, `label-content`, or `lc` - What the tooltip shows (optional). Can be:
+///   - **Value** - The formatted value
+///   - **Label** - The segment label
+///   - **Percentage** or **percent** - The segment's share of the total usage, with two decimals (for example `18.75%`)
+///   - **LabelAndValue** (or **label-and-value**, **label+value**) - `label: value`, or just the value when the label is empty. This is the default
+///   - **LabelAndPercentage** (or **label-and-percentage**, **label+percentage**) - `label: percentage`, or just the percentage when the label is empty
+/// * `selected`, `select`, or `selected-segment` - The index of the segment that is selected (optional).
+///   The index is the position after sorting
+/// * Position and size:
+///   - `x`, `y` - Position coordinates
+///   - `width`/`w`, `height`/`h` - Control dimensions
+/// * Layout:
+///   - `align`/`a` - Alignment: Left, Right, Top, Bottom, Center, etc.
+///   - `dock`/`d` - Docking: Left, Right, Top, Bottom, Center, etc.
+/// * Margins: `left`/`l`, `right`/`r`, `top`/`t`, `bottom`/`b`
+/// * State: `enabled`, `visible`
+///
+/// # Examples
+/// ```rust,compile_fail
+/// use appcui::prelude::*;
+///
+/// // Three segments that fill the parent
+/// let chart = usagechart!("d:f, segments: [10, 20, 30]");
+///
+/// // A 256 GB drive, with the free space left empty
+/// let chart = usagechart!(
+///     "d:f,
+///     flags: Margins+DimSegmentsOnSelection,
+///     total: Fixed(256),
+///     sort: HighestToLowest,
+///     nf: {dec, suffix: ' GB'},
+///     segments: [
+///         {48, 'OS', fill: Solid, attr: green},
+///         {36, 'Apps', fill: CrossHatch},
+///         {22, label: 'Docs', fill: Grid, color: yellow}
+///     ]"
+/// );
+///
+/// // Alphabetical labels, with the first segment selected
+/// let chart = usagechart!(
+///     "x:1, y:1, w:40, h:3,
+///     flags: Margins,
+///     sort: alpha,
+///     selected: 0,
+///     values: [{10, 'Cache'}, {20, 'Media'}, {5, fill: Custom('#'), name: 'Other'}]"
+/// );
+/// ```
+#[proc_macro]
+pub fn usagechart(input: TokenStream) -> TokenStream {
+    crate::controls::usagechart::create(input)
 }
