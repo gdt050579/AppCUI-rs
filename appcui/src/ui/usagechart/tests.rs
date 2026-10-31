@@ -155,6 +155,158 @@ fn check_macro_flags_and_selection() {
 }
 
 #[test]
+fn check_example_chart_hover_and_keyboard() {
+    // the 256 GB drive from the usage chart example, on a 70x10 screen
+    // client area is 68x8, so the bar (with margins) is 66 cells wide:
+    // OS 12, Apps 9, Documents 5, Media 5, Cache 2, and the rest stays free
+    let script = "
+        Paint.Enable(false)
+        Paint('0. nothing selected')
+        CheckHash(0x9B1E31EC5AC910D1)
+        Mouse.Move(8,5)
+        Paint('1. hover OS')
+        CheckHash(0x689E405BE1B2D465)
+        Mouse.Move(10,5)
+        Paint('2. hover OS again, tooltip stays on the segment')
+        CheckHash(0x689E405BE1B2D465)
+        Mouse.Move(18,5)
+        Paint('3. hover Apps')
+        CheckHash(0x97F7C322A50EE01B)
+        Mouse.Move(25,5)
+        Paint('4. hover Documents')
+        CheckHash(0x85407C160A33B511)
+        Mouse.Move(30,5)
+        Paint('5. hover Media')
+        CheckHash(0x67472A703AA1602E)
+        Mouse.Move(34,5)
+        Paint('6. hover Cache')
+        CheckHash(0x2980EEA1D939AA67)
+        Mouse.Move(52,5)
+        Paint('7. hover the free space')
+        CheckHash(0x9B1E31EC5AC910D1)
+        Mouse.Move(0,0)
+        Paint('8. mouse left the chart')
+        CheckHash(0x9B1E31EC5AC910D1)
+        Key.Pressed(Right)
+        Paint('9. Right: OS selected')
+        CheckHash(0x9932E532AA19AF11)
+        Key.Pressed(Right)
+        Paint('10. Right: Apps selected')
+        CheckHash(0x25E88D42D2D89BCD)
+        Key.Pressed(Right)
+        Paint('11. Right: Documents selected')
+        CheckHash(0x89BCB7CFB9736615)
+        Key.Pressed(Right)
+        Paint('12. Right: Media selected')
+        CheckHash(0xBCFAAE3207F0E189)
+        Key.Pressed(Right)
+        Paint('13. Right: Cache selected')
+        CheckHash(0xA30E6474A4321251)
+        Key.Pressed(Right)
+        Paint('14. Right: OS selected again')
+        CheckHash(0x9932E532AA19AF11)
+        Key.Pressed(Left)
+        Paint('15. Left: Cache selected')
+        CheckHash(0xA30E6474A4321251)
+        Key.Pressed(Escape)
+        Paint('16. Escape: nothing selected')
+        CheckHash(0x9B1E31EC5AC910D1)
+    ";
+    App::new()
+        .size(Size::new(70, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("'Usage chart',d:f");
+            w.add(usagechart!(
+                "d:f, flags: Margins+DimSegmentsOnSelection, total: Fixed(256), nf: {dec, suffix: ' GB'}, lc: LabelAndPercentage, segments: [
+                    {48, label: 'OS', fill: Solid},
+                    {36, label: 'Apps', fill: CrossHatch},
+                    {22, label: 'Documents', fill: Grid},
+                    {22, label: 'Media', fill: DiagonalDown},
+                    {8, label: 'Cache', fill: GridDouble}
+                ]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
+fn check_example_chart_hover_and_click() {
+    // same drive as `check_example_chart_hover_and_keyboard`, without dimming,
+    // and with the value (not the percentage) in the tooltip
+    let script = "
+        Paint.Enable(false)
+        Paint('0. nothing selected')
+        CheckHash(0x9B1E31EC5AC910D1)
+        Mouse.Move(8,5)
+        Paint('1. hover OS')
+        CheckHash(0xBD9CC0412FE580E9)
+        Mouse.Move(10,5)
+        Paint('2. hover OS again, tooltip stays on the segment')
+        CheckHash(0xBD9CC0412FE580E9)
+        Mouse.Move(18,5)
+        Paint('3. hover Apps')
+        CheckHash(0xA5E45A258027D982)
+        Mouse.Move(25,5)
+        Paint('4. hover Documents')
+        CheckHash(0x7E2CC8FA01E6ECBB)
+        Mouse.Move(30,5)
+        Paint('5. hover Media')
+        CheckHash(0x3B11A06F2AAFEA98)
+        Mouse.Move(34,5)
+        Paint('6. hover Cache')
+        CheckHash(0xEB3FEF435E65256C)
+        Mouse.Move(52,5)
+        Paint('7. hover the free space')
+        CheckHash(0x9B1E31EC5AC910D1)
+        Mouse.Move(0,0)
+        Paint('8. mouse left the chart')
+        CheckHash(0x9B1E31EC5AC910D1)
+        Mouse.Click(8,5,left)
+        Paint('9. click OS')
+        CheckHash(0xE96C2BA3C23F7801)
+        Mouse.Click(18,5,left)
+        Paint('10. click Apps')
+        CheckHash(0x6E847829C7CF5645)
+        Mouse.Click(25,5,left)
+        Paint('11. click Documents')
+        CheckHash(0xC11A7174A94DD4C5)
+        Mouse.Click(30,5,left)
+        Paint('12. click Media')
+        CheckHash(0x3AF710B09668B545)
+        Mouse.Click(34,5,left)
+        Paint('13. click Cache')
+        CheckHash(0xFD2B9FE8FA59B819)
+        Mouse.Click(8,5,left)
+        Paint('14. click OS again')
+        CheckHash(0xE96C2BA3C23F7801)
+        Mouse.Click(52,5,left)
+        Paint('15. click the free space: nothing selected')
+        CheckHash(0x9B1E31EC5AC910D1)
+    ";
+    App::new()
+        .size(Size::new(70, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("'Usage chart',d:f");
+            w.add(usagechart!(
+                "d:f, flags: Margins, total: Fixed(256), nf: {dec, suffix: ' GB'}, lc: LabelAndValue, segments: [
+                    {48, label: 'OS', fill: Solid},
+                    {36, label: 'Apps', fill: CrossHatch},
+                    {22, label: 'Documents', fill: Grid},
+                    {22, label: 'Media', fill: DiagonalDown},
+                    {8, label: 'Cache', fill: GridDouble}
+                ]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn check_macro_layout_and_state() {
     in_app(|| {
         let c = usagechart!("x:2, y:3, w:30, h:3, enabled: false, visible: false, segments: [1]");
