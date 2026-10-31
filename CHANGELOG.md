@@ -5,6 +5,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
+## [0.5.7] - 2026-10-31
+
+### Added
+- **UsageChart** control: one horizontal bar divided into segments that share a total.
+  Each segment has a `u64` value, a label, a fill (`Solid`, shades, `Braille`, `Checkerboard`,
+  grids, `CrossHatch`, `Dashed`, diagonals, `Notched`, or a custom character) and an optional
+  color. The width of a segment is its share of `TotalUsage` (`Auto`, or a fixed total that
+  leaves the rest of the bar empty). Segments stay in the order they were added, or are sorted
+  by value or by label. Hover tooltips show the label, the value, the percentage, or a
+  combination, with a configurable number format. Also supports `Margins`,
+  `DimSegmentsOnSelection`, selection by mouse or keyboard that stays visible without focus,
+  and the `on_usage_segment_selected` / `on_clear_selection` events. Created with
+  `UsageChart::new` or `usagechart!`.
+- `examples/usagechart` and `examples/usagechart_editor`.
+
 ## [0.5.6] - 2026-10-24
 
 ### Added
@@ -253,6 +268,8 @@ background tasks, dialogs, themes, the layout builder and the gallery. The
 [0.4.0 release notes](https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.4.0) list every pull
 request and its author.
 
+[0.5.7]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.7
+[0.5.6]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.6
 [0.5.5]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.5
 [0.5.4]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.4
 [0.5.3]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.3
