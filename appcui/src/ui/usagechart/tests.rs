@@ -25,6 +25,106 @@ fn check_add_segments() {
 }
 
 #[test]
+fn check_add_segment_from_u8() {
+    in_app(|| {
+        let mut c = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+        c.add_segment(10u8);
+        c.add_segment(20u8);
+        c.add_segment(u8::MAX);
+        assert_eq!(c.segments.iter().map(|s| s.value).collect::<Vec<_>>(), vec![10, 20, u8::MAX as u64]);
+        assert!(c.segments.iter().all(|s| s.label.is_empty() && s.fill_type == usagechart::SegmentFillType::Solid && s.attr.is_none()));
+        assert_eq!(c.segments.iter().map(|s| s.order).collect::<Vec<_>>(), vec![0, 1, 2]);
+    });
+}
+
+#[test]
+fn check_add_segment_from_u16() {
+    in_app(|| {
+        let mut c = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+        c.add_segment(10u16);
+        c.add_segment(20u16);
+        c.add_segment(u16::MAX);
+        assert_eq!(c.segments.iter().map(|s| s.value).collect::<Vec<_>>(), vec![10, 20, u16::MAX as u64]);
+        assert!(c.segments.iter().all(|s| s.label.is_empty() && s.fill_type == usagechart::SegmentFillType::Solid && s.attr.is_none()));
+        assert_eq!(c.segments.iter().map(|s| s.order).collect::<Vec<_>>(), vec![0, 1, 2]);
+    });
+}
+
+#[test]
+fn check_add_segment_from_u32() {
+    in_app(|| {
+        let mut c = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+        c.add_segment(10u32);
+        c.add_segment(20u32);
+        c.add_segment(u32::MAX);
+        assert_eq!(c.segments.iter().map(|s| s.value).collect::<Vec<_>>(), vec![10, 20, u32::MAX as u64]);
+        assert!(c.segments.iter().all(|s| s.label.is_empty() && s.fill_type == usagechart::SegmentFillType::Solid && s.attr.is_none()));
+        assert_eq!(c.segments.iter().map(|s| s.order).collect::<Vec<_>>(), vec![0, 1, 2]);
+    });
+}
+
+#[test]
+fn check_clear() {
+    in_app(|| {
+        let mut c = UsageChart::new(layout!("d:f"), usagechart::Flags::Margins);
+        c.set_label_content(usagechart::LabelContent::Percentage);
+        c.set_sort_type(usagechart::SortType::HighestToLowest);
+        c.set_total_usage(usagechart::TotalUsage::Fixed(100));
+        c.add_segments([10u64, 30, 20]);
+        c.set_selected_segment(Some(0));
+        assert_eq!(c.segments.len(), 3);
+        assert_eq!(c.selected_segment, Some(0));
+        c.clear();
+        assert!(c.segments.is_empty());
+        assert_eq!(c.selected_segment, None);
+        assert_eq!(c.flags, usagechart::Flags::Margins);
+        assert_eq!(c.label_content(), usagechart::LabelContent::Percentage);
+        assert_eq!(c.sort, usagechart::SortType::HighestToLowest);
+        assert_eq!(c.total_usage, usagechart::TotalUsage::Fixed(100));
+        c.add_segment(7u64);
+        assert_eq!((c.segments[0].value, c.segments[0].order), (7, 0));
+    });
+}
+
+#[test]
+fn check_set_flags() {
+    in_app(|| {
+        let mut c = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+        assert_eq!(c.flags, usagechart::Flags::None);
+        c.set_flags(usagechart::Flags::Margins);
+        assert_eq!(c.flags, usagechart::Flags::Margins);
+        c.set_flags(usagechart::Flags::Margins | usagechart::Flags::DimSegmentsOnSelection);
+        assert_eq!(c.flags, usagechart::Flags::Margins | usagechart::Flags::DimSegmentsOnSelection);
+        c.set_flags(usagechart::Flags::Margins | usagechart::Flags::DimSegmentsOnSelection);
+        assert_eq!(c.flags, usagechart::Flags::Margins | usagechart::Flags::DimSegmentsOnSelection);
+        c.set_flags(usagechart::Flags::DimSegmentsOnSelection);
+        assert_eq!(c.flags, usagechart::Flags::DimSegmentsOnSelection);
+        c.set_flags(usagechart::Flags::None);
+        assert_eq!(c.flags, usagechart::Flags::None);
+    });
+}
+
+#[test]
+fn check_label_content() {
+    in_app(|| {
+        let mut c = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+        assert_eq!(c.label_content(), usagechart::LabelContent::LabelAndValue);
+        c.set_label_content(usagechart::LabelContent::Value);
+        assert_eq!(c.label_content(), usagechart::LabelContent::Value);
+        c.set_label_content(usagechart::LabelContent::Label);
+        assert_eq!(c.label_content(), usagechart::LabelContent::Label);
+        c.set_label_content(usagechart::LabelContent::Percentage);
+        assert_eq!(c.label_content(), usagechart::LabelContent::Percentage);
+        c.set_label_content(usagechart::LabelContent::LabelAndPercentage);
+        assert_eq!(c.label_content(), usagechart::LabelContent::LabelAndPercentage);
+        c.set_label_content(usagechart::LabelContent::LabelAndValue);
+        assert_eq!(c.label_content(), usagechart::LabelContent::LabelAndValue);
+        assert_eq!(usagechart!("d:f").label_content(), usagechart::LabelContent::LabelAndValue);
+        assert_eq!(usagechart!("d:f, lc: percentage").label_content(), usagechart::LabelContent::Percentage);
+    });
+}
+
+#[test]
 fn check_macro_defaults() {
     in_app(|| {
         let c = usagechart!("d:f");
@@ -593,6 +693,167 @@ fn check_example_chart_hover_and_click_auto_total_three_rows() {
         })
         .run()
         .unwrap();
+}
+
+#[test]
+fn check_example_chart_disabled() {
+    // same drive as `check_example_chart_hover_and_keyboard`, with the chart disabled.
+    // the bar is painted with the inactive color, and a selected segment draws no border
+    let script = "
+        Paint.Enable(false)
+        Paint('disabled chart')
+        CheckHash(0xCB9C88EFBC32B2F5)
+        Mouse.Move(8,5)
+        Paint('hover does not change a disabled chart')
+        CheckHash(0xCB9C88EFBC32B2F5)
+        Mouse.Click(8,5,left)
+        Paint('click does not change a disabled chart')
+        CheckHash(0xCB9C88EFBC32B2F5)
+    ";
+    App::new()
+        .size(Size::new(70, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("'Usage chart',d:f");
+            w.add(usagechart!(
+                "d:f, enabled: false, selected: 0, flags: Margins+DimSegmentsOnSelection, total: Fixed(256), nf: {dec, suffix: ' GB'}, lc: LabelAndPercentage, segments: [
+                    {48, label: 'OS', fill: Solid},
+                    {36, label: 'Apps', fill: CrossHatch},
+                    {22, label: 'Documents', fill: Grid},
+                    {22, label: 'Media', fill: DiagonalDown},
+                    {8, label: 'Cache', fill: GridDouble}
+                ]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+fn example_drive_chart(content: usagechart::LabelContent) -> UsageChart {
+    let mut c = UsageChart::new(layout!("d:f"), usagechart::Flags::Margins | usagechart::Flags::DimSegmentsOnSelection);
+    c.set_total_usage(usagechart::TotalUsage::Fixed(256));
+    c.set_number_format(FormatNumber::new(10).suffix(" GB"));
+    c.set_label_content(content);
+    c.add_segments([
+        usagechart::SegmentBuilder::new().value(48).label("OS").fill(usagechart::SegmentFillType::Solid).build(),
+        usagechart::SegmentBuilder::new().value(36).label("Apps").fill(usagechart::SegmentFillType::CrossHatch).build(),
+        usagechart::SegmentBuilder::new().value(22).label("Documents").fill(usagechart::SegmentFillType::Grid).build(),
+        usagechart::SegmentBuilder::new().value(22).label("Media").fill(usagechart::SegmentFillType::DiagonalDown).build(),
+        usagechart::SegmentBuilder::new().value(8).label("Cache").fill(usagechart::SegmentFillType::GridDouble).build(),
+    ]);
+    c
+}
+
+fn run_drive_hover(content: usagechart::LabelContent, script: &str) {
+    App::new()
+        .size(Size::new(70, 10))
+        .debug_script(script)
+        .window(move || {
+            let mut w = window!("'Usage chart',d:f");
+            w.add(example_drive_chart(content));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+fn check_label_content_hover(content: usagechart::LabelContent, os: u64, apps: u64, documents: u64, media: u64, cache: u64) {
+    // the bar itself does not depend on the tooltip, so the resting hashes are shared
+    let script = format!(
+        "
+        Paint.Enable(false)
+        Paint('0. nothing hovered')
+        CheckHash(0x9B1E31EC5AC910D1)
+        Mouse.Move(8,5)
+        Paint('1. hover OS')
+        CheckHash(0x{os:X})
+        Mouse.Move(18,5)
+        Paint('2. hover Apps')
+        CheckHash(0x{apps:X})
+        Mouse.Move(25,5)
+        Paint('3. hover Documents')
+        CheckHash(0x{documents:X})
+        Mouse.Move(30,5)
+        Paint('4. hover Media')
+        CheckHash(0x{media:X})
+        Mouse.Move(34,5)
+        Paint('5. hover Cache')
+        CheckHash(0x{cache:X})
+        Mouse.Move(52,5)
+        Paint('6. hover the free space')
+        CheckHash(0x9B1E31EC5AC910D1)
+        Mouse.Move(0,0)
+        Paint('7. mouse left the chart')
+        CheckHash(0x9B1E31EC5AC910D1)
+        "
+    );
+    run_drive_hover(content, &script);
+}
+
+#[test]
+fn check_hover_label_content_value() {
+    // tooltip is the value: "48 GB", "36 GB", "22 GB", "22 GB", "8 GB"
+    check_label_content_hover(
+        usagechart::LabelContent::Value,
+        0x1DD8018C79FD3C1F,
+        0x182337E3066C9942,
+        0xEEB8810F13F3D7C8,
+        0x6AD82145BC7D7E93,
+        0x1EC4B7E9BEE3D71C,
+    );
+}
+
+#[test]
+fn check_hover_label_content_label() {
+    // tooltip is the label: "OS", "Apps", "Documents", "Media", "Cache"
+    check_label_content_hover(
+        usagechart::LabelContent::Label,
+        0x43BC9D6ECBB66B2E,
+        0x2739B2E3964DFE60,
+        0x2FEB7670F488FFDD,
+        0x4C83076B31E3CE2E,
+        0x8032FD47AE067889,
+    );
+}
+
+#[test]
+fn check_hover_label_content_percentage() {
+    // tooltip is the share of 256 GB: "18.75%", "14.06%", "8.59%", "8.59%", "3.13%"
+    check_label_content_hover(
+        usagechart::LabelContent::Percentage,
+        0xDF0AFBD3A778F59F,
+        0x47D3483A76FE470D,
+        0xCB5EA809FB090C36,
+        0x67002B23677C9661,
+        0x8C7D3CFDE44A74DE,
+    );
+}
+
+#[test]
+fn check_hover_label_content_label_and_value() {
+    // tooltip is "OS: 48 GB", "Apps: 36 GB", "Documents: 22 GB", "Media: 22 GB", "Cache: 8 GB"
+    check_label_content_hover(
+        usagechart::LabelContent::LabelAndValue,
+        0xBD9CC0412FE580E9,
+        0xA5E45A258027D982,
+        0x7E2CC8FA01E6ECBB,
+        0x3B11A06F2AAFEA98,
+        0xEB3FEF435E65256C,
+    );
+}
+
+#[test]
+fn check_hover_label_content_label_and_percentage() {
+    // tooltip is "OS: 18.75%", "Apps: 14.06%", "Documents: 8.59%", "Media: 8.59%", "Cache: 3.13%"
+    check_label_content_hover(
+        usagechart::LabelContent::LabelAndPercentage,
+        0x689E405BE1B2D465,
+        0x97F7C322A50EE01B,
+        0x85407C160A33B511,
+        0x67472A703AA1602E,
+        0x2980EEA1D939AA67,
+    );
 }
 
 #[test]
