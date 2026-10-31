@@ -48,14 +48,12 @@ fn visual_order(segments: &[SegmentItem], sort: SortType) -> Vec<usize> {
     order
 }
 
-#[Window(events = [UsageChartEvents, WindowEvents, ComboBoxEvents, CheckBoxEvents, ColorPickerEvents, CharPickerEvents, NumericSelectorEvents<u64>, TextFieldEvents, ButtonEvents, ListViewEvents<SegmentItem>])]
+#[Window(events = [UsageChartEvents, ComboBoxEvents, CheckBoxEvents, ColorPickerEvents, CharPickerEvents, NumericSelectorEvents<u64>, TextFieldEvents, ButtonEvents, ListViewEvents<SegmentItem>])]
 struct UsageChartExample {
     chart: Handle<UsageChart>,
-    chart_host: Handle<Panel>,
     pages: Handle<Accordion>,
     // chart settings
     sort: Handle<ComboBox>,
-    height: Handle<ComboBox>,
     total_kind: Handle<ComboBox>,
     total_value_label: Handle<Label>,
     total_value: Handle<NumericSelector<u64>>,
@@ -97,10 +95,8 @@ impl UsageChartExample {
         let mut win = Self {
             base: window!("'Usage chart example',d:f"),
             chart: Handle::None,
-            chart_host: Handle::None,
             pages: Handle::None,
             sort: Handle::None,
-            height: Handle::None,
             total_kind: Handle::None,
             total_value_label: Handle::None,
             total_value: Handle::None,
@@ -130,7 +126,7 @@ impl UsageChartExample {
             loading: false,
         };
 
-        let mut splitter = vsplitter!("pos:65%,d:f,resize:PreserveRightPanelSize,min-left-width:30,min-right-width:36");
+        let mut splitter = vsplitter!("pos:35%,d:f,resize:PreserveLeftPanelSize,min-left-width:36,min-right-width:30,flags:MergeBorders");
 
         let samples = sample_segments();
         let mut chart = UsageChart::new(layout!("d:f"), usagechart::Flags::Margins | usagechart::Flags::DimSegmentsOnSelection);
@@ -138,12 +134,8 @@ impl UsageChartExample {
         chart.set_label_content(LabelContent::LabelAndPercentage);
         chart.set_number_format(FormatNumber::new(10).group(3, b',').suffix(" GB"));
         chart.add_segments(samples.iter().map(SegmentItem::to_segment));
-        // the page is the chart's parent, so a fixed height leaves the rest of the left side empty
-        let mut host = panel!("'',d:f,type:Page");
-        win.chart = host.add(chart);
-        win.chart_host = splitter.add(vsplitter::Panel::Left, host);
 
-        let mut pages = accordion!("d:f,panels:['&Chart Settings','&Tooltip','Selected Se&gment','Da&ta']");
+        let mut pages = accordion!("d:f,panels:['&Chart Settings','&Tooltip','Selected Se&gment']");
 
         // chart settings
         pages.add(0, label!("'Sort',l:1,t:1,r:1,h:1"));
@@ -153,14 +145,12 @@ impl UsageChartExample {
         }
         sort.set_index(0);
         win.sort = pages.add(0, sort);
-        pages.add(0, label!("'Height',l:1,t:4,r:1,h:1"));
-        win.height = pages.add(0, combobox!("l:1,t:5,r:1,items:[Fill],index:0"));
-        pages.add(0, label!("'Total',l:1,t:7,r:1,h:1"));
-        win.total_kind = pages.add(0, combobox!("l:1,t:8,r:1,items:[Auto,Fixed],index:1"));
-        win.total_value_label = pages.add(0, label!("'Value',l:1,t:10,r:1,h:1"));
-        win.total_value = pages.add(0, numericselector!("u64,256,0,1000000,1,l:1,t:11,r:1"));
-        win.margins = pages.add(0, checkbox!("'Margins',l:1,t:13,r:1,checked:true"));
-        win.dim = pages.add(0, checkbox!("'Dim unselected segments',l:1,t:15,r:1,checked:true"));
+        pages.add(0, label!("'Total',l:1,t:4,r:1,h:1"));
+        win.total_kind = pages.add(0, combobox!("l:1,t:5,r:1,items:[Auto,Fixed],index:1"));
+        win.total_value_label = pages.add(0, label!("'Value',l:1,t:7,r:1,h:1"));
+        win.total_value = pages.add(0, numericselector!("u64,256,0,1000000,1,l:1,t:8,r:1"));
+        win.margins = pages.add(0, checkbox!("'Margins',l:1,t:10,r:1,checked:true"));
+        win.dim = pages.add(0, checkbox!("'Dim unselected segments',l:1,t:12,r:1,checked:true"));
 
         // tooltip
         pages.add(1, label!("'Content',l:1,t:1,r:1,h:1"));
@@ -207,19 +197,25 @@ impl UsageChartExample {
         win.segment_delete = editor.add(button!("'&Delete segment',l:1,b:0,w:18"));
         win.editor_panel = pages.add(2, editor);
 
-        // data
-        pages.add(3, label!("'Default value (for new segments)',l:1,t:1,r:1,h:1"));
-        win.default_value = pages.add(3, numericselector!("u64,10,0,1000000,1,l:1,t:2,r:1"));
+        // data sits under the chart; dragging the bar between them changes the chart height
+        let mut data = panel!("'',d:f,type:Page");
+        data.add(label!("'Default value (for new segments)',l:1,t:1,r:1,h:1"));
+        win.default_value = data.add(numericselector!("u64,10,0,1000000,1,l:1,t:2,r:1"));
         let mut segments_panel = panel!("'Segments',l:1,t:4,r:1,b:3");
         let mut segments = listview!("class: SegmentItem,d:f,flags:ScrollBars");
         segments.add_items(samples);
         win.segments = segments_panel.add(segments);
-        pages.add(3, segments_panel);
-        win.segments_add = pages.add(3, button!("'&Add',l:1,b:0,w:8"));
-        win.segments_delete = pages.add(3, button!("'&Del',l:10,b:0,w:8"));
-        win.segments_clear = pages.add(3, button!("'&Clear',l:19,b:0,w:8"));
+        data.add(segments_panel);
+        win.segments_add = data.add(button!("'&Add',l:1,b:0,w:8"));
+        win.segments_delete = data.add(button!("'&Del',l:10,b:0,w:8"));
+        win.segments_clear = data.add(button!("'&Clear',l:19,b:0,w:8"));
 
-        win.pages = splitter.add(vsplitter::Panel::Right, pages);
+        let mut rows = hsplitter!("pos:40%,d:f,resize:PreserveBottomPanelSize,mth:3,mbh:8,flags:MergeBorders");
+        win.chart = rows.add(hsplitter::Panel::Top, chart);
+        rows.add(hsplitter::Panel::Bottom, data);
+
+        win.pages = splitter.add(vsplitter::Panel::Left, pages);
+        splitter.add(vsplitter::Panel::Right, rows);
         win.add(splitter);
         win
     }
@@ -271,75 +267,6 @@ impl UsageChartExample {
 
     // ---- chart settings -----------------------------------------------------------------
 
-    fn margins_enabled(&self) -> bool {
-        self.control(self.margins).is_some_and(|check| check.is_checked())
-    }
-
-    /// Smallest height the chart can take: margins need two extra rows around the bar.
-    fn min_chart_height(&self) -> u16 {
-        if self.margins_enabled() { 3 } else { 1 }
-    }
-
-    fn apply_height(&mut self) {
-        if self.loading {
-            return;
-        }
-        let count = self.control(self.height).map(|combo| combo.count()).unwrap_or(0);
-        let index = self.combo_index(self.height);
-        let layout = if count == 0 || index + 1 >= count {
-            layout!("d:f")
-        } else {
-            let height = self.min_chart_height() + index as u16;
-            LayoutBuilder::new().dock(Dock::Top).height(height).build()
-        };
-        let margins = self.margins_enabled();
-        // update_layout clears the size bounds, so they are put back the way the chart sets them
-        self.update_chart(|chart| {
-            chart.update_layout(layout);
-            if margins {
-                chart.set_size_bounds(3, 3, u16::MAX, u16::MAX);
-            } else {
-                chart.set_size_bounds(3, 1, u16::MAX, u16::MAX);
-            }
-        });
-    }
-
-    /// Lists every height from the minimum (1, or 3 when margins are on) up to the parent. Fill is last and keeps tracking the parent.
-    fn refresh_height_choices(&mut self, parent_height: u16) {
-        if parent_height == 0 {
-            return;
-        }
-        let min_height = self.min_chart_height();
-        let numeric = if parent_height >= min_height { (parent_height - min_height + 1) as u32 } else { 0 };
-        let desired = numeric + 1;
-        let count = self.control(self.height).map(|combo| combo.count()).unwrap_or(0);
-        if count == desired {
-            return;
-        }
-        let selected = self.control(self.height).map(|combo| combo.value().to_string()).unwrap_or_default();
-        let selected_height = selected.parse::<u16>().ok();
-        let handle = self.height;
-        self.loading = true;
-        if let Some(combo) = self.control_mut(handle) {
-            combo.clear();
-            if parent_height >= min_height {
-                for value in min_height..=parent_height {
-                    combo.add(&value.to_string());
-                }
-            }
-            combo.add("Fill");
-            let index = match selected_height {
-                Some(height) if parent_height >= min_height => (height.clamp(min_height, parent_height) - min_height) as u32,
-                _ => numeric,
-            };
-            combo.set_index(index);
-        }
-        self.loading = false;
-        if selected_height.is_some_and(|height| height < min_height || height > parent_height) {
-            self.apply_height();
-        }
-    }
-
     fn apply_sort(&mut self) {
         let sort = self.current_sort();
         self.update_chart(|chart| chart.set_sort_type(sort));
@@ -366,8 +293,6 @@ impl UsageChartExample {
             flags |= usagechart::Flags::DimSegmentsOnSelection;
         }
         self.update_chart(|chart| chart.set_flags(flags));
-        let height = u16::try_from(self.client_size().height).unwrap_or(u16::MAX);
-        self.refresh_height_choices(height);
     }
 
     // ---- tooltip --------------------------------------------------------------------------
@@ -624,13 +549,6 @@ impl UsageChartExample {
     }
 }
 
-impl WindowEvents for UsageChartExample {
-    fn on_layout_changed(&mut self, _old_layout: Rect, _new_layout: Rect) {
-        let height = u16::try_from(self.client_size().height).unwrap_or(u16::MAX);
-        self.refresh_height_choices(height);
-    }
-}
-
 impl UsageChartEvents for UsageChartExample {
     fn on_usage_segment_selected(&mut self, _handle: Handle<UsageChart>, index: usize) -> EventProcessStatus {
         self.edit_segment(index);
@@ -657,7 +575,6 @@ impl ComboBoxEvents for UsageChartExample {
         }
         match () {
             _ if handle == self.sort => self.apply_sort(),
-            _ if handle == self.height => self.apply_height(),
             _ if handle == self.total_kind => self.apply_total(),
             _ if handle == self.label_content => self.apply_label_content(),
             _ if handle == self.number_base || handle == self.number_group || handle == self.number_style => self.apply_number_format(),
