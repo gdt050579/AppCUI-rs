@@ -40,6 +40,13 @@ impl UsageChart {
         self.total_usage = total_usage;
         self.update_surface_content();
     }
+    pub fn set_sort_type(&mut self, sort_type: SortType) {
+        self.sort = sort_type;
+        self.update_surface_content();
+    }
+    pub fn set_selected_segment(&mut self, index: Option<usize>) {
+        self.select_segment_internal(index, false);
+    }
     fn recompute_positions(&mut self) {
         let width = (self.surface.size().width as u128).saturating_sub(if self.flags.contains(Flags::Margins) { 2 } else { 0 });
         if width == 0 {
@@ -146,17 +153,19 @@ impl UsageChart {
             }),
         });
     }
-    fn select_segment(&mut self, index: Option<usize>) -> bool {
+    fn select_segment_internal(&mut self, index: Option<usize>, raise_event: bool) -> bool {
         if self.selected_segment == index {
             return false;
         }
         self.selected_segment = index;
-        self.raise_selection_event(index);
+        if raise_event {
+            self.raise_selection_event(index);
+        }
         true
     }
     fn goto_segment_by(&mut self, forward: bool) {
         if self.segments.is_empty() {
-            self.select_segment(None);
+            self.select_segment_internal(None, true);
             return;
         }
         let mut pos = if let Some(idx) = self.selected_segment {
@@ -189,11 +198,11 @@ impl UsageChart {
             }
             count += 1;
             if count >= self.segments.len() {
-                self.select_segment(None);
+                self.select_segment_internal(None, true);
                 return;
             }
         }
-        self.select_segment(Some(pos));
+        self.select_segment_internal(Some(pos), true);
     }
 }
 impl OnPaint for UsageChart {
@@ -253,7 +262,7 @@ impl OnMouseEvent for UsageChart {
             }
             MouseEvent::Pressed(ed) => {
                 let idx = self.pos_to_segment_index(ed.x, self.selected_segment);
-                if self.select_segment(idx) {
+                if self.select_segment_internal(idx, true) {
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
@@ -275,7 +284,7 @@ impl OnKeyPressed for UsageChart {
                 EventProcessStatus::Processed
             }
             KeyCode::Escape => {
-                if self.select_segment(None) {
+                if self.select_segment_internal(None, true) {
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
