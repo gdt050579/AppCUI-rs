@@ -8,15 +8,15 @@ fn main() -> Result<(), appcui::system::Error> {
             win.add(usagechart!(
                 "d:f, 
                 flags: Margins+DimSegmentsOnSelection, 
-                total: Fixed(256), 
+                total: Fixed(168), 
                 nf: {dec, suffix: ' GB'}, 
                 lc: LabelAndPercentage,
                 segments: [
-                    {48, label: 'OS', fill: Solid},
-                    {36, label: 'Apps', fill: CrossHatch},
-                    {22, label: 'Documents', fill: Grid},
-                    {22, label: 'Media', fill: DiagonalDown},
-                    {8, label: 'Cache', fill: GridDouble}
+                    {48, label: 'OS', fill: Solid, color: red},
+                    {36, label: 'Apps', fill: CrossHatch, color: green},
+                    {22, label: 'Documents', fill: Grid, color: blue},
+                    {22, label: 'Media', fill: DiagonalDown, color: yellow},
+                    {8, label: 'Cache', fill: GridDouble, color: magenta}
                 ]"
             ));
             win
