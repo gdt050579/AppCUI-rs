@@ -450,6 +450,10 @@ name = "usagechart"
 path = "usagechart/main.rs"
 
 [[example]]
+name = "usagechart_example"
+path = "usagechart_example/main.rs"
+
+[[example]]
 name = "hexview"
 path = "hexview/main.rs"
 
