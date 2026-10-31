@@ -6,7 +6,11 @@ fn main() -> Result<(), appcui::system::Error> {
             let mut win = window!("'Usage chart',a:c,w:70,h:10,flags:Sizeable");
             // 256 GB drive: OS, apps, documents, media, cache. The rest stays free.
             win.add(usagechart!(
-                "d:f, flags: Margins+DimSegmentsOnSelection, total: Fixed(256), segments: [
+                "d:f, 
+                flags: Margins+DimSegmentsOnSelection, 
+                total: Fixed(256), 
+                nf: {dec, suffix: ' GB'}, 
+                segments: [
                     {48, fill: Solid},
                     {36, fill: CrossHatch},
                     {22, fill: Grid},

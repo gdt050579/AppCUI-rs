@@ -3308,7 +3308,7 @@ pub fn piechart(input: TokenStream) -> TokenStream {
 ///     flags: Margins+DimSegmentsOnSelection,
 ///     total: Fixed(256),
 ///     sort: HighestToLowest,
-///     nf: {dec, suffix: GB},
+///     nf: {dec, suffix: ' GB'},
 ///     segments: [
 ///         {48, 'OS', fill: Solid, attr: green},
 ///         {36, 'Apps', fill: CrossHatch},
