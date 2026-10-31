@@ -6,6 +6,7 @@ mod initialization_flags;
 mod tests;
 
 pub use self::initialization_flags::Flags;
+pub use self::initialization_flags::LabelContent;
 pub use self::initialization_flags::SortType;
 pub use self::initialization_flags::TotalUsage;
 pub use self::usagechart::UsageChart;

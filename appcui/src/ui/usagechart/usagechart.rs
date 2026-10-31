@@ -1,7 +1,10 @@
 use super::events::EventData;
-use super::{Flags, Segment, SortType, TotalUsage};
+use super::{Flags, LabelContent, Segment, SortType, TotalUsage};
 use crate::utils::FormatNumber;
 use appcui_proc_macro::CustomControl;
+
+// hundredths of a percent, so two decimals are exact (see the pie chart)
+const PERCENTAGE_FORMAT: FormatNumber = FormatNumber::new(10).decimals(2).suffix("%");
 
 #[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnKeyPressed, internal = true)]
 pub struct UsageChart {
@@ -11,6 +14,7 @@ pub struct UsageChart {
     pub(super) sort: SortType,
     pub(super) total_usage: TotalUsage,
     pub(super) number_format: FormatNumber,
+    pub(super) label_content: LabelContent,
     hovered_segment: Option<usize>,
     pub(super) selected_segment: Option<usize>,
 }
@@ -24,6 +28,7 @@ impl UsageChart {
             flags,
             total_usage: TotalUsage::Auto,
             number_format: FormatNumber::new(10).group(3, b','),
+            label_content: LabelContent::LabelAndValue,
             hovered_segment: None,
             selected_segment: None,
         };
@@ -89,6 +94,25 @@ impl UsageChart {
         self.number_format = format;
         self.update_tooltip();
     }
+    /// Sets what the hover tooltip of a segment shows.
+    ///
+    /// The default is [`LabelContent::LabelAndValue`].
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+    /// chart.set_label_content(usagechart::LabelContent::Percentage);
+    /// ```
+    pub fn set_label_content(&mut self, content: LabelContent) {
+        self.label_content = content;
+        self.update_tooltip();
+    }
+    /// Returns what the hover tooltip of a segment shows.
+    pub fn label_content(&self) -> LabelContent {
+        self.label_content
+    }
     pub fn set_selected_segment(&mut self, index: Option<usize>) {
         self.select_segment_internal(index, false);
     }
@@ -97,16 +121,7 @@ impl UsageChart {
         if width == 0 {
             return;
         }
-        let total_value = match self.total_usage {
-            TotalUsage::Auto => {
-                let mut v = 0u128;
-                for segment in &self.segments {
-                    v += segment.value as u128;
-                }
-                v
-            }
-            TotalUsage::Fixed(value) => value as u128,
-        };
+        let total_value = self.total_value();
 
         // sort from biggest to smallest
         self.segments.sort_by_key(|segment| u64::MAX - segment.value);
@@ -176,20 +191,55 @@ impl UsageChart {
         }
         None
     }
-    fn update_tooltip(&self) {
-        if let Some(idx) = self.hovered_segment {
-            let seg = &self.segments[idx];
-            let mut buffer = [0u8; 96];
-            let value = self.number_format.write_number(seg.value, &mut buffer).unwrap_or("");
-            let tooltip = if seg.label.is_empty() {
-                value.to_string()
-            } else {
-                format!("{}: {value}", seg.label)
-            };
-            self.show_tooltip_on_point(&tooltip, seg.poz + seg.len as i32 / 2, self.surface.size().height as i32 / 2);
-        } else {
-            self.hide_tooltip();
+    fn total_value(&self) -> u128 {
+        match self.total_usage {
+            TotalUsage::Auto => self.segments.iter().map(|segment| segment.value as u128).sum(),
+            TotalUsage::Fixed(value) => value as u128,
         }
+    }
+    fn percentage_text<'a>(&self, value: u64, buffer: &'a mut [u8]) -> &'a str {
+        let total = self.total_value();
+        let percent = if total == 0 {
+            0
+        } else {
+            u64::try_from(value as u128 * 10_000 / total).unwrap_or(u64::MAX)
+        };
+        PERCENTAGE_FORMAT.write_fraction(percent, 100u64, buffer).unwrap_or("")
+    }
+    fn update_tooltip(&self) {
+        let Some(idx) = self.hovered_segment else {
+            self.hide_tooltip();
+            return;
+        };
+        let seg = &self.segments[idx];
+        let mut value_buffer = [0u8; 96];
+        let mut percentage_buffer = [0u8; 32];
+        let value = self.number_format.write_number(seg.value, &mut value_buffer).unwrap_or("");
+        let percentage = self.percentage_text(seg.value, &mut percentage_buffer);
+        let tooltip = match self.label_content {
+            LabelContent::Label => seg.label.clone(),
+            LabelContent::Value => value.to_string(),
+            LabelContent::LabelAndValue => {
+                if seg.label.is_empty() {
+                    value.to_string()
+                } else {
+                    format!("{}: {value}", seg.label)
+                }
+            }
+            LabelContent::Percentage => percentage.to_string(),
+            LabelContent::LabelAndPercentage => {
+                if seg.label.is_empty() {
+                    percentage.to_string()
+                } else {
+                    format!("{}: {percentage}", seg.label)
+                }
+            }
+        };
+        if tooltip.is_empty() {
+            self.hide_tooltip();
+            return;
+        }
+        self.show_tooltip_on_point(&tooltip, seg.poz + seg.len as i32 / 2, self.surface.size().height as i32 / 2);
     }
     fn raise_selection_event(&self, index: Option<usize>) {
         self.raise_event(ControlEvent {

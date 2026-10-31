@@ -3284,6 +3284,12 @@ pub fn piechart(input: TokenStream) -> TokenStream {
 ///   - **Auto** - The total is the sum of the segments (default). The bar is always full
 ///   - **Fixed(n)**, **fix(n)**, or a positive integer - The total is `n`. Space not covered by a segment stays empty
 /// * `numeric-format` or `nf` - Format for the values in tooltips (optional), using the same syntax as [`numericformat!`]
+/// * `content`, `label-content`, or `lc` - What the tooltip shows (optional). Can be:
+///   - **Value** - The formatted value
+///   - **Label** - The segment label
+///   - **Percentage** or **percent** - The segment's share of the total usage, with two decimals (for example `18.75%`)
+///   - **LabelAndValue** (or **label-and-value**, **label+value**) - `label: value`, or just the value when the label is empty. This is the default
+///   - **LabelAndPercentage** (or **label-and-percentage**, **label+percentage**) - `label: percentage`, or just the percentage when the label is empty
 /// * `selected`, `select`, or `selected-segment` - The index of the segment that is selected (optional).
 ///   The index is the position after sorting
 /// * Position and size:

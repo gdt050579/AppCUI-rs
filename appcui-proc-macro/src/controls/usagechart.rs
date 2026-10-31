@@ -19,6 +19,19 @@ static SORTS: &[(&str, &str)] = &[
 
 static TOTALS: &[(&str, &str)] = &[("Auto", "auto"), ("Fixed", "fixed"), ("Fixed", "fix")];
 
+static LABEL_CONTENTS: &[(&str, &str)] = &[
+    ("Value", "value"),
+    ("Label", "label"),
+    ("Percentage", "percentage"),
+    ("Percentage", "percent"),
+    ("LabelAndValue", "labelandvalue"),
+    ("LabelAndValue", "label-and-value"),
+    ("LabelAndValue", "label+value"),
+    ("LabelAndPercentage", "labelandpercentage"),
+    ("LabelAndPercentage", "label-and-percentage"),
+    ("LabelAndPercentage", "label+percentage"),
+];
+
 static FILLS: &[(&str, &str)] = &[
     ("Solid", "solid"),
     ("Shade75", "shade75"),
@@ -80,6 +93,9 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("selected-segment", "selected", ParamType::Integer),
     NamedParameter::new("numeric-format", "numeric-format", ParamType::String),
     NamedParameter::new("nf", "numeric-format", ParamType::String),
+    NamedParameter::new("label-content", "label-content", ParamType::String),
+    NamedParameter::new("content", "label-content", ParamType::String),
+    NamedParameter::new("lc", "label-content", ParamType::String),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
@@ -90,6 +106,9 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.finish_control_initialization();
     cb.call_method_with_string_parameter_parser("set_sort_type", "sort", parse_sort);
     cb.call_method_with_string_parameter_parser("set_total_usage", "total", parse_total);
+    cb.call_method_with_string_parameter_parser("set_label_content", "label-content", |repr| {
+        format!("usagechart::LabelContent::{}", find("label-content", LABEL_CONTENTS, repr))
+    });
     if cb.has_parameter("numeric-format") {
         let str_repr = String::from(cb.get_string_representation());
         let tmp = if let Some(d) = cb.get_dict("numeric-format") {
