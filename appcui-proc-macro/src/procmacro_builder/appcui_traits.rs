@@ -66,6 +66,7 @@ pub(crate) enum AppCUITrait {
     GenericHBarChartEvents = 57,
     PieChartEvents = 58,
     GenericLineChartEvents = 59,
+    UsageChartEvents = 60,
 }
 
 #[repr(u8)]
@@ -142,6 +143,7 @@ impl AppCUITrait {
             AppCUITrait::GenericHBarChartEvents => "HBarChartEvents",
             AppCUITrait::PieChartEvents => "PieChartEvents",
             AppCUITrait::GenericLineChartEvents => "LineChartEvents",
+            AppCUITrait::UsageChartEvents => "UsageChartEvents",
         }
     }
     pub(crate) fn trait_type(&self) -> TraitType {
@@ -209,6 +211,7 @@ impl AppCUITrait {
             AppCUITrait::GenericHBarChartEvents => TraitType::ControlEvent,
             AppCUITrait::PieChartEvents => TraitType::ControlEvent,
             AppCUITrait::GenericLineChartEvents => TraitType::ControlEvent,
+            AppCUITrait::UsageChartEvents => TraitType::ControlEvent,
         }
     }
     pub(crate) fn basefallback_implementation(&self) -> &'static str {
@@ -276,6 +279,7 @@ impl AppCUITrait {
             AppCUITrait::GenericHBarChartEvents => "",
             AppCUITrait::PieChartEvents => "",
             AppCUITrait::GenericLineChartEvents => "",
+            AppCUITrait::UsageChartEvents => "",
         }
     }
     pub(crate) fn default_implementation(&self) -> &'static str {
@@ -343,6 +347,7 @@ impl AppCUITrait {
             AppCUITrait::GenericHBarChartEvents => "impl$(TEMPLATE_TYPE) GenericHBarChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::PieChartEvents => "impl$(TEMPLATE_TYPE) PieChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
             AppCUITrait::GenericLineChartEvents => "impl$(TEMPLATE_TYPE) GenericLineChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
+            AppCUITrait::UsageChartEvents => "impl$(TEMPLATE_TYPE) UsageChartEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {}",
         }
     }
     pub(crate) fn is_generic(&self) -> bool {
@@ -417,6 +422,7 @@ impl AppCUITrait {
             "HBarChartEvents" | "HBarChart" => Some(AppCUITrait::GenericHBarChartEvents),
             "PieChartEvents" | "PieChart" => Some(AppCUITrait::PieChartEvents),
             "LineChartEvents" | "LineChart" => Some(AppCUITrait::GenericLineChartEvents),
+            "UsageChartEvents" | "UsageChart" => Some(AppCUITrait::UsageChartEvents),
             _ => None,
         }
     }
@@ -485,6 +491,7 @@ impl AppCUITrait {
             57 => Some(AppCUITrait::GenericHBarChartEvents),
             58 => Some(AppCUITrait::PieChartEvents),
             59 => Some(AppCUITrait::GenericLineChartEvents),
+            60 => Some(AppCUITrait::UsageChartEvents),
             _ => None,
         };
         result?;
