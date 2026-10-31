@@ -6,6 +6,7 @@ pub enum Flags {
     DimSegmentsOnSelection = 0x0002,
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum SortType {
     None,
     HighestToLowest,
@@ -14,7 +15,8 @@ pub enum SortType {
     ReverseAlphabetical,
 }
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum TotalUsage {
     Auto,
-    Fixed(u64)
+    Fixed(u64),
 }

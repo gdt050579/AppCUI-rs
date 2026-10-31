@@ -4,13 +4,13 @@ use appcui_proc_macro::CustomControl;
 
 #[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnKeyPressed, internal = true)]
 pub struct UsageChart {
-    flags: Flags,
-    segments: Vec<Segment>,
+    pub(super) flags: Flags,
+    pub(super) segments: Vec<Segment>,
     surface: Surface,
-    sort: SortType,
-    total_usage: TotalUsage,
+    pub(super) sort: SortType,
+    pub(super) total_usage: TotalUsage,
     hovered_segment: Option<usize>,
-    selected_segment: Option<usize>,
+    pub(super) selected_segment: Option<usize>,
 }
 impl UsageChart {
     pub fn new(layout: Layout, flags: Flags) -> Self {
@@ -33,7 +33,10 @@ impl UsageChart {
         me
     }
     pub fn add_segment<T: Into<Segment>>(&mut self, segment: T) {
-        self.segments.push(segment.into());
+        let mut segment = segment.into();
+        // `SortType::None` sorts by this, so it stays the order segments were added in
+        segment.order = self.segments.len() as u16;
+        self.segments.push(segment);
         self.update_surface_content();
     }
     pub fn set_total_usage(&mut self, total_usage: TotalUsage) {

@@ -1,5 +1,6 @@
 use crate::graphics::CharAttribute;
 
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum SegmentFillType {
     /// U+2588 — full block.
     Solid,
