@@ -3283,6 +3283,7 @@ pub fn piechart(input: TokenStream) -> TokenStream {
 /// * `total`, `total-usage`, or `totalusage` - What the segments are a part of (optional). Can be:
 ///   - **Auto** - The total is the sum of the segments (default). The bar is always full
 ///   - **Fixed(n)**, **fix(n)**, or a positive integer - The total is `n`. Space not covered by a segment stays empty
+/// * `numeric-format` or `nf` - Format for the values in tooltips (optional), using the same syntax as [`numericformat!`]
 /// * `selected`, `select`, or `selected-segment` - The index of the segment that is selected (optional).
 ///   The index is the position after sorting
 /// * Position and size:
@@ -3307,6 +3308,7 @@ pub fn piechart(input: TokenStream) -> TokenStream {
 ///     flags: Margins+DimSegmentsOnSelection,
 ///     total: Fixed(256),
 ///     sort: HighestToLowest,
+///     nf: {dec, suffix: GB},
 ///     segments: [
 ///         {48, 'OS', fill: Solid, attr: green},
 ///         {36, 'Apps', fill: CrossHatch},

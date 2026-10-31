@@ -1,5 +1,6 @@
 use super::events::EventData;
 use super::{Flags, Segment, SortType, TotalUsage};
+use crate::utils::FormatNumber;
 use appcui_proc_macro::CustomControl;
 
 #[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnKeyPressed, internal = true)]
@@ -9,6 +10,7 @@ pub struct UsageChart {
     surface: Surface,
     pub(super) sort: SortType,
     pub(super) total_usage: TotalUsage,
+    pub(super) number_format: FormatNumber,
     hovered_segment: Option<usize>,
     pub(super) selected_segment: Option<usize>,
 }
@@ -21,6 +23,7 @@ impl UsageChart {
             sort: SortType::None,
             flags,
             total_usage: TotalUsage::Auto,
+            number_format: FormatNumber::new(10).group(3, b','),
             hovered_segment: None,
             selected_segment: None,
         };
@@ -70,6 +73,21 @@ impl UsageChart {
     pub fn set_sort_type(&mut self, sort_type: SortType) {
         self.sort = sort_type;
         self.update_surface_content();
+    }
+    /// Sets how segment values are written, including in hover tooltips.
+    ///
+    /// The default groups digits by thousands (`1,234,567`).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+    /// chart.set_number_format(FormatNumber::new(10).group(3, b',').suffix(" GB"));
+    /// ```
+    pub fn set_number_format(&mut self, format: FormatNumber) {
+        self.number_format = format;
+        self.update_tooltip();
     }
     pub fn set_selected_segment(&mut self, index: Option<usize>) {
         self.select_segment_internal(index, false);
@@ -161,10 +179,12 @@ impl UsageChart {
     fn update_tooltip(&self) {
         if let Some(idx) = self.hovered_segment {
             let seg = &self.segments[idx];
+            let mut buffer = [0u8; 96];
+            let value = self.number_format.write_number(seg.value, &mut buffer).unwrap_or("");
             let tooltip = if seg.label.is_empty() {
-                format!("{}", seg.value)
+                value.to_string()
             } else {
-                format!("{}: {}", seg.label, seg.value)
+                format!("{}: {value}", seg.label)
             };
             self.show_tooltip_on_point(&tooltip, seg.poz + seg.len as i32 / 2, self.surface.size().height as i32 / 2);
         } else {

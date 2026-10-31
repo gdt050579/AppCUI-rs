@@ -78,6 +78,8 @@ static NAMED_PARAMETERS: &[NamedParameter] = &[
     NamedParameter::new("selected", "selected", ParamType::Integer),
     NamedParameter::new("select", "selected", ParamType::Integer),
     NamedParameter::new("selected-segment", "selected", ParamType::Integer),
+    NamedParameter::new("numeric-format", "numeric-format", ParamType::String),
+    NamedParameter::new("nf", "numeric-format", ParamType::String),
 ];
 
 pub(crate) fn create(input: TokenStream) -> TokenStream {
@@ -88,6 +90,22 @@ pub(crate) fn create(input: TokenStream) -> TokenStream {
     cb.finish_control_initialization();
     cb.call_method_with_string_parameter_parser("set_sort_type", "sort", parse_sort);
     cb.call_method_with_string_parameter_parser("set_total_usage", "total", parse_total);
+    if cb.has_parameter("numeric-format") {
+        let str_repr = String::from(cb.get_string_representation());
+        let tmp = if let Some(d) = cb.get_dict("numeric-format") {
+            crate::numericformat::builder::create_from_dict(&str_repr, d)
+        } else if let Some(v) = cb.get_value("numeric-format") {
+            let mut parsed = crate::parameter_parser::parse(v).unwrap_or_else(|e| {
+                panic!("Invalid numeric-format: {v} !{e:?}");
+            });
+            crate::numericformat::builder::create_from_dict(v, &mut parsed)
+        } else {
+            panic!("Invalid numeric-format ! Expected a number format (e.g. 'dec', 'hex, prefix: 0x' or '{{dec, group: 3}}')");
+        };
+        cb.add("control.set_number_format(");
+        cb.add(&tmp);
+        cb.add(");\n");
+    }
     // segments are added after sort and total, so every segment is laid out with those settings
     if cb.has_parameter("segments") {
         let param_list = cb.get_string_representation().to_string();
