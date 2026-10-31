@@ -7,6 +7,30 @@ use appcui_proc_macro::CustomControl;
 const PERCENTAGE_FORMAT: FormatNumber = FormatNumber::new(10).decimals(2).suffix("%");
 
 #[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnKeyPressed, internal = true)]
+/// A horizontal bar split into segments that share one total.
+///
+/// Each segment's width is its share of the [`TotalUsage`](super::TotalUsage). Values are
+/// `u64`, so a segment cannot be negative. A segment with value `0`, or one that does not
+/// fit, stays in the chart (and keeps its index) but takes no space. The largest values
+/// are given space first.
+///
+/// Hovering a segment shows a tooltip. See [`LabelContent`](super::LabelContent).
+/// Clicking a segment selects it. Clicking the empty part of the bar clears the selection.
+/// The selection stays visible when the chart loses the focus: the segment is outlined and,
+/// with [`Flags::DimSegmentsOnSelection`](super::Flags::DimSegmentsOnSelection), the others
+/// are dimmed. A disabled chart is drawn with the inactive color and shows no selection.
+///
+/// When the chart has the focus, the keyboard moves the selection. Segments that take no
+/// space are skipped, and the selection wraps around:
+///
+/// | Key      | Action                    |
+/// | -------- | ------------------------- |
+/// | `Right`  | selects the next segment  |
+/// | `Left`   | selects the previous one  |
+/// | `Escape` | clears the selection      |
+///
+/// Selecting a segment or clearing the selection this way raises the events of
+/// [`UsageChartEvents`](super::events::UsageChartEvents).
 pub struct UsageChart {
     pub(super) flags: Flags,
     pub(super) segments: Vec<Segment>,
@@ -19,6 +43,20 @@ pub struct UsageChart {
     pub(super) selected_segment: Option<usize>,
 }
 impl UsageChart {
+    /// Creates an empty usage chart.
+    ///
+    /// `layout` places the control. `flags` selects optional behavior; see [`Flags`](super::Flags).
+    /// The segments stay in the order they are added ([`SortType::None`](super::SortType::None)),
+    /// the total is the sum of the values ([`TotalUsage::Auto`](super::TotalUsage::Auto)), and the
+    /// tooltip shows the label and the value. Values are grouped by thousands (`1,234,567`).
+    /// With [`Flags::Margins`](super::Flags::Margins) the minimum size is 3×3; otherwise it is 3×1.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let chart = UsageChart::new(layout!("d:f"), usagechart::Flags::Margins);
+    /// ```
     pub fn new(layout: Layout, flags: Flags) -> Self {
         let mut me = Self {
             base: ControlBase::new(layout, true),
@@ -40,9 +78,20 @@ impl UsageChart {
         me.update_surface_content();
         me
     }
-    /// Appends a segment and repaints the chart.
+    /// Appends one segment and repaints the chart.
     ///
-    /// The segment may be a `u64` (also `u8`, `u16` or `u32`) or a [`Segment`].
+    /// The segment may be a `u8`, `u16`, `u32`, or `u64`, or a [`Segment`](super::Segment)
+    /// from [`SegmentBuilder`](super::SegmentBuilder). A number becomes a solid segment
+    /// with an empty label.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+    /// chart.add_segment(48u64);
+    /// chart.add_segment(usagechart::SegmentBuilder::new().value(36).label("Apps").build());
+    /// ```
     pub fn add_segment<T: Into<Segment>>(&mut self, segment: T) {
         self.add_segments([segment]);
     }
@@ -71,7 +120,12 @@ impl UsageChart {
         }));
         self.update_surface_content();
     }
-    /// Removes all segments from the chart and repaints it.
+    /// Removes every segment and repaints the chart.
+    ///
+    /// The selection and the hover tooltip are cleared as well. Flags, sort, total,
+    /// number format, and tooltip content are left as they are. This does not raise
+    /// [`on_clear_selection`](super::events::UsageChartEvents::on_clear_selection).
+    /// The next segment added is the first one again.
     pub fn clear(&mut self) {
         self.segments.clear();
         self.hovered_segment = None;
@@ -79,7 +133,13 @@ impl UsageChart {
         self.hide_tooltip();
         self.update_surface_content();
     }
-    /// Sets the chart flags and repaints it.
+    /// Replaces the chart flags and repaints it.
+    ///
+    /// This sets the whole flag set; it does not add flags to the current ones.
+    /// Passing the flags the chart already has does nothing.
+    /// [`Flags::Margins`](super::Flags::Margins) makes the minimum size 3×3 and insets
+    /// the bar by one cell. Any other set makes the minimum size 3×1 and lets the bar
+    /// fill the control.
     pub fn set_flags(&mut self, flags: Flags) {
         if self.flags == flags {
             return;
@@ -92,10 +152,18 @@ impl UsageChart {
         }
         self.update_surface_content();
     }
+    /// Sets what the full width of the bar represents and repaints the chart.
+    ///
+    /// See [`TotalUsage`](super::TotalUsage). The default is [`TotalUsage::Auto`](super::TotalUsage::Auto).
     pub fn set_total_usage(&mut self, total_usage: TotalUsage) {
         self.total_usage = total_usage;
         self.update_surface_content();
     }
+    /// Sets the left-to-right order of the segments and repaints the chart.
+    ///
+    /// See [`SortType`](super::SortType). The default is [`SortType::None`](super::SortType::None),
+    /// which keeps the order in which the segments were added. A segment's selection index
+    /// is its position after this sort.
     pub fn set_sort_type(&mut self, sort_type: SortType) {
         self.sort = sort_type;
         self.update_surface_content();
@@ -131,9 +199,28 @@ impl UsageChart {
         self.update_tooltip();
     }
     /// Returns what the hover tooltip of a segment shows.
+    ///
+    /// The default is [`LabelContent::LabelAndValue`](super::LabelContent::LabelAndValue).
     pub fn label_content(&self) -> LabelContent {
         self.label_content
     }
+    /// Selects the segment at `index`, or clears the selection when `index` is `None`.
+    ///
+    /// `index` is the segment's position after sorting. The segment is outlined and, with
+    /// [`Flags::DimSegmentsOnSelection`](super::Flags::DimSegmentsOnSelection), the others
+    /// are dimmed. The outline stays when the chart loses the focus.
+    ///
+    /// This does not raise [`UsageChartEvents`](super::events::UsageChartEvents).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut chart = UsageChart::new(layout!("d:f"), usagechart::Flags::None);
+    /// chart.add_segments([10u64, 20, 30]);
+    /// chart.set_selected_segment(Some(0));
+    /// chart.set_selected_segment(None);
+    /// ```
     pub fn set_selected_segment(&mut self, index: Option<usize>) {
         self.select_segment_internal(index, false);
     }
