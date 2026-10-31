@@ -327,7 +327,22 @@ impl OnPaint for UsageChart {
                 } else {
                     surface.draw_surface(0, 0, &self.surface);
                 }
-                surface.draw_rect(r, LineType::Single, theme.chart.selection_border);
+                match r.height() {
+                    0 => {}
+                    1 => {
+                        surface.write_char(r.left(), 0, Character::with_attributes('[', theme.chart.selection_border));
+                        surface.write_char(r.right(), 0, Character::with_attributes(']', theme.chart.selection_border));
+                    }
+                    2 => {
+                        surface.write_char(r.left(), 0, Character::with_attributes('┌', theme.chart.selection_border));
+                        surface.write_char(r.left(), 1, Character::with_attributes('└', theme.chart.selection_border));
+                        surface.write_char(r.right(), 0, Character::with_attributes('┐', theme.chart.selection_border));
+                        surface.write_char(r.right(), 1, Character::with_attributes('┘', theme.chart.selection_border));
+                    }
+                    _ => {
+                        surface.draw_rect(r, LineType::Single, theme.chart.selection_border);
+                    }
+                }
             } else {
                 surface.draw_surface(0, 0, &self.surface);
             }
