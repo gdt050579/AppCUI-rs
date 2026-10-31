@@ -1,3 +1,4 @@
+use super::events::EventData;
 use super::{Flags, Segment, SortType, TotalUsage};
 use appcui_proc_macro::CustomControl;
 
@@ -136,9 +137,26 @@ impl UsageChart {
             self.hide_tooltip();
         }
     }
+    fn raise_selection_event(&self, index: Option<usize>) {
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::UsageChart(EventData {
+                index: index.map(|value| value as u32),
+            }),
+        });
+    }
+    fn select_segment(&mut self, index: Option<usize>) -> bool {
+        if self.selected_segment == index {
+            return false;
+        }
+        self.selected_segment = index;
+        self.raise_selection_event(index);
+        true
+    }
     fn goto_segment_by(&mut self, forward: bool) {
         if self.segments.is_empty() {
-            self.selected_segment = None;
+            self.select_segment(None);
             return;
         }
         let mut pos = if let Some(idx) = self.selected_segment {
@@ -171,11 +189,11 @@ impl UsageChart {
             }
             count += 1;
             if count >= self.segments.len() {
-                self.selected_segment = None;
+                self.select_segment(None);
                 return;
             }
         }
-        self.selected_segment = Some(pos);
+        self.select_segment(Some(pos));
     }
 }
 impl OnPaint for UsageChart {
@@ -235,8 +253,7 @@ impl OnMouseEvent for UsageChart {
             }
             MouseEvent::Pressed(ed) => {
                 let idx = self.pos_to_segment_index(ed.x, self.selected_segment);
-                if idx != self.selected_segment {
-                    self.selected_segment = idx;
+                if self.select_segment(idx) {
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
@@ -258,8 +275,7 @@ impl OnKeyPressed for UsageChart {
                 EventProcessStatus::Processed
             }
             KeyCode::Escape => {
-                if self.selected_segment.is_some() {
-                    self.selected_segment = None;
+                if self.select_segment(None) {
                     EventProcessStatus::Processed
                 } else {
                     EventProcessStatus::Ignored
