@@ -307,6 +307,79 @@ fn check_example_chart_hover_and_click() {
 }
 
 #[test]
+fn check_example_chart_hover_and_click_auto_total() {
+    // same drive as `check_example_chart_hover_and_click`, with no margins.
+    // the total is the sum of the segments (136), so the bar is full:
+    // OS 24, Apps 18, Documents 11, Media 11, Cache 4
+    let script = "
+        Paint.Enable(false)
+        Paint('0. nothing selected')
+        CheckHash(0xF3D8679DB5E8339)
+        Mouse.Move(13,5)
+        Paint('1. hover OS')
+        CheckHash(0x3291F3BA3A72DEE9)
+        Mouse.Move(5,5)
+        Paint('2. hover OS again, tooltip stays on the segment')
+        CheckHash(0x3291F3BA3A72DEE9)
+        Mouse.Move(34,5)
+        Paint('3. hover Apps')
+        CheckHash(0xE6B2BD490958C37E)
+        Mouse.Move(48,5)
+        Paint('4. hover Documents')
+        CheckHash(0x78432465CAA8450D)
+        Mouse.Move(59,5)
+        Paint('5. hover Media')
+        CheckHash(0xC25CBFBD88DEF244)
+        Mouse.Move(67,5)
+        Paint('6. hover Cache')
+        CheckHash(0x55577FA84A0F74DF)
+        Mouse.Move(0,0)
+        Paint('7. mouse left the chart')
+        CheckHash(0xF3D8679DB5E8339)
+        Mouse.Click(13,5,left)
+        Paint('8. click OS')
+        CheckHash(0x5A2F818E695BFE9)
+        Mouse.Click(34,5,left)
+        Paint('9. click Apps')
+        CheckHash(0xD9096E128E9CD221)
+        Mouse.Click(48,5,left)
+        Paint('10. click Documents')
+        CheckHash(0xCDC695EF023D1DB1)
+        Mouse.Click(59,5,left)
+        Paint('11. click Media')
+        CheckHash(0xE6FD286D7E1F1639)
+        Mouse.Click(67,5,left)
+        Paint('12. click Cache')
+        CheckHash(0xBF7D463741BED5A9)
+        Mouse.Click(13,5,left)
+        Paint('13. click OS again')
+        CheckHash(0x5A2F818E695BFE9)
+        Mouse.Move(0,0)
+        Key.Pressed(Escape)
+        Paint('14. Escape: nothing selected')
+        CheckHash(0xF3D8679DB5E8339)
+    ";
+    App::new()
+        .size(Size::new(70, 10))
+        .debug_script(script)
+        .window(|| {
+            let mut w = window!("'Usage chart',d:f");
+            w.add(usagechart!(
+                "d:f, total: Auto, nf: {dec, suffix: ' GB'}, lc: LabelAndValue, segments: [
+                    {48, label: 'OS', fill: Solid},
+                    {36, label: 'Apps', fill: CrossHatch},
+                    {22, label: 'Documents', fill: Grid},
+                    {22, label: 'Media', fill: DiagonalDown},
+                    {8, label: 'Cache', fill: GridDouble}
+                ]"
+            ));
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+#[test]
 fn check_macro_layout_and_state() {
     in_app(|| {
         let c = usagechart!("x:2, y:3, w:30, h:3, enabled: false, visible: false, segments: [1]");

@@ -311,7 +311,10 @@ impl OnPaint for UsageChart {
             if let Some(idx) = self.selected_segment {
                 let seg = &self.segments[idx];
                 let (start, end) = seg.range();
-                let r = Rect::new(start.saturating_sub(1), 0, end, (self.size().height as i32).saturating_sub(1));
+                let sz = self.size();
+                let right_most = ((sz.width as i32) - 1).max(0);
+                let bottom_most = ((sz.height as i32) - 1).max(0);
+                let r = Rect::new((start - 1).max(0), 0, end.min(right_most), bottom_most);
                 if self.flags.contains(Flags::DimSegmentsOnSelection) {
                     let attr = theme.chart.inactive;
                     surface.draw_surface_with_transform(0, 0, &self.surface, |ch, p| {
