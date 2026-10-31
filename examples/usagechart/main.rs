@@ -10,12 +10,13 @@ fn main() -> Result<(), appcui::system::Error> {
                 flags: Margins+DimSegmentsOnSelection, 
                 total: Fixed(256), 
                 nf: {dec, suffix: ' GB'}, 
+                lc: LabelAndPercentage,
                 segments: [
-                    {48, fill: Solid},
-                    {36, fill: CrossHatch},
-                    {22, fill: Grid},
-                    {22, fill: DiagonalDown},
-                    {8, fill: GridDouble}
+                    {48, label: 'OS', fill: Solid},
+                    {36, label: 'Apps', fill: CrossHatch},
+                    {22, label: 'Documents', fill: Grid},
+                    {22, label: 'Media', fill: DiagonalDown},
+                    {8, label: 'Cache', fill: GridDouble}
                 ]"
             ));
             win
