@@ -40,7 +40,7 @@ impl SegmentFillType {
             SegmentFillType::Shade50 => '▒',
             SegmentFillType::Shade25 => '░',
             SegmentFillType::Braille => '⣿',
-            SegmentFillType::Checkerboard => '⣿',
+            SegmentFillType::Checkerboard => '\u{259A}',
             SegmentFillType::Grid => '┼',
             SegmentFillType::GridDouble => '╬',
             SegmentFillType::CrossHatch => '╳',
