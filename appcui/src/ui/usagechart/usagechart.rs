@@ -71,6 +71,27 @@ impl UsageChart {
         }));
         self.update_surface_content();
     }
+    /// Removes all segments from the chart and repaints it.
+    pub fn clear(&mut self) {
+        self.segments.clear();
+        self.hovered_segment = None;
+        self.selected_segment = None;
+        self.hide_tooltip();
+        self.update_surface_content();
+    }
+    /// Sets the chart flags and repaints it.
+    pub fn set_flags(&mut self, flags: Flags) {
+        if self.flags == flags {
+            return;
+        }
+        self.flags = flags;
+        if flags.contains(Flags::Margins) {
+            self.set_size_bounds(3, 3, u16::MAX, u16::MAX);
+        } else {
+            self.set_size_bounds(3, 1, u16::MAX, u16::MAX);
+        }
+        self.update_surface_content();
+    }
     pub fn set_total_usage(&mut self, total_usage: TotalUsage) {
         self.total_usage = total_usage;
         self.update_surface_content();
@@ -131,8 +152,13 @@ impl UsageChart {
                 segment.len = 0;
                 continue;
             }
-            let mut l = segment.value as u128 * width / total_value;
-            if (l == 0) && (sz < width) {
+            // a total of zero (no values, or a fixed total of 0) leaves every segment empty
+            let mut l = if total_value == 0 {
+                0
+            } else {
+                segment.value as u128 * width / total_value
+            };
+            if (l == 0) && (total_value > 0) && (sz < width) {
                 l = 1;
             }
             segment.len = l as u16;
