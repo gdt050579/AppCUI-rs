@@ -1,4 +1,4 @@
-use super::{Flags, Segment, SegmentFillType, SortType, TotalUsage};
+use super::{Flags, Segment, SortType, TotalUsage};
 use appcui_proc_macro::CustomControl;
 
 #[CustomControl(overwrite = OnPaint + OnResize + OnMouseEvent + OnKeyPressed, internal = true)]
