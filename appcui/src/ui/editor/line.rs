@@ -122,6 +122,11 @@ impl Line {
     }
 
     #[inline(always)]
+    pub(super) fn logical_len(&self) -> u32 {
+        self.col_map.len() as u32
+    }
+
+    #[inline(always)]
     pub(super) fn line_number(&self) -> u32 {
         self.line_number
     }
@@ -183,7 +188,8 @@ impl Line {
     
     pub(super) fn unwrapped_col_to_line_char_index(&self, column: u32) -> LineCharIndex {
         if self.chars.is_empty() || column >= self.last_col {
-            return LineCharIndex(self.chars.len() as u32);
+            // end of line = number of logical chars (not columns: a tab spans several columns)
+            return LineCharIndex(self.col_map.len() as u32);
         }
         let idx = self.col_map.partition_point(|&pos| pos <= column).saturating_sub(1);
         LineCharIndex(idx as u32)

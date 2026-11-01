@@ -50,16 +50,15 @@
 - [ ] `Ctrl+Shift+Z` → redo (alternative)
 
 ## Mouse
-- [ ] `Click` → place cursor
-- [ ] `Click + Drag` → select range
-- [ ] `Double-click` → select word
-- [ ] `Triple-click` → select line
-- [ ] `Shift+Click` → extend selection to click position
-- [ ] `Scroll wheel` → scroll vertically
-- [ ] `Ctrl+Scroll` → zoom in/out
-- [ ] `Alt+Click` → add cursor (multi-cursor)
+- [x] `Click` → place cursor
+- [x] `Click + Drag` → select range
+- [x] `Double-click` → select word
+- [x] `Triple-click` → select line
+- [x] `Shift+Click` → extend selection to click position
+- [x] `Scroll wheel` → scroll vertically
+- [x] `Alt+Click` → add cursor (multi-cursor)
 
-## File Operations
+<!--## File Operations
 - [ ] `Ctrl+S` → save file
 
 ## Search & Navigation
@@ -68,7 +67,7 @@
 - [ ] `F3` → find next
 - [ ] `Shift+F3` → find previous
 - [ ] `Ctrl+G` → go to line
-- [ ] `Ctrl+/` → toggle line comment
+- [ ] `Ctrl+/` → toggle line comment-->
 
 ## Line Manipulation
 - [ ] `Alt+Up` → move line up

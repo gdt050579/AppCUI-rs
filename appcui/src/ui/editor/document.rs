@@ -42,18 +42,19 @@ impl Document {
     pub(super) fn line_end_position(&self, line: u32) -> usize {
         let start = self.line_to_char(line);
         let ln = self.line(line);
-        let len = ln.len_chars();
-        if len == 0 {
-            return start;
-        }
-        // last_linee checks
-        if (line as usize) + 1 == self.rope.len_lines() {
-            let ch = ln.char(len - 1);
-            if ch == '\n' || ch == '\r' {
-                return start + len;
+        let mut len = ln.len_chars();
+        let mut it = ln.chars_at(len);
+        match it.prev() {
+            Some('\n') => {
+                len -= 1;
+                if it.prev() == Some('\r') {
+                    len -= 1;
+                }
             }
+            Some('\r') => len -= 1,
+            _ => {}
         }
-        start + len - 1
+        start + len
     }
     pub(super) fn char_to_pos_info(&self, char_index: usize) -> PosInfo {
         let line_index = self.position_to_line(char_index);

@@ -249,6 +249,7 @@ impl Folds {
         let adopted: Vec<ArenaIndex> = kids_slice[idx..adopt_end].to_vec();
         for (i, &c) in adopted.iter().enumerate() {
             new_children.insert(i, c);
+            self.arena[c.index()].parent = new_id;
         }
         self.arena.push(Node {
             fold: f,

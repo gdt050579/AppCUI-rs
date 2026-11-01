@@ -878,4 +878,19 @@ mod visible_lines_tests {
         assert_eq!(folds.previous_visible_nth_line(10, 1), 9);
         assert_eq!(folds.previous_visible_nth_line(30, 0), 30);
     }
+
+    #[test]
+    fn nested_inner_added_before_outer() {
+        // Inner fold added first, then adopted by the outer one: the outer fold must still hide it.
+        let folds = build_folds(&[(12, 5), (10, 20)]);
+        for hidden in [11, 12, 13, 16, 17, 29] {
+            assert_eq!(
+                folds.previous_visible_nth_line(hidden, 0),
+                10,
+                "line {hidden} should snap to outer header"
+            );
+        }
+        assert_eq!(folds.visible_lines_from(12).next(), Some(30));
+        assert_eq!(visible_lines(&folds, 8, 4), vec![8, 9, 10, 30]);
+    }
 }

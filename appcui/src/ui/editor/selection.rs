@@ -45,6 +45,14 @@ impl Selection {
         }
     }
     #[inline(always)]
+    pub(crate) fn start(&self) -> usize {
+        self.start
+    }
+    #[inline(always)]
+    pub(crate) fn end(&self) -> usize {
+        self.end
+    }
+    #[inline(always)]
     pub(crate) fn contains(&self, pos: usize) -> bool {
         (pos >= self.start) && (pos < self.end)
     }

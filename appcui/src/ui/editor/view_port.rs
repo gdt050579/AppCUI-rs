@@ -1,4 +1,4 @@
-use super::{Document, Line, LineCharIndex, VisualPos};
+use super::{Document, Folds, Line, LineCharIndex, VisualPos};
 use crate::prelude::{CharAttribute, Size};
 
 pub(super) struct ViewPort {
@@ -132,52 +132,60 @@ impl ViewPort {
             return;
         };
     
-        let shift = (0..cur_count).find(|&i| self.lines[i].line_number() == first_target);
-        if let Some(k) = shift {
+        let reuse = if let Some(k) = (0..cur_count).find(|&i| self.lines[i].line_number() == first_target) {
             if k > 0 {
                 self.lines[..cur_count].rotate_left(k);
             }
-            let preserved = cur_count - k;
-    
-            // Pass 2: walk visible lines again, update slots that don't match.
-            let mut it = folds.visible_lines_from(start_line);
-            let mut i = 0u32;
-            while i < capacity {
-                let Some(ln) = it.next() else { break; };
-                if ln >= total_lines { break; }
-                let slot = i as usize;
-                let needs_update = slot >= preserved
-                    || self.lines[slot].line_number() != ln
-                    || self.lines[slot].is_modified();
-                if needs_update {
-                    self.lines[slot].update(ln, doc, attr, tab_align);
-                    if self.word_wrap {
-                        self.lines[slot].update_wrap_points(self.size.width);
-                    }
-                }
-                i += 1;
-            }
-            self.count = i;
+            0..cur_count - k
+        } else if let Some(k) = self.scrolled_up_by(first_target, folds) {
+            self.lines.rotate_right(k);
+            k..(cur_count + k).min(capacity as usize)
         } else {
-            // No overlap — full rebuild in one pass.
-            let mut it = folds.visible_lines_from(start_line);
-            let mut i = 0u32;
-            while i < capacity {
-                let Some(ln) = it.next() else { break; };
-                if ln >= total_lines { break; }
-                self.lines[i as usize].update(ln, doc, attr, tab_align);
-                if self.word_wrap {
-                    self.lines[i as usize].update_wrap_points(self.size.width);
+            0..0
+        };
+
+        let wrap_width = if self.word_wrap { self.size.width } else { 0 };
+        let mut it = folds.visible_lines_from(start_line);
+        let mut i = 0u32;
+        while i < capacity {
+            let Some(ln) = it.next() else { break; };
+            if ln >= total_lines { break; }
+            let slot = i as usize;
+            let line = &mut self.lines[slot];
+            if !reuse.contains(&slot) || line.line_number() != ln || line.is_modified() {
+                line.update(ln, doc, attr, tab_align);
+                if wrap_width > 0 {
+                    line.update_wrap_points(wrap_width);
                 }
-                i += 1;
             }
-            self.count = i;
+            i += 1;
         }
+        self.count = i;
+    }
+
+    fn scrolled_up_by(&self, new_first: u32, folds: &Folds) -> Option<usize> {
+        if self.count == 0 {
+            return None;
+        }
+        let old_first = self.lines[0].line_number();
+        if old_first <= new_first {
+            return None;
+        }
+        folds
+            .visible_lines_from(new_first)
+            .take(self.lines.len())
+            .take_while(|&ln| ln <= old_first)
+            .position(|ln| ln == old_first)
+    }
+
+    #[inline(always)]
+    pub(super) fn line_at(&self, index: u32) -> &Line {
+        &self.lines[index as usize]
     }
 
     #[inline(always)]
     pub(super) fn update_max_columns(&mut self) {
-        self.max_columns = self.lines.iter().map(|line| line.columns_count()).max().unwrap_or(0);
+        self.max_columns = self.lines[..self.count as usize].iter().map(|line| line.columns_count()).max().unwrap_or(0);
     }
 
     #[inline(always)]
@@ -185,22 +193,20 @@ impl ViewPort {
         if self.word_wrap { 0 } else { self.max_columns }
     }
 
-    /// O(1) — lines in the viewport are contiguous starting at `first_line()`.
     pub(super) fn line_number_to_index(&self, line_number: u32) -> Option<u32> {
-        if self.count == 0 {
-            return None;
-        }
-        let first = self.lines[0].line_number();
+        let lines = &self.lines[..self.count as usize];
+        let first = lines.first()?.line_number();
         if line_number < first {
             return None;
         }
-        let offset = line_number - first;
-        if offset >= self.count {
-            return None;
+        let offset = (line_number - first) as usize;
+        if offset < lines.len() && lines[offset].line_number() == line_number {
+            return Some(offset as u32);
         }
-        // Defensive check: confirm contiguity (cheap; one comparison).
-        debug_assert_eq!(self.lines[offset as usize].line_number(), line_number);
-        Some(offset)
+        lines
+            .binary_search_by_key(&line_number, |l| l.line_number())
+            .ok()
+            .map(|i| i as u32)
     }
 
     // --- Unwrapped column queries (kept for selection painting, internal use) ---
