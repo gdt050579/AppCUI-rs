@@ -469,3 +469,7 @@ path = "hslider/main.rs"
 name = "numericselector"
 path = "numericselector/main.rs"
 
+[[example]]
+name = "booking_form"
+path = "booking_form/main.rs"
+
