@@ -3334,4 +3334,4 @@ pub fn piechart(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn usagechart(input: TokenStream) -> TokenStream {
     crate::controls::usagechart::create(input)
-}
+}

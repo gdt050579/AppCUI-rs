@@ -4,8 +4,10 @@
 
 mod heatmap;
 mod initialization_flags;
+mod cell;
 #[cfg(test)]
 mod tests;
 
 pub use self::heatmap::HeatMap;
 pub use self::initialization_flags::Flags;
+use self::cell::Cell;
