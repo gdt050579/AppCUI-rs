@@ -4,4 +4,6 @@ use EnumBitFlags::EnumBitFlags;
 /// Initialization flags for a [`struct@super::HeatMap`].
 ///
 /// Combine values with `|`. `Flags::None` creates a heat map with the default behavior.
-pub enum Flags {}
+pub enum Flags {
+    ScrollBars = 1,
+}
