@@ -185,7 +185,8 @@ impl<T: Number> HeatMap<T> {
                 return;
             }
         }
-        self.repaint_cell(row, column);
+        let mut params = self.paint_params();
+        self.paint_cell(row, column, &mut params);
     }
 
     fn refresh_all(&mut self) {
@@ -223,24 +224,6 @@ impl<T: Number> HeatMap<T> {
         }
     }
 
-    // Repaints one cell on the cached surface, if it is visible.
-    fn repaint_cell(&mut self, row: u32, column: u32) {
-        let x = column as i64 * self.cell_size.width as i64 - self.left_scroll as i64;
-        let y = row as i64 * self.cell_size.height as i64 - self.top_scroll as i64;
-        let view = self.surface.size();
-        if x >= view.width as i64 || y >= view.height as i64 || x + self.cell_size.width as i64 <= 0 || y + self.cell_size.height as i64 <= 0 {
-            return;
-        }
-        let (x, y) = (x as i32, y as i32);
-        let background = Character::with_attributes(' ', self.theme().chart.background);
-        for line in 0..self.cell_size.height as i32 {
-            self.surface.fill_horizontal_line_with_size(x, y + line, self.cell_size.width, background);
-        }
-        let mut params = self.paint_params();
-        params.x = x;
-        params.y = y;
-        self.paint_cell(row, column, &mut params);
-    }
     #[inline(always)]
     fn content_width(&self) -> u64 {
         self.size.width as u64 * self.cell_size.width as u64
@@ -249,20 +232,31 @@ impl<T: Number> HeatMap<T> {
     fn content_height(&self) -> u64 {
         self.size.height as u64 * self.cell_size.height as u64
     }
+    // Paints one cell on the cached surface. The position comes from the scroll offsets;
+    // a cell outside the grid or outside the visible area is skipped. The cell is first
+    // cleared to the background, so this also works for a cell that has just been emptied.
     fn paint_cell(&mut self, row: u32, column: u32, params: &mut PaintParams) {
         // a column past the last one would otherwise wrap to the next row
         let Some(idx) = self.index(row, column) else {
             return;
         };
-        let cell = &self.cells[idx];
-        if cell.is_none() {
+        let x = column as i64 * self.cell_size.width as i64 - self.left_scroll as i64;
+        let y = row as i64 * self.cell_size.height as i64 - self.top_scroll as i64;
+        let view = self.surface.size();
+        if x >= view.width as i64 || y >= view.height as i64 || x + self.cell_size.width as i64 <= 0 || y + self.cell_size.height as i64 <= 0 {
             return;
         }
-        let cell = cell.as_ref().unwrap();
-        let value = cell.value.to_f64();
-        let percentage = (((value - self.min_value) / (self.max_value - self.min_value)) * 100.0).round() as u8;
-        params.percentage = percentage;
-        cell.paint(&mut self.surface, params);
+        params.x = x as i32;
+        params.y = y as i32;
+        let background = Character::with_attributes(' ', self.theme().chart.background);
+        for line in 0..self.cell_size.height as i32 {
+            self.surface.fill_horizontal_line_with_size(params.x, params.y + line, self.cell_size.width, background);
+        }
+        if let Some(cell) = self.cells[idx].as_ref() {
+            let value = cell.value.to_f64();
+            params.percentage = (((value - self.min_value) / (self.max_value - self.min_value)) * 100.0).round() as u8;
+            cell.paint(&mut self.surface, params);
+        }
     }
     fn scroll_to(&mut self, left: u32, top: u32) {
         let max_left = self.size.width.saturating_sub(1).saturating_mul(self.cell_size.width);
@@ -293,27 +287,18 @@ impl<T: Number> HeatMap<T> {
         if self.flags.contains(Flags::ScrollBars) {
             self.scrollbars.update(self.content_width(), self.content_height(), self.size());
         }
-        let start_column = self.left_scroll / self.cell_size.width;
-        let start_row = self.top_scroll / self.cell_size.height;
-        let start_x = (start_column * self.cell_size.width) as i32 - self.left_scroll as i32;
-        let start_y = (start_row * self.cell_size.height) as i32 - self.top_scroll as i32;
-        // loop over the visible area (the control), not over the grid size
+        // only the rows and columns that are (at least partly) visible
         let view = self.surface.size();
-        let height = view.height as i32;
-        let width = view.width as i32;
-        let mut row = start_row;
+        let (cw, ch) = (self.cell_size.width as u64, self.cell_size.height as u64);
+        let first_column = (self.left_scroll as u64 / cw) as u32;
+        let first_row = (self.top_scroll as u64 / ch) as u32;
+        let end_column = (self.left_scroll as u64 + view.width as u64).div_ceil(cw).min(self.size.width as u64) as u32;
+        let end_row = (self.top_scroll as u64 + view.height as u64).div_ceil(ch).min(self.size.height as u64) as u32;
         let mut params = self.paint_params();
-        params.y = start_y;
-        while params.y < height && row < self.size.height {
-            let mut column = start_column;
-            params.x = start_x;
-            while params.x < width && column < self.size.width {
+        for row in first_row..end_row {
+            for column in first_column..end_column {
                 self.paint_cell(row, column, &mut params);
-                params.x += self.cell_size.width as i32;
-                column += 1;
             }
-            params.y += self.cell_size.height as i32;
-            row += 1;
         }
     }
 }
