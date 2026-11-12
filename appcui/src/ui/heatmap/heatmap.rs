@@ -1,4 +1,4 @@
-use super::{Cell, Flags};
+use super::{Cell, CellAttribute, CellFill, Flags, PaintParams};
 use crate::prelude::*;
 
 #[CustomControl(overwrite = OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal = true)]
@@ -12,6 +12,8 @@ pub struct HeatMap<T> where T: Number {
     scrollbars: ScrollBars,
     left_scroll: u32,
     top_scroll: u32,
+    default_attr: Option<CellAttribute>,
+    default_fill: Option<CellFill>,
 }
 
 impl<T: Number> HeatMap<T> {
@@ -45,6 +47,8 @@ impl<T: Number> HeatMap<T> {
             scrollbars: ScrollBars::new(has_scrollbars),
             left_scroll: 0,
             top_scroll: 0,
+            default_attr: None,
+            default_fill: None,
         };
         me.set_size_bounds(1, 1, u16::MAX, u16::MAX);
         me
@@ -62,7 +66,7 @@ impl<T: Number> HeatMap<T> {
     fn content_height(&self) -> u64 {
         self.size.height as u64 * self.cell_size.height as u64
     }
-    fn paint_cell(&mut self, row: u32, column: u32, x: i32, y: i32) {
+    fn paint_cell(&mut self, row: u32, column: u32, params: &mut PaintParams) {
         let idx = row as usize * self.size.width as usize + column as usize;
         if idx >= self.cells.len() {
             return;
@@ -72,7 +76,7 @@ impl<T: Number> HeatMap<T> {
             return;
         }
         let cell = cell.as_ref().unwrap();
-        cell.paint(&mut self.surface, x, y, self.cell_size);
+        cell.paint(&mut self.surface, params);
     }
     fn scroll_to(&mut self, left: u32, top: u32) {
         let max_left = self.size.width.saturating_sub(1).saturating_mul(self.cell_size.width);
@@ -109,17 +113,23 @@ impl<T: Number> HeatMap<T> {
         let start_y = (start_row * self.cell_size.height) as i32 - self.top_scroll as i32;
         let height = self.size.height as i32;
         let width = self.size.width as i32;
-        let mut y = start_y;
         let mut row = start_row;
-        while y < height {
-            let mut x = start_x;
+        let mut params = PaintParams {
+            x: start_x,
+            y: start_y,
+            size: self.cell_size,
+            percentage: 0,
+            default_attr: self.default_attr.unwrap_or(CellAttribute::Fixed(self.theme().chart.bar[0])),
+            default_fill: self.default_fill.unwrap_or(CellFill::Shades),
+        };
+        while params.y < height {
             let mut column = start_column;
-            while x < width {
-                self.paint_cell(row, column, x, y);
-                x += self.cell_size.width as i32;
+            while params.x < width {
+                self.paint_cell(row, column, &mut params);
+                params.x += self.cell_size.width as i32;
                 column += 1;
             }
-            y += self.cell_size.height as i32;
+            params.y += self.cell_size.height as i32;
             row += 1;
         }
     }

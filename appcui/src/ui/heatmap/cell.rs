@@ -1,12 +1,46 @@
-use crate::{graphics::{Size, Surface}, prelude::Number};
+use crate::{
+    graphics::{CharAttribute, Size, Surface},
+    prelude::Number,
+};
 
+pub(crate) struct PaintParams {
+    pub(crate) x: i32,
+    pub(crate) y: i32,
+    pub(crate) size: Size,
+    pub(crate) percentage: u8,
+    pub(crate) default_attr: CellAttribute,
+    pub(crate) default_fill: CellFill,
+}
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum CellAttribute {
+    Fixed(CharAttribute),
+    Range(CharAttribute, CharAttribute),
+}
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum CellFill {
+    Shades,
+    Custom(char),
+}
 pub(crate) struct Cell<T: Number> {
     value: T,
     label: String,
-
+    attr: Option<CellAttribute>,
+    fill: Option<CellFill>,
 }
 impl<T: Number> Cell<T> {
-    pub(super) fn paint(&self, surface: &mut Surface, x: i32, y: i32, size: Size) {
-
+    // where percentage is a value between 0 and 100
+    pub(super) fn paint(&self, surface: &mut Surface, params: &PaintParams) {}
+    fn compute_attr(&self, params: &PaintParams) -> CharAttribute {
+        match self.attr {
+            Some(CellAttribute::Fixed(attr)) => attr,
+            Some(CellAttribute::Range(min, max)) => Self::attribute_from_range(min, max, params.percentage),
+            None => match params.default_attr {
+                CellAttribute::Fixed(attr) => attr,
+                CellAttribute::Range(min, max) => Self::attribute_from_range(min, max, params.percentage),
+            },
+        }
+    }
+    fn attribute_from_range(min: CharAttribute, max: CharAttribute, percentage: u8) -> CharAttribute {
+        todo!()
     }
 }
