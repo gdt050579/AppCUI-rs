@@ -3,18 +3,9 @@ use crate::prelude::*;
 
 #[CustomControl(overwrite = OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal = true)]
 /// A heat map control.
-///
-/// When the heat map has the focus, the keyboard scrolls the view by one cell:
-///
-/// | Key            | Action                          |
-/// | -------------- | ------------------------------- |
-/// | `Left`/`Right` | scrolls one cell horizontally   |
-/// | `Up`/`Down`    | scrolls one cell vertically     |
-/// | `Home`         | moves to the first cell `(0,0)` |
-/// | `End`          | moves to the last cell          |
-pub struct HeatMap {
+pub struct HeatMap<T> where T: Number {
     flags: Flags,
-    cells: Vec<Option<Cell>>,
+    cells: Vec<Option<Cell<T>>>,
     size: Size,
     cell_size: Size,
     surface: Surface,
@@ -23,7 +14,7 @@ pub struct HeatMap {
     top_scroll: u32,
 }
 
-impl HeatMap {
+impl<T: Number> HeatMap<T> {
     /// Creates a heat map with the given layout and flags.
     ///
     /// # Example
@@ -58,8 +49,10 @@ impl HeatMap {
         me.set_size_bounds(1, 1, u16::MAX, u16::MAX);
         me
     }
-    pub fn cell(&self, row: u32, column: u32) -> Option<&Cell> {
-        self.cells.get(row as usize * self.size.width as usize + column as usize).and_then(|cell| cell.as_ref())
+    pub fn cell(&self, row: u32, column: u32) -> Option<&Cell<T>> {
+        self.cells
+            .get(row as usize * self.size.width as usize + column as usize)
+            .and_then(|cell| cell.as_ref())
     }
     #[inline(always)]
     fn content_width(&self) -> u64 {
@@ -93,7 +86,8 @@ impl HeatMap {
     }
     fn scroll_by_cells(&mut self, columns: i32, rows: i32) {
         let left = if columns < 0 {
-            self.left_scroll.saturating_sub(self.cell_size.width.saturating_mul(columns.unsigned_abs()))
+            self.left_scroll
+                .saturating_sub(self.cell_size.width.saturating_mul(columns.unsigned_abs()))
         } else {
             self.left_scroll.saturating_add(self.cell_size.width.saturating_mul(columns as u32))
         };
@@ -131,7 +125,7 @@ impl HeatMap {
     }
 }
 
-impl OnPaint for HeatMap {
+impl<T: Number> OnPaint for HeatMap<T> {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if self.has_focus() && self.flags.contains(Flags::ScrollBars) {
             self.scrollbars.paint(surface, theme, self);
@@ -141,7 +135,7 @@ impl OnPaint for HeatMap {
     }
 }
 
-impl OnResize for HeatMap {
+impl<T: Number> OnResize for HeatMap<T> {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.surface.resize(new_size);
         if self.flags.contains(Flags::ScrollBars) {
@@ -151,7 +145,7 @@ impl OnResize for HeatMap {
     }
 }
 
-impl OnKeyPressed for HeatMap {
+impl<T: Number> OnKeyPressed for HeatMap<T> {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         match key.value() {
             key!("Left") => self.scroll_by_cells(-1, 0),
@@ -166,7 +160,7 @@ impl OnKeyPressed for HeatMap {
     }
 }
 
-impl OnMouseEvent for HeatMap {
+impl<T: Number> OnMouseEvent for HeatMap<T> {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if !self.flags.contains(Flags::ScrollBars) {
             return EventProcessStatus::Ignored;

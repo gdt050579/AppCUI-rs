@@ -1,9 +1,11 @@
-use crate::graphics::{Size, Surface};
+use crate::{graphics::{Size, Surface}, prelude::Number};
 
-pub(crate) struct Cell {
+pub(crate) struct Cell<T: Number> {
+    value: T,
+    label: String,
 
 }
-impl Cell {
+impl<T: Number> Cell<T> {
     pub(super) fn paint(&self, surface: &mut Surface, x: i32, y: i32, size: Size) {
 
     }
