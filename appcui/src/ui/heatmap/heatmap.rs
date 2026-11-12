@@ -1,8 +1,17 @@
 use super::{Cell, Flags};
 use crate::prelude::*;
 
-#[CustomControl(overwrite = OnPaint+OnResize+OnMouseEvent, internal = true)]
+#[CustomControl(overwrite = OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal = true)]
 /// A heat map control.
+///
+/// When the heat map has the focus, the keyboard scrolls the view by one cell:
+///
+/// | Key            | Action                          |
+/// | -------------- | ------------------------------- |
+/// | `Left`/`Right` | scrolls one cell horizontally   |
+/// | `Up`/`Down`    | scrolls one cell vertically     |
+/// | `Home`         | moves to the first cell `(0,0)` |
+/// | `End`          | moves to the last cell          |
 pub struct HeatMap {
     flags: Flags,
     cells: Vec<Option<Cell>>,
@@ -72,6 +81,29 @@ impl HeatMap {
         let cell = cell.as_ref().unwrap();
         cell.paint(&mut self.surface, x, y, self.cell_size);
     }
+    fn scroll_to(&mut self, left: u32, top: u32) {
+        let max_left = self.size.width.saturating_sub(1).saturating_mul(self.cell_size.width);
+        let max_top = self.size.height.saturating_sub(1).saturating_mul(self.cell_size.height);
+        self.left_scroll = left.min(max_left);
+        self.top_scroll = top.min(max_top);
+        self.update_view();
+        if self.flags.contains(Flags::ScrollBars) {
+            self.scrollbars.set_indexes(self.left_scroll as u64, self.top_scroll as u64);
+        }
+    }
+    fn scroll_by_cells(&mut self, columns: i32, rows: i32) {
+        let left = if columns < 0 {
+            self.left_scroll.saturating_sub(self.cell_size.width.saturating_mul(columns.unsigned_abs()))
+        } else {
+            self.left_scroll.saturating_add(self.cell_size.width.saturating_mul(columns as u32))
+        };
+        let top = if rows < 0 {
+            self.top_scroll.saturating_sub(self.cell_size.height.saturating_mul(rows.unsigned_abs()))
+        } else {
+            self.top_scroll.saturating_add(self.cell_size.height.saturating_mul(rows as u32))
+        };
+        self.scroll_to(left, top);
+    }
     fn update_view(&mut self) {
         self.surface.clear(Character::with_attributes(' ', self.theme().chart.background));
         if self.flags.contains(Flags::ScrollBars) {
@@ -119,12 +151,29 @@ impl OnResize for HeatMap {
     }
 }
 
+impl OnKeyPressed for HeatMap {
+    fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
+        match key.value() {
+            key!("Left") => self.scroll_by_cells(-1, 0),
+            key!("Right") => self.scroll_by_cells(1, 0),
+            key!("Up") => self.scroll_by_cells(0, -1),
+            key!("Down") => self.scroll_by_cells(0, 1),
+            key!("Home") => self.scroll_to(0, 0),
+            key!("End") => self.scroll_to(u32::MAX, u32::MAX),
+            _ => return EventProcessStatus::Ignored,
+        }
+        EventProcessStatus::Processed
+    }
+}
+
 impl OnMouseEvent for HeatMap {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if !self.flags.contains(Flags::ScrollBars) {
             return EventProcessStatus::Ignored;
         }
         if self.scrollbars.process_mouse_event(event) {
+            self.left_scroll = self.scrollbars.horizontal_index() as u32;
+            self.top_scroll = self.scrollbars.vertical_index() as u32;
             self.update_view();
             EventProcessStatus::Processed
         } else if self.scrollbars.should_repaint() {
