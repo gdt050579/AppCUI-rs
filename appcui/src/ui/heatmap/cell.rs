@@ -53,3 +53,15 @@ impl<T: Number> Cell<T> {
         todo!()
     }
 }
+
+/// A cell with this value and the heat map's default fill and attribute.
+impl<T: Number> From<T> for Cell<T> {
+    fn from(value: T) -> Self {
+        Self {
+            value,
+            label: String::new(),
+            attr: None,
+            fill: None,
+        }
+    }
+}

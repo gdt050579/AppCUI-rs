@@ -18,6 +18,7 @@ pub struct HeatMap<T> where T: Number {
     max_value: f64,
 }
 
+#[allow(private_bounds)]
 impl<T: Number> HeatMap<T> {
     /// Creates a heat map with the given layout and flags.
     ///
@@ -57,23 +58,188 @@ impl<T: Number> HeatMap<T> {
         me.set_size_bounds(1, 1, u16::MAX, u16::MAX);
         me
     }
+    /// Returns the cell at `row` and `column`, or `None` if the position is empty or outside the heat map.
     pub fn cell(&self, row: u32, column: u32) -> Option<&Cell<T>> {
-        self.cells
-            .get(row as usize * self.size.width as usize + column as usize)
-            .and_then(|cell| cell.as_ref())
+        self.index(row, column).and_then(|idx| self.cells[idx].as_ref())
     }
+
+    /// Sets the cell at `row` and `column`. A number can be passed directly
+    /// (for example `heatmap.set(2, 3, 17)`).
+    ///
+    /// A position outside the heat map is ignored. If the new value does not change the
+    /// minimum or the maximum, only this cell is repainted; otherwise every cell is.
+    pub fn set(&mut self, row: u32, column: u32, cell: impl Into<Cell<T>>) {
+        self.replace(row, column, Some(cell.into()));
+    }
+
+    /// Empties the cell at `row` and `column`. A position outside the heat map is ignored.
+    pub fn clear(&mut self, row: u32, column: u32) {
+        self.replace(row, column, None);
+    }
+
+    /// Empties every cell.
+    pub fn clear_all(&mut self) {
+        self.cells.iter_mut().for_each(|c| *c = None);
+        self.refresh_all();
+    }
+
+    /// Sets cells in row-major order, starting with `(0,0)`: the first row from left to
+    /// right, then the second row, and so on.
+    ///
+    /// Returns the number of cells that were set. Values beyond the last cell are not read,
+    /// so an endless iterator is allowed. If there are fewer values than cells, the remaining
+    /// cells keep their current content (call [`clear_all`](Self::clear_all) first for an empty map).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(4, 3), heatmap::Flags::None);
+    /// let written = heatmap.set_values([1, 5, 9, 2, 7, 3, 8, 4, 6, 0, 1, 2]);
+    /// assert_eq!(written, 12);
+    /// ```
+    pub fn set_values<C: Into<Cell<T>>>(&mut self, values: impl IntoIterator<Item = C>) -> usize {
+        let count = self.cells.len();
+        let mut written = 0;
+        for (slot, value) in self.cells.iter_mut().zip(values.into_iter().take(count)) {
+            *slot = Some(value.into());
+            written += 1;
+        }
+        if written > 0 {
+            self.refresh_all();
+        }
+        written
+    }
+
+    /// Sets every cell from a callback that receives `(row, column)`. Returning `None`
+    /// leaves that position empty.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.fill_with(|row, column| Some(row * column));
+    /// ```
+    pub fn fill_with<C: Into<Cell<T>>>(&mut self, mut f: impl FnMut(u32, u32) -> Option<C>) {
+        let width = self.size.width;
+        for (idx, slot) in self.cells.iter_mut().enumerate() {
+            let (row, column) = ((idx / width as usize) as u32, (idx % width as usize) as u32);
+            *slot = f(row, column).map(Into::into);
+        }
+        self.refresh_all();
+    }
+
+    /// Calls a callback for every position with `(row, column, &mut cell)`, so cells can be
+    /// changed, added (`*cell = Some(..)`) or removed (`*cell = None`) in place.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.fill_with(|row, column| Some(row + column));
+    /// // empty the diagonal
+    /// heatmap.update_with(|row, column, cell| {
+    ///     if row == column {
+    ///         *cell = None;
+    ///     }
+    /// });
+    /// ```
+    pub fn update_with(&mut self, mut f: impl FnMut(u32, u32, &mut Option<Cell<T>>)) {
+        let width = self.size.width;
+        for (idx, slot) in self.cells.iter_mut().enumerate() {
+            f((idx / width as usize) as u32, (idx % width as usize) as u32, slot);
+        }
+        self.refresh_all();
+    }
+
+    #[inline(always)]
+    fn index(&self, row: u32, column: u32) -> Option<usize> {
+        if row < self.size.height && column < self.size.width {
+            Some(row as usize * self.size.width as usize + column as usize)
+        } else {
+            None
+        }
+    }
+
+    // Replaces one cell and repaints as little as possible.
+    fn replace(&mut self, row: u32, column: u32, new: Option<Cell<T>>) {
+        let Some(idx) = self.index(row, column) else {
+            return;
+        };
+        let old_value = self.cells[idx].as_ref().map(|c| c.value.to_f64());
+        let new_value = new.as_ref().map(|c| c.value.to_f64());
+        self.cells[idx] = new;
+
+        // The range can only change if the old value was an extreme (it may have been the
+        // only one) or the new value falls outside the current range. NaN never counts.
+        let old_was_extreme = old_value.is_some_and(|v| v == self.min_value || v == self.max_value);
+        let new_outside = new_value.is_some_and(|v| v < self.min_value || v > self.max_value);
+        // (an empty map has the range [0, 0], so a first value is handled by `new_outside`)
+        if old_was_extreme || new_outside {
+            let (min, max) = (self.min_value, self.max_value);
+            self.update_min_max();
+            if min != self.min_value || max != self.max_value {
+                self.update_view();
+                return;
+            }
+        }
+        self.repaint_cell(row, column);
+    }
+
+    fn refresh_all(&mut self) {
+        self.update_min_max();
+        self.update_view();
+    }
+
     fn update_min_max(&mut self) {
-        let mut min = f64::MAX;
-        let mut max = f64::MIN;
-        for cell in self.cells.iter() {
-            if let Some(cell) = cell {
-                let value = cell.value.to_f64();
+        let mut min = f64::INFINITY;
+        let mut max = f64::NEG_INFINITY;
+        for cell in self.cells.iter().flatten() {
+            let value = cell.value.to_f64();
+            if !value.is_nan() {
                 min = min.min(value);
                 max = max.max(value);
             }
         }
+        if min > max {
+            // no cells (or only NaN values)
+            min = 0.0;
+            max = 0.0;
+        }
         self.min_value = min;
         self.max_value = max;
+    }
+
+    fn paint_params(&self) -> PaintParams {
+        PaintParams {
+            x: 0,
+            y: 0,
+            size: self.cell_size,
+            percentage: 0,
+            default_attr: self.default_attr.unwrap_or(CellAttribute::Fixed(self.theme().chart.bar[0])),
+            default_fill: self.default_fill.unwrap_or(CellFill::Shades),
+        }
+    }
+
+    // Repaints one cell on the cached surface, if it is visible.
+    fn repaint_cell(&mut self, row: u32, column: u32) {
+        let x = column as i64 * self.cell_size.width as i64 - self.left_scroll as i64;
+        let y = row as i64 * self.cell_size.height as i64 - self.top_scroll as i64;
+        let view = self.surface.size();
+        if x >= view.width as i64 || y >= view.height as i64 || x + self.cell_size.width as i64 <= 0 || y + self.cell_size.height as i64 <= 0 {
+            return;
+        }
+        let (x, y) = (x as i32, y as i32);
+        let background = Character::with_attributes(' ', self.theme().chart.background);
+        for line in 0..self.cell_size.height as i32 {
+            self.surface.fill_horizontal_line_with_size(x, y + line, self.cell_size.width, background);
+        }
+        let mut params = self.paint_params();
+        params.x = x;
+        params.y = y;
+        self.paint_cell(row, column, &mut params);
     }
     #[inline(always)]
     fn content_width(&self) -> u64 {
@@ -84,10 +250,10 @@ impl<T: Number> HeatMap<T> {
         self.size.height as u64 * self.cell_size.height as u64
     }
     fn paint_cell(&mut self, row: u32, column: u32, params: &mut PaintParams) {
-        let idx = row as usize * self.size.width as usize + column as usize;
-        if idx >= self.cells.len() {
+        // a column past the last one would otherwise wrap to the next row
+        let Some(idx) = self.index(row, column) else {
             return;
-        }
+        };
         let cell = &self.cells[idx];
         if cell.is_none() {
             return;
@@ -131,20 +297,17 @@ impl<T: Number> HeatMap<T> {
         let start_row = self.top_scroll / self.cell_size.height;
         let start_x = (start_column * self.cell_size.width) as i32 - self.left_scroll as i32;
         let start_y = (start_row * self.cell_size.height) as i32 - self.top_scroll as i32;
-        let height = self.size.height as i32;
-        let width = self.size.width as i32;
+        // loop over the visible area (the control), not over the grid size
+        let view = self.surface.size();
+        let height = view.height as i32;
+        let width = view.width as i32;
         let mut row = start_row;
-        let mut params = PaintParams {
-            x: start_x,
-            y: start_y,
-            size: self.cell_size,
-            percentage: 0,
-            default_attr: self.default_attr.unwrap_or(CellAttribute::Fixed(self.theme().chart.bar[0])),
-            default_fill: self.default_fill.unwrap_or(CellFill::Shades),
-        };
-        while params.y < height {
+        let mut params = self.paint_params();
+        params.y = start_y;
+        while params.y < height && row < self.size.height {
             let mut column = start_column;
-            while params.x < width {
+            params.x = start_x;
+            while params.x < width && column < self.size.width {
                 self.paint_cell(row, column, &mut params);
                 params.x += self.cell_size.width as i32;
                 column += 1;
