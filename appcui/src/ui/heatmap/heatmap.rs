@@ -39,6 +39,8 @@ impl HeatMap {
     }
     fn update_view(&mut self) {
         self.surface.clear(Character::with_attributes(' ', self.theme().chart.background));
+        let max_width = self.size.width as usize * self.cell_size.width as usize;
+        let max_height = self.size.height as usize * self.cell_size.height as usize;
     }
 }
 
