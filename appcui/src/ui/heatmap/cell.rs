@@ -21,7 +21,7 @@ pub(crate) enum CellFill {
     Custom(char),
 }
 pub(crate) struct Cell<T: Number> {
-    value: T,
+    pub(crate) value: T,
     label: String,
     attr: Option<CellAttribute>,
     fill: Option<CellFill>,

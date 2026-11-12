@@ -14,6 +14,8 @@ pub struct HeatMap<T> where T: Number {
     top_scroll: u32,
     default_attr: Option<CellAttribute>,
     default_fill: Option<CellFill>,
+    min_value: f64,
+    max_value: f64,
 }
 
 impl<T: Number> HeatMap<T> {
@@ -49,6 +51,8 @@ impl<T: Number> HeatMap<T> {
             top_scroll: 0,
             default_attr: None,
             default_fill: None,
+            min_value: 0.0,
+            max_value: 0.0,
         };
         me.set_size_bounds(1, 1, u16::MAX, u16::MAX);
         me
@@ -57,6 +61,19 @@ impl<T: Number> HeatMap<T> {
         self.cells
             .get(row as usize * self.size.width as usize + column as usize)
             .and_then(|cell| cell.as_ref())
+    }
+    fn update_min_max(&mut self) {
+        let mut min = f64::MAX;
+        let mut max = f64::MIN;
+        for cell in self.cells.iter() {
+            if let Some(cell) = cell {
+                let value = cell.value.to_f64();
+                min = min.min(value);
+                max = max.max(value);
+            }
+        }
+        self.min_value = min;
+        self.max_value = max;
     }
     #[inline(always)]
     fn content_width(&self) -> u64 {
@@ -76,6 +93,9 @@ impl<T: Number> HeatMap<T> {
             return;
         }
         let cell = cell.as_ref().unwrap();
+        let value = cell.value.to_f64();
+        let percentage = (((value - self.min_value) / (self.max_value - self.min_value)) * 100.0).round() as u8;
+        params.percentage = percentage;
         cell.paint(&mut self.surface, params);
     }
     fn scroll_to(&mut self, left: u32, top: u32) {
