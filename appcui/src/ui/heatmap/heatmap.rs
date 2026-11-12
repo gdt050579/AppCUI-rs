@@ -148,12 +148,12 @@ impl<T: Number> OnResize for HeatMap<T> {
 impl<T: Number> OnKeyPressed for HeatMap<T> {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         match key.value() {
-            key!("Left") => self.scroll_by_cells(-1, 0),
-            key!("Right") => self.scroll_by_cells(1, 0),
-            key!("Up") => self.scroll_by_cells(0, -1),
-            key!("Down") => self.scroll_by_cells(0, 1),
-            key!("Home") => self.scroll_to(0, 0),
-            key!("End") => self.scroll_to(u32::MAX, u32::MAX),
+            key!("Ctrl+Left") => self.scroll_by_cells(-1, 0),
+            key!("Ctrl+Right") => self.scroll_by_cells(1, 0),
+            key!("Ctrl+Up") => self.scroll_by_cells(0, -1),
+            key!("Ctrl+Down") => self.scroll_by_cells(0, 1),
+            key!("Ctrl+Home") => self.scroll_to(0, 0),
+            key!("Ctrl+End") => self.scroll_to(u32::MAX, u32::MAX),
             _ => return EventProcessStatus::Ignored,
         }
         EventProcessStatus::Processed
