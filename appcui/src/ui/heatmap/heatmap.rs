@@ -1,7 +1,7 @@
 use super::{Cell, Flags};
 use crate::prelude::*;
 
-#[CustomControl(overwrite = OnPaint+OnResize, internal = true)]
+#[CustomControl(overwrite = OnPaint+OnResize+OnMouseEvent, internal = true)]
 /// A heat map control.
 pub struct HeatMap {
     flags: Flags,
@@ -9,6 +9,9 @@ pub struct HeatMap {
     size: Size,
     cell_size: Size,
     surface: Surface,
+    scrollbars: ScrollBars,
+    left_scroll: u32,
+    top_scroll: u32,
 }
 
 impl HeatMap {
@@ -18,7 +21,7 @@ impl HeatMap {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let heatmap = HeatMap::new(layout!("d:f"), heatmap::Flags::None);
+    /// let heatmap = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
     /// ```
     pub fn new(layout: Layout, size: Size, flags: Flags) -> Self {
         let count = size.width as usize * size.height as usize;
@@ -26,26 +29,82 @@ impl HeatMap {
         for _ in 0..count {
             v.push(None);
         }
+        let has_scrollbars = flags.contains(Flags::ScrollBars);
+        let extra = if has_scrollbars {
+            StatusFlags::IncreaseBottomMarginOnFocus | StatusFlags::IncreaseRightMarginOnFocus
+        } else {
+            StatusFlags::None
+        };
         let mut me = Self {
-            base: ControlBase::new(layout, true),
+            base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | extra),
             flags,
             cells: v,
             cell_size: Size::new(2, 1),
             size,
             surface: Surface::new(1, 1),
+            scrollbars: ScrollBars::new(has_scrollbars),
+            left_scroll: 0,
+            top_scroll: 0,
         };
         me.set_size_bounds(1, 1, u16::MAX, u16::MAX);
         me
     }
+    pub fn cell(&self, row: u32, column: u32) -> Option<&Cell> {
+        self.cells.get(row as usize * self.size.width as usize + column as usize).and_then(|cell| cell.as_ref())
+    }
+    #[inline(always)]
+    fn content_width(&self) -> u64 {
+        self.size.width as u64 * self.cell_size.width as u64
+    }
+    #[inline(always)]
+    fn content_height(&self) -> u64 {
+        self.size.height as u64 * self.cell_size.height as u64
+    }
+    fn paint_cell(&mut self, row: u32, column: u32, x: i32, y: i32) {
+        let idx = row as usize * self.size.width as usize + column as usize;
+        if idx >= self.cells.len() {
+            return;
+        }
+        let cell = &self.cells[idx];
+        if cell.is_none() {
+            return;
+        }
+        let cell = cell.as_ref().unwrap();
+        cell.paint(&mut self.surface, x, y, self.cell_size);
+    }
     fn update_view(&mut self) {
         self.surface.clear(Character::with_attributes(' ', self.theme().chart.background));
-        let max_width = self.size.width as usize * self.cell_size.width as usize;
-        let max_height = self.size.height as usize * self.cell_size.height as usize;
+        if self.flags.contains(Flags::ScrollBars) {
+            self.scrollbars.update(self.content_width(), self.content_height(), self.size());
+        }
+        let start_column = self.left_scroll / self.cell_size.width;
+        let start_row = self.top_scroll / self.cell_size.height;
+        let start_x = (start_column * self.cell_size.width) as i32 - self.left_scroll as i32;
+        let start_y = (start_row * self.cell_size.height) as i32 - self.top_scroll as i32;
+        let height = self.size.height as i32;
+        let width = self.size.width as i32;
+        let mut y = start_y;
+        let mut row = start_row;
+        while y < height {
+            let mut x = start_x;
+            let mut column = start_column;
+            while x < width {
+                self.paint_cell(row, column, x, y);
+                x += self.cell_size.width as i32;
+                column += 1;
+            }
+            y += self.cell_size.height as i32;
+            row += 1;
+        }
     }
 }
 
 impl OnPaint for HeatMap {
-    fn on_paint(&self, surface: &mut Surface, _theme: &Theme) {
+    fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
+        if self.has_focus() && self.flags.contains(Flags::ScrollBars) {
+            self.scrollbars.paint(surface, theme, self);
+            surface.reduce_clip_by(0, 0, 1, 1);
+        }
         surface.draw_surface(0, 0, &self.surface);
     }
 }
@@ -53,6 +112,25 @@ impl OnPaint for HeatMap {
 impl OnResize for HeatMap {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.surface.resize(new_size);
+        if self.flags.contains(Flags::ScrollBars) {
+            self.scrollbars.resize(self.content_width(), self.content_height(), &self.base);
+        }
         self.update_view();
+    }
+}
+
+impl OnMouseEvent for HeatMap {
+    fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
+        if !self.flags.contains(Flags::ScrollBars) {
+            return EventProcessStatus::Ignored;
+        }
+        if self.scrollbars.process_mouse_event(event) {
+            self.update_view();
+            EventProcessStatus::Processed
+        } else if self.scrollbars.should_repaint() {
+            EventProcessStatus::Processed
+        } else {
+            EventProcessStatus::Ignored
+        }
     }
 }
