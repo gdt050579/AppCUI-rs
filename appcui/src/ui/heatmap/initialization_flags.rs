@@ -9,4 +9,8 @@ pub enum Flags {
     ///
     /// The right and bottom margins grow while the heat map has focus so the bars stay visible.
     ScrollBars = 1,
+    /// Adds one empty character around the heat map.
+    ///
+    /// The border is part of the image. It shows at the start and at the end of the scroll, and it moves with the cells. The border uses the chart background.
+    Margins = 2,
 }

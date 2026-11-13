@@ -225,20 +225,25 @@ impl<T: Number> HeatMap<T> {
     }
 
     #[inline(always)]
+    fn margin(&self) -> u32 {
+        u32::from(self.flags.contains(Flags::Margins))
+    }
+    #[inline(always)]
     fn content_width(&self) -> u64 {
-        self.size.width as u64 * self.cell_size.width as u64
+        self.size.width as u64 * self.cell_size.width as u64 + self.margin() as u64 * 2
     }
     #[inline(always)]
     fn content_height(&self) -> u64 {
-        self.size.height as u64 * self.cell_size.height as u64
+        self.size.height as u64 * self.cell_size.height as u64 + self.margin() as u64 * 2
     }
     fn paint_cell(&mut self, row: u32, column: u32, params: &mut PaintParams) {
         // a column past the last one would otherwise wrap to the next row
         let Some(idx) = self.index(row, column) else {
             return;
         };
-        let x = column as i64 * self.cell_size.width as i64 - self.left_scroll as i64;
-        let y = row as i64 * self.cell_size.height as i64 - self.top_scroll as i64;
+        let margin = self.margin() as i64;
+        let x = column as i64 * self.cell_size.width as i64 - self.left_scroll as i64 + margin;
+        let y = row as i64 * self.cell_size.height as i64 - self.top_scroll as i64 + margin;
         let view = self.surface.size();
         if x >= view.width as i64 || y >= view.height as i64 || x + self.cell_size.width as i64 <= 0 || y + self.cell_size.height as i64 <= 0 {
             return;
@@ -295,10 +300,14 @@ impl<T: Number> HeatMap<T> {
         // only the rows and columns that are (at least partly) visible
         let view = self.surface.size();
         let (cw, ch) = (self.cell_size.width as u64, self.cell_size.height as u64);
-        let first_column = (self.left_scroll as u64 / cw) as u32;
-        let first_row = (self.top_scroll as u64 / ch) as u32;
-        let end_column = (self.left_scroll as u64 + view.width as u64).div_ceil(cw).min(self.size.width as u64) as u32;
-        let end_row = (self.top_scroll as u64 + view.height as u64).div_ceil(ch).min(self.size.height as u64) as u32;
+        if cw == 0 || ch == 0 {
+            return;
+        }
+        let margin = self.margin() as u64;
+        let first_column = ((self.left_scroll as u64).saturating_sub(margin) / cw) as u32;
+        let first_row = ((self.top_scroll as u64).saturating_sub(margin) / ch) as u32;
+        let end_column = (self.left_scroll as u64 + view.width as u64).saturating_sub(margin).div_ceil(cw).min(self.size.width as u64) as u32;
+        let end_row = (self.top_scroll as u64 + view.height as u64).saturating_sub(margin).div_ceil(ch).min(self.size.height as u64) as u32;
         let mut params = self.paint_params();
         for row in first_row..end_row {
             for column in first_column..end_column {
