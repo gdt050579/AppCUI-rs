@@ -64,7 +64,7 @@ impl<T: Number + 'static> HeatMap<T> {
     /// ```rust, no_run
     /// use appcui::prelude::*;
     ///
-    /// let heatmap = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// let heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
     /// ```
     pub fn new(layout: Layout, size: Size, flags: Flags) -> Self {
         let count = size.width as usize * size.height as usize;
