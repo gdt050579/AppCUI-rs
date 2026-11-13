@@ -1,5 +1,5 @@
 use crate::{
-    graphics::{CharAttribute, Character, Rect, Size, Surface}, prelude::Number,
+    graphics::{CharAttribute, Character, Color, Rect, Size, Surface}, prelude::Number,
 };
 
 pub(crate) struct PaintParams {
@@ -51,6 +51,11 @@ impl<T: Number> Cell<T> {
         }
     }
     fn attribute_from_range(min: CharAttribute, max: CharAttribute, percentage: u8) -> CharAttribute {
+        let fore = Self::color_from_range(min.foreground, max.foreground, percentage);
+        let back = Self::color_from_range(min.background, max.background, percentage);
+        CharAttribute::with_color(fore, back)
+    }
+    fn color_from_range(min: Color, max: Color, percentage: u8) -> Color {
         todo!()
     }
     fn percentage_to_char(list: &[char], proc: u8) -> char {

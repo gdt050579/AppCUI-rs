@@ -232,9 +232,6 @@ impl<T: Number> HeatMap<T> {
     fn content_height(&self) -> u64 {
         self.size.height as u64 * self.cell_size.height as u64
     }
-    // Paints one cell on the cached surface. The position comes from the scroll offsets;
-    // a cell outside the grid or outside the visible area is skipped. The cell is first
-    // cleared to the background, so this also works for a cell that has just been emptied.
     fn paint_cell(&mut self, row: u32, column: u32, params: &mut PaintParams) {
         // a column past the last one would otherwise wrap to the next row
         let Some(idx) = self.index(row, column) else {
