@@ -63,7 +63,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 
 
 ## ✨ Features
-- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, bar charts, pie charts, line charts, usage charts, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
+- [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, bar charts, pie charts, line charts, usage charts, heatmaps, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
 - [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors, or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
 - [x] menus and toolbars
 - [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, macOS via termios)
@@ -132,6 +132,7 @@ AppCUI-rs ships with a rich set of controls and widgets for building terminal us
 - **PieChart** — pie chart for a numeric series (scale, axes, and per-slice appearance)
 - **LineChart** — line chart for a numeric series (scale, axes, and per-point appearance)
 - **UsageChart** — horizontal bar split into segments that share one total (per-segment fill and a hover tooltip)
+- **HeatMap** — grid of cells with values, labels, and colors
 
 ### Text
 - **TextField** — single-line text input
