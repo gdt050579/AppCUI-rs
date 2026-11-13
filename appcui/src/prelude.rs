@@ -99,6 +99,7 @@ pub use super::ui::linechart::events::GenericLineChartEvents;
 pub use super::ui::usagechart;
 pub use super::ui::usagechart::events::UsageChartEvents;
 pub use super::ui::heatmap;
+pub use super::ui::heatmap::events::GenericHeatMapEvents;
 pub use super::ui::vsplitter;
 pub use super::ui::window::events::ModalWindowMethods;
 pub use super::ui::window::events::ToolBarEvents;

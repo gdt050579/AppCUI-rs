@@ -436,6 +436,43 @@ if std::any::TypeId::of::<$(TYPE)>() == type_id {
 }
 ";
 
+pub(crate) static HEATMAP_TRAIT_DEF: &str = "
+trait HeatMapEvents<T: Number+'static> {
+    fn on_cell_selected(&mut self, handle: Handle<HeatMap<T>>, row: u32, column: u32) -> EventProcessStatus;
+    fn on_clear_selection(&mut self, handle: Handle<HeatMap<T>>) -> EventProcessStatus;
+}
+impl$(TEMPLATE_TYPE) GenericHeatMapEvents for $(STRUCT_NAME)$(TEMPLATE_DEF) {
+    fn on_cell_selected(&mut self, handle: Handle<()>, type_id: std::any::TypeId, row: u32, column: u32) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HEATMAP_ON_CELL_SELECTED)
+        return EventProcessStatus::Ignored;
+    }
+    fn on_clear_selection(&mut self, handle: Handle<()>, type_id: std::any::TypeId) -> EventProcessStatus {
+        $(TYPE_ID_TRANSLATION_FOR_HEATMAP_ON_CLEAR_SELECTION)
+        return EventProcessStatus::Ignored;
+    }
+}
+";
+
+pub(crate) static HEATMAP_ON_CELL_SELECTED_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HeatMap<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return HeatMapEvents::<$(TYPE)>::on_cell_selected(self, h, row, column);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
+pub(crate) static HEATMAP_ON_CLEAR_SELECTION_DEF: &str = "
+if std::any::TypeId::of::<$(TYPE)>() == type_id {
+    let h: Handle<HeatMap<$(TYPE)>> = unsafe { handle.unsafe_cast() };
+    if self.control(h).is_some() {
+        return HeatMapEvents::<$(TYPE)>::on_clear_selection(self, h);
+    }
+    return EventProcessStatus::Ignored;
+}
+";
+
 pub(crate) static LISTVIEW_ON_CURRENT_ITEM_CHANGED_DEF: &str = "
 if std::any::TypeId::of::<$(TYPE)>() == type_id {
     let h: Handle<ListView<$(TYPE)>> = unsafe { handle.unsafe_cast() };

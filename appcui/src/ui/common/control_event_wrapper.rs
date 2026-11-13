@@ -29,6 +29,8 @@ use crate::ui::{
     linechart::events::GenericLineChartEvents,
     usagechart,
     usagechart::events::UsageChartEvents,
+    heatmap,
+    heatmap::events::GenericHeatMapEvents,
     hslider, hslider::events::GenericHSliderEvents, pathfinder, treeview, markdown_composer::events::MarkdownComposerEvents,
 };
 
@@ -74,6 +76,7 @@ pub(crate) enum ControlEventData {
     PieChart(piechart::events::EventData),
     LineChart(linechart::events::EventData),
     UsageChart(usagechart::events::EventData),
+    HeatMap(heatmap::events::EventData),
 }
 
 pub(crate) struct ControlEvent {
@@ -262,6 +265,12 @@ impl ControlEvent {
             ControlEventData::UsageChart(data) => match data.index {
                 Some(index) => UsageChartEvents::on_usage_segment_selected(receiver, self.emitter.cast(), index as usize),
                 None => UsageChartEvents::on_clear_selection(receiver, self.emitter.cast()),
+            },
+            ControlEventData::HeatMap(data) => match data.event_type {
+                heatmap::events::EventType::CellSelected { row, column } => {
+                    GenericHeatMapEvents::on_cell_selected(receiver, self.emitter.cast(), data.type_id, row, column)
+                }
+                heatmap::events::EventType::ClearSelection => GenericHeatMapEvents::on_clear_selection(receiver, self.emitter.cast(), data.type_id),
             },
         }
     }

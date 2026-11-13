@@ -1,12 +1,38 @@
+use super::events::{EventData, EventType};
 use super::{Cell, CellAttribute, CellFill, Flags, PaintParams, TooltipFormat};
 use crate::prelude::*;
 use crate::utils::TempString;
+use std::any::TypeId;
 
 #[CustomControl(overwrite = OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal = true)]
 /// A heat map control.
 ///
 /// Hovering a cell shows a tooltip. See [`TooltipFormat`](super::TooltipFormat).
-pub struct HeatMap<T> where T: Number {
+/// Clicking a cell selects it. Clicking an empty cell, or the margin around the grid,
+/// clears the selection. The selection stays visible when the heat map loses the focus:
+/// the cell is outlined and, with [`Flags::DimCellsOnSelection`](super::Flags::DimCellsOnSelection),
+/// the others are dimmed. A disabled heat map is drawn with the inactive color and shows no selection.
+///
+/// When the heat map has the focus, the arrow keys move the selection. Empty cells are
+/// skipped, and the selection wraps around. `Left` and `Right` walk the grid in row order.
+/// `Up` and `Down` walk it in column order. `Escape` clears the selection.
+///
+/// | Key      | Action                                      |
+/// | -------- | ------------------------------------------- |
+/// | `Right`  | selects the next cell in the row            |
+/// | `Left`   | selects the previous cell in the row        |
+/// | `Down`   | selects the next cell in the column         |
+/// | `Up`     | selects the previous cell in the column     |
+/// | `Escape` | clears the selection                        |
+///
+/// `Ctrl` with an arrow key scrolls the heat map by one cell and does not change the selection.
+/// Selecting a cell or clearing the selection this way raises the events of
+/// [`GenericHeatMapEvents`](super::events::GenericHeatMapEvents). With the `#[Window]` macro,
+/// use `events = HeatMapEvents<T>`.
+pub struct HeatMap<T>
+where
+    T: Number + 'static,
+{
     flags: Flags,
     cells: Vec<Option<Cell<T>>>,
     size: Size,
@@ -19,12 +45,13 @@ pub struct HeatMap<T> where T: Number {
     default_fill: Option<CellFill>,
     tooltip_format: TooltipFormat,
     hovered: Option<(u32, u32)>,
+    selected: Option<(u32, u32)>,
     min_value: f64,
     max_value: f64,
 }
 
 #[allow(private_bounds)]
-impl<T: Number> HeatMap<T> {
+impl<T: Number + 'static> HeatMap<T> {
     /// Creates a heat map with the given layout and flags.
     ///
     /// # Example
@@ -59,6 +86,7 @@ impl<T: Number> HeatMap<T> {
             default_fill: None,
             tooltip_format: TooltipFormat::LabelAndValue,
             hovered: None,
+            selected: None,
             min_value: 0.0,
             max_value: 0.0,
         };
@@ -80,13 +108,23 @@ impl<T: Number> HeatMap<T> {
     }
 
     /// Empties the cell at `row` and `column`. A position outside the heat map is ignored.
+    ///
+    /// If that cell was selected, the selection is cleared as well. This does not raise
+    /// [`on_clear_selection`](super::events::GenericHeatMapEvents::on_clear_selection).
     pub fn clear(&mut self, row: u32, column: u32) {
         self.replace(row, column, None);
+        if self.selected == Some((row, column)) {
+            self.selected = None;
+        }
     }
 
     /// Empties every cell.
+    ///
+    /// The selection is cleared as well. This does not raise
+    /// [`on_clear_selection`](super::events::GenericHeatMapEvents::on_clear_selection).
     pub fn clear_all(&mut self) {
         self.cells.iter_mut().for_each(|c| *c = None);
+        self.selected = None;
         self.refresh_all();
     }
 
@@ -206,6 +244,39 @@ impl<T: Number> HeatMap<T> {
         self.tooltip_format
     }
 
+    /// Returns the selected cell as `(row, column)`, or `None` when nothing is selected.
+    pub fn selected_cell(&self) -> Option<(u32, u32)> {
+        self.selected
+    }
+
+    /// Selects the cell at `(row, column)`, or clears the selection when `cell` is `None`.
+    ///
+    /// A position outside the heat map is ignored. An empty cell can be selected. The cell
+    /// is outlined and, with [`Flags::DimCellsOnSelection`](super::Flags::DimCellsOnSelection),
+    /// the others are dimmed. The outline stays when the heat map loses the focus.
+    ///
+    /// This does not raise [`GenericHeatMapEvents`](super::events::GenericHeatMapEvents).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(4, 3), heatmap::Flags::None);
+    /// heatmap.set_values([1, 5, 9, 2, 7, 3, 8, 4, 6, 0, 1, 2]);
+    /// heatmap.set_selected_cell(Some((1, 2)));
+    /// heatmap.set_selected_cell(None);
+    /// ```
+    pub fn set_selected_cell(&mut self, cell: Option<(u32, u32)>) {
+        let Some((row, column)) = cell else {
+            self.selected = None;
+            return;
+        };
+        if self.index(row, column).is_none() {
+            return;
+        }
+        self.selected = Some((row, column));
+    }
+
     #[inline(always)]
     fn index(&self, row: u32, column: u32) -> Option<usize> {
         if row < self.size.height && column < self.size.width {
@@ -309,7 +380,8 @@ impl<T: Number> HeatMap<T> {
         params.y = y as i32;
         let background = Character::with_attributes(' ', self.theme().chart.background);
         for line in 0..self.cell_size.height as i32 {
-            self.surface.fill_horizontal_line_with_size(params.x, params.y + line, self.cell_size.width, background);
+            self.surface
+                .fill_horizontal_line_with_size(params.x, params.y + line, self.cell_size.width, background);
         }
         if let Some(cell) = self.cells[idx].as_ref() {
             let value = cell.value.to_f64();
@@ -449,6 +521,172 @@ impl<T: Number> HeatMap<T> {
         };
         self.scroll_to(left, top);
     }
+    fn cell_view_rect(&self, row: u32, column: u32) -> Rect {
+        let margin = self.margin() as i64;
+        let x = column as i64 * self.cell_size.width as i64 - self.left_scroll as i64 + margin;
+        let y = row as i64 * self.cell_size.height as i64 - self.top_scroll as i64 + margin;
+        Rect::with_size(x as i32, y as i32, self.cell_size.width as u16, self.cell_size.height as u16)
+    }
+    fn raise_selection_event(&self, cell: Option<(u32, u32)>) {
+        let event_type = match cell {
+            Some((row, column)) => EventType::CellSelected { row, column },
+            None => EventType::ClearSelection,
+        };
+        self.raise_event(ControlEvent {
+            emitter: self.handle,
+            receiver: self.event_processor,
+            data: ControlEventData::HeatMap(EventData {
+                type_id: TypeId::of::<T>(),
+                event_type,
+            }),
+        });
+    }
+    fn select_cell_from_user(&mut self, cell: Option<(u32, u32)>) -> bool {
+        let cell = cell.filter(|&(row, column)| self.index(row, column).is_some());
+        if self.selected == cell {
+            return false;
+        }
+        self.selected = cell;
+        self.raise_selection_event(cell);
+        true
+    }
+    // The next filled cell after the selection (or before it), wrapping around.
+    // Horizontal moves walk the rows; vertical moves walk the columns. Empty cells are skipped.
+    // With nothing selected, a forward move starts at the first filled cell and a backward move at the last.
+    fn neighbor(&self, vertical: bool, forward: bool) -> Option<(u32, u32)> {
+        let width = self.size.width as usize;
+        let height = self.size.height as usize;
+        if width == 0 || height == 0 || self.cells.is_empty() {
+            return None;
+        }
+        let count = width * height;
+        let index_of = |row: u32, column: u32| -> usize {
+            if vertical {
+                column as usize * height + row as usize
+            } else {
+                row as usize * width + column as usize
+            }
+        };
+        let cell_of = |index: usize| -> (u32, u32) {
+            if vertical {
+                ((index % height) as u32, (index / height) as u32)
+            } else {
+                ((index / width) as u32, (index % width) as u32)
+            }
+        };
+        let start = match self.selected {
+            Some((row, column)) => index_of(row, column),
+            None => {
+                if forward {
+                    count - 1
+                } else {
+                    0
+                }
+            }
+        };
+        let mut index = start;
+        for _ in 0..count {
+            index = if forward {
+                if index + 1 >= count {
+                    0
+                } else {
+                    index + 1
+                }
+            } else if index == 0 {
+                count - 1
+            } else {
+                index - 1
+            };
+            let (row, column) = cell_of(index);
+            if self.cell(row, column).is_some() {
+                return Some((row, column));
+            }
+        }
+        None
+    }
+    fn move_selection(&mut self, vertical: bool, forward: bool) {
+        match self.neighbor(vertical, forward) {
+            Some((row, column)) => {
+                self.select_cell_from_user(Some((row, column)));
+                self.reveal_cell(row, column);
+            }
+            None => {
+                self.select_cell_from_user(None);
+            }
+        }
+    }
+    fn reveal_cell(&mut self, row: u32, column: u32) {
+        let (cw, ch) = (self.cell_size.width, self.cell_size.height);
+        if cw == 0 || ch == 0 {
+            return;
+        }
+        let view = self.size();
+        if view.width == 0 || view.height == 0 {
+            return;
+        }
+        let margin = self.margin();
+        let cell_left = column.saturating_mul(cw).saturating_add(margin);
+        let cell_top = row.saturating_mul(ch).saturating_add(margin);
+        let cell_right = cell_left.saturating_add(cw);
+        let cell_bottom = cell_top.saturating_add(ch);
+        let mut left = self.left_scroll;
+        let mut top = self.top_scroll;
+        if cell_left < left {
+            left = cell_left;
+        } else if cell_right > left.saturating_add(view.width) {
+            left = cell_right.saturating_sub(view.width);
+        }
+        if cell_top < top {
+            top = cell_top;
+        } else if cell_bottom > top.saturating_add(view.height) {
+            top = cell_bottom.saturating_sub(view.height);
+        }
+        if left != self.left_scroll || top != self.top_scroll {
+            self.scroll_to(left, top);
+        }
+    }
+    fn paint_selection_border(&self, surface: &mut Surface, content: Rect, attr: CharAttribute) {
+        let view = surface.size();
+        let view_w = view.width as i32;
+        let view_h = view.height as i32;
+        if view_w <= 0 || view_h <= 0 || self.cell_size.width == 0 {
+            return;
+        }
+        if content.right() < 0 || content.bottom() < 0 || content.left() >= view_w || content.top() >= view_h {
+            return;
+        }
+        let right_most = view_w - 1;
+        let bottom_most = view_h - 1;
+        let left = (content.left() - 1).clamp(0, right_most);
+        let right = (content.right() + 1).clamp(0, right_most);
+        match self.cell_size.height {
+            0 => {}
+            1 => {
+                let y = content.top();
+                if (0..=bottom_most).contains(&y) {
+                    surface.write_char(left, y, Character::with_attributes('[', attr));
+                    surface.write_char(right, y, Character::with_attributes(']', attr));
+                }
+            }
+            2 => {
+                let y0 = content.top();
+                let y1 = content.bottom();
+                if (0..=bottom_most).contains(&y0) {
+                    surface.write_char(left, y0, Character::with_attributes('┌', attr));
+                    surface.write_char(right, y0, Character::with_attributes('┐', attr));
+                }
+                if (0..=bottom_most).contains(&y1) {
+                    surface.write_char(left, y1, Character::with_attributes('└', attr));
+                    surface.write_char(right, y1, Character::with_attributes('┘', attr));
+                }
+            }
+            _ => {
+                let top = content.top().clamp(0, bottom_most);
+                let bottom = content.bottom().clamp(0, bottom_most);
+                surface.draw_rect(Rect::new(left, top, right, bottom), LineType::Single, attr);
+            }
+        }
+    }
     fn update_view(&mut self) {
         self.surface.clear(Character::with_attributes(' ', self.theme().chart.background));
         if self.flags.contains(Flags::ScrollBars) {
@@ -463,8 +701,14 @@ impl<T: Number> HeatMap<T> {
         let margin = self.margin() as u64;
         let first_column = ((self.left_scroll as u64).saturating_sub(margin) / cw) as u32;
         let first_row = ((self.top_scroll as u64).saturating_sub(margin) / ch) as u32;
-        let end_column = (self.left_scroll as u64 + view.width as u64).saturating_sub(margin).div_ceil(cw).min(self.size.width as u64) as u32;
-        let end_row = (self.top_scroll as u64 + view.height as u64).saturating_sub(margin).div_ceil(ch).min(self.size.height as u64) as u32;
+        let end_column = (self.left_scroll as u64 + view.width as u64)
+            .saturating_sub(margin)
+            .div_ceil(cw)
+            .min(self.size.width as u64) as u32;
+        let end_row = (self.top_scroll as u64 + view.height as u64)
+            .saturating_sub(margin)
+            .div_ceil(ch)
+            .min(self.size.height as u64) as u32;
         let mut params = self.paint_params();
         for row in first_row..end_row {
             for column in first_column..end_column {
@@ -474,17 +718,44 @@ impl<T: Number> HeatMap<T> {
     }
 }
 
-impl<T: Number> OnPaint for HeatMap<T> {
+impl<T: Number + 'static> OnPaint for HeatMap<T> {
     fn on_paint(&self, surface: &mut Surface, theme: &Theme) {
         if self.has_focus() && self.flags.contains(Flags::ScrollBars) {
             self.scrollbars.paint(surface, theme, self);
             surface.reduce_clip_by(0, 0, 1, 1);
         }
-        surface.draw_surface(0, 0, &self.surface);
+        if !self.is_enabled() {
+            let attr = theme.chart.inactive;
+            surface.draw_surface_with_transform(0, 0, &self.surface, |ch, _| Some(Character::with_attributes(ch.code, attr)));
+            return;
+        }
+        // the selection stays visible after the heat map loses the focus, as in the usage chart
+        let Some((row, column)) = self.selected else {
+            surface.draw_surface(0, 0, &self.surface);
+            return;
+        };
+        if self.index(row, column).is_none() {
+            surface.draw_surface(0, 0, &self.surface);
+            return;
+        }
+        let content = self.cell_view_rect(row, column);
+        if self.flags.contains(Flags::DimCellsOnSelection) {
+            let attr = theme.chart.inactive;
+            surface.draw_surface_with_transform(0, 0, &self.surface, |ch, p| {
+                if content.contains(p) {
+                    Some(ch)
+                } else {
+                    Some(Character::with_attributes(ch.code, attr))
+                }
+            });
+        } else {
+            surface.draw_surface(0, 0, &self.surface);
+        }
+        self.paint_selection_border(surface, content, theme.chart.selection_border);
     }
 }
 
-impl<T: Number> OnResize for HeatMap<T> {
+impl<T: Number + 'static> OnResize for HeatMap<T> {
     fn on_resize(&mut self, _old_size: Size, new_size: Size) {
         self.surface.resize(new_size);
         if self.flags.contains(Flags::ScrollBars) {
@@ -495,7 +766,7 @@ impl<T: Number> OnResize for HeatMap<T> {
     }
 }
 
-impl<T: Number> OnKeyPressed for HeatMap<T> {
+impl<T: Number + 'static> OnKeyPressed for HeatMap<T> {
     fn on_key_pressed(&mut self, key: Key, _character: char) -> EventProcessStatus {
         match key.value() {
             key!("Ctrl+Left") => self.scroll_by_cells(-1, 0),
@@ -504,13 +775,23 @@ impl<T: Number> OnKeyPressed for HeatMap<T> {
             key!("Ctrl+Down") => self.scroll_by_cells(0, 1),
             key!("Ctrl+Home") => self.scroll_to(0, 0),
             key!("Ctrl+End") => self.scroll_to(u32::MAX, u32::MAX),
+            key!("Left") => self.move_selection(false, false),
+            key!("Right") => self.move_selection(false, true),
+            key!("Up") => self.move_selection(true, false),
+            key!("Down") => self.move_selection(true, true),
+            key!("Escape") => {
+                if self.select_cell_from_user(None) {
+                    return EventProcessStatus::Processed;
+                }
+                return EventProcessStatus::Ignored;
+            }
             _ => return EventProcessStatus::Ignored,
         }
         EventProcessStatus::Processed
     }
 }
 
-impl<T: Number> OnMouseEvent for HeatMap<T> {
+impl<T: Number + 'static> OnMouseEvent for HeatMap<T> {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
         if self.scrollbars.process_mouse_event(event) {
             self.scroll_to(self.scrollbars.horizontal_index() as u32, self.scrollbars.vertical_index() as u32);
@@ -524,7 +805,7 @@ impl<T: Number> OnMouseEvent for HeatMap<T> {
             MouseEvent::Over(point) => {
                 let previous = self.hovered;
                 self.hover_at(point.x, point.y);
-                if self.hovered == previous {   
+                if self.hovered == previous {
                     EventProcessStatus::Ignored
                 } else {
                     EventProcessStatus::Processed
@@ -538,6 +819,14 @@ impl<T: Number> OnMouseEvent for HeatMap<T> {
                     MouseWheelDirection::Down => self.scroll_by_cells(0, 1),
                 }
                 EventProcessStatus::Processed
+            }
+            MouseEvent::Pressed(data) => {
+                let cell = self.cell_at(data.x, data.y).filter(|&(row, column)| self.cell(row, column).is_some());
+                if self.select_cell_from_user(cell) {
+                    EventProcessStatus::Processed
+                } else {
+                    EventProcessStatus::Ignored
+                }
             }
             _ => EventProcessStatus::Ignored,
         };

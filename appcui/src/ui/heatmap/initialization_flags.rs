@@ -13,6 +13,11 @@ pub enum Flags {
     ///
     /// The border is part of the image. It shows at the start and at the end of the scroll, and it moves with the cells. The border uses the chart background.
     Margins = 2,
+    /// Draws every cell except the selected one with the inactive chart color.
+    ///
+    /// The selected cell keeps its own color and is outlined. The outline stays
+    /// visible when the heat map does not have the focus.
+    DimCellsOnSelection = 4,
 }
 
 /// What the hover tooltip of a cell shows.
