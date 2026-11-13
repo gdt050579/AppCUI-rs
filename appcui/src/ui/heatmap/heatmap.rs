@@ -114,7 +114,7 @@ impl<T: Number + 'static> HeatMap<T> {
     ///
     /// If that cell was selected, the selection is cleared as well. This does not raise
     /// [`on_clear_selection`](super::events::GenericHeatMapEvents::on_clear_selection).
-    pub fn clear(&mut self, row: u32, column: u32) {
+    pub fn clear_cell(&mut self, row: u32, column: u32) {
         self.replace(row, column, None);
         if self.selected == Some((row, column)) {
             self.selected = None;
@@ -202,23 +202,34 @@ impl<T: Number + 'static> HeatMap<T> {
         self.refresh_all();
     }
 
-    /// Sets the label of the cell at `row` and `column`.
+    /// Changes the cell at `row` and `column`.
     ///
-    /// The label is shown by [`TooltipFormat::Label`](super::TooltipFormat::Label),
-    /// [`TooltipFormat::LabelAndValue`](super::TooltipFormat::LabelAndValue), and
-    /// [`TooltipFormat::LabelAndPercentage`](super::TooltipFormat::LabelAndPercentage).
-    /// An empty label is allowed. A position outside the heat map, or an empty cell, is ignored.
-    pub fn set_label(&mut self, row: u32, column: u32, label: &str) {
-        let Some(cell) = self.index(row, column).and_then(|idx| self.cells[idx].as_mut()) else {
+    /// The callback receives that cell. A position outside the heat map, or an empty cell, is
+    /// ignored and the callback is not called. If the value changes the minimum or the maximum,
+    /// every cell is repainted; otherwise only this cell is. The hover tooltip is updated when
+    /// it is showing this cell.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.set(2, 3, 17);
+    /// heatmap.update_cell(2, 3, |cell| {
+    ///     cell.set_label("Peak");
+    /// });
+    /// ```
+    pub fn update_cell(&mut self, row: u32, column: u32, f: impl FnOnce(&mut Cell<T>)) {
+        let Some(idx) = self.index(row, column) else {
             return;
         };
-        if cell.label() == label {
+        let Some(cell) = self.cells[idx].as_mut() else {
             return;
-        }
-        cell.set_label(label);
-        if self.hovered == Some((row, column)) {
-            self.update_tooltip();
-        }
+        };
+        let old_value = cell.value.to_f64();
+        f(cell);
+        let new_value = self.cells[idx].as_ref().map(|cell| cell.value.to_f64());
+        self.refresh_cell(row, column, Some(old_value), new_value);
     }
 
     /// Sets what the hover tooltip of a cell shows.
@@ -297,12 +308,16 @@ impl<T: Number + 'static> HeatMap<T> {
         let old_value = self.cells[idx].as_ref().map(|c| c.value.to_f64());
         let new_value = new.as_ref().map(|c| c.value.to_f64());
         self.cells[idx] = new;
+        self.refresh_cell(row, column, old_value, new_value);
+    }
 
-        // The range can only change if the old value was an extreme (it may have been the
-        // only one) or the new value falls outside the current range. NaN never counts.
+    // Repaints after one cell's value may have changed. The range can only change if the old
+    // value was an extreme (it may have been the only one) or the new value falls outside the
+    // current range. NaN never counts. An empty map has the range [0, 0], so a first value is
+    // handled by `new_outside`.
+    fn refresh_cell(&mut self, row: u32, column: u32, old_value: Option<f64>, new_value: Option<f64>) {
         let old_was_extreme = old_value.is_some_and(|v| v == self.min_value || v == self.max_value);
         let new_outside = new_value.is_some_and(|v| v < self.min_value || v > self.max_value);
-        // (an empty map has the range [0, 0], so a first value is handled by `new_outside`)
         if old_was_extreme || new_outside {
             let (min, max) = (self.min_value, self.max_value);
             self.update_min_max();

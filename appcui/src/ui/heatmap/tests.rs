@@ -67,7 +67,7 @@ fn check_click_selects_and_clears() {
 fn check_click_on_empty_cell_clears() {
     in_app(|| {
         let mut map = filled(2, 2);
-        map.clear(0, 1);
+        map.clear_cell(0, 1);
         assert!(is_processed(click(&mut map, 0, 0)));
         assert_eq!(map.selected_cell(), Some((0, 0)));
         assert!(is_processed(click(&mut map, 2, 0)));
@@ -96,8 +96,8 @@ fn check_margins_shift_the_hit_test() {
 fn check_arrow_keys_wrap_and_skip_empty_cells() {
     in_app(|| {
         let mut map = filled(2, 2);
-        map.clear(0, 1);
-        map.clear(1, 0);
+        map.clear_cell(0, 1);
+        map.clear_cell(1, 0);
         // filled cells are (0, 0) and (1, 1)
         assert!(is_processed(press(&mut map, key!("Right"))));
         assert_eq!(map.selected_cell(), Some((0, 0)));
@@ -160,7 +160,7 @@ fn check_set_selected_cell_and_clear() {
         map.set_selected_cell(None);
         assert_eq!(map.selected_cell(), None);
         map.set_selected_cell(Some((0, 1)));
-        map.clear(0, 1);
+        map.clear_cell(0, 1);
         assert_eq!(map.selected_cell(), None);
         map.set_selected_cell(Some((0, 0)));
         map.clear_all();

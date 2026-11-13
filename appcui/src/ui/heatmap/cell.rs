@@ -21,18 +21,22 @@ pub(crate) enum CellFill {
     Shades,
     Custom(char),
 }
-pub(crate) struct Cell<T: Number> {
+pub struct Cell<T: Number> {
     pub(crate) value: T,
-    label: String,
-    attr: Option<CellAttribute>,
-    fill: Option<CellFill>,
+    pub(crate) label: String,
+    pub(crate) attr: Option<CellAttribute>,
+    pub(crate) fill: Option<CellFill>,
 }
 impl<T: Number> Cell<T> {
     const SHADES: &[char] = &[' ', '░', '▒', '▓', '█'];
-    pub(super) fn label(&self) -> &str {
+    /// The label shown by tooltip formats that include a label.
+    pub fn label(&self) -> &str {
         &self.label
     }
-    pub(super) fn set_label(&mut self, label: &str) {
+    /// Sets the label shown by tooltip formats that include a label.
+    ///
+    /// An empty label is allowed.
+    pub fn set_label(&mut self, label: &str) {
         self.label.clear();
         self.label.push_str(label);
     }

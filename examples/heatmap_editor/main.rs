@@ -325,7 +325,7 @@ impl HeatMapEditor {
                 for column in 0..COLUMNS {
                     let label = &labels[index(row, column)];
                     if !label.is_empty() {
-                        map.set_label(row, column, label);
+                        map.update_cell(row, column, |cell| cell.set_label(label));
                     }
                 }
             }
@@ -339,9 +339,9 @@ impl HeatMapEditor {
         self.with_chart(|map| match value {
             Some(value) => {
                 map.set(row, column, value);
-                map.set_label(row, column, &label);
+                map.update_cell(row, column, |cell| cell.set_label(&label));
             }
-            None => map.clear(row, column),
+            None => map.clear_cell(row, column),
         });
     }
 
@@ -472,7 +472,7 @@ impl HeatMapEditor {
         }
         self.labels[idx] = text;
         let label = self.labels[idx].clone();
-        self.with_chart(|map| map.set_label(row, column, &label));
+        self.with_chart(|map| map.update_cell(row, column, |cell| cell.set_label(&label)));
     }
 
     fn clear_selected(&mut self) {
