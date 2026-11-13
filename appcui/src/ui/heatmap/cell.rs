@@ -28,39 +28,45 @@ pub enum CellAttribute {
 }
 /// How a heat map cell is drawn.
 ///
-/// [`Shades`](Self::Shades) uses the cell's place between the smallest and the largest value
-/// to pick a character: a space, `░`, `▒`, `▓`, or `█`. [`Custom`](Self::Custom) repeats one
-/// character and ignores that place.
+/// Each variant except [`Custom`](Self::Custom) uses the cell's place between the
+/// smallest and the largest value to pick a character from its list, from a space at
+/// 0% to the last character at 100%. [`Custom`](Self::Custom) repeats one character
+/// and ignores that place.
 ///
 /// A cell with no fill of its own uses the heat map's default fill. With no default fill,
 /// the heat map uses [`Shades`](Self::Shades).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CellFill {
-    /// Shade characters chosen from the cell's value.
+    /// Space, `░`, `▒`, `▓`, `█`.
     Shades,
-    /// Dot characters chosen from the cell's value.
+    /// Space, `·`, `•`, `●`.
     Dots,
-    /// ASCII characters chosen from the cell's value.
+    /// Space, `.`, `:`, `-`, `=`, `+`, `x`, `#`, `%`, `@`.
     ASCII,
-    /// Circle characters chosen from the cell's value.
+    /// Space, `·`, `∘`, `○`, `◎`, `●`.
     Circles,
-    /// Square characters chosen from the cell's value.
+    /// Space, `▫`, `□`, `▪`, `■`.
     Squares,
-    /// Diamond characters chosen from the cell's value.
+    /// Space, `◇`, `◈`, `◆`.
     Diamonds,
-    /// Cross characters chosen from the cell's value.
+    /// Space, `·`, `+`, `✚`.
     Crosses,
-    /// Star characters chosen from the cell's value.
+    /// Space, `✧`, `✦`, `✶`, `✹`.
     Stars,
-    /// Asterisk characters chosen from the cell's value.
+    /// Space, `✢`, `✣`, `✤`, `✥`.
     Asterisks,
-    /// Flower characters chosen from the cell's value.
+    /// Space, `❀`, `❁`, `✿`.
     Flowers,
-    /// Plus characters chosen from the cell's value.
+    /// Space, `✛`, `✜`, `✚`.
     Pluses,
     /// Repeats this character for the whole cell.
     Custom(char),
 }
+/// One cell of a [`struct@super::HeatMap`].
+///
+/// A cell stores a value, a label, and an optional fill and attribute. A number becomes
+/// a cell with that value, an empty label, and the heat map's default fill and attribute.
+/// Build a cell that sets a label, fill, or attribute with [`CellBuilder`].
 pub struct Cell<T: Number> {
     pub(crate) value: T,
     pub(crate) label: String,
@@ -79,6 +85,9 @@ impl<T: Number> Cell<T> {
     const ASTERISKS: &[char] = &[' ', '✢', '✣', '✤', '✥'];
     const FLOWERS: &[char] = &[' ', '❀', '❁', '✿'];
     const PLUSES: &[char] = &[' ', '✛', '✜', '✚'];
+    /// The number stored in this cell.
+    ///
+    /// The heat map uses it for the fill character, the color blend, and the tooltip.
     pub fn value(&self) -> T {
         self.value
     }
@@ -315,6 +324,7 @@ impl<T: Number> CellBuilder<T> {
     }
 }
 
+/// The cell produced by this builder.
 impl<T: Number> From<CellBuilder<T>> for Cell<T> {
     fn from(builder: CellBuilder<T>) -> Self {
         builder.build()

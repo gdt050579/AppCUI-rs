@@ -58,7 +58,7 @@ where
 
 #[allow(private_bounds)]
 impl<T: Number + 'static> HeatMap<T> {
-    /// Creates a heat map with the given layout and flags.
+    /// Creates a heat map with `size` columns and rows, the given layout, and flags.
     ///
     /// # Example
     /// ```rust, no_run
@@ -137,8 +137,8 @@ impl<T: Number + 'static> HeatMap<T> {
 
     /// Sets the number of columns (`width`) and rows (`height`), and repaints the heat map.
     ///
-    /// Cells that still fit stay at the same row and column, including their value, label
-    /// and fill. New positions are empty. Cells outside the new grid are removed. A selected
+    /// Cells that still fit stay at the same row and column, including their value, label,
+    /// fill, and attribute. New positions are empty. Cells outside the new grid are removed. A selected
     /// or hovered cell that no longer fits is cleared. This does not raise
     /// [`on_clear_selection`](super::events::GenericHeatMapEvents::on_clear_selection).
     /// A width or height of 0 is ignored. The scroll position is kept and clamped so the
@@ -246,7 +246,11 @@ impl<T: Number + 'static> HeatMap<T> {
     }
 
     /// Sets the cell at `row` and `column`. A number can be passed directly
-    /// (for example `heatmap.set(2, 3, 17)`). A [`CellBuilder`](super::CellBuilder) can be passed as well.
+    /// (for example `heatmap.set(2, 3, 17)`). A [`Cell`](super::Cell) or a
+    /// [`CellBuilder`](super::CellBuilder) can be passed as well.
+    ///
+    /// A number replaces the whole cell: the label is empty, and the fill and attribute
+    /// stay unset, so the cell uses the heat map defaults.
     ///
     /// A position outside the heat map is ignored. If the new value does not change the
     /// minimum or the maximum, only this cell is repainted; otherwise every cell is.
@@ -405,8 +409,7 @@ impl<T: Number + 'static> HeatMap<T> {
     /// Sets the fill used by cells that do not have their own, and repaints the heat map.
     ///
     /// A cell that has a fill ([`Cell::set_fill`](super::Cell::set_fill)) keeps it.
-    /// [`CellFill::Shades`](super::CellFill::Shades) draws each cell with a shade chosen from
-    /// its value. [`CellFill::Custom`](super::CellFill::Custom) repeats one character.
+    /// [`CellFill`](super::CellFill) lists the character each value draws.
     ///
     /// # Example
     /// ```rust, no_run

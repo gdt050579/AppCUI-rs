@@ -1,6 +1,6 @@
 //! A heat map control.
 //!
-//! [`HeatMap`] is a grid of cells. [`Flags`] adds scroll bars, a margin, and dimming of
+//! [`HeatMap`] is a grid of [`Cell`]s. [`Flags`] adds scroll bars, a margin, and dimming of
 //! the cells that are not selected. [`TooltipFormat`] chooses the hover tooltip.
 //! [`CellFill`] chooses the characters a cell is drawn with.
 //! [`CellAttribute`] chooses its colors. [`CellBuilder`] builds a cell with a label, fill, and attribute.
