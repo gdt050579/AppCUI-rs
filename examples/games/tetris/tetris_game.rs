@@ -207,8 +207,8 @@ impl TetrisGame {
                     self.board[y][x] = self.board[y - 1][x];
                 }
             }
-            for x in 0..BOARD_WIDTH {
-                self.board[0][x] = SquareState::Empty;
+            for item in self.board[0].iter_mut().take(BOARD_WIDTH) {
+                *item = SquareState::Empty;
             }
         }
 

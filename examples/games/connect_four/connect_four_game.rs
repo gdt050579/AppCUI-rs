@@ -219,11 +219,7 @@ impl ConnectFourGame {
             x -= 1;
             y += 1;
         }
-        if count >= 4 {
-            return true;
-        }
-
-        false
+        count >= 4
     }
 
     fn is_board_full(&self) -> bool {
