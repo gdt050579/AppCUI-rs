@@ -255,11 +255,19 @@ impl<T: Number> HeatMap<T> {
             cell.paint(&mut self.surface, params);
         }
     }
+    // Furthest offset that does not reveal empty space past the image.
+    fn clamp_scroll(offset: u32, content: u64, view: u32) -> u32 {
+        let max = if view == 0 || content <= view as u64 {
+            0
+        } else {
+            (content - view as u64).min(u32::MAX as u64) as u32
+        };
+        offset.min(max)
+    }
     fn scroll_to(&mut self, left: u32, top: u32) {
-        let max_left = self.size.width.saturating_sub(1).saturating_mul(self.cell_size.width);
-        let max_top = self.size.height.saturating_sub(1).saturating_mul(self.cell_size.height);
-        self.left_scroll = left.min(max_left);
-        self.top_scroll = top.min(max_top);
+        let view = self.size();
+        self.left_scroll = Self::clamp_scroll(left, self.content_width(), view.width);
+        self.top_scroll = Self::clamp_scroll(top, self.content_height(), view.height);
         self.update_view();
         if self.flags.contains(Flags::ScrollBars) {
             self.scrollbars.set_indexes(self.left_scroll as u64, self.top_scroll as u64);
@@ -316,7 +324,8 @@ impl<T: Number> OnResize for HeatMap<T> {
         if self.flags.contains(Flags::ScrollBars) {
             self.scrollbars.resize(self.content_width(), self.content_height(), &self.base);
         }
-        self.update_view();
+        // the view changed, so a previous offset may now sit past the image
+        self.scroll_to(self.left_scroll, self.top_scroll);
     }
 }
 
@@ -337,15 +346,23 @@ impl<T: Number> OnKeyPressed for HeatMap<T> {
 
 impl<T: Number> OnMouseEvent for HeatMap<T> {
     fn on_mouse_event(&mut self, event: &MouseEvent) -> EventProcessStatus {
-        if !self.flags.contains(Flags::ScrollBars) {
-            return EventProcessStatus::Ignored;
-        }
         if self.scrollbars.process_mouse_event(event) {
-            self.left_scroll = self.scrollbars.horizontal_index() as u32;
-            self.top_scroll = self.scrollbars.vertical_index() as u32;
-            self.update_view();
-            EventProcessStatus::Processed
-        } else if self.scrollbars.should_repaint() {
+            self.scroll_to(self.scrollbars.horizontal_index() as u32, self.scrollbars.vertical_index() as u32);
+            return EventProcessStatus::Processed;
+        }
+        match event {
+            MouseEvent::Wheel(direction) => {
+                match direction {
+                    MouseWheelDirection::Left => self.scroll_by_cells(-1, 0),
+                    MouseWheelDirection::Right => self.scroll_by_cells(1, 0),
+                    MouseWheelDirection::Up => self.scroll_by_cells(0, -1),
+                    MouseWheelDirection::Down => self.scroll_by_cells(0, 1),
+                }
+                return EventProcessStatus::Processed;
+            }
+            _ => {}
+        }
+        if self.scrollbars.should_repaint() {
             EventProcessStatus::Processed
         } else {
             EventProcessStatus::Ignored
