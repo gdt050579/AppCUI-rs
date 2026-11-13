@@ -27,6 +27,7 @@ pub(crate) struct Cell<T: Number> {
     fill: Option<CellFill>,
 }
 impl<T: Number> Cell<T> {
+    const SHADES: &[char] = &[' ', '░', '▒', '▓', '█'];
     // where percentage is a value between 0 and 100
     pub(super) fn paint(&self, surface: &mut Surface, params: &PaintParams) {
         let attr = self.compute_attr(params);
@@ -38,7 +39,7 @@ impl<T: Number> Cell<T> {
     fn compute_fill(&self, params: &PaintParams) -> char {
         let fill = self.fill.unwrap_or(params.default_fill);
         match fill {
-            CellFill::Shades => todo!(),
+            CellFill::Shades => Self::percentage_to_char(Self::SHADES, params.percentage),
             CellFill::Custom(ch) => ch,
         }
     }
@@ -51,6 +52,12 @@ impl<T: Number> Cell<T> {
     }
     fn attribute_from_range(min: CharAttribute, max: CharAttribute, percentage: u8) -> CharAttribute {
         todo!()
+    }
+    fn percentage_to_char(list: &[char], proc: u8) -> char {
+        let len = list.len();
+        let csz = (100_usize / len).max(1);
+        let index = (proc as usize / csz).min(len - 1);
+        list[index]
     }
 }
 
