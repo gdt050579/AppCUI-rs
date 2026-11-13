@@ -16,9 +16,19 @@ pub(crate) enum CellAttribute {
     Fixed(CharAttribute),
     Range(CharAttribute, CharAttribute),
 }
-#[derive(Debug, Clone, Copy)]
+/// How a heat map cell is drawn.
+///
+/// [`Shades`](Self::Shades) uses the cell's place between the smallest and the largest value
+/// to pick a character: a space, `░`, `▒`, `▓`, or `█`. [`Custom`](Self::Custom) repeats one
+/// character and ignores that place.
+///
+/// A cell with no fill of its own uses the heat map's default fill. With no default fill,
+/// the heat map uses [`Shades`](Self::Shades).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CellFill {
+    /// Shade characters chosen from the cell's value.
     Shades,
+    /// Repeats this character for the whole cell.
     Custom(char),
 }
 pub struct Cell<T: Number> {
@@ -32,12 +42,47 @@ impl<T: Number> Cell<T> {
     pub fn value(&self) -> T {
         self.value
     }
+    /// This cell's fill, or `None` when the cell uses the heat map's default fill.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(4, 3), heatmap::Flags::None);
+    /// heatmap.set(1, 2, 10);
+    /// heatmap.update_cell(1, 2, |cell| cell.set_fill(heatmap::CellFill::Shades));
+    /// let fill = heatmap.cell(1, 2).and_then(|cell| cell.fill());
+    /// assert_eq!(fill, Some(heatmap::CellFill::Shades));
+    /// ```
     pub fn fill(&self) -> Option<CellFill> {
         self.fill
     }
+    /// Sets this cell's fill, replacing the heat map's default fill for this cell only.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(4, 3), heatmap::Flags::None);
+    /// heatmap.set(1, 2, 10);
+    /// heatmap.update_cell(1, 2, |cell| cell.set_fill(heatmap::CellFill::Custom('*')));
+    /// ```
     pub fn set_fill(&mut self, fill: CellFill) {
         self.fill = Some(fill);
     }
+    /// Removes this cell's fill so the cell uses the heat map's default fill.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(4, 3), heatmap::Flags::None);
+    /// heatmap.set(1, 2, 10);
+    /// heatmap.update_cell(1, 2, |cell| {
+    ///     cell.set_fill(heatmap::CellFill::Custom('*'));
+    ///     cell.clear_fill();
+    /// });
+    /// ```
     pub fn clear_fill(&mut self) {
         self.fill = None;
     }

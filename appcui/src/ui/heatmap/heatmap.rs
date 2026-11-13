@@ -204,10 +204,10 @@ impl<T: Number + 'static> HeatMap<T> {
 
     /// Changes the cell at `row` and `column`.
     ///
-    /// The callback receives that cell. A position outside the heat map, or an empty cell, is
-    /// ignored and the callback is not called. If the value changes the minimum or the maximum,
-    /// every cell is repainted; otherwise only this cell is. The hover tooltip is updated when
-    /// it is showing this cell.
+    /// The callback receives that cell, so it can change the label or the fill. A position
+    /// outside the heat map, or an empty cell, is ignored and the callback is not called.
+    /// If the value changes the minimum or the maximum, every cell is repainted; otherwise
+    /// only this cell is. The hover tooltip is updated when it is showing this cell.
     ///
     /// # Example
     /// ```rust, no_run
@@ -258,16 +258,55 @@ impl<T: Number + 'static> HeatMap<T> {
         self.tooltip_format
     }
 
+    /// Sets the fill used by cells that do not have their own, and repaints the heat map.
+    ///
+    /// A cell that has a fill ([`Cell::set_fill`](super::Cell::set_fill)) keeps it.
+    /// [`CellFill::Shades`](super::CellFill::Shades) draws each cell with a shade chosen from
+    /// its value. [`CellFill::Custom`](super::CellFill::Custom) repeats one character.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.fill_with(|row, column| Some(row + column));
+    /// heatmap.set_default_fill(heatmap::CellFill::Custom('#'));
+    /// ```
     pub fn set_default_fill(&mut self, fill: CellFill) {
+        if self.default_fill == Some(fill) {
+            return;
+        }
         self.default_fill = Some(fill);
+        self.update_view();
     }
+
+    /// The default fill, or `None` when cells use the built-in shades.
+    ///
+    /// `None` and [`CellFill::Shades`](super::CellFill::Shades) draw the same characters.
+    /// `None` means the default was never set, or was removed with [`clear_default_fill`](Self::clear_default_fill).
     pub fn default_fill(&self) -> Option<CellFill> {
         self.default_fill
     }
-    pub fn clear_default_fill(&mut self) {
-        self.default_fill = None;
-    }
 
+    /// Removes the default fill and repaints the heat map.
+    ///
+    /// Cells without their own fill are drawn with shades. Cells that have a fill are left as they are.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.set_default_fill(heatmap::CellFill::Custom('#'));
+    /// heatmap.clear_default_fill();
+    /// ```
+    pub fn clear_default_fill(&mut self) {
+        if self.default_fill.is_none() {
+            return;
+        }
+        self.default_fill = None;
+        self.update_view();
+    }
 
     /// Returns the selected cell as `(row, column)`, or `None` when nothing is selected.
     pub fn selected_cell(&self) -> Option<(u32, u32)> {
