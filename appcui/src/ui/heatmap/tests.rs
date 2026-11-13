@@ -269,3 +269,62 @@ fn check_cell_builder_is_accepted_by_set() {
         assert_eq!(cell.attr(), Some(attr));
     });
 }
+
+#[test]
+fn check_heatmap_macro_rows() {
+    in_app(|| {
+        let map = heatmap!(
+            "i32, size: 3x2, d:f,
+            flags: Margins+DimCellsOnSelection,
+            cell-size: 3x2,
+            tooltip: Value,
+            fill: Dots,
+            attr: red,
+            values: [
+                [1, {10, 'Peak', fill: Stars, attr: green}, 3],
+                [none, 4, _]
+            ],
+            selected: {0, 1}"
+        );
+        assert_eq!(map.heatmap_size(), Size::new(3, 2));
+        assert_eq!(map.cell_size(), Size::new(3, 2));
+        assert_eq!(map.tooltip_format(), heatmap::TooltipFormat::Value);
+        assert_eq!(map.default_fill(), Some(heatmap::CellFill::Dots));
+        assert!(matches!(map.default_attr(), Some(heatmap::CellAttribute::Fixed(_))));
+        assert_eq!(map.cell(0, 0).map(|cell| cell.value()), Some(1));
+        assert_eq!(map.cell(0, 0).unwrap().label(), "");
+        let peak = map.cell(0, 1).unwrap();
+        assert_eq!(peak.value(), 10);
+        assert_eq!(peak.label(), "Peak");
+        assert_eq!(peak.fill(), Some(heatmap::CellFill::Stars));
+        assert!(matches!(peak.attr(), Some(heatmap::CellAttribute::Fixed(_))));
+        assert_eq!(map.cell(0, 2).map(|cell| cell.value()), Some(3));
+        assert!(map.cell(1, 0).is_none());
+        assert_eq!(map.cell(1, 1).map(|cell| cell.value()), Some(4));
+        assert!(map.cell(1, 2).is_none());
+        assert_eq!(map.selected_cell(), Some((0, 1)));
+    });
+}
+
+#[test]
+fn check_heatmap_macro_flat_list() {
+    in_app(|| {
+        let map = heatmap!(
+            "u32, columns: 2, rows: 2, x:0, y:0, w:20, h:8,
+            fill: Custom('#'),
+            color: Range(blue, red),
+            data: [{7, label: Source}, 8, none, 9]"
+        );
+        assert_eq!(map.heatmap_size(), Size::new(2, 2));
+        assert_eq!(map.cell_size(), Size::new(2, 1));
+        assert_eq!(map.default_fill(), Some(heatmap::CellFill::Custom('#')));
+        assert!(matches!(map.default_attr(), Some(heatmap::CellAttribute::Range(_, _))));
+        let source = map.cell(0, 0).unwrap();
+        assert_eq!(source.value(), 7);
+        assert_eq!(source.label(), "Source");
+        assert_eq!(map.cell(0, 1).map(|cell| cell.value()), Some(8));
+        assert!(map.cell(1, 0).is_none());
+        assert_eq!(map.cell(1, 1).map(|cell| cell.value()), Some(9));
+        assert_eq!(map.selected_cell(), None);
+    });
+}

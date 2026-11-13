@@ -4,6 +4,7 @@
 //! the cells that are not selected. [`TooltipFormat`] chooses the hover tooltip.
 //! [`CellFill`] chooses the characters a cell is drawn with.
 //! [`CellAttribute`] chooses its colors. [`CellBuilder`] builds a cell with a label, fill, and attribute.
+//! The `heatmap!` macro creates a heat map from a text description.
 //! [`events::GenericHeatMapEvents`] reports selection changes.
 
 mod cell;
