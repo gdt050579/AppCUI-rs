@@ -87,9 +87,7 @@ impl CommandBar {
 
     pub(crate) fn clear(&mut self) {
         self.version += 1;
-        for has_shift in &mut self.has_shifts {
-            *has_shift = false;
-        }
+        self.has_shifts.fill(false);
         for vec in &mut self.indexes {
             vec.clear();
         }

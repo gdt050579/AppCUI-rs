@@ -103,9 +103,7 @@ impl Image {
     ///
     /// * `pixel` - The pixel value to fill the image with
     pub fn clear(&mut self, pixel: Pixel) {
-        for px in &mut self.pixels {
-            *px = pixel;
-        }
+        self.pixels.fill(pixel);
     }
     /// Sets a pixel at the specified coordinates.
     ///

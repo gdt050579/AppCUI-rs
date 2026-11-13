@@ -329,9 +329,7 @@ impl Surface {
     /// You can use this method method if you want to fill a surface with a transparent character (e.g. if you want that surface to be printed on another surface via draw_surface method)
     pub fn reset(&mut self, ch: Character) {
         self.reset_clip_and_origin();
-        for c in &mut self.chars {
-            *c = ch;
-        }
+        self.chars.fill(ch);
     }
 
     /// Fills a horizontal line with the specified character type, color and attributes. If the line is outside the clip area, it will not be drawn.

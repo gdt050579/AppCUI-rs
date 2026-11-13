@@ -845,7 +845,7 @@ fn check_temp_string() {
     write!(t, "n={value}", value = 42).unwrap();
     assert_eq!(t.as_str(), "n=42");
     assert!(!t.is_on_heap());
-    write!(t, " {label}", label = "overflow").unwrap();
+    write!(t, " overflow").unwrap();
     assert_eq!(t.as_str(), "n=42 overflow");
     assert!(t.is_on_heap());
 }
