@@ -11,7 +11,10 @@ use std::any::TypeId;
 /// Clicking a cell selects it. Clicking an empty cell, or the margin around the grid,
 /// clears the selection. The selection stays visible when the heat map loses the focus:
 /// the cell is outlined and, with [`Flags::DimCellsOnSelection`](super::Flags::DimCellsOnSelection),
-/// the others are dimmed. A disabled heat map is drawn with the inactive color and shows no selection.
+/// the others are dimmed. With [`Flags::Margins`](super::Flags::Margins) the outline is a rectangle
+/// around the cell. Without margins, a one-row cell is marked with brackets, a two-row cell with
+/// corners, and a taller cell with a rectangle. A disabled heat map is drawn with the inactive
+/// color and shows no selection.
 ///
 /// When the heat map has the focus, the arrow keys move the selection. Empty cells are
 /// skipped, and the selection wraps around. `Left` and `Right` walk the grid in row order.
@@ -657,6 +660,12 @@ impl<T: Number + 'static> HeatMap<T> {
         }
         let right_most = view_w - 1;
         let bottom_most = view_h - 1;
+        // the margin is a free character around the grid, so the border can be a full rectangle
+        if self.flags.contains(Flags::Margins) {
+            let r = Rect::new(content.left() - 1, content.top() - 1, content.right() + 1, content.bottom() + 1);
+            surface.draw_rect(r, LineType::Single, attr);
+            return;
+        }
         let left = (content.left() - 1).clamp(0, right_most);
         let right = (content.right() + 1).clamp(0, right_most);
         match self.cell_size.height {

@@ -12,6 +12,7 @@ pub enum Flags {
     /// Adds one empty character around the heat map.
     ///
     /// The border is part of the image. It shows at the start and at the end of the scroll, and it moves with the cells. The border uses the chart background.
+    /// A selected cell is outlined with a rectangle drawn in that free space.
     Margins = 2,
     /// Draws every cell except the selected one with the inactive chart color.
     ///
