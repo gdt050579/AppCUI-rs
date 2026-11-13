@@ -46,6 +46,7 @@ impl<const N: usize> TempBuffer<N> {
         }
     }
     /// Drops the contents. A heap buffer stays on the heap.
+    #[allow(dead_code)]
     pub(crate) fn clear(&mut self) {
         match &mut self.inner {
             InnerTempBuffer::StackBuffer(buffer) => buffer.len = 0,
@@ -53,6 +54,7 @@ impl<const N: usize> TempBuffer<N> {
         }
     }
     /// Drops the contents and moves a heap buffer back to the stack.
+    #[allow(dead_code)]
     pub(crate) fn reset(&mut self) {
         if matches!(self.inner, InnerTempBuffer::HeapBuffer(_)) {
             self.inner = InnerTempBuffer::StackBuffer(StackBuffer { buffer: [0; N], len: 0 });
@@ -109,10 +111,12 @@ impl<const N: usize> TempString<N> {
         self.buffer.push_slice(text.as_bytes());
     }
     #[inline(always)]
+    #[allow(dead_code)]
     pub(crate) fn clear(&mut self) {
         self.buffer.clear();
     }
     #[inline(always)]
+    #[allow(dead_code)]
     pub(crate) fn reset(&mut self) {
         self.buffer.reset();
     }

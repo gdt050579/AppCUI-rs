@@ -2758,11 +2758,9 @@ fn compare_strings(s1: &str, s2: &str) {
     assert_eq!(s1.chars().count(), s2.chars().count(), "Expcting string with the same number of characters but got: {} and {}",s1,s2);
     let i1 = s1.chars();
     let mut i2 = s2.chars();
-    let mut index = 0;
-    for c1 in i1 {
+    for (index, c1) in i1.enumerate() {
         let c2 = i2.next().unwrap();
         assert_eq!(c1,c2,"Characters don't match {} with {} (at index {}) for S1={} and S2={}",c1,c2,index,s1,s2);
-        index += 1;
     }
 }
 
