@@ -258,6 +258,17 @@ impl<T: Number + 'static> HeatMap<T> {
         self.tooltip_format
     }
 
+    pub fn set_default_fill(&mut self, fill: CellFill) {
+        self.default_fill = Some(fill);
+    }
+    pub fn default_fill(&self) -> Option<CellFill> {
+        self.default_fill
+    }
+    pub fn clear_default_fill(&mut self) {
+        self.default_fill = None;
+    }
+
+
     /// Returns the selected cell as `(row, column)`, or `None` when nothing is selected.
     pub fn selected_cell(&self) -> Option<(u32, u32)> {
         self.selected

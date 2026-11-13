@@ -12,9 +12,9 @@ mod initialization_flags;
 mod tests;
 
 use self::cell::CellAttribute;
-use self::cell::CellFill;
 use self::cell::PaintParams;
 pub use self::heatmap::HeatMap;
 pub use self::initialization_flags::Flags;
 pub use self::initialization_flags::TooltipFormat;
 pub use self::cell::Cell;
+pub use self::cell::CellFill;

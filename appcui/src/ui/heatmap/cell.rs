@@ -17,7 +17,7 @@ pub(crate) enum CellAttribute {
     Range(CharAttribute, CharAttribute),
 }
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum CellFill {
+pub enum CellFill {
     Shades,
     Custom(char),
 }
@@ -29,6 +29,18 @@ pub struct Cell<T: Number> {
 }
 impl<T: Number> Cell<T> {
     const SHADES: &[char] = &[' ', '░', '▒', '▓', '█'];
+    pub fn value(&self) -> T {
+        self.value
+    }
+    pub fn fill(&self) -> Option<CellFill> {
+        self.fill
+    }
+    pub fn set_fill(&mut self, fill: CellFill) {
+        self.fill = Some(fill);
+    }
+    pub fn clear_fill(&mut self) {
+        self.fill = None;
+    }
     /// The label shown by tooltip formats that include a label.
     pub fn label(&self) -> &str {
         &self.label
