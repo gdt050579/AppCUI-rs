@@ -16,6 +16,9 @@ use std::any::TypeId;
 /// corners, and a taller cell with a rectangle. A disabled heat map is drawn with the inactive
 /// color and shows no selection.
 ///
+/// A cell is 2 characters wide and 1 tall unless [`set_cell_size`](Self::set_cell_size) changes it.
+/// [`set_heatmap_size`](Self::set_heatmap_size) changes how many columns and rows the grid has.
+///
 /// When the heat map has the focus, the arrow keys move the selection. Empty cells are
 /// skipped, and the selection wraps around. `Left` and `Right` walk the grid in row order.
 /// `Up` and `Down` walk it in column order. `Escape` clears the selection.
@@ -95,6 +98,91 @@ impl<T: Number + 'static> HeatMap<T> {
         };
         me.set_size_bounds(1, 1, u16::MAX, u16::MAX);
         me
+    }
+
+    /// The width and height, in characters, of one cell.
+    ///
+    /// The default is 2 by 1.
+    pub fn cell_size(&self) -> Size {
+        self.cell_size
+    }
+
+    /// Sets the width and height, in characters, of one cell, and repaints the heat map.
+    ///
+    /// A width or height of 0 is ignored. The scroll position is kept and clamped so the
+    /// view does not run past the end of the map. The selection mark follows the cell
+    /// height: one row uses brackets, two rows use corners, and a taller cell uses a rectangle.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.set_cell_size(Size::new(3, 2));
+    /// assert_eq!(heatmap.cell_size(), Size::new(3, 2));
+    /// ```
+    pub fn set_cell_size(&mut self, size: Size) {
+        if size.width == 0 || size.height == 0 || size == self.cell_size {
+            return;
+        }
+        self.cell_size = size;
+        self.scroll_to(self.left_scroll, self.top_scroll);
+        self.refresh_hovered_tooltip();
+    }
+
+    /// The number of columns (`width`) and rows (`height`) in the grid.
+    pub fn heatmap_size(&self) -> Size {
+        self.size
+    }
+
+    /// Sets the number of columns (`width`) and rows (`height`), and repaints the heat map.
+    ///
+    /// Cells that still fit stay at the same row and column, including their value, label
+    /// and fill. New positions are empty. Cells outside the new grid are removed. A selected
+    /// or hovered cell that no longer fits is cleared. This does not raise
+    /// [`on_clear_selection`](super::events::GenericHeatMapEvents::on_clear_selection).
+    /// A width or height of 0 is ignored. The scroll position is kept and clamped so the
+    /// view does not run past the end of the map.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.set(1, 2, 7);
+    /// heatmap.set_heatmap_size(Size::new(4, 3));
+    /// assert_eq!(heatmap.heatmap_size(), Size::new(4, 3));
+    /// assert_eq!(heatmap.cell(1, 2).map(|cell| cell.value()), Some(7));
+    /// ```
+    pub fn set_heatmap_size(&mut self, size: Size) {
+        if size.width == 0 || size.height == 0 || size == self.size {
+            return;
+        }
+        let count = size.width as usize * size.height as usize;
+        let mut next = Vec::with_capacity(count);
+        next.resize_with(count, || None);
+        let rows = self.size.height.min(size.height);
+        let columns = self.size.width.min(size.width);
+        for row in 0..rows {
+            for column in 0..columns {
+                let old_index = row as usize * self.size.width as usize + column as usize;
+                let new_index = row as usize * size.width as usize + column as usize;
+                if let Some(slot) = self.cells.get_mut(old_index) {
+                    next[new_index] = slot.take();
+                }
+            }
+        }
+        self.cells = next;
+        self.size = size;
+        if self.selected.is_some_and(|(row, column)| self.index(row, column).is_none()) {
+            self.selected = None;
+        }
+        if self.hovered.is_some_and(|(row, column)| self.index(row, column).is_none()) {
+            self.clear_hover();
+        }
+        self.update_min_max();
+        self.scroll_to(self.left_scroll, self.top_scroll);
+        self.refresh_hovered_tooltip();
     }
     /// Returns the cell at `row` and `column`, or `None` if the position is empty or outside the heat map.
     pub fn cell(&self, row: u32, column: u32) -> Option<&Cell<T>> {

@@ -28,8 +28,8 @@ enum Pattern {
 
 const PATTERNS: [(&str, Pattern); 3] = [("Peaks", Pattern::Peaks), ("Ramp", Pattern::Ramp), ("Gaps", Pattern::Gaps)];
 
-fn index(row: u32, column: u32) -> usize {
-    (row * COLUMNS + column) as usize
+fn index(columns: u32, row: u32, column: u32) -> usize {
+    (row * columns + column) as usize
 }
 
 fn peak_value(row: u32, column: u32) -> i32 {
@@ -41,71 +41,76 @@ fn peak_value(row: u32, column: u32) -> i32 {
     heat(SOURCE_A) + heat(SOURCE_B)
 }
 
-fn pattern_data(pattern: Pattern) -> (Vec<Option<i32>>, Vec<String>) {
-    let count = (ROWS * COLUMNS) as usize;
+fn pattern_data(pattern: Pattern, columns: u32, rows: u32) -> (Vec<Option<i32>>, Vec<String>) {
+    let count = (rows * columns) as usize;
     let mut values = vec![None; count];
     let mut labels = vec![String::new(); count];
+    let label_source = |labels: &mut [String], source: (u32, u32), text: &str| {
+        if source.0 < rows && source.1 < columns {
+            labels[index(columns, source.0, source.1)] = String::from(text);
+        }
+    };
     match pattern {
         Pattern::Peaks => {
-            for row in 0..ROWS {
-                for column in 0..COLUMNS {
-                    values[index(row, column)] = Some(peak_value(row, column));
+            for row in 0..rows {
+                for column in 0..columns {
+                    values[index(columns, row, column)] = Some(peak_value(row, column));
                 }
             }
-            labels[index(SOURCE_A.0, SOURCE_A.1)] = String::from("Source A");
-            labels[index(SOURCE_B.0, SOURCE_B.1)] = String::from("Source B");
+            label_source(&mut labels, SOURCE_A, "Source A");
+            label_source(&mut labels, SOURCE_B, "Source B");
         }
         Pattern::Ramp => {
-            for row in 0..ROWS {
-                for column in 0..COLUMNS {
-                    values[index(row, column)] = Some(row as i32 * 10 + column as i32);
+            for row in 0..rows {
+                for column in 0..columns {
+                    values[index(columns, row, column)] = Some(row as i32 * 10 + column as i32);
                 }
             }
         }
         Pattern::Gaps => {
-            for row in 0..ROWS {
-                for column in 0..COLUMNS {
+            for row in 0..rows {
+                for column in 0..columns {
                     let source = (row, column) == SOURCE_A || (row, column) == SOURCE_B;
                     if source || (row + column) % 2 == 0 {
-                        values[index(row, column)] = Some(peak_value(row, column));
+                        values[index(columns, row, column)] = Some(peak_value(row, column));
                     }
                 }
             }
-            labels[index(SOURCE_A.0, SOURCE_A.1)] = String::from("Source A");
-            labels[index(SOURCE_B.0, SOURCE_B.1)] = String::from("Source B");
+            label_source(&mut labels, SOURCE_A, "Source A");
+            label_source(&mut labels, SOURCE_B, "Source B");
         }
     }
     (values, labels)
 }
 
-fn format_values(values: &[Option<i32>]) -> String {
-    let mut rows = Vec::with_capacity(ROWS as usize);
-    for row in 0..ROWS {
+fn format_values(values: &[Option<i32>], columns: u32, rows: u32) -> String {
+    let mut lines = Vec::with_capacity(rows as usize);
+    for row in 0..rows {
         let mut line = String::new();
-        for column in 0..COLUMNS {
+        for column in 0..columns {
             if column > 0 {
                 line.push_str(", ");
             }
-            if let Some(value) = values[index(row, column)] {
+            if let Some(value) = values[index(columns, row, column)] {
                 line.push_str(&value.to_string());
             }
         }
-        rows.push(line);
+        lines.push(line);
     }
-    rows.join("\n")
+    lines.join("\n")
 }
 
-fn parse_values(text: &str) -> Result<Vec<Option<i32>>, String> {
+fn parse_values(text: &str, columns: u32, rows: u32) -> Result<Vec<Option<i32>>, String> {
     let lines: Vec<&str> = text.lines().collect();
-    if lines.len() != ROWS as usize {
-        return Err(format!("Enter {ROWS} rows (this text has {}).", lines.len()));
+    if lines.len() != rows as usize {
+        return Err(format!("Enter {rows} rows (this text has {}).", lines.len()));
     }
-    let mut values = Vec::with_capacity((ROWS * COLUMNS) as usize);
+    let mut values = Vec::with_capacity((rows * columns) as usize);
     for (line_index, line) in lines.iter().enumerate() {
         let parts: Vec<&str> = line.split(',').collect();
-        if parts.len() != COLUMNS as usize {
+        if parts.len() != columns as usize {
             return Err(format!(
-                "Row {}: enter {COLUMNS} comma-separated values (found {}).",
+                "Row {}: enter {columns} comma-separated values (found {}).",
                 line_index + 1,
                 parts.len()
             ));
@@ -127,8 +132,8 @@ fn parse_values(text: &str) -> Result<Vec<Option<i32>>, String> {
     Ok(values)
 }
 
-fn blank_fills() -> Vec<Option<heatmap::CellFill>> {
-    vec![None; (ROWS * COLUMNS) as usize]
+fn blank_fills(columns: u32, rows: u32) -> Vec<Option<heatmap::CellFill>> {
+    vec![None; (rows * columns) as usize]
 }
 
 fn char_picker(layout: Layout) -> CharPicker {
@@ -166,10 +171,12 @@ fn percentage(value: i32, min: i32, max: i32) -> u8 {
 // Editor window
 // ---------------------------------------------------------------------------------------------
 
-#[Window(events = [HeatMapEvents<i32>, ComboBoxEvents, CheckBoxEvents, CharPickerEvents, NumericSelectorEvents<i32>, TextFieldEvents, ButtonEvents])]
+#[Window(events = [HeatMapEvents<i32>, HSliderEvents<u8>, ComboBoxEvents, CheckBoxEvents, CharPickerEvents, NumericSelectorEvents<i32>, TextFieldEvents, ButtonEvents])]
 struct HeatMapEditor {
     chart: Handle<HeatMap<i32>>,
     pages: Handle<Accordion>,
+    columns: u32,
+    rows: u32,
     // chart settings
     tooltip: Handle<ComboBox>,
     default_fill: Handle<ComboBox>,
@@ -177,6 +184,10 @@ struct HeatMapEditor {
     default_char: Handle<CharPicker>,
     summary: Handle<Label>,
     range_label: Handle<Label>,
+    cell_width: Handle<HSlider<u8>>,
+    cell_height: Handle<HSlider<u8>>,
+    grid_columns: Handle<HSlider<u8>>,
+    grid_rows: Handle<HSlider<u8>>,
     // selected cell
     empty_panel: Handle<Panel>,
     editor_panel: Handle<Panel>,
@@ -192,6 +203,7 @@ struct HeatMapEditor {
     cell_clear: Handle<Button>,
     // data
     pattern: Handle<ComboBox>,
+    data_shape: Handle<Label>,
     data_text: Handle<TextArea>,
     data_apply: Handle<Button>,
     data_reload: Handle<Button>,
@@ -205,18 +217,24 @@ struct HeatMapEditor {
 
 impl HeatMapEditor {
     fn new() -> Self {
-        let (values, labels) = pattern_data(Pattern::Peaks);
-        let data_text = format_values(&values);
+        let (values, labels) = pattern_data(Pattern::Peaks, COLUMNS, ROWS);
+        let data_text = format_values(&values, COLUMNS, ROWS);
         let mut win = Self {
             base: window!("'Heat map editor',d:f"),
             chart: Handle::None,
             pages: Handle::None,
+            columns: COLUMNS,
+            rows: ROWS,
             tooltip: Handle::None,
             default_fill: Handle::None,
             default_char_label: Handle::None,
             default_char: Handle::None,
             summary: Handle::None,
             range_label: Handle::None,
+            cell_width: Handle::None,
+            cell_height: Handle::None,
+            grid_columns: Handle::None,
+            grid_rows: Handle::None,
             empty_panel: Handle::None,
             editor_panel: Handle::None,
             info: Handle::None,
@@ -230,12 +248,13 @@ impl HeatMapEditor {
             cell_char: Handle::None,
             cell_clear: Handle::None,
             pattern: Handle::None,
+            data_shape: Handle::None,
             data_text: Handle::None,
             data_apply: Handle::None,
             data_reload: Handle::None,
             values,
             labels,
-            fills: blank_fills(),
+            fills: blank_fills(COLUMNS, ROWS),
             loading: false,
         };
 
@@ -279,10 +298,20 @@ impl HeatMapEditor {
         pages.add(0, label!("'Cells',l:1,t:10,r:1,h:1"));
         win.summary = pages.add(0, label!("'',l:1,t:11,r:1,h:1"));
         win.range_label = pages.add(0, label!("'',l:1,t:12,r:1,h:1"));
-        pages.add(0, label!("'Hover a cell to see its tooltip.',l:1,t:14,r:1,h:1"));
-        pages.add(0, label!("'Arrow keys move the selection.',l:1,t:15,r:1,h:1"));
-        pages.add(0, label!("'Ctrl+arrows scroll the map.',l:1,t:16,r:1,h:1"));
-        pages.add(0, label!("'Escape clears the selection.',l:1,t:17,r:1,h:1"));
+        pages.add(0, label!("'Cell width',l:1,t:14,w:16"));
+        pages.add(0, label!("'Cell height',l:54%,t:14,r:1,h:1"));
+        let mut cell_width = hslider!("u8,1,12,1,l:1,t:15,r:52%,flags:ShowValue,type:Ruler");
+        cell_width.set_value(2);
+        win.cell_width = pages.add(0, cell_width);
+        win.cell_height = pages.add(0, hslider!("u8,1,6,1,l:54%,t:15,r:1,flags:ShowValue,type:Ruler"));
+        pages.add(0, label!("'Columns',l:1,t:17,w:16"));
+        pages.add(0, label!("'Rows',l:54%,t:17,r:1,h:1"));
+        let mut grid_columns = hslider!("u8,1,40,1,l:1,t:18,r:52%,flags:ShowValue,type:Ruler");
+        grid_columns.set_value(COLUMNS as u8);
+        win.grid_columns = pages.add(0, grid_columns);
+        let mut grid_rows = hslider!("u8,1,30,1,l:54%,t:18,r:1,flags:ShowValue,type:Ruler");
+        grid_rows.set_value(ROWS as u8);
+        win.grid_rows = pages.add(0, grid_rows);
 
         // ---------------------------------------------------------------- page 1: selected cell
         let mut empty = panel!("'',d:f,type:Page");
@@ -332,7 +361,7 @@ impl HeatMapEditor {
         }
         pattern.set_index(0);
         win.pattern = pages.add(2, pattern);
-        pages.add(
+        win.data_shape = pages.add(
             2,
             Label::new(&format!("{COLUMNS} x {ROWS}, comma separated."), layout!("l:1,t:4,r:1,h:1")),
         );
@@ -404,15 +433,25 @@ impl HeatMapEditor {
 
     // ------------------------------------------------------------------ chart
 
+    fn at(&self, row: u32, column: u32) -> usize {
+        index(self.columns, row, column)
+    }
+
+    fn slider_value(&self, handle: Handle<HSlider<u8>>) -> u32 {
+        self.control(handle).map(|slider| slider.value() as u32).unwrap_or(0)
+    }
+
     fn sync_chart(&mut self) {
         let values = self.values.clone();
         let labels = self.labels.clone();
         let fills = self.fills.clone();
+        let columns = self.columns;
+        let rows = self.rows;
         self.with_chart(|map| {
-            map.fill_with(|row, column| values[index(row, column)]);
-            for row in 0..ROWS {
-                for column in 0..COLUMNS {
-                    let idx = index(row, column);
+            map.fill_with(|row, column| values[index(columns, row, column)]);
+            for row in 0..rows {
+                for column in 0..columns {
+                    let idx = index(columns, row, column);
                     let label = &labels[idx];
                     let fill = fills[idx];
                     if label.is_empty() && fill.is_none() {
@@ -425,7 +464,7 @@ impl HeatMapEditor {
     }
 
     fn write_cell(&mut self, row: u32, column: u32) {
-        let idx = index(row, column);
+        let idx = self.at(row, column);
         let value = self.values[idx];
         let label = self.labels[idx].clone();
         let fill = self.fills[idx];
@@ -439,7 +478,7 @@ impl HeatMapEditor {
     }
 
     fn refresh_summary(&mut self) {
-        let total = (ROWS * COLUMNS) as usize;
+        let total = (self.rows * self.columns) as usize;
         let filled = self.values.iter().filter(|value| value.is_some()).count();
         let count = format!("{filled} / {total} cells");
         let range = match self.range() {
@@ -487,6 +526,70 @@ impl HeatMapEditor {
         }
     }
 
+    fn apply_cell_size(&mut self) {
+        if self.loading {
+            return;
+        }
+        let width = self.slider_value(self.cell_width);
+        let height = self.slider_value(self.cell_height);
+        if width == 0 || height == 0 {
+            return;
+        }
+        let size = Size::new(width, height);
+        self.with_chart(|map| {
+            if map.cell_size() != size {
+                map.set_cell_size(size);
+            }
+        });
+    }
+
+    fn apply_grid_size(&mut self) {
+        if self.loading {
+            return;
+        }
+        self.resize_grid(self.slider_value(self.grid_columns), self.slider_value(self.grid_rows));
+    }
+
+    fn resize_grid(&mut self, columns: u32, rows: u32) {
+        if columns == 0 || rows == 0 || (columns == self.columns && rows == self.rows) {
+            return;
+        }
+        let count = (columns * rows) as usize;
+        let mut values = vec![None; count];
+        let mut labels = vec![String::new(); count];
+        let mut fills = vec![None; count];
+        let copy_rows = rows.min(self.rows);
+        let copy_columns = columns.min(self.columns);
+        for row in 0..copy_rows {
+            for column in 0..copy_columns {
+                let old_idx = index(self.columns, row, column);
+                let new_idx = index(columns, row, column);
+                values[new_idx] = self.values[old_idx];
+                labels[new_idx] = std::mem::take(&mut self.labels[old_idx]);
+                fills[new_idx] = self.fills[old_idx];
+            }
+        }
+        self.columns = columns;
+        self.rows = rows;
+        self.values = values;
+        self.labels = labels;
+        self.fills = fills;
+        self.with_chart(|map| map.set_heatmap_size(Size::new(columns, rows)));
+        self.sync_chart();
+        self.sync_text();
+        self.refresh_summary();
+        self.refresh_shape();
+        self.refresh_selection();
+    }
+
+    fn refresh_shape(&mut self) {
+        let caption = format!("{} x {}, comma separated.", self.columns, self.rows);
+        let handle = self.data_shape;
+        if let Some(label) = self.control_mut(handle) {
+            label.set_caption(&caption);
+        }
+    }
+
     // ------------------------------------------------------------------ selected cell
 
     fn show_editor(&mut self, show: bool) {
@@ -495,7 +598,7 @@ impl HeatMapEditor {
     }
 
     fn load_cell(&mut self, row: u32, column: u32, open_page: bool) {
-        let idx = index(row, column);
+        let idx = self.at(row, column);
         let Some(value) = self.values.get(idx).copied().flatten() else {
             self.show_editor(false);
             return;
@@ -590,7 +693,7 @@ impl HeatMapEditor {
             return;
         };
         let fill = self.cell_fill_choice();
-        let idx = index(row, column);
+        let idx = self.at(row, column);
         if idx >= self.fills.len() || self.fills[idx] == fill {
             return;
         }
@@ -617,7 +720,7 @@ impl HeatMapEditor {
             self.show_editor(false);
             return;
         };
-        if self.values.get(index(row, column)).copied().flatten().is_some() {
+        if self.values.get(self.at(row, column)).copied().flatten().is_some() {
             self.load_cell(row, column, false);
             return;
         }
@@ -632,7 +735,7 @@ impl HeatMapEditor {
         let Some((row, column)) = self.selected_cell() else {
             return;
         };
-        let idx = index(row, column);
+        let idx = self.at(row, column);
         if self.values.get(idx).copied().flatten() == Some(value) {
             return;
         }
@@ -651,7 +754,7 @@ impl HeatMapEditor {
             return;
         };
         let text = self.control(self.cell_label).map(|field| field.text().to_string()).unwrap_or_default();
-        let idx = index(row, column);
+        let idx = self.at(row, column);
         if self.labels.get(idx).is_some_and(|label| label == &text) {
             return;
         }
@@ -664,7 +767,7 @@ impl HeatMapEditor {
         let Some((row, column)) = self.selected_cell() else {
             return;
         };
-        let idx = index(row, column);
+        let idx = self.at(row, column);
         self.values[idx] = None;
         self.labels[idx].clear();
         self.fills[idx] = None;
@@ -677,7 +780,7 @@ impl HeatMapEditor {
     // ------------------------------------------------------------------ data
 
     fn sync_text(&mut self) {
-        let text = format_values(&self.values);
+        let text = format_values(&self.values, self.columns, self.rows);
         let handle = self.data_text;
         if let Some(area) = self.control_mut(handle) {
             if area.text() != text {
@@ -694,10 +797,10 @@ impl HeatMapEditor {
     }
 
     fn load_pattern(&mut self) {
-        let (values, labels) = pattern_data(self.current_pattern());
+        let (values, labels) = pattern_data(self.current_pattern(), self.columns, self.rows);
         self.values = values;
         self.labels = labels;
-        self.fills = blank_fills();
+        self.fills = blank_fills(self.columns, self.rows);
         self.sync_text();
         self.sync_chart();
         self.refresh_summary();
@@ -706,7 +809,7 @@ impl HeatMapEditor {
 
     fn apply_data(&mut self) {
         let text = self.control(self.data_text).map(|area| area.text().to_string()).unwrap_or_default();
-        let values = match parse_values(&text) {
+        let values = match parse_values(&text, self.columns, self.rows) {
             Ok(values) => values,
             Err(message) => {
                 dialogs::message("Data", &message);
@@ -788,6 +891,19 @@ impl NumericSelectorEvents<i32> for HeatMapEditor {
             return EventProcessStatus::Ignored;
         }
         self.apply_cell_value(value);
+        EventProcessStatus::Processed
+    }
+}
+
+impl HSliderEvents<u8> for HeatMapEditor {
+    fn on_value_changed(&mut self, handle: Handle<HSlider<u8>>, _value: u8) -> EventProcessStatus {
+        if handle == self.cell_width || handle == self.cell_height {
+            self.apply_cell_size();
+        } else if handle == self.grid_columns || handle == self.grid_rows {
+            self.apply_grid_size();
+        } else {
+            return EventProcessStatus::Ignored;
+        }
         EventProcessStatus::Processed
     }
 }
