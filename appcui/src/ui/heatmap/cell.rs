@@ -29,6 +29,13 @@ pub(crate) struct Cell<T: Number> {
 }
 impl<T: Number> Cell<T> {
     const SHADES: &[char] = &[' ', '░', '▒', '▓', '█'];
+    pub(super) fn label(&self) -> &str {
+        &self.label
+    }
+    pub(super) fn set_label(&mut self, label: &str) {
+        self.label.clear();
+        self.label.push_str(label);
+    }
     // where percentage is a value between 0 and 100
     pub(super) fn paint(&self, surface: &mut Surface, params: &PaintParams) {
         let attr = self.compute_attr(params);

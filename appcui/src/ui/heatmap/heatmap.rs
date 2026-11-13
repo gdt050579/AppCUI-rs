@@ -1,8 +1,11 @@
-use super::{Cell, CellAttribute, CellFill, Flags, PaintParams};
+use super::{Cell, CellAttribute, CellFill, Flags, PaintParams, TooltipFormat};
 use crate::prelude::*;
+use crate::utils::TempString;
 
 #[CustomControl(overwrite = OnPaint+OnResize+OnMouseEvent+OnKeyPressed, internal = true)]
 /// A heat map control.
+///
+/// Hovering a cell shows a tooltip. See [`TooltipFormat`](super::TooltipFormat).
 pub struct HeatMap<T> where T: Number {
     flags: Flags,
     cells: Vec<Option<Cell<T>>>,
@@ -14,6 +17,8 @@ pub struct HeatMap<T> where T: Number {
     top_scroll: u32,
     default_attr: Option<CellAttribute>,
     default_fill: Option<CellFill>,
+    tooltip_format: TooltipFormat,
+    hovered: Option<(u32, u32)>,
     min_value: f64,
     max_value: f64,
 }
@@ -52,6 +57,8 @@ impl<T: Number> HeatMap<T> {
             top_scroll: 0,
             default_attr: None,
             default_fill: None,
+            tooltip_format: TooltipFormat::LabelAndValue,
+            hovered: None,
             min_value: 0.0,
             max_value: 0.0,
         };
@@ -154,6 +161,51 @@ impl<T: Number> HeatMap<T> {
         self.refresh_all();
     }
 
+    /// Sets the label of the cell at `row` and `column`.
+    ///
+    /// The label is shown by [`TooltipFormat::Label`](super::TooltipFormat::Label),
+    /// [`TooltipFormat::LabelAndValue`](super::TooltipFormat::LabelAndValue), and
+    /// [`TooltipFormat::LabelAndPercentage`](super::TooltipFormat::LabelAndPercentage).
+    /// An empty label is allowed. A position outside the heat map, or an empty cell, is ignored.
+    pub fn set_label(&mut self, row: u32, column: u32, label: &str) {
+        let Some(cell) = self.index(row, column).and_then(|idx| self.cells[idx].as_mut()) else {
+            return;
+        };
+        if cell.label() == label {
+            return;
+        }
+        cell.set_label(label);
+        if self.hovered == Some((row, column)) {
+            self.update_tooltip();
+        }
+    }
+
+    /// Sets what the hover tooltip of a cell shows.
+    ///
+    /// The default is [`TooltipFormat::LabelAndValue`](super::TooltipFormat::LabelAndValue).
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.set_tooltip_format(heatmap::TooltipFormat::Value);
+    /// ```
+    pub fn set_tooltip_format(&mut self, format: TooltipFormat) {
+        if self.tooltip_format == format {
+            return;
+        }
+        self.tooltip_format = format;
+        self.update_tooltip();
+    }
+
+    /// Returns what the hover tooltip of a cell shows.
+    ///
+    /// The default is [`TooltipFormat::LabelAndValue`](super::TooltipFormat::LabelAndValue).
+    pub fn tooltip_format(&self) -> TooltipFormat {
+        self.tooltip_format
+    }
+
     #[inline(always)]
     fn index(&self, row: u32, column: u32) -> Option<usize> {
         if row < self.size.height && column < self.size.width {
@@ -182,16 +234,21 @@ impl<T: Number> HeatMap<T> {
             self.update_min_max();
             if min != self.min_value || max != self.max_value {
                 self.update_view();
+                self.refresh_hovered_tooltip();
                 return;
             }
         }
         let mut params = self.paint_params();
         self.paint_cell(row, column, &mut params);
+        if self.hovered == Some((row, column)) {
+            self.update_tooltip();
+        }
     }
 
     fn refresh_all(&mut self) {
         self.update_min_max();
         self.update_view();
+        self.refresh_hovered_tooltip();
     }
 
     fn update_min_max(&mut self) {
@@ -271,12 +328,112 @@ impl<T: Number> HeatMap<T> {
     }
     fn scroll_to(&mut self, left: u32, top: u32) {
         let view = self.size();
-        self.left_scroll = Self::clamp_scroll(left, self.content_width(), view.width);
-        self.top_scroll = Self::clamp_scroll(top, self.content_height(), view.height);
+        let left = Self::clamp_scroll(left, self.content_width(), view.width);
+        let top = Self::clamp_scroll(top, self.content_height(), view.height);
+        let moved = left != self.left_scroll || top != self.top_scroll;
+        self.left_scroll = left;
+        self.top_scroll = top;
         self.update_view();
         if self.flags.contains(Flags::ScrollBars) {
             self.scrollbars.set_indexes(self.left_scroll as u64, self.top_scroll as u64);
         }
+        if moved {
+            self.clear_hover();
+        }
+    }
+    fn cell_at(&self, x: i32, y: i32) -> Option<(u32, u32)> {
+        let (cw, ch) = (self.cell_size.width as i64, self.cell_size.height as i64);
+        if cw <= 0 || ch <= 0 {
+            return None;
+        }
+        let margin = self.margin() as i64;
+        let content_x = x as i64 + self.left_scroll as i64 - margin;
+        let content_y = y as i64 + self.top_scroll as i64 - margin;
+        if content_x < 0 || content_y < 0 {
+            return None;
+        }
+        let column = (content_x / cw) as u32;
+        let row = (content_y / ch) as u32;
+        if row >= self.size.height || column >= self.size.width {
+            return None;
+        }
+        Some((row, column))
+    }
+    fn percentage(&self, value: f64) -> u8 {
+        if !value.is_finite() {
+            return 0;
+        }
+        let span = self.max_value - self.min_value;
+        if span == 0.0 {
+            return 100;
+        }
+        (((value - self.min_value) / span) * 100.0).round().clamp(0.0, 100.0) as u8
+    }
+    fn tooltip_text(&self, cell: &Cell<T>) -> TempString<128> {
+        let mut text = TempString::<128>::new("");
+        let label = cell.label();
+        match self.tooltip_format {
+            TooltipFormat::Value => {
+                let _ = write!(text, "{}", cell.value);
+            }
+            TooltipFormat::Label => {
+                let _ = write!(text, "{label}");
+            }
+            TooltipFormat::Percentage => {
+                let _ = write!(text, "{}%", self.percentage(cell.value.to_f64()));
+            }
+            TooltipFormat::LabelAndValue => {
+                if !label.is_empty() {
+                    let _ = write!(text, "{label}: ");
+                }
+                let _ = write!(text, "{}", cell.value);
+            }
+            TooltipFormat::LabelAndPercentage => {
+                if !label.is_empty() {
+                    let _ = write!(text, "{label}: ");
+                }
+                let _ = write!(text, "{}%", self.percentage(cell.value.to_f64()));
+            }
+        }
+        text
+    }
+    fn update_tooltip(&self) {
+        let Some((row, column)) = self.hovered else {
+            self.hide_tooltip();
+            return;
+        };
+        let Some(cell) = self.cell(row, column) else {
+            self.hide_tooltip();
+            return;
+        };
+        let text = self.tooltip_text(cell);
+        if text.is_empty() {
+            self.hide_tooltip();
+            return;
+        }
+        let margin = self.margin() as i32;
+        let x = column as i32 * self.cell_size.width as i32 - self.left_scroll as i32 + margin;
+        let y = row as i32 * self.cell_size.height as i32 - self.top_scroll as i32 + margin;
+        let rect = Rect::with_size(x, y, self.cell_size.width as u16, self.cell_size.height as u16);
+        self.show_tooltip_on_rect(text.as_str(), &rect);
+    }
+    fn refresh_hovered_tooltip(&self) {
+        if self.hovered.is_some() {
+            self.update_tooltip();
+        }
+    }
+    fn clear_hover(&mut self) {
+        if self.hovered.take().is_some() {
+            self.hide_tooltip();
+        }
+    }
+    fn hover_at(&mut self, x: i32, y: i32) {
+        let cell = self.cell_at(x, y).filter(|&(row, column)| self.cell(row, column).is_some());
+        if cell == self.hovered {
+            return;
+        }
+        self.hovered = cell;
+        self.update_tooltip();
     }
     fn scroll_by_cells(&mut self, columns: i32, rows: i32) {
         let left = if columns < 0 {
@@ -359,7 +516,20 @@ impl<T: Number> OnMouseEvent for HeatMap<T> {
             self.scroll_to(self.scrollbars.horizontal_index() as u32, self.scrollbars.vertical_index() as u32);
             return EventProcessStatus::Processed;
         }
-        match event {
+        let response = match event {
+            MouseEvent::Enter | MouseEvent::Leave => {
+                self.clear_hover();
+                EventProcessStatus::Processed
+            }
+            MouseEvent::Over(point) => {
+                let previous = self.hovered;
+                self.hover_at(point.x, point.y);
+                if self.hovered == previous {   
+                    EventProcessStatus::Ignored
+                } else {
+                    EventProcessStatus::Processed
+                }
+            }
             MouseEvent::Wheel(direction) => {
                 match direction {
                     MouseWheelDirection::Left => self.scroll_by_cells(-1, 0),
@@ -367,14 +537,14 @@ impl<T: Number> OnMouseEvent for HeatMap<T> {
                     MouseWheelDirection::Up => self.scroll_by_cells(0, -1),
                     MouseWheelDirection::Down => self.scroll_by_cells(0, 1),
                 }
-                return EventProcessStatus::Processed;
+                EventProcessStatus::Processed
             }
-            _ => {}
-        }
+            _ => EventProcessStatus::Ignored,
+        };
         if self.scrollbars.should_repaint() {
             EventProcessStatus::Processed
         } else {
-            EventProcessStatus::Ignored
+            response
         }
     }
 }
