@@ -1,5 +1,6 @@
 use crate::{
-    graphics::{CharAttribute, Character, Color, Rect, Size, Surface}, prelude::Number,
+    graphics::{CharAttribute, Character, Color, Rect, Size, Surface},
+    prelude::Number,
 };
 
 pub(crate) struct PaintParams {
@@ -50,13 +51,40 @@ impl<T: Number> Cell<T> {
             CellAttribute::Range(min, max) => Self::attribute_from_range(*min, *max, params.percentage),
         }
     }
-    fn attribute_from_range(min: CharAttribute, max: CharAttribute, percentage: u8) -> CharAttribute {
-        let fore = Self::color_from_range(min.foreground, max.foreground, percentage);
-        let back = Self::color_from_range(min.background, max.background, percentage);
-        CharAttribute::with_color(fore, back)
+    fn attribute_from_range(start: CharAttribute, end: CharAttribute, percentage: u8) -> CharAttribute {
+        let fore = Self::color_from_range(start.foreground, end.foreground, percentage);
+        let back = Self::color_from_range(start.background, end.background, percentage);
+        if percentage <= 50 {
+            CharAttribute::new(fore, back, start.flags)
+        } else {
+            CharAttribute::new(fore, back, end.flags)
+        }
     }
-    fn color_from_range(min: Color, max: Color, percentage: u8) -> Color {
-        todo!()
+    fn blend(from: u8, to: u8, percentage: u32) -> u8 {
+        let (from, to) = (from as u32, to as u32);
+        if to >= from {
+            (from + (to - from) * percentage / 100) as u8
+        } else {
+            (from - (from - to) * percentage / 100) as u8
+        }
+    }
+    fn color_from_range(start: Color, end: Color, percentage: u8) -> Color {
+        let percentage = percentage.min(100) as u32;
+        match (start.to_rgb(), end.to_rgb()) {
+            (Some(start_rgb), Some(end_rgb)) => {
+                let r = Self::blend(start_rgb.0, end_rgb.0, percentage);
+                let g = Self::blend(start_rgb.1, end_rgb.1, percentage);
+                let b = Self::blend(start_rgb.2, end_rgb.2, percentage);
+                Color::from_rgb(r, g, b)
+            }
+            _ => {
+                if percentage <= 50 {
+                    start
+                } else {
+                    end
+                }
+            }
+        }
     }
     fn percentage_to_char(list: &[char], proc: u8) -> char {
         let len = list.len();
