@@ -30,7 +30,7 @@ where
         me.btn_ok = me.add(Button::with_type("&Ok", layout!("l:5,b:0,w:13"), button::Type::Normal));
         me.add(Button::with_type("&Cancel", layout!("l:21,b:0,w:13"), button::Type::Normal));
         let content = if let Some(value) = value {
-            format! {"{value}"}
+            format!("{value}")
         } else {
             String::new()
         };

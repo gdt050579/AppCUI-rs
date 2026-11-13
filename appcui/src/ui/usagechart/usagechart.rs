@@ -240,11 +240,7 @@ impl UsageChart {
                 continue;
             }
             // a total of zero (no values, or a fixed total of 0) leaves every segment empty
-            let mut l = if total_value == 0 {
-                0
-            } else {
-                segment.value as u128 * width / total_value
-            };
+            let mut l = (segment.value as u128 * width).checked_div(total_value).unwrap_or(0);
             if (l == 0) && (total_value > 0) && (sz < width) {
                 l = 1;
             }

@@ -49,6 +49,7 @@ use crate::{
         piechart::events::PieChartEvents,
         linechart::events::GenericLineChartEvents,
         usagechart::events::UsageChartEvents,
+        heatmap::events::GenericHeatMapEvents,
     },
 };
 
@@ -271,6 +272,7 @@ pub trait Control:
     + PieChartEvents
     + GenericLineChartEvents
     + UsageChartEvents
+    + GenericHeatMapEvents
 {
 }
 

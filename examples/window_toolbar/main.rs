@@ -46,10 +46,10 @@ impl ToolBarEvents for MyWin {
 
     fn on_checkbox_clicked(&mut self, handle: Handle<toolbar::CheckBox>, checked: bool) -> EventProcessStatus {
         if handle == self.cb1 {
-            self.set_info(format! {"CheckBox 1 is {checked}"}.as_str());
+            self.set_info(format!("CheckBox 1 is {checked}").as_str());
         }
         if handle == self.cb2 {
-            self.set_info(format! {"CheckBox 2 is {checked}"}.as_str());
+            self.set_info(format!("CheckBox 2 is {checked}").as_str());
         }
         EventProcessStatus::Processed
     }

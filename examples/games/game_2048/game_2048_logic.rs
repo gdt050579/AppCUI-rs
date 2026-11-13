@@ -228,9 +228,9 @@ impl Game2048Logic {
     }
 
     fn is_game_over(&self) -> bool {
-        for i in 0..4 {
-            for j in 0..4 {
-                if self.grid[i][j].value == 0 {
+        for row in &self.grid {
+            for item in row {
+                if item.value == 0 {
                     return false;
                 }
             }
@@ -388,20 +388,20 @@ impl OnPaint for Game2048Logic {
                 let py = start_y + 1 + y * CELL_HEIGHT;
 
                 let tile = self.grid[y as usize][x as usize];
-                let (fg_color,bg_color) = match tile.value {
-                    0 => (Color::Black,Color::Black),
-                    2 => (Color::White,Color::DarkBlue),
-                    4 => (Color::White,Color::DarkGreen),
-                    8 => (Color::White,Color::DarkRed),
-                    16 => (Color::White,Color::Magenta),
-                    32 => (Color::White,Color::Olive),
-                    64 => (Color::White,Color::Teal),
-                    128 => (Color::White,Color::Blue),
-                    256 => (Color::Black,Color::Green),
-                    512 => (Color::White,Color::Red),
-                    1024 => (Color::Black,Color::Pink),
-                    2048 => (Color::Black,Color::Yellow),
-                    _ => (Color::Black,Color::White),
+                let (fg_color, bg_color) = match tile.value {
+                    0 => (Color::Black, Color::Black),
+                    2 => (Color::White, Color::DarkBlue),
+                    4 => (Color::White, Color::DarkGreen),
+                    8 => (Color::White, Color::DarkRed),
+                    16 => (Color::White, Color::Magenta),
+                    32 => (Color::White, Color::Olive),
+                    64 => (Color::White, Color::Teal),
+                    128 => (Color::White, Color::Blue),
+                    256 => (Color::Black, Color::Green),
+                    512 => (Color::White, Color::Red),
+                    1024 => (Color::Black, Color::Pink),
+                    2048 => (Color::Black, Color::Yellow),
+                    _ => (Color::Black, Color::White),
                 };
 
                 surface.fill_rect(

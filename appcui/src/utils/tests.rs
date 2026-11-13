@@ -811,6 +811,43 @@ fn check_temp_string() {
     let t: TempString<10> = TempString::new("1234567890A");
     assert_eq!(t.as_str(), "1234567890A");
     assert!(t.is_on_heap());
+
+    let mut t: TempString<10> = TempString::new("hello");
+    t.push_str("");
+    assert_eq!(t.as_str(), "hello");
+    assert!(!t.is_on_heap());
+    t.push_str("!");
+    assert_eq!(t.as_str(), "hello!");
+    assert!(!t.is_on_heap());
+    t.push_str(" world");
+    assert_eq!(t.as_str(), "hello! world");
+    assert!(t.is_on_heap());
+    t.push_str("!");
+    assert_eq!(t.as_str(), "hello! world!");
+    assert!(t.is_on_heap());
+
+    t.clear();
+    assert!(t.is_empty());
+    assert_eq!(t.as_str(), "");
+    assert!(t.is_on_heap());
+    t.push_str("ab");
+    assert_eq!(t.as_str(), "ab");
+    assert!(t.is_on_heap());
+
+    t.reset();
+    assert!(t.is_empty());
+    assert!(!t.is_on_heap());
+    t.push_str("back");
+    assert_eq!(t.as_str(), "back");
+    assert!(!t.is_on_heap());
+
+    t.reset();
+    write!(t, "n={value}", value = 42).unwrap();
+    assert_eq!(t.as_str(), "n=42");
+    assert!(!t.is_on_heap());
+    write!(t, " overflow").unwrap();
+    assert_eq!(t.as_str(), "n=42 overflow");
+    assert!(t.is_on_heap());
 }
 
 #[test]
@@ -818,9 +855,16 @@ fn check_temp_buffer() {
     let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     assert!(!buf.is_on_heap());
-    let buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    let mut buf: TempBuffer<10> = TempBuffer::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert_eq!(buf.as_slice(), &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
     assert!(buf.is_on_heap());
+    buf.clear();
+    assert!(buf.is_empty());
+    assert_eq!(buf.as_slice(), &[] as &[u8]);
+    assert!(buf.is_on_heap());
+    buf.reset();
+    assert!(buf.is_empty());
+    assert!(!buf.is_on_heap());
 }
 
 #[test]

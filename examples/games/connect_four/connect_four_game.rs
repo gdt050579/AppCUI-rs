@@ -219,16 +219,12 @@ impl ConnectFourGame {
             x -= 1;
             y += 1;
         }
-        if count >= 4 {
-            return true;
-        }
-
-        false
+        count >= 4
     }
 
     fn is_board_full(&self) -> bool {
-        for col in 0..BOARD_WIDTH {
-            if self.board[0][col].is_empty() {
+        for cell in self.board[0].iter().take(BOARD_WIDTH) {
+            if cell.is_empty() {
                 return false;
             }
         }

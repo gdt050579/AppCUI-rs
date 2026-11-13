@@ -132,6 +132,7 @@ pub mod hbarchart;
 pub mod piechart;
 pub mod linechart;
 pub mod usagechart;
+pub mod heatmap;
 
 // re-export
 pub use common::ControlBase;
@@ -192,3 +193,4 @@ pub use piechart::PieChart;
 pub use linechart::LineChart;
 pub use markdown_composer::MarkdownComposer;
 pub use usagechart::UsageChart;
+pub use heatmap::HeatMap;

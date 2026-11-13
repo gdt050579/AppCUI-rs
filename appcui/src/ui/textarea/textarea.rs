@@ -537,8 +537,9 @@ impl TextArea {
         let y = y.min(line_count - 1);
 
         // Here I count the byte sizes of that lines above
-        for i in 0..y {
-            cursor_absolute_position += self.line_sizes[i];
+        //for i in 0..y {
+        for sz in self.line_sizes.iter().take(y) {
+            cursor_absolute_position += *sz;
         }
 
         // Here I need the absolute position of that character, therefore I need to slice 
@@ -562,8 +563,8 @@ impl TextArea {
         let line_index = (self.line_offset + self.cursor.pos_y as u32).min(line_count as u32 - 1) as usize;
 
         // Here I count the byte sizes of that lines above
-        for i in 0..line_index {
-            cursor_absolute_position += self.line_sizes[i];
+        for sz in self.line_sizes.iter().take(line_index) {
+            cursor_absolute_position += *sz;
         }
 
         // Here I need the absolute position of that character, therefore I need to slice 

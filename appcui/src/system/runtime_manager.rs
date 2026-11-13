@@ -1127,8 +1127,10 @@ impl RuntimeManager {
         let controls = unsafe { &mut *self.controls };
         if let Some(control) = controls.get_mut(handle) {
             let base = control.base_mut();
-            for i in 0..base.children.len() {
-                let child_handle = base.children[i];
+            for (i, handle) in base.children.iter().enumerate().take(base.children.len()) {
+            //for i in 0..base.children.len() {
+                //let child_handle = base.children[i];
+                let child_handle = *handle;
                 if let Some(child) = unsafe { (*self.controls).get_mut(child_handle) } {
                     child.base_mut().parent_index = VectorIndex::with_value(i);
                     self.update_parent_indexes(child_handle);

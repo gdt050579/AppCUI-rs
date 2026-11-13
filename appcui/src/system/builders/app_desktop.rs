@@ -90,6 +90,7 @@ macro_rules! impl_app_desktop_methods {
             PieChartEvents,
             GenericLineChartEvents,
             UsageChartEvents,
+            GenericHeatMapEvents,
         );
     };
     (@empty $wrapper:ident, $bound:path; $($trait_name:path),* $(,)?) => {
