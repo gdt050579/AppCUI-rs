@@ -5,6 +5,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
+## [0.5.8] - 2026-11-13
+
+### Added
+- **HeatMap** control: a grid of cells with values, labels, and colors. Supports scale modes,
+  axes, per-cell appearance where you can edit the way each cell is drawn. Created with
+  `HeatMap::new` or `heatmap!`.
+- `examples/heatmap` and `examples/heatmap_editor`.
+- new example: `booking_form` by @shu-chen-dot-ca in #288
+- Color::to_rgb() / as_rgb() / from_rgb() apis
+
+
 ## [0.5.7] - 2026-10-31
 
 ### Added
@@ -268,6 +279,7 @@ background tasks, dialogs, themes, the layout builder and the gallery. The
 [0.4.0 release notes](https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.4.0) list every pull
 request and its author.
 
+[0.5.8]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.8
 [0.5.7]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.7
 [0.5.6]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.6
 [0.5.5]: https://github.com/gdt050579/AppCUI-rs/releases/tag/v0.5.5
