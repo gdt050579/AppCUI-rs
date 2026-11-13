@@ -5,7 +5,20 @@ const ROWS: u32 = 14;
 const VALUE_MIN: i32 = -10_000;
 const VALUE_MAX: i32 = 10_000;
 const DEFAULT_MARK: char = '#';
-const FILL_CUSTOM: u32 = 1;
+const PRESET_FILLS: [(&str, heatmap::CellFill); 11] = [
+    ("Shades", heatmap::CellFill::Shades),
+    ("Dots", heatmap::CellFill::Dots),
+    ("ASCII", heatmap::CellFill::ASCII),
+    ("Circles", heatmap::CellFill::Circles),
+    ("Squares", heatmap::CellFill::Squares),
+    ("Diamonds", heatmap::CellFill::Diamonds),
+    ("Crosses", heatmap::CellFill::Crosses),
+    ("Stars", heatmap::CellFill::Stars),
+    ("Asterisks", heatmap::CellFill::Asterisks),
+    ("Flowers", heatmap::CellFill::Flowers),
+    ("Pluses", heatmap::CellFill::Pluses),
+];
+const FILL_CUSTOM: u32 = PRESET_FILLS.len() as u32;
 const CHART_ATTR_THEME: u32 = 0;
 const CHART_ATTR_RANGE: u32 = 2;
 const CELL_ATTR_RANGE: u32 = 1;
@@ -152,6 +165,13 @@ fn range_attr(cold: Color, hot: Color) -> heatmap::CellAttribute {
         CharAttribute::with_color(cold, Color::Black),
         CharAttribute::with_color(hot, Color::Black),
     )
+}
+
+fn add_fills(combo: &mut ComboBox) {
+    for (name, _) in PRESET_FILLS {
+        combo.add(name);
+    }
+    combo.add("Custom");
 }
 
 fn char_picker(layout: Layout) -> CharPicker {
@@ -331,8 +351,7 @@ impl HeatMapEditor {
         win.tooltip = pages.add(0, tooltip);
         pages.add(0, label!("'Default fill',l:1,t:4,r:1,h:1"));
         let mut default_fill = ComboBox::new(layout!("l:1,t:5,r:1"), combobox::Flags::None);
-        default_fill.add("Shades");
-        default_fill.add("Custom");
+        add_fills(&mut default_fill);
         default_fill.set_index(0);
         win.default_fill = pages.add(0, default_fill);
         let mut default_char_label = label!("'Character',l:1,t:7,w:12");
@@ -404,8 +423,7 @@ impl HeatMapEditor {
         cell_fill_label.set_visible(false);
         win.cell_fill_label = editor.add(cell_fill_label);
         let mut cell_fill = ComboBox::new(layout!("l:1,t:13,r:1"), combobox::Flags::None);
-        cell_fill.add("Shades");
-        cell_fill.add("Custom");
+        add_fills(&mut cell_fill);
         cell_fill.set_index(0);
         cell_fill.set_visible(false);
         win.cell_fill = editor.add(cell_fill);
@@ -604,23 +622,30 @@ impl HeatMapEditor {
         if self.loading {
             return;
         }
-        let custom = self.combo_index(self.default_fill) == FILL_CUSTOM;
+        let index = self.combo_index(self.default_fill);
+        let custom = index == FILL_CUSTOM;
         self.set_visible(self.default_char_label, custom);
         self.set_visible(self.default_char, custom);
-        if custom {
-            let mark = self.mark_char(self.default_char);
-            self.with_chart(|map| {
-                if map.default_fill() != Some(heatmap::CellFill::Custom(mark)) {
-                    map.set_default_fill(heatmap::CellFill::Custom(mark));
-                }
-            });
+        // Shades is the built-in fill, so choosing it clears a default instead of setting one.
+        let fill = if custom {
+            Some(heatmap::CellFill::Custom(self.mark_char(self.default_char)))
+        } else if index == 0 {
+            None
         } else {
-            self.with_chart(|map| {
+            PRESET_FILLS.get(index as usize).map(|(_, fill)| *fill)
+        };
+        self.with_chart(|map| match fill {
+            Some(fill) => {
+                if map.default_fill() != Some(fill) {
+                    map.set_default_fill(fill);
+                }
+            }
+            None => {
                 if map.default_fill().is_some() {
                     map.clear_default_fill();
                 }
-            });
-        }
+            }
+        });
     }
 
     fn apply_default_attr(&mut self) {
@@ -783,7 +808,7 @@ impl HeatMapEditor {
     fn show_cell_fill(&mut self, fill: Option<heatmap::CellFill>) {
         let (index, mark) = match fill {
             Some(heatmap::CellFill::Custom(mark)) => (FILL_CUSTOM, Some(mark)),
-            Some(heatmap::CellFill::Shades) => (0, None),
+            Some(fill) => (PRESET_FILLS.iter().position(|(_, preset)| *preset == fill).unwrap_or(0) as u32, None),
             None => (0, None),
         };
         self.set_checked(self.cell_use_default, fill.is_none());
@@ -809,10 +834,11 @@ impl HeatMapEditor {
         if self.is_checked(self.cell_use_default) {
             return None;
         }
-        if self.combo_index(self.cell_fill) == FILL_CUSTOM {
+        let index = self.combo_index(self.cell_fill);
+        if index == FILL_CUSTOM {
             Some(heatmap::CellFill::Custom(self.mark_char(self.cell_char)))
         } else {
-            Some(heatmap::CellFill::Shades)
+            PRESET_FILLS.get(index as usize).map(|(_, fill)| *fill)
         }
     }
 

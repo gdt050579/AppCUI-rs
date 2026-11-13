@@ -38,6 +38,26 @@ pub enum CellAttribute {
 pub enum CellFill {
     /// Shade characters chosen from the cell's value.
     Shades,
+    /// Dot characters chosen from the cell's value.
+    Dots,
+    /// ASCII characters chosen from the cell's value.
+    ASCII,
+    /// Circle characters chosen from the cell's value.
+    Circles,
+    /// Square characters chosen from the cell's value.
+    Squares,
+    /// Diamond characters chosen from the cell's value.
+    Diamonds,
+    /// Cross characters chosen from the cell's value.
+    Crosses,
+    /// Star characters chosen from the cell's value.
+    Stars,
+    /// Asterisk characters chosen from the cell's value.
+    Asterisks,
+    /// Flower characters chosen from the cell's value.
+    Flowers,
+    /// Plus characters chosen from the cell's value.
+    Pluses,
     /// Repeats this character for the whole cell.
     Custom(char),
 }
@@ -49,6 +69,16 @@ pub struct Cell<T: Number> {
 }
 impl<T: Number> Cell<T> {
     const SHADES: &[char] = &[' ', '░', '▒', '▓', '█'];
+    const DOTS: &[char] = &[' ', '·', '•', '●'];
+    const ASCII: &[char] = &[' ', '.', ':', '-', '=', '+', 'x', '#', '%', '@'];
+    const CIRCLES: &[char] = &[' ', '·', '∘', '○', '◎', '●'];
+    const SQUARES: &[char] = &[' ', '▫', '□', '▪', '■'];
+    const DIAMONDS: &[char] = &[' ', '◇', '◈', '◆'];
+    const CROSSES: &[char] = &[' ', '·', '+', '✚'];
+    const STARS: &[char] = &[' ', '✧', '✦', '✶', '✹']; 
+    const ASTERISKS: &[char] = &[' ', '✢', '✣', '✤', '✥']; 
+    const FLOWERS: &[char] = &[' ', '❀', '❁', '✿']; 
+    const PLUSES: &[char] = &[' ', '✛', '✜', '✚'];
     pub fn value(&self) -> T {
         self.value
     }
@@ -169,6 +199,16 @@ impl<T: Number> Cell<T> {
         let fill = self.fill.unwrap_or(params.default_fill);
         match fill {
             CellFill::Shades => Self::percentage_to_char(Self::SHADES, params.percentage),
+            CellFill::Dots => Self::percentage_to_char(Self::DOTS, params.percentage),
+            CellFill::ASCII => Self::percentage_to_char(Self::ASCII, params.percentage),
+            CellFill::Circles => Self::percentage_to_char(Self::CIRCLES, params.percentage),
+            CellFill::Squares => Self::percentage_to_char(Self::SQUARES, params.percentage),
+            CellFill::Diamonds => Self::percentage_to_char(Self::DIAMONDS, params.percentage),
+            CellFill::Crosses => Self::percentage_to_char(Self::CROSSES, params.percentage),
+            CellFill::Stars => Self::percentage_to_char(Self::STARS, params.percentage),
+            CellFill::Asterisks => Self::percentage_to_char(Self::ASTERISKS, params.percentage),
+            CellFill::Flowers => Self::percentage_to_char(Self::FLOWERS, params.percentage),
+            CellFill::Pluses => Self::percentage_to_char(Self::PLUSES, params.percentage),
             CellFill::Custom(ch) => ch,
         }
     }
