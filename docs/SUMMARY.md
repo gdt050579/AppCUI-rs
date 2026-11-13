@@ -73,6 +73,7 @@
         - [DropDownList](chapter-3/stock-controls/dropdownlist.md)
         - [GraphView](chapter-3/stock-controls/graphview.md)
         - [HBarChart](chapter-3/stock-controls/hbarchart.md)
+        - [HeatMap](chapter-3/stock-controls/heatmap.md)
         - [HLine](chapter-3/stock-controls/hline.md)
         - [HSlider](chapter-3/stock-controls/hslider.md)
         - [HSplitter](chapter-3/stock-controls/hsplitter.md)
