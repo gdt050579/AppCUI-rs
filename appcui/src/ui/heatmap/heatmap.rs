@@ -184,6 +184,62 @@ impl<T: Number + 'static> HeatMap<T> {
         self.scroll_to(self.left_scroll, self.top_scroll);
         self.refresh_hovered_tooltip();
     }
+
+    /// The default attribute, or `None` when cells use the theme color.
+    ///
+    /// `None` means the default was never set, or was removed with [`clear_default_attr`](Self::clear_default_attr).
+    /// Cells are then drawn with the theme's first chart color.
+    pub fn default_attr(&self) -> Option<CellAttribute> {
+        self.default_attr
+    }
+
+    /// Sets the attribute used by cells that do not have their own, and repaints the heat map.
+    ///
+    /// A cell that has an attribute ([`Cell::set_attr`](super::Cell::set_attr)) keeps it.
+    /// [`CellAttribute::Fixed`](super::CellAttribute::Fixed) uses one color.
+    /// [`CellAttribute::Range`](super::CellAttribute::Range) blends two colors from the smallest
+    /// value to the largest.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.fill_with(|row, column| Some(row + column));
+    /// let attr = heatmap::CellAttribute::Fixed(CharAttribute::with_color(Color::Red, Color::Black));
+    /// heatmap.set_default_attr(attr);
+    /// assert_eq!(heatmap.default_attr(), Some(attr));
+    /// ```
+    pub fn set_default_attr(&mut self, attr: CellAttribute) {
+        if self.default_attr == Some(attr) {
+            return;
+        }
+        self.default_attr = Some(attr);
+        self.update_view();
+    }
+
+    /// Removes the default attribute and repaints the heat map.
+    ///
+    /// Cells without their own attribute are drawn with the theme's first chart color.
+    /// Cells that have an attribute are left as they are.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(10, 10), heatmap::Flags::None);
+    /// heatmap.set_default_attr(heatmap::CellAttribute::Fixed(CharAttribute::with_color(Color::Red, Color::Black)));
+    /// heatmap.clear_default_attr();
+    /// assert_eq!(heatmap.default_attr(), None);
+    /// ```
+    pub fn clear_default_attr(&mut self) {
+        if self.default_attr.is_none() {
+            return;
+        }
+        self.default_attr = None;
+        self.update_view();
+    }
+
     /// Returns the cell at `row` and `column`, or `None` if the position is empty or outside the heat map.
     pub fn cell(&self, row: u32, column: u32) -> Option<&Cell<T>> {
         self.index(row, column).and_then(|idx| self.cells[idx].as_ref())
@@ -292,7 +348,7 @@ impl<T: Number + 'static> HeatMap<T> {
 
     /// Changes the cell at `row` and `column`.
     ///
-    /// The callback receives that cell, so it can change the label or the fill. A position
+    /// The callback receives that cell, so it can change the label, the fill, or the attribute. A position
     /// outside the heat map, or an empty cell, is ignored and the callback is not called.
     /// If the value changes the minimum or the maximum, every cell is repainted; otherwise
     /// only this cell is. The hover tooltip is updated when it is showing this cell.

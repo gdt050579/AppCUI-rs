@@ -6,6 +6,9 @@ const VALUE_MIN: i32 = -10_000;
 const VALUE_MAX: i32 = 10_000;
 const DEFAULT_MARK: char = '#';
 const FILL_CUSTOM: u32 = 1;
+const CHART_ATTR_THEME: u32 = 0;
+const CHART_ATTR_RANGE: u32 = 2;
+const CELL_ATTR_RANGE: u32 = 1;
 
 /// Centers of the two hot spots, as `(row, column)`.
 const SOURCE_A: (u32, u32) = (4, 6);
@@ -136,6 +139,21 @@ fn blank_fills(columns: u32, rows: u32) -> Vec<Option<heatmap::CellFill>> {
     vec![None; (rows * columns) as usize]
 }
 
+fn blank_attrs(columns: u32, rows: u32) -> Vec<Option<heatmap::CellAttribute>> {
+    vec![None; (rows * columns) as usize]
+}
+
+fn fixed_attr(color: Color) -> heatmap::CellAttribute {
+    heatmap::CellAttribute::Fixed(CharAttribute::with_color(color, Color::Black))
+}
+
+fn range_attr(cold: Color, hot: Color) -> heatmap::CellAttribute {
+    heatmap::CellAttribute::Range(
+        CharAttribute::with_color(cold, Color::Black),
+        CharAttribute::with_color(hot, Color::Black),
+    )
+}
+
 fn char_picker(layout: Layout) -> CharPicker {
     let mut picker = CharPicker::new(Some(DEFAULT_MARK), layout);
     picker.clear_sets();
@@ -150,11 +168,15 @@ fn char_picker(layout: Layout) -> CharPicker {
     picker
 }
 
-fn style_cell(cell: &mut heatmap::Cell<i32>, label: &str, fill: Option<heatmap::CellFill>) {
+fn style_cell(cell: &mut heatmap::Cell<i32>, label: &str, fill: Option<heatmap::CellFill>, attr: Option<heatmap::CellAttribute>) {
     cell.set_label(label);
     match fill {
         Some(fill) => cell.set_fill(fill),
         None => cell.clear_fill(),
+    }
+    match attr {
+        Some(attr) => cell.set_attr(attr),
+        None => cell.clear_attr(),
     }
 }
 
@@ -171,7 +193,7 @@ fn percentage(value: i32, min: i32, max: i32) -> u8 {
 // Editor window
 // ---------------------------------------------------------------------------------------------
 
-#[Window(events = [HeatMapEvents<i32>, HSliderEvents<u8>, ComboBoxEvents, CheckBoxEvents, CharPickerEvents, NumericSelectorEvents<i32>, TextFieldEvents, ButtonEvents])]
+#[Window(events = [HeatMapEvents<i32>, HSliderEvents<u8>, ComboBoxEvents, CheckBoxEvents, CharPickerEvents, ColorPickerEvents, NumericSelectorEvents<i32>, TextFieldEvents, ButtonEvents])]
 struct HeatMapEditor {
     chart: Handle<HeatMap<i32>>,
     pages: Handle<Accordion>,
@@ -182,6 +204,11 @@ struct HeatMapEditor {
     default_fill: Handle<ComboBox>,
     default_char_label: Handle<Label>,
     default_char: Handle<CharPicker>,
+    default_attr: Handle<ComboBox>,
+    default_color_label: Handle<Label>,
+    default_color: Handle<ColorPicker>,
+    default_hot_label: Handle<Label>,
+    default_hot: Handle<ColorPicker>,
     summary: Handle<Label>,
     range_label: Handle<Label>,
     cell_width: Handle<HSlider<u8>>,
@@ -200,6 +227,12 @@ struct HeatMapEditor {
     cell_fill: Handle<ComboBox>,
     cell_char_label: Handle<Label>,
     cell_char: Handle<CharPicker>,
+    cell_use_default_attr: Handle<CheckBox>,
+    cell_attr: Handle<ComboBox>,
+    cell_color_label: Handle<Label>,
+    cell_color: Handle<ColorPicker>,
+    cell_hot_label: Handle<Label>,
+    cell_hot: Handle<ColorPicker>,
     cell_clear: Handle<Button>,
     // data
     pattern: Handle<ComboBox>,
@@ -207,10 +240,11 @@ struct HeatMapEditor {
     data_text: Handle<TextArea>,
     data_apply: Handle<Button>,
     data_reload: Handle<Button>,
-    // values, labels and fills edited here, then written into the heat map
+    // values, labels, fills and attributes edited here, then written into the heat map
     values: Vec<Option<i32>>,
     labels: Vec<String>,
     fills: Vec<Option<heatmap::CellFill>>,
+    attrs: Vec<Option<heatmap::CellAttribute>>,
     // set while the editor fills its own controls, so that their events are ignored
     loading: bool,
 }
@@ -229,6 +263,11 @@ impl HeatMapEditor {
             default_fill: Handle::None,
             default_char_label: Handle::None,
             default_char: Handle::None,
+            default_attr: Handle::None,
+            default_color_label: Handle::None,
+            default_color: Handle::None,
+            default_hot_label: Handle::None,
+            default_hot: Handle::None,
             summary: Handle::None,
             range_label: Handle::None,
             cell_width: Handle::None,
@@ -246,6 +285,12 @@ impl HeatMapEditor {
             cell_fill: Handle::None,
             cell_char_label: Handle::None,
             cell_char: Handle::None,
+            cell_use_default_attr: Handle::None,
+            cell_attr: Handle::None,
+            cell_color_label: Handle::None,
+            cell_color: Handle::None,
+            cell_hot_label: Handle::None,
+            cell_hot: Handle::None,
             cell_clear: Handle::None,
             pattern: Handle::None,
             data_shape: Handle::None,
@@ -255,6 +300,7 @@ impl HeatMapEditor {
             values,
             labels,
             fills: blank_fills(COLUMNS, ROWS),
+            attrs: blank_attrs(COLUMNS, ROWS),
             loading: false,
         };
 
@@ -295,21 +341,40 @@ impl HeatMapEditor {
         let mut default_char = char_picker(layout!("l:1,t:8,r:1"));
         default_char.set_visible(false);
         win.default_char = pages.add(0, default_char);
-        pages.add(0, label!("'Cells',l:1,t:10,r:1,h:1"));
-        win.summary = pages.add(0, label!("'',l:1,t:11,r:1,h:1"));
-        win.range_label = pages.add(0, label!("'',l:1,t:12,r:1,h:1"));
-        pages.add(0, label!("'Cell width',l:1,t:14,w:16"));
-        pages.add(0, label!("'Cell height',l:54%,t:14,r:1,h:1"));
-        let mut cell_width = hslider!("u8,1,12,1,l:1,t:15,r:52%,flags:ShowValue,type:Ruler");
+        pages.add(0, label!("'Colors',l:1,t:10,r:1,h:1"));
+        let mut default_attr = ComboBox::new(layout!("l:1,t:11,r:1"), combobox::Flags::None);
+        default_attr.add("Theme");
+        default_attr.add("Fixed");
+        default_attr.add("Range");
+        default_attr.set_index(CHART_ATTR_THEME);
+        win.default_attr = pages.add(0, default_attr);
+        let mut default_color_label = label!("'Color',l:1,t:12,w:16");
+        default_color_label.set_visible(false);
+        win.default_color_label = pages.add(0, default_color_label);
+        let mut default_hot_label = label!("'Hot',l:54%,t:12,r:1,h:1");
+        default_hot_label.set_visible(false);
+        win.default_hot_label = pages.add(0, default_hot_label);
+        let mut default_color = ColorPicker::new(Color::Green, layout!("l:1,t:13,r:52%"));
+        default_color.set_visible(false);
+        win.default_color = pages.add(0, default_color);
+        let mut default_hot = ColorPicker::new(Color::Red, layout!("l:54%,t:13,r:1"));
+        default_hot.set_visible(false);
+        win.default_hot = pages.add(0, default_hot);
+        pages.add(0, label!("'Cells',l:1,t:15,r:1,h:1"));
+        win.summary = pages.add(0, label!("'',l:1,t:16,r:1,h:1"));
+        win.range_label = pages.add(0, label!("'',l:1,t:17,r:1,h:1"));
+        pages.add(0, label!("'Cell width',l:1,t:19,w:16"));
+        pages.add(0, label!("'Cell height',l:54%,t:19,r:1,h:1"));
+        let mut cell_width = hslider!("u8,1,12,1,l:1,t:20,r:52%,flags:ShowValue,type:Ruler");
         cell_width.set_value(2);
         win.cell_width = pages.add(0, cell_width);
-        win.cell_height = pages.add(0, hslider!("u8,1,6,1,l:54%,t:15,r:1,flags:ShowValue,type:Ruler"));
-        pages.add(0, label!("'Columns',l:1,t:17,w:16"));
-        pages.add(0, label!("'Rows',l:54%,t:17,r:1,h:1"));
-        let mut grid_columns = hslider!("u8,1,40,1,l:1,t:18,r:52%,flags:ShowValue,type:Ruler");
+        win.cell_height = pages.add(0, hslider!("u8,1,6,1,l:54%,t:20,r:1,flags:ShowValue,type:Ruler"));
+        pages.add(0, label!("'Columns',l:1,t:22,w:16"));
+        pages.add(0, label!("'Rows',l:54%,t:22,r:1,h:1"));
+        let mut grid_columns = hslider!("u8,1,40,1,l:1,t:23,r:52%,flags:ShowValue,type:Ruler");
         grid_columns.set_value(COLUMNS as u8);
         win.grid_columns = pages.add(0, grid_columns);
-        let mut grid_rows = hslider!("u8,1,30,1,l:54%,t:18,r:1,flags:ShowValue,type:Ruler");
+        let mut grid_rows = hslider!("u8,1,30,1,l:54%,t:23,r:1,flags:ShowValue,type:Ruler");
         grid_rows.set_value(ROWS as u8);
         win.grid_rows = pages.add(0, grid_rows);
 
@@ -350,6 +415,25 @@ impl HeatMapEditor {
         let mut cell_char = char_picker(layout!("l:1,t:16,r:1"));
         cell_char.set_visible(false);
         win.cell_char = editor.add(cell_char);
+        win.cell_use_default_attr = editor.add(checkbox!("'Use default colors',l:1,t:18,r:1,checked:true"));
+        let mut cell_attr = ComboBox::new(layout!("l:1,t:19,r:1"), combobox::Flags::None);
+        cell_attr.add("Fixed");
+        cell_attr.add("Range");
+        cell_attr.set_index(0);
+        cell_attr.set_visible(false);
+        win.cell_attr = editor.add(cell_attr);
+        let mut cell_color_label = label!("'Color',l:1,t:21,w:16");
+        cell_color_label.set_visible(false);
+        win.cell_color_label = editor.add(cell_color_label);
+        let mut cell_hot_label = label!("'Hot',l:54%,t:21,r:1,h:1");
+        cell_hot_label.set_visible(false);
+        win.cell_hot_label = editor.add(cell_hot_label);
+        let mut cell_color = ColorPicker::new(Color::Green, layout!("l:1,t:22,r:52%"));
+        cell_color.set_visible(false);
+        win.cell_color = editor.add(cell_color);
+        let mut cell_hot = ColorPicker::new(Color::Red, layout!("l:54%,t:22,r:1"));
+        cell_hot.set_visible(false);
+        win.cell_hot = editor.add(cell_hot);
         win.cell_clear = editor.add(button!("'&Clear cell',l:1,b:0,w:14"));
         win.editor_panel = pages.add(1, editor);
 
@@ -441,10 +525,21 @@ impl HeatMapEditor {
         self.control(handle).map(|slider| slider.value() as u32).unwrap_or(0)
     }
 
+    fn picker_color(&self, handle: Handle<ColorPicker>) -> Color {
+        self.control(handle).map(|picker| picker.color()).unwrap_or(Color::White)
+    }
+
+    fn set_picker_color(&mut self, handle: Handle<ColorPicker>, color: Color) {
+        if let Some(picker) = self.control_mut(handle) {
+            picker.set_color(color);
+        }
+    }
+
     fn sync_chart(&mut self) {
         let values = self.values.clone();
         let labels = self.labels.clone();
         let fills = self.fills.clone();
+        let attrs = self.attrs.clone();
         let columns = self.columns;
         let rows = self.rows;
         self.with_chart(|map| {
@@ -454,10 +549,11 @@ impl HeatMapEditor {
                     let idx = index(columns, row, column);
                     let label = &labels[idx];
                     let fill = fills[idx];
-                    if label.is_empty() && fill.is_none() {
+                    let attr = attrs[idx];
+                    if label.is_empty() && fill.is_none() && attr.is_none() {
                         continue;
                     }
-                    map.update_cell(row, column, |cell| style_cell(cell, label, fill));
+                    map.update_cell(row, column, |cell| style_cell(cell, label, fill, attr));
                 }
             }
         });
@@ -468,10 +564,11 @@ impl HeatMapEditor {
         let value = self.values[idx];
         let label = self.labels[idx].clone();
         let fill = self.fills[idx];
+        let attr = self.attrs[idx];
         self.with_chart(|map| match value {
             Some(value) => {
                 map.set(row, column, value);
-                map.update_cell(row, column, |cell| style_cell(cell, &label, fill));
+                map.update_cell(row, column, |cell| style_cell(cell, &label, fill, attr));
             }
             None => map.clear_cell(row, column),
         });
@@ -526,6 +623,45 @@ impl HeatMapEditor {
         }
     }
 
+    fn apply_default_attr(&mut self) {
+        if self.loading {
+            return;
+        }
+        let mode = self.combo_index(self.default_attr);
+        let custom = mode != CHART_ATTR_THEME;
+        let range = mode == CHART_ATTR_RANGE;
+        self.set_visible(self.default_color_label, custom);
+        self.set_visible(self.default_color, custom);
+        self.set_visible(self.default_hot_label, range);
+        self.set_visible(self.default_hot, range);
+        if custom {
+            let caption = if range { "Cold" } else { "Color" };
+            let handle = self.default_color_label;
+            if let Some(label) = self.control_mut(handle) {
+                label.set_caption(caption);
+            }
+        }
+        if !custom {
+            self.with_chart(|map| {
+                if map.default_attr().is_some() {
+                    map.clear_default_attr();
+                }
+            });
+            return;
+        }
+        let color = self.picker_color(self.default_color);
+        let attr = if range {
+            range_attr(color, self.picker_color(self.default_hot))
+        } else {
+            fixed_attr(color)
+        };
+        self.with_chart(|map| {
+            if map.default_attr() != Some(attr) {
+                map.set_default_attr(attr);
+            }
+        });
+    }
+
     fn apply_cell_size(&mut self) {
         if self.loading {
             return;
@@ -558,6 +694,7 @@ impl HeatMapEditor {
         let mut values = vec![None; count];
         let mut labels = vec![String::new(); count];
         let mut fills = vec![None; count];
+        let mut attrs = vec![None; count];
         let copy_rows = rows.min(self.rows);
         let copy_columns = columns.min(self.columns);
         for row in 0..copy_rows {
@@ -567,6 +704,7 @@ impl HeatMapEditor {
                 values[new_idx] = self.values[old_idx];
                 labels[new_idx] = std::mem::take(&mut self.labels[old_idx]);
                 fills[new_idx] = self.fills[old_idx];
+                attrs[new_idx] = self.attrs[old_idx];
             }
         }
         self.columns = columns;
@@ -574,6 +712,7 @@ impl HeatMapEditor {
         self.values = values;
         self.labels = labels;
         self.fills = fills;
+        self.attrs = attrs;
         self.with_chart(|map| map.set_heatmap_size(Size::new(columns, rows)));
         self.sync_chart();
         self.sync_text();
@@ -605,6 +744,7 @@ impl HeatMapEditor {
         };
         let label = self.labels.get(idx).cloned().unwrap_or_default();
         let fill = self.fills.get(idx).copied().flatten();
+        let attr = self.attrs.get(idx).copied().flatten();
         let (min, max) = self.range().unwrap_or((value, value));
         let position = format!("Row {row}, column {column}");
         let detail = format!("{}% of the range {min}..{max}", percentage(value, min, max));
@@ -625,6 +765,7 @@ impl HeatMapEditor {
             }
         }
         self.show_cell_fill(fill);
+        self.show_cell_attr(attr);
         self.loading = false;
         self.show_editor(true);
         if open_page {
@@ -706,6 +847,73 @@ impl HeatMapEditor {
         });
     }
 
+    fn show_cell_attr(&mut self, attr: Option<heatmap::CellAttribute>) {
+        let (index, color, hot) = match attr {
+            Some(heatmap::CellAttribute::Range(start, end)) => (CELL_ATTR_RANGE, start.foreground, end.foreground),
+            Some(heatmap::CellAttribute::Fixed(attr)) => (0, attr.foreground, Color::Red),
+            None => (0, Color::Green, Color::Red),
+        };
+        self.set_checked(self.cell_use_default_attr, attr.is_none());
+        let combo = self.cell_attr;
+        if let Some(combo) = self.control_mut(combo) {
+            combo.set_index(index);
+        }
+        self.set_picker_color(self.cell_color, color);
+        self.set_picker_color(self.cell_hot, hot);
+        self.sync_cell_attr_controls();
+    }
+
+    fn cell_attr_choice(&self) -> Option<heatmap::CellAttribute> {
+        if self.is_checked(self.cell_use_default_attr) {
+            return None;
+        }
+        let color = self.picker_color(self.cell_color);
+        if self.combo_index(self.cell_attr) == CELL_ATTR_RANGE {
+            Some(range_attr(color, self.picker_color(self.cell_hot)))
+        } else {
+            Some(fixed_attr(color))
+        }
+    }
+
+    fn sync_cell_attr_controls(&mut self) {
+        let own = !self.is_checked(self.cell_use_default_attr);
+        let range = own && self.combo_index(self.cell_attr) == CELL_ATTR_RANGE;
+        self.set_visible(self.cell_attr, own);
+        self.set_visible(self.cell_color_label, own);
+        self.set_visible(self.cell_color, own);
+        self.set_visible(self.cell_hot_label, range);
+        self.set_visible(self.cell_hot, range);
+        if own {
+            let caption = if range { "Cold" } else { "Color" };
+            let handle = self.cell_color_label;
+            if let Some(label) = self.control_mut(handle) {
+                label.set_caption(caption);
+            }
+        }
+    }
+
+    fn apply_cell_attr(&mut self) {
+        if self.loading {
+            return;
+        }
+        self.sync_cell_attr_controls();
+        let Some((row, column)) = self.selected_cell() else {
+            return;
+        };
+        let attr = self.cell_attr_choice();
+        let idx = self.at(row, column);
+        if idx >= self.attrs.len() || self.attrs[idx] == attr {
+            return;
+        }
+        self.attrs[idx] = attr;
+        self.with_chart(|map| {
+            map.update_cell(row, column, |cell| match attr {
+                Some(attr) => cell.set_attr(attr),
+                None => cell.clear_attr(),
+            });
+        });
+    }
+
     fn refresh_detail(&mut self, value: i32) {
         let (min, max) = self.range().unwrap_or((value, value));
         let detail = format!("{}% of the range {min}..{max}", percentage(value, min, max));
@@ -771,6 +979,7 @@ impl HeatMapEditor {
         self.values[idx] = None;
         self.labels[idx].clear();
         self.fills[idx] = None;
+        self.attrs[idx] = None;
         self.write_cell(row, column);
         self.show_editor(false);
         self.refresh_summary();
@@ -801,6 +1010,7 @@ impl HeatMapEditor {
         self.values = values;
         self.labels = labels;
         self.fills = blank_fills(self.columns, self.rows);
+        self.attrs = blank_attrs(self.columns, self.rows);
         self.sync_text();
         self.sync_chart();
         self.refresh_summary();
@@ -820,6 +1030,7 @@ impl HeatMapEditor {
             if value.is_none() {
                 self.labels[idx].clear();
                 self.fills[idx] = None;
+                self.attrs[idx] = None;
             }
         }
         self.values = values;
@@ -853,6 +1064,10 @@ impl ComboBoxEvents for HeatMapEditor {
             self.apply_default_fill();
         } else if handle == self.cell_fill {
             self.apply_cell_fill();
+        } else if handle == self.default_attr {
+            self.apply_default_attr();
+        } else if handle == self.cell_attr {
+            self.apply_cell_attr();
         } else if handle == self.pattern {
             self.load_pattern();
         } else {
@@ -864,10 +1079,13 @@ impl ComboBoxEvents for HeatMapEditor {
 
 impl CheckBoxEvents for HeatMapEditor {
     fn on_status_changed(&mut self, handle: Handle<CheckBox>, _checked: bool) -> EventProcessStatus {
-        if handle != self.cell_use_default {
+        if handle == self.cell_use_default {
+            self.apply_cell_fill();
+        } else if handle == self.cell_use_default_attr {
+            self.apply_cell_attr();
+        } else {
             return EventProcessStatus::Ignored;
         }
-        self.apply_cell_fill();
         EventProcessStatus::Processed
     }
 }
@@ -878,6 +1096,19 @@ impl CharPickerEvents for HeatMapEditor {
             self.apply_default_fill();
         } else if handle == self.cell_char {
             self.apply_cell_fill();
+        } else {
+            return EventProcessStatus::Ignored;
+        }
+        EventProcessStatus::Processed
+    }
+}
+
+impl ColorPickerEvents for HeatMapEditor {
+    fn on_color_changed(&mut self, handle: Handle<ColorPicker>, _color: Color) -> EventProcessStatus {
+        if handle == self.default_color || handle == self.default_hot {
+            self.apply_default_attr();
+        } else if handle == self.cell_color || handle == self.cell_hot {
+            self.apply_cell_attr();
         } else {
             return EventProcessStatus::Ignored;
         }

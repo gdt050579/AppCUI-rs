@@ -11,9 +11,19 @@ pub(crate) struct PaintParams {
     pub(crate) default_attr: CellAttribute,
     pub(crate) default_fill: CellFill,
 }
-#[derive(Debug, Clone, Copy)]
-pub(crate) enum CellAttribute {
+/// The colors a heat map cell is drawn with.
+///
+/// [`Fixed`](Self::Fixed) uses one [`CharAttribute`] for every value.
+/// [`Range`](Self::Range) blends two attributes by the cell's place between the
+/// smallest and the largest value: the first at 0% and the second at 100%.
+///
+/// A cell with no attribute of its own uses the heat map's default attribute.
+/// With no default attribute, the heat map uses the theme's first chart color.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum CellAttribute {
+    /// One attribute for every value.
     Fixed(CharAttribute),
+    /// Blends from the first attribute to the second as the value goes from the minimum to the maximum.
     Range(CharAttribute, CharAttribute),
 }
 /// How a heat map cell is drawn.
@@ -85,6 +95,56 @@ impl<T: Number> Cell<T> {
     /// ```
     pub fn clear_fill(&mut self) {
         self.fill = None;
+    }
+    /// This cell's attribute, or `None` when the cell uses the heat map's default attribute.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(4, 3), heatmap::Flags::None);
+    /// heatmap.set(1, 2, 10);
+    /// let attr = heatmap::CellAttribute::Fixed(CharAttribute::with_color(Color::Red, Color::Black));
+    /// heatmap.update_cell(1, 2, |cell| cell.set_attr(attr));
+    /// assert_eq!(heatmap.cell(1, 2).and_then(|cell| cell.attr()), Some(attr));
+    /// ```
+    pub fn attr(&self) -> Option<CellAttribute> {
+        self.attr
+    }
+    /// Sets this cell's attribute, replacing the heat map's default attribute for this cell only.
+    ///
+    /// [`CellAttribute::Fixed`](super::CellAttribute::Fixed) uses one color.
+    /// [`CellAttribute::Range`](super::CellAttribute::Range) blends two colors from this cell's
+    /// place between the smallest and the largest value.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(4, 3), heatmap::Flags::None);
+    /// heatmap.set(1, 2, 10);
+    /// heatmap.update_cell(1, 2, |cell| {
+    ///     cell.set_attr(heatmap::CellAttribute::Fixed(CharAttribute::with_color(Color::Red, Color::Black)));
+    /// });
+    /// ```
+    pub fn set_attr(&mut self, attr: CellAttribute) {
+        self.attr = Some(attr);
+    }
+    /// Removes this cell's attribute so the cell uses the heat map's default attribute.
+    ///
+    /// # Example
+    /// ```rust, no_run
+    /// use appcui::prelude::*;
+    ///
+    /// let mut heatmap: HeatMap<u32> = HeatMap::new(layout!("d:f"), Size::new(4, 3), heatmap::Flags::None);
+    /// heatmap.set(1, 2, 10);
+    /// heatmap.update_cell(1, 2, |cell| {
+    ///     cell.set_attr(heatmap::CellAttribute::Fixed(CharAttribute::with_color(Color::Red, Color::Black)));
+    ///     cell.clear_attr();
+    /// });
+    /// ```
+    pub fn clear_attr(&mut self) {
+        self.attr = None;
     }
     /// The label shown by tooltip formats that include a label.
     pub fn label(&self) -> &str {
