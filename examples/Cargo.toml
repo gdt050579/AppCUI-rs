@@ -458,6 +458,10 @@ name = "heatmap"
 path = "heatmap/main.rs"
 
 [[example]]
+name = "heatmap_editor"
+path = "heatmap_editor/main.rs"
+
+[[example]]
 name = "hexview"
 path = "hexview/main.rs"
 
