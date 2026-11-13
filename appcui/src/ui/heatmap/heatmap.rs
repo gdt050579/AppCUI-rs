@@ -246,7 +246,7 @@ impl<T: Number + 'static> HeatMap<T> {
     }
 
     /// Sets the cell at `row` and `column`. A number can be passed directly
-    /// (for example `heatmap.set(2, 3, 17)`).
+    /// (for example `heatmap.set(2, 3, 17)`). A [`CellBuilder`](super::CellBuilder) can be passed as well.
     ///
     /// A position outside the heat map is ignored. If the new value does not change the
     /// minimum or the maximum, only this cell is repainted; otherwise every cell is.

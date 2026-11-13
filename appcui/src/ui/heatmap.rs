@@ -3,7 +3,7 @@
 //! [`HeatMap`] is a grid of cells. [`Flags`] adds scroll bars, a margin, and dimming of
 //! the cells that are not selected. [`TooltipFormat`] chooses the hover tooltip.
 //! [`CellFill`] chooses the characters a cell is drawn with.
-//! [`CellAttribute`] chooses its colors.
+//! [`CellAttribute`] chooses its colors. [`CellBuilder`] builds a cell with a label, fill, and attribute.
 //! [`events::GenericHeatMapEvents`] reports selection changes.
 
 mod cell;
@@ -15,6 +15,7 @@ mod tests;
 
 pub use self::cell::Cell;
 pub use self::cell::CellAttribute;
+pub use self::cell::CellBuilder;
 pub use self::cell::CellFill;
 use self::cell::PaintParams;
 pub use self::heatmap::HeatMap;

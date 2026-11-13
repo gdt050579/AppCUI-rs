@@ -220,3 +220,52 @@ fn check_selection_events() {
         &[Some((0, 0)), Some((0, 1)), Some((0, 2)), Some((1, 2)), None,]
     );
 }
+
+#[test]
+fn check_cell_builder() {
+    let cell = heatmap::CellBuilder::<i32>::new(10).build();
+    assert_eq!(cell.value(), 10);
+    assert_eq!(cell.label(), "");
+    assert_eq!(cell.fill(), None);
+    assert_eq!(cell.attr(), None);
+
+    let attr = heatmap::CellAttribute::Fixed(CharAttribute::with_color(Color::Red, Color::Black));
+    let cell = heatmap::CellBuilder::new(10)
+        .label("first")
+        .label("Peak")
+        .fill(heatmap::CellFill::Shades)
+        .fill(heatmap::CellFill::Custom('#'))
+        .attr(attr)
+        .build();
+    assert_eq!(cell.value(), 10);
+    assert_eq!(cell.label(), "Peak");
+    assert_eq!(cell.fill(), Some(heatmap::CellFill::Custom('#')));
+    assert_eq!(cell.attr(), Some(attr));
+
+    let cell: heatmap::Cell<i32> = heatmap::CellBuilder::new(4).label("").fill(heatmap::CellFill::Stars).into();
+    assert_eq!(cell.value(), 4);
+    assert_eq!(cell.label(), "");
+    assert_eq!(cell.fill(), Some(heatmap::CellFill::Stars));
+    assert_eq!(cell.attr(), None);
+}
+
+#[test]
+fn check_cell_builder_is_accepted_by_set() {
+    in_app(|| {
+        let mut map: HeatMap<i32> = HeatMap::new(layout!("d:f"), Size::new(2, 2), heatmap::Flags::None);
+        let attr = heatmap::CellAttribute::Range(
+            CharAttribute::with_color(Color::Blue, Color::Black),
+            CharAttribute::with_color(Color::Red, Color::Black),
+        );
+        map.set(
+            1,
+            0,
+            heatmap::CellBuilder::new(7).label("Source").fill(heatmap::CellFill::Circles).attr(attr),
+        );
+        let cell = map.cell(1, 0).unwrap();
+        assert_eq!(cell.value(), 7);
+        assert_eq!(cell.label(), "Source");
+        assert_eq!(cell.fill(), Some(heatmap::CellFill::Circles));
+        assert_eq!(cell.attr(), Some(attr));
+    });
+}

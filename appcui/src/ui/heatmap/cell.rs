@@ -75,9 +75,9 @@ impl<T: Number> Cell<T> {
     const SQUARES: &[char] = &[' ', '▫', '□', '▪', '■'];
     const DIAMONDS: &[char] = &[' ', '◇', '◈', '◆'];
     const CROSSES: &[char] = &[' ', '·', '+', '✚'];
-    const STARS: &[char] = &[' ', '✧', '✦', '✶', '✹']; 
-    const ASTERISKS: &[char] = &[' ', '✢', '✣', '✤', '✥']; 
-    const FLOWERS: &[char] = &[' ', '❀', '❁', '✿']; 
+    const STARS: &[char] = &[' ', '✧', '✦', '✶', '✹'];
+    const ASTERISKS: &[char] = &[' ', '✢', '✣', '✤', '✥'];
+    const FLOWERS: &[char] = &[' ', '❀', '❁', '✿'];
     const PLUSES: &[char] = &[' ', '✛', '✜', '✚'];
     pub fn value(&self) -> T {
         self.value
@@ -262,14 +262,68 @@ impl<T: Number> Cell<T> {
     }
 }
 
+/// Builds a [`Cell`] by setting only the properties that should differ from the heat map defaults.
+///
+/// # Example
+/// ```rust
+/// use appcui::prelude::*;
+///
+/// let cell = heatmap::CellBuilder::new(10)
+///     .label("Peak")
+///     .fill(heatmap::CellFill::Dots)
+///     .attr(heatmap::CellAttribute::Fixed(CharAttribute::with_color(Color::Red, Color::Black)))
+///     .build();
+/// assert_eq!(cell.value(), 10);
+/// assert_eq!(cell.label(), "Peak");
+/// assert_eq!(cell.fill(), Some(heatmap::CellFill::Dots));
+/// ```
+pub struct CellBuilder<T: Number> {
+    cell: Cell<T>,
+}
+impl<T: Number> CellBuilder<T> {
+    /// Starts a cell with `value`. The label is empty, and the fill and attribute stay unset.
+    pub fn new(value: T) -> Self {
+        Self {
+            cell: Cell {
+                value,
+                label: String::new(),
+                attr: None,
+                fill: None,
+            },
+        }
+    }
+    /// Sets the label shown by tooltip formats that include a label.
+    ///
+    /// An empty label is allowed.
+    pub fn label(mut self, label: &str) -> Self {
+        self.cell.label = label.to_string();
+        self
+    }
+    /// Sets this cell's fill, replacing the heat map's default fill for this cell only.
+    pub fn fill(mut self, fill: CellFill) -> Self {
+        self.cell.fill = Some(fill);
+        self
+    }
+    /// Sets this cell's attribute, replacing the heat map's default attribute for this cell only.
+    pub fn attr(mut self, attr: CellAttribute) -> Self {
+        self.cell.attr = Some(attr);
+        self
+    }
+    /// Returns the finished cell.
+    pub fn build(self) -> Cell<T> {
+        self.cell
+    }
+}
+
+impl<T: Number> From<CellBuilder<T>> for Cell<T> {
+    fn from(builder: CellBuilder<T>) -> Self {
+        builder.build()
+    }
+}
+
 /// A cell with this value and the heat map's default fill and attribute.
 impl<T: Number> From<T> for Cell<T> {
     fn from(value: T) -> Self {
-        Self {
-            value,
-            label: String::new(),
-            attr: None,
-            fill: None,
-        }
+        CellBuilder::new(value).build()
     }
 }
