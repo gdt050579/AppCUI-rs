@@ -1709,6 +1709,34 @@ fn check_color_as_color_index() {
 }
 
 #[test]
+fn check_color_to_rgb() {
+    assert_eq!(Color::Black.to_rgb(), Some((0, 0, 0)));
+    assert_eq!(Color::DarkBlue.to_rgb(), Some((0, 0, 128)));
+    assert_eq!(Color::DarkGreen.to_rgb(), Some((0, 128, 0)));
+    assert_eq!(Color::Teal.to_rgb(), Some((0, 128, 128)));
+    assert_eq!(Color::DarkRed.to_rgb(), Some((128, 0, 0)));
+    assert_eq!(Color::Magenta.to_rgb(), Some((128, 0, 128)));
+    assert_eq!(Color::Olive.to_rgb(), Some((128, 128, 0)));
+    assert_eq!(Color::Silver.to_rgb(), Some((192, 192, 192)));
+    assert_eq!(Color::Gray.to_rgb(), Some((128, 128, 128)));
+    assert_eq!(Color::Blue.to_rgb(), Some((0, 0, 255)));
+    assert_eq!(Color::Green.to_rgb(), Some((0, 255, 0)));
+    assert_eq!(Color::Aqua.to_rgb(), Some((0, 255, 255)));
+    assert_eq!(Color::Red.to_rgb(), Some((255, 0, 0)));
+    assert_eq!(Color::Pink.to_rgb(), Some((255, 0, 255)));
+    assert_eq!(Color::Yellow.to_rgb(), Some((255, 255, 0)));
+    assert_eq!(Color::White.to_rgb(), Some((255, 255, 255)));
+    assert_eq!(Color::Transparent.to_rgb(), None);
+    #[cfg(feature = "TRUE_COLORS")]
+    {
+        assert_eq!(Color::RGB(0, 0, 0).to_rgb(), Some((0, 0, 0)));
+        assert_eq!(Color::RGB(255, 128, 0).to_rgb(), Some((255, 128, 0)));
+        assert_eq!(Color::RGB(1, 2, 3).to_rgb(), Some((1, 2, 3)));
+        assert_eq!(Color::RGB(255, 255, 255).to_rgb(), Some((255, 255, 255)));
+    }
+}
+
+#[test]
 fn check_draw_line_boxes() {
     let mut s = SurfaceTester::new(60, 25);
     s.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
