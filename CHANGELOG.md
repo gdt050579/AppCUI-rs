@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
+## [next] - UNRELEASED
+
+### Changed
+- ncurses is an optional feature on linux.
+
 ## [0.5.8] - 2026-11-13
 
 ### Added
