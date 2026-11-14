@@ -223,7 +223,8 @@ fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sende
 fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // TermiosTerminal::new(builder)
     // let term = NcursesTerminal::new(builder, sender)?;
-    let term = CrossTerm::new(builder, sender)?;
+    // let term = CrossTerm::new(builder, sender)?;
+    let term = TermiosTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "macos")]
