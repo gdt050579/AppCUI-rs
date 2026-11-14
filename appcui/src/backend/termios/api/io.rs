@@ -346,6 +346,198 @@ fn sgr_params(payload: &[u8]) -> Result<([i32; 3], u8), TermiosError> {
     Ok((params, final_byte))
 }
 
+/// Decodes one CSI key sequence, not including the `ESC [` introducer.
+///
+/// Parameters are decimals separated by `;`. The final byte is in `@`..=`~`. For `~` the first
+/// parameter is the key code and the second is the xterm modifier. For every other final byte the
+/// second parameter is the modifier (`1` + Shift + 2×Alt + 4×Ctrl). A missing modifier is `1`.
+pub(super) fn decode_csi(payload: &[u8]) -> Result<AnsiKey, TermiosError> {
+    let Some((&final_byte, fields)) = payload.split_last() else {
+        return Err(TermiosError::UnknownKey);
+    };
+    if !(0x40..=0x7E).contains(&final_byte) {
+        return Err(TermiosError::UnknownKey);
+    }
+    let (params, count) = csi_params(fields)?;
+    let params = &params[..count];
+    let mut modifier = csi_key_modifier(params, final_byte);
+    let code = match final_byte {
+        b'A' => AnsiKeyCode::_Up,
+        b'B' => AnsiKeyCode::_Down,
+        b'C' => AnsiKeyCode::_Right,
+        b'D' => AnsiKeyCode::_Left,
+        b'H' => AnsiKeyCode::_Home,
+        b'F' => AnsiKeyCode::_End,
+        b'P' => AnsiKeyCode::F1,
+        b'Q' => AnsiKeyCode::F2,
+        b'R' => AnsiKeyCode::F3,
+        b'S' => AnsiKeyCode::F4,
+        b'Z' => {
+            modifier |= KeyModifier::Shift;
+            AnsiKeyCode::_Tab
+        }
+        b'~' => tilde_key(*params.first().unwrap_or(&0))?,
+        _ => return Err(TermiosError::UnknownKey),
+    };
+    Ok(AnsiKey {
+        bytes: [27, 91, final_byte, 0, 0],
+        code,
+        modifier,
+    })
+}
+
+fn csi_params(fields: &[u8]) -> Result<([i32; 4], usize), TermiosError> {
+    let mut params = [0i32; 4];
+    if fields.is_empty() {
+        return Ok((params, 0));
+    }
+    let mut count = 0usize;
+    let mut value = 0i32;
+    let mut saw_digit = false;
+    for &byte in fields {
+        match byte {
+            b'0'..=b'9' => {
+                saw_digit = true;
+                value = value.saturating_mul(10).saturating_add(i32::from(byte - b'0'));
+            }
+            b';' => {
+                if count == params.len() {
+                    return Err(TermiosError::UnknownKey);
+                }
+                params[count] = if saw_digit { value } else { 0 };
+                count += 1;
+                value = 0;
+                saw_digit = false;
+            }
+            _ => return Err(TermiosError::UnknownKey),
+        }
+    }
+    if count == params.len() {
+        return Err(TermiosError::UnknownKey);
+    }
+    params[count] = if saw_digit { value } else { 0 };
+    count += 1;
+    Ok((params, count))
+}
+
+fn csi_key_modifier(params: &[i32], final_byte: u8) -> KeyModifier {
+    let value = if final_byte == b'~' {
+        params.get(1).copied().unwrap_or(1)
+    } else if params.len() >= 2 {
+        params[1]
+    } else {
+        1
+    };
+    let bits = value.saturating_sub(1);
+    let mut modifier = KeyModifier::None;
+    if bits & 1 != 0 {
+        modifier |= KeyModifier::Shift;
+    }
+    if bits & 2 != 0 {
+        modifier |= KeyModifier::Alt;
+    }
+    if bits & 4 != 0 {
+        modifier |= KeyModifier::Ctrl;
+    }
+    modifier
+}
+
+fn tilde_key(code: i32) -> Result<AnsiKeyCode, TermiosError> {
+    Ok(match code {
+        1 => AnsiKeyCode::_Home,
+        2 => AnsiKeyCode::_Insert,
+        3 => AnsiKeyCode::Delete,
+        4 => AnsiKeyCode::_End,
+        5 => AnsiKeyCode::_PageUp,
+        6 => AnsiKeyCode::_PageDown,
+        11 => AnsiKeyCode::F1,
+        12 => AnsiKeyCode::F2,
+        13 => AnsiKeyCode::F3,
+        14 => AnsiKeyCode::F4,
+        15 => AnsiKeyCode::F5,
+        17 => AnsiKeyCode::F6,
+        18 => AnsiKeyCode::F7,
+        19 => AnsiKeyCode::F8,
+        20 => AnsiKeyCode::F9,
+        21 => AnsiKeyCode::F10,
+        23 => AnsiKeyCode::_F11,
+        24 => AnsiKeyCode::F12,
+        _ => return Err(TermiosError::UnknownKey),
+    })
+}
+
+pub(super) fn add_alt(mut key: AnsiKey) -> AnsiKey {
+    key.modifier |= KeyModifier::Alt;
+    key
+}
+
+/// Decodes one non-escape byte the way the terminal delivers it in raw mode.
+pub(super) fn decode_plain_key(c: u8) -> Result<AnsiKey, TermiosError> {
+    let (code, modifier) = match c {
+        8 => (AnsiKeyCode::_Backspace, KeyModifier::Ctrl),
+        9 => (AnsiKeyCode::_Tab, KeyModifier::None),
+        10..=13 => (AnsiKeyCode::_Enter, KeyModifier::None),
+        1..=7 | 14..=26 => (AnsiKeyCode::Letter(Letter::try_from(c)?), KeyModifier::Ctrl),
+        27 => (AnsiKeyCode::_Escape, KeyModifier::None),
+        28 => (AnsiKeyCode::BackSlash, KeyModifier::Ctrl),
+        29 => (AnsiKeyCode::RightBracket, KeyModifier::Ctrl),
+        30 => (AnsiKeyCode::Unknown, KeyModifier::Ctrl),
+        31 => (AnsiKeyCode::Dash, KeyModifier::Ctrl),
+        32 => (AnsiKeyCode::Space, KeyModifier::None),
+        33 => (AnsiKeyCode::N1, KeyModifier::Shift),
+        34 => (AnsiKeyCode::Quote, KeyModifier::Shift),
+        35 => (AnsiKeyCode::N3, KeyModifier::Shift),
+        36 => (AnsiKeyCode::N4, KeyModifier::Shift),
+        37 => (AnsiKeyCode::N5, KeyModifier::Shift),
+        38 => (AnsiKeyCode::N7, KeyModifier::Shift),
+        39 => (AnsiKeyCode::Quote, KeyModifier::None),
+        40 => (AnsiKeyCode::N9, KeyModifier::Shift),
+        41 => (AnsiKeyCode::N0, KeyModifier::Shift),
+        42 => (AnsiKeyCode::N8, KeyModifier::Shift),
+        43 => (AnsiKeyCode::Equal, KeyModifier::Shift),
+        44 => (AnsiKeyCode::Comma, KeyModifier::None),
+        45 => (AnsiKeyCode::Dash, KeyModifier::None),
+        46 => (AnsiKeyCode::Dot, KeyModifier::None),
+        47 => (AnsiKeyCode::Slash, KeyModifier::None),
+        48 => (AnsiKeyCode::N0, KeyModifier::None),
+        49 => (AnsiKeyCode::N1, KeyModifier::None),
+        50 => (AnsiKeyCode::N2, KeyModifier::None),
+        51 => (AnsiKeyCode::N3, KeyModifier::None),
+        52 => (AnsiKeyCode::N4, KeyModifier::None),
+        53 => (AnsiKeyCode::N5, KeyModifier::None),
+        54 => (AnsiKeyCode::N6, KeyModifier::None),
+        55 => (AnsiKeyCode::N7, KeyModifier::None),
+        56 => (AnsiKeyCode::N8, KeyModifier::None),
+        57 => (AnsiKeyCode::N9, KeyModifier::None),
+        58 => (AnsiKeyCode::SemiColon, KeyModifier::Shift),
+        59 => (AnsiKeyCode::SemiColon, KeyModifier::None),
+        60 => (AnsiKeyCode::Comma, KeyModifier::Shift),
+        61 => (AnsiKeyCode::Equal, KeyModifier::None),
+        62 => (AnsiKeyCode::Dot, KeyModifier::Shift),
+        63 => (AnsiKeyCode::Slash, KeyModifier::Shift),
+        64 => (AnsiKeyCode::N2, KeyModifier::Shift),
+        65..=90 => (AnsiKeyCode::Letter(Letter::try_from(c.saturating_sub(64))?), KeyModifier::Shift),
+        91 => (AnsiKeyCode::LeftBracket, KeyModifier::None),
+        92 => (AnsiKeyCode::BackSlash, KeyModifier::None),
+        93 => (AnsiKeyCode::RightBracket, KeyModifier::None),
+        94 => (AnsiKeyCode::N6, KeyModifier::Shift),
+        95 => (AnsiKeyCode::Dash, KeyModifier::Shift),
+        96 => (AnsiKeyCode::AngleQuote, KeyModifier::None),
+        97..=122 => (AnsiKeyCode::Letter(Letter::try_from(c.saturating_sub(96))?), KeyModifier::None),
+        123 => (AnsiKeyCode::LeftBracket, KeyModifier::Shift),
+        124 => (AnsiKeyCode::BackSlash, KeyModifier::Shift),
+        125 => (AnsiKeyCode::RightBracket, KeyModifier::Shift),
+        126 => (AnsiKeyCode::AngleQuote, KeyModifier::Shift),
+        127 => (AnsiKeyCode::_Backspace, KeyModifier::None),
+        _ => (AnsiKeyCode::Unknown, KeyModifier::None),
+    };
+    Ok(AnsiKey {
+        bytes: [c, 0, 0, 0, 0],
+        code,
+        modifier,
+    })
+}
+
 impl TermiosReader {
     fn parse_mouse_event() -> Result<AnsiKey, TermiosError> {
         let (mut button_code, x, y) = (checked_stdin_read()? - 32, checked_stdin_read()? - 32, checked_stdin_read()? - 32); // all of them are "encoded" by adding 32 to the actual value
@@ -408,6 +600,38 @@ impl TermiosReader {
         decode_sgr_mouse(&payload[..len])
     }
 
+    /// Bytes after `ESC [`, except SGR (`<`) and the legacy mouse introducer (`M`).
+    fn parse_csi_sequence() -> Result<AnsiKey, TermiosError> {
+        let mut payload = [0u8; 32];
+        let mut len = 0usize;
+        loop {
+            if len == payload.len() {
+                return Err(TermiosError::UnknownKey);
+            }
+            let byte = checked_stdin_read()?;
+            if len == 0 {
+                match byte {
+                    b'<' => return Self::parse_sgr_mouse_event(),
+                    b'M' => return Self::parse_mouse_event(),
+                    _ => {}
+                }
+            }
+            match byte {
+                b'0'..=b'9' | b';' => {
+                    payload[len] = byte;
+                    len += 1;
+                }
+                0x40..=0x7E => {
+                    payload[len] = byte;
+                    len += 1;
+                    break;
+                }
+                _ => return Err(TermiosError::UnknownKey),
+            }
+        }
+        decode_csi(&payload[..len])
+    }
+
     pub fn read_key() -> Result<AnsiKey, TermiosError> {
         while let Ok(c) = checked_stdin_read() {
             if c == 0 {
@@ -454,51 +678,9 @@ impl TermiosReader {
                                     let code = [c, byte_2, byte_3, 0, 0];
                                     (code, key, modifier)
                                 }
-                                91 => {
-                                    // We need to read a 3rd byte
-                                    let byte_3 = checked_stdin_read()?;
-                                    match byte_3 {
-                                        // Here we read from F5 to F8 inclusive
-                                        // F5 -> 27 91 49 53 126
-                                        // F6 -> 27 91 49 55 126
-                                        // F7 -> 27 91 49 56 126
-                                        // F8 -> 27 91 49 57 126
-                                        49 => {
-                                            let (byte_4, byte_5) = (checked_stdin_read()?, checked_stdin_read()?);
-                                            let key = match (byte_4, byte_5) {
-                                                (53, 126) => AnsiKeyCode::F5,
-                                                (55, 126) => AnsiKeyCode::F6,
-                                                (56, 126) => AnsiKeyCode::F7,
-                                                (57, 126) => AnsiKeyCode::F8,
-                                                _ => return Err(TermiosError::UnknownKey),
-                                            };
-                                            ([c, byte_2, byte_3, byte_4, byte_5], key, modifier)
-                                        }
-                                        // F9 -> 27 91 50 48 126
-                                        // F10 -> 27 91 50 49 126
-                                        // F11 -> Seems to be hardwired by the OS
-                                        // F12 -> 27 91 50 52 126
-                                        50 => {
-                                            let (byte_4, byte_5) = (checked_stdin_read()?, checked_stdin_read()?);
-                                            let key = match (byte_4, byte_5) {
-                                                (48, 126) => AnsiKeyCode::F9,
-                                                (49, 126) => AnsiKeyCode::F10,
-                                                (52, 126) => AnsiKeyCode::F12,
-                                                _ => return Err(TermiosError::UnknownKey),
-                                            };
-                                            ([c, byte_2, byte_3, byte_4, byte_5], key, modifier)
-                                        }
-                                        65 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Up, modifier),
-                                        66 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Down, modifier),
-                                        67 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Right, modifier),
-                                        68 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Left, modifier),
-                                        60 => return Self::parse_sgr_mouse_event(), // SGR: ESC [ < Pb ; Px ; Py M/m
-                                        77 => return Self::parse_mouse_event(),
-                                        _ => return Err(TermiosError::UnknownKey),
-                                    }
-                                }
+                                91 => return Self::parse_csi_sequence(),
                                 0 => ([c, byte_2, 0, 0, 0], AnsiKeyCode::_Escape, modifier),
-                                _ => ([c, byte_2, 0, 0, 0], AnsiKeyCode::Unknown, modifier),
+                                other => return Ok(add_alt(decode_plain_key(other)?)),
                             }
                         }
                         28 => ([c, 0, 0, 0, 0], AnsiKeyCode::BackSlash, modifier),
