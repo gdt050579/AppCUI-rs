@@ -186,7 +186,10 @@ pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<Syste
             Ok(Box::new(term))
         }
         #[cfg(target_family = "unix")]
-        Type::Termios => TermiosTerminal::new(builder, sender),
+        Type::Termios => {
+            let term = TermiosTerminal::new(builder, sender)?;
+            Ok(Box::new(term))
+        }
 
         #[cfg(target_family = "unix")]
         Type::NcursesTerminal => {
@@ -229,10 +232,12 @@ fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sende
 }
 #[cfg(target_os = "macos")]
 fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
-    TermiosTerminal::new(builder, sender)
+    let term = TermiosTerminal::new(builder, sender)?;
+    Ok(Box::new(term))
 }
 #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos", target_arch = "wasm32")))]
 fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // anything else
-    TermiosTerminal::new(builder, sender)
+    let term = TermiosTerminal::new(builder, sender)?;
+    Ok(Box::new(term))
 }

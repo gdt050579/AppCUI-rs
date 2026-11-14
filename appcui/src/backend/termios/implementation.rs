@@ -31,7 +31,7 @@ pub struct TermiosTerminal {
 }
 
 impl TermiosTerminal {
-    pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let Ok(orig_termios) = Termios::enable_raw_mode() else {
             return Err(Error::new(
                 crate::prelude::ErrorKind::InitializationFailure,
@@ -84,7 +84,7 @@ impl TermiosTerminal {
 
         Input::new().start(sender.clone());
         SizeReader::new(get_resize_notification().clone()).start(sender);
-        Ok(Box::new(t))
+        Ok(t)
     }
 }
 
@@ -135,4 +135,4 @@ impl Backend for TermiosTerminal {
         self.ansi_buffer.execute();
         self.orig_termios.restore();
     }
-}
+}
