@@ -191,19 +191,16 @@ pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<Syste
             Ok(Box::new(term))
         }
         #[cfg(target_family = "unix")]
-        Type::Termios => TermiosTerminal::new(builder, sender),
+        Type::Termios => {
+            let term = TermiosTerminal::new(builder, sender)?;
+            Ok(Box::new(term))
+        }
 
         #[cfg(all(target_family = "unix", feature = "NCURSES"))]
         Type::NcursesTerminal => {
             let term = NcursesTerminal::new(builder, sender)?;
             Ok(Box::new(term))
         }
-
-        // #[cfg(target_family = "unix")]
-        // Type::NcursesTerminal => {
-        //     let term = NcursesTerminal::new(builder, sender)?;
-        //     Ok(Box::new(term))
-        // }
 
         #[cfg(target_arch = "wasm32")]
         Type::WebTerminal => {
@@ -233,9 +230,6 @@ fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sende
 }
 #[cfg(target_os = "linux")]
 fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
-    // TermiosTerminal::new(builder)
-    // let term = NcursesTerminal::new(builder, sender)?;
-    // let term = CrossTerm::new(builder, sender)?;
     let term = TermiosTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
