@@ -40,6 +40,8 @@
 //! platform-specific features when available.
 
 mod debug;
+#[cfg(all(target_family = "unix", feature = "NCURSES"))]
+mod ncurses;
 mod system_event_thread;
 // #[cfg(target_family = "unix")]
 // mod ncurses;
@@ -74,8 +76,8 @@ pub(super) use self::system_event_thread::SystemEventReader;
 
 use self::debug::DebugTerminal;
 
-// #[cfg(target_family = "unix")]
-// use self::ncurses::NcursesTerminal;
+#[cfg(all(target_family = "unix", feature = "NCURSES"))]
+use self::ncurses::NcursesTerminal;
 #[cfg(target_family = "unix")]
 use self::termios::TermiosTerminal;
 #[cfg(target_arch = "wasm32")]
@@ -140,8 +142,8 @@ pub enum Type {
     #[cfg(target_family = "unix")]
     Termios,
     /// Unix ncurses terminal.
-    // #[cfg(target_family = "unix")]
-    // NcursesTerminal,
+    #[cfg(all(target_family = "unix", feature = "NCURSES"))]
+    NcursesTerminal,
     /// Browser canvas terminal (default on WASM).
     #[cfg(target_arch = "wasm32")]
     WebTerminal,
@@ -189,8 +191,11 @@ pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<Syste
             Ok(Box::new(term))
         }
         #[cfg(target_family = "unix")]
-        Type::Termios => {
-            let term = TermiosTerminal::new(builder, sender)?;
+        Type::Termios => TermiosTerminal::new(builder, sender),
+
+        #[cfg(all(target_family = "unix", feature = "NCURSES"))]
+        Type::NcursesTerminal => {
+            let term = NcursesTerminal::new(builder, sender)?;
             Ok(Box::new(term))
         }
 
