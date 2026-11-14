@@ -1,6 +1,6 @@
 //! `<termios.h>` definitions for macOS (x86_64 and aarch64), from `<sys/termios.h>`.
 
-use std::ffi::{c_uint, c_ulong};
+use std::ffi::{c_int, c_uint, c_ulong};
 
 /// `tcflag_t` (`unsigned long` on macOS)
 pub(crate) type TcFlag = c_ulong;
@@ -10,6 +10,8 @@ pub(crate) type Speed = c_ulong;
 pub(crate) type Cc = u8;
 /// `nfds_t` (`unsigned int` on macOS), the type of `poll()`'s second argument
 pub(crate) type NfdsT = c_uint;
+/// Type of `ioctl()`'s `request` argument (`unsigned long` on macOS)
+pub(crate) type IoctlRequest = c_ulong;
 
 /// Number of control characters (`NCCS`)
 pub(crate) const NCCS: usize = 20;
@@ -93,4 +95,17 @@ pub(crate) mod ctrl_char_idx {
     pub(crate) const VMIN: usize = 16;
     /// Maximum amount of time to wait before `read` returns
     pub(crate) const VTIME: usize = 17;
+}
+
+/// Signal sent when the terminal window size changes
+pub(crate) const SIGWINCH: c_int = 28;
+
+pub(crate) mod ioctl_request {
+    //! `ioctl()` requests for the terminal size (`<sys/ttycom.h>`).
+    use super::IoctlRequest;
+
+    /// Get the window size: `_IOR('t', 104, struct winsize)`
+    pub(crate) const TIOCGWINSZ: IoctlRequest = 0x4008_7468;
+    /// Set the window size: `_IOW('t', 103, struct winsize)`
+    pub(crate) const TIOCSWINSZ: IoctlRequest = 0x8008_7467;
 }

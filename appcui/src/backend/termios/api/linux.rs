@@ -15,7 +15,7 @@
 )))]
 compile_error!("The termios backend does not have <termios.h> definitions for this Linux architecture.");
 
-use std::ffi::{c_uint, c_ulong};
+use std::ffi::{c_int, c_uint, c_ulong};
 
 /// `tcflag_t` (`unsigned int` on Linux)
 pub(crate) type TcFlag = c_uint;
@@ -25,6 +25,12 @@ pub(crate) type Speed = c_uint;
 pub(crate) type Cc = u8;
 /// `nfds_t` (`unsigned long` on Linux), the type of `poll()`'s second argument
 pub(crate) type NfdsT = c_ulong;
+/// Type of `ioctl()`'s `request` argument: `unsigned long` in glibc, `int` in musl
+#[cfg(not(target_env = "musl"))]
+pub(crate) type IoctlRequest = c_ulong;
+/// Type of `ioctl()`'s `request` argument: `unsigned long` in glibc, `int` in musl
+#[cfg(target_env = "musl")]
+pub(crate) type IoctlRequest = c_int;
 
 /// Number of control characters (`NCCS`)
 pub(crate) const NCCS: usize = 32;
@@ -110,4 +116,17 @@ pub(crate) mod ctrl_char_idx {
     pub(crate) const VMIN: usize = 6;
     /// Maximum amount of time to wait before `read` returns
     pub(crate) const VTIME: usize = 5;
+}
+
+/// Signal sent when the terminal window size changes
+pub(crate) const SIGWINCH: c_int = 28;
+
+pub(crate) mod ioctl_request {
+    //! `ioctl()` requests for the terminal size (`asm-generic/ioctls.h`).
+    use super::IoctlRequest;
+
+    /// Get the window size
+    pub(crate) const TIOCGWINSZ: IoctlRequest = 0x5413;
+    /// Set the window size
+    pub(crate) const TIOCSWINSZ: IoctlRequest = 0x5414;
 }

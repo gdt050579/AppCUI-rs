@@ -6,12 +6,12 @@ pub(crate) mod sizing;
 #[cfg(target_os = "linux")]
 pub(crate) mod linux;
 #[cfg(target_os = "linux")]
-use linux as platform;
+pub(crate) use linux as platform;
 
 #[cfg(target_os = "macos")]
 pub(crate) mod macos;
 #[cfg(target_os = "macos")]
-use macos as platform;
+pub(crate) use macos as platform;
 
 #[cfg(not(any(target_os = "linux", target_os = "macos")))]
 compile_error!("The termios backend only has <termios.h> definitions for Linux and macOS.");
