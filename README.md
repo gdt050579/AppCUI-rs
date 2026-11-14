@@ -66,7 +66,7 @@ AppCUI-rs is a fast, cross-platform Rust library for building modern, text-based
 - [x] multiple out-of-the-box controls (buttons, labels, text boxes, check boxes, radio buttons, list views, tree views, buffer view, hexview, progress bar, graph view, bar charts, pie charts, line charts, usage charts, heatmaps, combo boxes, date/time pickers, color pickers, tabs, accordions, etc.).
 - [x] powerful layout system that allows you to position controls using absolute coordinates, relative coordinates, docking, alignment, anchors, or pivot positioning (see more [here](https://gdt050579.github.io/AppCUI-rs/chapter-3/layout.html)) 
 - [x] menus and toolbars
-- [x] multi-platform support (Windows via API and virtual terminal, Linux via ncurses, macOS via termios)
+- [x] multi-platform support (Windows via the console API and virtual terminal, Linux and macOS via termios, with optional ncurses and crossterm backends)
 - [x] multi-threading support to allow background tasks
 - [x] timers
 - [x] mouse support
@@ -159,12 +159,12 @@ AppCUI-rs ships with a rich set of controls and widgets for building terminal us
 
 AppCUI supports various backends depending on the operating system:
 
-* **Windows Console** - based on the Win32 low-level API, designed for the classical Windows console
-* **Windows VT** - based on ANSI sequences, designed for modern Windows virtual terminals
-* **NCurses** - based on the NCurses API for Linux environments
-* **Termios** - based on ANSI sequences and low-level APIs for macOS
-* **Web Terminal** - designed for web implementations (based on WebGL)
-* **CrossTerm** - based on the `crossterm` crate, enabled via a feature flag
+* **Windows Console** - Win32 console API. This is the default on Windows.
+* **Windows VT** - ANSI sequences for modern Windows terminals
+* **Termios** - ANSI sequences and the termios API. This is the default on Linux and macOS.
+* **NCurses** - ncurses API for Linux and macOS. Enable the `NCURSES` feature; it is not selected by default.
+* **Web Terminal** - browser terminal (WebGL). This is the default on WebAssembly.
+* **CrossTerm** - the `crossterm` crate. Enable the `CROSSTERM` feature; it is not selected by default.
 
 More on the supported backends can be found [here](https://gdt050579.github.io/AppCUI-rs/chapter-2/backends.html)
 

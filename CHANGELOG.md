@@ -8,7 +8,7 @@ screenshots and the full notes.
 ## [next] - UNRELEASED
 
 ### Changed
-- ncurses is an optional feature on linux.
+- Termios is the default backend on Linux and on macOS. NCurses is optional (`NCURSES` feature) on Unix. CrossTerm stays optional (`CROSSTERM` feature) and is not a default feature.
 
 ## [0.5.8] - 2026-11-13
 

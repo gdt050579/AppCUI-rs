@@ -4,40 +4,17 @@
 //! The backend is responsible for rendering the UI and handling user input.
 //!
 //! The backend is not created by the user, it is created by the system based on some parameters that are provided when an Application is being initialized.
-//! ## Terminal Support and Capabilities
 //!
-//! AppCUI supports multiple backends with varying capabilities across different operating systems:
+//! ## Backends
 //!
-//! - **Windows Console**: Native Windows terminal with full keyboard/mouse support
-//! - **NCurses**: Unix-based terminal with good display and input capabilities
-//! - **Termios**: Basic Unix terminal with limited features
+//! - **Windows Console**: native Windows console API. Default on Windows.
+//! - **Windows VT**: Windows console driven by VT / ANSI sequences.
+//! - **Termios**: termios raw mode and ANSI sequences. Default on Linux and macOS.
+//! - **NCurses**: ncurses. Unix only, and only when the `NCURSES` feature is enabled.
+//! - **CrossTerm**: the `crossterm` crate. Only when the `CROSSTERM` feature is enabled.
+//! - **Web Terminal**: browser canvas. Default on WebAssembly.
 //!
-//! ### Default Backends by OS:
-//! - Windows: Windows Console
-//! - Linux: NCurses
-//! - Mac/OSX: Termios
-//!
-//! ### Key Capabilities:
-//!
-//! #### Display
-//! - 16 foreground and background colors across all terminals
-//! - Unicode support (Windows Console: UTF-16, NCurses: UTF-8)
-//! - Cursor control and underline support (Windows/NCurses)
-//! - Bold text support (NCurses only)
-//!
-//! #### Input Handling
-//! - Keyboard: Full modifier support in Windows (Alt/Ctrl/Shift combinations)
-//! - Mouse: Click, move, drag and wheel support (Windows/NCurses)
-//! - System: Console resize events (Windows/NCurses)
-//!
-//! #### Additional Features
-//! - Clipboard support via native APIs (Windows) or copypasta crate (NCurses)
-//! - Window title control (Windows only)
-//! - Console dimension control (Windows/NCurses)
-//!
-//! Each backend implementation provides these capabilities through the Backend trait,
-//! allowing AppCUI to work consistently across different platforms while leveraging
-//! platform-specific features when available.
+//! NCurses and CrossTerm are never selected automatically. What each backend can display and which input it can read depends on the terminal.
 
 mod debug;
 #[cfg(all(target_family = "unix", feature = "NCURSES"))]
@@ -114,7 +91,7 @@ pub(crate) trait Backend {
 /// | OS | Default |
 /// |----|---------|
 /// | Windows | Windows Console |
-/// | Linux | CrossTerm |
+/// | Linux | Termios |
 /// | macOS | Termios |
 /// | WASM | Web Terminal |
 ///
@@ -138,16 +115,16 @@ pub enum Type {
     /// Windows console driven by VT100 / ANSI sequences. Supports true color; slower than the Console API.
     #[cfg(target_os = "windows")]
     WindowsVT,
-    /// Low-level Unix termios / raw mode (default on macOS). Limited display and input features.
+    /// Low-level Unix termios / raw mode and ANSI sequences (default on Linux and macOS).
     #[cfg(target_family = "unix")]
     Termios,
-    /// Unix ncurses terminal.
+    /// Unix ncurses terminal. Enable the `NCURSES` crate feature. Not selected by default.
     #[cfg(all(target_family = "unix", feature = "NCURSES"))]
     NcursesTerminal,
     /// Browser canvas terminal (default on WASM).
     #[cfg(target_arch = "wasm32")]
     WebTerminal,
-    /// [`crossterm`](https://docs.rs/crossterm) backend (default on Linux). Always available on Unix; on Windows enable the `CROSSTERM` crate feature.
+    /// [`crossterm`](https://docs.rs/crossterm) backend. Enable the `CROSSTERM` crate feature. Not selected by default.
     //#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
     #[cfg(feature = "CROSSTERM")]
     CrossTerm,

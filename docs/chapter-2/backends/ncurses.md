@@ -1,5 +1,27 @@
 # Ncurses Terminal
 
+NCurses is an optional Unix backend (Linux and macOS). It is not the default: Linux and macOS use Termios unless you enable this backend.
+
+Enable the `NCURSES` feature, then select it when creating the application:
+
+```toml
+[dependencies]
+appcui = { version = "*", features = ["NCURSES"] }
+```
+
+```rust
+use appcui::prelude::*;
+
+fn main() -> Result<(), appcui::system::Error> {
+    App::new()
+        .backend(appcui::backend::Type::NcursesTerminal)
+        .window(|| window!("'Demo',a:c,w:30,h:9"))
+        .run()
+}
+```
+
+The system ncurses library also has to be installed. Without the feature, `Type::NcursesTerminal` is not part of the crate.
+
 ## Installing ncurses Library
 
 To use the ncurses terminal library in your Rust project, you need to install the ncurses library on your system. Here's how you can install it on different platforms:
