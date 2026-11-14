@@ -24,6 +24,8 @@ fn sgr_release_is_button_up() {
 fn sgr_drag_and_hover_keep_the_cell() {
     assert_eq!(decode("32;15;7M").unwrap(), AnsiKeyCode::MouseMove(mouse(MouseButton::Left, 14, 6)));
     assert_eq!(decode("35;15;7M").unwrap(), AnsiKeyCode::MouseMove(mouse(MouseButton::None, 14, 6)));
+    // Windows Terminal reports the same hover with a trailing `m`.
+    assert_eq!(decode("35;15;7m").unwrap(), AnsiKeyCode::MouseMove(mouse(MouseButton::None, 14, 6)));
 }
 
 #[test]

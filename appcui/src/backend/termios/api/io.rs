@@ -267,9 +267,10 @@ fn mouse_modifiers(button_code: i32) -> KeyModifier {
 
 /// Decodes the payload of an SGR mouse report, not including the `ESC [` introducer.
 ///
-/// `payload` is `Pb ; Px ; Py` followed by `M` (press or move) or `m` (release). Coordinates in
-/// the payload are 1-based. Button numbers follow xterm: 0 left, 1 middle, 2 right. Bit 5 (32) is
-/// motion. Bits 2, 3 and 4 are Shift, Alt and Ctrl.
+/// `payload` is `Pb ; Px ; Py` followed by `M` or `m`. Coordinates in the payload are 1-based.
+/// Button numbers follow xterm: 0 left, 1 middle, 2 right. Bit 5 (32) is motion, and a report with
+/// that bit set is a move whether it ends in `M` or `m` (Windows Terminal sends hover as `m`).
+/// A trailing `m` is a release only when the motion bit is clear. Bits 2, 3 and 4 are Shift, Alt and Ctrl.
 pub(super) fn decode_sgr_mouse(payload: &[u8]) -> Result<AnsiKey, TermiosError> {
     let (params, final_byte) = sgr_params(payload)?;
     let button_code = params[0];
@@ -282,8 +283,10 @@ pub(super) fn decode_sgr_mouse(payload: &[u8]) -> Result<AnsiKey, TermiosError> 
         return Err(TermiosError::UnknownKey);
     }
 
-    let is_release = final_byte == b'm';
     let is_motion = kind & MOUSE_MOTION_MASK != 0;
+    // A trailing `m` is a release only when the pointer is not moving. Windows Terminal ends a
+    // no-button move (`35;…m`) with `m`; xterm ends the same move with `M`.
+    let is_release = final_byte == b'm' && !is_motion;
     let button = if is_release {
         MouseButton::None
     } else {
@@ -297,7 +300,7 @@ pub(super) fn decode_sgr_mouse(payload: &[u8]) -> Result<AnsiKey, TermiosError> 
     let event = MouseButtonEvent { button, x, y };
     Ok(AnsiKey {
         bytes: [27, 91, b'<', final_byte, 0],
-        code: if is_motion && !is_release {
+        code: if is_motion {
             AnsiKeyCode::MouseMove(event)
         } else {
             AnsiKeyCode::MouseButton(event)
@@ -379,9 +382,10 @@ impl TermiosReader {
 
     /// Reads one SGR mouse report (`CSI < Pb ; Px ; Py M/m`) from stdin.
     ///
-    /// `M` is a press or a move. `m` is a release, reported as [`MouseButton::None`] so the input
-    /// layer turns it into a button-up. Wheel and extra-button reports are consumed and rejected
-    /// so their digits are not parsed again as keystrokes.
+    /// Bit 5 set means a move, for both `M` and `m`. A trailing `m` with that bit clear is a
+    /// release, reported as [`MouseButton::None`] so the input layer turns it into a button-up.
+    /// Wheel and extra-button reports are consumed and rejected so their digits are not parsed
+    /// again as keystrokes.
     fn parse_sgr_mouse_event() -> Result<AnsiKey, TermiosError> {
         let mut payload = [0u8; 64];
         let mut len = 0usize;
