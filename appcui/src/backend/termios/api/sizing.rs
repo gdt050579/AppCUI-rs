@@ -2,7 +2,11 @@
 
 use std::sync::{Arc, Condvar, Mutex, OnceLock};
 
-use libc::{ioctl, sighandler_t, signal, SIGWINCH, SIG_ERR, STDOUT_FILENO, TIOCGWINSZ, TIOCSWINSZ};
+use std::ffi::c_int;
+
+use super::common::{ioctl, signal, SigHandler, Winsize, SIG_ERR, STDOUT_FILENO};
+use super::platform::ioctl_request::{TIOCGWINSZ, TIOCSWINSZ};
+use super::platform::SIGWINCH;
 
 use crate::prelude::Size;
 
@@ -13,25 +17,11 @@ pub struct ResizeNotification {
 
 pub static RESIZE_ARC: OnceLock<Arc<ResizeNotification>> = OnceLock::new();
 
-#[repr(C)]
-struct Winsize {
-    ws_row: u16,
-    ws_col: u16,
-    ws_xpixel: u16,  // not used
-    ws_ypixel: u16,  // not used
-}
-
-impl Winsize {
-    pub fn empty() -> Self {
-        Winsize { ws_row: 0, ws_col: 0, ws_xpixel: 0, ws_ypixel: 0 }
-    }
-}
-
 pub fn get_resize_notification() -> &'static Arc<ResizeNotification> {
     RESIZE_ARC.get_or_init(|| Arc::new(ResizeNotification {mutex: Mutex::new(Size::default()), cond_var: Condvar::new()}))
 }
 
-extern "C" fn handle_resize(_: libc::c_int) {
+extern "C" fn handle_resize(_: c_int) {
     let resize_not = get_resize_notification();
     let mut guard = resize_not.mutex.lock().unwrap();
     *guard = Size::default();
@@ -45,7 +35,7 @@ pub(crate) fn listen_for_resizes () -> Result<(), std::io::Error> {
     let _ = get_resize_notification();
     
     unsafe {
-        if SIG_ERR == signal(SIGWINCH, handle_resize as sighandler_t) {
+        if SIG_ERR == signal(SIGWINCH, handle_resize as extern "C" fn(c_int) as *const () as SigHandler) {
             return Err(std::io::Error::last_os_error());
         };
     };
@@ -54,8 +44,8 @@ pub(crate) fn listen_for_resizes () -> Result<(), std::io::Error> {
 }
 
 pub(crate) fn get_terminal_size() -> Result<Size, std::io::Error> {
-    let mut w_size = Winsize::empty();
-    if unsafe { ioctl(STDOUT_FILENO, TIOCGWINSZ, &mut w_size) } == -1 {
+    let mut w_size = Winsize::default();
+    if unsafe { ioctl(STDOUT_FILENO, TIOCGWINSZ, &mut w_size as *mut Winsize) } == -1 {
         return Err(std::io::Error::last_os_error());
     }
 
@@ -71,7 +61,7 @@ pub(crate) fn set_terminal_size(size: &Size) -> Result<(), std::io::Error> {
     };
 
     if unsafe {
-        ioctl(STDOUT_FILENO, TIOCSWINSZ, &w_size)
+        ioctl(STDOUT_FILENO, TIOCSWINSZ, &w_size as *const Winsize)
     } == -1 {
         return Err(std::io::Error::last_os_error());
     }

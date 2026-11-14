@@ -4,45 +4,24 @@
 //! The backend is responsible for rendering the UI and handling user input.
 //!
 //! The backend is not created by the user, it is created by the system based on some parameters that are provided when an Application is being initialized.
-//! ## Terminal Support and Capabilities
 //!
-//! AppCUI supports multiple backends with varying capabilities across different operating systems:
+//! ## Backends
 //!
-//! - **Windows Console**: Native Windows terminal with full keyboard/mouse support
-//! - **NCurses**: Unix-based terminal with good display and input capabilities
-//! - **Termios**: Basic Unix terminal with limited features
+//! - **Windows Console**: native Windows console API. Default on Windows.
+//! - **Windows VT**: Windows console driven by VT / ANSI sequences.
+//! - **Termios**: termios raw mode and ANSI sequences. Default on Linux and macOS.
+//! - **NCurses**: ncurses. Unix only, and only when the `NCURSES` feature is enabled.
+//! - **CrossTerm**: the `crossterm` crate. Only when the `CROSSTERM` feature is enabled.
+//! - **Web Terminal**: browser canvas. Default on WebAssembly.
 //!
-//! ### Default Backends by OS:
-//! - Windows: Windows Console
-//! - Linux: NCurses
-//! - Mac/OSX: Termios
-//!
-//! ### Key Capabilities:
-//!
-//! #### Display
-//! - 16 foreground and background colors across all terminals
-//! - Unicode support (Windows Console: UTF-16, NCurses: UTF-8)
-//! - Cursor control and underline support (Windows/NCurses)
-//! - Bold text support (NCurses only)
-//!
-//! #### Input Handling
-//! - Keyboard: Full modifier support in Windows (Alt/Ctrl/Shift combinations)
-//! - Mouse: Click, move, drag and wheel support (Windows/NCurses)
-//! - System: Console resize events (Windows/NCurses)
-//!
-//! #### Additional Features
-//! - Clipboard support via native APIs (Windows) or copypasta crate (NCurses)
-//! - Window title control (Windows only)
-//! - Console dimension control (Windows/NCurses)
-//!
-//! Each backend implementation provides these capabilities through the Backend trait,
-//! allowing AppCUI to work consistently across different platforms while leveraging
-//! platform-specific features when available.
+//! NCurses and CrossTerm are never selected automatically. What each backend can display and which input it can read depends on the terminal.
 
 mod debug;
 #[cfg(all(target_family = "unix", feature = "NCURSES"))]
 mod ncurses;
 mod system_event_thread;
+// #[cfg(target_family = "unix")]
+// mod ncurses;
 #[cfg(target_family = "unix")]
 mod termios;
 #[cfg(target_arch = "wasm32")]
@@ -51,7 +30,8 @@ mod web_terminal;
 mod windows_console;
 #[cfg(target_os = "windows")]
 mod windows_vt;
-#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+//#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+#[cfg(feature = "CROSSTERM")]
 mod crossterm;
 
 pub(crate) mod utils;
@@ -83,7 +63,8 @@ use self::web_terminal::WebTerminal;
 use self::windows_console::WindowsConsoleTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_vt::WindowsVTTerminal;
-#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+//#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+#[cfg(feature = "CROSSTERM")]
 use self::crossterm::CrossTerm;
 
 pub(crate) trait Backend {
@@ -110,7 +91,7 @@ pub(crate) trait Backend {
 /// | OS | Default |
 /// |----|---------|
 /// | Windows | Windows Console |
-/// | Linux | CrossTerm |
+/// | Linux | Termios |
 /// | macOS | Termios |
 /// | WASM | Web Terminal |
 ///
@@ -134,17 +115,18 @@ pub enum Type {
     /// Windows console driven by VT100 / ANSI sequences. Supports true color; slower than the Console API.
     #[cfg(target_os = "windows")]
     WindowsVT,
-    /// Low-level Unix termios / raw mode (default on macOS). Limited display and input features.
+    /// Low-level Unix termios / raw mode and ANSI sequences (default on Linux and macOS).
     #[cfg(target_family = "unix")]
     Termios,
-    /// Unix ncurses terminal.
+    /// Unix ncurses terminal. Enable the `NCURSES` crate feature. Not selected by default.
     #[cfg(all(target_family = "unix", feature = "NCURSES"))]
     NcursesTerminal,
     /// Browser canvas terminal (default on WASM).
     #[cfg(target_arch = "wasm32")]
     WebTerminal,
-    /// [`crossterm`](https://docs.rs/crossterm) backend (default on Linux). Always available on Unix; on Windows enable the `CROSSTERM` crate feature.
-    #[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+    /// [`crossterm`](https://docs.rs/crossterm) backend. Enable the `CROSSTERM` crate feature. Not selected by default.
+    //#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+    #[cfg(feature = "CROSSTERM")]
     CrossTerm,
 }
 
@@ -186,7 +168,10 @@ pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<Syste
             Ok(Box::new(term))
         }
         #[cfg(target_family = "unix")]
-        Type::Termios => TermiosTerminal::new(builder, sender),
+        Type::Termios => {
+            let term = TermiosTerminal::new(builder, sender)?;
+            Ok(Box::new(term))
+        }
 
         #[cfg(all(target_family = "unix", feature = "NCURSES"))]
         Type::NcursesTerminal => {
@@ -200,7 +185,8 @@ pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<Syste
             Ok(Box::new(term))
         }
 
-        #[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+        // #[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+        #[cfg(feature = "CROSSTERM")]
         Type::CrossTerm => {
             let term = CrossTerm::new(builder, sender)?;
             Ok(Box::new(term))
@@ -221,17 +207,17 @@ fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sende
 }
 #[cfg(target_os = "linux")]
 fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
-    // TermiosTerminal::new(builder)
-    // let term = NcursesTerminal::new(builder, sender)?;
-    let term = CrossTerm::new(builder, sender)?;
+    let term = TermiosTerminal::new(builder, sender)?;
     Ok(Box::new(term))
 }
 #[cfg(target_os = "macos")]
 fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
-    TermiosTerminal::new(builder, sender)
+    let term = TermiosTerminal::new(builder, sender)?;
+    Ok(Box::new(term))
 }
 #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos", target_arch = "wasm32")))]
 fn build_default_backend(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
     // anything else
-    TermiosTerminal::new(builder, sender)
+    let term = TermiosTerminal::new(builder, sender)?;
+    Ok(Box::new(term))
 }

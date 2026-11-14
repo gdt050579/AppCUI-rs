@@ -31,7 +31,7 @@ pub struct TermiosTerminal {
 }
 
 impl TermiosTerminal {
-    pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Box<dyn Backend>, Error> {
+    pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<SystemEvent>) -> Result<Self, Error> {
         let Ok(orig_termios) = Termios::enable_raw_mode() else {
             return Err(Error::new(
                 crate::prelude::ErrorKind::InitializationFailure,
@@ -78,13 +78,13 @@ impl TermiosTerminal {
         }
 
         t.ansi_buffer.clear();
-        //t.ansi_buffer.enable_mouse_events();
-        t.ansi_buffer.write_string("\x1b[?1000h\x1b[?1002h\x1b[?1003h");
+        t.ansi_buffer.enable_mouse_events();
+        //t.ansi_buffer.write_string("\x1b[?1000h\x1b[?1002h\x1b[?1003h");
         t.ansi_buffer.execute();
 
         Input::new().start(sender.clone());
         SizeReader::new(get_resize_notification().clone()).start(sender);
-        Ok(Box::new(t))
+        Ok(t)
     }
 }
 
@@ -132,6 +132,7 @@ impl Backend for TermiosTerminal {
         self.ansi_buffer.clear();
         self.ansi_buffer.reset_screen();
         self.ansi_buffer.disable_mouse_events();
+        self.ansi_buffer.show_cursor();
         self.ansi_buffer.execute();
         self.orig_termios.restore();
     }

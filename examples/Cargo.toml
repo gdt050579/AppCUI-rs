@@ -481,3 +481,6 @@ path = "numericselector/main.rs"
 name = "booking_form"
 path = "booking_form/main.rs"
 
+
+[lints]
+workspace = true

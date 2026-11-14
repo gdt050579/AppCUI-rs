@@ -5,10 +5,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 [Semantic Versioning](https://semver.org/). Each version links to its GitHub release, which has
 screenshots and the full notes.
 
-## [next] - UNRELEASED
+## [0.5.9] - 2026-11-14
 
-### Changed
-- ncurses is an optional feature on linux.
+- Termios is the default backend on Linux and on macOS. NCurses is optional (`NCURSES` feature) on Unix. CrossTerm stays optional (`CROSSTERM` feature) and is not a default feature.
+- `NCURSES` feature by @peso in #291
 
 ## [0.5.8] - 2026-11-13
 

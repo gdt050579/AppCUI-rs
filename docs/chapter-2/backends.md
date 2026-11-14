@@ -34,22 +34,25 @@ pub enum Type {
     WindowsVT,
     #[cfg(target_family = "unix")]
     Termios,
-    #[cfg(target_os = "linux")]
+    #[cfg(all(target_family = "unix", feature = "NCURSES"))]
     NcursesTerminal,
     #[cfg(target_arch = "wasm32")]
     WebTerminal,
-    CrossTerm
+    #[cfg(feature = "CROSSTERM")]
+    CrossTerm,
 }
 ```
 
 ## OS Support
 
-| OS      | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
-| ------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
-| Windows | Yes             | Yes        | -       | -       | -            | Yes       |
-| Linux   | -               | -          | Yes     | Yes     | -            | Yes       |
-| macOS   | -               | -          | Yes     | Yes     | -            | Yes       |
-| Web     | -               | -          | -       | -       | Yes          | -         |
+| OS      | Windows Console | Windows VT | NCurses    | Termios | Web Terminal | CrossTerm   |
+| ------- | --------------- | ---------- | ---------- | ------- | ------------ | ----------- |
+| Windows | Yes             | Yes        | -          | -       | -            | `CROSSTERM` |
+| Linux   | -               | -          | `NCURSES`  | Yes     | -            | `CROSSTERM` |
+| macOS   | -               | -          | `NCURSES`  | Yes     | -            | `CROSSTERM` |
+| Web     | -               | -          | -          | -       | Yes          | -           |
+
+`Yes` means the backend is compiled in. A feature name means that backend is compiled only when that crate feature is enabled. Termios is built in on Linux and macOS. NCurses and CrossTerm are never selected automatically.
 
 
 ## Display
@@ -70,7 +73,7 @@ Each backend comes with different support related to what can be displayed on th
 | ASCII           | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
 | WTF-16          | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
 | UTF-8           | -               | Yes        | -       | Yes     | Yes          | Yes       |
-| Cursor          | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
+| Cursor          | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
 | Cursor Blinking | Yes             | Yes        | -       | -       | -            | Yes       |
 
 **Remarks**:
@@ -83,7 +86,7 @@ In terms of the output method, each backend uses a different approach:
 | --------------- | ----------------------------------------------------------------------- |
 | Windows Console | Direct output via Windows API                                           |
 | Windows VT      | ANSI sequences                                                          |
-| NCurses         | Direct output via NCurses API. NCurses must be installed on the system. |
+| NCurses         | Direct output via NCurses API. Enable the `NCURSES` feature and install ncurses on the system. |
 | Termios         | ANSI sequences                                                          |
 | Web Terminal    | HTML elements and browser APIs                                          |
 | CrossTerm       | ANSI sequences (directly via the `crossterm` crate API)                 |
@@ -118,9 +121,9 @@ Capturing the input implies the following capabilities from any backend:
 
 | Keys               | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
 | ------------------ | --------------- | ---------- | ------- | ------- | ------------ | --------- |
-| Alt+Key            | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
-| Shift+Key          | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
-| Ctrl+Key           | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
+| Alt+Key            | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| Shift+Key          | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
+| Ctrl+Key           | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
 | Alt+Shift+Key      | Yes             | Yes        | -       | -       | -            | -         |
 | Ctrl+Shift+Key     | Yes             | Yes        | -       | -       | -            | -         |
 | Ctrl+Alt+Key       | Yes             | Yes        | -       | -       | -            | -         |
@@ -143,7 +146,7 @@ Capturing the input implies the following capabilities from any backend:
 | --------------- | -------------------------------------------------------------------------------------------------- |
 | Windows Console | Read the input directly from the console via Windows API                                           |
 | Windows VT      | Read the input directly from the console via Windows API                                           |
-| NCurses         | Read the input directly from the console via NCurses API. NCurses must be installed on the system. |
+| NCurses         | Read the input directly from the console via NCurses API. Enable the `NCURSES` feature and install ncurses on the system. |
 | Termios         | Read the input directly from the console via Termios API                                           |
 | Web Terminal    | Read the input directly from the browser                                                           |
 | CrossTerm       | Read the input via the `crossterm` crate API                                                       |
@@ -155,7 +158,7 @@ System events are events that are not related to the keyboard or mouse, but are 
 
 | Events         | Windows Console | Windows VT | NCurses | Termios | Web Terminal | CrossTerm |
 | -------------- | --------------- | ---------- | ------- | ------- | ------------ | --------- |
-| Console Resize | Yes             | Yes        | Yes     | -       | Yes          | Yes       |
+| Console Resize | Yes             | Yes        | Yes     | Yes     | Yes          | Yes       |
 | Console Closed | Yes             | Yes        | -       | -       | Yes          | -         |
 
 ## Other capabilities
@@ -177,7 +180,7 @@ AppCUI provides clipboard support for copying and pasting text. The clipboard fu
 | Windows Console | Yes               | Windows API                                             |
 | Windows VT      | Yes               | Windows API                                             |
 | NCurses         | Yes               | via copypasta crate                                     |
-| Termios         | -                 | -                                                       |
+| Termios         | Yes               | via copypasta crate                                     |
 | Web Terminal    | Yes               | Browser API                                             |
 | CrossTerm       | Yes               | via copypasta crate (Linux/macOS) or Windows API (Windows) |
 
@@ -185,8 +188,11 @@ AppCUI provides clipboard support for copying and pasting text. The clipboard fu
 
 By default, when initializing an `App` object via `App::new()`, the following backend will be used:
 
-| OS      | Default backend | Other available backends |
-| ------- | --------------- | ------------------------ |
-| Windows | Windows Console | Windows VT, CrossTerm    |
-| Linux   | NCurses         | CrossTerm                |
-| macOS   | Termios         | NCurses, CrossTerm       |
+| OS      | Default backend | Other available backends                         |
+| ------- | --------------- | ------------------------------------------------ |
+| Windows | Windows Console | Windows VT, CrossTerm (`CROSSTERM`)              |
+| Linux   | Termios         | NCurses (`NCURSES`), CrossTerm (`CROSSTERM`)     |
+| macOS   | Termios         | NCurses (`NCURSES`), CrossTerm (`CROSSTERM`)     |
+| Web     | Web Terminal    | —                                                |
+
+`App::new()` uses the default backend for the current OS. NCurses and CrossTerm are used only when the matching feature is enabled and `.backend(...)` selects them.
