@@ -1,6 +1,11 @@
 //! Interface to the <termios.h> API
 pub(crate) mod io;
 pub(crate) mod sizing;
+pub(crate) mod common;
+#[cfg(target_os = "linux")]
+pub(crate) mod linux;
+#[cfg(target_os = "macos")]
+pub(crate) mod macos;
 
 // Define C system binding calls
 extern "C" {
