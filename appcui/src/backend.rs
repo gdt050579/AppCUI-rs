@@ -40,9 +40,9 @@
 //! platform-specific features when available.
 
 mod debug;
-#[cfg(target_family = "unix")]
-mod ncurses;
 mod system_event_thread;
+// #[cfg(target_family = "unix")]
+// mod ncurses;
 #[cfg(target_family = "unix")]
 mod termios;
 #[cfg(target_arch = "wasm32")]
@@ -51,7 +51,8 @@ mod web_terminal;
 mod windows_console;
 #[cfg(target_os = "windows")]
 mod windows_vt;
-#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+//#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+#[cfg(feature = "CROSSTERM")]
 mod crossterm;
 
 pub(crate) mod utils;
@@ -73,8 +74,8 @@ pub(super) use self::system_event_thread::SystemEventReader;
 
 use self::debug::DebugTerminal;
 
-#[cfg(target_family = "unix")]
-use self::ncurses::NcursesTerminal;
+// #[cfg(target_family = "unix")]
+// use self::ncurses::NcursesTerminal;
 #[cfg(target_family = "unix")]
 use self::termios::TermiosTerminal;
 #[cfg(target_arch = "wasm32")]
@@ -83,7 +84,8 @@ use self::web_terminal::WebTerminal;
 use self::windows_console::WindowsConsoleTerminal;
 #[cfg(target_os = "windows")]
 use self::windows_vt::WindowsVTTerminal;
-#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+//#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+#[cfg(feature = "CROSSTERM")]
 use self::crossterm::CrossTerm;
 
 pub(crate) trait Backend {
@@ -138,13 +140,14 @@ pub enum Type {
     #[cfg(target_family = "unix")]
     Termios,
     /// Unix ncurses terminal.
-    #[cfg(target_family = "unix")]
-    NcursesTerminal,
+    // #[cfg(target_family = "unix")]
+    // NcursesTerminal,
     /// Browser canvas terminal (default on WASM).
     #[cfg(target_arch = "wasm32")]
     WebTerminal,
     /// [`crossterm`](https://docs.rs/crossterm) backend (default on Linux). Always available on Unix; on Windows enable the `CROSSTERM` crate feature.
-    #[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+    //#[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+    #[cfg(feature = "CROSSTERM")]
     CrossTerm,
 }
 
@@ -191,11 +194,11 @@ pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<Syste
             Ok(Box::new(term))
         }
 
-        #[cfg(target_family = "unix")]
-        Type::NcursesTerminal => {
-            let term = NcursesTerminal::new(builder, sender)?;
-            Ok(Box::new(term))
-        }
+        // #[cfg(target_family = "unix")]
+        // Type::NcursesTerminal => {
+        //     let term = NcursesTerminal::new(builder, sender)?;
+        //     Ok(Box::new(term))
+        // }
 
         #[cfg(target_arch = "wasm32")]
         Type::WebTerminal => {
@@ -203,7 +206,8 @@ pub(crate) fn new(builder: &crate::system::InternalBuilder, sender: Sender<Syste
             Ok(Box::new(term))
         }
 
-        #[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+        // #[cfg(any(target_family = "unix", feature = "CROSSTERM"))]
+        #[cfg(feature = "CROSSTERM")]
         Type::CrossTerm => {
             let term = CrossTerm::new(builder, sender)?;
             Ok(Box::new(term))
