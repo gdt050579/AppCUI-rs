@@ -15,7 +15,7 @@
 )))]
 compile_error!("The termios backend does not have <termios.h> definitions for this Linux architecture.");
 
-use std::ffi::c_uint;
+use std::ffi::{c_uint, c_ulong};
 
 /// `tcflag_t` (`unsigned int` on Linux)
 pub(crate) type TcFlag = c_uint;
@@ -23,6 +23,8 @@ pub(crate) type TcFlag = c_uint;
 pub(crate) type Speed = c_uint;
 /// `cc_t`
 pub(crate) type Cc = u8;
+/// `nfds_t` (`unsigned long` on Linux), the type of `poll()`'s second argument
+pub(crate) type NfdsT = c_ulong;
 
 /// Number of control characters (`NCCS`)
 pub(crate) const NCCS: usize = 32;

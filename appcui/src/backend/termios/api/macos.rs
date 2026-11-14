@@ -1,6 +1,6 @@
 //! `<termios.h>` definitions for macOS (x86_64 and aarch64), from `<sys/termios.h>`.
 
-use std::ffi::c_ulong;
+use std::ffi::{c_uint, c_ulong};
 
 /// `tcflag_t` (`unsigned long` on macOS)
 pub(crate) type TcFlag = c_ulong;
@@ -8,6 +8,8 @@ pub(crate) type TcFlag = c_ulong;
 pub(crate) type Speed = c_ulong;
 /// `cc_t`
 pub(crate) type Cc = u8;
+/// `nfds_t` (`unsigned int` on macOS), the type of `poll()`'s second argument
+pub(crate) type NfdsT = c_uint;
 
 /// Number of control characters (`NCCS`)
 pub(crate) const NCCS: usize = 20;
