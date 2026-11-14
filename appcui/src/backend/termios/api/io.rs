@@ -4,14 +4,7 @@ use crate::{
     prelude::KeyCode,
 };
 
-// Define C system binding calls
-extern "C" {
-    // "unistd.h" function bindings
-    pub fn read(file_des: u32, buf: *mut u8, size: usize) -> isize;
-}
-
-// Default descriptor for the standard input file
-pub const STDIN_FILENO: u32 = 0;
+use super::common::{poll, read, PollFd, POLLIN, STDIN_FILENO};
 
 #[derive(Debug)]
 pub struct TermiosReader;
@@ -694,8 +687,8 @@ impl TermiosReader {
 ///
 /// In case an OS error occurs, we return it
 pub fn checked_stdin_read() -> Result<u8, TermiosError> {
-    let mut byte = 0;
-    if unsafe { read(STDIN_FILENO, &mut byte, 1) } == -1 {
+    let mut byte = 0u8;
+    if unsafe { read(STDIN_FILENO, &mut byte as *mut u8 as *mut _, 1) } == -1 {
         return Err(TermiosError::ReadStdInFailed);
     }
     // println!("{}", byte);
@@ -703,20 +696,17 @@ pub fn checked_stdin_read() -> Result<u8, TermiosError> {
 }
 
 pub fn try_check_stdin_read() -> Option<u8> {
-    use std::os::unix::io::AsRawFd;
-
-    let mut byte = [0u8;1];
-    let fd = std::io::stdin().as_raw_fd();
-    let mut fds = libc::pollfd { fd, events: libc::POLLIN, revents: 0 };
-    let ret = unsafe { libc::poll(&mut fds,1, 25)};
-    if ret<=0 {
+    let mut byte = 0u8;
+    let mut fds = PollFd { fd: STDIN_FILENO, events: POLLIN, revents: 0 };
+    let ret = unsafe { poll(&mut fds, 1, 25) };
+    if ret <= 0 {
         None
     } else {
-        let res = unsafe { libc::read(fd, byte.as_mut_ptr() as *mut _, 1)};
+        let res = unsafe { read(STDIN_FILENO, &mut byte as *mut u8 as *mut _, 1) };
         if res == -1 {
             None
         } else {
-            Some(byte[0])
+            Some(byte)
         }
     }
 }
