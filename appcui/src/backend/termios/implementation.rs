@@ -132,6 +132,7 @@ impl Backend for TermiosTerminal {
         self.ansi_buffer.clear();
         self.ansi_buffer.reset_screen();
         self.ansi_buffer.disable_mouse_events();
+        self.ansi_buffer.show_cursor();
         self.ansi_buffer.execute();
         self.orig_termios.restore();
     }
