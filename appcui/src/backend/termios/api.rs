@@ -1,4 +1,8 @@
 //! Interface to the <termios.h> API
+
+#[cfg(test)]
+mod tests;
+
 pub(crate) mod common;
 pub(crate) mod io;
 pub(crate) mod sizing;

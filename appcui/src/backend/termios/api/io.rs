@@ -19,8 +19,8 @@ pub struct AnsiKey {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MouseButtonEvent {
     pub(crate) button: MouseButton, // None => release (in xterm documentation there is no None)
-    pub(crate) x: u8,
-    pub(crate) y: u8,
+    pub(crate) x: i32,
+    pub(crate) y: i32,
 }
 
 impl AnsiKey {
@@ -244,9 +244,104 @@ impl From<AnsiKey> for Key {
 // taken into condideration.
 const _CTRL_KEY_MASK: u8 = 0b0001_1111;
 
-const MOUSE_SHIFT_MASK: u8 = 4;
-const MOUSE_META_MASK: u8 = 8;
-const MOUSE_CTRL_MASK: u8 = 16;
+const MOUSE_SHIFT_MASK: i32 = 4;
+const MOUSE_META_MASK: i32 = 8;
+const MOUSE_CTRL_MASK: i32 = 16;
+const MOUSE_MOTION_MASK: i32 = 32;
+const MOUSE_WHEEL_MASK: i32 = 64;
+const MOUSE_EXTRA_BUTTON_MASK: i32 = 128;
+
+fn mouse_modifiers(button_code: i32) -> KeyModifier {
+    let mut modifier = KeyModifier::None;
+    if (button_code & MOUSE_SHIFT_MASK) != 0 {
+        modifier.set(KeyModifier::Shift);
+    }
+    if (button_code & MOUSE_META_MASK) != 0 {
+        modifier.set(KeyModifier::Alt);
+    }
+    if (button_code & MOUSE_CTRL_MASK) != 0 {
+        modifier.set(KeyModifier::Ctrl);
+    }
+    modifier
+}
+
+/// Decodes the payload of an SGR mouse report, not including the `ESC [` introducer.
+///
+/// `payload` is `Pb ; Px ; Py` followed by `M` (press or move) or `m` (release). Coordinates in
+/// the payload are 1-based. Button numbers follow xterm: 0 left, 1 middle, 2 right. Bit 5 (32) is
+/// motion. Bits 2, 3 and 4 are Shift, Alt and Ctrl.
+pub(super) fn decode_sgr_mouse(payload: &[u8]) -> Result<AnsiKey, TermiosError> {
+    let (params, final_byte) = sgr_params(payload)?;
+    let button_code = params[0];
+    let x = params[1].saturating_sub(1);
+    let y = params[2].saturating_sub(1);
+    let kind = button_code & !(MOUSE_SHIFT_MASK | MOUSE_META_MASK | MOUSE_CTRL_MASK);
+    // Wheel (64) and buttons past the right button (128) are not represented as clicks. Reject
+    // them after the bytes have been consumed so they are not replayed as keyboard input.
+    if kind & (MOUSE_WHEEL_MASK | MOUSE_EXTRA_BUTTON_MASK) != 0 {
+        return Err(TermiosError::UnknownKey);
+    }
+
+    let is_release = final_byte == b'm';
+    let is_motion = kind & MOUSE_MOTION_MASK != 0;
+    let button = if is_release {
+        MouseButton::None
+    } else {
+        match kind & 0b11 {
+            0 => MouseButton::Left,
+            1 => MouseButton::Center,
+            2 => MouseButton::Right,
+            _ => MouseButton::None,
+        }
+    };
+    let event = MouseButtonEvent { button, x, y };
+    Ok(AnsiKey {
+        bytes: [27, 91, b'<', final_byte, 0],
+        code: if is_motion && !is_release {
+            AnsiKeyCode::MouseMove(event)
+        } else {
+            AnsiKeyCode::MouseButton(event)
+        },
+        modifier: mouse_modifiers(button_code),
+    })
+}
+
+fn sgr_params(payload: &[u8]) -> Result<([i32; 3], u8), TermiosError> {
+    let Some((&final_byte, fields)) = payload.split_last() else {
+        return Err(TermiosError::UnknownKey);
+    };
+    if final_byte != b'M' && final_byte != b'm' {
+        return Err(TermiosError::UnknownKey);
+    }
+
+    let mut params = [0i32; 3];
+    let mut count = 0usize;
+    let mut value = 0i32;
+    let mut saw_digit = false;
+    for &byte in fields {
+        match byte {
+            b'0'..=b'9' => {
+                saw_digit = true;
+                value = value.saturating_mul(10).saturating_add(i32::from(byte - b'0'));
+            }
+            b';' => {
+                if !saw_digit || count >= 3 {
+                    return Err(TermiosError::UnknownKey);
+                }
+                params[count] = value;
+                count += 1;
+                value = 0;
+                saw_digit = false;
+            }
+            _ => return Err(TermiosError::UnknownKey),
+        }
+    }
+    if !saw_digit || count != 2 {
+        return Err(TermiosError::UnknownKey);
+    }
+    params[2] = value;
+    Ok((params, final_byte))
+}
 
 impl TermiosReader {
     fn parse_mouse_event() -> Result<AnsiKey, TermiosError> {
@@ -265,18 +360,11 @@ impl TermiosReader {
             _ => MouseButton::None,
         };
 
-        let event = MouseButtonEvent { button, x: x - 1, y: y - 1 }; // coordinates start at 1 in the codes
-
-        let mut modifier = KeyModifier::None;
-        if (button_code & MOUSE_SHIFT_MASK) != 0 {
-            modifier.set(KeyModifier::Shift);
-        }
-        if (button_code & MOUSE_META_MASK) != 0 {
-            modifier.set(KeyModifier::Alt);
-        }
-        if (button_code & MOUSE_CTRL_MASK) != 0 {
-            modifier.set(KeyModifier::Ctrl);
-        }
+        let event = MouseButtonEvent {
+            button,
+            x: i32::from(x) - 1, // coordinates start at 1 in the codes
+            y: i32::from(y) - 1,
+        };
 
         Ok(AnsiKey {
             bytes: [27, 91, 77, button_code, 0],
@@ -285,8 +373,35 @@ impl TermiosReader {
             } else {
                 AnsiKeyCode::MouseButton(event)
             },
-            modifier,
+            modifier: mouse_modifiers(i32::from(button_code)),
         })
+    }
+
+    /// Reads one SGR mouse report (`CSI < Pb ; Px ; Py M/m`) from stdin.
+    ///
+    /// `M` is a press or a move. `m` is a release, reported as [`MouseButton::None`] so the input
+    /// layer turns it into a button-up. Wheel and extra-button reports are consumed and rejected
+    /// so their digits are not parsed again as keystrokes.
+    fn parse_sgr_mouse_event() -> Result<AnsiKey, TermiosError> {
+        let mut payload = [0u8; 64];
+        let mut len = 0usize;
+        loop {
+            if len == payload.len() {
+                return Err(TermiosError::UnknownKey);
+            }
+            let byte = checked_stdin_read()?;
+            match byte {
+                b'0'..=b'9' | b';' | b'M' | b'm' => {
+                    payload[len] = byte;
+                    len += 1;
+                    if byte == b'M' || byte == b'm' {
+                        break;
+                    }
+                }
+                _ => return Err(TermiosError::UnknownKey),
+            }
+        }
+        decode_sgr_mouse(&payload[..len])
     }
 
     pub fn read_key() -> Result<AnsiKey, TermiosError> {
@@ -373,6 +488,7 @@ impl TermiosReader {
                                         66 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Down, modifier),
                                         67 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Right, modifier),
                                         68 => ([c, byte_2, byte_3, 0, 0], AnsiKeyCode::_Left, modifier),
+                                        60 => return Self::parse_sgr_mouse_event(), // SGR: ESC [ < Pb ; Px ; Py M/m
                                         77 => return Self::parse_mouse_event(),
                                         _ => return Err(TermiosError::UnknownKey),
                                     }
@@ -697,7 +813,11 @@ pub fn checked_stdin_read() -> Result<u8, TermiosError> {
 
 pub fn try_check_stdin_read() -> Option<u8> {
     let mut byte = 0u8;
-    let mut fds = PollFd { fd: STDIN_FILENO, events: POLLIN, revents: 0 };
+    let mut fds = PollFd {
+        fd: STDIN_FILENO,
+        events: POLLIN,
+        revents: 0,
+    };
     let ret = unsafe { poll(&mut fds, 1, 25) };
     if ret <= 0 {
         None
