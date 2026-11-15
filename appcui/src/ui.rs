@@ -133,6 +133,7 @@ pub mod piechart;
 pub mod linechart;
 pub mod usagechart;
 pub mod heatmap;
+pub mod vstackedbarchart;
 
 // re-export
 pub use common::ControlBase;
@@ -194,3 +195,4 @@ pub use linechart::LineChart;
 pub use markdown_composer::MarkdownComposer;
 pub use usagechart::UsageChart;
 pub use heatmap::HeatMap;
+pub use vstackedbarchart::VStackedBarChart;
