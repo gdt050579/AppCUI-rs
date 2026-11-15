@@ -999,3 +999,205 @@ fn check_other_scales_use_number_format() {
     chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 10 });
     assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
 }
+
+fn make_stack(thickness: Option<u8>, spacing: Option<u8>) -> BarsStack<i32> {
+    let mut stack = BarsStack::<i32>::from([1, 2]);
+    if let Some(value) = thickness {
+        stack.set_thickness(value);
+    }
+    if let Some(value) = spacing {
+        stack.set_spacing(value);
+    }
+    stack
+}
+
+fn positions(chart: &VStackedBarChart<i32>) -> Vec<i32> {
+    chart.stacks.iter().map(|entry| entry.pos).collect()
+}
+
+#[test]
+fn check_columns_layout_empty_chart() {
+    let chart = new_chart();
+    assert_eq!(chart.stacks_width, 0);
+    assert!(positions(&chart).is_empty());
+}
+
+#[test]
+fn check_columns_layout_single_stack() {
+    let mut chart = new_chart();
+    chart.add_stack([1, 2]);
+    assert_eq!(positions(&chart), vec![1]);
+    assert_eq!(chart.stacks_width, 3);
+}
+
+#[test]
+fn check_columns_layout_default_spacing_and_thickness() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+    assert_eq!(positions(&chart), vec![1, 3, 5]);
+    assert_eq!(chart.stacks_width, 7);
+}
+
+#[test]
+fn check_columns_layout_per_stack_thickness() {
+    let mut chart = new_chart();
+    chart.add_stack(make_stack(Some(3), None));
+    chart.add_stack(make_stack(Some(1), None));
+    chart.add_stack(make_stack(Some(2), None));
+    assert_eq!(positions(&chart), vec![1, 5, 7]);
+    assert_eq!(chart.stacks_width, 10);
+}
+
+#[test]
+fn check_columns_layout_per_stack_spacing() {
+    let mut chart = new_chart();
+    chart.add_stack(make_stack(None, Some(0)));
+    chart.add_stack(make_stack(None, Some(2)));
+    chart.add_stack(make_stack(None, Some(3)));
+    assert_eq!(positions(&chart), vec![0, 3, 7]);
+    assert_eq!(chart.stacks_width, 8);
+}
+
+#[test]
+fn check_columns_layout_trailing_margin_is_first_stack_spacing() {
+    let mut chart = new_chart();
+    chart.add_stack(make_stack(None, Some(5)));
+    chart.add_stack(make_stack(None, None));
+    assert_eq!(positions(&chart), vec![5, 7]);
+    assert_eq!(chart.stacks_width, 13);
+}
+
+#[test]
+fn check_columns_layout_default_spacing_change() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+    chart.set_default_bar_spacing(2);
+    assert_eq!(positions(&chart), vec![2, 5, 8]);
+    assert_eq!(chart.stacks_width, 11);
+    chart.set_default_bar_spacing(0);
+    assert_eq!(positions(&chart), vec![0, 1, 2]);
+    assert_eq!(chart.stacks_width, 3);
+}
+
+#[test]
+fn check_columns_layout_default_width_change() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+    chart.set_default_bar_width(3);
+    assert_eq!(positions(&chart), vec![1, 5, 9]);
+    assert_eq!(chart.stacks_width, 13);
+    chart.set_default_bar_width(1);
+    assert_eq!(positions(&chart), vec![1, 3, 5]);
+    assert_eq!(chart.stacks_width, 7);
+}
+
+#[test]
+fn check_columns_layout_default_drawmode_raises_thickness() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+    chart.set_default_bar_drawmode(rect());
+    assert_eq!(positions(&chart), vec![1, 4, 7]);
+    assert_eq!(chart.stacks_width, 10);
+    chart.set_default_bar_drawmode(fill());
+    assert_eq!(positions(&chart), vec![1, 3, 5]);
+}
+
+#[test]
+fn check_columns_layout_stack_with_wider_draw_mode() {
+    let mut chart = new_chart();
+    chart.add_stack([1, 2]);
+    let mut wide = BarsStack::<i32>::new();
+    wide.add_bar(StackBarBuilder::new(1).draw_mode(filled_rect()).build());
+    chart.add_stack(wide);
+    chart.add_stack([3]);
+    assert_eq!(positions(&chart), vec![1, 3, 7]);
+    assert_eq!(chart.stacks_width, 9);
+}
+
+#[test]
+fn check_columns_layout_update_stack_moves_following_columns() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+    chart.update_stack(0, |stack| {
+        stack.set_thickness(4);
+    });
+    assert_eq!(positions(&chart), vec![1, 6, 8]);
+    assert_eq!(chart.stacks_width, 10);
+    chart.update_stack(1, |stack| {
+        stack.set_spacing(0);
+    });
+    assert_eq!(positions(&chart), vec![1, 5, 7]);
+    assert_eq!(chart.stacks_width, 9);
+}
+
+#[test]
+fn check_columns_layout_update_stack_draw_mode_moves_following_columns() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4]]);
+    chart.update_stack(0, |stack| {
+        stack.get_mut(0).unwrap().set_draw_mode(filled_rect());
+    });
+    assert_eq!(positions(&chart), vec![1, 5]);
+    assert_eq!(chart.stacks_width, 7);
+}
+
+#[test]
+fn check_columns_layout_add_after_add() {
+    let mut chart = new_chart();
+    chart.add_stack([1, 2]);
+    chart.add_stack([3, 4]);
+    assert_eq!(positions(&chart), vec![1, 3]);
+    chart.add_stack([5, 6]);
+    assert_eq!(positions(&chart), vec![1, 3, 5]);
+    assert_eq!(chart.stacks_width, 7);
+}
+
+#[test]
+fn check_columns_layout_clear_resets_width() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4]]);
+    assert!(chart.stacks_width > 0);
+    chart.clear();
+    assert_eq!(chart.stacks_width, 0);
+    assert!(positions(&chart).is_empty());
+    chart.add_stack([1]);
+    assert_eq!(positions(&chart), vec![1]);
+    assert_eq!(chart.stacks_width, 3);
+}
+
+#[test]
+fn check_columns_layout_empty_stack_still_takes_space() {
+    let mut chart = new_chart();
+    chart.add_stack(BarsStack::<i32>::new());
+    chart.add_stack(BarsStack::<i32>::new());
+    assert_eq!(positions(&chart), vec![1, 3]);
+    assert_eq!(chart.stacks_width, 5);
+}
+
+#[test]
+fn check_columns_layout_columns_never_overlap() {
+    let mut chart = new_chart();
+    for index in 0..40u8 {
+        chart.add_stack(make_stack(Some(1 + index % 5), Some(index % 4)));
+    }
+    let mut previous_end = i32::MIN;
+    for (index, entry) in chart.stacks.iter().enumerate() {
+        let spacing = entry.stack.actual_spacing(chart.defaults.spacing) as i32;
+        assert!(entry.pos >= previous_end + spacing, "stack {} overlaps the previous one", index);
+        previous_end = entry.pos + entry.stack.actual_thickness() as i32;
+    }
+    let first_spacing = chart.stacks[0].stack.actual_spacing(chart.defaults.spacing) as u32;
+    assert_eq!(chart.stacks_width, previous_end as u32 + first_spacing);
+}
+
+#[test]
+fn check_columns_layout_many_stacks() {
+    let mut chart = new_chart();
+    chart.set_default_bar_width(10);
+    chart.set_default_bar_spacing(2);
+    chart.add_stacks((0..1000).map(|_| [1, 2]));
+    assert_eq!(chart.stacks_count(), 1000);
+    assert_eq!(chart.stacks[0].pos, 2);
+    assert_eq!(chart.stacks[999].pos, 999 * 12 + 2);
+    assert_eq!(chart.stacks_width, 1000 * 12 + 2);
+}

@@ -30,6 +30,7 @@ where
 {
     flags: Flags,
     pub(super) stacks: Vec<StackWithLayout<T>>,
+    pub(super) stacks_width: u32,
     pub(super) defaults: Defaults,
     pub(super) scale: StackBarScale<T>,
     pub(super) number_format: FormatNumber,
@@ -52,6 +53,7 @@ where
             base: ControlBase::with_status_flags(layout, StatusFlags::Visible | StatusFlags::Enabled | StatusFlags::AcceptInput | extra),
             flags,
             stacks: Vec::new(),
+            stacks_width: 0,
             defaults: Defaults {
                 thickness: 1,
                 spacing: 1,
@@ -83,6 +85,7 @@ where
     {
         let entry = self.new_entry(stack.into());
         self.stacks.push(entry);
+        self.update_layout();
     }
     pub fn add_stacks<S>(&mut self, stacks: impl IntoIterator<Item = S>)
     where
@@ -92,6 +95,7 @@ where
             let entry = self.new_entry(stack.into());
             self.stacks.push(entry);
         }
+        self.update_layout();
     }
     #[inline(always)]
     pub fn stacks_count(&self) -> usize {
@@ -109,10 +113,12 @@ where
         if let Some(entry) = self.stacks.get_mut(index) {
             f(&mut entry.stack);
             entry.stack.update_actual_thickness(defaults.thickness, defaults.draw_mode);
+            self.update_layout();
         }
     }
     pub fn clear(&mut self) {
         self.stacks.clear();
+        self.update_layout();
     }
     pub fn set_stacks_scale(&mut self, scale: StackBarScale<T>) {
         self.scale = scale;
@@ -200,7 +206,26 @@ where
             entry.stack.update_actual_thickness(defaults.thickness, defaults.draw_mode);
         }
     }
-    fn repaint_surface(&mut self) {}
+    fn repaint_surface(&mut self) {
+        self.update_layout();
+    }
+    fn update_layout(&mut self) {
+        self.update_columns_layout();
+    }
+    pub(super) fn update_columns_layout(&mut self) {
+        if self.stacks.is_empty() {
+            self.stacks_width = 0;
+            return;
+        }
+        let default_spacing = self.defaults.spacing;
+        let mut x: i32 = 0;
+        for entry in self.stacks.iter_mut() {
+            x += entry.stack.actual_spacing(default_spacing) as i32;
+            entry.pos = x;
+            x += entry.stack.actual_thickness() as i32;
+        }
+        self.stacks_width = x as u32 + self.stacks[0].stack.actual_spacing(default_spacing) as u32;
+    }
     fn new_entry(&self, mut stack: BarsStack<T>) -> StackWithLayout<T> {
         stack.update_actual_thickness(self.defaults.thickness, self.defaults.draw_mode);
         StackWithLayout::new(stack)
