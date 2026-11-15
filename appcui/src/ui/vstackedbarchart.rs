@@ -4,5 +4,9 @@
 //! This is currently only a skeleton: it has no data, painting or events yet.
 
 mod vstackedbarchart;
+mod initialization_flags;
+#[cfg(test)]
+mod tests;
 
 pub use self::vstackedbarchart::VStackedBarChart;
+pub use self::initialization_flags::Flags;
