@@ -918,3 +918,84 @@ fn check_setters_do_not_change_stacks_data() {
     assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, -2]);
     assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3, 4]);
 }
+
+#[test]
+fn check_percentage_format_default() {
+    let chart = new_chart();
+    let expected = FormatNumber::new(10).suffix("%");
+    assert_eq!(format_float(&chart.percentage_format, 50.0), format_float(&expected, 50.0));
+    let text = format_float(&chart.percentage_format, 50.0).unwrap();
+    assert!(text.ends_with('%'));
+    assert!(text.starts_with("50"));
+}
+
+#[test]
+fn check_percentage_format_has_no_decimals() {
+    let chart = new_chart();
+    let text = format_float(&chart.percentage_format, 33.333).unwrap();
+    assert!(!text.contains('.'));
+    assert!(text.ends_with('%'));
+    let float_chart = VStackedBarChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None);
+    let float_text = format_float(&float_chart.percentage_format, 33.333).unwrap();
+    assert!(!float_text.contains('.'));
+    assert!(float_text.ends_with('%'));
+}
+
+#[test]
+fn check_set_percentage_format() {
+    let mut chart = new_chart();
+    chart.set_percentage_format(FormatNumber::new(10).decimals(1).suffix(" pct"));
+    let custom = FormatNumber::new(10).decimals(1).suffix(" pct");
+    assert_eq!(format_float(&chart.percentage_format, 12.5), format_float(&custom, 12.5));
+    let default_chart = new_chart();
+    assert_ne!(format_float(&default_chart.percentage_format, 12.5), format_float(&chart.percentage_format, 12.5));
+}
+
+#[test]
+fn check_set_percentage_format_keeps_number_format() {
+    let mut chart = new_chart();
+    let before = format_float(&chart.number_format, 1234.0);
+    chart.set_percentage_format(FormatNumber::new(10).decimals(2).suffix("%"));
+    assert_eq!(format_float(&chart.number_format, 1234.0), before);
+}
+
+#[test]
+fn check_yaxis_format_follows_scale() {
+    let mut chart = new_chart();
+    let plain = format_float(chart.yaxis_format(), 50.0);
+    assert_eq!(plain, format_float(&chart.number_format, 50.0));
+    assert!(!plain.unwrap().ends_with('%'));
+
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    let percent = format_float(chart.yaxis_format(), 50.0);
+    assert_eq!(percent, format_float(&chart.percentage_format, 50.0));
+    assert!(percent.unwrap().ends_with('%'));
+
+    chart.set_stacks_scale(StackBarScale::FitData);
+    assert_eq!(format_float(chart.yaxis_format(), 50.0), format_float(&chart.number_format, 50.0));
+}
+
+#[test]
+fn check_yaxis_format_uses_custom_formats() {
+    let mut chart = new_chart();
+    chart.set_number_format(FormatNumber::new(10).decimals(3));
+    chart.set_percentage_format(FormatNumber::new(10).decimals(1).suffix("%"));
+    let number = format_float(chart.yaxis_format(), 2.0);
+    assert_eq!(number, format_float(&FormatNumber::new(10).decimals(3), 2.0));
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    let percent = format_float(chart.yaxis_format(), 2.0);
+    assert_eq!(percent, format_float(&FormatNumber::new(10).decimals(1).suffix("%"), 2.0));
+    assert_ne!(number, percent);
+}
+
+#[test]
+fn check_other_scales_use_number_format() {
+    let mut chart = new_chart();
+    let expected = format_float(&chart.number_format, 7.0);
+    chart.set_stacks_scale(StackBarScale::FromZero);
+    assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
+    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -1, max: 1 });
+    assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
+    chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 10 });
+    assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
+}

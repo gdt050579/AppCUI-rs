@@ -33,6 +33,7 @@ where
     pub(super) defaults: Defaults,
     pub(super) scale: StackBarScale<T>,
     pub(super) number_format: FormatNumber,
+    pub(super) percentage_format: FormatNumber,
     pub(super) yaxis: YAxis,
     pub(super) xaxis: XAxis,
 }
@@ -63,6 +64,7 @@ where
             } else {
                 FormatNumber::new(10).group(3, b',')
             },
+            percentage_format: FormatNumber::new(10).suffix("%"),
             yaxis: YAxis {
                 width: 6,
                 step: 3,
@@ -118,6 +120,10 @@ where
     }
     pub fn set_number_format(&mut self, format: FormatNumber) {
         self.number_format = format;
+        self.repaint_surface();
+    }
+    pub fn set_percentage_format(&mut self, format: FormatNumber) {
+        self.percentage_format = format;
         self.repaint_surface();
     }
     pub fn set_default_bar_width(&mut self, width: u8) {
@@ -179,6 +185,14 @@ where
             }
         }
         self.repaint_surface();
+    }
+    #[inline(always)]
+    pub(super) fn yaxis_format(&self) -> &FormatNumber {
+        if matches!(self.scale, StackBarScale::Percentage) {
+            &self.percentage_format
+        } else {
+            &self.number_format
+        }
     }
     fn refresh_thickness(&mut self) {
         let defaults = self.defaults;
