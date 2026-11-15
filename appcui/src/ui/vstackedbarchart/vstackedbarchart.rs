@@ -213,6 +213,70 @@ where
         self.update_stack_sums();
         self.update_columns_layout();
     }
+    pub(super) fn compute_range(&self) -> (f64, f64) {
+        match &self.scale {
+            StackBarScale::FromZero => self.range_from_zero(0.0, 0.0),
+            StackBarScale::FromZeroMinRange { min, max } => {
+                let min = (*min).to_f64();
+                let max = (*max).to_f64();
+                self.range_from_zero(if min.is_finite() { min } else { 0.0 }, if max.is_finite() { max } else { 0.0 })
+            }
+            StackBarScale::FitData => self.range_fit_data(),
+            StackBarScale::Fixed { min, max } => {
+                let min = (*min).to_f64();
+                let max = (*max).to_f64();
+                if min.is_finite() && max.is_finite() {
+                    (min, max)
+                } else {
+                    (0.0, 0.0)
+                }
+            }
+            StackBarScale::Percentage => self.range_percentage(),
+        }
+    }
+    fn range_from_zero(&self, min: f64, max: f64) -> (f64, f64) {
+        let mut lo = min.min(0.0);
+        let mut hi = max.max(0.0);
+        for entry in self.stacks.iter() {
+            lo = lo.min(entry.negative_sum);
+            hi = hi.max(entry.positive_sum);
+        }
+        (lo, hi)
+    }
+    fn range_fit_data(&self) -> (f64, f64) {
+        let mut lo = f64::MAX;
+        let mut hi = f64::MIN;
+        let mut found = false;
+        for entry in self.stacks.iter() {
+            if entry.has_positive() {
+                lo = lo.min(entry.positive_sum);
+                hi = hi.max(entry.positive_sum);
+                found = true;
+            }
+            if entry.has_negative() {
+                lo = lo.min(entry.negative_sum);
+                hi = hi.max(entry.negative_sum);
+                found = true;
+            }
+        }
+        if found {
+            (lo, hi)
+        } else {
+            (0.0, 0.0)
+        }
+    }
+    fn range_percentage(&self) -> (f64, f64) {
+        let mut up = 0.0f64;
+        let mut down = 0.0f64;
+        for entry in self.stacks.iter() {
+            let total = entry.abs_total();
+            if total > 0.0 {
+                up = up.max(entry.positive_sum / total * 100.0);
+                down = down.max(-entry.negative_sum / total * 100.0);
+            }
+        }
+        (-down, up)
+    }
     pub(super) fn update_stack_sums(&mut self) {
         for entry in self.stacks.iter_mut() {
             entry.update_sums();

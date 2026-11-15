@@ -1373,3 +1373,260 @@ fn check_sums_after_clear_and_add() {
     chart.add_stack([1]);
     assert_eq!(sums_of(&chart, 0), (1.0, 0.0, 1.0));
 }
+
+fn range_of(chart: &VStackedBarChart<i32>) -> (f64, f64) {
+    chart.compute_range()
+}
+
+fn assert_close(actual: f64, expected: f64) {
+    assert!((actual - expected).abs() < 1e-9, "expected {} but got {}", expected, actual);
+}
+
+#[test]
+fn check_range_from_zero_empty_chart() {
+    let chart = new_chart();
+    assert_eq!(range_of(&chart), (0.0, 0.0));
+}
+
+#[test]
+fn check_range_from_zero_only_positive() {
+    let mut chart = new_chart();
+    chart.add_stacks(vec![vec![1, 2, 3], vec![4]]);
+    assert_eq!(range_of(&chart), (0.0, 6.0));
+}
+
+#[test]
+fn check_range_from_zero_only_negative() {
+    let mut chart = new_chart();
+    chart.add_stacks(vec![vec![-1, -2], vec![-5]]);
+    assert_eq!(range_of(&chart), (-5.0, 0.0));
+}
+
+#[test]
+fn check_range_from_zero_mixed_signs() {
+    let mut chart = new_chart();
+    chart.add_stacks(vec![vec![5, -3], vec![2, -8]]);
+    assert_eq!(range_of(&chart), (-8.0, 5.0));
+}
+
+#[test]
+fn check_range_from_zero_uses_stack_sums_not_single_values() {
+    let mut chart = new_chart();
+    chart.add_stack([4, 4, 4, -1, -1]);
+    assert_eq!(range_of(&chart), (-2.0, 12.0));
+}
+
+#[test]
+fn check_range_from_zero_all_zero_values() {
+    let mut chart = new_chart();
+    chart.add_stack([0, 0]);
+    assert_eq!(range_of(&chart), (0.0, 0.0));
+}
+
+#[test]
+fn check_range_from_zero_min_range_expands() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -10, max: 20 });
+    chart.add_stack([1, 2]);
+    assert_eq!(range_of(&chart), (-10.0, 20.0));
+}
+
+#[test]
+fn check_range_from_zero_min_range_data_wins_when_larger() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -1, max: 2 });
+    chart.add_stacks(vec![vec![30, -4], vec![5, -6]]);
+    assert_eq!(range_of(&chart), (-6.0, 30.0));
+}
+
+#[test]
+fn check_range_from_zero_min_range_always_includes_zero() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: 5, max: 8 });
+    chart.add_stack([1]);
+    assert_eq!(range_of(&chart), (0.0, 8.0));
+    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -8, max: -5 });
+    assert_eq!(range_of(&chart), (-8.0, 1.0));
+}
+
+#[test]
+fn check_range_from_zero_min_range_empty_chart() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -3, max: 4 });
+    assert_eq!(range_of(&chart), (-3.0, 4.0));
+}
+
+#[test]
+fn check_range_from_zero_min_range_ignores_non_finite_limits() {
+    let mut chart = float_chart();
+    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: f64::NAN, max: f64::INFINITY });
+    chart.add_stack(vec![2.0, -1.0]);
+    assert_eq!(chart.compute_range(), (-1.0, 2.0));
+}
+
+#[test]
+fn check_range_fit_data_only_positive() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FitData);
+    chart.add_stacks(vec![vec![1, 2], vec![4], vec![10]]);
+    assert_eq!(range_of(&chart), (3.0, 10.0));
+}
+
+#[test]
+fn check_range_fit_data_only_negative() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FitData);
+    chart.add_stacks(vec![vec![-1, -2], vec![-5]]);
+    assert_eq!(range_of(&chart), (-5.0, -3.0));
+}
+
+#[test]
+fn check_range_fit_data_mixed_signs_includes_zero() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FitData);
+    chart.add_stacks(vec![vec![10, -4], vec![3]]);
+    assert_eq!(range_of(&chart), (-4.0, 10.0));
+}
+
+#[test]
+fn check_range_fit_data_zero_is_not_forced_into_the_range() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FitData);
+    chart.add_stacks(vec![vec![50], vec![80]]);
+    let (lo, hi) = range_of(&chart);
+    assert!(lo > 0.0);
+    assert_eq!((lo, hi), (50.0, 80.0));
+}
+
+#[test]
+fn check_range_fit_data_single_stack_is_degenerate() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FitData);
+    chart.add_stack([2, 3]);
+    assert_eq!(range_of(&chart), (5.0, 5.0));
+}
+
+#[test]
+fn check_range_fit_data_without_tips() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FitData);
+    assert_eq!(range_of(&chart), (0.0, 0.0));
+    chart.add_stacks(vec![vec![0, 0], vec![]]);
+    assert_eq!(range_of(&chart), (0.0, 0.0));
+}
+
+#[test]
+fn check_range_fit_data_zero_values_do_not_make_a_tip() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::FitData);
+    chart.add_stacks(vec![vec![0, 5], vec![0, 0], vec![7]]);
+    assert_eq!(range_of(&chart), (5.0, 7.0));
+}
+
+#[test]
+fn check_range_fixed_passthrough() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 20 });
+    assert_eq!(range_of(&chart), (-5.0, 20.0));
+    chart.add_stack([100, -100]);
+    assert_eq!(range_of(&chart), (-5.0, 20.0));
+}
+
+#[test]
+fn check_range_fixed_reversed_or_equal_is_returned_unchanged() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Fixed { min: 10, max: 2 });
+    assert_eq!(range_of(&chart), (10.0, 2.0));
+    chart.set_stacks_scale(StackBarScale::Fixed { min: 4, max: 4 });
+    assert_eq!(range_of(&chart), (4.0, 4.0));
+}
+
+#[test]
+fn check_range_fixed_non_finite_limits_are_degenerate() {
+    let mut chart = float_chart();
+    chart.set_stacks_scale(StackBarScale::Fixed { min: f64::NAN, max: 5.0 });
+    assert_eq!(chart.compute_range(), (0.0, 0.0));
+    chart.set_stacks_scale(StackBarScale::Fixed { min: 0.0, max: f64::INFINITY });
+    assert_eq!(chart.compute_range(), (0.0, 0.0));
+}
+
+#[test]
+fn check_range_percentage_only_positive() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    chart.add_stacks(vec![vec![1, 3], vec![5]]);
+    assert_eq!(range_of(&chart), (0.0, 100.0));
+}
+
+#[test]
+fn check_range_percentage_only_negative() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    chart.add_stack([-2, -2]);
+    assert_eq!(range_of(&chart), (-100.0, 0.0));
+}
+
+#[test]
+fn check_range_percentage_mixed_signs() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    chart.add_stacks(vec![vec![3, -1], vec![1, -1]]);
+    assert_eq!(range_of(&chart), (-50.0, 75.0));
+}
+
+#[test]
+fn check_range_percentage_each_stack_is_normalized_separately() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    chart.add_stacks(vec![vec![1000, -1000], vec![1, -3]]);
+    assert_eq!(range_of(&chart), (-75.0, 50.0));
+}
+
+#[test]
+fn check_range_percentage_ignores_empty_and_zero_stacks() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    chart.add_stacks(vec![vec![], vec![0, 0], vec![2, -2]]);
+    assert_eq!(range_of(&chart), (-50.0, 50.0));
+}
+
+#[test]
+fn check_range_percentage_without_values() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    assert_eq!(range_of(&chart), (0.0, 0.0));
+    chart.add_stack(BarsStack::<i32>::new());
+    assert_eq!(range_of(&chart), (0.0, 0.0));
+}
+
+#[test]
+fn check_range_percentage_with_fractions() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    chart.add_stack([1, 1, 1, -1]);
+    let (lo, hi) = range_of(&chart);
+    assert_close(hi, 75.0);
+    assert_close(lo, -25.0);
+}
+
+#[test]
+fn check_range_percentage_parts_of_one_stack_add_up_to_100() {
+    let mut chart = float_chart();
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    chart.add_stack(vec![1.0, 2.0, -4.0, 0.5]);
+    let (lo, hi) = chart.compute_range();
+    assert_close(hi - lo, 100.0);
+}
+
+#[test]
+fn check_range_follows_scale_changes() {
+    let mut chart = new_chart();
+    chart.add_stacks(vec![vec![10, -4], vec![3]]);
+    assert_eq!(range_of(&chart), (-4.0, 10.0));
+    chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 50 });
+    assert_eq!(range_of(&chart), (0.0, 50.0));
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    let (lo, hi) = range_of(&chart);
+    assert_close(lo, -4.0 / 14.0 * 100.0);
+    assert_close(hi, 100.0);
+}
