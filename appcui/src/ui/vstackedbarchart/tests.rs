@@ -2,6 +2,7 @@ use crate::prelude::*;
 use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
 use super::XAxisLabelFormat;
 use super::mapping::ValueMapping;
+use super::stackbar::paint_segment;
 use crate::ui::components::BarFillType;
 
 fn in_app(f: impl FnOnce() + 'static) {
@@ -2737,4 +2738,216 @@ fn check_paint_data_changes_after_attach() {
         chart.add_stack([9]);
         chart
     });
+}
+
+fn paint_surface() -> Surface {
+    let mut surface = Surface::new(20, 12);
+    surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    surface
+}
+
+fn code_at(surface: &Surface, x: i32, y: i32) -> char {
+    surface.char(x, y).unwrap().code
+}
+
+fn row_of(surface: &Surface, y: i32, from: i32, to: i32) -> String {
+    (from..=to).map(|x| code_at(surface, x, y)).collect()
+}
+
+fn seg_attr() -> CharAttribute {
+    charattr!("red,blue")
+}
+
+#[test]
+fn check_paint_segment_fill_positive() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 8, 3, 4, fill(), seg_attr());
+    for y in 5..=8 {
+        assert_eq!(row_of(&s, y, 1, 5), " \u{2588}\u{2588}\u{2588} ");
+    }
+    assert_eq!(row_of(&s, 4, 1, 5), "     ");
+    assert_eq!(row_of(&s, 9, 1, 5), "     ");
+}
+
+#[test]
+fn check_paint_segment_fill_negative() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 4, 2, -3, fill(), seg_attr());
+    assert_eq!(row_of(&s, 4, 1, 4), "    ");
+    for y in 5..=7 {
+        assert_eq!(row_of(&s, y, 1, 4), " \u{2588}\u{2588} ");
+    }
+    assert_eq!(row_of(&s, 8, 1, 4), "    ");
+}
+
+#[test]
+fn check_paint_segment_fill_applies_attribute() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 0, 3, 1, 1, fill(), seg_attr());
+    let ch = s.char(0, 3).unwrap();
+    assert_eq!(ch.foreground, Color::Red);
+    assert_eq!(ch.background, Color::Blue);
+}
+
+#[test]
+fn check_paint_segment_zero_length_draws_nothing() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 5, 3, 0, fill(), seg_attr());
+    paint_segment(&mut s, 2, 5, 3, 0, rect(), seg_attr());
+    paint_segment(&mut s, 2, 5, 3, 0, filled_rect(), seg_attr());
+    for y in 0..12 {
+        assert_eq!(row_of(&s, y, 0, 19), " ".repeat(20));
+    }
+}
+
+#[test]
+fn check_paint_segment_zero_thickness_draws_nothing() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 5, 0, 3, fill(), seg_attr());
+    for y in 0..12 {
+        assert_eq!(row_of(&s, y, 0, 19), " ".repeat(20));
+    }
+}
+
+#[test]
+fn check_paint_segment_fill_types() {
+    let cases = [
+        (BarFillType::Solid, '\u{2588}'),
+        (BarFillType::Shade75, '\u{2593}'),
+        (BarFillType::Shade50, '\u{2592}'),
+        (BarFillType::Shade25, '\u{2591}'),
+        (BarFillType::Grid, '\u{253C}'),
+        (BarFillType::CrossHatch, '\u{2573}'),
+        (BarFillType::Custom('#'), '#'),
+    ];
+    for (fill_type, expected) in cases {
+        let mut s = paint_surface();
+        paint_segment(&mut s, 1, 4, 2, 2, StackBarDrawMode::Fill(fill_type), seg_attr());
+        assert_eq!(code_at(&s, 1, 3), expected);
+        assert_eq!(code_at(&s, 2, 4), expected);
+    }
+}
+
+#[test]
+fn check_paint_segment_rectangle_positive() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 8, 4, 4, rect(), seg_attr());
+    assert_eq!(row_of(&s, 5, 2, 5), "\u{250C}\u{2500}\u{2500}\u{2510}");
+    assert_eq!(row_of(&s, 6, 2, 5), "\u{2502}  \u{2502}");
+    assert_eq!(row_of(&s, 7, 2, 5), "\u{2502}  \u{2502}");
+    assert_eq!(row_of(&s, 8, 2, 5), "\u{2514}\u{2500}\u{2500}\u{2518}");
+    assert_eq!(row_of(&s, 4, 2, 5), "    ");
+    assert_eq!(row_of(&s, 9, 2, 5), "    ");
+}
+
+#[test]
+fn check_paint_segment_rectangle_negative() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 4, 3, -3, rect(), seg_attr());
+    assert_eq!(row_of(&s, 4, 2, 4), "   ");
+    assert_eq!(row_of(&s, 5, 2, 4), "\u{250C}\u{2500}\u{2510}");
+    assert_eq!(row_of(&s, 6, 2, 4), "\u{2502} \u{2502}");
+    assert_eq!(row_of(&s, 7, 2, 4), "\u{2514}\u{2500}\u{2518}");
+}
+
+#[test]
+fn check_paint_segment_rectangle_two_rows() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 6, 3, 2, rect(), seg_attr());
+    assert_eq!(row_of(&s, 5, 2, 4), "\u{250C}\u{2500}\u{2510}");
+    assert_eq!(row_of(&s, 6, 2, 4), "\u{2514}\u{2500}\u{2518}");
+}
+
+#[test]
+fn check_paint_segment_rectangle_one_row_is_a_line() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 6, 4, 1, rect(), seg_attr());
+    assert_eq!(row_of(&s, 6, 1, 6), " \u{2500}\u{2500}\u{2500}\u{2500} ");
+    assert_eq!(row_of(&s, 5, 1, 6), "      ");
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 6, 4, -1, rect(), seg_attr());
+    assert_eq!(row_of(&s, 7, 1, 6), " \u{2500}\u{2500}\u{2500}\u{2500} ");
+    assert_eq!(row_of(&s, 6, 1, 6), "      ");
+}
+
+#[test]
+fn check_paint_segment_rectangle_line_types() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 1, 6, 3, 3, StackBarDrawMode::Rectangle(LineType::Double), seg_attr());
+    assert_eq!(code_at(&s, 1, 4), '\u{2554}');
+    assert_eq!(code_at(&s, 2, 4), '\u{2550}');
+    assert_eq!(code_at(&s, 3, 6), '\u{255D}');
+}
+
+#[test]
+fn check_paint_segment_filled_rectangle() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 8, 4, 4, filled_rect(), seg_attr());
+    assert_eq!(row_of(&s, 5, 2, 5), "\u{250C}\u{2500}\u{2500}\u{2510}");
+    assert_eq!(row_of(&s, 6, 2, 5), "\u{2502}\u{2588}\u{2588}\u{2502}");
+    assert_eq!(row_of(&s, 7, 2, 5), "\u{2502}\u{2588}\u{2588}\u{2502}");
+    assert_eq!(row_of(&s, 8, 2, 5), "\u{2514}\u{2500}\u{2500}\u{2518}");
+}
+
+#[test]
+fn check_paint_segment_filled_rectangle_one_row_is_a_line() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 6, 3, 1, filled_rect(), seg_attr());
+    assert_eq!(row_of(&s, 6, 1, 5), " \u{2500}\u{2500}\u{2500} ");
+}
+
+#[test]
+fn check_paint_segment_filled_rectangle_two_rows_has_no_interior() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 6, 3, 2, filled_rect(), seg_attr());
+    assert_eq!(row_of(&s, 5, 2, 4), "\u{250C}\u{2500}\u{2510}");
+    assert_eq!(row_of(&s, 6, 2, 4), "\u{2514}\u{2500}\u{2518}");
+}
+
+#[test]
+fn check_paint_segment_adjacent_positive_segments_touch() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 1, 9, 2, 3, fill(), seg_attr());
+    paint_segment(&mut s, 1, 6, 2, 2, StackBarDrawMode::Fill(BarFillType::Shade50), seg_attr());
+    for y in 7..=9 {
+        assert_eq!(code_at(&s, 1, y), '\u{2588}');
+    }
+    for y in 5..=6 {
+        assert_eq!(code_at(&s, 1, y), '\u{2592}');
+    }
+    assert_eq!(code_at(&s, 1, 4), ' ');
+}
+
+#[test]
+fn check_paint_segment_adjacent_negative_segments_touch() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 1, 4, 2, -2, fill(), seg_attr());
+    paint_segment(&mut s, 1, 6, 2, -3, StackBarDrawMode::Fill(BarFillType::Shade50), seg_attr());
+    for y in 5..=6 {
+        assert_eq!(code_at(&s, 1, y), '\u{2588}');
+    }
+    for y in 7..=9 {
+        assert_eq!(code_at(&s, 1, y), '\u{2592}');
+    }
+}
+
+#[test]
+fn check_paint_segment_outside_surface_does_not_panic() {
+    let mut s = paint_surface();
+    for mode in [fill(), rect(), filled_rect()] {
+        paint_segment(&mut s, -5, -3, 4, 6, mode, seg_attr());
+        paint_segment(&mut s, 18, 14, 4, -6, mode, seg_attr());
+        paint_segment(&mut s, 100, 100, 3, 3, mode, seg_attr());
+        paint_segment(&mut s, -100, -100, 3, -3, mode, seg_attr());
+        paint_segment(&mut s, 0, 0, 255, i16::MAX, mode, seg_attr());
+        paint_segment(&mut s, 0, 0, 255, i16::MIN, mode, seg_attr());
+    }
+}
+
+#[test]
+fn check_paint_segment_clipped_at_surface_edge() {
+    let mut s = paint_surface();
+    paint_segment(&mut s, 2, 1, 2, 4, fill(), seg_attr());
+    assert_eq!(code_at(&s, 2, 0), '\u{2588}');
+    assert_eq!(code_at(&s, 2, 1), '\u{2588}');
 }

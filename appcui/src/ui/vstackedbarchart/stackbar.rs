@@ -1,4 +1,4 @@
-use crate::graphics::{CharAttribute, LineType};
+use crate::graphics::{CharAttribute, Character, LineType, Rect, SpecialChar, Surface};
 use crate::ui::common::Number;
 use crate::ui::components::BarFillType;
 use super::mapping::ValueMapping;
@@ -454,4 +454,29 @@ where
             self.layout.push(segment);
         }
     }
+}
+
+pub(super) fn paint_segment(surface: &mut Surface, x: i32, y: i32, thickness: u8, len: i16, mode: StackBarDrawMode, attr: CharAttribute) {
+    let height = len.unsigned_abs();
+    if height == 0 || thickness == 0 {
+        return;
+    }
+    let top = if len > 0 { y + 1 - len as i32 } else { y + 1 };
+    let rect = Rect::with_size(x, top, thickness as u16, height);
+    match mode {
+        StackBarDrawMode::Fill(fill_type) => surface.fill_rect(rect, fill_type.character(attr)),
+        StackBarDrawMode::Rectangle(line_type) => paint_rectangle(surface, rect, line_type, attr, false),
+        StackBarDrawMode::FilledRectangle(line_type) => paint_rectangle(surface, rect, line_type, attr, true),
+    }
+}
+
+fn paint_rectangle(surface: &mut Surface, rect: Rect, line_type: LineType, attr: CharAttribute, fill: bool) {
+    if rect.bottom() <= rect.top() {
+        surface.draw_horizontal_line(rect.left(), rect.top(), rect.right(), line_type, attr);
+        return;
+    }
+    if fill {
+        surface.fill_rect(rect, Character::with_attributes(SpecialChar::Block100, attr));
+    }
+    surface.draw_rect(rect, line_type, attr);
 }
