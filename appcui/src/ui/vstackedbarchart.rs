@@ -14,5 +14,6 @@ pub use self::initialization_flags::Flags;
 pub use self::stackbar::StackBar;
 pub use self::stackbar::StackBarBuilder;
 pub use self::stackbar::StackBarDrawMode;
+pub use self::stackbar::StackBarScale;
 pub use self::stackbar::BarsStack;
 pub use self::stackbar::BarsStackBuilder;

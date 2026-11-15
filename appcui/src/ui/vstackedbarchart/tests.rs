@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode};
+use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale};
 use crate::ui::components::BarFillType;
 
 fn new_chart() -> VStackedBarChart<i32> {
@@ -590,4 +590,48 @@ fn check_zero_values_are_kept() {
     let mut chart = new_chart();
     chart.add_stack([0, 0, 0]);
     assert_eq!(chart.get_stack(0).unwrap().count(), 3);
+}
+
+#[test]
+fn check_scale_variants_are_comparable() {
+    assert_eq!(StackBarScale::<i32>::FromZero, StackBarScale::FromZero);
+    assert_eq!(StackBarScale::<i32>::FitData, StackBarScale::FitData);
+    assert_eq!(StackBarScale::<i32>::Percentage, StackBarScale::Percentage);
+    assert_eq!(StackBarScale::Fixed { min: -5, max: 10 }, StackBarScale::Fixed { min: -5, max: 10 });
+    assert_eq!(
+        StackBarScale::FromZeroMinRange { min: -1, max: 1 },
+        StackBarScale::FromZeroMinRange { min: -1, max: 1 }
+    );
+    assert_ne!(StackBarScale::<i32>::FromZero, StackBarScale::FitData);
+    assert_ne!(StackBarScale::<i32>::FitData, StackBarScale::Percentage);
+    assert_ne!(StackBarScale::Fixed { min: 0, max: 10 }, StackBarScale::Fixed { min: 0, max: 11 });
+    assert_ne!(StackBarScale::Fixed { min: 0, max: 10 }, StackBarScale::FromZeroMinRange { min: 0, max: 10 });
+}
+
+#[test]
+fn check_scale_is_copy() {
+    let scale = StackBarScale::Fixed { min: -2.5f64, max: 7.5 };
+    let copy = scale;
+    assert_eq!(scale, copy);
+    let float_scale = StackBarScale::<f64>::Percentage;
+    let float_copy = float_scale;
+    assert_eq!(float_scale, float_copy);
+}
+
+#[test]
+fn check_scale_keeps_range_values() {
+    match (StackBarScale::Fixed { min: -3, max: 9 }) {
+        StackBarScale::Fixed { min, max } => {
+            assert_eq!(min, -3);
+            assert_eq!(max, 9);
+        }
+        _ => panic!("expected a fixed scale"),
+    }
+    match (StackBarScale::FromZeroMinRange { min: -10, max: 20 }) {
+        StackBarScale::FromZeroMinRange { min, max } => {
+            assert_eq!(min, -10);
+            assert_eq!(max, 20);
+        }
+        _ => panic!("expected a from-zero scale with a minimum range"),
+    }
 }

@@ -26,6 +26,15 @@ impl Default for StackBarDrawMode {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum StackBarScale<T: Number + 'static> {
+    FromZero,
+    FromZeroMinRange { min: T, max: T },
+    FitData,
+    Fixed { min: T, max: T },
+    Percentage,
+}
+
 #[derive(Clone, Debug)]
 pub struct StackBar<T: Number + 'static> {
     pub(crate) value: T,
