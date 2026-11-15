@@ -1792,3 +1792,193 @@ fn check_chart_value_mapping_empty_chart() {
     assert_eq!(m.zero(), 0);
     assert_eq!(m.offset(3.0), 0);
 }
+
+fn segments_of<T: Number + 'static>(chart: &mut VStackedBarChart<T>, height: u32, index: usize) -> Vec<(i16, i16)> {
+    chart.update_segments_layout(height);
+    chart.stacks[index].layout.iter().map(|s| (s.offset, s.len)).collect()
+}
+
+#[test]
+fn check_segments_single_positive_bar() {
+    let mut chart = new_chart();
+    chart.add_stack([3]);
+    assert_eq!(segments_of(&mut chart, 3, 0), vec![(0, 3)]);
+}
+
+#[test]
+fn check_segments_positive_bars_stack_upward() {
+    let mut chart = new_chart();
+    chart.add_stack([2, 3]);
+    assert_eq!(segments_of(&mut chart, 5, 0), vec![(0, 2), (2, 3)]);
+}
+
+#[test]
+fn check_segments_negative_bars_stack_downward() {
+    let mut chart = new_chart();
+    chart.add_stack([-2, -3]);
+    assert_eq!(segments_of(&mut chart, 5, 0), vec![(0, -2), (-2, -3)]);
+}
+
+#[test]
+fn check_segments_mixed_signs_keep_insertion_order() {
+    let mut chart = new_chart();
+    chart.add_stack([4, -2, 3, -1]);
+    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 4), (0, -2), (4, 3), (-2, -1)]);
+}
+
+#[test]
+fn check_segments_zero_value_has_empty_segment() {
+    let mut chart = new_chart();
+    chart.add_stack([0, 2]);
+    assert_eq!(segments_of(&mut chart, 2, 0), vec![(0, 0), (0, 2)]);
+}
+
+#[test]
+fn check_segments_tiny_bars_vanish() {
+    let mut chart = new_chart();
+    chart.add_stack([1000]);
+    chart.add_stack([1, 1, 1, 1000]);
+    assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, 0), (0, 0), (0, 0), (0, 10)]);
+}
+
+#[test]
+fn check_segments_rounding_sums_exactly() {
+    let mut chart = new_chart();
+    chart.add_stack([1, 1, 1]);
+    let segs = segments_of(&mut chart, 2, 0);
+    assert_eq!(segs, vec![(0, 1), (1, 0), (1, 1)]);
+    assert_eq!(segs.iter().map(|s| s.1 as i32).sum::<i32>(), 2);
+}
+
+#[test]
+fn check_segments_are_contiguous() {
+    let mut chart = new_chart();
+    chart.add_stack([7, 3, 11, 2, 5, 13, 1]);
+    chart.add_stack([-7, -3, -11, -2, -5]);
+    for height in 1..40u32 {
+        for index in 0..2 {
+            let segs = segments_of(&mut chart, height, index);
+            let mut expected = 0i32;
+            for (offset, len) in segs {
+                if len == 0 {
+                    continue;
+                }
+                let start = offset as i32;
+                assert_eq!(start, expected);
+                expected = start + len as i32;
+            }
+        }
+    }
+}
+
+#[test]
+fn check_segments_total_matches_tip_position() {
+    let mut chart = new_chart();
+    chart.add_stack([3, 4, 5]);
+    chart.add_stack([9]);
+    for height in 1..30u32 {
+        let mapping = chart.value_mapping(height);
+        let segs = segments_of(&mut chart, height, 0);
+        let sum: i32 = segs.iter().map(|s| s.1 as i32).sum();
+        assert_eq!(sum, mapping.offset(12.0));
+    }
+}
+
+#[test]
+fn check_segments_fixed_scale_clamps() {
+    let mut chart = new_chart();
+    chart.add_stack([100]);
+    chart.add_stack([-100]);
+    chart.add_stack([3, 100]);
+    chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 5 });
+    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 5)]);
+    assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, -5)]);
+    assert_eq!(segments_of(&mut chart, 10, 2), vec![(0, 3), (3, 2)]);
+}
+
+#[test]
+fn check_segments_fixed_scale_zero_not_visible() {
+    let mut chart = new_chart();
+    chart.add_stack([2, 3, 20]);
+    chart.set_stacks_scale(StackBarScale::Fixed { min: 2, max: 10 });
+    assert_eq!(segments_of(&mut chart, 8, 0), vec![(0, 0), (0, 3), (3, 5)]);
+}
+
+#[test]
+fn check_segments_fit_data_smallest_stack_is_empty() {
+    let mut chart = new_chart();
+    chart.add_stack([5]);
+    chart.add_stack([10]);
+    chart.set_stacks_scale(StackBarScale::FitData);
+    assert_eq!(segments_of(&mut chart, 5, 0), vec![(0, 0)]);
+    assert_eq!(segments_of(&mut chart, 5, 1), vec![(0, 5)]);
+}
+
+#[test]
+fn check_segments_percentage_positive_only() {
+    let mut chart = new_chart();
+    chart.add_stack([1, 1]);
+    chart.add_stack([3]);
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 5), (5, 5)]);
+    assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, 10)]);
+}
+
+#[test]
+fn check_segments_percentage_with_negatives() {
+    let mut chart = new_chart();
+    chart.add_stack([5, -5]);
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 5), (0, -5)]);
+}
+
+#[test]
+fn check_segments_percentage_all_zero_stack_is_empty() {
+    let mut chart = new_chart();
+    chart.add_stack([0, 0]);
+    chart.add_stack([2]);
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 0), (0, 0)]);
+    assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, 10)]);
+}
+
+#[test]
+fn check_segments_ignore_non_finite_values() {
+    let mut chart = float_chart();
+    chart.add_stack([f64::NAN, 2.0, f64::INFINITY]);
+    assert_eq!(segments_of(&mut chart, 2, 0), vec![(0, 0), (0, 2), (0, 0)]);
+}
+
+#[test]
+fn check_segments_zero_height() {
+    let mut chart = new_chart();
+    chart.add_stack([3, -2]);
+    assert_eq!(segments_of(&mut chart, 0, 0), vec![(0, 0), (0, 0)]);
+}
+
+#[test]
+fn check_segments_empty_stack_and_empty_chart() {
+    let mut chart = new_chart();
+    chart.update_segments_layout(10);
+    chart.add_stack(BarsStack::<i32>::new());
+    assert!(segments_of(&mut chart, 10, 0).is_empty());
+}
+
+#[test]
+fn check_segments_recomputed_on_each_call() {
+    let mut chart = new_chart();
+    chart.add_stack([4]);
+    assert_eq!(segments_of(&mut chart, 4, 0), vec![(0, 4)]);
+    assert_eq!(segments_of(&mut chart, 8, 0), vec![(0, 8)]);
+    chart.update_stack(0, |s| {
+        s.add_bar(4);
+    });
+    assert_eq!(segments_of(&mut chart, 8, 0), vec![(0, 4), (4, 4)]);
+}
+
+#[test]
+fn check_segments_huge_height_does_not_overflow() {
+    let mut chart = new_chart();
+    chart.add_stack([1]);
+    assert_eq!(segments_of(&mut chart, 100000, 0), vec![(0, i16::MAX)]);
+}

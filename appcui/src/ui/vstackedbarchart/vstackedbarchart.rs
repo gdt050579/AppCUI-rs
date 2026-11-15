@@ -282,6 +282,13 @@ where
         let (lo, hi) = self.compute_range();
         ValueMapping::new(lo, hi, height)
     }
+    pub(super) fn update_segments_layout(&mut self, height: u32) {
+        let mapping = self.value_mapping(height);
+        let percentage = matches!(self.scale, StackBarScale::Percentage);
+        for entry in self.stacks.iter_mut() {
+            entry.update_segments(&mapping, percentage);
+        }
+    }
     pub(super) fn update_stack_sums(&mut self) {
         for entry in self.stacks.iter_mut() {
             entry.update_sums();

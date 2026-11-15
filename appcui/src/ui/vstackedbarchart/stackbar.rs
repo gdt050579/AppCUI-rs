@@ -1,6 +1,7 @@
 use crate::graphics::{CharAttribute, LineType};
 use crate::ui::common::Number;
 use crate::ui::components::BarFillType;
+use super::mapping::ValueMapping;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum StackBarDrawMode {
@@ -413,5 +414,44 @@ where
     #[inline(always)]
     pub(crate) fn has_negative(&self) -> bool {
         self.negative_sum < 0.0
+    }
+    pub(super) fn update_segments(&mut self, mapping: &ValueMapping, percentage: bool) {
+        let total = self.abs_total();
+        let to_domain = |cumulative: f64| -> f64 {
+            if !percentage {
+                cumulative
+            } else if total > 0.0 {
+                cumulative / total * 100.0
+            } else {
+                0.0
+            }
+        };
+        let to_i16 = |value: i32| -> i16 { value.clamp(i16::MIN as i32, i16::MAX as i32) as i16 };
+        self.layout.clear();
+        let mut positive = 0.0f64;
+        let mut negative = 0.0f64;
+        for bar in self.stack.bars.iter() {
+            let value = bar.value.to_f64();
+            let segment = if !value.is_finite() || value == 0.0 {
+                SegmentLayout::default()
+            } else if value > 0.0 {
+                let start = mapping.offset(to_domain(positive));
+                positive += value;
+                let end = mapping.offset(to_domain(positive));
+                SegmentLayout {
+                    offset: to_i16(start),
+                    len: to_i16(end - start),
+                }
+            } else {
+                let start = mapping.offset(to_domain(negative));
+                negative += value;
+                let end = mapping.offset(to_domain(negative));
+                SegmentLayout {
+                    offset: to_i16(start),
+                    len: to_i16(end - start),
+                }
+            };
+            self.layout.push(segment);
+        }
     }
 }
