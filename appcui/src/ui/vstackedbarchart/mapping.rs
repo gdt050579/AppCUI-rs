@@ -34,6 +34,18 @@ impl ValueMapping {
     pub(super) fn below(&self) -> u32 {
         self.zero
     }
+    #[inline(always)]
+    pub(super) fn bottom_value(&self) -> f64 {
+        self.lo
+    }
+    #[inline(always)]
+    pub(super) fn value_per_cell(&self) -> f64 {
+        if self.scale > 0.0 {
+            1.0 / self.scale
+        } else {
+            0.0
+        }
+    }
     pub(super) fn position(&self, value: f64) -> u32 {
         let p = (value - self.lo) * self.scale;
         if p.is_nan() {

@@ -1982,3 +1982,267 @@ fn check_segments_huge_height_does_not_overflow() {
     chart.add_stack([1]);
     assert_eq!(segments_of(&mut chart, 100000, 0), vec![(0, i16::MAX)]);
 }
+
+fn yaxis_of<T: Number + 'static>(chart: &mut VStackedBarChart<T>, height: u32) -> (i32, f64, f64) {
+    chart.update_yaxis_data(height);
+    (chart.yaxis.zero, chart.yaxis.bottom_value, chart.yaxis.bottom_step)
+}
+
+#[test]
+fn check_yaxis_defaults() {
+    let chart = new_chart();
+    assert_eq!(chart.yaxis.zero, 0);
+    assert_eq!(chart.yaxis.bottom_value, 0.0);
+    assert_eq!(chart.yaxis.bottom_step, 0.0);
+}
+
+#[test]
+fn check_yaxis_from_zero_positive_only() {
+    let mut chart = new_chart();
+    chart.add_stack([10]);
+    let (zero, bottom, step) = yaxis_of(&mut chart, 10);
+    assert_eq!(zero, 0);
+    assert_close(bottom, 0.0);
+    assert_close(step, -3.0);
+}
+
+#[test]
+fn check_yaxis_from_zero_mixed_values() {
+    let mut chart = new_chart();
+    chart.add_stack([10, -10]);
+    let (zero, bottom, step) = yaxis_of(&mut chart, 20);
+    assert_eq!(zero, 10);
+    assert_close(bottom, -10.0);
+    assert_close(step, -3.0);
+}
+
+#[test]
+fn check_yaxis_from_zero_negative_only() {
+    let mut chart = new_chart();
+    chart.add_stack([-8]);
+    let (zero, bottom, step) = yaxis_of(&mut chart, 8);
+    assert_eq!(zero, 8);
+    assert_close(bottom, -8.0);
+    assert_close(step, -3.0);
+}
+
+#[test]
+fn check_yaxis_step_follows_setting() {
+    let mut chart = new_chart();
+    chart.add_stack([10]);
+    chart.set_yaxis_step(5);
+    let (_, _, step) = yaxis_of(&mut chart, 10);
+    assert_close(step, -5.0);
+    chart.set_yaxis_step(1);
+    let (_, _, step) = yaxis_of(&mut chart, 20);
+    assert_close(step, -0.5);
+}
+
+#[test]
+fn check_yaxis_fit_data() {
+    let mut chart = new_chart();
+    chart.add_stack([5]);
+    chart.add_stack([10]);
+    chart.set_stacks_scale(StackBarScale::FitData);
+    let (zero, bottom, step) = yaxis_of(&mut chart, 5);
+    assert_eq!(zero, 0);
+    assert_close(bottom, 5.0);
+    assert_close(step, -3.0);
+}
+
+#[test]
+fn check_yaxis_fixed() {
+    let mut chart = new_chart();
+    chart.add_stack([1]);
+    chart.set_stacks_scale(StackBarScale::Fixed { min: -20, max: 40 });
+    let (zero, bottom, step) = yaxis_of(&mut chart, 30);
+    assert_eq!(zero, 10);
+    assert_close(bottom, -20.0);
+    assert_close(step, -6.0);
+}
+
+#[test]
+fn check_yaxis_percentage() {
+    let mut chart = new_chart();
+    chart.add_stack([1, 1]);
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    let (zero, bottom, step) = yaxis_of(&mut chart, 10);
+    assert_eq!(zero, 0);
+    assert_close(bottom, 0.0);
+    assert_close(step, -30.0);
+    chart.add_stack([5, -5]);
+    let (zero, bottom, step) = yaxis_of(&mut chart, 15);
+    assert_eq!(zero, 5);
+    assert_close(bottom, -50.0);
+    assert_close(step, -30.0);
+}
+
+#[test]
+fn check_yaxis_zero_matches_mapping_zero() {
+    let mut chart = new_chart();
+    chart.add_stack([7, -3]);
+    chart.add_stack([-9, 2]);
+    for height in 0..40u32 {
+        let mapping = chart.value_mapping(height);
+        let (zero, _, _) = yaxis_of(&mut chart, height);
+        assert_eq!(zero, mapping.zero() as i32);
+    }
+}
+
+#[test]
+fn check_yaxis_zero_line_row_from_bottom_value() {
+    let mut chart = new_chart();
+    chart.add_stack([12, -6]);
+    let height = 18u32;
+    let (zero, bottom, step) = yaxis_of(&mut chart, height);
+    let rows_to_zero = (bottom * chart.yaxis.step as f64 / step).round() as i32;
+    assert_eq!(rows_to_zero, zero);
+}
+
+#[test]
+fn check_yaxis_empty_chart_and_zero_height() {
+    let mut chart = new_chart();
+    assert_eq!(yaxis_of(&mut chart, 10), (0, 0.0, 0.0));
+    chart.add_stack([3, -3]);
+    assert_eq!(yaxis_of(&mut chart, 0), (0, -3.0, 0.0));
+}
+
+#[test]
+fn check_yaxis_degenerate_fixed_range() {
+    let mut chart = new_chart();
+    chart.add_stack([3]);
+    chart.set_stacks_scale(StackBarScale::Fixed { min: 5, max: 5 });
+    let (zero, bottom, step) = yaxis_of(&mut chart, 10);
+    assert_eq!(zero, 0);
+    assert_close(bottom, 5.0);
+    assert_close(step, 0.0);
+}
+
+#[test]
+fn check_plot_layout_updates_axis_and_segments() {
+    let mut chart = new_chart();
+    chart.add_stack([4, -2, 3]);
+    chart.update_plot_layout(9);
+    assert_eq!(chart.yaxis.zero, 2);
+    assert_close(chart.yaxis.bottom_value, -2.0);
+    let segs: Vec<(i16, i16)> = chart.stacks[0].layout.iter().map(|s| (s.offset, s.len)).collect();
+    assert_eq!(segs, vec![(0, 4), (0, -2), (4, 3)]);
+}
+
+#[test]
+fn check_plot_layout_empty_chart() {
+    let mut chart = new_chart();
+    chart.update_plot_layout(10);
+    chart.update_plot_layout(0);
+    assert_eq!(chart.stacks_count(), 0);
+    assert_eq!(chart.yaxis.zero, 0);
+}
+
+#[test]
+fn check_plot_layout_after_clear() {
+    let mut chart = new_chart();
+    chart.add_stack([4, -2]);
+    chart.update_plot_layout(10);
+    chart.clear();
+    chart.update_plot_layout(10);
+    assert_eq!(chart.yaxis.zero, 0);
+    assert_close(chart.yaxis.bottom_step, 0.0);
+}
+
+#[test]
+fn check_plot_layout_single_stack_all_scales() {
+    let scales = [
+        StackBarScale::FromZero,
+        StackBarScale::FromZeroMinRange { min: -5, max: 5 },
+        StackBarScale::FitData,
+        StackBarScale::Fixed { min: -3, max: 3 },
+        StackBarScale::Percentage,
+    ];
+    for scale in scales {
+        for height in 0..12u32 {
+            let mut chart = new_chart();
+            chart.add_stack([2, -1, 3]);
+            chart.set_stacks_scale(scale);
+            chart.update_plot_layout(height);
+            assert_eq!(chart.stacks[0].layout.len(), 3);
+            assert!(chart.yaxis.zero >= 0 && chart.yaxis.zero <= height as i32);
+        }
+    }
+}
+
+#[test]
+fn check_plot_layout_all_zero_stack_all_scales() {
+    let scales = [
+        StackBarScale::FromZero,
+        StackBarScale::FromZeroMinRange { min: 0, max: 0 },
+        StackBarScale::FitData,
+        StackBarScale::Fixed { min: 0, max: 0 },
+        StackBarScale::Percentage,
+    ];
+    for scale in scales {
+        for height in 0..6u32 {
+            let mut chart = new_chart();
+            chart.add_stack([0, 0, 0]);
+            chart.set_stacks_scale(scale);
+            chart.update_plot_layout(height);
+            assert!(chart.stacks[0].layout.iter().all(|s| s.len == 0));
+        }
+    }
+}
+
+#[test]
+fn check_plot_layout_stack_without_bars_all_scales() {
+    let scales = [
+        StackBarScale::FromZero,
+        StackBarScale::FitData,
+        StackBarScale::Fixed { min: -2, max: 2 },
+        StackBarScale::Percentage,
+    ];
+    for scale in scales {
+        let mut chart = new_chart();
+        chart.add_stack(BarsStack::<i32>::new());
+        chart.add_stack([3]);
+        chart.set_stacks_scale(scale);
+        chart.update_plot_layout(6);
+        assert!(chart.stacks[0].layout.is_empty());
+        assert_eq!(chart.stacks[1].layout.len(), 1);
+    }
+}
+
+#[test]
+fn check_plot_layout_extreme_values() {
+    let mut chart = float_chart();
+    chart.add_stack([f64::MAX, -f64::MAX, f64::MAX]);
+    chart.add_stack([f64::NAN, f64::INFINITY, f64::NEG_INFINITY]);
+    for height in 0..8u32 {
+        chart.update_plot_layout(height);
+    }
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    chart.update_plot_layout(8);
+    chart.set_stacks_scale(StackBarScale::FitData);
+    chart.update_plot_layout(8);
+    assert_eq!(chart.stacks[1].layout.len(), 3);
+}
+
+#[test]
+fn check_plot_layout_follows_data_updates() {
+    let mut chart = new_chart();
+    chart.add_stack([2]);
+    chart.update_plot_layout(4);
+    assert_eq!(chart.stacks[0].layout[0].len, 4);
+    chart.add_stack([4]);
+    chart.update_plot_layout(4);
+    assert_eq!(chart.stacks[0].layout[0].len, 2);
+    assert_eq!(chart.stacks[1].layout[0].len, 4);
+}
+
+#[test]
+fn check_mapping_bottom_value_and_value_per_cell() {
+    let m = ValueMapping::new(-10.0, 30.0, 20);
+    assert_close(m.bottom_value(), -10.0);
+    assert_close(m.value_per_cell(), 2.0);
+    let m = ValueMapping::new(0.0, 0.0, 20);
+    assert_close(m.value_per_cell(), 0.0);
+    let m = ValueMapping::new(0.0, 10.0, 0);
+    assert_close(m.value_per_cell(), 0.0);
+}

@@ -17,6 +17,9 @@ pub(super) struct YAxis {
     pub(super) step: u8,
     pub(super) visible: bool,
     pub(super) show_grid: bool,
+    pub(super) zero: i32,
+    pub(super) bottom_value: f64,
+    pub(super) bottom_step: f64,
 }
 
 pub(super) struct XAxis {
@@ -73,6 +76,9 @@ where
                 step: 3,
                 visible: true,
                 show_grid: true,
+                zero: 0,
+                bottom_value: 0.0,
+                bottom_step: 0.0,
             },
             xaxis: XAxis {
                 label_format: XAxisLabelFormat::None,
@@ -284,10 +290,27 @@ where
     }
     pub(super) fn update_segments_layout(&mut self, height: u32) {
         let mapping = self.value_mapping(height);
+        self.apply_segments(&mapping);
+    }
+    pub(super) fn update_yaxis_data(&mut self, height: u32) {
+        let mapping = self.value_mapping(height);
+        self.apply_yaxis(&mapping);
+    }
+    pub(super) fn update_plot_layout(&mut self, height: u32) {
+        let mapping = self.value_mapping(height);
+        self.apply_yaxis(&mapping);
+        self.apply_segments(&mapping);
+    }
+    fn apply_segments(&mut self, mapping: &ValueMapping) {
         let percentage = matches!(self.scale, StackBarScale::Percentage);
         for entry in self.stacks.iter_mut() {
-            entry.update_segments(&mapping, percentage);
+            entry.update_segments(mapping, percentage);
         }
+    }
+    fn apply_yaxis(&mut self, mapping: &ValueMapping) {
+        self.yaxis.zero = mapping.zero() as i32;
+        self.yaxis.bottom_value = mapping.bottom_value();
+        self.yaxis.bottom_step = -(mapping.value_per_cell() * self.yaxis.step as f64);
     }
     pub(super) fn update_stack_sums(&mut self) {
         for entry in self.stacks.iter_mut() {
