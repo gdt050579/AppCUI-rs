@@ -4,6 +4,22 @@ use super::XAxisLabelFormat;
 use super::mapping::ValueMapping;
 use crate::ui::components::BarFillType;
 
+fn in_app(f: impl FnOnce() + 'static) {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+    ";
+    App::new()
+        .size(Size::new(30, 10))
+        .debug_script(script)
+        .window(move || {
+            f();
+            window!("Test,d:f")
+        })
+        .run()
+        .unwrap();
+}
+
 fn new_chart() -> VStackedBarChart<i32> {
     VStackedBarChart::<i32>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None)
 }
@@ -26,18 +42,22 @@ fn fill() -> StackBarDrawMode {
 
 #[test]
 fn check_creation() {
-    let chart = new_chart();
-    assert_eq!(chart.stacks_count(), 0);
-    assert!(chart.get_stack(0).is_none());
+    in_app(|| {
+        let chart = new_chart();
+        assert_eq!(chart.stacks_count(), 0);
+        assert!(chart.get_stack(0).is_none());
+    });
 }
 
 #[test]
 fn check_creation_with_scrollbars() {
-    let chart = VStackedBarChart::<f64>::new(
-        layout!("x:1,y:1,w:10,h:5"),
-        vstackedbarchart::Flags::ScrollBars | vstackedbarchart::Flags::ShowZeroLineOnYAxis,
-    );
-    assert_eq!(chart.stacks_count(), 0);
+    in_app(|| {
+        let chart = VStackedBarChart::<f64>::new(
+            layout!("x:1,y:1,w:10,h:5"),
+            vstackedbarchart::Flags::ScrollBars | vstackedbarchart::Flags::ShowZeroLineOnYAxis,
+        );
+        assert_eq!(chart.stacks_count(), 0);
+    });
 }
 
 #[test]
@@ -338,260 +358,310 @@ fn check_bars_stack_from_stack_reference_is_a_copy() {
 
 #[test]
 fn check_add_stack_from_stack() {
-    let mut chart = new_chart();
-    chart.add_stack(BarsStackBuilder::<i32>::new().bars([1, 2, 3]).build());
-    assert_eq!(chart.stacks_count(), 1);
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2, 3]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(BarsStackBuilder::<i32>::new().bars([1, 2, 3]).build());
+        assert_eq!(chart.stacks_count(), 1);
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2, 3]);
+    });
 }
 
 #[test]
 fn check_add_stack_from_values() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2, 3]);
-    chart.add_stack(&[4, 5]);
-    chart.add_stack(vec![6]);
-    chart.add_stack(&vec![7, 8]);
-    chart.add_stack(&[9, 10, 11][..]);
-    assert_eq!(chart.stacks_count(), 5);
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2, 3]);
-    assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![4, 5]);
-    assert_eq!(values_of(chart.get_stack(2).unwrap()), vec![6]);
-    assert_eq!(values_of(chart.get_stack(3).unwrap()), vec![7, 8]);
-    assert_eq!(values_of(chart.get_stack(4).unwrap()), vec![9, 10, 11]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2, 3]);
+        chart.add_stack(&[4, 5]);
+        chart.add_stack(vec![6]);
+        chart.add_stack(&vec![7, 8]);
+        chart.add_stack(&[9, 10, 11][..]);
+        assert_eq!(chart.stacks_count(), 5);
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2, 3]);
+        assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![4, 5]);
+        assert_eq!(values_of(chart.get_stack(2).unwrap()), vec![6]);
+        assert_eq!(values_of(chart.get_stack(3).unwrap()), vec![7, 8]);
+        assert_eq!(values_of(chart.get_stack(4).unwrap()), vec![9, 10, 11]);
+    });
 }
 
 #[test]
 fn check_add_stack_keeps_negative_and_positive_values_in_order() {
-    let mut chart = new_chart();
-    chart.add_stack([5, -3, 2, -1]);
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![5, -3, 2, -1]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([5, -3, 2, -1]);
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![5, -3, 2, -1]);
+    });
 }
 
 #[test]
 fn check_add_stack_flat_list_is_one_stack() {
-    let mut chart = new_chart();
-    chart.add_stack(&[1, 2, 3]);
-    assert_eq!(chart.stacks_count(), 1);
-    assert_eq!(chart.get_stack(0).unwrap().count(), 3);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(&[1, 2, 3]);
+        assert_eq!(chart.stacks_count(), 1);
+        assert_eq!(chart.get_stack(0).unwrap().count(), 3);
+    });
 }
 
 #[test]
 fn check_add_stack_computes_thickness() {
-    let mut chart = new_chart();
-    let mut stack = BarsStack::<i32>::new();
-    stack.add_bar(StackBarBuilder::new(1).draw_mode(filled_rect()).build());
-    chart.add_stack(stack);
-    chart.add_stack([1, 2]);
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
-    assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 1);
+    in_app(|| {
+        let mut chart = new_chart();
+        let mut stack = BarsStack::<i32>::new();
+        stack.add_bar(StackBarBuilder::new(1).draw_mode(filled_rect()).build());
+        chart.add_stack(stack);
+        chart.add_stack([1, 2]);
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
+        assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 1);
+    });
 }
 
 #[test]
 fn check_add_stack_uses_requested_thickness() {
-    let mut chart = new_chart();
-    chart.add_stack(BarsStackBuilder::<i32>::new().bars([1, 2]).thickness(4).build());
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 4);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(BarsStackBuilder::<i32>::new().bars([1, 2]).thickness(4).build());
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 4);
+    });
 }
 
 #[test]
 fn check_add_stacks_from_stacks() {
-    let mut chart = new_chart();
-    let stacks = vec![BarsStack::from([1, 2]), BarsStack::from([3]), BarsStack::from([4, 5, 6])];
-    chart.add_stacks(stacks);
-    assert_eq!(chart.stacks_count(), 3);
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2]);
-    assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3]);
-    assert_eq!(values_of(chart.get_stack(2).unwrap()), vec![4, 5, 6]);
+    in_app(|| {
+        let mut chart = new_chart();
+        let stacks = vec![BarsStack::from([1, 2]), BarsStack::from([3]), BarsStack::from([4, 5, 6])];
+        chart.add_stacks(stacks);
+        assert_eq!(chart.stacks_count(), 3);
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2]);
+        assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3]);
+        assert_eq!(values_of(chart.get_stack(2).unwrap()), vec![4, 5, 6]);
+    });
 }
 
 #[test]
 fn check_add_stacks_from_stack_references() {
-    let mut chart = new_chart();
-    let stacks = vec![BarsStack::from([1, 2]), BarsStack::from([3])];
-    chart.add_stacks(&stacks);
-    assert_eq!(chart.stacks_count(), 2);
-    assert_eq!(stacks.len(), 2);
-    assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3]);
+    in_app(|| {
+        let mut chart = new_chart();
+        let stacks = vec![BarsStack::from([1, 2]), BarsStack::from([3])];
+        chart.add_stacks(&stacks);
+        assert_eq!(chart.stacks_count(), 2);
+        assert_eq!(stacks.len(), 2);
+        assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3]);
+    });
 }
 
 #[test]
 fn check_add_stacks_from_array_matrix() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2, 3], [4, 5, 6]]);
-    assert_eq!(chart.stacks_count(), 2);
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2, 3]);
-    assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![4, 5, 6]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2, 3], [4, 5, 6]]);
+        assert_eq!(chart.stacks_count(), 2);
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2, 3]);
+        assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![4, 5, 6]);
+    });
 }
 
 #[test]
 fn check_add_stacks_from_ragged_vec_matrix() {
-    let mut chart = new_chart();
-    chart.add_stacks(vec![vec![1, 2, 3], vec![4], vec![]]);
-    assert_eq!(chart.stacks_count(), 3);
-    assert_eq!(chart.get_stack(0).unwrap().count(), 3);
-    assert_eq!(chart.get_stack(1).unwrap().count(), 1);
-    assert_eq!(chart.get_stack(2).unwrap().count(), 0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks(vec![vec![1, 2, 3], vec![4], vec![]]);
+        assert_eq!(chart.stacks_count(), 3);
+        assert_eq!(chart.get_stack(0).unwrap().count(), 3);
+        assert_eq!(chart.get_stack(1).unwrap().count(), 1);
+        assert_eq!(chart.get_stack(2).unwrap().count(), 0);
+    });
 }
 
 #[test]
 fn check_add_stacks_from_slice_of_slices() {
-    let mut chart = new_chart();
-    let rows: Vec<&[i32]> = vec![&[1, 2][..], &[3, 4, 5][..]];
-    chart.add_stacks(rows.iter().copied());
-    assert_eq!(chart.stacks_count(), 2);
-    assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3, 4, 5]);
+    in_app(|| {
+        let mut chart = new_chart();
+        let rows: Vec<&[i32]> = vec![&[1, 2][..], &[3, 4, 5][..]];
+        chart.add_stacks(rows.iter().copied());
+        assert_eq!(chart.stacks_count(), 2);
+        assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3, 4, 5]);
+    });
 }
 
 #[test]
 fn check_add_stacks_empty_iterator() {
-    let mut chart = new_chart();
-    chart.add_stacks(Vec::<BarsStack<i32>>::new());
-    assert_eq!(chart.stacks_count(), 0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks(Vec::<BarsStack<i32>>::new());
+        assert_eq!(chart.stacks_count(), 0);
+    });
 }
 
 #[test]
 fn check_add_stacks_appends_after_existing() {
-    let mut chart = new_chart();
-    chart.add_stack([1]);
-    chart.add_stacks([[2], [3]]);
-    chart.add_stack([4]);
-    assert_eq!(chart.stacks_count(), 4);
-    let first: Vec<i32> = (0..4).map(|i| chart.get_stack(i).unwrap().get(0).unwrap().value()).collect();
-    assert_eq!(first, vec![1, 2, 3, 4]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1]);
+        chart.add_stacks([[2], [3]]);
+        chart.add_stack([4]);
+        assert_eq!(chart.stacks_count(), 4);
+        let first: Vec<i32> = (0..4).map(|i| chart.get_stack(i).unwrap().get(0).unwrap().value()).collect();
+        assert_eq!(first, vec![1, 2, 3, 4]);
+    });
 }
 
 #[test]
 fn check_add_stacks_computes_thickness_for_every_stack() {
-    let mut chart = new_chart();
-    let mut rect_stack = BarsStack::<i32>::new();
-    rect_stack.add_bar(StackBarBuilder::new(1).draw_mode(rect()).build());
-    chart.add_stacks(vec![rect_stack, BarsStack::from([1, 2])]);
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
-    assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 1);
+    in_app(|| {
+        let mut chart = new_chart();
+        let mut rect_stack = BarsStack::<i32>::new();
+        rect_stack.add_bar(StackBarBuilder::new(1).draw_mode(rect()).build());
+        chart.add_stacks(vec![rect_stack, BarsStack::from([1, 2])]);
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
+        assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 1);
+    });
 }
 
 #[test]
 fn check_get_stack_out_of_range() {
-    let mut chart = new_chart();
-    chart.add_stack([1]);
-    assert!(chart.get_stack(0).is_some());
-    assert!(chart.get_stack(1).is_none());
-    assert!(chart.get_stack(usize::MAX).is_none());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1]);
+        assert!(chart.get_stack(0).is_some());
+        assert!(chart.get_stack(1).is_none());
+        assert!(chart.get_stack(usize::MAX).is_none());
+    });
 }
 
 #[test]
 fn check_update_stack_modifies_values() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2, 3]);
-    chart.update_stack(0, |stack| {
-        stack.get_mut(1).unwrap().set_value(20);
-        stack.add_bar(-4);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2, 3]);
+        chart.update_stack(0, |stack| {
+            stack.get_mut(1).unwrap().set_value(20);
+            stack.add_bar(-4);
+        });
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 20, 3, -4]);
     });
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 20, 3, -4]);
 }
 
 #[test]
 fn check_update_stack_recomputes_thickness() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2, 3]);
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
-    chart.update_stack(0, |stack| {
-        stack.get_mut(0).unwrap().set_draw_mode(rect());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2, 3]);
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
+        chart.update_stack(0, |stack| {
+            stack.get_mut(0).unwrap().set_draw_mode(rect());
+        });
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
+        chart.update_stack(0, |stack| {
+            stack.get_mut(1).unwrap().set_draw_mode(filled_rect());
+        });
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
+        chart.update_stack(0, |stack| {
+            stack.get_mut(1).unwrap().clear_draw_mode();
+            stack.get_mut(0).unwrap().clear_draw_mode();
+        });
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
     });
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
-    chart.update_stack(0, |stack| {
-        stack.get_mut(1).unwrap().set_draw_mode(filled_rect());
-    });
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
-    chart.update_stack(0, |stack| {
-        stack.get_mut(1).unwrap().clear_draw_mode();
-        stack.get_mut(0).unwrap().clear_draw_mode();
-    });
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
 }
 
 #[test]
 fn check_update_stack_thickness_request() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2]);
-    chart.update_stack(0, |stack| {
-        stack.set_thickness(6);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2]);
+        chart.update_stack(0, |stack| {
+            stack.set_thickness(6);
+        });
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 6);
+        assert_eq!(chart.get_stack(0).unwrap().thickness(), Some(6));
     });
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 6);
-    assert_eq!(chart.get_stack(0).unwrap().thickness(), Some(6));
 }
 
 #[test]
 fn check_update_stack_touches_only_the_selected_stack() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4]]);
-    chart.update_stack(1, |stack| {
-        stack.get_mut(0).unwrap().set_value(30).set_draw_mode(filled_rect());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4]]);
+        chart.update_stack(1, |stack| {
+            stack.get_mut(0).unwrap().set_value(30).set_draw_mode(filled_rect());
+        });
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2]);
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
+        assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![30, 4]);
+        assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 3);
     });
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2]);
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
-    assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![30, 4]);
-    assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 3);
 }
 
 #[test]
 fn check_update_stack_out_of_range_does_nothing() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2]);
-    let mut called = false;
-    chart.update_stack(5, |_| called = true);
-    assert!(!called);
-    assert_eq!(chart.stacks_count(), 1);
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2]);
+        let mut called = false;
+        chart.update_stack(5, |_| called = true);
+        assert!(!called);
+        assert_eq!(chart.stacks_count(), 1);
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, 2]);
+    });
 }
 
 #[test]
 fn check_update_stack_on_empty_chart() {
-    let mut chart = new_chart();
-    let mut called = false;
-    chart.update_stack(0, |_| called = true);
-    assert!(!called);
-    assert_eq!(chart.stacks_count(), 0);
+    in_app(|| {
+        let mut chart = new_chart();
+        let mut called = false;
+        chart.update_stack(0, |_| called = true);
+        assert!(!called);
+        assert_eq!(chart.stacks_count(), 0);
+    });
 }
 
 #[test]
 fn check_clear() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4]]);
-    assert_eq!(chart.stacks_count(), 2);
-    chart.clear();
-    assert_eq!(chart.stacks_count(), 0);
-    assert!(chart.get_stack(0).is_none());
-    chart.add_stack([9]);
-    assert_eq!(chart.stacks_count(), 1);
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![9]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4]]);
+        assert_eq!(chart.stacks_count(), 2);
+        chart.clear();
+        assert_eq!(chart.stacks_count(), 0);
+        assert!(chart.get_stack(0).is_none());
+        chart.add_stack([9]);
+        assert_eq!(chart.stacks_count(), 1);
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![9]);
+    });
 }
 
 #[test]
 fn check_clear_on_empty_chart() {
-    let mut chart = new_chart();
-    chart.clear();
-    assert_eq!(chart.stacks_count(), 0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.clear();
+        assert_eq!(chart.stacks_count(), 0);
+    });
 }
 
 #[test]
 fn check_float_chart_with_mixed_signs() {
-    let mut chart = VStackedBarChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None);
-    chart.add_stack([1.5, -2.5, 0.0]);
-    chart.add_stacks(vec![vec![-1.0, 2.0], vec![3.25]]);
-    assert_eq!(chart.stacks_count(), 3);
-    let first = chart.get_stack(0).unwrap();
-    assert_eq!(first.get(0).unwrap().value(), 1.5);
-    assert_eq!(first.get(1).unwrap().value(), -2.5);
-    assert_eq!(first.get(2).unwrap().value(), 0.0);
-    assert_eq!(chart.get_stack(2).unwrap().get(0).unwrap().value(), 3.25);
+    in_app(|| {
+        let mut chart = VStackedBarChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None);
+        chart.add_stack([1.5, -2.5, 0.0]);
+        chart.add_stacks(vec![vec![-1.0, 2.0], vec![3.25]]);
+        assert_eq!(chart.stacks_count(), 3);
+        let first = chart.get_stack(0).unwrap();
+        assert_eq!(first.get(0).unwrap().value(), 1.5);
+        assert_eq!(first.get(1).unwrap().value(), -2.5);
+        assert_eq!(first.get(2).unwrap().value(), 0.0);
+        assert_eq!(chart.get_stack(2).unwrap().get(0).unwrap().value(), 3.25);
+    });
 }
 
 #[test]
 fn check_zero_values_are_kept() {
-    let mut chart = new_chart();
-    chart.add_stack([0, 0, 0]);
-    assert_eq!(chart.get_stack(0).unwrap().count(), 3);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([0, 0, 0]);
+        assert_eq!(chart.get_stack(0).unwrap().count(), 3);
+    });
 }
 
 #[test]
@@ -667,12 +737,14 @@ fn check_stack_label_builder_and_clone() {
 
 #[test]
 fn check_chart_keeps_stack_label() {
-    let mut chart = new_chart();
-    chart.add_stack(BarsStackBuilder::<i32>::new().label("A").bars([1]).build());
-    chart.update_stack(0, |stack| {
-        stack.set_label("B");
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(BarsStackBuilder::<i32>::new().label("A").bars([1]).build());
+        chart.update_stack(0, |stack| {
+            stack.set_label("B");
+        });
+        assert_eq!(chart.get_stack(0).unwrap().label(), "B");
     });
-    assert_eq!(chart.get_stack(0).unwrap().label(), "B");
 }
 
 #[test]
@@ -697,308 +769,360 @@ fn format_float(format: &FormatNumber, value: f64) -> Option<String> {
 
 #[test]
 fn check_new_chart_defaults() {
-    let chart = new_chart();
-    assert!(chart.scale == StackBarScale::FromZero);
-    assert_eq!(chart.defaults.thickness, 1);
-    assert_eq!(chart.defaults.spacing, 1);
-    assert_eq!(chart.defaults.draw_mode, fill());
-    assert!(chart.defaults.attr.is_none());
-    assert_eq!(chart.yaxis.width, 6);
-    assert_eq!(chart.yaxis.step, 3);
-    assert!(chart.yaxis.visible);
-    assert!(chart.yaxis.show_grid);
-    assert!(chart.xaxis.label_format == XAxisLabelFormat::None);
-    assert!(chart.xaxis.spans.is_empty());
+    in_app(|| {
+        let chart = new_chart();
+        assert!(chart.scale == StackBarScale::FromZero);
+        assert_eq!(chart.defaults.thickness, 1);
+        assert_eq!(chart.defaults.spacing, 1);
+        assert_eq!(chart.defaults.draw_mode, fill());
+        assert!(chart.defaults.attr.is_none());
+        assert_eq!(chart.yaxis.width, 6);
+        assert_eq!(chart.yaxis.step, 3);
+        assert!(chart.yaxis.visible);
+        assert!(chart.yaxis.show_grid);
+        assert!(chart.xaxis.label_format == XAxisLabelFormat::None);
+        assert!(chart.xaxis.spans.is_empty());
+    });
 }
 
 #[test]
 fn check_set_stacks_scale() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 20 });
-    assert!(chart.scale == StackBarScale::Fixed { min: -5, max: 20 });
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    assert!(chart.scale == StackBarScale::Percentage);
-    chart.set_stacks_scale(StackBarScale::FitData);
-    assert!(chart.scale == StackBarScale::FitData);
-    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -1, max: 1 });
-    assert!(chart.scale == StackBarScale::FromZeroMinRange { min: -1, max: 1 });
-    chart.set_stacks_scale(StackBarScale::FromZero);
-    assert!(chart.scale == StackBarScale::FromZero);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 20 });
+        assert!(chart.scale == StackBarScale::Fixed { min: -5, max: 20 });
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        assert!(chart.scale == StackBarScale::Percentage);
+        chart.set_stacks_scale(StackBarScale::FitData);
+        assert!(chart.scale == StackBarScale::FitData);
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -1, max: 1 });
+        assert!(chart.scale == StackBarScale::FromZeroMinRange { min: -1, max: 1 });
+        chart.set_stacks_scale(StackBarScale::FromZero);
+        assert!(chart.scale == StackBarScale::FromZero);
+    });
 }
 
 #[test]
 fn check_set_number_format() {
-    let mut chart = new_chart();
-    chart.set_number_format(FormatNumber::new(10).decimals(3));
-    let custom = FormatNumber::new(10).decimals(3);
-    assert_eq!(format_float(&chart.number_format, 1.0), format_float(&custom, 1.0));
-    assert_eq!(format_float(&chart.number_format, 2.5), format_float(&custom, 2.5));
-    let default_chart = new_chart();
-    assert_ne!(format_float(&default_chart.number_format, 1.0), format_float(&custom, 1.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_number_format(FormatNumber::new(10).decimals(3));
+        let custom = FormatNumber::new(10).decimals(3);
+        assert_eq!(format_float(&chart.number_format, 1.0), format_float(&custom, 1.0));
+        assert_eq!(format_float(&chart.number_format, 2.5), format_float(&custom, 2.5));
+        let default_chart = new_chart();
+        assert_ne!(format_float(&default_chart.number_format, 1.0), format_float(&custom, 1.0));
+    });
 }
 
 #[test]
 fn check_default_number_format_depends_on_value_type() {
-    let int_chart = new_chart();
-    let float_chart = VStackedBarChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None);
-    assert_ne!(format_float(&int_chart.number_format, 1.0), format_float(&float_chart.number_format, 1.0));
+    in_app(|| {
+        let int_chart = new_chart();
+        let float_chart = VStackedBarChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None);
+        assert_ne!(format_float(&int_chart.number_format, 1.0), format_float(&float_chart.number_format, 1.0));
+    });
 }
 
 #[test]
 fn check_set_default_bar_width() {
-    let mut chart = new_chart();
-    chart.set_default_bar_width(4);
-    assert_eq!(chart.defaults.thickness, 4);
-    chart.set_default_bar_width(0);
-    assert_eq!(chart.defaults.thickness, 1);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_default_bar_width(4);
+        assert_eq!(chart.defaults.thickness, 4);
+        chart.set_default_bar_width(0);
+        assert_eq!(chart.defaults.thickness, 1);
+    });
 }
 
 #[test]
 fn check_set_default_bar_width_refreshes_every_stack() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4]]);
-    chart.add_stack(BarsStackBuilder::<i32>::new().bars([5]).thickness(2).build());
-    chart.set_default_bar_width(5);
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 5);
-    assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 5);
-    assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 2);
-    chart.set_default_bar_width(1);
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
-    assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 2);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4]]);
+        chart.add_stack(BarsStackBuilder::<i32>::new().bars([5]).thickness(2).build());
+        chart.set_default_bar_width(5);
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 5);
+        assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 5);
+        assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 2);
+        chart.set_default_bar_width(1);
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
+        assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 2);
+    });
 }
 
 #[test]
 fn check_set_default_bar_spacing() {
-    let mut chart = new_chart();
-    chart.set_default_bar_spacing(3);
-    assert_eq!(chart.defaults.spacing, 3);
-    chart.set_default_bar_spacing(0);
-    assert_eq!(chart.defaults.spacing, 0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_default_bar_spacing(3);
+        assert_eq!(chart.defaults.spacing, 3);
+        chart.set_default_bar_spacing(0);
+        assert_eq!(chart.defaults.spacing, 0);
+    });
 }
 
 #[test]
 fn check_set_default_bar_drawmode() {
-    let mut chart = new_chart();
-    chart.set_default_bar_drawmode(rect());
-    assert_eq!(chart.defaults.draw_mode, rect());
-    chart.set_default_bar_drawmode(filled_rect());
-    assert_eq!(chart.defaults.draw_mode, filled_rect());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_default_bar_drawmode(rect());
+        assert_eq!(chart.defaults.draw_mode, rect());
+        chart.set_default_bar_drawmode(filled_rect());
+        assert_eq!(chart.defaults.draw_mode, filled_rect());
+    });
 }
 
 #[test]
 fn check_set_default_bar_drawmode_refreshes_every_stack() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4]]);
-    let mut override_stack = BarsStack::<i32>::new();
-    override_stack.add_bar(StackBarBuilder::new(1).draw_mode(fill()).build());
-    chart.add_stack(override_stack);
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
-    chart.set_default_bar_drawmode(rect());
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
-    assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 2);
-    assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 1);
-    chart.set_default_bar_drawmode(filled_rect());
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
-    assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 3);
-    assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 1);
-    chart.set_default_bar_drawmode(fill());
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4]]);
+        let mut override_stack = BarsStack::<i32>::new();
+        override_stack.add_bar(StackBarBuilder::new(1).draw_mode(fill()).build());
+        chart.add_stack(override_stack);
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
+        chart.set_default_bar_drawmode(rect());
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
+        assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 2);
+        assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 1);
+        chart.set_default_bar_drawmode(filled_rect());
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
+        assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 3);
+        assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 1);
+        chart.set_default_bar_drawmode(fill());
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
+    });
 }
 
 #[test]
 fn check_stacks_added_after_defaults_change_use_new_defaults() {
-    let mut chart = new_chart();
-    chart.set_default_bar_width(3);
-    chart.set_default_bar_drawmode(rect());
-    chart.add_stack([1, 2]);
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
-    chart.set_default_bar_width(1);
-    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_default_bar_width(3);
+        chart.set_default_bar_drawmode(rect());
+        chart.add_stack([1, 2]);
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
+        chart.set_default_bar_width(1);
+        assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
+    });
 }
 
 #[test]
 fn check_set_default_bar_attr() {
-    let mut chart = new_chart();
-    assert!(chart.defaults.attr.is_none());
-    chart.set_default_bar_attr(CharAttribute::with_fore_color(Color::Yellow));
-    assert!(chart.defaults.attr.is_some());
+    in_app(|| {
+        let mut chart = new_chart();
+        assert!(chart.defaults.attr.is_none());
+        chart.set_default_bar_attr(CharAttribute::with_fore_color(Color::Yellow));
+        assert!(chart.defaults.attr.is_some());
+    });
 }
 
 #[test]
 fn check_set_yaxis_visible_and_grid() {
-    let mut chart = new_chart();
-    chart.set_yaxis_visible(false);
-    assert!(!chart.yaxis.visible);
-    assert!(chart.yaxis.show_grid);
-    chart.set_yaxis_show_grid(false);
-    assert!(!chart.yaxis.show_grid);
-    chart.set_yaxis_visible(true);
-    chart.set_yaxis_show_grid(true);
-    assert!(chart.yaxis.visible);
-    assert!(chart.yaxis.show_grid);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_yaxis_visible(false);
+        assert!(!chart.yaxis.visible);
+        assert!(chart.yaxis.show_grid);
+        chart.set_yaxis_show_grid(false);
+        assert!(!chart.yaxis.show_grid);
+        chart.set_yaxis_visible(true);
+        chart.set_yaxis_show_grid(true);
+        assert!(chart.yaxis.visible);
+        assert!(chart.yaxis.show_grid);
+    });
 }
 
 #[test]
 fn check_set_yaxis_width() {
-    let mut chart = new_chart();
-    chart.set_yaxis_width(9);
-    assert_eq!(chart.yaxis.width, 9);
-    chart.set_yaxis_width(0);
-    assert_eq!(chart.yaxis.width, 1);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_yaxis_width(9);
+        assert_eq!(chart.yaxis.width, 9);
+        chart.set_yaxis_width(0);
+        assert_eq!(chart.yaxis.width, 1);
+    });
 }
 
 #[test]
 fn check_set_yaxis_step() {
-    let mut chart = new_chart();
-    chart.set_yaxis_step(5);
-    assert_eq!(chart.yaxis.step, 5);
-    chart.set_yaxis_step(0);
-    assert_eq!(chart.yaxis.step, 1);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_yaxis_step(5);
+        assert_eq!(chart.yaxis.step, 5);
+        chart.set_yaxis_step(0);
+        assert_eq!(chart.yaxis.step, 1);
+    });
 }
 
 #[test]
 fn check_set_xaxis_label_mode_simple_modes() {
-    let mut chart = new_chart();
-    chart.set_xaxis_label_mode(XAxisLabelMode::Index(5));
-    assert!(chart.xaxis.label_format == XAxisLabelFormat::Index(5));
-    chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
-    assert!(chart.xaxis.label_format == XAxisLabelFormat::StackLabels);
-    chart.set_xaxis_label_mode(XAxisLabelMode::None);
-    assert!(chart.xaxis.label_format == XAxisLabelFormat::None);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_xaxis_label_mode(XAxisLabelMode::Index(5));
+        assert!(chart.xaxis.label_format == XAxisLabelFormat::Index(5));
+        chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+        assert!(chart.xaxis.label_format == XAxisLabelFormat::StackLabels);
+        chart.set_xaxis_label_mode(XAxisLabelMode::None);
+        assert!(chart.xaxis.label_format == XAxisLabelFormat::None);
+    });
 }
 
 #[test]
 fn check_set_xaxis_label_mode_custom_sorts_spans() {
-    let mut chart = new_chart();
-    let spans = [BarSpan::new(6, 2, "C"), BarSpan::new(0, 3, "A"), BarSpan::new(3, 2, "B")];
-    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&spans));
-    assert!(chart.xaxis.label_format == XAxisLabelFormat::Custom);
-    let starts: Vec<u32> = chart.xaxis.spans.iter().map(|span| span.start).collect();
-    assert_eq!(starts, vec![0, 3, 6]);
+    in_app(|| {
+        let mut chart = new_chart();
+        let spans = [BarSpan::new(6, 2, "C"), BarSpan::new(0, 3, "A"), BarSpan::new(3, 2, "B")];
+        chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&spans));
+        assert!(chart.xaxis.label_format == XAxisLabelFormat::Custom);
+        let starts: Vec<u32> = chart.xaxis.spans.iter().map(|span| span.start).collect();
+        assert_eq!(starts, vec![0, 3, 6]);
+    });
 }
 
 #[test]
 fn check_set_xaxis_label_mode_custom_drops_overlapping_spans() {
-    let mut chart = new_chart();
-    let spans = [
-        BarSpan::new(6, 2, "C"),
-        BarSpan::new(0, 3, "A"),
-        BarSpan::new(2, 2, "B"),
-        BarSpan::new(3, 1, "D"),
-    ];
-    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&spans));
-    let ranges: Vec<(u32, u32)> = chart.xaxis.spans.iter().map(|span| (span.start, span.end)).collect();
-    assert_eq!(ranges, vec![(0, 2), (3, 3), (6, 7)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        let spans = [
+            BarSpan::new(6, 2, "C"),
+            BarSpan::new(0, 3, "A"),
+            BarSpan::new(2, 2, "B"),
+            BarSpan::new(3, 1, "D"),
+        ];
+        chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&spans));
+        let ranges: Vec<(u32, u32)> = chart.xaxis.spans.iter().map(|span| (span.start, span.end)).collect();
+        assert_eq!(ranges, vec![(0, 2), (3, 3), (6, 7)]);
+    });
 }
 
 #[test]
 fn check_set_xaxis_label_mode_custom_replaces_previous_spans() {
-    let mut chart = new_chart();
-    let first = [BarSpan::new(0, 2, "A"), BarSpan::new(2, 2, "B")];
-    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&first));
-    assert_eq!(chart.xaxis.spans.len(), 2);
-    let second = [BarSpan::new(1, 1, "X")];
-    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&second));
-    assert_eq!(chart.xaxis.spans.len(), 1);
-    assert_eq!(chart.xaxis.spans[0].start, 1);
-    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&[]));
-    assert!(chart.xaxis.spans.is_empty());
-    assert!(chart.xaxis.label_format == XAxisLabelFormat::Custom);
+    in_app(|| {
+        let mut chart = new_chart();
+        let first = [BarSpan::new(0, 2, "A"), BarSpan::new(2, 2, "B")];
+        chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&first));
+        assert_eq!(chart.xaxis.spans.len(), 2);
+        let second = [BarSpan::new(1, 1, "X")];
+        chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&second));
+        assert_eq!(chart.xaxis.spans.len(), 1);
+        assert_eq!(chart.xaxis.spans[0].start, 1);
+        chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&[]));
+        assert!(chart.xaxis.spans.is_empty());
+        assert!(chart.xaxis.label_format == XAxisLabelFormat::Custom);
+    });
 }
 
 #[test]
 fn check_setters_do_not_change_stacks_data() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, -2], [3, 4]]);
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    chart.set_default_bar_width(2);
-    chart.set_default_bar_spacing(2);
-    chart.set_yaxis_width(4);
-    chart.set_xaxis_label_mode(XAxisLabelMode::Index(1));
-    assert_eq!(chart.stacks_count(), 2);
-    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, -2]);
-    assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3, 4]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, -2], [3, 4]]);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.set_default_bar_width(2);
+        chart.set_default_bar_spacing(2);
+        chart.set_yaxis_width(4);
+        chart.set_xaxis_label_mode(XAxisLabelMode::Index(1));
+        assert_eq!(chart.stacks_count(), 2);
+        assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, -2]);
+        assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3, 4]);
+    });
 }
 
 #[test]
 fn check_percentage_format_default() {
-    let chart = new_chart();
-    let expected = FormatNumber::new(10).suffix("%");
-    assert_eq!(format_float(&chart.percentage_format, 50.0), format_float(&expected, 50.0));
-    let text = format_float(&chart.percentage_format, 50.0).unwrap();
-    assert!(text.ends_with('%'));
-    assert!(text.starts_with("50"));
+    in_app(|| {
+        let chart = new_chart();
+        let expected = FormatNumber::new(10).suffix("%");
+        assert_eq!(format_float(&chart.percentage_format, 50.0), format_float(&expected, 50.0));
+        let text = format_float(&chart.percentage_format, 50.0).unwrap();
+        assert!(text.ends_with('%'));
+        assert!(text.starts_with("50"));
+    });
 }
 
 #[test]
 fn check_percentage_format_has_no_decimals() {
-    let chart = new_chart();
-    let text = format_float(&chart.percentage_format, 33.333).unwrap();
-    assert!(!text.contains('.'));
-    assert!(text.ends_with('%'));
-    let float_chart = VStackedBarChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None);
-    let float_text = format_float(&float_chart.percentage_format, 33.333).unwrap();
-    assert!(!float_text.contains('.'));
-    assert!(float_text.ends_with('%'));
+    in_app(|| {
+        let chart = new_chart();
+        let text = format_float(&chart.percentage_format, 33.333).unwrap();
+        assert!(!text.contains('.'));
+        assert!(text.ends_with('%'));
+        let float_chart = VStackedBarChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None);
+        let float_text = format_float(&float_chart.percentage_format, 33.333).unwrap();
+        assert!(!float_text.contains('.'));
+        assert!(float_text.ends_with('%'));
+    });
 }
 
 #[test]
 fn check_set_percentage_format() {
-    let mut chart = new_chart();
-    chart.set_percentage_format(FormatNumber::new(10).decimals(1).suffix(" pct"));
-    let custom = FormatNumber::new(10).decimals(1).suffix(" pct");
-    assert_eq!(format_float(&chart.percentage_format, 12.5), format_float(&custom, 12.5));
-    let default_chart = new_chart();
-    assert_ne!(format_float(&default_chart.percentage_format, 12.5), format_float(&chart.percentage_format, 12.5));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_percentage_format(FormatNumber::new(10).decimals(1).suffix(" pct"));
+        let custom = FormatNumber::new(10).decimals(1).suffix(" pct");
+        assert_eq!(format_float(&chart.percentage_format, 12.5), format_float(&custom, 12.5));
+        let default_chart = new_chart();
+        assert_ne!(format_float(&default_chart.percentage_format, 12.5), format_float(&chart.percentage_format, 12.5));
+    });
 }
 
 #[test]
 fn check_set_percentage_format_keeps_number_format() {
-    let mut chart = new_chart();
-    let before = format_float(&chart.number_format, 1234.0);
-    chart.set_percentage_format(FormatNumber::new(10).decimals(2).suffix("%"));
-    assert_eq!(format_float(&chart.number_format, 1234.0), before);
+    in_app(|| {
+        let mut chart = new_chart();
+        let before = format_float(&chart.number_format, 1234.0);
+        chart.set_percentage_format(FormatNumber::new(10).decimals(2).suffix("%"));
+        assert_eq!(format_float(&chart.number_format, 1234.0), before);
+    });
 }
 
 #[test]
 fn check_yaxis_format_follows_scale() {
-    let mut chart = new_chart();
-    let plain = format_float(chart.yaxis_format(), 50.0);
-    assert_eq!(plain, format_float(&chart.number_format, 50.0));
-    assert!(!plain.unwrap().ends_with('%'));
+    in_app(|| {
+        let mut chart = new_chart();
+        let plain = format_float(chart.yaxis_format(), 50.0);
+        assert_eq!(plain, format_float(&chart.number_format, 50.0));
+        assert!(!plain.unwrap().ends_with('%'));
 
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    let percent = format_float(chart.yaxis_format(), 50.0);
-    assert_eq!(percent, format_float(&chart.percentage_format, 50.0));
-    assert!(percent.unwrap().ends_with('%'));
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        let percent = format_float(chart.yaxis_format(), 50.0);
+        assert_eq!(percent, format_float(&chart.percentage_format, 50.0));
+        assert!(percent.unwrap().ends_with('%'));
 
-    chart.set_stacks_scale(StackBarScale::FitData);
-    assert_eq!(format_float(chart.yaxis_format(), 50.0), format_float(&chart.number_format, 50.0));
+        chart.set_stacks_scale(StackBarScale::FitData);
+        assert_eq!(format_float(chart.yaxis_format(), 50.0), format_float(&chart.number_format, 50.0));
+    });
 }
 
 #[test]
 fn check_yaxis_format_uses_custom_formats() {
-    let mut chart = new_chart();
-    chart.set_number_format(FormatNumber::new(10).decimals(3));
-    chart.set_percentage_format(FormatNumber::new(10).decimals(1).suffix("%"));
-    let number = format_float(chart.yaxis_format(), 2.0);
-    assert_eq!(number, format_float(&FormatNumber::new(10).decimals(3), 2.0));
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    let percent = format_float(chart.yaxis_format(), 2.0);
-    assert_eq!(percent, format_float(&FormatNumber::new(10).decimals(1).suffix("%"), 2.0));
-    assert_ne!(number, percent);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_number_format(FormatNumber::new(10).decimals(3));
+        chart.set_percentage_format(FormatNumber::new(10).decimals(1).suffix("%"));
+        let number = format_float(chart.yaxis_format(), 2.0);
+        assert_eq!(number, format_float(&FormatNumber::new(10).decimals(3), 2.0));
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        let percent = format_float(chart.yaxis_format(), 2.0);
+        assert_eq!(percent, format_float(&FormatNumber::new(10).decimals(1).suffix("%"), 2.0));
+        assert_ne!(number, percent);
+    });
 }
 
 #[test]
 fn check_other_scales_use_number_format() {
-    let mut chart = new_chart();
-    let expected = format_float(&chart.number_format, 7.0);
-    chart.set_stacks_scale(StackBarScale::FromZero);
-    assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
-    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -1, max: 1 });
-    assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
-    chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 10 });
-    assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
+    in_app(|| {
+        let mut chart = new_chart();
+        let expected = format_float(&chart.number_format, 7.0);
+        chart.set_stacks_scale(StackBarScale::FromZero);
+        assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -1, max: 1 });
+        assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 10 });
+        assert_eq!(format_float(chart.yaxis_format(), 7.0), expected);
+    });
 }
 
 fn make_stack(thickness: Option<u8>, spacing: Option<u8>) -> BarsStack<i32> {
@@ -1018,189 +1142,223 @@ fn positions(chart: &VStackedBarChart<i32>) -> Vec<i32> {
 
 #[test]
 fn check_columns_layout_empty_chart() {
-    let chart = new_chart();
-    assert_eq!(chart.stacks_width, 0);
-    assert!(positions(&chart).is_empty());
+    in_app(|| {
+        let chart = new_chart();
+        assert_eq!(chart.stacks_width, 0);
+        assert!(positions(&chart).is_empty());
+    });
 }
 
 #[test]
 fn check_columns_layout_single_stack() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2]);
-    assert_eq!(positions(&chart), vec![1]);
-    assert_eq!(chart.stacks_width, 3);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2]);
+        assert_eq!(positions(&chart), vec![1]);
+        assert_eq!(chart.stacks_width, 3);
+    });
 }
 
 #[test]
 fn check_columns_layout_default_spacing_and_thickness() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
-    assert_eq!(positions(&chart), vec![1, 3, 5]);
-    assert_eq!(chart.stacks_width, 7);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+        assert_eq!(positions(&chart), vec![1, 3, 5]);
+        assert_eq!(chart.stacks_width, 7);
+    });
 }
 
 #[test]
 fn check_columns_layout_per_stack_thickness() {
-    let mut chart = new_chart();
-    chart.add_stack(make_stack(Some(3), None));
-    chart.add_stack(make_stack(Some(1), None));
-    chart.add_stack(make_stack(Some(2), None));
-    assert_eq!(positions(&chart), vec![1, 5, 7]);
-    assert_eq!(chart.stacks_width, 10);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(make_stack(Some(3), None));
+        chart.add_stack(make_stack(Some(1), None));
+        chart.add_stack(make_stack(Some(2), None));
+        assert_eq!(positions(&chart), vec![1, 5, 7]);
+        assert_eq!(chart.stacks_width, 10);
+    });
 }
 
 #[test]
 fn check_columns_layout_per_stack_spacing() {
-    let mut chart = new_chart();
-    chart.add_stack(make_stack(None, Some(0)));
-    chart.add_stack(make_stack(None, Some(2)));
-    chart.add_stack(make_stack(None, Some(3)));
-    assert_eq!(positions(&chart), vec![0, 3, 7]);
-    assert_eq!(chart.stacks_width, 8);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(make_stack(None, Some(0)));
+        chart.add_stack(make_stack(None, Some(2)));
+        chart.add_stack(make_stack(None, Some(3)));
+        assert_eq!(positions(&chart), vec![0, 3, 7]);
+        assert_eq!(chart.stacks_width, 8);
+    });
 }
 
 #[test]
 fn check_columns_layout_trailing_margin_is_first_stack_spacing() {
-    let mut chart = new_chart();
-    chart.add_stack(make_stack(None, Some(5)));
-    chart.add_stack(make_stack(None, None));
-    assert_eq!(positions(&chart), vec![5, 7]);
-    assert_eq!(chart.stacks_width, 13);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(make_stack(None, Some(5)));
+        chart.add_stack(make_stack(None, None));
+        assert_eq!(positions(&chart), vec![5, 7]);
+        assert_eq!(chart.stacks_width, 13);
+    });
 }
 
 #[test]
 fn check_columns_layout_default_spacing_change() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
-    chart.set_default_bar_spacing(2);
-    assert_eq!(positions(&chart), vec![2, 5, 8]);
-    assert_eq!(chart.stacks_width, 11);
-    chart.set_default_bar_spacing(0);
-    assert_eq!(positions(&chart), vec![0, 1, 2]);
-    assert_eq!(chart.stacks_width, 3);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+        chart.set_default_bar_spacing(2);
+        assert_eq!(positions(&chart), vec![2, 5, 8]);
+        assert_eq!(chart.stacks_width, 11);
+        chart.set_default_bar_spacing(0);
+        assert_eq!(positions(&chart), vec![0, 1, 2]);
+        assert_eq!(chart.stacks_width, 3);
+    });
 }
 
 #[test]
 fn check_columns_layout_default_width_change() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
-    chart.set_default_bar_width(3);
-    assert_eq!(positions(&chart), vec![1, 5, 9]);
-    assert_eq!(chart.stacks_width, 13);
-    chart.set_default_bar_width(1);
-    assert_eq!(positions(&chart), vec![1, 3, 5]);
-    assert_eq!(chart.stacks_width, 7);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+        chart.set_default_bar_width(3);
+        assert_eq!(positions(&chart), vec![1, 5, 9]);
+        assert_eq!(chart.stacks_width, 13);
+        chart.set_default_bar_width(1);
+        assert_eq!(positions(&chart), vec![1, 3, 5]);
+        assert_eq!(chart.stacks_width, 7);
+    });
 }
 
 #[test]
 fn check_columns_layout_default_drawmode_raises_thickness() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
-    chart.set_default_bar_drawmode(rect());
-    assert_eq!(positions(&chart), vec![1, 4, 7]);
-    assert_eq!(chart.stacks_width, 10);
-    chart.set_default_bar_drawmode(fill());
-    assert_eq!(positions(&chart), vec![1, 3, 5]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+        chart.set_default_bar_drawmode(rect());
+        assert_eq!(positions(&chart), vec![1, 4, 7]);
+        assert_eq!(chart.stacks_width, 10);
+        chart.set_default_bar_drawmode(fill());
+        assert_eq!(positions(&chart), vec![1, 3, 5]);
+    });
 }
 
 #[test]
 fn check_columns_layout_stack_with_wider_draw_mode() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2]);
-    let mut wide = BarsStack::<i32>::new();
-    wide.add_bar(StackBarBuilder::new(1).draw_mode(filled_rect()).build());
-    chart.add_stack(wide);
-    chart.add_stack([3]);
-    assert_eq!(positions(&chart), vec![1, 3, 7]);
-    assert_eq!(chart.stacks_width, 9);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2]);
+        let mut wide = BarsStack::<i32>::new();
+        wide.add_bar(StackBarBuilder::new(1).draw_mode(filled_rect()).build());
+        chart.add_stack(wide);
+        chart.add_stack([3]);
+        assert_eq!(positions(&chart), vec![1, 3, 7]);
+        assert_eq!(chart.stacks_width, 9);
+    });
 }
 
 #[test]
 fn check_columns_layout_update_stack_moves_following_columns() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
-    chart.update_stack(0, |stack| {
-        stack.set_thickness(4);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4], [5, 6]]);
+        chart.update_stack(0, |stack| {
+            stack.set_thickness(4);
+        });
+        assert_eq!(positions(&chart), vec![1, 6, 8]);
+        assert_eq!(chart.stacks_width, 10);
+        chart.update_stack(1, |stack| {
+            stack.set_spacing(0);
+        });
+        assert_eq!(positions(&chart), vec![1, 5, 7]);
+        assert_eq!(chart.stacks_width, 9);
     });
-    assert_eq!(positions(&chart), vec![1, 6, 8]);
-    assert_eq!(chart.stacks_width, 10);
-    chart.update_stack(1, |stack| {
-        stack.set_spacing(0);
-    });
-    assert_eq!(positions(&chart), vec![1, 5, 7]);
-    assert_eq!(chart.stacks_width, 9);
 }
 
 #[test]
 fn check_columns_layout_update_stack_draw_mode_moves_following_columns() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4]]);
-    chart.update_stack(0, |stack| {
-        stack.get_mut(0).unwrap().set_draw_mode(filled_rect());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4]]);
+        chart.update_stack(0, |stack| {
+            stack.get_mut(0).unwrap().set_draw_mode(filled_rect());
+        });
+        assert_eq!(positions(&chart), vec![1, 5]);
+        assert_eq!(chart.stacks_width, 7);
     });
-    assert_eq!(positions(&chart), vec![1, 5]);
-    assert_eq!(chart.stacks_width, 7);
 }
 
 #[test]
 fn check_columns_layout_add_after_add() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2]);
-    chart.add_stack([3, 4]);
-    assert_eq!(positions(&chart), vec![1, 3]);
-    chart.add_stack([5, 6]);
-    assert_eq!(positions(&chart), vec![1, 3, 5]);
-    assert_eq!(chart.stacks_width, 7);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2]);
+        chart.add_stack([3, 4]);
+        assert_eq!(positions(&chart), vec![1, 3]);
+        chart.add_stack([5, 6]);
+        assert_eq!(positions(&chart), vec![1, 3, 5]);
+        assert_eq!(chart.stacks_width, 7);
+    });
 }
 
 #[test]
 fn check_columns_layout_clear_resets_width() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4]]);
-    assert!(chart.stacks_width > 0);
-    chart.clear();
-    assert_eq!(chart.stacks_width, 0);
-    assert!(positions(&chart).is_empty());
-    chart.add_stack([1]);
-    assert_eq!(positions(&chart), vec![1]);
-    assert_eq!(chart.stacks_width, 3);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4]]);
+        assert!(chart.stacks_width > 0);
+        chart.clear();
+        assert_eq!(chart.stacks_width, 0);
+        assert!(positions(&chart).is_empty());
+        chart.add_stack([1]);
+        assert_eq!(positions(&chart), vec![1]);
+        assert_eq!(chart.stacks_width, 3);
+    });
 }
 
 #[test]
 fn check_columns_layout_empty_stack_still_takes_space() {
-    let mut chart = new_chart();
-    chart.add_stack(BarsStack::<i32>::new());
-    chart.add_stack(BarsStack::<i32>::new());
-    assert_eq!(positions(&chart), vec![1, 3]);
-    assert_eq!(chart.stacks_width, 5);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(BarsStack::<i32>::new());
+        chart.add_stack(BarsStack::<i32>::new());
+        assert_eq!(positions(&chart), vec![1, 3]);
+        assert_eq!(chart.stacks_width, 5);
+    });
 }
 
 #[test]
 fn check_columns_layout_columns_never_overlap() {
-    let mut chart = new_chart();
-    for index in 0..40u8 {
-        chart.add_stack(make_stack(Some(1 + index % 5), Some(index % 4)));
-    }
-    let mut previous_end = i32::MIN;
-    for (index, entry) in chart.stacks.iter().enumerate() {
-        let spacing = entry.stack.actual_spacing(chart.defaults.spacing) as i32;
-        assert!(entry.pos >= previous_end + spacing, "stack {} overlaps the previous one", index);
-        previous_end = entry.pos + entry.stack.actual_thickness() as i32;
-    }
-    let first_spacing = chart.stacks[0].stack.actual_spacing(chart.defaults.spacing) as u32;
-    assert_eq!(chart.stacks_width, previous_end as u32 + first_spacing);
+    in_app(|| {
+        let mut chart = new_chart();
+        for index in 0..40u8 {
+            chart.add_stack(make_stack(Some(1 + index % 5), Some(index % 4)));
+        }
+        let mut previous_end = i32::MIN;
+        for (index, entry) in chart.stacks.iter().enumerate() {
+            let spacing = entry.stack.actual_spacing(chart.defaults.spacing) as i32;
+            assert!(entry.pos >= previous_end + spacing, "stack {} overlaps the previous one", index);
+            previous_end = entry.pos + entry.stack.actual_thickness() as i32;
+        }
+        let first_spacing = chart.stacks[0].stack.actual_spacing(chart.defaults.spacing) as u32;
+        assert_eq!(chart.stacks_width, previous_end as u32 + first_spacing);
+    });
 }
 
 #[test]
 fn check_columns_layout_many_stacks() {
-    let mut chart = new_chart();
-    chart.set_default_bar_width(10);
-    chart.set_default_bar_spacing(2);
-    chart.add_stacks((0..1000).map(|_| [1, 2]));
-    assert_eq!(chart.stacks_count(), 1000);
-    assert_eq!(chart.stacks[0].pos, 2);
-    assert_eq!(chart.stacks[999].pos, 999 * 12 + 2);
-    assert_eq!(chart.stacks_width, 1000 * 12 + 2);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_default_bar_width(10);
+        chart.set_default_bar_spacing(2);
+        chart.add_stacks((0..1000).map(|_| [1, 2]));
+        assert_eq!(chart.stacks_count(), 1000);
+        assert_eq!(chart.stacks[0].pos, 2);
+        assert_eq!(chart.stacks[999].pos, 999 * 12 + 2);
+        assert_eq!(chart.stacks_width, 1000 * 12 + 2);
+    });
 }
 
 fn sums_of(chart: &VStackedBarChart<i32>, index: usize) -> (f64, f64, f64) {
@@ -1214,165 +1372,197 @@ fn float_chart() -> VStackedBarChart<f64> {
 
 #[test]
 fn check_sums_only_positive_values() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2, 3]);
-    assert_eq!(sums_of(&chart, 0), (6.0, 0.0, 6.0));
-    assert!(chart.stacks[0].has_positive());
-    assert!(!chart.stacks[0].has_negative());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2, 3]);
+        assert_eq!(sums_of(&chart, 0), (6.0, 0.0, 6.0));
+        assert!(chart.stacks[0].has_positive());
+        assert!(!chart.stacks[0].has_negative());
+    });
 }
 
 #[test]
 fn check_sums_only_negative_values() {
-    let mut chart = new_chart();
-    chart.add_stack([-1, -2]);
-    assert_eq!(sums_of(&chart, 0), (0.0, -3.0, 3.0));
-    assert!(!chart.stacks[0].has_positive());
-    assert!(chart.stacks[0].has_negative());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([-1, -2]);
+        assert_eq!(sums_of(&chart, 0), (0.0, -3.0, 3.0));
+        assert!(!chart.stacks[0].has_positive());
+        assert!(chart.stacks[0].has_negative());
+    });
 }
 
 #[test]
 fn check_sums_mixed_values() {
-    let mut chart = new_chart();
-    chart.add_stack([5, -3, 2, -1]);
-    assert_eq!(sums_of(&chart, 0), (7.0, -4.0, 11.0));
-    assert!(chart.stacks[0].has_positive());
-    assert!(chart.stacks[0].has_negative());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([5, -3, 2, -1]);
+        assert_eq!(sums_of(&chart, 0), (7.0, -4.0, 11.0));
+        assert!(chart.stacks[0].has_positive());
+        assert!(chart.stacks[0].has_negative());
+    });
 }
 
 #[test]
 fn check_sums_zero_values() {
-    let mut chart = new_chart();
-    chart.add_stack([0, 0, 0]);
-    assert_eq!(sums_of(&chart, 0), (0.0, 0.0, 0.0));
-    assert!(!chart.stacks[0].has_positive());
-    assert!(!chart.stacks[0].has_negative());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([0, 0, 0]);
+        assert_eq!(sums_of(&chart, 0), (0.0, 0.0, 0.0));
+        assert!(!chart.stacks[0].has_positive());
+        assert!(!chart.stacks[0].has_negative());
+    });
 }
 
 #[test]
 fn check_sums_empty_stack() {
-    let mut chart = new_chart();
-    chart.add_stack(BarsStack::<i32>::new());
-    assert_eq!(sums_of(&chart, 0), (0.0, 0.0, 0.0));
-    assert!(!chart.stacks[0].has_positive());
-    assert!(!chart.stacks[0].has_negative());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(BarsStack::<i32>::new());
+        assert_eq!(sums_of(&chart, 0), (0.0, 0.0, 0.0));
+        assert!(!chart.stacks[0].has_positive());
+        assert!(!chart.stacks[0].has_negative());
+    });
 }
 
 #[test]
 fn check_sums_do_not_depend_on_value_order() {
-    let mut chart = new_chart();
-    chart.add_stack([1, -1, 1, -1]);
-    chart.add_stack([1, 1, -1, -1]);
-    chart.add_stack([-1, -1, 1, 1]);
-    assert_eq!(sums_of(&chart, 0), (2.0, -2.0, 4.0));
-    assert_eq!(sums_of(&chart, 1), (2.0, -2.0, 4.0));
-    assert_eq!(sums_of(&chart, 2), (2.0, -2.0, 4.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, -1, 1, -1]);
+        chart.add_stack([1, 1, -1, -1]);
+        chart.add_stack([-1, -1, 1, 1]);
+        assert_eq!(sums_of(&chart, 0), (2.0, -2.0, 4.0));
+        assert_eq!(sums_of(&chart, 1), (2.0, -2.0, 4.0));
+        assert_eq!(sums_of(&chart, 2), (2.0, -2.0, 4.0));
+    });
 }
 
 #[test]
 fn check_sums_are_per_stack() {
-    let mut chart = new_chart();
-    chart.add_stacks(vec![vec![1, 2], vec![-3], vec![4, -5, 6], vec![]]);
-    assert_eq!(sums_of(&chart, 0), (3.0, 0.0, 3.0));
-    assert_eq!(sums_of(&chart, 1), (0.0, -3.0, 3.0));
-    assert_eq!(sums_of(&chart, 2), (10.0, -5.0, 15.0));
-    assert_eq!(sums_of(&chart, 3), (0.0, 0.0, 0.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks(vec![vec![1, 2], vec![-3], vec![4, -5, 6], vec![]]);
+        assert_eq!(sums_of(&chart, 0), (3.0, 0.0, 3.0));
+        assert_eq!(sums_of(&chart, 1), (0.0, -3.0, 3.0));
+        assert_eq!(sums_of(&chart, 2), (10.0, -5.0, 15.0));
+        assert_eq!(sums_of(&chart, 3), (0.0, 0.0, 0.0));
+    });
 }
 
 #[test]
 fn check_sums_abs_total_is_positive_minus_negative() {
-    let mut chart = new_chart();
-    chart.add_stack([7, -2, 4, -9]);
-    let entry = &chart.stacks[0];
-    assert_eq!(entry.abs_total(), entry.positive_sum - entry.negative_sum);
-    assert_eq!(entry.abs_total(), 22.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([7, -2, 4, -9]);
+        let entry = &chart.stacks[0];
+        assert_eq!(entry.abs_total(), entry.positive_sum - entry.negative_sum);
+        assert_eq!(entry.abs_total(), 22.0);
+    });
 }
 
 #[test]
 fn check_sums_large_values_do_not_overflow() {
-    let mut chart = new_chart();
-    chart.add_stack([i32::MAX, i32::MAX]);
-    chart.add_stack([i32::MIN, i32::MIN]);
-    assert_eq!(chart.stacks[0].positive_sum, 2.0 * i32::MAX as f64);
-    assert_eq!(chart.stacks[1].negative_sum, 2.0 * i32::MIN as f64);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([i32::MAX, i32::MAX]);
+        chart.add_stack([i32::MIN, i32::MIN]);
+        assert_eq!(chart.stacks[0].positive_sum, 2.0 * i32::MAX as f64);
+        assert_eq!(chart.stacks[1].negative_sum, 2.0 * i32::MIN as f64);
+    });
 }
 
 #[test]
 fn check_sums_float_values() {
-    let mut chart = float_chart();
-    chart.add_stack(vec![1.5, -2.5, 0.25]);
-    let entry = &chart.stacks[0];
-    assert_eq!(entry.positive_sum, 1.75);
-    assert_eq!(entry.negative_sum, -2.5);
-    assert_eq!(entry.abs_total(), 4.25);
+    in_app(|| {
+        let mut chart = float_chart();
+        chart.add_stack(vec![1.5, -2.5, 0.25]);
+        let entry = &chart.stacks[0];
+        assert_eq!(entry.positive_sum, 1.75);
+        assert_eq!(entry.negative_sum, -2.5);
+        assert_eq!(entry.abs_total(), 4.25);
+    });
 }
 
 #[test]
 fn check_sums_ignore_non_finite_values() {
-    let mut chart = float_chart();
-    chart.add_stack(vec![f64::NAN, 1.0, f64::INFINITY, f64::NEG_INFINITY, -2.0]);
-    let entry = &chart.stacks[0];
-    assert_eq!(entry.positive_sum, 1.0);
-    assert_eq!(entry.negative_sum, -2.0);
-    assert_eq!(entry.abs_total(), 3.0);
+    in_app(|| {
+        let mut chart = float_chart();
+        chart.add_stack(vec![f64::NAN, 1.0, f64::INFINITY, f64::NEG_INFINITY, -2.0]);
+        let entry = &chart.stacks[0];
+        assert_eq!(entry.positive_sum, 1.0);
+        assert_eq!(entry.negative_sum, -2.0);
+        assert_eq!(entry.abs_total(), 3.0);
+    });
 }
 
 #[test]
 fn check_sums_only_non_finite_values() {
-    let mut chart = float_chart();
-    chart.add_stack(vec![f64::NAN, f64::INFINITY]);
-    let entry = &chart.stacks[0];
-    assert_eq!(entry.positive_sum, 0.0);
-    assert_eq!(entry.negative_sum, 0.0);
-    assert!(!entry.has_positive());
-    assert!(!entry.has_negative());
+    in_app(|| {
+        let mut chart = float_chart();
+        chart.add_stack(vec![f64::NAN, f64::INFINITY]);
+        let entry = &chart.stacks[0];
+        assert_eq!(entry.positive_sum, 0.0);
+        assert_eq!(entry.negative_sum, 0.0);
+        assert!(!entry.has_positive());
+        assert!(!entry.has_negative());
+    });
 }
 
 #[test]
 fn check_sums_after_update_stack() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 2, 3]);
-    assert_eq!(sums_of(&chart, 0), (6.0, 0.0, 6.0));
-    chart.update_stack(0, |stack| {
-        stack.get_mut(0).unwrap().set_value(-10);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 2, 3]);
+        assert_eq!(sums_of(&chart, 0), (6.0, 0.0, 6.0));
+        chart.update_stack(0, |stack| {
+            stack.get_mut(0).unwrap().set_value(-10);
+        });
+        assert_eq!(sums_of(&chart, 0), (5.0, -10.0, 15.0));
+        chart.update_stack(0, |stack| {
+            stack.add_bar(4);
+            stack.add_bar(-1);
+        });
+        assert_eq!(sums_of(&chart, 0), (9.0, -11.0, 20.0));
     });
-    assert_eq!(sums_of(&chart, 0), (5.0, -10.0, 15.0));
-    chart.update_stack(0, |stack| {
-        stack.add_bar(4);
-        stack.add_bar(-1);
-    });
-    assert_eq!(sums_of(&chart, 0), (9.0, -11.0, 20.0));
 }
 
 #[test]
 fn check_sums_after_update_only_touch_that_stack_values() {
-    let mut chart = new_chart();
-    chart.add_stacks([[1, 2], [3, 4]]);
-    chart.update_stack(1, |stack| {
-        stack.get_mut(0).unwrap().set_value(-3);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks([[1, 2], [3, 4]]);
+        chart.update_stack(1, |stack| {
+            stack.get_mut(0).unwrap().set_value(-3);
+        });
+        assert_eq!(sums_of(&chart, 0), (3.0, 0.0, 3.0));
+        assert_eq!(sums_of(&chart, 1), (4.0, -3.0, 7.0));
     });
-    assert_eq!(sums_of(&chart, 0), (3.0, 0.0, 3.0));
-    assert_eq!(sums_of(&chart, 1), (4.0, -3.0, 7.0));
 }
 
 #[test]
 fn check_sums_survive_setters() {
-    let mut chart = new_chart();
-    chart.add_stack([2, -3]);
-    chart.set_default_bar_width(4);
-    chart.set_default_bar_spacing(0);
-    chart.set_default_bar_drawmode(rect());
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    assert_eq!(sums_of(&chart, 0), (2.0, -3.0, 5.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([2, -3]);
+        chart.set_default_bar_width(4);
+        chart.set_default_bar_spacing(0);
+        chart.set_default_bar_drawmode(rect());
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        assert_eq!(sums_of(&chart, 0), (2.0, -3.0, 5.0));
+    });
 }
 
 #[test]
 fn check_sums_after_clear_and_add() {
-    let mut chart = new_chart();
-    chart.add_stack([5, -5]);
-    chart.clear();
-    assert!(chart.stacks.is_empty());
-    chart.add_stack([1]);
-    assert_eq!(sums_of(&chart, 0), (1.0, 0.0, 1.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([5, -5]);
+        chart.clear();
+        assert!(chart.stacks.is_empty());
+        chart.add_stack([1]);
+        assert_eq!(sums_of(&chart, 0), (1.0, 0.0, 1.0));
+    });
 }
 
 fn range_of(chart: &VStackedBarChart<i32>) -> (f64, f64) {
@@ -1385,251 +1575,311 @@ fn assert_close(actual: f64, expected: f64) {
 
 #[test]
 fn check_range_from_zero_empty_chart() {
-    let chart = new_chart();
-    assert_eq!(range_of(&chart), (0.0, 0.0));
+    in_app(|| {
+        let chart = new_chart();
+        assert_eq!(range_of(&chart), (0.0, 0.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_only_positive() {
-    let mut chart = new_chart();
-    chart.add_stacks(vec![vec![1, 2, 3], vec![4]]);
-    assert_eq!(range_of(&chart), (0.0, 6.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks(vec![vec![1, 2, 3], vec![4]]);
+        assert_eq!(range_of(&chart), (0.0, 6.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_only_negative() {
-    let mut chart = new_chart();
-    chart.add_stacks(vec![vec![-1, -2], vec![-5]]);
-    assert_eq!(range_of(&chart), (-5.0, 0.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks(vec![vec![-1, -2], vec![-5]]);
+        assert_eq!(range_of(&chart), (-5.0, 0.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_mixed_signs() {
-    let mut chart = new_chart();
-    chart.add_stacks(vec![vec![5, -3], vec![2, -8]]);
-    assert_eq!(range_of(&chart), (-8.0, 5.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks(vec![vec![5, -3], vec![2, -8]]);
+        assert_eq!(range_of(&chart), (-8.0, 5.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_uses_stack_sums_not_single_values() {
-    let mut chart = new_chart();
-    chart.add_stack([4, 4, 4, -1, -1]);
-    assert_eq!(range_of(&chart), (-2.0, 12.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([4, 4, 4, -1, -1]);
+        assert_eq!(range_of(&chart), (-2.0, 12.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_all_zero_values() {
-    let mut chart = new_chart();
-    chart.add_stack([0, 0]);
-    assert_eq!(range_of(&chart), (0.0, 0.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([0, 0]);
+        assert_eq!(range_of(&chart), (0.0, 0.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_min_range_expands() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -10, max: 20 });
-    chart.add_stack([1, 2]);
-    assert_eq!(range_of(&chart), (-10.0, 20.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -10, max: 20 });
+        chart.add_stack([1, 2]);
+        assert_eq!(range_of(&chart), (-10.0, 20.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_min_range_data_wins_when_larger() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -1, max: 2 });
-    chart.add_stacks(vec![vec![30, -4], vec![5, -6]]);
-    assert_eq!(range_of(&chart), (-6.0, 30.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -1, max: 2 });
+        chart.add_stacks(vec![vec![30, -4], vec![5, -6]]);
+        assert_eq!(range_of(&chart), (-6.0, 30.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_min_range_always_includes_zero() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: 5, max: 8 });
-    chart.add_stack([1]);
-    assert_eq!(range_of(&chart), (0.0, 8.0));
-    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -8, max: -5 });
-    assert_eq!(range_of(&chart), (-8.0, 1.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: 5, max: 8 });
+        chart.add_stack([1]);
+        assert_eq!(range_of(&chart), (0.0, 8.0));
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -8, max: -5 });
+        assert_eq!(range_of(&chart), (-8.0, 1.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_min_range_empty_chart() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -3, max: 4 });
-    assert_eq!(range_of(&chart), (-3.0, 4.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -3, max: 4 });
+        assert_eq!(range_of(&chart), (-3.0, 4.0));
+    });
 }
 
 #[test]
 fn check_range_from_zero_min_range_ignores_non_finite_limits() {
-    let mut chart = float_chart();
-    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: f64::NAN, max: f64::INFINITY });
-    chart.add_stack(vec![2.0, -1.0]);
-    assert_eq!(chart.compute_range(), (-1.0, 2.0));
+    in_app(|| {
+        let mut chart = float_chart();
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: f64::NAN, max: f64::INFINITY });
+        chart.add_stack(vec![2.0, -1.0]);
+        assert_eq!(chart.compute_range(), (-1.0, 2.0));
+    });
 }
 
 #[test]
 fn check_range_fit_data_only_positive() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FitData);
-    chart.add_stacks(vec![vec![1, 2], vec![4], vec![10]]);
-    assert_eq!(range_of(&chart), (3.0, 10.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FitData);
+        chart.add_stacks(vec![vec![1, 2], vec![4], vec![10]]);
+        assert_eq!(range_of(&chart), (3.0, 10.0));
+    });
 }
 
 #[test]
 fn check_range_fit_data_only_negative() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FitData);
-    chart.add_stacks(vec![vec![-1, -2], vec![-5]]);
-    assert_eq!(range_of(&chart), (-5.0, -3.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FitData);
+        chart.add_stacks(vec![vec![-1, -2], vec![-5]]);
+        assert_eq!(range_of(&chart), (-5.0, -3.0));
+    });
 }
 
 #[test]
 fn check_range_fit_data_mixed_signs_includes_zero() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FitData);
-    chart.add_stacks(vec![vec![10, -4], vec![3]]);
-    assert_eq!(range_of(&chart), (-4.0, 10.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FitData);
+        chart.add_stacks(vec![vec![10, -4], vec![3]]);
+        assert_eq!(range_of(&chart), (-4.0, 10.0));
+    });
 }
 
 #[test]
 fn check_range_fit_data_zero_is_not_forced_into_the_range() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FitData);
-    chart.add_stacks(vec![vec![50], vec![80]]);
-    let (lo, hi) = range_of(&chart);
-    assert!(lo > 0.0);
-    assert_eq!((lo, hi), (50.0, 80.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FitData);
+        chart.add_stacks(vec![vec![50], vec![80]]);
+        let (lo, hi) = range_of(&chart);
+        assert!(lo > 0.0);
+        assert_eq!((lo, hi), (50.0, 80.0));
+    });
 }
 
 #[test]
 fn check_range_fit_data_single_stack_is_degenerate() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FitData);
-    chart.add_stack([2, 3]);
-    assert_eq!(range_of(&chart), (5.0, 5.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FitData);
+        chart.add_stack([2, 3]);
+        assert_eq!(range_of(&chart), (5.0, 5.0));
+    });
 }
 
 #[test]
 fn check_range_fit_data_without_tips() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FitData);
-    assert_eq!(range_of(&chart), (0.0, 0.0));
-    chart.add_stacks(vec![vec![0, 0], vec![]]);
-    assert_eq!(range_of(&chart), (0.0, 0.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FitData);
+        assert_eq!(range_of(&chart), (0.0, 0.0));
+        chart.add_stacks(vec![vec![0, 0], vec![]]);
+        assert_eq!(range_of(&chart), (0.0, 0.0));
+    });
 }
 
 #[test]
 fn check_range_fit_data_zero_values_do_not_make_a_tip() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::FitData);
-    chart.add_stacks(vec![vec![0, 5], vec![0, 0], vec![7]]);
-    assert_eq!(range_of(&chart), (5.0, 7.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::FitData);
+        chart.add_stacks(vec![vec![0, 5], vec![0, 0], vec![7]]);
+        assert_eq!(range_of(&chart), (5.0, 7.0));
+    });
 }
 
 #[test]
 fn check_range_fixed_passthrough() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 20 });
-    assert_eq!(range_of(&chart), (-5.0, 20.0));
-    chart.add_stack([100, -100]);
-    assert_eq!(range_of(&chart), (-5.0, 20.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 20 });
+        assert_eq!(range_of(&chart), (-5.0, 20.0));
+        chart.add_stack([100, -100]);
+        assert_eq!(range_of(&chart), (-5.0, 20.0));
+    });
 }
 
 #[test]
 fn check_range_fixed_reversed_or_equal_is_returned_unchanged() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Fixed { min: 10, max: 2 });
-    assert_eq!(range_of(&chart), (10.0, 2.0));
-    chart.set_stacks_scale(StackBarScale::Fixed { min: 4, max: 4 });
-    assert_eq!(range_of(&chart), (4.0, 4.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 10, max: 2 });
+        assert_eq!(range_of(&chart), (10.0, 2.0));
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 4, max: 4 });
+        assert_eq!(range_of(&chart), (4.0, 4.0));
+    });
 }
 
 #[test]
 fn check_range_fixed_non_finite_limits_are_degenerate() {
-    let mut chart = float_chart();
-    chart.set_stacks_scale(StackBarScale::Fixed { min: f64::NAN, max: 5.0 });
-    assert_eq!(chart.compute_range(), (0.0, 0.0));
-    chart.set_stacks_scale(StackBarScale::Fixed { min: 0.0, max: f64::INFINITY });
-    assert_eq!(chart.compute_range(), (0.0, 0.0));
+    in_app(|| {
+        let mut chart = float_chart();
+        chart.set_stacks_scale(StackBarScale::Fixed { min: f64::NAN, max: 5.0 });
+        assert_eq!(chart.compute_range(), (0.0, 0.0));
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0.0, max: f64::INFINITY });
+        assert_eq!(chart.compute_range(), (0.0, 0.0));
+    });
 }
 
 #[test]
 fn check_range_percentage_only_positive() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    chart.add_stacks(vec![vec![1, 3], vec![5]]);
-    assert_eq!(range_of(&chart), (0.0, 100.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stacks(vec![vec![1, 3], vec![5]]);
+        assert_eq!(range_of(&chart), (0.0, 100.0));
+    });
 }
 
 #[test]
 fn check_range_percentage_only_negative() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    chart.add_stack([-2, -2]);
-    assert_eq!(range_of(&chart), (-100.0, 0.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack([-2, -2]);
+        assert_eq!(range_of(&chart), (-100.0, 0.0));
+    });
 }
 
 #[test]
 fn check_range_percentage_mixed_signs() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    chart.add_stacks(vec![vec![3, -1], vec![1, -1]]);
-    assert_eq!(range_of(&chart), (-50.0, 75.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stacks(vec![vec![3, -1], vec![1, -1]]);
+        assert_eq!(range_of(&chart), (-50.0, 75.0));
+    });
 }
 
 #[test]
 fn check_range_percentage_each_stack_is_normalized_separately() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    chart.add_stacks(vec![vec![1000, -1000], vec![1, -3]]);
-    assert_eq!(range_of(&chart), (-75.0, 50.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stacks(vec![vec![1000, -1000], vec![1, -3]]);
+        assert_eq!(range_of(&chart), (-75.0, 50.0));
+    });
 }
 
 #[test]
 fn check_range_percentage_ignores_empty_and_zero_stacks() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    chart.add_stacks(vec![vec![], vec![0, 0], vec![2, -2]]);
-    assert_eq!(range_of(&chart), (-50.0, 50.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stacks(vec![vec![], vec![0, 0], vec![2, -2]]);
+        assert_eq!(range_of(&chart), (-50.0, 50.0));
+    });
 }
 
 #[test]
 fn check_range_percentage_without_values() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    assert_eq!(range_of(&chart), (0.0, 0.0));
-    chart.add_stack(BarsStack::<i32>::new());
-    assert_eq!(range_of(&chart), (0.0, 0.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        assert_eq!(range_of(&chart), (0.0, 0.0));
+        chart.add_stack(BarsStack::<i32>::new());
+        assert_eq!(range_of(&chart), (0.0, 0.0));
+    });
 }
 
 #[test]
 fn check_range_percentage_with_fractions() {
-    let mut chart = new_chart();
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    chart.add_stack([1, 1, 1, -1]);
-    let (lo, hi) = range_of(&chart);
-    assert_close(hi, 75.0);
-    assert_close(lo, -25.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack([1, 1, 1, -1]);
+        let (lo, hi) = range_of(&chart);
+        assert_close(hi, 75.0);
+        assert_close(lo, -25.0);
+    });
 }
 
 #[test]
 fn check_range_percentage_parts_of_one_stack_add_up_to_100() {
-    let mut chart = float_chart();
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    chart.add_stack(vec![1.0, 2.0, -4.0, 0.5]);
-    let (lo, hi) = chart.compute_range();
-    assert_close(hi - lo, 100.0);
+    in_app(|| {
+        let mut chart = float_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack(vec![1.0, 2.0, -4.0, 0.5]);
+        let (lo, hi) = chart.compute_range();
+        assert_close(hi - lo, 100.0);
+    });
 }
 
 #[test]
 fn check_range_follows_scale_changes() {
-    let mut chart = new_chart();
-    chart.add_stacks(vec![vec![10, -4], vec![3]]);
-    assert_eq!(range_of(&chart), (-4.0, 10.0));
-    chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 50 });
-    assert_eq!(range_of(&chart), (0.0, 50.0));
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    let (lo, hi) = range_of(&chart);
-    assert_close(lo, -4.0 / 14.0 * 100.0);
-    assert_close(hi, 100.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stacks(vec![vec![10, -4], vec![3]]);
+        assert_eq!(range_of(&chart), (-4.0, 10.0));
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 0, max: 50 });
+        assert_eq!(range_of(&chart), (0.0, 50.0));
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        let (lo, hi) = range_of(&chart);
+        assert_close(lo, -4.0 / 14.0 * 100.0);
+        assert_close(hi, 100.0);
+    });
 }
 
 #[test]
@@ -1766,31 +2016,37 @@ fn check_mapping_zero_row_is_clamped_to_plot() {
 
 #[test]
 fn check_chart_value_mapping_from_zero() {
-    let mut chart = new_chart();
-    chart.add_stack(BarsStack::from([4, -2]));
-    chart.add_stack(BarsStack::from([6]));
-    let m = chart.value_mapping(8);
-    assert_eq!(m.zero(), 2);
-    assert_eq!(m.offset(6.0), 6);
-    assert_eq!(m.offset(-2.0), -2);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(BarsStack::from([4, -2]));
+        chart.add_stack(BarsStack::from([6]));
+        let m = chart.value_mapping(8);
+        assert_eq!(m.zero(), 2);
+        assert_eq!(m.offset(6.0), 6);
+        assert_eq!(m.offset(-2.0), -2);
+    });
 }
 
 #[test]
 fn check_chart_value_mapping_fixed_clamps() {
-    let mut chart = new_chart();
-    chart.add_stack(BarsStack::from([100]));
-    chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 5 });
-    let m = chart.value_mapping(10);
-    assert_eq!(m.zero(), 5);
-    assert_eq!(m.offset(100.0), 5);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack(BarsStack::from([100]));
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 5 });
+        let m = chart.value_mapping(10);
+        assert_eq!(m.zero(), 5);
+        assert_eq!(m.offset(100.0), 5);
+    });
 }
 
 #[test]
 fn check_chart_value_mapping_empty_chart() {
-    let chart = new_chart();
-    let m = chart.value_mapping(10);
-    assert_eq!(m.zero(), 0);
-    assert_eq!(m.offset(3.0), 0);
+    in_app(|| {
+        let chart = new_chart();
+        let m = chart.value_mapping(10);
+        assert_eq!(m.zero(), 0);
+        assert_eq!(m.offset(3.0), 0);
+    });
 }
 
 fn segments_of<T: Number + 'static>(chart: &mut VStackedBarChart<T>, height: u32, index: usize) -> Vec<(i16, i16)> {
@@ -1800,187 +2056,227 @@ fn segments_of<T: Number + 'static>(chart: &mut VStackedBarChart<T>, height: u32
 
 #[test]
 fn check_segments_single_positive_bar() {
-    let mut chart = new_chart();
-    chart.add_stack([3]);
-    assert_eq!(segments_of(&mut chart, 3, 0), vec![(0, 3)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([3]);
+        assert_eq!(segments_of(&mut chart, 3, 0), vec![(0, 3)]);
+    });
 }
 
 #[test]
 fn check_segments_positive_bars_stack_upward() {
-    let mut chart = new_chart();
-    chart.add_stack([2, 3]);
-    assert_eq!(segments_of(&mut chart, 5, 0), vec![(0, 2), (2, 3)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([2, 3]);
+        assert_eq!(segments_of(&mut chart, 5, 0), vec![(0, 2), (2, 3)]);
+    });
 }
 
 #[test]
 fn check_segments_negative_bars_stack_downward() {
-    let mut chart = new_chart();
-    chart.add_stack([-2, -3]);
-    assert_eq!(segments_of(&mut chart, 5, 0), vec![(0, -2), (-2, -3)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([-2, -3]);
+        assert_eq!(segments_of(&mut chart, 5, 0), vec![(0, -2), (-2, -3)]);
+    });
 }
 
 #[test]
 fn check_segments_mixed_signs_keep_insertion_order() {
-    let mut chart = new_chart();
-    chart.add_stack([4, -2, 3, -1]);
-    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 4), (0, -2), (4, 3), (-2, -1)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([4, -2, 3, -1]);
+        assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 4), (0, -2), (4, 3), (-2, -1)]);
+    });
 }
 
 #[test]
 fn check_segments_zero_value_has_empty_segment() {
-    let mut chart = new_chart();
-    chart.add_stack([0, 2]);
-    assert_eq!(segments_of(&mut chart, 2, 0), vec![(0, 0), (0, 2)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([0, 2]);
+        assert_eq!(segments_of(&mut chart, 2, 0), vec![(0, 0), (0, 2)]);
+    });
 }
 
 #[test]
 fn check_segments_tiny_bars_vanish() {
-    let mut chart = new_chart();
-    chart.add_stack([1000]);
-    chart.add_stack([1, 1, 1, 1000]);
-    assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, 0), (0, 0), (0, 0), (0, 10)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1000]);
+        chart.add_stack([1, 1, 1, 1000]);
+        assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, 0), (0, 0), (0, 0), (0, 10)]);
+    });
 }
 
 #[test]
 fn check_segments_rounding_sums_exactly() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 1, 1]);
-    let segs = segments_of(&mut chart, 2, 0);
-    assert_eq!(segs, vec![(0, 1), (1, 0), (1, 1)]);
-    assert_eq!(segs.iter().map(|s| s.1 as i32).sum::<i32>(), 2);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 1, 1]);
+        let segs = segments_of(&mut chart, 2, 0);
+        assert_eq!(segs, vec![(0, 1), (1, 0), (1, 1)]);
+        assert_eq!(segs.iter().map(|s| s.1 as i32).sum::<i32>(), 2);
+    });
 }
 
 #[test]
 fn check_segments_are_contiguous() {
-    let mut chart = new_chart();
-    chart.add_stack([7, 3, 11, 2, 5, 13, 1]);
-    chart.add_stack([-7, -3, -11, -2, -5]);
-    for height in 1..40u32 {
-        for index in 0..2 {
-            let segs = segments_of(&mut chart, height, index);
-            let mut expected = 0i32;
-            for (offset, len) in segs {
-                if len == 0 {
-                    continue;
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([7, 3, 11, 2, 5, 13, 1]);
+        chart.add_stack([-7, -3, -11, -2, -5]);
+        for height in 1..40u32 {
+            for index in 0..2 {
+                let segs = segments_of(&mut chart, height, index);
+                let mut expected = 0i32;
+                for (offset, len) in segs {
+                    if len == 0 {
+                        continue;
+                    }
+                    let start = offset as i32;
+                    assert_eq!(start, expected);
+                    expected = start + len as i32;
                 }
-                let start = offset as i32;
-                assert_eq!(start, expected);
-                expected = start + len as i32;
             }
         }
-    }
+    });
 }
 
 #[test]
 fn check_segments_total_matches_tip_position() {
-    let mut chart = new_chart();
-    chart.add_stack([3, 4, 5]);
-    chart.add_stack([9]);
-    for height in 1..30u32 {
-        let mapping = chart.value_mapping(height);
-        let segs = segments_of(&mut chart, height, 0);
-        let sum: i32 = segs.iter().map(|s| s.1 as i32).sum();
-        assert_eq!(sum, mapping.offset(12.0));
-    }
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([3, 4, 5]);
+        chart.add_stack([9]);
+        for height in 1..30u32 {
+            let mapping = chart.value_mapping(height);
+            let segs = segments_of(&mut chart, height, 0);
+            let sum: i32 = segs.iter().map(|s| s.1 as i32).sum();
+            assert_eq!(sum, mapping.offset(12.0));
+        }
+    });
 }
 
 #[test]
 fn check_segments_fixed_scale_clamps() {
-    let mut chart = new_chart();
-    chart.add_stack([100]);
-    chart.add_stack([-100]);
-    chart.add_stack([3, 100]);
-    chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 5 });
-    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 5)]);
-    assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, -5)]);
-    assert_eq!(segments_of(&mut chart, 10, 2), vec![(0, 3), (3, 2)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([100]);
+        chart.add_stack([-100]);
+        chart.add_stack([3, 100]);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 5 });
+        assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 5)]);
+        assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, -5)]);
+        assert_eq!(segments_of(&mut chart, 10, 2), vec![(0, 3), (3, 2)]);
+    });
 }
 
 #[test]
 fn check_segments_fixed_scale_zero_not_visible() {
-    let mut chart = new_chart();
-    chart.add_stack([2, 3, 20]);
-    chart.set_stacks_scale(StackBarScale::Fixed { min: 2, max: 10 });
-    assert_eq!(segments_of(&mut chart, 8, 0), vec![(0, 0), (0, 3), (3, 5)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([2, 3, 20]);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 2, max: 10 });
+        assert_eq!(segments_of(&mut chart, 8, 0), vec![(0, 0), (0, 3), (3, 5)]);
+    });
 }
 
 #[test]
 fn check_segments_fit_data_smallest_stack_is_empty() {
-    let mut chart = new_chart();
-    chart.add_stack([5]);
-    chart.add_stack([10]);
-    chart.set_stacks_scale(StackBarScale::FitData);
-    assert_eq!(segments_of(&mut chart, 5, 0), vec![(0, 0)]);
-    assert_eq!(segments_of(&mut chart, 5, 1), vec![(0, 5)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([5]);
+        chart.add_stack([10]);
+        chart.set_stacks_scale(StackBarScale::FitData);
+        assert_eq!(segments_of(&mut chart, 5, 0), vec![(0, 0)]);
+        assert_eq!(segments_of(&mut chart, 5, 1), vec![(0, 5)]);
+    });
 }
 
 #[test]
 fn check_segments_percentage_positive_only() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 1]);
-    chart.add_stack([3]);
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 5), (5, 5)]);
-    assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, 10)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 1]);
+        chart.add_stack([3]);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 5), (5, 5)]);
+        assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, 10)]);
+    });
 }
 
 #[test]
 fn check_segments_percentage_with_negatives() {
-    let mut chart = new_chart();
-    chart.add_stack([5, -5]);
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 5), (0, -5)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([5, -5]);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 5), (0, -5)]);
+    });
 }
 
 #[test]
 fn check_segments_percentage_all_zero_stack_is_empty() {
-    let mut chart = new_chart();
-    chart.add_stack([0, 0]);
-    chart.add_stack([2]);
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 0), (0, 0)]);
-    assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, 10)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([0, 0]);
+        chart.add_stack([2]);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        assert_eq!(segments_of(&mut chart, 10, 0), vec![(0, 0), (0, 0)]);
+        assert_eq!(segments_of(&mut chart, 10, 1), vec![(0, 10)]);
+    });
 }
 
 #[test]
 fn check_segments_ignore_non_finite_values() {
-    let mut chart = float_chart();
-    chart.add_stack([f64::NAN, 2.0, f64::INFINITY]);
-    assert_eq!(segments_of(&mut chart, 2, 0), vec![(0, 0), (0, 2), (0, 0)]);
+    in_app(|| {
+        let mut chart = float_chart();
+        chart.add_stack([f64::NAN, 2.0, f64::INFINITY]);
+        assert_eq!(segments_of(&mut chart, 2, 0), vec![(0, 0), (0, 2), (0, 0)]);
+    });
 }
 
 #[test]
 fn check_segments_zero_height() {
-    let mut chart = new_chart();
-    chart.add_stack([3, -2]);
-    assert_eq!(segments_of(&mut chart, 0, 0), vec![(0, 0), (0, 0)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([3, -2]);
+        assert_eq!(segments_of(&mut chart, 0, 0), vec![(0, 0), (0, 0)]);
+    });
 }
 
 #[test]
 fn check_segments_empty_stack_and_empty_chart() {
-    let mut chart = new_chart();
-    chart.update_segments_layout(10);
-    chart.add_stack(BarsStack::<i32>::new());
-    assert!(segments_of(&mut chart, 10, 0).is_empty());
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.update_segments_layout(10);
+        chart.add_stack(BarsStack::<i32>::new());
+        assert!(segments_of(&mut chart, 10, 0).is_empty());
+    });
 }
 
 #[test]
 fn check_segments_recomputed_on_each_call() {
-    let mut chart = new_chart();
-    chart.add_stack([4]);
-    assert_eq!(segments_of(&mut chart, 4, 0), vec![(0, 4)]);
-    assert_eq!(segments_of(&mut chart, 8, 0), vec![(0, 8)]);
-    chart.update_stack(0, |s| {
-        s.add_bar(4);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([4]);
+        assert_eq!(segments_of(&mut chart, 4, 0), vec![(0, 4)]);
+        assert_eq!(segments_of(&mut chart, 8, 0), vec![(0, 8)]);
+        chart.update_stack(0, |s| {
+            s.add_bar(4);
+        });
+        assert_eq!(segments_of(&mut chart, 8, 0), vec![(0, 4), (4, 4)]);
     });
-    assert_eq!(segments_of(&mut chart, 8, 0), vec![(0, 4), (4, 4)]);
 }
 
 #[test]
 fn check_segments_huge_height_does_not_overflow() {
-    let mut chart = new_chart();
-    chart.add_stack([1]);
-    assert_eq!(segments_of(&mut chart, 100000, 0), vec![(0, i16::MAX)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1]);
+        assert_eq!(segments_of(&mut chart, 100000, 0), vec![(0, i16::MAX)]);
+    });
 }
 
 fn yaxis_of<T: Number + 'static>(chart: &mut VStackedBarChart<T>, height: u32) -> (i32, f64, f64) {
@@ -1990,250 +2286,290 @@ fn yaxis_of<T: Number + 'static>(chart: &mut VStackedBarChart<T>, height: u32) -
 
 #[test]
 fn check_yaxis_defaults() {
-    let chart = new_chart();
-    assert_eq!(chart.yaxis.zero, 0);
-    assert_eq!(chart.yaxis.bottom_value, 0.0);
-    assert_eq!(chart.yaxis.bottom_step, 0.0);
+    in_app(|| {
+        let chart = new_chart();
+        assert_eq!(chart.yaxis.zero, 0);
+        assert_eq!(chart.yaxis.bottom_value, 0.0);
+        assert_eq!(chart.yaxis.bottom_step, 0.0);
+    });
 }
 
 #[test]
 fn check_yaxis_from_zero_positive_only() {
-    let mut chart = new_chart();
-    chart.add_stack([10]);
-    let (zero, bottom, step) = yaxis_of(&mut chart, 10);
-    assert_eq!(zero, 0);
-    assert_close(bottom, 0.0);
-    assert_close(step, -3.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([10]);
+        let (zero, bottom, step) = yaxis_of(&mut chart, 10);
+        assert_eq!(zero, 0);
+        assert_close(bottom, 0.0);
+        assert_close(step, -3.0);
+    });
 }
 
 #[test]
 fn check_yaxis_from_zero_mixed_values() {
-    let mut chart = new_chart();
-    chart.add_stack([10, -10]);
-    let (zero, bottom, step) = yaxis_of(&mut chart, 20);
-    assert_eq!(zero, 10);
-    assert_close(bottom, -10.0);
-    assert_close(step, -3.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([10, -10]);
+        let (zero, bottom, step) = yaxis_of(&mut chart, 20);
+        assert_eq!(zero, 10);
+        assert_close(bottom, -10.0);
+        assert_close(step, -3.0);
+    });
 }
 
 #[test]
 fn check_yaxis_from_zero_negative_only() {
-    let mut chart = new_chart();
-    chart.add_stack([-8]);
-    let (zero, bottom, step) = yaxis_of(&mut chart, 8);
-    assert_eq!(zero, 8);
-    assert_close(bottom, -8.0);
-    assert_close(step, -3.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([-8]);
+        let (zero, bottom, step) = yaxis_of(&mut chart, 8);
+        assert_eq!(zero, 8);
+        assert_close(bottom, -8.0);
+        assert_close(step, -3.0);
+    });
 }
 
 #[test]
 fn check_yaxis_step_follows_setting() {
-    let mut chart = new_chart();
-    chart.add_stack([10]);
-    chart.set_yaxis_step(5);
-    let (_, _, step) = yaxis_of(&mut chart, 10);
-    assert_close(step, -5.0);
-    chart.set_yaxis_step(1);
-    let (_, _, step) = yaxis_of(&mut chart, 20);
-    assert_close(step, -0.5);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([10]);
+        chart.set_yaxis_step(5);
+        let (_, _, step) = yaxis_of(&mut chart, 10);
+        assert_close(step, -5.0);
+        chart.set_yaxis_step(1);
+        let (_, _, step) = yaxis_of(&mut chart, 20);
+        assert_close(step, -0.5);
+    });
 }
 
 #[test]
 fn check_yaxis_fit_data() {
-    let mut chart = new_chart();
-    chart.add_stack([5]);
-    chart.add_stack([10]);
-    chart.set_stacks_scale(StackBarScale::FitData);
-    let (zero, bottom, step) = yaxis_of(&mut chart, 5);
-    assert_eq!(zero, 0);
-    assert_close(bottom, 5.0);
-    assert_close(step, -3.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([5]);
+        chart.add_stack([10]);
+        chart.set_stacks_scale(StackBarScale::FitData);
+        let (zero, bottom, step) = yaxis_of(&mut chart, 5);
+        assert_eq!(zero, 0);
+        assert_close(bottom, 5.0);
+        assert_close(step, -3.0);
+    });
 }
 
 #[test]
 fn check_yaxis_fixed() {
-    let mut chart = new_chart();
-    chart.add_stack([1]);
-    chart.set_stacks_scale(StackBarScale::Fixed { min: -20, max: 40 });
-    let (zero, bottom, step) = yaxis_of(&mut chart, 30);
-    assert_eq!(zero, 10);
-    assert_close(bottom, -20.0);
-    assert_close(step, -6.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1]);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -20, max: 40 });
+        let (zero, bottom, step) = yaxis_of(&mut chart, 30);
+        assert_eq!(zero, 10);
+        assert_close(bottom, -20.0);
+        assert_close(step, -6.0);
+    });
 }
 
 #[test]
 fn check_yaxis_percentage() {
-    let mut chart = new_chart();
-    chart.add_stack([1, 1]);
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    let (zero, bottom, step) = yaxis_of(&mut chart, 10);
-    assert_eq!(zero, 0);
-    assert_close(bottom, 0.0);
-    assert_close(step, -30.0);
-    chart.add_stack([5, -5]);
-    let (zero, bottom, step) = yaxis_of(&mut chart, 15);
-    assert_eq!(zero, 5);
-    assert_close(bottom, -50.0);
-    assert_close(step, -30.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([1, 1]);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        let (zero, bottom, step) = yaxis_of(&mut chart, 10);
+        assert_eq!(zero, 0);
+        assert_close(bottom, 0.0);
+        assert_close(step, -30.0);
+        chart.add_stack([5, -5]);
+        let (zero, bottom, step) = yaxis_of(&mut chart, 15);
+        assert_eq!(zero, 5);
+        assert_close(bottom, -50.0);
+        assert_close(step, -30.0);
+    });
 }
 
 #[test]
 fn check_yaxis_zero_matches_mapping_zero() {
-    let mut chart = new_chart();
-    chart.add_stack([7, -3]);
-    chart.add_stack([-9, 2]);
-    for height in 0..40u32 {
-        let mapping = chart.value_mapping(height);
-        let (zero, _, _) = yaxis_of(&mut chart, height);
-        assert_eq!(zero, mapping.zero() as i32);
-    }
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([7, -3]);
+        chart.add_stack([-9, 2]);
+        for height in 0..40u32 {
+            let mapping = chart.value_mapping(height);
+            let (zero, _, _) = yaxis_of(&mut chart, height);
+            assert_eq!(zero, mapping.zero() as i32);
+        }
+    });
 }
 
 #[test]
 fn check_yaxis_zero_line_row_from_bottom_value() {
-    let mut chart = new_chart();
-    chart.add_stack([12, -6]);
-    let height = 18u32;
-    let (zero, bottom, step) = yaxis_of(&mut chart, height);
-    let rows_to_zero = (bottom * chart.yaxis.step as f64 / step).round() as i32;
-    assert_eq!(rows_to_zero, zero);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([12, -6]);
+        let height = 18u32;
+        let (zero, bottom, step) = yaxis_of(&mut chart, height);
+        let rows_to_zero = (bottom * chart.yaxis.step as f64 / step).round() as i32;
+        assert_eq!(rows_to_zero, zero);
+    });
 }
 
 #[test]
 fn check_yaxis_empty_chart_and_zero_height() {
-    let mut chart = new_chart();
-    assert_eq!(yaxis_of(&mut chart, 10), (0, 0.0, 0.0));
-    chart.add_stack([3, -3]);
-    assert_eq!(yaxis_of(&mut chart, 0), (0, -3.0, 0.0));
+    in_app(|| {
+        let mut chart = new_chart();
+        assert_eq!(yaxis_of(&mut chart, 10), (0, 0.0, 0.0));
+        chart.add_stack([3, -3]);
+        assert_eq!(yaxis_of(&mut chart, 0), (0, -3.0, 0.0));
+    });
 }
 
 #[test]
 fn check_yaxis_degenerate_fixed_range() {
-    let mut chart = new_chart();
-    chart.add_stack([3]);
-    chart.set_stacks_scale(StackBarScale::Fixed { min: 5, max: 5 });
-    let (zero, bottom, step) = yaxis_of(&mut chart, 10);
-    assert_eq!(zero, 0);
-    assert_close(bottom, 5.0);
-    assert_close(step, 0.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([3]);
+        chart.set_stacks_scale(StackBarScale::Fixed { min: 5, max: 5 });
+        let (zero, bottom, step) = yaxis_of(&mut chart, 10);
+        assert_eq!(zero, 0);
+        assert_close(bottom, 5.0);
+        assert_close(step, 0.0);
+    });
 }
 
 #[test]
 fn check_plot_layout_updates_axis_and_segments() {
-    let mut chart = new_chart();
-    chart.add_stack([4, -2, 3]);
-    chart.update_plot_layout(9);
-    assert_eq!(chart.yaxis.zero, 2);
-    assert_close(chart.yaxis.bottom_value, -2.0);
-    let segs: Vec<(i16, i16)> = chart.stacks[0].layout.iter().map(|s| (s.offset, s.len)).collect();
-    assert_eq!(segs, vec![(0, 4), (0, -2), (4, 3)]);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([4, -2, 3]);
+        chart.update_plot_layout(9);
+        assert_eq!(chart.yaxis.zero, 2);
+        assert_close(chart.yaxis.bottom_value, -2.0);
+        let segs: Vec<(i16, i16)> = chart.stacks[0].layout.iter().map(|s| (s.offset, s.len)).collect();
+        assert_eq!(segs, vec![(0, 4), (0, -2), (4, 3)]);
+    });
 }
 
 #[test]
 fn check_plot_layout_empty_chart() {
-    let mut chart = new_chart();
-    chart.update_plot_layout(10);
-    chart.update_plot_layout(0);
-    assert_eq!(chart.stacks_count(), 0);
-    assert_eq!(chart.yaxis.zero, 0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.update_plot_layout(10);
+        chart.update_plot_layout(0);
+        assert_eq!(chart.stacks_count(), 0);
+        assert_eq!(chart.yaxis.zero, 0);
+    });
 }
 
 #[test]
 fn check_plot_layout_after_clear() {
-    let mut chart = new_chart();
-    chart.add_stack([4, -2]);
-    chart.update_plot_layout(10);
-    chart.clear();
-    chart.update_plot_layout(10);
-    assert_eq!(chart.yaxis.zero, 0);
-    assert_close(chart.yaxis.bottom_step, 0.0);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([4, -2]);
+        chart.update_plot_layout(10);
+        chart.clear();
+        chart.update_plot_layout(10);
+        assert_eq!(chart.yaxis.zero, 0);
+        assert_close(chart.yaxis.bottom_step, 0.0);
+    });
 }
 
 #[test]
 fn check_plot_layout_single_stack_all_scales() {
-    let scales = [
-        StackBarScale::FromZero,
-        StackBarScale::FromZeroMinRange { min: -5, max: 5 },
-        StackBarScale::FitData,
-        StackBarScale::Fixed { min: -3, max: 3 },
-        StackBarScale::Percentage,
-    ];
-    for scale in scales {
-        for height in 0..12u32 {
-            let mut chart = new_chart();
-            chart.add_stack([2, -1, 3]);
-            chart.set_stacks_scale(scale);
-            chart.update_plot_layout(height);
-            assert_eq!(chart.stacks[0].layout.len(), 3);
-            assert!(chart.yaxis.zero >= 0 && chart.yaxis.zero <= height as i32);
+    in_app(|| {
+        let scales = [
+            StackBarScale::FromZero,
+            StackBarScale::FromZeroMinRange { min: -5, max: 5 },
+            StackBarScale::FitData,
+            StackBarScale::Fixed { min: -3, max: 3 },
+            StackBarScale::Percentage,
+        ];
+        for scale in scales {
+            for height in 0..12u32 {
+                let mut chart = new_chart();
+                chart.add_stack([2, -1, 3]);
+                chart.set_stacks_scale(scale);
+                chart.update_plot_layout(height);
+                assert_eq!(chart.stacks[0].layout.len(), 3);
+                assert!(chart.yaxis.zero >= 0 && chart.yaxis.zero <= height as i32);
+            }
         }
-    }
+    });
 }
 
 #[test]
 fn check_plot_layout_all_zero_stack_all_scales() {
-    let scales = [
-        StackBarScale::FromZero,
-        StackBarScale::FromZeroMinRange { min: 0, max: 0 },
-        StackBarScale::FitData,
-        StackBarScale::Fixed { min: 0, max: 0 },
-        StackBarScale::Percentage,
-    ];
-    for scale in scales {
-        for height in 0..6u32 {
-            let mut chart = new_chart();
-            chart.add_stack([0, 0, 0]);
-            chart.set_stacks_scale(scale);
-            chart.update_plot_layout(height);
-            assert!(chart.stacks[0].layout.iter().all(|s| s.len == 0));
+    in_app(|| {
+        let scales = [
+            StackBarScale::FromZero,
+            StackBarScale::FromZeroMinRange { min: 0, max: 0 },
+            StackBarScale::FitData,
+            StackBarScale::Fixed { min: 0, max: 0 },
+            StackBarScale::Percentage,
+        ];
+        for scale in scales {
+            for height in 0..6u32 {
+                let mut chart = new_chart();
+                chart.add_stack([0, 0, 0]);
+                chart.set_stacks_scale(scale);
+                chart.update_plot_layout(height);
+                assert!(chart.stacks[0].layout.iter().all(|s| s.len == 0));
+            }
         }
-    }
+    });
 }
 
 #[test]
 fn check_plot_layout_stack_without_bars_all_scales() {
-    let scales = [
-        StackBarScale::FromZero,
-        StackBarScale::FitData,
-        StackBarScale::Fixed { min: -2, max: 2 },
-        StackBarScale::Percentage,
-    ];
-    for scale in scales {
-        let mut chart = new_chart();
-        chart.add_stack(BarsStack::<i32>::new());
-        chart.add_stack([3]);
-        chart.set_stacks_scale(scale);
-        chart.update_plot_layout(6);
-        assert!(chart.stacks[0].layout.is_empty());
-        assert_eq!(chart.stacks[1].layout.len(), 1);
-    }
+    in_app(|| {
+        let scales = [
+            StackBarScale::FromZero,
+            StackBarScale::FitData,
+            StackBarScale::Fixed { min: -2, max: 2 },
+            StackBarScale::Percentage,
+        ];
+        for scale in scales {
+            let mut chart = new_chart();
+            chart.add_stack(BarsStack::<i32>::new());
+            chart.add_stack([3]);
+            chart.set_stacks_scale(scale);
+            chart.update_plot_layout(6);
+            assert!(chart.stacks[0].layout.is_empty());
+            assert_eq!(chart.stacks[1].layout.len(), 1);
+        }
+    });
 }
 
 #[test]
 fn check_plot_layout_extreme_values() {
-    let mut chart = float_chart();
-    chart.add_stack([f64::MAX, -f64::MAX, f64::MAX]);
-    chart.add_stack([f64::NAN, f64::INFINITY, f64::NEG_INFINITY]);
-    for height in 0..8u32 {
-        chart.update_plot_layout(height);
-    }
-    chart.set_stacks_scale(StackBarScale::Percentage);
-    chart.update_plot_layout(8);
-    chart.set_stacks_scale(StackBarScale::FitData);
-    chart.update_plot_layout(8);
-    assert_eq!(chart.stacks[1].layout.len(), 3);
+    in_app(|| {
+        let mut chart = float_chart();
+        chart.add_stack([f64::MAX, -f64::MAX, f64::MAX]);
+        chart.add_stack([f64::NAN, f64::INFINITY, f64::NEG_INFINITY]);
+        for height in 0..8u32 {
+            chart.update_plot_layout(height);
+        }
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.update_plot_layout(8);
+        chart.set_stacks_scale(StackBarScale::FitData);
+        chart.update_plot_layout(8);
+        assert_eq!(chart.stacks[1].layout.len(), 3);
+    });
 }
 
 #[test]
 fn check_plot_layout_follows_data_updates() {
-    let mut chart = new_chart();
-    chart.add_stack([2]);
-    chart.update_plot_layout(4);
-    assert_eq!(chart.stacks[0].layout[0].len, 4);
-    chart.add_stack([4]);
-    chart.update_plot_layout(4);
-    assert_eq!(chart.stacks[0].layout[0].len, 2);
-    assert_eq!(chart.stacks[1].layout[0].len, 4);
+    in_app(|| {
+        let mut chart = new_chart();
+        chart.add_stack([2]);
+        chart.update_plot_layout(4);
+        assert_eq!(chart.stacks[0].layout[0].len, 4);
+        chart.add_stack([4]);
+        chart.update_plot_layout(4);
+        assert_eq!(chart.stacks[0].layout[0].len, 2);
+        assert_eq!(chart.stacks[1].layout[0].len, 4);
+    });
 }
 
 #[test]
@@ -2284,22 +2620,34 @@ fn check_paint_axes_with_data() {
 }
 
 #[test]
-fn check_paint_each_scale() {
+fn check_paint_scale_from_zero_min_range() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -20, max: 20 });
         chart
     });
+}
+
+#[test]
+fn check_paint_scale_fit_data() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         chart.set_stacks_scale(StackBarScale::FitData);
         chart
     });
+}
+
+#[test]
+fn check_paint_scale_fixed() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         chart.set_stacks_scale(StackBarScale::Fixed { min: -4, max: 4 });
         chart
     });
+}
+
+#[test]
+fn check_paint_scale_percentage() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         chart.set_stacks_scale(StackBarScale::Percentage);
@@ -2308,17 +2656,25 @@ fn check_paint_each_scale() {
 }
 
 #[test]
-fn check_paint_xaxis_modes() {
+fn check_paint_xaxis_index() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         chart.set_xaxis_label_mode(XAxisLabelMode::Index(1));
         chart
     });
+}
+
+#[test]
+fn check_paint_xaxis_stack_labels() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
         chart
     });
+}
+
+#[test]
+fn check_paint_xaxis_custom() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         let spans = [BarSpan::new(0, 2, "First"), BarSpan::new(2, 5, "Second")];
@@ -2328,17 +2684,25 @@ fn check_paint_xaxis_modes() {
 }
 
 #[test]
-fn check_paint_yaxis_options() {
+fn check_paint_yaxis_hidden() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         chart.set_yaxis_visible(false);
         chart
     });
+}
+
+#[test]
+fn check_paint_yaxis_no_grid() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         chart.set_yaxis_show_grid(false);
         chart
     });
+}
+
+#[test]
+fn check_paint_yaxis_narrow_small_step() {
     paint_in_app(30, 10, || {
         let mut chart = painted_chart();
         chart.set_yaxis_width(3);
@@ -2348,8 +2712,12 @@ fn check_paint_yaxis_options() {
 }
 
 #[test]
-fn check_paint_tiny_surfaces() {
+fn check_paint_tiny_surface() {
     paint_in_app(12, 3, painted_chart);
+}
+
+#[test]
+fn check_paint_tiny_surface_with_xaxis() {
     paint_in_app(12, 3, || {
         let mut chart = painted_chart();
         chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);

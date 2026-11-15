@@ -3,7 +3,6 @@ use super::mapping::ValueMapping;
 use super::stackbar::StackWithLayout;
 use super::{BarsStack, Flags, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
 use crate::ui::components::BarSpan;
-use crate::system::RuntimeManager;
 use flat_string::FlatString;
 
 #[derive(Copy, Clone)]
@@ -239,9 +238,6 @@ where
         self.update_layout();
         let height = self.visible_height();
         self.update_plot_layout(height);
-        if !RuntimeManager::is_instantiated() {
-            return;
-        }
         let theme = self.theme();
         let background = theme.chart.background;
         let grid_attr = theme.chart.grid;
