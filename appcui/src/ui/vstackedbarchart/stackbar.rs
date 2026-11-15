@@ -271,3 +271,89 @@ impl<T: Number + 'static> Default for BarsStackBuilder<T> {
         Self::new()
     }
 }
+
+impl<T> From<&[T]> for BarsStack<T>
+where
+    T: Number + 'static,
+{
+    fn from(values: &[T]) -> Self {
+        let mut stack = BarsStack::new();
+        stack.add_bars(values);
+        stack
+    }
+}
+
+impl<T> From<Vec<T>> for BarsStack<T>
+where
+    T: Number + 'static,
+{
+    fn from(values: Vec<T>) -> Self {
+        let mut stack = BarsStack::new();
+        stack.add_bars(values);
+        stack
+    }
+}
+
+impl<T> From<&Vec<T>> for BarsStack<T>
+where
+    T: Number + 'static,
+{
+    fn from(values: &Vec<T>) -> Self {
+        values.as_slice().into()
+    }
+}
+
+impl<T, const N: usize> From<[T; N]> for BarsStack<T>
+where
+    T: Number + 'static,
+{
+    fn from(values: [T; N]) -> Self {
+        let mut stack = BarsStack::new();
+        stack.add_bars(values);
+        stack
+    }
+}
+
+impl<T, const N: usize> From<&[T; N]> for BarsStack<T>
+where
+    T: Number + 'static,
+{
+    fn from(values: &[T; N]) -> Self {
+        values.as_slice().into()
+    }
+}
+
+impl<T> From<&BarsStack<T>> for BarsStack<T>
+where
+    T: Number + 'static,
+{
+    fn from(stack: &BarsStack<T>) -> Self {
+        stack.clone()
+    }
+}
+
+#[derive(Copy, Clone, Default)]
+pub(crate) struct SegmentLayout {
+    pub(crate) offset: i16,
+    pub(crate) len: i16,
+}
+
+pub(crate) struct StackWithLayout<T: Number + 'static> {
+    pub(crate) stack: BarsStack<T>,
+    pub(crate) pos: i32,
+    pub(crate) layout: Vec<SegmentLayout>,
+}
+
+impl<T> StackWithLayout<T>
+where
+    T: Number + 'static,
+{
+    #[inline(always)]
+    pub(crate) fn new(stack: BarsStack<T>) -> Self {
+        Self {
+            stack,
+            pos: 0,
+            layout: Vec::new(),
+        }
+    }
+}
