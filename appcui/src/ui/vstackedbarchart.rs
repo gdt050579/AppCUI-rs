@@ -5,8 +5,14 @@
 
 mod vstackedbarchart;
 mod initialization_flags;
+mod stackbar;
 #[cfg(test)]
 mod tests;
 
 pub use self::vstackedbarchart::VStackedBarChart;
 pub use self::initialization_flags::Flags;
+pub use self::stackbar::StackBar;
+pub use self::stackbar::StackBarBuilder;
+pub use self::stackbar::StackBarDrawMode;
+pub use self::stackbar::BarsStack;
+pub use self::stackbar::BarsStackBuilder;
