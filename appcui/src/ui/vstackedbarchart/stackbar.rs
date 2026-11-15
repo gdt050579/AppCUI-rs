@@ -366,6 +366,8 @@ pub(crate) struct SegmentLayout {
 pub(crate) struct StackWithLayout<T: Number + 'static> {
     pub(crate) stack: BarsStack<T>,
     pub(crate) pos: i32,
+    pub(crate) positive_sum: f64,
+    pub(crate) negative_sum: f64,
     pub(crate) layout: Vec<SegmentLayout>,
 }
 
@@ -378,7 +380,38 @@ where
         Self {
             stack,
             pos: 0,
+            positive_sum: 0.0,
+            negative_sum: 0.0,
             layout: Vec::new(),
         }
+    }
+    pub(crate) fn update_sums(&mut self) {
+        let mut positive = 0.0f64;
+        let mut negative = 0.0f64;
+        for bar in self.stack.bars.iter() {
+            let value = bar.value.to_f64();
+            if !value.is_finite() {
+                continue;
+            }
+            if value > 0.0 {
+                positive += value;
+            } else if value < 0.0 {
+                negative += value;
+            }
+        }
+        self.positive_sum = positive;
+        self.negative_sum = negative;
+    }
+    #[inline(always)]
+    pub(crate) fn abs_total(&self) -> f64 {
+        self.positive_sum - self.negative_sum
+    }
+    #[inline(always)]
+    pub(crate) fn has_positive(&self) -> bool {
+        self.positive_sum > 0.0
+    }
+    #[inline(always)]
+    pub(crate) fn has_negative(&self) -> bool {
+        self.negative_sum < 0.0
     }
 }

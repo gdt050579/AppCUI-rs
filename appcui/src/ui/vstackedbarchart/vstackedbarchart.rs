@@ -210,7 +210,13 @@ where
         self.update_layout();
     }
     fn update_layout(&mut self) {
+        self.update_stack_sums();
         self.update_columns_layout();
+    }
+    pub(super) fn update_stack_sums(&mut self) {
+        for entry in self.stacks.iter_mut() {
+            entry.update_sums();
+        }
     }
     pub(super) fn update_columns_layout(&mut self) {
         if self.stacks.is_empty() {

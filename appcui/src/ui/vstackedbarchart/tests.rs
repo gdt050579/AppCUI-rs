@@ -1201,3 +1201,175 @@ fn check_columns_layout_many_stacks() {
     assert_eq!(chart.stacks[999].pos, 999 * 12 + 2);
     assert_eq!(chart.stacks_width, 1000 * 12 + 2);
 }
+
+fn sums_of(chart: &VStackedBarChart<i32>, index: usize) -> (f64, f64, f64) {
+    let entry = &chart.stacks[index];
+    (entry.positive_sum, entry.negative_sum, entry.abs_total())
+}
+
+fn float_chart() -> VStackedBarChart<f64> {
+    VStackedBarChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None)
+}
+
+#[test]
+fn check_sums_only_positive_values() {
+    let mut chart = new_chart();
+    chart.add_stack([1, 2, 3]);
+    assert_eq!(sums_of(&chart, 0), (6.0, 0.0, 6.0));
+    assert!(chart.stacks[0].has_positive());
+    assert!(!chart.stacks[0].has_negative());
+}
+
+#[test]
+fn check_sums_only_negative_values() {
+    let mut chart = new_chart();
+    chart.add_stack([-1, -2]);
+    assert_eq!(sums_of(&chart, 0), (0.0, -3.0, 3.0));
+    assert!(!chart.stacks[0].has_positive());
+    assert!(chart.stacks[0].has_negative());
+}
+
+#[test]
+fn check_sums_mixed_values() {
+    let mut chart = new_chart();
+    chart.add_stack([5, -3, 2, -1]);
+    assert_eq!(sums_of(&chart, 0), (7.0, -4.0, 11.0));
+    assert!(chart.stacks[0].has_positive());
+    assert!(chart.stacks[0].has_negative());
+}
+
+#[test]
+fn check_sums_zero_values() {
+    let mut chart = new_chart();
+    chart.add_stack([0, 0, 0]);
+    assert_eq!(sums_of(&chart, 0), (0.0, 0.0, 0.0));
+    assert!(!chart.stacks[0].has_positive());
+    assert!(!chart.stacks[0].has_negative());
+}
+
+#[test]
+fn check_sums_empty_stack() {
+    let mut chart = new_chart();
+    chart.add_stack(BarsStack::<i32>::new());
+    assert_eq!(sums_of(&chart, 0), (0.0, 0.0, 0.0));
+    assert!(!chart.stacks[0].has_positive());
+    assert!(!chart.stacks[0].has_negative());
+}
+
+#[test]
+fn check_sums_do_not_depend_on_value_order() {
+    let mut chart = new_chart();
+    chart.add_stack([1, -1, 1, -1]);
+    chart.add_stack([1, 1, -1, -1]);
+    chart.add_stack([-1, -1, 1, 1]);
+    assert_eq!(sums_of(&chart, 0), (2.0, -2.0, 4.0));
+    assert_eq!(sums_of(&chart, 1), (2.0, -2.0, 4.0));
+    assert_eq!(sums_of(&chart, 2), (2.0, -2.0, 4.0));
+}
+
+#[test]
+fn check_sums_are_per_stack() {
+    let mut chart = new_chart();
+    chart.add_stacks(vec![vec![1, 2], vec![-3], vec![4, -5, 6], vec![]]);
+    assert_eq!(sums_of(&chart, 0), (3.0, 0.0, 3.0));
+    assert_eq!(sums_of(&chart, 1), (0.0, -3.0, 3.0));
+    assert_eq!(sums_of(&chart, 2), (10.0, -5.0, 15.0));
+    assert_eq!(sums_of(&chart, 3), (0.0, 0.0, 0.0));
+}
+
+#[test]
+fn check_sums_abs_total_is_positive_minus_negative() {
+    let mut chart = new_chart();
+    chart.add_stack([7, -2, 4, -9]);
+    let entry = &chart.stacks[0];
+    assert_eq!(entry.abs_total(), entry.positive_sum - entry.negative_sum);
+    assert_eq!(entry.abs_total(), 22.0);
+}
+
+#[test]
+fn check_sums_large_values_do_not_overflow() {
+    let mut chart = new_chart();
+    chart.add_stack([i32::MAX, i32::MAX]);
+    chart.add_stack([i32::MIN, i32::MIN]);
+    assert_eq!(chart.stacks[0].positive_sum, 2.0 * i32::MAX as f64);
+    assert_eq!(chart.stacks[1].negative_sum, 2.0 * i32::MIN as f64);
+}
+
+#[test]
+fn check_sums_float_values() {
+    let mut chart = float_chart();
+    chart.add_stack(vec![1.5, -2.5, 0.25]);
+    let entry = &chart.stacks[0];
+    assert_eq!(entry.positive_sum, 1.75);
+    assert_eq!(entry.negative_sum, -2.5);
+    assert_eq!(entry.abs_total(), 4.25);
+}
+
+#[test]
+fn check_sums_ignore_non_finite_values() {
+    let mut chart = float_chart();
+    chart.add_stack(vec![f64::NAN, 1.0, f64::INFINITY, f64::NEG_INFINITY, -2.0]);
+    let entry = &chart.stacks[0];
+    assert_eq!(entry.positive_sum, 1.0);
+    assert_eq!(entry.negative_sum, -2.0);
+    assert_eq!(entry.abs_total(), 3.0);
+}
+
+#[test]
+fn check_sums_only_non_finite_values() {
+    let mut chart = float_chart();
+    chart.add_stack(vec![f64::NAN, f64::INFINITY]);
+    let entry = &chart.stacks[0];
+    assert_eq!(entry.positive_sum, 0.0);
+    assert_eq!(entry.negative_sum, 0.0);
+    assert!(!entry.has_positive());
+    assert!(!entry.has_negative());
+}
+
+#[test]
+fn check_sums_after_update_stack() {
+    let mut chart = new_chart();
+    chart.add_stack([1, 2, 3]);
+    assert_eq!(sums_of(&chart, 0), (6.0, 0.0, 6.0));
+    chart.update_stack(0, |stack| {
+        stack.get_mut(0).unwrap().set_value(-10);
+    });
+    assert_eq!(sums_of(&chart, 0), (5.0, -10.0, 15.0));
+    chart.update_stack(0, |stack| {
+        stack.add_bar(4);
+        stack.add_bar(-1);
+    });
+    assert_eq!(sums_of(&chart, 0), (9.0, -11.0, 20.0));
+}
+
+#[test]
+fn check_sums_after_update_only_touch_that_stack_values() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4]]);
+    chart.update_stack(1, |stack| {
+        stack.get_mut(0).unwrap().set_value(-3);
+    });
+    assert_eq!(sums_of(&chart, 0), (3.0, 0.0, 3.0));
+    assert_eq!(sums_of(&chart, 1), (4.0, -3.0, 7.0));
+}
+
+#[test]
+fn check_sums_survive_setters() {
+    let mut chart = new_chart();
+    chart.add_stack([2, -3]);
+    chart.set_default_bar_width(4);
+    chart.set_default_bar_spacing(0);
+    chart.set_default_bar_drawmode(rect());
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    assert_eq!(sums_of(&chart, 0), (2.0, -3.0, 5.0));
+}
+
+#[test]
+fn check_sums_after_clear_and_add() {
+    let mut chart = new_chart();
+    chart.add_stack([5, -5]);
+    chart.clear();
+    assert!(chart.stacks.is_empty());
+    chart.add_stack([1]);
+    assert_eq!(sums_of(&chart, 0), (1.0, 0.0, 1.0));
+}
