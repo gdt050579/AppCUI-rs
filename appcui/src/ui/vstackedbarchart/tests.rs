@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
 use super::XAxisLabelFormat;
+use super::mapping::ValueMapping;
 use crate::ui::components::BarFillType;
 
 fn new_chart() -> VStackedBarChart<i32> {
@@ -1629,4 +1630,165 @@ fn check_range_follows_scale_changes() {
     let (lo, hi) = range_of(&chart);
     assert_close(lo, -4.0 / 14.0 * 100.0);
     assert_close(hi, 100.0);
+}
+
+#[test]
+fn check_mapping_symmetric_range() {
+    let m = ValueMapping::new(-10.0, 10.0, 20);
+    assert_eq!(m.height(), 20);
+    assert_eq!(m.zero(), 10);
+    assert_eq!(m.above(), 10);
+    assert_eq!(m.below(), 10);
+    assert_eq!(m.offset(0.0), 0);
+    assert_eq!(m.offset(10.0), 10);
+    assert_eq!(m.offset(-10.0), -10);
+    assert_eq!(m.offset(5.0), 5);
+    assert_eq!(m.offset(-5.0), -5);
+}
+
+#[test]
+fn check_mapping_only_positive_range() {
+    let m = ValueMapping::new(0.0, 10.0, 10);
+    assert_eq!(m.zero(), 0);
+    assert_eq!(m.below(), 0);
+    assert_eq!(m.above(), 10);
+    assert_eq!(m.offset(3.0), 3);
+    assert_eq!(m.offset(10.0), 10);
+}
+
+#[test]
+fn check_mapping_only_negative_range() {
+    let m = ValueMapping::new(-10.0, 0.0, 10);
+    assert_eq!(m.zero(), 10);
+    assert_eq!(m.above(), 0);
+    assert_eq!(m.below(), 10);
+    assert_eq!(m.offset(-4.0), -4);
+    assert_eq!(m.offset(-10.0), -10);
+    assert_eq!(m.offset(0.0), 0);
+}
+
+#[test]
+fn check_mapping_scales_to_height() {
+    let m = ValueMapping::new(0.0, 100.0, 5);
+    assert_eq!(m.offset(20.0), 1);
+    assert_eq!(m.offset(50.0), 3);
+    assert_eq!(m.offset(100.0), 5);
+    let m = ValueMapping::new(0.0, 1.0, 10);
+    assert_eq!(m.offset(0.04), 0);
+    assert_eq!(m.offset(0.06), 1);
+}
+
+#[test]
+fn check_mapping_clamps_values_outside_range() {
+    let m = ValueMapping::new(-10.0, 10.0, 20);
+    assert_eq!(m.offset(1000.0), 10);
+    assert_eq!(m.offset(-1000.0), -10);
+    assert_eq!(m.offset(f64::INFINITY), 10);
+    assert_eq!(m.offset(f64::NEG_INFINITY), -10);
+}
+
+#[test]
+fn check_mapping_nan_maps_to_zero() {
+    let m = ValueMapping::new(-10.0, 10.0, 20);
+    assert_eq!(m.offset(f64::NAN), 0);
+    assert_eq!(m.position(f64::NAN), m.zero());
+}
+
+#[test]
+fn check_mapping_zero_below_visible_range() {
+    let m = ValueMapping::new(2.0, 10.0, 8);
+    assert_eq!(m.zero(), 0);
+    assert_eq!(m.offset(2.0), 0);
+    assert_eq!(m.offset(1.0), 0);
+    assert_eq!(m.offset(0.0), 0);
+    assert_eq!(m.offset(6.0), 4);
+    assert_eq!(m.offset(10.0), 8);
+}
+
+#[test]
+fn check_mapping_zero_above_visible_range() {
+    let m = ValueMapping::new(-10.0, -2.0, 8);
+    assert_eq!(m.zero(), 8);
+    assert_eq!(m.above(), 0);
+    assert_eq!(m.offset(0.0), 0);
+    assert_eq!(m.offset(-2.0), 0);
+    assert_eq!(m.offset(-6.0), -4);
+    assert_eq!(m.offset(-10.0), -8);
+}
+
+#[test]
+fn check_mapping_zero_height() {
+    let m = ValueMapping::new(-10.0, 10.0, 0);
+    assert_eq!(m.height(), 0);
+    assert_eq!(m.zero(), 0);
+    assert_eq!(m.above(), 0);
+    assert_eq!(m.below(), 0);
+    assert_eq!(m.offset(5.0), 0);
+    assert_eq!(m.offset(-5.0), 0);
+}
+
+#[test]
+fn check_mapping_degenerate_range() {
+    for (lo, hi) in [(0.0, 0.0), (5.0, 5.0), (10.0, -10.0), (f64::NAN, f64::NAN), (0.0, f64::INFINITY), (f64::NEG_INFINITY, f64::INFINITY)] {
+        let m = ValueMapping::new(lo, hi, 10);
+        assert_eq!(m.zero(), 0);
+        assert_eq!(m.above(), 10);
+        assert_eq!(m.offset(7.0), 0);
+        assert_eq!(m.offset(-7.0), 0);
+        assert_eq!(m.offset(f64::INFINITY), 0);
+    }
+}
+
+#[test]
+fn check_mapping_offset_is_monotonic() {
+    let m = ValueMapping::new(-7.5, 13.25, 17);
+    let mut previous = m.offset(-100.0);
+    let mut v = -100.0;
+    while v <= 100.0 {
+        let current = m.offset(v);
+        assert!(current >= previous);
+        assert!(current >= -(m.below() as i32) && current <= m.above() as i32);
+        previous = current;
+        v += 0.37;
+    }
+}
+
+#[test]
+fn check_mapping_zero_row_is_clamped_to_plot() {
+    for (lo, hi) in [(-3.0, 9.0), (0.0, 4.0), (-4.0, 0.0), (1.0, 5.0), (-5.0, -1.0), (-1e9, 1.0)] {
+        for height in 0..30u32 {
+            let m = ValueMapping::new(lo, hi, height);
+            assert!(m.zero() <= m.height());
+            assert_eq!(m.below() + m.above(), m.height());
+        }
+    }
+}
+
+#[test]
+fn check_chart_value_mapping_from_zero() {
+    let mut chart = new_chart();
+    chart.add_stack(BarsStack::from([4, -2]));
+    chart.add_stack(BarsStack::from([6]));
+    let m = chart.value_mapping(8);
+    assert_eq!(m.zero(), 2);
+    assert_eq!(m.offset(6.0), 6);
+    assert_eq!(m.offset(-2.0), -2);
+}
+
+#[test]
+fn check_chart_value_mapping_fixed_clamps() {
+    let mut chart = new_chart();
+    chart.add_stack(BarsStack::from([100]));
+    chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 5 });
+    let m = chart.value_mapping(10);
+    assert_eq!(m.zero(), 5);
+    assert_eq!(m.offset(100.0), 5);
+}
+
+#[test]
+fn check_chart_value_mapping_empty_chart() {
+    let chart = new_chart();
+    let m = chart.value_mapping(10);
+    assert_eq!(m.zero(), 0);
+    assert_eq!(m.offset(3.0), 0);
 }

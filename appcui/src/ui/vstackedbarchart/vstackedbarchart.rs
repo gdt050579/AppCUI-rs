@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use super::mapping::ValueMapping;
 use super::stackbar::StackWithLayout;
 use super::{BarsStack, Flags, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
 use crate::ui::components::BarSpan;
@@ -276,6 +277,10 @@ where
             }
         }
         (-down, up)
+    }
+    pub(super) fn value_mapping(&self, height: u32) -> ValueMapping {
+        let (lo, hi) = self.compute_range();
+        ValueMapping::new(lo, hi, height)
     }
     pub(super) fn update_stack_sums(&mut self) {
         for entry in self.stacks.iter_mut() {
