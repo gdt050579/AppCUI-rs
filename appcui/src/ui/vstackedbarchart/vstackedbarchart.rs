@@ -1,26 +1,26 @@
 use crate::prelude::*;
 use super::stackbar::StackWithLayout;
-use super::{BarsStack, Flags, StackBarDrawMode, StackBarScale, XAxisLabelFormat};
+use super::{BarsStack, Flags, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
 use crate::ui::components::BarSpan;
 
 #[derive(Copy, Clone)]
-struct Defaults {
-    thickness: u8,
-    spacing: u8,
-    draw_mode: StackBarDrawMode,
-    attr: Option<CharAttribute>,
+pub(super) struct Defaults {
+    pub(super) thickness: u8,
+    pub(super) spacing: u8,
+    pub(super) draw_mode: StackBarDrawMode,
+    pub(super) attr: Option<CharAttribute>,
 }
 
-struct YAxis {
-    width: u8,
-    step: u8,
-    visible: bool,
-    show_grid: bool,
+pub(super) struct YAxis {
+    pub(super) width: u8,
+    pub(super) step: u8,
+    pub(super) visible: bool,
+    pub(super) show_grid: bool,
 }
 
-struct XAxis {
-    label_format: XAxisLabelFormat,
-    spans: Vec<BarSpan>,
+pub(super) struct XAxis {
+    pub(super) label_format: XAxisLabelFormat,
+    pub(super) spans: Vec<BarSpan>,
 }
 
 #[CustomControl(internal = true)]
@@ -29,12 +29,12 @@ where
     T: Number + 'static,
 {
     flags: Flags,
-    stacks: Vec<StackWithLayout<T>>,
-    defaults: Defaults,
-    scale: StackBarScale<T>,
-    number_format: FormatNumber,
-    yaxis: YAxis,
-    xaxis: XAxis,
+    pub(super) stacks: Vec<StackWithLayout<T>>,
+    pub(super) defaults: Defaults,
+    pub(super) scale: StackBarScale<T>,
+    pub(super) number_format: FormatNumber,
+    pub(super) yaxis: YAxis,
+    pub(super) xaxis: XAxis,
 }
 
 impl<T> VStackedBarChart<T>
@@ -112,6 +112,81 @@ where
     pub fn clear(&mut self) {
         self.stacks.clear();
     }
+    pub fn set_stacks_scale(&mut self, scale: StackBarScale<T>) {
+        self.scale = scale;
+        self.repaint_surface();
+    }
+    pub fn set_number_format(&mut self, format: FormatNumber) {
+        self.number_format = format;
+        self.repaint_surface();
+    }
+    pub fn set_default_bar_width(&mut self, width: u8) {
+        self.defaults.thickness = width.max(1);
+        self.refresh_thickness();
+        self.repaint_surface();
+    }
+    pub fn set_default_bar_spacing(&mut self, spacing: u8) {
+        self.defaults.spacing = spacing;
+        self.repaint_surface();
+    }
+    pub fn set_default_bar_drawmode(&mut self, draw_mode: StackBarDrawMode) {
+        self.defaults.draw_mode = draw_mode;
+        self.refresh_thickness();
+        self.repaint_surface();
+    }
+    pub fn set_default_bar_attr(&mut self, attr: CharAttribute) {
+        self.defaults.attr = Some(attr);
+        self.repaint_surface();
+    }
+    pub fn set_yaxis_visible(&mut self, visible: bool) {
+        self.yaxis.visible = visible;
+        self.repaint_surface();
+    }
+    pub fn set_yaxis_show_grid(&mut self, show_grid: bool) {
+        self.yaxis.show_grid = show_grid;
+        self.repaint_surface();
+    }
+    pub fn set_yaxis_width(&mut self, width: u8) {
+        self.yaxis.width = width.max(1);
+        self.repaint_surface();
+    }
+    pub fn set_yaxis_step(&mut self, step: u8) {
+        self.yaxis.step = step.max(1);
+        self.repaint_surface();
+    }
+    pub fn set_xaxis_label_mode(&mut self, xaxis: XAxisLabelMode) {
+        match xaxis {
+            XAxisLabelMode::None => self.xaxis.label_format = XAxisLabelFormat::None,
+            XAxisLabelMode::Index(start) => self.xaxis.label_format = XAxisLabelFormat::Index(start),
+            XAxisLabelMode::StackLabels => self.xaxis.label_format = XAxisLabelFormat::StackLabels,
+            XAxisLabelMode::Custom(spans) => {
+                self.xaxis.label_format = XAxisLabelFormat::Custom;
+                self.xaxis.spans.clear();
+                self.xaxis.spans.extend(spans);
+                self.xaxis.spans.sort_by(|a, b| a.start.cmp(&b.start).then(a.end.cmp(&b.end)));
+                let spans = &mut self.xaxis.spans;
+                let mut write = 0usize;
+                for read in 0..spans.len() {
+                    let overlaps = write > 0 && spans[read].start <= spans[write - 1].end;
+                    if !overlaps {
+                        if read != write {
+                            spans.swap(read, write);
+                        }
+                        write += 1;
+                    }
+                }
+                spans.truncate(write);
+            }
+        }
+        self.repaint_surface();
+    }
+    fn refresh_thickness(&mut self) {
+        let defaults = self.defaults;
+        for entry in self.stacks.iter_mut() {
+            entry.stack.update_actual_thickness(defaults.thickness, defaults.draw_mode);
+        }
+    }
+    fn repaint_surface(&mut self) {}
     fn new_entry(&self, mut stack: BarsStack<T>) -> StackWithLayout<T> {
         stack.update_actual_thickness(self.defaults.thickness, self.defaults.draw_mode);
         StackWithLayout::new(stack)

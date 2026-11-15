@@ -1,5 +1,6 @@
 use crate::prelude::*;
-use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale};
+use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
+use super::XAxisLabelFormat;
 use crate::ui::components::BarFillType;
 
 fn new_chart() -> VStackedBarChart<i32> {
@@ -686,4 +687,234 @@ fn check_xaxis_label_format_height() {
     assert_eq!(XAxisLabelFormat::Custom.height(), 2);
     assert!(XAxisLabelFormat::Index(1) == XAxisLabelFormat::Index(1));
     assert!(XAxisLabelFormat::Index(1) != XAxisLabelFormat::Index(2));
+}
+
+fn format_float(format: &FormatNumber, value: f64) -> Option<String> {
+    let mut buffer = [0u8; 32];
+    format.write_float(value, &mut buffer).map(|text| text.to_string())
+}
+
+#[test]
+fn check_new_chart_defaults() {
+    let chart = new_chart();
+    assert!(chart.scale == StackBarScale::FromZero);
+    assert_eq!(chart.defaults.thickness, 1);
+    assert_eq!(chart.defaults.spacing, 1);
+    assert_eq!(chart.defaults.draw_mode, fill());
+    assert!(chart.defaults.attr.is_none());
+    assert_eq!(chart.yaxis.width, 6);
+    assert_eq!(chart.yaxis.step, 3);
+    assert!(chart.yaxis.visible);
+    assert!(chart.yaxis.show_grid);
+    assert!(chart.xaxis.label_format == XAxisLabelFormat::None);
+    assert!(chart.xaxis.spans.is_empty());
+}
+
+#[test]
+fn check_set_stacks_scale() {
+    let mut chart = new_chart();
+    chart.set_stacks_scale(StackBarScale::Fixed { min: -5, max: 20 });
+    assert!(chart.scale == StackBarScale::Fixed { min: -5, max: 20 });
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    assert!(chart.scale == StackBarScale::Percentage);
+    chart.set_stacks_scale(StackBarScale::FitData);
+    assert!(chart.scale == StackBarScale::FitData);
+    chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -1, max: 1 });
+    assert!(chart.scale == StackBarScale::FromZeroMinRange { min: -1, max: 1 });
+    chart.set_stacks_scale(StackBarScale::FromZero);
+    assert!(chart.scale == StackBarScale::FromZero);
+}
+
+#[test]
+fn check_set_number_format() {
+    let mut chart = new_chart();
+    chart.set_number_format(FormatNumber::new(10).decimals(3));
+    let custom = FormatNumber::new(10).decimals(3);
+    assert_eq!(format_float(&chart.number_format, 1.0), format_float(&custom, 1.0));
+    assert_eq!(format_float(&chart.number_format, 2.5), format_float(&custom, 2.5));
+    let default_chart = new_chart();
+    assert_ne!(format_float(&default_chart.number_format, 1.0), format_float(&custom, 1.0));
+}
+
+#[test]
+fn check_default_number_format_depends_on_value_type() {
+    let int_chart = new_chart();
+    let float_chart = VStackedBarChart::<f64>::new(layout!("x:1,y:1,w:10,h:5"), vstackedbarchart::Flags::None);
+    assert_ne!(format_float(&int_chart.number_format, 1.0), format_float(&float_chart.number_format, 1.0));
+}
+
+#[test]
+fn check_set_default_bar_width() {
+    let mut chart = new_chart();
+    chart.set_default_bar_width(4);
+    assert_eq!(chart.defaults.thickness, 4);
+    chart.set_default_bar_width(0);
+    assert_eq!(chart.defaults.thickness, 1);
+}
+
+#[test]
+fn check_set_default_bar_width_refreshes_every_stack() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4]]);
+    chart.add_stack(BarsStackBuilder::<i32>::new().bars([5]).thickness(2).build());
+    chart.set_default_bar_width(5);
+    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 5);
+    assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 5);
+    assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 2);
+    chart.set_default_bar_width(1);
+    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
+    assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 2);
+}
+
+#[test]
+fn check_set_default_bar_spacing() {
+    let mut chart = new_chart();
+    chart.set_default_bar_spacing(3);
+    assert_eq!(chart.defaults.spacing, 3);
+    chart.set_default_bar_spacing(0);
+    assert_eq!(chart.defaults.spacing, 0);
+}
+
+#[test]
+fn check_set_default_bar_drawmode() {
+    let mut chart = new_chart();
+    chart.set_default_bar_drawmode(rect());
+    assert_eq!(chart.defaults.draw_mode, rect());
+    chart.set_default_bar_drawmode(filled_rect());
+    assert_eq!(chart.defaults.draw_mode, filled_rect());
+}
+
+#[test]
+fn check_set_default_bar_drawmode_refreshes_every_stack() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, 2], [3, 4]]);
+    let mut override_stack = BarsStack::<i32>::new();
+    override_stack.add_bar(StackBarBuilder::new(1).draw_mode(fill()).build());
+    chart.add_stack(override_stack);
+    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
+    chart.set_default_bar_drawmode(rect());
+    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
+    assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 2);
+    assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 1);
+    chart.set_default_bar_drawmode(filled_rect());
+    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
+    assert_eq!(chart.get_stack(1).unwrap().actual_thickness(), 3);
+    assert_eq!(chart.get_stack(2).unwrap().actual_thickness(), 1);
+    chart.set_default_bar_drawmode(fill());
+    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 1);
+}
+
+#[test]
+fn check_stacks_added_after_defaults_change_use_new_defaults() {
+    let mut chart = new_chart();
+    chart.set_default_bar_width(3);
+    chart.set_default_bar_drawmode(rect());
+    chart.add_stack([1, 2]);
+    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 3);
+    chart.set_default_bar_width(1);
+    assert_eq!(chart.get_stack(0).unwrap().actual_thickness(), 2);
+}
+
+#[test]
+fn check_set_default_bar_attr() {
+    let mut chart = new_chart();
+    assert!(chart.defaults.attr.is_none());
+    chart.set_default_bar_attr(CharAttribute::with_fore_color(Color::Yellow));
+    assert!(chart.defaults.attr.is_some());
+}
+
+#[test]
+fn check_set_yaxis_visible_and_grid() {
+    let mut chart = new_chart();
+    chart.set_yaxis_visible(false);
+    assert!(!chart.yaxis.visible);
+    assert!(chart.yaxis.show_grid);
+    chart.set_yaxis_show_grid(false);
+    assert!(!chart.yaxis.show_grid);
+    chart.set_yaxis_visible(true);
+    chart.set_yaxis_show_grid(true);
+    assert!(chart.yaxis.visible);
+    assert!(chart.yaxis.show_grid);
+}
+
+#[test]
+fn check_set_yaxis_width() {
+    let mut chart = new_chart();
+    chart.set_yaxis_width(9);
+    assert_eq!(chart.yaxis.width, 9);
+    chart.set_yaxis_width(0);
+    assert_eq!(chart.yaxis.width, 1);
+}
+
+#[test]
+fn check_set_yaxis_step() {
+    let mut chart = new_chart();
+    chart.set_yaxis_step(5);
+    assert_eq!(chart.yaxis.step, 5);
+    chart.set_yaxis_step(0);
+    assert_eq!(chart.yaxis.step, 1);
+}
+
+#[test]
+fn check_set_xaxis_label_mode_simple_modes() {
+    let mut chart = new_chart();
+    chart.set_xaxis_label_mode(XAxisLabelMode::Index(5));
+    assert!(chart.xaxis.label_format == XAxisLabelFormat::Index(5));
+    chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+    assert!(chart.xaxis.label_format == XAxisLabelFormat::StackLabels);
+    chart.set_xaxis_label_mode(XAxisLabelMode::None);
+    assert!(chart.xaxis.label_format == XAxisLabelFormat::None);
+}
+
+#[test]
+fn check_set_xaxis_label_mode_custom_sorts_spans() {
+    let mut chart = new_chart();
+    let spans = [BarSpan::new(6, 2, "C"), BarSpan::new(0, 3, "A"), BarSpan::new(3, 2, "B")];
+    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&spans));
+    assert!(chart.xaxis.label_format == XAxisLabelFormat::Custom);
+    let starts: Vec<u32> = chart.xaxis.spans.iter().map(|span| span.start).collect();
+    assert_eq!(starts, vec![0, 3, 6]);
+}
+
+#[test]
+fn check_set_xaxis_label_mode_custom_drops_overlapping_spans() {
+    let mut chart = new_chart();
+    let spans = [
+        BarSpan::new(6, 2, "C"),
+        BarSpan::new(0, 3, "A"),
+        BarSpan::new(2, 2, "B"),
+        BarSpan::new(3, 1, "D"),
+    ];
+    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&spans));
+    let ranges: Vec<(u32, u32)> = chart.xaxis.spans.iter().map(|span| (span.start, span.end)).collect();
+    assert_eq!(ranges, vec![(0, 2), (3, 3), (6, 7)]);
+}
+
+#[test]
+fn check_set_xaxis_label_mode_custom_replaces_previous_spans() {
+    let mut chart = new_chart();
+    let first = [BarSpan::new(0, 2, "A"), BarSpan::new(2, 2, "B")];
+    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&first));
+    assert_eq!(chart.xaxis.spans.len(), 2);
+    let second = [BarSpan::new(1, 1, "X")];
+    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&second));
+    assert_eq!(chart.xaxis.spans.len(), 1);
+    assert_eq!(chart.xaxis.spans[0].start, 1);
+    chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&[]));
+    assert!(chart.xaxis.spans.is_empty());
+    assert!(chart.xaxis.label_format == XAxisLabelFormat::Custom);
+}
+
+#[test]
+fn check_setters_do_not_change_stacks_data() {
+    let mut chart = new_chart();
+    chart.add_stacks([[1, -2], [3, 4]]);
+    chart.set_stacks_scale(StackBarScale::Percentage);
+    chart.set_default_bar_width(2);
+    chart.set_default_bar_spacing(2);
+    chart.set_yaxis_width(4);
+    chart.set_xaxis_label_mode(XAxisLabelMode::Index(1));
+    assert_eq!(chart.stacks_count(), 2);
+    assert_eq!(values_of(chart.get_stack(0).unwrap()), vec![1, -2]);
+    assert_eq!(values_of(chart.get_stack(1).unwrap()), vec![3, 4]);
 }
