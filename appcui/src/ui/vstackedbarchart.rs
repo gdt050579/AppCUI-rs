@@ -9,8 +9,11 @@ mod stackbar;
 #[cfg(test)]
 mod tests;
 
+use self::initialization_flags::XAxisLabelFormat;
+
 pub use self::vstackedbarchart::VStackedBarChart;
 pub use self::initialization_flags::Flags;
+pub use self::initialization_flags::XAxisLabelMode;
 pub use self::stackbar::StackBar;
 pub use self::stackbar::StackBarBuilder;
 pub use self::stackbar::StackBarDrawMode;

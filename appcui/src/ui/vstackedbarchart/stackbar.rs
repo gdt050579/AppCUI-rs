@@ -146,6 +146,7 @@ where
 #[derive(Clone, Debug)]
 pub struct BarsStack<T: Number + 'static> {
     pub(crate) bars: Vec<StackBar<T>>,
+    pub(crate) label: String,
     pub(crate) thickness: Option<u8>,
     pub(crate) spacing: Option<u8>,
     pub(crate) computed_thickness: u8,
@@ -155,6 +156,7 @@ impl<T: Number + 'static> BarsStack<T> {
     pub fn new() -> Self {
         Self {
             bars: Vec::new(),
+            label: String::new(),
             thickness: None,
             spacing: None,
             computed_thickness: 0,
@@ -185,6 +187,16 @@ impl<T: Number + 'static> BarsStack<T> {
     #[inline(always)]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut StackBar<T>> {
         self.bars.get_mut(index)
+    }
+    #[inline(always)]
+    pub fn label(&self) -> &str {
+        &self.label
+    }
+    #[inline(always)]
+    pub fn set_label(&mut self, label: &str) -> &mut Self {
+        self.label.clear();
+        self.label.push_str(label);
+        self
     }
     #[inline(always)]
     pub fn thickness(&self) -> Option<u8> {
@@ -260,6 +272,10 @@ impl<T: Number + 'static> BarsStackBuilder<T> {
         B: Into<StackBar<T>>,
     {
         self.stack.bars.extend(bars.into_iter().map(|bar| bar.into()));
+        self
+    }
+    pub fn label(mut self, label: &str) -> Self {
+        self.stack.label = label.to_string();
         self
     }
     pub fn thickness(mut self, thickness: u8) -> Self {

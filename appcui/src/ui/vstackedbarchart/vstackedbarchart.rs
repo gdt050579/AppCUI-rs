@@ -1,11 +1,26 @@
 use crate::prelude::*;
 use super::stackbar::StackWithLayout;
-use super::{BarsStack, Flags, StackBarDrawMode};
+use super::{BarsStack, Flags, StackBarDrawMode, StackBarScale, XAxisLabelFormat};
+use crate::ui::components::BarSpan;
 
 #[derive(Copy, Clone)]
 struct Defaults {
     thickness: u8,
+    spacing: u8,
     draw_mode: StackBarDrawMode,
+    attr: Option<CharAttribute>,
+}
+
+struct YAxis {
+    width: u8,
+    step: u8,
+    visible: bool,
+    show_grid: bool,
+}
+
+struct XAxis {
+    label_format: XAxisLabelFormat,
+    spans: Vec<BarSpan>,
 }
 
 #[CustomControl(internal = true)]
@@ -16,6 +31,10 @@ where
     flags: Flags,
     stacks: Vec<StackWithLayout<T>>,
     defaults: Defaults,
+    scale: StackBarScale<T>,
+    number_format: FormatNumber,
+    yaxis: YAxis,
+    xaxis: XAxis,
 }
 
 impl<T> VStackedBarChart<T>
@@ -34,7 +53,25 @@ where
             stacks: Vec::new(),
             defaults: Defaults {
                 thickness: 1,
+                spacing: 1,
                 draw_mode: StackBarDrawMode::default(),
+                attr: None,
+            },
+            scale: StackBarScale::FromZero,
+            number_format: if T::is_float() {
+                FormatNumber::new(10).decimals(2)
+            } else {
+                FormatNumber::new(10).group(3, b',')
+            },
+            yaxis: YAxis {
+                width: 6,
+                step: 3,
+                visible: true,
+                show_grid: true,
+            },
+            xaxis: XAxis {
+                label_format: XAxisLabelFormat::None,
+                spans: Vec::new(),
             },
         }
     }

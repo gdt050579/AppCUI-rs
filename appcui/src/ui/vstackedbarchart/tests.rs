@@ -635,3 +635,55 @@ fn check_scale_keeps_range_values() {
         _ => panic!("expected a from-zero scale with a minimum range"),
     }
 }
+
+#[test]
+fn check_stack_label_default_is_empty() {
+    let stack = BarsStack::<i32>::new();
+    assert_eq!(stack.label(), "");
+    let from_values: BarsStack<i32> = [1, 2].into();
+    assert_eq!(from_values.label(), "");
+}
+
+#[test]
+fn check_stack_label_set_and_replace() {
+    let mut stack = BarsStack::<i32>::new();
+    stack.set_label("Q1").add_bar(1);
+    assert_eq!(stack.label(), "Q1");
+    stack.set_label("Second");
+    assert_eq!(stack.label(), "Second");
+    stack.set_label("");
+    assert_eq!(stack.label(), "");
+}
+
+#[test]
+fn check_stack_label_builder_and_clone() {
+    let stack = BarsStackBuilder::<i32>::new().label("North").bars([1, 2]).build();
+    assert_eq!(stack.label(), "North");
+    let copy: BarsStack<i32> = (&stack).into();
+    assert_eq!(copy.label(), "North");
+}
+
+#[test]
+fn check_chart_keeps_stack_label() {
+    let mut chart = new_chart();
+    chart.add_stack(BarsStackBuilder::<i32>::new().label("A").bars([1]).build());
+    chart.update_stack(0, |stack| {
+        stack.set_label("B");
+    });
+    assert_eq!(chart.get_stack(0).unwrap().label(), "B");
+}
+
+#[test]
+fn check_xaxis_label_format_height() {
+    use super::XAxisLabelFormat;
+    assert!(XAxisLabelFormat::None.is_none());
+    assert!(!XAxisLabelFormat::Index(0).is_none());
+    assert!(!XAxisLabelFormat::StackLabels.is_none());
+    assert!(!XAxisLabelFormat::Custom.is_none());
+    assert_eq!(XAxisLabelFormat::None.height(), 0);
+    assert_eq!(XAxisLabelFormat::Index(5).height(), 2);
+    assert_eq!(XAxisLabelFormat::StackLabels.height(), 2);
+    assert_eq!(XAxisLabelFormat::Custom.height(), 2);
+    assert!(XAxisLabelFormat::Index(1) == XAxisLabelFormat::Index(1));
+    assert!(XAxisLabelFormat::Index(1) != XAxisLabelFormat::Index(2));
+}
