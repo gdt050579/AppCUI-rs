@@ -139,6 +139,7 @@ pub struct BarsStack<T: Number + 'static> {
     pub(crate) bars: Vec<StackBar<T>>,
     pub(crate) thickness: Option<u8>,
     pub(crate) spacing: Option<u8>,
+    pub(crate) computed_thickness: u8,
 }
 
 impl<T: Number + 'static> BarsStack<T> {
@@ -147,6 +148,7 @@ impl<T: Number + 'static> BarsStack<T> {
             bars: Vec::new(),
             thickness: None,
             spacing: None,
+            computed_thickness: 0,
         }
     }
     pub fn add_bar<B>(&mut self, bar: B) -> &mut Self
@@ -203,7 +205,7 @@ impl<T: Number + 'static> BarsStack<T> {
         self.spacing = None;
         self
     }
-    pub(crate) fn actual_thickness(&self, default_thickness: u8, default_draw_mode: StackBarDrawMode) -> u8 {
+    pub(crate) fn update_actual_thickness(&mut self, default_thickness: u8, default_draw_mode: StackBarDrawMode) {
         let requested = self.thickness.unwrap_or(default_thickness).max(1);
         let required = self
             .bars
@@ -211,7 +213,11 @@ impl<T: Number + 'static> BarsStack<T> {
             .map(|bar| bar.draw_mode.unwrap_or(default_draw_mode).min_thickness())
             .max()
             .unwrap_or(1);
-        requested.max(required)
+        self.computed_thickness = requested.max(required);
+    }
+    #[inline(always)]
+    pub(crate) fn actual_thickness(&self) -> u8 {
+        self.computed_thickness
     }
     #[inline(always)]
     pub(crate) fn actual_spacing(&self, default_spacing: u8) -> u8 {
