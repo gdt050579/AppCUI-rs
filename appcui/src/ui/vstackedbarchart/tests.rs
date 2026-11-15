@@ -2246,3 +2246,127 @@ fn check_mapping_bottom_value_and_value_per_cell() {
     let m = ValueMapping::new(0.0, 10.0, 0);
     assert_close(m.value_per_cell(), 0.0);
 }
+
+fn paint_in_app(width: u32, height: u32, build: impl FnOnce() -> VStackedBarChart<i32> + 'static) {
+    let script = "
+        Paint.Enable(false)
+        Paint('1. Initial state')
+    ";
+    App::new()
+        .size(Size::new(width, height))
+        .debug_script(script)
+        .window(move || {
+            let chart = build();
+            let mut w = window!("Test,d:f");
+            w.add(chart);
+            w
+        })
+        .run()
+        .unwrap();
+}
+
+fn painted_chart() -> VStackedBarChart<i32> {
+    let mut chart = VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None);
+    chart.add_stack(BarsStackBuilder::new().label("A").bar(5).bar(-3).bar(2).build());
+    chart.add_stack(BarsStackBuilder::new().label("B").bar(8).bar(1).build());
+    chart.add_stack(BarsStackBuilder::new().label("C").bar(-6).bar(-2).build());
+    chart
+}
+
+#[test]
+fn check_paint_empty_chart() {
+    paint_in_app(30, 10, || VStackedBarChart::<i32>::new(layout!("d:f"), vstackedbarchart::Flags::None));
+}
+
+#[test]
+fn check_paint_axes_with_data() {
+    paint_in_app(30, 10, painted_chart);
+}
+
+#[test]
+fn check_paint_each_scale() {
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.set_stacks_scale(StackBarScale::FromZeroMinRange { min: -20, max: 20 });
+        chart
+    });
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.set_stacks_scale(StackBarScale::FitData);
+        chart
+    });
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.set_stacks_scale(StackBarScale::Fixed { min: -4, max: 4 });
+        chart
+    });
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart
+    });
+}
+
+#[test]
+fn check_paint_xaxis_modes() {
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.set_xaxis_label_mode(XAxisLabelMode::Index(1));
+        chart
+    });
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+        chart
+    });
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        let spans = [BarSpan::new(0, 2, "First"), BarSpan::new(2, 5, "Second")];
+        chart.set_xaxis_label_mode(XAxisLabelMode::Custom(&spans));
+        chart
+    });
+}
+
+#[test]
+fn check_paint_yaxis_options() {
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.set_yaxis_visible(false);
+        chart
+    });
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.set_yaxis_show_grid(false);
+        chart
+    });
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.set_yaxis_width(3);
+        chart.set_yaxis_step(1);
+        chart
+    });
+}
+
+#[test]
+fn check_paint_tiny_surfaces() {
+    paint_in_app(12, 3, painted_chart);
+    paint_in_app(12, 3, || {
+        let mut chart = painted_chart();
+        chart.set_xaxis_label_mode(XAxisLabelMode::StackLabels);
+        chart
+    });
+}
+
+#[test]
+fn check_paint_data_changes_after_attach() {
+    paint_in_app(30, 10, || {
+        let mut chart = painted_chart();
+        chart.add_stack([1, 2, 3]);
+        chart.update_stack(0, |stack| {
+            stack.add_bar(4);
+        });
+        chart.clear();
+        chart.add_stack([9]);
+        chart
+    });
+}
