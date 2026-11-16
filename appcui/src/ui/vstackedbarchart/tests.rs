@@ -3221,3 +3221,59 @@ fn check_paint_stacks_percentage_scale() {
         }
     });
 }
+
+#[test]
+fn check_paint_stacks_uses_theme_colors_by_bar_index() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 13);
+        chart.add_stack([2, 2, 2, 2, 2, 2]);
+        chart.update_plot_layout(12);
+        let colors = chart.theme().chart.bar;
+        chart.paint_stacks(&colors, 20, 12);
+        for index in 0..6usize {
+            let expected = colors[index % colors.len()];
+            let ch = chart.surface.char(9, 12 - 2 * index as i32).unwrap();
+            assert_eq!(ch.foreground, expected.foreground);
+            assert_eq!(ch.background, expected.background);
+        }
+    });
+}
+
+#[test]
+fn check_paint_stacks_default_attr_overrides_theme_colors() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 13);
+        chart.set_default_bar_attr(charattr!("white,black"));
+        chart.add_stack([2, 2, 2, 2, 2, 2]);
+        chart.update_plot_layout(12);
+        let colors = chart.theme().chart.bar;
+        chart.paint_stacks(&colors, 20, 12);
+        for index in 0..6i32 {
+            assert_eq!(chart.surface.char(9, 12 - 2 * index).unwrap().foreground, Color::White);
+        }
+    });
+}
+
+#[test]
+fn check_paint_stacks_does_not_store_resolved_colors() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 7);
+        chart.add_stack([2, 2]);
+        paint_plot(&mut chart, 20, 7);
+        let stack = chart.get_stack(0).unwrap();
+        assert!(stack.get(0).unwrap().attr().is_none());
+        assert!(stack.get(1).unwrap().attr().is_none());
+    });
+}
+
+#[test]
+fn check_paint_stacks_bar_attr_wins_over_default_attr() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 5);
+        chart.set_default_bar_attr(charattr!("white,black"));
+        chart.add_stack(BarsStackBuilder::new().bar(StackBarBuilder::new(4).attr(charattr!("red,black")).build()).build());
+        paint_plot(&mut chart, 20, 5);
+        assert_eq!(plot_cell(&chart, 9, 4).1, Color::Red);
+        assert_eq!(plot_cell(&chart, 9, 1).1, Color::Red);
+    });
+}
