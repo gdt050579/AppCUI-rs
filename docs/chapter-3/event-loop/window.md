@@ -31,13 +31,23 @@ A window supports all common parameters (as they are described in [Instantiate v
 | `hotkey` or `hot-key` or `key` | Key            | **No**                               | The hotkey associated with a window. You can also use the `auto` value to ask the framework to find the first available key (from `Alt`+`1` to `Alt`+`9`) |
 
 
-To create a window that will handle events from its children, use `#[Window(...)]` method:
+To create a window that will handle events from its children, use the `#[Window(...)]` attribute:
 ```rs
 #[Window(events=..., )]
 struct MyWindow {
     // specific fields
 }
 ```
+
+The attribute rewrites that struct in three ways:
+
+* it inserts a field `base: Window` as the first field (every constructor initializes `base`)
+* it implements `Deref` and `DerefMut`, so `Window` methods such as `add` and `set_title` are called on `base`
+* it implements every event trait with an empty body, except the traits named in `events`. Those are left for you to write.
+
+For example, `#[Window(events = ButtonEvents)] struct MyWin { x: i32 }` becomes a struct with `base: Window` and `x: i32`, plus `Deref` / `DerefMut`, plus an empty `impl CheckBoxEvents for MyWin`, an empty `impl RadioBoxEvents for MyWin`, and an empty impl for every other event trait. `impl ButtonEvents for MyWin` is not generated.
+
+The expansion, the compiler errors that follow from it (`missing field 'base'`, conflicting trait implementations, `Control` not implemented), and the same code written without the attribute are described in [What the `#[Window]` attribute does](../event_loop.md#what-the-window-attribute-does).
 
 
 A window supports the following initialization flags:
