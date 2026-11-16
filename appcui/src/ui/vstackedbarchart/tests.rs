@@ -2,7 +2,7 @@ use crate::prelude::*;
 use crate::ui::vstackedbarchart::{BarsStack, BarsStackBuilder, StackBar, StackBarBuilder, StackBarDrawMode, StackBarScale, XAxisLabelMode};
 use super::XAxisLabelFormat;
 use super::mapping::ValueMapping;
-use super::stackbar::paint_segment;
+use super::stackbar::{paint_segment, resolve_attr};
 use crate::ui::components::BarFillType;
 
 fn in_app(f: impl FnOnce() + 'static) {
@@ -2950,4 +2950,274 @@ fn check_paint_segment_clipped_at_surface_edge() {
     paint_segment(&mut s, 2, 1, 2, 4, fill(), seg_attr());
     assert_eq!(code_at(&s, 2, 0), '\u{2588}');
     assert_eq!(code_at(&s, 2, 1), '\u{2588}');
+}
+
+fn plot_colors() -> [CharAttribute; 4] {
+    [charattr!("red,black"), charattr!("green,black"), charattr!("blue,black"), charattr!("yellow,black")]
+}
+
+fn plot_chart(width: u32, height: u32) -> VStackedBarChart<i32> {
+    let mut chart = new_chart();
+    chart.surface = Surface::new(width, height);
+    chart.surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    chart
+}
+
+fn paint_plot(chart: &mut VStackedBarChart<i32>, width: u32, height: u32) {
+    chart.surface.reset_clip();
+    chart.surface.clear(Character::new(' ', Color::White, Color::Black, CharFlags::None));
+    let plot_bottom = height as i32 - 1;
+    chart.update_plot_layout(plot_bottom as u32);
+    chart.paint_stacks(&plot_colors(), width as i32, plot_bottom);
+}
+
+fn plot_cell(chart: &VStackedBarChart<i32>, x: i32, y: i32) -> (char, Color) {
+    let ch = chart.surface.char(x, y).unwrap();
+    (ch.code, ch.foreground)
+}
+
+#[test]
+fn check_resolve_attr_prefers_bar_then_default_then_theme() {
+    let bar = charattr!("red,black");
+    let default = charattr!("green,black");
+    let theme = charattr!("blue,black");
+    assert_eq!(resolve_attr(Some(bar), Some(default), theme), bar);
+    assert_eq!(resolve_attr(Some(bar), None, theme), bar);
+    assert_eq!(resolve_attr(None, Some(default), theme), default);
+    assert_eq!(resolve_attr(None, None, theme), theme);
+}
+
+#[test]
+fn check_paint_stacks_positive_segments() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 8);
+        chart.add_stack([4, 3]);
+        paint_plot(&mut chart, 20, 8);
+        for y in 4..=7 {
+            assert_eq!(plot_cell(&chart, 9, y), ('\u{2588}', Color::Red));
+        }
+        for y in 1..=3 {
+            assert_eq!(plot_cell(&chart, 9, y), ('\u{2588}', Color::Green));
+        }
+        assert_eq!(plot_cell(&chart, 9, 0).0, ' ');
+        assert_eq!(plot_cell(&chart, 8, 5).0, ' ');
+        assert_eq!(plot_cell(&chart, 10, 5).0, ' ');
+    });
+}
+
+#[test]
+fn check_paint_stacks_negative_segments() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 8);
+        chart.add_stack([-4, -3]);
+        paint_plot(&mut chart, 20, 8);
+        assert_eq!(plot_cell(&chart, 9, 0).0, ' ');
+        for y in 1..=4 {
+            assert_eq!(plot_cell(&chart, 9, y), ('\u{2588}', Color::Red));
+        }
+        for y in 5..=7 {
+            assert_eq!(plot_cell(&chart, 9, y), ('\u{2588}', Color::Green));
+        }
+    });
+}
+
+#[test]
+fn check_paint_stacks_mixed_segments() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 10);
+        chart.add_stack([4, -2, 3]);
+        paint_plot(&mut chart, 20, 10);
+        for y in 4..=7 {
+            assert_eq!(plot_cell(&chart, 9, y), ('\u{2588}', Color::Red));
+        }
+        for y in 8..=9 {
+            assert_eq!(plot_cell(&chart, 9, y), ('\u{2588}', Color::Green));
+        }
+        for y in 1..=3 {
+            assert_eq!(plot_cell(&chart, 9, y), ('\u{2588}', Color::Blue));
+        }
+        assert_eq!(plot_cell(&chart, 9, 0).0, ' ');
+    });
+}
+
+#[test]
+fn check_paint_stacks_skips_empty_segments() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 11);
+        chart.add_stack([1, 1, 1, 1000]);
+        paint_plot(&mut chart, 20, 11);
+        for y in 1..=10 {
+            assert_eq!(plot_cell(&chart, 9, y), ('\u{2588}', Color::Yellow));
+        }
+        assert_eq!(plot_cell(&chart, 9, 0).0, ' ');
+    });
+}
+
+#[test]
+fn check_paint_stacks_colors_cycle_by_bar_index() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 11);
+        chart.add_stack([2, 2, 2, 2, 2]);
+        paint_plot(&mut chart, 20, 11);
+        assert_eq!(plot_cell(&chart, 9, 10).1, Color::Red);
+        assert_eq!(plot_cell(&chart, 9, 8).1, Color::Green);
+        assert_eq!(plot_cell(&chart, 9, 6).1, Color::Blue);
+        assert_eq!(plot_cell(&chart, 9, 4).1, Color::Yellow);
+        assert_eq!(plot_cell(&chart, 9, 2).1, Color::Red);
+    });
+}
+
+#[test]
+fn check_paint_stacks_bar_attr_and_default_attr() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 7);
+        chart.set_default_bar_attr(charattr!("white,black"));
+        chart.add_stack(BarsStackBuilder::new().bar(2).bar(StackBarBuilder::new(2).attr(charattr!("magenta,black")).build()).bar(2).build());
+        paint_plot(&mut chart, 20, 7);
+        assert_eq!(plot_cell(&chart, 9, 6).1, Color::White);
+        assert_eq!(plot_cell(&chart, 9, 4).1, Color::Magenta);
+        assert_eq!(plot_cell(&chart, 9, 2).1, Color::White);
+    });
+}
+
+#[test]
+fn check_paint_stacks_per_bar_draw_mode() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 9);
+        chart.add_stack(BarsStackBuilder::new().bar(StackBarBuilder::new(4).draw_mode(rect()).build()).bar(4).build());
+        paint_plot(&mut chart, 20, 9);
+        assert_eq!(plot_cell(&chart, 9, 5).0, '\u{250C}');
+        assert_eq!(plot_cell(&chart, 10, 5).0, '\u{2510}');
+        assert_eq!(plot_cell(&chart, 9, 8).0, '\u{2514}');
+        assert_eq!(plot_cell(&chart, 9, 7).0, '\u{2502}');
+        assert_eq!(plot_cell(&chart, 9, 4).0, '\u{2588}');
+        assert_eq!(plot_cell(&chart, 10, 1).0, '\u{2588}');
+    });
+}
+
+#[test]
+fn check_paint_stacks_uses_default_draw_mode() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 6);
+        chart.set_default_bar_drawmode(StackBarDrawMode::Fill(BarFillType::Shade50));
+        chart.add_stack([5]);
+        paint_plot(&mut chart, 20, 6);
+        assert_eq!(plot_cell(&chart, 9, 5).0, '\u{2592}');
+        assert_eq!(plot_cell(&chart, 9, 1).0, '\u{2592}');
+    });
+}
+
+#[test]
+fn check_paint_stacks_positions_follow_thickness_and_spacing() {
+    in_app(|| {
+        let mut chart = plot_chart(30, 6);
+        chart.set_default_bar_width(2);
+        chart.set_default_bar_spacing(3);
+        chart.add_stack([5]);
+        chart.add_stack([5]);
+        paint_plot(&mut chart, 30, 6);
+        assert_eq!(plot_cell(&chart, 10, 5).0, ' ');
+        assert_eq!(plot_cell(&chart, 11, 5).0, '\u{2588}');
+        assert_eq!(plot_cell(&chart, 12, 5).0, '\u{2588}');
+        assert_eq!(plot_cell(&chart, 13, 5).0, ' ');
+        assert_eq!(plot_cell(&chart, 15, 5).0, ' ');
+        assert_eq!(plot_cell(&chart, 16, 5).0, '\u{2588}');
+        assert_eq!(plot_cell(&chart, 17, 5).0, '\u{2588}');
+        assert_eq!(plot_cell(&chart, 18, 5).0, ' ');
+    });
+}
+
+#[test]
+fn check_paint_stacks_left_scroll_shifts_and_clips() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 6);
+        chart.add_stack([5]);
+        chart.add_stack([5]);
+        chart.left_scroll = 1;
+        paint_plot(&mut chart, 20, 6);
+        assert_eq!(plot_cell(&chart, 8, 5).0, '\u{2588}');
+        assert_eq!(plot_cell(&chart, 10, 5).0, '\u{2588}');
+        chart.left_scroll = 3;
+        paint_plot(&mut chart, 20, 6);
+        assert_eq!(plot_cell(&chart, 6, 5).0, ' ');
+        assert_eq!(plot_cell(&chart, 7, 5).0, ' ');
+        assert_eq!(plot_cell(&chart, 8, 5).0, '\u{2588}');
+    });
+}
+
+#[test]
+fn check_paint_stacks_first_visible_stack() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 6);
+        chart.add_stack([5]);
+        chart.add_stack([5]);
+        chart.first_visible_stack = 1;
+        paint_plot(&mut chart, 20, 6);
+        assert_eq!(plot_cell(&chart, 9, 5).0, ' ');
+        assert_eq!(plot_cell(&chart, 11, 5).0, '\u{2588}');
+    });
+}
+
+#[test]
+fn check_paint_stacks_stops_at_right_edge() {
+    in_app(|| {
+        let mut chart = plot_chart(14, 6);
+        chart.add_stack([5]);
+        chart.add_stack([5]);
+        chart.add_stack([5]);
+        chart.add_stack([5]);
+        paint_plot(&mut chart, 14, 6);
+        assert_eq!(plot_cell(&chart, 9, 5).0, '\u{2588}');
+        assert_eq!(plot_cell(&chart, 11, 5).0, '\u{2588}');
+        assert_eq!(plot_cell(&chart, 13, 5).0, '\u{2588}');
+    });
+}
+
+#[test]
+fn check_paint_stacks_does_not_touch_y_axis_column() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 6);
+        chart.add_stack([5]);
+        chart.left_scroll = 2;
+        paint_plot(&mut chart, 20, 6);
+        for y in 0..6 {
+            assert_eq!(plot_cell(&chart, 7, y).0, ' ');
+        }
+    });
+}
+
+#[test]
+fn check_paint_stacks_empty_chart_and_odd_sizes() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 6);
+        paint_plot(&mut chart, 20, 6);
+        chart.add_stack([5, -5]);
+        chart.add_stack(BarsStack::<i32>::new());
+        paint_plot(&mut chart, 20, 6);
+        let mut tiny = plot_chart(3, 1);
+        tiny.add_stack([5, -5]);
+        paint_plot(&mut tiny, 3, 1);
+        chart.paint_stacks(&[], 20, 5);
+        chart.paint_stacks(&plot_colors(), 0, -3);
+    });
+}
+
+#[test]
+fn check_paint_stacks_percentage_scale() {
+    in_app(|| {
+        let mut chart = plot_chart(20, 11);
+        chart.set_stacks_scale(StackBarScale::Percentage);
+        chart.add_stack([1, 1]);
+        chart.add_stack([3]);
+        paint_plot(&mut chart, 20, 11);
+        for y in 6..=10 {
+            assert_eq!(plot_cell(&chart, 9, y).1, Color::Red);
+        }
+        for y in 1..=5 {
+            assert_eq!(plot_cell(&chart, 9, y).1, Color::Green);
+        }
+        for y in 1..=10 {
+            assert_eq!(plot_cell(&chart, 11, y).1, Color::Red);
+        }
+    });
 }

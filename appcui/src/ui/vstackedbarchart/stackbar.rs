@@ -480,3 +480,7 @@ fn paint_rectangle(surface: &mut Surface, rect: Rect, line_type: LineType, attr:
     }
     surface.draw_rect(rect, line_type, attr);
 }
+
+pub(super) fn resolve_attr(bar: Option<CharAttribute>, default: Option<CharAttribute>, theme: CharAttribute) -> CharAttribute {
+    bar.or(default).unwrap_or(theme)
+}

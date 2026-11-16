@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use super::mapping::ValueMapping;
-use super::stackbar::StackWithLayout;
+use super::stackbar::{paint_segment, resolve_attr, StackWithLayout};
 use super::{BarsStack, Flags, StackBarDrawMode, StackBarScale, XAxisLabelFormat, XAxisLabelMode};
 use crate::ui::components::BarSpan;
 use flat_string::FlatString;
@@ -243,10 +243,15 @@ where
         let grid_attr = theme.chart.grid;
         let axis_attr = theme.chart.axis;
         let label_attr = theme.chart.label;
+        let theme_bars = theme.chart.bar;
         self.surface.reset_clip();
         self.surface.clear(Character::with_attributes(' ', background));
         self.paint_yaxis(axis_attr, grid_attr, label_attr);
         self.paint_xaxis(axis_attr, label_attr);
+        let bar_colors = theme_bars;
+        let width = self.size().width as i32;
+        let plot_bottom = self.size().height as i32 - (self.xaxis.label_format.height() as i32 + 1);
+        self.paint_stacks(&bar_colors, width, plot_bottom);
         let left_margin = self.x_axis_left_margin();
         if (left_margin > 0) && !self.xaxis.label_format.is_none() {
             self.surface.reset_clip();
@@ -257,6 +262,36 @@ where
                 Character::with_attributes(' ', background),
             );
         }
+    }
+    pub(super) fn paint_stacks(&mut self, bar_colors: &[CharAttribute], width: i32, plot_bottom: i32) {
+        let left_margin = self.x_axis_left_margin();
+        let zero_row = plot_bottom - self.yaxis.zero;
+        let defaults = self.defaults;
+        self.surface.set_relative_clip(left_margin, 0, width, plot_bottom);
+        let mut index = self.first_visible_stack as usize;
+        while index < self.stacks.len() {
+            let entry = &self.stacks[index];
+            let x = entry.pos - self.left_scroll + left_margin;
+            if x >= width {
+                break;
+            }
+            let thickness = entry.stack.actual_thickness();
+            for (bar_index, (bar, segment)) in entry.stack.bars.iter().zip(entry.layout.iter()).enumerate() {
+                if segment.len == 0 {
+                    continue;
+                }
+                let theme_attr = if bar_colors.is_empty() {
+                    CharAttribute::default()
+                } else {
+                    bar_colors[bar_index % bar_colors.len()]
+                };
+                let attr = resolve_attr(bar.attr(), defaults.attr, theme_attr);
+                let mode = bar.draw_mode().unwrap_or(defaults.draw_mode);
+                paint_segment(&mut self.surface, x, zero_row - segment.offset as i32, thickness, segment.len, mode, attr);
+            }
+            index += 1;
+        }
+        self.surface.reset_clip();
     }
     fn paint_yaxis(&mut self, axis_attr: CharAttribute, grid_attr: CharAttribute, label_attr: CharAttribute) {
         let bottom = self.size().height as i32 - if self.xaxis.label_format.is_none() { 1 } else { 2 };
